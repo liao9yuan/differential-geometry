@@ -57,18 +57,17 @@ theorem branchDeriv2_zero
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {x : TangentSpace I p} {t : Real}
     (ht : 0 < t)
-    (hsrc :
-      (⟨p, t • x⟩ : TangentBundle I M) ∈ B.hom.source) :
+    (hsrc : t • (x : E) ∈ B.hom.source) :
     (deriv^[2]
       (fun s : Real =>
-        branchRadius (I := I) g B p
+        branchRadius (I := I) g B
           (intrinsicGeodesic (I := I) g hEnorm p x s))) t = 0 := by
   let f : Real → Real := fun s =>
-    branchRadius (I := I) g B p
+    branchRadius (I := I) g B
       (intrinsicGeodesic (I := I) g hEnorm p x s)
   let a : Real := Real.sqrt (g.inner p x x)
   let ℓ : Real → Real := fun s => s * a
@@ -92,15 +91,15 @@ theorem branchHess_radial
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u) :
     let γ : Real → M :=
       intrinsicGeodesic (I := I) g hEnorm p u
     hessFun (I := I) g
-        (branchRadius (I := I) g B p)
+        (branchRadius (I := I) g B)
         (γ 1) (curveVelocity (I := I) γ 1)
         (curveVelocity (I := I) γ 1) = 0 := by
   dsimp only
@@ -125,11 +124,11 @@ theorem branchHess_radial
   have htrace :=
     deriv2_comp_geo_on (I := I) g hUopen hrU hγ hgeo hqU'
   have hu1 :
-      (⟨p, (1 : Real) • u⟩ : TangentBundle I M) ∈ B.hom.source := by
+      (1 : Real) • (u : E) ∈ B.hom.source := by
     simpa only [one_smul] using hu
   have hzero :
       (deriv^[2]
-        (branchRadius (I := I) g B p ∘ γ)) 1 = 0 := by
+        (branchRadius (I := I) g B ∘ γ)) 1 = 0 := by
     simpa only [γ, Function.comp_apply, one_smul] using
       branchDeriv2_zero (I := I) B (t := (1 : Real)) zero_lt_one hu1
   rw [htrace] at hzero
@@ -143,11 +142,11 @@ theorem branchLap_eq_mean
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     (u : TangentSpace I p)
     (v : ι → TangentSpace I p)
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u)
     (hv : LinearIndependent Real v)
     (hperp : ∀ i, g.inner p u (v i) = 0)
@@ -158,7 +157,7 @@ theorem branchLap_eq_mean
     let V := fun i =>
       intrinsicJacobi (I := I) g hEnorm p u (v i)
     laplacian (I := I) (LeviCivita (I := I) g) g
-        (branchRadius (I := I) g B p) (γ 1)
+        (branchRadius (I := I) g B) (γ 1)
       =
         curveMean (I := I) g γ V 1 /
           Real.sqrt (g.inner p u u) := by
@@ -174,7 +173,7 @@ theorem branchLap_eq_mean
       Tensor0SSpace
         (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) 2 q :=
-    hessTensorAt (I := I) g (branchRadius (I := I) g B p) q
+    hessTensorAt (I := I) g (branchRadius (I := I) g B) q
   obtain ⟨U, hUopen, hqU, hrU⟩ :=
     branchRadius_open (I := I) B hu hu_pos
   have hqU' : q ∈ U := by
@@ -404,14 +403,12 @@ theorem radialLap_eq_mean
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     (x : E) (v : ι → E) (t : Real)
     (ht : 0 < t)
     (hx_pos : 0 < g.inner p x x)
-    (hsrc :
-      (⟨p, show TangentSpace I p from t • x⟩ :
-        TangentBundle I M) ∈ B.hom.source)
+    (hsrc : t • x ∈ B.hom.source)
     (hC2 :
       ‖t • x‖ < expMapC2Radius (I := I) g p)
     (hv : LinearIndependent Real v)
@@ -422,7 +419,7 @@ theorem radialLap_eq_mean
     let V := fun i =>
       radialJacobiField (I := I) g p x (v i)
     laplacian (I := I) (LeviCivita (I := I) g) g
-        (branchRadius (I := I) g B p) (γ t)
+        (branchRadius (I := I) g B) (γ t)
       =
         curveMean (I := I) g γ V t /
           Real.sqrt (g.inner p x x) := by
@@ -559,7 +556,7 @@ theorem radialLap_eq_mean
       hperp i, mul_zero, mul_zero]
   have hbranch :
       laplacian (I := I) (LeviCivita (I := I) g) g
-          (branchRadius (I := I) g B p) (γT 1)
+          (branchRadius (I := I) g B) (γT 1)
         =
           curveMean (I := I) g γT VT 1 /
             Real.sqrt (g.inner p (t • x) (t • x)) := by
@@ -585,7 +582,7 @@ theorem radialLap_eq_mean
       Real.sqrt_sq_eq_abs, abs_of_pos ht]
   change
     laplacian (I := I) (LeviCivita (I := I) g) g
-        (branchRadius (I := I) g B p) (γR t) =
+        (branchRadius (I := I) g B) (γR t) =
       curveMean (I := I) g γR VR t /
         Real.sqrt (g.inner p x x)
   rw [hend, hbranch, hMeanT, ← hMeanRI, hsqrt]

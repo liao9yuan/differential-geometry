@@ -25,3 +25,15 @@ module refresh is GREEN (`3803/3803`).  The adapter is complete (100%).  The
 global constant-curvature classification theorem remains unstated (0%); its
 dedicated local-to-global machinery is approximately 32%, with the
 Cartan/Jacobi transfer and global gluing still constituting the real frontier.
+
+## 2026-07-24 compatibility projection
+
+`fixedPD` no longer constructs and proves a separate fixed-base partial
+diffeomorphism. It is definitionally the partial diffeomorphism carried by
+`DiagInvBranch.fixed`, the canonical projection to `ExpInvBranch`. The
+existing `fixedPD_*` declarations remain as compatibility lemmas for Cartan
+consumers.
+
+The refactored source is focused green and placeholder-free. This adapter
+remains theorem-level 100%; it does not advance the unstated
+`calabiDist_support` endpoint, which remains 0%.

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarGradient
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -297,6 +298,141 @@ theorem metricDiffCovDerivAt_pullbackCross
         (fun q : Fin (a + 2) => mfderiv I J (Phi : M → N) x (slots q)) :=
       (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (Phi x) _ _ _).symm
 
+/-- The Ricci tensor of a cross-model pullback metric is the evaluated
+pullback of the target Ricci tensor. -/
+theorem ricciTensor_cross
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold J 1 N] [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N)
+    (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x v w =
+      ricciTensor (I := J) g (Phi x)
+        (mfderiv I J (Phi : M → N) x v)
+        (mfderiv I J (Phi : M → N) x w) := by
+  classical
+  obtain ⟨basis, hON⟩ :=
+    exists_gOrthonormalBasis
+      (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x
+  let dPhi : TangentSpace I x ≃L[Real] TangentSpace J (Phi x) :=
+    Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zeroC x
+  let idxEquiv :
+      Fin (Module.finrank Real (TangentSpace I x)) ≃
+        Fin (Module.finrank Real (TangentSpace J (Phi x))) :=
+    finCongr dPhi.toLinearEquiv.finrank_eq
+  let basis' :
+      Module.Basis (Fin (Module.finrank Real (TangentSpace J (Phi x))))
+        Real (TangentSpace J (Phi x)) :=
+    (basis.map dPhi.toLinearEquiv).reindex idxEquiv
+  have hdPhi_apply : ∀ u : TangentSpace I x,
+      dPhi u = mfderiv I J (Phi : M → N) x u := by
+    intro u
+    have hco :=
+      Diffeomorph.mfderivToContinuousLinearEquiv_coe
+        (Φ := Phi) (x := x) infty_ne_zeroC
+    exact congrArg
+      (fun f : TangentSpace I x →L[Real] TangentSpace J (Phi x) => f u) hco
+  have hbasis'_apply : ∀ j,
+      basis' j =
+        mfderiv I J (Phi : M → N) x (basis (idxEquiv.symm j)) := by
+    intro j
+    change ((basis.map dPhi.toLinearEquiv).reindex idxEquiv) j = _
+    rw [Module.Basis.reindex_apply, Module.Basis.map_apply]
+    change dPhi (basis (idxEquiv.symm j)) =
+      mfderiv I J (Phi : M → N) x (basis (idxEquiv.symm j))
+    exact hdPhi_apply _
+  have hON' : ∀ i j,
+      g.inner (Phi x) (basis' i) (basis' j) =
+        if i = j then (1 : Real) else 0 := by
+    intro i j
+    rw [hbasis'_apply i, hbasis'_apply j,
+      ← Diffeomorph.pullbackMetricCross_inner
+        (I := I) (J := J) g Phi x
+        (basis (idxEquiv.symm i)) (basis (idxEquiv.symm j))]
+    simpa using hON (idxEquiv.symm i) (idxEquiv.symm j)
+  rw [ricciTensor_eq_orthonormal_trace
+        (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+        x v w (fun i => basis i) hON,
+      ricciTensor_eq_orthonormal_trace
+        (I := J) g (Phi x)
+        (mfderiv I J (Phi : M → N) x v)
+        (mfderiv I J (Phi : M → N) x w)
+        (fun i => basis' i) hON']
+  refine Fintype.sum_equiv idxEquiv _ _ ?_
+  intro i
+  have hbasis'_comp :
+      basis' (idxEquiv i) =
+        mfderiv I J (Phi : M → N) x (basis i) := by
+    simpa using hbasis'_apply (idxEquiv i)
+  rw [hbasis'_comp]
+  rw [(Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi).symm x
+        (riemannOp
+          (cov := LeviCivita (I := I)
+            (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
+          x (basis i) v w) (basis i),
+      ← metricRm04StdAt_eq_inner_riemannOp
+        (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+        x (basis i) v w (basis i),
+      metricRm04Std_pullbackCross
+        (I := I) (J := J) g Phi x (basis i) v w (basis i),
+      metricRm04StdAt_eq_inner_riemannOp
+        (I := J) g (Phi x)
+        (mfderiv I J (Phi : M → N) x (basis i))
+        (mfderiv I J (Phi : M → N) x v)
+        (mfderiv I J (Phi : M → N) x w)
+        (mfderiv I J (Phi : M → N) x (basis i)),
+      g.symm (Phi x)
+        (mfderiv I J (Phi : M → N) x (basis i))
+        (riemannOp (cov := LeviCivita (I := J) g) (Phi x)
+          (mfderiv I J (Phi : M → N) x (basis i))
+          (mfderiv I J (Phi : M → N) x v)
+          (mfderiv I J (Phi : M → N) x w))]
+
+/-- The canonical Ricci `(0,2)` tensor of a cross-model pullback metric
+evaluates as the pullback of the target Ricci tensor. -/
+theorem metricRicci_cross
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold J 1 N] [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N)
+    (x : M) (slots : Fin 2 → TangentSpace I x) :
+    metricRicci (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x slots =
+      metricRicci (I := J) g (Phi x)
+        (fun q : Fin 2 => mfderiv I J (Phi : M → N) x (slots q)) := by
+  have hleft :
+      metricRicci (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x
+          (vec2 (slots 0) (slots 1)) =
+        ricciTensor (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+          x (slots 0) (slots 1) := by
+    rw [metricRicci_apply, metricRicciAt_apply_eq_ricciTensor]
+  have hright :
+      metricRicci (I := J) g (Phi x)
+          (vec2
+            (mfderiv I J (Phi : M → N) x (slots 0))
+            (mfderiv I J (Phi : M → N) x (slots 1))) =
+        ricciTensor (I := J) g (Phi x)
+          (mfderiv I J (Phi : M → N) x (slots 0))
+          (mfderiv I J (Phi : M → N) x (slots 1)) := by
+    rw [metricRicci_apply, metricRicciAt_apply_eq_ricciTensor]
+  rw [show vec2 (slots 0) (slots 1) = slots from by
+    funext i
+    fin_cases i <;> rfl] at hleft
+  rw [show
+      vec2
+          (mfderiv I J (Phi : M → N) x (slots 0))
+          (mfderiv I J (Phi : M → N) x (slots 1)) =
+        (fun q : Fin 2 => mfderiv I J (Phi : M → N) x (slots q)) from by
+    funext i
+    fin_cases i <;> rfl] at hright
+  rw [hleft, ricciTensor_cross (I := I) (J := J) g Phi x (slots 0) (slots 1),
+    ← hright]
+
 /-- Squared norms of covariant tensors are preserved by a cross-model
 pullback metric when the source tensor is supplied by its evaluated pullback
 relation. -/
@@ -367,6 +503,127 @@ theorem normSq0S_pullbackCross_eval_of_orthonormal
   congr 1
   rw [component0S_apply, component0S_apply, hT]
   exact congrArg T (funext fun q => (hbasis'_apply (slots q)).symm)
+
+/-- Scalar curvature is preserved by a cross-model pullback metric. -/
+theorem metricScalar_cross
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold J 1 N] [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N) (x : M) :
+    metricScalarAt (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x =
+      metricScalarAt (I := J) g (Phi x) := by
+  classical
+  obtain ⟨basis, hON⟩ :=
+    exists_gOrthonormalBasis
+      (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x
+  let dPhi : TangentSpace I x ≃L[Real] TangentSpace J (Phi x) :=
+    Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zeroC x
+  let basis' : Module.Basis _ Real (TangentSpace J (Phi x)) :=
+    basis.map dPhi.toLinearEquiv
+  have hbasis'_apply : ∀ i,
+      basis' i = mfderiv I J (Phi : M → N) x (basis i) := by
+    intro i
+    have hco :=
+      Diffeomorph.mfderivToContinuousLinearEquiv_coe
+        (Φ := Phi) (x := x) infty_ne_zeroC
+    change (basis.map dPhi.toLinearEquiv) i = _
+    rw [Module.Basis.map_apply]
+    exact congrArg
+      (fun f : TangentSpace I x →L[Real] TangentSpace J (Phi x) => f (basis i)) hco
+  have hON' : ∀ i j,
+      g.inner (Phi x) (basis' i) (basis' j) =
+        if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hsrc := hON i j
+    rw [Diffeomorph.pullbackMetricCross_inner] at hsrc
+    simpa [hbasis'_apply i, hbasis'_apply j] using hsrc
+  have hinv :
+      MetricInverseInBasis_gen (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+        x basis identityInvMetric := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal
+        (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+        basis hON
+  have hinv' :
+      MetricInverseInBasis_gen (I := J) g (Phi x) basis'
+        identityInvMetric := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal (I := J) g basis' hON'
+  rw [metricScalarAt_def, metricScalarAt_def,
+    metricTracePair0SAt_eq_sum_basis
+      (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+      basis identityInvMetric hinv
+      (metricRicciAt (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x),
+    metricTracePair0SAt_eq_sum_basis
+      (I := J) g basis' identityInvMetric hinv'
+      (metricRicciAt (I := J) g (Phi x))]
+  refine Finset.sum_congr rfl (fun i _ =>
+    Finset.sum_congr rfl (fun j _ => ?_))
+  have hric :
+      metricRicciAt (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x
+          (vec2 (basis i) (basis j)) =
+        metricRicciAt (I := J) g (Phi x)
+          (vec2 (basis' i) (basis' j)) := by
+    rw [metricRicciAt_apply_eq_ricciTensor,
+      metricRicciAt_apply_eq_ricciTensor,
+      hbasis'_apply i, hbasis'_apply j]
+    exact ricciTensor_cross (I := I) (J := J) g Phi x (basis i) (basis j)
+  rw [hric]
+
+/-- The squared norm of the canonical Ricci tensor is preserved by a
+cross-model pullback metric. -/
+theorem ricciNormSq_cross
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold J 1 N] [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N) (x : M) :
+    normSq0S (I := I)
+        (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+        x 2
+        (metricRicci (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x) =
+      normSq0S (I := J) g (Phi x) 2
+        (metricRicci (I := J) g (Phi x)) := by
+  classical
+  obtain ⟨basis, hON⟩ :=
+    exists_gOrthonormalBasis
+      (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x
+  exact normSq0S_pullbackCross_eval_of_orthonormal
+    (I := I) (J := J) g Phi x 2 basis hON
+    (metricRicci (I := I)
+      (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x)
+    (metricRicci (I := J) g (Phi x))
+    (metricRicci_cross (I := I) (J := J) g Phi x)
+
+/-- The canonical pointwise trace-free Ricci norm square is preserved by a
+cross-model pullback metric. -/
+theorem tfRicNormSq_cross
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold J N]
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold J 1 N] [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N) (x : M) :
+    DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqAtOf
+        (metricScalarAt (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x)
+        (normSq0S (I := I)
+          (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
+          x 2
+          (metricRicci (I := I)
+            (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) x)) =
+      DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqAtOf
+        (metricScalarAt (I := J) g (Phi x))
+        (normSq0S (I := J) g (Phi x) 2
+          (metricRicci (I := J) g (Phi x))) := by
+  rw [metricScalar_cross (I := I) (J := J),
+    ricciNormSq_cross (I := I) (J := J)]
 
 /-- Pointwise metric-difference seminorms are invariant under simultaneous
 cross-model pullback of the compared metrics and the reference metric. -/

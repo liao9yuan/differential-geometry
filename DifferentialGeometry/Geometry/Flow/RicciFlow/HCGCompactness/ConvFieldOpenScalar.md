@@ -17,3 +17,15 @@ open-interval readout and has no existing downstream call site yet.
 The scalar readout now carries the revised grow-local `hcovTail` interface.
 Its proof is otherwise unchanged. Focused verification and the exact module
 refresh pass.
+
+## 2026-07-24 open-window Ricci-norm readout
+
+`OpenConvOut.ricNorm_conv` uses the same canonical compact-window selection as
+`scalar_conv` and reads the genuine pointwise `ConvOut.ricNorm_conv_at`
+producer. Its result is the fully evaluated real-valued convergence from the
+source-flow intrinsic squared Ricci norm to the AA limit metric's intrinsic
+squared Ricci norm; no flow-limit cast or extra convergence assumption appears
+at this layer.
+
+Source wiring and focused verification pass with no diagnostics. The required
+`ConvFieldPDE` producer and this open-window readout are both exact-current.

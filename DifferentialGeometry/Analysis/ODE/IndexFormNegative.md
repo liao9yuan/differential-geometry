@@ -1,5 +1,19 @@
 # IndexFormNegative
 
+## 2026-07-24
+
+The canonical negative split construction is now parameterized by an arbitrary
+terminal time `L`.  The endpoint-aware test field is owned by
+`indexTestFieldTo` / `indexTestDerivTo`; `indexForm_test_to`,
+`indexForm_pos_to`, and `IsJacobiSolOn.exists_split_neg_on` carry the
+proof on `[0,L]`.  The former unit-interval declarations remain compatibility
+wrappers at `L = 1`.
+
+Focused verification passed without diagnostics.  The arbitrary-length split
+theorem is 100% at theorem level and its dedicated ODE machinery is 100%.
+The globally smooth arbitrary-length negative direction remains the immediate
+downstream theorem in `IndexFormNegativeSmooth`.
+
 ## 2026-07-23
 
 This module continues Route B, N-d, at the abstract Jacobi ODE layer.

@@ -19,40 +19,68 @@ namespace DifferentialGeometry.Analysis.ODE
 
 variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 
+/-- The endpoint-aware polynomial test field used in the interior conjugate-point argument. -/
+def indexTestFieldTo (L : ℝ) (q : F) (t : ℝ) : F :=
+  (t * (L - t)) • q
+
+/-- The derivative of `indexTestFieldTo`. -/
+def indexTestDerivTo (L : ℝ) (q : F) (t : ℝ) : F :=
+  (L - 2 * t) • q
+
+/-- Derivative formula for the endpoint-aware polynomial index-form test field. -/
+theorem testFieldTo_deriv (L : ℝ) (q : F) (t : ℝ) :
+    HasDerivAt (indexTestFieldTo L q) (indexTestDerivTo L q t) t := by
+  have hscalar :
+      HasDerivAt (fun s : ℝ => s * (L - s)) (L - 2 * t) t := by
+    convert (hasDerivAt_id t).mul
+      ((hasDerivAt_const t L).sub (hasDerivAt_id t)) using 1
+    all_goals simp
+    ring
+  simpa only [indexTestFieldTo, indexTestDerivTo] using hscalar.smul_const q
+
+/-- An endpoint-aware polynomial index-form test field is continuous. -/
+theorem testFieldTo_cont (L : ℝ) (q : F) :
+    Continuous (indexTestFieldTo L q) := by
+  unfold indexTestFieldTo
+  fun_prop
+
+/-- The derivative field of an endpoint-aware polynomial test field is continuous. -/
+theorem testDerivTo_cont (L : ℝ) (q : F) :
+    Continuous (indexTestDerivTo L q) := by
+  unfold indexTestDerivTo
+  fun_prop
+
+/-- An endpoint-aware polynomial index-form test field is smooth. -/
+theorem testFieldTo_smooth (L : ℝ) (q : F) :
+    ContDiff ℝ ∞ (indexTestFieldTo L q) := by
+  unfold indexTestFieldTo
+  fun_prop
+
 /-- The polynomial test field used in the interior conjugate-point argument. -/
 def indexTestField (q : F) (t : ℝ) : F :=
-  (t * (1 - t)) • q
+  indexTestFieldTo 1 q t
 
 /-- The derivative of `indexTestField`. -/
 def indexTestDeriv (q : F) (t : ℝ) : F :=
-  (1 - 2 * t) • q
+  indexTestDerivTo 1 q t
 
 /-- Derivative formula for the polynomial index-form test field. -/
 theorem indexTestField_deriv (q : F) (t : ℝ) :
     HasDerivAt (indexTestField q) (indexTestDeriv q t) t := by
-  have hscalar :
-      HasDerivAt (fun s : ℝ => s * (1 - s)) (1 - 2 * t) t := by
-    convert (hasDerivAt_id t).mul
-      ((hasDerivAt_const t 1).sub (hasDerivAt_id t)) using 1
-    simp
-    ring
-  simpa only [indexTestField, indexTestDeriv] using hscalar.smul_const q
+  simpa only [indexTestField, indexTestDeriv] using testFieldTo_deriv 1 q t
 
 /-- The polynomial index-form test field is continuous. -/
 theorem indexTestField_cont (q : F) : Continuous (indexTestField q) := by
-  unfold indexTestField
-  fun_prop
+  simpa only [indexTestField] using testFieldTo_cont 1 q
 
 /-- The derivative field of the polynomial test field is continuous. -/
 theorem indexTestDeriv_cont (q : F) : Continuous (indexTestDeriv q) := by
-  unfold indexTestDeriv
-  fun_prop
+  simpa only [indexTestDeriv] using testDerivTo_cont 1 q
 
 /-- A polynomial index-form test field is smooth. -/
 theorem testField_smooth (q : F) :
     ContDiff ℝ ∞ (indexTestField q) := by
-  unfold indexTestField
-  fun_prop
+  simpa only [indexTestField] using testFieldTo_smooth 1 q
 
 /-- On an open time set, a Jacobi ODE solution is as smooth as its smooth
 coefficient. -/
@@ -157,8 +185,25 @@ theorem snd_ne_zero
   obtain ⟨t, ht, hyt⟩ := hne
   exact hyt (hzero t ht).1
 
-/-- The cross term of a Jacobi solution with the polynomial test field is its
-right-end velocity norm squared times `c(1-c)`. -/
+/-- The cross term of a Jacobi solution with the endpoint-aware polynomial
+test field is its right-end velocity norm squared times `c(L-c)`. -/
+theorem indexForm_test_to
+    [CompleteSpace F]
+    {R : ℝ → F →L[ℝ] F} {L c : ℝ} {y v : ℝ → F}
+    (hsol : IsJacobiSolOn R 0 c y v)
+    (hc : 0 ≤ c)
+    (hR : ContinuousOn R (Icc 0 c)) :
+    indexForm R 0 c y v
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+      = c * (L - c) * ‖v c‖ ^ 2 := by
+  rw [hsol.indexForm_eq_sub hc hR
+    (fun t _ => (testFieldTo_deriv L (v c) t).hasDerivWithinAt)
+    (by
+      unfold indexTestDerivTo
+      fun_prop)]
+  simp [indexTestFieldTo, real_inner_smul_right]
+
+/-- The cross-term formula for the unit endpoint polynomial test field. -/
 theorem indexForm_test
     [CompleteSpace F]
     {R : ℝ → F →L[ℝ] F} {c : ℝ} {y v : ℝ → F}
@@ -167,12 +212,23 @@ theorem indexForm_test
     (hR : ContinuousOn R (Icc 0 c)) :
     indexForm R 0 c y v (indexTestField (v c)) (indexTestDeriv (v c))
       = c * (1 - c) * ‖v c‖ ^ 2 := by
-  rw [hsol.indexForm_eq_sub hc hR
-    (fun t _ => (indexTestField_deriv (v c) t).hasDerivWithinAt)
-    (by
-      unfold indexTestDeriv
-      fun_prop)]
-  simp [indexTestField, real_inner_smul_right]
+  simpa only [indexTestField, indexTestDeriv] using
+    hsol.indexForm_test_to (L := 1) hc hR
+
+/-- At an interior time of `[0,L]`, a nonzero Jacobi velocity makes the
+endpoint-aware polynomial-test-field cross term strictly positive. -/
+theorem indexForm_pos_to
+    [CompleteSpace F]
+    {R : ℝ → F →L[ℝ] F} {L c : ℝ} {y v : ℝ → F}
+    (hsol : IsJacobiSolOn R 0 c y v)
+    (hc : c ∈ Ioo (0 : ℝ) L)
+    (hR : ContinuousOn R (Icc 0 c))
+    (hvc : v c ≠ 0) :
+    0 < indexForm R 0 c y v
+      (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)) := by
+  rw [hsol.indexForm_test_to hc.1.le hR]
+  have hnorm : 0 < ‖v c‖ := norm_pos_iff.mpr hvc
+  exact mul_pos (mul_pos hc.1 (sub_pos.mpr hc.2)) (sq_pos_of_pos hnorm)
 
 /-- At an interior time of `[0,1]`, a nonzero Jacobi velocity makes the
 polynomial-test-field cross term strictly positive. -/
@@ -185,13 +241,189 @@ theorem indexForm_test_pos
     (hvc : v c ≠ 0) :
     0 < indexForm R 0 c y v
       (indexTestField (v c)) (indexTestDeriv (v c)) := by
-  rw [hsol.indexForm_test hc.1.le hR]
-  have hnorm : 0 < ‖v c‖ := norm_pos_iff.mpr hvc
-  exact mul_pos (mul_pos hc.1 (sub_pos.mpr hc.2)) (sq_pos_of_pos hnorm)
+  simpa only [indexTestField, indexTestDeriv] using
+    hsol.indexForm_pos_to (L := 1) hc hR hvc
 
-/-- An interior zero of a nontrivial Jacobi solution produces a negative
-split index direction.  The two fields are smooth on their respective
-subintervals and agree in value at the splitting time. -/
+/-- An interior zero of a nontrivial Jacobi solution on `[0,L]` produces a
+negative split index direction.  The two fields agree in value at the splitting
+time. -/
+theorem exists_split_neg_on
+    [CompleteSpace F]
+    {R : ℝ → F →L[ℝ] F} {L c : ℝ} {y v : ℝ → F}
+    (hsol : IsJacobiSolOn R 0 L y v)
+    (hc : c ∈ Ioo (0 : ℝ) L)
+    (hR : ContinuousOn R (Icc 0 L))
+    (hSym : ∀ t, ∀ x x' : F, ⟪R t x, x'⟫ = ⟪x, R t x'⟫)
+    (hy0 : y 0 = 0) (hyc : y c = 0)
+    (hne : ∃ t ∈ Icc (0 : ℝ) L, y t ≠ 0) :
+    ∃ s : ℝ,
+      indexForm R 0 c
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+        + indexForm R c L
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c))
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c)) < 0 := by
+  have hsol0c : IsJacobiSolOn R 0 c y v :=
+    hsol.mono le_rfl hc.2.le
+  have hR0c : ContinuousOn R (Icc 0 c) :=
+    hR.mono (Icc_subset_Icc le_rfl hc.2.le)
+  have hRcL : ContinuousOn R (Icc c L) :=
+    hR.mono (Icc_subset_Icc hc.1.le le_rfl)
+  have hvc : v c ≠ 0 :=
+    hsol.snd_ne_zero hc hR hyc hne
+  have hcross : 0 < indexForm R 0 c y v
+      (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)) :=
+    hsol0c.indexForm_pos_to hc hR0c hvc
+  have hself : indexForm R 0 c y v y v = 0 :=
+    hsol0c.indexForm_self_zero hc.1.le hR0c hy0 hyc
+  have hyy : IntervalIntegrable
+      (indexIntegrand R y v y v) MeasureTheory.volume 0 c :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
+  have hyz : IntervalIntegrable
+      (indexIntegrand R y v
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)))
+      MeasureTheory.volume 0 c :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
+      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+  have hzz0c : IntervalIntegrable
+      (indexIntegrand R
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)))
+      MeasureTheory.volume 0 c :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.1.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+  have hzzcL : IntervalIntegrable
+      (indexIntegrand R
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)))
+      MeasureTheory.volume c L :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.2.le] using hRcL)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+  have hzero_cont : Continuous (fun _ : ℝ => (0 : F)) := continuous_const
+  have h00 : IntervalIntegrable
+      (indexIntegrand R (fun _ => 0) (fun _ => 0)
+        (fun _ => 0) (fun _ => 0))
+      MeasureTheory.volume c L :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.2.le] using hRcL)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+  have h0z : IntervalIntegrable
+      (indexIntegrand R (fun _ => 0) (fun _ => 0)
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)))
+      MeasureTheory.volume c L :=
+    intInt_indexIntegrand
+      (by simpa only [uIcc_of_le hc.2.le] using hRcL)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testFieldTo_cont L (v c)).continuousOn)
+      (by
+        simpa only [uIcc_of_le hc.2.le] using
+          (testDerivTo_cont L (v c)).continuousOn)
+  have hleft (s : ℝ) :
+      indexForm R 0 c
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+        = indexForm R 0 c y v y v
+          + 2 * s * indexForm R 0 c y v
+            (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+          + s ^ 2 * indexForm R 0 c
+            (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+            (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)) :=
+    indexForm_add_smul hSym hyy hyz hzz0c s
+  have hright (s : ℝ) :
+      indexForm R c L
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c))
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c))
+        = s ^ 2 * indexForm R c L
+            (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+            (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c)) := by
+    have h := indexForm_add_smul
+      (R := R) (a := c) (b := L)
+      (y := fun _ => (0 : F)) (v := fun _ => (0 : F))
+      (z := indexTestFieldTo L (v c)) (w := indexTestDerivTo L (v c))
+      hSym h00 h0z hzzcL s
+    simpa [indexForm, indexIntegrand] using h
+  let κ : ℝ := indexForm R 0 c y v
+    (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+  let Q : ℝ :=
+    indexForm R 0 c
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+      + indexForm R c L
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+        (indexTestFieldTo L (v c)) (indexTestDerivTo L (v c))
+  have hκ : 0 < κ := by simpa only [κ] using hcross
+  obtain ⟨s, hs⟩ := exists_quad_neg hκ (Q := Q)
+  refine ⟨s, ?_⟩
+  calc
+    indexForm R 0 c
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+          (y + s • indexTestFieldTo L (v c))
+          (v + s • indexTestDerivTo L (v c))
+        + indexForm R c L
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c))
+          (s • indexTestFieldTo L (v c))
+          (s • indexTestDerivTo L (v c))
+        = 2 * s * κ + s ^ 2 * Q := by
+          rw [hleft s, hright s, hself]
+          simp only [zero_add]
+          dsimp only [κ, Q]
+          ring
+    _ < 0 := hs
+
+/-- The unit-interval compatibility form of `exists_split_neg_on`. -/
 theorem exists_split_neg
     [CompleteSpace F]
     {R : ℝ → F →L[ℝ] F} {c : ℝ} {y v : ℝ → F}
@@ -212,161 +444,8 @@ theorem exists_split_neg
           (s • indexTestDeriv (v c))
           (s • indexTestField (v c))
           (s • indexTestDeriv (v c)) < 0 := by
-  have hsol0c : IsJacobiSolOn R 0 c y v :=
-    hsol.mono le_rfl hc.2.le
-  have hR0c : ContinuousOn R (Icc 0 c) :=
-    hR.mono (Icc_subset_Icc le_rfl hc.2.le)
-  have hRc1 : ContinuousOn R (Icc c 1) :=
-    hR.mono (Icc_subset_Icc hc.1.le le_rfl)
-  have hvc : v c ≠ 0 :=
-    hsol.snd_ne_zero hc hR hyc hne
-  have hcross : 0 < indexForm R 0 c y v
-      (indexTestField (v c)) (indexTestDeriv (v c)) :=
-    hsol0c.indexForm_test_pos hc hR0c hvc
-  have hself : indexForm R 0 c y v y v = 0 :=
-    hsol0c.indexForm_self_zero hc.1.le hR0c hy0 hyc
-  have hyy : IntervalIntegrable
-      (indexIntegrand R y v y v) MeasureTheory.volume 0 c :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
-  have hyz : IntervalIntegrable
-      (indexIntegrand R y v
-        (indexTestField (v c)) (indexTestDeriv (v c)))
-      MeasureTheory.volume 0 c :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_fst)
-      (by simpa only [uIcc_of_le hc.1.le] using hsol0c.contOn_snd)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-  have hzz0c : IntervalIntegrable
-      (indexIntegrand R
-        (indexTestField (v c)) (indexTestDeriv (v c))
-        (indexTestField (v c)) (indexTestDeriv (v c)))
-      MeasureTheory.volume 0 c :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.1.le] using hR0c)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.1.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-  have hzzc1 : IntervalIntegrable
-      (indexIntegrand R
-        (indexTestField (v c)) (indexTestDeriv (v c))
-        (indexTestField (v c)) (indexTestDeriv (v c)))
-      MeasureTheory.volume c 1 :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.2.le] using hRc1)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-  have hzero_cont : Continuous (fun _ : ℝ => (0 : F)) := continuous_const
-  have h00 : IntervalIntegrable
-      (indexIntegrand R (fun _ => 0) (fun _ => 0)
-        (fun _ => 0) (fun _ => 0))
-      MeasureTheory.volume c 1 :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.2.le] using hRc1)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-  have h0z : IntervalIntegrable
-      (indexIntegrand R (fun _ => 0) (fun _ => 0)
-        (indexTestField (v c)) (indexTestDeriv (v c)))
-      MeasureTheory.volume c 1 :=
-    intInt_indexIntegrand
-      (by simpa only [uIcc_of_le hc.2.le] using hRc1)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-      (by simpa only [uIcc_of_le hc.2.le] using hzero_cont.continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestField_cont (v c)).continuousOn)
-      (by
-        simpa only [uIcc_of_le hc.2.le] using
-          (indexTestDeriv_cont (v c)).continuousOn)
-  have hleft (s : ℝ) :
-      indexForm R 0 c
-          (y + s • indexTestField (v c))
-          (v + s • indexTestDeriv (v c))
-          (y + s • indexTestField (v c))
-          (v + s • indexTestDeriv (v c))
-        = indexForm R 0 c y v y v
-          + 2 * s * indexForm R 0 c y v
-            (indexTestField (v c)) (indexTestDeriv (v c))
-          + s ^ 2 * indexForm R 0 c
-            (indexTestField (v c)) (indexTestDeriv (v c))
-            (indexTestField (v c)) (indexTestDeriv (v c)) :=
-    indexForm_add_smul hSym hyy hyz hzz0c s
-  have hright (s : ℝ) :
-      indexForm R c 1
-          (s • indexTestField (v c))
-          (s • indexTestDeriv (v c))
-          (s • indexTestField (v c))
-          (s • indexTestDeriv (v c))
-        = s ^ 2 * indexForm R c 1
-            (indexTestField (v c)) (indexTestDeriv (v c))
-            (indexTestField (v c)) (indexTestDeriv (v c)) := by
-    have h := indexForm_add_smul
-      (R := R) (a := c) (b := 1)
-      (y := fun _ => (0 : F)) (v := fun _ => (0 : F))
-      (z := indexTestField (v c)) (w := indexTestDeriv (v c))
-      hSym h00 h0z hzzc1 s
-    simpa [indexForm, indexIntegrand] using h
-  let κ : ℝ := indexForm R 0 c y v
-    (indexTestField (v c)) (indexTestDeriv (v c))
-  let Q : ℝ :=
-    indexForm R 0 c
-        (indexTestField (v c)) (indexTestDeriv (v c))
-        (indexTestField (v c)) (indexTestDeriv (v c))
-      + indexForm R c 1
-        (indexTestField (v c)) (indexTestDeriv (v c))
-        (indexTestField (v c)) (indexTestDeriv (v c))
-  have hκ : 0 < κ := by simpa only [κ] using hcross
-  obtain ⟨s, hs⟩ := exists_quad_neg hκ (Q := Q)
-  refine ⟨s, ?_⟩
-  calc
-    indexForm R 0 c
-          (y + s • indexTestField (v c))
-          (v + s • indexTestDeriv (v c))
-          (y + s • indexTestField (v c))
-          (v + s • indexTestDeriv (v c))
-        + indexForm R c 1
-          (s • indexTestField (v c))
-          (s • indexTestDeriv (v c))
-          (s • indexTestField (v c))
-          (s • indexTestDeriv (v c))
-        = 2 * s * κ + s ^ 2 * Q := by
-          rw [hleft s, hright s, hself]
-          simp only [zero_add]
-          dsimp only [κ, Q]
-          ring
-    _ < 0 := hs
+  simpa only [indexTestField, indexTestDeriv] using
+    hsol.exists_split_neg_on hc hR hSym hy0 hyc hne
 
 /-- A Jacobi solution on an open interval containing `[0,1]` produces two
 smooth, value-matching half-fields whose index forms have negative sum. -/
@@ -446,8 +525,8 @@ theorem exists_smooth_split
     simp only [indexIntegrand]
     rw [hdW₁ t]
   refine ⟨y + s • Z, s • Z, hW₀Smooth, hW₁Smooth, ?_, ?_, ?_, ?_⟩
-  · simp [Z, indexTestField, hy0]
-  · simp [Z, indexTestField]
+  · simp [Z, indexTestField, indexTestFieldTo, hy0]
+  · simp [Z, indexTestField, indexTestFieldTo]
   · simp [hyc]
   · rw [e₀, e₁]
     exact hs

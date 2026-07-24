@@ -764,6 +764,29 @@ noncomputable def ham3RescaledSol
   paraSolution (I := I) P.S (Q.time i) (ham3BlowupScale (I := I) P Q i)
     (hsel.1 i) (hsel.2.2.1 i)
 
+/-- The canonical trace-free Ricci norm square has weight two under each
+selected parabolic rescaling. -/
+theorem ham3_tf_display
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (hsel : Ham3PointSel (I := I) P Q) (i : Nat) :
+    DifferentialGeometry.PDE.RicciFlow.ParaTracefreeNormSqDisplay (M := M)
+      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+        (ham3RescaledSol (I := I) P Q hsel i).scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+          (ham3RescaledSol (I := I) P Q hsel i)))
+      (Q.time i) (ham3BlowupScale (I := I) P Q i) := by
+  intro s x
+  simp only [ham3RescaledSol,
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq,
+    DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
+    DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqAtOf,
+    DifferentialGeometry.PDE.RicciFlow.paraSolution_scalar,
+    DifferentialGeometry.PDE.RicciFlow.paraSolution_ricciNorm]
+  ring
+
 /-- The source sequence stored by a Hamilton CGH limit is the selected
 parabolic-rescaling sequence on the common limit interval. -/
 structure Ham3SourceRealizes
@@ -877,6 +900,123 @@ def Ham3PinchEstimate
         P.S.scalar
         (DifferentialGeometry.PDE.RicciFlow.pinchWeight (M := M) P.S.scalar epsilon)
         C P.D.carrier
+
+private theorem scaled_pinch_le
+    {q R r C epsilon : Real}
+    (hR : 0 < R) (hr : 0 < r) (hr1 : r ≤ 1)
+    (hC : 0 ≤ C) (hepsilon0 : 0 < epsilon) (hepsilon1 : epsilon < 1)
+    (hpinch : q / r ^ 2 ≤ C * (R * r) ^ (-epsilon)) :
+    q ≤ C * R ^ (-epsilon) := by
+  have hr2 : 0 < r ^ 2 := sq_pos_of_pos hr
+  have hmain :
+      q ≤ (C * (R * r) ^ (-epsilon)) * r ^ 2 :=
+    (div_le_iff₀ hr2).mp hpinch
+  have hrewrite :
+      (C * (R * r) ^ (-epsilon)) * r ^ 2 =
+        (C * R ^ (-epsilon)) * r ^ (2 - epsilon) := by
+    rw [Real.mul_rpow hR.le hr.le, ← Real.rpow_two r]
+    calc
+      C * (R ^ (-epsilon) * r ^ (-epsilon)) * r ^ (2 : Real) =
+          (C * R ^ (-epsilon)) *
+            (r ^ (-epsilon) * r ^ (2 : Real)) := by ring
+      _ = (C * R ^ (-epsilon)) * r ^ (2 - epsilon) := by
+        rw [← Real.rpow_add hr]
+        congr 2
+        ring
+  rw [hrewrite] at hmain
+  have hrpow : r ^ (2 - epsilon) ≤ 1 :=
+    Real.rpow_le_one hr.le hr1 (by linarith)
+  have hcoef : 0 ≤ C * R ^ (-epsilon) :=
+    mul_nonneg hC (Real.rpow_nonneg hR.le _)
+  exact hmain.trans (by simpa using mul_le_mul_of_nonneg_left hrpow hcoef)
+
+/-- The time-zero trace-free Ricci norm on every selected rescaling has the
+decaying upper bound supplied by Hamilton's improved pinching estimate. -/
+theorem ham3_tf_bound0
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (hsel : Ham3PointSel (I := I) P Q)
+    (hscalar :
+      ∀ t : Real, t ∈ P.D.carrier -> ∀ x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P) :
+    ∃ epsilon C : Real,
+      0 < epsilon ∧ epsilon < 1 ∧ 0 ≤ C ∧
+        ∀ i : Nat, ∀ x : M,
+          DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+              (ham3RescaledSol (I := I) P Q hsel i).scalar
+              (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+                (ham3RescaledSol (I := I) P Q hsel i)) 0 x ≤
+            C * ham3BlowupScale (I := I) P Q i ^ (-epsilon) := by
+  rcases hpinch with ⟨epsilon, C, hepsilon0, hepsilon1, hC, hest⟩
+  refine ⟨epsilon, C, hepsilon0, hepsilon1, hC, ?_⟩
+  intro i x
+  let R : Real := ham3BlowupScale (I := I) P Q i
+  let r : Real := (ham3RescaledSol (I := I) P Q hsel i).scalar 0 x
+  let q : Real :=
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+      (ham3RescaledSol (I := I) P Q hsel i).scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+        (ham3RescaledSol (I := I) P Q hsel i)) 0 x
+  have hR : 0 < R := hsel.1 i
+  have htime : 0 < Q.time i := hsel.2.1 i
+  have htimeMem : Q.time i ∈ P.D.carrier := hsel.2.2.1 i
+  have hscalarOld : 0 < P.S.scalar (Q.time i) x :=
+    hscalar (Q.time i) htimeMem x
+  have hr_eq :
+      r = R⁻¹ * P.S.scalar (Q.time i) x := by
+    simp only [r, R, ham3RescaledSol,
+      DifferentialGeometry.PDE.RicciFlow.paraSolution_scalar,
+      DifferentialGeometry.PDE.RicciFlow.paraTime_zero]
+  have hr : 0 < r := by
+    rw [hr_eq]
+    exact mul_pos (inv_pos.mpr hR) hscalarOld
+  have hleft : -(R * Q.time i) ≤ (0 : Real) := by
+    have : 0 < R * Q.time i := mul_pos hR htime
+    linarith
+  have hr1 : r ≤ 1 := by
+    have hmax := hsel.2.2.2.2.2 i 0 x
+      (by simpa only [R] using hleft) le_rfl
+    have hr_display :
+        r = ham3RescaledScalar (I := I) P Q i 0 x := by
+      simpa only [R, ham3RescaledScalar, ham3RescaledTime, ham3Scalar,
+        ham3Solution, zero_div, add_zero] using hr_eq
+    rwa [← hr_display] at hmax
+  have hscalarOld_eq : P.S.scalar (Q.time i) x = R * r := by
+    rw [hr_eq]
+    field_simp [ne_of_gt hR]
+  have hscalarDisplay :
+      DifferentialGeometry.PDE.RicciFlow.ParaScalarDisplay (M := M)
+        P.S.scalar
+        (ham3RescaledSol (I := I) P Q hsel i).scalar
+        (Q.time i) R := by
+    intro s y
+    simpa only [R, ham3RescaledSol] using
+      congrFun
+        (congrFun
+          (DifferentialGeometry.PDE.RicciFlow.paraSolution_scalar
+            (I := I) P.S (Q.time i) R hR htimeMem) s) y
+  have hratio :=
+    DifferentialGeometry.PDE.RicciFlow.para_tracefree_ratio_invariant
+      (M := M)
+      (scalar := P.S.scalar)
+      (scalarR := (ham3RescaledSol (I := I) P Q hsel i).scalar)
+      (q := DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+      (qR := DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+        (ham3RescaledSol (I := I) P Q hsel i).scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+          (ham3RescaledSol (I := I) P Q hsel i)))
+      (τ := Q.time i) (R := R) hR hscalarDisplay
+      (by simpa only [R] using ham3_tf_display (I := I) P Q hsel i)
+      0 x
+  have hratio_le :
+      q / r ^ 2 ≤ C * (R * r) ^ (-epsilon) := by
+    rw [hratio]
+    simpa only [q, r, R,
+      DifferentialGeometry.PDE.RicciFlow.paraTime_zero, hscalarOld_eq,
+      DifferentialGeometry.PDE.RicciFlow.pinchWeight] using
+      hest (Q.time i) htimeMem x
+  exact scaled_pinch_le hR hr hr1 hC hepsilon0 hepsilon1 hratio_le
 
 /-- The CGH transfer datum needed by the Section 12 pinching paragraph:
 smooth convergence of the selected rescalings, combined with the original
@@ -2300,6 +2440,65 @@ theorem ham3_r0_window
   · linarith
   · exact hsright
 
+/-- On a finite maximal-flow interval, point selection forces the scalar
+blow-up scales themselves to tend to infinity. -/
+theorem ham3_scale_atTop
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q) :
+    Filter.Tendsto (ham3BlowupScale (I := I) P Q)
+      Filter.atTop Filter.atTop := by
+  rcases hsel with ⟨hscale, _htime, htimeMem, hprod, _hbase, _hscalarMax⟩
+  rw [Filter.tendsto_atTop]
+  intro A
+  rcases hprod (A * omega) with ⟨N, hN⟩
+  filter_upwards [Filter.eventually_atTop.2 ⟨N, fun i hi => hi⟩] with i hi
+  have hprod_i :
+      A * omega ≤ ham3BlowupScale (I := I) P Q i * Q.time i :=
+    hN i hi
+  have htime_i := htimeMem i
+  rw [hD] at htime_i
+  have hlt :
+      ham3BlowupScale (I := I) P Q i * Q.time i <
+        ham3BlowupScale (I := I) P Q i * omega :=
+    mul_lt_mul_of_pos_left htime_i.2 (hscale i)
+  exact le_of_lt
+    (lt_of_mul_lt_mul_right (lt_of_le_of_lt hprod_i hlt) h0omega.le)
+
+/-- Every negative power of the selected blow-up scale tends to zero along the
+smooth-CGH subsequence. -/
+theorem ham3_scale_decay
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (L : Ham3CGHLimitData (I := I) M)
+    {epsilon C : Real} (hepsilon : 0 < epsilon) :
+    Filter.Tendsto
+      (fun k : Nat =>
+        C * ham3BlowupScale (I := I) P Q (L.subseq k) ^ (-epsilon))
+      Filter.atTop (nhds 0) := by
+  have hscale :
+      Filter.Tendsto
+        (fun k : Nat => ham3BlowupScale (I := I) P Q (L.subseq k))
+        Filter.atTop Filter.atTop :=
+    (ham3_scale_atTop (I := I) h0omega P hD Q hsel).comp
+      L.subseq_strict.tendsto_atTop
+  have hpow :
+      Filter.Tendsto
+        (fun k : Nat =>
+          ham3BlowupScale (I := I) P Q (L.subseq k) ^ (-epsilon))
+        Filter.atTop (nhds 0) :=
+    (tendsto_rpow_neg_atTop hepsilon).comp hscale
+  simpa only [mul_zero] using tendsto_const_nhds.mul hpow
+
 /-- The selected metric scaling eventually makes any fixed original
 noncollapsing scale `rho` contain a fixed rescaled radius `r`. -/
 theorem ham3_radius_event
@@ -2459,7 +2658,7 @@ theorem ham3_noncollapse
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (_hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
       0 omega h0omega)
@@ -2701,16 +2900,15 @@ theorem limit_tf_decay
     LimitTfDecay (I := I) L := by
   exact htransfer hreal hpinch hscalarPos
 
-/-- Once the pinching estimate has been transferred to arbitrary-small upper
-bounds on the CGH limit, nonnegativity of the canonical trace-free Ricci norm
-upgrades the decay statement to actual vanishing. -/
-theorem limit_tf_zero_of_decay
+/-- At one fixed time, arbitrary-small upper bounds on the canonical
+trace-free Ricci norm force that norm to vanish. -/
+theorem tf_zero_of_decay
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
-    (hdecay : LimitTfDecay (I := I) L) :
-    LimitTfZero (I := I) L := by
+    {t : Real}
+    (hdecay : LimitTfDecayAt (I := I) L t) :
+    LimitTfZeroAt (I := I) L t := by
   classical
-  intro t ht
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
@@ -2731,9 +2929,20 @@ theorem limit_tf_zero_of_decay
   have hle0 : q <= 0 := by
     have hforall : forall ε : Real, 0 < ε -> q <= 0 + ε := by
       intro ε hε
-      simpa [q] using hdecay t ht x ε hε
+      simpa [q] using hdecay x ε hε
     exact le_of_forall_pos_le_add hforall
   simpa [q] using le_antisymm hle0 hnonneg
+
+/-- Once the pinching estimate has been transferred to arbitrary-small upper
+bounds on the CGH limit, nonnegativity of the canonical trace-free Ricci norm
+upgrades the decay statement to actual vanishing. -/
+theorem limit_tf_zero_of_decay
+    {L : Ham3CGHLimitData (I := I) M}
+    (hdim : Module.finrank Real E = 3)
+    (hdecay : LimitTfDecay (I := I) L) :
+    LimitTfZero (I := I) L := by
+  intro t ht
+  exact tf_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
 
 /-- The Section 10 improved pinching estimate passes to the smooth CGH limit
 and kills the trace-free Ricci part. -/
@@ -2867,15 +3076,22 @@ theorem limitEinstein_of_tf0
           rw [hscalar_l1]
 
 /-- Static Schur/space-form step for the Section 12 limit: a connected
-three-dimensional limit metric with `Ric = (R / 3) g` and positive scalar at
-the selected time has constant positive sectional curvature. -/
-theorem limit_round_of_ein
+three-dimensional Einstein limit metric whose scalar curvature is positive at
+the base point has constant positive sectional curvature. -/
+theorem limit_round_base
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
     (hbdry : Ham3LimitBoundaryless (I := I) L)
     {t0 : Real}
-    (hscalar : LimitScalarPosAt (I := I) L t0)
+    (hbase :
+      letI : TopologicalSpace L.N := L.topology
+      letI : ChartedSpace H L.N := L.charted
+      letI : IsManifold I ∞ L.N := L.smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+      letI : SigmaCompactSpace L.N := L.sigmaCompact
+      letI : T2Space L.N := L.t2
+      0 < L.S.scalar t0 L.basepoint)
     (heinstein : LimitEinsteinAt (I := I) L t0) :
     LimitRoundAt (I := I) L t0 := by
   classical
@@ -2932,9 +3148,8 @@ theorem limit_round_of_ein
     simpa [g, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using hx
   have hR0_pos : 0 < R0 := by
-    have hb := hscalar L.basepoint
-    rw [hR0_scalar L.basepoint] at hb
-    exact hb
+    rw [hR0_scalar L.basepoint] at hbase
+    exact hbase
   have hRic :
       forall x : L.N, forall v : TangentSpace I x,
         (((Module.finrank Real E : Real) - 1) * (R0 / 6)) * g.inner x v v <=
@@ -2985,6 +3200,20 @@ theorem limit_round_of_ein
             g.inner x X Y * g.inner x X Y) := by
           rw [hscalar_x]
           ring
+
+/-- Compatibility form of `limit_round_base` for callers that already know
+pointwise positive scalar curvature on the selected slice. -/
+theorem limit_round_of_ein
+    {L : Ham3CGHLimitData (I := I) M}
+    (hdim : Module.finrank Real E = 3)
+    (hconn : Ham3LimitConnected (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I) L)
+    {t0 : Real}
+    (hscalar : LimitScalarPosAt (I := I) L t0)
+    (heinstein : LimitEinsteinAt (I := I) L t0) :
+    LimitRoundAt (I := I) L t0 := by
+  exact limit_round_base (I := I) (M := M) hdim hconn hbdry
+    (hscalar L.basepoint) heinstein
 
 /-- Compatibility projection of the slice-indexed round package to the older
 existential constant-curvature statement. -/

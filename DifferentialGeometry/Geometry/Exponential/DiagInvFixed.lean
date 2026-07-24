@@ -6,9 +6,9 @@ set_option autoImplicit false
 /-!
 # Fixed-base partial diffeomorphisms from diagonal exponential branches
 
-This file restricts a selected diagonal-exponential inverse branch to one
-fixed tangent fibre.  The resulting `C∞` partial diffeomorphism exposes the
-intrinsic exponential and its selected inverse in the model space.
+This file retains the established fixed-partial-diffeomorphism API as a
+compatibility projection of `DiagInvBranch.fixed`.  The canonical fixed-first
+object is `ExpInvBranch`.
 -/
 
 noncomputable section
@@ -37,67 +37,15 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- Restrict a selected diagonal-exponential branch to the tangent fibre over
-`p`, expressed in the model space `E`. -/
+/-- The established fixed-partial-diffeomorphism view of the canonical
+fixed-first branch. -/
 def fixedPD
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
     {p : M} (B : DiagInvBranch (I := I) g hEnorm p) :
-    PartialDiffeomorph 𝓘(ℝ, E) I E M ∞ where
-  toFun := fun u : E =>
-    expMapIntrinsic (I := I) g hEnorm p
-      (show TangentSpace I p from u)
-  invFun := fun q : M => ((B.inv (p, q)).snd : E)
-  source :=
-    (fun u : E => (⟨p, u⟩ : TangentBundle I M)) ⁻¹' B.hom.source
-  target := (fun q : M => (p, q)) ⁻¹' B.dom
-  map_source' := by
-    intro u hu
-    change (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source at hu
-    have hmap := B.hom.map_source hu
-    have heq := B.hom_eq hu
-    change
-      B.hom (⟨p, u⟩ : TangentBundle I M) =
-        (p, expMapIntrinsic (I := I) g hEnorm p
-          (show TangentSpace I p from u)) at heq
-    rw [heq] at hmap
-    exact hmap
-  map_target' := by
-    intro q hq
-    change (p, q) ∈ B.dom at hq
-    have hinv : B.inv (p, q) ∈ B.hom.source :=
-      B.hom.map_target hq
-    have htotal :
-        B.inv (p, q) =
-          (⟨p, (show TangentSpace I p from (B.inv (p, q)).snd)⟩ :
-            TangentBundle I M) := by
-      apply TotalSpace.ext (B.proj_eq hq)
-      exact heq_of_eq rfl
-    change
-      (⟨p, (show TangentSpace I p from (B.inv (p, q)).snd)⟩ :
-        TangentBundle I M) ∈ B.hom.source
-    rw [← htotal]
-    exact hinv
-  left_inv' := by
-    intro u hu
-    have hleft := B.left_inv hu
-    have hsnd :=
-      congrArg (fun a : TangentBundle I M => (a.snd : E)) hleft
-    simpa only [diagExp_apply] using hsnd
-  right_inv' := by
-    intro q hq
-    simpa only using B.exp_eq hq
-  open_source :=
-    B.hom.open_source.preimage
-      (FiberBundle.continuous_totalSpaceMk E (TangentSpace I) p)
-  open_target :=
-    B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
-  contMDiffOn_toFun :=
-    (intrinsicFiber_smooth (I := I) g hEnorm p).contMDiffOn
-  contMDiffOn_invFun :=
-    B.inv_fst_coord_inf (S := (fun q : M => (p, q)) ⁻¹' B.dom)
-      (fun q hq => hq)
+    PartialDiffeomorph 𝓘(ℝ, E) I E M ∞ :=
+  (B.fixed p).hom
 
 /-- The fixed-base partial diffeomorphism agrees with the intrinsic
 exponential map. -/

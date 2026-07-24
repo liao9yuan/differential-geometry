@@ -115,3 +115,19 @@ named operator theorems are complete (100%).  The solution-generated
 `ShiCutoffData` theorem and the corrected complete-noncompact Shi theorem remain
 separately at theorem-level 0%; their missing input is geometric/analytic, not
 this scalar calculus.
+
+## 2026-07-24
+
+Added `laplacian_add_const`, the neighborhood-local constant-add rule for the
+realized scalar Laplacian.  Its hypotheses are the actual first- and
+second-order local data used by the proof: eventual differentiability of the
+scalar near the evaluation point and differentiability there of its gradient
+section.  The proof identifies the two gradient fields on a neighborhood and
+uses locality of the covariant derivative; it does not require global
+differentiability or a globally smooth extension.
+
+Focused verification passed with no diagnostics.  This operator lemma is
+complete (theorem 100%, dedicated machinery 100%).  It closes only the local
+constant-add API seam for the Calabi support assembly; `calabiDist_support`
+remains a separate theorem-level frontier and is not advanced by this
+accounting alone.  No targeted module refresh was run in this lane.

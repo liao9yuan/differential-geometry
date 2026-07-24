@@ -56,3 +56,14 @@ Focused verification passed with no diagnostics.
 All open-endgame declarations now expose the revised grow-local covariant-tail
 premise. No proof or endpoint field changed. Focused verification and the
 exact module refresh pass.
+
+## 2026-07-24 retained intrinsic Ricci norm
+
+The open-window upgrade now takes the concrete `RicNormPullback` produced by
+the open convergence readout and stores it in `FlowLimitData`. The projection
+and conclusion wrappers thread the same witness; they add no new mathematical
+premise to the raw assembly endpoint.
+
+Source wiring and focused verification pass with no diagnostics, and the exact
+open-endgame artifact is current. The upstream Ricci-norm producer and
+open-window readout artifacts are also exact-current.

@@ -28,3 +28,25 @@ of the radial-Laplacian route is complete (100%).  This is producer
 infrastructure: the radial-Laplacian endpoint is accounted separately until
 its own theorem is proved and verified.  Whole HCG supporting machinery
 remains roughly 60%, while unconditional `compactnessSol` remains 0%.
+
+## 2026-07-24 canonical `ExpInvBranch` migration
+
+The fixed-first calculus now consumes the canonical `ExpInvBranch` directly.
+The redundant moving-base center argument and tangent-bundle pair packaging
+have been removed from `branchEnergy`, `branchRadius`, and all of their
+derivative formulas. Existing diagonal consumers are recovered through
+`DiagInvBranch.fixed`; this file is no longer a second proof hierarchy tied to
+the diagonal branch.
+
+The new theorem `ExpInvBranch.edist_le_radius` proves the exact inequality
+needed by the Calabi support construction: the intrinsic radial curve selected
+by the branch has endpoint distance at most its branch radius. It uses path
+length only and does not assert that the branch curve minimizes nearby
+endpoints.
+
+The migrated file is focused green and remains placeholder-free. Its targeted
+artifact refresh is temporarily waiting for the concurrently edited
+conjugacy-reversal upstream module to become focused green. This brick is
+complete at theorem level; `calabiDist_support` itself remains unstated and
+therefore 0%. Route B-prime remains about 45%, whole HCG supporting machinery
+about 60%, and unconditional `compactnessSol` theorem-level 0%.

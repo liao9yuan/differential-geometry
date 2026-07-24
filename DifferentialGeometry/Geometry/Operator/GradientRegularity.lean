@@ -81,7 +81,8 @@ private theorem gradientFun_coeff_eq_sum
 
 private theorem gradientFun_contMDiffAt
     (g : SmoothRiemannianMetric I M)
-    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x₀ : M) :
+    {f : M -> Real} {x₀ : M}
+    (hf : ContMDiffAt I 𝓘(Real, Real) ∞ f x₀) :
     ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
       (T% fun y : M => gradientFun (I := I) g f y) x₀ := by
   classical
@@ -116,7 +117,7 @@ private theorem gradientFun_contMDiffAt
             extDerivFun (I := I) f y (coordinateFrameAt (I := I) x₀ l y)) x₀ :=
       extDerivFun_apply_contMDiffAt_of_section (I := I)
         (f := f) (X := coordinateFrameAt (I := I) x₀ l)
-        hf.contMDiffAt hframe
+        hf hframe
     exact hginv.mul hderiv
   refine hrhs.congr_of_eventuallyEq ?_
   filter_upwards [(coordinateFrameSet_open (I := I) x₀).mem_nhds
@@ -131,7 +132,21 @@ theorem gradientFun_smooth
     ContMDiff I (I.prod 𝓘(Real, E)) ∞
       (T% fun y : M => gradientFun (I := I) g f y) := by
   intro x₀
-  exact gradientFun_contMDiffAt (I := I) g hf x₀
+  exact gradientFun_contMDiffAt (I := I) g hf.contMDiffAt
+
+/-- On an open set, a smooth scalar has a differentiable realized-gradient
+section at every point of that set. -/
+theorem gradientFun_mdiffOn
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {U : Set M} (hU : IsOpen U)
+    (hf : ContMDiffOn I 𝓘(Real, Real) ∞ f U)
+    {x : M} (hx : x ∈ U) :
+    MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x := by
+  have hfx : ContMDiffAt I 𝓘(Real, Real) ∞ f x :=
+    (hf x hx).contMDiffAt (hU.mem_nhds hx)
+  exact
+    (gradientFun_contMDiffAt (I := I) g hfx).mdifferentiableAt
+      (by simp)
 
 /-- Pointwise differentiability of the realized gradient of a smooth scalar. -/
 theorem gradientFun_mdiffAt

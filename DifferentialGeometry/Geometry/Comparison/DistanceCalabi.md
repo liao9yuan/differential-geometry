@@ -105,3 +105,44 @@ radial-Laplacian bricks.  The public
 `scaledDist_calabiUpperSupport_of_sol` theorem remains 0%; Route B-prime
 producer machinery is about 45%; unconditional `compactnessSol` remains 0%;
 whole HCG support remains about 60%.
+## 2026-07-24 deterministic whole-tail package
+
+`CalabiTailData` is now stated and focused green. It records exactly the
+fixed-first data selected at the deterministic split time `1 / 4`: the early
+point and long tail vector, the length split and half-length lower bound, one
+`ExpInvBranch`, a source point mapping to the endpoint, and nonconjugacy on an
+open interval `(0,b)` with `b > 1`.
+
+This is output data, not a new minimizing, radius, or cut-locus assumption.
+The producer `exists_calabiTail` is not yet proved because it depends on the
+active conjugacy-reversal and shifted-tail theorem. `CalabiTailData` is 100%;
+`exists_calabiTail` and `calabiDist_support` remain theorem-level 0%. Route
+B-prime remains about 45%, whole HCG supporting machinery about 60%, and
+unconditional `compactnessSol` theorem-level 0%.
+
+## 2026-07-24 fixed-metric assembly in progress
+
+- `minSeg_edist` now isolates the exact minimizing-subsegment distance
+  calculation used at the deterministic quarter point.  Its proof uses the two
+  radial length upper bounds, the endpoint minimizing equality, and ENNReal
+  cancellation; it does not add a minimizing predicate.
+- Source declarations for `exists_calabiTail` and `calabiDist_support` are now
+  present.  They follow the approved architecture literally: quarter split,
+  shifted-tail nonconjugacy, `ExpInvBranch`, source openness past time one,
+  `exists_intrMean`, `branchLap_eq_mean`, and
+  `ExpInvBranch.edist_le_radius`.
+- The support proof uses the new neighborhood-local
+  `laplacian_add_const` and `gradientFun_mdiffOn`; it does not pretend that
+  `branchRadius` is globally smooth.
+- These two endpoint declarations are not yet counted as proved.  Their first
+  focused elaboration waits on the active arbitrary-length generalization of
+  the negative-index-form theorem and the resulting `tail_no_conj` export.
+
+Current blocker classification: routine lower-layer API generalization from
+`[0,1]` to `[0,L]`, not a new geometric hypothesis or a new mathematical
+frontier.  `conjVec_reverse` and `exists_intrMean` are already checked.  Both
+`exists_calabiTail` and `calabiDist_support` remain theorem-level 0% until
+focused green; their dedicated fixed-metric machinery is about 75%.  The
+evolving-distance support and solution-generated cutoff remain separate 0%
+theorems, Route B-prime producer machinery is about 50%, whole HCG supporting
+machinery remains about 60%, and unconditional `compactnessSol` remains 0%.

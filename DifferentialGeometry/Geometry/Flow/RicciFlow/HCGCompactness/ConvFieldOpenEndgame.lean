@@ -173,6 +173,9 @@ noncomputable def flowUpgrade_of_open
         HEq (L.S.family.metric t) (co.gInf t))
     (scalar : ScalarPullbackTendsto (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ)))
+    (ricciNorm : RicNormPullback (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
     FlowUpgradeData (I := I) X mc := by
   have hL0 : L.atTime (I := I) 0 = mc.limit := hPL.trans hPlim
@@ -191,6 +194,7 @@ noncomputable def flowUpgrade_of_open
       L.S.family.metric t = co.gInf t :=
     fun t ht => eq_of_heq (hLmetric t ht)
   have hscalar : ScalarPullbackTendsto (I := I) (Φ.compSubseq co.φ co.hφ) := scalar
+  have hricciNorm : RicNormPullback (I := I) (Φ.compSubseq co.φ co.hφ) := ricciNorm
   set mc' := mc.compSubseq co.φ co.hφ with hmc'
   set Φ' := Φ.compSubseq co.φ co.hφ with hΦ'
   have hσsrc' : ∀ k : Nat, IsSigmaCompact (Φ'.source k) :=
@@ -203,6 +207,7 @@ noncomputable def flowUpgrade_of_open
       hL0 := by simpa [mc'] using hL0
       maps := Φ'
       scalar := hscalar
+      ricciNorm := hricciNorm
       hσsrc := hσsrc'
       hσtgt := ?_
       refMetric := ?_
@@ -278,9 +283,12 @@ theorem flowUpgrade_open_L
         HEq (L.S.family.metric t) (co.gInf t))
     (scalar : ScalarPullbackTendsto (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ)))
+    (ricciNorm : RicNormPullback (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
     (flowUpgrade_of_open (I := I) mc L P hPlim hPL Φ R bf hsrc htgt ht₀ hD co
-      hLmetric scalar).data.L = L := by
+      hLmetric scalar ricciNorm).data.L = L := by
   cases hPL
   rfl
 
@@ -314,10 +322,13 @@ theorem flowLimit_of_open
         HEq (L.S.family.metric t) (co.gInf t))
     (scalar : ScalarPullbackTendsto (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ)))
+    (ricciNorm : RicNormPullback (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
     CompactnessConclusion (I := I) X :=
   (flowUpgrade_of_open (I := I) mc L P hPlim hPL Φ R bf hsrc htgt ht₀ hD co
-    hLmetric scalar).toConclusion
+    hLmetric scalar ricciNorm).toConclusion
 
 end HCGCompactness
 end DifferentialGeometry

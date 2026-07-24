@@ -308,6 +308,42 @@ theorem intrinsic_jacobi_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The intrinsic initial-velocity Jacobi field at time `t` is the
+vector-slot differential of the intrinsic exponential at `t • x`, applied to
+`t • w`. -/
+theorem intrinsic_jacobi_at
+    [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (x w : E) (t : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from x + s • w) t) 0 (1 : ℝ)
+      =
+        mfderiv 𝓘(ℝ, E) I
+          (fun b : E => expMapIntrinsic (I := I) g hEnorm p
+            (show TangentSpace I p from b))
+          (t • x) (t • w) := by
+  have hfun :
+      (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+        (show TangentSpace I p from x + s • w) t) =
+        fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from t • x + s • (t • w)) 1 := by
+    funext s
+    have hvec : t • (x + s • w) = t • x + s • (t • w) := by
+      module
+    rw [← hvec]
+    exact
+      (intrinsicGeodesic_smul (I := I) g hEnorm p
+        (show TangentSpace I p from x + s • w) t).symm
+  rw [hfun]
+  exact intrinsic_jacobi_one (I := I) g hEnorm p (t • x) (t • w)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The intrinsic Jacobi variation has initial covariant derivative `w`.
 
 For the globally smooth variation

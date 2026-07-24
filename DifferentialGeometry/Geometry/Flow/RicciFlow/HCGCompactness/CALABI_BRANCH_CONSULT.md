@@ -1,5 +1,11 @@
 # GPT Pro consultation: the minimizing half-segment inverse branch
 
+> **Resolved 2026-07-24.**  The ruling selects a fixed early split
+> `s₀ = 1 / 4`, a canonical fixed-first `ExpInvBranch`, nonconjugacy extended
+> slightly past endpoint time `1`, and a whole-tail intrinsic Bishop theorem
+> with an explicit dimension-one branch.  Implementation status is maintained
+> in `CALABI_BRANCH_PLAN.md`.
+
 ## Repository visibility
 
 Repository:

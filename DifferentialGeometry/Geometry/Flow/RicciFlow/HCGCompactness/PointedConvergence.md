@@ -2,7 +2,24 @@
 
 Source used: MSM135 Chapter 3 Definition 3.1 and the following paragraph on exhaustions by open sets, together with the chapter's pointed Cheeger-Gromov-Hamilton convergence setup.
 
-Introduced definitions: `metricCovDerivStep`, `metricCovDeriv`, `metricDiffCovDerivAt`, `metricDerivNorm`, `metricDerivNormSupOn`, `MetricCPConvOn`, `MetricCInfConvOn`, `MetricCInfConvOnCompacts`, `MetricCInfConvData`, `ExhaustsByOpen`, `PointedCGHMaps`, `SourceDomain`, `sourceCompactSet`, `SourceDomainMetricData`, `SourceMetricCPConvOn`, `SourceMetricCPConvOnWindow`, `SourceMetricConvergenceData`, `SourceSpacetimeConvergenceData`, `FunctionPullbackTendsto`, `ScalarPullbackTendsto`, `PointedCGConverges`, and `SmoothCGHConverges`.
+Introduced definitions: `metricCovDerivStep`, `metricCovDeriv`, `metricDiffCovDerivAt`, `metricDerivNorm`, `metricDerivNormSupOn`, `MetricCPConvOn`, `MetricCInfConvOn`, `MetricCInfConvOnCompacts`, `MetricCInfConvData`, `ExhaustsByOpen`, `PointedCGHMaps`, `SourceDomain`, `sourceCompactSet`, `SourceDomainMetricData`, `SourceMetricCPConvOn`, `SourceMetricCPConvOnWindow`, `SourceMetricConvergenceData`, `SourceSpacetimeConvergenceData`, `FunctionPullbackTendsto`, `ScalarPullbackTendsto`, `RicNormPullback`, `PointedCGConverges`, and `SmoothCGHConverges`.
+
+## 2026-07-24: squared Ricci-norm convergence retention
+
+Added `RicNormPullback`, the canonical specialization of
+`FunctionPullbackTendsto` to the intrinsic squared Ricci norm
+`PDE.RicciFlow.ricciNorm`.  `SmoothCGHConverges` now retains this output in
+`ricciNorm_converges`; both `ofSpacetime` and `ofRestrictPullback` take the
+explicit concrete-produced convergence proof and preserve it.
+
+This is data-layer plumbing, not a new endpoint assumption or a proof of
+curvature convergence.  The concrete ConvOut construction must still derive
+the field from smooth metric convergence.  Theorem 3.10 remains unstated here
+and 0% unconditionally; this retention subtask is 100% checked, while the
+project map's P4 consumer-machinery and whole-HCG estimates are unchanged.
+
+Verification: focused verification and the exact exported-module refresh
+passed.
 
 The `C^p` definition is formalized using the displayed `sup_{0 <= alpha <= p} sup_{x in K}` condition. `metricDerivNorm` is now concrete: it uses the Levi-Civita connection of the reference metric `g` and the metric-induced tensor norm. The tensor `nabla^a(g_k - g_infty)` is represented as `nabla^a g_k - nabla^a g_infty`, which is the Lean-friendly form of the same expression by linearity of covariant differentiation.
 

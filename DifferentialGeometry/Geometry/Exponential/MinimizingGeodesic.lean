@@ -2226,13 +2226,13 @@ geodesics `Γu := intrinsicGeodesic p u` (on `[0, t₀]`) and `σ := intrinsicGe
 identifies the forward radial direction at the foot with `w₂`.  The autonomous
 time-translation continuation `intrinsicGeodesic_continuation` then forces
 `Γu(t₀ + δ') = σ δ' = y₁`, so `t₀ + δ' ∈ A`, contradicting `δ' > 0` and `t₀ = sSup A`. -/
-theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
+theorem minExp_of_ne_top
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p q : M) (hpq_ne_top : riemannianEDist I p q ≠ ⊤) :
+    (p q : M) (hfin : riemannianEDist I p q ≠ ⊤) :
     ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
       Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal := by
   classical
@@ -2245,7 +2245,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
       rw [hexp0, hpq]
     · have h0 : g.inner p (0 : TangentSpace I p) (0 : TangentSpace I p) = 0 := by simp
       rw [h0, Real.sqrt_zero, hr_def, hpq0, ENNReal.toReal_zero]
-  · have hr_ne_top : riemannianEDist I p q ≠ ⊤ := hpq_ne_top
+  · have hr_ne_top : riemannianEDist I p q ≠ ⊤ := hfin
     have hr_pos : 0 < r := by
       rw [hr_def]
       exact ENNReal.toReal_pos hpq_pos hr_ne_top
@@ -2262,7 +2262,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
       (riemannianEDist I (γ t) q).toReal = r - t} with hA_def
     have hA_closed : IsClosed A := by
       rw [hA_def, hγ_def]
-      exact propSet_closed_ne (I := I) g hEnorm p q u r hpq_ne_top
+      exact propSet_closed_ne (I := I) g hEnorm p q u r hfin
     have hγ0 : γ 0 = p := by
       rw [hγ_def]; simp only [zero_smul]
       exact expMapIntrinsic_zero (I := I) g hEnorm p
@@ -2309,7 +2309,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
       have hρc_pos : 0 < ρc := by rw [hρc_def]; linarith
       have hcq_fin : riemannianEDist I c q ≠ ⊤ := by
         rw [hc_def, ← hγ_eq, hγ_def]
-        exact radial_dist_ne_top (I := I) g hEnorm p q u hpq_ne_top t₀
+        exact radial_dist_ne_top (I := I) g hEnorm p q u hfin t₀
       have hcq_eq : riemannianEDist I c q = ENNReal.ofReal ρc := by
         rw [← ENNReal.ofReal_toReal hcq_fin]
         congr 1
@@ -2400,12 +2400,27 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
     have hr_dist0 : riemannianEDist I (γ r) q = 0 := by
       have hne_top : riemannianEDist I (γ r) q ≠ ⊤ := by
         rw [hγ_def]
-        exact radial_dist_ne_top (I := I) g hEnorm p q u hpq_ne_top r
+        exact radial_dist_ne_top (I := I) g hEnorm p q u hfin r
       exact ((ENNReal.toReal_eq_zero_iff _).mp hr_dist).resolve_right hne_top
     have hγr_eq_q : γ r = q := riemannianEDist_eq_zero_imp_eq (I := I) (γ r) q hr_dist0
     refine ⟨r • u, ?_, ?_⟩
     · rw [hγ_def] at hγr_eq_q; exact hγr_eq_q
     · rw [sqrt_gInner_smul_self (I := I) g p hr_pos.le u, hu_unit, Real.sqrt_one, mul_one]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Compatibility name for the finite-pair minimizing exponential theorem.
+New code should use `minExp_of_ne_top`. -/
+theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p q : M) (hfin : riemannianEDist I p q ≠ ⊤) :
+    ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
+      Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal :=
+  minExp_of_ne_top (I := I) g hEnorm p q hfin
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -2422,7 +2437,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     (p q : M) :
     ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
       Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal :=
-  hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
+  minExp_of_ne_top
     (I := I) g hEnorm p q (riemannianEDist_ne_top (I := I) p q)
 
 end Exponential

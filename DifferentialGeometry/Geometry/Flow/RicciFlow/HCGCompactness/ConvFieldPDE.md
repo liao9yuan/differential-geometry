@@ -1,5 +1,28 @@
 # ConvFieldPDE.lean — local PDE bridge for the P4 bump extension
 
+## 2026-07-24 fixed-time Ricci norm producer
+
+`gSeqExt_ricNorm` and `ConvOut.ricNorm_conv_at` are now proved without
+`sorry`, `admit`, wrapper assumptions, or a new convergence predicate. Focused
+verification and the exact module refresh both pass (`9563/9563`).
+
+- `gSeqExt_ricNorm` identifies the intrinsic squared Ricci norm of
+  `gSeqExt k t` on `bf.grow k` with the actual source `SolutionOn.ricciNorm`
+  at `Φ.map k x`. Its proof stays on one open metric germ and composes
+  restriction invariance with Ricci-norm pullback naturality.
+- `ConvOut.ricNorm_conv_at` shifts past the grow-cover index and applies
+  `ricNormConv_of_dn` to `co.convPt`, the existing uniform lower bound, and
+  the existing covariant-derivative bounds. It therefore proves fixed-time
+  convergence from the real source flow to the intrinsic squared Ricci norm of
+  `co.gInf`, with constants independent of the shifted stage.
+
+This closes the fixed-time Ricci-norm producer itself (100%) and leaves the
+local Ricci/scalar/PDE producer chain at 100%. It does not prove the Hamilton
+`ham3_cgh_limit` endpoint: that theorem remains unstated/unproved (0%), and its
+next genuine seam is the trace-free curvature combination and endpoint data
+plumbing. The unconditional Theorem 3.10 endpoint remains 0%; the conservative
+whole-HCG machinery estimate remains about 60%.
+
 ## 2026-07-17 result
 
 The new module is focused-green and contains no `sorry`/`admit`.  Its exact

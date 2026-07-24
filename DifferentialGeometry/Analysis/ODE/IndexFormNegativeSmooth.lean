@@ -24,6 +24,42 @@ namespace DifferentialGeometry.Analysis.ODE
 
 variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 
+private def scaleCoeff (L : ℝ) (R : ℝ → F →L[ℝ] F) (t : ℝ) : F →L[ℝ] F :=
+  L ^ 2 • R (L * t)
+
+private def scaleField (L : ℝ) (W : ℝ → F) (t : ℝ) : F :=
+  W (L * t)
+
+private def scaleDeriv (L : ℝ) (V : ℝ → F) (t : ℝ) : F :=
+  L • V (L * t)
+
+private theorem indexForm_scale
+    (L a b : ℝ) (R : ℝ → F →L[ℝ] F) (W V Z U : ℝ → F) :
+    indexForm (scaleCoeff L R) a b
+        (scaleField L W) (scaleDeriv L V)
+        (scaleField L Z) (scaleDeriv L U) =
+      L * indexForm R (L * a) (L * b) W V Z U := by
+  unfold indexForm
+  have hpoint (t : ℝ) :
+      indexIntegrand (scaleCoeff L R)
+          (scaleField L W) (scaleDeriv L V)
+          (scaleField L Z) (scaleDeriv L U) t =
+        L ^ 2 * indexIntegrand R W V Z U (L * t) := by
+    simp only [indexIntegrand, scaleCoeff, scaleField, scaleDeriv,
+      ContinuousLinearMap.smul_apply, real_inner_smul_left,
+      real_inner_smul_right]
+    ring
+  simp_rw [hpoint]
+  rw [intervalIntegral.integral_const_mul]
+  calc
+    L ^ 2 * ∫ t in a..b, indexIntegrand R W V Z U (L * t) =
+        L * (L * ∫ t in a..b, indexIntegrand R W V Z U (L * t)) := by ring
+    _ = L * ∫ t in L * a..L * b, indexIntegrand R W V Z U t := by
+      congr 1
+      simpa only [smul_eq_mul] using
+        (intervalIntegral.smul_integral_comp_mul_left
+          (f := fun t => indexIntegrand R W V Z U t) (a := a) (b := b) L)
+
 private def splitWeight (c δ t : ℝ) : ℝ :=
   DifferentialGeometry.Analysis.CutoffProfile.value
     (1 + (t - (c - δ)) / (2 * δ))
@@ -794,8 +830,212 @@ theorem exists_smooth_indexForm_neg_of_split
       linarith)]
     exact hW₁g_zero
 
-/-- A Jacobi solution on `[0, 1]` whose position field is globally smooth
+private theorem smooth_split_to
+    {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+    {R : ℝ → F →L[ℝ] F}
+    {L c : ℝ} {W₀ W₁ : ℝ → F}
+    (hL : 0 < L)
+    (hc : c ∈ Ioo (0 : ℝ) L)
+    (hR : ContinuousOn R (Icc (0 : ℝ) L))
+    (hW₀ : ContDiff ℝ ∞ W₀)
+    (hW₁ : ContDiff ℝ ∞ W₁)
+    (hW₀_zero : W₀ 0 = 0)
+    (hW₁_zero : W₁ L = 0)
+    (hmatch : W₀ c = W₁ c)
+    (hneg :
+      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) +
+          indexForm R c L W₁ (deriv W₁) W₁ (deriv W₁) < 0) :
+    ∃ W : ℝ → F,
+      ContDiff ℝ ∞ W ∧
+      W 0 = 0 ∧
+      W L = 0 ∧
+      indexForm R 0 L W (deriv W) W (deriv W) < 0 := by
+  let R₁ : ℝ → F →L[ℝ] F := scaleCoeff L R
+  let W₀₁ : ℝ → F := scaleField L W₀
+  let W₁₁ : ℝ → F := scaleField L W₁
+  have hLne : L ≠ 0 := hL.ne'
+  have hc₁ : c / L ∈ Ioo (0 : ℝ) 1 := by
+    constructor
+    · exact div_pos hc.1 hL
+    · exact (div_lt_one hL).mpr hc.2
+  have hmap : MapsTo (fun t : ℝ => L * t) (Icc (0 : ℝ) 1) (Icc (0 : ℝ) L) := by
+    intro t ht
+    constructor
+    · exact mul_nonneg hL.le ht.1
+    · calc
+        L * t ≤ L * 1 := mul_le_mul_of_nonneg_left ht.2 hL.le
+        _ = L := mul_one L
+  have hR₁ : ContinuousOn R₁ (Icc (0 : ℝ) 1) := by
+    exact ContinuousOn.smul continuousOn_const
+      (hR.comp (continuous_const.mul continuous_id).continuousOn hmap)
+  have hW₀₁ : ContDiff ℝ ∞ W₀₁ := by
+    exact hW₀.comp (contDiff_const.mul contDiff_id)
+  have hW₁₁ : ContDiff ℝ ∞ W₁₁ := by
+    exact hW₁.comp (contDiff_const.mul contDiff_id)
+  have scale_deriv
+      (W : ℝ → F) (hW : ContDiff ℝ ∞ W) (t : ℝ) :
+      deriv (scaleField L W) t = scaleDeriv L (deriv W) t := by
+    have houter :
+        HasDerivAt W (deriv W (L * t)) (L * t) :=
+      (hW.differentiable (by simp)).differentiableAt.hasDerivAt
+    have hinner : HasDerivAt (fun s : ℝ => L * s) L t :=
+      hasDerivAt_const_mul L
+    simpa only [scaleField, scaleDeriv] using
+      (houter.scomp t hinner).deriv
+  have hdW₀₁ : deriv W₀₁ = scaleDeriv L (deriv W₀) := by
+    funext t
+    exact scale_deriv W₀ hW₀ t
+  have hdW₁₁ : deriv W₁₁ = scaleDeriv L (deriv W₁) := by
+    funext t
+    exact scale_deriv W₁ hW₁ t
+  have hLc : L * (c / L) = c := by
+    field_simp
+  have hindex₀ :
+      indexForm R₁ 0 (c / L) W₀₁ (deriv W₀₁) W₀₁ (deriv W₀₁) =
+        L * indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) := by
+    rw [hdW₀₁]
+    simpa only [R₁, W₀₁, mul_zero, hLc] using
+      indexForm_scale L 0 (c / L) R W₀ (deriv W₀) W₀ (deriv W₀)
+  have hindex₁ :
+      indexForm R₁ (c / L) 1 W₁₁ (deriv W₁₁) W₁₁ (deriv W₁₁) =
+        L * indexForm R c L W₁ (deriv W₁) W₁ (deriv W₁) := by
+    rw [hdW₁₁]
+    simpa only [R₁, W₁₁, hLc, mul_one] using
+      indexForm_scale L (c / L) 1 R W₁ (deriv W₁) W₁ (deriv W₁)
+  have hneg₁ :
+      indexForm R₁ 0 (c / L) W₀₁ (deriv W₀₁) W₀₁ (deriv W₀₁) +
+          indexForm R₁ (c / L) 1 W₁₁ (deriv W₁₁) W₁₁ (deriv W₁₁) < 0 := by
+    rw [hindex₀, hindex₁]
+    nlinarith [mul_neg_of_pos_of_neg hL hneg]
+  have hW₀₁_zero : W₀₁ 0 = 0 := by
+    simpa only [W₀₁, scaleField, mul_zero] using hW₀_zero
+  have hW₁₁_zero : W₁₁ 1 = 0 := by
+    simpa only [W₁₁, scaleField, mul_one] using hW₁_zero
+  have hmatch₁ : W₀₁ (c / L) = W₁₁ (c / L) := by
+    simpa only [W₀₁, W₁₁, scaleField, hLc] using hmatch
+  obtain ⟨W₁, hW₁, hW₁_zero, hW₁_one, hW₁_neg⟩ :=
+    exists_smooth_indexForm_neg_of_split
+      (A := -1) (B := 2) (c := c / L)
+      (W₀ := W₀₁) (W₁ := W₁₁)
+      (by norm_num) (by norm_num) hc₁ hR₁
+      hW₀₁.contDiffOn hW₁₁.contDiffOn
+      hW₀₁_zero hW₁₁_zero hmatch₁ hneg₁
+  let W : ℝ → F := scaleField L⁻¹ W₁
+  have hW : ContDiff ℝ ∞ W := by
+    exact hW₁.comp (contDiff_const.mul contDiff_id)
+  have back_deriv (t : ℝ) :
+      deriv W t = scaleDeriv L⁻¹ (deriv W₁) t := by
+    have houter :
+        HasDerivAt W₁ (deriv W₁ (L⁻¹ * t)) (L⁻¹ * t) :=
+      (hW₁.differentiable (by simp)).differentiableAt.hasDerivAt
+    have hinner : HasDerivAt (fun s : ℝ => L⁻¹ * s) L⁻¹ t :=
+      hasDerivAt_const_mul L⁻¹
+    simpa only [W, scaleField, scaleDeriv] using
+      (houter.scomp t hinner).deriv
+  have hfield : scaleField L W = W₁ := by
+    funext t
+    simp [scaleField, W, hLne]
+  have hderiv : scaleDeriv L (deriv W) = deriv W₁ := by
+    funext t
+    simp [scaleDeriv, back_deriv, smul_smul, hLne]
+  have hindex :
+      indexForm R₁ 0 1 W₁ (deriv W₁) W₁ (deriv W₁) =
+        L * indexForm R 0 L W (deriv W) W (deriv W) := by
+    simpa only [R₁, mul_zero, mul_one, hfield, hderiv] using
+      indexForm_scale L 0 1 R W (deriv W) W (deriv W)
+  refine ⟨W, hW, ?_, ?_, ?_⟩
+  · simpa only [W, scaleField, mul_zero] using hW₁_zero
+  · have hback : L⁻¹ * L = 1 := inv_mul_cancel₀ hLne
+    simpa only [W, scaleField, hback] using hW₁_one
+  · have hmul_neg :
+        L * indexForm R 0 L W (deriv W) W (deriv W) < 0 := by
+      rwa [← hindex]
+    exact lt_of_mul_lt_mul_left (by simpa using hmul_neg) hL.le
+
+/-- A Jacobi solution on `[0, L]` whose position field is globally smooth
 produces a globally smooth endpoint-vanishing field with negative index. -/
+theorem IsJacobiSolOn.exists_smooth_neg_on
+    [CompleteSpace F]
+    {R : ℝ → F →L[ℝ] F} {L c : ℝ} {y v : ℝ → F}
+    (hsol : IsJacobiSolOn R 0 L y v)
+    (hc : c ∈ Ioo (0 : ℝ) L)
+    (hR : ContinuousOn R (Icc (0 : ℝ) L))
+    (hSym : ∀ t, ∀ x x' : F, ⟪R t x, x'⟫ = ⟪x, R t x'⟫)
+    (hySmooth : ContDiff ℝ ∞ y)
+    (hderiv : ∀ t ∈ Icc (0 : ℝ) L, deriv y t = v t)
+    (hy0 : y 0 = 0) (hyc : y c = 0)
+    (hne : ∃ t ∈ Icc (0 : ℝ) L, y t ≠ 0) :
+    ∃ W : ℝ → F,
+      ContDiff ℝ ∞ W ∧
+      W 0 = 0 ∧
+      W L = 0 ∧
+      indexForm R 0 L W (deriv W) W (deriv W) < 0 := by
+  obtain ⟨s, hs⟩ :=
+    hsol.exists_split_neg_on hc hR hSym hy0 hyc hne
+  let Z : ℝ → F := indexTestFieldTo L (v c)
+  let DZ : ℝ → F := indexTestDerivTo L (v c)
+  let W₀ : ℝ → F := y + s • Z
+  let W₁ : ℝ → F := s • Z
+  have hZSmooth : ContDiff ℝ ∞ Z := by
+    simpa only [Z] using testFieldTo_smooth L (v c)
+  have hW₀Smooth : ContDiff ℝ ∞ W₀ := by
+    simpa only [W₀] using hySmooth.add (hZSmooth.const_smul s)
+  have hW₁Smooth : ContDiff ℝ ∞ W₁ := by
+    simpa only [W₁] using hZSmooth.const_smul s
+  have hZd (t : ℝ) : HasDerivAt Z (DZ t) t := by
+    simpa only [Z, DZ] using testFieldTo_deriv L (v c) t
+  have hyDeriv (t : ℝ) : HasDerivAt y (deriv y t) t :=
+    (hySmooth.differentiable (by simp)).differentiableAt.hasDerivAt
+  have hW₀d (t : ℝ) :
+      HasDerivAt W₀ (deriv y t + s • DZ t) t := by
+    simpa only [W₀] using (hyDeriv t).add ((hZd t).const_smul s)
+  have hW₁d (t : ℝ) :
+      HasDerivAt W₁ (s • DZ t) t := by
+    simpa only [W₁] using (hZd t).const_smul s
+  have hdW₀ (t : ℝ) : deriv W₀ t = deriv y t + s • DZ t :=
+    (hW₀d t).deriv
+  have hdW₁ (t : ℝ) : deriv W₁ t = s • DZ t :=
+    (hW₁d t).deriv
+  have hW₀_zero : W₀ 0 = 0 := by
+    simp [W₀, Z, indexTestFieldTo, hy0]
+  have hW₁_zero : W₁ L = 0 := by
+    simp [W₁, Z, indexTestFieldTo]
+  have hmatch : W₀ c = W₁ c := by
+    simp [W₀, W₁, hyc]
+  have h0c : Icc (0 : ℝ) c ⊆ Icc (0 : ℝ) L :=
+    Icc_subset_Icc le_rfl hc.2.le
+  have hindex₀ :
+      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) =
+        indexForm R 0 c
+          (y + s • Z) (v + s • DZ)
+          (y + s • Z) (v + s • DZ) := by
+    unfold indexForm
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le hc.1.le] at ht
+    unfold indexIntegrand
+    rw [hdW₀ t, hderiv t (h0c ht)]
+    rfl
+  have hindex₁ :
+      indexForm R c L W₁ (deriv W₁) W₁ (deriv W₁) =
+        indexForm R c L
+          (s • Z) (s • DZ)
+          (s • Z) (s • DZ) := by
+    unfold indexForm
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le hc.2.le] at ht
+    unfold indexIntegrand
+    rw [hdW₁ t]
+    rfl
+  have hneg :
+      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) +
+          indexForm R c L W₁ (deriv W₁) W₁ (deriv W₁) < 0 := by
+    rw [hindex₀, hindex₁]
+    simpa only [Z, DZ] using hs
+  exact smooth_split_to (W₀ := W₀) (W₁ := W₁)
+    (hc.1.trans hc.2) hc hR hW₀Smooth hW₁Smooth
+    hW₀_zero hW₁_zero hmatch hneg
+
+/-- Unit-interval compatibility wrapper for `IsJacobiSolOn.exists_smooth_neg_on`. -/
 theorem IsJacobiSolOn.exists_smooth_neg
     [CompleteSpace F]
     {R : ℝ → F →L[ℝ] F} {c : ℝ} {y v : ℝ → F}
@@ -811,72 +1051,7 @@ theorem IsJacobiSolOn.exists_smooth_neg
       ContDiff ℝ ∞ W ∧
       W 0 = 0 ∧
       W 1 = 0 ∧
-      indexForm R 0 1 W (deriv W) W (deriv W) < 0 := by
-  obtain ⟨s, hs⟩ :=
-    hsol.exists_split_neg hc hR hSym hy0 hyc hne
-  let Z : ℝ → F := indexTestField (v c)
-  let DZ : ℝ → F := indexTestDeriv (v c)
-  let W₀ : ℝ → F := y + s • Z
-  let W₁ : ℝ → F := s • Z
-  have hZSmooth : ContDiff ℝ ∞ Z := by
-    simpa only [Z] using testField_smooth (v c)
-  have hW₀Smooth : ContDiff ℝ ∞ W₀ := by
-    simpa only [W₀] using hySmooth.add (hZSmooth.const_smul s)
-  have hW₁Smooth : ContDiff ℝ ∞ W₁ := by
-    simpa only [W₁] using hZSmooth.const_smul s
-  have hZd (t : ℝ) : HasDerivAt Z (DZ t) t := by
-    simpa only [Z, DZ] using indexTestField_deriv (v c) t
-  have hyDeriv (t : ℝ) : HasDerivAt y (deriv y t) t :=
-    (hySmooth.differentiable (by simp)).differentiableAt.hasDerivAt
-  have hW₀d (t : ℝ) :
-      HasDerivAt W₀ (deriv y t + s • DZ t) t := by
-    simpa only [W₀] using (hyDeriv t).add ((hZd t).const_smul s)
-  have hW₁d (t : ℝ) :
-      HasDerivAt W₁ (s • DZ t) t := by
-    simpa only [W₁] using (hZd t).const_smul s
-  have hdW₀ (t : ℝ) : deriv W₀ t = deriv y t + s • DZ t :=
-    (hW₀d t).deriv
-  have hdW₁ (t : ℝ) : deriv W₁ t = s • DZ t :=
-    (hW₁d t).deriv
-  have hW₀_zero : W₀ 0 = 0 := by
-    simp [W₀, Z, indexTestField, hy0]
-  have hW₁_zero : W₁ 1 = 0 := by
-    simp [W₁, Z, indexTestField]
-  have hmatch : W₀ c = W₁ c := by
-    simp [W₀, W₁, hyc]
-  have h0c : Icc (0 : ℝ) c ⊆ Icc (0 : ℝ) 1 :=
-    Icc_subset_Icc le_rfl hc.2.le
-  have hindex₀ :
-      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) =
-        indexForm R 0 c
-          (y + s • Z) (v + s • DZ)
-          (y + s • Z) (v + s • DZ) := by
-    unfold indexForm
-    refine intervalIntegral.integral_congr fun t ht => ?_
-    rw [uIcc_of_le hc.1.le] at ht
-    unfold indexIntegrand
-    rw [hdW₀ t, hderiv t (h0c ht)]
-    rfl
-  have hindex₁ :
-      indexForm R c 1 W₁ (deriv W₁) W₁ (deriv W₁) =
-        indexForm R c 1
-          (s • Z) (s • DZ)
-          (s • Z) (s • DZ) := by
-    unfold indexForm
-    refine intervalIntegral.integral_congr fun t ht => ?_
-    rw [uIcc_of_le hc.2.le] at ht
-    unfold indexIntegrand
-    rw [hdW₁ t]
-    rfl
-  have hneg :
-      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) +
-          indexForm R c 1 W₁ (deriv W₁) W₁ (deriv W₁) < 0 := by
-    rw [hindex₀, hindex₁]
-    simpa only [Z, DZ] using hs
-  exact exists_smooth_indexForm_neg_of_split
-    (A := -1) (B := 2) (W₀ := W₀) (W₁ := W₁)
-    (by norm_num) (by norm_num) hc hR
-    hW₀Smooth.contDiffOn hW₁Smooth.contDiffOn
-    hW₀_zero hW₁_zero hmatch hneg
+      indexForm R 0 1 W (deriv W) W (deriv W) < 0 :=
+  hsol.exists_smooth_neg_on hc hR hSym hySmooth hderiv hy0 hyc hne
 
 end DifferentialGeometry.Analysis.ODE

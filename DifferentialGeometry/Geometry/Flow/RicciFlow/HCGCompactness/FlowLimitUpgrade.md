@@ -4,6 +4,22 @@ Historical plan pointer (superseded):
 `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md`.  Current producer
 state is tracked in the repo by `P4_CONV_PLAN.md` and `ConvFieldEndgame.md`.
 
+## 2026-07-24: retain squared Ricci-norm convergence
+
+`FlowLimitData` now records `ricciNorm : RicNormPullback maps` next to the
+existing scalar-curvature convergence field, and `flowLimit_upgrade` passes it
+through the canonical `SmoothCGHConverges.ofRestrictPullback` constructor.
+This record is only the data-retention boundary: the concrete ConvOut/endgame
+producer must prove the field rather than receive an endpoint wrapper or a
+synonymous assumption.
+
+The data-plumbing subtask is 100% checked.  Unconditional Theorem 3.10 remains
+0%; its dedicated P4 consumer machinery and the whole-HCG machinery estimates
+remain those recorded in `PROJECT_MAP.md`.
+
+Verification: focused verification and the exact exported-module refresh
+passed.
+
 ## 2026-07-09: concrete upgrade boundary
 
 `FlowUpgradeData X mc` is now the canonical producer package above

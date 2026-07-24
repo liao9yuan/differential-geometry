@@ -1,5 +1,30 @@
 # RicciFromJets.lean — P4 Brick 6 `hRicConv` producer (plan, 2026-07-02)
 
+## Intrinsic Ricci-norm convergence producer (2026-07-24)
+
+Added the fixed-manifold producer needed by the Hamilton pinching transfer.
+
+- `ricNormSub_le_dn` is a pair-uniform estimate for the difference of the
+  intrinsic squared Ricci norms.  It expands both `normSq0S` contractions in
+  the same point-centered chart basis, uses `invGram_le_of_low` and
+  `invGram_sub_le` for the two inverse-metric factors, and uses
+  `ricci_abs_le` and `ricciSub_le_dNorm` for the two Ricci factors.
+- `ricNormConv_of_dn` packages that estimate with exactly the same
+  uniform-in-time C² metric-jet hypotheses as `ricciConv_of_dnConv` and
+  `scalarConv_of_dnConv`.  Its conclusion is uniform convergence on the
+  supplied compact time window of the canonical intrinsic quantity
+  `normSq0S g 2 (metricRicci g)`.
+
+Focused verification passes.  This theorem and its dedicated fixed-manifold
+contraction machinery are **100%**.  It adds no consumer assumption and does
+not replace the remaining source-domain task by a wrapper.
+
+Project accounting: the fixed-manifold Ricci-norm producer is complete, but
+`LimitTfDecayAt` remains theorem-level **0%** until this convergence is retained
+through the concrete `ConvOut` source-domain/pullback path.  The broader
+`ham3_cgh_limit` endpoint therefore remains theorem-level **0%**; whole HCG
+infrastructure remains conservatively about **60%**.
+
 Target: discharge the "missing conversion lemma" of `LimitSolutionEquation.md` —
 uniform Ricci convergence from C²-covariant metric convergence.  Consumer shape
 (`LimitSolutionEquation.lean:225`, `hRicConv`):

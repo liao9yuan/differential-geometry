@@ -25,6 +25,14 @@ no `sorry`:
 No smallness/injectivity-radius hypothesis anywhere — meaningful at every
 scale via `intrinsicExp_smooth`.
 
+## 2026-07-24 component-local signature cleanup
+
+The stale `ConnectedSpace M` binder was removed from `IsConjVec`,
+`isConjVec_iff`, `isConjVec_iff_jacobi`, `jacobiVar_zero`, and
+`conjVec_jacobi_at`.  These declarations only inspect the complete intrinsic
+geodesic and its vector-slot differential inside the component of the selected
+basepoint.  Their public names and proof content are unchanged.
+
 ## Remaining N frontier (next planning pass)
 
 - N-c: the endpoint covariant-derivative identity `D_t J_w(0) = w` (check
@@ -54,3 +62,21 @@ This file now also proves:
 Focused verification passes without warnings.  This closes the scaling
 interface needed by N-d; it does not itself prove that a minimizing geodesic
 has no interior conjugate vector.
+
+## 2026-07-24 conjugate-vector reversal
+
+The fixed-time intrinsic reversal brick is complete and focused-green:
+
+- `intrinsicGeodesic_reverse` identifies the reversed intrinsic geodesic with
+  the intrinsic geodesic launched from the endpoint with negative terminal
+  velocity.
+- The private `exp_pair_reverse` proves the endpoint Wronskian pairing between
+  the forward exponential differential at `u` and the reversed exponential
+  differential at the negative terminal velocity.
+- The public `conjVec_reverse` uses that pairing, positive definiteness, and
+  finite-dimensional injective/surjective duality to prove conjugacy is
+  invariant under geodesic reversal.
+
+The source is placeholder-free and focused verification passes.  The
+`conjVec_reverse` theorem and its dedicated reversal machinery are both 100%;
+the minimizing-tail theorems remain unstated here and therefore remain 0%.

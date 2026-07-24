@@ -242,10 +242,10 @@ theorem branchHess_jacobi
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u w₁ w₂ : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u) :
     let γ : Real → M :=
       intrinsicGeodesic (I := I) g hEnorm p u
@@ -253,7 +253,7 @@ theorem branchHess_jacobi
       intrinsicJacobi (I := I) g hEnorm p u w
     let a := Real.sqrt (g.inner p u u)
     hessFun (I := I) g
-        (branchRadius (I := I) g B p)
+        (branchRadius (I := I) g B)
         (γ 1) (J w₁ 1) (J w₂ 1)
       =
         g.inner (γ 1)
@@ -287,20 +287,20 @@ theorem branchHess_jacobi
   have hgrad_eq :
       (fun z => gradientFun (I := I) g rSmooth z) =ᶠ[𝓝 q]
         fun z => gradientFun (I := I) g
-          (branchRadius (I := I) g B p) z := by
+          (branchRadius (I := I) g B) z := by
     filter_upwards [hr_eq.eventuallyEq_nhds] with z hz
     unfold gradientFun
     rw [hz.mfderiv_eq]
   have hgrad_total :
       (T% fun z => gradientFun (I := I) g rSmooth z) =ᶠ[𝓝 q]
         (T% fun z => gradientFun (I := I) g
-          (branchRadius (I := I) g B p) z) := by
+          (branchRadius (I := I) g B) z) := by
     filter_upwards [hgrad_eq] with z hz
     change
       TotalSpace.mk' E z (gradientFun (I := I) g rSmooth z) =
         TotalSpace.mk' E z
           (gradientFun (I := I) g
-            (branchRadius (I := I) g B p) z)
+            (branchRadius (I := I) g B) z)
     rw [hz]
   have hgradSmooth : ContMDiff I (I.prod 𝓘(Real, E)) ∞
       (T% fun z => gradientFun (I := I) g rSmooth z) := by
@@ -308,20 +308,16 @@ theorem branchHess_jacobi
       gradFun_contMDiff_total_section (I := I) g hrSmooth
   have hgradAt : MDiffAt
       (T% fun z => gradientFun (I := I) g
-        (branchRadius (I := I) g B p) z) q := by
+        (branchRadius (I := I) g B) z) q := by
     have hsmoothAt :=
       hgradSmooth.contMDiffAt.congr_of_eventuallyEq hgrad_total.symm
     exact hsmoothAt.mdifferentiableAt (by simp)
-  have hlaunch : Continuous
-      (fun s : Real => (⟨p, u + s • w₁⟩ : TangentBundle I M)) := by
-    exact
-      (FiberBundle.continuous_totalSpaceMk E (TangentSpace I) p).comp
-        (continuous_const.add (continuous_id.smul continuous_const))
+  have hlaunch : Continuous (fun s : Real => (u : E) + s • (w₁ : E)) :=
+    continuous_const.add (continuous_id.smul continuous_const)
   have hsrc_ev : ∀ᶠ s in 𝓝 (0 : Real),
-      (⟨p, u + s • w₁⟩ : TangentBundle I M) ∈ B.hom.source := by
+      (u : E) + s • (w₁ : E) ∈ B.hom.source := by
     have hsrc0 :
-        (⟨p, u + (0 : Real) • w₁⟩ : TangentBundle I M) ∈
-          B.hom.source := by
+        (u : E) + (0 : Real) • (w₁ : E) ∈ B.hom.source := by
       simpa only [zero_smul, add_zero] using hu
     exact hlaunch.continuousAt (B.hom.open_source.mem_nhds hsrc0)
   have hsq_cont : Continuous
@@ -337,7 +333,7 @@ theorem branchHess_jacobi
     exact hsq_cont.continuousAt (isOpen_Ioi.mem_nhds hpos0)
   have hgrad_ev :
       (fun s => gradientFun (I := I) g
-        (branchRadius (I := I) g B p) (η s)) =ᶠ[𝓝 (0 : Real)]
+        (branchRadius (I := I) g B) (η s)) =ᶠ[𝓝 (0 : Real)]
       (fun s => (a s)⁻¹ • V s) := by
     filter_upwards [hsrc_ev, hpos_ev] with s hs hsp
     simpa only [η, F, a, V, expMapIntrinsic_def] using
@@ -347,7 +343,7 @@ theorem branchHess_jacobi
   have hchain := covDerivAlong_restrict_eq_leviCivita
     (I := I) g η
       (fun z => gradientFun (I := I) g
-        (branchRadius (I := I) g B p) z) 0 hη
+        (branchRadius (I := I) g B) z) 0 hη
       (by
         simpa only [η, F, q, zero_smul, add_zero, expMapIntrinsic_def] using
           hgradAt)
@@ -360,10 +356,10 @@ theorem branchHess_jacobi
   have hchain' :
       covDerivAlong (I := I) g η
           (fun s => gradientFun (I := I) g
-            (branchRadius (I := I) g B p) (η s)) 0 =
+            (branchRadius (I := I) g B) (η s)) 0 =
         (LeviCivita (I := I) g).toFun
           (fun z => gradientFun (I := I) g
-            (branchRadius (I := I) g B p) z)
+            (branchRadius (I := I) g B) z)
           q (J w₁ 1) := by
     rw [hη0] at hηvel hchain
     exact hchain.trans
@@ -371,7 +367,7 @@ theorem branchHess_jacobi
         (fun Z : TangentSpace I q =>
           (LeviCivita (I := I) g).toFun
             (fun z => gradientFun (I := I) g
-              (branchRadius (I := I) g B p) z) q Z)
+              (branchRadius (I := I) g B) z) q Z)
         hηvel)
   have hend := endpointJacobi_eq (I := I) g hEnorm p
     (u := u) (w := w₁) hu_pos
@@ -398,7 +394,7 @@ theorem branchHess_jacobi
   have hvec :
       (LeviCivita (I := I) g).toFun
           (fun z => gradientFun (I := I) g
-            (branchRadius (I := I) g B p) z)
+            (branchRadius (I := I) g B) z)
           q (J w₁ 1) =
         (Real.sqrt (g.inner p u u))⁻¹ •
             covDerivAlong (I := I) g γ (J w₁) 1
@@ -418,7 +414,7 @@ theorem branchHess_jacobi
       g.inner q
           ((LeviCivita (I := I) g).toFun
             (fun z => gradientFun (I := I) g
-              (branchRadius (I := I) g B p) z)
+              (branchRadius (I := I) g B) z)
             q (J w₁ 1))
           (J w₂ 1) =
         (Real.sqrt (g.inner p u u))⁻¹ *
@@ -480,10 +476,10 @@ theorem branchHess_shape
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u w₁ w₂ : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u)
     (hw₁ : g.inner p u w₁ = 0)
     (hw₂ : g.inner p u w₂ = 0) :
@@ -492,7 +488,7 @@ theorem branchHess_shape
     let J := fun w =>
       intrinsicJacobi (I := I) g hEnorm p u w
     hessFun (I := I) g
-        (branchRadius (I := I) g B p)
+        (branchRadius (I := I) g B)
         (γ 1) (J w₁ 1) (J w₂ 1)
       =
         g.inner (γ 1)
@@ -511,10 +507,10 @@ theorem intrinsicJacobi_li
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (v : ι → TangentSpace I p)
     (hv : LinearIndependent Real v) :
     LinearIndependent Real fun i =>
@@ -524,7 +520,7 @@ theorem intrinsicJacobi_li
       (show TangentSpace I p from w)
   let L : E →L[Real] E :=
     mfderiv 𝓘(Real, E) I expf (u : E)
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
+  let invf : M → E := B.inv
   let dInv : E → E := fun Y =>
     mfderiv I 𝓘(Real, E) invf
       (expMapIntrinsic (I := I) g hEnorm p u)

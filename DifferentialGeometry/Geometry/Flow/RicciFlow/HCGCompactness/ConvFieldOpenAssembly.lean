@@ -17,7 +17,7 @@ and proves completeness of every limit time slice.
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold
+open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Integral.Connection
 
@@ -165,6 +165,8 @@ theorem open_upgrade_of_raw
     flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero
   have hscalarRaw := OpenConvOut.scalar_conv (I := I) (Φ := Phi)
     hzero_mem hD co cLow hcLow hbound hcovTail
+  have hricRaw := OpenConvOut.ricNorm_conv (I := I) (Φ := Phi)
+    hzero_mem hD co cLow hcLow hbound hcovTail
   have map_cast {P Q : PointedRiemannianManifold (I := I)}
       {s : Nat -> Nat} (h : P = Q) (maps : PointedCGHMaps (I := I) X Q s)
       (k : Nat) (x : P.M) :
@@ -210,8 +212,40 @@ theorem open_upgrade_of_raw
       infer_instance
     exact congrArg
       (fun y => (X.term ((mc.subseq ∘ co.φ) k)).S.scalar t y) (hmap k x).symm
+  have ricciNorm : RicNormPullback (I := I)
+      (hL0.symm ▸ (Phi.compSubseq co.φ co.hφ) : PointedCGHMaps (I := I) X
+        (L.atTime (I := I) 0) (mc.subseq ∘ co.φ)) := by
+    unfold RicNormPullback FunctionPullbackTendsto
+    intro t ht x
+    change mc.limit.M at x
+    change Filter.Tendsto _ Filter.atTop
+      (nhds (normSq0S (I := I) (co.gInf t) x 2
+        (metricRicci (I := I) (co.gInf t) x)))
+    refine Filter.Tendsto.congr' (Filter.Eventually.of_forall (fun k => ?_))
+      (hricRaw t ht x)
+    letI : TopologicalSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).topology
+    letI : ChartedSpace H (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).charted
+    letI : IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).smooth
+    letI : SigmaCompactSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).sigmaCompact
+    letI : T2Space (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).t2
+    letI : IsManifold I 1 (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      IsManifold.of_le (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+        (X.term ((mc.subseq ∘ co.φ) k)).M := by
+      change IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M
+      infer_instance
+    exact congrArg
+      (fun y => DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+        (X.term ((mc.subseq ∘ co.φ) k)).S t y) (hmap k x).symm
   let d := flowUpgrade_of_open (I := I) mc L mc.limit rfl hL0 Phi
     mc.limit.metric bf hsrc htgt hzero_mem hD co (fun _ _ => HEq.rfl) scalar
+    ricciNorm
   refine ⟨d, ?_⟩
   intro t ht
   have htOpen : t ∈ Set.Ioo a b := by
@@ -233,6 +267,7 @@ theorem open_upgrade_of_raw
   have hdL : d.data.L = L := by
     exact flowUpgrade_open_L (I := I) mc L mc.limit rfl hL0 Phi
       mc.limit.metric bf hsrc htgt hzero_mem hD co (fun _ _ => HEq.rfl) scalar
+      ricciNorm
   rw [hdL]
   change MetricComplete (I := I)
     ({ mc.limit with metric := co.gInf t } : PointedRiemannianManifold (I := I))

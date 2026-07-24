@@ -520,3 +520,17 @@ The endgame constructors now take `hcovSrc` on `bf.grow k` and obtain
 and all four collar-based call sites were removed. Focused verification and
 the exact module refresh pass; the remaining raw producer is the uniform
 source-native grow bound, not a bump-family derivative estimate.
+
+## 2026-07-24 intrinsic Ricci-norm retention
+
+The closed-window endgame now retains pointwise pullback convergence of the
+intrinsic squared Ricci norm. `ConvOut.ricNorm_conv` promotes the genuine
+pointwise producer on the carrier, and every `FlowLimitData` constructor stores
+the resulting `RicNormPullback` beside scalar convergence. The cast from the
+static AA limit to `flowOfMetric` is proved only after full scalar evaluation;
+no tensor-valued or whole-model equality is introduced.
+
+The source wiring and focused verification pass, and the exact endgame artifact
+is current. The required `ConvFieldPDE` producer artifact is likewise
+exact-current. `LimitTfDecayAt` remains a separate Hamilton theorem frontier,
+not part of this endgame record.

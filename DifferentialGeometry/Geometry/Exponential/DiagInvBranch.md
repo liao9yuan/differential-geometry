@@ -85,3 +85,26 @@ readout theorem is complete (100%).  It is one infrastructure brick for the
 fixed-first radius route; the eventual `radialLap_eq_mean` theorem remains
 unstated (0%), its dedicated Route B-prime machinery is roughly 35%, and the
 whole HCG supporting machinery remains roughly 60%.
+
+## 2026-07-24 canonical fixed-first projection
+
+Added `DiagInvBranch.fixed`, which restricts a diagonal selected branch to one
+fixed first point and returns the canonical `ExpInvBranch`.  Its source and
+target are the direct preimages
+
+```text
+u ↦ ⟨p, u⟩ ∈ B.hom.source
+y ↦ (p, y) ∈ B.dom,
+```
+
+and the inverse is the existing fixed-first coordinate readout
+`((B.inv (p, y)).snd : E)`.  The smooth fiber insertion is proved through the
+canonical tangent-bundle trivialization; no singleton product is incorrectly
+claimed open.  The simp projections `fixed_source` and `fixed_target` expose
+the two membership formulas without unfolding the construction.
+
+Focused verification against the current `ExpInvBranch` artifact passed with
+zero diagnostics.  This compatibility projection is complete (100%) and adds
+no radius or endpoint hypothesis.  The fixed-metric
+`calabiDist_support` theorem is still unstated (0%); this projection is one
+completed API brick in its dedicated machinery.

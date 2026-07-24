@@ -1,6 +1,7 @@
-import DifferentialGeometry.Geometry.Exponential.DiagInvBranch
+import DifferentialGeometry.Geometry.Exponential.ExpInvBranch
 import DifferentialGeometry.Geometry.Exponential.IntrinsicGauss
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
+import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
@@ -9,8 +10,7 @@ set_option autoImplicit false
 # Radius functions from a selected inverse branch
 
 This file develops the fixed-first calculus of a selected inverse branch of the
-intrinsic exponential.  The centre used to select the branch is independent of
-the fixed source point used by the radius function.
+intrinsic exponential.
 -/
 
 noncomputable section
@@ -45,12 +45,10 @@ noncomputable def branchEnergy
     (g : SmoothRiemannianMetric I M)
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c : M} (B : DiagInvBranch (I := I) g hEnorm c)
-    (p z : M) : Real :=
+    {p : M} (B : ExpInvBranch (I := I) g hEnorm p)
+    (z : M) : Real :=
   (1 / 2 : Real) *
-    g.inner (B.inv (p, z)).proj
-      (B.inv (p, z)).snd
-      (B.inv (p, z)).snd
+    g.inner p (B.inv z) (B.inv z)
 
 /-- Length of the inverse vector selected by `B`, with the first point fixed
 at `p`. -/
@@ -58,21 +56,19 @@ noncomputable def branchRadius
     (g : SmoothRiemannianMetric I M)
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c : M} (B : DiagInvBranch (I := I) g hEnorm c)
-    (p z : M) : Real :=
+    {p : M} (B : ExpInvBranch (I := I) g hEnorm p)
+    (z : M) : Real :=
   Real.sqrt
-    (g.inner (B.inv (p, z)).proj
-      (B.inv (p, z)).snd
-      (B.inv (p, z)).snd)
+    (g.inner p (B.inv z) (B.inv z))
 
 /-- The branch radius is the square root of twice the branch energy. -/
 theorem branchRadius_eq
     (g : SmoothRiemannianMetric I M)
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c : M} (B : DiagInvBranch (I := I) g hEnorm c) (p : M) :
-    branchRadius (I := I) g B p =
-      fun z => Real.sqrt (2 * branchEnergy (I := I) g B p z) := by
+    {p : M} (B : ExpInvBranch (I := I) g hEnorm p) :
+    branchRadius (I := I) g B =
+      fun z => Real.sqrt (2 * branchEnergy (I := I) g B z) := by
   funext z
   simp only [branchRadius, branchEnergy]
   congr 1
@@ -83,42 +79,59 @@ theorem branchEnergy_exp
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source) :
-    branchEnergy (I := I) g B p
+    (hu : (u : E) ∈ B.hom.source) :
+    branchEnergy (I := I) g B
       (expMapIntrinsic (I := I) g hEnorm p u) =
         (1 / 2 : Real) * g.inner p u u := by
   have hinv :
-      B.inv (p, expMapIntrinsic (I := I) g hEnorm p u) =
-        (⟨p, u⟩ : TangentBundle I M) := by
-    simpa only [diagExp_apply] using B.left_inv hu
+      B.inv (expMapIntrinsic (I := I) g hEnorm p u) = (u : E) :=
+    B.left_inv hu
   unfold branchEnergy
   exact congrArg
-    (fun a : TangentBundle I M =>
-      (1 / 2 : Real) * g.inner a.proj a.snd a.snd) hinv
+    (fun a : E => (1 / 2 : Real) * g.inner p a a) hinv
 
 /-- On the selected source, branch radius reads off the launch-vector norm. -/
 theorem branchRadius_exp
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source) :
-    branchRadius (I := I) g B p
+    (hu : (u : E) ∈ B.hom.source) :
+    branchRadius (I := I) g B
       (expMapIntrinsic (I := I) g hEnorm p u) =
         Real.sqrt (g.inner p u u) := by
   have hinv :
-      B.inv (p, expMapIntrinsic (I := I) g hEnorm p u) =
-        (⟨p, u⟩ : TangentBundle I M) := by
-    simpa only [diagExp_apply] using B.left_inv hu
+      B.inv (expMapIntrinsic (I := I) g hEnorm p u) = (u : E) :=
+    B.left_inv hu
   unfold branchRadius
   exact congrArg
-    (fun a : TangentBundle I M =>
-      Real.sqrt (g.inner a.proj a.snd a.snd)) hinv
+    (fun a : E => Real.sqrt (g.inner p a a)) hinv
+
+/-- The radial path selected by a fixed-first branch bounds the Riemannian
+distance from its base point by the branch radius. -/
+theorem ExpInvBranch.edist_le_radius
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p y : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    (hy : y ∈ B.dom) :
+    riemannianEDist I p y ≤
+      ENNReal.ofReal (branchRadius (I := I) g B y) := by
+  let u : TangentSpace I p := show TangentSpace I p from B.inv y
+  have hdist :=
+    intrinsicGeodesic_riemannianEDist_le (I := I) g hEnorm p u
+      (s := (0 : Real)) (t := (1 : Real)) zero_le_one
+  have hright :
+      expMapIntrinsic (I := I) g hEnorm p u = y :=
+    B.right_inv hy
+  rw [intrinsicGeodesic_zero, ← expMapIntrinsic_def, hright] at hdist
+  simpa only [branchRadius, u, sub_zero, mul_one] using hdist
 
 /-- Along a positive radial ray that stays in the selected source, the branch
 radius is locally the affine function `s ↦ s |x|`. -/
@@ -126,25 +139,21 @@ theorem branchRadius_ray
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {x : TangentSpace I p} {t : Real}
     (ht : 0 < t)
-    (hsrc :
-      (⟨p, t • x⟩ : TangentBundle I M) ∈ B.hom.source) :
+    (hsrc : (t • (x : E)) ∈ B.hom.source) :
     (fun s : Real =>
-      branchRadius (I := I) g B p
+      branchRadius (I := I) g B
         (intrinsicGeodesic (I := I) g hEnorm p x s))
       =ᶠ[𝓝 t]
     (fun s : Real => s * Real.sqrt (g.inner p x x)) := by
-  have hlaunch : Continuous
-      (fun s : Real => (⟨p, s • x⟩ : TangentBundle I M)) := by
-    exact
-      (FiberBundle.continuous_totalSpaceMk E (TangentSpace I) p).comp
-        (continuous_id.smul continuous_const)
+  have hlaunch : Continuous (fun s : Real => s • (x : E)) :=
+    continuous_id.smul continuous_const
   have hsrc_ev :
       ∀ᶠ s in 𝓝 t,
-        (⟨p, s • x⟩ : TangentBundle I M) ∈ B.hom.source :=
+        s • (x : E) ∈ B.hom.source :=
     hlaunch.continuousAt (B.hom.open_source.mem_nhds hsrc)
   have hpos_ev : ∀ᶠ s in 𝓝 t, 0 < s :=
     isOpen_Ioi.mem_nhds ht
@@ -181,35 +190,31 @@ theorem branchEnergy_deriv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p q : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
-    (hq : (p, q) ∈ B.dom) :
-    let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
+    {p q : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    (hq : q ∈ B.dom) :
+    let invf : M → E := B.inv
     HasMFDerivAt I 𝓘(Real, Real)
-      (branchEnergy (I := I) g B p) q
+      (branchEnergy (I := I) g B) q
       ((g.inner p (invf q)).comp
         (mfderiv I 𝓘(Real, E) invf q)) := by
   dsimp only
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
-  let U : Set M := (fun z : M => (p, z)) ⁻¹' B.dom
-  have hUopen : IsOpen U := by
-    change IsOpen ((fun z : M => (p, z)) ⁻¹' B.hom.target)
-    exact B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
+  let invf : M → E := B.inv
+  let U : Set M := B.dom
+  have hUopen : IsOpen U := B.hom.open_target
   have hqU : q ∈ U := hq
   have hinv : MDifferentiableAt I 𝓘(Real, E) invf q := by
     have hinf : ContMDiffOn I 𝓘(Real, E) ∞ invf U := by
-      simpa only [invf, U] using
-        B.inv_fst_coord_inf (S := U) (fun z hz => hz)
+      simpa only [invf, U] using B.inv_inf
     exact (hinf.contMDiffAt (hUopen.mem_nhds hqU)).mdifferentiableAt (by simp)
   have hquad :=
     (half_inner_hasFDerivAt (I := I) g p (invf q)).hasMFDerivAt.comp q
       hinv.hasMFDerivAt
   have heq :
-      branchEnergy (I := I) g B p =ᶠ[𝓝 q]
+      branchEnergy (I := I) g B =ᶠ[𝓝 q]
         (fun z : M => (1 / 2 : Real) * g.inner p (invf z) (invf z)) := by
     filter_upwards [hUopen.mem_nhds hqU] with z hz
     simp only [branchEnergy, invf]
-    rw [B.proj_eq hz]
   simpa only using hquad.congr_of_eventuallyEq heq
 
 /-- The differential of the selected fixed-first inverse is a right inverse of
@@ -218,14 +223,14 @@ theorem exp_inv_mfderiv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p q : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
-    (hq : (p, q) ∈ B.dom)
+    {p q : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    (hq : q ∈ B.dom)
     (Y : TangentSpace I q) :
-    let uB : E := (B.inv (p, q)).snd
+    let uB : E := B.inv q
     let dInv : E :=
       mfderiv I 𝓘(Real, E)
-        (fun z : M => ((B.inv (p, z)).snd : E)) q Y
+        B.inv q Y
     ((mfderiv 𝓘(Real, E) I
         (fun u : E =>
           expMapIntrinsic (I := I) g hEnorm p
@@ -236,23 +241,20 @@ theorem exp_inv_mfderiv
   let expf : E → M := fun u =>
     expMapIntrinsic (I := I) g hEnorm p
       (show TangentSpace I p from u)
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
-  let U : Set M := (fun z : M => (p, z)) ⁻¹' B.dom
-  have hUopen : IsOpen U := by
-    change IsOpen ((fun z : M => (p, z)) ⁻¹' B.hom.target)
-    exact B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
+  let invf : M → E := B.inv
+  let U : Set M := B.dom
+  have hUopen : IsOpen U := B.hom.open_target
   have hqU : q ∈ U := hq
   have hinv : MDifferentiableAt I 𝓘(Real, E) invf q := by
     have hinf : ContMDiffOn I 𝓘(Real, E) ∞ invf U := by
-      simpa only [invf, U] using
-        B.inv_fst_coord_inf (S := U) (fun z hz => hz)
+      simpa only [invf, U] using B.inv_inf
     exact (hinf.contMDiffAt (hUopen.mem_nhds hqU)).mdifferentiableAt (by simp)
   have hexp : MDifferentiableAt 𝓘(Real, E) I expf (invf q) := by
     exact ((intrinsicFiber_smooth (I := I) g hEnorm p).contMDiffAt).mdifferentiableAt
       (by simp)
   have hright : (expf ∘ invf) =ᶠ[𝓝 q] id := by
     filter_upwards [hUopen.mem_nhds hqU] with z hz
-    simpa only [Function.comp_apply, id_eq, expf, invf, U] using B.exp_eq hz
+    simpa only [Function.comp_apply, id_eq, expf, invf, U] using B.right_inv hz
   have hchain :=
     mfderiv_comp_apply (I := I) (I' := 𝓘(Real, E)) (I'' := I)
       (x := q) (g := expf) hexp hinv Y
@@ -274,13 +276,13 @@ theorem inv_exp_mfderiv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (w : TangentSpace I p) :
     mfderiv I 𝓘(Real, E)
-      (fun z : M => ((B.inv (p, z)).snd : E))
+      B.inv
       (expMapIntrinsic (I := I) g hEnorm p u)
       (mfderiv 𝓘(Real, E) I
         (fun v : E =>
@@ -291,40 +293,29 @@ theorem inv_exp_mfderiv
   let expf : E → M := fun v =>
     expMapIntrinsic (I := I) g hEnorm p
       (show TangentSpace I p from v)
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
+  let invf : M → E := B.inv
   let uE : E := (u : E)
   let wE : E := (w : E)
-  let V : Set E :=
-    (fun v : E => (⟨p, v⟩ : TangentBundle I M)) ⁻¹' B.hom.source
-  have hVopen : IsOpen V := by
-    exact B.hom.open_source.preimage
-      (FiberBundle.continuous_totalSpaceMk E (TangentSpace I) p)
+  let V : Set E := B.hom.source
+  have hVopen : IsOpen V := B.hom.open_source
   have huV : uE ∈ V := hu
   have htarget :
-      (p, expf uE) ∈ B.dom := by
-    change
-      diagExp (I := I) g hEnorm
-        (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.target
-    rw [← B.hom_eq hu]
+      expf uE ∈ B.dom := by
+    rw [show expf uE = B.hom uE from B.hom_eq hu]
     exact B.hom.map_source hu
-  let U : Set M := (fun z : M => (p, z)) ⁻¹' B.dom
-  have hUopen : IsOpen U := by
-    change IsOpen ((fun z : M => (p, z)) ⁻¹' B.hom.target)
-    exact B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
+  let U : Set M := B.dom
+  have hUopen : IsOpen U := B.hom.open_target
   have hqU : expf uE ∈ U := htarget
   have hinv : MDifferentiableAt I 𝓘(Real, E) invf (expf uE) := by
     have hinf : ContMDiffOn I 𝓘(Real, E) ∞ invf U := by
-      simpa only [invf, U] using
-        B.inv_fst_coord_inf (S := U) (fun z hz => hz)
+      simpa only [invf, U] using B.inv_inf
     exact (hinf.contMDiffAt (hUopen.mem_nhds hqU)).mdifferentiableAt (by simp)
   have hexp : MDifferentiableAt 𝓘(Real, E) I expf uE := by
     exact ((intrinsicFiber_smooth (I := I) g hEnorm p).contMDiffAt).mdifferentiableAt
       (by simp)
   have hleft : (invf ∘ expf) =ᶠ[𝓝 uE] id := by
     filter_upwards [hVopen.mem_nhds huV] with v hv
-    have h := B.left_inv hv
-    have hsnd := congrArg (fun a : TangentBundle I M => (a.snd : E)) h
-    simpa only [Function.comp_apply, id_eq, expf, invf, diagExp_apply] using hsnd
+    simpa only [Function.comp_apply, id_eq, expf, invf] using B.left_inv hv
   have hchain :=
     mfderiv_comp_apply (I := 𝓘(Real, E)) (I' := I)
       (I'' := 𝓘(Real, E)) (x := uE) (g := invf)
@@ -346,35 +337,28 @@ theorem branchRadius_infAt
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u) :
     ContMDiffAt I 𝓘(Real, Real) ∞
-      (branchRadius (I := I) g B p)
+      (branchRadius (I := I) g B)
       (expMapIntrinsic (I := I) g hEnorm p u) := by
   let q : M := expMapIntrinsic (I := I) g hEnorm p u
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
-  let U : Set M := (fun z : M => (p, z)) ⁻¹' B.dom
-  have hUopen : IsOpen U := by
-    change IsOpen ((fun z : M => (p, z)) ⁻¹' B.hom.target)
-    exact B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
+  let invf : M → E := B.inv
+  let U : Set M := B.dom
+  have hUopen : IsOpen U := B.hom.open_target
   have hqU : q ∈ U := by
-    change (p, q) ∈ B.hom.target
-    change
-      diagExp (I := I) g hEnorm
-        (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.target
-    rw [← B.hom_eq hu]
+    rw [show q = B.hom (u : E) from B.hom_eq hu]
     exact B.hom.map_source hu
   have hinv : ContMDiffAt I 𝓘(Real, E) ∞ invf q := by
     have hinf : ContMDiffOn I 𝓘(Real, E) ∞ invf U := by
-      simpa only [invf, U] using
-        B.inv_fst_coord_inf (S := U) (fun z hz => hz)
+      simpa only [invf, U] using B.inv_inf
     exact hinf.contMDiffAt (hUopen.mem_nhds hqU)
   have hinv_eq :
-      B.inv (p, q) = (⟨p, u⟩ : TangentBundle I M) := by
-    simpa only [q, diagExp_apply] using B.left_inv hu
+      B.inv q = (u : E) := by
+    simpa only [q] using B.left_inv hu
   let gp : E →L[Real] E →L[Real] Real := g.inner p
   have hinner : ContMDiffAt I 𝓘(Real, Real) ∞
       (fun z : M => g.inner p (invf z) (invf z)) q := by
@@ -385,19 +369,16 @@ theorem branchRadius_infAt
     simpa only [gp] using (hg.clm_apply hinv).clm_apply hinv
   have hinner_ne :
       g.inner p (invf q) (invf q) ≠ 0 := by
-    have heq : invf q = (u : E) := by
-      exact congrArg (fun a : TangentBundle I M => (a.snd : E)) hinv_eq
-    rw [heq]
+    rw [show invf q = (u : E) from hinv_eq]
     exact hu_pos.ne'
   have hsqrt : ContMDiffAt I 𝓘(Real, Real) ∞
       (fun z : M => Real.sqrt (g.inner p (invf z) (invf z))) q := by
     exact ((Real.contDiffAt_sqrt hinner_ne).contMDiffAt).comp q hinner
   have heq :
-      branchRadius (I := I) g B p =ᶠ[𝓝 q]
+      branchRadius (I := I) g B =ᶠ[𝓝 q]
         (fun z : M => Real.sqrt (g.inner p (invf z) (invf z))) := by
     filter_upwards [hUopen.mem_nhds hqU] with z hz
     simp only [branchRadius, invf]
-    rw [B.proj_eq hz]
   simpa only [q] using hsqrt.congr_of_eventuallyEq heq
 
 /-- A nonzero selected launch vector has an open endpoint neighborhood on
@@ -406,26 +387,23 @@ theorem branchRadius_open
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u) :
     ∃ U : Set M,
       IsOpen U ∧
       expMapIntrinsic (I := I) g hEnorm p u ∈ U ∧
       ContMDiffOn I 𝓘(Real, Real) ∞
-        (branchRadius (I := I) g B p) U := by
-  let D : Set M := (fun z : M => (p, z)) ⁻¹' B.dom
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
+        (branchRadius (I := I) g B) U := by
+  let D : Set M := B.dom
+  let invf : M → E := B.inv
   let sq : M → Real := fun z => g.inner p (invf z) (invf z)
   let U : Set M := D ∩ sq ⁻¹' Set.Ioi 0
-  have hDopen : IsOpen D := by
-    change IsOpen ((fun z : M => (p, z)) ⁻¹' B.hom.target)
-    exact B.hom.open_target.preimage (continuous_const.prodMk continuous_id)
+  have hDopen : IsOpen D := B.hom.open_target
   have hinv : ContMDiffOn I 𝓘(Real, E) ∞ invf D := by
-    simpa only [invf, D] using
-      B.inv_fst_coord_inf (S := D) (fun z hz => hz)
+    simpa only [invf, D] using B.inv_inf
   let gp : E →L[Real] E →L[Real] Real := g.inner p
   have hsq : ContMDiffOn I 𝓘(Real, Real) ∞ sq D := by
     have hgp : ContMDiffOn I
@@ -437,19 +415,13 @@ theorem branchRadius_open
     exact hsq.continuousOn.isOpen_inter_preimage hDopen isOpen_Ioi
   let q : M := expMapIntrinsic (I := I) g hEnorm p u
   have hqD : q ∈ D := by
-    change (p, q) ∈ B.hom.target
-    change
-      diagExp (I := I) g hEnorm
-        (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.target
-    rw [← B.hom_eq hu]
+    rw [show q = B.hom (u : E) from B.hom_eq hu]
     exact B.hom.map_source hu
   have hinv_q :
-      B.inv (p, q) = (⟨p, u⟩ : TangentBundle I M) := by
-    simpa only [q, diagExp_apply] using B.left_inv hu
+      B.inv q = (u : E) := by
+    simpa only [q] using B.left_inv hu
   have hsq_q : sq q = g.inner p u u := by
-    change
-      g.inner p ((B.inv (p, q)).snd : E) ((B.inv (p, q)).snd : E) =
-        g.inner p u u
+    change g.inner p (B.inv q) (B.inv q) = g.inner p u u
     rw [hinv_q]
   have hqU : q ∈ U := by
     refine ⟨hqD, ?_⟩
@@ -467,7 +439,6 @@ theorem branchRadius_open
   refine ⟨U, hUopen, hqU, ContMDiffOn.congr hsqrt ?_⟩
   intro z hz
   simp only [branchRadius, sq, invf]
-  rw [B.proj_eq hz.1]
 
 /-- The gradient of the fixed-first branch energy is the terminal velocity of
 the intrinsic geodesic selected by the launch vector. -/
@@ -475,37 +446,33 @@ theorem grad_branchEnergy
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source) :
+    (hu : (u : E) ∈ B.hom.source) :
     gradientFun (I := I) g
-        (branchEnergy (I := I) g B p)
+        (branchEnergy (I := I) g B)
         (expMapIntrinsic (I := I) g hEnorm p u) =
       (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd := by
   let q : M := expMapIntrinsic (I := I) g hEnorm p u
-  let invf : M → E := fun z => ((B.inv (p, z)).snd : E)
+  let invf : M → E := B.inv
   let uB : E := invf q
   let dInv : TangentSpace I q → E := fun Y =>
     mfderiv I 𝓘(Real, E) invf q Y
-  have hq : (p, q) ∈ B.dom := by
-    change
-      diagExp (I := I) g hEnorm
-        (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.target
-    rw [← B.hom_eq hu]
+  have hq : q ∈ B.dom := by
+    rw [show q = B.hom (u : E) from B.hom_eq hu]
     exact B.hom.map_source hu
   have hinv :
-      B.inv (p, q) = (⟨p, u⟩ : TangentBundle I M) := by
-    simpa only [q, diagExp_apply] using B.left_inv hu
-  have huB : uB = (u : E) := by
-    exact congrArg (fun a : TangentBundle I M => (a.snd : E)) hinv
+      B.inv q = (u : E) := by
+    simpa only [q] using B.left_inv hu
+  have huB : uB = (u : E) := hinv
   have hderiv := branchEnergy_deriv (I := I) B hq
   apply gradientFun_eq_of_flat (I := I) g
   apply LinearMap.ext
   intro Y
   change
     mfderiv I 𝓘(Real, Real)
-        (branchEnergy (I := I) g B p) q Y =
+        (branchEnergy (I := I) g B) q Y =
       g.inner q
         (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd Y
   rw [hderiv.mfderiv]
@@ -565,24 +532,21 @@ theorem grad_branchRadius
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
-    {c p : M}
-    (B : DiagInvBranch (I := I) g hEnorm c)
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
     {u : TangentSpace I p}
-    (hu : (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hu : (u : E) ∈ B.hom.source)
     (hu_pos : 0 < g.inner p u u) :
     gradientFun (I := I) g
-        (branchRadius (I := I) g B p)
+        (branchRadius (I := I) g B)
         (expMapIntrinsic (I := I) g hEnorm p u) =
       (Real.sqrt (g.inner p u u))⁻¹ •
         (intrinsicVelocityLift (I := I) g hEnorm p u 1).snd := by
   let q : M := expMapIntrinsic (I := I) g hEnorm p u
-  let e : M → Real := branchEnergy (I := I) g B p
+  let e : M → Real := branchEnergy (I := I) g B
   let e2 : M → Real := (2 : Real) • e
-  have hq : (p, q) ∈ B.dom := by
-    change
-      diagExp (I := I) g hEnorm
-        (⟨p, u⟩ : TangentBundle I M) ∈ B.hom.target
-    rw [← B.hom_eq hu]
+  have hq : q ∈ B.dom := by
+    rw [show q = B.hom (u : E) from B.hom_eq hu]
     exact B.hom.map_source hu
   have he_diff : MDifferentiableAt I 𝓘(Real, Real) e q := by
     exact (branchEnergy_deriv (I := I) B hq).mdifferentiableAt
@@ -595,7 +559,7 @@ theorem grad_branchRadius
   have hsqrt_diff : DifferentiableAt Real Real.sqrt (e2 q) := by
     rw [he2_val]
     exact (Real.hasDerivAt_sqrt hu_pos.ne').differentiableAt
-  rw [branchRadius_eq (I := I) g B p]
+  rw [branchRadius_eq (I := I) g B]
   change gradientFun (I := I) g
       (fun z : M => Real.sqrt (e2 z)) q =
     (Real.sqrt (g.inner p u u))⁻¹ •

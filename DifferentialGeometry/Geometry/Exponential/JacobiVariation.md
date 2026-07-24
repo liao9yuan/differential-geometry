@@ -374,3 +374,16 @@ radial endpoint exports and the final `intrinsic_jacobi_d0`-inclusive artifact
 are exact-current (`3801/3801`).
 This is an API-hypothesis cleanup: the endpoint Jacobi theorems remain 100%,
 while the downstream Calabi support theorem remains unstated (0%).
+
+### 2026-07-24 arbitrary-time intrinsic Jacobi differential
+
+Added `intrinsic_jacobi_at`, identifying the intrinsic initial-velocity
+Jacobi field at an arbitrary time `t` with the vector-slot manifold derivative
+of `expMapIntrinsic` at `t • x`, applied to `t • w`.  The proof reuses the
+checked time-one theorem after scaling the intrinsic geodesic; no raw
+exponential radius or connectedness assumption enters the statement.
+
+Focused verification passed without diagnostics.  The new theorem is also
+consumed by the focused-green intrinsic whole-tail Bishop comparison in
+`Volume/BishopIntrinsic.lean`.  This bridge is complete (100%); the separate
+fixed-metric Calabi support theorem remains unstated (0%).

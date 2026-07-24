@@ -758,6 +758,49 @@ theorem divergence_sub
     exact gradientFun_const (I := I) g c y
   simp [laplacian, hgrad]
 
+/-- Adding a spatial constant does not change the Laplacian at a point, provided
+the scalar is differentiable near that point and its gradient field is
+differentiable there. -/
+theorem laplacian_add_const
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (c : Real) {f : M -> Real} {x : M}
+    (hf : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x) :
+    laplacian (I := I) cov g (fun y : M => c + f y) x =
+      laplacian (I := I) cov g f x := by
+  have hgrad_eq :
+      (fun y : M => gradientFun (I := I) g (fun z : M => c + f z) y) =ᶠ[nhds x]
+        (fun y : M => gradientFun (I := I) g f y) := by
+    filter_upwards [hf] with y hy
+    calc
+      gradientFun (I := I) g (fun z : M => c + f z) y =
+          gradientFun (I := I) g (fun _ : M => c) y +
+            gradientFun (I := I) g f y := by
+        exact gradientFun_add (I := I) g mdifferentiableAt_const hy
+      _ = gradientFun (I := I) g f y := by
+        rw [gradientFun_const, zero_add]
+  have hgrad_total :
+      (T% fun y : M => gradientFun (I := I) g (fun z : M => c + f z) y) =ᶠ[nhds x]
+        (T% fun y : M => gradientFun (I := I) g f y) := by
+    filter_upwards [hgrad_eq] with y hy
+    change TotalSpace.mk' E y
+        (gradientFun (I := I) g (fun z : M => c + f z) y) =
+      TotalSpace.mk' E y (gradientFun (I := I) g f y)
+    rw [hy]
+  have hgrad_add :
+      MDiffAt
+        (T% fun y : M => gradientFun (I := I) g (fun z : M => c + f z) y) x :=
+    hgrad.congr_of_eventuallyEq hgrad_total
+  have hcov :
+      cov.toFun (fun y : M =>
+          gradientFun (I := I) g (fun z : M => c + f z) y) x =
+        cov.toFun (fun y : M => gradientFun (I := I) g f y) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hgrad_add hgrad Filter.univ_mem hgrad_eq
+  unfold laplacian divergence
+  rw [hcov]
+
 /-- The Laplacian is unchanged by subtracting a spatial constant. -/
 theorem laplacian_sub_const
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

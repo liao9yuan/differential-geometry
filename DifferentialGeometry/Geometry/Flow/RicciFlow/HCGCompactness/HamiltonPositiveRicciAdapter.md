@@ -1,5 +1,28 @@
 # HamiltonPositiveRicciAdapter
 
+## 2026-07-24 fixed-time trace-free decay producer
+
+Added `tf_decay0_of_cgh`, the direct time-zero transfer theorem for
+`LimitTfDecayAt L 0`.  It combines the retained smooth-CGH scalar and intrinsic
+Ricci-norm pullback convergence into convergence of
+`|Ric|² - R² / 3`, freezes both source and limit functions at time zero, and
+uses `FunctionPullbackTendsto.le_of_bound0` with the bound from
+`ham3_tf_bound0` and the vanishing scale factor from `ham3_scale_decay`.
+
+The source comparison is geometric rather than an added transfer predicate:
+`Ham3SourceRealizes.metric_eq` identifies the source metric with the
+cross-model pullback of the selected rescaling, and `tfRicNormSq_cross`
+identifies the fully evaluated trace-free Ricci norms.  No new consumer
+assumption, desired-conclusion wrapper, or strong maximum principle input was
+introduced.
+
+Focused verification passed after normalizing the fully applied scalar source
+expression before rewriting the stored metric equality.  Thus
+`tf_decay0_of_cgh` and its dedicated fixed-time transfer machinery are each
+100%.  This does not complete the compactness endpoint:
+`ham3_cgh_limit` remains theorem-level 0%, and the whole HCG machinery remains
+about 60%.
+
 ## Current state — 2026-07-09 source realization and witness binding
 
 `Ham3SourceLink` is now data, parameterized by the actual point-selection

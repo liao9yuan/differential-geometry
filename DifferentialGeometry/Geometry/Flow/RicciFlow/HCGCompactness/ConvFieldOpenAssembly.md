@@ -50,3 +50,16 @@ about 97%, while unconditional `compactnessSol` remains theorem-level 0%; its
 real producer frontiers are the complete-noncompact open-window Shi theorem,
 the constants-first source covariant/Lipschitz theorem, and the concrete Step-D
 canonical-provenance sidecar.
+
+## 2026-07-24 concrete Ricci-norm assembly
+
+`open_upgrade_of_raw` now derives the open-window intrinsic squared Ricci-norm
+convergence from the same `cLow`, metric bound, and covariant-tail inputs as
+scalar convergence. It transports only the fully evaluated real-valued
+sequence across the time-zero target cast and passes that witness to
+`flowUpgrade_of_open`; no consumer-side convergence hypothesis was added.
+
+Source wiring is complete, and the three upstream artifacts
+`ConvFieldPDE`, `ConvFieldOpenScalar`, and `ConvFieldOpenEndgame` are
+exact-current. Focused verification of this final assembly passes with no
+diagnostics, and its exact artifact is current.

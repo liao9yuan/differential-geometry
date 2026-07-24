@@ -32,3 +32,17 @@ focused verification and the exact module refresh are both green.  The
 comparison-facing `radialLap_eq_mean` theorem remains 0% until the downstream
 radial module is checked; whole HCG supporting machinery remains roughly 60%,
 and unconditional `compactnessSol` remains 0%.
+
+## 2026-07-24 canonical fixed-first branch
+
+`branchHess_jacobi`, `branchHess_shape`, and `intrinsicJacobi_li` now consume
+`ExpInvBranch` directly. Their source neighborhoods live in the fixed model
+tangent space, and the inverse readout is `B.inv`; the old tangent-bundle
+pair packaging was inherited from `DiagInvBranch` and is no longer part of
+the proof-owning API.
+
+The migration is focused green and placeholder-free. The underlying endpoint
+Hessian theorem and its dedicated machinery remain 100%; the later
+`calabiDist_support` theorem is still unstated (0%). Route B-prime remains
+about 45%, whole HCG supporting machinery about 60%, and unconditional
+`compactnessSol` theorem-level 0%.

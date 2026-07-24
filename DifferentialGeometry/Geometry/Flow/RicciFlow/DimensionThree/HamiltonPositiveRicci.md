@@ -1,5 +1,63 @@
 # HamiltonPositiveRicci live frontier audit
 
+## Fixed-time improved-pinching producers — 2026-07-24
+
+The source and scale sides of the fixed-time Hamilton pinching argument now
+have checked producers.
+
+- `ham3_tf_display` proves the exact parabolic scaling law for
+  `tfRicNormSq`.
+- `ham3_tf_bound0` combines that scaling law, scalar positivity on the
+  original carrier, the selected-rescaling scalar bound, and
+  `Ham3PinchEstimate` to obtain the uniform estimate
+  `q_i(0,x) ≤ C * Q_i ^ (-epsilon)`.
+- `ham3_scale_atTop` derives `Q_i → ∞` from finite maximal time and
+  `Q_i * t_i → ∞`.
+- `ham3_scale_decay` restricts to the smooth-CGH subsequence and proves
+  `C * Q_i ^ (-epsilon) → 0`.
+
+Focused and exact source verification pass.  These source-bound and
+scale-decay producers and their dedicated algebraic machinery are **100%**.
+
+The actual fixed-time theorem
+`HamiltonPositiveRicciAdapter.tf_decay0_of_cgh : LimitTfDecayAt L 0` is now
+focused-green, so both that theorem and its dedicated machinery are **100%**.
+Cross-model naturality, C2-jet convergence of the intrinsic squared Ricci norm,
+and closed/open `ConvOut` retention through `FlowLimitData` are checked; the
+fully evaluated scalar combination
+`|Ric|² - scalar² / 3` then passes to the limit without a tensor-valued
+transport.  A scalar strong maximum principle and the older all-time
+`Ham3PinchTransfer` package are not needed for this time-zero route.  The
+adapter's exact artifact refresh is still running at this snapshot.
+
+Consequently `ham3_cgh_limit` remains theorem-level **0%**, while whole-project
+HCG infrastructure remains conservatively about **60%**.
+
+## Time-zero roundness reducers — 2026-07-24
+
+Two fixed-slice consumers now isolate the book-faithful time-zero route from
+the stronger all-window scalar-positivity package.
+
+- `tf_zero_of_decay` proves `LimitTfZeroAt L t` directly from
+  `LimitTfDecayAt L t` and the three-dimensional model-space hypothesis.  The
+  older `limit_tf_zero_of_decay` theorem remains as the all-regular-times
+  compatibility wrapper.
+- `limit_round_base` proves `LimitRoundAt L t` from the Einstein equation,
+  connectedness, boundarylessness, and positivity of scalar curvature only at
+  the CGH base point.  Schur constancy supplies positivity everywhere.  The
+  older `limit_round_of_ein` theorem remains as the compatibility wrapper for
+  callers carrying `LimitScalarPosAt`.
+
+The focused source verification passes.  Both new theorems and their dedicated
+consumer machinery are **100%**.  They add no analytic assumption and show that
+the static Hamilton endgame does not require a strong maximum principle.
+
+The missing endpoint-time CGH transfer is now proved by
+`HamiltonPositiveRicciAdapter.tf_decay0_of_cgh`.  Composing it with these
+reducers and the already retained base-scalar convergence is the next narrow
+assembly step.  `ham3_cgh_limit` itself remains theorem-level **0%**, and
+whole-project HCG infrastructure remains conservatively about **60%**.
+
 ## `ham3_space_box` endpoint integration — 2026-07-24
 
 The natural universal-cover construction exposed a declaration-level universe

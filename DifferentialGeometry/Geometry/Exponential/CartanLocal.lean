@@ -15,7 +15,8 @@ manifold gives the local Cartan map.
 
 The metric proof is pointwise and invariant.  The Jacobi-field producer
 `expDiff_sq_xfer` transfers the target exponential differential square, while
-`DiagInvBranch.exp_inv_mfderiv` cancels the source exponential differential.
+`exp_inv_mfderiv` cancels the source exponential differential after taking the
+canonical fixed-first projection of the diagonal branch.
 Polarization then gives the full bilinear metric identity.
 -/
 
@@ -187,8 +188,10 @@ theorem cartanMap_sq
   have hright :
       ((mfderiv 𝓘(ℝ, E) I expf u w : TangentSpace I _) : E) =
         (Y : E) := by
+    have hx' : x ∈ (B.fixed p).dom := by
+      simpa only [DiagInvBranch.fixed_target] using hx
     simpa only [expf, invf, u, w] using
-      exp_inv_mfderiv (I := I) B hx Y
+      exp_inv_mfderiv (I := I) (B.fixed p) hx' Y
   have hbase : expf u = x := by
     simpa only [expf, invf, u] using B.exp_eq hx
   have htransfer' :

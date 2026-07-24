@@ -50,3 +50,17 @@ is current.
   compact-support maximum-principle and quantitative cutoff estimates remain.
 - HCG supporting machinery: roughly 60%; unconditional `compactnessSol`
   remains theorem-level 0%.
+
+## 2026-07-24 `ExpInvBranch` migration
+
+The proof-owning statements `branchDeriv2_zero`, `branchHess_radial`,
+`branchLap_eq_mean`, and `radialLap_eq_mean` now consume the canonical
+fixed-first `ExpInvBranch`. Existing diagonal applications are recovered by
+projecting through `DiagInvBranch.fixed`; no second radius/Hessian/Laplacian
+hierarchy remains.
+
+The migrated source is focused green and placeholder-free. The fixed-first
+radial Laplacian theorem and its dedicated machinery remain 100%.
+`calabiDist_support` itself remains unstated and therefore 0%; Route B-prime
+remains about 45%, whole HCG supporting machinery about 60%, and
+unconditional `compactnessSol` theorem-level 0%.

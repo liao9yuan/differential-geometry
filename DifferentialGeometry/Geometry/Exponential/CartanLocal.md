@@ -35,3 +35,14 @@ GREEN (`3866/3866`); the file is sorry-free.
 Killing--Hopf machinery is approximately 55% complete.  The local Cartan
 partial-isometry phase is now implemented; the remaining substantive frontier
 is the explicit punctured-sphere extension and global two-chart gluing.
+
+## 2026-07-24 branch compatibility update
+
+The sole direct `exp_inv_mfderiv` call now projects the diagonal branch through
+`DiagInvBranch.fixed` and supplies the fixed target-domain membership. The
+Cartan API itself remains diagonal and unchanged; it consumes the canonical
+fixed-first calculus rather than maintaining an independent inverse proof.
+
+The source is focused green and placeholder-free. This compatibility edit does
+not change the existing `ham3_space_box` accounting: theorem-level 0%, with
+its dedicated positive Killing--Hopf machinery still approximately 55%.

@@ -1851,6 +1851,41 @@ def ScalarPullbackTendsto
       letI : T2Space L.M := L.t2
       L.S.scalar t x)
 
+/-- Pointwise pullback convergence of the intrinsic squared Ricci norm along
+the comparison maps of a smooth Cheeger--Gromov--Hamilton limit. -/
+def RicNormPullback
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Phi : PointedCGHMaps (I := I) X (L.atTime 0) subseq) : Prop :=
+  FunctionPullbackTendsto (I := I) Phi
+    (fun k t x =>
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M :=
+        by
+          change IsManifold I ∞ (X.term (subseq k)).M
+          infer_instance
+      letI : SigmaCompactSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).sigmaCompact
+      letI : T2Space (X.term (subseq k)).M :=
+        (X.term (subseq k)).t2
+      PDE.RicciFlow.ricciNorm (I := I) (X.term (subseq k)).S t x)
+    (fun t x =>
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : IsManifold I ∞ L.M := L.smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+        change IsManifold I ∞ L.M
+        infer_instance
+      letI : SigmaCompactSpace L.M := L.sigmaCompact
+      letI : T2Space L.M := L.t2
+      PDE.RicciFlow.ricciNorm (I := I) L.S t x)
+
 /-- Smooth pointed Cheeger--Gromov convergence of the spatial metrics at one
 time, packaged around the comparison maps. -/
 structure PointedCGConverges
@@ -1868,15 +1903,16 @@ structure SmoothCGHConverges
     (subseq : Nat -> Nat) where
   spatial : PointedCGConverges (I := I) X L subseq
   scalar_converges : ScalarPullbackTendsto (I := I) spatial.maps
+  ricciNorm_converges : RicNormPullback (I := I) spatial.maps
   spacetime :
     SourceSpacetimeConvergenceData (I := I) spatial.maps
       spatial.metrics.domain
 
 namespace SmoothCGHConverges
 
-/-- Build smooth CGH convergence from comparison maps, scalar pullback
-convergence, and source-domain spacetime metric convergence.  The spatial
-metric convergence is extracted from the singleton-window case. -/
+/-- Build smooth CGH convergence from comparison maps, scalar and squared
+Ricci-norm pullback convergence, and source-domain spacetime metric convergence.
+The spatial metric convergence is extracted from the singleton-window case. -/
 noncomputable def ofSpacetime
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
@@ -1884,23 +1920,27 @@ noncomputable def ofSpacetime
     (Φ : PointedCGHMaps (I := I) X (L.atTime 0) subseq)
     {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
     (hscalar : ScalarPullbackTendsto (I := I) Φ)
+    (hric : RicNormPullback (I := I) Φ)
     (Hst : SourceSpacetimeConvergenceData (I := I) Φ D) :
     SmoothCGHConverges (I := I) X L subseq where
   spatial := {
     maps := Φ
     metrics := Hst.toSpatial (I := I) }
   scalar_converges := hscalar
+  ricciNorm_converges := hric
   spacetime := Hst
 
 /-- Build smooth CGH convergence from the canonical source-domain
-restrict/pullback metrics.  The remaining analytic input is exactly uniform
-window convergence of the seminorms of those constructed metrics. -/
+restrict/pullback metrics.  The curvature pullback convergence inputs are
+retained explicitly; the remaining metric input is uniform window convergence
+of the seminorms of those constructed metrics. -/
 noncomputable def ofRestrictPullback
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
     {subseq : Nat -> Nat}
     (Φ : PointedCGHMaps (I := I) X (L.atTime 0) subseq)
     (hscalar : ScalarPullbackTendsto (I := I) Φ)
+    (hric : RicNormPullback (I := I) Φ)
     (hσsrc : forall k : Nat,
       letI : TopologicalSpace (L.atTime 0).M := L.topology
       IsSigmaCompact (Φ.source k))
@@ -1929,7 +1969,7 @@ noncomputable def ofRestrictPullback
                 (Φ := Φ) (k := k) (hσsrc k) (hσtgt k)
                 (referenceMetric k) limitMetricFamily).derivNormSupOn (I := I) K p t) < ε) :
     SmoothCGHConverges (I := I) X L subseq :=
-  SmoothCGHConverges.ofSpacetime (I := I) Φ hscalar
+  SmoothCGHConverges.ofSpacetime (I := I) Φ hscalar hric
     (SourceSpacetimeConvergenceData.ofRestrictPullback (I := I)
       hσsrc hσtgt referenceMetric limitMetricFamily hconv)
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 
 set_option autoImplicit false
@@ -221,6 +222,127 @@ theorem baseScalarConv_of_smoothCGH
     _ = ham3RescaledScalar (I := I) P Q (hsource.origIndex (subseq k)) 0
         (Q.point (hsource.origIndex (subseq k))) := by
           simpa using hsource.baseScalar (subseq k)
+
+/-- Smooth CGH convergence transfers the time-zero improved-pinching decay to
+the limit trace-free Ricci norm. -/
+theorem tf_decay0_of_cgh
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hscalar :
+      forall t : Real, t ∈ P.D.carrier ->
+        forall x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    (L : Ham3CGHLimitData (I := I) M)
+    (h0 : (0 : Real) ∈ L.D.carrier)
+    (hreal : Ham3SourceRealizes (I := I) (M := M) P Q hsel L) :
+    LimitTfDecayAt (I := I) L 0 := by
+  classical
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  rcases ham3_tf_bound0 (I := I) P Q hsel hscalar hpinch with
+    ⟨epsilon, C, hepsilon, _hepsilon1, _hC, hbound⟩
+  have hconv :
+      FunctionPullbackTendsto (I := I) L.cgh.spatial.maps
+        (fun k _t x =>
+          letI : TopologicalSpace (L.sourceTerm (L.cghSubseq k)).M :=
+            (L.sourceTerm (L.cghSubseq k)).topology
+          letI : ChartedSpace H (L.sourceTerm (L.cghSubseq k)).M :=
+            (L.sourceTerm (L.cghSubseq k)).charted
+          letI : IsManifold I ∞ (L.sourceTerm (L.cghSubseq k)).M :=
+            (L.sourceTerm (L.cghSubseq k)).smooth
+          letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+              (L.sourceTerm (L.cghSubseq k)).M := by
+            change IsManifold I ∞ (L.sourceTerm (L.cghSubseq k)).M
+            infer_instance
+          letI : SigmaCompactSpace (L.sourceTerm (L.cghSubseq k)).M :=
+            (L.sourceTerm (L.cghSubseq k)).sigmaCompact
+          letI : T2Space (L.sourceTerm (L.cghSubseq k)).M :=
+            (L.sourceTerm (L.cghSubseq k)).t2
+          DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+            (L.sourceTerm (L.cghSubseq k)).S.scalar
+            (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+              (L.sourceTerm (L.cghSubseq k)).S) 0 x)
+        (fun _t x =>
+          DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+            L.S.scalar
+            (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S)
+            0 x) := by
+    intro _t _ht x
+    have hsc := L.cgh.scalar_converges 0 h0 x
+    have hric := L.cgh.ricciNorm_converges 0 h0 x
+    simpa only [
+      DifferentialGeometry.PDE.RicciFlow.tfRicNormSq,
+      DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
+      DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqAtOf] using
+      hric.sub ((hsc.pow 2).div_const 3)
+  have hdecay :=
+    ham3_scale_decay (I := I) h0omega P hD Q hsel L
+      (C := C) hepsilon
+  have hsmall :=
+    FunctionPullbackTendsto.le_of_bound0 (I := I) hconv
+      (fun _t _x k =>
+        C * ham3BlowupScale (I := I) P Q (L.subseq k) ^ (-epsilon))
+      (by
+        intro _t x
+        refine ⟨hdecay, Filter.Eventually.of_forall ?_⟩
+        intro k
+        let i : Nat := L.cghSubseq k
+        letI : TopologicalSpace (L.sourceTerm i).M :=
+          (L.sourceTerm i).topology
+        letI : ChartedSpace H (L.sourceTerm i).M :=
+          (L.sourceTerm i).charted
+        letI : IsManifold I ∞ (L.sourceTerm i).M :=
+          (L.sourceTerm i).smooth
+        letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+            (L.sourceTerm i).M := by
+          change IsManifold I ∞ (L.sourceTerm i).M
+          infer_instance
+        letI : SigmaCompactSpace (L.sourceTerm i).M :=
+          (L.sourceTerm i).sigmaCompact
+        letI : T2Space (L.sourceTerm i).M :=
+          (L.sourceTerm i).t2
+        have hcross :
+            DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+                (L.sourceTerm i).S.scalar
+                (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+                  (L.sourceTerm i).S)
+                0 (L.cgh.spatial.maps.map k x) =
+              DifferentialGeometry.PDE.RicciFlow.tfRicNormSq
+                (ham3RescaledSol (I := I) P Q hsel (L.origIndex i)).scalar
+                (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
+                (ham3RescaledSol (I := I) P Q hsel (L.origIndex i)))
+                0
+                (L.sourceToOrig i (L.cgh.spatial.maps.map k x)) := by
+          simp only [
+            DifferentialGeometry.PDE.RicciFlow.tfRicNormSq,
+            DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
+            DifferentialGeometry.PDE.RicciFlow.ricciNorm,
+            DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
+            DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+            DifferentialGeometry.PDE.RicciFlow.SolutionOn.family_metric,
+            DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
+            DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci]
+          rw [hreal.metric_eq i 0 h0]
+          exact
+            tfRicNormSq_cross (I := I) (J := I)
+              ((ham3RescaledSol (I := I) P Q hsel
+                (L.origIndex i)).base.metric 0)
+              (L.sourceToOrig i) (L.cgh.spatial.maps.map k x)
+        rw [hcross]
+        simpa [i, Ham3CGHLimitData.subseq] using
+          hbound (L.origIndex i)
+            (L.sourceToOrig i (L.cgh.spatial.maps.map k x)))
+  exact hsmall 0 h0
 
 /-- A compactness conclusion from the new HCG interface supplies the old
 Hamilton Section 12 black-box conclusion. -/
