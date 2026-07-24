@@ -4,6 +4,57 @@ Session 4 (Opus 4.8, LANE C), branch `codex/analytic-producers-e87b`.
 Ratified route: item-6 packet S1 (`UNIF_ITEM6_RECON.md §S1, §7`), curvature taken
 ABSTRACTLY (Finding C, `HCGCompactness/UnifCurvatureJetBound.md`).
 
+## S1 CONSUMER VERDICT (session 10, read-and-verdict — NO build, NO commit)
+
+**VERDICT: S1-abstract COMPLETE — STEP 2.2 (`:1439` mode-mass) / 2.3 (`cc_dirichlet_gap`
+coefficient-one-gap) are UNNECESSARY.  No consumer needs the sharper-constant form; the S1 lane
+closes.**  Two DOWNSTREAM packaging/discharge deltas remain (neither is 2.2/2.3, both outside
+`UnifBochnerGap`'s spectral core).
+
+Evidence (read the CONSUMERS, not built):
+- **What consumers need = the two-sided equivalence pair.**  `UNIF_ITEM6_RECON.md §2` states S1 =
+  "**exactly `exists_{…}_general` (§1.1) but with the choose-constant bounded by explicit
+  `F(Λ,n)`**" — i.e. the covsum↔`Hs` pair `covsum_hs_unif`/`hs_covsum_unif`, which the landed
+  `covsum_hs_unif`/`hsCovsum_unif` (generic rank, abstract `hcurv`/`Fc`) provide.  §3 route table:
+  S2 = `covsum_hs_unif` at `s=a+1` + Morrey; S3 = the pair + Sobolev-mult + item-2; S4 =
+  `hs_covsum_unif` at `s=a` + curvature-jet→L²; S1b = `S1∘S0∘Gårding(gBase)`.  "**The whole packet
+  has ONE hard level, reached by S1; S2–S4, S1b inherit it.**"  `UnifClassBounds.md §2/§5`
+  confirms every (N)-time constant (`Csym1/Csym2`, `R₀`, `K`, `‖Nfun 0‖`) transfers through this
+  pair; `UNIF_EXISTENCE_PLAN.md` Stage-3 = "apply Stage 2 + Stage 1 to produce `τ₀`" (Stage-1 =
+  the S2–S4 uniform constants).
+- **The `:1439`/gap forms are NOT consumer-facing.**  Per `RECON §7.1–7.3` they are INTERNAL steps
+  of an ALTERNATIVE per-metric derivation (route 2, `DirichletSpectralBochnerGap.lean`
+  `…succ_le_…:1220` → mode-mass `:1439` → `cc_dirichlet_gap:1539`); `cc_dirichlet_gap` is
+  explicitly "a coefficient-one Gårding inequality, **not a spectral gap**" (§7.1).  The landed
+  pair reaches the SAME equivalence endpoints via route 1 (elliptic `elliptic_lapSum_unif` →
+  `jetEven_unif`/`jetOdd_unif` = uniform `hsJet_le`), so route 2's internal `:1439`/gap steps are
+  never needed.
+
+Downstream deltas (report-only; do NOT build this session):
+1. **Rank-2 `smoothCcToTensorHs` face.**  S1 spec writes `smoothCcToTensorHs g₀ s T`
+   (`T : SmoothCcTensor g₀ 0 2`); the landed pair uses generic `ccTensorToHs g₀ s (n:ℝ)`.  Bridged
+   by the existing identity `ccTensorToHs g₀ 2 (n:ℝ) = smoothCcToTensorHs g₀ (n:ℝ)`
+   (`IteratedCovGradHsJetBound.lean:1029`, `tensorHs.ext`; precedent adapter `:1021`) — a thin
+   rank-2 wrapper, downstream (Stage-1 `UnifClassBounds.lean` or a one-line specialization).
+2. **The `C ≤ F(Λ,n)` clause** (the S1 spec's `∃C, 0≤C ∧ C ≤ F(Λ,n) ∧ …`).  The landed pair gives
+   `∃C ≥ 0 ∧ ∀…` with `C` built from the ABSTRACT `Fc`(+dim/order + internally-`.choose`d
+   metric-contraction constants); the `≤ F(Λ,n)` bound is the DOWNSTREAM discharge 2a/2b/2c
+   (`RECON §7.5`: bound `sup‖∇^a Riemann‖`, `ccR/ccdR`, `K_lap` by `Λ` from
+   `MetricCovDerivOrderBoundOn`) — Finding C explicitly puts this in `HCGCompactness`
+   (`UnifCurvatureJetBound.lean`, the concurrently-active lane), NOT in S1.  **CAVEAT for the
+   planner (distinct from 2.2/2.3):** for 2c to prove the AGGREGATE `C ≤ F(Λ,n)`, the top-level
+   endpoints' `∃C` may need restating to EXPOSE `C` as an explicit monotone function of
+   (`Fc`, the metric-contraction/dimension constants) — the per-STEP blocks
+   (`bochner_step_hcurv`, `baseAddLower_unif`) already expose `Fc`-explicit constants; only the
+   aggregates (`elliptic_lapSum_unif`/`covsum_hs_unif`/`hsCovsum_unif`) are `∃`-wrapped.  This is
+   an "expose-aggregate-constant" refinement to scope when 2a/2c compose, NOT the mode-mass/gap
+   form.
+
+Net: the spectral gate (the one HARD level, S1) is mathematically DONE at the abstract-`hcurv`
+interface the plan mandates; remaining item-6 work is the downstream 2a/2b/2c curvature-jet
+discharge (other lane) + Stage-1 packaging (rank-2 face; expose-constant if 2c needs it) + S0/S1b
+covariant cross-metric + S2–S4.  STEP 2.2/2.3 dropped from the plan as unnecessary.
+
 ## What landed (stage α) — GREEN, axiom-clean
 
 `bochner_step_unif` — the `Λ`-uniform single Bochner step, the uniform sibling of
