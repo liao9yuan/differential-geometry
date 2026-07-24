@@ -1,0 +1,382 @@
+# UNIF_ITEM6_RECON — R1τ ruling item 6: the narrow class-uniform packet
+
+Recon executed 2026-07-24 (Opus 4.8, LANE C) in worktree
+`C:/Users/liao9/.codex/worktrees/e87b/...`, branch `codex/analytic-producers-e87b`.
+**RECON ONLY — no `.lean` written.**  Deliverable of the LANE C dispatch in
+`UNIF_EXISTENCE_PLAN.md` (Parallel lanes, 2026-07-24).  Spec = the item-6
+paragraph of `UNIF_N_PRO_RULING.md`.
+
+Scope: the FINAL packet of the R1τ route — after items 2–5 (tame estimate,
+cutoff, time-level Nemytskii, fixed-horizon representative) rebuild the
+per-datum lane in `H^{a+1}`-controlled form, item 6 makes the engine's
+surviving `g₀`-intrinsic constants class-uniform so the Stage-3/(N) assembly
+can replace each `Classical.choose(g₀)` by a `gBase`-level `Λ`-formula and read
+off a horizon floor `τ₀(gBase, Λ, S) > 0`.
+
+Orders (fixed once and for all, per the Stage-0 audit `UnifClassBounds.md` §3):
+`a = 4·finrank + 10` (EVEN), `a+1` (ODD), `a+2 = A(n) = 4·finrank + 12` (EVEN).
+The packet lives ONLY at these three orders.  Do NOT design a general `H^s`
+theory.
+
+---
+
+## 0. LEAD RISK (read first) — the spectral scale has no high-order min-max transfer
+
+`tensorHs g r s σ` (`Analysis/Spectral/Tensor/SobolevScale/Defs.lean:227`) is a
+**genuine spectral scale**, NOT a covariant-derivative-sum norm:
+
+- an element is a coordinate family `coeff : TensorEigenIdx g r s → ℝ` against
+  the **connection-Laplacian eigenbasis of `g`**, with norm²
+  `‖u‖²_{H^σ_g} = ∑ᵢ (1+λᵢ)^σ · (coeff i)²`
+  (`tensorSobolevWeight i σ = (1 + λᵢ)^σ`, `Defs.lean:100`; `λᵢ ≥ 0` = the
+  Bochner/rough-Laplacian eigenvalue of `g`, `TensorEigenIdx.lambda`).
+- the eigenbasis AND the eigenvalues depend on `g`; `tensorHs g₀ …` and
+  `tensorHs gBase …` are literally DIFFERENT spaces over different index types
+  `TensorEigenIdx g₀` vs `TensorEigenIdx gBase`.
+
+Consequence for the three-order comparison, and the packet's single biggest
+mathematical risk:
+
+> **There is no cheap operator/min-max transfer at orders `a, a+1, a+2`.**  Even
+> if `Δ_∇^{g₀} ≍_Λ Δ_∇^{gBase}` as quadratic forms (which follows from
+> `Λ`-comparability + jets), operator monotonicity of `A ↦ A^σ` holds only for
+> `0 ≤ σ ≤ 1` (Löwner–Heinz).  At `σ = a, a+1, a+2 ≈ 4n+10…12 ≫ 1` a form
+> comparison `Δ^{g₀} ≤ Λ·Δ^{gBase}` does NOT give `(1+Δ^{g₀})^σ ≤ C·(1+Δ^{gBase})^σ`.
+> So the high-order spectral norms CANNOT be compared spectrally; the comparison
+> is forced through covariant derivatives, and every route must pay the
+> **elliptic-regularity (Gårding) constant** that relates the `g₀`-spectral norm
+> to the `g₀`-covariant-derivative-sum norm.  That constant exists today only as
+> a `Classical.choose` existential (§1).  Making it `Λ`-uniform is a genuine
+> spectral-geometry re-derivation — it is the crux of the whole packet, and it is
+> NOT dissolved by the `connDiff` covariant-difference tools (those only serve
+> the covariant middle step).
+
+This is exactly the risk the ruling's stop-condition anticipated ("spectral
+scale with no clean min-max transfer").  It is real here.  The packet is
+otherwise routine-to-medium; this one level is the gate.
+
+**Mitigant (why it is hard-but-not-hopeless):** the existing per-metric proof of
+the hard direction (`DirichletSpectralBochnerGap.lean`) is an **iterated Bochner
+integration-by-parts recursion whose per-step constants are curvature
+contractions of `g`** (Weitzenböck commutators), plus the metric/volume
+contraction.  Under `Λ`-comparability to a FIXED `gBase` on a FIXED closed `M`
+with curvature/metric jets `≤ Λ`, every per-step constant is a polynomial in
+`Λ` and `n`.  So the Gårding constant is `Λ`-boundable in principle by re-running
+the SAME recursion with the constant tracked explicitly instead of
+`Classical.choose`d.  The difficulty is bookkeeping at high order (≈ `4n+12`
+nested steps, even+odd parity), not a missing idea — UNLESS a hidden dependence
+on a non-`Λ`-controlled quantity surfaces (see §4 risk row).
+
+---
+
+## 1. INVENTORY
+
+### 1.1 What EXISTS (per-metric, existential constants)
+
+The `g₀`-intrinsic spectral↔covariant equivalence is already built, two-sided,
+at every integer order, as **`∃ C` existentials** (`Classical.choose`, no
+formula, `g₀`-dependent):
+
+| direction | lemma (file:line) | shape |
+|---|---|---|
+| spectral ≤ covariant (`Ca`) | `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general` (`Spectral/Intrinsic/DeTurck/SobolevNonlinearityExistence.lean:902`) | `∃C≥0, ∀T, ‖smoothCcToTensorHs g₀ n T‖ ≤ C·∑_{j≤n}‖iteratedCovGrad g₀ j T‖` |
+| covariant ≤ spectral (`Cb`, ELLIPTIC REG.) | `exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general` (`…SobolevNonlinearityExistence.lean:774`) | `∃C≥0, ∀S, ∑_{j≤n}‖iteratedCovGrad g₀ j S‖ ≤ C·‖smoothCcToTensorHs g₀ n S‖` |
+
+The HARD direction's engine (private, `Classical.choose`):
+`Analysis/Spectral/Tensor/SobolevScale/DirichletSpectralBochnerGap.lean`
+— `exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local:1063` (even
+`:834` + odd `:896`), built from the **Bochner recursion**
+`iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower:1220`, the
+**Weitzenböck commutator** `iteratedRoughLapGrad_commutator_l2Norm_le_local:616`,
+the **Dirichlet gap** `cc_dirichlet_gap:1539`, and Parseval
+`rawConnLapIter_l2NormSq_eq_tsum:87`.  Imports show the analytic backbone:
+`GreenIdentityAndIBP.TensorCovDivergence` (IBP), `CovGradRoughLap.
+PointwiseToL2Packaging`, `GagliardoNirenbergLpFiberNorm`,
+`SobolevScale.SpectralPouNormEquiv`.
+
+The EASY direction's engine: `smoothCcToTensorHs_rawTensorConnLapSmooth_le_self`
+(`DirichletSpectralBochnerGap.lean:148`), `cc_raw_hs_le:286`, `cc_mass_le:352`.
+
+Symmetrization is a **contraction in the covariant-sum norm** (constant 1, NOT a
+`Ca·Cb` blow-up): `norm_iteratedCovGrad_symmS_le`
+(`SobolevNonlinearityExistence.lean:2707`).  This is the ruling's "expose the
+norm contraction, do not transfer `Csym1/Csym2`" — the `Csym1/Csym2 = Ca·Cb`
+packaging at `exists_norm_smoothCcToTensorHs_symmS_le:2727` only blows up
+because it round-trips through the spectral scale.  **`Csym1/Csym2` are NOT in
+the packet.**
+
+Spectral↔PoU-covariant scaffolding at general order (all within ONE metric,
+existential constants), useful as templates:
+`Analysis/Sobolev/Embedding/RawConnLapToHsOrderDropping.lean` —
+`exists_rawConnLapSmooth_toHs_le_toHs_succ:3785`,
+`exists_rawConnLapIter_toHs_le_toHs:3824`, `toHs_norm_mono:3862`;
+`Analysis/Sobolev/Tensor/PouWeightedHsNorm.lean` (the PoU covariant `H^k` norm
+`tensorPouSobolevHsNorm:98`, `_le_succ:295`, `_smul:518`, `NormSq:1023`);
+`SobolevScale/SpectralPouNormEquiv.lean` (spectral↔PoU norm equivalence, per
+metric); `SobolevScale/Order2Equivalence.lean` (`tensorHs g 2 ≃ₗᵢ TensorL2` —
+isometric, but only order 2).
+
+**Fiber-level cross-metric precedent (SCALAR, H² only):**
+`Analysis/Spectral/Intrinsic/Garding/CrossMetricEnergy.lean` — `cross_energy_le
+:265` compares Hessian/differential energies of a scalar in one metric against
+its fixed spectral `H²` norm in another, holding the spectral reference measure
+fixed.  This is the ONLY genuine cross-metric norm statement in the tree.  It is
+a template for the pattern, NOT the packet (rank 0, order 2, one-sided, fixed
+measure).
+
+Fiber/measure comparison building blocks (routine level, exist):
+`Sobolev/HebeyBlock/FiberNorm/FiberNormRiemannianBridge.lean`, `GramTwist.lean`,
+`Sobolev/Manifold/MeasureBridge.lean` (+ `MeasureBridgeUniform.lean`, but that is
+single-metric chart-cover uniformity).
+
+Covariant-derivative difference building blocks (the `∇^{g₁}−∇^{g₀}` engine that
+the mission asked about — the `TensorHilbert` `connDiff` layer):
+`Sobolev/TensorHilbert/ConnDiffJetL2Summed.lean`
+(`connDiffContrInsertionField_…_topSeparated`),
+`CometricInverseDifferenceMultiplier.lean`, `CometricDifferenceSlotPairing.lean`,
+`InverseMetricPerturbationFibreBound.lean`.  **Caveat:** these are per-order
+top-separated jet-L² bounds for the DeTurck REMAINDER coefficient fields
+(`g₁` = solution vs `g₀` = initial), tuned for item 2, NOT a packaged two-sided
+covariant-sum norm equivalence `∑‖∇^{g₀,j}u‖ ≍ ∑‖∇^{gBase,j}u‖`.  They supply the
+Christoffel/cometric-difference ATOMS, so the middle step is an assembly, not a
+from-scratch build.
+
+### 1.2 What is genuinely MISSING
+
+1. **Any two-metric `tensorHs` comparison.**  Grep across `Analysis/**` for a
+   norm relation between `tensorHs g₀` and `tensorHs gBase` (or any `Λ`-uniform
+   spectral↔covariant constant) returns NOTHING.  Confirmed the Stage-0 audit's
+   "No cross-metric layer was found."
+2. **A `Λ`-uniform Gårding constant** (both directions) at `s ∈ {a,a+1,a+2}` —
+   the §0 crux.  The per-metric versions (§1.1) are `Classical.choose`.
+3. **A packaged covariant-sum cross-metric equivalence**
+   `∑_{j≤s}‖∇^{g₀,j}u‖_{L²(g₀)} ≍_{F(Λ,n,s)} ∑_{j≤s}‖∇^{gBase,j}u‖_{L²(gBase)}` (atoms
+   exist, assembly does not).
+4. **`Λ`-uniform named-constant transfers**: uniform `‖N(0)‖_{H^a_{g₀}}`, uniform
+   tame `K`, uniform `H^{a+1}→C⁰` admissibility radius `R₀`.
+
+---
+
+## 2. STATEMENT LIST (narrow — the minimum for Stage-3/(N))
+
+Class-hypothesis bundle (spell out; propose predicate `IsUnifClass`, or reuse a
+`MetricCovDerivOrderBoundOn`-based bundle if the Evolution lane already has one):
+
+```
+hΛ    : 1 ≤ Λ
+hcmp  : ∀ x u, (1/Λ)·gBase x u u ≤ g₀ x u u ∧ g₀ x u u ≤ Λ·gBase x u u   -- Λ-comparable
+hjet₀ : MetricCovDerivOrderBoundOn Set.univ (A n) g₀   gBase Λ           -- jets of g₀ (≤ a+2)
+hjetB : (gBase fixed; its jets are absolute constants, folded into F)     -- no uniformity needed
+```
+(`M` closed, `gBase` fixed and smooth ⟹ its injectivity radius, volume, and
+curvature jets are fixed positive constants; this is what makes the geometric
+constants below `Λ`-uniform rather than merely "class-uniform over abstract
+manifolds" — see §4.)
+
+The packet, `s` ranging over `{a, a+1, a+2}` only:
+
+**S1 (SPINE, hard). `hs_covsum_unif` + `covsum_hs_unif`** — the `Λ`-uniform
+`g₀`-side spectral↔covariant Gårding equivalence.
+```
+theorem hs_covsum_unif  (…class hyps…) (s ∈ {a,a+1,a+2}) :
+  ∃ C : ℝ, 0 ≤ C ∧ C ≤ F₁(Λ, n) ∧ ∀ T : SmoothCcTensor g₀ 0 2,
+    ‖smoothCcToTensorHs g₀ s T‖ ≤ C · ∑_{j≤s} ‖iteratedCovGrad g₀ j T‖
+theorem covsum_hs_unif  (…class hyps…) (s ∈ {a,a+1,a+2}) :
+  ∃ C : ℝ, 0 ≤ C ∧ C ≤ F₂(Λ, n) ∧ ∀ S : SmoothCcTensor g₀ 0 2,
+    ∑_{j≤s} ‖iteratedCovGrad g₀ j S‖ ≤ C · ‖smoothCcToTensorHs g₀ s S‖
+```
+i.e. exactly `exists_{…}_general` (§1.1) but with the choose-constant bounded by
+an explicit `F(Λ,n)`.  This is the operational core: once S1 holds, every
+`g₀`-spectral quantity is bounded by a `g₀`-covariant computation with a
+`Λ`-uniform factor, and covariant computations with jets `≤ Λ` are the routine
+part.
+
+**S0 (MEDIUM, feeds S2/S1b). `covsum_cross_unif`** — covariant-sum cross-metric
+equivalence via jets + `connDiff`.
+```
+theorem covsum_cross_unif (…class hyps…) (s ∈ {a,a+1,a+2}) :
+  ∃ C ≥ 0, C ≤ F₀(Λ,n) ∧ ∀ u smooth,
+    ∑_{j≤s}‖∇^{g₀,j}u‖_{L²(g₀)} ≤ C·∑_{j≤s}‖∇^{gBase,j}u‖_{L²(gBase)}   (and reverse)
+```
+
+**S1b (MEDIUM, packaging = the ruling's "smooth-core norm comparison at
+(a,a+1,a+2)"). `hs_cross_unif`** — the g₀↔gBase spectral comparison, a corollary
+`S1 ∘ S0 ∘ (fixed gBase Gårding choose)`:
+```
+theorem hs_cross_unif (…class hyps…) (s ∈ {a,a+1,a+2}) :
+  ∃ C ≥ 0, C ≤ F(Λ,n) ∧ ∀ u, ‖u‖_{H^s_{g₀}} ≤ C·‖u‖_{H^s_{gBase}}   (and reverse)
+```
+NOTE: the (N) assembly does NOT strictly consume S1b — it consumes S1 + the
+covariant bounds S2–S4 to produce absolute `F(Λ,n)` numbers.  S1b is the
+mission's headline "three-order comparison" and the clean statement of the
+packet, so state it, but it is packaging, not the load-bearing input.
+
+**S2 (MEDIUM). `embed_ball_unif`** — uniform `H^{a+1}→C⁰` admissibility radius
+(the ruling's "class-uniform `(H^{a+1}→C⁰)`/fibre-operator bound"; under R1τ this
+replaces the old `H^{a+2}` radius `R₀` at `:2175`).
+```
+theorem embed_ball_unif (…class hyps…) :
+  ∃ ρ > 0, ρ ≥ φ(Λ,n) ∧ ∀ u, ‖u‖_{H^{a+1}_{g₀}} ≤ ρ → (fibre-smallness / C⁰ bound)
+```
+Route: `S1(covsum_hs_unif)` at `s=a+1` (spectral→covariant) then uniform Morrey
+(`Sobolev/Manifold/MorreyManifoldHigherOrder.lean`, covariant, constant fixed by
+`gBase` inj-radius on closed `M`).
+
+**S3 (MEDIUM, coupled to item 2). `tame_const_unif`** — uniform tame constant `K`
+(the ruling's "uniform tame constant"; the ball-Lipschitz `K` at `:2050`).
+```
+theorem tame_const_unif (…class hyps…) : ∃ K ≥ 0, K ≤ ψ(Λ,n) ∧ (the item-2 tame
+  two-orientation difference bound holds at g₀ with constant K)
+```
+Route: `S1` + uniform Sobolev multiplication (`Sobolev/Manifold/SobolevAlgebra
+.lean` / `MoserTameProduct.lean`) + the item-2 tame estimate (its leading
+coefficient is already R-free per plan §№12/№13 `TameNemytskii`).
+
+**S4 (ROUTINE given S1). `nfun0_norm_unif`** — uniform `‖N(0)‖_{H^a_{g₀}}`
+(`deTurckSobolevNHa2Symm g₀ g_bg a 0`, `:2783`; `≈ −2Ric(g₀)` + connection
+corrections).
+```
+theorem nfun0_norm_unif (…class hyps…) : ‖deTurckSobolevNHa2Symm g₀ gBase a 0‖_{H^a_{g₀}} ≤ D(Λ,n)
+```
+Route: `S1(hs_covsum_unif)` at `s=a` ⟹ `≤ Ca_unif·∑_{j≤a}‖∇^{g₀,j}N(0)‖_{L²(g₀)}`;
+`N(0)` is a curvature term, its covariant jets `≤ Λ` (Lemma-3.11 producers,
+`AllTimesBounds.lean`), the `L²(g₀)` integral over closed `M` has volume `≍ Λ`.
+
+Deliberately EXCLUDED (per ruling): `Csym1/Csym2` transfer (S-contraction,
+constant 1 in covariant norm — §1.1); the qualitative near-`t=0` `d` and
+horizons `d₂,d₂F` (item 5's fixed-horizon representative removes them, not the
+packet); any general/fractional-order `H^s` theory.
+
+---
+
+## 3. ROUTE per statement (fiber × derivative × spectral; hard level marked)
+
+Every statement decomposes into three levels.  The hard level is ALWAYS the
+spectral one, and only for the `g₀` side.
+
+| level | content | difficulty | machinery |
+|---|---|---|---|
+| **fiber** | `Λ`-comparable metrics ⟹ fibre-norm + volume equivalence (`|·|_{g₀} ≍_{√Λ} |·|_{gBase}`, `dV_{g₀} ≍_{Λ^{n/2}} dV_{gBase}`) | ROUTINE | `FiberNormRiemannianBridge`, `GramTwist`, `MeasureBridge`; scalar precedent `cross_energy_le` |
+| **derivative** | jets + `connDiff` ⟹ `∇^{g₀,j}` vs `∇^{gBase,j}` comparison (Christoffel-difference tensor `≤` 1-jet `≤ Λ`, iterated) | MEDIUM (assembly of existing atoms) | `ConnDiffJetL2Summed`, `CometricInverseDifferenceMultiplier`, `iteratedCovGrad` |
+| **spectral** | `g₀`-spectral `H^s` ↔ `g₀`-covariant sum, `Λ`-uniform constant | **HARD** (§0) | re-derive `DirichletSpectralBochnerGap` recursion with tracked constant |
+
+- **S1**: pure spectral level (single metric `g₀`).  **HARD.**  Re-run the
+  Bochner IBP recursion (`iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_
+  lower`) tracking the per-step curvature-commutator constant as a `Λ`-polynomial
+  through `a+2` steps and both parities.  The gBase side of any g₀↔gBase compare
+  is a FIXED `Classical.choose` (one number, no uniformity).
+- **S0**: fiber × derivative levels only (NO spectral).  MEDIUM — the routine and
+  assembly levels; this is where `connDiff` is the right engine.
+- **S1b** = `S1(g₀) ∘ S0 ∘ Gårding(gBase, fixed)`.  MEDIUM once S1+S0 exist.
+- **S2**: `S1` (spectral→covariant) then covariant Morrey (fiber-level embedding,
+  `gBase`-fixed inj-radius).  Hard part inherited from S1.
+- **S3**: `S1` then covariant Sobolev multiplication + item-2 tame estimate.  Hard
+  part inherited from S1; extra coupling to the in-flight item-2 constant.
+- **S4**: `S1` then curvature-jet-to-`L²` (routine, jets `≤ Λ`).  Hard part
+  inherited from S1.
+
+**The whole packet has ONE hard level, reached by S1; S2–S4, S1b inherit it and
+are otherwise routine-to-medium.**  The `connDiff` tools do NOT touch S1.
+
+---
+
+## 4. RISK + EFFORT
+
+| stmt | difficulty | sessions | note |
+|---|---|---|---|
+| **S1** | **HARD** | **3–5** | the gate; high-order Bochner-recursion constant, even+odd parity |
+| S0 | medium | 2–3 | tame tensor-algebra assembly of `connDiff` atoms into a two-sided covariant-sum equivalence |
+| S1b | medium | 1–2 | corollary once S1+S0 land (mostly packaging) |
+| S2 | medium | 1–2 | after S1; uniform Morrey on covariant norm |
+| S3 | medium | 2 | after S1 AND item-2 tame estimate lands (coupled) |
+| S4 | routine | 1 | after S1; curvature-jet→L² |
+
+**Single biggest mathematical risk of the packet:** the `Λ`-uniform
+elliptic-regularity (Gårding) constant of S1.  Sub-risks, in priority order:
+
+1. **High-order bookkeeping blow-up.**  Iterating the Bochner recursion to
+   order `a+2 ≈ 4n+12` yields a constant that is a length-`(a+2)` product of
+   per-step curvature/metric contractions.  It is a polynomial in `Λ,n` (fine
+   for a bound `F(Λ,n)`), but tracking it sorry-free through the existing
+   private `_even_local`/`_odd_local` split is heavy.  Likely the true
+   multi-session cost.
+2. **Hidden non-`Λ` dependence (the killer risk).**  Audit the
+   `DirichletSpectralBochnerGap` per-step constants for any dependence on a
+   quantity NOT controlled by `Λ`-comparability + jets — a spectral gap
+   `λ₁`, an injectivity radius, or a Poincaré/`cc_dirichlet_gap` constant.  For
+   the covariant↔spectral EQUIVALENCE (S1) the constants should be pure
+   curvature/metric contractions (`Λ`-controlled).  For the Sobolev EMBEDDING
+   (S2) a lower injectivity-radius bound IS classically needed — but it is
+   supplied FREE here because the class is comparable to a FIXED `gBase` on a
+   FIXED closed `M`, so `inj(g₀) ≥ c(gBase,Λ) > 0`.  **Confirm this in the S1
+   pre-build**: if a genuine `λ₁(g₀)`-type gap that `Λ`-comparability does not
+   control appears in the equivalence constant, the packet stalls and R1τ's
+   uniformization is in question (this is the §0 stop-condition materializing).
+3. **Odd order `a+1`.**  The odd-parity branch (`…_odd_local:896`,
+   `covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd_local:391`) is a separate,
+   slightly messier recursion; it must be uniformized too (one of the three
+   orders is odd).
+
+The routine/medium statements carry no comparable risk: fiber comparison is
+algebraic in `Λ`, derivative comparison is a bounded assembly of existing atoms,
+and the named-constant transfers are direct once S1 is in hand.
+
+---
+
+## 5. HOME (canonical homes)
+
+- **S1** (`hs_covsum_unif`, `covsum_hs_unif`): NEW leaf beside the per-metric
+  engine, `Analysis/Spectral/Tensor/SobolevScale/UnifBochnerGap.lean`
+  (namespace `DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral`, mirroring
+  `DirichletSpectralBochnerGap.lean`).  Its private Bochner-recursion deps live
+  there; the uniform version must sit next to them (a leaf cannot see the
+  privates otherwise, and re-deriving them elsewhere is forbidden parallel API).
+- **S0** (`covsum_cross_unif`): NEW leaf `Analysis/Sobolev/CrossMetric/
+  CovGradSumCrossUnif.lean` (or under `Sobolev/HebeyBlock/` next to the covariant
+  tensor-Sobolev block).  Imports the `connDiff` atoms from
+  `Sobolev/TensorHilbert/`.
+- **S1b** (`hs_cross_unif`): with S1, in `SobolevScale/UnifBochnerGap.lean`
+  (it is the spectral packaging), importing S0.
+- **S2/S3/S4** (`embed_ball_unif`, `tame_const_unif`, `nfun0_norm_unif`): the
+  DeTurck-specific named-constant transfers → the plan's already-named Stage-1
+  file `Geometry/Flow/RicciFlow/ShortTime/UnifClassBounds.lean` (one lemma per
+  engine input, per plan Stage 1), importing S1/S0 and the DeTurck defs from
+  `Spectral/Intrinsic/DeTurck/SobolevNonlinearityExistence.lean`.
+- Class-hypothesis predicate `IsUnifClass`: with the (N) statement, i.e. beside
+  `Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean`, or in
+  `UnifClassBounds.lean` if not already present in the Evolution lane.
+
+---
+
+## 6. RECOMMENDED FIRST BUILD BRICK
+
+**Build S1 first, and before writing any Lean, do the §4-risk-2 audit of
+`DirichletSpectralBochnerGap.lean`'s per-step constants** (are they pure
+curvature/metric contractions, or is there a hidden `λ₁`/gap/inj-radius term
+`Λ`-comparability does not control?).  Concretely, the first brick:
+
+> A `Λ`-uniform version of the SINGLE Bochner step
+> `iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower`
+> (`DirichletSpectralBochnerGap.lean:1220`): show its base + lower-order
+> constants are `≤ P(Λ,n)` under the class hypotheses (curvature commutator
+> `iteratedRoughLapGrad_commutator_l2Norm_le_local:616` bounded by the Riemann
+> jet `≤ Λ`; metric/volume contraction `≤ Λ`).  If that one step is `Λ`-uniform,
+> the induction to order `a+2` (both parities) is the same recursion the file
+> already runs, and S1 follows; if it is NOT (risk 2 fires), STOP and report —
+> that is the R1τ-endangering signal, and the packet should not be built on a
+> `Classical.choose` masked as uniform.
+
+Rationale: S1 is the gate and the only real risk; S0/S2/S3/S4 are mechanical
+once S1 is known achievable, and there is no point assembling the covariant
+cross-metric layer (S0, medium effort) if the spectral gate (S1) turns out to
+need a quantity `Λ` cannot control.
+
+---
+
+## Status
+- 2026-07-24: item-6 recon COMPLETE (LANE C, no Lean).  `tensorHs` confirmed a
+  spectral scale ⟹ the §0 min-max-failure risk is real and leads the report.
+  Packet = S1 (hard gate) + S0/S1b/S2/S3/S4 (routine-medium, inherit S1).  First
+  brick = the S1 single-step `Λ`-uniform Bochner constant, gated on a
+  hidden-dependence audit of `DirichletSpectralBochnerGap.lean`.  Reported to
+  planner.

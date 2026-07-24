@@ -182,3 +182,8 @@ layer (§5(ii))" vs "fixed-scale re-derivation" before Stage 1 is unblocked.
 ## Status
 - 2026-07-20: Stage 0 audit COMPLETE. Stage 1 NOT started (blocked; see §0/§5). STOP for
   planner acceptance of the re-scope. No `.lean` written (no sorry-free producer exists).
+- 2026-07-24: the R1τ item-6 narrow class-uniform packet (the §5 "smallest next machinery
+  lemma" made narrow to 3 orders) is reconnoitred in `ShortTime/UNIF_ITEM6_RECON.md` — spine
+  S1 = the `Λ`-uniform `g₀`-side spectral↔covariant Gårding constant (`DirichletSpectralBochnerGap`
+  re-derivation; the one HARD level, no high-order min-max transfer), with S0/S1b/S2/S3/S4
+  routine-to-medium and inheriting it.
