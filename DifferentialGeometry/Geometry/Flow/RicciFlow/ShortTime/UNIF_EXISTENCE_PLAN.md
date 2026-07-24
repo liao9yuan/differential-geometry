@@ -1368,3 +1368,54 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   authorize full bundle-setup repair of both drafts (extensive RiemannianBundle
   letI plumbing — repairing unverified drafts, not the lieCorr0 math), OR (b)
   rebuild+verify the two drafts upstream then I resume the leaf. `(N)` 0%.
+- 2026-07-24 (lieCorr0 build, ruling №21 probe): **P3 REACHED — RiemannianBundle
+  pattern did NOT fix `.ext`; escalate to GPT Pro.** Applied the working-file
+  `letI : Bundle.RiemannianBundle (fun y => TensorRSSpace 2 2 I y) :=
+  Tensor0SBundle.tensorRS_riemannianBundle g₀ 2 2` to Split's two `.ext` proofs
+  (`insert_base`, `lc0_decomp`); `lake build +LieCorr0Split` (wait-polled ~5 min
+  past lanes B/C): the letI elaborates but `apply ContMDiffSection.ext` STILL
+  fails `failed to synthesize FiberBundle (TensorRSModel 2 2 ℝ E) fun x ↦
+  TensorRSSpace 2 2 I x` at :119/:173. Root: RiemannianBundle equips a fiber
+  metric, does NOT provide `FiberBundle`. Working `DeTurckLieKernelL2JetBound`
+  resolves it AMBIENTLY (no letI, :82-83) via its rich CovGrad import cone; Split
+  (imports only LieCorr0Core + RiemannCoefficientPalatiniRefold) lacks it, and
+  the global `tensorRSSpace_fiberBundle` instance (from TensorRSContRiemannianBundle)
+  did NOT resolve when imported (likely eta/instance-form or competing-topology).
+  Full consult diagnostic (exact goal/error, 3 setups tried, key clue,
+  hypotheses) in `TensorHilbert/LieCorr0CoeffL2JetBound.md` §"P3 REACHED". Split
+  left with the reproducing setup (opens + `← insert_base` + 2 RiemannianBundle
+  letI); does NOT build; LowJet untouched; no commit. `(N)` 0%.
+- 2026-07-24 (lieCorr0, ruling №21 D-round): **ROOT CAUSE FOUND — TopologicalSpace-
+  instance DIAMOND, not eta; D2 ruled out, D3 failed+worsened; STOP for planner/
+  codebase decision.** synthInstance trace (split_trace.txt :6078-6093): the goal's
+  `TotalSpace (TensorRSModel 2 2 ℝ E) (fun x ↦ TensorRSSpace 2 2 I x)` topology
+  resolves to `tensorRSSpace_topologicalSpace`; both FiberBundle candidates then
+  fail `tryResolve` — `tensorRSSpace_fiberBundle` on the eta-contracted fiber,
+  `tensorRSBundle_fiber` (eta-expanded, fiber unifies) on the TOPOLOGY (it carries
+  `tensorRSBundle_topology` ≠ the goal's `tensorRSSpace_topologicalSpace`, and
+  FiberBundle bakes the TotalSpace topology). ≥3 competing TotalSpace-topology
+  instances are in scope (diamond). D2(eta) contraindicated (the eta-expanded
+  instance still fails on topology). D3(import TensorRSContRiemannianBundle) FAILED
+  and worsened it (adds more topology candidates; the 4 lc0* DEFS then also fail).
+  A topology `letI`-pin band-aids ONE .ext site but LowJet's 1832 lines use .ext
+  pervasively ⟹ dozens of pins, not bounded. **DECISION (planner/owner/Pro):**
+  (i) dedupe the competing TotalSpace-topology instances at the bundle-definition
+  layer so the FiberBundle instance's topology wins (clean, out of this lane), OR
+  (ii) accept pervasive per-.ext topology-pins across Split+LowJet. Split cleaned to
+  hygiene state (opens + `← insert_base`); does NOT build; LowJet untouched; no
+  commit. Full diagnostic in LieCorr0CoeffL2JetBound.md §"D-ROUND RESULT". `(N)` 0%.
+- 2026-07-24 (lieCorr0, ruling №21 T1): **band-aid (ii) TESTED and DEAD; T3 →
+  consult.** Paired pin (topology `tensorRSBundle_topology` first, then
+  `tensorRSBundle_fiber` FiberBundle letI, eta-expanded) at both `.ext` sites:
+  `lake build +Split` STILL fails FiberBundle at :79 (lc0Riem DEF toSection — the
+  diamond breaks defs too) and :122/:179 (the PINNED .ext proofs). Two reasons the
+  band-aid can't work: (a) the winning topology `tensorRSSpace_topologicalSpace`
+  has NO paired FiberBundle instance in scope (the 2 candidates pair with
+  `tensorRSBundle_topology` / `tensorRSSpace_totalSpace_topologicalSpace`);
+  (b) the topology is baked into SmoothCcTensor/ContMDiffSection UPSTREAM, so a
+  local letI arrives too late. ⟹ only the clean fix (i) works: dedupe/align the
+  competing TotalSpace-topology instances at the bundle-definition layer so the
+  FiberBundle instance's topology wins (codebase-owner change, out of this lane).
+  Split reverted to hygiene (opens + `← insert_base`); does NOT build; LowJet
+  untouched; no commit. Consult evidence = LieCorr0CoeffL2JetBound.md §"D-ROUND
+  RESULT" + §"T1". `(N)` 0%.

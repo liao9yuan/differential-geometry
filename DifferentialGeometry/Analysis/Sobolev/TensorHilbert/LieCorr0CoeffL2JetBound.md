@@ -106,3 +106,152 @@ verify `LieCorr0Split`+`LieCorr0LowJet` (they never compiled), then I resume the
 leaf per the ratified plan (top piece + Kc + assembly).  Re-deriving the LowJet
 refold/grid layer fresh in the leaf is not viable (it is the whole low-jet
 machinery — forbidden parallel API).
+
+## P3 REACHED (2026-07-24, ruling №21 probe) — RiemannianBundle pattern did NOT fix `.ext`; GPT Pro consult.
+
+Applied the working-file preamble to Split's two `.ext` proofs (`insert_base`,
+`lc0_decomp`):
+```
+letI : Bundle.RiemannianBundle (fun y : M => TensorRSSpace 2 2 I y) :=
+  Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 2
+```
+`lake build +LieCorr0Split` (wait-poll cleared after ~5 min): the `letI`
+elaborates with NO error, but the SUBSEQUENT `apply ContMDiffSection.ext`
+STILL fails identically at :119 and :173. Reason: `Bundle.RiemannianBundle`
+equips an existing bundle with a fiber inner product — it does NOT *provide*
+the `FiberBundle` instance `.ext` needs. So the RiemannianBundle pattern is not
+the fix; the working files get `FiberBundle` from their AMBIENT import cone, not
+from a letI. Per ruling №21 P3: STOP for a GPT Pro consult.
+
+### Consult diagnostic (exact goal / error / setups tried / clue)
+
+- **Target lemmas:** `insert_base`, `lc0_decomp` in
+  `Analysis/Spectral/Intrinsic/DeTurckCoefficients/LieCorr0Split.lean` — each an
+  equality of two `SmoothCcTensor g₀ 2 2`, proved by
+  `apply SmoothCcTensor.ext; apply ContMDiffSection.ext; …`.
+- **Current goal at the failure:** `SmoothCcTensor.ext` succeeds (yields a
+  `ContMDiffSection` equality); `apply ContMDiffSection.ext` then triggers
+  typeclass synthesis of the fiber-bundle instance and fails.
+- **Exact error (both sites):**
+  `failed to synthesize  FiberBundle (TensorRSModel 2 2 ℝ E) fun x ↦ TensorRSSpace 2 2 I x`.
+- **Setups tried, all failing to resolve it:**
+  1. `import …Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle`
+     — provides the GLOBAL `instance tensorRSSpace_fiberBundle (r s : ℕ) :
+     FiberBundle (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M))`
+     (namespace `DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous`).
+     `.ext` still fails. (Reverted the import.)
+  2. `letI : FiberBundle (TensorRSModel 2 2 ℝ E) (fun x : M => TensorRSSpace 2 2 I x)
+     := Tensor0SBundle.tensorRSBundle_fiber 2 2` — the `letI` elaborates, but the
+     following `.ext` STILL reports the same synthesis failure.
+  3. `letI : Bundle.RiemannianBundle … := Tensor0SBundle.tensorRS_riemannianBundle
+     g₀ 2 2` (this probe) — same failure (currently left in the file as the
+     reproducing setup).
+- **KEY CLUE:** `Analysis/Sobolev/TensorHilbert/DeTurckLieKernelL2JetBound.lean`
+  does the IDENTICAL `apply SmoothCcTensor.ext; apply ContMDiffSection.ext` at
+  :82-83 with NO letI and BUILDS — `FiberBundle` resolves AMBIENTLY there. Its
+  import cone is rich (CovGrad/`OperatorFieldFibreNormJet`,
+  `IteratedCovGradFibreNormPermutationInvariance`, …); Split imports only
+  `LieCorr0Core` + `RiemannCoefficientPalatiniRefold`.
+- **Hypotheses for GPT Pro:** (i) eta / instance-form mismatch — the global
+  instance's conclusion is the partially-applied `TensorRSSpace r s I (M := M)`
+  while the goal is the eta-expanded `fun x ↦ TensorRSSpace 2 2 I x`, and
+  synthesis won't bridge it; (ii) the `FiberBundle` synthesis needs the
+  `TopologicalSpace (TotalSpace …)` prerequisite to resolve to the SAME topology
+  instance the ambient file uses, which a competing topology instance in Split's
+  (different) open/import context blocks. Recommended next: a
+  `set_option trace.Meta.synthInstance true in` run on `insert_base` to see the
+  exact rejected candidate.
+
+STOPPED per P3. Split left with: hygiene opens + `← insert_base` + the two
+RiemannianBundle `letI`s (reproducing setup); still does NOT build.
+`LieCorr0LowJet` untouched. `(N)` 0%. No commit.
+
+## D-ROUND RESULT (2026-07-24, ruling №21) — ROOT CAUSE = TopologicalSpace-instance DIAMOND (not eta).
+
+Ran D1 (synthInstance trace) + D3 (import). D2 (eta letI) is RULED OUT by the
+trace. Decisive trace excerpt (`insert_base`/`lc0_decomp` `.ext` FiberBundle synth):
+```
+6078  [synthInstance] result tensorRSSpace_topologicalSpace 2 2          -- goal's TotalSpace topology
+6079  [synthInstance] ❌ FiberBundle (TensorRSModel 2 2 ℝ E) fun x ↦ TensorRSSpace 2 2 I x
+6081    instances #[@tensorRSBundle_fiber, @…TensorRSRiemannianBundleContinuous.tensorRSSpace_fiberBundle]
+6082  ❌ apply tensorRSSpace_fiberBundle
+6084    tryResolve ❌ …fun x ↦ TensorRSSpace 2 2 I x  ≟  …(TensorRSSpace ?178 ?179 ?173)   -- eta-CONTRACTED fiber, no unify
+6087  ❌ apply tensorRSBundle_fiber
+6089    tryResolve ❌ …fun x ↦ TensorRSSpace 2 2 I x  ≟  …fun x ↦ TensorRSSpace ?180 ?181 ?175 x  -- eta OK, but…
+6093  error: failed to synthesize FiberBundle …
+```
+Diagnosis: BOTH FiberBundle candidates are found and tried against the
+eta-expanded goal. `tensorRSSpace_fiberBundle` is stated with the eta-CONTRACTED
+fiber `TensorRSSpace ?r ?s ?I` and won't unify. `tensorRSBundle_fiber` IS stated
+eta-expanded (`fun x ↦ TensorRSSpace ?r ?s ?I x`) and its fiber DOES unify — yet
+`tryResolve` still ❌, because the goal's `TotalSpace` topology was already
+resolved (line 6078) to **`tensorRSSpace_topologicalSpace`**, which is a
+DIFFERENT instance than the one `tensorRSBundle_fiber` carries
+(`tensorRSBundle_topology`). The `FiberBundle` type bakes the `TopologicalSpace
+(TotalSpace …)` instance, so the two don't defeq-match ⟹ synthesis fails.
+
+**Root cause = a `TopologicalSpace`-instance DIAMOND on
+`TotalSpace (TensorRSModel r s ℝ E) (TensorRSSpace r s I)`** — at least three
+competing instances are in scope (`tensorRSSpace_topologicalSpace`,
+`tensorRSBundle_topology`, `…tensorRSSpace_totalSpace_topologicalSpace`; the
+massive `synthInstance.instances` list at trace :2383). In Split's minimal
+import context `tensorRSSpace_topologicalSpace` wins the topology race, but no
+in-scope `FiberBundle` instance is paired with it. The working
+`DeTurckLieKernelL2JetBound` avoids this only because its rich import context
+makes the paired topology win.
+
+- **D2 (eta letI): contraindicated** — `tensorRSBundle_fiber` is already
+  eta-expanded and still fails on the topology, so an eta-form letI cannot fix it.
+- **D3 (import `TensorRSContRiemannianBundle`): FAILED and WORSENED it** — it adds
+  `tensorRSSpace_totalSpace_topologicalSpace` + `tensorRSSpace_fiberBundle` to the
+  diamond; with it, even the four `lc0*` DEF constructions fail FiberBundle
+  (:47/:58/:69/:80), not just the `.ext` proofs. Import reverted.
+- **A `letI`-pin of the topology** (force `tensorRSBundle_topology` before the
+  synthesis) could band-aid ONE `.ext` site — but this is a codebase-level
+  instance diamond: **`LieCorr0LowJet` (1832 lines) uses `.ext` pervasively across
+  its refolds, so it would need the pin at DOZENS of sites** (and any file
+  building on this fiber inherits the diamond). That is not a bounded patch.
+
+**This is a planner/codebase-owner (or GPT Pro) decision, not a mechanical
+repair:** either (i) dedupe the competing `TotalSpace` topology instances so the
+`FiberBundle` instance's topology is the unique/winning one (the clean fix, at
+the bundle-definition layer — out of this lane's scope), or (ii) accept a
+pervasive per-`.ext` topology-pin across Split + LowJet (band-aid). Full trace at
+`scratchpad/split_trace.txt`. Split cleaned back to the hygiene state (opens +
+`← insert_base`; import/letI/set_option all reverted); does NOT build. `(N)` 0%.
+No commit.
+
+## T1 (ruling №21, band-aid TEST) — paired topology+FiberBundle pin FAILED; band-aid (ii) is DEAD.
+
+Installed the paired pin at both `.ext` sites (topology first, eta-expanded):
+```
+letI : TopologicalSpace (Bundle.TotalSpace (TensorRSModel 2 2 ℝ E) (fun x : M => TensorRSSpace 2 2 I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology 2 2
+letI : FiberBundle (TensorRSModel 2 2 ℝ E) (fun x : M => TensorRSSpace 2 2 I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber 2 2
+```
+`lake build +Split` STILL fails FiberBundle at THREE sites: `:79` (the `lc0Riem`
+DEF `toSection` construction — the diamond breaks the DEFS too, not just `.ext`;
+earlier `tail`-truncated logs hid the def errors) and `:122`/`:179` (the two
+PINNED `.ext` proofs). The `letI`s elaborate with no error, but do not fix synth.
+
+**Why the band-aid cannot work (two independent reasons):**
+1. The winning `TotalSpace` topology `tensorRSSpace_topologicalSpace` has **NO
+   paired FiberBundle instance in scope** — the only two FiberBundle candidates
+   pair with `tensorRSBundle_topology` and
+   `…tensorRSSpace_totalSpace_topologicalSpace`. So even a correct topology pin
+   points at a topology with no matching FiberBundle.
+2. The `TotalSpace` topology is baked into `SmoothCcTensor` / `ContMDiffSection`
+   at their UPSTREAM definitions; when the goal (a `SmoothCcTensor 2 2` equality,
+   or the def's `toSection`) is formed, its FiberBundle-requirement topology is
+   already fixed to the ambient winner — a LOCAL `letI` in the proof/def arrives
+   too late to change it. Hence `:122`/`:179` fail even WITH the pin.
+
+**Conclusion: band-aid (ii) is dead; only the clean fix (i) works** — align/dedupe
+the competing `TotalSpace`-topology instances at the bundle-definition layer
+(`RSTensor/Defs.lean` `tensorRSBundle_topology` / the `TensorRSContRiemannianBundle`
+`tensorRSSpace_totalSpace_topologicalSpace` / `tensorRSSpace_topologicalSpace`) so
+the FiberBundle instance's topology is the unique/winning one. That is a
+bundle-layer / codebase-owner change, out of this lane. Split reverted to the
+hygiene state (opens + `← insert_base`); does NOT build. T3 → GPT Pro consult.
+`(N)` 0%. No commit.
