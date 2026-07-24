@@ -641,7 +641,7 @@ small linearly independent transverse family satisfies the Bishop mean-curvature
 comparison and radial density-ratio monotonicity under the Ricci lower bound. -/
 theorem exists_radial_cmp
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)
@@ -842,7 +842,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Mean-curvature projection of `exists_radial_cmp`. -/
 theorem exists_radial_mean
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)

@@ -63,6 +63,34 @@ noncomputable def sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) :
 @[simp] theorem sphereDiffeo_coe (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1) :
     ((sphereDiffeo (n := n) e x : sphere (0 : E) 1) : E) = e (x : E) := rfl
 
+/-- Restriction to the unit sphere determines an ambient linear isometry. -/
+theorem sphereDiffeo_inj :
+    Function.Injective (sphereDiffeo (E := E) (n := n)) := by
+  intro e f hef
+  apply LinearIsometryEquiv.ext
+  intro x
+  by_cases hx : x = 0
+  · subst x
+    simp
+  let y : sphere (0 : E) 1 :=
+    ⟨‖x‖⁻¹ • x, by
+      rw [mem_sphere_zero_iff_norm, norm_smul]
+      simp [hx]⟩
+  have hxy : ‖x‖ • (y : E) = x := by
+    dsimp [y]
+    rw [smul_smul, mul_inv_cancel₀ (norm_ne_zero_iff.mpr hx), one_smul]
+  have hpoint :
+      sphereDiffeo (n := n) e y = sphereDiffeo (n := n) f y := by
+    rw [hef]
+  have hamb : e (y : E) = f (y : E) := by
+    simpa only [sphereDiffeo_coe] using congrArg Subtype.val hpoint
+  calc
+    e x = e (‖x‖ • (y : E)) := congrArg e hxy.symm
+    _ = ‖x‖ • e (y : E) := map_smul e ‖x‖ (y : E)
+    _ = ‖x‖ • f (y : E) := congrArg (fun z : E => ‖x‖ • z) hamb
+    _ = f (‖x‖ • (y : E)) := (map_smul f ‖x‖ (y : E)).symm
+    _ = f x := congrArg f hxy
+
 /-- `mfderiv` of an ambient linear isometry, applied to a vector: `d e_y w = e w`
 (the derivative of a linear map is the map itself). -/
 private theorem mfderiv_lie_apply (e : E ≃ₗᵢ[ℝ] E) (y w : E) :

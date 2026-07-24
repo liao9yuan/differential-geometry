@@ -38,3 +38,19 @@ scale via `intrinsicExp_smooth`.
   `exists_intrFrame`, Wronskian layer.  Reference route:
   frenzymath `IndexForm*` + `NoConjugateOfMinimizing` +
   `MinimalGeodesicNoConjugate` (five files — plan before implementing).
+
+## 2026-07-24 rescaling bridge
+
+N-c is complete in `JacobiVariation.lean` via `intrinsic_jacobi_d0`.
+This file now also proves:
+
+- `jacobiVar_smul`: differentiating the launch variation at time `c` along
+  `u` agrees with differentiating the corresponding launch variation at time
+  one along `c • u`; and
+- `conjVec_jacobi_at`: a conjugate vector `c • u`, with `c ≠ 0`, produces a
+  nonzero direction whose intrinsic Jacobi variation along the original
+  geodesic launched by `u` vanishes at time `c`.
+
+Focused verification passes without warnings.  This closes the scaling
+interface needed by N-d; it does not itself prove that a minimizing geodesic
+has no interior conjugate vector.

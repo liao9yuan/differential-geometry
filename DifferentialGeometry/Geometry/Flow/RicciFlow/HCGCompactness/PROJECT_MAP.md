@@ -3,8 +3,9 @@
 > **Wider program (2026-07-05):** this map covers the HCG compactness lane.
 > The program-level plans sit one directory up:
 > `../DimensionThree/HAM3_BLACKBOX_PLAN.md` (the original 8-frontier audit for
-> `ham3_main`; 6 remain open, incl. the Perelman no-local-collapsing box) and
-> `../POINCARE_PLAN.md` (the Poincaré-endpoint master plan + infrastructure gap
+> `ham3_main`; three strict frontiers remain: #2, #3, and #5;
+> short-time, Perelman noncollapse, and both space-form directions are closed)
+> and `../POINCARE_PLAN.md` (the Poincaré-endpoint master plan + infrastructure gap
 > list).  HCG compactness is `ham3_cgh_limit`'s producer and Morgan–Tian
 > `converge2`'s counterpart inside that program.
 
@@ -48,7 +49,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessEndpoint.lean` | **100% checked.**  `MetricCompactBase.exists_b1_raw` produces all 5/5 fields, `compactness_of_b1` performs Step-D assembly, and `MetricCompactnessConclusion.ofSeqSubseq` transports the nested subsequence conclusion back to the original sequence.  Focused check and exact targeted refresh are green. |
 | Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | 0%; the conditional endpoint is available, but the native CGT, Bishop–Gromov/uniform-packing, [H6], and connectedness producers needed to instantiate it remain external to this Chapter 4 assembly. |
 | Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer of the now-complete conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not produce that P4 input or prove unconditional Thm 3.10 |
-| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. `open_upgrade_of_raw` checks the complete consumer path, the concrete Step-D canonical provenance lane is closed, `srcCovLip_of_soln` is focused/exact-green, and `open_upgrade_canon` is focused/exact-green. The HCG-facing complete-Shi assembly is exact-green. Its trusted foundation includes the exact arbitrary-dimensional fixed-basis Hamilton identity, fixed global residual recursion, direct curvature tower, and smooth-cutoff generic Bernstein consumer. Route B-prime is selected for the remaining no-extra-input Shi producer: the local upper-support maximum principle, smooth/barrier cutoff data boundary, basepoint-free completeness, point-pair Hopf--Rinow, finite closed-eball compactness, fixed-path Ricci-flow length variation, the terminal Calabi inverse branch, and the quantifier-corrected point-centered barrier Bernstein consumer are checked; the last consumer is exact-current and its private HCG fixed-order adapter is focused-green. The radial Hessian/Laplacian bridge, spatial evolving-distance Calabi support, and solution barrier cutoff remain open. `MovingShiOpen` still consumes the legacy sorry-backed `estimate_complete` until that producer chain lands. |
+| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. `open_upgrade_of_raw` checks the complete consumer path, the concrete Step-D canonical provenance lane is closed, `srcCovLip_of_soln` is focused/exact-green, and `open_upgrade_canon` is focused/exact-green. The HCG-facing complete-Shi assembly is exact-green. Its trusted foundation includes the exact arbitrary-dimensional fixed-basis Hamilton identity, fixed global residual recursion, direct curvature tower, and smooth-cutoff generic Bernstein consumer. Route B-prime is selected for the remaining no-extra-input Shi producer: the local upper-support maximum principle, smooth/barrier cutoff data boundary, basepoint-free completeness, point-pair Hopf--Rinow, finite closed-eball compactness, fixed-path Ricci-flow length variation, the terminal Calabi inverse helper, and the quantifier-corrected point-centered barrier Bernstein consumer are checked; the last consumer is exact-current and its private HCG fixed-order adapter is focused-green. The fixed-first lower geometry is focused/exact-green through `IntrinsicGauss`, `BranchRadius`, `EndpointShape`, `MetricTrace.LineSplit`, `ChartBridge.Laplacian`, `RawIntrinsicC2`, and the capstones `branchLap_eq_mean` / `radialLap_eq_mean`; the raw theorem retains the mandatory unscaled launch-speed denominator. The terminal helper cannot prove the required pole constant because it supplies no half-length lower bound, and the existing Bishop wrapper is small-launch only. The next genuine producer frontier is therefore the early minimizing-tail nonconjugacy/local-inverse branch plus a global intrinsic tail comparison, as recorded in `CALABI_BRANCH_CONSULT.md`. The spatial evolving-distance Calabi support, solution-generated barrier cutoff, and final `MovingShiOpen` switch remain open. `MovingShiOpen` still consumes the legacy sorry-backed `estimate_complete` until that producer chain lands. |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
 
 ## 3. Live lanes and their entry documents
@@ -58,9 +59,9 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Ch4 Step B/C (selected B1 producer route) | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCStageComparison.md` + `C4/StepCStageDiagonal.md` + `C4/StepCStageInjectivity.md` + `C4/StepCStageMaster.md` + `C4/StepB1MetricLocal.md` + `C4/StepB1MetricIntrinsic.md` + `C4/StepB1MetricCarrier.md` + `C4/StepB1RawProducer.md` | **100% checked for the selected canonical framed producer route.**  The support capstone, full stage-master DAG, forward intrinsic tail, exact-`Function.invFunOn` reverse tail, two-carrier capstone, and `MetricCompactBase.exists_b1_raw` are focused/exact-green; the unchanged `StepB1RawInput` closes 5/5 fields for one global finite-stage map.  The separately named textbook B1 theorem remains unstated at 0%, and the historical full Step-C arbitrary recurrence remains separate/incomplete. |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` + `C4/MetricCompactnessEndpoint.md` | **100% checked for the concrete conditional route.** `compactness_canon` now proves its canonical whole-source metric-equivalence and all-order covariant bounds by joining the `D.close` tail with compact finite-head collars, then transports them through the canonical pullback and nested subsequence. `StepDAssembly` and `MetricCompactnessEndpoint` are focused- and exact-green on the live framed import chain; no `HasCanonBounds` frontier remains. |
 | Native [H6] normal-coordinate producer | `C4/B0NormalCoordBounds.md` + `C4/H6NormalCoord.md` | per-center `g_x`-orthonormal normalizer, framed exponential chart/inverse/differential, exact radial-ball correspondence, pullback metric, and framed radial-Jacobi bridge are checked. `StepBInputs.lean` now also focused-checks with canonical framed transition and metric semantics. The active API repair is ordered as radius profile, proper-ball/item-3, transition/overlap, metric-extension/branch stack, then Step-C/B1 readout; it adds no geometric hypothesis. |
-| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `ConvFieldCanon.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `rm04Base_of_solution_any`, `e0Residual`, the arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, direct tower `towerHeatSol_raw`, HCG `rmTowerCost`, constants-first `srcCovLip_of_soln`, and `open_upgrade_canon` are focused- and exact-green. Both the smooth fixed-order `BernsteinTower.estimate_cutoff_at` and family-centered `estimate_barrier_at` are exact-current; the private barrier adapter in `MovingShiOpen` is focused-green. Route B-prime is now selected for complete Shi: its upper-support maximum principle, barrier data boundary, basepoint-free completeness, point-pair Hopf--Rinow endpoint, finite closed-eball compactness, fixed-path Ricci-flow length variation, and terminal Calabi branch are checked. The radial Hessian/Laplacian bridge, spatial evolving-distance Calabi support, solution barrier cutoff, and final MovingShi switch remain open. Thm 3.10 stays 0%; dedicated P4 consumer machinery is about 98%, while selected Route B-prime producer machinery is about 35%. |
+| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `DISTANCE_CALABI_CONSULT.md` + `CALABI_BRANCH_CONSULT.md` + `ConvFieldCanon.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `rm04Base_of_solution_any`, `e0Residual`, the arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, direct tower `towerHeatSol_raw`, HCG `rmTowerCost`, constants-first `srcCovLip_of_soln`, and `open_upgrade_canon` are focused- and exact-green. Both the smooth fixed-order `BernsteinTower.estimate_cutoff_at` and family-centered `estimate_barrier_at` are exact-current; the private barrier adapter in `MovingShiOpen` is focused-green. Route B-prime is now selected for complete Shi: its upper-support maximum principle, barrier data boundary, basepoint-free completeness, point-pair Hopf--Rinow endpoint, finite closed-eball compactness, fixed-path Ricci-flow length variation, terminal Calabi helper, and the complete fixed-first radial Hessian/Laplacian bridge are focused/exact-green. The deeper audit shows that the remaining spatial support first needs a nonzero early-tail inverse branch and a global intrinsic minimizing-tail comparison; the short terminal branch and local raw Bishop wrapper cannot give the required `2(d-1)/r` pole. The spatial evolving-distance Calabi support, solution-generated barrier cutoff, and final MovingShi switch remain open. Thm 3.10 stays 0%; dedicated P4 consumer machinery is about 98%, while selected Route B-prime producer machinery is about 45%. |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
-| Space-form / quotient curvature | memory note `spaceform-hardroute-build` + same-name `.md`s | parallel, unrelated to 3.9/3.10 |
+| Space-form / quotient curvature | same-name `.md`s under `Geometry/Metric/Sphere` and `DimensionThree/HamiltonPositiveRicci.md` | **CLOSED, exact-green and axiom-clean;** parallel and unrelated to 3.9/3.10 |
 
 Superseded/historical: `C4/STEPC_HANDOFF.md`, `C4/STEPC_B1_HANDOFF.md` (banners in
 file), `PLANNER_HANDOFF.md`, `ARZELA_ASCOLI_PLAN.md` (delivered), `P3_PLAN.md`
@@ -105,7 +106,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-22)
+## 6. Honest progress (updated 2026-07-24)
 
 - **Conditional Thm 3.9 endpoint: 100% checked.**
   `MetricCompactBase.exists_b1_raw` is checked and fills the concrete
@@ -528,8 +529,21 @@ its docstring BEFORE consumers are built against it.
   this scale-transfer sublane and `ham3_noncollapse` are both theorem-level
   100%.  `HamiltonPositiveRicci.lean` directly imports
   `ExtendedSolutionRegularity` rather than the unused `MaximalTime` umbrella
-  and is focused-green.  This does not complete `ham3_cgh_limit` or the
-  unconditional HCG endpoint, which remain theorem-level 0%.
+  and is focused/exact-green.  Independent axiom replay for both
+  `no_local_open` and `ham3_noncollapse` reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.  The positive-space-form
+  classification lane is closed: `ham3_space_box` and its
+  `constPosQuotient` machinery have complete proofs.  The former
+  universal-cover `fibre_countable` `sorry` is replaced by the refined
+  countable polygonal-loop producer, without the invalid
+  pairwise-intersection assumption.  The complete downstream exact replay
+  passes, and the endpoint axiom audit reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.  `ham3_space_box` and its dedicated
+  machinery are each trusted at 100%.  The two
+  remaining sorries in the Hamilton file belong to the separate
+  `ham3_flow_exists_normalized` and `ham3_cgh_limit` producers and are not
+  dependencies of `ham3_noncollapse`; those unconditional endpoints remain
+  theorem-level 0%.
   **2026-07-09 CGH/3.10 repair:** `Ham3CGHLimitData` now retains the real source,
   original-index composition, `SmoothCGHConverges` maps, source-to-original
   diffeomorphisms, and limit-slice completeness.  The forgetful adapter and
@@ -644,9 +658,10 @@ its docstring BEFORE consumers are built against it.
   dependency of this chain.  `no_local_open` and the downstream
   `ham3_noncollapse` are each theorem-level 100%, and their dedicated
   noncollapsing machinery is 100%.  Their axiom audits contain only `propext`,
-  `Classical.choice`, and `Quot.sound`.  Whole-HCG machinery remains about 60%
-  and the unconditional Hamilton compactness/classification endpoint remains
-  theorem-level 0%.  See `../Perelman/Noncollapsing.md`.
+  `Classical.choice`, and `Quot.sound`.  Whole-HCG machinery remains about 60%.
+  The unconditional Hamilton main/compactness endpoint remains theorem-level
+  0%; the separate `ham3_space_box` classification theorem is closed.  See
+  `../Perelman/Noncollapsing.md`.
 - **Whole HCG project — conservative MACHINERY estimate ≈ 60%** (this is
   infrastructure coverage, not completion of the unconditional Hamilton
   endpoint).  **Conditional Thm 3.9 is 100% checked.  Unconditional Thm 3.9,

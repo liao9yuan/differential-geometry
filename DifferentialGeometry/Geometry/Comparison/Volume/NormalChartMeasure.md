@@ -188,3 +188,15 @@ gap is REAL — do not re-audit.
 chart form.  Execution prompt: `Geometry/Comparison/VOLCOMP_V0_API_HANDOFF.md`
 (brick V0).  V1a then becomes a one-line specialization at
 `Ψ := expMapDiffeo g x`; V1b–V1d resume per `VOLUME_COMPARISON_PLAN.md`.
+
+## 2026-07-24 component-local endpoint wrapper
+
+Removed the stale `ConnectedSpace M` binder from
+`exists_radialJacobi_zero_radius`.  The theorem is only the packaged
+`radialJacobiField` form of the now component-local
+`JacobiVariation.exists_jacobi_zero`; no proof structure or geometric
+hypothesis changed.
+
+After the coordinated `JacobiVariation` refresh, focused verification passed
+without diagnostics, and the exported artifact refresh is GREEN.  The wrapper
+theorem remains complete; the Calabi support theorem is still unstated (0%).

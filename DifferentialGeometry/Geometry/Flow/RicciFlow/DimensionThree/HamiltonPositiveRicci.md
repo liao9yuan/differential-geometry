@@ -1,5 +1,50 @@
 # HamiltonPositiveRicci live frontier audit
 
+## `ham3_space_box` endpoint integration — 2026-07-24
+
+The natural universal-cover construction exposed a declaration-level universe
+bug in `SphericalSpaceFormQuotientModel`: its quotient and deck-group universes
+were both pinned to `Type 0`, while a manifold `M : Type u`, its standard-model
+copy, and `FundamentalGroup M default` all naturally remain in `Type u`.  The
+model now stores
+`RoundQuotientData.{0, u, u} (EuclideanSpace Real (Fin 4)) 3`.
+Its carrier argument is also explicitly `N : Type u`, so the otherwise hidden
+quotient universe is determined by the supplied manifold rather than remaining
+an unification metavariable in `IsSphericalSpaceFormQuotient`.
+This changes no mathematical assumptions and avoids an artificial finite-group
+reindexing layer.
+
+`ham3_space_box` now has a complete proof.  It consumes the geometry-native
+`constPosQuotient` data producer, which:
+
+- re-presents the manifold over `𝓡 3` using `stdModelCopy`;
+- pulls the constant-curvature metric across the standard-model
+  diffeomorphism;
+- normalizes and lifts the metric to the universal cover;
+- applies the positive Killing--Hopf theorem in the correct intrinsic
+  pseudo-metric/uniformity world;
+- conjugates the deck action to orthogonal sphere isometries and returns
+  `RoundQuotientData` whose carrier is definitionally the standard-model copy.
+
+The first axiom audit found that this path inherited the former
+`fibre_countable` `sorry` through the universal-cover
+`instSigmaCompactSpace`.  The polygonal-loop code now records a
+path-connected basis refinement at every internal subdivision vertex, so it
+does not assume that arbitrary pairwise basis intersections are path
+connected.
+
+The final `CountablePi1 -> Manifold -> PositiveSpaceForm -> Hamilton` exact
+replay passes.  The axiom audit for `ham3_space_box`, `constPosQuotient`, the
+Killing--Hopf and deck-quotient producers, `fibre_countable`, and
+`instSigmaCompactSpace` reports only `propext`, `Classical.choice`, and
+`Quot.sound`, with no `sorryAx`.
+
+Accordingly, the `ham3_space_box` theorem and its dedicated machinery are both
+trusted and **100%**.  The only remaining theorem-body `sorry`s in the
+Hamilton file are the separate `ham3_flow_exists_normalized` and
+`ham3_cgh_limit` producers; each remains theorem-level 0%.  Whole-project HCG
+infrastructure remains conservatively about **60%**.
+
 ## Current state — 2026-07-23
 
 `ham3_noncollapse` is now proved.  It installs the compact, connected, and

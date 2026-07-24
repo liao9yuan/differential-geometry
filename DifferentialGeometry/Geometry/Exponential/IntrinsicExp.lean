@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.HopfRinow
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
+import DifferentialGeometry.Geometry.Geodesic.ChartRegularity
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Exponential.Defs
@@ -1630,7 +1631,6 @@ the same foot and tangent vector at `0`, agree throughout that set.  The proof
 uses moving charts at cluster points, so it does not require either curve to
 remain in one fixed chart. -/
 theorem geo_eqOn_of_init
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     (g : SmoothRiemannianMetric I M) {Γ₁ Γ₂ : ℝ → M} {O : Set ℝ}
     (hO_open : IsOpen O) (hO_conn : IsPreconnected O) (h0O : (0 : ℝ) ∈ O)
     (h₁ : Geodesic.IsGeodesicOn (I := I) g Γ₁ O)
@@ -1642,9 +1642,11 @@ theorem geo_eqOn_of_init
     Set.EqOn Γ₁ Γ₂ O := by
   classical
   have hC1₁ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₁ O :=
-    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g hO_open h₁ hc₁
+    (Geodesic.isGeodesicOn_contMDiffOn_infty (I := I) g hO_open h₁ hc₁).of_le
+      (ENat.LEInfty.out (m := (1 : WithTop ℕ∞)))
   have hC1₂ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₂ O :=
-    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g hO_open h₂ hc₂
+    (Geodesic.isGeodesicOn_contMDiffOn_infty (I := I) g hO_open h₂ hc₂).of_le
+      (ENat.LEInfty.out (m := (1 : WithTop ℕ∞)))
   have hmdiff₁ : ∀ t ∈ O, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₁ t := fun t ht =>
     (hC1₁.contMDiffAt (hO_open.mem_nhds ht)).mdifferentiableAt (by norm_num)
   have hmdiff₂ : ∀ t ∈ O, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₂ t := fun t ht =>

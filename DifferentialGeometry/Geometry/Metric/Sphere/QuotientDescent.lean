@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Metric.Sphere.OrthogonalAction
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 import DifferentialGeometry.Geometry.Metric.BumpExtend
+import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
+import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityLocal
 import DifferentialGeometry.Geometry.Curvature.Sphere.ConstCurvature
 
@@ -123,6 +125,47 @@ namespace SectionWitness
 variable {Q : Type*} [TopologicalSpace Q] [ChartedSpace (EuclideanSpace ℝ (Fin n)) Q]
   [IsManifold (𝓡 n) ∞ Q] {proj : sphere (0 : E) 1 → Q} {x₀ : Q}
   (S : SectionWitness E n Q proj x₀)
+
+/-- Construct covering local-section data from a surjective smooth local
+diffeomorphism. -/
+noncomputable def ofLocal
+    [SigmaCompactSpace Q] [T2Space Q] [BoundarylessManifold (𝓡 n) Q]
+    (hsurj : Function.Surjective proj)
+    (hloc : IsLocalDiffeomorph (𝓡 n) (𝓡 n) ∞ proj)
+    (x : Q) : SectionWitness E n Q proj x := by
+  let q := Classical.choose (hsurj x)
+  have hqx : proj q = x := Classical.choose_spec (hsurj x)
+  let Φ := Classical.choose (hloc q)
+  have hq : q ∈ Φ.source := (Classical.choose_spec (hloc q)).1
+  have hΦ : Set.EqOn proj Φ Φ.source := (Classical.choose_spec (hloc q)).2
+  let V : TopologicalSpace.Opens (sphere (0 : E) 1) :=
+    ⟨Φ.source, Φ.open_source⟩
+  let W : TopologicalSpace.Opens Q :=
+    ⟨(Φ : sphere (0 : E) 1 → Q) '' (V : Set (sphere (0 : E) 1)),
+      image_opens_isOpen Φ (by exact Subset.rfl)⟩
+  letI : SigmaCompactSpace V :=
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (DifferentialGeometry.Geometry.isSigmaCompact_of_isOpen (𝓡 n) V.2)
+  letI : SigmaCompactSpace W :=
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (DifferentialGeometry.Geometry.isSigmaCompact_of_isOpen (𝓡 n) W.2)
+  let e : V ≃ₘ⟮𝓡 n, 𝓡 n⟯ W :=
+    PartialDiffeomorph.toOpensDiffeoCross Φ (by exact Subset.rfl)
+  refine
+    { W := W
+      V := V
+      s := e.symm
+      mem := ?_
+      isSec := ?_ }
+  · exact ⟨q, hq, (hΦ hq).symm.trans hqx⟩
+  · intro r
+    have hvr : ((e.symm r : V) : sphere (0 : E) 1) ∈ Φ.source :=
+      (e.symm r).2
+    calc
+      proj ((e.symm r : V) : sphere (0 : E) 1) =
+          Φ ((e.symm r : V) : sphere (0 : E) 1) := hΦ hvr
+      _ = (r : Q) := by
+        exact congrArg Subtype.val (e.apply_symm_apply r)
 
 /-- The covering local section as a sphere-valued map `W → S`, `r ↦ ↑(s r)` (the composite
 `W → V → S`). -/

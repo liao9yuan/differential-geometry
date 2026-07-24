@@ -9,6 +9,27 @@ Quot.sound]`, real `lake-locked build`). Brick 4 (Hamilton assembly) landed:
 that pair (the hard topological direction). Both Hamilton consumers (`HamiltonPositiveRicciAdapter`,
 root) build green.
 
+## Local-section constructor (2026-07-23)
+
+Added the reusable `SectionWitness.ofLocal` constructor. A surjective smooth
+local diffeomorphism now supplies the section data required by
+`RoundQuotientData`: choose a lift of the requested base point, restrict its
+local partial diffeomorphism to the source open, and use
+`PartialDiffeomorph.toOpensDiffeoCross` in the reverse direction. The open
+source and image acquire sigma-compactness from
+`Geometry.isSigmaCompact_of_isOpen`; the remaining open-submanifold instances
+are inferred from the ambient sphere and quotient.
+
+The first proof attempt tried to destruct the existential witnesses inside a
+definition returning data and hit Lean's Prop-to-Type large-elimination
+restriction. `Classical.choose` is the correct normal form. Focused
+verification passes, and the file remains sorry-free.
+
+This closes the local-section packaging adapter completely. It does not prove
+the global classification producer: `ham3_space_box` remains 0% complete,
+while the reusable round-quotient descent machinery and this adapter are
+complete.
+
 ## Brick 3 + 4 execution notes (2026-07-07)
 
 **Brick 3 (`gQuot_constPosSec`, c=1).** Added a general metric-ext helper

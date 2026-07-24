@@ -155,6 +155,74 @@ theorem jacobiVar_zero
   rw [hconst, mfderiv_const]
   rfl
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Rescaling the launch vector and evaluating at time one agrees, after
+differentiation, with evaluating the rescaled variation at the original
+time. -/
+theorem jacobiVar_smul
+    [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (u w : E) {c : ℝ} (hc : c ≠ 0) :
+    mfderiv 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from u + s • (c⁻¹ • w)) c) 0 (1 : ℝ) =
+      mfderiv 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from c • u + s • w) 1) 0 (1 : ℝ) := by
+  have hfun :
+      (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+        (show TangentSpace I p from u + s • (c⁻¹ • w)) c) =
+        fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from c • u + s • w) 1 := by
+    funext s
+    have hscale : c • (u + s • (c⁻¹ • w)) = c • u + s • w := by
+      rw [smul_add, smul_smul, smul_smul]
+      congr 1
+      field_simp
+    calc
+      intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from u + s • (c⁻¹ • w)) c =
+        intrinsicGeodesic (I := I) g hEnorm p
+          (c • (show TangentSpace I p from u + s • (c⁻¹ • w))) 1 :=
+        (intrinsicGeodesic_smul (I := I) g hEnorm p
+          (show TangentSpace I p from u + s • (c⁻¹ • w)) c).symm
+      _ = intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from c • u + s • w) 1 := by
+        exact congrArg
+          (fun z : E => intrinsicGeodesic (I := I) g hEnorm p
+            (show TangentSpace I p from z) 1)
+          hscale
+  rw [hfun]
+  rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A conjugate vector at `c • u` produces a nontrivial intrinsic Jacobi
+variation along the geodesic launched by `u` that vanishes at time `c`. -/
+theorem conjVec_jacobi_at
+    [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (u : E) {c : ℝ} (hc : c ≠ 0)
+    (hconj : IsConjVec (I := I) g hEnorm p (c • u)) :
+    ∃ z : E, z ≠ 0 ∧
+      mfderiv 𝓘(ℝ, ℝ) I
+        (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from u + s • z) c) 0 (1 : ℝ) = 0 := by
+  rw [isConjVec_iff_jacobi (I := I) g hEnorm p (c • u)] at hconj
+  obtain ⟨w, hw, hwend⟩ := hconj
+  refine ⟨c⁻¹ • w, smul_ne_zero (inv_ne_zero hc) hw, ?_⟩
+  rw [jacobiVar_smul (I := I) g hEnorm p u w hc]
+  exact hwend
+
 end Riemannian
 end Geometry
 end DifferentialGeometry

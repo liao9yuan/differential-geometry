@@ -1,20 +1,20 @@
 # `ham3_main` black-box audit and fill plan
 
-## Live correction (2026-07-14, post merge)
+## Live correction (2026-07-24, post merge)
 
-The live source now has four theorem-body sorries in
-`HamiltonPositiveRicci.lean`, not five:
-`ham3_flow_exists_normalized`, `ham3_noncollapse`, `ham3_cgh_limit`, and
-`ham3_space_box`.
+The live source now has exactly two theorem-body `sorry`s in
+`HamiltonPositiveRicci.lean`: `ham3_flow_exists_normalized` and
+`ham3_cgh_limit`.  `ham3_noncollapse` and `ham3_space_box` are both proved,
+exact-green, and axiom-clean.
 
 The frontier-1 Hamilton adapters `ham3_short_isSolution` and
 `ham3_short_smooth_solution` are implemented using the merged short-time
 theorem and `solutionOn_of_joint`. Their theorem bodies are 100%. The
-unconditional short-time theorem is not yet certified axiom-clean on the live
-post-merge source: `ShortTime/WeylEigenvalueCountingBound.lean` contains the
-pointwise local-Weyl `sorry` explicitly documented as lying on that dependency
-closure. Until a fresh axiom probe after the current Spectral rebuild says
-otherwise, strict completion of the unconditional theorem is 0%.
+fresh exact replay reports that the unconditional short-time theorem depends
+only on `propext`, `Classical.choice`, and `Quot.sound`.  The pointwise
+local-Weyl `sorry` in `ShortTime/WeylEigenvalueCountingBound.lean` is therefore
+not on this live theorem's dependency closure.  Frontier #1 is closed and
+trusted at 100%.
 
 The extension consumer
 `extends_of_rmBounded` is assembled; its own body is sorry-free. Its live axiom
@@ -45,46 +45,49 @@ solutions, take the supremal time, prove maximality, use the positive-scalar
 finite-time estimate, and then invoke the curvature-unboundedness theorem.
 This is separate from proving `(N)` and `(B)` themselves.
 
-Written 2026-07-05 and live-updated 2026-07-14. The original scope was seven
+Written 2026-07-05 and live-updated 2026-07-24. The original scope was seven
 theorem-shaped `sorry`s behind the assembled Hamilton positive-Ricci endpoint
-plus one `MaximalTime.lean` frontier. Three original Hamilton boxes are now
-closed: `ham3_short_isSolution`, `limit_to_orig`, and
-`spaceForm_const_metric`. Four theorem-shaped `sorry`s remain in
-`HamiltonPositiveRicci.lean`; the extension theorem is assembled but still
-depends transitively on the two analytic inputs `(N)` and `(B)`.
-Companion program document: `../POINCARE_PLAN.md` (the two Perelman boxes are
-shared infrastructure with the Poincaré program — fill them once, in the shape
-that program needs).
+plus one `MaximalTime.lean` frontier. Five original Hamilton boxes are now
+closed: `ham3_short_isSolution`, `ham3_noncollapse`, `limit_to_orig`,
+`ham3_space_box`, and `spaceForm_const_metric`. Two theorem-shaped `sorry`s
+remain in `HamiltonPositiveRicci.lean`.  In the broader eight-frontier program,
+#2, #3, and #5 remain strict frontiers.  The extension theorem in #3 still
+depends transitively on the analytic inputs `(N)` and `(B)`.
+Companion program document: `../POINCARE_PLAN.md`; shared infrastructure with
+the Poincaré program should be proved once and the now-closed noncollapse box
+should not be reopened.
 
 Status legend for "difficulty": **S** = assembly against existing in-tree
 machinery; **M** = new theorem layer, no new foundations; **L** = new
 foundational layer required.
 
-## Original eight frontiers (six remain open)
+## Original eight frontiers (three strict frontiers remain open; two live theorem-body sorries)
 
 | # | Frontier | What it is mathematically | Difficulty | Fill route (summary) |
 |---|---|---|---|---|
-| 1 | `ham3_short_isSolution` | short-time existence: raw DeTurck data → `IsSolutionOn` bridge | adapter body 100%; unconditional short-time theorem 0% pending local-Weyl dependency discharge | merged theorem + `solutionOn_of_joint`; remove or prove the live pointwise local-Weyl dependency, then rerun the axiom audit |
+| 1 | `ham3_short_isSolution` | short-time existence: raw DeTurck data → `IsSolutionOn` bridge | **CLOSED: adapter and unconditional theorem 100%, axiom-clean** | merged theorem + `solutionOn_of_joint`; exact replay confirms the local-Weyl `sorry` is not on this dependency closure |
 | 2 | `ham3_flow_exists_normalized` | maximal continuation with finite-time curvature blow-up | L; endpoint 0% | prove `(N)`/`(B)`, construct the maximal compatible solution family, then consume finite-time and curvature-unboundedness theorems |
 | 3 | `extends_of_rmBounded` (`MaximalTime.lean`) | bounded `Rm` on `[0,T)` ⟹ extension past `T` | M/L; unconditional endpoint 0% | consumer assembly and moving-Shi producer are checked; only `(N)` uniform low-regularity existence and `(B)` forward uniqueness remain |
-| 4 | **`ham3_noncollapse`** | **Perelman no-local-collapsing** at the blow-up scale | **L; endpoint 0%** | actual balls, two-way scale transfer, `ham3_rm_control`, and `ham3_noncollapse_of` are checked; only the original-flow analytic producer remains |
-| 5 | `ham3_cgh_limit` | Hamilton–CGH compactness of the rescaled flows | M/L; **endpoint 0%**, whole-HCG machinery ≈45% | = the HCG compactness project (`../HCGCompactness/PROJECT_MAP.md`); keep machinery and endpoint accounting separate |
+| 4 | **`ham3_noncollapse`** | **Perelman no-local-collapsing** at the blow-up scale | **CLOSED: theorem 100%, machinery 100%, axiom-clean** | `no_local_open` plus the checked rescaling consumer; exact replay and axiom audit complete |
+| 5 | `ham3_cgh_limit` | Hamilton–CGH compactness of the rescaled flows | M/L; **endpoint 0%**, whole-HCG machinery ≈60% | = the HCG compactness project (`../HCGCompactness/PROJECT_MAP.md`); keep machinery and endpoint accounting separate |
 | 6 | `limit_to_orig` | compact limit globalizes the CGH maps and transfers the constant-curvature metric back | **CLOSED, theorem 100%** | Bonnet--Myers + `PointedConvergenceGlobal` + metric pullback; §3 |
-| 7 | `ham3_space_box` | closed 3-manifold with a constant-positive-sectional metric is a spherical space form (Killing–Hopf + quotient) | M/L | space-form lane (active; `spaceform-hardroute-build` memory) |
+| 7 | `ham3_space_box` | closed 3-manifold with a constant-positive-sectional metric is a spherical space form (Killing–Hopf + quotient) | **CLOSED: theorem 100%, machinery 100%, axiom-clean** | refined-basis universal-cover countability + positive Killing--Hopf + deck quotient; exact replay complete |
 | 8 | `spaceForm_const_metric` | a spherical space form admits a constant-curvature metric | **CLOSED, theorem 100%** | checked quotient-round-metric construction |
 
 Everything else on the `ham3` chain — pinching §9/§10, point selection, blow-up
-window bounds, the limit-side Einstein/constant-curvature argument, #6, and #8 — is
+window bounds, the limit-side Einstein/constant-curvature argument, #4, #6,
+#7, and #8 — is
 **checked** (see `IMPORTANT_THEOREM_INDEX.md`, "HamiltonPositiveRicci main
-chain"). Thus `ham3_main` still depends on four open Hamilton boxes, with the
-maximal-flow box additionally depending on `(N)` and `(B)` upstream. Checked
-consumers do not reduce an open producer endpoint above 0%.
+chain"). Thus `ham3_main` has two direct source boxes left, #2 and #5.  The
+strict wider program also retains upstream #3; the maximal-flow box depends on
+`(N)` and `(B)`. Checked consumers do not reduce an open producer endpoint
+above 0%.
 
 ## §1 Short-time + extension (frontiers 1–3)
 
-Frontier 1's Hamilton adapter is closed; unconditional short-time theorem status
-is pending the fresh axiom audit described above. `MaximalTime.lean` has no
-source-level sorry in `extends_of_rmBounded`, and
+Frontier 1's Hamilton adapter and unconditional short-time theorem are
+axiom-clean and closed. `MaximalTime.lean` has no source-level sorry in
+`extends_of_rmBounded`, and
 `ExtendShiInputs.movingShi_of_soln` is now backed by the checked, axiom-clean
 `movingShiBoundSol`. The unconditional extension route
 still depends on the two sorries in `Evolution/ExtendViaUniqueness.lean`:
@@ -92,7 +95,15 @@ still depends on the two sorries in `Evolution/ExtendViaUniqueness.lean`:
 `../SHORTTIME_MERGE_PLAN.md` and `Evolution/ExtendViaUniqueness.md` for the
 post-merge API audit and exact missing producers.
 
-## §2 `ham3_noncollapse` — the Perelman box (the real subject)
+## §2 `ham3_noncollapse` — CLOSED
+
+`no_local_open` now supplies the original-flow analytic producer, and the
+Hamilton rescaling consumer proves `ham3_noncollapse`.  The theorem and its
+dedicated machinery are each 100%; exact verification is green and the axiom
+audit reports only `propext`, `Classical.choice`, and `Quot.sound`.
+
+The route audit below records the pre-closure design history and is superseded
+as a live frontier.
 
 ### What exactly is assumed
 
@@ -187,31 +198,37 @@ the retained CGH maps, source-to-original diffeomorphisms, and slice
 completeness, and is checked with no `sorry` (**theorem 100%**).  This closes
 only the consumer; `ham3_cgh_limit` remains 0%.
 
-## §4 Space forms (frontier 7 open; frontier 8 closed)
+## §4 Space forms (frontiers 7 and 8 closed)
 
 `spaceForm_const_metric` is checked (S³ curvature + quotient route).
-`ham3_space_box` (Killing–Hopf direction) is the harder half: constant-curvature
-simply-connected complete ⟹ isometric to the round sphere, then deck-transform
-quotient bookkeeping.  Keep #7 in that lane; `ham3_main` cannot close without
-it, and it is pure global geometry (no flow content), so it parallelizes with
-§1–§2.
+`ham3_space_box` is proved through the positive Killing–Hopf, deck-action, and
+round-quotient producers.  The former `UniversalCover.fibre_countable` `sorry`
+is replaced by a path-connected basis refinement recorded at each
+polygonal-loop vertex, without a pairwise-intersection assumption.  The full
+downstream exact replay passes, and the endpoint axiom audit reports only
+`propext`, `Classical.choice`, and `Quot.sound`.  Frontiers #7 and #8 are both
+trusted at theorem level 100%.
 
 ## Critical path to `ham3_main`
 
 ```
-short-time lane (§1: #1)         ──┐
-extension lane  (§1: #2,#3)      ──┤
-W-entropy NLC   (§2: #4, poles A1)─┼──→  ham3_main
-HCG compactness (#5; endpoint 0%,
-  machinery ~45%)                ──┤
-space-form lane (#7)             ──┘
+extension (#3 -> #2) --------------------+
+                                          +--> ham3_main
+HCG compactness (#5; endpoint 0%, ~60%) -+
 ```
-Four parallel lanes; the two poles are **#5 (HCG)** and **#4/A1 (parabolic
-existence)**.  Honest estimate for `ham3_main` fully sorry-free:
-**12–20 months** at current velocity, dominated by those two poles.
+The remaining direct Hamilton poles are maximal-flow construction (#2) and
+HCG compactness (#5).  Strict completion of #2 also needs the extension input
+#3.  The earlier estimate dominated by the now-closed
+noncollapse box is obsolete; no replacement calendar estimate is asserted
+here.
 
 ## Status log
 
+- 2026-07-24: `ham3_space_box` closed.  The refined polygon-code proof removes
+  the universal-cover fibre-countability `sorry`; the full topology,
+  positive-space-form, and Hamilton exact replay is green, and the endpoint
+  axiom audit contains only `propext`, `Classical.choice`, and `Quot.sound`.
+  The Hamilton source now has exactly two theorem-body `sorry`s.
 - 2026-07-16 low-regularity E1 lane: route A was implemented. The exact
   Ricci+DeTurck three-arm slope identity and its concrete path-integral form are
   sorry-free, and the top path consumer has been migrated off the oversized
@@ -262,4 +279,4 @@ existence)**.  Honest estimate for `ham3_main` fully sorry-free:
   elaboration by the missing active-Spectral `GalerkinLimitUniformMass` object.
   This route is not consumed by live `extends_of_rmBounded`, so it contributes
   no percentage to `(N)`, `(B)`, `ham3_flow_exists_normalized`, or any of the
-  four open Hamilton endpoints.
+  then-four open Hamilton endpoints.

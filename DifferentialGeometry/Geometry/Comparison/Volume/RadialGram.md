@@ -51,3 +51,17 @@ is about 50%.  Global Bishop--Gromov and the producer from
 remain 0%.  The full V1--V3 volume-comparison/CGT producer program is about
 38--42% in machinery coverage; unconditional HCG compactness endpoints remain
 0% as theorems.
+
+## 2026-07-24 component-local radial Wronskian
+
+Removed the stale `ConnectedSpace M` binder from `radial_wronsk_zero`.  Its
+only endpoint input is `exists_radialJacobi_zero_radius`; all curves and fields
+remain in the component of the chosen center, while completeness continues to
+provide the intrinsic geodesics.
+
+After the dependency-ordered refresh of `JacobiVariation` and
+`NormalChartMeasure`, focused verification passed without diagnostics, and the
+exported artifact refresh is GREEN.  No wrapper, replacement theorem, or
+additional assumption was introduced.  The Wronskian producer remains
+mathematically complete; the fixed-metric Calabi support theorem remains
+unstated (0%).

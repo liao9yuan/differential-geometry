@@ -43,3 +43,18 @@ N-d endpoint.  The remaining frontier is to lift the smooth coefficient field
 through the parallel orthonormal frame, prove perpendicularity and equality
 with the geometric index form, and feed it to the minimizing-geodesic
 nonnegativity theorem.
+
+## 2026-07-24 closed-interval facade
+
+The public theorem `IsJacobiSolOn.exists_smooth_neg` now composes the negative
+split and quantitative smoothing results for the geometric use case where the
+Jacobi ODE is available only on `[0, 1]`, but the position coefficient field is
+globally smooth.  It takes the closed-interval solution, continuity and
+self-adjointness of the coefficient operator, global smoothness of `y`, and
+the exact identity `deriv y = v` on `[0, 1]`; it returns one globally smooth
+endpoint-vanishing field with strictly negative index.
+
+This avoids the mathematically false strengthening that a cut-off parallel
+frame remain parallel on an open interval beyond both endpoints.  Focused
+verification passes without warnings.  The theorem is an abstract ODE
+composition result, not the geometric no-conjugate endpoint.

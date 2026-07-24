@@ -71,3 +71,17 @@ branch proof no longer depends on either stale simplifier state or an accidental
 connectedness hypothesis.  This is a proof-stability repair only: the generic
 branch API remains complete, while the Route B' Calabi distance-support theorem
 remains 0%.
+
+## 2026-07-23 fixed-first coordinate readout
+
+Added `DiagInvBranch.inv_fst_coord_inf`.  It composes the existing smooth
+tangent-bundle inverse with the canonical geodesic-chart fiber coordinate and
+uses `proj_eq` to identify the fixed fiber.  Downstream inverse-function
+calculus can therefore work in the model space `E` without unfolding a
+trivialization or adding a chart selector.
+
+Focused verification and the exact module refresh both passed.  This coordinate
+readout theorem is complete (100%).  It is one infrastructure brick for the
+fixed-first radius route; the eventual `radialLap_eq_mean` theorem remains
+unstated (0%), its dedicated Route B-prime machinery is roughly 35%, and the
+whole HCG supporting machinery remains roughly 60%.

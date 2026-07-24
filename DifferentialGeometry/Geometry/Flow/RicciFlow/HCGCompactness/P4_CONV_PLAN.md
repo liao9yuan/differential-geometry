@@ -87,7 +87,8 @@ upper support only at a selected negative Bernstein minimizer.  The actual
 curvature-tower Kato estimate remains solution-generated, not a new HCG
 assumption.  The existing smooth fixed-order theorem
 `BernsteinTower.estimate_cutoff_at` stays exact-current, while the barrier
-sibling is a separate not-yet-stated theorem.
+  sibling `BernsteinTower.estimate_barrier_at` is now focused- and
+  exact-green.
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -187,12 +188,16 @@ are checked: `strict_barrier_cpt_of_upperSupport`,
   fixed-path time variation is focused-green:
   `pathLength_timeDeriv_of_ricciFlow` proves the exact Ricci-flow derivative,
   and `pathLength_deriv_ge` gives `∂ₜ L ≥ -A L` from a quadratic Ricci bound.
-  The pure model estimate `hypMeanCurv_le` is focused- and exact-green and supplies
-  the explicit `d / r + d * q` bound once the radial Laplacian/Jacobi trace
-  bridge is available.
-  The comparison-layer `calabi_tail_of` and `exists_calabi_tail` are
-  focused-green and provide the finite-distance minimizing vector, terminal
-  inverse branch, and target-domain membership needed by the local support.
+  The pure model estimate `hypMeanCurv_le` and the full fixed-first
+  radial-Hessian/Laplacian bridge through `branchLap_eq_mean` and
+  `radialLap_eq_mean` are focused- and exact-green.  The comparison-layer
+  `calabi_tail_of` and `exists_calabi_tail` are also exact-current, but the
+  deeper half-length audit shows that this terminal branch is too short to
+  produce the required `2(d-1)/r` pole, while `exists_radial_mean` is a
+  small-launch raw/C2 theorem.  The next honest architecture frontier is an
+  early minimizing-tail nonconjugacy/local-inverse producer plus a global
+  intrinsic minimizing-tail comparison; see
+  [`CALABI_BRANCH_CONSULT.md`](CALABI_BRANCH_CONSULT.md).
   `scaledDist_calabiUpperSupport_of_sol` and `shiBarrierCutoff_of_sol` remain
   theorem-level 0%.  The independent consumer-side sibling
   `BernsteinTower.estimate_barrier_at` is focused- and exact-green and sorry-free.

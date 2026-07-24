@@ -555,7 +555,11 @@ the lower radial geometry module.
 - Please identify any statement above that is false or missing a scale,
   sign, transpose, endpoint-time, or basis condition.
 
-## Honest current accounting
+## Pre-ruling accounting snapshot (historical)
+
+The following figures are the snapshot that was submitted with the
+consultation.  They are retained only to record the decision input; the live
+verified accounting is in the implementation section below.
 
 - `radialLap_eq_mean`: not implemented, theorem-level **0%**.
 - Dedicated second-order bridge: API audit complete, proof machinery roughly
@@ -571,5 +575,54 @@ the lower radial geometry module.
 - Whole HCG supporting machinery: approximately **60%**.
 - Unconditional HCG compactness endpoint: theorem-level **0%**.
 
-The immediate request is therefore not a proof patch. It is a ruling on the
-smallest correct lower geometric producer and its exact Lean signature.
+At that snapshot, the request was a ruling on the smallest correct lower
+geometric producer and its exact Lean signature.
+
+## 2026-07-23 ruling received and live implementation
+
+The approved route is the fixed-first selected inverse branch.  The canonical
+lower statement uses the time-one intrinsic geodesic; the existing raw radial
+family is only a rescaling/compatibility corollary.  The general endpoint
+Hessian formula includes the negative rank-one radial correction, and the
+final raw Laplacian identity has the mandatory denominator
+`Real.sqrt (g.inner p x x)`.
+
+Current live-tree status:
+
+- `IntrinsicGauss.intrinsic_gauss`, the selected inverse derivative and
+  `BranchRadius` calculus, and `EndpointShape.branchHess_jacobi` /
+  `branchHess_shape` are focused- and exact-green.
+- `MetricTrace.LineSplit.trace_eq_line_add` and the cycle-free
+  `ChartBridge.Laplacian.lap_eq_hess_on` adapter are focused- and exact-green.
+- `RawIntrinsicC2.exp_eq_intr_of_c2` and `exp_germ_eq_intr` are focused- and
+  exact-green.  They identify the raw and intrinsic maps on the named C2 ball;
+  no smaller agreement radius or wrapper assumption was introduced.
+- `RadialLaplacian.branchLap_eq_mean` and the raw compatibility capstone
+  `radialLap_eq_mean` are focused- and exact-green.  The raw theorem retains
+  the mandatory denominator `Real.sqrt (g.inner p x x)` and assumes neither
+  `ConnectedSpace M` nor an extra radius hierarchy.
+
+Honest accounting:
+
+- `branchLap_eq_mean`: theorem and dedicated machinery **100%**.
+- `radialLap_eq_mean`: theorem and dedicated machinery **100%**.
+- The complete fixed-first second-order/radial-Laplacian route selected by
+  this consultation: **100%** checked.
+- Selected Route B-prime no-extra-input Shi producer machinery: approximately
+  **45%** after the deeper half-length/global-comparison audit.  The spatial
+  evolving-distance Calabi upper support, the
+  solution-generated barrier cutoff, and the final `MovingShiOpen` switch
+  remain open.
+- The point-centred barrier Bernstein consumer is **100%** and exact-current;
+  dedicated P4 consumer/assembly machinery remains approximately **98%**.
+- Whole HCG supporting machinery remains approximately **60%**.
+- Unconditional `compactnessSol`: theorem-level **0%**.
+
+The initial terminal-tail plan was too optimistic: `calabi_tail_of` gives no
+lower bound on the selected tail length, while the existing radial comparison
+is restricted to a small raw/C2 launch.  The exact next architecture frontier
+is now recorded in `CALABI_BRANCH_CONSULT.md`: an early minimizing-tail
+nonconjugacy/local-inverse producer and a global intrinsic minimizing-tail
+comparison.  Only after those producers land can the fixed-metric spatial
+Calabi support be assembled.  It must remain separate from the later
+Ricci-flow time derivative and barrier-cutoff assembly.

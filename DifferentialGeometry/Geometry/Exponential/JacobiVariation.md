@@ -359,3 +359,18 @@ Focused verification passed without diagnostics, and the coordinated exact
 targeted refresh is GREEN (`3799/3799`).  These two theorems remain fully
 proved (100%); this is an API-hypothesis cleanup and does not by itself advance
 the still-open Route B′ cutoff producer or its endpoint theorem.
+
+### 2026-07-24 component-local radial endpoint API
+
+Removed the stale `ConnectedSpace M` binder from the private endpoint
+acceleration lemma, `jacobi_zero_of_lt`, and `exists_jacobi_zero`.  The
+independent `intrinsic_jacobi_d0` endpoint was weakened at the same time: its
+proof uses the already component-local `intrinsicVar_smooth`.  The radial proof
+ends in the component-local `exp_radial_d2_zero`; no connectedness input occurs
+in either argument.
+
+Focused verification passed without diagnostics after both cleanups.  The
+radial endpoint exports and the final `intrinsic_jacobi_d0`-inclusive artifact
+are exact-current (`3801/3801`).
+This is an API-hypothesis cleanup: the endpoint Jacobi theorems remain 100%,
+while the downstream Calabi support theorem remains unstated (0%).

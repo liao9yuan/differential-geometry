@@ -86,7 +86,7 @@ The direction vectors are kept inside the common local-variation radius; a
 later transverse-frame consumer may enforce this by a fixed positive scaling. -/
 theorem radial_wronsk_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

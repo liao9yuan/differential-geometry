@@ -794,4 +794,89 @@ theorem exists_smooth_indexForm_neg_of_split
       linarith)]
     exact hW₁g_zero
 
+/-- A Jacobi solution on `[0, 1]` whose position field is globally smooth
+produces a globally smooth endpoint-vanishing field with negative index. -/
+theorem IsJacobiSolOn.exists_smooth_neg
+    [CompleteSpace F]
+    {R : ℝ → F →L[ℝ] F} {c : ℝ} {y v : ℝ → F}
+    (hsol : IsJacobiSolOn R 0 1 y v)
+    (hc : c ∈ Ioo (0 : ℝ) 1)
+    (hR : ContinuousOn R (Icc (0 : ℝ) 1))
+    (hSym : ∀ t, ∀ x x' : F, ⟪R t x, x'⟫ = ⟪x, R t x'⟫)
+    (hySmooth : ContDiff ℝ ∞ y)
+    (hderiv : ∀ t ∈ Icc (0 : ℝ) 1, deriv y t = v t)
+    (hy0 : y 0 = 0) (hyc : y c = 0)
+    (hne : ∃ t ∈ Icc (0 : ℝ) 1, y t ≠ 0) :
+    ∃ W : ℝ → F,
+      ContDiff ℝ ∞ W ∧
+      W 0 = 0 ∧
+      W 1 = 0 ∧
+      indexForm R 0 1 W (deriv W) W (deriv W) < 0 := by
+  obtain ⟨s, hs⟩ :=
+    hsol.exists_split_neg hc hR hSym hy0 hyc hne
+  let Z : ℝ → F := indexTestField (v c)
+  let DZ : ℝ → F := indexTestDeriv (v c)
+  let W₀ : ℝ → F := y + s • Z
+  let W₁ : ℝ → F := s • Z
+  have hZSmooth : ContDiff ℝ ∞ Z := by
+    simpa only [Z] using testField_smooth (v c)
+  have hW₀Smooth : ContDiff ℝ ∞ W₀ := by
+    simpa only [W₀] using hySmooth.add (hZSmooth.const_smul s)
+  have hW₁Smooth : ContDiff ℝ ∞ W₁ := by
+    simpa only [W₁] using hZSmooth.const_smul s
+  have hZd (t : ℝ) : HasDerivAt Z (DZ t) t := by
+    simpa only [Z, DZ] using indexTestField_deriv (v c) t
+  have hyDeriv (t : ℝ) : HasDerivAt y (deriv y t) t :=
+    (hySmooth.differentiable (by simp)).differentiableAt.hasDerivAt
+  have hW₀d (t : ℝ) :
+      HasDerivAt W₀ (deriv y t + s • DZ t) t := by
+    simpa only [W₀] using (hyDeriv t).add ((hZd t).const_smul s)
+  have hW₁d (t : ℝ) :
+      HasDerivAt W₁ (s • DZ t) t := by
+    simpa only [W₁] using (hZd t).const_smul s
+  have hdW₀ (t : ℝ) : deriv W₀ t = deriv y t + s • DZ t :=
+    (hW₀d t).deriv
+  have hdW₁ (t : ℝ) : deriv W₁ t = s • DZ t :=
+    (hW₁d t).deriv
+  have hW₀_zero : W₀ 0 = 0 := by
+    simp [W₀, Z, indexTestField, hy0]
+  have hW₁_zero : W₁ 1 = 0 := by
+    simp [W₁, Z, indexTestField]
+  have hmatch : W₀ c = W₁ c := by
+    simp [W₀, W₁, hyc]
+  have h0c : Icc (0 : ℝ) c ⊆ Icc (0 : ℝ) 1 :=
+    Icc_subset_Icc le_rfl hc.2.le
+  have hindex₀ :
+      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) =
+        indexForm R 0 c
+          (y + s • Z) (v + s • DZ)
+          (y + s • Z) (v + s • DZ) := by
+    unfold indexForm
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le hc.1.le] at ht
+    unfold indexIntegrand
+    rw [hdW₀ t, hderiv t (h0c ht)]
+    rfl
+  have hindex₁ :
+      indexForm R c 1 W₁ (deriv W₁) W₁ (deriv W₁) =
+        indexForm R c 1
+          (s • Z) (s • DZ)
+          (s • Z) (s • DZ) := by
+    unfold indexForm
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le hc.2.le] at ht
+    unfold indexIntegrand
+    rw [hdW₁ t]
+    rfl
+  have hneg :
+      indexForm R 0 c W₀ (deriv W₀) W₀ (deriv W₀) +
+          indexForm R c 1 W₁ (deriv W₁) W₁ (deriv W₁) < 0 := by
+    rw [hindex₀, hindex₁]
+    simpa only [Z, DZ] using hs
+  exact exists_smooth_indexForm_neg_of_split
+    (A := -1) (B := 2) (W₀ := W₀) (W₁ := W₁)
+    (by norm_num) (by norm_num) hc hR
+    hW₀Smooth.contDiffOn hW₁Smooth.contDiffOn
+    hW₀_zero hW₁_zero hmatch hneg
+
 end DifferentialGeometry.Analysis.ODE

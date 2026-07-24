@@ -4,7 +4,7 @@
 
 The public interface remains unchanged.  `movingShi_of_bound`,
 `movingShi_complete`, and `CurvBoundInput.movingShi_open` are focused-green and
-the exact target is current (`9627/9627`), with no local `sorry` or warning.
+the exact target is current (`9634/9634`), with no local `sorry` or warning.
 The local assembly repairs installed the stored carrier instances explicitly,
 used the complete left-anchor metric for the tangent norm, and removed an
 accidental compactness requirement from the chart-local tower-norm regularity
@@ -52,7 +52,7 @@ metric equivalence or a Ricci lower bound.
 
 After one local multiplication-order repair and the coordinated
 `BernsteinComplete` refresh, the complete file is focused GREEN with zero
-diagnostics and exact GREEN (`9627/9627`).  The conditional cutoff adapter is
+diagnostics and exact GREEN (`9634/9634`).  The conditional cutoff adapter is
 therefore checked; it is not yet the public route because the solution cutoff
 producer does not exist.
 
@@ -100,9 +100,10 @@ quantifier-correct point-centered family
 
 After rewriting the truncated time horizon, it calls the exact-current
 `BernsteinTower.estimate_barrier_at`.  Focused verification of the complete
-file is GREEN.  This adapter adds no new public assumption and does not yet
-replace the public legacy call: that switch remains blocked on the actual
-solution-generated barrier-cutoff family.
+file is GREEN, and the coordinated exact refresh is GREEN (`9634/9634`).
+This adapter adds no new public assumption and does not yet replace the public
+legacy call: that switch remains blocked on the actual solution-generated
+barrier-cutoff family.
 
 The single-flow and sequence/open-window theorems contain no further `sorry`.
 In particular, the sequence theorem must never be reproved by calling

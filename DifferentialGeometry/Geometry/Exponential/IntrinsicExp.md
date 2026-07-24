@@ -5,6 +5,9 @@
 Removed the ambient `ConnectedSpace M` assumption from the canonical intrinsic
 exponential and complete-geodesic API.  The construction stays in the component
 of its initial point and velocity.  Focused and exact verification passed.
+The finite-order projection of the resulting smooth geodesics now uses the
+explicit `ENat.LEInfty` witness, avoiding ambiguity between the inner smooth
+order `∞` and the outer `WithTop` top element.
 
 Accounting: this module's no-connected migration is complete (100%).  This is
 producer infrastructure and does not by itself complete an HCG endpoint.

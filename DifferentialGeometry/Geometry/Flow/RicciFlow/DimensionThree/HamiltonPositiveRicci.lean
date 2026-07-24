@@ -18,6 +18,7 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.Headlines
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
+import DifferentialGeometry.Geometry.Metric.Sphere.PositiveSpaceForm
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
@@ -100,14 +101,14 @@ freely by ambient orthogonal isometries on the round three-sphere, packaged as a
 carries a smooth structure modeled on `𝓡 3` with descended round metric), together with a
 smooth equivalence of the supplied manifold `N` with that quotient. -/
 structure SphericalSpaceFormQuotientModel
-    (I : ModelWithCorners Real E H) (N : Type*)
+    (I : ModelWithCorners Real E H) (N : Type u)
     [TopologicalSpace N] [ChartedSpace H N] : Type _ where
-  data : Geometry.RoundQuotientData.{0, 0, 0} (EuclideanSpace Real (Fin 4)) 3
+  data : Geometry.RoundQuotientData.{0, u, u} (EuclideanSpace Real (Fin 4)) 3
   equiv : N ≃ₘ⟮I, 𝓡 3⟯ data.Q
 
 /-- Predicate that a smooth manifold is a spherical space-form quotient. -/
 def IsSphericalSpaceFormQuotient
-    (I : ModelWithCorners Real E H) (N : Type*)
+    (I : ModelWithCorners Real E H) (N : Type u)
     [TopologicalSpace N] [ChartedSpace H N] : Prop :=
   Nonempty (SphericalSpaceFormQuotientModel I N)
 
@@ -3223,7 +3224,12 @@ theorem ham3_space_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hconst : AdmitsConstPosSec (I := I) (M := M)) :
     SphericalSpaceForm (I := I) (M := M) := by
-  sorry
+  obtain ⟨hcompact, hconn, hbdry, hdim⟩ := hM
+  obtain ⟨g, c, hc, hsec⟩ := hconst
+  let model :=
+    Geometry.constPosQuotient
+      (I := I) (M := M) hcompact hconn hbdry hdim g c hc hsec
+  exact ⟨⟨model.1, model.2⟩⟩
 
 /-- A spherical-space-form model carries a constant positive sectional-curvature
 metric.

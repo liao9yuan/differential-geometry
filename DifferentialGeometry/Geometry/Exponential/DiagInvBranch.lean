@@ -162,6 +162,46 @@ theorem inv_fst_inf
     (contMDiff_const.prodMk contMDiff_id).contMDiffOn
   simpa only [inv, dom, Function.comp_apply] using B.inv_inf.comp hpair hdom
 
+/-- Fixing the first point of a selected inverse branch gives a smooth
+model-coordinate inverse vector on every set contained in the branch domain.
+
+This is the fixed-fiber companion of `inv_fst_inf`.  It uses the canonical
+tangent-bundle trivialization at the fixed point and hides that representation
+choice from downstream inverse-derivative arguments. -/
+theorem inv_fst_coord_inf
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {c p : M} (B : DiagInvBranch (I := I) g hEnorm c) {S : Set M}
+    (hdom : ∀ z ∈ S, (p, z) ∈ B.dom) :
+    ContMDiffOn I 𝓘(Real, E) ∞
+      (fun z : M => ((B.inv (p, z)).snd : E)) S := by
+  have hinv : ContMDiffOn I I.tangent ∞
+      (fun z : M => B.inv (p, z)) S :=
+    B.inv_fst_inf hdom
+  have hmaps :
+      MapsTo (fun z : M => B.inv (p, z)) S
+        (Geodesic.geodesicChartDomain (I := I) p) := by
+    intro z hz
+    apply Geodesic.mem_geodesicChartDomain_of_proj
+    rw [B.proj_eq (hdom z hz)]
+    exact mem_chart_source H p
+  have hcoord : ContMDiffOn I 𝓘(Real, E) ∞
+      (fun z : M => Geodesic.chartFiberCoord (I := I) p (B.inv (p, z))) S :=
+    (Geodesic.chartFiberCoord_contMDiffOn (I := I) p).comp hinv hmaps
+  refine hcoord.congr ?_
+  intro z hz
+  have hproj : (B.inv (p, z)).proj = p := B.proj_eq (hdom z hz)
+  have htotal :
+      B.inv (p, z) =
+        (⟨p, (show TangentSpace I p from (B.inv (p, z)).snd)⟩ :
+          TangentBundle I M) := by
+    apply TotalSpace.ext hproj
+    exact heq_of_eq rfl
+  rw [htotal]
+  exact (Geodesic.chartFiberCoord_mk_self (I := I) p
+    (show TangentSpace I p from (B.inv (p, z)).snd)).symm
+
 /-- On the selected inverse domain, exponentiating its fiber component gives
 the second point of the pair. -/
 theorem exp_eq

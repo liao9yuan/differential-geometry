@@ -43,3 +43,25 @@ Gauss route gives the curvature at EVERY point directly (no homogeneity / point-
   gives `+Gram`, c = 1. (Pro-review-confirmed 2026-06-29.)
 - **Capstone `roundMetric_constPosSec : ConstPosSecMetric roundMetric`** (extend this file, ~10 lines):
   `⟨1, one_pos, fun x X Y => by rw [metricRm04StdAt_apply, riemannCurvature04At_apply_const, 5B-C]; ring⟩`.
+
+## 2026-07-23: curvature-operator producer for Cartan transfer
+
+The Gauss route and capstone are now complete and verified, sorry-free.  In
+addition, `round_riemann_one` packages the full curvature-one operator identity
+
+`R(X,Y)Z = ⟪Y,Z⟫ X - ⟪X,Z⟫ Y`
+
+for the round sphere.  It is obtained by feeding `roundMetric_sec_value` through
+the reusable algebraic producer `metricRm_of_sec`, then recovering the vector
+identity with `riemannOp_of_rm`.
+
+The statement of `riemannOp` itself needs the smooth-connection typeclass before
+the theorem body is elaborated.  On the sphere model this required a private
+`NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n)))` instance derived from
+`[NeZero n]`; placing the instance only inside the proof is too late.  The
+sectional and existential scalar statements do not use `[NeZero n]`, so they
+explicitly omit it.
+
+Verification passed with no remaining warnings.  This producer is complete;
+the remaining `ham3_space_box` frontier is the Cartan/Jacobi exponential
+transfer and its global extension, not round-sphere curvature.

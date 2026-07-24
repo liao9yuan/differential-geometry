@@ -38,3 +38,16 @@ ambient `e : E ≃ₗᵢ[ℝ] E` (`[FiniteDimensional ℝ E]`, `[Fact (finrank �
 `pullbackMetric_round_eq` + `metricRm04Std_pullback` ⇒ curvature invariance under
 `sphereDiffeo` (needs the heavier sphere instances: `BoundarylessManifold (𝓡 n)`,
 `IsManifold (𝓡 n) 1`, `IsManifold (𝓡 n) (∞+1)` — verify availability/`of_le`).
+
+## 2026-07-23: faithfulness for quotient-action assembly
+
+Added and verified `sphereDiffeo_inj`: two ambient linear isometries whose
+restrictions to the unit sphere agree are equal.  The proof normalizes each
+nonzero ambient vector to the unit sphere and rescales; the zero case is
+immediate.
+
+This is the faithfulness lemma needed when the conjugated universal-cover deck
+action is represented by ambient orthogonal maps: the group-law equations can
+be checked after applying `sphereDiffeo`, then reflected back to the ambient
+maps.  The local lemma is complete; it does not itself construct the conjugated
+representation or solve the global Cartan classification.

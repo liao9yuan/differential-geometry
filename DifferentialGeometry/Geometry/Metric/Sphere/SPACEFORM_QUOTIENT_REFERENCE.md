@@ -1,5 +1,40 @@
 # SPACEFORM_QUOTIENT_REFERENCE — Petersen `quotientMetric` vs our round-quotient descent
 
+## 2026-07-24 update
+
+The reference-guided quotient design has now been consumed by the native
+positive-space-form producer and the `ham3_space_box` source proof.  The
+universal-cover countability repair and the complete downstream exact replay
+now pass; the final axiom audit has no `sorryAx`.  Thus the trusted
+`ham3_space_box` endpoint is closed.  The historical audit below describes the
+earlier producer frontier.
+
+The public `main` branch was rechecked at
+`27d799cc3710fed4e0c56d26e397f121d27b3346` (2026-07-23).  Its additional
+useful reference chain is:
+
+- Petersen `Ch01/SpaceForms.lean` for the explicit constant-curvature model;
+- Do Carmo `Jacobi/CartanLocalIsometry.lean` and the surrounding
+  constant-curvature Jacobi files for the local exponential-map isometry;
+- Do Carmo `Manifold/CoveringMapConclusion.lean` and
+  `CoveringDiffeomorph.lean` for globalization from a complete source;
+- Petersen `Ch05/LocalIsometryCovering.lean` and
+  `Ch06/MyersFundamentalGroup.lean` for related covering and finiteness
+  consequences.
+
+Those files are sorry-free at that remote revision, but they are reference
+infrastructure rather than a ready `ham3_space_box` theorem.  The local
+`RoundIntrinsic`/Cartan/Killing--Hopf, deck-isometry, quotient-descent, and
+Bonnet--Myers modules already adapt the needed parts to RicciFlower
+conventions.  LeeSmooth
+`Ch01/Sec01_05/Proposition_1_40.lean` does contain a sorry-free
+`countable_fundamentalGroup` polygon-code proof for its
+`TopologicalManifoldWithBoundary` interface.  It is a useful independent
+check, but not a drop-in producer for this project's more general
+`ModelWithCorners` universal-cover API; the local refined-basis proof closes
+that obligation natively.  No remote theorem was found that directly packages
+the Killing--Hopf round quotient.
+
 Reference study (2026-07-19) of `frenzymath/Poincare-Conjecture` (Apache-2.0), files
 `Petersen/PetersenLib/Ch01/{MetricConstructions,CoveringMetrics,AveragedMetric,AveragedMetricCompact}.lean`.
 STRICT POLICY: reference-only — statement shapes and design lessons; no proof bodies copied,
