@@ -76,14 +76,55 @@ in this leaf (forbidden-parallel-API territory — not recommended).  With the p
 `:1085` → `hbase` is a short assembly (commutator `roughLapComm_unif` + `:759`-analog +
 public IBP + public rawConnLap≤2ndCovGrad + the now-public covDivergence bound).
 
-## Stage β steps 2–3 (unchanged, after `hbase`)
-2. **Uniform strong induction** (mirror `:1439`): iterate `bochner_step_unif`, folding in
-   the uniform Sobolev-jet constant from `hsJet_le` (`IteratedCovGradHsJetBound.lean:834`
-   — audit its constant is curvature/dimension = uniformizable; expected yes, §7.3).
-3. **Coefficient-one gap** (mirror `cc_dirichlet_gap`, `:1539`) ⟹ `covsum_hs_unif`; the
-   easy direction (`hs_covsum_unif`) mirrors `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general`.
+## Stage β step 1 CLOSED (session 6) — `hbase` assembled; publicize granted
+
+Planner GRANTED the publicize (minimal form): `private` dropped from
+`covDivergence_l2Norm_le_covGrad_local` (`DirichletSpectralBochnerGap.lean:599`) ONLY (the
+`:479–597` support tower stays `private` — a public theorem freely uses same-file privates).
+This is the sole one-token edit in that foundational file.
+
+Three theorems added to this leaf (verification: authoritative `lake build +…UnifBochnerGap`,
+which refreshes the edited DirichletSpectralBochnerGap olean — status recorded in Status log):
+- `rawConnLapIter_unif` — uniform `:759` (`∇^a∘Δ_∇` bound): public dimension-only
+  `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen` + `roughLapComm_unif`.
+- `baseAddLower_unif` — uniform `:1085`, **the `hbase` provider**: its conclusion is EXACTLY
+  `bochner_step_unif`'s `hbase`; explicit constant `(Cfun 0)² + 2·Crc·√finrank·Cfun 1`
+  (`Fc`-explicit heads + dimension), IBP via public
+  `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence` + the now-public covDivergence bound.
+- `bochner_step_hcurv` — **`hbase` DISCHARGED**: combines `baseAddLower_unif` +
+  `bochner_step_unif` so the only remaining hypothesis is the abstract `hcurv` (with explicit
+  `Fc`).  Induction-ready form for step 2.
+
+## `hsJet_le` audit (session 6, for step 2) — PASSES, no non-Λ quantity
+
+`hsJet_le` (`IteratedCovGradHsJetBound.lean:834`) → `jet_even:603` / `jet_odd:667`:
+- `jet_even` constant `= (2k+1)·Cg·(k+1)` — order factors × `Cg` from
+  `exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter` (the SAME Bochner elliptic recursion
+  `∇^j ≤ ∑ Δ^i` this file uniformizes).
+- `mode_le_jet:438` constant `= (Cfun 0)²`, `Cfun` from
+  `exists_iteratedCovGrad_rawConnLapIter_l2Norm_le` (iterated Δ = curvature commutator + dim).
+**Verdict: entirely curvature-commutator + dimension + order factors — NO spectral gap,
+injectivity radius, or `λ₁`.  Λ-controllable via the same `hcurv`/`Fc` mechanism.** (Its
+UNIFORM version is not free — it requires re-deriving `exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter`
+through `bochner_step_hcurv`, which is step-2 work — but the audit finds no blocker.)
+
+## Stage β steps 2–3 (after `hbase` — now unblocked)
+2. **Uniform strong induction** (mirror `:1439`): iterate `bochner_step_hcurv`, folding in the
+   uniform Sobolev-jet constant (uniform `hsJet_le`, built from the audited chain via
+   `bochner_step_hcurv`/`roughLapComm_unif`).
+3. **Coefficient-one gap** (mirror `cc_dirichlet_gap`, `:1539`) ⟹ `covsum_hs_unif`; the easy
+   direction (`hs_covsum_unif`) mirrors `exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general`.
 
 ## Status
+- 2026-07-24 (session 6): publicize GRANTED + applied (one token: `private` dropped from
+  `covDivergence_l2Norm_le_covGrad_local:599`; DirichletSpectralBochnerGap rebuilt GREEN,
+  63s — NO downstream breakage).  `hbase` ASSEMBLED + DISCHARGED: `rawConnLapIter_unif`,
+  `baseAddLower_unif` (the `hbase` provider), `bochner_step_hcurv` (only `hcurv`/`Fc` remain)
+  — all three axiom-clean `[propext, Classical.choice, Quot.sound]`; authoritative
+  `lake build +…UnifBochnerGap` GREEN ("Build completed successfully (9342 jobs)", 46s).
+  One fix en route: `baseAddLower_unif` needed `set_option maxHeartbeats 1600000 in` (default
+  200000 timed out at the IBP `nlinarith`).  `hsJet_le` audit for step 2: PASSES (no non-Λ
+  quantity).  STEP 2 (strong induction) is next.  No plan edits; no commit.
 - 2026-07-24 (session 5): STEP 0 authoritative build of `UnifBochnerGap` GREEN ("Build
   completed successfully (9342 jobs)").  STEP 1: `roughLapComm_unif` + inlined
   `norm_iterCovGrad_comp` LANDED, both public theorems (`bochner_step_unif`,

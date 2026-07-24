@@ -596,7 +596,7 @@ private lemma riemannianFiberNormSq_covDivergence_le_local
   exact riemannianFiberNormSq_contract_le_succ_local (I := I) (M := M) g₀ s b
     (tensorCovDerivAt (I := I) (M := M) g₀ 0 (s + 1) V b (e i)) e rfl horth i
 
-private lemma covDivergence_l2Norm_le_covGrad_local
+lemma covDivergence_l2Norm_le_covGrad_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) :
     ‖covDivergence (I := I) (M := M) g₀ s V‖ ≤
       Real.sqrt (Module.finrank ℝ E) *
