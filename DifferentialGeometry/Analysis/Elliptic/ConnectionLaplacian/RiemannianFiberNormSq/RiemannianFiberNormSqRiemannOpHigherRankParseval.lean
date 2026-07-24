@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
@@ -24,6 +22,39 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+
+private local instance clm1_ts (r s : ℕ) (x : M) :
+    TopologicalSpace (Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.topologicalSpace
+private local instance clm1_ca (r s : ℕ) (x : M) :
+    ContinuousAdd (Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.topologicalAddGroup.toContinuousAdd
+private local instance clm1_acm (r s : ℕ) (x : M) :
+    AddCommMonoid (Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.addCommMonoid
+private local instance clm1_mod (r s : ℕ) (x : M) :
+    Module ℝ (Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.module
+private local instance clm2_ts (r s : ℕ) (x : M) :
+    TopologicalSpace (TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.topologicalSpace
+private local instance clm2_ca (r s : ℕ) (x : M) :
+    ContinuousAdd (TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.topologicalAddGroup.toContinuousAdd
+private local instance clm2_acm (r s : ℕ) (x : M) :
+    AddCommMonoid (TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.addCommMonoid
+private local instance clm2_mod (r s : ℕ) (x : M) :
+    Module ℝ (TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace r s I x) :=
+  ContinuousLinearMap.module
 
 noncomputable def coframeS
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
@@ -308,6 +339,17 @@ lemma tangent_orthonormalBasisS_witness
   · intro S
     rfl
 
+private lemma clmFinsetSum {X Y : Type*}
+    [TopologicalSpace X] [AddCommMonoid X] [Module ℝ X]
+    [TopologicalSpace Y] [AddCommMonoid Y] [Module ℝ Y] [ContinuousAdd Y]
+    {ι : Type*} (f : X →L[ℝ] Y) (t : Finset ι) (u : ι → X) :
+    f (∑ i ∈ t, u i) = ∑ i ∈ t, f (u i) := by
+  classical
+  induction t using Finset.induction with
+  | empty => rw [Finset.sum_empty, Finset.sum_empty, ContinuousLinearMap.map_zero]
+  | insert i A hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, ContinuousLinearMap.map_add, ih]
+
 omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannOp_tensorCovS_frame_expand
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
@@ -324,9 +366,9 @@ lemma riemannOp_tensorCovS_frame_expand
   have hw : w = ∑ j : Fin n, g.inner x (e j) w • e j := hv_expand w
   have hRv : R v = ∑ i : Fin n, g.inner x (e i) v • R (e i) := by
     conv_lhs => rw [hv]
-    rw [map_sum]
+    rw [clmFinsetSum R]
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul]
   have hRvw : R v w = ∑ i : Fin n, g.inner x (e i) v • R (e i) w := by
     rw [hRv, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -335,9 +377,9 @@ lemma riemannOp_tensorCovS_frame_expand
       ∑ j : Fin n, g.inner x (e j) w • R (e i) (e j) := by
     intro i
     conv_lhs => rw [hw]
-    rw [map_sum]
+    rw [clmFinsetSum (R (e i))]
     refine Finset.sum_congr rfl (fun j _ => ?_)
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul]
   have hRvwT : R v w T = ∑ i : Fin n, g.inner x (e i) v • (R (e i) w) T := by
     rw [hRvw, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -448,7 +490,7 @@ lemma sum_riemannianFiberNormSq_riemannOpS_le_Cx
         ∑ J : Fin s → Fin n,
           cT J • R (e i) (e j) (dualTensorFrameS (I := I) (M := M) g x s e J) := by
       conv_lhs => rw [hTexp]
-      rw [map_sum]
+      rw [clmFinsetSum (R (e i) (e j))]
       refine Finset.sum_congr rfl (fun J _ => ?_)
       rw [ContinuousLinearMap.map_smul]
     rw [hRT]
@@ -649,7 +691,7 @@ lemma tensorRS_dualFrame_expansion
       ∑ K : Fin r → Fin n,
         (τ (fun k : Fin r => e (K k))) • Tclm (coframeS (I := I) (M := M) g x r e K) := by
     conv_lhs => rw [hτexp]
-    rw [map_sum]
+    rw [clmFinsetSum Tclm]
     refine Finset.sum_congr rfl (fun K _ => ?_)
     rw [ContinuousLinearMap.map_smul]
   have hTcoframe : ∀ K : Fin r → Fin n,
@@ -722,9 +764,9 @@ lemma riemannOp_tensorCovRS_frame_expand
   have hw : w = ∑ j : Fin n, g.inner x (e j) w • e j := hv_expand w
   have hRv : R v = ∑ i : Fin n, g.inner x (e i) v • R (e i) := by
     conv_lhs => rw [hv]
-    rw [map_sum]
+    rw [clmFinsetSum R]
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul]
   have hRvw : R v w = ∑ i : Fin n, g.inner x (e i) v • R (e i) w := by
     rw [hRv, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -733,9 +775,9 @@ lemma riemannOp_tensorCovRS_frame_expand
       ∑ j : Fin n, g.inner x (e j) w • R (e i) (e j) := by
     intro i
     conv_lhs => rw [hw]
-    rw [map_sum]
+    rw [clmFinsetSum (R (e i))]
     refine Finset.sum_congr rfl (fun j _ => ?_)
-    rw [map_smul]
+    rw [ContinuousLinearMap.map_smul]
   have hRvwT : R v w T = ∑ i : Fin n, g.inner x (e i) v • (R (e i) w) T := by
     rw [hRvw, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -845,9 +887,9 @@ lemma sum_riemannianFiberNormSq_riemannOpRS_le_Cx
         ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
           cT (K, J) • R (e i) (e j) (dualTensorFrameRS (I := I) (M := M) g x r s e K J) := by
       conv_lhs => rw [hTexp]
-      rw [map_sum]
+      rw [clmFinsetSum (R (e i) (e j))]
       refine Finset.sum_congr rfl (fun K _ => ?_)
-      rw [map_sum]
+      rw [clmFinsetSum (R (e i) (e j))]
       refine Finset.sum_congr rfl (fun J _ => ?_)
       rw [ContinuousLinearMap.map_smul]
     rw [hRT]

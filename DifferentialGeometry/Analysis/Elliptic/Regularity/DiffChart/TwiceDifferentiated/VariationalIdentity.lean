@@ -56,8 +56,129 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 4000000 in
 
+private lemma integrable_mul_triple_of_tsupport {Ω K : Set EuclN}
+    (hΩ_open : IsOpen Ω) (hK_in : K ⊆ Ω) (hK_compact : IsCompact K)
+    (hK_closed : IsClosed K) (hK_meas : MeasurableSet K)
+    {a : EuclN → ℝ} (ha_cont_on : ContinuousOn a Ω)
+    {u : EuclN → ℝ} (hu_int : IntegrableOn u K (volume : Measure EuclN))
+    {h₁ : EuclN → ℝ} (hh₁_cont : Continuous h₁) (hh₁_supp : tsupport h₁ ⊆ K) :
+    Integrable (fun y => a y * u y * h₁ y)
+      ((volume : Measure EuclN).restrict Ω) := by
+  let h_prod : EuclN → ℝ := fun y => a y * h₁ y
+  have hh_prod_supp : tsupport h_prod ⊆ K := by
+    refine closure_minimal (fun y hy => ?_) hK_closed
+    by_contra hy_notin
+    have hh1y : h₁ y = 0 := image_eq_zero_of_notMem_tsupport
+      (fun h => hy_notin (hh₁_supp h))
+    exact hy (by change a y * _ = 0; rw [hh1y, mul_zero])
+  have hh_prod_cont : Continuous h_prod := by
+    rw [continuous_iff_continuousAt]
+    intro y
+    by_cases hy : y ∈ K
+    · exact (ha_cont_on.continuousAt
+        (hΩ_open.mem_nhds (hK_in hy))).mul hh₁_cont.continuousAt
+    · have h_compl_open : IsOpen (Kᶜ) := hK_closed.isOpen_compl
+      have h_eq_zero : ∀ᶠ z in 𝓝 y, h_prod z = 0 := by
+        filter_upwards [h_compl_open.mem_nhds hy] with z hz
+        have hh1z : h₁ z = 0 := image_eq_zero_of_notMem_tsupport
+          (fun h => hz (hh₁_supp h))
+        change a z * h₁ z = 0; rw [hh1z, mul_zero]
+      rw [continuousAt_congr h_eq_zero]; exact continuousAt_const
+  have hh_prod_contOn_K : ContinuousOn h_prod K := hh_prod_cont.continuousOn
+  have hu_h_int_K : IntegrableOn (fun y => u y * h_prod y) K
+      (volume : Measure EuclN) :=
+    hu_int.mul_continuousOn hh_prod_contOn_K hK_compact
+  have h_vanish : ∀ y, y ∉ K → u y * h_prod y = 0 := by
+    intro y hy
+    have : h_prod y = 0 :=
+      image_eq_zero_of_notMem_tsupport (fun hy_supp => hy (hh_prod_supp hy_supp))
+    simp [this]
+  have h_eq_ind :
+      (fun y => u y * h_prod y) = K.indicator (fun y => u y * h_prod y) := by
+    funext y
+    by_cases hy : y ∈ K
+    · simp [Set.indicator_of_mem hy]
+    · simp [Set.indicator_of_notMem hy, h_vanish y hy]
+  have ind_int : Integrable (K.indicator (fun y => u y * h_prod y))
+      (volume : Measure EuclN) :=
+    (integrable_indicator_iff hK_meas).mpr hu_h_int_K
+  have full_int : Integrable (fun y => u y * h_prod y) (volume : Measure EuclN) := by
+    rw [h_eq_ind]; exact ind_int
+  have h_reassoc : (fun y => u y * h_prod y) =
+      (fun y => a y * u y * h₁ y) := by
+    funext y; change u y * (a y * h₁ y) = _; ring
+  rw [h_reassoc] at full_int
+  exact full_int.restrict
+
+private lemma fderiv_apply_continuousOn_of_contDiffOn {Ω : Set EuclN}
+    (hΩ : IsOpen Ω) {a : EuclN → ℝ} (ha : ContDiffOn ℝ ∞ a Ω) (v : EuclN) :
+    ContinuousOn (fun y => (fderiv ℝ a y) v) Ω := by
+  have h_fderiv : ContDiffOn ℝ ∞ (fun y => fderiv ℝ a y) Ω :=
+    ((contDiffOn_infty_iff_fderiv_of_isOpen hΩ).1 ha).2
+  have h_eval : ContDiff ℝ ∞ (fun (L : EuclN →L[ℝ] ℝ) => L v) :=
+    (ContinuousLinearMap.apply ℝ ℝ v).contDiff
+  exact (h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)).continuousOn
+
+private lemma integral_add_thirteen {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 : α → ℝ}
+    (h1 : Integrable f1 μ)
+    (h2 : Integrable f2 μ)
+    (h3 : Integrable f3 μ)
+    (h4 : Integrable f4 μ)
+    (h5 : Integrable f5 μ)
+    (h6 : Integrable f6 μ)
+    (h7 : Integrable f7 μ)
+    (h8 : Integrable f8 μ)
+    (h9 : Integrable f9 μ)
+    (h10 : Integrable f10 μ)
+    (h11 : Integrable f11 μ)
+    (h12 : Integrable f12 μ)
+    (h13 : Integrable f13 μ) :
+    (∫ y, f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y + f12 y + f13 y ∂μ) =
+      (∫ y, f1 y ∂μ) +
+      (∫ y, f2 y ∂μ) +
+      (∫ y, f3 y ∂μ) +
+      (∫ y, f4 y ∂μ) +
+      (∫ y, f5 y ∂μ) +
+      (∫ y, f6 y ∂μ) +
+      (∫ y, f7 y ∂μ) +
+      (∫ y, f8 y ∂μ) +
+      (∫ y, f9 y ∂μ) +
+      (∫ y, f10 y ∂μ) +
+      (∫ y, f11 y ∂μ) +
+      (∫ y, f12 y ∂μ) +
+      (∫ y, f13 y ∂μ) := by
+  have hs2 : Integrable (fun y => f1 y + f2 y) μ := h1.add h2
+  have hs3 : Integrable (fun y => f1 y + f2 y + f3 y) μ := hs2.add h3
+  have hs4 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y) μ := hs3.add h4
+  have hs5 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y) μ := hs4.add h5
+  have hs6 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y) μ := hs5.add h6
+  have hs7 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y) μ := hs6.add h7
+  have hs8 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y) μ := hs7.add h8
+  have hs9 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y) μ := hs8.add h9
+  have hs10 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y) μ := hs9.add h10
+  have hs11 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y) μ := hs10.add h11
+  have hs12 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y + f12 y) μ := hs11.add h12
+  rw [MeasureTheory.integral_add hs12 h13,
+    MeasureTheory.integral_add hs11 h12,
+    MeasureTheory.integral_add hs10 h11,
+    MeasureTheory.integral_add hs9 h10,
+    MeasureTheory.integral_add hs8 h9,
+    MeasureTheory.integral_add hs7 h8,
+    MeasureTheory.integral_add hs6 h7,
+    MeasureTheory.integral_add hs5 h6,
+    MeasureTheory.integral_add hs4 h5,
+    MeasureTheory.integral_add hs3 h4,
+    MeasureTheory.integral_add hs2 h3,
+    MeasureTheory.integral_add h1 h2]
+
+-- Residual diffuse `whnf`/`isDefEq` cost of this ~1600-line chart identity. Factoring its
+-- integral-additivity (`integral_add_thirteen`), triple-integrability
+-- (`integrable_mul_triple_of_tsupport`), fderiv-apply (`fderiv_apply_continuousOn_of_contDiffOn`)
+-- and sum-distribution steps into the lemmas above cut the needed budget from 4000000 to ~230000
+-- (default 200000); the remainder is spread across the 295-line numerator-decomposition block.
+set_option maxHeartbeats 250000 in
 theorem twice_differentiated_variational_identity_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -86,16 +207,16 @@ theorem twice_differentiated_variational_identity_holds
         effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
-  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  let Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  set D_base := chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M)
+  let D_base := chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M)
     g α (laplacianDomainPow_succ_subset_laplacianDomain
-      (I := I) (M := M) g 1 hu_h) with hD_base_def
+      (I := I) (M := M) g 1 hu_h)
   have h_base_f_chart_memW1p :=
     base_f_chart_memW1p_from_residual_memW1p (I := I) (M := M) g α hu_h
       (fChartResidual_memW1p_truly_unconditional (I := I) (M := M) g α hu_h)
-  set ψl₂ : EuclN → ℝ := fun y => (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1)
-    with hψl₂_def
+  let ψl₂ : EuclN → ℝ := fun y => (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1)
+   
   have hψl₂_smooth : ContDiff ℝ (⊤ : ℕ∞) ψl₂ :=
     contDiff_fderiv_apply_single (ψ := ψ) hψ_smooth l₂
   have hψl₂_cs : HasCompactSupport ψl₂ :=
@@ -112,8 +233,8 @@ theorem twice_differentiated_variational_identity_holds
     change (fderiv ℝ (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single l₂ 1)) y)
         (EuclideanSpace.single j 1) = _
     exact fderiv_apply_single_swap (ψ := ψ) hψ_smooth y j l₂
-  set ψj : Fin (Module.finrank ℝ E) → EuclN → ℝ :=
-    fun j y => (fderiv ℝ ψ y) (EuclideanSpace.single j 1) with hψj_def
+  let ψj : Fin (Module.finrank ℝ E) → EuclN → ℝ :=
+    fun j y => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
   have hψj_smooth : ∀ j, ContDiff ℝ (⊤ : ℕ∞) (ψj j) := fun j =>
     contDiff_fderiv_apply_single (ψ := ψ) hψ_smooth j
   have hψj_cs : ∀ j, HasCompactSupport (ψj j) := fun j =>
@@ -287,7 +408,7 @@ theorem twice_differentiated_variational_identity_holds
     refine Finset.sum_congr rfl ?_; intro i _
     refine Finset.sum_congr rfl ?_; intro j _
     rw [h_schwarz_A1 y i j]
-  set K : Set EuclN := tsupport ψ with hK_def
+  let K : Set EuclN := tsupport ψ
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
   have hK_meas : MeasurableSet K := (isClosed_tsupport ψ).measurableSet
@@ -339,51 +460,8 @@ theorem twice_differentiated_variational_identity_holds
         Integrable (fun y => a y * u y * h₁ y)
           ((volume : Measure EuclN).restrict Ω) := by
     intro a ha_cont_on u hu_int h₁ hh₁_cont hh₁_supp
-    set h_prod : EuclN → ℝ := fun y => a y * h₁ y with hh_prod_def
-    have hh_prod_supp : tsupport h_prod ⊆ K := by
-      refine closure_minimal (fun y hy => ?_) (isClosed_tsupport ψ)
-      by_contra hy_notin
-      have hh1y : h₁ y = 0 := image_eq_zero_of_notMem_tsupport
-        (fun h => hy_notin (hh₁_supp h))
-      exact hy (by change a y * _ = 0; rw [hh1y, mul_zero])
-    have hh_prod_cont : Continuous h_prod := by
-      rw [continuous_iff_continuousAt]
-      intro y
-      by_cases hy : y ∈ K
-      · exact (ha_cont_on.continuousAt
-          (hΩ_open.mem_nhds (hK_in hy))).mul hh₁_cont.continuousAt
-      · have h_compl_open : IsOpen (Kᶜ) := (isClosed_tsupport _).isOpen_compl
-        have h_eq_zero : ∀ᶠ z in 𝓝 y, h_prod z = 0 := by
-          filter_upwards [h_compl_open.mem_nhds hy] with z hz
-          have hh1z : h₁ z = 0 := image_eq_zero_of_notMem_tsupport
-            (fun h => hz (hh₁_supp h))
-          change a z * h₁ z = 0; rw [hh1z, mul_zero]
-        rw [continuousAt_congr h_eq_zero]; exact continuousAt_const
-    have hh_prod_contOn_K : ContinuousOn h_prod K := hh_prod_cont.continuousOn
-    have hu_h_int_K : IntegrableOn (fun y => u y * h_prod y) K
-        (volume : Measure EuclN) :=
-      hu_int.mul_continuousOn hh_prod_contOn_K hK_compact
-    have h_vanish : ∀ y, y ∉ K → u y * h_prod y = 0 := by
-      intro y hy
-      have : h_prod y = 0 :=
-        image_eq_zero_of_notMem_tsupport (fun hy_supp => hy (hh_prod_supp hy_supp))
-      simp [this]
-    have h_eq_ind :
-        (fun y => u y * h_prod y) = K.indicator (fun y => u y * h_prod y) := by
-      funext y
-      by_cases hy : y ∈ K
-      · simp [Set.indicator_of_mem hy]
-      · simp [Set.indicator_of_notMem hy, h_vanish y hy]
-    have ind_int : Integrable (K.indicator (fun y => u y * h_prod y))
-        (volume : Measure EuclN) :=
-      (integrable_indicator_iff hK_meas).mpr hu_h_int_K
-    have full_int : Integrable (fun y => u y * h_prod y) (volume : Measure EuclN) := by
-      rw [h_eq_ind]; exact ind_int
-    have h_reassoc : (fun y => u y * h_prod y) =
-        (fun y => a y * u y * h₁ y) := by
-      funext y; change u y * (a y * h₁ y) = _; ring
-    rw [h_reassoc] at full_int
-    exact full_int.restrict
+    exact integrable_mul_triple_of_tsupport hΩ_open hK_in hK_compact
+      (isClosed_tsupport ψ) hK_meas ha_cont_on hu_int hh₁_cont hh₁_supp
   have h_chosenSecond_int : ∀ i l : Fin (Module.finrank ℝ E),
       IntegrableOn (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l)
         K (volume : Measure EuclN) :=
@@ -405,8 +483,8 @@ theorem twice_differentiated_variational_identity_holds
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
           (fderiv ℝ (ψj j) y) (EuclideanSpace.single l₂ 1))
         ((volume : Measure EuclN).restrict Ω) := fun i j => by
-    set h₁ : EuclN → ℝ := fun y =>
-      (fderiv ℝ (ψj j) y) (EuclideanSpace.single l₂ 1) with hh₁_def
+    let h₁ : EuclN → ℝ := fun y =>
+      (fderiv ℝ (ψj j) y) (EuclideanSpace.single l₂ 1)
     have hh₁_cont : Continuous h₁ := hψj_fderiv_cont j l₂
     have hh₁_supp : tsupport h₁ ⊆ K := by
       refine closure_minimal (fun y hy => ?_) (isClosed_tsupport ψ)
@@ -421,8 +499,8 @@ theorem twice_differentiated_variational_identity_holds
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
         ((volume : Measure EuclN).restrict Ω) := fun i j => by
-    set h₁ : EuclN → ℝ := fun y =>
-      (fderiv ℝ ψ y) (EuclideanSpace.single j 1) with hh₁_def
+    let h₁ : EuclN → ℝ := fun y =>
+      (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
     have hh₁_cont : Continuous h₁ := hψ_fderiv_cont j
     have hh₁_supp : tsupport h₁ ⊆ K := by
       refine closure_minimal (fun y hy => ?_) (isClosed_tsupport ψ)
@@ -437,7 +515,7 @@ theorem twice_differentiated_variational_identity_holds
           D_base.weak_partial i y *
           (fderiv ℝ (ψj j) y) (EuclideanSpace.single l₂ 1))
         ((volume : Measure EuclN).restrict Ω) := fun i j => by
-    set h₁ : EuclN → ℝ := fun y =>
+    let h₁ : EuclN → ℝ := fun y =>
       (fderiv ℝ (ψj j) y) (EuclideanSpace.single l₂ 1)
     have hh₁_cont : Continuous h₁ := hψj_fderiv_cont j l₂
     have hh₁_supp : tsupport h₁ ⊆ K := by
@@ -557,7 +635,7 @@ theorem twice_differentiated_variational_identity_holds
     fun _ => rfl
   have h_ψj_eq : ∀ j : Fin (Module.finrank ℝ E), ∀ y : EuclN,
       ψj j y = (fderiv ℝ ψ y) (EuclideanSpace.single j 1) := fun _ _ => rfl
-  set h_pair_A1_inner_ext : ∀ i j : Fin (Module.finrank ℝ E),
+  let h_pair_A1_inner_ext : ∀ i j : Fin (Module.finrank ℝ E),
       (∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
@@ -572,7 +650,7 @@ theorem twice_differentiated_variational_identity_holds
                 chosenThirdMixedPartialChartPushedU
                   (I := I) (M := M) g α u_h i l₁ j y *
                 ψ y
-              ∂(volume : Measure EuclN))) := h_pair_A1_inner with hh_ext
+              ∂(volume : Measure EuclN))) := h_pair_A1_inner
   have h_int_X1_ij : ∀ i j,
       Integrable (fun y => (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
             (EuclideanSpace.single l₂ 1) *
@@ -729,29 +807,29 @@ theorem twice_differentiated_variational_identity_holds
     simp_rw [Finset.sum_neg_distrib (s :=
       (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
   rw [h_sum_distrib_LHS_A1, h_sum_distrib_C] at h_once
-  set α1_sub1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+  let α1_sub1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
         (EuclideanSpace.single l₂ 1) *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
       ψj j y
-      ∂(volume : Measure EuclN) with hα1_sub1_def
-  set α1_sub2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let α1_sub2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω, weightedInvGramOnEuclid (I := I) g α i j y *
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ l₂ y *
       ψj j y
-      ∂(volume : Measure EuclN) with hα1_sub2_def
-  set γ_sub1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let γ_sub1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
         (EuclideanSpace.single l₂ 1) *
       D_base.weak_partial i y * ψj j y
-      ∂(volume : Measure EuclN) with hγ_sub1_def
-  set γ_sub2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let γ_sub2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
       ψj j y
-      ∂(volume : Measure EuclN) with hγ_sub2_def
+      ∂(volume : Measure EuclN)
   have hα1_sub1_inner_IBP_form : ∀ i j : Fin (Module.finrank ℝ E),
       α1_sub1 i j = -((∫ y in Ω,
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -938,7 +1016,7 @@ theorem twice_differentiated_variational_identity_holds
               ψj j y
               ∂(volume : Measure EuclN)) from rfl]
     rw [hSwap_LHS1]
-  set I_lhs1_target : ℝ :=
+  let I_lhs1_target : ℝ :=
     ∫ y in Ω,
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -946,47 +1024,47 @@ theorem twice_differentiated_variational_identity_holds
             chosenThirdMixedPartialChartPushedU
               (I := I) (M := M) g α u_h i l₁ l₂ y *
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
-      ∂(volume : Measure EuclN) with hI_lhs1_def
-  set I_lhs2_target : ℝ :=
+      ∂(volume : Measure EuclN)
+  let I_lhs2_target : ℝ :=
     ∫ y in Ω, densityOnEuclid (I := I) g α y *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h l₁ l₂ y * ψ y
-      ∂(volume : Measure EuclN) with hI_lhs2_def
-  set I_rhs_target : ℝ :=
+      ∂(volume : Measure EuclN)
+  let I_rhs_target : ℝ :=
     ∫ y in Ω, densityOnEuclid (I := I) g α y *
       effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
-      ∂(volume : Measure EuclN) with hI_rhs_def
-  set X1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let X1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
         (EuclideanSpace.single j 1) *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
       ψ y
-      ∂(volume : Measure EuclN) with hX1_def
-  set X2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let X2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
       ψ y
-      ∂(volume : Measure EuclN) with hX2_def
-  set C1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let C1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
         (EuclideanSpace.single j 1) *
       D_base.weak_partial i y * ψ y
-      ∂(volume : Measure EuclN) with hC1_def
-  set C2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let C2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω, weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y * ψ y
-      ∂(volume : Measure EuclN) with hC2_def
-  set C3 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let C3 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
         (EuclideanSpace.single j 1) *
       chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y * ψ y
-      ∂(volume : Measure EuclN) with hC3_def
-  set C4 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+      ∂(volume : Measure EuclN)
+  let C4 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω, weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
       chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y * ψ y
-      ∂(volume : Measure EuclN) with hC4_def
+      ∂(volume : Measure EuclN)
   have h_d2aij_contDiffOn : ∀ i j : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ (⊤ : ℕ∞)
         (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) Ω :=
@@ -1114,27 +1192,27 @@ theorem twice_differentiated_variational_identity_holds
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), α1_sub2 i j) = I_lhs1_target := by
     rw [h_α1_sub2_eq]; exact h_lhs1_swap_to_sum
-  set N_A3 : ℝ := ∫ y in Ω,
+  let N_A3 : ℝ := ∫ y in Ω,
     (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
-    D_base.weak_partial l₁ y * ψ y ∂(volume : Measure EuclN) with hN_A3_def
-  set N_B1 : ℝ := ∫ y in Ω,
+    D_base.weak_partial l₁ y * ψ y ∂(volume : Measure EuclN)
+  let N_B1 : ℝ := ∫ y in Ω,
     (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
     chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
-    ∂(volume : Measure EuclN) with hN_B1_def
-  set N_B2 : ℝ := ∫ y in Ω, densityOnEuclid (I := I) g α y *
+    ∂(volume : Measure EuclN)
+  let N_B2 : ℝ := ∫ y in Ω, densityOnEuclid (I := I) g α y *
     fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
-    ∂(volume : Measure EuclN) with hN_B2_def
-  set N_D1 : ℝ := ∫ y in Ω,
+    ∂(volume : Measure EuclN)
+  let N_D1 : ℝ := ∫ y in Ω,
     (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
-    D_base.u_chart y * ψ y ∂(volume : Measure EuclN) with hN_D1_def
-  set N_D2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
-    D_base.weak_partial l₂ y * ψ y ∂(volume : Measure EuclN) with hN_D2_def
-  set N_E1 : ℝ := ∫ y in Ω,
+    D_base.u_chart y * ψ y ∂(volume : Measure EuclN)
+  let N_D2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+    D_base.weak_partial l₂ y * ψ y ∂(volume : Measure EuclN)
+  let N_E1 : ℝ := ∫ y in Ω,
     (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
-    D_base.f_chart y * ψ y ∂(volume : Measure EuclN) with hN_E1_def
-  set N_E2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
+    D_base.f_chart y * ψ y ∂(volume : Measure EuclN)
+  let N_E2 : ℝ := ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
     chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
-    ∂(volume : Measure EuclN) with hN_E2_def
+    ∂(volume : Measure EuclN)
   have h_A2_named :
       (∫ y in Ω, densityOnEuclid (I := I) g α y * D_base.weak_partial l₁ y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
@@ -1152,9 +1230,9 @@ theorem twice_differentiated_variational_identity_holds
       (∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y * D_base.f_chart y *
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_E1 + N_E2) := h_E
-  set I_num : ℝ := ∫ y in Ω,
+  let I_num : ℝ := ∫ y in Ω,
     effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
-    ∂(volume : Measure EuclN) with hI_num_def
+    ∂(volume : Measure EuclN)
   have h_psi_cont : Continuous ψ := hψ_smooth.continuous
   have h_psi_supp : tsupport ψ ⊆ K := le_refl _
   have h_base_uc_int : IntegrableOn D_base.u_chart K (volume : Measure EuclN) :=
@@ -1228,18 +1306,8 @@ theorem twice_differentiated_variational_identity_holds
             (I := I) g α i j l₁ l₂) y) (EuclideanSpace.single j 1) *
           D_base.weak_partial i y * ψ y)
         ((volume : Measure EuclN).restrict Ω) := fun i j => by
-    have h_ai_cont_on : ContinuousOn (fun y =>
-        (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
-          (EuclideanSpace.single j 1)) Ω := by
-      have h_smooth := h_d2aij_contDiffOn i j
-      have h_open : IsOpen Ω := hΩ_open
-      have h_fderiv : ContDiffOn ℝ ∞ (fun y => fderiv ℝ
-          (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y) Ω :=
-        ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_smooth).2
-      have h_eval : ContDiff ℝ ∞ (fun (L : EuclN →L[ℝ] ℝ) =>
-          L (EuclideanSpace.single j 1)) :=
-        (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single j (1 : ℝ))).contDiff
-      exact (h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)).continuousOn
+    have h_ai_cont_on := fderiv_apply_continuousOn_of_contDiffOn hΩ_open
+      (h_d2aij_contDiffOn i j) (EuclideanSpace.single j (1 : ℝ))
     exact integrable_triple_psi h_ai_cont_on (h_base_wp_int i)
   have h_int_C2_pair : ∀ i j,
       Integrable (fun y => weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
@@ -1349,59 +1417,59 @@ theorem twice_differentiated_variational_identity_holds
       simp only [add_mul, sub_mul, Finset.sum_mul]
       ring
     rw [setIntegral_congr_fun hΩ_open.measurableSet (fun y _ => h_integrand_eq y)]
-    set int_A1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+    let int_A1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
             (EuclideanSpace.single j 1) *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁ y *
-          ψ y with hint_A1_def
-    set int_A2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+          ψ y
+    let int_A2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α i j l₂ y *
           chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₁ j y *
-          ψ y with hint_A2_def
-    set int_A3 : EuclN → ℝ := fun y =>
+          ψ y
+    let int_A3 : EuclN → ℝ := fun y =>
       - (densityDerivOnEuclid (I := I) g α l₂ y *
-          D_base.weak_partial l₁ y * ψ y) with hint_A3_def
-    set int_B1 : EuclN → ℝ := fun y =>
+          D_base.weak_partial l₁ y * ψ y)
+    let int_B1 : EuclN → ℝ := fun y =>
       densityDerivOnEuclid (I := I) g α l₂ y *
-        chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y with hint_B1_def
-    set int_B2 : EuclN → ℝ := fun y =>
+        chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
+    let int_B2 : EuclN → ℝ := fun y =>
       densityOnEuclid (I := I) g α y *
-        fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y with hint_B2_def
-    set int_C1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+        fChartDeriv2 (I := I) (M := M) g α hu_h l₁ l₂ y * ψ y
+    let int_C1 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
             (EuclideanSpace.single j 1) *
-          D_base.weak_partial i y * ψ y with hint_C1_def
-    set int_C2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+          D_base.weak_partial i y * ψ y
+    let int_C2 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y *
-          ψ y with hint_C2_def
-    set int_C3 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+          ψ y
+    let int_C3 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₁) y)
             (EuclideanSpace.single j 1) *
           chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₂ y *
-          ψ y with hint_C3_def
-    set int_C4 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
+          ψ y
+    let int_C4 : EuclN → ℝ := fun y => ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         weightedInvGramDerivOnEuclid (I := I) g α i j l₁ y *
           chosenThirdMixedPartialChartPushedU (I := I) (M := M) g α u_h i l₂ j y *
-          ψ y with hint_C4_def
-    set int_D1 : EuclN → ℝ := fun y =>
+          ψ y
+    let int_D1 : EuclN → ℝ := fun y =>
       - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-          D_base.u_chart y * ψ y) with hint_D1_def
-    set int_D2 : EuclN → ℝ := fun y =>
+          D_base.u_chart y * ψ y)
+    let int_D2 : EuclN → ℝ := fun y =>
       - (densityDerivOnEuclid (I := I) g α l₁ y *
-          D_base.weak_partial l₂ y * ψ y) with hint_D2_def
-    set int_E1 : EuclN → ℝ := fun y =>
+          D_base.weak_partial l₂ y * ψ y)
+    let int_E1 : EuclN → ℝ := fun y =>
       densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
-        D_base.f_chart y * ψ y with hint_E1_def
-    set int_E2 : EuclN → ℝ := fun y =>
+        D_base.f_chart y * ψ y
+    let int_E2 : EuclN → ℝ := fun y =>
       densityDerivOnEuclid (I := I) g α l₁ y *
-        chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y with hint_E2_def
+        chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
     have hint_A1 : Integrable int_A1 ((volume : Measure EuclN).restrict Ω) :=
       integrable_finset_sum _ (fun i _ =>
         integrable_finset_sum _ (fun j _ => h_int_X1_named i j))
@@ -1434,75 +1502,8 @@ theorem twice_differentiated_variational_identity_holds
       integrable_triple_psi h_d2c_cont_on h_base_fc_int
     have hint_E2 : Integrable int_E2 ((volume : Measure EuclN).restrict Ω) :=
       integrable_triple_psi h_dc_l₁_cont_on (h_chosenFChartDeriv_int l₂)
-    have hint_sum_A1A2 :
-        Integrable (fun y => int_A1 y + int_A2 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_A1.add hint_A2
-    have hint_sum_through_A3 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_A1A2.add hint_A3
-    have hint_sum_through_B1 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_A3.add hint_B1
-    have hint_sum_through_B2 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_B1.add hint_B2
-    have hint_sum_through_C1 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y) ((volume : Measure EuclN).restrict Ω) :=
-      hint_sum_through_B2.add hint_C1
-    have hint_sum_through_C2 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y) ((volume : Measure EuclN).restrict Ω) :=
-      hint_sum_through_C1.add hint_C2
-    have hint_sum_through_C3 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y + int_C3 y) ((volume : Measure EuclN).restrict Ω) :=
-      hint_sum_through_C2.add hint_C3
-    have hint_sum_through_C4 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y + int_C3 y + int_C4 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_C3.add hint_C4
-    have hint_sum_through_D1 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_C4.add hint_D1
-    have hint_sum_through_D2 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y + int_D2 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_D1.add hint_D2
-    have hint_sum_through_E1 :
-        Integrable (fun y => int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-          int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y + int_D2 y + int_E1 y)
-          ((volume : Measure EuclN).restrict Ω) := hint_sum_through_D2.add hint_E1
-    have h_int_split :
-        (∫ y in Ω, int_A1 y + int_A2 y + int_A3 y + int_B1 y + int_B2 y +
-            int_C1 y + int_C2 y + int_C3 y + int_C4 y + int_D1 y + int_D2 y +
-            int_E1 y + int_E2 y ∂(volume : Measure EuclN)) =
-        (∫ y in Ω, int_A1 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_A2 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_A3 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_B1 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_B2 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_C1 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_C2 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_C3 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_C4 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_D1 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_D2 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_E1 y ∂(volume : Measure EuclN)) +
-        (∫ y in Ω, int_E2 y ∂(volume : Measure EuclN)) := by
-      rw [MeasureTheory.integral_add hint_sum_through_E1 hint_E2]
-      rw [MeasureTheory.integral_add hint_sum_through_D2 hint_E1]
-      rw [MeasureTheory.integral_add hint_sum_through_D1 hint_D2]
-      rw [MeasureTheory.integral_add hint_sum_through_C4 hint_D1]
-      rw [MeasureTheory.integral_add hint_sum_through_C3 hint_C4]
-      rw [MeasureTheory.integral_add hint_sum_through_C2 hint_C3]
-      rw [MeasureTheory.integral_add hint_sum_through_C1 hint_C2]
-      rw [MeasureTheory.integral_add hint_sum_through_B2 hint_C1]
-      rw [MeasureTheory.integral_add hint_sum_through_B1 hint_B2]
-      rw [MeasureTheory.integral_add hint_sum_through_A3 hint_B1]
-      rw [MeasureTheory.integral_add hint_sum_A1A2 hint_A3]
-      rw [MeasureTheory.integral_add hint_A1 hint_A2]
+    have h_int_split := integral_add_thirteen hint_A1 hint_A2 hint_A3 hint_B1
+      hint_B2 hint_C1 hint_C2 hint_C3 hint_C4 hint_D1 hint_D2 hint_E1 hint_E2
     have eq_intA1 : (∫ y in Ω, int_A1 y ∂(volume : Measure EuclN)) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E), X1 i j := by
