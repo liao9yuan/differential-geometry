@@ -689,6 +689,28 @@ the Codex-blocked concrete instantiation, mirroring the
   `lc0InsertBase_realizedFam_perOrder_topSeparated` (top piece,
   `Ktop = Ktop_DLb`), `sq_le_five_add`.
 
+## Parallel lanes (2026-07-24, user-authorized)
+
+Three executor lanes run concurrently (user: “可以平行工作,多安排几个
+opus session”).  Disjoint file sets; every lane keeps the one-Lean-process
++ wait-poll protocol, so checks serialize on the machine while
+editing/recon overlaps:
+
+- LANE A (item 2 supply): lieCorr0 producer — LieCorr0Split/LowJet repair
+  (№20) + the new leaf `LieCorr0CoeffL2JetBound.lean`.
+- LANE B (item 5): fixed-horizon representative —
+  `HeatSemigroup/MaxRegSolutionJointlySmooth.lean` recon + additive
+  fixed-horizon variant (timeH1 modulus replaces the qualitative t=0 δ);
+  status in `MaxRegSolutionJointlySmooth.md` ONLY.
+- LANE C (item 6): class-uniform packet RECON-ONLY — deliverable
+  `ShortTime/UNIF_ITEM6_RECON.md` (inventory, narrow 3-order statement
+  list, per-statement route/risk/effort, canonical home).  No Lean.
+
+Parallel-mode recording rule: lanes B/C do NOT edit this plan (planner
+consolidates); lane A retains its status-log permission.  After lanes
+close: item-2 threeArm assembly (needs lane A), item-6 build (needs lane
+C ratified), final (N) assembly last.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
