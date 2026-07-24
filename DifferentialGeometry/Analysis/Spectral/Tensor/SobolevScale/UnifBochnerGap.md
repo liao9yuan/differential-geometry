@@ -203,6 +203,33 @@ endpoints (`covsum_hs_unif`/`hs_covsum_unif`) is exactly this wrapper layer + th
 induction; STEP 2.1's hard mathematical content (the Bochner elliptic recursion) is now DONE.
 
 ## Status
+- 2026-07-24 (session 9): STEP 2.1 WRAPPER LAYER COMPLETE — BOTH `Hs`↔covsum endpoints LANDED +
+  VERIFIED + AUDITED.  Publicize GRANTED + applied (four one-token edits in
+  `IteratedCovGradHsJetBound.lean`: `private` dropped from `rawIter_tsum`, `covIter_tsum`,
+  `covIter_odd`, `rawIter_even`; module rebuilt GREEN, 58s, no downstream breakage).  Eight new
+  public theorems in `UnifBochnerGap.lean` (all axiom-clean `[propext, Classical.choice,
+  Quot.sound]`; authoritative `lake build +…UnifBochnerGap` GREEN):
+  - HARD direction (covsum ≤ `Hs`): `jetEven_unif` (even, via `elliptic_lapSum_unif` +
+    `rawIter_even` + `ccToHs_norm_mono`); `jetOdd_unif` (odd, via `elliptic_lapSum_unif` at rank
+    `s+1` + `covIter_odd` + the `Fc`-explicit commutator); **`covsum_hs_unif`** = uniform
+    `hsJet_le` (`:834` shape), the endpoint.
+  - Commutator layer: `iterLapGradComm_unif` (`‖∇^p([Δ^i,∇]S)‖ ≤ Cfun(p)·∑_{a<2i+p}‖∇^a S‖`,
+    `Fc`+dim-explicit, mirror of the private aux `:673`) + `rawConnLapCovComm_unif` (`p=0` face).
+  - EASY direction (`Hs` ≤ covsum): `iterRawLap_unif` (`‖∇^p(Δ^i S)‖ ≤ Cfun(p)·∑_{b≤2i+p}‖∇^b S‖`,
+    mirror `:609`, iterates `rawConnLapIter_unif`); `modeLeJet_unif` (per-mode, via
+    `rawIter_tsum`/`covIter_tsum`); **`hsCovsum_unif`** = uniform `hs_le_jet` (`:855` shape),
+    the endpoint.
+  - Two more inlined private helpers (curvature-free, deps all public): `mode_summable_inl`
+    (mode-series summability, inline of private `mode_summable:533`) and `norm_icg_order_eq`
+    (jet-order reindex, inline of private `norm_iteratedCovGrad_order_eq:596`).  These + the
+    session-8 `rawIter_lap_reindex`/`lap_shift_le` are the only `private` inlines.
+  Constant chains are all `Fc`(+dimension/order)-explicit; the only `Classical.choose` calls are
+  of `rawConnLapIter_unif`'s `Fc`+dim constant (never a curvature sup), matching the original's
+  choose pattern but with the curvature already `hcurv`-packaged.  Distance to STEP 2.2/2.3: the
+  two endpoints ARE the `covsum_hs_unif`/`hs_covsum_unif` shapes (`hsJet_le`/`hs_le_jet` with
+  explicit `Fc` constants); STEP 2.2 (uniform strong induction, mirror `:1439`) can now iterate
+  `bochner_step_hcurv` and fold these jet constants, and STEP 2.3 (coefficient-one gap, mirror
+  `cc_dirichlet_gap:1539`) assembles the final gap.  No commit.
 - 2026-07-24 (session 8): STEP 2.1 CORE LANDED + VERIFIED + AUDITED.  `elliptic_lapSum_unif`
   (public, `:918`-shape, `Fc`-explicit) + 3 private helpers (`rawIter_lap_reindex`,
   `lap_shift_le`, `elliptic_engine`).  Authoritative `lake build +…UnifBochnerGap`: "Build
