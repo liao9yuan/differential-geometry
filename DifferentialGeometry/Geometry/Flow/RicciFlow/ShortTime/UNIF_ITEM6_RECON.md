@@ -499,6 +499,24 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (S0 session 1, LANE C, Opus): item-6 **S0** (`covsum_cross_unif`) build STARTED.
+  HOME confirmed `HCGCompactness/UnifCovSumCross.lean` (NOT recon §5's `Analysis/Sobolev/
+  CrossMetric/` — S0's `MetricCovDerivOrderBoundOn` hyps are downstream of `Analysis/`, same
+  Finding-C layering as brick 2a).  Comparability predicate = REUSE `MetricUniformEquivalentOn`
+  (`= Λ`-comparability, `C=Λ`).  **Fiber-level layer LANDED sorry-free + verified** (`lake build`
+  3860 jobs EXIT=0; axioms `[propext, Classical.choice, Quot.sound]` on all three):
+  `covsumCross_fibSq` (two-sided per-order, `Λ^{±s}`), `covsumCross_fibNorm` (`√`, `Λ^{s/2}`),
+  `covsumCross_fibSum` (covariant-SUM shell, single constant `Λ^{(s+n)/2}`) — forwards the
+  committed `normSq0S_le_of_metric_equiv` / `sqrt_normSq0S_le_of_metric_equiv`.  The L² S0 pair
+  is NOT yet stated sorry-free: THREE located missing bricks remain (design note
+  `HCGCompactness/UnifCovSumCross.md`): (i) **volume** `dV_{g₀}≍_{Λ^{n/2}}dV_{gBase}` — the
+  explicit-`Λ` Loewner→determinant estimate the project deliberately avoided
+  (`Measure/CompactVolumeEquiv.lean:9`), self-contained matrix analysis; (ii) **RS↔0S fibre
+  currency bridge** (`riemannianFiberNormSq g 0 s` ↔ `normSq0S`) — the sibling
+  `MetricCovDerivBridge` lane's `normBridge`; (iii) **iterated connection change**
+  `∇^{g₀,j}=∇^{gBase,j}+Γ-diff` for generic `T`, the main tensor-calculus frontier (one-derivative
+  machinery exists in `Garding/CrossMetricEnergy.lean cross_point_le`).  S0 remains recon-§4
+  medium (2–3 sessions); session-1 boundary (green fiber layer) reached.
 - 2026-07-24 (session 3, brick 2a recon): (2a) is an ASSEMBLY of existing
   jet-envelope curvature-difference machinery, NOT a missing layer (Finding A),
   but the machinery is small-perturbation `Λ<2` only (Finding B) and its home is
