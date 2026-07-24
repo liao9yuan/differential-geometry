@@ -3311,6 +3311,16 @@ private lemma rfns_symmS_zero_le_dla (g₀ : SmoothRiemannianMetric I M)
           ring
         rw [hc0, hc2, one_mul, hnE]
 
+theorem symmC0_rfns_le (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
+    (hbound : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        ((symmS (I := I) (M := M) g₀ T).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 * δ ^ 2 :=
+  rfns_symmS_zero_le_dla (I := I) (M := M) g₀ T hδ0 hbound x
+
 set_option linter.unusedSectionVars false in
 private lemma rfns_iCG_slotInsert3_dLaPerturb_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
