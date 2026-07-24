@@ -137,6 +137,25 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 8 (2026-07-24, LANE C, Opus) — D2 `normBridge` GATED on a missing upstream agreement (corrects session 7)
+
+Session 7 called D2 a "single-frontier assembly."  Session 8 recon of the two
+covariant-derivative FORMALISMS shows the frontier is bigger: `normBridge` (now homed in
+the ratified `MetricCovDerivBridge.lean`, statement pinned + `sorry`-at-gate, builds green,
+axioms `[propext, sorryAx, Classical.choice, Quot.sound]`) is **gated on a missing upstream
+framework agreement `nabla0SFun ↔ tensor0SCovariantDerivative` (r=0)**:
+- envelope side (`iteratedCovGrad`/`covGrad`) = ABSTRACT `tensor0SCovariantDerivative`;
+- `metricCovDeriv` side = CHART/model `nabla0SFun`/`totalNabla0S`
+  (`totalNabla0S_apply` → `fderivWithin` + `connectionEndomorphismInChartL`);
+- the crossing is flagged-missing (`Evolution/NablaRiemannT1Bound.lean:75`,
+  `Evolution/IteratedNablaRmTower.md:729,748,777,868`); the proven chart↔abstract agreement
+  (`Connection/ChartTensorNabla/Agreement/`) is for the DIFFERENT
+  `chartTensor0SCovariantDerivative`, no `nabla0SFun` link.
+No convention/slot-order/connection mismatch (session-7 verdict stands).  Full analysis,
+assembly plan, and the proposed upstream lemma live in **`MetricCovDerivBridge.md`**.
+D2 / single-link / 2a-tel remain blocked behind that upstream agreement (a separate planner
+dispatch).
+
 ## Session 7 (2026-07-24, LANE C, Opus) — D2 recon COMPLETE: decisive risk RESOLVED; single-frontier decomposition
 
 ### VERDICT — the coordinator's decisive risk (convention / slot-order / connection mismatch) is RESOLVED (no mismatch)
