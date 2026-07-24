@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.PerturbedRiemannOpDifferenceBound
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 
 /-!
 # Uniform curvature-jet bound (item-6 brick 2a)
@@ -36,6 +38,8 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry
@@ -216,6 +220,52 @@ theorem unifCurvatureSup_singleLink_of_diff
             (mul_le_mul_of_nonneg_left hP3_conv hcoeff_nn) hΛ0.le
     _ = (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
           g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by ring
+
+/-! ### P-construction tie API (session 5)
+
+The metric-difference realization `metricDifferenceCcTensor gBase g₀`
+(`RicciArmResidualCoefficientFields.lean:118`, reused) supplies the perturbation
+`P` the order-0 difference asset consumes; these lemmas prove it satisfies the
+asset's `htie` shape at role base = `gBase`, `g₁ = g₀`.  The two dischargers
+(`gFibreOpBound` from comparability; the order-`≤2` jet envelope from
+`MetricCovDerivOrderBoundOn`) are the remaining frontier — see
+`UnifCurvatureJetBound.md`. -/
+
+/-- The metric difference `metricDifferenceCcTensor gBase g₀` extracts, before
+symmetrization, to the pointwise metric difference `g₀ − gBase`. -/
+theorem metricDiff_ccBilin (gBase g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    ccTensorBilin (I := I) gBase
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x v w =
+      g₀.inner x v w - gBase.inner x v w := by
+  have h : metricDifferenceCcTensor (I := I) (M := M) gBase g₀ =
+      metricCcTensor (I := I) (M := M) gBase g₀ -
+        metricCcTensor (I := I) (M := M) gBase gBase := rfl
+  rw [h, ccTensorBilin_sub, metricCcTensor_apply, metricCcTensor_apply]
+
+/-- The metric difference realizes `g₀ − gBase` after symmetrization as well:
+the difference of two symmetric metrics is already symmetric. -/
+theorem metricDiff_ccBilinSymm (gBase g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) gBase
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x v w =
+      g₀.inner x v w - gBase.inner x v w := by
+  rw [ccTensorBilinSymm_apply, metricDiff_ccBilin gBase g₀ x v w,
+    metricDiff_ccBilin gBase g₀ x w v, gBase.symm x w v, g₀.symm x w v]
+  ring
+
+/-- **Tie identity — the asset `htie` shape (role base = `gBase`, `g₁ = g₀`).**
+`g₀` is realized as `gBase` plus the symmetric perturbation
+`ccTensorBilinSymm gBase (metricDifferenceCcTensor gBase g₀)`.  This discharges
+the `htie` hypothesis of
+`exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope`. -/
+theorem metricDiff_tie (gBase g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    g₀.inner x v w =
+      gBase.inner x v w +
+        ccTensorBilinSymm (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x v w := by
+  rw [metricDiff_ccBilinSymm]; ring
 
 end RicciFlow
 end PDE

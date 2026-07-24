@@ -137,6 +137,85 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 5 (2026-07-24, LANE C, Opus) — P-construction recon + TIE API landed
+
+### KEY RECON FINDING — the P-construction ALREADY EXISTS (reuse, don't rebuild)
+- `metricCcTensor (g₀ g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2`
+  (`Analysis/Parabolic/RicciLinearization/RicciArmResidualCoefficientFields.lean:107`)
+  realizes metric `g` as a `(0,2)` cc-tensor tagged over `g₀`; closed M ⟹ compact
+  support is `HasCompactSupport.of_compactSpace`.
+  KEY: `metricCcTensor_apply : ccTensorBilin g₀ (metricCcTensor g₀ g) x v w = g.inner x v w` (:150).
+- `metricDifferenceCcTensor g₀ g₁ := metricCcTensor g₀ g₁ − metricCcTensor g₀ g₀`
+  (:118), `SmoothCcTensor g₀ 0 2`; `metricDifferenceCcTensor_self = 0` (:121).
+- `ccTensorBilin_sub`, `ccTensorBilinSymm_sub` PUBLIC
+  (`MetricRealization/RealizedGramDiff.lean:101/110`).
+- No import cycle: `RicciArmResidualCoefficientFields` (Analysis/Parabolic) doesn't
+  import HCG; my leaf may import it.
+So the P **object** + realization is done; the mission's "construct P" reduces to
+proving the **tie identity** and the two dischargers.  Role: base = gBase,
+`g₁ = g₀`, `P = metricDifferenceCcTensor gBase g₀`.
+
+### Asset htie shape (ground truth, `PerturbedRiemannOpDifferenceBound.lean:95`)
+`htie : ∀ x v w, g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm g₀ P x v w`.
+
+### LANDED this session — TIE API (in `UnifCurvatureJetBound.lean`)
+- `metricDiff_ccBilin : ccTensorBilin gBase (metricDifferenceCcTensor gBase g₀) x v w
+   = g₀.inner x v w − gBase.inner x v w`  (via `ccTensorBilin_sub` + `metricCcTensor_apply`×2).
+- `metricDiff_ccBilinSymm : ccTensorBilinSymm gBase (metricDifferenceCcTensor gBase g₀) x v w
+   = g₀.inner x v w − gBase.inner x v w`  (symmetrization of a symmetric form; uses `g.symm`).
+- `metricDiff_tie : g₀.inner x v w = gBase.inner x v w
+   + ccTensorBilinSymm gBase (metricDifferenceCcTensor gBase g₀) x v w`  (asset htie shape, role base=gBase).
+Import ADDED: `…RicciLinearization.RicciArmResidualCoefficientFields`.
+
+### FRONTIER — the two dischargers (designed; next session, both new nontrivial lemmas)
+**Discharger 1 — comparability ⟹ `gFibreOpBound` (Λ<2 gate).**
+Target: `gFibreOpBound gBase (ccTensorBilinSymm gBase P) (Λ−1)`, i.e. (via the tie)
+`|g₀(v,w) − gBase(v,w)| ≤ (Λ−1)·√(gBase(v,v))·√(gBase(w,w))`.  From diagonal
+comparability `Λ⁻¹gBase(v,v) ≤ g₀(v,v) ≤ ΛgBase(v,v)`: diagonal
+`|D(v,v)| ≤ (Λ−1)gBase(v,v)` (`|Λ⁻¹−1| = 1−Λ⁻¹ ≤ Λ−1` for Λ≥1).  Off-diagonal via
+**homogeneity/unit-vector trick** (NOT plain polarization — that gives the AM bound
+½c(Q(v)+Q(w)), too weak): scale `v'=v/√Q(v), w'=w/√Q(w)`, get `|D(v',w')| ≤ c` from
+the AM bound at unit vectors, rescale to `|D(v,w)| ≤ c√(Q(v)Q(w))`; Q=gBase-quad;
+`Q=0 ⟹ v=0` (posdef) handles the degenerate case.  NO existing lemma
+(`gFibreOpBound` def = `PosDefPerturbation.lean:70`; no diagonal→offdiag producer).
+State honestly with `hΛ2 : Λ < 2` (⟹ δ=Λ−1<1); telescoping links each satisfy it.
+**Discharger 2 — jet envelope from `MetricCovDerivOrderBoundOn ≤2` (the HARD one).**
+Target: `∀ x, ∑_{j<3} ‖(iteratedCovGrad gBase 0 2 j P).toSection x‖ ≤ B(Λ)`.
+Structural bridge needed (NO existing lemma):
+`iteratedCovGrad gBase 0 2 j (metricCcTensor gBase h) = metricCovDeriv h gBase j`
+— both iterate the SAME covariant differentiation: `iteratedCovGrad` iterates
+`covGrad gBase` (`SobolevEmbeddingCm.lean:94`); `metricCovDeriv h gBase j`
+(`PointedConvergence.lean:80`) iterates `totalNabla0S(LeviCivita gBase)` of
+`metricTensorField h` (`Tensor/RSTensor/MetricCompatibility.lean:37`).  Sub-steps:
+(a) base-case `metricCcTensor gBase h .toSection ↔ metricTensorField h`;
+(b) step-op `covGrad gBase ↔ totalNabla0S(LeviCivita gBase)`;
+(c) `metricCovDeriv gBase gBase j = 0` for `j≥1` (iterated metric compatibility);
+(d) linearity on `P = metricCcTensor gBase g₀ − metricCcTensor gBase gBase`;
+(e) norm reconciliation `‖·.toSection x‖` (RiemannianBundle fibre norm on `TensorRSSpace 0 (2+j)`)
+   ↔ `metricCovDerivNorm j g₀ gBase x = √(normSq0S gBase x (j+2)(metricCovDeriv g₀ gBase j x))`;
+(f) order-0 `‖P.toSection x‖`: `(0,2)`-tensor (HS) norm of `g₀−gBase` from the
+   operator bound `Λ−1` (dimensional factor).
+So j=1,2 reduce to `MetricCovDerivOrderBoundOn ≤2` directly (since ∇^{gBase}gBase=0);
+j=0 from comparability.  **B(Λ) shape:** `B(Λ) = c₀(n)·(Λ−1) + 2Λ` — order-0
+`c₀·(Λ−1)` (dimensional, from the op bound) + orders 1,2 each `≤ Λ`, summed.
+(Refine `c₀(n)` and any norm-reconciliation constant on orders 1,2 when (e) lands.)
+
+### ASSEMBLY (final corollary, after both dischargers)
+`unifCurvatureSup_singleLink (gBase g₀ Λ) (hΛ : 1≤Λ) (hΛ2 : Λ<2)
+  (hcomp) (hjets : MetricCovDerivOrderBoundOn univ 2 g₀ gBase Λ)` ⟹
+`∃ F ≥ 0, ∀ x v w u, g₀(R(g₀)vwu,·) ≤ F²·g₀-quad`, by:
+tie ⟹ htie; discharger 1 ⟹ the asset's `hδ`; discharger 2 ⟹ the asset's envelope;
+apply `exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope` (δ₀:=Λ−1)
+to get `hdiff`; feed `hdiff` into the session-4 `unifCurvatureSup_singleLink_of_diff`.
+F = Λ²·(Cd(Λ−1,B(Λ)) + √Kbase).
+
+### Home decision
+Tie API + dischargers live in `UnifCurvatureJetBound.lean` (mission-sanctioned;
+consumer-side curvature-bound bridges).  If discharger 2's structural bridge
+(a)/(b) turns out to belong upstream (a general `iteratedCovGrad(metricCcTensor)
+= metricCovDeriv` fact, reusable beyond curvature), flag for an editable-set
+extension.
+
 ## Session 4 (2026-07-24, LANE C, Opus) — STEP 0 + composition core landed
 
 ### STEP 0 — asset real-green PROBE (mandatory, per false-green lesson)
@@ -207,6 +286,14 @@ conversion is fully proved.
   higher-order curvature-difference extension the current asset lacks).
 
 ## Status
+- 2026-07-24 (session 5, LANE C): P-construction recon done — `metricCcTensor` /
+  `metricDifferenceCcTensor` ALREADY EXIST (reuse).  TIE API landed + verified +
+  axiom-clean: `metricDiff_ccBilin`, `metricDiff_ccBilinSymm`, `metricDiff_tie`
+  (all three `[propext, Classical.choice, Quot.sound]`; `lake build` 9405 jobs
+  EXIT=0).  Frontier = the two dischargers (comparability→`gFibreOpBound` via the
+  homogeneity trick; the order-`≤2` jet envelope via the `iteratedCovGrad ↔
+  metricCovDeriv` structural bridge — the HARD one), then the assembled
+  `unifCurvatureSup_singleLink`, then 2a-tel.  See session-5 block.
 - 2026-07-24 (session 4, LANE C): STEP 0 asset probe PASSED (real-green);
   composition core `unifCurvatureSup_singleLink_of_diff` landed + verified +
   axiom-clean (see this file's session-4 block).  Frontier = discharge `hdiff`
