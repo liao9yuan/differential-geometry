@@ -4745,6 +4745,290 @@ theorem deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_ballUniform
           nlinarith [sq_nonneg R]
   linarith [hsum_le]
 
+/-! ### DLa top-separated tower (keeps the `A1 = covGrad (connDiffSection g₁ g₀)` head separate). -/
+
+/-- Reshape the `connDiffSection` top-separated engine remainder
+`∑_{k<j} b(j-k)·antidiagonalTupleGrid b (k+1)` into `dLaGridWin` currency (`R`-independent
+combinatorial count times `dLaGridWin b (j+2)`).  Pure combinatorial. -/
+private lemma engineRem_le_dLaGridWin (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : ℕ) :
+    ∑ k ∈ Finset.range j,
+        b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
+      (∑ k ∈ Finset.range j, dLaTGridCount (j - k) * dLaTGridCount (k + 1)) *
+        dLaGridWin b (j + 2) := by
+  rw [Finset.sum_mul]
+  refine Finset.sum_le_sum (fun k hk => ?_)
+  rw [Finset.mem_range] at hk
+  have hg_nn : 0 ≤ Combinatorics.antidiagonalTupleGrid b (k + 1) :=
+    Combinatorics.antidiagonalTupleGrid_nonneg b hb (k + 1)
+  have h1 : b (j - k) ≤ Combinatorics.antidiagonalTupleGrid b (j - k) :=
+    single_le_grid_dla b hb (j - k) (by omega)
+  have h2 : Combinatorics.antidiagonalTupleGrid b (j - k) *
+      Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
+      (dLaTGridCount (j - k) * dLaTGridCount (k + 1)) *
+        Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) :=
+    antidiagonalTupleGrid_mul_le_dla b hb (j - k) (k + 1)
+  have h3 : Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) ≤ dLaGridWin b (j + 2) :=
+    grid_le_dLaGridWin b hb (by omega)
+  calc b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1)
+      ≤ Combinatorics.antidiagonalTupleGrid b (j - k) *
+          Combinatorics.antidiagonalTupleGrid b (k + 1) :=
+        mul_le_mul_of_nonneg_right h1 hg_nn
+    _ ≤ (dLaTGridCount (j - k) * dLaTGridCount (k + 1)) *
+          Combinatorics.antidiagonalTupleGrid b ((j - k) + (k + 1)) := h2
+    _ ≤ (dLaTGridCount (j - k) * dLaTGridCount (k + 1)) * dLaGridWin b (j + 2) :=
+        mul_le_mul_of_nonneg_left h3
+          (mul_nonneg (dLaTGridCount_nonneg _) (dLaTGridCount_nonneg _))
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **connDiffSection top-separated jet bound in `dLaGridWin` currency.**  The top coefficient
+`Ktop = 2·Kt0` (`Kt0` = engine head `10·S 0`) is `R`-independent; the remainder is `dLaGridWin`
+(house `R`-pattern).  This is the `dLaGridWin`-currency sibling of the head cell
+`covGradConnDiffSection_perOrder_rfns_topSeparated`, in the shape the DLa 8-summand kernel triangle's
+`A1` slot consumes. -/
+private theorem exists_rfns_connDiffSection_topsep_dla
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ j, 0 ≤ Kc j) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (j : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+          Ktop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) T).toSection x) +
+          Kc j * dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (j + 2) := by
+  classical
+  obtain ⟨Kt0, hKt0_nn, Kc0, hKc0_nn, hbot⟩ :=
+    rfns_iteratedCovGrad_connDiffSection_topSeparated_le (I := I) (M := M) g₀ hδ₀
+  refine ⟨2 * Kt0, mul_nonneg (by norm_num) hKt0_nn,
+    fun j => 2 * Kc0 j * (∑ k ∈ Finset.range j, dLaTGridCount (j - k) * dLaTGridCount (k + 1)),
+    fun j => mul_nonneg (mul_nonneg (by norm_num) (hKc0_nn j))
+      (Finset.sum_nonneg fun k _ =>
+        mul_nonneg (dLaTGridCount_nonneg _) (dLaTGridCount_nonneg _)), ?_⟩
+  intro g₁ T htie δ hδ_le hδ0 hbound j x
+  set b : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) with hb_def
+  have hb : ∀ l, 0 ≤ b l :=
+    fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+  have heng := hbot g₁ T htie hδ_le hδ0 hbound j x
+  set Hd : SmoothCcTensor g₀ 1 (2 + j) :=
+    appCcRS (I := I) (M := M) g₀ 1 1 (2 + j)
+      (iteratedCovGrad (I := I) g₀ 1 2 j (raisedKoszul (I := I) g₀ g₁))
+      (sharpFlatEndoCc (I := I) g₀ g₁) with hHd_def
+  have hhead : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) ≤
+      Kt0 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) T).toSection x) := heng.1
+  have hrem := heng.2
+  have hsplit : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) +
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+          Hd).toSection x) := by
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 1 (2 + j) x
+      (Hd.toSection x)
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) - Hd).toSection x)
+    have key :
+        (iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x =
+          Hd.toSection x +
+            (iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+              Hd).toSection x := by
+      simp only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+      abel
+    rw [key]
+    exact hadd
+  have hrem2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) - Hd).toSection x) ≤
+      Kc0 j * ((∑ k ∈ Finset.range j, dLaTGridCount (j - k) * dLaTGridCount (k + 1)) *
+        dLaGridWin b (j + 2)) :=
+    le_trans hrem (mul_le_mul_of_nonneg_left (engineRem_le_dLaGridWin b hb j) (hKc0_nn j))
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x (Hd.toSection x) +
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) -
+            Hd).toSection x) := hsplit
+    _ ≤ 2 * (Kt0 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) T).toSection x)) +
+        2 * (Kc0 j * ((∑ k ∈ Finset.range j,
+          dLaTGridCount (j - k) * dLaTGridCount (k + 1)) * dLaGridWin b (j + 2))) := by
+          linarith [hhead, hrem2]
+    _ = (2 * Kt0) * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (j + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (j + 1) T).toSection x) +
+        (2 * Kc0 j * (∑ k ∈ Finset.range j,
+          dLaTGridCount (j - k) * dLaTGridCount (k + 1))) * dLaGridWin b (j + 2) := by ring
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **Kernel top-separated bound.**  Top-separated twin of `exists_rfns_dLaKernelRaised_tgrid`:
+the isolated `A1 = covGrad (connDiffSection g₁ g₀)` head is kept separate via the top-separated
+connDiffSection bound (`R`-independent top coefficient `Ktop = 128·KtopA`), while the 7 lower
+summands (`A2 = covGrad (connDiffSection g_bg g₀)` and the 6 quad terms) go entirely into the
+`dLaGridWin` remainder. -/
+private theorem exists_rfns_dLaKernelRaised_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 3 i
+              (dLaKernelRaisedCc (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
+          Ktop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
+          Kc i * dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 3) := by
+  classical
+  obtain ⟨CA, hCA_nn, hCA⟩ := exists_rfns_iteratedCovGrad_connDiffSection_tgrid_dla
+    (I := I) (M := M) g₀ hδ₀
+  obtain ⟨KtopA, hKtopA_nn, KcA, hKcA_nn, hCAts⟩ :=
+    exists_rfns_connDiffSection_topsep_dla (I := I) (M := M) g₀ hδ₀
+  obtain ⟨cbg, hcbg_nn, hcbg⟩ := exists_fixedField_rfns_jet_dla (I := I) (M := M) g₀ 1 3
+    (covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g_bg g₀))
+  obtain ⟨cc, hcc_nn, hcc⟩ := exists_fixedField_rfns_jet_dla (I := I) (M := M) g₀ 1 2
+    (connDiffSection (I := I) g_bg g₀)
+  set CQ1 : ℕ → ℝ := fun j => appCcGdiag (E := E) j * ∑ i' ∈ Finset.range (j + 1),
+    (Module.finrank ℝ E : ℝ) * CA i' *
+      ∑ l ∈ Finset.range (j + 1 - i'), CA l * dLaPairCount (i' + 2) (l + 2) with hCQ1_def
+  set CQ2 : ℕ → ℝ := fun j => appCcGdiag (E := E) j * ∑ i' ∈ Finset.range (j + 1),
+    (Module.finrank ℝ E : ℝ) * cc i' *
+      ∑ l ∈ Finset.range (j + 1 - i'), CA l * dLaPairCount (i' + 2) (l + 2) with hCQ2_def
+  set CQ3 : ℕ → ℝ := fun j => appCcGdiag (E := E) j * ∑ i' ∈ Finset.range (j + 1),
+    (Module.finrank ℝ E : ℝ) * CA i' *
+      ∑ l ∈ Finset.range (j + 1 - i'), cc l * dLaPairCount (i' + 2) (l + 2) with hCQ3_def
+  have hCQ1_nn : ∀ j, 0 ≤ CQ1 j := by
+    intro j
+    refine mul_nonneg (appCcGdiag_nonneg (E := E) j) (Finset.sum_nonneg fun i' _ => ?_)
+    refine mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (hCA_nn i'))
+      (Finset.sum_nonneg fun l _ => mul_nonneg (hCA_nn l) (dLaPairCount_nonneg _ _))
+  have hCQ2_nn : ∀ j, 0 ≤ CQ2 j := by
+    intro j
+    refine mul_nonneg (appCcGdiag_nonneg (E := E) j) (Finset.sum_nonneg fun i' _ => ?_)
+    refine mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (hcc_nn i'))
+      (Finset.sum_nonneg fun l _ => mul_nonneg (hCA_nn l) (dLaPairCount_nonneg _ _))
+  have hCQ3_nn : ∀ j, 0 ≤ CQ3 j := by
+    intro j
+    refine mul_nonneg (appCcGdiag_nonneg (E := E) j) (Finset.sum_nonneg fun i' _ => ?_)
+    refine mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (hCA_nn i'))
+      (Finset.sum_nonneg fun l _ => mul_nonneg (hcc_nn l) (dLaPairCount_nonneg _ _))
+  refine ⟨128 * KtopA, by positivity,
+    fun i => 2 * (2 * (2 * (2 * (2 * (2 * (2 * KcA (i + 1) + 2 * cbg i) + 2 * CQ1 i)
+      + 2 * CQ2 i) + 2 * CQ1 i) + 2 * CQ3 i) + 2 * CQ1 i) + 2 * CQ3 i,
+    fun i => by
+      have h1 := hKcA_nn (i + 1)
+      have h2 := hcbg_nn i
+      have h3 := hCQ1_nn i
+      have h4 := hCQ2_nn i
+      have h5 := hCQ3_nn i
+      positivity, ?_⟩
+  intro g₁ T htie δ hδ_le hδ0 hbound i x
+  set b : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) with hb_def
+  have hb : ∀ l, 0 ≤ b l :=
+    fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+  set W : ℝ := dLaGridWin b (i + 3) with hW_def
+  have hW_nn : 0 ≤ W := dLaGridWin_nonneg b hb (i + 3)
+  have hW_ge1 : 1 ≤ W := one_le_dLaGridWin b hb (by omega)
+  have harm : ∀ i', i' ≤ i →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i') x
+        ((iteratedCovGrad (I := I) g₀ 1 2 i' (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+      CA i' * dLaGridWin b (i' + 2) :=
+    fun i' _ => hCA g₁ T htie hδ_le hδ0 hbound i' x
+  have hfix : ∀ i', i' ≤ i →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i') x
+        ((iteratedCovGrad (I := I) g₀ 1 2 i' (connDiffSection (I := I) g_bg g₀)).toSection x) ≤
+      cc i' * dLaGridWin b (i' + 2) := by
+    intro i' _
+    refine le_trans (hcc i' x) ?_
+    have h1 : (1 : ℝ) ≤ dLaGridWin b (i' + 2) := one_le_dLaGridWin b hb (by omega)
+    nlinarith [hcc_nn i']
+  have hQ1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i
+        (dLaQuadCc (I := I) (M := M) g₀ g₁ g₁)).toSection x) ≤ CQ1 i * W :=
+    dLaQuad_tower_of_factors (I := I) (M := M) g₀ g₁ g₁ i x b hb CA CA hCA_nn hCA_nn harm harm
+  have hQ2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i
+        (dLaQuadCc (I := I) (M := M) g₀ g_bg g₁)).toSection x) ≤ CQ2 i * W :=
+    dLaQuad_tower_of_factors (I := I) (M := M) g₀ g_bg g₁ i x b hb cc CA hcc_nn hCA_nn hfix harm
+  have hQ3 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i
+        (dLaQuadCc (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤ CQ3 i * W :=
+    dLaQuad_tower_of_factors (I := I) (M := M) g₀ g₁ g_bg i x b hb CA cc hCA_nn hcc_nn harm hfix
+  have hrs_eq : ∀ (σ : Equiv.Perm (Fin 3)) (F : SmoothCcTensor g₀ 1 3),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 i
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 σ F)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 i F).toSection x) := by
+    intro σ F
+    exact rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 1 3 σ F
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 σ F)
+      (fun y d => by
+        rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x
+  have hA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i
+        (covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀))).toSection x) ≤
+      KtopA * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
+      KcA (i + 1) * W := by
+    rw [rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 1 2 i
+      (connDiffSection (I := I) g₁ g₀) x]
+    exact hCAts g₁ T htie hδ_le hδ0 hbound (i + 1) x
+  have hA2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i
+        (covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g_bg g₀))).toSection x) ≤
+      cbg i * W := by
+    refine le_trans (hcbg i x) ?_
+    nlinarith [hcbg_nn i]
+  set A1 := covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀) with hA1_def
+  set A2 := covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g_bg g₀) with hA2_def
+  set Q11 := dLaQuadCc (I := I) (M := M) g₀ g₁ g₁ with hQ11_def
+  set Qbg1 := dLaQuadCc (I := I) (M := M) g₀ g_bg g₁ with hQbg1_def
+  set Q1bg := dLaQuadCc (I := I) (M := M) g₀ g₁ g_bg with hQ1bg_def
+  set P1 := rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (Equiv.swap (0 : Fin 3) 2) Q11
+    with hP1_def
+  set P2 := rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (Equiv.swap (0 : Fin 3) 2) Q1bg
+    with hP2_def
+  set P3 := rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (finRotate 3) Q11 with hP3_def
+  set P4 := rsDomDomCongrSection (I := I) (M := M) g₀ 1 3 (finRotate 3) Q1bg with hP4_def
+  have hP1_le : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i P1).toSection x) ≤ CQ1 i * W :=
+    le_of_eq_of_le (hrs_eq (Equiv.swap (0 : Fin 3) 2) Q11) hQ1
+  have hP2_le : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i P2).toSection x) ≤ CQ3 i * W :=
+    le_of_eq_of_le (hrs_eq (Equiv.swap (0 : Fin 3) 2) Q1bg) hQ3
+  have hP3_le : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i P3).toSection x) ≤ CQ1 i * W :=
+    le_of_eq_of_le (hrs_eq (finRotate 3) Q11) hQ1
+  have hP4_le : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 3 i P4).toSection x) ≤ CQ3 i * W :=
+    le_of_eq_of_le (hrs_eq (finRotate 3) Q1bg) hQ3
+  have t1 := rfns_iCG_sub_le_dla (I := I) (M := M) g₀ 1 3 i A1 A2 x
+  have t2 := rfns_iCG_add_le_dla (I := I) (M := M) g₀ 1 3 i (A1 - A2) Q11 x
+  have t3 := rfns_iCG_sub_le_dla (I := I) (M := M) g₀ 1 3 i (A1 - A2 + Q11) Qbg1 x
+  have t4 := rfns_iCG_sub_le_dla (I := I) (M := M) g₀ 1 3 i (A1 - A2 + Q11 - Qbg1) P1 x
+  have t5 := rfns_iCG_add_le_dla (I := I) (M := M) g₀ 1 3 i (A1 - A2 + Q11 - Qbg1 - P1) P2 x
+  have t6 := rfns_iCG_sub_le_dla (I := I) (M := M) g₀ 1 3 i
+    (A1 - A2 + Q11 - Qbg1 - P1 + P2) P3 x
+  have t7 := rfns_iCG_add_le_dla (I := I) (M := M) g₀ 1 3 i
+    (A1 - A2 + Q11 - Qbg1 - P1 + P2 - P3) P4 x
+  have hKK : dLaKernelRaisedCc (I := I) (M := M) g₀ g₁ g_bg =
+      A1 - A2 + Q11 - Qbg1 - P1 + P2 - P3 + P4 := rfl
+  rw [hKK]
+  linarith [t1, t2, t3, t4, t5, t6, t7, hA1, hA2, hQ1, hQ2, hQ3,
+    hP1_le, hP2_le, hP3_le, hP4_le,
+    mul_assoc (128 : ℝ) KtopA (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x))]
+
 end DLaGridBrick
 
 end DifferentialGeometry.Integral.Connection

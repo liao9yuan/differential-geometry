@@ -135,3 +135,23 @@ No Lean written. Nothing committed; no dirty tracked file edited (elaboration ne
 `922dbc4ac`). Only new untracked files touched (this note + the plan status log). (N)
 `ricci_flow_unif_existence` remains **0%**; `deTurckLieCoeffField` is the 1st of the two genuinely-
 missing C₀ constituents of the threeArm precursor (ruling item 2) and sits far below (N).
+
+---
+
+## 2026-07-23 (later) — DLa field bridge STARTED inside the file; route validated
+
+The tree is now committed clean (plan №13); the bridge is being built **inside**
+`DeTurckLieKernelL2JetBound.lean` next to its private deps.  Full route + piece status now lives in
+`DeTurckLieKernelL2JetBound.md`.  Key corrections/findings vs the recon above:
+- The "no top-separation" pessimism is resolved: the R-independence linchpin is
+  `dLaGridWin b 1 = antidiagonalTupleGrid b 0 = 1`, so both frame operators (`pairTraceOpDla` and the
+  perturb `slotInsert(perturbSharp)`) have **R-independent order-0 `rfns`**, and each appCcRS's
+  `(i'=0,l=i)` cell carries the top `∇^{i+2}T` with an R-independent coefficient.
+- **`dLaLoweredPerturbCc = appCcRS(perturb)(dLaLoweredCc)` also carries A1** (not purely lower-order as
+  the recon guessed) ⟹ the field needs **two** nested appCcRS `(0,i)`-cell extractions (perturb + PT),
+  both R-independent.  A generic extractor `rfns_iCG_appCcRS_topsep_of` handles both.
+- The 8-summand kernel triangle top-separated twin (`exists_rfns_dLaKernelRaised_topsep`, the
+  dispatched "Step 2") is a near-verbatim copy of `exists_rfns_dLaKernelRaised_tgrid` with `hA1`
+  swapped for the top-separated connDiffSection bound (`Ktop = 128·(2·Kt0)`, R-indep).
+- Per-cycle full-file `lake env lean` check ≈ 10-20 min (heavy in-file proofs with high heartbeats),
+  so this is genuinely multi-cycle / multi-session as the recon estimated.

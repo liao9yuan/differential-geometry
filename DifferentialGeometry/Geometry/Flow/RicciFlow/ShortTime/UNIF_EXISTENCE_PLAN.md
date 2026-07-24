@@ -496,6 +496,26 @@ the Codex-blocked concrete instantiation, mirroring the
   green, `exists_rfns_dLaKernelRaised_topsep` in re-check, field lift
   drafted); items 5, 6 open.
 
+## Planner acceptance №14 (2026-07-24) — DLa session 1 ACCEPTED; item 4 DONE
+
+- DLa brick session 1 (kernel top-separation) ACCEPTED: spot-checks pass
+  (three lemmas present in `DeTurckLieKernelL2JetBound.lean`
+  `section DLaGridBrick` at :4753/:4789/:4873; audit lines stripped; diff
+  scope = the brick's own files only).  Discipline check PASSED: Ktop =
+  `2·Kt0` (connDiffSection) and `256·Kt0` (8-summand kernel twin), both
+  `(g₀,g_bg,hδ₀)`-level and R-free; R only in Kc (house pattern); the
+  `A1 = covGrad(connDiffSection g₁ g₀)` head stays separate.  Axiom audit
+  verbatim `[propext, Classical.choice, Quot.sound]` on all three.
+- Ruling item 4 DONE the same night (`TameNemytskii.lean`, commit
+  `3bd9a72f0`).  Scoreboard: items 1 ✓, 3 ✓, 4 ✓; item 2 = DLa piece 4
+  (field lift, designed, next session) then DLb
+  (`DeTurckVectorFieldL2JetBound.lean`) then assembly; items 5, 6 open.
+- Next dispatch: DLa session 2 = piece 4 field lift per
+  `DeTurckLieKernelL2JetBound.md` §"Remaining field assembly" (route
+  4.1–4.7; `appCcGdiag i ≤ appCcGdiag a` monotone bound resolves the
+  i-dependent top coefficient; `jetL2_sum_lowShift a 2 3` at the summed
+  layer).
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -899,10 +919,15 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   `∇^{i+2}T` with R-independent coefficient.  **KEY finding**: `dLaLoweredPerturbCc =
   appCcRS(perturb)(dLaLoweredCc)` also carries A1 ⟹ the field needs TWO nested appCcRS `(0,i)`-cell
   extractions (handled by a generic extractor `rfns_iCG_appCcRS_topsep_of`, drafted).  Full route + piece
-  status in `DeTurckLieKernelL2JetBound.md`; recon corrections in `DeTurckLieJetL2Summed.md`.  Pieces
-  1–2 verified (focused `lake env lean` EXIT=0, only the standard `unusedVariables` lint on hypothesis
-  binders — suppressed with `set_option` matching the file's existing tgrid theorems).  Piece 3 +
-  combined re-check in progress (per-cycle full-file check ≈ 15 min; machine shared with Codex —
-  quiet-window waiter used).  Remaining Step 3 (field assembly ≈ 450 lines: generic extractor + perturb
-  extraction + sym/X glue + two `hfull` re-derivations + integrate + realizedFam sum) is genuinely
-  multi-session as the recon estimated.  (N) `ricci_flow_unif_existence` still **0%**.
+  status in `DeTurckLieKernelL2JetBound.md`; recon corrections in `DeTurckLieJetL2Summed.md`.  **All
+  three pieces VERIFIED GREEN** — focused `lake env lean` (whole file, `LEAN_NUM_THREADS=4`,
+  quiet-window waiter) EXIT=0, zero errors, zero warnings; `#print axioms` on all three ⇒
+  `[propext, Classical.choice, Quot.sound]` (audit lines stripped).  Two fixes were needed on the
+  kernel twin (a dropped `hW_ge1`, and a `mul_assoc` regroup hint so `linarith` relates the shared
+  `KtopA·τ` atom scaled by 128).  The `unusedVariables` lint on hypothesis binders is suppressed with
+  `set_option` matching the file's existing tgrid theorems.  Remaining Step 3 (field assembly ≈ 450
+  lines: generic extractor + perturb extraction + sym/X glue + two `hfull` re-derivations + integrate +
+  realizedFam sum) is genuinely multi-session as the recon estimated; fully designed in
+  `DeTurckLieKernelL2JetBound.md` §"Remaining field assembly".  (N) `ricci_flow_unif_existence` still
+  **0%** (kernel top-separation is machinery toward the field-level lift of `deTurckLieCoeffField`,
+  the 1st of 2 genuinely-missing C₀ constituents).
