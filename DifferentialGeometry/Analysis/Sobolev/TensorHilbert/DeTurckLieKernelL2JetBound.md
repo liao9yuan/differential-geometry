@@ -100,16 +100,48 @@ Scratchpad drafts for piece 4 (session-temp, fold into file next session):
 `dla_generic_appccrs.lean` (4.1 extractor), `dla_zero_order.lean` (4.2 CPT0/Cperturb0),
 `dla_field_pointwise_PLAN.md` (full 4.1–4.7 recipe with exact copy-block line refs).
 
+## Piece 4 — BUILT (session 2).  Realized decls (all in `section DLaGridBrick`)
+
+Route as designed (4.1–4.7), with two shared helpers factored out so the perturb + field
+extractions reuse one grid-cell body:
+
+- `gridSplit_dla` (pure real): pulls the `(i'=0,l=i)` top cell out of the appCcRS Leibniz grid,
+  `G·∑pΦ·∑qW ≤ G·cΦ0·Wtop·τ + (G·cΦ0·Wrem + gridB)`.
+- `appCcGrid_le_dla`: shared full-grid bound `appCcGdiag i·∑pΦ·∑qW ≤ (appCcGdiag i·∑cΦ·∑cW·pair)·W`
+  for window `(i'+1)(l+3)→(i+3)` (BOTH perturb Φ=slotInsert AND field Φ=PT use this window).
+- `exists_rfns_dLaLowered_topsep` (4.2): raise-eq bridge into piece 3; `Ktop_L = 256·Kt0` (fixed real).
+- `exists_rfns_dLaSym_topsep` (4.3+4.4): perturb extraction (`gridSplit_dla` + `appCcGrid_le_dla`) →
+  G1 add → sym (domDomCongr+add).  Exported top coeff FIXED `Ktop_sym = 8·KtopL·(1+fr⁵δ₀²)`, with the
+  `appCcGdiag i` power EXPLICIT in the statement (`Ktop·appCcGdiag i·τ`).  Key trick: `1 ≤ appCcGdiag i`
+  lift at the G1 step collapses the two-power `(1+…·appCcGdiag i)` to single-power `…·appCcGdiag i`.
+- `rfns_iCG_dLaField_topsep` (4.5): X-tower `hXfr` (perm + 2 slotExtend) reduces X to `fr²·dLaSymCc`;
+  `gridSplit_dla` on Φ=PT (cΦ0=CPT 0) gives `Ktop_field·(appCcGdiag i)²·τ + Kc·dLaGridWin`, exported base
+  `Ktop_field = CPT0·fr²·Ktop_sym` (fixed), two explicit `appCcGdiag i` powers.
+- `sum_shift_le`, `jetL2_sum_lowShift` (copied verbatim from DLaTopSeparated).
+- `deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_topSeparated`: integrate 4.5 (top → `‖∇^{i+2}Pc‖²`
+  via `tensorL2Norm_sq…`; remainder → `∑_k ∫antidiagGrid` ball-uniform via the tameWindow integrator,
+  weight-dependent `(1+∑‖∇^jPc‖²)`), convert Pc→(T,T'), FIX `Ktop = Ktop_field·(appCcGdiag a)²` via
+  `appCcGdiag i ≤ appCcGdiag a` (`pow_le_pow_right₀`).  R-free Ktop; R only in Kc (integrator `K`).
+- `deTurckLieDLaCoeffField_realizedFam_jetL2_summed_topSeparated` (ENDPOINT): `jetL2_sum_lowShift a 2 3`,
+  top window `a+3`, low window `a+3`.  Shape matches the sibling
+  `connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated`.
+
+Ktop shape (all R-free): `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²`
+(= CPT0, fr=finrank, Kt0 engine head, δ₀, appCcGdiag a; NO R, NO ‖T‖ products).
+
 ## Verification status
 
-**PIECES 1-3 VERIFIED GREEN** — focused `lake env lean DeTurckLieKernelL2JetBound.lean` (whole file,
-`LEAN_NUM_THREADS=4`, quiet-window waiter) EXIT=0, **zero errors, zero warnings**.  Two fixes were
-applied after the first check flagged the kernel-twin tail: (i) restored `have hW_ge1 : 1 ≤ W`
-(dropped in the copy; needed by `hA2`'s `nlinarith`); (ii) added a `mul_assoc (128:ℝ) KtopA <τ>`
-regrouping hint to the final `linarith` (it treated `KtopA·τ` in `hA1` and `(128·KtopA)·τ` in the
-goal as unrelated opaque nonlinear atoms; the hint bridges them as `128·(KtopA·τ)`).  Axiom audit:
-`#print axioms` on all three ⇒ `[propext, Classical.choice, Quot.sound]` (audit lines then stripped).
+**PIECES 1-3 VERIFIED GREEN** (session 1).  **Piece 4 VERIFIED GREEN** (session 2).  First focused check
+flagged exactly 3 real errors (exit-0 was false-green): (i) `gridSplit_dla` `hrest` linarith needed
+`0 ≤ pΦ 0·qW i` not `hpq_le`; (ii) `one_le_appCcGdiag` is PRIVATE in `OperatorFieldFibreNormJet` →
+inlined via `one_le_pow₀`; (iii) `dLaSym` `hG1` step-3 `add_le_add_right` arg-order wrong → `add_le_add
+… (le_refl _)`.  After the 3 fixes: focused `lake env lean` whole-file EXIT=0, **zero output (zero
+errors, zero warnings)** — a real green (check 1 from the same command DID surface errors, so not a
+cached false-green).  Direct-`lean` axiom audit (captured `lake env` LEAN_PATH; temporary
+`#print axioms` on both public endpoints) ⇒ each `depends on axioms: [propext, Classical.choice,
+Quot.sound]` (audit lines then stripped).  Field/perOrder/summed produced NO errors even in check 1
+(they typecheck against the helper SIGNATURES, unchanged by the 3 fixes).
 
-Piece 4 (field lift) NOT built — designed + drafted only (see above + scratchpad).
-`(N) ricci_flow_unif_existence` remains **0%**; pieces 1-3 are the kernel top-separation ("DLa Step 2")
-of the field-level lift of the 1st of 2 genuinely-missing C₀ constituents (`deTurckLieCoeffField`).
+`(N) ricci_flow_unif_existence` remains **0%**; piece 4 completes the field-level lift of the DLa half
+(`deTurckLieDLaCoeffField`) — one of the 2 genuinely-missing C₀ constituents.  DLb + the DLa+DLb
+combined-coefficient assembly (`deTurckLieCoeffField = DLa + DLb`) still open.

@@ -155,3 +155,19 @@ The tree is now committed clean (plan №13); the bridge is being built **inside
   swapped for the top-separated connDiffSection bound (`Ktop = 128·(2·Kt0)`, R-indep).
 - Per-cycle full-file `lake env lean` check ≈ 10-20 min (heavy in-file proofs with high heartbeats),
   so this is genuinely multi-cycle / multi-session as the recon estimated.
+
+## 2026-07-24 — DLa field lift COMPLETE (session 2); DLa half of `deTurckLieCoeffField` DONE
+
+Piece 4 (the field-level lift) is built + verified inside `DeTurckLieKernelL2JetBound.lean`
+(`section DLaGridBrick`).  The DLa endpoint now exists:
+`deTurckLieDLaCoeffField_realizedFam_jetL2_summed_topSeparated`
+(+ its per-order sibling), shape-matching `connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated`:
+`∑_{i≤a}‖∇^i(deTurckLieDLaCoeffField g₀ (realizedFam …) g_bg)‖² ≤ Ktop·(∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²)) +
+Kc·(1+∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²))`, `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²` R-FREE,
+`R` only in `Kc` (tame-window integrator).  Full decl list + constant derivation:
+`DeTurckLieKernelL2JetBound.md` §"Piece 4 — BUILT".
+
+Still open for `deTurckLieCoeffField` (= DLa + DLb): the **DLb** half
+(`DeTurckVectorFieldL2JetBound.lean` / `deTurckLieDLbCoeffField`) top-separated summed producer, then the
+**combined-coefficient assembly** `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via
+`deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`).

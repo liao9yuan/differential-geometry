@@ -516,6 +516,32 @@ the Codex-blocked concrete instantiation, mirroring the
   i-dependent top coefficient; `jetL2_sum_lowShift a 2 3` at the summed
   layer).
 
+## Planner acceptance №15 (2026-07-24) — DLa HALF COMPLETE (field lift verified)
+
+- DLa session 2 (piece 4, +971 lines) ACCEPTED.  Spot-checks pass: both
+  public endpoints present
+  (`deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_topSeparated` :5680,
+  `..._summed_topSeparated` :5966), zero `sorry`, audit lines stripped,
+  diff scope = the four permitted files.  Executor evidence: whole-file
+  focused check EXIT 0 with EMPTY log (zero errors/warnings, real — the
+  identical command surfaced errors before the fixes), axiom audit exactly
+  `[propext, Classical.choice, Quot.sound]` on both endpoints.
+- Discipline PASSED: `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²`
+  — `(g₀,g_bg,hδ₀)`-level only, R-free, no top-norm products; R only in
+  the lumped `Kc` via the tame-window integrator.  Summed endpoint uses
+  `jetL2_sum_lowShift a 2 3` (both windows `a+3`), shape-matching the
+  connDiff sibling.
+- With session 1, the ENTIRE DLa half of `deTurckLieCoeffField` is done.
+  Remaining for the constituent: DLb sibling producer
+  (`DeTurckVectorFieldL2JetBound.lean`, near
+  `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform` :3041),
+  then the combined assembly via
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` (2·DLa²+2·DLb²).
+- Maintenance note: `DeTurckLieKernelL2JetBound.lean` is now 6007 lines
+  (over the 3000 cap, grandfathered mid-brick).  Split by abstraction
+  boundary AFTER the deTurckLie constituent closes; do not churn now.
+- (N) still 0%.  DLb session dispatched next.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -931,3 +957,32 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   `DeTurckLieKernelL2JetBound.md` §"Remaining field assembly".  (N) `ricci_flow_unif_existence` still
   **0%** (kernel top-separation is machinery toward the field-level lift of `deTurckLieCoeffField`,
   the 1st of 2 genuinely-missing C₀ constituents).
+
+## Status log — DLa field lift LANDED (session 2, 2026-07-24)
+
+- **Piece 4 (field-level lift) BUILT + VERIFIED** in `DeTurckLieKernelL2JetBound.lean`
+  `section DLaGridBrick` (+971 lines).  Public DLa ENDPOINT now exists:
+  `deTurckLieDLaCoeffField_realizedFam_jetL2_summed_topSeparated` (+ per-order sibling), landing
+  `∑_{i≤a}‖∇^i(deTurckLieDLaCoeffField g₀ (realizedFam …) g_bg)‖² ≤ Ktop·(∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²))
+  + Kc·(1+∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²))` via `jetL2_sum_lowShift a 2 3`.
+- Realized decls: `gridSplit_dla` (pure-real top-cell split), `appCcGrid_le_dla` (shared full-grid,
+  window `(i'+1)(l+3)→(i+3)` for BOTH extractions), `exists_rfns_dLaLowered_topsep` (4.2, raise-eq into
+  piece 3), `exists_rfns_dLaSym_topsep` (4.3+4.4), `rfns_iCG_dLaField_topsep` (4.5), `sum_shift_le` +
+  `jetL2_sum_lowShift`, and the two `…_realizedFam_jetL2_{perOrder,summed}_topSeparated` endpoints.
+- **Constant discipline PASSED**: `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²` — only
+  `(CPT0, fr=finrank, Kt0, δ₀, appCcGdiag a)`, i.e. `(g₀,g_bg,hδ₀)`-level and R-FREE; NO `‖T‖_top`
+  products.  `R` lives ONLY in `Kc` (tame-window integrator `K`).  The two i-dependent `appCcGdiag i`
+  powers (from the two nested appCcRS extractions) stay EXPLICIT in the producer statements and
+  collapse to one fixed `Ktop` at the summed layer via `appCcGdiag i ≤ appCcGdiag a`
+  (`pow_le_pow_right₀`); a `1 ≤ appCcGdiag i` lift keeps each producer's top a single power.
+- Verification: focused `lake env lean` whole-file EXIT=0 zero-errors/zero-warnings after 3 fixes on the
+  two lowest helpers (gridSplit `hrest` nonneg witness; `one_le_appCcGdiag` PRIVATE upstream → inlined
+  `one_le_pow₀`; `dLaSym hG1` `add_le_add_right` arg-order → `add_le_add … (le_refl _)`).  Direct-lean
+  axiom audit on both endpoints ⇒ `[propext, Classical.choice, Quot.sound]` (audit lines stripped).
+  Diff scope = the brick's own files only.
+- **Next frontier (NOT this session): DLb + combined assembly.**  (a) DLb top-separated summed producer
+  in `DeTurckVectorFieldL2JetBound.lean` (`deTurckLieDLbCoeffField`); (b) combined-coefficient assembly
+  `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed via
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`.  Then `deTurckLieCoeffField` (ruling item 2's
+  1st constituent) is DONE.  (N) `ricci_flow_unif_existence` still **0%** — this is a C₀-constituent
+  producer far below (N).
