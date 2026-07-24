@@ -711,6 +711,32 @@ consolidates); lane A retains its status-log permission.  After lanes
 close: item-2 threeArm assembly (needs lane A), item-6 build (needs lane
 C ratified), final (N) assembly last.
 
+## Planner ruling №21 (2026-07-24) — LieCorr0 upstream repair: PROBE ROUTE
+
+- Lane A's guardrail stop ACCEPTED: the `LieCorr0Split`/`LieCorr0LowJet`
+  breakage exceeds hygiene — every `.ext` proof fails
+  `FiberBundle (TensorRSModel 2 2 ℝ E) …` instance synthesis; three
+  bare-instance routes failed; the working TensorHilbert files instead
+  install the metric-dependent
+  `letI : Bundle.RiemannianBundle … := tensorRS_riemannianBundle g r s`
+  setup.  The drafts are genuinely uncompiled Codex infra debt (second
+  false-green recurrence).  Split currently holds the correct hygiene
+  portion (full open set + the statement-sound `← insert_base` direction
+  fix) and still does not build.
+- RULING (probe route, bounded): (P1) apply the RiemannianBundle-letI
+  setup pattern (copied from a working TensorHilbert file) to Split's
+  four `.ext` proofs ONLY, target = `lake build` green for Split (186
+  lines — small, decisive pattern test).  (P2) if Split goes green, run
+  `lake build` on LowJet and CAPTURE THE FULL ERROR LIST without fixing
+  — classify (instance-pattern vs other) and report the inventory; the
+  planner then decides full repair vs escalation (GPT Pro consult or
+  Codex handback).  (P3) if Split still fails after the pattern on one
+  `.ext`, stop with exact goal/error for a Pro consult.  Statement
+  changes remain forbidden; letI/instance setup is authorized as setup
+  code, not proof content.
+- Lane A's leaf (top piece via DLb@`g_bg:=g₀`) stays written and parked
+  until the deps build.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
@@ -1323,3 +1349,22 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   open(s)/autoImplicit-false fixes so the ratified plan can proceed, OR repair +
   rebuild them upstream first.  No `.lean` edits outside the new leaf were made.
   `(N)` still **0%**.
+- 2026-07-24 (lieCorr0 build, session 1 cont.): **REPAIR EXCEEDS HYGIENE — STOP
+  per guardrail; planner decision needed.**  Under the repair authorization,
+  `LieCorr0Split` needed: `open …Integral.L2` + Core's full open set (fixes
+  `SmoothCcTensor` + 4 record-construction instance failures) + `tail_base_split`
+  `rw [insert_base]`→`rw [← insert_base]` (statement-sound). But `insert_base`/
+  `lc0_decomp` `.ext` proofs then fail `FiberBundle (TensorRSModel 2 2 ℝ E)`
+  synthesis; THREE routes (providing-module import; wrapper letI; underlying
+  `Tensor0SBundle.tensorRSBundle_fiber` letI) all failed. Working TensorHilbert
+  files set up a metric-dependent `letI : Bundle.RiemannianBundle … :=
+  tensorRS_riemannianBundle g r s` — i.e. the fix is coherent bundle-instance
+  setup, NOT bare-FiberBundle, and is genuine instance plumbing past
+  opens/binders. `LieCorr0LowJet` (1832 lines) uses `.ext` pervasively across its
+  refolds → same setup × many + unknown further issues. Verdict: the drafts are
+  genuinely uncompiled (FALSE-GREEN hid real breakage). Left Split with the
+  correct hygiene portion (opens + `← insert_base`); still does NOT build; LowJet
+  untouched; reverted the non-working import/letI attempts. **DECISION:** (a)
+  authorize full bundle-setup repair of both drafts (extensive RiemannianBundle
+  letI plumbing — repairing unverified drafts, not the lieCorr0 math), OR (b)
+  rebuild+verify the two drafts upstream then I resume the leaf. `(N)` 0%.
