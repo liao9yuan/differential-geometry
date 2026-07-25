@@ -137,6 +137,63 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 9 (2026-07-24, LANE C, Opus) — ENVELOPE + Λ<2 single link (normBridge now DISCHARGED)
+
+`normBridge` landed sorry-free in `MetricCovDerivBridge.lean` (session 8's gate is OPEN).
+Mission: build the order-`≤2` jet envelope + the assembled `unifCurvatureSup_singleLink`
+(Λ<2 regime) in this leaf.  Confirmed API inventory (all public unless noted):
+
+- **normBridge** (`MetricCovDerivBridge.lean:238`): `‖(iteratedCovGrad gBase 0 2 j
+  (metricCcTensor gBase h)).toSection x‖ = √(normSq0S gBase x (j+2) (metricCovDeriv h gBase j x))`
+  under `letI := tensorRS_riemannianBundle gBase 0 (2+j)`.
+- **difference asset** (`PerturbedRiemannOpDifferenceBound.lean:88`): role base=gBase,
+  g₁=g₀, P=metricDifferenceCcTensor gBase g₀; needs hδ₀:δ₀<1, B, hB; then per (g₁,P,δ,hδ_le,
+  hδ,htie,x): envelope `∑_{j<3}‖(iteratedCovGrad gBase 0 2 j P).toSection x‖ ≤ B` ⟹
+  `gBase(R(g₀)−R(gBase),·) ≤ C²·gBase-quad`.  δ IMPLICIT with `hδ_le : δ ≤ max δ₀ 0`.
+- **MetricCovDerivOrderBoundOn K a h gRef C** (`AllTimesBounds.lean:691`) `:= ∀ x∈K,
+  metricCovDerivNorm a h gRef x ≤ C`, single order `a`; `metricCovDerivNorm a h gRef x =
+  √(normSq0S gRef x (a+2)(metricCovDeriv h gRef a x))` (`:661`, rfl).
+- **iteratedCovGrad_zero** (`SobolevEmbeddingCm.lean:102`, simp): `… 0 T = T`.
+- **norm_toSection_eq_sqrt_riemannianFiberNormSq** (`MetricArmCoeffJetTower.lean:904`, public):
+  `‖W.toSection x‖ = √(riemannianFiberNormSq gBase r s x (W.toSection x))`.
+- **normSq0S_le_card_of_component_bound** (`Comparison.lean:240`): ON-frame component bound
+  `≤ B` ⟹ `normSq0S ≤ card(Fin s→Idx)·B²`.  (j=0 Parseval tool; card(Fin 2→Fin n)=n².)
+- **ccTensorBilin_abs_le_fibreNorm_mul_sqrt** (`TensorHsRealize.lean:163`, public): its proof
+  contains inline the Parseval identity `∑_{i,j}(ccTensorBilin gBase T x (e i)(e j))² =
+  ‖T.toSection x‖²` (`have hcompsq`, lines 279-299) over an ON frame from
+  `tangent_frame_expansion`.  (Fallback source if no standalone public Parseval bridge.)
+- **metricCovDeriv_succ** (`MetricCovDerivLinear.lean:81`, OTHER-executor file — USE ONLY):
+  `metricCovDeriv h gRef (a+1) = metricCovDerivStep gRef a (metricCovDeriv h gRef a)` (rfl).
+- **metricCovDeriv_succ_apply_section** (`MetricCovDerivCoordStep.lean:43`): `… (a+1) x
+  (Fin.cons (X x) slots) = nabla0SFun (a+2)(leviCiv gRef) X (metricCovDeriv h gRef a) x slots`.
+- **nabla_metric_zero** (`MetricCompatibility.lean:117`): `nabla0SFun 2 cov X (metricTensorField
+  g) x = 0` (cov metric-compat); **nabla_zero** (`:151`): `nabla0SFun s cov X 0 x = 0`.
+- **leviCivitaConnectionOfMetric_isMetricCompatible** (`Integral.Connection`): `IsMetricCompatible_gen
+  (leviCivitaConnectionOfMetric g) g`.
+- **ext0S_basis** (`CoordinateBasis.lean:207`), **component0S_apply** (`:150`, rfl),
+  **iteratedCovGrad_sub** (`IteratedCovGradLinear.lean:91`).
+- **metricCovDeriv gBase gBase 0 = metricTensorField gBase** (rfl, `PointedConvergence.lean:96/184`).
+
+### Route
+1. **j=0** (`‖metricDiff.toSection x‖ ≤ n·(Λ−1)`): `norm_toSection_eq_sqrt_rfns` →
+   bridge rfns=normSq0S(unit) [PENDING agent: public or reproduce ~30 lines] →
+   `normSq0S_le_card_of_component_bound` (component = ccTensorBilin = g₀−gBase, |·|≤Λ−1 on
+   ON frame via `metricDiff_gFibreOpBound`) → √(n²(Λ−1)²)=n(Λ−1).
+2. **j∈{1,2}** (`≤ Λ`): `metricDiff_iterCovGrad_sub` split; `metricCcTensor gBase gBase` half
+   →0 via normBridge + selfZero (`metricCovDeriv gBase gBase j = 0`) + normSq0S 0 =0;
+   `metricCcTensor gBase g₀` half = normBridge = metricCovDerivNorm ≤ Λ [hjet_j].
+   Needs: toSection-sub additivity [PENDING agent], selfZero1/selfZero2 (build via
+   succ_apply_section + nabla_metric_zero/nabla_zero + ext0S_basis).
+3. **envelope**: sum = n(Λ−1)+Λ+Λ = **n(Λ−1)+2Λ**.  c₀(n)=n.
+4. **single link**: obtain asset C=Cd; discharge hdiff via P/htie(`metricDiff_tie`)/hδ
+   (`metricDiff_gFibreOpBound`,δ=Λ−1<1 from hΛ2)/envelope; feed
+   `unifCurvatureSup_singleLink_of_diff`.  **F = Λ²·(Cd + √Kbase)**.
+
+RISK: RiemannianBundle `letI` + `attribute [-instance] tensorRSSpace_normedAddCommGroup/
+normedSpace` juggling must mirror asset/normBridge exactly (norm-instance defeq).
+STATUS: recon done, awaiting 2 Explore agents (j=0 bridge public status; toSection-sub +
+self-zero support), then build.
+
 ## Session 8 (2026-07-24, LANE C, Opus) — D2 `normBridge` GATED on a missing upstream agreement (corrects session 7)
 
 Session 7 called D2 a "single-frontier assembly."  Session 8 recon of the two

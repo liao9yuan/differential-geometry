@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.PerturbedRiemannOpDifferenceBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
+import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 /-!
 # Uniform curvature-jet bound (item-6 brick 2a)
@@ -42,6 +45,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.HCGCompactness
 
 namespace DifferentialGeometry
 namespace PDE
@@ -435,6 +439,302 @@ theorem metricDiff_iterCovGrad_sub (gBase g₀ : SmoothRiemannianMetric I M) (j 
       metricCcTensor (I := I) (M := M) gBase g₀ -
         metricCcTensor (I := I) (M := M) gBase gBase := rfl
   rw [h, iteratedCovGrad_sub]
+
+/-! ### Discharger 2 — the order-`≤2` jet envelope (session 9)
+
+`normBridge` (`MetricCovDerivBridge.lean`) is now proved sorry-free, so the jet
+envelope lands.  The `j = 0` term is the order-0 Hilbert–Schmidt norm of
+`g₀ − gBase`, bounded by `n·(Λ−1)` (`n = finrank`) through a `normSq0S` Parseval
+expansion of Discharger 1's operator bound on an orthonormal frame; the `j ≥ 1`
+terms reduce, through `normBridge` and the self-vanishing of the `gBase`-tower
+(`covNorm_self_succ`), to `metricCovDerivNorm j g₀ gBase x ≤ Λ` from
+`MetricCovDerivOrderBoundOn`.  The two private helpers below re-derive the
+fibre-norm ↔ `normSq0S`-of-unit-value bridge (private in `MetricCovDerivBridge`;
+re-derived here since this leaf may not edit that file). -/
+
+set_option linter.unusedSectionVars false in
+/-- The `r = 0` index-lowering is unit-evaluation (local re-derivation of the
+private `MetricCovDerivBridge.lowerAllUpper_zero_eq_unit`). -/
+private lemma lowerAllUpper_zero_eq_unit'
+    (gBase : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (W : SmoothCcTensor gBase 0 s) (w : Fin (0 + s) → TangentSpace I x) :
+    lowerAllUpperIndices (I := I) (M := M) gBase 0 s x
+        (TensorRSSpace.toModel
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)) w =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
+        (unitZeroSec (I := I) (M := M) x) (fun j : Fin s => w (Fin.natAdd 0 j)) := by
+  rw [lowerAllUpperIndices_apply, separableFormAt_zero]
+  rw [show (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) =
+      Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x) from rfl]
+  rw [← toModel_tensorRS_apply (I := I) (M := M) 0 s x (W.toSection x)
+    (unitZeroSec (I := I) (M := M) x)]
+  rfl
+
+/-- The `gBase`-Riemannian squared fibre norm of a smooth `(0, s)`-tensor section
+equals the intrinsic `normSq0S` of its unit-value (local re-derivation of the
+private `MetricCovDerivBridge.rfns_eq_normSq0S_unit`). -/
+private lemma rfns_eq_normSq0S_unit'
+    (gBase : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (W : SmoothCcTensor gBase 0 s) :
+    riemannianFiberNormSq (I := I) (M := M) gBase 0 s x (W.toSection x) =
+      Tensor0SBundle.normSq0S (I := I) gBase x s
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
+          (unitZeroSec (I := I) (M := M) x)) := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gBase x
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) gBase 0 s x
+    (W.toSection x)]
+  rw [show tensorInnerPointwise (I := I) (M := M) gBase 0 s x
+        (TensorRSSpace.toModel (W.toSection x)) (TensorRSSpace.toModel (W.toSection x)) =
+      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) gBase x
+        (lowerAllUpperIndices (I := I) (M := M) gBase 0 s x
+          (TensorRSSpace.toModel (W.toSection x)))
+        (lowerAllUpperIndices (I := I) (M := M) gBase 0 s x
+          (TensorRSSpace.toModel (W.toSection x))) from rfl]
+  rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) gBase x (0 + s)
+    basis hON _ _]
+  rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gBase x s basis
+    (metricInverseInBasis_of_orthonormal (I := I) gBase basis hON) _]
+  symm
+  refine Fintype.sum_equiv
+    (Equiv.arrowCongr (finCongr (Nat.zero_add s).symm) (Equiv.refl _)) _ _ ?_
+  intro slots
+  rw [Tensor0SBundle.component0S_apply]
+  rw [lowerAllUpper_zero_eq_unit' (I := I) gBase s x W]
+  rw [sq]
+  congr 1 <;>
+    (congr 1; funext a;
+     simp only [Equiv.arrowCongr_apply, Equiv.coe_refl, Function.comp_apply, id_eq];
+     congr 1;
+     apply Fin.ext;
+     simp)
+
+set_option linter.unusedSectionVars false in
+/-- The intrinsic component of the unit-value of a `(0,2)`-tensor section against
+a basis pair is exactly the extracted bilinear form on the two basis vectors. -/
+private lemma component0S_unit_eq_ccBilin
+    (gBase : SmoothRiemannianMetric I M) (S : SmoothCcTensor gBase 0 2) (x : M)
+    (basis : Module.Basis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ (TangentSpace I x))
+    (slots : Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) :
+    Tensor0SBundle.component0S (I := I) basis
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
+          (unitZeroSec (I := I) (M := M) x)) slots =
+      ccTensorBilin (I := I) gBase S x (basis (slots 0)) (basis (slots 1)) := by
+  have hbil : ∀ u v : TangentSpace I x,
+      ccTensorBilin (I := I) gBase S x u v =
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
+          (unitZeroSec (I := I) (M := M) x) ![u, v] := by
+    intro u v
+    rw [ccTensorBilin_apply]
+    rfl
+  rw [Tensor0SBundle.component0S_apply, hbil (basis (slots 0)) (basis (slots 1))]
+  congr 1
+  funext k
+  fin_cases k <;> rfl
+
+set_option linter.unusedSectionVars false in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Envelope term, order 0.**  The `gBase`-Riemannian fibre norm of the metric
+difference `g₀ − gBase` (as a `(0,2)` cc-tensor) is at most `n·(Λ−1)`,
+`n = finrank ℝ E`, by a `normSq0S` Parseval expansion of Discharger 1's operator
+bound on a `gBase`-orthonormal frame. -/
+theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (x : M) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 2
+    ‖((metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x :
+        TensorRSSpace 0 2 I x)‖ ≤ (Module.finrank ℝ E : ℝ) * (Λ - 1) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 2
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gBase x
+  have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
+  -- norm = √ riemannianFiberNormSq = √ normSq0S(unit-value)
+  rw [norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) gBase 0 2 x
+    (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)]
+  rw [rfns_eq_normSq0S_unit' (I := I) gBase 2 x
+    (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)]
+  -- component bound: |component| = |g₀ - gBase on ON basis| ≤ Λ - 1
+  have hcompbound : ∀ slots : Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x)),
+      |Tensor0SBundle.component0S (I := I) basis
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+              (metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x)
+            (unitZeroSec (I := I) (M := M) x)) slots| ≤ Λ - 1 := by
+    intro slots
+    rw [component0S_unit_eq_ccBilin (I := I) gBase
+      (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x basis slots]
+    have heq : ccTensorBilin (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x
+          (basis (slots 0)) (basis (slots 1)) =
+        ccTensorBilinSymm (I := I) gBase
+          (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) x
+          (basis (slots 0)) (basis (slots 1)) := by
+      rw [metricDiff_ccBilin, metricDiff_ccBilinSymm]
+    rw [heq]
+    have hbound := metricDiff_gFibreOpBound (I := I) (M := M) gBase g₀ hΛ hcomp
+      x (basis (slots 0)) (basis (slots 1))
+    have h00 : gBase.inner x (basis (slots 0)) (basis (slots 0)) = 1 := by
+      rw [hON (slots 0) (slots 0)]; simp
+    have h11 : gBase.inner x (basis (slots 1)) (basis (slots 1)) = 1 := by
+      rw [hON (slots 1) (slots 1)]; simp
+    rw [h00, h11, Real.sqrt_one, mul_one, mul_one] at hbound
+    exact hbound
+  have hnormsq := Tensor0SBundle.normSq0S_le_card_of_component_bound (I := I) gBase x 2 basis
+    (metricInverseInBasis_of_orthonormal (I := I) gBase basis hON)
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x)
+      (unitZeroSec (I := I) (M := M) x)) (Λ - 1) hΛ1 hcompbound
+  -- card (Fin 2 → Fin n) = n²
+  have hcard : (Fintype.card (Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) : ℝ) =
+      (Module.finrank ℝ E : ℝ) ^ 2 := by
+    simp [Fintype.card_fun]
+  rw [hcard] at hnormsq
+  -- √ normSq0S ≤ √ (n² (Λ-1)²) = n (Λ-1)
+  calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gBase x 2
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+              (metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x)
+            (unitZeroSec (I := I) (M := M) x)))
+      ≤ Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2 * (Λ - 1) ^ 2) := Real.sqrt_le_sqrt hnormsq
+    _ = (Module.finrank ℝ E : ℝ) * (Λ - 1) := by
+        rw [← mul_pow, Real.sqrt_sq (mul_nonneg (Nat.cast_nonneg _) hΛ1)]
+
+set_option linter.unusedSectionVars false in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Envelope term, order `a + 1 ≥ 1`.**  Through the linearity split
+`metricDiff_iterCovGrad_sub`, the `metricCcTensor gBase gBase` half vanishes
+(`normBridge` + `covNorm_self_succ`), leaving the `metricCcTensor gBase g₀` half,
+whose fibre norm is `metricCovDerivNorm (a+1) g₀ gBase x ≤ Λ` by
+`MetricCovDerivOrderBoundOn`. -/
+theorem metricDiff_orderPos_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (a : ℕ) (hjet : MetricCovDerivOrderBoundOn Set.univ (a + 1) g₀ gBase Λ) (x : M) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + (a + 1)) I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + (a + 1))
+    ‖((iteratedCovGrad gBase 0 2 (a + 1)
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
+        TensorRSSpace 0 (2 + (a + 1)) I x)‖ ≤ Λ := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + (a + 1)) I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + (a + 1))
+  -- the gBase-tower half has zero norm
+  have hBzero : ‖((iteratedCovGrad gBase 0 2 (a + 1)
+        (metricCcTensor (I := I) (M := M) gBase gBase)).toSection x :
+        TensorRSSpace 0 (2 + (a + 1)) I x)‖ = 0 := by
+    rw [normBridge gBase gBase (a + 1) x]
+    exact covNorm_self_succ gBase a x
+  have hBsec : (iteratedCovGrad gBase 0 2 (a + 1)
+      (metricCcTensor (I := I) (M := M) gBase gBase)).toSection x = 0 :=
+    norm_eq_zero.mp hBzero
+  -- split via linearity and drop the zero half
+  have hsplit : (iteratedCovGrad gBase 0 2 (a + 1)
+        (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x =
+      (iteratedCovGrad gBase 0 2 (a + 1)
+        (metricCcTensor (I := I) (M := M) gBase g₀)).toSection x := by
+    rw [metricDiff_iterCovGrad_sub]
+    simp only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply, hBsec,
+      sub_zero]
+  rw [hsplit, normBridge g₀ gBase (a + 1) x]
+  exact hjet x (Set.mem_univ x)
+
+set_option linter.unusedSectionVars false in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The order-`≤2` jet envelope `B(Λ) = n·(Λ−1) + 2Λ`.**  This is the metric-jet
+envelope the order-0 Riemann *difference* asset consumes at role base = `gBase`,
+`P = metricDifferenceCcTensor gBase g₀`. -/
+theorem metricDiff_jetEnvelope (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn Set.univ 2 g₀ gBase Λ)
+    (x : M) :
+    (∑ j ∈ Finset.range 3,
+        (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + j)
+        ‖((iteratedCovGrad gBase 0 2 j
+            (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
+            TensorRSSpace 0 (2 + j) I x)‖)) ≤ (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ := by
+  have hbound : ∀ j ∈ Finset.range 3,
+      (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + j)
+        ‖((iteratedCovGrad gBase 0 2 j
+            (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
+            TensorRSSpace 0 (2 + j) I x)‖) ≤
+        (if j = 0 then (Module.finrank ℝ E : ℝ) * (Λ - 1) else Λ) := by
+    intro j hj
+    fin_cases hj
+    · simpa only [iteratedCovGrad_zero] using
+        metricDiff_order0_bound (I := I) (M := M) gBase g₀ hΛ hcomp x
+    · simpa only [iteratedCovGrad_zero] using
+        metricDiff_orderPos_bound (I := I) (M := M) gBase g₀ 0 hjet1 x
+    · simpa only [iteratedCovGrad_zero] using
+        metricDiff_orderPos_bound (I := I) (M := M) gBase g₀ 1 hjet2 x
+  calc (∑ j ∈ Finset.range 3,
+          (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + j)
+            ‖((iteratedCovGrad gBase 0 2 j
+                (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
+                TensorRSSpace 0 (2 + j) I x)‖))
+      ≤ ∑ j ∈ Finset.range 3,
+          (if j = 0 then (Module.finrank ℝ E : ℝ) * (Λ - 1) else Λ) := Finset.sum_le_sum hbound
+    _ = (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ := by
+        simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+        ring
+
+/-- **Order-0 curvature sup, single link (`Λ < 2` regime), from comparability and
+jets alone.**
+
+Under `Λ`-comparability of `g₀` with `gBase` (`1 ≤ Λ < 2`) and the class metric-jet
+bounds `MetricCovDerivOrderBoundOn` at orders `1` and `2`, the absolute Riemann
+operator of `g₀` is bounded in the `g₀` inner product by `F²` with an explicit
+`F = Λ² · (Cd + √Kbase)`, where `Cd` is the order-0 Riemann *difference* constant
+of `exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope` at envelope
+`B = n·(Λ−1) + 2Λ` and operator radius `δ₀ = Λ − 1 < 1`, and `Kbase` is the fixed
+`gBase` curvature constant.  This discharges brick 2a-0; the full class `Λ ≥ 1`
+follows by `convexComb` telescoping (2a-tel). -/
+theorem unifCurvatureSup_singleLink
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn Set.univ 2 g₀ gBase Λ) :
+    ∃ F : ℝ, 0 ≤ F ∧
+      ∀ (x : M) (v w u : TangentSpace I x),
+        g₀.inner x
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
+          F ^ 2 * g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
+  classical
+  have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
+  have hB0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ :=
+    add_nonneg (mul_nonneg (Nat.cast_nonneg _) hΛ1) (by linarith)
+  obtain ⟨Cd, hCd0, hCd⟩ :=
+    exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope (I := I) (M := M)
+      gBase (δ₀ := Λ - 1) (by linarith : Λ - 1 < 1)
+      ((Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ) hB0
+  have hdiff : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
+            riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
+            riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Cd ^ 2 * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u := by
+    intro x v w u
+    exact hCd g₀ (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) (δ := Λ - 1)
+      (le_of_eq (max_eq_left hΛ1).symm)
+      (metricDiff_gFibreOpBound (I := I) (M := M) gBase g₀ hΛ hcomp)
+      (fun x v w => metricDiff_tie (I := I) (M := M) gBase g₀ x v w) x
+      (metricDiff_jetEnvelope (I := I) (M := M) gBase g₀ hΛ hcomp hjet1 hjet2 x) v w u
+  exact unifCurvatureSup_singleLink_of_diff (I := I) (M := M) gBase g₀ hΛ hcomp hCd0 hdiff
 
 end RicciFlow
 end PDE
