@@ -900,7 +900,8 @@ noncomputable instance tensorRSBundle_topology (r s : ℕ) :
 noncomputable instance tensorRSBundle_fiber (r s : ℕ) :
     @FiberBundle M (TensorRSModel r s 𝕜 E) _ (by infer_instance : TopologicalSpace _)
       (fun x : M => TensorRSSpace r s I x)
-      (tensorRSBundle_topology r s) _ :=
+      (tensorRSBundle_topology r s)
+      (fun x : M => tensorRSSpace_topologicalSpace r s x) :=
   Bundle.ContinuousLinearMap.fiberBundle (RingHom.id 𝕜)
     (Tensor0SModel r 𝕜 E)
     (fun (x : M) => Tensor0SSpace r I x)

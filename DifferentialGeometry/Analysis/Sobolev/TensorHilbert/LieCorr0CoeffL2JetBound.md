@@ -4,6 +4,32 @@ New leaf (RULING 1, planner acceptance №19): the `TensorHilbert/` home of the
 `lieCorr0Field` realizedFam jet-L2 top-separated producer (2nd genuinely-missing
 `C₀` constituent of `Ψ₀`).  Namespace `DifferentialGeometry.Integral.Connection`.
 
+## State (2026-07-25): dedup DONE; still blocked on LowJet WIP (not the diamond).
+
+The TensorRS TotalSpace topology-instance diamond dedup (GPT Pro ruling,
+`ShortTime/UNIF_DIAMOND_PRO_RULING.md`) is DONE + verified: Edit A (harden
+`tensorRSBundle_fiber`'s explicit fibre-topology family, `RSTensor/Defs.lean`),
+Edit B (3× `instance`→`def` in `…/TensorRSContRiemannianBundle.lean`), Edit C
+(type-based audit — no additional alias). Probes green in both eta spellings /
+both import contexts; Phase 2b (2743 jobs) + Phase 4 (9388-job rich-import cone)
+GREEN — dedup is regression-free.
+
+CORRECTION to the §D-ROUND / T1 classification below: the "≥3 competing
+TotalSpace topologies" count was type-miscounted. There is ONE canonical
+pointwise fibre topology (`tensorRSSpace_topologicalSpace`, KEEP), ONE canonical
+TotalSpace topology (`tensorRSBundle_topology`, KEEP), one redundant TotalSpace
+wrapper alias (demoted), plus a SEPARATE documented pointwise norm-topology
+diamond (out of scope). Trust the ruling over the D-ROUND note.
+
+The consumer chain still doesn't build, but NOT because of the diamond:
+`LieCorr0Split` is now GREEN (dedup + a mechanical `set_option
+backward.isDefEq.respectTransparency false`). `LieCorr0LowJet` (which THIS file
+imports) is deep pre-existing WIP — syntax errors, embedded `sorry`s, unimported
+symbols (`ccTensorBilinSymm`, `gFibreOpBound`), undefined `lieCorr0IVPerm`, and
+genuine proof failures — a STOP beyond mechanical-hygiene scope. See
+`LieCorr0LowJet.md`. So this leaf remains BLOCKED on LowJet, no longer on the
+topology diamond.
+
 ## State (2026-07-24): WRITTEN but BLOCKED-UNVERIFIED on a broken upstream dep.
 
 Written so far (top piece + assembly helper — the decisive R-free-Ktop brick):

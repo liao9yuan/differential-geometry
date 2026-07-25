@@ -19,8 +19,16 @@ not small at `H3` regularity.
 
 ## Verification
 
-The source is written but not yet focused-checked because the shared build is
-under an exclusive sequential artifact refresh.  Thus these are not yet
-counted as verified Lean theorems.
+2026-07-25: **GREEN** — `lake build +LieCorr0Split` succeeds sorry-free (22s)
+after the TensorRS TotalSpace topology dedup (Edits A/B/C in
+`RSTensor/Defs.lean` + `…/TensorRSContRiemannianBundle.lean`) PLUS a mechanical
+elaboration-config fix in this file: `set_option
+backward.isDefEq.respectTransparency false` added after `noncomputable section`.
+Rationale: the `SmoothCcTensor g 2 2` sections here elaborate `Cₛ^∞⟮…⟯` =
+`ContMDiffSection`, whose instance stack needs `NormedSpace (TensorRSModel 2 2 ℝ
+E)`; that model-fibre normed instance only synthesizes under reduced def-eq
+transparency (the same option `Tensor/RSTensor/Defs.lean` uses at line 50).
+Without the option the four `SmoothCcTensor` fields fail with `failed to
+synthesize FiberBundle …`. Elaboration-config only — no statement/proof change.
 
 Endpoint theorem progress remains 0%; this file is producer machinery only.

@@ -18,6 +18,30 @@ metric derivative is requested.
 
 ## Verification state
 
-Source has been written while the shared Lean artifact repair is exclusive.
-No theorem in this file has yet been checked.  Endpoint completion remains
-0%; this is producer machinery only.
+2026-07-25: **RED — STOP (deep WIP, out of dedup scope).**
+
+After the TensorRS topology dedup + the mechanical `set_option
+backward.isDefEq.respectTransparency false` (added after `noncomputable section`,
+same as `LieCorr0Split`), the FiberBundle/VectorBundle synthesis blocker is
+GONE — no bundle-synthesis errors remain. But `lake build +LieCorr0LowJet`
+still fails with ~40 pre-existing errors that are NOT mechanical hygiene:
+
+- **Syntax errors**: `unexpected token ':='` at lines 1381, 1520; `expected
+  token` at 1598 (the 1598 error breaks the `private theorem riemRest_smooth`
+  defined at 1597, cascading to "unknown identifier riemRest_smooth" at 1629).
+- **Embedded `sorry`s** in hypotheses (e.g. `htie : … = … + sorry`, `hbound :
+  sorry`) at 91, 119, 1772, 1794, …
+- **Unresolved identifiers**: `ccTensorBilinSymm` (exists in
+  `MetricRealization/TensorHsRealize.lean:395` but unimported here),
+  `gFibreOpBound` (exists in `MetricRealization/PosDefPerturbation.lean:70`,
+  unimported), `lieCorr0IVPerm` (no definition found).
+- **Genuine proof failures**: type mismatches (123, 1756), application type
+  mismatches (263, 392, 418), rewrite failures (1232, 1288, 1644, 1772, 1794),
+  `No goals` (312), positivity failure (1693), whnf/tactic heartbeat timeout
+  (232, 234).
+
+Bringing this file green requires fixing syntax, resolving `sorry`s, adding
+imports, and repairing proofs — theorem-statement / genuine-proof work beyond
+the mechanical-hygiene guardrail. The transparency `set_option` was kept (it is
+a correct, necessary partial fix) but is necessary-not-sufficient. Endpoint
+completion remains 0%.

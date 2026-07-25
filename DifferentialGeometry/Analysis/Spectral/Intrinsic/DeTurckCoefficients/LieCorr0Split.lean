@@ -13,6 +13,13 @@ DeTurck endomorphism arm, where its leading derivative cancels.
 
 noncomputable section
 
+-- Match `Tensor/RSTensor/Defs.lean`: the bundle instances (and the model-fibre
+-- `NormedSpace (TensorRSModel …)` needed by the `Cₛ^∞⟮…⟯` section stack) were
+-- elaborated under reduced def-eq transparency, so downstream section
+-- constructions require the same option to synthesize the FiberBundle/VectorBundle
+-- stack. Elaboration-config only; no statement or proof changes.
+set_option backward.isDefEq.respectTransparency false
+
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold Topology ContDiff Matrix
 

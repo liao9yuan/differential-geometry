@@ -13,6 +13,11 @@ at every covariant order.
 
 noncomputable section
 
+-- Match `Tensor/RSTensor/Defs.lean` (and `LieCorr0Split`): section constructions
+-- over the `(r,s)`-tensor bundle need the same reduced def-eq transparency to
+-- synthesize the FiberBundle/VectorBundle stack. Elaboration-config only.
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
