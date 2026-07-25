@@ -80,7 +80,6 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
@@ -151,7 +150,6 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
   rw [h_pow_eq, smul_eq_mul]
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M) {f : ι → EuclN → ℝ}

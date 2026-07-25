@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.PullbackCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -40,7 +39,8 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N
 private lemma infty_ne_zeroC : (∞ : WithTop ℕ∞) ≠ 0 := by
   decide
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 private theorem mfderiv_eq_cle_applyCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zeroC x v =
@@ -49,7 +49,8 @@ private theorem mfderiv_eq_cle_applyCross
     Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zeroC
   exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace J (Phi x) => f v) h
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 theorem mpullback_symm_applyCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     VectorField.mpullback J I (Phi.symm : N -> M) X (Phi x) =
@@ -96,7 +97,8 @@ private abbrev pushFwdFieldCross
     (q : N) -> TangentSpace J q :=
   VectorField.mpullback J I (Phi.symm : N -> M) X
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 @[simp] private theorem pushFwdFieldCross_apply_at_image
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) (x : M) :
     pushFwdFieldCross (I := I) (J := J) Phi X (Phi x) =
@@ -122,7 +124,8 @@ noncomputable def pushFwdSectionCross
       exact ContinuousLinearMap.isInvertible_equiv
     · simp
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] [IsManifold I ∞ M] [IsManifold J ∞ N] in
 @[simp] theorem pushFwdSectionCross_apply_at_image
     [IsManifold I 1 M] [IsManifold J 1 N]
     (Phi : M ≃ₘ⟮I, J⟯ N)
@@ -134,7 +137,8 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [NeZero (Module.finrank ℝ F)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 theorem directionalDeriv_pullbackCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -169,7 +173,8 @@ theorem directionalDeriv_pullbackCross
         (fun q : N =>
           g.inner q (pushFwdSectionCross (I := I) (J := J) Phi P q)
             (pushFwdSectionCross (I := I) (J := J) Phi Q q)) (Phi x) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := J) (M := N) g
+    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := J)
+      (M := N) g
       (pushFwdSectionCross (I := I) (J := J) Phi P).contMDiff.contMDiffAt
       (pushFwdSectionCross (I := I) (J := J) Phi Q).contMDiff.contMDiffAt
       (by simp)).mdifferentiableAt (by simp)
@@ -184,7 +189,8 @@ theorem directionalDeriv_pullbackCross
   simpa [Function.comp_def] using hcomp
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [NeZero (Module.finrank ℝ F)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem inner_bracket_pullback_pushFwdCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -231,7 +237,8 @@ private theorem inner_bracket_pullback_pushFwdCross
   rw [pushFwdSectionCross_apply_at_image]
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [NeZero (Module.finrank ℝ F)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem koszulScalar_pullback_pushFwdCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold J N]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -287,7 +294,8 @@ theorem metricCov_pullbackCross
       (n := (⊤ : ℕ∞)) x w
   have hu : pushFwdSectionCross (I := I) (J := J) Phi Zw (Phi x) = u := by
     rw [pushFwdSectionCross_apply_at_image, hZw]; exact hdw
-  have hv : pushFwdSectionCross (I := I) (J := J) Phi Xv (Phi x) = mfderiv I J (Phi : M -> N) x v := by
+  have hv : pushFwdSectionCross (I := I) (J := J) Phi Xv (Phi x) = mfderiv I J (Phi : M -> N) x
+    v := by
     rw [pushFwdSectionCross_apply_at_image, hXv]
   have hkoszul_h :
       g.inner (Phi x)
@@ -299,7 +307,8 @@ theorem metricCov_pullbackCross
               (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
               (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x := by
     rw [← hdw, ← Diffeomorph.pullbackMetricCross_inner, ← hXv, ← hZw]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
       (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x
       (Xv.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
@@ -316,14 +325,18 @@ theorem metricCov_pullbackCross
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Zw q) (Phi x) := by
     rw [← hu, ← hv]
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    exact
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := J) g
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Xv q)
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Zw q) (Phi x)
-      ((pushFwdSectionCross (I := I) (J := J) Phi Xv).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
-      ((pushFwdSectionCross (I := I) (J := J) Phi Y).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
-      ((pushFwdSectionCross (I := I) (J := J) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Xv).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Y).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
+      ((pushFwdSectionCross (I := I) (J := J) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt
+        (by simp))
   rw [hkoszul_h, hkoszul_g, koszulScalar_pullback_pushFwdCross (I := I) (J := J) g Phi Xv Y Zw x]
 
 
@@ -355,11 +368,13 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
     metricCov (I := J) (M := N) g
   let ZYh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (Y p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) Y Z p⟩
   let ZXh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (X p),
-      fun p => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      fun p
+        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) X Z p⟩
   have hZY :
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi ZYh q) =

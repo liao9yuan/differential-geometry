@@ -24,7 +24,8 @@ noncomputable def transitionCoeffOnEuclid
   transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma transitionCoeffOnEuclid_def
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (y : EuclN) :
@@ -36,14 +37,16 @@ noncomputable def chartTransitionEuclidOverlap (α β : M) : Set EuclN :=
   {y | y ∈ chartTargetEuclid (I := I) (M := M) α ∧
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source}
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma mem_chartTransitionEuclidOverlap {α β : M} {y : EuclN} :
     y ∈ chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β ↔
       y ∈ chartTargetEuclid (I := I) (M := M) α ∧
         (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source :=
   Iff.rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
     IsOpen (chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β) := by
   classical
@@ -83,7 +86,8 @@ private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
   rw [h_eq]
   exact h_pre_open
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma transitionCoeffOnEuclid_contDiffOn
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -124,7 +128,6 @@ lemma transitionCoeffOnEuclid_contDiffOn
     h_tc.comp h_chart_symm_sub h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-set_option maxHeartbeats 800000 in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact
     (r s k : ℕ) (α β : M)
@@ -228,7 +231,6 @@ theorem tensorChartTransition_Ck_bound_on_compact
       exact Finset.mem_product.mpr ⟨Finset.mem_univ _, Finset.mem_univ _⟩
     exact (hCj_bd j P₀ Q y hy).trans (hC_ge j P₀ Q hmem)
 
-set_option maxHeartbeats 800000 in
 
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartTransition_Ck_bound_on_compact_manifold

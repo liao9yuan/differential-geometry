@@ -8,9 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -95,7 +92,8 @@ theorem ricciFromRm13At_rm04_first_trace_convention
     DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis
         (ricciFromRm13At (I := I) (M := M) Rm13) i j =
       ∑ k : Idx, ∑ l : Idx,
-        gInv k l * DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis Rm04 k i j l := by
+        gInv k l * DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis Rm04 k i j
+          l := by
   have h := DifferentialGeometry.Integral.Connection.ricciFromRm13_comp_eq_rm04_trace
     (I := I) g basis gInv hinv Rm13 Rm04 hLower i j
   simpa using h

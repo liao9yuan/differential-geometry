@@ -9,8 +9,6 @@ import Mathlib.GroupTheory.Perm.Fin
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -87,7 +85,8 @@ private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
   exact tensorRSCovariantDerivative_zeroS_unit_eval
     (I := I) (M := M) g s W.toSection x v
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartE_section_repr_apply_tuple
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace s I b) (b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -103,7 +102,8 @@ private lemma tensor0SChartE_section_repr_apply_tuple
   rw [e.continuousLinearMapAt_apply ℝ, e.coe_linearMapAt_of_mem hbE]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartE_section_repr_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
@@ -111,7 +111,8 @@ private lemma tensor0SChartE_section_repr_domDomCongr
         (fun y => ContinuousMultilinearMap.domDomCongr σ
           (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) b =
       ContinuousMultilinearMap.domDomCongr σ
-        (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α T b) := by
+        (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr (I := I) s α T
+          b) := by
   classical
   apply ContinuousMultilinearMap.ext
   intro v
@@ -130,7 +131,8 @@ private lemma tensor0SChartE_section_repr_domDomCongr
       e.continuousLinearMapAt_apply ℝ, e.linearMapAt_def_of_notMem hbE]
     simp
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartFiberFromModel_apply_tuple
     (s : ℕ) (α : M) (b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -145,7 +147,8 @@ private lemma tensor0SChartFiberFromModel_apply_tuple
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply] at h2
   exact h2
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SChartFiberFromModel_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M) (b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -153,16 +156,19 @@ private lemma tensor0SChartFiberFromModel_domDomCongr
     DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b
         (ContinuousMultilinearMap.domDomCongr σ M0) =
       ContinuousMultilinearMap.domDomCongr σ
-        (DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b M0) := by
+        (DifferentialGeometry.Integral.Connection.tensor0SChartFiberFromModel (I := I) s α b
+          M0) := by
   classical
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb (ContinuousMultilinearMap.domDomCongr σ M0) v]
+  rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb
+    (ContinuousMultilinearMap.domDomCongr σ M0) v]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb M0 (fun i => v (σ i))]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SIntrinsicChartCLM_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M)
@@ -172,11 +178,11 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
         (fun y => ContinuousMultilinearMap.domDomCongr σ
           (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) b v =
       ContinuousMultilinearMap.domDomCongr σ
-        (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) s α T b v) := by
+        (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) s α T b
+          v) := by
   classical
   rw [DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply,
     DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply]
-
   set L : Tensor0SModel s ℝ E ≃L[ℝ] Tensor0SModel s ℝ E :=
     (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ).toContinuousLinearEquiv with hL
   have hpull :
@@ -196,7 +202,6 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
   rw [L.comp_fderiv]
   rw [ContinuousLinearMap.comp_apply]
   rw [hL, ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
-
   rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ)
         ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
             (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
@@ -205,10 +210,10 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
         ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
             (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
           (DifferentialGeometry.Integral.Connection.trivToE (I := I) α b v)) from rfl]
-
   rw [tensor0SChartFiberFromModel_domDomCongr (I := I) s σ α b hb]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma localSlotCLM_comp_perm
     (s : ℕ) (σ : Equiv.Perm (Fin s)) {b : M} (k : Fin s)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (i : Fin s) :
@@ -223,7 +228,8 @@ private lemma localSlotCLM_comp_perm
         (by intro h; exact hi (by rw [← Equiv.symm_apply_apply σ i, h])),
       DifferentialGeometry.Integral.Connection.localSlotCLM_other s (σ.symm k) Φ hi]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensor0SSlotCorrection_sum_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (X : Π b : M, TangentSpace I b) (b : M) :
@@ -231,20 +237,20 @@ private lemma chartTensor0SSlotCorrection_sum_domDomCongr
         (fun y => ContinuousMultilinearMap.domDomCongr σ
           (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from T y)) X b k =
       ContinuousMultilinearMap.domDomCongr σ
-        (∑ k : Fin s, DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection (I := I) s g α
+        (∑ k : Fin s, DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection (I := I)
+          s g α
           T X b k) := by
   classical
   apply ContinuousMultilinearMap.ext
   intro m
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
-
-  rw [← Equiv.sum_comp σ.symm (fun k => DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
+  rw [← Equiv.sum_comp σ.symm
+    (fun k => DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
     (I := I) s g α T X b k (fun i => m (σ i)))]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM,
     DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM]
-
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   refine congrArg _ ?_
   funext i
@@ -261,16 +267,19 @@ private lemma domDomCongr_sub
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1))) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) (X : Π b : M, TangentSpace I b) {b : M}
     (hb : b ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α) :
     DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative (I := I) (s + 1) g α
         (fun y => ContinuousMultilinearMap.domDomCongr σ
-          (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from T y)) X b =
+          (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from T y)) X
+            b =
       ContinuousMultilinearMap.domDomCongr σ
-        (DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative (I := I) (s + 1) g α
+        (DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative (I := I) (s + 1)
+          g α
           T X b) := by
   classical
   have hbE : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -278,9 +287,11 @@ private lemma chartTensor0SCovariantDerivative_succ_domDomCongr
   rw [DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_succ (I := I) s g α
       (fun y => ContinuousMultilinearMap.domDomCongr σ
         (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from T y)) X b,
-    DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_succ (I := I) s g α T X b]
+    DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_succ (I := I) s g α T
+      X b]
   rw [domDomCongr_sub σ
-    (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b (X b))
+    (DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM (I := I) (s + 1) α T b
+      (X b))
     (∑ k : Fin (s + 1), DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
       (I := I) (s + 1) g α T X b k)]
   rw [tensor0SIntrinsicChartCLM_domDomCongr (I := I) (s + 1) σ α T b hbE (X b)]
@@ -340,7 +351,6 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
     DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet x
   have hxE : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_mem_baseSet hx_good
-
   have hframe : ∀ i : Fin (Module.finrank ℝ E),
       (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
           (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ' x)
@@ -352,18 +362,21 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
     intro i
     have hXi_at := DifferentialGeometry.Integral.Connection.chartBasisVec_alpha_mdifferentiableAt
         (I := I) x i hx_good
-    rw [← DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
-      (I := I) (M := M) g x s ŝ' (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
+    rw [←
+      DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
+      (I := I) (M := M) g x s ŝ'
+        (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
       hx_good hŝ' hXi_at]
     rw [show ŝ' = (fun y => ContinuousMultilinearMap.domDomCongr σ
         (show ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => TangentSpace I y) ℝ from ŝ y))
         from funext hrel]
     rw [chartTensor0SCovariantDerivative_succ_domDomCongr (I := I) s g σ x ŝ
       (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i) hx_good]
-    rw [DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
-      (I := I) (M := M) g x s ŝ (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
+    rw
+      [chartTensor0SCovariantDerivative_eq_abstract_succ_aux
+      (I := I) (M := M) g x s ŝ
+        (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
       hx_good hŝ hXi_at]
-
   conv_lhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
     (I := I) x hxE v, map_sum]
   conv_rhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
@@ -390,10 +403,8 @@ theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
       ContinuousMultilinearMap.domDomCongr σ
         (covDerivUnitModel (I := I) (M := M) g s S x v) := by
   classical
-
   rw [covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S' x v,
     covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S x v]
-
   have hrel : ∀ y : M, unitEvalSection (I := I) (M := M) g s S' y =
       ContinuousMultilinearMap.domDomCongr σ
         (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from
@@ -403,7 +414,8 @@ theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
     rw [unitModel, unitModel] at h
     exact h
   rcases s with _ | s
-  · have hsec : unitEvalSection (I := I) (M := M) g 0 S' = unitEvalSection (I := I) (M := M) g 0 S := by
+  · have hsec : unitEvalSection (I := I) (M := M) g 0 S' = unitEvalSection (I := I) (M := M) g 0
+      S := by
       funext y
       have := hrel y
       rw [Subsingleton.elim σ (1 : Equiv.Perm (Fin 0))] at this
@@ -458,7 +470,6 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
     refine ⟨Equiv.Perm.decomposeFin.symm (0, σ'), fun x => ?_⟩
     apply ContinuousMultilinearMap.ext
     intro v
-
     change unitModel (I := I) (M := M) g (s + i + 1)
         (covGrad (I := I) (M := M) g 0 (s + i)
           (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S')) x v =
@@ -466,19 +477,16 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
         (unitModel (I := I) (M := M) g (s + i + 1)
           (covGrad (I := I) (M := M) g 0 (s + i)
             (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S)) x) v
-
     rw [unitModel_covGrad_apply (I := I) (M := M) g (s + i)
       (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') x v]
     rw [ContinuousMultilinearMap.domDomCongr_apply,
       unitModel_covGrad_apply (I := I) (M := M) g (s + i)
         (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S) x
         (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ')) k))]
-
     rw [tensorCovDerivAt_unit_toModel_domDomCongr_of_section (I := I) (M := M) g (s + i) σ'
       (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S)
       (iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S') hσ' x (v 0)]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
-
     have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ')) (0 : Fin (s + i + 1))) = v 0 := by
       rw [Equiv.Perm.decomposeFin_symm_apply_zero]
     have htail :
@@ -490,12 +498,14 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
       rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
     rw [hzero, htail]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma applySection_tensorSectionMDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s)
     (w : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯) (x : M) :
     DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s
-      (fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y)) x := by
+      (fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y))
+        x := by
   classical
   have hHom : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E))
       (fun z : M => TotalSpace.mk' (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)
@@ -528,15 +538,15 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
             tensorCovDerivAt (I := I) (M := M) g r s Φ x v) D)) := by
   classical
-
   obtain ⟨w, hw⟩ := ContMDiffSection.exists_eq_at (I := I)
     (F := Tensor0SModel r ℝ E) (V := fun y : M => Tensor0SSpace r I y)
     (n := (⊤ : ℕ∞)) x D
-
   set u : Π y : M, Tensor0SSpace s I y :=
-    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y) with hu_def
+    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y) with
+               hu_def
   set u' : Π y : M, Tensor0SSpace s I y :=
-    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ'.toSection y) (w y) with hu'_def
+    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ'.toSection y) (w y) with
+               hu'_def
   have hu_at : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s u x :=
     applySection_tensorSectionMDiffAt (I := I) (M := M) g r s Φ w x
   have hu'_at : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s u' x :=
@@ -549,7 +559,6 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
     have h := hrel y (w y)
     rw [hu'_def, hu_def]
     exact h
-
   rw [tensorCovDerivAt_def (I := I) (M := M) g r s Φ' x v,
     tensorCovDerivAt_def (I := I) (M := M) g r s Φ x v]
   have hHL' := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s
@@ -559,7 +568,6 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
   rw [← hw]
   rw [hHL', hHL]
   rw [Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_sub, domDomCongr_sub]
-
   have hsource :
       Tensor0SSpace.toModel
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ'.toSection x)
@@ -571,7 +579,6 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
               (Tensor0SNabla.tensor0SCovariantDerivative I M r
                 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) w x v))) :=
     hrel x _
-
   have htarget :
       Tensor0SSpace.toModel
           (Tensor0SNabla.tensor0SCovariantDerivative I M s
@@ -624,10 +631,8 @@ theorem covGrad_rs_toModel_domDomCongr
   rw [ContinuousMultilinearMap.domDomCongr_apply,
     covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x d
       (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ)) k))]
-
   rw [tensorCovDerivAt_rs_toModel_domDomCongr (I := I) (M := M) g r s σ Φ Φ' hrel x (v 0) d]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
-
   have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ)) (0 : Fin (s + 1))) = v 0 := by
     rw [Equiv.Perm.decomposeFin_symm_apply_zero]
   have htail :
@@ -639,7 +644,8 @@ theorem covGrad_rs_toModel_domDomCongr
     rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
   rw [hzero, htail]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerAllUpperIndices_zero_apply_unitModel
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) (u : Fin (0 + s) → TangentSpace I x) :
@@ -655,7 +661,8 @@ private lemma lowerAllUpperIndices_zero_apply_unitModel
   rw [Tensor0SSpace.toModel_ofModel]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerAllUpperIndices_zero_domDomCongr_of_unitModel
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -676,11 +683,9 @@ private lemma lowerAllUpperIndices_zero_domDomCongr_of_unitModel
   rw [hSS' x, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
   rw [lowerAllUpperIndices_zero_apply_unitModel (I := I) (M := M) g s S x]
-
   congr 1
   funext j
   congr 1
-
   rw [Equiv.permCongr_symm, Equiv.permCongr_apply]
   apply Fin.ext
   simp
@@ -704,7 +709,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
       ((iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S').toSection x),
     riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + i) x
       ((iteratedCovGrad (E := E) (H := H) (I := I) (M := M) g 0 s i S).toSection x)]
-
   change covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel

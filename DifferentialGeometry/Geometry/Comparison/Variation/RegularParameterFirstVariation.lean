@@ -45,7 +45,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem speed_positivity_near
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f)
@@ -97,7 +98,8 @@ theorem speed_positivity_near
     hUV_in_S (Set.mk_mem_prod hs_in_U ht_in_V)
   exact Real.sqrt_le_sqrt (le_of_lt h_st_in_S)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem S2_diff_under_interval_integral_general
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

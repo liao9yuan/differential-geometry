@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

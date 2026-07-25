@@ -12,8 +12,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -30,7 +28,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+  (metricCauchySchwarzBound ccTensorBilinSymm)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -52,11 +51,13 @@ private lemma diagonalGrid_leftFactor_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ)
     with hD_def
   have hcell_nn : ∀ i, 0 ≤ cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l := by
     intro i; exact mul_nonneg (hcΦ i) (Finset.sum_nonneg (fun l _ => hcW l))
-  have hWshift : ∀ m : ℕ, (∑ l ∈ Finset.range m, cW (l + 1)) ≤ ∑ l ∈ Finset.range (m + 1), cW l := by
+  have hWshift : ∀ m : ℕ, (∑ l ∈ Finset.range m, cW (l + 1)) ≤ ∑ l ∈ Finset.range (m + 1), cW
+    l := by
     intro m
     rw [Finset.sum_range_succ' (fun l => cW l) m]
     exact le_add_of_nonneg_right (hcW 0)
-  have hA : (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) ≤ D := by
+  have hA : (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) ≤
+    D := by
     rw [hD_def]
     rw [Finset.sum_range_succ' (fun i => cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l) (j + 1)]
     refine le_trans ?_ (le_add_of_nonneg_right (hcell_nn 0))
@@ -64,7 +65,8 @@ private lemma diagonalGrid_leftFactor_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ)
     have hile : i ≤ j := by simp only [Finset.mem_range] at hi; omega
     refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (hcΦ (i + 1))
     rw [show j + 1 + 1 - (i + 1) = j + 1 - i from by omega]
-  have hB : (∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) ≤ D := by
+  have hB : (∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) ≤
+    D := by
     rw [hD_def]
     rw [Finset.sum_range_succ (fun i => cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l) (j + 1)]
     refine le_trans ?_ (le_add_of_nonneg_right (hcell_nn (j + 1)))
@@ -80,7 +82,6 @@ private lemma diagonalGrid_leftFactor_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ)
         exact mul_le_mul_of_nonneg_left hB hn
     _ = (n + 1) * D := by ring
 
-set_option maxHeartbeats 6400000 in
 theorem riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (g : SmoothRiemannianMetric I M) :
     ∀ (j p a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g p a) (x : M),
@@ -193,7 +194,8 @@ theorem riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGri
       have hstep : SA + (Module.finrank ℝ E : ℝ) * SB ≤ ((Module.finrank ℝ E : ℝ) + 1) * DG := by
         rw [hSA_def, hSB_def, hDG_def]
         exact diagonalGrid_leftFactor_step_le (Module.finrank ℝ E : ℝ) hn_nn j cΦ cW hcΦ_nn hcW_nn
-      have hGdiag_succ : diagonalGridGrowthFactor (E := E) (j + 1) = (2 * ((Module.finrank ℝ E : ℝ) + 1)) * Gj := by
+      have hGdiag_succ : diagonalGridGrowthFactor (E := E) (j + 1) =
+        (2 * ((Module.finrank ℝ E : ℝ) + 1)) * Gj := by
         rw [hGj_def, diagonalGridGrowthFactor, diagonalGridGrowthFactor, pow_succ]; ring
       rw [hGdiag_succ]
       have hGj_nn' : (0 : ℝ) ≤ Gj := hGj_nn

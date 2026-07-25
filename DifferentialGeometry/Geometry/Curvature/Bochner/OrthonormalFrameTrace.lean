@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 
-set_option linter.unnecessarySimpa false
 
 
 noncomputable section
@@ -34,7 +33,8 @@ private noncomputable def coBchange
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i k => (chartModelBasis E).repr (B i) k
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] private lemma coBchange_apply
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -61,7 +61,8 @@ private lemma modelGramMatrix_eq_chartGramMatrix :
   rw [chartBasisVecFiber_self (I := I) x k]
   rw [chartBasisVecFiber_self (I := I) x l]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma decompose_in_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) :
@@ -72,7 +73,8 @@ private lemma decompose_in_modelBasis
   have h := (chartModelBasis E).sum_repr (B i)
   exact h.symm
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma bilin_expand_modelBasis
     (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -500,7 +502,7 @@ theorem trace_eq_ortho_sum
       OrthonormalBasis.mk hON hspan
     have hb : ∀ i, b i = B i := by
       intro i
-      show (OrthonormalBasis.mk hON hspan) i = B i
+      change (OrthonormalBasis.mk hON hspan) i = B i
       rw [OrthonormalBasis.coe_mk]
     rw [LinearMap.trace_eq_sum_inner T b]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -518,10 +520,10 @@ private def riemannCurvatureEndo
   toFun Z := riemannOp (LeviCivita (I := I) g) x Z v w
   map_add' Z Z' := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_add Z Z'
-    simpa using h
+    simp
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
-    simpa using h
+    simp
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

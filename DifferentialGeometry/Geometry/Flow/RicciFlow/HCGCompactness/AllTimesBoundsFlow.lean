@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -125,17 +124,17 @@ theorem metricQuadFormDiff_le_metricDerivNorm
       metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
         = gk.inner x v v - gInf.inner x v v := by
-    show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+    change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = _
     have hk : metricCovDeriv (I := I) gk gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gk x
+      change Tensor0SBundle.metricTensorField (I := I) gk x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
     have hI : metricCovDeriv (I := I) gInf gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v := by
-      show Tensor0SBundle.metricTensorField (I := I) gInf x
+      change Tensor0SBundle.metricTensorField (I := I) gInf x
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
@@ -182,17 +181,17 @@ theorem metricDiffCovDerivAt_zero_apply
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     change IsManifold I ∞ M; infer_instance
-  show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+  change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = _
   have hk : metricCovDeriv (I := I) gk gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gk x
+    change Tensor0SBundle.metricTensorField (I := I) gk x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
   have hI : metricCovDeriv (I := I) gInf gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b := by
-    show Tensor0SBundle.metricTensorField (I := I) gInf x
+    change Tensor0SBundle.metricTensorField (I := I) gInf x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
@@ -509,19 +508,22 @@ theorem log_integrable_of_sol
         (-2 : Real) * S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
       (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := hS.ricciCont) (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun p => hsub p.2) continuous_const (v := fun _ _ => v) (fun _ => continuous_const)
     refine continuous_const.mul ?_
     refine hev.congr ?_
     intro p
-    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v from by
+    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v
+      from by
       funext i; fin_cases i <;> rfl]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt]
   have hden : ContinuousOn (fun s : Real => (S.family.metric s).inner x v v) (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := DifferentialGeometry.Integral.Connection.metricTensor_cont_of_metricFamilySmoothOn
         S.family hS.smoothMetric)
       (P := {s : Real // s ∈ Set.uIcc t0 t})

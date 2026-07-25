@@ -46,9 +46,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSAbstractJet2B
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -71,7 +68,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem extChartAt_self_mem_interior_target (α : M) :
     extChartAt I α α ∈ interior ((extChartAt I α).target : Set E) := by
   rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
@@ -80,7 +78,8 @@ theorem extChartAt_self_mem_interior_target (α : M) :
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem singleton_chartCenter_subset_interior_target (α : M) :
     ({extChartAt I α α} : Set E) ⊆ interior ((extChartAt I α).target : Set E) :=
   Set.singleton_subset_iff.mpr (extChartAt_self_mem_interior_target (I := I) α)

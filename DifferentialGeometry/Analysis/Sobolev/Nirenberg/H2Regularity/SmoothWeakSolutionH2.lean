@@ -76,7 +76,6 @@ theorem uniform_nirenberg_estimate
   exact h_mul
 
 omit [NeZero d] in
-
 private lemma contDiff_secondPartialDeriv
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i k : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
@@ -103,7 +102,6 @@ private lemma contDiff_secondPartialDeriv
   exact h_apply_k_smooth.comp h_fderiv_smooth_partial
 
 omit [NeZero d] in
-
 private lemma hasWeakPartialDeriv_partialDeriv_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -132,7 +130,6 @@ private lemma hasWeakPartialDeriv_partialDeriv_of_contDiff
     h_partial_C1
 
 omit [NeZero d] in
-
 private lemma memLp_two_continuous_compact_closure
     {f : E → ℝ} (hf : Continuous f)
     {Ω : Set E} (hΩ_open : IsOpen Ω) (hΩ_compact : IsCompact (closure Ω)) :

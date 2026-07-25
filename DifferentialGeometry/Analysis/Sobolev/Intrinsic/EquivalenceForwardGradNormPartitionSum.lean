@@ -227,7 +227,8 @@ lemma gNormGrad_le_finset_sum_pou_mul
           have h1 : g.inner x (a + t • b) (a + t • b) =
               g.inner x a (a + t • b) + g.inner x (t • b) (a + t • b) := by
             have := (g.inner x).map_add a (t • b)
-            have h_apply : ((g.inner x).map_add a (t • b)).symm = ((g.inner x).map_add a (t • b)).symm := rfl
+            have h_apply : ((g.inner x).map_add a (t • b)).symm =
+              ((g.inner x).map_add a (t • b)).symm := rfl
             rw [show ((g.inner x) (a + t • b)) =
                 ((g.inner x) a) + ((g.inner x) (t • b)) from
               (g.inner x).map_add a (t • b)]

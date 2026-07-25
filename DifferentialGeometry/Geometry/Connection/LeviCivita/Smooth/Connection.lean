@@ -1,11 +1,12 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasis
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open DifferentialGeometry.Integral.Connection
@@ -28,7 +29,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     (g : SmoothRiemannianMetric I M)
@@ -49,7 +50,7 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     (g : SmoothRiemannianMetric I M)

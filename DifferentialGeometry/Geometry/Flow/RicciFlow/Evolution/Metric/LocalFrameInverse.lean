@@ -94,8 +94,6 @@ private theorem frameGram_time
   exact (hmetric i j).smul contDiffOn_const
 
 omit [Fintype Idx] [DecidableEq Idx] in
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_time
     [Finite Idx]

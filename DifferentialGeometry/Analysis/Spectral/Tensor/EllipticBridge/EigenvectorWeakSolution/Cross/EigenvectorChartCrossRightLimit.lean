@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -41,7 +39,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
@@ -57,7 +56,8 @@ private lemma tensorCovDerivAt_zero_dir
   rw [tensorCovDerivAt_def]
   exact ContinuousLinearMap.map_zero _
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma gradFun_eq_gramInv_sum
     (g : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
     gradFun (I := I) g (ζ : M → ℝ) x =
@@ -82,7 +82,8 @@ private lemma gradFun_eq_gramInv_sum
         extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) k) := by
     rw [DifferentialGeometry.Integral.Connection.metricFlatLinear_apply, extDerivFun_apply_scalar]
     exact inner_gradFun (I := I) g (ζ : M → ℝ) x ((chartModelBasis E) k)
-  have hrhs_k : DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs ((chartModelBasis E) k) =
+  have hrhs_k : DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs
+    ((chartModelBasis E) k) =
       ∑ j : Fin (Module.finrank ℝ E),
         (∑ i : Fin (Module.finrank ℝ E),
           Ginv i j * extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) *
@@ -101,7 +102,8 @@ private lemma gradFun_eq_gramInv_sum
     rw [Matrix.mul_apply] at hentry
     rw [hGinv]
     exact hentry
-  calc DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs ((chartModelBasis E) k)
+  calc DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs
+         ((chartModelBasis E) k)
       = ∑ j : Fin (Module.finrank ℝ E),
           (∑ i : Fin (Module.finrank ℝ E),
             Ginv i j *
@@ -357,7 +359,8 @@ private noncomputable def tensorInnerPointwiseRightHom
   map_zero' := tensorInnerPointwise_zero_right (I := I) (M := M) g r s x A
   map_add' := tensorInnerPointwise_add_right (I := I) (M := M) g r s x A
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorInnerPointwise_sum_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSModel r s ℝ E)

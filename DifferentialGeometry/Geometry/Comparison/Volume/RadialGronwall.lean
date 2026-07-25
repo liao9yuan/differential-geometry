@@ -21,6 +21,8 @@ open Set
 open scoped Topology Manifold ContDiff
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace Geometry
 namespace Riemannian
 namespace VolumeComparison
@@ -44,14 +46,16 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 def radialCurve (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) : M :=
   expMap (I := I) g p (show TangentSpace I p from (t • x))
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (t : ℝ) :
     radialCurve (I := I) g p x t =
       expMap (I := I) g p (show TangentSpace I p from (t • x)) :=
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 @[simp] lemma radialCurve_one
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     radialCurve (I := I) g p x 1 =
@@ -88,7 +92,8 @@ theorem exists_radialJacobi_diff
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 theorem radial_mem_expBall
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     {ρ b : Real} (hxρ : ‖x‖ < ρ) (hb : b ≤ 1) :
@@ -414,7 +419,8 @@ theorem radial_speed_le
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 private theorem exists_gON_tangentBasis_E
     (g : SmoothRiemannianMetric I M) (y : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
@@ -684,7 +690,8 @@ theorem exists_ode_Ico
     (hJac x w hx hw hb) hcurv h0
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_self_nonneg
     (g : SmoothRiemannianMetric I M) {q : M} (u : TangentSpace I q) :
     0 <= g.inner q u u := by
@@ -693,7 +700,8 @@ private lemma inner_self_nonneg
   · exact (g.pos q u hu).le
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_sq_le_of_sqrt_le
     (g : SmoothRiemannianMetric I M) {q : M} {u v : TangentSpace I q} {K : Real}
     (hK : 0 ≤ K)
@@ -788,7 +796,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (basis : Module.Basis Idx Real (TangentSpace I (radialCurve (I := I) g p x t)))
     (i : Idx) :
@@ -826,7 +834,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem abs_flat_apply_le_rm04
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real)
     (basis : Module.Basis Idx Real (TangentSpace I (radialCurve (I := I) g p x t)))
     (hON : ∀ i j : Idx,
@@ -937,9 +945,10 @@ theorem radialCurvTermFlat_normSq_le_card
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotProd_basis_le
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
     (basis : Module.Basis Idx Real (TangentSpace I q))
     (hON : ∀ i j : Idx,
@@ -961,9 +970,10 @@ private theorem radialSlotProd_basis_le
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotBound_basis_le
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
     (basis : Module.Basis Idx Real (TangentSpace I q))
     (hON : ∀ i j : Idx,
@@ -1705,8 +1715,6 @@ theorem exists_ode_rm04_jac0
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_ode_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1754,8 +1762,6 @@ theorem exists_ode_rm04
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_rm04_data
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1808,7 +1814,6 @@ theorem exists_rm04_data
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem exists_rm04_basis
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1865,8 +1870,6 @@ theorem exists_rm04_basis
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_rm04_pack
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -1948,9 +1951,6 @@ theorem rm04_Ioo_of_region
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 theorem exists_ode_rm04_on
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -2115,7 +2115,8 @@ private lemma sqrt_coercive_mul_norm_le
   rw [hlhs_eq]
   exact Real.sqrt_le_sqrt hcoerc
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma inner_le_opNorm_sq
     (g : SmoothRiemannianMetric I M) (p : M)
     (x : E) :
@@ -2191,7 +2192,8 @@ theorem exists_unitCoeff_ge
         rfl
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 theorem exists_unitCoeff_le
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ D : ℝ, 0 ≤ D ∧
@@ -2277,7 +2279,8 @@ lemma unitDirScaleSmall {r : ℝ} (hr : 0 < r) :
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma dir_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
     (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -3586,7 +3589,8 @@ lemma radialJacobi_init_le_of_deriv_eq
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma fin_deriv_radius
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ} (x : E)
     (hderivRadius : ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
@@ -3602,7 +3606,8 @@ lemma fin_deriv_radius
   intro k
   simpa [radialCurve] using hderivRadius x ((chartModelBasis E) k) hx (hbasisSmall k)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_of_smul_le
     (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
     {a B : ℝ} (ha : 0 < a)
@@ -3620,7 +3625,8 @@ private lemma sqrt_inner_le_of_smul_le
   rw [hscale, hsqrt] at h
   exact (le_of_mul_le_mul_left h ha)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private lemma le_sqrt_inner_of_smul_ge
     (g : SmoothRiemannianMetric I M) (q : M) (v : TangentSpace I q)
     {a B : ℝ} (ha : 0 < a)
@@ -3772,7 +3778,8 @@ lemma basisUnitScaleSmall {r : ℝ} (hr : 0 < r) :
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma basisInit_smul_le
     (g : SmoothRiemannianMetric I M) (p : M) {a A : ℝ} (ha : 0 < a)
     (hbasis : ∀ k : Fin (Module.finrank ℝ E),
@@ -3813,7 +3820,8 @@ lemma model_le_smul {a K b A B : ℝ} (ha : 0 < a)
   nlinarith
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma basisModel_le_smul
     (g : SmoothRiemannianMetric I M) (p : M) {a K b A B : ℝ} (ha : 0 < a)
     (hbasis : ∀ k : Fin (Module.finrank ℝ E),
@@ -4540,7 +4548,8 @@ theorem radialJacobi_dir_ge_of_scaled_radius
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 lemma model_ge_of_smul
     (g : SmoothRiemannianMetric I M) (p : M) (w : E)
     {a K b B : ℝ} (ha : 0 < a)
@@ -4574,7 +4583,8 @@ lemma model_ge_of_smul
   nlinarith
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma dirModel_ge_smul
     (g : SmoothRiemannianMetric I M) (p : M)
     {a K b B : ℝ} (ha : 0 < a)
@@ -4600,7 +4610,8 @@ lemma dirModel_ge_smul
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
 lemma dirModel_ge_of_bounds
     (g : SmoothRiemannianMetric I M) (p : M)
     {K b B₀ D B : ℝ} (hK : 0 ≤ K) (hb : 0 ≤ b)
@@ -4829,8 +4840,6 @@ theorem radialJacobi_fin_le_of_scaled_radius
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_fin_le_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -4888,8 +4897,6 @@ theorem exists_fin_le_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_fin_le_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -4941,8 +4948,6 @@ theorem exists_fin_le_rm04
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_dir_ge_rm04_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -5028,8 +5033,6 @@ theorem exists_dir_ge_rm04_at
 open Bundle in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_dir_ge_rm04
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]

@@ -50,6 +50,21 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+noncomputable local instance smoothMetricModelDualNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance smoothMetricModelDualNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance smoothMetricModelBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance smoothMetricModelBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
 
 private def mdlBasis (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
@@ -125,7 +140,6 @@ def frameVec (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) : TangentSpace 
 
 
 omit [FiniteDimensional ℝ E] in
-set_option maxHeartbeats 1000000 in
 theorem metricCoeffInModel_apply (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (v w : E) :
@@ -164,10 +178,6 @@ theorem metricCoeffInModel_apply (x₀ : M) {x : M}
     rfl
   rw [hone]
   simp only [ContinuousLinearMap.comp_apply]
-
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
-
 
 private lemma metric_contMDiffOn (gm : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (x₀ : M)

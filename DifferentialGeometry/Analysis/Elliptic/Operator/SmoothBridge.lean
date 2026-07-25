@@ -60,7 +60,8 @@ theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         -∫ x, v.toFun x * Δ_g (I := I) g u.smooth x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-    green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g v.smooth u.smooth hu_cs
+    green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g v.smooth u.smooth
+      hu_cs
   have hsymm :
       (∫ x, g.inner x ((grad_g (I := I) g u.smooth :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)

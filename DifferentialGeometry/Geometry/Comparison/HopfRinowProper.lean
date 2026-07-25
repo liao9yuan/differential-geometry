@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -36,7 +35,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 @[reducible] noncomputable def riemMetricSpace
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] :
     MetricSpace M :=
@@ -47,8 +45,8 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem riemMetric_realizes
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] :
     ∀ x y : M,
@@ -63,8 +61,8 @@ theorem riemMetric_realizes
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem riemMetric_dist_eq
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (x y : M) :
@@ -86,7 +84,6 @@ theorem riemMetric_dist_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expImgClosedBall_compact
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
@@ -111,8 +108,6 @@ theorem expImgClosedBall_compact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem closedBall_subset_expImg
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :
@@ -147,7 +142,6 @@ theorem closedBall_subset_expImg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem properSpace_riemMetric
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :
@@ -172,8 +166,6 @@ theorem properSpace_riemMetric
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem intermediateDist_riemMetric
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (hcomplete :

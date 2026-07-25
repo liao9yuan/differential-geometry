@@ -9,8 +9,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -25,6 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -79,13 +78,16 @@ private lemma chartPushed_pou_mul_smooth_compactSupport
   set v : EuclN → ℝ := chartPushedRaw I β g_M with hv_def
   refine ⟨v, ?_, ?_, ?_, ?_⟩
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    exact
+      Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M) (α := β) (u := g_M) hg_M_smooth hg_M_supp
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    exact
+      chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) (α := β) (u := g_M) hg_M_supp
   · rw [hv_def]
-    exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
+    exact
+      tsupport_chartPushedRaw_subset_chartTargetEuclid
       (I := I) (M := M) (α := β) (u := g_M) hg_M_supp
   · refine (ae_restrict_iff'
       (chartTargetEuclid_measurableSet (I := I) (M := M) β)).mpr ?_

@@ -10,8 +10,6 @@ import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 open ContinuousAlternatingMap
 
@@ -101,9 +99,11 @@ noncomputable def _root_.LinearIsometry.compLeft {𝕜 : Type*} {𝕜₂ : Type*
   { ContinuousLinearMap.compSL _ _ _ _ _ f.toContinuousLinearMap with
     norm_map' := fun _ ↦ f.norm_toContinuousLinearMap_comp }
 
-theorem compContinuousAlternatingMapCLM_cont :
+omit [Fintype ι] in
+theorem compContinuousAlternatingMapCLM_cont [Finite ι] :
     Continuous (ContinuousAlternatingMap.compContinuousLinearMapCLM :
     (M →L[𝕜] M') → (M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)) := by
+  letI := Fintype.ofFinite ι
   let φ : (M [⋀^ι]→L[𝕜] N) →ₗᵢ[𝕜] _ := ContinuousAlternatingMap.toContinuousMultilinearMapLI
   let Φ : ((M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)) →ₗᵢ[𝕜] _ := φ.compLeft _ (RingHom.id _)
   rw [← Φ.comp_continuous_iff]
@@ -154,7 +154,7 @@ section Continuous
 
 variable
   (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  (ι : Type*) [Fintype ι]
+  (ι : Type*) [Finite ι]
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
@@ -162,17 +162,15 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapL_continuous :
     Continuous (fun p : F₁ →L[𝕜] F₁ ↦
     (ContinuousAlternatingMap.compContinuousLinearMapCLM p :
     (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂))) := by
-
+  letI := Fintype.ofFinite ι
   let φ : (F₁ [⋀^ι]→L[𝕜] F₂) →ₗᵢ[𝕜] _ := ContinuousAlternatingMap.toContinuousMultilinearMapLI
   let Φ : ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) →ₗᵢ[𝕜] _ := φ.compLeft _ (RingHom.id _)
   rw [← Φ.comp_continuous_iff]
-
   change Continuous (fun p : F₁ →L[𝕜] F₁ ↦
     (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ ↦ p) :
     ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂ →L[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂).comp
     (toContinuousMultilinearMapCLM 𝕜))
-
   exact (ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous 𝕜 ι F₁ F₂).clm_comp
     continuous_const
 
@@ -202,7 +200,6 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff :
   let Φ : ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) →ₗᵢ[𝕜]
       (F₁ [⋀^ι]→L[𝕜] F₂ →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ F₁) F₂) :=
     φ.compLeft _ (RingHom.id _)
-
   haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ F₁) F₂)
     := FiniteDimensional.of_injective ContinuousMultilinearMap.toMultilinearMapLinear
       ContinuousMultilinearMap.toMultilinearMap_injective

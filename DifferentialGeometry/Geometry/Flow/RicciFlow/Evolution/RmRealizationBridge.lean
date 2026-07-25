@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -83,7 +80,8 @@ def frameComp0S {r : ℕ}
     M → (Fin r → Idx) → Real :=
   fun x m => A x (frameTuple (I := I) frame x m)
 
-omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 @[simp] theorem frameComp0S_apply {r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r)
@@ -92,7 +90,9 @@ omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] 
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx]
+    [DecidableEq Idx] in
 theorem frameTuple_eq_cons {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x) (x : M) (n : Fin (r + 1) → Idx) :
     frameTuple (I := I) frame x n =
@@ -146,14 +146,11 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
         (frameComp0S (I := I) A frame x) n =
       nablaA x (frameTuple (I := I) frame x n) := by
   classical
-
   set V : Fin s → (y : M) → TangentSpace I y :=
     fun q y => frame (Fin.tail n q) y with hV_def
-
   obtain ⟨X, hX⟩ :=
     ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x (frame (n 0) x)
-
   have hV_at : ∀ q : Fin s,
       ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
         (fun y : M => (⟨y, V q y⟩ : TotalSpace E (TangentSpace I : M → Type _))) x := by
@@ -165,24 +162,19 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
               TotalSpace E (TangentSpace I : M → Type _))) x :=
       (hframe.contMDiffAt hu hx (Fin.tail n q))
     simpa [hV_def] using htop
-
   have heval :=
     (hreal X x (fun q : Fin s => V q x)).trans
       (nabla0SFun_eval_C1_slots
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         cov X V A x hV_at)
-
-
   unfold covDerivStepComp
   rw [frameTuple_eq_cons (I := I) frame x n]
-
   rw [show
       nablaA x (Fin.cons (frame (n 0) x)
           (frameTuple (I := I) frame x (Fin.tail n))) =
         nablaA x (Fin.cons (X x) (fun q : Fin s => V q x)) by
         rw [hX]; rfl]
   rw [heval, hX]
-
   have hext :
       extDerivFun (I := I)
           (fun p : M => A p (fun q : Fin s => V q p)) x (frame (n 0) x) =
@@ -190,9 +182,7 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
           (Fin.tail n) (n 0) := by
     rfl
   rw [hext]
-
   congr 1
-
   have hslot : ∀ q : Fin s,
       A x
           (Function.update (fun b : Fin s => V b x) q ((cov (V q) x) (frame (n 0) x))) =
@@ -226,7 +216,6 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
     rw [MultilinearMap.map_update_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
     rw [MultilinearMap.map_update_smul]
-
     have hupd :
         Function.update (fun b : Fin s => V b x) q (frame p x) =
           frameTuple (I := I) frame x (Function.update (Fin.tail n) q p) := by
@@ -239,7 +228,6 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
           A x (Function.update (fun b : Fin s => V b x) q (frame p x)) from rfl]
     rw [hupd]
     simp [frameComp0S, smul_eq_mul]
-
   exact Finset.sum_congr rfl fun q _ => (hslot q).symm
 
 end StepBridge
@@ -262,7 +250,8 @@ theorem connSmoothInf
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem extDerivFun_eventuallyEq_congr
     {f g : M → Real} {x : M} (V : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
@@ -446,8 +435,6 @@ theorem iteratedRmComp_two_eq_nabla2Rm04Field
         (frameTuple (I := I) (coordinateFrameAt (I := I) x₀) x₀ n) := by
   classical
   set frame := coordinateFrameAt (I := I) x₀ with hframe_def
-
-
   have hlevel1 :
       (fun y : M =>
           iteratedRmComp (I := I) frame
@@ -461,9 +448,7 @@ theorem iteratedRmComp_two_eq_nabla2Rm04Field
     funext m
     simpa [frameComp0S, hframe_def] using
       iteratedRmComp_one_eq_nablaRm04Field (I := I) S x₀ t hy m
-
   rw [iteratedRmComp_succ]
-
   have hext :
       frameExtData (I := I) frame
           (fun y : M =>
@@ -481,7 +466,6 @@ theorem iteratedRmComp_two_eq_nabla2Rm04Field
         frameComp0S (I := I) (nablaRm04Field (I := I) S t) frame x₀ :=
     hlevel1.self_of_nhds
   rw [hext, hbase]
-
   exact covDerivStepComp_frameComp_eq
     (I := I) (S.family.connection t) (nablaRm04Field (I := I) S t)
     (nabla2Rm04Field (I := I) S t)

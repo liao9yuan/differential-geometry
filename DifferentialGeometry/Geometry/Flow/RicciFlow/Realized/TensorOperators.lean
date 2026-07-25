@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -38,9 +37,11 @@ private theorem metricTraceFirstTwo0SAt_zero
   rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x)
     (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
     tail]

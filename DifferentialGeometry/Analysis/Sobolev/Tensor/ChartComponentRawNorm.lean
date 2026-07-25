@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -82,8 +80,8 @@ theorem wkpNormChartRaw_zero_section
         (0 : SmoothCcTensor g r s) α x = 0 := by
       unfold tensorTrivProj
       have hsec : (0 : SmoothCcTensor g r s).toSection x = 0 := rfl
-      rw [hsec, map_zero]
-    rw [hzero, map_zero]
+      rw [hsec, ContinuousLinearMap.map_zero]
+    rw [hzero, ContinuousLinearMap.map_zero]
   rw [hraw_zero]
   have hpush_zero :
       chartPushedRaw (I := I) (M := M) α (fun _ : M => (0 : ℝ)) =
@@ -98,7 +96,8 @@ theorem wkpNormChartRaw_zero_section
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (α : M) (ρ u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -123,7 +122,8 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy]
     rw [mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
     (α : M) (ρ u : M → ℝ) :
     (chartPushedRaw (I := I) (M := M) α (fun x : M => ρ x * u x)) =

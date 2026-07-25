@@ -278,7 +278,6 @@ private theorem uc_sheet_proj_isOpenMap
   apply hsub
   refine ⟨hjoined.somePath, hjoined.somePath_mem, rfl⟩
 
-set_option linter.dupNamespace false in
 
 
 
@@ -295,7 +294,7 @@ set_option linter.dupNamespace false in
 
 
 omit [ConnectedSpace X] in
-theorem UniversalCover.proj_isCoveringMap :
+theorem proj_isCoveringMap :
     IsCoveringMap (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) := by
   intro x
@@ -646,12 +645,11 @@ theorem uc_joined_basePoint
     source' := uc_subpathLift_zero γ
     target' := uc_subpathLift_one γ }⟩
 
-set_option linter.dupNamespace false in
 
 
 
 
-instance UniversalCover.pathConnectedSpace :
+instance pathConnectedSpace :
     PathConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) where
   nonempty := ⟨basePoint⟩
@@ -732,13 +730,12 @@ theorem uc_basePoint_loops_nullhomotopic
     exact ⟨Path.Homotopy.refl _⟩
   rw [hδmap, hreflmap, hclass]
 
-set_option linter.dupNamespace false in
 
 
 
 
 
-instance UniversalCover.simplyConnectedSpace :
+instance simplyConnectedSpace :
     SimplyConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) := by
   rw [simply_connected_iff_loops_nullhomotopic]

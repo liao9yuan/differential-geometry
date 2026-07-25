@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -475,7 +473,8 @@ lemma sq_norm_le_const_mul_chartTensorInner_on_compact
           (I := I) (M := M) g r s α b T T / ε from by rw [div_eq_inv_mul]]
     exact (le_div_iff₀ hε_pos).mpr (by linarith [h_mul])
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartTensorInner_tensorTrivProj_eq_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -792,7 +791,7 @@ lemma cutoffComponentEuclid_eLpNorm_le_uniform
     cutoffComponentScalar_eLpNorm_le_uniform (I := I) (M := M) g r s α
   by_cases hker : (cutoffChartKernel (I := I) (M := M) α).Nonempty
   · obtain ⟨C₂, hC₂_pos, h_bridge⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
+      eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
         (I := I) (M := M) g α
         (cutoffChartKernel_isCompact (I := I) (M := M) α) hker
         (cutoffChartKernel_subset_target (I := I) (M := M) α)
@@ -888,7 +887,8 @@ private lemma cutoffComponentScalar_add
           tensorChartComponentRaw (I := I) (M := M) g r s S₂ α Idx Jdx x := by
     unfold tensorChartComponentRaw tensorTrivProj
     rw [show (S₁ + S₂).toSection x = S₁.toSection x + S₂.toSection x from by
-      rw [SmoothCcTensor.toSection_add]; rfl, map_add, map_add]
+      rw [SmoothCcTensor.toSection_add]; rfl, ContinuousLinearMap.map_add,
+        ContinuousLinearMap.map_add]
   rw [hraw_add]; ring
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
@@ -907,7 +907,8 @@ private lemma cutoffComponentScalar_smul
         c • tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx x := by
     unfold tensorChartComponentRaw tensorTrivProj
     rw [show (c • S).toSection x = c • S.toSection x from by
-      rw [SmoothCcTensor.toSection_smul]; rfl, map_smul, map_smul]
+      rw [SmoothCcTensor.toSection_smul]; rfl, ContinuousLinearMap.map_smul,
+        ContinuousLinearMap.map_smul]
   rw [hraw_smul, smul_eq_mul, smul_eq_mul]; ring
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in

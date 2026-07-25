@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

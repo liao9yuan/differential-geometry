@@ -576,7 +576,6 @@ private lemma opNorm_coprod_le {F G H : Type*}
         gcongr
     _ = (‖L₁‖ + ‖L₂‖) * ‖p‖ := by ring
 
-set_option maxHeartbeats 2400000 in
 
 theorem continuousOn_fderiv_flow_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)

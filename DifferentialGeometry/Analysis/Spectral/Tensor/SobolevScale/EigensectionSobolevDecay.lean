@@ -28,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-
 theorem ccSpectralEmbed_eigenvectorSmooth_norm_sq
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -83,8 +82,6 @@ private theorem eigen_coeff
   exact horth j i
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-
-
 theorem ccEigen_norm_sq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 s) :
@@ -139,8 +136,6 @@ private theorem eigen_cc_norm
       (eigenvectorSmooth (I := I) (M := M) g 0 s i))]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-
-
 theorem eigen_toHs_le
     (g : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -181,7 +176,6 @@ theorem eigen_toHs_le
           (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * k) := by ring
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-
 theorem eigenvectorSmooth_toHs_norm_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

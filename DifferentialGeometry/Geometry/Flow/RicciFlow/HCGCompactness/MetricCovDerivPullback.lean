@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -21,6 +20,8 @@ set_option linter.style.longLine false
 noncomputable section
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite
 namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
@@ -545,7 +546,7 @@ theorem ricciSection_eq_ricciTensor
     DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
         (I := I) (M := M)
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) (M := M) g) x (vec2 (I := I) v w)
       = ricciTensor (I := I) g x v w := by
   rw [DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection_apply]
@@ -694,7 +695,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
     [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 1 M] [IsManifold I 1 N]
     (g : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : ∀ i j : Idx,
@@ -726,7 +727,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
       basis' i = mfderiv I I (Phi : M -> N) x (basis i) := by
     intro i
     have hmap : basis' i = dPhi (basis i) := by
-      show (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
+      change (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
       rw [Module.Basis.map_apply]
       rfl
     rw [hmap, hdPhi_apply (basis i)]
@@ -774,7 +775,7 @@ theorem metricDerivNorm_pullback_of_orthonormal
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
     (gk gInf gRef : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
     (a : Nat) (x : M)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : ∀ i j : Idx,
       (Diffeomorph.pullbackMetric (I := I) gRef Phi).inner x (basis i) (basis j) =
@@ -875,7 +876,6 @@ theorem metricCInf_pullback
   rw [metricDerivNormSupOn_pullback_image (I := I)]
   exact hk₀ k hk
 
-set_option maxHeartbeats 400000 in
 
 
 
@@ -900,7 +900,7 @@ theorem metricScalarAt_pullback
     intro i
     have hco :=
       Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
-    show (basis.map dPhi.toLinearEquiv) i = _
+    change (basis.map dPhi.toLinearEquiv) i = _
     rw [Module.Basis.map_apply]
     exact congrArg
       (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f (basis i)) hco

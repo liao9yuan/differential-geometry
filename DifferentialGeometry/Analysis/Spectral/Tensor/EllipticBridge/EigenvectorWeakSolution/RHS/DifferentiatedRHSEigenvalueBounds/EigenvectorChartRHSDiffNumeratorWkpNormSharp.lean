@@ -7,9 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
   RealInnerProductSpace InnerProductSpace
@@ -196,7 +193,6 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma sharp_memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
@@ -226,7 +222,6 @@ private lemma sharp_memWkp_finset_sum
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
 omit [CompleteSpace E] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
@@ -252,7 +247,6 @@ private lemma sharp_wkpNorm_sub_le
   rw [h_neg_eq]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
@@ -984,9 +978,6 @@ lemma sharp_density_mul_prevChartFunWeakDeriv_wkpNorm_le
   refine le_trans h_bd ?_
   refine le_trans (mul_le_mul' (le_refl _) (hAtomE_bd i)) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hKc_nn, mul_assoc Kc CatomE]
-
-set_option maxHeartbeats 8000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp

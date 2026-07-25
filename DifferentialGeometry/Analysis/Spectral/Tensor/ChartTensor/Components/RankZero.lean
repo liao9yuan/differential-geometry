@@ -33,7 +33,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem scalar0_raw_eq
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0)
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :

@@ -34,9 +34,6 @@ theorem contDiffOn_ringInverse (n : WithTop ℕ∞) :
 
 
 
-set_option synthInstance.maxHeartbeats 1000000 in
-
-
 theorem norm_iteratedFDerivWithin_ringInverse_le : ∀ (i : ℕ) (x : Rˣ),
     ‖iteratedFDerivWithin 𝕜 i Ring.inverse {y : R | IsUnit y} (x : R)‖
       ≤ (i.factorial : ℝ) * ‖(↑x⁻¹ : R)‖ ^ (i + 1) := by

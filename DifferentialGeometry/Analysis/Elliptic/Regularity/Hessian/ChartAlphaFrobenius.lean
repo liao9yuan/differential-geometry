@@ -48,14 +48,16 @@ private noncomputable def chartAlphaCoBchange
     (chartModelBasis E).repr
       ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] private lemma chartAlphaCoBchange_apply
     (α : M) (x : M) (i k : Fin (Module.finrank ℝ E)) :
     chartAlphaCoBchange (I := I) α x i k =
       (chartModelBasis E).repr
         ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_decompose_in_modelBasis
     (α : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x) =
@@ -67,7 +69,8 @@ private lemma chartBasisVecFiber_decompose_in_modelBasis
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x)
   exact h.symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma clm_bilinear_expand_two_sums
     {x : M} (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (n : ℕ)
@@ -101,7 +104,8 @@ private lemma clm_bilinear_expand_two_sums
   intro j _
   ring
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_bilinear_expand_two_sums
     (g : SmoothRiemannianMetric I M) (x : M)
     (n : ℕ)
@@ -112,7 +116,8 @@ private lemma g_inner_bilinear_expand_two_sums
         c i * d j * g.inner x (u i) (w j) :=
   clm_bilinear_expand_two_sums (I := I) (g.inner x) n c d u w
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_eq_PGPt
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -151,7 +156,8 @@ private lemma chartGramMatrix_alpha_eq_PGPt
     rw [chartBasisVecFiber_self (I := I) x l]
   rw [h_inner]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_eq_PGPt_matrix
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -187,7 +193,8 @@ private lemma chartGramMatrix_alpha_eq_PGPt_matrix
   intro k _
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartGramMatrix_alpha_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -198,7 +205,8 @@ private lemma chartGramMatrix_alpha_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g α hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartGramMatrix_x_isUnit
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsUnit (chartGramMatrix (I := I) g x x).det := by
@@ -207,7 +215,8 @@ private lemma chartGramMatrix_x_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g x hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartAlphaCoBchange_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -238,7 +247,8 @@ private lemma chartAlphaCoBchange_isUnit
     ring
   exact isUnit_iff_ne_zero.mpr hAne
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -298,7 +308,8 @@ private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
   rw [h_inv]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :

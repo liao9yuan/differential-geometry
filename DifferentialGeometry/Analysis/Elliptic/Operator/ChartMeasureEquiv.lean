@@ -97,7 +97,6 @@ private def toEuclideanMeasurableEquiv :
     (toEuclideanMeasurableEquiv (E := E)).symm y = (toEuclidean (E := E)).symm y := rfl
 
 omit [IsManifold I ∞ M] in
-
 private lemma toEuclidean_mem_chartTargetEuclid_iff
     (α : M) (y : E) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α ↔

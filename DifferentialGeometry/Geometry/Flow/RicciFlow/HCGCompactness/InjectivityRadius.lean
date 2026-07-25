@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

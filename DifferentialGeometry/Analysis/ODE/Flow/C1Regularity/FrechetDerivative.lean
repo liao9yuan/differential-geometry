@@ -132,7 +132,6 @@ section MainTheorem
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-set_option maxHeartbeats 1200000 in
 
 theorem hasFDerivAt_flow_at_initial_of_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -518,7 +517,8 @@ theorem hasFDerivAt_flow_at_initial_of_isLocalFlow
       rw [h_simplify] at h_comp
       exact h_comp
     have hβR_deriv_R : ∀ τ' ∈ Ico t₀ (t₀ + T),
-        HasDerivWithinAt βR (-(f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ') (y_h (2 * t₀ - τ'))))
+        HasDerivWithinAt βR (-(f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ')
+          (y_h (2 * t₀ - τ'))))
           (Ici τ') τ' := by
       intro τ' hτ'R
       have hτ'_sub : 2 * t₀ - τ' ∈ Icc (t₀ - T) (t₀ + T) :=
@@ -528,7 +528,8 @@ theorem hasFDerivAt_flow_at_initial_of_isLocalFlow
         linarith [hτ'R.2]
       have h_d := hβ_h_deriv (2 * t₀ - τ') hτ'_sub
       have h_d_left :
-          HasDerivWithinAt β_h (f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ') (y_h (2 * t₀ - τ')))
+          HasDerivWithinAt β_h (f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ')
+            (y_h (2 * t₀ - τ')))
             (Iic (2 * t₀ - τ')) (2 * t₀ - τ') :=
         hasDerivWithinAt_Iic_of_Icc h_d hτ'_Ioc_sub
       have hψ_dwa : HasDerivWithinAt ψ (-1 : ℝ) (Ici τ') τ' :=

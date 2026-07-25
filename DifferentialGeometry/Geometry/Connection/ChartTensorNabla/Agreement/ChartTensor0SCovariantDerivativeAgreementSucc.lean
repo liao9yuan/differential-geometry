@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
@@ -31,7 +29,8 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
     (Φ : TangentSpace I b →L[ℝ] Tensor0SSpace s I b)
     (v : TangentSpace I b) (m : Fin s → TangentSpace I b) :

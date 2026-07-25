@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -32,9 +30,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma gNorm_self_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -70,7 +75,8 @@ private lemma gNorm_self_triangle
   rw [hsq]
   linarith [hcs]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma gNorm_self_sub_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -174,8 +180,8 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       exact norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)
     have h1mem : (1 : ℕ) ∈ Finset.range 3 := by decide
     exact le_trans (Finset.single_le_sum hsum_terms h1mem) henv
-
-  have hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) (max δ 0) := by
+  have hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+    (max δ 0) := by
     intro y a b
     refine le_trans (hδ y a b) ?_
     have hle : δ ≤ max δ 0 := le_max_left _ _
@@ -188,7 +194,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       _ = max δ 0 * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
   have hδ'_le : max δ 0 ≤ m := max_le hδ_le hm0
   have hδ'_nn : 0 ≤ max δ 0 := le_max_right _ _
-
   have hconn0 : ∀ a b : TangentSpace I x,
       Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)) ≤
@@ -206,7 +211,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
   have hSv_nn : 0 ≤ Sv := Real.sqrt_nonneg _
   have hSw_nn : 0 ≤ Sw := Real.sqrt_nonneg _
   have hSu_nn : 0 ≤ Su := Real.sqrt_nonneg _
-
   have hA1_bd : Real.sqrt (g₀.inner x A1 A1) ≤ CA * Sv * Sw * Su := by
     have h := hCA g₁ P hδ_le hδ htie x henv v w u
     rw [← hX_def, ← hY_def, ← hZ_def, ← hSv_def, ← hSw_def, ← hSu_def] at h
@@ -217,7 +221,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     rw [← hX_def, ← hY_def, ← hZ_def, ← hSv_def, ← hSw_def, ← hSu_def] at h
     rw [hA2_def]
     exact h
-
   have hS1_eq : S1 = PDE.DeTurck.connDiff (I := I) g₁ g₀ x u w := by
     rw [hS1_def]
     change CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) x
@@ -232,7 +235,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     rw [hQ1_def, ← connDiff_eq_difference (I := I) g₀ g₁, hXx]
   have hQ2_eq : Q2 = PDE.DeTurck.connDiff (I := I) g₁ g₀ x S2 w := by
     rw [hQ2_def, ← connDiff_eq_difference (I := I) g₀ g₁, hYx]
-
   have hQ1_bd : Real.sqrt (g₀.inner x Q1 Q1) ≤ (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by
     rw [hQ1_eq]
     have hS1_bd : Real.sqrt (g₀.inner x S1 S1) ≤ C0 * Np * Su * Sw := by
@@ -254,8 +256,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       _ = (C0 ^ 2 * Np ^ 2) * Sv * Sw * Su := by ring
       _ ≤ (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by
           have hNpB : Np ^ 2 ≤ B ^ 2 := by
-            have := hNp_le_B
-            nlinarith [hNp_nn, hB, this]
+            exact pow_le_pow_left₀ hNp_nn hNp_le_B 2
           have hfac : C0 ^ 2 * Np ^ 2 ≤ C0 ^ 2 * B ^ 2 :=
             mul_le_mul_of_nonneg_left hNpB (sq_nonneg _)
           have hprod_nn : 0 ≤ Sv * Sw * Su :=
@@ -287,8 +288,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       _ = (C0 ^ 2 * Np ^ 2) * Sv * Sw * Su := by ring
       _ ≤ (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by
           have hNpB : Np ^ 2 ≤ B ^ 2 := by
-            have := hNp_le_B
-            nlinarith [hNp_nn, hB, this]
+            exact pow_le_pow_left₀ hNp_nn hNp_le_B 2
           have hfac : C0 ^ 2 * Np ^ 2 ≤ C0 ^ 2 * B ^ 2 :=
             mul_le_mul_of_nonneg_left hNpB (sq_nonneg _)
           have hprod_nn : 0 ≤ Sv * Sw * Su :=
@@ -300,7 +300,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
               = (C0 ^ 2 * Np ^ 2) * (Sv * Sw * Su) := by ring
             _ ≤ (C0 ^ 2 * B ^ 2) * (Sv * Sw * Su) := hstep
             _ = (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by ring
-
   set Kc : ℝ := 2 * CA + 2 * (C0 ^ 2 * B ^ 2) with hKc_def
   have hKc_nn : 0 ≤ Kc := by rw [hKc_def]; positivity
   have hRsub_bd : Real.sqrt (g₀.inner x (R1 - R0) (R1 - R0)) ≤ Kc * Sv * Sw * Su := by
@@ -325,7 +324,6 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
             ((C0 ^ 2 * B ^ 2) * Sv * Sw * Su + (C0 ^ 2 * B ^ 2) * Sv * Sw * Su) :=
           add_le_add htri1 htri2
       _ = Kc * Sv * Sw * Su := by rw [hKc_def]; ring
-
   have hRsub_nn : 0 ≤ g₀.inner x (R1 - R0) (R1 - R0) :=
     metric_inner_self_nonneg (I := I) (M := M) g₀ x (R1 - R0)
   have hrhs_nn : 0 ≤ Kc * Sv * Sw * Su :=

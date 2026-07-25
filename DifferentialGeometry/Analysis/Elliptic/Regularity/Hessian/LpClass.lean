@@ -91,7 +91,6 @@ noncomputable def laplacianDomainHessianChart
     (chartTargetEuclid (I := I) (M := M) α)
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 private lemma laplacianDomainHessianChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -117,7 +116,6 @@ theorem laplacianDomainHessianChart_memLp_two
     (chosenInner_memW1p (I := I) (M := M) g α hu_h i) j
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 private lemma chartPushedU_ae_zero_off_support
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -170,7 +168,6 @@ private lemma chartPushedU_memW1p_sdiff
     · exact DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_subset hgk_weak
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 private lemma chosenWeakPartial_chartPushedU_ae_zero_sdiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -225,7 +222,6 @@ private lemma chosenWeakPartial_chartPushedU_restrict_ae_eq
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hV_open : IsOpen V := hΩ_open.sdiff hK_closed
   have hV_subset : V ⊆ chartTargetEuclid (I := I) (M := M) α := Set.diff_subset
-
   have hu_full := chartPushedU_memW1p (I := I) (M := M) g α hu_h
   have hu_sdiff := chartPushedU_memW1p_sdiff (I := I) (M := M) g α hu_h
   have h_partial_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
@@ -246,7 +242,6 @@ private lemma chosenWeakPartial_chartPushedU_restrict_ae_eq
         (chartPushedU (I := I) (M := M) g α u_h) V)
       (chartPushedU (I := I) (M := M) g α u_h) V :=
     chosenWeakPartial'_isWeakPartial_of_mem hu_sdiff i
-
   have hmemLp_Ω : MemLp
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
         (chartPushedU (I := I) (M := M) g α u_h)
@@ -313,7 +308,6 @@ private lemma chosenWeakPartial_outer_sdiff_ae_zero
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hV_open : IsOpen V := hΩ_open.sdiff hK_closed
-
   exact chosenWeakPartial'_ae_zero_of_ae_zero
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hV_open
     (chosenWeakPartial_chartPushedU_ae_zero_off_support
@@ -336,7 +330,6 @@ private lemma chosenInner_sdiff_memW1p
       (chartPushedU (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α \
         chartImagePOUTsupport (I := I) (M := M) α) := by
-
     classical
     set V : Set EuclN := chartTargetEuclid (I := I) (M := M) α \
       chartImagePOUTsupport (I := I) (M := M) α with hV_def
@@ -347,10 +340,8 @@ private lemma chosenInner_sdiff_memW1p
       chartTargetEuclid_isOpen (I := I) (M := M) α
     have hV_open : IsOpen V := hΩ_open.sdiff hK_closed
     have hV_subset : V ⊆ Ω := Set.diff_subset
-
     refine ⟨chartPushedU_memW1p_sdiff (I := I) (M := M) g α hu_h, ?_⟩
     intro k
-
     rw [MemWkp.one_iff_memW1p]
     have h_inner_Ω := chosenInner_memW1p (I := I) (M := M) g α hu_h k
     have h_inner_V : DeGiorgi.MemW1p 2
@@ -363,7 +354,6 @@ private lemma chosenInner_sdiff_memW1p
         refine ⟨gj, ?_, ?_⟩
         · exact hgj_memLp.mono_measure (Measure.restrict_mono_set volume hV_subset)
         · exact DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_subset hgj_weak
-
     have hae := chosenWeakPartial_chartPushedU_restrict_ae_eq
       (I := I) (M := M) g α hu_h k
     exact (MemW1p_congr_ae
@@ -392,18 +382,15 @@ lemma laplacianDomainHessianChart_ae_zero_off_support
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hV_open : IsOpen V := hΩ_open.sdiff hK_closed
   have hV_subset : V ⊆ Ω := Set.diff_subset
-
   set inner_Ω := chosenWeakPartial' (d := Module.finrank ℝ E) 2 i
     (chartPushedU (I := I) (M := M) g α u_h) Ω with hinner_Ω_def
   set FΩ := chosenWeakPartial' (d := Module.finrank ℝ E) 2 j inner_Ω Ω
     with hFΩ_def
   set Fmid := chosenWeakPartial' (d := Module.finrank ℝ E) 2 j inner_Ω V
     with hFmid_def
-
   have h_outer_V_zero : Fmid =ᵐ[(volume : Measure EuclN).restrict V]
       (fun _ : EuclN => (0 : ℝ)) :=
     chosenWeakPartial_outer_sdiff_ae_zero (I := I) (M := M) g α hu_h i j
-
   have h_FΩ_partial_on_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E)
       j FΩ inner_Ω V := by
     have h_partial_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E)
@@ -411,7 +398,6 @@ lemma laplacianDomainHessianChart_ae_zero_off_support
       chosenWeakPartial'_isWeakPartial_of_mem
         (chosenInner_memW1p (I := I) (M := M) g α hu_h i) j
     exact DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_subset h_partial_Ω
-
   have h_inner_Ω_W1p_V : DeGiorgi.MemW1p 2 inner_Ω V := by
     have h_inner_Ω_W1p_Ω := chosenInner_memW1p (I := I) (M := M) g α hu_h i
     refine ⟨?_, ?_⟩
@@ -424,7 +410,6 @@ lemma laplacianDomainHessianChart_ae_zero_off_support
   have h_Fmid_partial_on_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E)
       j Fmid inner_Ω V :=
     chosenWeakPartial'_isWeakPartial_of_mem h_inner_Ω_W1p_V j
-
   have h_FΩ_Lp_Ω : MemLp FΩ 2 ((volume : Measure EuclN).restrict Ω) :=
     chosenWeakPartial'_memLp_of_mem
       (chosenInner_memW1p (I := I) (M := M) g α hu_h i) j
@@ -436,11 +421,9 @@ lemma laplacianDomainHessianChart_ae_zero_off_support
     chosenWeakPartial'_memLp_of_mem h_inner_Ω_W1p_V j
   have h_Fmid_loc : LocallyIntegrable Fmid ((volume : Measure EuclN).restrict V) :=
     h_Fmid_Lp_V.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-
   have hae_FΩ_Fmid : FΩ =ᵐ[(volume : Measure EuclN).restrict V] Fmid :=
     DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open
       h_FΩ_partial_on_V h_Fmid_partial_on_V h_FΩ_loc h_Fmid_loc
-
   change FΩ =ᵐ[(volume : Measure EuclN).restrict V] (fun _ : EuclN => (0 : ℝ))
   exact hae_FΩ_Fmid.trans h_outer_V_zero
 
@@ -546,16 +529,13 @@ lemma cutoffInvGram_bounded
     ∃ C : ℝ, 0 ≤ C ∧ ∀ y : EuclN,
       |cutoffInvGram (I := I) (M := M) g α i j y| ≤ C := by
   classical
-
   set η := chartCutoffα (I := I) (M := M) α with hη_def
   set Ω := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set Kη : Set EuclN := tsupport η with hKη_def
   have hKη_compact : IsCompact Kη :=
     chartCutoffα_compactSupport (I := I) (M := M) α
   have hKη_sub_Ω : Kη ⊆ Ω := chartCutoffα_tsupport (I := I) (M := M) α
-
   have hη_bdd : ∀ y : EuclN, |η y| ≤ 1 := abs_chartCutoffα_le (I := I) (M := M) α
-
   have h_zero_off : ∀ y : EuclN, y ∉ Kη →
       cutoffInvGram (I := I) (M := M) g α i j y = 0 := by
     intro y hy
@@ -563,10 +543,8 @@ lemma cutoffInvGram_bounded
       image_eq_zero_of_notMem_tsupport hy
     unfold cutoffInvGram
     rw [hη_zero, zero_mul]
-
   have hG_cont_on : ContinuousOn (invGramOnEuclid (I := I) g α i j) Ω :=
     (invGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
-
   by_cases hKη_ne : Kη.Nonempty
   · have hG_cont_on_Kη : ContinuousOn (invGramOnEuclid (I := I) g α i j) Kη :=
       hG_cont_on.mono hKη_sub_Ω
@@ -610,7 +588,6 @@ lemma cutoffInvGram_continuous
   set η := chartCutoffα (I := I) (M := M) α with hη_def
   set Ω := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set Kη : Set EuclN := tsupport η with hKη_def
-
   have hη_cont : Continuous η :=
     (chartCutoffα_smooth (I := I) (M := M) α).continuous
   have hKη_compact : IsCompact Kη :=
@@ -618,7 +595,6 @@ lemma cutoffInvGram_continuous
   have hKη_sub_Ω : Kη ⊆ Ω := chartCutoffα_tsupport (I := I) (M := M) α
   have hΩ_open : IsOpen Ω :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-
   have h_zero_off : ∀ y : EuclN, y ∉ Kη →
       cutoffInvGram (I := I) (M := M) g α i j y = 0 := by
     intro y hy
@@ -626,7 +602,6 @@ lemma cutoffInvGram_continuous
       image_eq_zero_of_notMem_tsupport hy
     unfold cutoffInvGram
     rw [hη_zero, zero_mul]
-
   rw [continuous_iff_continuousAt]
   intro y
   by_cases hyKη : y ∈ Kη
@@ -641,7 +616,6 @@ lemma cutoffInvGram_continuous
       (isClosed_tsupport η).isOpen_compl.mem_nhds hyKη
     have hVal_y : cutoffInvGram (I := I) (M := M) g α i j y = 0 :=
       h_zero_off y hyKη
-
     have h_eventually_zero :
         cutoffInvGram (I := I) (M := M) g α i j =ᶠ[𝓝 y] (fun _ => (0 : ℝ)) := by
       filter_upwards [h_nbd] with z hz
@@ -678,14 +652,12 @@ private lemma invGram_mul_H_H_ae_eq_cutoff_mul_H_H
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set K : Set EuclN := chartImagePOUTsupport (I := I) (M := M) α with hK_def
   set V : Set EuclN := Ω \ K with hV_def
-
   have hΩ_meas : MeasurableSet Ω :=
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   have hK_compact : IsCompact K :=
     chartImagePOUTsupport_isCompact (I := I) (M := M) α
   have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
   have hK_sub_Ω : K ⊆ Ω := chartImagePOUTsupport_subset_target (I := I) (M := M) α
-
   have h_pt_K : ∀ y ∈ K,
       invGramOnEuclid (I := I) g α i k y *
         invGramOnEuclid (I := I) g α j l y *
@@ -701,16 +673,12 @@ private lemma invGram_mul_H_H_ae_eq_cutoff_mul_H_H
     unfold cutoffInvGram
     rw [hη_one]
     ring
-
   have h_H_zero_ij := laplacianDomainHessianChart_ae_zero_off_support
     (I := I) (M := M) g α hu_h i j
   have h_H_zero_kl := laplacianDomainHessianChart_ae_zero_off_support
     (I := I) (M := M) g α hu_h k l
-
   have hV_meas : MeasurableSet V := hΩ_meas.diff hK_meas
-
   refine (ae_restrict_iff' hΩ_meas).mpr ?_
-
   have hae_ij : (fun y : EuclN =>
       laplacianDomainHessianChart (I := I) (M := M) g α hu_h i j y)
       =ᵐ[(volume : Measure EuclN).restrict V] (fun _ => (0 : ℝ)) :=
@@ -719,7 +687,6 @@ private lemma invGram_mul_H_H_ae_eq_cutoff_mul_H_H
       laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l y)
       =ᵐ[(volume : Measure EuclN).restrict V] (fun _ => (0 : ℝ)) :=
     h_H_zero_kl
-
   have hae_ij' : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ V →
       laplacianDomainHessianChart (I := I) (M := M) g α hu_h i j y = 0 := by
     have := (ae_restrict_iff' hV_meas).mp hae_ij
@@ -783,12 +750,10 @@ private lemma cutoffSummand_memLp_one
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-
   obtain ⟨C_ik, hC_ik_nn, hC_ik_bd⟩ :=
     cutoffInvGram_bounded (I := I) (M := M) g α i k
   obtain ⟨C_jl, hC_jl_nn, hC_jl_bd⟩ :=
     cutoffInvGram_bounded (I := I) (M := M) g α j l
-
   have h_HH_int := H_ij_mul_H_kl_integrable
     (I := I) (M := M) g α hu_h i j k l
   have h_HH_memLp_one : MemLp (fun y : EuclN =>
@@ -797,10 +762,8 @@ private lemma cutoffSummand_memLp_one
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
     memLp_one_iff_integrable.mpr h_HH_int
-
   set C := C_ik * C_jl with hC_def
   have hC_nn : 0 ≤ C := mul_nonneg hC_ik_nn hC_jl_nn
-
   set bdd_fn : EuclN → ℝ := fun y =>
     C * |laplacianDomainHessianChart (I := I) (M := M) g α hu_h i j y *
       laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l y|
@@ -814,7 +777,6 @@ private lemma cutoffSummand_memLp_one
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)) := h_HH_memLp_one.abs
     exact h_abs.const_mul C
-
   refine MemLp.mono hbdd_memLp ?_ ?_
   · have h_cont_ik : Continuous (cutoffInvGram (I := I) (M := M) g α i k) :=
       cutoffInvGram_continuous (I := I) (M := M) g α i k
@@ -837,14 +799,11 @@ private lemma cutoffSummand_memLp_one
     exact ((h_aesm_ik.mul h_aesm_jl).mul h_aesm_ij_H).mul h_aesm_kl_H
   · refine Filter.Eventually.of_forall ?_
     intro y
-
     simp only [Real.norm_eq_abs, hbdd_def]
-
     set H_ij := laplacianDomainHessianChart (I := I) (M := M) g α hu_h i j with hH_ij_def
     set H_kl := laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l with hH_kl_def
     set Gik := cutoffInvGram (I := I) (M := M) g α i k with hGik_def
     set Gjl := cutoffInvGram (I := I) (M := M) g α j l with hGjl_def
-
     have h_abs : |Gik y * Gjl y * H_ij y * H_kl y| =
         |Gik y| * |Gjl y| * |H_ij y * H_kl y| := by
       rw [show Gik y * Gjl y * H_ij y * H_kl y =
@@ -896,7 +855,6 @@ theorem laplacianDomainHessFrobeniusSqChart_memLp_one
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
-
   have h_eq : laplacianDomainHessFrobeniusSqChart (I := I) (M := M) g α hu_h =
       fun y => ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -909,7 +867,6 @@ theorem laplacianDomainHessFrobeniusSqChart_memLp_one
     funext y
     rw [laplacianDomainHessFrobeniusSqChart_def]
   rw [h_eq]
-
   refine memLp_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
     (fun i _ => ?_)
   refine memLp_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
@@ -921,7 +878,6 @@ theorem laplacianDomainHessFrobeniusSqChart_memLp_one
   exact summand_memLp_one (I := I) (M := M) g α hu_h i j k l
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem laplacianDomainHessianChart_smooth_case
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : SmoothScalar g) (i j : Fin (Module.finrank ℝ E))
@@ -941,7 +897,6 @@ theorem laplacianDomainHessianChart_smooth_case
           (chartTargetEuclid (I := I) (M := M) α))
         (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set u_h_mem := smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) f
   set u₁ : EuclN → ℝ := chartPushedU (I := I) (M := M) g α
@@ -949,14 +904,12 @@ theorem laplacianDomainHessianChart_smooth_case
   set u₂ : EuclN → ℝ := chartPushed (I := I) (M := M) (chartAtlasPOU I M) α f.toFun
     with hu₂_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-
   have h_inner_eq :
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u₁ Ω
         =ᵐ[(volume : Measure EuclN).restrict Ω]
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u₂ Ω :=
     chosenWeakPartial'_ae_congr (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_bridge i
-
   have h_outer_eq :
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 j
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u₁ Ω) Ω
@@ -965,7 +918,6 @@ theorem laplacianDomainHessianChart_smooth_case
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u₂ Ω) Ω :=
     chosenWeakPartial'_ae_congr (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_inner_eq j
-
   change chosenWeakPartial' (d := Module.finrank ℝ E) 2 j
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 i u₁ Ω) Ω
     =ᵐ[(volume : Measure EuclN).restrict Ω]

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Calculus.MapConvergence
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

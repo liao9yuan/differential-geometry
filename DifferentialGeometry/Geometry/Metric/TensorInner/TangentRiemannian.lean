@@ -32,18 +32,14 @@ private lemma continuous_g_inner_aux
     (hw : Continuous (fun x : M => TotalSpace.mk' E
       (E := (TangentSpace I : M → Type _)) x (w x))) :
     Continuous (fun b : M => g.inner b (v b) (w b)) := by
-
   letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
     g.toContinuousRiemannianMetric
   letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨cg.toRiemannianMetric⟩
-
   have h := Continuous.inner_bundle (F := E) (B := M) (E := (TangentSpace I : M → Type _))
     (b := fun x => x) (v := v) (w := w) hv hw
-
   refine h.congr ?_
   intro b
-
   rfl
 
 end TangentRiemannian
@@ -64,7 +60,6 @@ theorem continuous_g_inner_of_smooth_sections
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (X b) (Y b)) := by
-
   have hX : Continuous (fun x : M => TotalSpace.mk' E
       (E := (TangentSpace I : M → Type _)) x (X x)) :=
     X.contMDiff.continuous

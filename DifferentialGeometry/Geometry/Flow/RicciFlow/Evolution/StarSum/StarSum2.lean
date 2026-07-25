@@ -4,9 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -114,7 +111,8 @@ def mtIter (g : SmoothRiemannianMetric I M) {s : ℕ} :
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem mtIter_add (g : SmoothRiemannianMetric I M) {s : ℕ} (τ : ℕ) :
     ∀ A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2 * τ),
@@ -381,7 +379,6 @@ theorem stNabla_smul
 
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -472,7 +469,6 @@ theorem stNablaMtIter
       exact ⟨_, h2⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -606,7 +602,8 @@ private theorem sumIdentityDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mtInputBasis {x : M} {Idx : Type*} {s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (r r' : Idx) (mm : Fin s' → Idx) :
@@ -624,7 +621,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem mtfOrthoBd
     [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -659,7 +657,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem mtIterOrthoBd
     [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -740,7 +739,6 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       split_ifs <;> simp
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -815,7 +813,6 @@ theorem StarSum2Cost.bound
       exact le_trans htop (mul_le_mul_of_nonneg_left hsingle (by positivity))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -872,7 +869,6 @@ theorem StarSum2.bound
       have hab : a + b = k := by omega
       refine ⟨(Fintype.card Idx : Real) ^ (2 + r), by positivity,
         fun x basis horth m => ?_⟩
-
       have hinner : ∀ mm : Fin ((4 + k) + 2 * (2 + r)) → Idx,
           |(MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
               (E := TangentSpace I) (∞ : WithTop ℕ∞) σ
@@ -883,7 +879,6 @@ theorem StarSum2.bound
         rw [MultilinearSection.domDomCongr_apply,
           ContinuousMultilinearMap.domDomCongr_apply]
         exact starProdBd (I := I) S t a b basis horth r (fun p => mm (σ p))
-
       have htop := mtIterOrthoBd (I := I) (S.family.metric t) basis horth
         (s' := 4 + k) (2 + r) _ _ hinner m
       have hmem : a ∈ Finset.range (k + 1) := Finset.mem_range.mpr (by omega)
@@ -914,7 +909,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem mtfDiag
     [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -967,16 +963,12 @@ theorem starBase_comp_eq
   rw [starBaseField]
   set A := MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
     (E := TangentSpace I) (∞ : WithTop ℕ∞) σ (starProd (I := I) S t a b 0) with hA
-
-
   rw [show mtIter (I := I) (S.family.metric t) (2 + 0) A
       = metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
           (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t) A) from rfl]
-
   rw [mtfDiag (I := I) (S.family.metric t) basis horth
     (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t) A) m]
   refine Finset.sum_congr rfl fun j _ => ?_
-
   obtain ⟨mIdx, hmIdx⟩ := mtInputBasis (I := I) basis j j m
   rw [hmIdx, mtfDiag (I := I) (S.family.metric t) basis horth A mIdx, ← hmIdx]
   rfl
@@ -1011,8 +1003,6 @@ theorem starBaseProd_eq
   rw [starBase_comp_eq (I := I) S t k a b basis horth σ m]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => ?_
   rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
-
-
   exact Bundle.continuousMultilinearMap.product_fun_apply
     (nablaKRm04Field (I := I) S t a x) (nablaKRm04Field (I := I) S t b x)
     (fun p => metricTraceInput (I := I) (basis i) (basis i)
@@ -1428,7 +1418,6 @@ theorem drStar4
 end TermIdentities
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -1449,7 +1438,6 @@ theorem e0Field_comp
             + Bt R (n 0) (n 2) (n 1) (n 3) - Bt R (n 0) (n 3) (n 1) (n 2))
         - drift R (n 0) (n 1) (n 2) (n 3) := by
   classical
-
   have hev : e0Field (I := I) S t x (fun p => basis (n p))
       = -2 * starBaseField (I := I) S t 0 0 0 0 btPermE x (fun p => basis (n p))
         + 2 * starBaseField (I := I) S t 0 0 0 0 σBt2 x (fun p => basis (n p))
@@ -1463,11 +1451,9 @@ theorem e0Field_comp
     btStar3 (I := I) S t basis horth n, btStar4 (I := I) S t basis horth n,
     drStar1 (I := I) S t basis horth n, drStar2 (I := I) S t basis horth n,
     drStar3 (I := I) S t basis horth n, drStar4 (I := I) S t basis horth n]
-
   simp only [rmComp_eq_rm (I := I) S t hdim basis horth R hR htr,
     Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
     Matrix.tail_cons, Matrix.cons_val_three]
-
   rw [driftPiece R (n 0) (fun f => rm R f (n 1) (n 2) (n 3)),
     driftPiece R (n 1) (fun f => rm R (n 0) f (n 2) (n 3)),
     driftPiece R (n 2) (fun f => rm R (n 0) (n 1) f (n 3)),
@@ -1489,11 +1475,6 @@ end ComponentIdentity
 
 open DifferentialGeometry.Dim3Reaction in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 theorem residualStarSum_zero
@@ -1546,11 +1527,9 @@ theorem residualStarSum_zero
       = sc (fun i j => S.ricciAt (t : Real) x (vec2 (I := I) (basis i) (basis j))) := by
     rw [scalar_eq_trace_ortho (I := I) S (t : Real) x horth]
     simp only [sc]
-
   have hlhs : (fun r : Real => tensor0SComponent (I := I) (nablaKRm04Field (I := I) S r 0 x)
         (fun i => basis i) I0)
       = (fun r : Real => S.base.rm04 r x (fun p => basis (I0 p))) := rfl
-
   have hval : tensor0SComponent (I := I)
         (metricTrace0S2TensorInBasis (I := I) basis (identityInvMetric (Idx := Fin 3))
             (nablaKRm04Field (I := I) S (t : Real) (0 + 2) x) + (e0Field (I := I) S (t : Real)) x)

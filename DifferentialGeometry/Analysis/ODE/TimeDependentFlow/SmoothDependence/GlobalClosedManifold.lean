@@ -19,7 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 open Bundle in
-
 theorem autonomizedFlowVF_section_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -56,7 +55,6 @@ theorem autonomizedFlowVF_section_contMDiff
   exact hsymm.comp hpair
 
 omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
-
 theorem autonomizedFieldJointC1_of_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -144,7 +142,8 @@ theorem global_flow_jointContMDiffOn_on_closed_manifold
             ((1 : ℝ →L[ℝ] ℝ).smulRight (X u ((fun r' _ => Φloc j x r') u (x : M)))) := by
         intro u hu
         exact (hΦloc_bare j x hxj u (hwin_j hu)).hasMFDerivWithinAt
-      have hstart : (fun r' _ => Φloc i x r') t₀ (x : M) = (fun r' _ => Φloc j x r') t₀ (x : M) := by
+      have hstart : (fun r' _ => Φloc i x r') t₀ (x : M) = (fun r' _ => Φloc j x r') t₀
+        (x : M) := by
         simp only
         rw [hΦloc_init i x hxi, hΦloc_init j x hxj]
       have := bare_integral_flow_eqOn_of_jointC1 (a := t₀ - T) (b := t₀ + T) (t₀ := t₀)

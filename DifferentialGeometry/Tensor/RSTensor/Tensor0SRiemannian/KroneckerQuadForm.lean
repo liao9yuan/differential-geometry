@@ -64,8 +64,6 @@ private lemma isHermitian_entry
     exact absurd (Finset.mem_univ k) hk
 
 omit [DecidableEq n] in
-
-
 theorem sum_posSemidef_mul_posSemidef_nonneg
     {M G : Matrix n n ℝ} (hM : M.PosSemidef) (hG : G.PosSemidef) :
     0 ≤ ∑ i, ∑ j, M i j * G i j := by
@@ -113,7 +111,6 @@ section KroneckerPow
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 omit [DecidableEq Idx] in
-
 private lemma sum_fin_succ_fun {R : Type*} [AddCommMonoid R] (s : ℕ)
     (f : (Fin (s + 1) → Idx) → R) :
     (∑ I : Fin (s + 1) → Idx, f I)
@@ -128,7 +125,6 @@ private lemma sum_fin_succ_fun {R : Type*} [AddCommMonoid R] (s : ℕ)
         rfl
 
 omit [DecidableEq Idx] in
-
 private lemma sum_fin_succ_fun₂ {R : Type*} [AddCommMonoid R] (s : ℕ)
     (f : (Fin (s + 1) → Idx) → (Fin (s + 1) → Idx) → R) :
     (∑ I : Fin (s + 1) → Idx, ∑ J : Fin (s + 1) → Idx, f I J)
@@ -139,7 +135,6 @@ private lemma sum_fin_succ_fun₂ {R : Type*} [AddCommMonoid R] (s : ℕ)
     sum_fin_succ_fun (s := s) (f := fun J => f (Fin.cons k I) J)
 
 omit [Fintype Idx] [DecidableEq Idx] in
-
 private lemma prod_fin_succ_Q (s : ℕ) (Q : Idx → Idx → ℝ)
     (k l : Idx) (I J : Fin s → Idx) :
     (∏ a : Fin (s + 1),
@@ -220,7 +215,6 @@ private lemma shifted_posSemidef
     exact sub_nonneg.mpr (hQlb x)
 
 omit [DecidableEq Idx] in
-
 private lemma kron_kernel_posSemidef_of_ih (s : ℕ) (Q : Idx → Idx → ℝ) (α : ℝ)
     (hαnonneg : 0 ≤ α)
     (hQsymm : ∀ i j, Q i j = Q j i)
@@ -255,12 +249,6 @@ private lemma sandwich_entry {ι κ : Type*} [Fintype ι]
     _ = ∑ I : ι, ∑ J : ι, P I J * (V I k * V J l) := Finset.sum_comm
 
 omit [DecidableEq Idx] in
-
-
-
-
-
-
 theorem quadForm_id_le_pow
     (Q : Idx → Idx → ℝ) (C : ℝ) (hC : 0 < C)
     (hQsymm : ∀ i j, Q i j = Q j i)
@@ -300,7 +288,6 @@ theorem quadForm_id_le_pow
         refine Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => ?_
         rw [hP, hW]
         simp only [Matrix.of_apply]
-
       have hexpand : (∑ i : Idx, ∑ j : Idx,
             (Matrix.of fun i j : Idx =>
               Q i j - 1 / C * (if i = j then (1 : ℝ) else 0)) i j * S i j)
@@ -328,7 +315,6 @@ theorem quadForm_id_le_pow
         have h0 := sum_posSemidef_mul_posSemidef_nonneg hMpsd hSpsd
         rw [hexpand] at h0
         linarith
-
       have hdiagIH : ∀ k : Idx,
           (1 / C) ^ s * ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2 ≤ S k k := by
         intro k
@@ -381,7 +367,6 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
   intro w
   have hsq_nonneg : (0 : ℝ) ≤ ∑ i, w i ^ 2 :=
     Finset.sum_nonneg fun i _ => sq_nonneg (w i)
-
   have hsplit : (∑ i, ∑ j, Q i j * (w i * w j))
       = (∑ i, w i ^ 2)
         + ∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j) := by
@@ -404,7 +389,6 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [hid, one_mul]
           congr 1
           exact Finset.sum_congr rfl fun i _ => (pow_two (w i)).symm
-
   have herr : |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
       ≤ ε * ((∑ i, |w i|) * (∑ j, |w j|)) := by
     calc |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
@@ -421,7 +405,6 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [Finset.sum_mul_sum, Finset.mul_sum]
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [Finset.mul_sum]
-
   have hCS : ((∑ i, |w i|) * (∑ j, |w j|)) ≤ (Fintype.card ι : ℝ) * ∑ i, w i ^ 2 := by
     have h := sq_sum_le_card_mul_sum_sq (s := (Finset.univ : Finset ι))
       (f := fun i => |w i|)
@@ -432,7 +415,6 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
           rw [Finset.card_univ]
           congr 1
           exact Finset.sum_congr rfl fun i _ => sq_abs (w i)
-
   have hEbound : ε * ((∑ i, |w i|) * (∑ j, |w j|))
       ≤ (1 / 2) * ∑ i, w i ^ 2 := by
     calc ε * ((∑ i, |w i|) * (∑ j, |w j|))

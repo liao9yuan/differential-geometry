@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Slot0SliceFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -32,7 +30,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -73,7 +72,8 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
   set bse : Module.Basis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ (TangentSpace I x) :=
     basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
   have hbse_eq : ∀ i, bse i = e i := by
-    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard)
+      i
   have hbse_orth : ∀ i j, g.inner x (bse i) (bse j) = if i = j then (1 : ℝ) else 0 := by
     intro i j; rw [hbse_eq i, hbse_eq j]; exact horth i j
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 s x Tr]
@@ -175,7 +175,6 @@ private lemma frame_field_energy_eq_sum_trace_fiberNormSq
     rw [orthoWeighted_frame_sum_collapse (I := I) (M := M) g s x e horth Tr (φ 0)
       (fun k => e (Fin.tail φ k))]
   rw [Finset.sum_congr rfl (fun φ (_ : φ ∈ Finset.univ) => hcollapse φ)]
-
   rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (s + 1) => Fin n))
         (fun (pr : Fin n × (Fin s → Fin n)) =>
           Tensor0SSpace.toModel
@@ -207,7 +206,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
   classical
-
   have huniform : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
@@ -241,7 +239,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
   refine ⟨fun s => (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * C s), fun s => ?_, ?_⟩
   · exact mul_nonneg (Nat.cast_nonneg _) (mul_nonneg (Nat.cast_nonneg _) (hC_nonneg s))
   intro s S x v hv
-
   set n : ℕ := Module.finrank ℝ E with hn_def
   set F : Fin n → TensorRSSpace 0 s I x := fun i =>
     riemannSec (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -253,14 +250,12 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
       (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
     rw [genuineCurvTraceFixedFrameCurvatureOnly]
   rw [htrace]
-
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
     smoothExtensionTangent_contMDiff (I := I) x v
   have hS_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
     S.toSection.contMDiff
-
   have hFop : ∀ i : Fin n, F i =
       riemannOp (tensorCov (I := I) g 0 s) x
         (smoothOrthoFrame (I := I) g x i x) (smoothExtensionTangent (I := I) x v x)
@@ -268,7 +263,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           (fun y : M => S.toSection y) x) := by
     intro i; rw [hF_def]
     exact tensor3rdCurv_pure_R_eq_riemannOp (I := I) g 0 s i hW hS_total
-
   have hcovApply_le : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -281,7 +275,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     have horthF : ∀ a b : Fin n, g.inner x (eF a) (eF b) = if a = b then (1 : ℝ) else 0 := by
       intro a b; rw [heF_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
     set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
-
     have hweight : ∀ (m : ℕ),
         ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
@@ -326,7 +319,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
         rw [fiberNormSqSummand, hweight (s + 1)]; rfl
       · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
       · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
-
     have hslice_eq :
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
             (slot0Curry (I := I) (M := M) g x s eF K₀
@@ -350,7 +342,8 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
           (unitZeroSec (I := I) (M := M) x)]
         rw [hweight s]
-        have hscalar : tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
+        have hscalar : tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) =
+          1 := by
           rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
           have hone : Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x)
               (fun k : Fin 0 => k.elim0) = (1 : ℝ) := by
@@ -365,8 +358,8 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     rw [← hslice_eq]
     exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eF K₀
       hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
-
-  have hgv : g.inner x (smoothExtensionTangent (I := I) x v x) (smoothExtensionTangent (I := I) x v x)
+  have hgv : g.inner x (smoothExtensionTangent (I := I) x v x)
+    (smoothExtensionTangent (I := I) x v x)
       = 1 := by rw [smoothExtensionTangent_eq x v]; exact hv
   have hper : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) ≤
@@ -374,7 +367,8 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
     intro i
     rw [hFop i]
-    have hgB : g.inner x (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) = 1 := by
+    have hgB : g.inner x (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) =
+      1 := by
       have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i; rwa [if_pos rfl] at this
     have hbound := hC_bound s x (smoothOrthoFrame (I := I) g x i x)
       (smoothExtensionTangent (I := I) x v x)
@@ -384,7 +378,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     refine le_trans hbound ?_
     refine mul_le_mul_of_nonneg_left ?_ (hC_nonneg s)
     exact hcovApply_le i
-
   calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
       ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
         have := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
@@ -418,7 +411,6 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     exists_uniform_genuineCurvTracePureR_fiberNormSq_bound (I := I) (M := M) g
   refine ⟨fun s => Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s), fun s => Real.sqrt_nonneg _,
     fun s S x n e hn horth => ?_⟩
-
   set Tr : Fin n → TensorRSSpace 0 s I x := fun a =>
     genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
       (smoothExtensionTangent (I := I) x (e a)) (smoothOrthoFrame (I := I) g x)
@@ -432,12 +424,10 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     intro w m; rw [genuineThirdCurvFieldFibPureR]
   rw [frame_field_energy_eq_sum_trace_fiberNormSq (I := I) (M := M) g s x e hn horth Tr
     (genuineThirdCurvFieldFibPureR (I := I) (M := M) g s S x e) hfield]
-
   have hCsq : (Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s)) ^ 2 =
       (Module.finrank ℝ E : ℝ) * Kpure s :=
     Real.sq_sqrt (mul_nonneg (Nat.cast_nonneg _) (hKpure_nn s))
   rw [hCsq]
-
   have hper : ∀ a : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (Tr a) ≤
         Kpure s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x

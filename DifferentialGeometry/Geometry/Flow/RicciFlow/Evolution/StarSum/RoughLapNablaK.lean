@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridg
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

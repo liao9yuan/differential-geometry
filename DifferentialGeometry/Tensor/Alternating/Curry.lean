@@ -13,7 +13,6 @@ import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
 import Mathlib.Tactic.Cases
 
-set_option linter.style.cases false
 
 namespace ContinuousAlternatingMap
 
@@ -259,10 +258,8 @@ theorem uncurrySum.summand_eq_zero_of_smul_invariant (f : E [⋀^ι]→L[𝕜] E
     ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.uncurrySum_apply,
     uncurrySum.summand]
   intro hσ
-
-  cases' hi : σ⁻¹ i with val val <;> cases' hj : σ⁻¹ j with val_1 val_1 <;>
+  rcases hi : σ⁻¹ i with val | val <;> rcases hj : σ⁻¹ j with val_1 | val_1 <;>
     rw [Equiv.Perm.inv_eq_iff_eq] at hi hj <;> substs hi hj <;> revert val val_1
-
   case inl.inr =>
     intro i' j' _ _ hσ
     obtain ⟨⟨sl, sr⟩, hσ⟩ := QuotientGroup.leftRel_apply.mp (Quotient.exact' hσ)
@@ -279,7 +276,6 @@ theorem uncurrySum.summand_eq_zero_of_smul_invariant (f : E [⋀^ι]→L[𝕜] E
     rw [smul_eq_mul, ← Equiv.mul_swap_eq_swap_mul, mul_inv_rev, Equiv.swap_inv,
       inv_mul_cancel_right] at hσ
     simp at hσ
-
   case inr.inr =>
     intro i' j' hv hij _
     convert smul_zero (M := ℤˣ) (A := F) _
@@ -358,7 +354,6 @@ theorem summand_left_match
       ⟨Quotient.mk'' σ, shuffleLeftRestrict_subtype_of_inv σ hσ⟩) :
     uncurrySum.summand F (Quotient.mk'' σ) w =
       uncurrySum.summand (curryFin F x) (Quotient.mk'' σ') (w ∘ Sum.map Fin.succ id) := by
-
   have h_coset : (Quotient.mk'' σ' :
       Equiv.Perm.ModSumCongr (Fin m) (Fin (n + 1))) =
       Quotient.mk'' (shuffleLeftFwd σ hσ) := by
@@ -376,7 +371,6 @@ theorem summand_left_match
   set k := hσ.choose
   set hk := hσ.choose_spec
   set σ_can := shuffleLeftFwd σ hσ
-
   have h_sign : Equiv.Perm.sign σ_can =
       Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap 0 k) := by
     change Equiv.Perm.sign (shuffleLeftFwd σ hσ) = _

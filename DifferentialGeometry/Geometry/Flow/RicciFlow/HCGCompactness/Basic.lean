@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRieman
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -36,7 +35,8 @@ variable {I : ModelWithCorners Real E H}
 
 
 structure PointedFlowData
-    (I : ModelWithCorners Real E H) (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) where
+    (I : ModelWithCorners Real E H)
+      (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) where
   M : Type u
   [topology : TopologicalSpace M]
   [charted : ChartedSpace H M]

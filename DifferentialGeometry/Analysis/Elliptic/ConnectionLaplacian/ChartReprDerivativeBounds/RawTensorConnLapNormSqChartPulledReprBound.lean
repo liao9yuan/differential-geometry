@@ -19,8 +19,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -48,7 +46,8 @@ private lemma sq_add_three_le_three_mul_sum_sq (a b c : ℝ) :
     (a + b + c) ^ 2 ≤ 3 * (a ^ 2 + b ^ 2 + c ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -221,7 +220,9 @@ private lemma chartFrameNormGlobalSmooth_fderiv_repr_bound
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α) (chartAt H α).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub_good : K_set ⊆ chartLeviCivitaGoodSet (I := I) α := by
-    have h_eq := DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α
+    have h_eq :=
+      DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I)
+      α
     intro y hy
     rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
     exact hK_sub hy

@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -62,8 +59,10 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
     (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x₀ : M)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
-    DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real)) x₀ i j k =
-      DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real)) x₀ j i k := by
+    DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+      (S.family.connection (t : Real)) x₀ i j k =
+      DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+        (S.family.connection (t : Real)) x₀ j i k := by
   have htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I)
       (S.family.connection (t : Real)) := by
     simpa [DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt] using
@@ -75,7 +74,8 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
             (coordinateFrameAt (I := I) x₀ j x₀)) = 0 := by
     rw [htf x₀]
     simp
-  have hskew := DifferentialGeometry.Integral.Connection.coordinate_torsion_coeff_eq_christoffel_skew
+  have hskew :=
+    DifferentialGeometry.Integral.Connection.coordinate_torsion_coeff_eq_christoffel_skew
     (I := I) (S.family.connection (t : Real)) x₀ i j k
   rw [hzero] at hskew
   exact sub_eq_zero.mp hskew.symm
@@ -97,7 +97,8 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
     (dir i j k : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelCoordDerivAt (I := I) (S.family.connection s)
+        DifferentialGeometry.Integral.Connection.christoffelCoordDerivAt (I := I)
+          (S.family.connection s)
           x₀ dir i j k)
       (extDerivFun (I := I) (fun y : M => rhs (t : Real) y i j k) x₀
         (coordinateFrameAt (I := I) x₀ dir x₀))
@@ -105,7 +106,8 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
       (t : Real) := by
   have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ :=
     coordinateFrameAt_mem (I := I) x₀
-  simpa [DifferentialGeometry.Integral.Connection.christoffelCoordDerivAt, DifferentialGeometry.Integral.Connection.christoffelCoordFun] using
+  simpa [DifferentialGeometry.Integral.Connection.christoffelCoordDerivAt,
+    DifferentialGeometry.Integral.Connection.christoffelCoordFun] using
     fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I) (h := hmix i j k)
       (t := (t : Real)) t.2 (x := x₀) hx₀
       (coordinateFrameAt (I := I) x₀ dir x₀)
@@ -127,7 +129,8 @@ private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     (i j k : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s) x₀ i j k)
+        DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+          x₀ i j k)
       (rhs (t : Real) x₀ i j k)
       D.carrier
       (t : Real) := by
@@ -159,7 +162,8 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (i k j m : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I) (S.family.connection s)
+        DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I)
+          (S.family.connection s)
           x₀ i k j m)
       (christoffelVariationCovDerivCoordAt (I := I)
           (S.family.connection (t : Real)) rhs (t : Real) x₀ i m k j -
@@ -176,7 +180,8 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
       ∀ a b c : CoordinateIdx (𝕜 := Real) E,
         HasDerivWithinAt
           (fun s : Real =>
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection s)
               x₀ a b c)
           (rhs (t : Real) x₀ a b c) D.carrier (t : Real) := by
     intro a b c
@@ -186,15 +191,19 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
       HasDerivWithinAt
         (fun s : Real =>
           ∑ a : CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection s)
               x₀ k j a *
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection s)
               x₀ i a m)
         (∑ a : CoordinateIdx (𝕜 := Real) E,
           (rhs (t : Real) x₀ k j a *
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real))
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection (t : Real))
               x₀ i a m +
-          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real))
+          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+            (S.family.connection (t : Real))
               x₀ k j a *
             rhs (t : Real) x₀ i a m))
         D.carrier
@@ -206,15 +215,19 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
       HasDerivWithinAt
         (fun s : Real =>
           ∑ a : CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection s)
               x₀ i j a *
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection s)
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection s)
               x₀ k a m)
         (∑ a : CoordinateIdx (𝕜 := Real) E,
           (rhs (t : Real) x₀ i j a *
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real))
+            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              (S.family.connection (t : Real))
               x₀ k a m +
-          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real))
+          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+            (S.family.connection (t : Real))
               x₀ i j a *
             rhs (t : Real) x₀ k a m))
         D.carrier
@@ -225,7 +238,8 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
   have hraw :
       HasDerivWithinAt
         (fun s : Real =>
-          DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I) (S.family.connection s)
+          DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I)
+            (S.family.connection s)
             x₀ i k j m)
         ((extDerivFun (I := I) (fun y : M => rhs (t : Real) y k j m) x₀
             (coordinateFrameAt (I := I) x₀ i x₀) -
@@ -247,20 +261,24 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
               rhs (t : Real) x₀ k a m)))
         D.carrier
         (t : Real) := by
-    simpa [DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt, sub_eq_add_neg, add_assoc,
+    simpa [DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt, sub_eq_add_neg,
+      add_assoc,
       Finset.sum_add_distrib] using
       (((hD_i.sub hD_k).add hprod_left).sub hprod_right)
   refine hraw.congr_deriv ?_
   have hsymm :
       ∀ a b c : CoordinateIdx (𝕜 := Real) E,
-        DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real)) x₀ a b c =
-          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real)) x₀ b a c := by
+        DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+          (S.family.connection (t : Real)) x₀ a b c =
+          DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+            (S.family.connection (t : Real)) x₀ b a c := by
     intro a b c
     exact christoffelCoordAt_symm_of_isSolutionOn (I := I) S hS t x₀ a b c
   let Γ : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> Real :=
     fun a b c =>
-      DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (S.family.connection (t : Real)) x₀ a b c
+      DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+        (S.family.connection (t : Real)) x₀ a b c
   let A : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> Real :=
     fun a b c => rhs (t : Real) x₀ a b c
@@ -296,7 +314,8 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (i j : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (S.family.connection s)
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+          (S.family.connection s)
           x₀ i j)
       (ricciVariationFromConnectionRHSInFrame (M := M)
         (fun τ x d k i j =>
@@ -339,11 +358,14 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (x₀ : M)
     (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s)
+        (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (Rm13 s))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
+      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
+        (S.family.connection s) x₀)
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
@@ -365,15 +387,18 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
   have hricci :
       ∀ s : Real, s ∈ D.carrier ->
         ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ i j =
-          DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j := by
+          DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            (S.family.connection s) x₀ i j := by
     intro s hs
     unfold ricciCompInFrame
     change (S.ricci s x₀)
         (DifferentialGeometry.Integral.Connection.vec2 (coordinateFrameAt (I := I) x₀ i x₀)
           (coordinateFrameAt (I := I) x₀ j x₀)) =
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j
+        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+          (S.family.connection s) x₀ i j
     rw [hRicTrace s hs x₀]
-    exact DifferentialGeometry.Integral.Connection.ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
+    exact
+      DifferentialGeometry.Integral.Connection.ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
       (I := I) (S.family.connection s) (connSmoothOfSol (I := I) S hS s hs) (Rm13 s) x₀
       (hRm s hs) (hcurv s hs) i j
   exact hderiv.congr
@@ -391,7 +416,8 @@ theorem gammaCovNab2Core
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (nablaRic :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
@@ -444,16 +470,6 @@ theorem gammaCovNab2Core
                 (I := I) S frame hframe nablaRic (t : Real) x₀ d j i l +
               ricciSecondCovDerivCompInFrame
                 (I := I) S frame hframe nablaRic (t : Real) x₀ d l i j) := by
-
-
-
-
-
-
-
-
-
-
     let Γ : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
       fun up low => DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
         (S.family.connection (t : Real)) x₀ d low up
@@ -604,7 +620,8 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (nablaRic :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
@@ -697,7 +714,8 @@ theorem ricciVarCore
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (nablaRic :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
@@ -736,11 +754,14 @@ theorem ricciVarCore
               (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic
               (t : Real) x₀ a b c e)
     (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s)
+        (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (Rm13 s))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
+      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
+        (S.family.connection s) x₀)
     (hmix :
       ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
@@ -836,7 +857,8 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (gInvDt :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
     (nablaRic :
@@ -857,11 +879,14 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
     (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s)
+        (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (Rm13 s))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
+      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
+        (S.family.connection s) x₀)
     (hmix :
       ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)

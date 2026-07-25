@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
@@ -26,6 +24,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 noncomputable def iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -60,6 +64,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local2
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 noncomputable def iteratedCovGradSobolevNorm
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (T : SmoothCcTensor g r s) : ℝ :=
   ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s + j) (2 * (k - j))
@@ -67,7 +77,6 @@ noncomputable def iteratedCovGradSobolevNorm
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
@@ -134,7 +143,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2
     (g : SmoothRiemannianMetric I M) (k : ℕ)

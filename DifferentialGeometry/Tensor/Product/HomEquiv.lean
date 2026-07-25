@@ -27,7 +27,6 @@ variable (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [Finit
 variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
 
 omit [FiniteDimensional 𝕜 F₂] in
-
 noncomputable def tensorHomEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] ((Module.Dual 𝕜 F₁) →ₗ[𝕜] F₂) := by
   let f : Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ≃ₗ[𝕜] F₁ := (Module.evalEquiv 𝕜 F₁).symm
   have h₀ : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁)) ⊗[𝕜] F₂ ≃ₗ[𝕜] (F₁ ⊗[𝕜] F₂) :=
@@ -67,7 +66,6 @@ noncomputable def toHomAux :
     F₁ →ₗ[𝕜] F₂ →ₗ[𝕜] (cDual (𝕜:=𝕜) (F₁:=F₁) →L[𝕜] F₂) :=
 by
   classical
-
   refine
     { toFun := fun v =>
         { toFun := fun w =>
@@ -78,7 +76,6 @@ by
                 simp [add_smul]
               map_smul' := by
                 intro a φ
-
                 simp [mul_smul]
             } : (cDual (𝕜:=𝕜) (F₁:=F₁) →ₗ[𝕜] F₂)).toContinuousLinearMap
           map_add' := by
@@ -96,7 +93,6 @@ by
       map_smul' := by
         intro a v
         ext w φ
-
         simp [mul_smul] }
 
 noncomputable def toHom :
@@ -107,7 +103,6 @@ omit [FiniteDimensional 𝕜 F₂]
 
 lemma finrank_continuousLinearMap :
     Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
-
   haveI : Module.Free 𝕜 F₁ := inferInstance
   haveI : Module.Free 𝕜 F₂ := inferInstance
   have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
@@ -132,14 +127,12 @@ noncomputable instance instNormedAddCommGroup_tensor :
 by
   classical
   let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-
   refine NormedAddCommGroup.induced
     (𝓕 := (F₁ ⊗[𝕜] F₂) →+ (cDual 𝕜 F₁ →L[𝕜] F₂))
     (E := (F₁ ⊗[𝕜] F₂))
     (F := (cDual 𝕜 F₁ →L[𝕜] F₂))
     (f := e.toLinearMap.toAddMonoidHom)
     ?_
-
   exact e.injective
 
 noncomputable instance instNormedSpace_tensor :
@@ -147,7 +140,6 @@ noncomputable instance instNormedSpace_tensor :
 by
   classical
   let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-
   refine NormedSpace.induced
     (F := (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (cDual 𝕜 F₁ →L[𝕜] F₂))
     (𝕜 := 𝕜)

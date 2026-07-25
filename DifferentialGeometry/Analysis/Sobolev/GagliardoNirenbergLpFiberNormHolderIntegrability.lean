@@ -40,7 +40,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 section SecondOrderInterpInfra
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem continuous_riemannianFiberNormSq_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
@@ -63,7 +64,8 @@ private theorem memLp_riemannianFiberNormSq_rpow
       (I := I) (M := M) g
   have hcont : Continuous
       (fun x => (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) ^ a) :=
-    (continuous_riemannianFiberNormSq_section (I := I) (M := M) g r s S).rpow_const (fun _ => Or.inr ha)
+    (continuous_riemannianFiberNormSq_section (I := I) (M := M) g r s S).rpow_const
+      (fun _ => Or.inr ha)
   exact hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
 
 
@@ -82,14 +84,12 @@ theorem real_holder_three_nonneg
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-
   set α' : ℝ := (β⁻¹ + γ⁻¹)⁻¹ with hα'def
   have hβγpos : 0 < β⁻¹ + γ⁻¹ := by positivity
   have hα'pos : 0 < α' := by rw [hα'def]; positivity
   have hα'inv : α'⁻¹ = β⁻¹ + γ⁻¹ := by rw [hα'def, inv_inv]
   have hγinv_pos : (0 : ℝ) < γ⁻¹ := by positivity
   have hβinv_pos : (0 : ℝ) < β⁻¹ := by positivity
-
   have hconj1 : α.HolderConjugate α' := by
     refine Real.holderConjugate_iff.mpr ⟨?_, ?_⟩
     · have hαinv_lt : α⁻¹ < 1 := by
@@ -99,17 +99,14 @@ theorem real_holder_three_nonneg
       rw [← inv_inv α]
       exact one_lt_inv_iff₀.mpr ⟨hαinv_pos, hαinv_lt⟩
     · rw [hα'inv]; linarith [hABC]
-
   have hf23_0 : ∀ x, 0 ≤ f₂ x * f₃ x := fun x => mul_nonneg (hf₂0 x) (hf₃0 x)
   have hf1_mem : MeasureTheory.MemLp f₁ (ENNReal.ofReal α) μ :=
     hf₁c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   have hf23_mem : MeasureTheory.MemLp (fun x => f₂ x * f₃ x) (ENNReal.ofReal α') μ :=
     (hf₂c.mul hf₃c).memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-
   have hstep1 := MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hconj1
     (f := f₁) (g := fun x => f₂ x * f₃ x)
     (MeasureTheory.ae_of_all _ hf₁0) (MeasureTheory.ae_of_all _ hf23_0) hf1_mem hf23_mem
-
   have hβα' : 0 < β / α' := by positivity
   have hγα' : 0 < γ / α' := by positivity
   have hf2α'_mem : MeasureTheory.MemLp (fun x => f₂ x ^ α') (ENNReal.ofReal (β / α')) μ :=
@@ -127,15 +124,12 @@ theorem real_holder_three_nonneg
     · have hsplit : α' / β + α' / γ = α' * (β⁻¹ + γ⁻¹) := by
         rw [div_eq_mul_inv, div_eq_mul_inv, ← mul_add]
       rw [inv_div, inv_div, hsplit, ← hα'inv, mul_inv_cancel₀ hα'ne]
-
   have hstep2 := MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hconj2
     (f := fun x => f₂ x ^ α') (g := fun x => f₃ x ^ α')
     (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hf₂0 x) _))
     (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hf₃0 x) _)) hf2α'_mem hf3α'_mem
-
   have hprod_rpow : ∀ x, (f₂ x * f₃ x) ^ α' = f₂ x ^ α' * f₃ x ^ α' :=
     fun x => Real.mul_rpow (hf₂0 x) (hf₃0 x)
-
   have hmulcancel : ∀ t : ℝ, α' * (t / α') = t := by
     intro t; rw [mul_comm, div_mul_cancel₀ t hα'ne]
   have hpow2 : ∀ x, (f₂ x ^ α') ^ (β / α') = f₂ x ^ β := by
@@ -144,10 +138,8 @@ theorem real_holder_three_nonneg
   have hpow3 : ∀ x, (f₃ x ^ α') ^ (γ / α') = f₃ x ^ γ := by
     intro x
     rw [← Real.rpow_mul (hf₃0 x), hmulcancel]
-
   rw [MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow2),
       MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow3)] at hstep2
-
   set Iβ : ℝ := ∫ x, f₂ x ^ β ∂μ with hIβ
   set Iγ : ℝ := ∫ x, f₃ x ^ γ ∂μ with hIγ
   have hIβ_nn : 0 ≤ Iβ := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hf₂0 x) _)
@@ -173,7 +165,6 @@ theorem real_holder_three_nonneg
             rw [one_div_div]
             field_simp
           rw [he2, he3]
-
   calc ∫ x, f₁ x * f₂ x * f₃ x ∂μ
       = ∫ x, f₁ x * (f₂ x * f₃ x) ∂μ := by
         refine MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ (fun x => ?_))
@@ -181,7 +172,8 @@ theorem real_holder_three_nonneg
     _ ≤ (∫ x, f₁ x ^ α ∂μ) ^ (1 / α) * (∫ x, (f₂ x * f₃ x) ^ α' ∂μ) ^ (1 / α') := hstep1
     _ ≤ (∫ x, f₁ x ^ α ∂μ) ^ (1 / α) * (Iβ ^ (1 / β) * Iγ ^ (1 / γ)) := by
         apply mul_le_mul_of_nonneg_left hmid
-        exact Real.rpow_nonneg (MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hf₁0 x) _)) _
+        exact Real.rpow_nonneg (MeasureTheory.integral_nonneg
+          (fun x => Real.rpow_nonneg (hf₁0 x) _)) _
 
 end SecondOrderInterpInfra
 

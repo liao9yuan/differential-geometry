@@ -19,7 +19,6 @@ def commutatorPointwise (a u φ : E → ℝ) (x : E) : ℝ :=
     ((fun y => a y * u y) ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] φ) x
 
 omit [NeZero d] in
-
 private lemma exists_sup_bound_nonneg
     {φ : E → ℝ} (hφ_cont : Continuous φ) (hφ_compact : HasCompactSupport φ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ y, |φ y| ≤ M := by
@@ -28,7 +27,6 @@ private lemma exists_sup_bound_nonneg
   exact (hM y).trans (le_max_left _ _)
 
 omit [NeZero d] in
-
 private lemma memLp_smul_of_bound
     {a u : E → ℝ}
     (ha_meas : AEStronglyMeasurable a (volume : Measure E))
@@ -52,7 +50,6 @@ private lemma memLp_smul_of_bound
     exact mul_le_mul_of_nonneg_right (ha_bd x) (abs_nonneg _)
 
 omit [NeZero d] in
-
 private lemma measurePreserving_constSub' (x : E) :
     MeasurePreserving (fun t : E => x - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -64,14 +61,12 @@ private lemma measurePreserving_constSub' (x : E) :
   rw [heq]; exact h_addL.comp h_neg
 
 omit [NeZero d] in
-
 private lemma hasCompactSupport_translateSub
     {φ : E → ℝ} (hφ_compact : HasCompactSupport φ) (x : E) :
     HasCompactSupport (fun t : E => φ (x - t)) :=
   hφ_compact.comp_homeomorph (Homeomorph.subLeft x)
 
 omit [NeZero d] in
-
 private lemma integrable_conv_integrand
     {u φ : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E))
@@ -125,7 +120,6 @@ private lemma integrable_conv_integrand
   exact h_ind.const_mul M
 
 omit [NeZero d] in
-
 private lemma conv_apply
     {u φ : E → ℝ} (x : E) :
     (u ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] φ) x =
@@ -133,7 +127,6 @@ private lemma conv_apply
   simp [MeasureTheory.convolution_def, ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
 omit [NeZero d] in
-
 lemma commutatorPointwise_eq_integral
     {a u φ : E → ℝ} {Λ : ℝ}
     (ha_cont : Continuous a)
@@ -159,7 +152,6 @@ lemma commutatorPointwise_eq_integral
   ring
 
 omit [NeZero d] in
-
 private lemma abs_commutator_integrand_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ)
@@ -193,7 +185,6 @@ private lemma abs_commutator_integrand_le
     exact mul_le_mul_of_nonneg_left h_sub_bnd hub
 
 omit [NeZero d] in
-
 lemma abs_commutatorPointwise_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ)
@@ -230,7 +221,6 @@ lemma abs_commutatorPointwise_le
         congr 1; funext t; ring
 
 omit [NeZero d] in
-
 private lemma lintegral_constSub
     (x : E) (f : E → ℝ≥0∞) :
     ∫⁻ t, f (x - t) ∂(volume : Measure E) =
@@ -239,7 +229,6 @@ private lemma lintegral_constSub
   exact hMP.lintegral_comp_emb (Homeomorph.subLeft x).measurableEmbedding f
 
 omit [NeZero d] in
-
 private lemma enorm_commutatorPointwise_le_lintegral
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)
@@ -285,7 +274,6 @@ private lemma enorm_commutatorPointwise_le_lintegral
   exact le_of_eq (by rw [Real.enorm_eq_ofReal_abs])
 
 omit [NeZero d] in
-
 private lemma lintegral_phi_norm_u_sq_le
     {φ : E → ℝ}
     (hφ_meas : Measurable φ)
@@ -351,7 +339,6 @@ private lemma lintegral_phi_norm_u_sq_le
   exact hsq
 
 omit [NeZero d] in
-
 private lemma lintegral_ofReal_phi_lt_top
     {φ : E → ℝ} (hφ_cont : Continuous φ) (hφ_compact : HasCompactSupport φ) :
     ∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E) < ∞ := by
@@ -366,14 +353,12 @@ private lemma lintegral_ofReal_phi_lt_top
   exact ENNReal.ofReal_le_ofReal (le_abs_self _)
 
 omit [NeZero d] in
-
 private lemma aemeasurable_enorm_sq
     {u : E → ℝ} (hu : MemLp u 2 (volume : Measure E)) :
     AEMeasurable (fun t : E => ‖u t‖ₑ ^ (2 : ℝ)) (volume : Measure E) :=
   ((hu.aestronglyMeasurable.aemeasurable.enorm).pow_const _)
 
 omit [NeZero d] in
-
 private lemma eLpNorm_commutatorPointwise_sq_le_aux
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)
@@ -510,7 +495,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     mul_assoc Eu B B, mul_comm Eu (B * B), ← mul_assoc]
 
 omit [NeZero d] in
-
 theorem eLpNorm_commutatorPointwise_le
     {a u φ : E → ℝ} {Λ ε : ℝ}
     (hΛ_nn : 0 ≤ Λ) (hε_nn : 0 ≤ ε)

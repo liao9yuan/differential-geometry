@@ -55,7 +55,6 @@ variable {M : Type*} [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] in
-
 private lemma compactSpace_boundaryManifold :
     CompactSpace
       (BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) := by

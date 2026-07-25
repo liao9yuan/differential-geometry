@@ -292,7 +292,8 @@ lemma AnisotropicJointContDiffOn.congr {k : ℕ} {T : ℝ} {V : Set X} (hV : IsO
   exact (pdIter_congrOn hV (heq t ht) L hy).symm
 
 lemma AnisotropicJointContDiffOn.mono {k : ℕ} {T : ℝ} {V V' : Set X} {W : ℝ → X → ℝ}
-    (h : AnisotropicJointContDiffOn k T V W) (hsub : V' ⊆ V) : AnisotropicJointContDiffOn k T V' W :=
+    (h : AnisotropicJointContDiffOn k T V W) (hsub : V' ⊆ V) : AnisotropicJointContDiffOn k T V'
+      W :=
   ⟨fun t ht => (h.1 t ht).mono hsub,
    fun L => (h.2 L).mono (Set.prod_mono (le_refl _) hsub)⟩
 
@@ -320,7 +321,8 @@ lemma anisoOn_timeIndep {k : ℕ} {T : ℝ} {V : Set X} (hV : IsOpen V)
     (fun q hq => hq.2)
 
 lemma AnisotropicJointContDiffOn.add {k : ℕ} {T : ℝ} {V : Set X} (hV : IsOpen V)
-    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁) (h₂ : AnisotropicJointContDiffOn k T V W₂) :
+    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁)
+      (h₂ : AnisotropicJointContDiffOn k T V W₂) :
     AnisotropicJointContDiffOn k T V (fun t y => W₁ t y + W₂ t y) := by
   refine ⟨fun t ht => (h₁.1 t ht).add (h₂.1 t ht), fun L => ?_⟩
   refine ((h₁.2 L).add (h₂.2 L)).congr ?_
@@ -341,7 +343,8 @@ lemma AnisotropicJointContDiffOn.neg {k : ℕ} {T : ℝ} {V : Set X} (hV : IsOpe
   refine (h.smul hV (-1)).congr hV (fun t y => -W t y) (fun t ht z hz => by ring)
 
 lemma AnisotropicJointContDiffOn.sub {k : ℕ} {T : ℝ} {V : Set X} (hV : IsOpen V)
-    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁) (h₂ : AnisotropicJointContDiffOn k T V W₂) :
+    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁)
+      (h₂ : AnisotropicJointContDiffOn k T V W₂) :
     AnisotropicJointContDiffOn k T V (fun t y => W₁ t y - W₂ t y) := by
   refine ((h₁.add hV (h₂.neg hV)).congr hV (fun t y => W₁ t y - W₂ t y)
     (fun t ht z hz => by ring))
@@ -412,7 +415,8 @@ private lemma anisoOn_mul_clause_graded {k : ℕ} {T : ℝ} {V : Set X} (hV : Is
         rw [hstep1, hstep2]
 
 lemma AnisotropicJointContDiffOn.mul {k : ℕ} {T : ℝ} {V : Set X} (hV : IsOpen V)
-    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁) (h₂ : AnisotropicJointContDiffOn k T V W₂) :
+    {W₁ W₂ : ℝ → X → ℝ} (h₁ : AnisotropicJointContDiffOn k T V W₁)
+      (h₂ : AnisotropicJointContDiffOn k T V W₂) :
     AnisotropicJointContDiffOn k T V (fun t y => W₁ t y * W₂ t y) :=
   ⟨fun t ht => (h₁.1 t ht).mul (h₂.1 t ht),
    fun L => anisoOn_mul_clause_graded hV L.length L (le_refl _) W₁ W₂ h₁.1 h₂.1

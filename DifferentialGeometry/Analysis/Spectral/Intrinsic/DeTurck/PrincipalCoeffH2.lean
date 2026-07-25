@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 
 
 
@@ -60,7 +60,7 @@ private theorem h2_grid_two
   obtain ⟨Cpt, hCpt, hpt⟩ := hs2_fiber_sq (I := I) (M := M) hDim g 2
   obtain ⟨Cjet, hCjet, hjet⟩ := hs2_low2 (I := I) (M := M) g 2
   obtain ⟨Cgn, hCgn, hgn⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       (I := I) (M := M) g 0 2 2 (by omega)
   let B : ℝ := max Cpt (max Cgn 1)
   let Q : ℝ := ∑ n ∈ Finset.range 3,
@@ -193,7 +193,6 @@ private theorem h2_grid_two
             _ = (Real.sqrt K) ^ 2 * N ^ 2 := by rw [Real.sq_sqrt hK]
             _ = (Real.sqrt K * N) ^ 2 := by ring
 
-set_option maxHeartbeats 1600000 in
 
 
 
@@ -433,7 +432,7 @@ theorem principal_coeff_h2
   classical
   obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ := inv_coeff_h2 (I := I) (M := M) hDim g₀
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
+    deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨Cl2, hCl2, hl2⟩ :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.coeff_jet_l2_sq
@@ -530,7 +529,6 @@ private theorem convex_hs_le
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-set_option linter.unusedVariables false in
 
 
 
@@ -539,10 +537,10 @@ theorem principal_path_h2
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ rho C : ℝ, 0 < rho ∧ 0 ≤ C ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {delta : ℝ} (hdelta_lt : delta < 1)
+        {delta : ℝ} (_hdelta_lt : delta < 1)
         (hdelta : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) delta)
-        {delta' : ℝ} (hdelta'_lt : delta' < 1)
+        {delta' : ℝ} (_hdelta'_lt : delta' < 1)
         (hdelta' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') delta')
         {R : ℝ}, 0 ≤ R → R ≤ rho →

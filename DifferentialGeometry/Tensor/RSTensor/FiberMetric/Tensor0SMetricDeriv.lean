@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Prod
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -126,9 +125,6 @@ theorem hasDerivWithinAt_coordContract {s : Nat}
       u t := by
   classical
   unfold coordContract coordContractDt
-
-
-
   rw [show
       (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
           (∑ b : Fin s,
@@ -155,8 +151,6 @@ theorem hasDerivWithinAt_coordContract {s : Nat}
   intro I0 _
   refine HasDerivWithinAt.fun_sum ?_
   intro J0 _
-
-
   have hP :
       HasDerivWithinAt
         (fun r : Real => ∏ a : Fin s, gInv r (I0 a) (J0 a))
@@ -172,12 +166,9 @@ theorem hasDerivWithinAt_coordContract {s : Nat}
         (x := t) (s := u)
         (fun a _ => hgInv (I0 a) (J0 a))
     simpa [smul_eq_mul, mul_comm] using h
-
   have hprodA := hP.mul (hcA I0)
   have hfull := hprodA.mul (hcB J0)
   refine hfull.congr_deriv ?_
-
-
   simp only [Pi.mul_apply]
   ring
 
@@ -235,8 +226,6 @@ theorem coordContractDt_eq_ricReactionContract {s : Nat}
       ricReactionContract gInv ric cA cB := by
   classical
   unfold coordContractDt ricReactionContract
-
-
   have hsub :
       (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
           (∑ b : Fin s,
@@ -251,7 +240,6 @@ theorem coordContractDt_eq_ricReactionContract {s : Nat}
               cA I0 * cB J0) := by
     refine Finset.sum_congr rfl fun I0 _ => ?_
     refine Finset.sum_congr rfl fun J0 _ => ?_
-
     rw [show
         (∑ b : Fin s,
             (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
@@ -523,9 +511,6 @@ private theorem bmat_inv_entry
   ring
 
 omit [DecidableEq Idx] in
-
-
-
 theorem basisInv_time {x : M} {t : Real}
     (g : Real → SmoothMetric I M)
     (gdot : Idx → Idx → Real)
@@ -708,7 +693,6 @@ theorem hasDerivWithinAt_normSq0S_coord {s : Nat} {x : M}
           (fun I0 => tensor0SComponent (I := I) (T t) (fun i => basis i) I0) Tdt)
       u t := by
   classical
-
   have hpt : ∀ r : Real,
       normSq0S (I := I) (g r) x s (T r) =
         coordContract (gInv r)
@@ -717,7 +701,6 @@ theorem hasDerivWithinAt_normSq0S_coord {s : Nat} {x : M}
     intro r
     rw [coordContract_eq_coordInner0S (I := I) (gInv r) (T r) (T r) basis]
     rw [normSq0S_eq_coord (I := I) (g r) x s basis (gInv r) (hinvAll r) (T r)]
-
   have hderiv :=
     hasDerivWithinAt_coordContract (s := s) (u := u) (t := t)
       (gInv := gInv) (gInvDt := gInvDt)
@@ -725,7 +708,6 @@ theorem hasDerivWithinAt_normSq0S_coord {s : Nat} {x : M}
       (cB := fun r J0 => tensor0SComponent (I := I) (T r) (fun i => basis i) J0)
       (cAdt := Tdt) (cBdt := Tdt)
       hgInv hT hT
-
   refine hderiv.congr ?_ ?_
   · intro r _; exact hpt r
   · exact hpt t
@@ -772,18 +754,13 @@ theorem hasDerivWithinAt_normSq0S {s : Nat} {x : M}
         2 * inner0S (I := I) (g t) x s Tdot (T t))
       u t := by
   classical
-
   have hderiv :=
     hasDerivWithinAt_normSq0S_coord (s := s) (u := u) (t := t)
       g gInv gInvDt T Tdt basis hinvAll hgInv hT
   refine hderiv.congr_deriv ?_
-
-
-
   have hcompTdot :
       (fun I0 => tensor0SComponent (I := I) Tdot (fun i => basis i) I0) = Tdt := by
     funext I0; exact hTdot I0
-
   have hleft :
       coordContract (gInv t) Tdt
           (fun J0 => tensor0SComponent (I := I) (T t) (fun i => basis i) J0) =
@@ -791,7 +768,6 @@ theorem hasDerivWithinAt_normSq0S {s : Nat} {x : M}
     rw [← hcompTdot]
     rw [coordContract_eq_coordInner0S (I := I) (gInv t) Tdot (T t) basis]
     rw [← inner0S_eq_coord (I := I) (g t) x s basis (gInv t) (hinvAll t) Tdot (T t)]
-
   have hright :
       coordContract (gInv t)
           (fun I0 => tensor0SComponent (I := I) (T t) (fun i => basis i) I0) Tdt =
@@ -800,8 +776,6 @@ theorem hasDerivWithinAt_normSq0S {s : Nat} {x : M}
     rw [coordContract_eq_coordInner0S (I := I) (gInv t) (T t) Tdot basis]
     rw [← inner0S_eq_coord (I := I) (g t) x s basis (gInv t) (hinvAll t) (T t) Tdot]
   rw [hleft, hright]
-
-
   have hsymm :
       inner0S (I := I) (g t) x s (T t) Tdot =
         inner0S (I := I) (g t) x s Tdot (T t) := by

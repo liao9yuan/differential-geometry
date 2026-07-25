@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -50,7 +48,8 @@ def inverseMetricCovDerivCompInFrame
     (∑ a : Idx,
       christoffelSymbolInFrame cov frame hframe x d a l * gInv t x k a)
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [Fintype Idx] in
 private theorem metric_localFrame_mdiffAt
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -102,7 +101,8 @@ theorem metricCompInFrame_extDerivFun_eq_christoffel
   rw [covariantDerivative_eq_sum_christoffel (I := I) cov frame hframe hx d b]
   simp [metricCompInFrame, map_sum]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem metric_mdiffAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -121,7 +121,8 @@ theorem metric_mdiffAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem metric_extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -153,7 +154,8 @@ theorem metric_extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem metric_extDerivFun_mul
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -169,7 +171,8 @@ theorem metric_extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem metric_extDerivFun_congr_eventually
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :

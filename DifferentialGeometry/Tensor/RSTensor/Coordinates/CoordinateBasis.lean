@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 noncomputable section
@@ -60,10 +58,12 @@ theorem continuousMultilinearMapBasisElem_apply
       exact funext h
     exact Finset.prod_eq_zero (Finset.mem_univ a) (if_neg (Ne.symm ha))
 
-theorem continuousMultilinearMapBasisElem_linearIndependent
+omit [Fintype Idx] [DecidableEq Idx] in
+theorem continuousMultilinearMapBasisElem_linearIndependent [Finite Idx]
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     LinearIndependent 𝕜 (continuousMultilinearMapBasisElem basis s) := by
   classical
+  letI := Fintype.ofFinite Idx
   rw [Fintype.linearIndependent_iff]
   intro c hc slots'
   have h1 : (∑ slots : Fin s -> Idx,
@@ -76,7 +76,7 @@ theorem continuousMultilinearMapBasisElem_linearIndependent
   simp only [smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true] at h1
   rwa [smul_eq_mul, mul_one] at h1
 
-def continuousMultilinearMapBasis
+def continuousMultilinearMapBasis [DecidableEq Idx]
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     Module.Basis (Fin s -> Idx) 𝕜
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => V) 𝕜) :=
@@ -185,12 +185,15 @@ theorem coordEquiv0S_apply
     component0S (I := I) basis A slots
   exact tensor0SBasis_repr (I := I) basis A slots
 
-theorem ext0S_basis
+omit [Fintype Idx] [DecidableEq Idx] in
+theorem ext0S_basis [Finite Idx]
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     {A B : Tensor0SSpace s I x}
     (h : ∀ slots : Fin s -> Idx,
       component0S (I := I) basis A slots = component0S (I := I) basis B slots) :
     A = B := by
+  classical
+  letI := Fintype.ofFinite Idx
   apply (coordEquiv0S (I := I) basis s).injective
   ext slots
   simpa using h slots

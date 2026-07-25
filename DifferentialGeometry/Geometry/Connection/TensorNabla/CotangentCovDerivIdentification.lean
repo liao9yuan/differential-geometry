@@ -126,7 +126,6 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hYmd : MDiffAt (T% (fun b : M => Y b)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-
   have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
       cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensorOneForm g σ) x
         (fun b : M => X b) (fun b : M => Y b) := by
@@ -138,10 +137,8 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
   rw [hcov, cotangentScalar_def]
   simp only []
   rw [hXx]
-
   have hpair := tensor0SCovariantDerivative_one_cotangentToCLM (I := I) (M := M)
     g (unitEvalSection (I := I) (M := M) g 1 σ) hUz Y v
-
   have hθeq : (fun b : M => ccTensorOneForm g σ b (Y b)) =
       (fun b : M => cotangentToCLM (I := I)
         (unitEvalSection (I := I) (M := M) g 1 σ b) (Y b)) := rfl
@@ -151,7 +148,6 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
       cotangentToCLM (I := I) (unitEvalSection (I := I) (M := M) g 1 σ x)
         ((LeviCivita (I := I) g).toFun (fun y => Y y) x v) from rfl]
   rw [← hpair]
-
   rw [← hYx]
   congr 2
   rw [tensorCovDerivAt_def]

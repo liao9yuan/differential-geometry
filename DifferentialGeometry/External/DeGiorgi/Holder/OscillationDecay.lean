@@ -211,7 +211,7 @@ theorem pointwise_le_of_ae_le_on_ball_inter_half
     (hx_ball : x ∈ Metric.ball c r)
     (hv_cont : ContinuousOn v (Metric.ball (0 : E) (1 / 2 : ℝ)))
     (hvu : v =ᵐ[μ1] u)
-    (hu_le : ∀ᵐ z ∂ ballMeasure c r, u z ≤ M) :
+    (hu_le : ∀ᵐ z ∂ballMeasure c r, u z ≤ M) :
     v x ≤ M := by
   let s : Set E := Metric.ball c r ∩ Metric.ball (0 : E) (1 / 2 : ℝ)
   have hs_open : IsOpen s := Metric.isOpen_ball.inter Metric.isOpen_ball
@@ -253,7 +253,7 @@ theorem pointwise_ge_of_ae_ge_on_ball_inter_half
     (hx_ball : x ∈ Metric.ball c r)
     (hv_cont : ContinuousOn v (Metric.ball (0 : E) (1 / 2 : ℝ)))
     (hvu : v =ᵐ[μ1] u)
-    (hm_le : ∀ᵐ z ∂ ballMeasure c r, m ≤ u z) :
+    (hm_le : ∀ᵐ z ∂ballMeasure c r, m ≤ u z) :
     m ≤ v x := by
   let s : Set E := Metric.ball c r ∩ Metric.ball (0 : E) (1 / 2 : ℝ)
   have hs_open : IsOpen s := Metric.isOpen_ball.inter Metric.isOpen_ball
@@ -364,28 +364,28 @@ theorem exists_moserDyadicRadius_near
 
 omit [NeZero d] in
 theorem ae_upper_of_ae_abs_le {μ : Measure E} {u : E → ℝ} {K : ℝ}
-    (hu_bound : ∀ᵐ z ∂ μ, |u z| ≤ K) :
+    (hu_bound : ∀ᵐ z ∂μ, |u z| ≤ K) :
     ∀ᵐ z ∂ μ, u z ≤ K := by
   filter_upwards [hu_bound] with z hz
   exact (abs_le.mp hz).2
 
 omit [NeZero d] in
 theorem ae_lower_of_ae_abs_le {μ : Measure E} {u : E → ℝ} {K : ℝ}
-    (hu_bound : ∀ᵐ z ∂ μ, |u z| ≤ K) :
+    (hu_bound : ∀ᵐ z ∂μ, |u z| ≤ K) :
     ∀ᵐ z ∂ μ, -K ≤ u z := by
   filter_upwards [hu_bound] with z hz
   exact (abs_le.mp hz).1
 
 omit [NeZero d] in
 theorem ae_neg_upper_of_ae_lower {μ : Measure E} {u : E → ℝ} {K : ℝ}
-    (hu_lower : ∀ᵐ z ∂ μ, -K ≤ u z) :
+    (hu_lower : ∀ᵐ z ∂μ, -K ≤ u z) :
     ∀ᵐ z ∂ μ, -u z ≤ K := by
   filter_upwards [hu_lower] with z hz
   linarith
 
 omit [NeZero d] in
 theorem ae_neg_lower_of_ae_upper {μ : Measure E} {u : E → ℝ} {K : ℝ}
-    (hu_upper : ∀ᵐ z ∂ μ, u z ≤ K) :
+    (hu_upper : ∀ᵐ z ∂μ, u z ≤ K) :
     ∀ᵐ z ∂ μ, -K ≤ -u z := by
   filter_upwards [hu_upper] with z hz
   linarith
@@ -504,7 +504,7 @@ theorem moser_oscillation_decay_on_ball
     {c : E} (hc : c ∈ Metric.ball (0 : E) (1 / 2 : ℝ))
     {r : ℝ} (hr : 0 < r) (hrq : r ≤ (1 / 4 : ℝ))
     (K : ℝ)
-    (hu_bound : ∀ᵐ z ∂ ballMeasure c r, |u z| ≤ K) :
+    (hu_bound : ∀ᵐ z ∂ballMeasure c r, |u z| ≤ K) :
     essSup u (ballMeasure c (r / 2 : ℝ)) - essInf u (ballMeasure c (r / 2 : ℝ)) ≤
       (1 - moserDecayAlpha A) *
         (essSup u (ballMeasure c r) - essInf u (ballMeasure c r)) := by

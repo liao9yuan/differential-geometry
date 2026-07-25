@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -198,7 +197,8 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
         (scalarHess t x))
     (hcomp : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       forall i j : Idx,
-        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x)
+          (frame j x)) =
           roughLapRic t x i j) :
     ScalarLaplacianRealizesHeatOperatorOn (I := I) G T
       (scalarTraceInFrame (I := I) S gInv frame)
@@ -211,12 +211,14 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
       DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 =
         scalarLaplacianTraceInFrame (M := M) gInv roughLapRic t x := by
-    unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis scalarLaplacianTraceInFrame
+    unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis
+      scalarLaplacianTraceInFrame
     refine Finset.sum_congr rfl fun i _hi => ?_
     refine Finset.sum_congr rfl fun j _hj => ?_
     congr 1
     have hinput :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j) Fin.elim0 =
+        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j)
+          Fin.elim0 =
           DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
       have hbi : basis i = frame i x := by
         simp [basis, IsLocalFrameOn.toBasisAt_coe]
@@ -225,7 +227,9 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
       rw [hbi, hbj]
       funext q
       fin_cases q
-      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput,
+        DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
       · rfl
     rw [hinput, hcomp t ht x i j]
   have htrace_tx := htrace t ht x
@@ -288,7 +292,8 @@ theorem scalarTraceInFrame_eq_metricTracePair
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (t : Real) {x : M} (hx : x ∈ u) :
     scalarTraceInFrame (I := I) S gInv frame t x =
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.family.metric t) (S.ricci t x) := by
+      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.family.metric t)
+        (S.ricci t x) := by
   classical
   let basis := hframe.toBasisAt hx
   have hinvAt :
@@ -342,7 +347,8 @@ theorem raisedRicciCompInFrame_eq_of_orthonormal_inv
     raisedRicciCompInFrame (I := I) S gInv frame t x i j =
       ricciCompInFrame (I := I) S frame t x i j := by
   classical
-  unfold raisedRicciCompInFrame DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame
+  unfold raisedRicciCompInFrame
+    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame
     ricciTwoTensorField
   simp [hInvDelta]
 

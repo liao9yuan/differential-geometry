@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -156,26 +155,24 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
   rw [contrTail_apply]
   refine Finset.sum_congr rfl fun c _ => ?_
   congr 1
-  ·
-    congr 1
+  · congr 1
     funext m
     refine Fin.lastCases ?_ (fun m' => ?_) m
     · rw [Fin.snoc_last]
       rfl
     · rw [Fin.snoc_castSucc]
       refine Fin.cases ?_ (fun m'' => ?_) m'
-      · show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
+      · change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 0 =
           n (akSlotEquiv s (Fin.castAdd q (0 : Fin 2)))
         rw [akSlotEquiv_castAdd0]
         rfl
       · have hm : m'' = 0 := Subsingleton.elim _ _
         subst hm
-        show (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
+        change (![n 0, Fin.tail n s, c] : Fin 3 → Idx) 1 =
           n (akSlotEquiv s (Fin.castAdd q (1 : Fin 2)))
         rw [akSlotEquiv_castAdd1]
         rfl
-  ·
-    congr 1
+  · congr 1
     funext j
     rcases eq_or_ne j s with rfl | hjs
     · rw [Function.update_self, Equiv.swap_apply_left, Fin.snoc_last]
@@ -198,7 +195,8 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (F : ι → M → Real)
     (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
@@ -217,7 +215,8 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -279,7 +278,8 @@ theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -295,7 +295,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
         compL2 (iterCovCompU (I := I) frame chr A c y) *
         compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
   classical
-
   have hbase : (fun z => akAct (A z) (B z)) =
       fun z (n : Fin (q + 1 + 1) → Idx) => ∑ s : Fin (q + 1),
         contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
@@ -303,7 +302,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     funext z n
     unfold akAct
     exact Finset.sum_congr rfl fun s _ => akActTerm_eq (A z) (B z) s n
-
   have hFsm : ∀ s : Fin (q + 1), ∀ k : Fin (q + 1 + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun z => contrTail (A z)
@@ -312,7 +310,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
     fun s k => contMDiffOn_contrTail _ _ hA
       (fun k' => hB (fun j => k' (Equiv.swap s (Fin.last q) j))) _
   rw [hbase]
-
   have htower := iterCovComp_sum hu frame chr Finset.univ
     (fun (s : Fin (q + 1)) (z : M) (n : Fin (q + 1 + 1) → Idx) =>
       contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
@@ -337,7 +334,6 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
           compL2 (iterCovCompU (I := I) frame chr A c y) *
           compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
         refine Finset.sum_le_sum fun s _ => ?_
-
         rw [compL2_iterCovComp_compReindex (akSlotEquiv s) frame chr
           (fun z => contrTail (A z)
             (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))) a y]
@@ -359,7 +355,8 @@ theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 omit [DecidableEq Idx] in
 theorem iterCov_chr_convert {q : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -382,7 +379,8 @@ theorem iterCov_chr_convert {q : ℕ}
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem claim2core {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrR chrK : M → Idx → Idx → Idx → Real)
@@ -413,7 +411,6 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
       rw [iterCovComp_zero] at h ⊢
       exact le_trans h (le_max_left _ _)
     | succ a' =>
-
       have hakSm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
           (fun y => chrK y (k 0) (k 1) (k 2) - chrR y (k 0) (k 1) (k 2)) u :=
         fun k => (hchrK (k 0) (k 1) (k 2)).sub (hchrR (k 0) (k 1) (k 2))
@@ -438,7 +435,6 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
         exact contMDiffOn_finsetSum' _ _ fun s _ =>
           contMDiffOn_finsetSum' _ _ fun p _ =>
             (hakSm ![k 0, Fin.tail k s, p]).mul (hB _)
-
       have hKt' : ∀ j, j ≤ a' → ∀ y ∈ u,
           compL2 (iterCovComp (I := I) frame chrK
             (fun z => iterCovComp (I := I) frame chrK B 1 z) j y) ≤ S (j + 1) := by
@@ -447,12 +443,10 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
         exact hKt (j + 1) (by omega) y hy
       obtain ⟨C1, hC10, hC1⟩ := ih a' (Nat.lt_succ_self a') (by omega)
         (fun z => iterCovComp (I := I) frame chrK B 1 z) hB'sm (fun j => S (j + 1)) hKt'
-
       have hmixc : ∀ c, c ≤ a' → ∃ C, 0 ≤ C ∧ ∀ y ∈ u,
           compL2 (iterCovComp (I := I) frame chrR B (a' - c) y) ≤ C :=
         fun c hc => ih (a' - c) (by omega) (by omega) B hB S (fun j hj => hKt j (by omega))
       choose! Cm hCm0 hCmB using hmixc
-
       have hsumnn : (0 : ℝ) ≤ ∑ c ∈ Finset.range (a' + 1),
           (a'.choose c : ℝ) * CA c * Cm c :=
         Finset.sum_nonneg fun c hc =>
@@ -568,7 +562,6 @@ theorem claim2_geom
     fun d i j => lcChrist_e_mdiffOn e₀ gRef basisE d i j
   have hchrKsm : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrKf y d i j) e₀.baseSet :=
     fun d i j => lcChrist_e_mdiffOn e₀ gK basisE d i j
-
   have hCAex : ∀ c, c < L → ∃ Cc, 0 ≤ Cc ∧ ∀ y ∈ e₀.baseSet,
       compL2 (iterCovCompU (I := I) frame chrRf
         (fun z (m : Fin (2 + 1) → Idx) =>

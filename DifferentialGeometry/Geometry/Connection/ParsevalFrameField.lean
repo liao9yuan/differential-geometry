@@ -3,8 +3,6 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -20,7 +18,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
-
 theorem orthonormal_tangent_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -72,7 +69,6 @@ theorem orthonormal_tangent_expansion
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M]
   [BoundarylessManifold I M] in
-
 theorem parseval_family_inner_mul_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     {N : ℕ} (W : Fin N → TangentSpace I x)
@@ -92,7 +88,6 @@ theorem parseval_family_inner_mul_sum
       smul_eq_mul]
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
-
 theorem parseval_family_sum_bilin_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     {N : ℕ} (W : Fin N → TangentSpace I x)

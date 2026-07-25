@@ -39,7 +39,6 @@ noncomputable def product_fun {s q : ℕ} {x : B}
 scoped infixl:70 " ⊗ₘ " => product_fun
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-
 theorem product_fun_apply {s q : ℕ} {x : B}
     (α : Bundle.continuousMultilinearMap 𝕜 s F E x)
     (β : Bundle.continuousMultilinearMap 𝕜 q F E x)
@@ -233,7 +232,6 @@ noncomputable def modelFromTensorEquiv {d : ℕ} (b : Module.Basis (Fin d) 𝕜 
      modelFromTensor_surjective b s q⟩
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-
 theorem product_fun_ofModel {s q : ℕ} {x : B}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
     (g : ContinuousMultilinearMap 𝕜 (fun _ : Fin q => F) 𝕜) :
@@ -243,7 +241,6 @@ theorem product_fun_ofModel {s q : ℕ} {x : B}
   simp only [product_fun, modelProduct, toModel_ofModel]
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-
 theorem fromTensor_map_ofModel {s q : ℕ} {x : B}
     (t : TensorProduct 𝕜
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
@@ -450,7 +447,6 @@ noncomputable def product
       (fun x => (α x : Bundle.continuousMultilinearMap 𝕜 s F E x))).mp α.contMDiff)
     have hβ := ((contMDiff_multilinearSection_iff_coord E n b
       (fun x => (β x : Bundle.continuousMultilinearMap 𝕜 q F E x))).mp β.contMDiff)
-
     simp_rw [Bundle.continuousMultilinearMap.triv_coord_product b σ x₀ _ (α _) (β _)]
     exact (contMDiffAt_const (c := ContinuousLinearMap.mul 𝕜 𝕜).clm_apply
       (hα (σ ∘ Fin.castAdd q) x₀)).clm_apply (hβ (σ ∘ Fin.natAdd s) x₀)⟩
@@ -486,7 +482,8 @@ section TensorProductInstances
 
 variable {s q : ℕ}
 
-local instance multilinearTensorFiberTopology {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+local instance multilinearTensorFiberTopology {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    [CompleteSpace 𝕜]
     {B : Type*} [TopologicalSpace B] {F : Type*}
     [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)]
@@ -500,7 +497,8 @@ local instance multilinearTensorFiberTopology {𝕜 : Type*} [NontriviallyNormed
     (Bundle.continuousMultilinearMap 𝕜 s F E)
     (Bundle.continuousMultilinearMap 𝕜 q F E)
 
-local instance multilinearTensorFiberBundle {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+local instance multilinearTensorFiberBundle {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    [CompleteSpace 𝕜]
     {B : Type*} [TopologicalSpace B] {F : Type*}
     [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)]
@@ -517,7 +515,8 @@ local instance multilinearTensorFiberBundle {𝕜 : Type*} [NontriviallyNormedFi
     (E₁ := Bundle.continuousMultilinearMap 𝕜 s F E)
     (E₂ := Bundle.continuousMultilinearMap 𝕜 q F E)
 
-local instance multilinearTensorVectorBundle {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+local instance multilinearTensorVectorBundle {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    [CompleteSpace 𝕜]
     {B : Type*} [TopologicalSpace B] {F : Type*}
     [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
     {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace 𝕜 (E x)]
@@ -637,7 +636,6 @@ theorem multilinearTensorFiberwiseEquiv_smooth
     ] with p hp
     exact triv_fwdEquiv_eq s q p₀.proj p.proj hp p.snd
 
-set_option maxHeartbeats 400000 in
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearTensorFiberwiseEquiv_symm_smooth
@@ -653,6 +651,10 @@ theorem multilinearTensorFiberwiseEquiv_symm_smooth
           TotalSpace (MLF (s + q))
             (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x))) := by
   letI := _hE
+  letI : NormedAddCommGroup ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Bundle.TensorProduct.instNormedAddCommGroup_tensor
+  letI : NormedSpace 𝕜 ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Bundle.TensorProduct.instNormedSpace_model_tensor
   haveI : ContMDiffVectorBundle n
       ((MLF s) ⊗[𝕜] (MLF q))
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
@@ -707,7 +709,8 @@ noncomputable def fromTensorProduct
                        Bundle.continuousMultilinearMap 𝕜 q F E x)) :
     MultilinearSection 𝕜 F IB E n (s + q) :=
   ⟨fun x => (multilinearTensorFiberwiseEquiv s q x).symm (γ x),
-   ((multilinearTensorFiberwiseEquiv_symm_smooth n inferInstance).comp γ.contMDiff).congr fun _ => rfl⟩
+   ((multilinearTensorFiberwiseEquiv_symm_smooth n inferInstance).comp γ.contMDiff).congr fun _
+     => rfl⟩
 
 theorem fromTensorProduct_toTensorProduct
     (α : MultilinearSection 𝕜 F IB E n (s + q)) (x : B) :

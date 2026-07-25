@@ -62,8 +62,6 @@ section DiagExpDerivative
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 private def chartedDiagExp
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -77,15 +75,12 @@ private def chartedDiagExp
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 private def diagExpZeroPt (p : M) : E × E :=
   extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)
     (⟨p, (0 : E)⟩ : TangentBundle I M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 private lemma chartedDiagExp_contDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -108,7 +103,6 @@ private lemma chartedDiagExp_contDiffAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 private lemma diagExp_zero_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -126,8 +120,8 @@ private lemma diagExp_zero_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma diagExpZeroPt_eq [T2Space (TangentBundle I M)] (p : M) :
     diagExpZeroPt (I := I) p = ((extChartAt I p p, (0 : E)) : E × E) := by
   classical
@@ -140,8 +134,6 @@ private lemma diagExpZeroPt_eq [T2Space (TangentBundle I M)] (p : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 private lemma exists_chartDiagInf
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -245,7 +237,8 @@ private lemma exists_chartDiagInf
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma chartFiberCoord_mk_zero (p q : M)
     (hq : q ∈ (chartAt H p).source) :
     chartFiberCoord (I := I) p (⟨q, (0 : E)⟩ : TangentBundle I M) = 0 := by
@@ -261,10 +254,8 @@ private lemma chartFiberCoord_mk_zero (p q : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma extChartAt_tangent_zero_symm_zero_fiber
     [T2Space (TangentBundle I M)] (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E))
@@ -276,7 +267,6 @@ private lemma extChartAt_tangent_zero_symm_zero_fiber
   have hz1_target : z.1 ∈ (extChartAt I p).target := interior_subset hz.1
   have hq_src : q ∈ (chartAt H p).source := by
     rw [hq_def, ← extChartAt_source I]; exact (extChartAt I p).map_target hz1_target
-
   have hchart_zero : extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)
       (⟨q, (0 : E)⟩ : TangentBundle I M) = z := by
     rw [extChartAt_tangent_zero_apply_chartFiber (I := I) p
@@ -285,7 +275,6 @@ private lemma extChartAt_tangent_zero_symm_zero_fiber
     have hz1 : extChartAt I p q = z.1 := by
       rw [hq_def, (extChartAt I p).right_inv hz1_target]
     rw [hz1, ← hz2]
-
   have hsymm := congrArg
     (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm hchart_zero
   rw [(extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).left_inv
@@ -295,10 +284,8 @@ private lemma extChartAt_tangent_zero_symm_zero_fiber
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma extChartAt_tangent_zero_symm_at_base
     [T2Space (TangentBundle I M)] (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E))
@@ -320,7 +307,6 @@ private lemma extChartAt_tangent_zero_symm_at_base
   have hfib : chartFiberCoord (I := I) p u = z.2 := by
     have := congrArg Prod.snd hpair
     exact this.symm
-
   have hu_eq : u = (⟨u.proj, u.snd⟩ : TangentBundle I M) := rfl
   have hmk : chartFiberCoord (I := I) p (⟨p, u.snd⟩ : TangentBundle I M) = u.snd :=
     chartFiberCoord_mk_self (I := I) p u.snd
@@ -328,13 +314,11 @@ private lemma extChartAt_tangent_zero_symm_at_base
     have hfib' : chartFiberCoord (I := I) p (⟨p, u.snd⟩ : TangentBundle I M) = z.2 := by
       rw [← hfib]; congr 1; rw [← hproj]
     rw [← hmk, hfib']
-
   calc u = (⟨u.proj, u.snd⟩ : TangentBundle I M) := rfl
     _ = (⟨p, z.2⟩ : TangentBundle I M) := by rw [hproj, hsnd]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 private def chartedExpIntrinsic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -346,9 +330,6 @@ private def chartedExpIntrinsic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [ConnectedSpace M] in
 private lemma chartedExpIntrinsic_hasFDerivAt_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -363,7 +344,6 @@ private lemma chartedExpIntrinsic_hasFDerivAt_zero
   classical
   haveI : Nontrivial E :=
     Module.nontrivial_of_finrank_pos (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
-
   have hdiff : MDifferentiableAt 𝓘(ℝ, E) I
       (fun v : E => (expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from v) : M))
       (0 : E) := by
@@ -378,7 +358,6 @@ private lemma chartedExpIntrinsic_hasFDerivAt_zero
       (0 : E) (ContinuousLinearMap.id ℝ E) := by
     have h := hdiff.hasMFDerivAt
     rwa [mfderiv_expMapIntrinsic_at_zero (I := I) g hEnorm p] at h
-
   have hpt : (fun v : E => (expMapIntrinsic (I := I) g hEnorm p
       (show TangentSpace I p from v) : M)) 0 = p := by
     change expMapIntrinsic (I := I) g hEnorm p 0 = p
@@ -404,16 +383,6 @@ private lemma chartedExpIntrinsic_hasFDerivAt_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem diagExp_hasFDerivAt_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -430,12 +399,11 @@ theorem diagExp_hasFDerivAt_zero
   classical
   rw [diagExpZeroPt_eq (I := I) p]
   set c : E := extChartAt I p p with hc_def
-
   have hc_int : c ∈ interior (extChartAt I p).target := by
     rw [hc_def]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) p ((extChartAt I p).map_source (mem_extChartAt_source (I := I) p))
-
   have hcd := chartedDiagExp_contDiffAt (I := I) g hEnorm p n hn
   rw [diagExpZeroPt_eq (I := I) p] at hcd
   have hD : HasFDerivAt (chartedDiagExp (I := I) g hEnorm p)
@@ -443,7 +411,6 @@ theorem diagExp_hasFDerivAt_zero
       ((c, (0 : E)) : E × E) :=
     (hcd.differentiableAt (by exact_mod_cast Nat.one_le_iff_ne_zero.mp hn)).hasFDerivAt
   set D := fderiv ℝ (chartedDiagExp (I := I) g hEnorm p) ((c, (0 : E)) : E × E) with hD_def
-
   have hbase_eq : (fun z₁ : E => chartedDiagExp (I := I) g hEnorm p ((z₁, (0 : E)) : E × E))
       =ᶠ[𝓝 c] (fun z₁ : E => ((z₁, z₁) : E × E)) := by
     filter_upwards [isOpen_interior.mem_nhds hc_int] with z₁ hz₁int
@@ -459,7 +426,6 @@ theorem diagExp_hasFDerivAt_zero
     rw [hinner, diagExp_zero_eq (I := I) g hEnorm p, extChartAt_prod]
     simp only [PartialEquiv.prod_coe]
     rw [(extChartAt I p).right_inv hz1t]
-
   have hfiber_eq : (fun z₂ : E => chartedDiagExp (I := I) g hEnorm p ((c, z₂) : E × E))
       =ᶠ[𝓝 (0 : E)] (fun z₂ : E => ((c, chartedExpIntrinsic (I := I) g hEnorm p z₂) : E × E)) := by
     filter_upwards with z₂
@@ -473,7 +439,6 @@ theorem diagExp_hasFDerivAt_zero
     rw [hinner, diagExp_zero_eq (I := I) g hEnorm p, extChartAt_prod]
     simp only [PartialEquiv.prod_coe]
     exact Prod.ext hc_def.symm rfl
-
   have hinl : D.comp ((ContinuousLinearMap.id ℝ E).prod (0 : E →L[ℝ] E))
       = (ContinuousLinearMap.id ℝ E).prod (ContinuousLinearMap.id ℝ E) := by
     have haff : HasFDerivAt (fun z₁ : E => ((z₁, (0 : E)) : E × E))
@@ -490,11 +455,12 @@ theorem diagExp_hasFDerivAt_zero
         ((0 : E →L[ℝ] E).prod (ContinuousLinearMap.id ℝ E)) (0 : E) :=
       (hasFDerivAt_const c (0 : E)).prodMk (hasFDerivAt_id (0 : E))
     have hc2 := hD.comp (0 : E) haff
-    have hpair : HasFDerivAt (fun z₂ : E => ((c, chartedExpIntrinsic (I := I) g hEnorm p z₂) : E × E))
+    have hpair : HasFDerivAt
+      (fun z₂ : E => ((c, chartedExpIntrinsic (I := I) g hEnorm p z₂) : E × E))
         ((0 : E →L[ℝ] E).prod (ContinuousLinearMap.id ℝ E)) (0 : E) :=
-      (hasFDerivAt_const c (0 : E)).prodMk (chartedExpIntrinsic_hasFDerivAt_zero (I := I) g hEnorm p)
+      (hasFDerivAt_const c (0 : E)).prodMk
+        (chartedExpIntrinsic_hasFDerivAt_zero (I := I) g hEnorm p)
     exact (hc2.congr_of_eventuallyEq hfiber_eq.symm).unique hpair
-
   have hDL : D = (ContinuousLinearMap.fst ℝ E E).prod
       (ContinuousLinearMap.fst ℝ E E + ContinuousLinearMap.snd ℝ E E) := by
     apply ContinuousLinearMap.ext
@@ -515,8 +481,6 @@ def unipotentCLE : (E × E) ≃L[ℝ] (E × E) :=
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem diagExp_hasFDerivAt_zero_unipotent
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -542,8 +506,6 @@ theorem diagExp_hasFDerivAt_zero_unipotent
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 private lemma chartedDiagExp_cdaOne
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -558,8 +520,6 @@ private lemma chartedDiagExp_cdaOne
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 private def diagExpIFT
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -577,7 +537,6 @@ private def diagExpIFT
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 private lemma diagExpIFT_coe
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -591,8 +550,6 @@ private lemma diagExpIFT_coe
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 private lemma exists_chartInvInf
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -708,8 +665,8 @@ private lemma exists_chartInvInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma inner_symm_zeroPt
     [T2Space (TangentBundle I M)] (p : M) :
     (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm (diagExpZeroPt (I := I) p)
@@ -720,8 +677,6 @@ private lemma inner_symm_zeroPt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 private lemma outer_center
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -742,11 +697,6 @@ private lemma outer_center
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 def diagExpInv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -760,8 +710,6 @@ def diagExpInv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem diagExpInv_center
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -784,7 +732,6 @@ theorem diagExpInv_center
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem diagExpInv_contMDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -832,12 +779,6 @@ theorem diagExpInv_contMDiffAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem diagExpInv_contMDiffAt_order
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -886,9 +827,6 @@ theorem diagExpInv_contMDiffAt_order
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [ConnectedSpace M] in
 theorem diagExp_diagExpInv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -949,8 +887,6 @@ theorem diagExp_diagExpInv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem diagExpInv_diagExp
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1005,8 +941,6 @@ theorem diagExpInv_diagExp
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem diagExpInv_proj
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1023,9 +957,6 @@ theorem diagExpInv_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [ConnectedSpace M] in
 theorem expIntr_diagExpInv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1044,12 +975,6 @@ theorem expIntr_diagExpInv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem exists_diagInvDom
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1090,9 +1015,6 @@ theorem exists_diagInvDom
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [ConnectedSpace M] in
 theorem exists_diagInvDom_inf
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1177,8 +1099,6 @@ theorem exists_diagInvDom_inf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 private def diagExpHome
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1331,8 +1251,6 @@ private theorem exists_stdBranch
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 noncomputable def stdBranch
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1345,7 +1263,6 @@ noncomputable def stdBranch
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem std_inv_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -401,7 +399,8 @@ private theorem nablaEval_ker
           Function.update (vec2 (I := I) v v) (0 : Fin 2) A =
             vec2 (I := I) A v := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, A]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          A]
       rw [hupdate]
       exact hkerR A
     · change
@@ -413,7 +412,8 @@ private theorem nablaEval_ker
           Function.update (vec2 (I := I) v v) (1 : Fin 2) A =
             vec2 (I := I) v A := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, A]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          A]
       rw [hupdate]
       exact hkerL A
   rw [hsum]
@@ -516,7 +516,8 @@ private theorem deriv_eval_zero_left
           Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) W =
             vec2 (I := I) W v := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       rw [hupdate]
       exact hkerR W
     have h1 :
@@ -528,7 +529,8 @@ private theorem deriv_eval_zero_left
           Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2) W =
             vec2 (I := I) (0 : TangentSpace I x) W := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       have hzero :
           B x (vec2 (I := I) (0 : TangentSpace I x) W) = 0 := by
         exact (B x).map_coord_zero (0 : Fin 2)
@@ -597,7 +599,8 @@ private theorem deriv_eval_zero_right
           Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2) W =
             vec2 (I := I) W (0 : TangentSpace I x) := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       have hzero :
           B x (vec2 (I := I) W (0 : TangentSpace I x)) = 0 := by
         exact (B x).map_coord_zero (1 : Fin 2)
@@ -613,7 +616,8 @@ private theorem deriv_eval_zero_right
           Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) W =
             vec2 (I := I) v W := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       rw [hupdate]
       exact hkerL W
     rw [h0, h1]
@@ -699,7 +703,8 @@ private theorem deriv_eval_zero_left_C1
           Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) W =
             vec2 (I := I) W v := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       rw [hupdate]
       exact hkerR W
     have h1 :
@@ -711,7 +716,8 @@ private theorem deriv_eval_zero_left_C1
           Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2) W =
             vec2 (I := I) (0 : TangentSpace I x) W := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       have hzero :
           B x (vec2 (I := I) (0 : TangentSpace I x) W) = 0 := by
         exact (B x).map_coord_zero (0 : Fin 2)
@@ -801,7 +807,8 @@ private theorem deriv_eval_zero_right_C1
           Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2) W =
             vec2 (I := I) W (0 : TangentSpace I x) := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       have hzero :
           B x (vec2 (I := I) W (0 : TangentSpace I x)) = 0 := by
         exact (B x).map_coord_zero (1 : Fin 2)
@@ -817,7 +824,8 @@ private theorem deriv_eval_zero_right_C1
           Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) W =
             vec2 (I := I) v W := by
         funext q
-        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update, W]
+        fin_cases q <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update,
+          W]
       rw [hupdate]
       exact hkerL W
     rw [h0, h1]

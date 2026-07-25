@@ -256,7 +256,8 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
       ENNReal.ofReal (M_sup ^ (1 / p.toReal)) *
         eLpNorm f p
           ((volume : Measure EuclN).restrict
-            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) := by
+            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
+              α)) := by
   classical
   have hp_ne_zero : p ≠ 0 := by
     intro h; rw [h] at hp_one; exact absurd hp_one (by norm_num)
@@ -346,7 +347,7 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
         rw [← hxy, ← hzy]; simp
       rw [h_x_eq]; exact hz_target
     obtain ⟨C_K, hC_K_pos, hC_K_bnd⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
+      Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
         (I := I) (M := M) g α hK_E_compact hK_E_ne hK_E_sub_target hp_one hp_top
     refine ⟨M_sup ^ (1 / p.toReal) * C_K, ?_, ?_⟩
     · exact mul_pos (Real.rpow_pos_of_pos hM_sup_pos _) hC_K_pos
@@ -373,7 +374,8 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
               (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
                 (I := I) (M := M) α)]
           DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α v := by
-      refine (MeasureTheory.ae_restrict_iff' (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
+      refine (MeasureTheory.ae_restrict_iff'
+        (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
         (I := I) (M := M) α)).mpr ?_
       refine Filter.Eventually.of_forall (fun y hy => ?_)
       exact chartPushed_eq_chartPushedRaw_on_chartTarget (I := I) (M := M) α u hy
@@ -466,7 +468,8 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     have h_eLpNorm_zero :
         eLpNorm (fun _ : EuclN => (0 : ℝ)) p
           ((chartPulledWeightedMeasure (I := I) g α).restrict
-            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) = 0 := by
+            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) =
+              0 := by
       have h_zero_eq : (fun _ : EuclN => (0 : ℝ)) = (0 : EuclN → ℝ) := rfl
       rw [h_zero_eq, MeasureTheory.eLpNorm_zero]
     rw [h_eLpNorm_zero]
@@ -478,7 +481,8 @@ private noncomputable def extChartAtSymmExt (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -488,7 +492,8 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -558,7 +563,8 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
             (chartPulledWeightedMeasure (I := I) g α).restrict
               (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
                 (I := I) (M := M) α)] ψ := by
-      refine (MeasureTheory.ae_restrict_iff' (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
+      refine (MeasureTheory.ae_restrict_iff'
+        (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
         (I := I) (M := M) α)).mpr ?_
       refine Filter.Eventually.of_forall (fun y hy => ?_)
       exact (h_ψ_eq_chartPushed y hy).symm

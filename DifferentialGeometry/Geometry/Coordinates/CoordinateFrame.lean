@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

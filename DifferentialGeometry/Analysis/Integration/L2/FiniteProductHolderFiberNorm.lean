@@ -6,8 +6,6 @@ import Mathlib.MeasureTheory.Integral.MeanInequalities
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Manifold MeasureTheory Set Filter Bundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators

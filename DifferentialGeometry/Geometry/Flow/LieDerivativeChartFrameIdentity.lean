@@ -56,7 +56,8 @@ private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
         (W : ∀ x : M, TangentSpace I x) hy_base]
   rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma differentiableAt_chartE_pullback_W_alpha
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :

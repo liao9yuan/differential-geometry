@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

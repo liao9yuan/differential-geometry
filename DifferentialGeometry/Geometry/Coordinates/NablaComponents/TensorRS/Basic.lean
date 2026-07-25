@@ -13,7 +13,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TensorRS
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 

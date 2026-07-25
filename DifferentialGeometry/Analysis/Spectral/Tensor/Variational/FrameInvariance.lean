@@ -20,8 +20,6 @@ import Mathlib.Topology.ContinuousOn
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -122,7 +120,8 @@ private noncomputable def chartBasisTransitionMatrix (α : M) (b : M) :
   Matrix.of fun k i =>
     ((chartModelBasis E).repr (chartBasisVecFiber (I := I) α i b)) k
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_eq_sum_chartModelBasis
     (α : M) (b : M) (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) α i b =
@@ -134,7 +133,8 @@ private lemma chartBasisVecFiber_eq_sum_chartModelBasis
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i b))).symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartBasisTransitionMatrix_eq_toMatrix
     (α : M) (b : M) :
     chartBasisTransitionMatrix (I := I) α b =
@@ -146,7 +146,8 @@ private lemma chartBasisTransitionMatrix_eq_toMatrix
   ext k i
   rw [Module.Basis.toMatrix_apply, Matrix.of_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartBasisTransitionMatrix_isUnit
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -166,7 +167,8 @@ private lemma chartBasisTransitionMatrix_isUnit
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma g_inner_bilinear_expand
     (g : SmoothRiemannianMetric I M) (b : M) {n : ℕ}
     (a c : Fin n → ℝ) (u : Fin n → E) :
@@ -190,7 +192,8 @@ private lemma g_inner_bilinear_expand
   rw [map_smul, smul_eq_mul]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartGramMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartGramMatrix (I := I) g α b =
@@ -217,7 +220,8 @@ private lemma chartGramMatrix_eq_transition
   rw [Matrix.transpose_apply, gramMatrixAt_apply]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_sum_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : ι → TensorRSModel r s ℝ E)
@@ -233,7 +237,8 @@ lemma tensorInnerPointwise_sum_left
       rw [Finset.sum_insert hi₀, tensorInnerPointwise_add_left,
           tensorInnerPointwise_smul_left, ih, Finset.sum_insert hi₀]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : TensorRSModel r s ℝ E)
@@ -488,7 +493,8 @@ private lemma frameTransitionMatrix_isUnit
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
   · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma frameGram_eq_transition
     (g : SmoothRiemannianMetric I M) (b : M)
     (frame : Fin (Module.finrank ℝ E) → E) :

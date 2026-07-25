@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MultiNormHeat
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -148,7 +145,8 @@ theorem nablaRm04NormHeatBoundOn_scalar
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (u uLap nabla2 reaction v : Real -> M -> Real) (cReact : Real)
     (h_heat : NablaRm04NormHeatEquationOn (D := D) u uLap nabla2 reaction)
-    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+      D)
       (x : M), 0 ≤ nabla2 (t : Real) x)
     (hreact_bound : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       (x : M), reaction (t : Real) x ≤ cReact * Real.sqrt (v (t : Real) x) * u (t : Real) x) :
@@ -263,13 +261,11 @@ theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
       2 * compPairMulti (star (t : Real) x) (level (t : Real) x) ≤
         cReact * Real.sqrt (v (t : Real) x) * normSq (t : Real) x) :
     NablaRm04NormHeatBoundOn (D := D) normSq normLap v cReact := by
-
   have h_heat :
       NablaRm04NormHeatEquationOn (D := D) normSq normLap nextNormSq
         (multiReactionDown level levelDt levelLap) :=
     nablaRm04NormHeatEquationOn_of_multiBochner (D := D) level levelDt levelLap
       nextLevel normSq normLap nextNormSq h_dt h_normSq h_lap
-
   refine nablaRm04NormHeatBoundOn_scalar (D := D) normSq normLap nextNormSq
     (multiReactionDown level levelDt levelLap) v cReact h_heat hnext_nonneg ?_
   intro t x

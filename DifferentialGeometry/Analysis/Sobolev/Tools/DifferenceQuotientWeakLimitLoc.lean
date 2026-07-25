@@ -72,7 +72,6 @@ omit [NeZero d] in
   Iff.rfl
 
 omit [NeZero d] in
-
 private lemma memLp_two_restrict_of_smoothCS
     {Ω'' : Set E}
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ) :
@@ -434,7 +433,6 @@ lemma denseRange_smoothCSSupportedInToLp
     linarith
 
 omit [NeZero d] in
-
 private lemma integrable_w_partial_phi_loc
     {Ω : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -561,7 +559,6 @@ omit [NeZero d] in
         ∂(volume : Measure E) := rfl
 
 omit [NeZero d] in
-
 private lemma diffQuot_eq_zero_of_notMem_cthickening_loc
     {φ : E → ℝ} (_hφ_supp : HasCompactSupport φ)
     (k : Fin d) {h₀ : ℝ} (_hh₀ : 0 ≤ h₀) {h : ℝ} (hh_bd : |h| ≤ h₀) :
@@ -594,7 +591,6 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening_loc
     simp
 
 omit [NeZero d] in
-
 private lemma tendsto_integral_w_diffQuot_phi_loc
     {Ω : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -745,7 +741,6 @@ private lemma tendsto_integral_w_diffQuot_phi_loc
     h_pointwise_bound h_bound_int h_pointwise_conv
 
 omit [NeZero d] in
-
 private lemma abs_integral_mul_le_eLpNorm_two_loc
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     ENNReal.ofReal |∫ x, f x * g x ∂μ| ≤ eLpNorm f 2 μ * eLpNorm g 2 μ := by
@@ -798,7 +793,6 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp_loc
   exact h_toReal
 
 omit [NeZero d] in
-
 private lemma abs_smoothTestFunctional_loc_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1212,7 +1206,6 @@ private lemma norm_smoothTestFunctional_loc_riesz
     (Lp ℝ 2 ((volume : Measure E).restrict Ω''))).symm.norm_map _
 
 omit [NeZero d] in
-
 private lemma smoothTestFunctional_loc_ext_eq_inner
     {Ω Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))

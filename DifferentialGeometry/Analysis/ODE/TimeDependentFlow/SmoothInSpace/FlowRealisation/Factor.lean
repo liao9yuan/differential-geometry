@@ -25,7 +25,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] in
 theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
@@ -42,7 +41,6 @@ theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
   IsLocalFlow.hasDerivAt_partial_spatial_fderiv hΦ hf hUopen hΦsmooth hxsU hx ht
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
 theorem hagree_of_spatial_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (Φ_eucl : E → ℝ → E)
@@ -59,7 +57,6 @@ theorem hagree_of_spatial_chart_realisation
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ)
@@ -72,7 +69,8 @@ theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
   have := hGfd.comp_hasDerivAt t hc
   simpa using this
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartCloseFactors_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}
@@ -97,7 +95,8 @@ theorem chartCloseFactors_of_chart_realisation
   exact chartCloseFderiv_hasDerivAt_of_eucl (I := I) Φ_fam (Φ_fam t x) x t Φ_eucl
     hx_src heucl heucl_diff hagree
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ) (v : TangentSpace I x)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}
@@ -207,8 +206,10 @@ theorem variational_flow_flat_paired_residual_of_chart_realisation
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t :=
   variational_flow_flat_paired_residual_hasDerivAt (I := I) g X Φ_fam t x v w
     T'v P'v T'w P'w hv_flat hw_flat hflatval_v hflatval_w
-    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x v hα hRdiff hCdiff)
-    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x w hα hRdiff hCdiff)
+    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x v hα hRdiff
+      hCdiff)
+    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x w hα hRdiff
+      hCdiff)
 
 end PairedResidualDischarge
 

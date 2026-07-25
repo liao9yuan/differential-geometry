@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -66,7 +64,6 @@ private theorem iteratedCovGrad_convexPerturbation_norm_le
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem exists_Csob_convexPerturbation_pointwise_C2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

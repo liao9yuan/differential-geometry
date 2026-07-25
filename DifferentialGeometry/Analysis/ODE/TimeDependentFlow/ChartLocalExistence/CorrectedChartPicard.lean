@@ -24,27 +24,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [CompactSpace M] in
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chart_local_picard_from_zero
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (r : ℝ) (hr : 0 < r)
-    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
+    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.univ : Set (ℝ × M)))
     (hLip : ∃ L K : ℝ, 0 < L ∧ 0 ≤ K ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) L, ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) L, LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r))) :
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y)
+        (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, LipschitzOnWith (Real.toNNReal K)
+        (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r))) :
     ∃ T : ℝ, 0 < T ∧ ∃ r' : ℝ, 0 < r' ∧ ∃ C : ℝ, 0 ≤ C ∧
       ∃ flow : E → ℝ → E,
         (∀ y ∈ Metric.closedBall (I ((chartAt H α) α)) r',
           flow y 0 = y ∧
           ∀ t ∈ Set.Icc (0 : ℝ) T,
-            HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t)) (Set.Icc (0 : ℝ) T) t ∧
+            HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t))
+              (Set.Icc (0 : ℝ) T) t ∧
             flow y t ∈ Metric.closedBall (I ((chartAt H α) α)) r ∧
             ‖chartTrivRepr (I := I) α (X t) (flow y t)‖ ≤ C) := by
   obtain ⟨L, K, hL, hK, _hContY, hLipt⟩ := hLip

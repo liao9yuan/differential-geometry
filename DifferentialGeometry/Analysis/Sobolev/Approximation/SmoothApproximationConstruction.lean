@@ -15,7 +15,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma exists_abs_bound_of_continuous_compactSupport
     {h : E → ℝ} (h_cont : Continuous h) (h_cs : HasCompactSupport h) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x : E, |h x| ≤ M := by
@@ -24,7 +23,6 @@ private lemma exists_abs_bound_of_continuous_compactSupport
   exact (hM x).trans (le_max_left _ _)
 
 omit [NeZero d] in
-
 private lemma memLp_two_restrict_of_continuous_compactSupport
     {h : E → ℝ} (h_cont : Continuous h) (h_cs : HasCompactSupport h)
     (S : Set E) :
@@ -34,7 +32,6 @@ private lemma memLp_two_restrict_of_continuous_compactSupport
   exact hMemLp_volume.restrict S
 
 omit [NeZero d] in
-
 private lemma exists_grad_component_bound
     {u : E → ℝ}
     (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u) (hu_cs : HasCompactSupport u) :

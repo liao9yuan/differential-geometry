@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -86,7 +84,6 @@ theorem covDerivLowerOrderTerm_pouSmul_memLp
         g r s i n).toCcTensor k P₀.1 P₀.2 hy)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 noncomputable def covGradChristoffelLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -104,7 +101,6 @@ noncomputable def covGradChristoffelLimit
           EuclN → ℝ) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem covGradChristoffelLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -236,7 +232,6 @@ private theorem covDerivLowerOrderTerm_pouSmul_tendsto
     hFn_eq hFlim_eq
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma smul_componentLpLimit_coeFn_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -269,7 +264,6 @@ private lemma smul_componentLpLimit_coeFn_ae
       (z : EuclN → ℝ)) h_lp_eq)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma smul_unscaledLimit_toLp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

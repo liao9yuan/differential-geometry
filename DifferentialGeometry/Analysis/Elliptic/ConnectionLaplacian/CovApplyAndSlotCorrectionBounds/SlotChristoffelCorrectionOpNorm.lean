@@ -6,8 +6,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators
@@ -82,7 +80,8 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -96,7 +95,8 @@ lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤
@@ -122,7 +122,8 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space 
       tensorSlotSubstCLMRS (I := I) n b Φ) x =
       tensorSlotSubstCLM (I := I) n b Φ x := rfl
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private lemma slotSubstCLM_factor_prod_nonneg (n : ℕ) {b : M}
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     0 ≤ ∏ i : Fin n, ‖Φ i‖ :=

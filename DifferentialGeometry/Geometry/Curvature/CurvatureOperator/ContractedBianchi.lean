@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
-set_option linter.flexible false
 
 noncomputable section
 
@@ -229,13 +228,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ) (f i) x) :
     MDifferentiableAt I 𝓘(ℝ) (t.sum f) x := by
   classical
   induction t using Finset.induction_on with
-  | empty => simp; exact mdifferentiableAt_const
+  | empty => simpa using mdifferentiableAt_const
   | insert i t hit ih =>
       have hfi : MDifferentiableAt I 𝓘(ℝ) (f i) x := hf i (by simp)
       have hft : ∀ j ∈ t, MDifferentiableAt I 𝓘(ℝ) (f j) x :=
@@ -245,7 +243,6 @@ private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M �
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 private lemma extDerivFun_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ)
     {x : M} (v : TangentSpace I x)
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ) (f i) x) :

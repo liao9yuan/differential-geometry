@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompLinear
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

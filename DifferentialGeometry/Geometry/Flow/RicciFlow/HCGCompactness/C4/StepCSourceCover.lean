@@ -35,8 +35,21 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option synthInstance.maxHeartbeats 100000 in
+noncomputable local instance stepCSourceCoverModelDualNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
 
+noncomputable local instance stepCSourceCoverModelDualNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance stepCSourceCoverModelBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance stepCSourceCoverModelBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
 
 theorem liveMetric0_close
     (inp : MetricCompactnessInputs (I := I) X)
@@ -100,9 +113,6 @@ theorem liveMetric0_close
     _ ≤ (1 / 10 : Real) * ‖v‖ * ‖v‖ := by gcongr
     _ = (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
 
-set_option synthInstance.maxHeartbeats 100000 in
-
-
 theorem liveMetric0_symm
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -149,14 +159,6 @@ theorem liveMetric0_symm
     simpa only [Function.comp_apply] using hwv
   rw [hstage] at hvw'
   exact tendsto_nhds_unique hvw' hwv'
-
-set_option synthInstance.maxHeartbeats 100000 in
-
-
-
-
-
-
 
 
 
@@ -580,9 +582,6 @@ theorem MetricCompactnessInputs.exists_live_cores
       refine ⟨alpha, v, hvexp, ?_⟩
       exact (Metric.closedBall_subset_cthickening hvdeep (eta alpha)).trans
         (heta_sub alpha)
-
-set_option synthInstance.maxHeartbeats 100000 in
-
 
 theorem MetricCompactnessInputs.exists_live_source_cover
     (inp : MetricCompactnessInputs (I := I) X)

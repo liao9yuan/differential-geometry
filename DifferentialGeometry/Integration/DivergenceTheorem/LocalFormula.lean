@@ -125,18 +125,12 @@ private lemma partialDeriv_contDiffOn_interior
     (i : Fin (Module.finrank ℝ E)) {u : E → ℝ} {s : Set E}
     (hu : ContDiffOn ℝ ∞ u s) :
     ContDiffOn ℝ ∞ (partialDeriv (E := E) i u) (interior s) := by
-
   have hu_int : ContDiffOn ℝ ∞ u (interior s) := hu.mono interior_subset
-
-
-
   have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ u) (interior s) :=
     hu_int.fderiv_of_isOpen isOpen_interior
       (by rw [ENat.coe_top_add_one])
-
   have hconst : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
       (interior s) := contDiffOn_const
-
   exact hfderiv.clm_apply hconst
 
 private def localDivergenceDomain (α : M) : Set M :=
@@ -148,8 +142,6 @@ private lemma localDivergenceDomain_subset_baseSet (α : M) :
     localDivergenceDomain (I := I) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
   intro x hx
-
-
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]
   rw [← extChartAt_source_eq_chartAt_source (I := I)]
   exact hx.1
@@ -168,7 +160,6 @@ private lemma localDivergence_summand_contMDiffOn
               chartDensityOnE (I := I) g α y)
           (extChartAt I α x))
       (localDivergenceDomain (I := I) α) := by
-
   have hpartial : ContDiffOn ℝ ∞
       (fun y : E =>
         partialDeriv (E := E) i
@@ -177,7 +168,6 @@ private lemma localDivergence_summand_contMDiffOn
               chartDensityOnE (I := I) g α z) y)
       (interior (extChartAt I α).target) :=
     partialDeriv_chartCoeffOnE_mul_chartDensityOnE_contDiffOn (I := I) g α X i
-
   have hpartialM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
       (fun y : E =>
         partialDeriv (E := E) i
@@ -185,11 +175,8 @@ private lemma localDivergence_summand_contMDiffOn
             chartCoeffOnE (I := I) α X i z *
               chartDensityOnE (I := I) g α z) y)
       (interior (extChartAt I α).target) := hpartial.contMDiffOn
-
   have hchart : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E)
       (chartAt H α).source := contMDiffOn_extChartAt
-
-
   have hchart' : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E)
       (localDivergenceDomain (I := I) α) := by
     refine hchart.mono ?_
@@ -197,7 +184,6 @@ private lemma localDivergence_summand_contMDiffOn
     have h1 : x ∈ (extChartAt I α).source := hx.1
     rw [extChartAt_source_eq_chartAt_source (I := I)] at h1
     exact h1
-
   have hsubset : localDivergenceDomain (I := I) α ⊆
       (extChartAt I α : M → E) ⁻¹' interior (extChartAt I α).target :=
     fun _ hx => hx.2
@@ -240,7 +226,7 @@ theorem divergence_g_chart_product
     rw [extChartAt_source_eq_chartAt_source (I := I)]
     exact mem_chart_source H x
   have hy₀_target : y₀ ∈ (extChartAt I x).target := by
-    simp [hy₀_def, (extChartAt I x).map_source hxsrc]
+    simp [hy₀_def]
   have htarget_nhd : (extChartAt I x).target ∈ 𝓝 y₀ :=
     (isOpen_extChartAt_target (I := I) x).mem_nhds hy₀_target
   have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
@@ -250,7 +236,7 @@ theorem divergence_g_chart_product
     chartDensity_pos (I := I) g x hbase
   have hρ_ne : chartDensity (I := I) g x x ≠ 0 := ne_of_gt hρ_pos
   have hsymm : (extChartAt I x).symm y₀ = x := by
-    simp [hy₀_def, (extChartAt I x).left_inv hxsrc]
+    simp [hy₀_def]
   have hρOnE :
       chartDensityOnE (I := I) g x y₀ = chartDensity (I := I) g x x := by
     change chartDensity (I := I) g x ((extChartAt I x).symm y₀) =

@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.QuasiMeasureP
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -60,7 +58,8 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     (β γ : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) β) :
@@ -240,7 +239,6 @@ private lemma eigenvectorChartComponentFun_comp_chartTransition_ae_eq_cutoff_mul
 
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorSmoothChart_transport_term_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

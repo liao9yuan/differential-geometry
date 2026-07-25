@@ -58,7 +58,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNormHalfSpace_of_memWkpHalfSpace
         (d := n) Ω) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace_isOpen hΩ
   have h_main :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanSubcritical.eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
+    Analysis.Sobolev.Chart.EuclideanSubcritical.eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
       (d := n) hp_one hp_dim hΩ_int_open hf hf_compact hf_supp
   exact h_main
 

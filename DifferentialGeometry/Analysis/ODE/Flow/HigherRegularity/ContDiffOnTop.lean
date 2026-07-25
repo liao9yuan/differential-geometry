@@ -150,7 +150,8 @@ theorem IsLocalFlow.contDiffOn_top
       have hA_joint_cont : ContinuousOn (uncurry A)
           (ball x₀ (ρ : ℝ) ×ˢ Ioo (t₀ - T) (t₀ + T)) := hcoeff_Cn.continuousOn
       have h_exists : HasLinearODESolution A (t₀ - T) (t₀ + T) t₀ (fun _ => δ) q.1 :=
-        hasLinearODESolution_of_continuousOn hab ht₀_mem isOpen_ball hA_joint_cont (mem_ball.mpr hx')
+        hasLinearODESolution_of_continuousOn hab ht₀_mem isOpen_ball hA_joint_cont
+          (mem_ball.mpr hx')
       have h_uniq := linearODE_unique_on_Ioo (G := E) ht₀_mem hA_cont_Ioo
         (fun s hs => by
           have hs_mid : s ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) :=

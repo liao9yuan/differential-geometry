@@ -18,7 +18,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma mollifyEps_eq_convolution_swap
     {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
@@ -89,7 +88,7 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
   have hη_smooth' : ContDiff ℝ (⊤ : ℕ∞) (mollifierEps (d := d) hε) :=
     mollifierEps_smooth hε
   have h_ibp :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.convolution_fderiv_eq_convolution_weakPartial_univ
+    Euclidean.convolution_fderiv_eq_convolution_weakPartial_univ
       (d := d) (i := j) (g := g) (u := u) hweak hη_smooth' hη_compact x
   rw [h_ibp]
   rfl
@@ -150,7 +149,8 @@ theorem eLpNorm_mollifyEps_le
       refine integral_congr_ae ?_
       filter_upwards with y
       simp [ρ, ψ, ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_nn y]
-    have h_norm_sq_int_vol : Integrable (fun y => (ρ y).toReal * ‖u (x - y)‖) (volume : Measure E) := by
+    have h_norm_sq_int_vol : Integrable (fun y => (ρ y).toReal * ‖u (x - y)‖)
+      (volume : Measure E) := by
       refine hce_u.integrable.norm.congr ?_
       filter_upwards with y
       simp [ρ, ψ, ContinuousLinearMap.lsmul_apply, smul_eq_mul, hψ_nn y]
@@ -299,7 +299,8 @@ theorem eLpNorm_mollifyEps_le
       have h_lint_pt :
           (fun x => ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖ₑ
             ^ (2 : ℝ)) =
-          (fun x => ENNReal.ofReal (‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖
+          (fun x => ENNReal.ofReal
+            (‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u) x)‖
             ^ (2 : ℝ))) := by
         funext x
         exact h_pt_lint x
@@ -424,14 +425,12 @@ private lemma is_smooth_weak_sol_mollifyEps
     (d := d) hΩ B (hu.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)) hε
 
 omit [NeZero d] in
-
 private lemma memLp_two_restrict_of_memLp_two
     {f : E → ℝ} (hf : MemLp f 2 (volume : Measure E)) (S : Set E) :
     MemLp f 2 (volume.restrict S) :=
   hf.restrict S
 
 omit [NeZero d] in
-
 private lemma integral_sq_le_eLpNorm_sq
     {f : E → ℝ} (hf : MemLp f 2 (volume : Measure E))
     {S : Set E} (_hS_open : IsOpen S) :

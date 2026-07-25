@@ -18,8 +18,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -142,7 +140,6 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
     Tensor0SBundle.TensorRSSpace.toModel_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorMainDir_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

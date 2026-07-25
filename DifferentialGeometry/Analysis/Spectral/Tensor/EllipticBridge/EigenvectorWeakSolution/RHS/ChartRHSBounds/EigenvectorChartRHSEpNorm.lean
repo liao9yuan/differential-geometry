@@ -41,7 +41,6 @@ section Aggregation
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma eLpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {μ : Measure EuclN} (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -96,7 +95,6 @@ variable (g : SmoothRiemannianMetric I M) (α : M)
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -142,7 +140,6 @@ end Aggregate
 section MainBound
 
 omit [CompleteSpace E] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
@@ -158,7 +155,6 @@ private lemma eigenIdx_val_pos
 end MainBound
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma eLpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {ν : Type*} {μ : Measure EuclN}
     (F : ι → ν → EuclN → ℝ) (A : ν → ℝ≥0∞)
@@ -211,7 +207,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def eigenvectorChartComponentFun_unconditional : EuclN → ℝ :=
   fun y =>
     ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -285,7 +280,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma rhsTerm1_memLp_unconditional :
     MemLp (rhsTerm1 (I := I) (M := M) g r s i α P₀) 2
@@ -492,7 +486,6 @@ end TermMemLpUnconditional
 section AggregateUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private def aggrUchart
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1243,7 +1236,6 @@ end BracketBoundUnconditional
 section MainBoundUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_uniform_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

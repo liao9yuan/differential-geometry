@@ -25,7 +25,8 @@ local notation "E" => AmbientSpace d
 /-- Canonical De Giorgi energy sequence on nested balls and levels. -/
 noncomputable def deGiorgiEnergySeq
     (u : E → ℝ) (x₀ : E) (lamStar : ℝ) (n : ℕ) : ℝ :=
-  ∫ x in Metric.ball x₀ (deGiorgiRadius n), |positivePartSub u (deGiorgiLevel lamStar n) x| ^ 2 ∂volume
+  ∫ x in Metric.ball x₀ (deGiorgiRadius n), |positivePartSub u (deGiorgiLevel lamStar n) x| ^ 2
+    ∂volume
 
 lemma deGiorgiTail_lt_one (n : ℕ) : deGiorgiTail n < 1 := by
   dsimp [deGiorgiTail]
@@ -656,7 +657,8 @@ theorem deGiorgi_iteration_package_on_unitBall_of_subsolution
         simpa [pow_two] using hwθ1.memLp.integrable_sq
       refine Integrable.mono' (hposSqInt.const_mul (Cη ^ 2)) ?_ ?_
       · exact
-          ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow 2).aemeasurable).mul
+          ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow
+            2).aemeasurable).mul
             hposSqInt.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
       · filter_upwards with x
         have hfd_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 := by
@@ -830,9 +832,11 @@ theorem deGiorgi_iteration_package_on_unitBall_of_subsolution
       rw [Real.mul_rpow (by positivity) hIθ_nonneg]
       rw [hpow_gap]
       have hstep :
-          (C_gns d 2) ^ 2 * (8 * (ellipticityRatio A + 1) * ((2 * (Mst : ℝ)) ^ 2 * (((s - r) ^ 2)⁻¹))) *
+          (C_gns d 2) ^ 2 * (8 * (ellipticityRatio A + 1) *
+            ((2 * (Mst : ℝ)) ^ 2 * (((s - r) ^ 2)⁻¹))) *
               ((lam - θ) ^ (-(4 / (d : ℝ))) * Iθ ^ (2 / (d : ℝ))) * Iθ =
-            (C_gns d 2) ^ 2 * (8 * (ellipticityRatio A + 1) * ((2 * (Mst : ℝ)) ^ 2 * (((s - r) ^ 2)⁻¹))) *
+            (C_gns d 2) ^ 2 * (8 * (ellipticityRatio A + 1) *
+              ((2 * (Mst : ℝ)) ^ 2 * (((s - r) ^ 2)⁻¹))) *
               (lam - θ) ^ (-(4 / (d : ℝ))) * (Iθ ^ (2 / (d : ℝ)) * Iθ) := by
         ring
       rw [hstep, hIθ_pow]
@@ -1110,7 +1114,8 @@ theorem linfty_subsolution_DeGiorgi_ae_of_unitBall_initial_energy_smallness
         (deGiorgiRecurrenceCoeff d K lamStar) ^ (-(1 : ℝ) / (2 / (d : ℝ))) *
           (deGiorgiRecurrenceBase d) ^ (-(1 : ℝ) / (2 / (d : ℝ)) ^ 2) := by
     exact
-      (deGiorgiEnergySeq_zero_le_integral_sq_posPartZero_on_unitBall hLamStar (hAint 0) hposInt).trans
+      (deGiorgiEnergySeq_zero_le_integral_sq_posPartZero_on_unitBall hLamStar (hAint 0)
+        hposInt).trans
         hsmall0
   exact linfty_subsolution_DeGiorgi_ae_of_smallness
     hd hK hLamStar hStarInt hAint hpre hsmall

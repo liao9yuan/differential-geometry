@@ -47,7 +47,7 @@ theorem chartPushed_memW1p_two_of_laplacianDomainPow_two
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
   have h_memWkp22 :=
-    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.laplacianDomainPow_two_chartPushed_memWkp_two_two
+    laplacianDomainPow_two_chartPushed_memWkp_two_two
       (I := I) (M := M) g α hu_h
   exact h_memWkp22.memW1p
 

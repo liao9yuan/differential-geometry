@@ -909,7 +909,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
             DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h D.u_chart y)
       ∂(volume : Measure EuclN) := by
-
     have h_global_to_restricted :
         ∫ y, DifferentialGeometry.Analysis.Sobolev.diffQuot
           (d := Module.finrank ℝ E) k h

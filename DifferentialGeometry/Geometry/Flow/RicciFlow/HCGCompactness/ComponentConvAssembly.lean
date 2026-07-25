@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -103,7 +102,8 @@ theorem exists_framePairs_diag
           (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gRef
               (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
-                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) Φinf := by
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+                  Φinf := by
   classical
   set Vfam : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) →
       Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
@@ -149,7 +149,8 @@ theorem exists_pairs_refs
           (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gBase
               (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
-                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) Φinf := by
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+                  Φinf := by
   classical
   set Vfam : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) →
       Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
@@ -212,13 +213,12 @@ theorem framePairs_pinned
     exists_framePairs_diag (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ
   refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
   obtain ⟨Φinf, hΦinf⟩ := hpairs0 i j
-
   have hinner : ∀ (g : SmoothRiemannianMetric I M) (w : M),
       (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) 0) w
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -300,7 +300,7 @@ theorem pairs_pinned_refs
           (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
         = g.inner w (frame i w) (frame j w) := by
     intro g w
-    show (Tensor0SBundle.metricTensorField (I := I) g) w
+    change (Tensor0SBundle.metricTensorField (I := I) g) w
         (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
       = g.inner w (frame i w) (frame j w)
     rw [Tensor0SBundle.metricTensorField_apply]
@@ -376,7 +376,6 @@ theorem exists_tower_conv
   obtain ⟨frame, vbasis, hframeσ, hspan⟩ := exists_frameData (I := I) x₀ hK₀ hK₀chart
   obtain ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, hpairs⟩ :=
     framePairs_pinned (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ gInf hconv
-
   set U : Set E := (extChartAt I x₀).target ∩
     (extChartAt I x₀).symm ⁻¹' interior K₀ with hUdef
   have hUopen : IsOpen U :=
@@ -396,7 +395,6 @@ theorem exists_tower_conv
     exact ⟨(extChartAt I x₀).map_source hysrc, by
       rw [Set.mem_preimage, (extChartAt I x₀).left_inv hysrc]; exact hy⟩
   refine ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, fun a V => ?_⟩
-
   have hpairsU : ∀ (i j : Fin (Module.finrank Real E)),
       MapCInfConvOnCompacts U
         (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -546,7 +544,8 @@ theorem componentConv_covDeriv_of_chartCInf
 
 
 
-omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
 theorem tangentConst_basis_expand (x₀ : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) (p : M) :
@@ -564,7 +563,8 @@ theorem tangentConst_basis_expand (x₀ : M)
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 theorem bz_eq_tangentConst (x : M)
     (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (i : Fin (Module.finrank Real E)) {z : M}
@@ -604,8 +604,9 @@ theorem componentBz_eq_covDeriv
           (fun q => (∑ j : Fin (Module.finrank Real E),
             (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j) z) := by
   rw [Tensor0SBundle.component0S_apply]
-  show (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
-      (fun q => (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+  change (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+      (fun q => (((trivializationAt E (TangentSpace I : M → Type _)
+        x).isLocalFrameOn_localFrame_baseSet
           I 1 basisE).toBasisAt hzbase) (I0 q))
     = (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
       (fun q => (∑ j : Fin (Module.finrank Real E),
@@ -674,7 +675,6 @@ private theorem exists_patch_core
   obtain ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, htower⟩ :=
     hTower x K₀ hK₀cpt hK₀src (φ₀ ∘ ρ) gInf hconv'
   refine ⟨ψ, hψ, fun p ε hε => ?_⟩
-
   have hCu' : C ⊆ u' := fun z hz => (hCsub hz).1
   have hCK₀ : C ⊆ interior K₀ := fun z hz => (hCsub hz).2
   have hCbase : C ⊆ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet :=
@@ -685,12 +685,10 @@ private theorem exists_patch_core
     hCcpt.image_of_continuousOn ((continuousOn_extChartAt (I := I) x).mono hCsrc)
   have hEcCU : extChartAt I x '' C ⊆ U := by
     rintro w ⟨z, hz, rfl⟩; exact hImg ⟨z, hCK₀ hz, rfl⟩
-
   set Vfun : (a : ℕ) → (Fin (a + 2) → Fin (Module.finrank Real E)) →
       Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
     fun a I0 q => ∑ j : Fin (Module.finrank Real E),
       (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j with hVfun
-
   have hcarval : ∀ (a : ℕ) (I0 : Fin (a + 2) → Fin (Module.finrank Real E))
       (g : SmoothRiemannianMetric I M) {z : M} (hz : z ∈ C),
       χ (extChartAt I x z) * writtenInExtChartAt I 𝓘(Real, Real) x
@@ -705,7 +703,6 @@ private theorem exists_patch_core
       (extChartAt I x).left_inv (hCsrc hz)]
     exact (componentBz_eq_covDeriv (I := I) gRef x basisE frame hframeσ a I0 g
       (hCbase hz) (interior_subset (hCK₀ hz))).symm
-
   have key : ∀ a : ℕ, ∃ k0a : ℕ, a ≤ p → ∀ k : ℕ, k0a ≤ k → ∀ z ∈ C,
       metricDerivNorm (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z < ε := by
     intro a
@@ -713,7 +710,8 @@ private theorem exists_patch_core
     · set cardI : ℕ := Fintype.card (Fin (a + 2) → Fin (Module.finrank Real E)) with hcardI
       set Cgf : Real :=
         ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) with hCgf
-      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) := Nat.cast_nonneg _
+      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
+        Nat.cast_nonneg _
       have hCgf1 : (1 : Real) ≤ Cgf := one_le_pow₀ (by nlinarith)
       have hCgf0 : (0 : Real) < Cgf := lt_of_lt_of_le one_pos hCgf1
       have hsqc : (0 : Real) ≤ Real.sqrt (cardI : Real) := Real.sqrt_nonneg _
@@ -723,7 +721,8 @@ private theorem exists_patch_core
       have perI0 : ∀ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
           ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ z : M, ∀ hz : z ∈ C,
             |Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt (hCbase hz))
                 (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0| ≤ ε' := by
         intro I0
@@ -739,13 +738,15 @@ private theorem exists_patch_core
       rw [metricDerivNorm]
       have hsumle : (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
             Tensor0SBundle.component0S (I := I)
-              (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+              (((trivializationAt E (TangentSpace I : M → Type _)
+                x).isLocalFrameOn_localFrame_baseSet
                   I 1 basisE).toBasisAt (hCbase hz))
               (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
           ≤ (cardI : Real) * ε' ^ 2 := by
         calc (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt (hCbase hz))
                 (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
             ≤ ∑ _I0 : Fin (a + 2) → Fin (Module.finrank Real E), ε' ^ 2 :=
@@ -756,7 +757,8 @@ private theorem exists_patch_core
           _ = (cardI : Real) * ε' ^ 2 := by
               rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hcardI]
       have hnormle : Tensor0SBundle.normSq0S (I := I) gRef z (a + 2)
-          (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) ≤ Cgf * ((cardI : Real) * ε' ^ 2) :=
+          (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) ≤ Cgf *
+            ((cardI : Real) * ε' ^ 2) :=
         le_trans (hrev z (hCbase hz) (hCu' hz) (a + 2) _) (by gcongr)
       have hCgfsq : Cgf ≤ Cgf ^ 2 := le_self_pow₀ hCgf1 (by norm_num)
       have hsqCgf : Real.sqrt Cgf ≤ Cgf :=
@@ -813,7 +815,6 @@ theorem exists_patch_refs
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
 
-set_option maxHeartbeats 800000 in
 
 
 
@@ -878,7 +879,6 @@ theorem metricPreconvInf (hne : Nonempty M)
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-set_option maxHeartbeats 800000 in
 
 theorem metricCInf_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)

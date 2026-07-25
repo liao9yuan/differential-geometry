@@ -58,7 +58,7 @@ private theorem wkpNorm_le_of_memWkp_precompact_uniform
   have hN_meas : MeasurableSet N := hN_closed.measurableSet
   have hK_sub_N : K ⊆ N := Metric.self_subset_cthickening K
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) hχ_smooth hχ_compact k
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
@@ -133,9 +133,53 @@ private lemma sqrt_energy_le_of_atoms_le
         rw [Real.sqrt_mul (by positivity)]
     _ = Real.sqrt ((n : ℝ) + 2) * T := by rw [Real.sqrt_sq hT]
 
-set_option maxHeartbeats 3200000 in
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+private theorem chosenWeakPartial_ae_eq_of_memLp
+    {d : ℕ} {Ω : Set (EuclideanSpace ℝ (Fin d))}
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    {f : EuclideanSpace ℝ (Fin d) → ℝ} {i : Fin d}
+    (hΩ : IsOpen Ω) (hu : DeGiorgi.MemW1p 2 u Ω)
+    (hf : MemLp f 2 (volume.restrict Ω))
+    (hpartial : DeGiorgi.HasWeakPartialDeriv i f u Ω) :
+    chosenWeakPartial' 2 i u Ω =ᵐ[volume.restrict Ω] f := by
+  have hchosen : DeGiorgi.HasWeakPartialDeriv i
+      (chosenWeakPartial' 2 i u Ω) u Ω :=
+    chosenWeakPartial'_isWeakPartial_of_mem hu i
+  have hchosenLoc : LocallyIntegrable (chosenWeakPartial' 2 i u Ω)
+      (volume.restrict Ω) :=
+    (chosenWeakPartial'_memLp_of_mem hu i).locallyIntegrable
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+  have hfLoc : LocallyIntegrable f (volume.restrict Ω) :=
+    hf.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hchosen hpartial hchosenLoc hfLoc
 
+private theorem memWkp_two_two_of_weakPartials
+    {d : ℕ} {Ω : Set (EuclideanSpace ℝ (Fin d))}
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    {f : Fin d → EuclideanSpace ℝ (Fin d) → ℝ}
+    (hΩ : IsOpen Ω) (hu : DeGiorgi.MemW1p 2 u Ω)
+    (hf : ∀ i, DeGiorgi.MemW1p 2 (f i) Ω)
+    (hpartial : ∀ i, DeGiorgi.HasWeakPartialDeriv i (f i) u Ω) :
+    MemWkp (d := d) 2 2 u Ω := by
+  refine ⟨hu, fun i => ?_⟩
+  have hae := chosenWeakPartial_ae_eq_of_memLp hΩ hu (hf i).1 (hpartial i)
+  rw [MemWkp.one_iff_memW1p]
+  exact (MemW1p_congr_ae hΩ hae.symm).mp (hf i)
+
+private lemma ennreal_nested_nsmul_collapse
+    (n : ℕ) {T : ℝ} (hT : 0 ≤ T) :
+    ENNReal.ofReal T + n • (ENNReal.ofReal T + n • ENNReal.ofReal T) =
+      ENNReal.ofReal (((1 : ℝ) + n + n * n) * T) := by
+  rw [nsmul_eq_mul, nsmul_eq_mul, ← ENNReal.ofReal_natCast n]
+  rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _),
+    ← ENNReal.ofReal_add hT (mul_nonneg (Nat.cast_nonneg _) hT),
+    ← ENNReal.ofReal_mul (Nat.cast_nonneg _),
+    ← ENNReal.ofReal_add hT
+      (mul_nonneg (Nat.cast_nonneg _)
+        (add_nonneg hT (mul_nonneg (Nat.cast_nonneg _) hT)))]
+  congr 1
+  ring
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -375,20 +419,29 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
   set Cdat : ℝ := (1 + c_d) * Catom with hCdat_def
   have hCdat_nn : 0 ≤ Cdat := by rw [hCdat_def]; positivity
   have hCatom_le_Cdat : Catom ≤ Cdat := by
-    rw [hCdat_def]; nlinarith [hCatom_nn, hc_d_nn]
+    rw [hCdat_def, add_mul, one_mul]
+    exact le_add_of_nonneg_right (mul_nonneg hc_d_nn hCatom_nn)
   set Cbig : ℝ := C_geom_max * Real.sqrt ((n : ℝ) + 2) + 1 with hCbig_def
   have hCbig_nn : 0 ≤ Cbig := by
     rw [hCbig_def]
-    have := Real.sqrt_nonneg ((n : ℝ) + 2)
-    positivity
+    exact add_nonneg
+      (mul_nonneg hC_geom_max_nn (Real.sqrt_nonneg _)) zero_le_one
+  have hCbig_one : 1 ≤ Cbig := by
+    rw [hCbig_def]
+    exact le_add_of_nonneg_left
+      (mul_nonneg hC_geom_max_nn (Real.sqrt_nonneg _))
   set Cint : ℝ :=
     (1 + (n : ℝ) + (n : ℝ) * (n : ℝ)) * Cbig * Cdat with hCint_def
-  have hCint_nn : 0 ≤ Cint := by rw [hCint_def]; positivity
+  have hCint_nn : 0 ≤ Cint := by
+    rw [hCint_def]
+    have hn_nn : 0 ≤ (n : ℝ) := Nat.cast_nonneg n
+    exact mul_nonneg
+      (mul_nonneg (add_nonneg (add_nonneg zero_le_one hn_nn)
+        (mul_nonneg hn_nn hn_nn)) hCbig_nn) hCdat_nn
   set C : ℝ := K_prom * Cint + 1 with hC_def
   have hC_nn : 0 ≤ C := by
     rw [hC_def]
-    have : 0 ≤ K_prom * Cint := mul_nonneg hK_prom_pos.le hCint_nn
-    linarith
+    exact add_nonneg (mul_nonneg hK_prom_pos.le hCint_nn) zero_le_one
   refine ⟨C, hC_nn, fun i => ?_⟩
   set D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
     eigenvectorTensorChartBilinearData (I := I) (M := M)
@@ -432,7 +485,10 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
   have h_sqrt_μinv_le : Real.sqrt ((i.fst.val)⁻¹) ≤ (i.fst.val)⁻¹ := by
     have h := Real.sqrt_le_sqrt
       (show (i.fst.val)⁻¹ ≤ (i.fst.val)⁻¹ * (i.fst.val)⁻¹ from by
-        nlinarith [h_one_le_μinv, hμinv_pos])
+        calc
+          (i.fst.val)⁻¹ = (i.fst.val)⁻¹ * 1 := by ring
+          _ ≤ (i.fst.val)⁻¹ * (i.fst.val)⁻¹ :=
+            mul_le_mul_of_nonneg_left h_one_le_μinv hμinv_pos.le)
     calc Real.sqrt ((i.fst.val)⁻¹)
         ≤ Real.sqrt ((i.fst.val)⁻¹ * (i.fst.val)⁻¹) := h
       _ = (i.fst.val)⁻¹ := by
@@ -505,7 +561,9 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
       rw [hT_atom_def]
       have hstep : c_d * Ccomp ≤ Cdat * (i.fst.val)⁻¹ := by
         have hcC : c_d * Ccomp ≤ Cdat := by
-          rw [hCdat_def]; nlinarith [hCcomp_le, hc_d_nn, hCatom_nn, hCcomp_nn]
+          rw [hCdat_def, add_mul, one_mul]
+          exact (mul_le_mul_of_nonneg_left hCcomp_le hc_d_nn).trans
+            (le_add_of_nonneg_left hCatom_nn)
         exact le_trans hcC (le_mul_of_one_le_right hCdat_nn h_one_le_μinv)
       exact mul_le_mul_of_nonneg_right hstep hφnorm_nn
     have h_toReal := ENNReal.toReal_mono ENNReal.ofReal_ne_top h_vol_le
@@ -536,7 +594,9 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
       rw [hT_atom_def]
       have hstep : c_d * (Cf * (i.fst.val)⁻¹) ≤ Cdat * (i.fst.val)⁻¹ := by
         have hcCf : c_d * Cf ≤ Cdat := by
-          rw [hCdat_def]; nlinarith [hCf_le, hc_d_nn, hCatom_nn, hCf_nn]
+          rw [hCdat_def, add_mul, one_mul]
+          exact (mul_le_mul_of_nonneg_left hCf_le hc_d_nn).trans
+            (le_add_of_nonneg_left hCatom_nn)
         calc c_d * (Cf * (i.fst.val)⁻¹)
             = (c_d * Cf) * (i.fst.val)⁻¹ := by ring
           _ ≤ Cdat * (i.fst.val)⁻¹ :=
@@ -601,52 +661,17 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
   have h_uChart_memWkp_two_Ω'' :
       MemWkp (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' := by
-    refine ⟨h_uChart_memW1p, fun j => ?_⟩
-    have h_dwp_weak_uChart_Ω'' : DeGiorgi.HasWeakPartialDeriv
-        (d := Module.finrank ℝ E) j (D.weak_partial j) D.u_chart Ω'' :=
-      DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart
-        (D.weak_partial_isWeakPartial j)
-    have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
-        (d := Module.finrank ℝ E) j
-        (chosenWeakPartial' 2 j D.u_chart Ω'') D.u_chart Ω'' :=
-      chosenWeakPartial'_isWeakPartial_of_mem h_uChart_memW1p j
-    have h_chosen_loc : MeasureTheory.LocallyIntegrable
-        (chosenWeakPartial' 2 j D.u_chart Ω'')
-        ((volume : Measure EuclN).restrict Ω'') :=
-      (chosenWeakPartial'_memLp_of_mem h_uChart_memW1p j).locallyIntegrable
-        (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-    have h_dwp_loc : MeasureTheory.LocallyIntegrable (D.weak_partial j)
-        ((volume : Measure EuclN).restrict Ω'') :=
-      (h_wp_memW1p j).1.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-    have h_ae :
-        chosenWeakPartial' 2 j D.u_chart Ω'' =ᵐ[(volume : Measure EuclN).restrict Ω'']
-          D.weak_partial j :=
-      DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
-        h_dwp_weak_uChart_Ω'' h_chosen_loc h_dwp_loc
-    rw [MemWkp.one_iff_memW1p]
-    exact (MemW1p_congr_ae hΩ''_open h_ae.symm).mp (h_wp_memW1p j)
+    exact memWkp_two_two_of_weakPartials hΩ''_open h_uChart_memW1p h_wp_memW1p
+      (fun j => DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart
+        (D.weak_partial_isWeakPartial j))
   have h_chosen_ae_wp : ∀ i' : Fin (Module.finrank ℝ E),
       chosenWeakPartial' 2 i' D.u_chart Ω''
         =ᵐ[(volume : Measure EuclN).restrict Ω''] D.weak_partial i' := by
     intro i'
-    have h_dwp_weak_uChart_Ω'' : DeGiorgi.HasWeakPartialDeriv
-        (d := Module.finrank ℝ E) i' (D.weak_partial i') D.u_chart Ω'' :=
-      DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart
-        (D.weak_partial_isWeakPartial i')
-    have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
-        (d := Module.finrank ℝ E) i'
-        (chosenWeakPartial' 2 i' D.u_chart Ω'') D.u_chart Ω'' :=
-      chosenWeakPartial'_isWeakPartial_of_mem h_uChart_memW1p i'
-    have h_chosen_loc : MeasureTheory.LocallyIntegrable
-        (chosenWeakPartial' 2 i' D.u_chart Ω'')
-        ((volume : Measure EuclN).restrict Ω'') :=
-      (chosenWeakPartial'_memLp_of_mem h_uChart_memW1p i').locallyIntegrable
-        (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-    have h_dwp_loc : MeasureTheory.LocallyIntegrable (D.weak_partial i')
-        ((volume : Measure EuclN).restrict Ω'') :=
-      (h_wp_memW1p i').1.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-    exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial
-      h_dwp_weak_uChart_Ω'' h_chosen_loc h_dwp_loc
+    exact chosenWeakPartial_ae_eq_of_memLp hΩ''_open h_uChart_memW1p
+      (h_wp_memW1p i').1
+      (DeGiorgi.HasWeakPartialDeriv.restrict hΩ''_open hΩ''_in_chart
+        (D.weak_partial_isWeakPartial i'))
   set Tsum : ℝ≥0∞ := ENNReal.ofReal (Cbig * T_atom) with hTsum_def
   have h_wp_eLpNorm_Ω''_le : ∀ l : Fin (Module.finrank ℝ E),
       eLpNorm (D.weak_partial l) 2 ((volume : Measure EuclN).restrict Ω'') ≤
@@ -671,10 +696,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     refine (h_mono.trans h_clΩ'_le).trans ?_
     rw [hTsum_def]
     exact ENNReal.ofReal_le_ofReal
-      (le_mul_of_one_le_left hT_atom_nn (by
-        rw [hCbig_def]
-        have := Real.sqrt_nonneg ((n : ℝ) + 2)
-        nlinarith [hC_geom_max_nn, this]))
+      (le_mul_of_one_le_left hT_atom_nn hCbig_one)
   have h_uChart_eLpNorm_Ω''_le :
       eLpNorm D.u_chart 2 ((volume : Measure EuclN).restrict Ω'') ≤ Tsum := by
     have h_mono :
@@ -696,10 +718,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     refine (h_mono.trans h_clΩ'_le).trans ?_
     rw [hTsum_def]
     exact ENNReal.ofReal_le_ofReal
-      (le_mul_of_one_le_left hT_atom_nn (by
-        rw [hCbig_def]
-        have := Real.sqrt_nonneg ((n : ℝ) + 2)
-        nlinarith [hC_geom_max_nn, this]))
+      (le_mul_of_one_le_left hT_atom_nn hCbig_one)
   have h_interior_bound :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2 D.u_chart Ω''
@@ -718,24 +737,11 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
         (fun k' _ => ?_))
       rw [wkpNorm_zero]
       obtain ⟨g_ik, hg_memLp, hg_weak, hg_norm⟩ := h_gik_bound i' k'
-      have h_chosen_partial : DeGiorgi.HasWeakPartialDeriv
-          (d := Module.finrank ℝ E) k'
-          (chosenWeakPartial' 2 k' (D.weak_partial i') Ω'')
-          (D.weak_partial i') Ω'' :=
-        chosenWeakPartial'_isWeakPartial_of_mem (h_wp_memW1p i') k'
-      have h_chosen_loc : MeasureTheory.LocallyIntegrable
-          (chosenWeakPartial' 2 k' (D.weak_partial i') Ω'')
-          ((volume : Measure EuclN).restrict Ω'') :=
-        (chosenWeakPartial'_memLp_of_mem (h_wp_memW1p i') k').locallyIntegrable
-          (by norm_num : (1 : ℝ≥0∞) ≤ 2)
-      have h_g_loc : MeasureTheory.LocallyIntegrable g_ik
-          ((volume : Measure EuclN).restrict Ω'') :=
-        hg_memLp.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       have h_ae :
           chosenWeakPartial' 2 k' (D.weak_partial i') Ω''
             =ᵐ[(volume : Measure EuclN).restrict Ω''] g_ik :=
-        DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ''_open h_chosen_partial hg_weak
-          h_chosen_loc h_g_loc
+        chosenWeakPartial_ae_eq_of_memLp hΩ''_open (h_wp_memW1p i')
+          hg_memLp hg_weak
       rw [eLpNorm_congr_ae h_ae]
       refine hg_norm.trans ?_
       rw [hTsum_def]
@@ -745,7 +751,8 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
           C_geom_max * (Real.sqrt ((n : ℝ) + 2) * T_atom) =
             (C_geom_max * Real.sqrt ((n : ℝ) + 2)) * T_atom := by ring
       rw [h_rearrange]
-      exact mul_le_mul_of_nonneg_right (by linarith) hT_atom_nn
+      exact mul_le_mul_of_nonneg_right
+        (le_add_of_nonneg_right zero_le_one) hT_atom_nn
     refine (add_le_add h_uChart_eLpNorm_Ω''_le
       (Finset.sum_le_sum (fun i' _ => h_per_i i'))).trans ?_
     rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, Fintype.card_fin]
@@ -753,16 +760,19 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
         Tsum + (Module.finrank ℝ E) • (Tsum +
             (Module.finrank ℝ E) • Tsum) =
           ENNReal.ofReal (Cint * (i.fst.val)⁻¹ * φnorm) := by
-      rw [hTsum_def, hCint_def, hT_atom_def]
-      rw [nsmul_eq_mul, nsmul_eq_mul]
-      rw [← ENNReal.ofReal_natCast (Module.finrank ℝ E)]
-      rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _),
-        ← ENNReal.ofReal_add (by positivity) (by positivity),
-        ← ENNReal.ofReal_mul (Nat.cast_nonneg _),
-        ← ENNReal.ofReal_add (by positivity) (by positivity)]
-      refine congrArg ENNReal.ofReal ?_
-      rw [← hn_def]
-      ring
+      rw [hTsum_def]
+      calc
+        ENNReal.ofReal (Cbig * T_atom) +
+              (Module.finrank ℝ E) • (ENNReal.ofReal (Cbig * T_atom) +
+                (Module.finrank ℝ E) • ENNReal.ofReal (Cbig * T_atom)) =
+            ENNReal.ofReal
+              (((1 : ℝ) + Module.finrank ℝ E +
+                Module.finrank ℝ E * Module.finrank ℝ E) * (Cbig * T_atom)) :=
+          ennreal_nested_nsmul_collapse _ (mul_nonneg hCbig_nn hT_atom_nn)
+        _ = ENNReal.ofReal (Cint * (i.fst.val)⁻¹ * φnorm) := by
+          congr 1
+          rw [hCint_def, hT_atom_def, ← hn_def]
+          ring
     rw [h_collapse]
   have h_ae_zero :
       D.u_chart =ᵐ[(volume : Measure EuclN).restrict
@@ -813,7 +823,8 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
         have h_expand : K_prom * (Cint * (i.fst.val)⁻¹ * φnorm) =
             (K_prom * Cint) * (i.fst.val)⁻¹ * φnorm := by ring
         rw [h_expand]
-        have h_le : (K_prom * Cint) ≤ K_prom * Cint + 1 := by linarith
+        have h_le : (K_prom * Cint) ≤ K_prom * Cint + 1 :=
+          le_add_of_nonneg_right zero_le_one
         exact mul_le_mul_of_nonneg_right
           (mul_le_mul_of_nonneg_right h_le hμinv_pos.le) hφnorm_nn
     _ = ENNReal.ofReal (C * (i.fst.val)⁻¹) * ENNReal.ofReal φnorm := by

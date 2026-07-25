@@ -13,7 +13,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma restrict_mem_Icc_of_abs_le
     {K : Set E} {C : ℝ}
     {f : ℕ → E → ℝ}
@@ -25,7 +24,6 @@ private lemma restrict_mem_Icc_of_abs_le
   exact ⟨hL, hR⟩
 
 omit [NeZero d] in
-
 private lemma C_nonneg_of_pos {C : ℝ} (hC : 0 < C) : 0 ≤ C := hC.le
 
 omit [NeZero d] in

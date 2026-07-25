@@ -14,8 +14,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators Matrix Interval
@@ -45,6 +43,32 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private local instance tensorRSModelAdd_local (r s : ℕ) :
+    Add (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.addCommGroup.toAddCommMonoid.toAddCommSemigroup.toAddCommMagma.toAdd
+
+private local instance tensorRSModelSub_local (r s : ℕ) :
+    Sub (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.sub
+
+private local instance tensorRSModelNeg_local (r s : ℕ) :
+    Neg (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.neg
+
+private local instance tensorRSModelZero_local (r s : ℕ) :
+    Zero (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.zero
+
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section UniformBound
@@ -59,7 +83,8 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δc : ℝ} (_hδc_le : δc ≤ max δ₀ 0)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δc)
         (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle
@@ -96,7 +121,8 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
   intro g₁ P htie δc hδc_le hbound x henv
   letI instT3 : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 3 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
-  have hboundm : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δm := by
+  have hboundm : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+    δm := by
     intro y v w'
     refine le_trans (hbound y v w') ?_
     have hnnw : 0 ≤ Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w' w') :=
@@ -228,7 +254,8 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
   have hCAB : C₀ * G ≤ C₀ * B := mul_le_mul_of_nonneg_left hG_le hC₀0
   have hO1 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-        linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 3 * nn ^ 2 * Mc1 ^ 2 := by
+        linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 3 * nn ^ 2 * Mc1 ^
+          2 := by
     rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 3 2 x
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from
         linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) e bse rfl hbse horth]
@@ -284,7 +311,8 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
           ring
   have hO0 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-        linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 2 * nn ^ 2 * Mc0 ^ 2 := by
+        linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 2 * nn ^ 2 * Mc0 ^
+          2 := by
     rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
         linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) e bse rfl hbse horth]
@@ -345,7 +373,7 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
+theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linRicciConnDiffCoeff_of_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -368,7 +396,8 @@ theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCo
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
   obtain ⟨C, hC0, hcore⟩ :=
-    exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ (Csob * R)
+    exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope (I := I)
+      (M := M) g₀ hδ₀ (Csob * R)
       (by positivity)
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
@@ -420,7 +449,8 @@ theorem ricci_coeff_rfns_le
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δc : ℝ} (_hδc_le : δc ≤ max δ₀ 0)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δc)
         (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle

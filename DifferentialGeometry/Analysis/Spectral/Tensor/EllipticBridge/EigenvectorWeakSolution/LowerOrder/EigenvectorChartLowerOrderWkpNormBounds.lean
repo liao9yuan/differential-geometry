@@ -220,7 +220,6 @@ private lemma wkpNorm_indicatorFactor_mul_atom_le_uniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma exists_uniform_const_of_finite_wkpNorm_bounds_uniform
     {α : M} {K : ℕ} {δ ι κ : Type*} [Finite ι]
     (F : δ → ι → EuclN → ℝ) (atom : δ → κ → EuclN → ℝ) (proj : ι → κ)
@@ -434,12 +433,14 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → ℝ := fun x =>
+  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    Fin (Module.finrank ℝ E)) → ℝ := fun x =>
     (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
       (valuePartialFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
     with hCfP_def
-  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)),
+  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+    (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)),
       0 ≤ CfP x ∧ ∀ {G : EuclN → ℝ},
         MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
         (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -458,12 +459,14 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
         (valuePartialFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
+  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
     (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
       (valueComponentFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)).choose
     with hCfC_def
-  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+    (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       0 ≤ CfC x ∧ ∀ {G : EuclN → ℝ},
         MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
         (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -482,7 +485,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
         (valueComponentFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2.1 x.2.2.2.2)).choose_spec
-  set Fpart : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
+  set Fpart : TensorEigenIdx (I := I) (M := M) g r s →
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E)) → EuclN → ℝ :=
     fun i x y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valuePartialFactor (I := I) (M := M)
@@ -490,7 +495,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
         ((partialLpLimit (I := I) (M := M) g r s i α x.1 x.2.2.1 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFpart_def
-  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
+  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s →
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
     fun i x y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valueComponentFactor (I := I) (M := M)
@@ -533,13 +540,23 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
             g r s i α x.2.2.2.2)
         exact hatom.2)
   refine ⟨max
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
+      (Cpart * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+        (Module.finrank ℝ E))).card)
+      (Ccomp * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+        (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
     le_trans (by positivity) (le_max_left _ _), fun i => ?_⟩
   set Cmax : ℝ := max
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card) with hCmax_def
-  have h_part_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)),
+      (Cpart * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+        (Module.finrank ℝ E))).card)
+      (Ccomp * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+        (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card) with hCmax_def
+  have h_part_memWkp : ∀ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E)),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
     intro x
     have hatom := (hCfP_spec x).2
@@ -548,7 +565,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (partialLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.1 x.2.2.1 K (h_pou i))
     exact hatom.1
-  have h_comp_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+  have h_comp_memWkp : ∀ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
     intro x
     have hatom := (hCfC_spec x).2
@@ -559,8 +578,11 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     exact hatom.1
   have h_part_bound :
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
+          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
+        ≤ ENNReal.ofReal (Cpart *
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
           * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
               iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (partAtom i pk) Ω :=
     wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
@@ -571,8 +593,12 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       (fun x _ => hCpart_bd i x)
   have h_comp_bound :
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
+          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x
+            y) Ω
+        ≤ ENNReal.ofReal (Ccomp *
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
           * ∑ p : TensorCompIdx (E := E) r s,
               iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (compAtom i p) Ω :=
     wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
@@ -581,7 +607,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
       Ccomp hCcomp_nn
       (fun x _ => h_comp_memWkp x)
       (fun x _ => hCcomp_bd i x)
-  have h_part_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
+  have h_part_eq : (fun y => ∑ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E)), Fpart i x y)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -594,7 +622,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     funext y
     rw [hFpart_def]
     simp only [Fintype.sum_prod_type]
-  have h_comp_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
+  have h_comp_eq : (fun y => ∑ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin
+    (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -620,7 +650,8 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
               Ω := by
     rw [Fintype.sum_prod_type]
   have hpart : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
+        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
       ≤ ENNReal.ofReal Cmax *
         ∑ P : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
@@ -634,7 +665,9 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
   have hcomp : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
+        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x
+          y) Ω
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
@@ -646,10 +679,13 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
   have h_part_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω :=
+      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_part_memWkp x)
   have h_comp_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
+      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
+        Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_comp_memWkp x)
   rw [show (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
         g r s i α P₀ : EuclN → ℝ)
@@ -691,19 +727,27 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                           g r s α P₀ P Q k l p) y *
                       (componentLpLimit (I := I) (M := M)
                         g r s i α p : EuclN → ℝ) y)
-      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
-          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) := by
+      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
+          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x
+            y) := by
     funext y
     rw [← congrFun h_part_eq y, ← congrFun h_comp_eq y]
   rw [h_bridge]
   calc
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
-        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
+        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y)
+        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+          × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
         ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
+              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+                (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)), Fpart i x y) Ω
           + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
+              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+                (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp
+                i x y) Ω :=
         wkpNorm_add_le (d := Module.finrank ℝ E)
           (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
           h_part_group_memWkp h_comp_group_memWkp
@@ -776,12 +820,14 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
-  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
+  set CfC : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s) → ℝ := fun x =>
     (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
       (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
     with hCfC_def
-  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+  have hCfC_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+    (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       0 ≤ CfC x ∧ ∀ {G : EuclN → ℝ},
         MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
         (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -802,12 +848,14 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
         (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → ℝ := fun x =>
+  set CfP : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s) → ℝ := fun x =>
     (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
       (weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose
     with hCfP_def
-  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+  have hCfP_spec : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+    (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
       0 ≤ CfP x ∧ ∀ {G : EuclN → ℝ},
         MemWkp (d := Module.finrank ℝ E) K 2 G Ω →
         (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -826,7 +874,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (wkpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) α K
         (weightedGradFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ l x.1 x.2.1 x.2.2.1 x.2.2.2)).choose_spec
-  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
+  set Fcomp : TensorEigenIdx (I := I) (M := M) g r s →
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s) → EuclN → ℝ :=
     fun i x y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (euclidPartial (E := E) l
@@ -835,7 +885,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
         ((componentLpLimit (I := I) (M := M) g r s i α x.2.2.2 :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
     with hFcomp_def
-  set Fpart : TensorEigenIdx (I := I) (M := M) g r s → (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) → EuclN → ℝ :=
+  set Fpart : TensorEigenIdx (I := I) (M := M) g r s →
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s) → EuclN → ℝ :=
     fun i x y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (weightedGradFactor (I := I) (M := M)
@@ -878,13 +930,23 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
             g r s i α x.2.2.2 l K (h_pou i))
         exact hatom.2)
   refine ⟨max
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card),
+      (Ccomp * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+        TensorCompIdx (E := E) r s)).card)
+      (Cpart * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+        TensorCompIdx (E := E) r s)).card),
     le_trans (by positivity) (le_max_left _ _), fun i => ?_⟩
   set Cmax : ℝ := max
-      (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
-      (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card) with hCmax_def
-  have h_comp_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+      (Ccomp * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+        TensorCompIdx (E := E) r s)).card)
+      (Cpart * (Finset.univ : Finset
+        (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+        TensorCompIdx (E := E) r s)).card) with hCmax_def
+  have h_comp_memWkp : ∀ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fcomp i x) Ω := by
     intro x
     have hatom := (hCfC_spec x).2
@@ -893,7 +955,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (componentLpLimit_ae_zero_off_chartPouKernel (I := I) (M := M)
         g r s i α x.2.2.2)
     exact hatom.1
-  have h_part_memWkp : ∀ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s),
+  have h_part_memWkp : ∀ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) K 2 (Fpart i x) Ω := by
     intro x
     have hatom := (hCfP_spec x).2
@@ -904,8 +968,11 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     exact hatom.1
   have h_comp_bound :
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
-        ≤ ENNReal.ofReal (Ccomp * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
+          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
+        ≤ ENNReal.ofReal (Ccomp *
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
           * ∑ p : TensorCompIdx (E := E) r s,
               iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (compAtom i p) Ω :=
     wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
@@ -916,8 +983,11 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       (fun x _ => hCcomp_bd i x)
   have h_part_bound :
       iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
-        ≤ ENNReal.ofReal (Cpart * (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
+          (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
+        ≤ ENNReal.ofReal (Cpart *
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × TensorCompIdx (E := E) r s)).card)
           * ∑ pl : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
               iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (partAtom i pl) Ω :=
     wkpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M)
@@ -926,7 +996,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
       Cpart hCpart_nn
       (fun x _ => h_part_memWkp x)
       (fun x _ => hCpart_bd i x)
-  have h_comp_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
+  have h_comp_eq : (fun y => ∑ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s), Fcomp i x y)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -940,7 +1012,9 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     funext y
     rw [hFcomp_def]
     simp only [Fintype.sum_prod_type]
-  have h_part_eq : (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y)
+  have h_part_eq : (fun y => ∑ x :
+    (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) ×
+    TensorCompIdx (E := E) r s), Fpart i x y)
       = (fun y => ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -965,7 +1039,8 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
               Ω := by
     rw [Fintype.sum_prod_type]
   have hcomp : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
+        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
@@ -977,7 +1052,8 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (le_max_left _ _)) (zero_le _)
   have hpart : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
+        (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
       ≤ ENNReal.ofReal Cmax *
         ∑ p : TensorCompIdx (E := E) r s,
           ∑ l' : Fin (Module.finrank ℝ E),
@@ -991,10 +1067,12 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (le_max_right _ _)) (zero_le _)
   have h_comp_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
+      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_comp_memWkp x)
   have h_part_group_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
-      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
+      (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
     memWkp_finsetSum (I := I) (M := M) _ (fun x _ => h_part_memWkp x)
   rw [show (weightedGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ l : EuclN → ℝ)
@@ -1036,19 +1114,25 @@ theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
                         g r s α P₀ l P Q k p) y *
                     (partialLpLimit (I := I) (M := M) g r s i α p l :
                       EuclN → ℝ) y)
-      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) := by
+      = (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+        (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
+          + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+            (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) := by
     funext y
     rw [← congrFun h_comp_eq y, ← congrFun h_part_eq y]
   rw [h_bridge]
   calc
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
-        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω
+        (fun y => (∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+          (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y)
+        + ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+          × TensorCompIdx (E := E) r s), Fpart i x y) Ω
         ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
+              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+                (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fcomp i x y) Ω
           + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
-              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
+              (fun y => ∑ x : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s × Fin
+                (Module.finrank ℝ E) × TensorCompIdx (E := E) r s), Fpart i x y) Ω :=
         wkpNorm_add_le (d := Module.finrank ℝ E)
           (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
           h_comp_group_memWkp h_part_group_memWkp

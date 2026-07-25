@@ -382,7 +382,8 @@ private lemma chartPushedRaw_gradInnerPiece_eq_rhs
       chartFormulaRhsSmooth (I := I) (M := M) g α
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
         (etaTimesV (I := I) (M := M) α v.toFun) y := by
-    have := DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula.chartPushedRaw_gradInnerSmooth_pointwise
+    have :=
+      chartPushedRaw_gradInnerSmooth_pointwise
       (I := I) (M := M) g α (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
       (etaTimesVScalar (I := I) (M := M) g α v) hy
     simpa using this

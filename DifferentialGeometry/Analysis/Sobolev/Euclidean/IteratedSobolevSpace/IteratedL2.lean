@@ -297,7 +297,8 @@ theorem wkpNormL2_add_le
     exact h_lhs_le
   have h_triangle :
       Real.sqrt (∑ a : multiIndexUpToOrder k d, hR a ^ 2) ≤
-        Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) + Real.sqrt (∑ a : multiIndexUpToOrder k d, gR a ^ 2) := by
+        Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) + Real.sqrt
+          (∑ a : multiIndexUpToOrder k d, gR a ^ 2) := by
     let FR : EuclideanSpace ℝ (multiIndexUpToOrder k d) := WithLp.toLp 2 fR
     let GR : EuclideanSpace ℝ (multiIndexUpToOrder k d) := WithLp.toLp 2 gR
     let HR : EuclideanSpace ℝ (multiIndexUpToOrder k d) := WithLp.toLp 2 hR
@@ -435,13 +436,16 @@ theorem wkpNormL2_le_wkpNorm
     exact (iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_uWj β).eLpNorm_lt_top
   let fR : multiIndexUpToOrder k d → ℝ := fun a => (f a).toReal
   have hfR_nonneg : ∀ a : multiIndexUpToOrder k d, 0 ≤ fR a := fun a => ENNReal.toReal_nonneg
-  have h_real : Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) ≤ ∑ a : multiIndexUpToOrder k d, fR a := by
-    have h_aux : ∀ a ∈ (Finset.univ : Finset (multiIndexUpToOrder k d)), fR a ^ 2 ≤ fR a * (∑ b, fR b) := by
+  have h_real : Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) ≤ ∑ a : multiIndexUpToOrder k d,
+    fR a := by
+    have h_aux : ∀ a ∈ (Finset.univ : Finset (multiIndexUpToOrder k d)), fR a ^ 2 ≤ fR a *
+      (∑ b, fR b) := by
       intro a _
       rw [sq]
       apply mul_le_mul_of_nonneg_left _ (hfR_nonneg a)
       exact Finset.single_le_sum (f := fR) (fun b _ => hfR_nonneg b) (Finset.mem_univ _)
-    have h_sq_le : ∑ a : multiIndexUpToOrder k d, fR a ^ 2 ≤ (∑ a : multiIndexUpToOrder k d, fR a) ^ 2 := by
+    have h_sq_le : ∑ a : multiIndexUpToOrder k d, fR a ^ 2 ≤ (∑ a : multiIndexUpToOrder k d, fR a) ^
+      2 := by
       calc ∑ a : multiIndexUpToOrder k d, fR a ^ 2
           ≤ ∑ a : multiIndexUpToOrder k d, fR a * (∑ b, fR b) := Finset.sum_le_sum h_aux
         _ = (∑ a : multiIndexUpToOrder k d, fR a) * (∑ b, fR b) := by rw [← Finset.sum_mul]
@@ -468,7 +472,8 @@ theorem wkpNormL2_le_wkpNorm
     rw [wkpNorm_two_eq_sigma_sum]
     rw [ENNReal.toReal_sum (fun a _ => (h_finiteness_f a).ne)]
   rw [wkpNormL2_eq_ofReal_sqrt_toReal hSq_finite, hSq_toReal]
-  rw [show iteratedWeakSobolevNorm (d := d) k 2 u Ω = ENNReal.ofReal (∑ a : multiIndexUpToOrder k d, fR a) from by
+  rw [show iteratedWeakSobolevNorm (d := d) k 2 u Ω = ENNReal.ofReal
+    (∑ a : multiIndexUpToOrder k d, fR a) from by
     rw [← hLin_toReal, ENNReal.ofReal_toReal hLin_finite]]
   exact ENNReal.ofReal_le_ofReal h_real
 
@@ -493,7 +498,8 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
   let fR : multiIndexUpToOrder k d → ℝ := fun a => (f a).toReal
   have hfR_nonneg : ∀ a : multiIndexUpToOrder k d, 0 ≤ fR a := fun a => ENNReal.toReal_nonneg
   have h_real : (∑ a : multiIndexUpToOrder k d, fR a) ≤
-      Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) := by
+      Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt
+        (∑ a : multiIndexUpToOrder k d, fR a ^ 2) := by
     have h_CS : (∑ a : multiIndexUpToOrder k d, fR a) ^ 2 ≤
         (Fintype.card (multiIndexUpToOrder k d) : ℝ) * ∑ a : multiIndexUpToOrder k d, fR a ^ 2 := by
       have h := @sq_sum_le_card_mul_sum_sq (multiIndexUpToOrder k d) ℝ _ _ _ _ Finset.univ fR
@@ -504,11 +510,13 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
       Finset.sum_nonneg (fun a _ => sq_nonneg _)
     have h_sum_nonneg : 0 ≤ ∑ a : multiIndexUpToOrder k d, fR a :=
       Finset.sum_nonneg (fun a _ => hfR_nonneg a)
-    have h_RHS_nonneg : 0 ≤ Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2) :=
+    have h_RHS_nonneg : 0 ≤ Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt
+      (∑ a : multiIndexUpToOrder k d, fR a ^ 2) :=
       mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
     nlinarith [Real.sq_sqrt h_card_nonneg, Real.sq_sqrt h_sum_sq_nonneg,
       h_CS, h_sum_nonneg, h_RHS_nonneg, sq_nonneg ((∑ a : multiIndexUpToOrder k d, fR a) -
-        (Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt (∑ a : multiIndexUpToOrder k d, fR a ^ 2)))]
+        (Real.sqrt (Fintype.card (multiIndexUpToOrder k d) : ℝ) * Real.sqrt
+          (∑ a : multiIndexUpToOrder k d, fR a ^ 2)))]
   have hSq_finite : wkpNormL2Sq (d := d) k u Ω ≠ ∞ :=
     (wkpNormL2Sq_lt_top_of_memWkp (d := d) hu).ne
   have hLin_finite : iteratedWeakSobolevNorm (d := d) k 2 u Ω ≠ ∞ :=
@@ -524,7 +532,8 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
       (iteratedWeakSobolevNorm (d := d) k 2 u Ω).toReal = ∑ a : multiIndexUpToOrder k d, fR a := by
     rw [wkpNorm_two_eq_sigma_sum]
     rw [ENNReal.toReal_sum (fun a _ => (h_finiteness_f a).ne)]
-  rw [show iteratedWeakSobolevNorm (d := d) k 2 u Ω = ENNReal.ofReal (∑ a : multiIndexUpToOrder k d, fR a) from by
+  rw [show iteratedWeakSobolevNorm (d := d) k 2 u Ω = ENNReal.ofReal
+    (∑ a : multiIndexUpToOrder k d, fR a) from by
     rw [← hLin_toReal, ENNReal.ofReal_toReal hLin_finite]]
   rw [wkpNormL2_eq_ofReal_sqrt_toReal hSq_finite, hSq_toReal]
   rw [show ENNReal.ofReal (Real.sqrt (multiIndexUpToOrderCard k d)) =

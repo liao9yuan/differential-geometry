@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParse
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
@@ -22,7 +21,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem tensor0S_uncurry_cons_eval_of_expansion
     {s : ℕ} {x : M} (T : Tensor0SSpace (s + 1) I x)
     {n : ℕ} (c : Fin n → ℝ) (e : Fin n → TangentSpace I x)
@@ -49,7 +49,8 @@ theorem tensor0S_uncurry_cons_eval_of_expansion
   rw [Tensor0SSpace.toModel_smul (c a) (tensor0S_curry (I := I) (M := M) s x T (e a))]
   rw [ContinuousMultilinearMap.smul_apply]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem tensor0S_uncurry_cons_eval_orthonormal
     (g : SmoothRiemannianMetric I M) {s : ℕ} {x : M} (T : Tensor0SSpace (s + 1) I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -61,7 +62,8 @@ theorem tensor0S_uncurry_cons_eval_orthonormal
   tensor0S_uncurry_cons_eval_of_expansion (I := I) (M := M) T
     (fun a => g.inner x (e a) w) e w (hv_expand w) m
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma slot0Curry_coframeS_eq_tensor0S_curry
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -83,7 +85,8 @@ lemma slot0Curry_coframeS_eq_tensor0S_curry
   rw [hscalar, one_smul]
   rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem tensorRS_section_uncurry_cons_eval_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -104,7 +107,8 @@ theorem tensorRS_section_uncurry_cons_eval_slot0Curry
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [slot0Curry_coframeS_eq_tensor0S_curry (I := I) (M := M) g x s e K₀ T a]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem tensor0S_eq_sum_slot0_uncurry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -121,7 +125,8 @@ theorem tensor0S_eq_sum_slot0_uncurry
   refine ⟨n, e, hn, horth, fun T w m => ?_⟩
   exact tensor0S_uncurry_cons_eval_orthonormal (I := I) (M := M) g T e hv_expand w m
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem tensorRS_section_eq_sum_slot0Curry_uncurry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n),

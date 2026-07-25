@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransit
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -32,7 +30,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma coeFn_finsetSum_chartL2
     (α : M) {ι : Type*} (s : Finset ι)
     (G : ι → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -213,7 +212,8 @@ private lemma cutoffComponentScalar_eq_pou_transport_sum
       sum_chartAtlasPOU_transportChartCenters_eq_one (I := I) (M := M) α hχα,
       one_mul]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_finsetSum
     (α : M) {ι : Type*} (s : Finset ι) (F : ι → M → ℝ) (y : EuclN) :
     chartPushedRaw I α (fun x : M => ∑ a ∈ s, F a x) y =
@@ -265,7 +265,8 @@ private lemma cutoffComponentEuclid_eq_pou_transport_sum
     (fun Q x => transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x *
       tensorChartComponentPou (I := I) (M := M) g r s S β Q.1 Q.2 x) y
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma finsetSum_ae_eq
     (α : M) {ι : Type*} (s : Finset ι) {f h : ι → EuclN → ℝ}
     (hfh : ∀ a ∈ s,

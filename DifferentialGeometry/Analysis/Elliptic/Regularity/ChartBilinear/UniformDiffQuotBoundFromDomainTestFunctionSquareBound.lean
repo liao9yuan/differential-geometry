@@ -44,7 +44,159 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option maxHeartbeats 1200000 in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma nirenberg_product_rule_square_bound
+    {η u g G_F : EuclN → ℝ} (N : ℝ) (hN : 0 ≤ N)
+    (k : Fin (Module.finrank ℝ E)) (h : ℝ)
+    (hG_F_def : G_F = fun y =>
+      (η y) ^ 2 *
+          DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h g y +
+        ((fderiv ℝ (fun z => (η z) ^ 2) y) (EuclideanSpace.single k 1)) *
+          DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h u y)
+    (hη_sq_le_one : ∀ x, (η x) ^ 2 ≤ 1)
+    (h_eta_sq_fderiv_bound : ∀ y,
+      |(fderiv ℝ (fun z => (η z) ^ 2) y) (EuclideanSpace.single k 1)| ≤ 2 * N) :
+    ∀ x : EuclN,
+      (G_F x)^2 ≤
+        8 * N^2 *
+          (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
+          (DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h u x)^2 +
+        2 * (η x)^2 *
+          (DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h g x)^2 := by
+  intro x
+  set T1 : ℝ := (η x)^2 *
+    DifferentialGeometry.Analysis.Sobolev.diffQuot
+      (d := Module.finrank ℝ E) k h g x with hT1_def
+  set T2 : ℝ := ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)) *
+    DifferentialGeometry.Analysis.Sobolev.diffQuot
+      (d := Module.finrank ℝ E) k h u x with hT2_def
+  have hG_F_x : G_F x = T1 + T2 := by
+    rw [hG_F_def]
+  rw [hG_F_x]
+  have h_sq_sum_le : (T1 + T2)^2 ≤ 2 * T1^2 + 2 * T2^2 := by
+    have h_nn_diff : 0 ≤ (T1 - T2)^2 := sq_nonneg _
+    nlinarith
+  refine h_sq_sum_le.trans ?_
+  have h_T1_sq_bound : 2 * T1^2 ≤ 2 * (η x)^2 *
+      (DifferentialGeometry.Analysis.Sobolev.diffQuot
+        (d := Module.finrank ℝ E) k h g x)^2 := by
+    rw [hT1_def]
+    have h_sq : ((η x)^2 *
+        DifferentialGeometry.Analysis.Sobolev.diffQuot
+          (d := Module.finrank ℝ E) k h g x)^2 =
+        (η x)^4 *
+        (DifferentialGeometry.Analysis.Sobolev.diffQuot
+          (d := Module.finrank ℝ E) k h g x)^2 := by ring
+    rw [h_sq]
+    have h_eta_4_le_2 : (η x)^4 ≤ (η x)^2 := by
+      have h1 : (η x)^4 = (η x)^2 * (η x)^2 := by ring
+      rw [h1]
+      have h_eta_sq_nn : 0 ≤ (η x)^2 := sq_nonneg _
+      have h_eta_sq_le_one : (η x)^2 ≤ 1 := hη_sq_le_one x
+      nlinarith
+    have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
+        (d := Module.finrank ℝ E) k h g x)^2 := sq_nonneg _
+    calc
+      2 * ((η x)^4 *
+          (DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h g x)^2) ≤
+          2 * ((η x)^2 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h g x)^2) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right h_eta_4_le_2 h_dq_sq_nn) (by norm_num)
+      _ = 2 * (η x)^2 *
+          (DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h g x)^2 := by ring
+  have h_T2_sq_bound : 2 * T2^2 ≤ 8 * N^2 *
+      (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
+      (DifferentialGeometry.Analysis.Sobolev.diffQuot
+        (d := Module.finrank ℝ E) k h u x)^2 := by
+    rw [hT2_def]
+    by_cases hx_in : x ∈ tsupport η
+    · rw [Set.indicator_of_mem hx_in]
+      have h_bound := h_eta_sq_fderiv_bound x
+      have h_sq_eq : (((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)) *
+          DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h u x)^2 =
+          ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 *
+          (DifferentialGeometry.Analysis.Sobolev.diffQuot
+            (d := Module.finrank ℝ E) k h u x)^2 := by ring
+      rw [h_sq_eq]
+      have h_partial_sq_le_4N2 :
+          ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 ≤
+            4 * N^2 := by
+        have h_abs_le : |(fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)|
+            ≤ 2 * N := h_bound
+        have h_2N_nn : 0 ≤ 2 * N := by linarith
+        have h_sq_le : |(fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)|^2 ≤
+            (2 * N)^2 :=
+          sq_le_sq'
+            ((neg_nonpos.mpr h_2N_nn).trans (abs_nonneg _)) h_abs_le
+        have h_sq_abs : |(fderiv ℝ (fun z => (η z)^2) x)
+            (EuclideanSpace.single k 1)|^2 =
+            ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 := by
+          rw [sq_abs]
+        rw [← h_sq_abs]
+        have h_two_sq : (2 * N)^2 = 4 * N^2 := by ring
+        rw [h_two_sq] at h_sq_le
+        exact h_sq_le
+      have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
+          (d := Module.finrank ℝ E) k h u x)^2 := sq_nonneg _
+      calc
+        2 * (((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h u x)^2) ≤
+            2 * ((4 * N^2) *
+              (DifferentialGeometry.Analysis.Sobolev.diffQuot
+                (d := Module.finrank ℝ E) k h u x)^2) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_right h_partial_sq_le_4N2 h_dq_sq_nn) (by norm_num)
+        _ = 8 * N^2 * 1 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h u x)^2 := by ring
+    · rw [Set.indicator_of_notMem hx_in]
+      have h_tsupp_compl_open : IsOpen (tsupport η)ᶜ :=
+        (isClosed_tsupport η).isOpen_compl
+      have h_eta_sq_eq_zero_nhds :
+          (fun y : EuclN => (η y)^2) =ᶠ[nhds x] (fun _ => (0 : ℝ)) := by
+        refine Filter.eventually_of_mem (h_tsupp_compl_open.mem_nhds hx_in) ?_
+        intro y hy
+        have hη_y_zero : η y = 0 := image_eq_zero_of_notMem_tsupport hy
+        change (η y)^2 = 0
+        rw [hη_y_zero]
+        ring
+      have h_fderiv_eq : fderiv ℝ (fun y : EuclN => (η y)^2) x =
+          fderiv ℝ (fun _ : EuclN => (0 : ℝ)) x :=
+        Filter.EventuallyEq.fderiv_eq h_eta_sq_eq_zero_nhds
+      have h_partial_zero :
+          (fderiv ℝ (fun y : EuclN => (η y)^2) x)
+            (EuclideanSpace.single k 1) = 0 := by
+        rw [h_fderiv_eq]
+        simp
+      rw [h_partial_zero, zero_mul]
+      norm_num
+  calc
+    2 * T1^2 + 2 * T2^2 ≤
+        2 * (η x)^2 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h g x)^2 +
+          8 * N^2 *
+            (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h u x)^2 :=
+      add_le_add h_T1_sq_bound h_T2_sq_bound
+    _ = 8 * N^2 *
+            (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h u x)^2 +
+          2 * (η x)^2 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h g x)^2 := by ring
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_v_test_sq_discharge
@@ -115,7 +267,7 @@ theorem chartBilinear_v_test_sq_discharge
     rw [h_eq] at hx'
     exact hδ_in_chart hx'
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := Metric.cthickening r (tsupport η))
       (Ω' := chartTargetEuclid (I := I) (M := M) α)
@@ -163,7 +315,7 @@ theorem chartBilinear_v_test_sq_discharge
         (fun y => (η y)^2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h u_g y)
         Set.univ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction.hasWeakPartialDeriv_eta_sq_diffQuot
+    hasWeakPartialDeriv_eta_sq_diffQuot
       (d := Module.finrank ℝ E) k k h hη hu_g_locInt (hG_locInt k) (hG_isWP k)
   have h_self_subset_cthick :
       tsupport η ⊆ Metric.cthickening |h| (tsupport η) :=
@@ -690,211 +842,26 @@ theorem chartBilinear_v_test_sq_discharge
             (d := Module.finrank ℝ E) k h u_g x)^2 +
         2 * (η x)^2 *
           (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2 := by
-    intro x
-    set T1 : ℝ := (η x)^2 *
-      DifferentialGeometry.Analysis.Sobolev.diffQuot
-        (d := Module.finrank ℝ E) k h (G k) x with hT1_def
-    set T2 : ℝ := ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)) *
-      DifferentialGeometry.Analysis.Sobolev.diffQuot
-        (d := Module.finrank ℝ E) k h u_g x with hT2_def
-    have hG_F_x : G_F x = T1 + T2 := rfl
-    rw [hG_F_x]
-    have h_sq_sum_le : (T1 + T2)^2 ≤ 2 * T1^2 + 2 * T2^2 := by
-      have h_nn_diff : 0 ≤ (T1 - T2)^2 := sq_nonneg _
-      nlinarith
-    refine h_sq_sum_le.trans ?_
-    have h_T1_sq_bound : 2 * T1^2 ≤ 2 * (η x)^2 *
-        (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2 := by
-      rw [hT1_def]
-      have h_sq : ((η x)^2 *
-          DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2 =
-          (η x)^4 *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2 := by ring
-      rw [h_sq]
-      have h_eta_4_le_2 : (η x)^4 ≤ (η x)^2 := by
-        have h1 : (η x)^4 = (η x)^2 * (η x)^2 := by ring
-        rw [h1]
-        have h_eta_sq_nn : 0 ≤ (η x)^2 := sq_nonneg _
-        have h_eta_sq_le_one : (η x)^2 ≤ 1 := hη_sq_le_one x
-        nlinarith
-      have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2 := sq_nonneg _
-      nlinarith
-    have h_T2_sq_bound : 2 * T2^2 ≤ 8 * N^2 *
-        (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
-        (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h u_g x)^2 := by
-      rw [hT2_def]
-      by_cases hx_in : x ∈ tsupport η
-      · rw [Set.indicator_of_mem hx_in]
-        have h_bound := h_eta_sq_fderiv_bound x
-        have h_sq_eq : (((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)) *
-            DifferentialGeometry.Analysis.Sobolev.diffQuot
-              (d := Module.finrank ℝ E) k h u_g x)^2 =
-            ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 *
-            (DifferentialGeometry.Analysis.Sobolev.diffQuot
-              (d := Module.finrank ℝ E) k h u_g x)^2 := by ring
-        rw [h_sq_eq]
-        have h_partial_sq_le_4N2 :
-            ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 ≤
-              4 * N^2 := by
-          have h_abs_le : |(fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)|
-              ≤ 2 * N := h_bound
-          have h_abs_nn : 0 ≤
-              |(fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)| :=
-            abs_nonneg _
-          have h_2N_nn : 0 ≤ 2 * N := by linarith
-          have h_sq_le : |(fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1)|^2 ≤
-              (2 * N)^2 := by
-            exact sq_le_sq' (by linarith) h_abs_le
-          have h_sq_abs : |(fderiv ℝ (fun z => (η z)^2) x)
-              (EuclideanSpace.single k 1)|^2 =
-              ((fderiv ℝ (fun z => (η z)^2) x) (EuclideanSpace.single k 1))^2 := by
-            rw [sq_abs]
-          rw [← h_sq_abs]
-          have : (2 * N)^2 = 4 * N^2 := by ring
-          rw [this] at h_sq_le
-          exact h_sq_le
-        have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2 := sq_nonneg _
-        nlinarith
-      · rw [Set.indicator_of_notMem hx_in]
-        have h_η_zero : η x = 0 := image_eq_zero_of_notMem_tsupport hx_in
-        have h_tsupp_compl_open : IsOpen (tsupport η)ᶜ :=
-          (isClosed_tsupport η).isOpen_compl
-        have hx_in_compl : x ∈ (tsupport η)ᶜ := hx_in
-        have h_eta_sq_eq_zero_nhds :
-            (fun y : EuclN => (η y)^2) =ᶠ[nhds x] (fun _ => (0 : ℝ)) := by
-          refine Filter.eventually_of_mem (h_tsupp_compl_open.mem_nhds hx_in_compl) ?_
-          intro y hy
-          have hη_y_zero : η y = 0 := image_eq_zero_of_notMem_tsupport hy
-          change (η y)^2 = 0
-          rw [hη_y_zero]; ring
-        have h_fderiv_eq : fderiv ℝ (fun y : EuclN => (η y)^2) x =
-            fderiv ℝ (fun _ : EuclN => (0 : ℝ)) x :=
-          Filter.EventuallyEq.fderiv_eq h_eta_sq_eq_zero_nhds
-        have h_partial_zero :
-            (fderiv ℝ (fun y : EuclN => (η y)^2) x)
-              (EuclideanSpace.single k 1) = 0 := by
-          rw [h_fderiv_eq]; simp
-        rw [h_partial_zero, zero_mul]
-        have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2 := sq_nonneg _
-        nlinarith
-    linarith
+            (d := Module.finrank ℝ E) k h (G k) x)^2 :=
+    nirenberg_product_rule_square_bound (E := E)
+      (η := η) (u := u_g) (g := G k) (G_F := G_F) N hN k h
+      hG_F_def hη_sq_le_one h_eta_sq_fderiv_bound
   have h_eta_sq_dq_G_sq_integrable :
       Integrable (fun x : EuclN => (η x)^2 *
         (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2) (volume : Measure EuclN) := by
-    have h_dq_G_sq_int : Integrable (fun x : EuclN =>
-        (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2) (volume : Measure EuclN) :=
-      h_diffQuot_G_l2.integrable_sq
-    have h_aesm : AEStronglyMeasurable (fun x : EuclN => (η x)^2 *
-        (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2) (volume : Measure EuclN) := by
-      have h1 : AEStronglyMeasurable (fun x : EuclN => (η x)^2)
-          (volume : Measure EuclN) := hη_sq_cont.aestronglyMeasurable
-      have h2 : AEStronglyMeasurable (fun x : EuclN =>
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2) (volume : Measure EuclN) :=
-        h_dq_G_sq_int.aestronglyMeasurable
-      exact h1.mul h2
-    have h_pt_le : ∀ᵐ x ∂(volume : Measure EuclN),
-        ‖(η x)^2 *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2‖ ≤
-          ‖(DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h (G k) x)^2‖ := by
-      refine Filter.Eventually.of_forall ?_
-      intro x
-      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_of_nonneg (hη_sq_nn x)]
-      have h_le1 : (η x)^2 ≤ 1 := hη_sq_le_one x
-      nlinarith [abs_nonneg
-        ((DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h (G k) x)^2), hη_sq_nn x]
-    exact h_dq_G_sq_int.mono h_aesm h_pt_le
-  have h_dq_u_g_sq_int : Integrable (fun x : EuclN =>
-      (DifferentialGeometry.Analysis.Sobolev.diffQuot
-        (d := Module.finrank ℝ E) k h u_g x)^2) (volume : Measure EuclN) :=
-    h_diffQuot_u_g_l2.integrable_sq
+          (d := Module.finrank ℝ E) k h (G k) x)^2)
+        (volume : Measure EuclN) := by
+    have hbase := integrable_const_eta_sq_diffQuot_g_sq
+      (d := Module.finrank ℝ E) hG_l2 hη hη_supp k k h 1
+    simpa only [one_mul] using hbase
   have h_indicator_dq_u_g_sq_int : Integrable (fun x : EuclN =>
       8 * N^2 *
       (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
       (DifferentialGeometry.Analysis.Sobolev.diffQuot
-        (d := Module.finrank ℝ E) k h u_g x)^2) (volume : Measure EuclN) := by
-    have h_aesm : AEStronglyMeasurable (fun x : EuclN =>
-        8 * N^2 *
-        (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
-        (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h u_g x)^2) (volume : Measure EuclN) := by
-      have h1 : AEStronglyMeasurable
-          (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)))
-          (volume : Measure EuclN) :=
-        (aestronglyMeasurable_const).indicator
-          (isClosed_tsupport η).measurableSet
-      have h2 : AEStronglyMeasurable (fun x : EuclN =>
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2)
-          (volume : Measure EuclN) := h_dq_u_g_sq_int.aestronglyMeasurable
-      exact ((aestronglyMeasurable_const.mul h1).mul h2)
-    have h_pt_le : ∀ᵐ x ∂(volume : Measure EuclN),
-        ‖8 * N^2 *
-          (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2‖ ≤
-          ‖8 * N^2 *
-            (DifferentialGeometry.Analysis.Sobolev.diffQuot
-              (d := Module.finrank ℝ E) k h u_g x)^2‖ := by
-      refine Filter.Eventually.of_forall ?_
-      intro x
-      have h_8N2_nn : 0 ≤ 8 * N^2 := by nlinarith
-      have h_indicator_le : |Set.indicator (tsupport η)
-          (fun _ : EuclN => (1 : ℝ)) x| ≤ 1 := by
-        by_cases hx : x ∈ tsupport η
-        · rw [Set.indicator_of_mem hx]; simp
-        · rw [Set.indicator_of_notMem hx]; simp
-      have h_indicator_nn : 0 ≤ Set.indicator (tsupport η)
-          (fun _ : EuclN => (1 : ℝ)) x := by
-        by_cases hx : x ∈ tsupport η
-        · rw [Set.indicator_of_mem hx]; norm_num
-        · rw [Set.indicator_of_notMem hx]
-      have h_dq_sq_nn : 0 ≤ (DifferentialGeometry.Analysis.Sobolev.diffQuot
-          (d := Module.finrank ℝ E) k h u_g x)^2 := sq_nonneg _
-      have h_LHS_nn : 0 ≤ 8 * N^2 *
-          (Set.indicator (tsupport η) (fun _ : EuclN => (1 : ℝ)) x) *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2 := by
-        have : 0 ≤ 8 * N^2 * (Set.indicator (tsupport η)
-            (fun _ : EuclN => (1 : ℝ)) x) :=
-          mul_nonneg h_8N2_nn h_indicator_nn
-        exact mul_nonneg this h_dq_sq_nn
-      have h_RHS_nn : 0 ≤ 8 * N^2 *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2 :=
-        mul_nonneg h_8N2_nn h_dq_sq_nn
-      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg h_LHS_nn,
-        abs_of_nonneg h_RHS_nn]
-      have h_ind_le_1 : Set.indicator (tsupport η)
-          (fun _ : EuclN => (1 : ℝ)) x ≤ 1 := by
-        by_cases hx : x ∈ tsupport η
-        · rw [Set.indicator_of_mem hx]
-        · rw [Set.indicator_of_notMem hx]; norm_num
-      have h_step : 8 * N^2 * (Set.indicator (tsupport η)
-          (fun _ : EuclN => (1 : ℝ)) x) *
-          (DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k h u_g x)^2 ≤
-          8 * N^2 * 1 *
-            (DifferentialGeometry.Analysis.Sobolev.diffQuot
-              (d := Module.finrank ℝ E) k h u_g x)^2 :=
-        mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left h_ind_le_1 h_8N2_nn)
-          h_dq_sq_nn
-      linarith
-    exact (h_dq_u_g_sq_int.const_mul (8 * N^2)).mono h_aesm h_pt_le
+        (d := Module.finrank ℝ E) k h u_g x)^2)
+      (volume : Measure EuclN) :=
+    integrable_const_indicator_diffQuot_u_sq
+      (d := Module.finrank ℝ E) hu_g_l2 hη_supp k h (8 * N^2)
   have hG_F_sq_int : Integrable (fun x : EuclN => (G_F x)^2)
       (volume : Measure EuclN) := hG_F_l2.integrable_sq
   have h_two_eta_sq_dq_int : Integrable (fun x : EuclN =>

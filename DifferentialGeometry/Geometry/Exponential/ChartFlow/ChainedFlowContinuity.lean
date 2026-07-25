@@ -55,7 +55,8 @@ theorem maximalGeodesic_continuousAt_zero
       Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hε)
     filter_upwards [h_ball] with t ht using h_eq t ht
   exact hproj_cont.congr h_eventually.symm
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless]
+    [T2Space (TangentBundle I M)] in
 lemma IsGeodesicOnWithInitial.continuousOn_base
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {J : Set ℝ}
     {p : M} {v : TangentSpace I p}

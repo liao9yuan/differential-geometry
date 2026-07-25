@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -89,8 +88,7 @@ noncomputable def freezeTailField {s : ℕ}
             TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y (v q y)) x₀ := by
       intro q
       refine Fin.cases ?_ (fun i => ?_) q
-      ·
-        have hframe :
+      · have hframe :
             ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
               (fun y : M =>
                 TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -102,8 +100,7 @@ noncomputable def freezeTailField {s : ℕ}
         filter_upwards with y
         simp [v, freezeTailSlots, metricTraceInput]
       · refine Fin.cases ?_ (fun c => ?_) i
-        ·
-          have hframe :
+        · have hframe :
               ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
                 (fun y : M =>
                   TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y
@@ -115,8 +112,7 @@ noncomputable def freezeTailField {s : ℕ}
           filter_upwards with y
           simp only [v, freezeTailSlots, metricTraceInput, Fin.cases_succ,
             Fin.cases_zero]
-        ·
-          have hYc := (Y c).contMDiff x₀
+        · have hYc := (Y c).contMDiff x₀
           refine hYc.congr_of_eventuallyEq ?_
           filter_upwards with y
           simp [v, freezeTailSlots, metricTraceInput]
@@ -638,7 +634,7 @@ theorem metricTraceFirstTwoField_eq_sum {s : ℕ}
       (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
         DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
           (I := I) g x k l (extChartAt I x x))
-      (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) g x)
       (A x) tail]
 
@@ -955,7 +951,8 @@ theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
     rcases eq_or_ne (p : ℕ) 1 with h1 | h1
     · rw [show traceNablaShuffle s p = 0 from
         Fin.ext (by rw [Fin.val_zero, hv, if_neg h0, if_pos h1]), Fin.cons_zero]
-      rw [show p.pred hp0 = 0 from Fin.ext (by rw [Fin.val_zero, Fin.val_pred]; omega), Fin.cons_zero]
+      rw [show p.pred hp0 = 0 from Fin.ext (by rw [Fin.val_zero, Fin.val_pred]; omega),
+        Fin.cons_zero]
     · rcases eq_or_ne (p : ℕ) 2 with h2 | h2
       · have hs : traceNablaShuffle s p ≠ 0 := by
           rw [Ne, Fin.ext_iff, Fin.val_zero, hv, if_neg h0, if_neg h1, if_pos h2]; omega
@@ -1022,7 +1019,7 @@ theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
     (fun k l => DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) g x k l (extChartAt I x x)) with hgInv
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   rw [← totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         s cov X (metricTraceFirstTwoField (I := I) (M := M) g A) x slots,

@@ -103,28 +103,23 @@ theorem volume_variation_formula_clean
               + (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x)
           ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t₀))
       t₀ := by
-
   have hf_cont_joint : Continuous (fun p : ℝ × M => f p.1 p.2) := hf.continuous_joint
-
   have hf_cont : ∀ᶠ s in 𝓝 t₀, Continuous (f s) := by
     refine Filter.Eventually.of_forall (fun s => ?_)
     have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (s, x))) := by
       refine hf_cont_joint.comp ?_
       exact continuous_const.prodMk continuous_id
     exact this
-
   have hft₀_cont : Continuous (f t₀) := by
     have : Continuous ((fun p : ℝ × M => f p.1 p.2) ∘ (fun x : M => (t₀, x))) := by
       refine hf_cont_joint.comp ?_
       exact continuous_const.prodMk continuous_id
     exact this
-
   have h_deriv_cont : Continuous (fun x : M => deriv (fun s : ℝ => f s x) t₀) := by
     have : Continuous ((fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
         ∘ (fun x : M => (t₀, x))) :=
       hf.continuous_deriv_joint.comp (continuous_const.prodMk continuous_id)
     exact this
-
   have hh_cont : Continuous (fun x : M =>
       deriv (fun s : ℝ => f s x) t₀ +
       (1/2) * traceTimeDerivMetric (I := I) g_fam t₀ x * f t₀ x) := by
@@ -132,7 +127,6 @@ theorem volume_variation_formula_clean
     refine Continuous.mul ?_ hft₀_cont
     refine Continuous.mul continuous_const ?_
     exact traceTimeDerivMetric_continuous (I := I) (M := M) hg
-
   refine volume_variation_formula_clean_of_chart_derivs
     (I := I) (M := M) g_fam f t₀ hf_cont hh_cont ?_
   intro α hα

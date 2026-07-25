@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -25,6 +23,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -49,7 +48,8 @@ private lemma cutoffComponentEuclid_contDiff_section
     ContDiff ℝ ∞
       (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) := by
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+  exact
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
     (I := I) (M := M)
     (cutoffComponentScalar_contMDiff (I := I) (M := M) g r s S α Idx Jdx)
     (cutoffComponentScalar_tsupport_subset_source
@@ -65,7 +65,8 @@ private lemma cutoffComponentEuclid_hasCompactSupport_section
     HasCompactSupport
       (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) := by
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+  exact
+    chartPushedRaw_smooth_hasCompactSupport_local
     (I := I) (M := M)
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
@@ -80,7 +81,8 @@ private lemma cutoffComponentEuclid_tsupport_subset_section
     tsupport (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
+  exact
+    tsupport_chartPushedRaw_subset_chartTargetEuclid
     (I := I) (M := M)
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
@@ -464,7 +466,8 @@ private lemma differentiableAt_cutoffComponentEuclid
   ((cutoffComponentEuclid_contDiff_section (I := I) (M := M)
     g r s S α Idx Jdx).differentiable (by norm_num)).differentiableAt
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tendsto_sum3
     (α : M) {κ₁ κ₂ κ₃ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃]

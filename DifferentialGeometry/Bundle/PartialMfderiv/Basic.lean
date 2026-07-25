@@ -48,7 +48,50 @@ noncomputable abbrev vderiv
 
 
 
-set_option maxHeartbeats 250000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem mfderiv_eq_fderivWithin_chart_comp
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    [FiniteDimensional Real E] [CompleteSpace E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [IsManifold I 1 M]
+    (f : M -> Real) (x : M) (z : M) (hz : z ∈ (extChartAt I x).source)
+    (hg_diffWithin : DifferentiableWithinAt Real (f ∘ (extChartAt I x).symm)
+      (Set.range I) ((extChartAt I x) z)) :
+    mfderiv I 𝓘(Real, Real) f z =
+      (fderivWithin Real (f ∘ (extChartAt I x).symm) (Set.range I)
+          ((extChartAt I x) z)).comp
+        (mfderiv I 𝓘(Real, E) (extChartAt I x) z) := by
+  set φ := extChartAt I x with hφ
+  set s : Set E := Set.range I with hs
+  set g : E -> Real := f ∘ φ.symm with hg
+  have hφ_open : IsOpen φ.source := isOpen_extChartAt_source (I := I) x
+  have hz_chart : z ∈ (chartAt H x).source := by
+    simpa only [φ, extChartAt_source] using hz
+  have hf_eq : f =ᶠ[𝓝 z] g ∘ φ := by
+    filter_upwards [hφ_open.mem_nhds hz] with w hw
+    simp only [g, Function.comp_apply, φ.left_inv hw]
+  rw [hf_eq.mfderiv_eq]
+  have hφ_diff : MDifferentiableAt I 𝓘(Real, E) φ z :=
+    mdifferentiableAt_extChartAt (I := I) (x := x) hz_chart
+  have hφ_diffWithin : MDifferentiableWithinAt I 𝓘(Real, E) φ φ.source z :=
+    hφ_diff.mdifferentiableWithinAt
+  have hg_mdiffWithin : MDifferentiableWithinAt 𝓘(Real, E) 𝓘(Real, Real) g s (φ z) :=
+    mdifferentiableWithinAt_iff_differentiableWithinAt.mpr hg_diffWithin
+  have h_maps : φ.source ⊆ φ ⁻¹' s := fun w hw =>
+    extChartAt_target_subset_range (I := I) x (φ.map_source hw)
+  have hUniq : UniqueMDiffWithinAt I φ.source z :=
+    hφ_open.uniqueMDiffWithinAt hz
+  have hchain := mfderivWithin_comp z hg_mdiffWithin hφ_diffWithin h_maps hUniq
+  rw [mfderivWithin_eq_mfderiv hUniq hφ_diff] at hchain
+  have hgφ_diff : MDifferentiableAt I 𝓘(Real, Real) (g ∘ φ) z := by
+    have hcomp : MDifferentiableWithinAt I 𝓘(Real, Real) (g ∘ φ) φ.source z :=
+      hg_mdiffWithin.comp z hφ_diffWithin h_maps
+    exact hcomp.mdifferentiableAt (hφ_open.mem_nhds hz)
+  rw [mfderivWithin_eq_mfderiv hUniq hgφ_diff] at hchain
+  rw [mfderivWithin_eq_fderivWithin] at hchain
+  exact hchain
+
 set_option backward.isDefEq.respectTransparency false in
 theorem vderiv_mlieBracket
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -85,26 +128,21 @@ theorem vderiv_mlieBracket
   letI : NormedSpace Real (TangentSpace 𝓘(Real, E) y₀) := by
     change NormedSpace Real E
     infer_instance
-  have hxmem : x ∈ φ.source := by
-    simp [φ]
-  have hy₀tgt : y₀ ∈ φ.target := by
-    simpa [y₀] using φ.map_source hxmem
-  have hy₀s : y₀ ∈ s := by
-    simp [s, φ, y₀]
-  have huniq : UniqueDiffOn Real s := by
-    simpa [s] using I.uniqueDiffOn
+  have hxmem : x ∈ φ.source := mem_extChartAt_source (I := I) x
+  have hy₀tgt : y₀ ∈ φ.target := φ.map_source hxmem
+  have hy₀s : y₀ ∈ s := extChartAt_target_subset_range (I := I) x hy₀tgt
+  have huniq : UniqueDiffOn Real s := I.uniqueDiffOn
   have hy₀closure : y₀ ∈ closure (interior s) := by
-    exact I.range_subset_closure_interior (by simpa [s] using hy₀s)
+    exact I.range_subset_closure_interior hy₀s
+  have hmin : (minSmoothness Real 2 : WithTop ℕ∞) = 2 := by
+    rw [minSmoothness_of_isRCLikeNormedField]
   have hn_ne_top : (minSmoothness Real 2 : WithTop ℕ∞) ≠ ∞ := by
-    rw [minSmoothness_of_isRCLikeNormedField]
-    norm_num
+    rw [hmin]; norm_num
   have hn_ne_zero : (minSmoothness Real 2 : WithTop ℕ∞) ≠ 0 := by
-    rw [minSmoothness_of_isRCLikeNormedField]
-    norm_num
+    rw [hmin]; norm_num
   have h_one_add_le :
       (1 : WithTop ℕ∞) + 1 ≤ (minSmoothness Real 2 : WithTop ℕ∞) := by
-    rw [minSmoothness_of_isRCLikeNormedField]
-    norm_num
+    rw [hmin]; norm_num
   have h_two_le : minSmoothness Real 2 ≤ (minSmoothness Real 2 : WithTop ℕ∞) := le_rfl
   have mfderiv_eq :
       ∀ (h : M -> Real), MDifferentiableAt I 𝓘(Real, Real) h x ->
@@ -154,114 +192,74 @@ theorem vderiv_mlieBracket
   have hg_event :
       ∀ᶠ y in 𝓝[s] y₀,
         ContDiffWithinAt Real (minSmoothness Real 2) g s y := by
-    simpa [Set.insert_eq_of_mem hy₀s] using hg_smooth.eventually hn_ne_top
+    simpa only [Set.insert_eq_of_mem hy₀s] using hg_smooth.eventually hn_ne_top
   have mfderiv_fderivWithin_chain :
       ∀ z ∈ φ.source, DifferentiableWithinAt Real g s (φ z) ->
         mfderiv I 𝓘(Real, Real) f z =
-          (fderivWithin Real g s (φ z)).comp (mfderiv I 𝓘(Real, E) φ z) := by
-    intro z hz hg_diffWithin
-    have hφ_open : IsOpen φ.source := by
-      simpa [φ] using isOpen_extChartAt_source (I := I) x
-    have hz_chart : z ∈ (chartAt H x).source := by
-      simpa [φ, extChartAt_source] using hz
-    have hφz_tgt : φ z ∈ φ.target := φ.map_source hz
-    have hf_eq : f =ᶠ[𝓝 z] g ∘ φ := by
-      filter_upwards [hφ_open.mem_nhds hz] with w hw
-      simp [g, φ.left_inv hw]
-    rw [hf_eq.mfderiv_eq]
-    have hφ_diff : MDifferentiableAt I 𝓘(Real, E) φ z := by
-      simpa [φ] using mdifferentiableAt_extChartAt (I := I) (x := x) hz_chart
-    have hφ_diffWithin : MDifferentiableWithinAt I 𝓘(Real, E) φ φ.source z :=
-      hφ_diff.mdifferentiableWithinAt
-    have hg_mdiffWithin : MDifferentiableWithinAt 𝓘(Real, E) 𝓘(Real, Real) g s (φ z) :=
-      mdifferentiableWithinAt_iff_differentiableWithinAt.mpr hg_diffWithin
-    have h_maps : φ.source ⊆ φ ⁻¹' s := fun w hw =>
-      extChartAt_target_subset_range (I := I) x (by simpa [φ] using φ.map_source hw)
-    have hUniq : UniqueMDiffWithinAt I φ.source z :=
-      hφ_open.uniqueMDiffWithinAt hz
-    have hchain := mfderivWithin_comp z hg_mdiffWithin hφ_diffWithin h_maps hUniq
-    rw [mfderivWithin_eq_mfderiv hUniq hφ_diff] at hchain
-    have hgφ_diff : MDifferentiableAt I 𝓘(Real, Real) (g ∘ φ) z := by
-      have hcomp : MDifferentiableWithinAt I 𝓘(Real, Real) (g ∘ φ) φ.source z :=
-        hg_mdiffWithin.comp z hφ_diffWithin h_maps
-      exact hcomp.mdifferentiableAt (hφ_open.mem_nhds hz)
-    rw [mfderivWithin_eq_mfderiv hUniq hgφ_diff] at hchain
-    rw [mfderivWithin_eq_fderivWithin] at hchain
-    exact hchain
+          (fderivWithin Real g s (φ z)).comp (mfderiv I 𝓘(Real, E) φ z) :=
+    fun z hz hg_diffWithin =>
+      mfderiv_eq_fderivWithin_chart_comp f x z hz hg_diffWithin
+  have pull_eq : ∀ (Z : (p : M) -> TangentSpace I p), ∀ y ∈ φ.target,
+      VectorField.mpullbackWithin 𝓘(Real, E) I φ.symm Z s y =
+        mfderiv I 𝓘(Real, E) φ (φ.symm y) (Z (φ.symm y)) := by
+    intro Z y hy
+    simp only [VectorField.mpullbackWithin_apply]
+    congr 1
+    exact ContinuousLinearMap.inverse_eq
+      (mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt (I := I) hy)
+      (mfderiv_extChartAt_comp_mfderivWithin_extChartAt_symm (I := I) hy)
   have W'_eq : ∀ y ∈ φ.target,
-      W' y = mfderiv I 𝓘(Real, E) φ (φ.symm y) (Y (φ.symm y)) := by
-    intro y hy
-    simp only [W', VectorField.mpullbackWithin_apply]
-    congr 1
-    exact ContinuousLinearMap.inverse_eq
-      (mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt (I := I) hy)
-      (mfderiv_extChartAt_comp_mfderivWithin_extChartAt_symm (I := I) hy)
+      W' y = mfderiv I 𝓘(Real, E) φ (φ.symm y) (Y (φ.symm y)) := pull_eq Y
   have V'_eq : ∀ y ∈ φ.target,
-      V' y = mfderiv I 𝓘(Real, E) φ (φ.symm y) (X (φ.symm y)) := by
-    intro y hy
-    simp only [V', VectorField.mpullbackWithin_apply]
+      V' y = mfderiv I 𝓘(Real, E) φ (φ.symm y) (X (φ.symm y)) := pull_eq X
+  have hZf_eq : ∀ Z : (p : M) -> TangentSpace I p,
+      ((fun p : M => mfderiv I 𝓘(Real, Real) f p (Z p)) ∘ φ.symm)
+        =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y
+          (VectorField.mpullbackWithin 𝓘(Real, E) I φ.symm Z s y)) := by
+    intro Z
+    filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem (I := I) hy₀tgt,
+      hg_event] with y hy hgy
+    have hy_src : φ.symm y ∈ φ.source := φ.map_target hy
+    have hgy_diff :
+        DifferentiableWithinAt Real g s (φ (φ.symm y)) := by
+      simpa [φ.right_inv hy] using hgy.differentiableWithinAt hn_ne_zero
+    have h1 := mfderiv_fderivWithin_chain (φ.symm y) hy_src hgy_diff
+    have h2 : mfderiv I 𝓘(Real, Real) f (φ.symm y) (Z (φ.symm y)) =
+        fderivWithin Real g s (φ (φ.symm y))
+          (mfderiv I 𝓘(Real, E) φ (φ.symm y) (Z (φ.symm y))) := by
+      rw [h1]
+      rfl
+    simp only [Function.comp_def]
+    rw [h2, φ.right_inv hy]
     congr 1
-    exact ContinuousLinearMap.inverse_eq
-      (mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt (I := I) hy)
-      (mfderiv_extChartAt_comp_mfderivWithin_extChartAt_symm (I := I) hy)
+    exact (pull_eq Z y hy).symm
   have hYf_eq : ((fun p : M => mfderiv I 𝓘(Real, Real) f p (Y p)) ∘ φ.symm)
-      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (W' y)) := by
-    filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem (I := I) hy₀tgt,
-      hg_event] with y hy hgy
-    have hy_src : φ.symm y ∈ φ.source := φ.map_target hy
-    have hgy_diff :
-        DifferentiableWithinAt Real g s (φ (φ.symm y)) := by
-      simpa [φ.right_inv hy] using hgy.differentiableWithinAt hn_ne_zero
-    have h1 := mfderiv_fderivWithin_chain (φ.symm y) hy_src hgy_diff
-    have h2 : mfderiv I 𝓘(Real, Real) f (φ.symm y) (Y (φ.symm y)) =
-        fderivWithin Real g s (φ (φ.symm y))
-          (mfderiv I 𝓘(Real, E) φ (φ.symm y) (Y (φ.symm y))) := by
-      rw [h1]
-      rfl
-    simp only [Function.comp_def]
-    rw [h2, φ.right_inv hy]
-    congr 1
-    exact (W'_eq y hy).symm
+      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (W' y)) := hZf_eq Y
   have hXf_eq : ((fun p : M => mfderiv I 𝓘(Real, Real) f p (X p)) ∘ φ.symm)
-      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (V' y)) := by
-    filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem (I := I) hy₀tgt,
-      hg_event] with y hy hgy
-    have hy_src : φ.symm y ∈ φ.source := φ.map_target hy
-    have hgy_diff :
-        DifferentiableWithinAt Real g s (φ (φ.symm y)) := by
-      simpa [φ.right_inv hy] using hgy.differentiableWithinAt hn_ne_zero
-    have h1 := mfderiv_fderivWithin_chain (φ.symm y) hy_src hgy_diff
-    have h2 : mfderiv I 𝓘(Real, Real) f (φ.symm y) (X (φ.symm y)) =
-        fderivWithin Real g s (φ (φ.symm y))
-          (mfderiv I 𝓘(Real, E) φ (φ.symm y) (X (φ.symm y))) := by
-      rw [h1]
-      rfl
-    simp only [Function.comp_def]
-    rw [h2, φ.right_inv hy]
-    congr 1
-    exact (V'_eq y hy).symm
+      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (V' y)) := hZf_eq X
+  have hZf_eq_v : ∀ (Z : (p : M) -> TangentSpace I p) (P : E -> E),
+      ((fun p : M => mfderiv I 𝓘(Real, Real) f p (Z p)) ∘ φ.symm)
+          =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (P y)) ->
+      ((vderiv (I := I) f Z) ∘ φ.symm)
+          =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (P y)) := by
+    intro Z P hZ
+    filter_upwards [hZ] with y hy
+    simpa only [vderiv, extDerivFun, NormedSpace.fromTangentSpace,
+      ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe,
+      ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk] using hy
   have hYf_eq_v : ((vderiv (I := I) f Y) ∘ φ.symm)
-      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (W' y)) := by
-    filter_upwards [hYf_eq] with y hy
-    simpa [vderiv, extDerivFun, NormedSpace.fromTangentSpace] using hy
+      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (W' y)) := hZf_eq_v Y W' hYf_eq
   have hXf_eq_v : ((vderiv (I := I) f X) ∘ φ.symm)
-      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (V' y)) := by
-    filter_upwards [hXf_eq] with y hy
-    simpa [vderiv, extDerivFun, NormedSpace.fromTangentSpace] using hy
+      =ᶠ[𝓝[s] y₀] (fun y => fderivWithin Real g s y (V' y)) := hZf_eq_v X V' hXf_eq
+  have hfd_diff : DifferentiableWithinAt Real (fderivWithin Real g s) s y₀ :=
+    (hg_smooth.fderivWithin_right huniq h_one_add_le hy₀s).differentiableWithinAt
+      (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
   have hmodelY_diff :
-      DifferentiableWithinAt Real (fun y => fderivWithin Real g s y (W' y)) s y₀ := by
-    have hderiv :
-        DifferentiableWithinAt Real (fderivWithin Real g s) s y₀ := by
-      exact (hg_smooth.fderivWithin_right huniq h_one_add_le hy₀s).differentiableWithinAt
-        (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
-    exact hderiv.clm_apply hW'_diff
+      DifferentiableWithinAt Real (fun y => fderivWithin Real g s y (W' y)) s y₀ :=
+    hfd_diff.clm_apply hW'_diff
   have hmodelX_diff :
-      DifferentiableWithinAt Real (fun y => fderivWithin Real g s y (V' y)) s y₀ := by
-    have hderiv :
-        DifferentiableWithinAt Real (fderivWithin Real g s) s y₀ := by
-      exact (hg_smooth.fderivWithin_right huniq h_one_add_le hy₀s).differentiableWithinAt
-        (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
-    exact hderiv.clm_apply hV'_diff
+      DifferentiableWithinAt Real (fun y => fderivWithin Real g s y (V' y)) s y₀ :=
+    hfd_diff.clm_apply hV'_diff
   have hYf_chart_diff :
       DifferentiableWithinAt Real
         ((vderiv (I := I) f Y) ∘ φ.symm)
@@ -272,20 +270,19 @@ theorem vderiv_mlieBracket
         ((vderiv (I := I) f X) ∘ φ.symm)
         s y₀ :=
     (hXf_eq_v.differentiableWithinAt_iff_of_mem hy₀s).mpr hmodelX_diff
+  have hZf_diff : ∀ Z : (p : M) -> TangentSpace I p,
+      DifferentiableWithinAt Real ((vderiv (I := I) f Z) ∘ φ.symm) s y₀ ->
+      MDifferentiableAt I 𝓘(Real, Real) (vderiv (I := I) f Z) x := by
+    intro Z hZ
+    rw [mdifferentiableAt_iff_source_of_mem_source (I := I) (I' := 𝓘(Real, Real))
+      (x := x) (x' := x) (mem_chart_source H x)]
+    rw [mdifferentiableWithinAt_iff_differentiableWithinAt]
+    simpa only [writtenInExtChartAt, extChartAt, φ, y₀, s, Function.comp_def]
+      using hZ
   have hYf_diff : MDifferentiableAt I 𝓘(Real, Real)
-      (vderiv (I := I) f Y) x := by
-    rw [mdifferentiableAt_iff_source_of_mem_source (I := I) (I' := 𝓘(Real, Real))
-      (x := x) (x' := x) (mem_chart_source H x)]
-    rw [mdifferentiableWithinAt_iff_differentiableWithinAt]
-    simpa [writtenInExtChartAt, extChartAt, φ, y₀, s, Function.comp_def]
-      using hYf_chart_diff
+      (vderiv (I := I) f Y) x := hZf_diff Y hYf_chart_diff
   have hXf_diff : MDifferentiableAt I 𝓘(Real, Real)
-      (vderiv (I := I) f X) x := by
-    rw [mdifferentiableAt_iff_source_of_mem_source (I := I) (I' := 𝓘(Real, Real))
-      (x := x) (x' := x) (mem_chart_source H x)]
-    rw [mdifferentiableWithinAt_iff_differentiableWithinAt]
-    simpa [writtenInExtChartAt, extChartAt, φ, y₀, s, Function.comp_def]
-      using hXf_chart_diff
+      (vderiv (I := I) f X) x := hZf_diff X hXf_chart_diff
   rw [mfderiv_eq _ hYf_diff, mfderiv_eq _ hXf_diff]
   have hYf_fd :
       fderivWithin Real
@@ -299,9 +296,11 @@ theorem vderiv_mlieBracket
           s y₀ =
         fderivWithin Real (fun y => fderivWithin Real g s y (V' y)) s y₀ :=
     hXf_eq_v.fderivWithin_eq (hXf_eq_v.self_of_nhdsWithin hy₀s)
-  rw [hYf_fd, hXf_fd, ← hV'_y₀, ← hW'_y₀]
-  exact VectorField.fderivWithin_apply_lieBracket hg_smooth h_two_le huniq
+  have hmain := VectorField.fderivWithin_apply_lieBracket hg_smooth h_two_le huniq
     hy₀closure hy₀s hW'_diff hV'_diff
+  rw [hV'_y₀, hW'_y₀] at hmain
+  rw [hYf_fd, hXf_fd]
+  exact hmain
 
 
 theorem extDerivFun_apply_mlieBracket
@@ -330,25 +329,20 @@ theorem contMDiff_partial_deriv_fst_gen
     (F : C^∞⟮𝓘(ℝ, ℝ).prod I, ℝ × M; ℝ⟯) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) := by
-
-
   have hrw : (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) =
       fun p : ℝ × M => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t => F (t, p.2)) p.1) (1 : ℝ) := by
     funext p
     rw [mfderiv_eq_fderiv]
     exact (fderiv_apply_one_eq_deriv (f := fun t => F (t, p.2)) (x := p.1)).symm
   rw [hrw]
-
   rw [contMDiff_infty]
   intro n p₀
-
   have harg : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
       (fun q : (ℝ × M) × ℝ => (q.2, q.1.2)) :=
     ContMDiff.prodMk contMDiff_snd contMDiff_fst.snd
   have hF : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2)) :=
     F.contMDiff.comp harg
-
   have h_apply :=
     ContMDiffAt.mfderiv_apply
       (I := 𝓘(ℝ, ℝ)) (I' := 𝓘(ℝ, ℝ))
@@ -363,8 +357,6 @@ theorem contMDiff_partial_deriv_fst_gen
       contMDiffAt_id
       contMDiffAt_const
       le_rfl
-
-
   simpa [inTangentCoordinates_model_space] using h_apply
 
 
@@ -474,7 +466,6 @@ theorem extDerivFun_finset_sum_mul_at
         (U i x * extDerivFun (I := I) (B i) x v +
           B i x * extDerivFun (I := I) (U i) x v) := by
   classical
-
   have hsumdiff :
       ∀ (s : Finset ι), (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x) →
         (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x) →
@@ -482,7 +473,8 @@ theorem extDerivFun_finset_sum_mul_at
             (fun y : M => ∑ i ∈ s, U i y * B i y) x := by
     intro s
     induction s using Finset.induction_on with
-    | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+    | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ))
+                 (c := (0 : ℝ))
     | insert a s has ih =>
         intro hUs hBs
         have hUa : MDifferentiableAt I 𝓘(ℝ, ℝ) (U a) x := hUs a (by simp)
@@ -596,7 +588,6 @@ theorem extDerivFun_finset_sum_sum_mul_at
         (U i j x * extDerivFun (I := I) (B i j) x v +
           B i j x * extDerivFun (I := I) (U i j) x v) := by
   classical
-
   have hinner_diff :
       ∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ)
         (fun y : M => ∑ j ∈ t, U i j y * B i j y) x := by
@@ -607,7 +598,8 @@ theorem extDerivFun_finset_sum_sum_mul_at
             MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y : M => ∑ j ∈ r, U i j y * B i j y) x := by
       intro r
       induction r using Finset.induction_on with
-      | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+      | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ))
+                   (c := (0 : ℝ))
       | insert a r har ih =>
           intro hUr hBr
           have hUa := hUr a (by simp)

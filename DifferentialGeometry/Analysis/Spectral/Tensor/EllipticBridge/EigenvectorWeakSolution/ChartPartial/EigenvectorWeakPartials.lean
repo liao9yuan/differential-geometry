@@ -175,7 +175,6 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
       g r s i α P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -238,7 +237,6 @@ private lemma eigenvectorChartPartial_eLpNorm_tendsto
       g r s i α P₀ k)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

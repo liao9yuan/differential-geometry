@@ -287,7 +287,6 @@ lemma chartPushedRaw_pou_mul_hasCompactSupport
     isClosed_closure h_tsupp_sub
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
-
 omit [IsManifold I ∞ M] in
 lemma chartPushedRaw_sub
     (α : M) (u v : M → ℝ) :
@@ -302,7 +301,6 @@ lemma chartPushedRaw_sub
   · simp [hy]
 
 omit [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
-
 omit [IsManifold I ∞ M] [T2Space M] in
 lemma chartPushedRaw_pullbackToM_apply
     (α : M)
@@ -1106,7 +1104,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable
@@ -1116,7 +1113,6 @@ private lemma chartAtlasPOU_measurable (α : M) :
     : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma pou_mul_measurable (α : M) {u : M → ℝ} (hu : Measurable u) :
     Measurable (fun x : M =>
@@ -1125,7 +1121,6 @@ private lemma pou_mul_measurable (α : M) {u : M → ℝ} (hu : Measurable u) :
   (chartAtlasPOU_measurable (I := I) (M := M) α).mul hu
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma pou_mul_sub_measurable (α : M) {u v : M → ℝ}
     (hu : Measurable u) (hv : Measurable v) :
@@ -1138,7 +1133,6 @@ private lemma pou_mul_sub_measurable (α : M) {u v : M → ℝ}
     ((chartAtlasPOU_measurable (I := I) (M := M) α).mul hv)
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma tsupport_pou_mul_subset_tsupport_pou
     (α : M) (u : M → ℝ) :
@@ -1158,7 +1152,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou
   exact tsupport_smul_subset_left _ _
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma tsupport_pou_mul_sub_subset_tsupport_pou
     (α : M) (u v : M → ℝ) :
@@ -1212,7 +1205,6 @@ private lemma tsupport_pou_mul_sub_subset_tsupport_pou
       (subset_tsupport _ hv_supp)
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma tsupport_pou_mul_subset_chart_source
     (α : M) (u : M → ℝ) :
@@ -1224,7 +1216,6 @@ private lemma tsupport_pou_mul_subset_chart_source
       (I := I) (M := M) α)
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma tsupport_pou_mul_sub_subset_chart_source
     (α : M) (u v : M → ℝ) :
@@ -1263,7 +1254,6 @@ private lemma kPouCompact_nonempty_of_pouNonempty
   exact ⟨_, x, subset_tsupport _ hx, rfl⟩
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma image_extChartAt_tsupport_pou_mul_subset_kPouCompact
     (α : M) (u : M → ℝ) :
@@ -1274,7 +1264,6 @@ private lemma image_extChartAt_tsupport_pou_mul_subset_kPouCompact
   exact ⟨x, tsupport_pou_mul_subset_tsupport_pou (I := I) (M := M) α u hx, rfl⟩
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma image_extChartAt_tsupport_pou_mul_sub_subset_kPouCompact
     (α : M) (u v : M → ℝ) :

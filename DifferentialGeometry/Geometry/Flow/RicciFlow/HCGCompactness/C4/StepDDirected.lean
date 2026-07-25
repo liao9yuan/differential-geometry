@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackFi
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Distances
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -275,10 +274,6 @@ theorem chainComp'_snoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
       rw [chainComp'_apply_succ,
         ih (j + 1) (j + (l + 1 + 1)) (by omega) ((Ψ j : Mf j → Mf (j + 1)) x)]
       conv_rhs => rw [chainComp'_apply_succ]
-
-
-
-
       have hcast : ∀ (a : ℕ) (ha : (j + 1) + l = a),
           (Ψ a : Mf a → Mf (a + 1))
               ((chainComp' (I := I) (Mf := Mf) Ψ l (j + 1) a ha : Mf (j + 1) → Mf a)
@@ -289,8 +284,6 @@ theorem chainComp'_snoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
                   ((Ψ j : Mf j → Mf (j + 1)) x))) := by
         intro a ha; subst ha; rfl
       rw [hcast (j + (l + 1)) (by omega)]
-
-
       simp only [eqRec_eq_cast]
 
 
@@ -369,9 +362,6 @@ theorem closedEBall_ofReal_subset_ball {α : Type*} [PseudoMetricSpace α]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem data_image_metric_ball
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
@@ -406,8 +396,6 @@ theorem data_image_metric_ball
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem data_image_metric_ball_of_superset
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [IsManifold I ∞ M]
@@ -545,8 +533,10 @@ theorem image_eq_of_fun_eq {α β : Type*} {s : Set α} {f g : α → β} (h : f
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [MetricSpace M] [Nonempty M] [T2Space N] [SigmaCompactSpace N] in
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [IsManifold I ∞ N] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [MetricSpace M] [Nonempty M] [T2Space N]
+    [SigmaCompactSpace N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [IsManifold I ∞ N] in
 theorem symm_eventuallyEq_on_image
     {Φ Ψ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
     {U : TopologicalSpace.Opens M}
@@ -597,7 +587,6 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     Nonempty (BookApproxIsoPartialData (I := I) K ε p
       (PartialDiffeomorph.refl (I := I) M') g g) := by
   classical
-
   have hcoe : ∀ x : M', (PartialDiffeomorph.refl (I := I) M' : M' → M') x = x := fun _ => rfl
   have hmfd : ∀ x : M', mfderiv I I (PartialDiffeomorph.refl (I := I) M' : M' → M') x
       = ContinuousLinearMap.id ℝ (TangentSpace I x) := fun x => mfderiv_id
@@ -605,15 +594,15 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
     fun _ => rfl
   have hsymmmfd : ∀ x : M', mfderiv I I ((PartialDiffeomorph.refl (I := I) M').symm : M' → M') x
       = ContinuousLinearMap.id ℝ (TangentSpace I x) := fun x => mfderiv_id
-
-
   have hnz : ∀ (s : ℕ) (y : M'),
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g y s
-        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y)) = 0 := by
+        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y)) =
+          0 := by
     intro s y
     have hz : Tensor0SBundle.inner0S (I := I) g y s
-        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 = 0 := by
-      show (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
+        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 =
+          0 := by
+      change (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
       rw [(Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat.map_zero]
       exact LinearMap.zero_apply _
     rw [Tensor0SBundle.normSq0S_eq_inner, hz, Real.sqrt_zero]
@@ -635,7 +624,7 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [Tensor0SBundle.metricTensorField_apply, hΦ x, hΦd x]
       simp only [ContinuousLinearMap.id_apply]
     · intro x _
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
         (Tensor0SBundle.metricTensorField (I := I) g x
           - Tensor0SBundle.metricTensorField (I := I) g x)) ≤ ε
       have hs : (Tensor0SBundle.metricTensorField (I := I) g x
@@ -646,11 +635,11 @@ theorem reflBookData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       exact le_of_lt hε
     · intro a ha1 _ x _
       obtain ⟨a', rfl⟩ : ∃ a', a = a' + 1 := ⟨a - 1, by omega⟩
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (tensor02CovDeriv (I := I) (Tensor0SBundle.metricTensorField (I := I) g) g (a' + 1) x))
         ≤ ε
       rw [tensor02CovDeriv_metric_zero]
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M')
           (a' + 1 + 2) x)) ≤ ε
       rw [hnz]
@@ -685,11 +674,13 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       = ContinuousLinearMap.id ℝ (TangentSpace I x) := fun x => mfderiv_id
   have hnz : ∀ (s : ℕ) (y : M'),
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g y s
-        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y)) = 0 := by
+        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y)) =
+          0 := by
     intro s y
     have hz : Tensor0SBundle.inner0S (I := I) g y s
-        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 = 0 := by
-      show (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
+        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M') s y) 0 =
+          0 := by
+      change (Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat 0 0 = 0
       rw [(Tensor0SBundle.tensor0SMetricData (I := I) g y s).flat.map_zero]
       exact LinearMap.zero_apply _
     rw [Tensor0SBundle.normSq0S_eq_inner, hz, Real.sqrt_zero]
@@ -711,7 +702,7 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [Tensor0SBundle.metricTensorField_apply, hΦ x, hΦd x]
       simp only [ContinuousLinearMap.id_apply]
     · intro x _
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
         (Tensor0SBundle.metricTensorField (I := I) g x
           - Tensor0SBundle.metricTensorField (I := I) g x)) ≤ 0
       have hs : (Tensor0SBundle.metricTensorField (I := I) g x
@@ -721,11 +712,11 @@ theorem reflSepData {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       rw [hs, hnz]
     · intro a ha1 _ x _
       obtain ⟨a', rfl⟩ : ∃ a', a = a' + 1 := ⟨a - 1, by omega⟩
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (tensor02CovDeriv (I := I) (Tensor0SBundle.metricTensorField (I := I) g) g (a' + 1) x))
         ≤ 0
       rw [tensor02CovDeriv_metric_zero]
-      show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
+      change Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (a' + 1 + 2)
         (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M')
           (a' + 1 + 2) x)) ≤ 0
       rw [hnz]
@@ -1038,6 +1029,18 @@ def sepNextC0 (c0 cov δ : ℝ) : ℝ :=
 def sepNextCov (c0 cov δ B : ℝ) : ℝ :=
   sepFeed c0 cov + δ * B
 
+private lemma sepNextC0_nonneg {c0 cov δ : ℝ} (hc0 : 0 ≤ c0) (hδ : 0 ≤ δ)
+    (hfeed : 0 ≤ sepFeed c0 cov) : 0 ≤ sepNextC0 c0 cov δ := by
+  unfold sepNextC0
+  have h : 0 ≤ δ * (1 + sepFeed c0 cov) := mul_nonneg hδ (by linarith)
+  linarith
+
+private lemma sepNextCov_nonneg {c0 cov δ B : ℝ} (hfeed : 0 ≤ sepFeed c0 cov)
+    (hδ : 0 ≤ δ) (hB : 0 ≤ B) : 0 ≤ sepNextCov c0 cov δ B := by
+  unfold sepNextCov
+  have h : 0 ≤ δ * B := mul_nonneg hδ hB
+  linarith
+
 theorem sepFeed_c0 (c0 cov : ℝ) :
     c0 / (1 - c0) ≤ sepFeed c0 cov :=
   le_max_left _ _
@@ -1190,11 +1193,10 @@ theorem sepTailBudget (B ε : ℝ) (hε : 0 < ε) :
 theorem exists_strictMono_ge (T : ℕ → ℕ) :
     ∃ σ : ℕ → ℕ, StrictMono σ ∧ ∀ j, T j ≤ σ j := by
   classical
-
   refine ⟨fun j => j + Finset.sup (Finset.range (j + 1)) T, ?_, ?_⟩
   · apply strictMono_nat_of_lt_succ
     intro n
-    show n + Finset.sup (Finset.range (n + 1)) T
+    change n + Finset.sup (Finset.range (n + 1)) T
         < (n + 1) + Finset.sup (Finset.range (n + 1 + 1)) T
     have hsub : Finset.range (n + 1) ⊆ Finset.range (n + 1 + 1) :=
       Finset.range_mono (Nat.le_succ (n + 1))
@@ -1205,12 +1207,11 @@ theorem exists_strictMono_ge (T : ℕ → ℕ) :
         ≤ n + Finset.sup (Finset.range (n + 1 + 1)) T := Nat.add_le_add_left hmono n
       _ < (n + 1) + Finset.sup (Finset.range (n + 1 + 1)) T := by omega
   · intro j
-    show T j ≤ j + Finset.sup (Finset.range (j + 1)) T
+    change T j ≤ j + Finset.sup (Finset.range (j + 1)) T
     exact le_trans (Finset.le_sup (Finset.self_mem_range_succ j)) (Nat.le_add_left _ j)
 
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -1238,18 +1239,15 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
             (chainComp (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ j l)
             (X.obj (σ j)).metric (X.obj (σ (j + l))).metric)) := by
   classical
-
   have hrpos : ∀ j : ℕ, (0 : ℝ) < (2 : ℝ) ^ (j + 1) := fun j => by positivity
   have hepos : ∀ j : ℕ, (0 : ℝ) < (1 / 2 : ℝ) ^ (j + 1) := fun j => by positivity
   have helt : ∀ j : ℕ, (1 / 2 : ℝ) ^ (j + 1) < 1 :=
     fun j => pow_lt_one₀ (by norm_num) (by norm_num) (by omega)
-
   set T : ℕ → ℕ := fun j =>
     (stepB1_of_raw P B ((2 : ℝ) ^ (j + 1)) (hrpos j) ((1 / 2 : ℝ) ^ (j + 1)) (hepos j)
       (helt j) j).choose with hT
   obtain ⟨σ, hσmono, hσge⟩ := exists_strictMono_ge T
   refine ⟨σ, hσmono, ?_⟩
-
   letI : ∀ j, TopologicalSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).topology
   letI : ∀ j, ChartedSpace H (X.obj (σ j)).M := fun j => (X.obj (σ j)).charted
   letI : ∀ j, IsManifold I ∞ (X.obj (σ j)).M := fun j => (X.obj (σ j)).smooth
@@ -1264,17 +1262,13 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
       (by decide : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
   letI : ∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj (σ j)).M := fun j => by
     change IsManifold I ∞ (X.obj (σ j)).M; infer_instance
-
   letI hRB : ∀ j, Bundle.RiemannianBundle (fun x : (X.obj (σ j)).M => TangentSpace I x) :=
     fun j => (X.obj (σ j)).riemBundle
   haveI hRiem : ∀ j, IsRiemannianManifold I (X.obj (σ j)).M := fun j =>
     member_isRiemannian (X.obj (σ j)) (P (σ j))
   haveI hProper : ∀ j, ProperSpace (X.obj (σ j)).M := fun j => (P (σ j)).proper
-
   have hstep : ∀ j : ℕ, T j ≤ σ j ∧ T j ≤ σ (j + 1) := fun j =>
     ⟨hσge j, le_trans (hσge j) (le_of_lt (hσmono (Nat.lt_succ_self j)))⟩
-
-
   have hΨex : ∀ j : ℕ,
       ∃ Φ : PartialDiffeomorph I I (X.obj (σ j)).M (X.obj (σ (j + 1))).M (∞ : WithTop ℕ∞),
         Metric.closedBall ((X.obj (σ j)).basepoint) ((2 : ℝ) ^ (j + 1)) ⊆ Φ.source ∧
@@ -1292,7 +1286,6 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
   have hC0 : 0 ≤ C := (comp_cov_le_unif.{u, uE, uH} (I := I) p).choose_spec.1
   let B : ℝ := max C 2
   have hBpos : 0 < B := lt_of_lt_of_le (by norm_num : (0 : ℝ) < 2) (le_max_right C 2)
-
   obtain ⟨jε, hjε⟩ := sepTailBudget B ε hε
   obtain ⟨jβ, hjβ⟩ := sepTailBudget B (1 / 2) (by norm_num)
   refine ⟨max (max jε jβ) p, fun j hj => ?_⟩
@@ -1418,18 +1411,10 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
         sepFeed_nonneg hc0F0 (lt_of_le_of_lt hc0F2 (by norm_num))
       have hfeedR0 : 0 ≤ sepFeed c0R covR :=
         sepFeed_nonneg hc0R0 (lt_of_le_of_lt hc0R2 (by norm_num))
-      have hc0NF0 : 0 ≤ c0NF := by
-        dsimp [c0NF, sepNextC0]
-        nlinarith
-      have hcovNF0 : 0 ≤ covNF := by
-        dsimp [covNF, sepNextCov]
-        nlinarith [hBpos.le]
-      have hc0NR0 : 0 ≤ c0NR := by
-        dsimp [c0NR, sepNextC0]
-        nlinarith
-      have hcovNR0 : 0 ≤ covNR := by
-        dsimp [covNR, sepNextCov]
-        nlinarith [hBpos.le]
+      have hc0NF0 : 0 ≤ c0NF := sepNextC0_nonneg hc0F0 hδF0 hfeedF0
+      have hcovNF0 : 0 ≤ covNF := sepNextCov_nonneg hfeedF0 hδF0 hBpos.le
+      have hc0NR0 : 0 ≤ c0NR := sepNextC0_nonneg hc0R0 hδR0 hfeedR0
+      have hcovNR0 : 0 ≤ covNR := sepNextCov_nonneg hfeedR0 hδR0 hBpos.le
       have hc0Next0 : 0 ≤ c0Next := by
         dsimp [c0Next]
         exact le_max_of_le_left hc0NF0
@@ -1552,12 +1537,12 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
             (by
               intro x v
               simpa using
-                (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+                (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                   (I := I) (X.obj (σ s)).metric x v))
             (by
               intro x v
               simpa using
-                (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+                (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                   (I := I) (X.obj (σ (s + l))).metric x v))
             hRmid_pos le_rfl (by norm_num : (0 : ℝ) ≤ 1 / 2)
             (by
@@ -1645,11 +1630,13 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
           ((X.obj (σ (s + 1))).basepoint) (openRad_pos (s + 1) l)
       have DtailR_Ktail : BookApproxIsoSep (I := I) (Ktail : Set (X.obj (σ (s + 1))).M)
           c0R covR p
-          (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1)) htail_index)
+          (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1))
+            htail_index)
           (X.obj (σ (s + 1))).metric (X.obj (σ (s + (l + 1)))).metric := by
         exact DrevTail
       have hKtail_src : (Ktail : Set (X.obj (σ (s + 1))).M) ⊆
-          (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1)) htail_index).source :=
+          (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1))
+            htail_index).source :=
         DtailR_Ktail.source_sub
       let KmidE : Set (X.obj (σ s)).M :=
         Metric.closedEBall ((X.obj (σ s)).basepoint) (ENNReal.ofReal Rmid)
@@ -1682,12 +1669,12 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
             (by
               intro x v
               simpa using
-                (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+                (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                   (I := I) (X.obj (σ s)).metric x v))
             (by
               intro x v
               simpa using
-                (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+                (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                   (I := I) (X.obj (σ (s + 1))).metric x v))
             hRmid_pos le_rfl hδR0 hstep_image_radius hclosed_mid_step DstepR_p.forward
             hsrc_step_mid
@@ -1707,15 +1694,18 @@ theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
             exact le_max_right _ _
       have hRclosedSep : PreApproxIsoSep (I := I)
           ((PartialDiffeomorph.trans (I := I) (Ψ s)
-              (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1)) htail_index) :
+              (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1))
+                htail_index) :
                 (X.obj (σ s)).M → (X.obj (σ (s + (l + 1)))).M) ''
             Metric.closedBall ((X.obj (σ s)).basepoint) Rnext) c0Next covNext p
           ((PartialDiffeomorph.trans (I := I) (Ψ s)
-              (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1)) htail_index)).symm :
+              (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1))
+                htail_index)).symm :
                 (X.obj (σ (s + (l + 1)))).M → (X.obj (σ s)).M)
           (X.obj (σ (s + (l + 1)))).metric (X.obj (σ s)).metric :=
         compSepRev (I := I)
-          (Ψ s) (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1)) htail_index)
+          (Ψ s) (chainComp' (I := I) (Mf := fun i => (X.obj (σ i)).M) Ψ l (s + 1) (s + (l + 1))
+            htail_index)
           DstepRopen.source_sub hKtail_src himg_step_mid hKcompactF hKU₁F hc0R2
           hfeedR0 hqR1 (sepFeed_c0 c0R covR) (sepFeed_cov c0R covR)
           hδR0 le_rfl le_rfl C hC0

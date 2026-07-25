@@ -721,7 +721,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α v)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by

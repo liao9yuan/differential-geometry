@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryRecon
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -197,7 +195,8 @@ noncomputable def genuineThirdCurvFieldFibPureR
   ∑ a : Fin n, g.inner x (e a) w •
     Tensor0SSpace.toModel
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s (smoothExtensionTangent (I := I) x (e a))
+        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
+          (smoothExtensionTangent (I := I) x (e a))
           (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x)
         (unitZeroSec (I := I) (M := M) x)) m
 
@@ -231,7 +230,8 @@ theorem genuineThirdCurvFieldFib_eq_pureR_add_covDeriv
           (fun y : M => S.toSection y) x)
         (unitZeroSec (I := I) (M := M) x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s (smoothExtensionTangent (I := I) x (e a))
+        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
+          (smoothExtensionTangent (I := I) x (e a))
           (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x)
         (unitZeroSec (I := I) (M := M) x) +
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
@@ -241,7 +241,8 @@ theorem genuineThirdCurvFieldFib_eq_pureR_add_covDeriv
     have hclm :
         (tensor3rdCurvGenuine (I := I) g 0 s (smoothExtensionTangent (I := I) x (e a))
           (fun y : M => S.toSection y) x : TensorRSSpace 0 s I x) =
-        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s (smoothExtensionTangent (I := I) x (e a))
+        genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
+          (smoothExtensionTangent (I := I) x (e a))
             (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x +
           genuineCurvTraceFixedFrameCovDeriv (I := I) g s (smoothExtensionTangent (I := I) x (e a))
             (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x := by
@@ -290,7 +291,8 @@ private lemma genuinePureRDirCLM_apply_extend
       genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s (smoothExtensionTangent (I := I) x v)
         (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x := by
   classical
-  rw [genuineCurvatureOnlyDirectionalCLM, ContinuousLinearMap.sum_apply, genuineCurvTraceFixedFrameCurvatureOnly]
+  rw [genuineCurvatureOnlyDirectionalCLM, ContinuousLinearMap.sum_apply,
+    genuineCurvTraceFixedFrameCurvatureOnly]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [genuinePureRDirCLMSummand, LinearMap.coe_toContinuousLinearMap', genuinePureRDirLMSummand,
     LinearMap.coe_mk, AddHom.coe_mk]
@@ -357,7 +359,8 @@ private lemma genericTensor0S_curry_covGradBundleEquiv_unit
 noncomputable def genuineCurvPureRFib
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     TensorRSSpace 0 (s + 1) I x :=
-  covGradBundleEquiv (I := I) (M := M) 0 s x (genuineCurvatureOnlyDirectionalCLM (I := I) (M := M) g s S x)
+  covGradBundleEquiv (I := I) (M := M) 0 s x
+    (genuineCurvatureOnlyDirectionalCLM (I := I) (M := M) g s S x)
 
 omit [CompactSpace M] [I.Boundaryless] in
 private lemma tensor0S_curry_genuineCurvPureRFib_unit
@@ -510,6 +513,19 @@ private noncomputable def pureRValuedBilinAt
     TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace 0 s I y :=
   haveI : T2Space (TangentSpace I y) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I y) := inferInstanceAs (FiniteDimensional ℝ E)
+  letI : TopologicalSpace (TensorRSSpace 0 s I y) :=
+    tensorRSSpace_topologicalSpace 0 s y
+  letI : AddCommGroup (TensorRSSpace 0 s I y) := tensorRSSpace_addCommGroup 0 s y
+  letI : Module ℝ (TensorRSSpace 0 s I y) := tensorRSSpace_module 0 s y
+  letI : ContinuousAdd (TensorRSSpace 0 s I y) := tensorRSSpace_continuousAdd 0 s y
+  letI : ContinuousSMul ℝ (TensorRSSpace 0 s I y) := tensorRSSpace_continuousSMul 0 s y
+  letI : AddCommMonoid (TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    ContinuousLinearMap.addCommMonoid
+  letI : ContinuousAdd (TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    inferInstance
+  letI : AddCommMonoid
+      (TangentSpace I y →L[ℝ] TensorRSSpace 0 s I y →L[ℝ] TensorRSSpace 0 s I y) :=
+    ContinuousLinearMap.addCommMonoid
   LinearMap.toContinuousLinearMap
     { toFun := fun X => (riemannOp (tensorCov (I := I) g 0 s) y X (W y)).comp
         ((tensorCov (I := I) g 0 s).toFun (fun b : M => S.toSection b) y)
@@ -586,7 +602,6 @@ private theorem genuineCurvTraceFixedFramePureR_frame_independent
     inferInstanceAs (T2Space (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y))
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I y) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y))
-
   set scalarize : TensorRSSpace 0 s I y →L[ℝ] ℝ :=
     LinearMap.toContinuousLinearMap
       { toFun := fun T => Tensor0SSpace.toModel
@@ -634,12 +649,14 @@ private theorem genuineCurvTraceFixedFramePureR_frame_independent
       (∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (F i))) →
       Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
-          genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s W F (fun b : M => S.toSection b) y) D) m =
+          genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s W F (fun b : M => S.toSection b) y)
+            D) m =
       ∑ i : Fin (Module.finrank ℝ E), Hb (F i y) (F i y) := by
     intro F hF
     have hsum_apply :
         (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
-          genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s W F (fun b : M => S.toSection b) y) D =
+          genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s W F (fun b : M => S.toSection b) y) D
+            =
         ∑ i : Fin (Module.finrank ℝ E),
           (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
             riemannSec (tensorCov (I := I) g 0 s) (F i) W
@@ -718,7 +735,8 @@ omit [I.Boundaryless] in
     (genuineCurvPureRSection (I := I) (M := M) g s S).toSection x =
       genuineCurvPureRFib (I := I) (M := M) g s S x := rfl
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma smoothOrthoFrame_parseval_expand
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
     u = ∑ a : Fin (Module.finrank ℝ E),
@@ -747,7 +765,8 @@ private lemma smoothOrthoFrame_parseval_expand
   set bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
     basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
   have hbse_eq : ∀ i, bse i = e i := by
-    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard)
+      i
   conv_lhs => rw [← bse.sum_repr u]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [hbse_eq a]
@@ -832,7 +851,8 @@ theorem GcurvSection_toSection_eventuallyEq_fixedFramePureRSection
         (fixedFramePureRSection (I := I) (M := M) g s S
           (smoothOrthoFrame (I := I) g x₀) hB).toSection y := by
   filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
-  rw [genuineCurvatureOnlySection, genuineCurvPureRSection_toSection, fixedFramePureRSection_toSection]
+  rw [genuineCurvatureOnlySection, genuineCurvPureRSection_toSection,
+    fixedFramePureRSection_toSection]
   exact genuineCurvPureRFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd (I := I) (M := M) g s S x₀ hy
 
 end Connection

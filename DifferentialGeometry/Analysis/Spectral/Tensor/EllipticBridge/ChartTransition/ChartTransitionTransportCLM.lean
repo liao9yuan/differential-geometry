@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -222,7 +220,8 @@ theorem exists_bound_transportCoeffManifold
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ x, |transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x| ≤ C := by
   obtain ⟨C, hC⟩ :=
-    (hasCompactSupport_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q).exists_bound_of_continuous
+    (hasCompactSupport_transportCoeffManifold (I := I) (M := M) g r s β α P₀
+      Q).exists_bound_of_continuous
       (continuous_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q)
   refine ⟨max C 0, le_max_right _ _, fun x => ?_⟩
   have hx := hC x

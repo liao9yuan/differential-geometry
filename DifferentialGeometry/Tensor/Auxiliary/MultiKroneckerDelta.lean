@@ -132,7 +132,6 @@ theorem multiKroneckerDelta_addCases_assoc
 variable {𝕜 : Type*} [Field 𝕜]
 
 open Classical in
-
 theorem multiKroneckerDelta_cauchyBinet [CharZero 𝕜]
     {d m p : ℕ} (I : Fin m → Fin d) (J : Fin p → Fin d) (v : Fin (m + p) → Fin d) :
     ((↑(m.factorial * p.factorial) : 𝕜))⁻¹ •

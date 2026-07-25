@@ -194,7 +194,6 @@ private theorem exists_smooth_metric_extension_with_density
     exact extendedDensity_eq_density_of_chi_one (I := I) g α (hχ_one y hy)
   exact ⟨B, h_agree_a, h_agree_c⟩
 
-set_option maxHeartbeats 8000000 in
 
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -267,7 +266,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     intro x hx
     exact hδ_in_chart (Metric.thickening_subset_cthickening _ _ hx)
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := K_χ)
       (Ω' := Metric.thickening δ (closure Ω'))
@@ -1377,7 +1376,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
       = Sw + Su + Sf from by rw [hSw_def, hSu_def, hSf_def]]
   exact h_g_g_bd
 
-set_option maxHeartbeats 1600000 in
 
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

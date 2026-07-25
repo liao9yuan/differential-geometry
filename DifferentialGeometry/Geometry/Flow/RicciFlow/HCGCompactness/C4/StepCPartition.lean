@@ -2,7 +2,6 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -487,7 +486,8 @@ theorem hatPOU_sum_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
   have hsum := ρ.sum_eq_one hx
   rw [finsum_eq_sum (fun γ : Fin (pb.A r) => ρ γ x)
-    (Finite.subset finite_univ (subset_univ (Function.support fun γ : Fin (pb.A r) => ρ γ x)))] at hsum
+    (Finite.subset finite_univ (subset_univ (Function.support fun γ : Fin (pb.A r) => ρ γ x)))]
+      at hsum
   rwa [Fintype.sum_subset (by simp)] at hsum
 
 

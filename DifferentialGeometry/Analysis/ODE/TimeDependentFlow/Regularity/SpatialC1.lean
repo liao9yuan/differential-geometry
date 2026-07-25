@@ -21,7 +21,8 @@ def ChartCoordSpatialC1 (X : ℝ → ∀ x : M, TangentSpace I x) : Prop :=
     ContinuousOn (Function.uncurry Df)
       (Set.Icc (0 : ℝ) L ×ˢ Metric.closedBall (I ((chartAt H α) α)) r)
 
-omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem exists_uniform_chart_lipschitz_of_spatialC1
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (L r : ℝ) (Df : ℝ → E → (E →L[ℝ] E))
@@ -81,7 +82,8 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
     exact hnorm
   exact hconv.lipschitzOnWith_of_nnnorm_hasFDerivWithin_le hder_open hbound_open
 
-omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartCoordPicardRegular_of_spatialC1
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hCont : ContinuousOn (Function.uncurry (fun t x => X t x))
@@ -94,7 +96,8 @@ theorem chartCoordPicardRegular_of_spatialC1
   exact exists_uniform_chart_lipschitz_of_spatialC1 X α L r Df hL hr hHasDeriv
     hDerCont
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chartCoordSpatialC1_neg
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hC1 : ChartCoordSpatialC1 (I := I) X) :

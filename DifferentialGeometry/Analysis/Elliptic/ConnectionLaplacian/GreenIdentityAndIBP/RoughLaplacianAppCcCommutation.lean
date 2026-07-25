@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -51,7 +49,8 @@ theorem cometricDoubleTraceFib_eq_sum_curry (g₀ : SmoothRiemannianMetric I M) 
       cometricDoubleTraceFib (I := I) g₀ b x D from rfl]
   nth_rewrite 2 [← Tensor0SSpace.toModelL_apply (s := b) (x := x)]
   rw [map_sum (Tensor0SSpace.toModelL b x)]
-  rw [cometricDoubleTraceFib_toModel, modelDoubleTrace_apply (E := E) b (cometricLmodel (I := I) g₀ x)]
+  rw [cometricDoubleTraceFib_toModel, modelDoubleTrace_apply (E := E) b
+    (cometricLmodel (I := I) g₀ x)]
   simp only [ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [Tensor0SSpace.toModelL_apply]
@@ -67,7 +66,8 @@ theorem cometricDoubleTraceFib_eq_sum_curry (g₀ : SmoothRiemannianMetric I M) 
         ((Module.finBasis ℝ E).cDualBasis k)))
     (vs := Fin.cons ((Module.finBasis ℝ E) k) m)]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (x : M) (D : Tensor0SSpace (b + 2) I x) (a c : E)
     (m : Fin s → E) :
@@ -131,7 +131,8 @@ theorem cometricDoubleTraceFib_comp_slotExtend_two_eq (g₀ : SmoothRiemannianMe
         ((show Tensor0SSpace (b + 2) I x →L[ℝ] Tensor0SSpace (s + 2) I x from
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
             (slotExtend (I := I) (M := M) g₀ b s Φ)).toSection x) D) from rfl]
-  rw [cometricDoubleTraceFib_toModel, modelDoubleTrace_apply (E := E) s (cometricLmodel (I := I) g₀ x)]
+  rw [cometricDoubleTraceFib_toModel, modelDoubleTrace_apply (E := E) s
+    (cometricLmodel (I := I) g₀ x)]
   simp only [ContinuousMultilinearMap.sum_apply, Tensor0SSpace.toModelL_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [toModel_slotExtend_two_apply (I := I) (M := M) g₀ b s Φ x D
@@ -149,7 +150,8 @@ theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMe
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
             (slotExtend (I := I) (M := M) g₀ b s Φ)) V) =
       operatorFieldApply (I := I) (M := M) g₀ b s Φ
-        (operatorFieldApply (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b) V) := by
+        (operatorFieldApply (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b)
+          V) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -178,7 +180,8 @@ theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) 
     (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)]
   have h1 : covGrad (I := I) (M := M) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
       operatorFieldApply (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W +
-        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g₀ b s Φ)
           (covGrad (I := I) (M := M) g₀ 0 b W) :=
     covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b s Φ W
   have hA : covGrad (I := I) (M := M) g₀ 0 (s + 1)
@@ -188,9 +191,11 @@ theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) 
         operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (slotExtend (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 b W) :=
-    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W
+    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b (s + 1)
+      (covGrad (I := I) (M := M) g₀ b s Φ) W
   have hB : covGrad (I := I) (M := M) g₀ 0 (s + 1)
-        (operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+        (operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g₀ b s Φ)
           (covGrad (I := I) (M := M) g₀ 0 b W)) =
       operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (covGrad (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
@@ -198,7 +203,8 @@ theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) 
         operatorFieldApply (I := I) (M := M) g₀ (b + 2) (s + 2)
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) :=
-    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (b + 1) (s + 1)
+      (slotExtend (I := I) (M := M) g₀ b s Φ)
       (covGrad (I := I) (M := M) g₀ 0 b W)
   have hexp : iteratedCovGrad (I := I) g₀ 0 s 2 (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
       operatorFieldApply (I := I) (M := M) g₀ b (s + 2)
@@ -212,16 +218,19 @@ theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) 
         operatorFieldApply (I := I) (M := M) g₀ (b + 2) (s + 2)
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) := by
-    have hxeq : iteratedCovGrad (I := I) g₀ 0 s 2 (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
+    have hxeq : iteratedCovGrad (I := I) g₀ 0 s 2 (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)
+      =
         covGrad (I := I) (M := M) g₀ 0 (s + 1)
-          (covGrad (I := I) (M := M) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)) := rfl
+          (covGrad (I := I) (M := M) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)) :=
+            rfl
     rw [hxeq, h1, covGrad_add, hA, hB]
     abel
   rw [hexp]
   simp only [appCc_add_right]
   rw [cometricDoubleTrace_appCc_slotExtend_two_comm (I := I) g₀ b s Φ
     (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W))]
-  rw [show operatorFieldApply (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b)
+  rw [show operatorFieldApply (I := I) (M := M) g₀ (b + 2) b
+    (cometricDoubleTraceField (I := I) g₀ b)
         (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) =
       rawTensorConnLapSmooth (I := I) g₀ 0 b W from by
     rw [rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank (I := I) g₀ b W]
@@ -249,7 +258,8 @@ theorem rawConnLap_iteratedCovGrad_two_comm (g₀ : SmoothRiemannianMetric I M) 
 theorem rawConnLap_appCc_iteratedCovGrad_two_comm (g₀ : SmoothRiemannianMetric I M) (s t : ℕ)
     (C : SmoothCcTensor g₀ (s + 2) t) (S : SmoothCcTensor g₀ 0 s) :
     rawTensorConnLapSmooth (I := I) g₀ 0 t
-        (operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C (iteratedCovGrad (I := I) g₀ 0 s 2 S)) =
+        (operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C (iteratedCovGrad (I := I) g₀ 0 s 2 S))
+          =
       operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C
           (iteratedCovGrad (I := I) g₀ 0 s 2 (rawTensorConnLapSmooth (I := I) g₀ 0 s S))
       + operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C
@@ -271,7 +281,8 @@ theorem rawConnLap_appCc_iteratedCovGrad_two_comm (g₀ : SmoothRiemannianMetric
             (covGrad (I := I) (M := M) g₀ (s + 2 + 1) (t + 1)
               (slotExtend (I := I) (M := M) g₀ (s + 2) t C))
             (covGrad (I := I) (M := M) g₀ 0 (s + 2) (iteratedCovGrad (I := I) g₀ 0 s 2 S))) := by
-  rw [rawTensorConnLap_appCc_comm_of_rank (I := I) g₀ (s + 2) t C (iteratedCovGrad (I := I) g₀ 0 s 2 S)]
+  rw [rawTensorConnLap_appCc_comm_of_rank (I := I) g₀ (s + 2) t C
+    (iteratedCovGrad (I := I) g₀ 0 s 2 S)]
   rw [rawConnLap_iteratedCovGrad_two_comm (I := I) g₀ s S]
   rw [appCc_add_right, appCc_add_right]
 

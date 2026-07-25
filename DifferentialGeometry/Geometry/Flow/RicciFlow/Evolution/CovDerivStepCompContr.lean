@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompLinear
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -110,7 +109,7 @@ private theorem tail_snoc_cons {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx)
     Fin.tail (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) =
       (Fin.snoc Y c : Fin (p + 1) → Idx) := by
   funext i
-  show (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) i.succ =
+  change (Fin.snoc (Fin.cons d Y : Fin (p + 1) → Idx) c : Fin (p + 2) → Idx) i.succ =
     (Fin.snoc Y c : Fin (p + 1) → Idx) i
   rcases Fin.eq_castSucc_or_eq_last i with ⟨j, rfl⟩ | rfl
   · rw [Fin.succ_castSucc, Fin.snoc_castSucc, Fin.cons_succ, Fin.snoc_castSucc]
@@ -200,27 +199,6 @@ theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}
         contrTail A (covDerivStepComp extB chr B)
           (Fin.append aPart (Fin.cons d bPart)) := by
   classical
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   simp only [covDerivStepComp, covDerivStepCompU, contrTail, Fin.tail_cons, Fin.cons_zero,
     castAdd_append, natAdd_append, snoc_cons_zero, tail_snoc_cons,
     Fin.snoc_castSucc, Fin.snoc_last, update_snoc_castSucc, update_snoc_last]
@@ -229,7 +207,6 @@ theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}
   rw [Fin.sum_univ_add]
   simp only [castAdd_append, natAdd_append, update_append_castAdd, update_append_natAdd,
     Fin.sum_univ_castSucc, Fin.snoc_castSucc, Fin.snoc_last, update_snoc_castSucc, update_snoc_last]
-
   have hA :
       (∑ x : Fin p, ∑ x_1 : Idx, chr d (aPart x) x_1 *
           ∑ x_2 : Idx, A (Fin.snoc (Function.update aPart x x_1) x_2) * B (Fin.snoc bPart x_2)) =
@@ -237,11 +214,11 @@ theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}
             A (Fin.snoc (Function.update aPart x_1 x_2) x)) * B (Fin.snoc bPart x) := by
     simp only [Finset.sum_mul, Finset.mul_sum]
     rw [Finset.sum_congr rfl fun x _ => Finset.sum_comm (f := fun x_1 x_2 =>
-      chr d (aPart x) x_1 * (A (Fin.snoc (Function.update aPart x x_1) x_2) * B (Fin.snoc bPart x_2))),
+      chr d (aPart x) x_1 * (A (Fin.snoc (Function.update aPart x x_1) x_2) * B
+        (Fin.snoc bPart x_2))),
       Finset.sum_comm]
     exact Finset.sum_congr rfl fun x2 _ => Finset.sum_congr rfl fun xs _ =>
       Finset.sum_congr rfl fun x1 _ => by ring
-
   have hB :
       (∑ x : Fin q, ∑ x_1 : Idx, chr d (bPart x) x_1 *
           ∑ x_2 : Idx, A (Fin.snoc aPart x_2) * B (Fin.snoc (Function.update bPart x x_1) x_2)) =
@@ -250,11 +227,11 @@ theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}
             B (Fin.snoc (Function.update bPart x_1 x_2) x) := by
     simp only [Finset.mul_sum]
     rw [Finset.sum_congr rfl fun x _ => Finset.sum_comm (f := fun x_1 x_2 =>
-      chr d (bPart x) x_1 * (A (Fin.snoc aPart x_2) * B (Fin.snoc (Function.update bPart x x_1) x_2))),
+      chr d (bPart x) x_1 * (A (Fin.snoc aPart x_2) * B
+        (Fin.snoc (Function.update bPart x x_1) x_2))),
       Finset.sum_comm]
     exact Finset.sum_congr rfl fun x2 _ => Finset.sum_congr rfl fun xs _ =>
       Finset.sum_congr rfl fun x1 _ => by ring
-
   have hcancel := contrTail_contracted_cancel (Idx := Idx) chr d A B aPart bPart
   rw [hA, hB]
   simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_mul, Finset.mul_sum,

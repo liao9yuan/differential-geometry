@@ -1,18 +1,16 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Set Matrix
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
@@ -29,7 +27,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [I.Boundaryless] in
 private lemma exists_bound_of_contDiffOn_int
     {f : E → ℝ} (α : M)
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -45,9 +44,10 @@ private lemma exists_bound_of_contDiffOn_int
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [I.Boundaryless] in
 private lemma exists_uniform_bound_family
-    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {ι : Type*} [Finite ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
     (hf : ∀ i, ContDiffOn ℝ ∞ (f i) (interior (extChartAt I α).target))
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -500,8 +500,6 @@ theorem deTurckVF_abs_le
       ring
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD_abs_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -558,7 +556,6 @@ theorem deTurckVFD_abs_le
 
 omit [NeZero (Module.finrank ℝ E)]
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma symm_image_compact_subset_source
     (α : M) {K : Set E} (hK : IsCompact K)
@@ -1002,7 +999,6 @@ theorem chartLie_sub_abs_le
           ((Cw * Q + U * 1) + (1 * V + Gb * Cdw) + (1 * V + Gb * Cdw)) * jet2 := by
       ring
 
-set_option linter.unusedFintypeInType false in
 
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir

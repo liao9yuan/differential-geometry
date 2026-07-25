@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set IsManifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -24,12 +22,13 @@ def HomTensorRSModel (r a c : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNorme
 
 private instance tensor0SModel_smulCommClass (s : ℕ) :
     SMulCommClass 𝕜 𝕜 (Tensor0SModel s 𝕜 E) := by
-  unfold Tensor0SModel; infer_instance
+  unfold Tensor0SModel
+  infer_instance
 
 private instance tensorRSModel_smulCommClass (r c : ℕ) :
     SMulCommClass 𝕜 𝕜 (TensorRSModel r c 𝕜 E) := by
-  letI nsr : NormedSpace 𝕜 (Tensor0SModel r 𝕜 E) := tensor0SModel_normedSpace r
-  letI nsc : NormedSpace 𝕜 (Tensor0SModel c 𝕜 E) := tensor0SModel_normedSpace c
+  letI : NormedSpace 𝕜 (Tensor0SModel r 𝕜 E) := tensor0SModel_normedSpace r
+  letI : NormedSpace 𝕜 (Tensor0SModel c 𝕜 E) := tensor0SModel_normedSpace c
   unfold TensorRSModel
   infer_instance
 
@@ -51,7 +50,9 @@ instance homTensorRSModel_normedSpace (r a c : ℕ) :
     (TensorRSModel r a 𝕜 E) (TensorRSModel r c 𝕜 E) _ _ _ _ _ _ _ _ 𝕜 _ nsV scc
 
 noncomputable instance homTensorRSModel_finiteDimensional [CompleteSpace 𝕜] (r a c : ℕ) :
-    FiniteDimensional 𝕜 (HomTensorRSModel r a c 𝕜 E) := by
+    @FiniteDimensional 𝕜 (HomTensorRSModel r a c 𝕜 E) _
+      (homTensorRSModel_normedAddCommGroup r a c).toAddCommGroup
+      (homTensorRSModel_normedSpace r a c).toModule := by
   letI nsU : NormedSpace 𝕜 (TensorRSModel r a 𝕜 E) := tensorRSModel_normedSpace r a
   letI nsV : NormedSpace 𝕜 (TensorRSModel r c 𝕜 E) := tensorRSModel_normedSpace r c
   haveI iUf : FiniteDimensional 𝕜 (TensorRSModel r a 𝕜 E) := tensorRSModel_finiteDimensional r a
@@ -69,32 +70,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
 @[nolint unusedArguments]
-def HomTensorRSSpace (r a c : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
+abbrev HomTensorRSSpace (r a c : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type
+    _ :=
   TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x
-
-instance homTensorRSSpace_topologicalSpace (r a c : ℕ) (x : M) :
-    TopologicalSpace (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (TopologicalSpace (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
-
-instance homTensorRSSpace_addCommGroup (r a c : ℕ) (x : M) :
-    AddCommGroup (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (AddCommGroup (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
-
-instance homTensorRSSpace_module (r a c : ℕ) (x : M) :
-    Module 𝕜 (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (Module 𝕜 (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
-
-instance homTensorRSSpace_isTopologicalAddGroup (r a c : ℕ) (x : M) :
-    IsTopologicalAddGroup (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (IsTopologicalAddGroup (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
-
-instance homTensorRSSpace_continuousAdd (r a c : ℕ) (x : M) :
-    ContinuousAdd (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (ContinuousAdd (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
-
-instance homTensorRSSpace_continuousSMul (r a c : ℕ) (x : M) :
-    ContinuousSMul 𝕜 (HomTensorRSSpace r a c I x) :=
-  inferInstanceAs (ContinuousSMul 𝕜 (TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x))
 
 noncomputable instance homTensorRSBundle_topology (r a c : ℕ) :
     TopologicalSpace (TotalSpace (HomTensorRSModel r a c 𝕜 E)
@@ -135,7 +113,8 @@ end SpaceFiber
 
 section CovDeriv
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
@@ -163,6 +142,32 @@ noncomputable instance homTensorRSCovariantDerivative_contMDiff (r a c : ℕ)
     (TensorRSModel r c ℝ E) (fun x : M => TensorRSSpace r c I x)
     (TensorRSNabla.tensorRSCovariantDerivative I M r a cov)
     (TensorRSNabla.tensorRSCovariantDerivative I M r c cov)
+
+omit [CompleteSpace E] in
+theorem homTensorRSCovariantDerivative_contMDiffOn (r a c : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞] :
+    ContMDiffCovariantDerivativeOn (HomTensorRSModel r a c ℝ E) ∞
+      (homTensorRSCovariantDerivative I M r a c cov).toFun Set.univ := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  exact (homTensorRSCovariantDerivative_contMDiff I M r a c cov).contMDiff
+
+omit [CompleteSpace E] in
+theorem homTensorRSCovariantDerivative_section_contMDiffOn (r a c : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (Ψ : Π x : M, HomTensorRSSpace r a c I x)
+    (hΨ : ContMDiff I (I.prod 𝓘(ℝ, HomTensorRSModel r a c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (HomTensorRSModel r a c ℝ E)
+        (E := fun z : M => HomTensorRSSpace r a c I z) x (Ψ x))) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] HomTensorRSModel r a c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] HomTensorRSModel r a c ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] HomTensorRSSpace r a c I z) x
+        ((homTensorRSCovariantDerivative I M r a c cov).toFun Ψ x)) Set.univ := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have h_le : ((∞ : WithTop ℕ∞) + 1) ≤ (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
+  exact (homTensorRSCovariantDerivative_contMDiffOn I M r a c cov).contMDiff
+    (σ := Ψ) ((hΨ.of_le h_le).contMDiffOn)
 
 omit [CompleteSpace E] in
 theorem homTensorRSCovariantDerivative_apply (r a c : ℕ)

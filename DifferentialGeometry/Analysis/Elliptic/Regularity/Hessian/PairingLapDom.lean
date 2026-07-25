@@ -47,7 +47,8 @@ noncomputable def chartHessianPhiOnEuclid
   chartHessianTensor (I := I) g α (φ : M → ℝ) i j
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma chartHessianPhiOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -857,7 +858,7 @@ theorem riemannianVolumeMeasure_pullback_null
   have hF_meas : Measurable (NM.indicator (fun _ => (1 : ℝ≥0∞))) :=
     Measurable.indicator measurable_const hNM_meas
   have h_bridge :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
+    riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
       (I := I) (M := M) g α hF_meas hF_supp
   change ∫⁻ x, NM.indicator (fun _ : M => (1 : ℝ≥0∞)) x
       ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -1075,7 +1076,7 @@ private lemma chartContribSurrogate_memLp_two
       (chartAt H α).source :=
     chartContribSurrogate_tsupport_subset (I := I) (M := M) g φ α hu_h
   obtain ⟨C_α, hC_α_pos, hC_α_bnd⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
+    eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
       (I := I) (M := M) g α (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_c_meas h_c_tsupp
   have h_chart_le : eLpNorm

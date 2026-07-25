@@ -14,8 +14,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open MeasureTheory
@@ -142,7 +140,8 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   rw [show ((f x) ^ 2 : ℝ) = ‖f x‖ ^ 2 from by rw [Real.norm_eq_abs, sq_abs],
     ENNReal.ofReal_pow (norm_nonneg _) 2, ofReal_norm_eq_enorm]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma repr_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -267,7 +266,8 @@ private lemma fderiv_pou_raw_symm_leibniz
     raw_symm_differentiableAt (I := I) (M := M) g r s T α Idx Jdx he
   exact fderiv_fun_mul hP_diff hR_diff
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -692,7 +692,8 @@ lemma pou_sq_fderiv_repr_sq_pointwise
   exact le_trans h_scaled h_sum_per
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -761,6 +762,206 @@ private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     have := (tensorChartComp_contDiff (I := I) (M := M) g r s T α Idx Jdx)
     exact this.continuous_fderiv (by simp)
   exact h_fderiv_cont.norm.measurable
+
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma chartTarget_fderiv_sq_lintegral_le_wkpNorm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          (‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖ ^ 2)
+        ∂(volume : Measure EuclN) ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 1 2
+        (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
+        (chartTargetEuclid (I := I) (M := M) α) ^ 2 := by
+  have h_chartTarget_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
+      (I := I) (M := M) α
+  have h_tcc_smooth : ContDiff ℝ ∞
+      (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
+    tensorChartComp_contDiff (I := I) (M := M) g r s T α Idx Jdx
+  have h_tcc_compactSupport : HasCompactSupport
+      (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
+    tensorChartComp_hasCompactSupport (I := I) (M := M) g r s T α Idx Jdx
+  have h_tcc_supp : tsupport (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    tensorChartComp_tsupport_subset_chartTargetEuclid
+      (I := I) (M := M) g r s T α Idx Jdx
+  have h_brg :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
+      (d := Module.finrank ℝ E) h_chartTarget_open
+      (h_tcc_smooth.of_le (by simp)) h_tcc_compactSupport h_tcc_supp
+  have h_lp_sq :
+      (eLpNorm
+          (fun y : EuclN =>
+            ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖) 2
+          ((volume : Measure EuclN).restrict
+            (chartTargetEuclid (I := I) (M := M) α))) ^ 2 =
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          ENNReal.ofReal
+            (‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖ ^ 2)
+          ∂(volume : Measure EuclN) := by
+    exact sq_eLpNorm_two_eq_lintegral_ofReal_sq
+      (fun y : EuclN =>
+        ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖)
+      ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α))
+  rw [← h_lp_sq]
+  exact pow_le_pow_left' h_brg 2
+
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+private lemma chartTarget_raw_sq_lintegral_eq_eLpNorm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2)
+        ∂(volume : Measure EuclN) =
+      eLpNorm
+          (fun y : EuclN =>
+            tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) 2
+          ((volume : Measure EuclN).restrict
+            (chartTargetEuclid (I := I) (M := M) α)) ^ 2 := by
+  exact (sq_eLpNorm_two_eq_lintegral_ofReal_sq
+    (fun y : EuclN =>
+      tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+    ((volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α))).symm
+
+omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma chartTarget_pouWeighted_fderiv_repr_pointwise
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
+    (K_pou C1 C2 : ℝ) (hK_pou_nn : 0 ≤ K_pou)
+    (hK_pou_bound : ∀ e ∈ (extChartAt I α).target,
+      ‖fderiv ℝ
+        (fun e' : E => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+          ((extChartAt I α).symm e')) e‖ ≤ K_pou)
+    (hC1 : C1 = 2 * ((Finset.univ : Finset
+        ((Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ) *
+        (tensorChartBasisNormConstant (E := E) r s) ^ 2 *
+        ‖(toEuclidean (E := E) : E →L[ℝ] EuclN)‖ ^ 2)
+    (hC2 : C2 = 2 * ((Finset.univ : Finset
+        ((Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))).card : ℝ) *
+        (tensorChartBasisNormConstant (E := E) r s) ^ 2 * K_pou ^ 2)
+    (y : EuclN) (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2) *
+        ENNReal.ofReal
+          (‖fderiv ℝ
+            (tensorRSChartE_section_repr (I := I) r s α
+              (fun z : M => T.toSection z) ∘ (extChartAt I α).symm)
+            ((toEuclidean (E := E)).symm y)‖ ^ 2) ≤
+      ENNReal.ofReal C1 *
+          (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+              ENNReal.ofReal
+                (‖fderiv ℝ
+                  (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖ ^ 2)) +
+        ENNReal.ofReal C2 *
+          (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+              ENNReal.ofReal
+                ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2)) := by
+  classical
+  set e : E := (toEuclidean (E := E)).symm y with he_def
+  have he_target : e ∈ (extChartAt I α).target := by
+    rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
+    exact hy
+  have h_real := pou_sq_fderiv_repr_sq_pointwise
+    (I := I) (M := M) g r s T α K_pou hK_pou_nn hK_pou_bound (e := e) he_target
+  have h_toEucl_e : (toEuclidean (E := E)) e = y := by
+    simp [he_def, (toEuclidean (E := E)).apply_symm_apply]
+  set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm e) with hρ_def
+  set FRsq : ℝ := ‖fderiv ℝ
+    (tensorRSChartE_section_repr (I := I) r s α
+      (fun z : M => T.toSection z) ∘ (extChartAt I α).symm) e‖ ^ 2 with hFRsq_def
+  set fSum : ℝ := ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+    ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+      ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
+        ((toEuclidean (E := E)) e)‖ ^ 2 with hfSum_def
+  have hfSum_nn : 0 ≤ fSum :=
+    Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
+  set rSum : ℝ := ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+    ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+      (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+        ((extChartAt I α).symm e)) ^ 2 with hrSum_def
+  have hrSum_nn : 0 ≤ rSum :=
+    Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
+  have h_real' : ρ ^ 2 * FRsq ≤ C1 * fSum + C2 * rSum := by
+    rw [hC1, hC2]
+    simpa only [ρ, FRsq, fSum, rSum] using h_real
+  have h_LHS_eq :
+      ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2) *
+          ENNReal.ofReal
+            (‖fderiv ℝ
+              (tensorRSChartE_section_repr (I := I) r s α
+                (fun z : M => T.toSection z) ∘ (extChartAt I α).symm)
+              ((toEuclidean (E := E)).symm y)‖ ^ 2) =
+        ENNReal.ofReal (ρ ^ 2 * FRsq) := by
+    simp only [ρ, FRsq, he_def]
+    rw [← ENNReal.ofReal_mul (sq_nonneg _)]
+  rw [h_LHS_eq]
+  refine le_trans (ENNReal.ofReal_le_ofReal h_real') ?_
+  have hC1_nn : 0 ≤ C1 := by
+    rw [hC1]
+    exact mul_nonneg
+      (mul_nonneg
+        (mul_nonneg (by norm_num) (Nat.cast_nonneg _))
+        (sq_nonneg _))
+      (sq_nonneg _)
+  have hC2_nn : 0 ≤ C2 := by
+    rw [hC2]
+    exact mul_nonneg
+      (mul_nonneg
+        (mul_nonneg (by norm_num) (Nat.cast_nonneg _))
+        (sq_nonneg _))
+      (sq_nonneg _)
+  have h_C1fSum_nn : 0 ≤ C1 * fSum := mul_nonneg hC1_nn hfSum_nn
+  have h_C2rSum_nn : 0 ≤ C2 * rSum := mul_nonneg hC2_nn hrSum_nn
+  rw [ENNReal.ofReal_add h_C1fSum_nn h_C2rSum_nn]
+  rw [ENNReal.ofReal_mul hC1_nn, ENNReal.ofReal_mul hC2_nn]
+  have h_fSum_eq :
+      ENNReal.ofReal fSum =
+        ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+          ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+            ENNReal.ofReal
+              (‖fderiv ℝ
+                (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖ ^ 2) := by
+    simp only [hfSum_def]
+    rw [ENNReal.ofReal_sum_of_nonneg
+      (fun Idx _ => Finset.sum_nonneg (fun Jdx _ => sq_nonneg _))]
+    refine Finset.sum_congr rfl (fun Idx _ => ?_)
+    rw [ENNReal.ofReal_sum_of_nonneg (fun Jdx _ => sq_nonneg _)]
+    refine Finset.sum_congr rfl (fun Jdx _ => ?_)
+    rw [h_toEucl_e]
+  have h_rSum_eq :
+      ENNReal.ofReal rSum =
+        ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+          ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+            ENNReal.ofReal
+              ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2) := by
+    simp only [hrSum_def]
+    rw [ENNReal.ofReal_sum_of_nonneg
+      (fun Idx _ => Finset.sum_nonneg (fun Jdx _ => sq_nonneg _))]
+    refine Finset.sum_congr rfl (fun Idx _ => ?_)
+    rw [ENNReal.ofReal_sum_of_nonneg (fun Jdx _ => sq_nonneg _)]
+  rw [h_fSum_eq, h_rSum_eq]
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -844,74 +1045,11 @@ theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             rIntegrand Idx Jdx y) := by
     intro y hy
-    set e : E := (toEuclidean (E := E)).symm y with he_def
-    have he_target : e ∈ (extChartAt I α).target := by
-      rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
-      exact hy
-    have h_real := pou_sq_fderiv_repr_sq_pointwise
-      (I := I) (M := M) g r s T α K_pou hK_pou_nn hK_pou_bound (e := e) he_target
-    have h_toEucl_e : (toEuclidean (E := E)) e = y := by
-      simp [he_def, (toEuclidean (E := E)).apply_symm_apply]
-    set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm e) with hρ_def
-    have hρ_sym : ρ = (chartAtlasPOU I M α : M → ℝ) (sym y) := by
-      simp [hρ_def, hsym_def, he_def]
-    have hρ_nn : 0 ≤ ρ := (chartAtlasPOU I M).nonneg α _
-    set FRsq : ℝ := ‖fderiv ℝ
-      (tensorRSChartE_section_repr (I := I) r s α
-        (fun z : M => T.toSection z) ∘ (extChartAt I α).symm) e‖ ^ 2 with hFRsq_def
-    have hFRsq_nn : 0 ≤ FRsq := sq_nonneg _
-    set fSum : ℝ := ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
-          ((toEuclidean (E := E)) e)‖ ^ 2 with hfSum_def
-    have hfSum_nn : 0 ≤ fSum :=
-      Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
-    set rSum : ℝ := ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx
-          ((extChartAt I α).symm e)) ^ 2 with hrSum_def
-    have hrSum_nn : 0 ≤ rSum :=
-      Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
-    have h_real' : ρ ^ 2 * FRsq ≤ C1 * fSum + C2 * rSum := by
-      simpa [ρ, FRsq, fSum, rSum, C1, C2, Bnorm, NtoE, N, hC1_def, hC2_def,
-        hBnorm_def, hNtoE_def, hN_def] using h_real
-    have h_LHS_eq : lhsIntegrand y =
-        ENNReal.ofReal (ρ ^ 2 * FRsq) := by
-      simp only [hlhs_def, ← hρ_sym, FRsq]
-      rw [← ENNReal.ofReal_mul (sq_nonneg _)]
-    rw [h_LHS_eq]
-    refine le_trans (ENNReal.ofReal_le_ofReal h_real') ?_
-    have h_C1fSum_nn : 0 ≤ C1 * fSum := mul_nonneg hC1_nn hfSum_nn
-    have h_C2rSum_nn : 0 ≤ C2 * rSum := mul_nonneg hC2_nn hrSum_nn
-    rw [ENNReal.ofReal_add h_C1fSum_nn h_C2rSum_nn]
-    rw [ENNReal.ofReal_mul hC1_nn, ENNReal.ofReal_mul hC2_nn]
-    have h_fSum_eq :
-        ENNReal.ofReal fSum =
-          ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-              fIntegrand Idx Jdx y := by
-      simp only [hfSum_def]
-      rw [ENNReal.ofReal_sum_of_nonneg
-        (fun Idx _ => Finset.sum_nonneg (fun Jdx _ => sq_nonneg _))]
-      refine Finset.sum_congr rfl (fun Idx _ => ?_)
-      rw [ENNReal.ofReal_sum_of_nonneg (fun Jdx _ => sq_nonneg _)]
-      refine Finset.sum_congr rfl (fun Jdx _ => ?_)
-      change ENNReal.ofReal
-          (‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
-            ((toEuclidean (E := E)) e)‖ ^ 2) =
-        fIntegrand Idx Jdx y
-      rw [h_toEucl_e]
-    have h_rSum_eq :
-        ENNReal.ofReal rSum =
-          ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-              rIntegrand Idx Jdx y := by
-      simp only [hrSum_def]
-      rw [ENNReal.ofReal_sum_of_nonneg
-        (fun Idx _ => Finset.sum_nonneg (fun Jdx _ => sq_nonneg _))]
-      refine Finset.sum_congr rfl (fun Idx _ => ?_)
-      rw [ENNReal.ofReal_sum_of_nonneg (fun Jdx _ => sq_nonneg _)]
-    rw [h_fSum_eq, h_rSum_eq]
+    simpa only [hlhs_def, hfInt_def, hrInt_def, hsym_def] using
+      chartTarget_pouWeighted_fderiv_repr_pointwise
+        (I := I) (M := M) g r s T α K_pou C1 C2 hK_pou_nn hK_pou_bound
+          (by simp only [hC1_def, hN_def, hBnorm_def, hNtoE_def])
+          (by simp only [hC2_def, hN_def, hBnorm_def]) y hy
   have h_chartTarget_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_measurableSet
       (I := I) (M := M) α
@@ -1128,48 +1266,9 @@ theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) ^ 2 := by
     intro Idx Jdx
-    have h_chartTarget_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
-        (I := I) (M := M) α
-    have h_tcc_smooth : ContDiff ℝ ∞
-        (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
-      tensorChartComp_contDiff (I := I) (M := M) g r s T α Idx Jdx
-    have h_tcc_compactSupport : HasCompactSupport
-        (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
-      tensorChartComp_hasCompactSupport (I := I) (M := M) g r s T α Idx Jdx
-    have h_tcc_supp : tsupport (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
-        ⊆ chartTargetEuclid (I := I) (M := M) α :=
-      tensorChartComp_tsupport_subset_chartTargetEuclid
+    simpa only [hfInt_def] using
+      chartTarget_fderiv_sq_lintegral_le_wkpNorm
         (I := I) (M := M) g r s T α Idx Jdx
-    have h_brg :=
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
-        (d := Module.finrank ℝ E) h_chartTarget_open
-        (h_tcc_smooth.of_le (by simp)) h_tcc_compactSupport h_tcc_supp
-    have h_lp_sq :
-        (eLpNorm
-            (fun y : EuclN =>
-              ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖) 2
-            ((volume : Measure EuclN).restrict
-              (chartTargetEuclid (I := I) (M := M) α))) ^ 2 =
-          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
-              fIntegrand Idx Jdx y ∂(volume : Measure EuclN) := by
-      have h_eLp_sq := sq_eLpNorm_two_eq_lintegral_ofReal_sq
-        (fun y : EuclN =>
-          ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖)
-        ((volume : Measure EuclN).restrict
-          (chartTargetEuclid (I := I) (M := M) α))
-      rw [h_eLp_sq]
-    have h_sq_le :
-        (eLpNorm
-            (fun y : EuclN =>
-              ‖fderiv ℝ (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) y‖) 2
-            ((volume : Measure EuclN).restrict
-              (chartTargetEuclid (I := I) (M := M) α))) ^ 2 ≤
-          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 1 2
-            (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
-            (chartTargetEuclid (I := I) (M := M) α) ^ 2 := by
-      exact pow_le_pow_left' h_brg 2
-    rw [← h_lp_sq]; exact h_sq_le
   have h_per_r : ∀ Idx Jdx,
       ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           rIntegrand Idx Jdx y ∂(volume : Measure EuclN) =
@@ -1179,21 +1278,9 @@ theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
             ((volume : Measure EuclN).restrict
               (chartTargetEuclid (I := I) (M := M) α)) ^ 2 := by
     intro Idx Jdx
-    have h_eLp_sq := sq_eLpNorm_two_eq_lintegral_ofReal_sq
-      (fun y : EuclN =>
-        tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx (sym y))
-      ((volume : Measure EuclN).restrict
-        (chartTargetEuclid (I := I) (M := M) α))
-    have h_eq_lhs :
-        ∫⁻ y,
-            ENNReal.ofReal
-              ((tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx (sym y)) ^ 2)
-            ∂((volume : Measure EuclN).restrict
-              (chartTargetEuclid (I := I) (M := M) α)) =
-          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
-            rIntegrand Idx Jdx y ∂(volume : Measure EuclN) := rfl
-    rw [h_eq_lhs] at h_eLp_sq
-    exact h_eLp_sq.symm
+    simpa only [hrInt_def, hsym_def] using
+      chartTarget_raw_sq_lintegral_eq_eLpNorm
+        (I := I) (M := M) g r s T α Idx Jdx
   refine h_int_mono.trans ?_
   have h_f_total_le :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),

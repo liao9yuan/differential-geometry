@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFor
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -36,21 +34,24 @@ private def euclidNeighbourhood (α : M) (U : Set M) :
   chartTargetEuclid (I := I) (M := M) α ∩
     {y | (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ U}
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_mem_iff (α : M) (U : Set M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))} :
     y ∈ euclidNeighbourhood (I := I) (M := M) α U ↔
       y ∈ chartTargetEuclid (I := I) (M := M) α ∧
       (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ U := Iff.rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_subset_chartTargetEuclid
     (α : M) (U : Set M) :
     euclidNeighbourhood (I := I) (M := M) α U ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   intro y hy; exact hy.1
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma euclidNeighbourhood_isOpen
     (α : M) {U : Set M} (hU_open : IsOpen U) :
     IsOpen (euclidNeighbourhood (I := I) (M := M) α U) := by
@@ -88,7 +89,8 @@ private lemma euclidNeighbourhood_isOpen
   rw [hset_eq]
   exact hcont_comp.isOpen_inter_preimage hchartT_open hU_open
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma toEuclidean_extChartAt_mem_euclidNeighbourhood
     (α : M) {U : Set M} (hU_sub_good : U ⊆ chartLeviCivitaGoodSet (I := I) α)
     {b₀ : M} (hb₀_U : b₀ ∈ U) :

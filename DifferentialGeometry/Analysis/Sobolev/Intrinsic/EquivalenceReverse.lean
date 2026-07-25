@@ -315,7 +315,7 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
   obtain ⟨C_K, hC_K_pos, hC_K_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
+    eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
   refine ⟨C_K, hC_K_pos.le, ?_⟩
   intro u hu
@@ -617,20 +617,23 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
               Real.sqrt
                 (g.inner x
                   (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x)
-                  (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) := by ring
+                  (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) :=
+                    by ring
         _ = K_grad * Real.sqrt M_α *
               DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α
                 (fun z : M => |u z| +
                   Real.sqrt
                     (g.inner z
                       (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
-                      (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) y := by
+                      (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)))
+                        y := by
             rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
               (I := I) α (fun z : M => |u z| +
                 Real.sqrt
                   (g.inner z
                     (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
-                    (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) hy_in]
+                    (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)))
+                      hy_in]
     · have hx_off_f : x ∉ tsupport f :=
         fun hin => hx_pou ((tsupport_smul_subset_left
           (f := fun z : M => ((ρ : C^∞⟮I, M; ℝ⟯) : M → ℝ) z) (g := u)) hin)
@@ -868,7 +871,7 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
   obtain ⟨K, hK_nn, hK_bound⟩ :=
     abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator (I := I) (M := M) g α
   obtain ⟨C_K, hC_K_pos, hC_K_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
+    eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
   refine ⟨K * C_K, mul_nonneg hK_nn hC_K_pos.le, ?_⟩
   intro u hu i
@@ -1083,7 +1086,8 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α))
           p
           ((volume : Measure EuclN_E).restrict
-            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) := by
+            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
+              α)) := by
     have h_unfold : ∀ β : Fin 1 → Fin (Module.finrank ℝ E),
         DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
             (d := Module.finrank ℝ E) p 1 β
@@ -1096,7 +1100,8 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
               (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
-            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) := by
+            (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
+              α) := by
       intro β
       rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]
       simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
@@ -1177,7 +1182,8 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
                 (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) p
             (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) :=
     fun i => hC_grad_bound (u := u) hu i
-  have h_grad_sum_le := Finset.sum_le_sum (fun i (_ : i ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E)))) => h_grad_each i)
+  have h_grad_sum_le := Finset.sum_le_sum
+    (fun i (_ : i ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E)))) => h_grad_each i)
   have h_const_sum :
       (∑ _ : Fin (Module.finrank ℝ E), ENNReal.ofReal C_grad *
         (eLpNorm u p

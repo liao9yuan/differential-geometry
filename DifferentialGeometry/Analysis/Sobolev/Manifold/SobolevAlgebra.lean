@@ -533,14 +533,16 @@ private lemma per_chart_bilinear_bound
       exact h.trans (le_max_right _ _)
     have hEv_mem : DeGiorgi.MemW1p (d := d) p Ev Ω :=
       leftSmoothFactor_memW1p (I := I) (M := M) α hb_smooth hv hb_supp hp_one
-    have h_PuEv_ae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
+    have h_PuEv_ae :=
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := d) hp_one hΩ_open hPu_smooth hPu_bd_C hPu_grad_bd_C hEv_mem i
     have hR_smooth : ContDiff ℝ (⊤ : ℕ∞) R := liftedPou_smooth (I := I) (M := M) α
     have hR_bd : ∀ y ∈ Ω, ‖R y‖ ≤ max 1 C_R := fun y _ =>
       (liftedPou_norm_le_one (I := I) (M := M) α y).trans (le_max_left _ _)
     have hR_grad_bd : ∀ y ∈ Ω, ‖fderiv ℝ R y‖ ≤ max 1 C_R := fun y _ =>
       (hC_R_bound y).trans (le_max_right _ _)
-    have h_REv_ae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
+    have h_REv_ae :=
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := d) hp_one hΩ_open hR_smooth hR_bd hR_grad_bd hEv_mem i
     have h_R_Ev_eq_Pv : (fun y : EuclN => R y * Ev y) = Pv :=
       liftedPou_mul_leftSmoothFactor_eq_smoothPushed (I := I) (M := M)
@@ -588,7 +590,8 @@ private lemma per_chart_bilinear_bound
       rw [h_factor, h_eq_R_Ev]
       ring
     rw [eLpNorm_congr_ae h_combined]
-    set f1 : EuclN → ℝ := fun y => Eu y * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
+    set f1 : EuclN → ℝ := fun y => Eu y *
+                                     Analysis.Sobolev.Euclidean.chosenWeakPartial'
       (d := d) p i Pv Ω y with hf1_def
     set f2 : EuclN → ℝ := fun y => Eu y * (fderiv ℝ R y) (EuclideanSpace.single i (1 : ℝ)) * Ev y
       with hf2_def
@@ -658,7 +661,8 @@ private lemma per_chart_bilinear_bound
       refine (ae_restrict_iff' hΩ_open.measurableSet).mpr ?_
       refine Filter.Eventually.of_forall (fun y _ => ?_)
       change ‖Eu y * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
-          (d := d) p i Pv Ω y‖ ≤ uMax * ‖DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
+          (d := d) p i Pv Ω y‖ ≤ uMax *
+            ‖DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
             (d := d) p i Pv Ω y‖
       calc
         ‖Eu y * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -872,12 +876,14 @@ private lemma mul_smooth_chart_bound_explicit_form
     exact (Classical.choose_spec (h_per_α α hα)).2 hu hv huMax_nn hvMax_nn hu_bound hv_bound
   refine (Finset.sum_le_sum (fun α hα => hBfun_bound α hα)).trans ?_
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-  set X : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
+  set X : M → ℝ≥0∞ := fun α
+    => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
     (chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
     (chartTargetEuclid (I := I) (M := M) α) with hX_def
-  set Y : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
+  set Y : M → ℝ≥0∞ := fun α
+    => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
     (chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)

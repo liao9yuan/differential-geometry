@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christoffel
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -395,7 +392,8 @@ theorem evol_christoffel_inFrame
     (hnabla :
       NablaRicciComponentsByConnectionInFrameOn
         (I := I) S frame u nablaRic)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (hx : x ∈ u)
     (i j k : Idx) :
     HasDerivWithinAt
       (fun s : Real =>

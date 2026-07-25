@@ -48,11 +48,11 @@ variable {E F : Type*}
 
 theorem contDiffOn_glue_of_seam_param
     {V : Set E} (hV : IsOpen V) (fL fR : ℝ × E → F)
-    (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0:ℝ) ×ˢ V))
-    (hR : ContDiffOn ℝ ∞ fR (Set.Ici (0:ℝ) ×ˢ V))
+    (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0 : ℝ) ×ˢ V))
+    (hR : ContDiffOn ℝ ∞ fR (Set.Ici (0 : ℝ) ×ˢ V))
     (hmatch : ∀ (n : ℕ) (z : E), z ∈ V →
-      iteratedFDerivWithin ℝ n fL (Set.Iic (0:ℝ) ×ˢ V) (0, z)
-        = iteratedFDerivWithin ℝ n fR (Set.Ici (0:ℝ) ×ˢ V) (0, z)) :
+      iteratedFDerivWithin ℝ n fL (Set.Iic (0 : ℝ) ×ˢ V) (0, z)
+        = iteratedFDerivWithin ℝ n fR (Set.Ici (0 : ℝ) ×ˢ V) (0, z)) :
     ContDiffOn ℝ ∞ (fun q : ℝ × E => if q.1 ≤ 0 then fL q else fR q)
       ((Set.univ : Set ℝ) ×ˢ V) := by
   set sL : Set (ℝ × E) := Set.Iic (0:ℝ) ×ˢ V with hsL_def
@@ -68,26 +68,20 @@ theorem contDiffOn_glue_of_seam_param
   have hUDR : UniqueDiffOn ℝ sR := UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hV.uniqueDiffOn
   have hTL : HasFTaylorSeriesUpToOn ∞ fL pL sL := hL.ftaylorSeriesWithin hUDL
   have hTR : HasFTaylorSeriesUpToOn ∞ fR pR sR := hR.ftaylorSeriesWithin hUDR
-
   have hmatchP : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pR (0, z) n := by
     intro n z hz
     simpa only [hpL_def, hpR_def, ftaylorSeriesWithin] using hmatch n z hz
-
   have hEqL : ∀ m : ℕ, Set.EqOn (fun y => p y m) (fun y => pL y m) sL := by
     rintro m ⟨y1, y2⟩ hy
     obtain ⟨hy1, _⟩ := hy
     simp only [hp_def, if_pos (Set.mem_Iic.mp hy1)]
-
   have hEqR : ∀ m : ℕ, Set.EqOn (fun y => p y m) (fun y => pR y m) sR := by
     rintro m ⟨y1, y2⟩ hy
     obtain ⟨hy1, hy2⟩ := hy
     rcases eq_or_lt_of_le (Set.mem_Ici.mp hy1) with hy0 | hy0
-    ·
-      subst hy0
+    · subst hy0
       simp only [hp_def, if_pos (le_refl (0:ℝ)), hmatchP m y2 hy2]
-    ·
-      simp only [hp_def, if_neg (not_le.mpr hy0)]
-
+    · simp only [hp_def, if_neg (not_le.mpr hy0)]
   have hzero : ∀ x : ℝ × E, x ∈ ((Set.univ : Set ℝ) ×ˢ V) → (p x 0).curry0 = f x := by
     rintro ⟨x1, x2⟩ hx
     obtain ⟨_, hx2⟩ := hx
@@ -99,7 +93,6 @@ theorem contDiffOn_glue_of_seam_param
       simp only [hp_def, hf_def, if_neg hx1, hval]
   have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
     exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
-
   have hderiv : ∀ (m : ℕ) (x : ℝ × E), x ∈ ((Set.univ : Set ℝ) ×ˢ V) →
       HasFDerivWithinAt (fun y => p y m) (p x m.succ).curryLeft ((Set.univ : Set ℝ) ×ˢ V) x := by
     rintro m ⟨x1, x2⟩ hx
@@ -109,11 +102,11 @@ theorem contDiffOn_glue_of_seam_param
     have hpR_succ : ∀ y : ℝ × E, 0 < y.1 → p y m.succ = pR y m.succ :=
       fun y hy => by simp only [hp_def, if_neg (not_le.mpr hy)]
     rcases lt_trichotomy x1 0 with hx1 | hx1 | hx1
-    ·
-      have hxle : x1 ≤ 0 := le_of_lt hx1
+    · have hxle : x1 ≤ 0 := le_of_lt hx1
       have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (x1, x2) m.succ).curryLeft sL (x1, x2) :=
         hTL.fderivWithin m (hm_lt m) (x1, x2) ⟨hxle, hx2⟩
-      have hsub : Set.Iio (0:ℝ) ×ˢ V ⊆ sL := Set.prod_mono Set.Iio_subset_Iic_self (Set.Subset.refl V)
+      have hsub : Set.Iio (0:ℝ) ×ˢ V ⊆ sL := Set.prod_mono Set.Iio_subset_Iic_self
+        (Set.Subset.refl V)
       have hnhds : Set.Iio (0:ℝ) ×ˢ V ∈ 𝓝 ((x1, x2) : ℝ × E) :=
         (isOpen_Iio.prod hV).mem_nhds ⟨hx1, hx2⟩
       have hdL' : HasFDerivAt (fun y => pL y m) (pL (x1, x2) m.succ).curryLeft (x1, x2) :=
@@ -124,8 +117,7 @@ theorem contDiffOn_glue_of_seam_param
         hdL'.congr_of_eventuallyEq hee
       rw [hpL_succ (x1, x2) hxle]
       exact hfd.hasFDerivWithinAt
-    ·
-      subst hx1
+    · subst hx1
       have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL ((0:ℝ), x2) m.succ).curryLeft sL
           ((0:ℝ), x2) := hTL.fderivWithin m (hm_lt m) ((0:ℝ), x2) ⟨Set.self_mem_Iic, hx2⟩
       have hdL0' : HasFDerivWithinAt (fun y => p y m) (pL ((0:ℝ), x2) m.succ).curryLeft sL
@@ -145,11 +137,11 @@ theorem contDiffOn_glue_of_seam_param
       rw [hsetUnion] at hunion
       rw [hpL_succ ((0:ℝ), x2) (le_refl (0:ℝ))]
       exact hunion
-    ·
-      have hxge : (0:ℝ) ≤ x1 := le_of_lt hx1
+    · have hxge : (0:ℝ) ≤ x1 := le_of_lt hx1
       have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (x1, x2) m.succ).curryLeft sR (x1, x2) :=
         hTR.fderivWithin m (hm_lt m) (x1, x2) ⟨hxge, hx2⟩
-      have hsub : Set.Ioi (0:ℝ) ×ˢ V ⊆ sR := Set.prod_mono Set.Ioi_subset_Ici_self (Set.Subset.refl V)
+      have hsub : Set.Ioi (0:ℝ) ×ˢ V ⊆ sR := Set.prod_mono Set.Ioi_subset_Ici_self
+        (Set.Subset.refl V)
       have hnhds : Set.Ioi (0:ℝ) ×ˢ V ∈ 𝓝 ((x1, x2) : ℝ × E) :=
         (isOpen_Ioi.prod hV).mem_nhds ⟨hx1, hx2⟩
       have hdR' : HasFDerivAt (fun y => pR y m) (pR (x1, x2) m.succ).curryLeft (x1, x2) :=
@@ -160,7 +152,6 @@ theorem contDiffOn_glue_of_seam_param
         hdR'.congr_of_eventuallyEq hee
       rw [hpR_succ (x1, x2) hx1]
       exact hfd.hasFDerivWithinAt
-
   have hTaylor : HasFTaylorSeriesUpToOn ∞ f p ((Set.univ : Set ℝ) ×ˢ V) :=
     (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr
       ⟨fun x hx => hzero x hx, fun m x hx => hderiv m x hx⟩
@@ -220,14 +211,12 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
       exact ⟨hq.1, subset_closure hq.2⟩
     have hmemL : ((0:ℝ), z) ∈ sL := ⟨Set.self_mem_Iic, hz⟩
     have hmemR : ((0:ℝ), z) ∈ sR := ⟨Set.self_mem_Ici, hz⟩
-
     simp only [iteratedFDerivWithin_succ_eq_comp_left, Function.comp_apply]
     congr 1
     refine ContinuousLinearMap.ext (fun p => ?_)
     obtain ⟨t, e⟩ := p
     have hsplit : (t, e) = t • ((1:ℝ), (0:E)) + ((0:ℝ), e) := by
       simp [Prod.smul_mk, Prod.mk_add_mk]
-
     have htrans : fderivWithin ℝ (iteratedFDerivWithin ℝ n fL sL) sL (0, z) ((1:ℝ), (0:E))
         = fderivWithin ℝ (iteratedFDerivWithin ℝ n fR sR) sR (0, z) ((1:ℝ), (0:E)) := by
       rw [fderivWithin_iteratedFDerivWithin_apply_eq hUDL hSLclo n hL ((1:ℝ), (0:E)) (0, z) hmemL,
@@ -270,7 +259,6 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
           iteratedDerivWithin_congr hcongrR Set.self_mem_Ici, ← iteratedDerivWithin_succ']
         exact hjet (i + 1) w hw
       exact IH hDtL hDtR hjet' hz
-
     have hseam : fderivWithin ℝ (iteratedFDerivWithin ℝ n fL sL) sL (0, z) ((0:ℝ), e)
         = fderivWithin ℝ (iteratedFDerivWithin ℝ n fR sR) sR (0, z) ((0:ℝ), e) := by
       set ι : E → ℝ × E := fun v => (0, v) with hι_def
@@ -319,8 +307,8 @@ theorem iteratedFDerivWithin_seam_match {V : Set E} (hV : IsOpen V) :
 
 theorem contDiffOn_glue_of_jet_param
     {V : Set E} (hV : IsOpen V) (fL fR : ℝ × E → F)
-    (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0:ℝ) ×ˢ V))
-    (hR : ContDiffOn ℝ ∞ fR (Set.Ici (0:ℝ) ×ˢ V))
+    (hL : ContDiffOn ℝ ∞ fL (Set.Iic (0 : ℝ) ×ˢ V))
+    (hR : ContDiffOn ℝ ∞ fR (Set.Ici (0 : ℝ) ×ˢ V))
     (hjet : ∀ (i : ℕ), ∀ w ∈ V,
       iteratedDerivWithin i (fun t => fL (t, w)) (Set.Iic 0) 0
         = iteratedDerivWithin i (fun t => fR (t, w)) (Set.Ici 0) 0) :

@@ -7,8 +7,6 @@ import Mathlib.Analysis.Normed.Operator.ContinuousLinearMap
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -343,7 +341,8 @@ theorem tensorPouSobolevNorm_ne_top
   exact tensorPouSobolevNorm_inner_integral_lt_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_euclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

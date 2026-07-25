@@ -20,8 +20,6 @@ import Mathlib.MeasureTheory.Integral.IntegrableOn
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -214,7 +212,8 @@ private def christoffelAtomIntegrand
       ((∑ k : Fin r, ‖trivInput (I := I) g r s α j T b k‖ ^ 2) +
        (∑ l : Fin s, ‖trivOutput (I := I) g r s α j T b l‖ ^ 2))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma triv_continuousLinearMapAt_eq_triv_snd
     {b : M} (hb : b ∈ (chartAt H α).source) (v : TensorRSSpace r s I b) :
     (trivializationAt (TensorRSModel r s ℝ E)

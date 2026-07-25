@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -137,7 +136,8 @@ def directionalDerivAlong
     (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) : Real :=
   extDerivFun (I := I) f x (X x)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 @[simp] theorem directionalDerivAlong_add_left
     (X X' : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) :
   directionalDerivAlong (I := I) (X + X') f x =
@@ -146,7 +146,8 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaComp
   unfold directionalDerivAlong
   rw [Pi.add_apply, map_add]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 @[simp] theorem directionalDerivAlong_smul_left
     (a : Real) (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M) :
   directionalDerivAlong (I := I) (a • X) f x =
@@ -155,7 +156,8 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaComp
   rw [Pi.smul_apply, map_smul]
   rfl
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem directionalDerivAlong_add_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -242,7 +244,8 @@ private theorem koszulScalar_add_second
   simp [Pi.add_apply, map_add, ContinuousLinearMap.add_apply]
   abel_nf
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem extDerivFun_mul_at
     {f h : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -258,7 +261,8 @@ private theorem extDerivFun_mul_at
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem directionalDerivAlong_mul_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -269,7 +273,8 @@ private theorem directionalDerivAlong_mul_fun
   unfold directionalDerivAlong
   exact extDerivFun_mul_at (I := I) (v := X x) hf hh
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem directionalDerivAlong_smul_fun_left
     {f : M -> Real} (X : (p : M) -> TangentSpace I p) (h : M -> Real) (x : M) :
     directionalDerivAlong (I := I) (f • X) h x =

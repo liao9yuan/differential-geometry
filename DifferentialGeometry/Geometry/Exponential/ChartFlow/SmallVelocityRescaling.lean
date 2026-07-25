@@ -218,7 +218,6 @@ theorem maximalGeodesic_continuousOn_Icc_of_norm_lt
     rw [one_div, ← div_eq_inv_mul, div_lt_iff₀ ht'_pos]
     linarith [hw_norm, mul_comm t' ρ₀]
   have hT_div : T / t' = 2 := by rw [ht'_def]; field_simp
-
   have h_eqOn : Set.EqOn (maximalGeodesic (I := I) g p v₀)
       (fun t => (extChartAt I p).symm
         (Φ (((extChartAt I p p, vb) : E × E), t' * t)).1)
@@ -234,7 +233,6 @@ theorem maximalGeodesic_continuousOn_Icc_of_norm_lt
       (s := t) ht_Ioo
     rw [show (t' • vb : TangentSpace I p) = v₀ from hvb_resc] at h
     exact h
-
   have hφ_contOn : ContinuousOn
       (fun s : ℝ => Φ (((extChartAt I p p, vb) : E × E), s)) (Set.Ioo (-T) T) := by
     intro s hs

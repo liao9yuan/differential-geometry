@@ -28,8 +28,6 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace H' N] [IsManifold J ∞ 
 variable {n : WithTop ℕ∞}
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-
-
 theorem codRestr_contMDiffAt
     {N' : Type*} [TopologicalSpace N'] [ChartedSpace H' N']
     {V : Opens N'} {f : M → N'} (hmem : ∀ y, f y ∈ V) {x : M}
@@ -43,8 +41,6 @@ theorem codRestr_contMDiffAt
   convert hdiff using 2
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-
-
 theorem image_opens_isOpen
     (Φ : PartialDiffeomorph I J M N n)
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source) :
@@ -130,8 +126,6 @@ noncomputable def toOpensDiffeoCross
     exact codRestr_contMDiffAt (I := J) (J := I) hmem hbase
 
 omit [IsManifold I ∞ M] [IsManifold J ∞ N] in
-
-
 theorem opensDiffeo_mfd
     (Φ : PartialDiffeomorph I J M N (∞ : WithTop ℕ∞))
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source)

@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -149,7 +147,7 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
       (roughLapRicciInnerInFrame (I := I) S roughLapRic gInv frame)
       (nablaRicciNormSqInFrame (M := M) nablaRic gInv) := by
   have hrealized :=
-    DifferentialGeometry.Integral.Connection.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
+    Integral.Connection.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
       (I := I) (M := M) (Time := Real) ricciNormLap roughLapRic
       (ricciTwoTensorField (I := I) S) gInv frame nablaRic h_lap
   intro t x
@@ -181,7 +179,7 @@ theorem coordInvReal
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x0)
       (fun i j => coordInv (I := I) S x0 t x0 i j) := by
   simpa [coordInv] using
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) (S.family.metric t) x0
 
 
@@ -220,7 +218,8 @@ noncomputable def coordNab2Ric
   fun t x d a i j =>
     extDerivFun (I := I)
         (fun y : M =>
-          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+            (I := I) x0)
             t y a i j)
         x
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0 d x) -
@@ -230,7 +229,8 @@ noncomputable def coordNab2Ric
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x0)
             x d a p *
-          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+            (I := I) x0)
             t x p i j) -
       (∑ p : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
@@ -238,7 +238,8 @@ noncomputable def coordNab2Ric
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x0)
             x d i p *
-          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+            (I := I) x0)
             t x a p j) -
       (∑ p : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
@@ -246,7 +247,8 @@ noncomputable def coordNab2Ric
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
             (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x0)
             x d j p *
-          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+          nablaRicComp (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt
+            (I := I) x0)
             t x a i p)
 
 
@@ -498,7 +500,8 @@ theorem ricci_heat_mc
     (hinv : forall t x,
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) (S.base.metric t) x
         (basis x) (gInv t x))
-    (hfields : forall x, DifferentialGeometry.Integral.Connection.SmoothBasisFieldsAt (I := I) (basis x) (X x))
+    (hfields : forall x, DifferentialGeometry.Integral.Connection.SmoothBasisFieldsAt (I := I)
+      (basis x) (X x))
     (hlapTrace : forall t x,
       ricciNormLap t x =
         DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
@@ -511,10 +514,12 @@ theorem ricci_heat_mc
         (M := M) 3 (S.base.connection t) (nablaA t) (nabla2A t))
     (hdu : forall t,
       DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
-        (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y (A t y))
+        (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y
+          (A t y))
         (du t))
     (hHess : forall t x,
-      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I) (S.base.connection t) (du t)
+      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I)
+        (S.base.connection t) (du t)
         (normSecond t) x)
     (hrough : forall t x,
       DifferentialGeometry.Integral.Connection.RoughLap0SRealizesMetricTraceInBasis (I := I)
@@ -526,7 +531,8 @@ theorem ricci_heat_mc
       roughA t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
         roughLapRic t x i j)
     (hnablaComp : forall t x a i j,
-      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+        (frame j x)) =
         nablaRic t x a i j) :
     RicciNormHeatEquationOn
       (D := D) (ricciNormSqInFrame (I := I) S gInv frame)

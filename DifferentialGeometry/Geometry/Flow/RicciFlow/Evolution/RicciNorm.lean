@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -46,7 +45,8 @@ structure TFLapReg
   scalar_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) x
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+          (S.scalar t) y) x
   scalar_sq_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ y : M,
       MDifferentiableAt I 𝓘(Real, Real)
@@ -141,7 +141,8 @@ theorem tfLapCore
       DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
           (fun y : M =>
             ricciNorm (I := I) S t y - S.scalar t y ^ 2 / 3) x =
-          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (ricciNorm (I := I) S t) x -
+          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (ricciNorm (I := I) S t)
+            x -
           DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
             (fun y : M => S.scalar t y ^ 2 / 3) x :=
     DifferentialGeometry.Integral.Connection.laplacianAt_sub (I := I) G t
@@ -154,7 +155,8 @@ theorem tfLapCore
         DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
           (fun y : M =>
             ricciNorm (I := I) S t y - S.scalar t y ^ 2 / 3) x := rfl
-    _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (ricciNorm (I := I) S t) x -
+    _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (ricciNorm (I := I) S t) x
+      -
           DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
             (fun y : M => S.scalar t y ^ 2 / 3) x := hsub
     _ = ricciNormLap (I := I) S t x -
@@ -327,13 +329,15 @@ private theorem coordPair4_eq
     coordInner0S (I := I) (x := x) 4 gInv Rm04
         (ricciPair04 (I := I) Ric) basis =
       ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
-        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j)
+          (basis l)) *
           (∑ a : Idx, ∑ c : Idx,
             gInv i a * gInv j c *
               Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis a) (basis c))) *
           (∑ b : Idx, ∑ d : Idx,
             gInv k b * gInv l d *
-              Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b) (basis d))) := by
+              Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b)
+                (basis d))) := by
   classical
   unfold coordInner0S tensor0SComponent
   rw [sumFin4Slot]
@@ -347,7 +351,8 @@ private theorem coordPair4_eq
             Rm04 (fun q : Fin 4 => basis (slot4ikjl i j k l q))) *
           ricciPair04 (I := I) Ric (fun q : Fin 4 => basis (u q)))
         =
-        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j)
+          (basis l)) *
           (∑ u : Fin 4 -> Idx,
             (∏ q : Fin 4, gInv (slot4ikjl i j k l q) (u q)) *
               ricciPair04 (I := I) Ric (fun q : Fin 4 => basis (u q))) := by
@@ -355,29 +360,34 @@ private theorem coordPair4_eq
           refine Finset.sum_congr rfl fun u _ => ?_
           have hRm :
               (fun q : Fin 4 => basis (slot4ikjl i j k l q)) =
-                DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j) (basis l) := by
+                DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j)
+                  (basis l) := by
             funext q
             fin_cases q <;> simp [slot4ikjl, DifferentialGeometry.Integral.Connection.vec4,
               DifferentialGeometry.Integral.Connection.vec4]
           rw [hRm]
           ring
     _ =
-        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j)
+          (basis l)) *
           ((∑ a : Idx, ∑ c : Idx,
               gInv i a * gInv j c *
                 Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis a) (basis c))) *
             (∑ b : Idx, ∑ d : Idx,
               gInv k b * gInv l d *
-                Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b) (basis d)))) := by
+                Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b)
+                  (basis d)))) := by
           rw [pairSum_eq (I := I) gInv Ric basis i j k l]
     _ =
-        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+        Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) (basis i) (basis k) (basis j)
+          (basis l)) *
           (∑ a : Idx, ∑ c : Idx,
             gInv i a * gInv j c *
               Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis a) (basis c))) *
           (∑ b : Idx, ∑ d : Idx,
             gInv k b * gInv l d *
-              Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b) (basis d))) := by
+              Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis b)
+                (basis d))) := by
           ring
 
 
@@ -434,9 +444,9 @@ private def ricciDataOfFrame
       (hdt t x).congr_deriv (by
         rw [hreact (t : Real) x])
     refine hframeDeriv.congr_of_eventuallyEq ?_ ?_
-    filter_upwards with s
-    exact (hnorm s x).symm
-    exact (hnorm (t : Real) x).symm
+    · filter_upwards with s
+      exact (hnorm s x).symm
+    · exact (hnorm (t : Real) x).symm
   · have hlap :=
       ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
         (I := I) S gInv frame roughLapRic (ricciNormLap (I := I) S)
@@ -472,7 +482,8 @@ theorem coordReact
     (coordInvReal (I := I) S x0 t)]
   rw [coordPair4_eq]
   unfold curvRicciRicciInFrame raisedRicciCompInFrame
-    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame ricciTwoTensorField DifferentialGeometry.Integral.Connection.rm04Comp
+    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame ricciTwoTensorField
+      DifferentialGeometry.Integral.Connection.rm04Comp
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -560,7 +571,8 @@ def ricciDataAtCoord
       intro s
       have hbasis :
           forall i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x i = frame i x := by
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x i = frame i
+              x := by
         intro i
         simp [frame, DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
       simpa [ricciNorm] using
@@ -581,9 +593,9 @@ def ricciDataAtCoord
       hframe0.congr_deriv (by
         rw [coordReact (I := I) S x (t : Real)])
     refine hframeDeriv.congr_of_eventuallyEq ?_ ?_
-    filter_upwards with s
-    exact (hnorm s).symm
-    exact (hnorm (t : Real)).symm
+    · filter_upwards with s
+      exact (hnorm s).symm
+    · exact (hnorm (t : Real)).symm
   · intro t x
     let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
     change

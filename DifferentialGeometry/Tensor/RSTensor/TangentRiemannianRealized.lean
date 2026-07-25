@@ -29,7 +29,6 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

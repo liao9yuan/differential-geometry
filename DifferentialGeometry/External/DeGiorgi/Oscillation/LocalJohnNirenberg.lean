@@ -53,9 +53,11 @@ theorem john_nirenberg_level_set_decay
     have h1 : volume E_lam ≤ volume (⋃ i, (B i).fivefold) := measure_mono hcover
     have h2 : volume (⋃ i, (B i).fivefold) ≤ ∑' i, volume ((B i).fivefold) :=
       measure_iUnion_le _
-    have h3 : ∀ i, volume ((B i).fivefold) = ENNReal.ofReal ((5 : ℝ) ^ d) * volume ((B i).carrier) :=
+    have h3 : ∀ i, volume ((B i).fivefold) = ENNReal.ofReal ((5 : ℝ) ^ d) * volume
+      ((B i).carrier) :=
       fun i => (B i).volume_fivefold
-    have h4 : ∑' i, volume ((B i).fivefold) = ∑' i, (ENNReal.ofReal ((5 : ℝ) ^ d) * volume ((B i).carrier)) :=
+    have h4 : ∑' i, volume ((B i).fivefold) = ∑' i,
+      (ENNReal.ofReal ((5 : ℝ) ^ d) * volume ((B i).carrier)) :=
       tsum_congr (fun i => h3 i)
     have h5 : ∑' i, (ENNReal.ofReal ((5 : ℝ) ^ d) * volume ((B i).carrier)) =
         ENNReal.ofReal ((5 : ℝ) ^ d) * ∑' i, volume ((B i).carrier) :=
@@ -287,7 +289,8 @@ lemma abs_subballAverage_sub_ballAverage_le
     (hsub : Metric.ball c s ⊆ Metric.ball x r)
     (hu_int : IntegrableOn u (Metric.ball x r) volume) :
     |⨍ z in Metric.ball c s, u z ∂volume - ⨍ z in Metric.ball x r, u z ∂volume| ≤
-      (r / s) ^ d * (⨍ z in Metric.ball x r, ‖u z - ⨍ w in Metric.ball x r, u w ∂volume‖ ∂volume) := by
+      (r / s) ^ d * (⨍ z in Metric.ball x r, ‖u z - ⨍ w in Metric.ball x r, u w ∂volume‖
+        ∂volume) := by
   let S : Set E := Metric.ball c s
   let B : Set E := Metric.ball x r
   let avg : ℝ := ⨍ w in B, u w ∂volume
@@ -344,10 +347,12 @@ lemma abs_subballAverage_sub_ballAverage_le
         = |⨍ z in S, (u z - avg) ∂volume| := by rw [hdiff]
     _ ≤ ⨍ z in S, |u z - avg| ∂volume := hnorm
     _ = (volume.real S)⁻¹ * ∫ z in S, |u z - avg| ∂volume := by
-      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S), smul_eq_mul]
+      rw [MeasureTheory.setAverage_eq (μ := volume) (f := fun z => |u z - avg|) (s := S),
+        smul_eq_mul]
     _ ≤ (volume.real S)⁻¹ * ∫ z in B, |u z - avg| ∂volume := by
       gcongr
-    _ = (r / s) ^ d * ⨍ z in Metric.ball x r, ‖u z - ⨍ w in Metric.ball x r, u w ∂volume‖ ∂volume := by
+    _ = (r / s) ^ d * ⨍ z in Metric.ball x r, ‖u z - ⨍ w in Metric.ball x r, u w ∂volume‖
+      ∂volume := by
       have havg_eq : ⨍ z in Metric.ball x r, ‖u z - ⨍ w in Metric.ball x r, u w ∂volume‖ ∂volume =
         (volume.real B)⁻¹ * ∫ z in B, |u z - avg| ∂volume := by
         rw [MeasureTheory.setAverage_eq, smul_eq_mul]
@@ -372,8 +377,10 @@ lemma abs_ballAverage_sub_sixBallAverage_le
     rw [mul_div_cancel_of_imp]
     exact fun h => absurd h (ne_of_gt hr)
   calc |⨍ x in Metric.ball x₀ r, u x ∂volume - ⨍ x in Metric.ball x₀ (6 * r), u x ∂volume|
-        ≤ (6 * r / r) ^ d * (⨍ z in Metric.ball x₀ (6 * r), ‖u z - ⨍ w in Metric.ball x₀ (6 * r), u w ∂volume‖ ∂volume) := hle
-      _ = 6 ^ d * (⨍ z in Metric.ball x₀ (6 * r), ‖u z - ⨍ w in Metric.ball x₀ (6 * r), u w ∂volume‖ ∂volume) := by rw [hratio]
+        ≤ (6 * r / r) ^ d * (⨍ z in Metric.ball x₀ (6 * r), ‖u z - ⨍ w in Metric.ball x₀ (6 * r), u
+          w ∂volume‖ ∂volume) := hle
+      _ = 6 ^ d * (⨍ z in Metric.ball x₀ (6 * r), ‖u z - ⨍ w in Metric.ball x₀ (6 * r), u w ∂volume‖
+        ∂volume) := by rw [hratio]
       _ ≤ 6 ^ d * M := by exact mul_le_mul_of_nonneg_left hu_bmo (by positivity)
 
 /-- Base-scale control: if `lam ≥ 4 * 6^d * M`, then the average of `‖u - avg‖` on every radius
@@ -1114,6 +1121,8 @@ private lemma fivefold_cover_real_le
   simpa [U] using hreal
 
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 private lemma assigned_union_half_measure_real
     {u : E → ℝ} {x₀ : E} {R M lam μ A C5 avgR : ℝ}
     (_hR : 0 < R) (_hM : 0 < M)
@@ -1478,6 +1487,8 @@ private lemma closedBall_subset_ball_of_mem_ball_half_aux
     _ ≤ R := by linarith
 
 set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 private lemma ae_pointwise_gt_subset_badCenter
     {w : E → ℝ} {x₀ : E} {R lam : ℝ}
     (hR : 0 < R)
@@ -1565,6 +1576,8 @@ private lemma ae_pointwise_gt_subset_badCenter
   simpa [r] using hn.trans_eq havg_eq
 
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- The full local John-Nirenberg inequality: if `u` has BMO seminorm at most `M`
 on all sub-balls of `ball(x₀, 6R)`, then the level sets of `|u - (u)_B|` on `B = ball(x₀, R)`
 decay exponentially. -/
@@ -1767,11 +1780,15 @@ theorem john_nirenberg_local
       have hrawLam_nonempty : (⋃ p : F lam, Metric.ball p.center (rLam p)).Nonempty := by
         rcases hFlam_nonempty with ⟨p⟩
         refine ⟨p.center, Set.mem_iUnion.2 ?_⟩
-        exact ⟨p, by simpa using (Metric.mem_ball_self (hrLam_pos p) : p.center ∈ Metric.ball p.center (rLam p))⟩
+        exact ⟨p, by simpa using
+                       (Metric.mem_ball_self (hrLam_pos p) : p.center ∈ Metric.ball p.center
+          (rLam p))⟩
       have hrawMu_nonempty : (⋃ p : F μ, Metric.ball p.center (rMu p)).Nonempty := by
         rcases hFμ_nonempty with ⟨p⟩
         refine ⟨p.center, Set.mem_iUnion.2 ?_⟩
-        exact ⟨p, by simpa using (Metric.mem_ball_self (hrMu_pos p) : p.center ∈ Metric.ball p.center (rMu p))⟩
+        exact ⟨p, by simpa using
+                       (Metric.mem_ball_self (hrMu_pos p) : p.center ∈ Metric.ball p.center
+          (rMu p))⟩
       obtain ⟨SLam, hSLam_count, hSLam_disj, hSLam_hit, hSLam_cover⟩ :=
         vitali_covering_lemma (ι := F lam) (x := fun p => p.center) (r := rLam)
           hrLam_pos hrLam_bdd hrawLam_nonempty

@@ -16,6 +16,22 @@ section VariationalSolution
 variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
+noncomputable local instance parametricLinearODEEndoNormedAddCommGroup :
+    NormedAddCommGroup (G →L[ℝ] G) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance parametricLinearODEEndoNormedSpace :
+    NormedSpace ℝ (G →L[ℝ] G) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance parametricLinearODEDerivativeNormedAddCommGroup :
+    NormedAddCommGroup (F →L[ℝ] G →L[ℝ] G) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance parametricLinearODEDerivativeNormedSpace :
+    NormedSpace ℝ (F →L[ℝ] G →L[ℝ] G) :=
+  ContinuousLinearMap.toNormedSpace
+
 noncomputable def variationalForcing
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
     (x : F) (v : F) (t : ℝ) : G :=
@@ -141,7 +157,8 @@ theorem inhomogLinearODE_unique_on_Ioo
       abel
     rw [h_eq] at hsub
     exact hsub
-  have h0_deriv : ∀ t ∈ Set.Ioo a b', HasDerivAt (fun _ : ℝ => (0 : G)) (A t ((fun _ => 0) t)) t := by
+  have h0_deriv : ∀ t ∈ Set.Ioo a b', HasDerivAt (fun _ : ℝ => (0 : G)) (A t ((fun _ => 0) t))
+    t := by
     intro t _
     have h0 : HasDerivAt (fun _ : ℝ => (0 : G)) 0 t := hasDerivAt_const _ _
     have h_eq : (A t ((fun _ : ℝ => (0 : G)) t)) = 0 := by
@@ -653,7 +670,8 @@ noncomputable def variationalW_clm
           Continuous.continuousAt (by continuity)
         exact (h.comp hcurve).continuousWithinAt
       have h_normDA_cont : ContinuousOn (fun s => ‖fderiv ℝ (fun y => A y s) x‖)
-          (Set.Icc α β) := continuous_norm.comp_continuousOn hDAx_cont_Icc
+          (Set.Icc α β) := by
+        simpa only using hDAx_cont_Icc.norm
       obtain ⟨σP, _, hP_bd⟩ := hIcc_cpt.exists_isMaxOn hIcc_ne h_normDA_cont
       let Pv : ℝ := ‖fderiv ℝ (fun y => A y σP) x‖
       have hPv_nn : 0 ≤ Pv := norm_nonneg _
@@ -780,7 +798,237 @@ theorem linearODESolution_dist_le
     rw [h_abs]
     exact hres
 
-set_option maxHeartbeats 1600000 in
+omit [CompleteSpace G] in
+theorem norm_le_gronwallBound_on_Icc
+    {R R' : ℝ → G} {α β h₀ t r₀ K η : ℝ}
+    (hh₀_mem : h₀ ∈ Set.Icc α β) (ht_mem : t ∈ Set.Icc α β)
+    (hr₀_nn : 0 ≤ r₀) (hK_nn : 0 ≤ K) (hη_nn : 0 ≤ η)
+    (hR_cont : ContinuousOn R (Set.Icc α β))
+    (hR_deriv : ∀ s ∈ Set.Icc α β, HasDerivAt R (R' s) s)
+    (hR_init : ‖R h₀‖ ≤ r₀)
+    (hR_bd : ∀ s ∈ Set.Icc α β, ‖R' s‖ ≤ K * ‖R s‖ + η) :
+    ‖R t‖ ≤ gronwallBound r₀ K η (β - α) := by
+  have h_α_le_h₀ : α ≤ h₀ := hh₀_mem.1
+  have h_h₀_le_β : h₀ ≤ β := hh₀_mem.2
+  rcases le_total h₀ t with hht | hth
+  · have ht_fwd : t ∈ Set.Icc h₀ β := ⟨hht, ht_mem.2⟩
+    have hIcc_fwd_sub : Set.Icc h₀ β ⊆ Set.Icc α β := fun s hs =>
+      ⟨le_trans h_α_le_h₀ hs.1, hs.2⟩
+    have hR_cont_fwd : ContinuousOn R (Set.Icc h₀ β) :=
+      hR_cont.mono hIcc_fwd_sub
+    have hR_deriv_within_right : ∀ s ∈ Set.Ico h₀ β,
+        HasDerivWithinAt R (R' s) (Set.Ici s) s := fun s hs =>
+      (hR_deriv s (hIcc_fwd_sub (Set.Ico_subset_Icc_self hs))).hasDerivWithinAt
+    have h_bound_fwd : ∀ s ∈ Set.Ico h₀ β,
+        ‖R' s‖ ≤ K * ‖R s‖ + η := fun s hs =>
+      hR_bd s (hIcc_fwd_sub (Set.Ico_subset_Icc_self hs))
+    have hgw := norm_le_gronwallBound_of_norm_deriv_right_le
+      hR_cont_fwd hR_deriv_within_right hR_init h_bound_fwd t ht_fwd
+    have h_t_sub_le : t - h₀ ≤ β - α := by
+      linarith [ht_mem.2, h_α_le_h₀]
+    have h_mono :
+        gronwallBound r₀ K η (t - h₀) ≤
+          gronwallBound r₀ K η (β - α) :=
+      gronwallBound_mono hr₀_nn hη_nn hK_nn h_t_sub_le
+    exact hgw.trans h_mono
+  · have ht_bwd : t ∈ Set.Icc α h₀ := ⟨ht_mem.1, hth⟩
+    have hIcc_bwd_sub : Set.Icc α h₀ ⊆ Set.Icc α β := fun s hs =>
+      ⟨hs.1, le_trans hs.2 h_h₀_le_β⟩
+    let Rb : ℝ → G := fun s => R (2 * h₀ - s)
+    have h_h₀_le_2h₀_t : h₀ ≤ 2 * h₀ - t := by linarith
+    have h_dom_swap :
+        ∀ s ∈ Set.Icc h₀ (2 * h₀ - t), 2 * h₀ - s ∈ Set.Icc α h₀ := by
+      intro s hs
+      refine ⟨?_, ?_⟩ <;> linarith [hs.1, hs.2, ht_bwd.1]
+    have hRb_cont : ContinuousOn Rb (Set.Icc h₀ (2 * h₀ - t)) := by
+      apply ContinuousOn.comp (hR_cont.mono hIcc_bwd_sub)
+        (s := Set.Icc h₀ (2 * h₀ - t)) (t := Set.Icc α h₀)
+        (f := fun s => 2 * h₀ - s)
+      · exact (continuous_const.sub continuous_id).continuousOn
+      · exact h_dom_swap
+    have hRb_deriv : ∀ s ∈ Set.Icc h₀ (2 * h₀ - t),
+        HasDerivAt Rb (-(R' (2 * h₀ - s))) s := by
+      intro s hs
+      have hd := hR_deriv (2 * h₀ - s)
+        (hIcc_bwd_sub (h_dom_swap s hs))
+      have hchain : HasDerivAt (fun r : ℝ => 2 * h₀ - r) (-1 : ℝ) s := by
+        simpa using (hasDerivAt_const s (2 * h₀)).sub (hasDerivAt_id s)
+      have hd' := hd.scomp s hchain
+      rw [show ((-1 : ℝ) • R' (2 * h₀ - s) : G) =
+        -(R' (2 * h₀ - s)) by exact neg_one_smul ℝ _] at hd'
+      exact hd'
+    have hRb_deriv_within_right : ∀ s ∈ Set.Ico h₀ (2 * h₀ - t),
+        HasDerivWithinAt Rb (-(R' (2 * h₀ - s))) (Set.Ici s) s :=
+      fun s hs => (hRb_deriv s (Set.Ico_subset_Icc_self hs)).hasDerivWithinAt
+    have hRb_init : Rb h₀ = R h₀ := by
+      change R (2 * h₀ - h₀) = R h₀
+      congr 1
+      ring
+    have hRb_init_bd : ‖Rb h₀‖ ≤ r₀ := by
+      rw [hRb_init]
+      exact hR_init
+    have hRb_bd : ∀ s ∈ Set.Ico h₀ (2 * h₀ - t),
+        ‖-(R' (2 * h₀ - s))‖ ≤ K * ‖Rb s‖ + η := by
+      intro s hs
+      have hin : 2 * h₀ - s ∈ Set.Icc α β :=
+        hIcc_bwd_sub (h_dom_swap s (Set.Ico_subset_Icc_self hs))
+      have hbound := hR_bd (2 * h₀ - s) hin
+      rw [norm_neg]
+      exact hbound
+    have hgw_bwd := norm_le_gronwallBound_of_norm_deriv_right_le
+      hRb_cont hRb_deriv_within_right hRb_init_bd hRb_bd (2 * h₀ - t)
+      (right_mem_Icc.mpr h_h₀_le_2h₀_t)
+    have hRb_t : Rb (2 * h₀ - t) = R t := by
+      change R (2 * h₀ - (2 * h₀ - t)) = R t
+      congr 1
+      ring
+    rw [hRb_t] at hgw_bwd
+    have h_time : 2 * h₀ - t - h₀ = h₀ - t := by ring
+    rw [h_time] at hgw_bwd
+    have h_h₀_sub_t_le : h₀ - t ≤ β - α := by
+      linarith [ht_bwd.1, h_h₀_le_β]
+    have h_mono :
+        gronwallBound r₀ K η (h₀ - t) ≤
+          gronwallBound r₀ K η (β - α) :=
+      gronwallBound_mono hr₀_nn hη_nn hK_nn h_h₀_sub_t_le
+    exact hgw_bwd.trans h_mono
+
+theorem linearODESolution_local_lipschitz_on_Icc
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hA_diff : ∀ y ∈ U, ∀ s ∈ Set.Ioo a b',
+      HasFDerivAt (fun z => A z s) (fderiv ℝ (fun z => A z s) y) y)
+    {x : F} {α β δ M P Q L : ℝ}
+    (hx : x ∈ U) (hα_le_β : α ≤ β)
+    (ha_lt_α : a < α) (hβ_lt_b' : β < b')
+    (hh₀_mem : h₀ ∈ Set.Icc α β)
+    (hIcc_sub : Set.Icc α β ⊆ Set.Ioo a b')
+    (hclosedBall_sub : Metric.closedBall x δ ⊆ U)
+    (hδ_nn : 0 ≤ δ) (hM_nn : 0 ≤ M) (hP_nn : 0 ≤ P)
+    (hQ_nn : 0 ≤ Q) (hL_nn : 0 ≤ L)
+    (hAx_bd : ∀ s ∈ Set.Icc α β, ‖A x s‖ ≤ M)
+    (hDA_bd : ∀ y ∈ Metric.closedBall x δ, ∀ s ∈ Set.Icc α β,
+      ‖fderiv ℝ (fun z => A z s) y‖ ≤ P)
+    (hZ_bd : ∀ y ∈ Metric.closedBall x δ, ∀ s ∈ Set.Icc α β,
+      ‖linearODESolution A a b' h₀ Z₀ y s‖ ≤ Q)
+    (hDZ₀_bd : ∀ y ∈ Metric.closedBall x δ, ‖fderiv ℝ Z₀ y‖ ≤ L)
+    (hZ₀_diff : ∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y) :
+    ∀ h : F, ‖h‖ ≤ δ → ∀ s ∈ Set.Icc α β,
+      ‖linearODESolution A a b' h₀ Z₀ (x + h) s -
+          linearODESolution A a b' h₀ Z₀ x s‖ ≤
+        gronwallBound L M (P * Q) (β - α) * ‖h‖ := by
+  intro h hh_bd s hs
+  have hdist_xh_x : dist (x + h) x = ‖h‖ := by
+    rw [dist_eq_norm]
+    congr 1
+    abel
+  have hxh_ball : x + h ∈ Metric.closedBall x δ := by
+    rw [Metric.mem_closedBall, hdist_xh_x]
+    exact hh_bd
+  have hxh_U : x + h ∈ U := hclosedBall_sub hxh_ball
+  have hConv : Convex ℝ (Metric.closedBall x δ) := convex_closedBall _ _
+  have hZ₀_lip : ‖Z₀ (x + h) - Z₀ x‖ ≤ L * ‖h‖ := by
+    have hdiff : ∀ y ∈ Metric.closedBall x δ, DifferentiableAt ℝ Z₀ y :=
+      fun y hy => (hZ₀_diff y (hclosedBall_sub hy)).differentiableAt
+    have hres := hConv.norm_image_sub_le_of_norm_fderiv_le
+      hdiff hDZ₀_bd (Metric.mem_closedBall_self hδ_nn) hxh_ball
+    have hsub_eq : x + h - x = h := by abel
+    rw [hsub_eq] at hres
+    exact hres
+  have h_force : ∀ s' ∈ Set.Icc α β,
+      ‖(A (x + h) s' - A x s')
+          (linearODESolution A a b' h₀ Z₀ (x + h) s')‖ ≤
+        (P * Q) * ‖h‖ := by
+    intro s' hs'
+    have hZxh_bd :
+        ‖linearODESolution A a b' h₀ Z₀ (x + h) s'‖ ≤ Q :=
+      hZ_bd (x + h) hxh_ball s' hs'
+    have hAdiff_bd : ‖A (x + h) s' - A x s'‖ ≤ P * ‖h‖ := by
+      have hbd : ∀ y ∈ Metric.closedBall x δ,
+          ‖fderiv ℝ (fun z => A z s') y‖ ≤ P :=
+        fun y hy => hDA_bd y hy s' hs'
+      have hdiff : ∀ y ∈ Metric.closedBall x δ,
+          DifferentiableAt ℝ (fun z => A z s') y := fun y hy =>
+        (hA_diff y (hclosedBall_sub hy) s' (hIcc_sub hs')).differentiableAt
+      have hres := hConv.norm_image_sub_le_of_norm_fderiv_le
+        hdiff hbd (Metric.mem_closedBall_self hδ_nn) hxh_ball
+      have hsub_eq : x + h - x = h := by abel
+      rw [hsub_eq] at hres
+      exact hres
+    have h1 :
+        ‖(A (x + h) s' - A x s')
+            (linearODESolution A a b' h₀ Z₀ (x + h) s')‖ ≤
+          ‖A (x + h) s' - A x s'‖ *
+            ‖linearODESolution A a b' h₀ Z₀ (x + h) s'‖ :=
+      (A (x + h) s' - A x s').le_opNorm _
+    have h2 :
+        ‖A (x + h) s' - A x s'‖ *
+            ‖linearODESolution A a b' h₀ Z₀ (x + h) s'‖ ≤
+          (P * ‖h‖) * Q :=
+      mul_le_mul hAdiff_bd hZxh_bd (norm_nonneg _)
+        (mul_nonneg hP_nn (norm_nonneg _))
+    calc
+      ‖(A (x + h) s' - A x s')
+          (linearODESolution A a b' h₀ Z₀ (x + h) s')‖
+          ≤ ‖A (x + h) s' - A x s'‖ *
+              ‖linearODESolution A a b' h₀ Z₀ (x + h) s'‖ := h1
+      _ ≤ (P * ‖h‖) * Q := h2
+      _ = P * Q * ‖h‖ := by ring
+  have hgw := linearODESolution_dist_le (A := A) (Z₀ := Z₀)
+    hab_lt h₀_mem hU hA_cont hx hxh_U hα_le_β ha_lt_α hβ_lt_b' hh₀_mem
+    hM_nn hAx_bd h_force hs
+  have h_init_bd : ‖Z₀ x - Z₀ (x + h)‖ ≤ L * ‖h‖ := by
+    rw [show Z₀ x - Z₀ (x + h) = -(Z₀ (x + h) - Z₀ x) by abel, norm_neg]
+    exact hZ₀_lip
+  have h_abs_le : |s - h₀| ≤ β - α := by
+    rcases le_total h₀ s with hle | hle
+    · rw [abs_of_nonneg (by linarith)]
+      linarith [hh₀_mem.1, hs.2]
+    · rw [abs_of_nonpos (by linarith)]
+      linarith [hs.1, hh₀_mem.2]
+  rw [show linearODESolution A a b' h₀ Z₀ x s -
+      linearODESolution A a b' h₀ Z₀ (x + h) s =
+      -(linearODESolution A a b' h₀ Z₀ (x + h) s -
+        linearODESolution A a b' h₀ Z₀ x s) by abel, norm_neg] at hgw
+  have h_gb_mono_δ :
+      gronwallBound ‖Z₀ x - Z₀ (x + h)‖ M (P * Q * ‖h‖) |s - h₀| ≤
+        gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀| := by
+    by_cases hMeq : M = 0
+    · simp only [gronwallBound_K0, hMeq]
+      linarith
+    · simp only [gronwallBound_of_K_ne_0 hMeq]
+      have hexp_nn : 0 ≤ Real.exp (M * |s - h₀|) := (Real.exp_pos _).le
+      have hmul : ‖Z₀ x - Z₀ (x + h)‖ * Real.exp (M * |s - h₀|) ≤
+          (L * ‖h‖) * Real.exp (M * |s - h₀|) :=
+        mul_le_mul_of_nonneg_right h_init_bd hexp_nn
+      linarith
+  have h_gb_mono_x :
+      gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀| ≤
+        gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) :=
+    gronwallBound_mono (mul_nonneg hL_nn (norm_nonneg _))
+      (mul_nonneg (mul_nonneg hP_nn hQ_nn) (norm_nonneg _))
+      hM_nn h_abs_le
+  have h_gb_scale :
+      gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) =
+        ‖h‖ * gronwallBound L M (P * Q) (β - α) := by
+    by_cases hMeq : M = 0
+    · rw [hMeq]
+      simp only [gronwallBound_K0]
+      ring
+    · simp only [gronwallBound_of_K_ne_0 hMeq]
+      field_simp
+  calc
+    ‖linearODESolution A a b' h₀ Z₀ (x + h) s -
+        linearODESolution A a b' h₀ Z₀ x s‖
+        ≤ gronwallBound ‖Z₀ x - Z₀ (x + h)‖ M
+            (P * Q * ‖h‖) |s - h₀| := hgw
+    _ ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀| := h_gb_mono_δ
+    _ ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) := h_gb_mono_x
+    _ = ‖h‖ * gronwallBound L M (P * Q) (β - α) := h_gb_scale
+    _ = gronwallBound L M (P * Q) (β - α) * ‖h‖ := mul_comm _ _
 
 theorem linearODESolution_hasFDerivAt_param
     [FiniteDimensional ℝ F]
@@ -852,7 +1100,8 @@ theorem linearODESolution_hasFDerivAt_param
     hDA_cont.mono hK_sub
   have hDAnorm_cont_K : ContinuousOn
       (fun p : F × ℝ => ‖fderiv ℝ (fun z => A z p.2) p.1‖) K :=
-    continuous_norm.comp_continuousOn hDA_cont_K
+    by
+      simpa only [Function.uncurry_apply_pair] using hDA_cont_K.norm
   obtain ⟨pP, _, hP_bd⟩ := hK_cpt.exists_isMaxOn hK_ne hDAnorm_cont_K
   set P : ℝ := ‖fderiv ℝ (fun z => A z pP.2) pP.1‖ with hP_def
   have hP_nn : 0 ≤ P := norm_nonneg _
@@ -893,86 +1142,18 @@ theorem linearODESolution_hasFDerivAt_param
     have hmono : gronwallBound L M (P * Q) 0 ≤ gronwallBound L M (P * Q) (β - α) :=
       gronwallBound_mono hL_nn hPQ_nn hM_nn hβα_nn
     linarith
-  have h_gb_scale : ∀ (c y : ℝ),
-      gronwallBound (L * c) M (P * Q * c) y = c * gronwallBound L M (P * Q) y := by
-    intro c y
-    by_cases hMeq : M = 0
-    · rw [hMeq]
-      simp only [gronwallBound_K0]; ring
-    · simp only [gronwallBound_of_K_ne_0 hMeq]
-      field_simp
   have h_stab : ∀ h : F, ‖h‖ ≤ δ₀ → ∀ s ∈ Set.Icc α β,
       ‖Z (x + h) s - Z x s‖ ≤ C_stab * ‖h‖ := by
-    intro h hh_bd s hs
-    have hdist_xh_x : dist (x + h) x = ‖h‖ := by
-      rw [dist_eq_norm]; congr 1; abel
-    have hxh_ball : x + h ∈ Metric.closedBall x δ₀ := by
-      rw [Metric.mem_closedBall, hdist_xh_x]; exact hh_bd
-    have hxh_U : x + h ∈ U := hclosedBall_sub hxh_ball
-    have hConv : Convex ℝ (Metric.closedBall x δ₀) := convex_closedBall _ _
-    have hZ₀_lip : ‖Z₀ (x + h) - Z₀ x‖ ≤ L * ‖h‖ := by
-      have hdiff : ∀ y ∈ Metric.closedBall x δ₀, DifferentiableAt ℝ Z₀ y :=
-        fun y hy => (hZ₀_diff y (hclosedBall_sub hy)).differentiableAt
-      have hres := hConv.norm_image_sub_le_of_norm_fderiv_le hdiff hL_bd' hx_ball hxh_ball
-      have hsub_eq : x + h - x = h := by abel
-      rw [hsub_eq] at hres; exact hres
-    have h_force : ∀ s' ∈ Set.Icc α β,
-        ‖(A (x + h) s' - A x s') (Z (x + h) s')‖ ≤ (P * Q) * ‖h‖ := by
-      intro s' hs'
-      have hZxh_bd : ‖Z (x + h) s'‖ ≤ Q := hQ_bd' (x + h, s') ⟨hxh_ball, hs'⟩
-      have hAdiff_bd : ‖A (x + h) s' - A x s'‖ ≤ P * ‖h‖ := by
-        have hbd : ∀ y ∈ Metric.closedBall x δ₀,
-            ‖fderiv ℝ (fun z => A z s') y‖ ≤ P :=
-          fun y hy => hP_bd' (y, s') ⟨hy, hs'⟩
-        have hdiff : ∀ y ∈ Metric.closedBall x δ₀,
-            DifferentiableAt ℝ (fun z => A z s') y := fun y hy =>
-          (hA_diff y (hclosedBall_sub hy) s' (hIcc_sub hs')).differentiableAt
-        have hres := hConv.norm_image_sub_le_of_norm_fderiv_le hdiff hbd hx_ball hxh_ball
-        have hsub_eq : x + h - x = h := by abel
-        rw [hsub_eq] at hres; exact hres
-      have h1 : ‖(A (x + h) s' - A x s') (Z (x + h) s')‖
-          ≤ ‖A (x + h) s' - A x s'‖ * ‖Z (x + h) s'‖ :=
-        (A (x + h) s' - A x s').le_opNorm _
-      have h2 : ‖A (x + h) s' - A x s'‖ * ‖Z (x + h) s'‖ ≤ (P * ‖h‖) * Q :=
-        mul_le_mul hAdiff_bd hZxh_bd (norm_nonneg _) (by positivity)
-      calc ‖(A (x + h) s' - A x s') (Z (x + h) s')‖
-          ≤ ‖A (x + h) s' - A x s'‖ * ‖Z (x + h) s'‖ := h1
-        _ ≤ (P * ‖h‖) * Q := h2
-        _ = P * Q * ‖h‖ := by ring
-    have hgw := linearODESolution_dist_le (A := A) (Z₀ := Z₀)
-      hab_lt h₀_mem hU hA_cont hx hxh_U hα_le_β ha_lt_α hβ_lt_b' hh₀_mem_Icc
-      hM_nn hAx_bd h_force hs
-    have h_init_bd : ‖Z₀ x - Z₀ (x + h)‖ ≤ L * ‖h‖ := by
-      rw [show Z₀ x - Z₀ (x + h) = -(Z₀ (x + h) - Z₀ x) by abel, norm_neg]
-      exact hZ₀_lip
-    have h_abs_le : |s - h₀| ≤ β - α := by
-      rcases le_total h₀ s with h | h
-      · rw [abs_of_nonneg (by linarith)]; linarith [hh₀_mem_Icc.1, hs.2]
-      · rw [abs_of_nonpos (by linarith)]; linarith [hs.1, hh₀_mem_Icc.2]
-    rw [show Z x s - Z (x + h) s = -(Z (x + h) s - Z x s) by abel, norm_neg] at hgw
-    have h_gb_mono_δ : gronwallBound ‖Z₀ x - Z₀ (x + h)‖ M (P * Q * ‖h‖) |s - h₀|
-        ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀| := by
-      by_cases hMeq : M = 0
-      · simp only [gronwallBound_K0, hMeq]; linarith
-      · simp only [gronwallBound_of_K_ne_0 hMeq]
-        have hexp_nn : 0 ≤ Real.exp (M * |s - h₀|) := (Real.exp_pos _).le
-        have : ‖Z₀ x - Z₀ (x + h)‖ * Real.exp (M * |s - h₀|)
-            ≤ (L * ‖h‖) * Real.exp (M * |s - h₀|) :=
-          mul_le_mul_of_nonneg_right h_init_bd hexp_nn
-        linarith
-    have h_abs_nn : 0 ≤ |s - h₀| := abs_nonneg _
-    have h_gb_mono_x : gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀|
-        ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) :=
-      gronwallBound_mono (mul_nonneg hL_nn (norm_nonneg _))
-        (mul_nonneg hPQ_nn (norm_nonneg _)) hM_nn h_abs_le
-    have hbd_final :
-        gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) = C_stab * ‖h‖ := by
-      rw [hC_stab_def, h_gb_scale ‖h‖ (β - α)]; ring
-    calc ‖Z (x + h) s - Z x s‖
-        ≤ gronwallBound ‖Z₀ x - Z₀ (x + h)‖ M (P * Q * ‖h‖) |s - h₀| := hgw
-      _ ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) |s - h₀| := h_gb_mono_δ
-      _ ≤ gronwallBound (L * ‖h‖) M (P * Q * ‖h‖) (β - α) := h_gb_mono_x
-      _ = C_stab * ‖h‖ := hbd_final
+    simpa only [hZ_def, hC_stab_def] using
+      (linearODESolution_local_lipschitz_on_Icc (A := A) (Z₀ := Z₀)
+        hab_lt h₀_mem hU hA_cont hA_diff (x := x) (α := α) (β := β)
+        (δ := δ₀) (M := M) (P := P) (Q := Q) (L := L) hx hα_le_β
+        ha_lt_α hβ_lt_b' hh₀_mem_Icc hIcc_sub hclosedBall_sub
+        hδ₀_pos.le hM_nn hP_nn hQ_nn hL_nn hAx_bd
+        (fun y hy s hs => hP_bd' (y, s) ⟨hy, hs⟩)
+        (fun y hy s hs => by
+          simpa only [hZ_def] using hQ_bd' (y, s) ⟨hy, hs⟩)
+        hL_bd' hZ₀_diff)
   have hUC : UniformContinuousOn
       (fun p : F × ℝ => fderiv ℝ (fun z => A z p.2) p.1) K :=
     hK_cpt.uniformContinuousOn_of_continuous hDA_cont_K
@@ -1234,7 +1415,7 @@ theorem linearODESolution_hasFDerivAt_param
       have h2 : ‖dxA h‖ ≤ P * ‖h‖ :=
         le_trans hop2 (mul_le_mul_of_nonneg_right hP_s_bd (norm_nonneg _))
       have h3 : ‖dxA h‖ * ‖Z (x + h) s - Z x s‖ ≤ (P * ‖h‖) * (C_stab * ‖h‖) :=
-        mul_le_mul h2 h_stab_s (norm_nonneg _) (by positivity)
+        mul_le_mul h2 h_stab_s (norm_nonneg _) (mul_nonneg hP_nn (norm_nonneg _))
       calc ‖dxA h (Z (x + h) s - Z x s)‖
           ≤ ‖dxA h‖ * ‖Z (x + h) s - Z x s‖ := hop1
         _ ≤ (P * ‖h‖) * (C_stab * ‖h‖) := h3
@@ -1242,7 +1423,7 @@ theorem linearODESolution_hasFDerivAt_param
     change ‖piece1 + piece2‖ ≤ _
     calc ‖piece1 + piece2‖
         ≤ ‖piece1‖ + ‖piece2‖ := norm_add_le _ _
-      _ ≤ (ε₁ * Q) * ‖h‖ + (P * C_stab * ‖h‖) * ‖h‖ := by linarith
+      _ ≤ (ε₁ * Q) * ‖h‖ + (P * C_stab * ‖h‖) * ‖h‖ := add_le_add hp1 hp2
       _ = (ε₁ * Q + P * C_stab * ‖h‖) * ‖h‖ := by ring
   set ε_total : ℝ := ε₁ * Q + P * C_stab * ‖h‖ with hε_total_def
   have hε_total_nn : 0 ≤ ε_total := by
@@ -1268,89 +1449,12 @@ theorem linearODESolution_hasFDerivAt_param
       _ ≤ M * ‖R s‖ + ε_total * ‖h‖ := by linarith
   have hR_cont : ContinuousOn R (Set.Icc α β) := fun s hs =>
     ((hR_deriv s (hIcc_sub hs)).continuousAt).continuousWithinAt
-  have h_α_le_h₀ : α ≤ h₀ := hh₀_mem_Icc.1
-  have h_h₀_le_β : h₀ ≤ β := hh₀_mem_Icc.2
-  have hRt_bd : ‖R t‖ ≤ gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α) := by
-    rcases le_total h₀ t with hht | hth
-    · have ht_fwd : t ∈ Set.Icc h₀ β := ⟨hht, ht_mem_Icc.2⟩
-      have hIcc_fwd_sub : Set.Icc h₀ β ⊆ Set.Icc α β := fun s hs =>
-        ⟨le_trans h_α_le_h₀ hs.1, hs.2⟩
-      have hR_cont_fwd : ContinuousOn R (Set.Icc h₀ β) := hR_cont.mono hIcc_fwd_sub
-      have hR_deriv_within_right : ∀ s ∈ Set.Ico h₀ β,
-          HasDerivWithinAt R (Rderiv s) (Set.Ici s) s := fun s hs =>
-        (hR_deriv s (hIcc_sub (hIcc_fwd_sub (Set.Ico_subset_Icc_self hs)))).hasDerivWithinAt
-      have h_init_le : ‖R h₀‖ ≤ c₁ * ‖h‖ := hR_init_bd
-      have h_bound_fwd : ∀ s ∈ Set.Ico h₀ β,
-          ‖Rderiv s‖ ≤ M * ‖R s‖ + ε_total * ‖h‖ := fun s hs =>
-        hR_deriv_norm_bd s (hIcc_fwd_sub (Set.Ico_subset_Icc_self hs))
-      have hgw := norm_le_gronwallBound_of_norm_deriv_right_le
-        hR_cont_fwd hR_deriv_within_right h_init_le h_bound_fwd t ht_fwd
-      have h_t_sub_le : t - h₀ ≤ β - α := by linarith [ht_mem_Icc.2, h_α_le_h₀]
-      have hε_total_h_nn : 0 ≤ ε_total * ‖h‖ :=
-        mul_nonneg hε_total_nn (norm_nonneg _)
-      have hc₁_h_nn : 0 ≤ c₁ * ‖h‖ := mul_nonneg hc₁_pos.le (norm_nonneg _)
-      have h_mono : gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (t - h₀)
-          ≤ gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α) :=
-        gronwallBound_mono hc₁_h_nn hε_total_h_nn hM_nn h_t_sub_le
-      linarith
-    · have ht_bwd : t ∈ Set.Icc α h₀ := ⟨ht_mem_Icc.1, hth⟩
-      have hIcc_bwd_sub : Set.Icc α h₀ ⊆ Set.Icc α β := fun s hs =>
-        ⟨hs.1, le_trans hs.2 h_h₀_le_β⟩
-      set Rb : ℝ → G := fun s => R (2 * h₀ - s) with hRb_def
-      have h_h₀_le_2h₀_t : h₀ ≤ 2 * h₀ - t := by linarith
-      have h_dom_swap : ∀ s ∈ Set.Icc h₀ (2 * h₀ - t), 2 * h₀ - s ∈ Set.Icc α h₀ := by
-        intro s hs; refine ⟨?_, ?_⟩ <;> linarith [hs.1, hs.2, ht_bwd.1]
-      have hRb_cont : ContinuousOn Rb (Set.Icc h₀ (2 * h₀ - t)) := by
-        apply ContinuousOn.comp (hR_cont.mono hIcc_bwd_sub)
-          (s := Set.Icc h₀ (2 * h₀ - t)) (t := Set.Icc α h₀) (f := fun s => 2 * h₀ - s)
-        · exact (continuous_const.sub continuous_id).continuousOn
-        · exact h_dom_swap
-      have hRb_deriv : ∀ s ∈ Set.Icc h₀ (2 * h₀ - t),
-          HasDerivAt Rb (-(Rderiv (2 * h₀ - s))) s := by
-        intro s hs
-        have hs_in : 2 * h₀ - s ∈ Set.Ioo a b' :=
-          hIcc_sub (hIcc_bwd_sub (h_dom_swap s hs))
-        have hd := hR_deriv (2 * h₀ - s) hs_in
-        have hchain : HasDerivAt (fun r : ℝ => 2 * h₀ - r) (-1 : ℝ) s := by
-          simpa using (hasDerivAt_const s (2 * h₀)).sub (hasDerivAt_id s)
-        have hd' := hd.scomp s hchain
-        have h_smul : ((-1 : ℝ) • Rderiv (2 * h₀ - s) : G)
-            = -(Rderiv (2 * h₀ - s)) := neg_one_smul ℝ _
-        rw [h_smul] at hd'
-        exact hd'
-      have hRb_deriv_within_right : ∀ s ∈ Set.Ico h₀ (2 * h₀ - t),
-          HasDerivWithinAt Rb (-(Rderiv (2 * h₀ - s))) (Set.Ici s) s :=
-        fun s hs => (hRb_deriv s (Set.Ico_subset_Icc_self hs)).hasDerivWithinAt
-      have hRb_init : Rb h₀ = R h₀ := by
-        change R (2 * h₀ - h₀) = R h₀
-        congr 1; ring
-      have hRb_init_bd : ‖Rb h₀‖ ≤ c₁ * ‖h‖ := by rw [hRb_init]; exact hR_init_bd
-      have hRb_bd : ∀ s ∈ Set.Ico h₀ (2 * h₀ - t),
-          ‖-(Rderiv (2 * h₀ - s))‖ ≤ M * ‖Rb s‖ + ε_total * ‖h‖ := by
-        intro s hs
-        have hin : 2 * h₀ - s ∈ Set.Icc α β :=
-          hIcc_bwd_sub (h_dom_swap s (Set.Ico_subset_Icc_self hs))
-        have h := hR_deriv_norm_bd (2 * h₀ - s) hin
-        have hRbs_eq : Rb s = R (2 * h₀ - s) := rfl
-        rw [norm_neg, hRbs_eq]
-        exact h
-      have hgw_bwd := norm_le_gronwallBound_of_norm_deriv_right_le
-        hRb_cont hRb_deriv_within_right hRb_init_bd hRb_bd (2 * h₀ - t)
-        (right_mem_Icc.mpr h_h₀_le_2h₀_t)
-      have hRb_t : Rb (2 * h₀ - t) = R t := by
-        change R (2 * h₀ - (2 * h₀ - t)) = R t
-        congr 1; ring
-      rw [hRb_t] at hgw_bwd
-      have h_time : 2 * h₀ - t - h₀ = h₀ - t := by ring
-      rw [h_time] at hgw_bwd
-      have h_h₀_sub_t_le : h₀ - t ≤ β - α := by linarith [ht_bwd.1, h_h₀_le_β]
-      have hε_total_h_nn : 0 ≤ ε_total * ‖h‖ :=
-        mul_nonneg hε_total_nn (norm_nonneg _)
-      have hc₁_h_nn : 0 ≤ c₁ * ‖h‖ := mul_nonneg hc₁_pos.le (norm_nonneg _)
-      have h_mono : gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (h₀ - t)
-          ≤ gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α) :=
-        gronwallBound_mono hc₁_h_nn hε_total_h_nn hM_nn h_h₀_sub_t_le
-      linarith
+  have hRt_bd :
+      ‖R t‖ ≤ gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α) :=
+    norm_le_gronwallBound_on_Icc hh₀_mem_Icc ht_mem_Icc
+      (mul_nonneg hc₁_pos.le (norm_nonneg _)) hM_nn
+      (mul_nonneg hε_total_nn (norm_nonneg _)) hR_cont
+      (fun s hs => hR_deriv s (hIcc_sub hs)) hR_init_bd hR_deriv_norm_bd
   have h_final : ‖R t‖ ≤ c * ‖h‖ := by
     have hgb_evald : gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α)
         = (c₁ * ‖h‖) * E_δ + (ε_total * ‖h‖) * E_T := hgb_eq _ _
@@ -1360,11 +1464,12 @@ theorem linearODESolution_hasFDerivAt_param
     have h_ε_le : ε_total * E_T ≤ c₂ * E_T :=
       mul_le_mul_of_nonneg_right hε_total_le_c₂ hET_nn
     have h_combo :
-        c₁ * E_δ + ε_total * E_T ≤ c₁ * E_δ + c₂ * E_T := by linarith
+        c₁ * E_δ + ε_total * E_T ≤ c₁ * E_δ + c₂ * E_T :=
+      add_le_add_right h_ε_le _
     have h_bound_final :
         ‖h‖ * (c₁ * E_δ + ε_total * E_T) ≤ ‖h‖ * c := by
       apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
-      linarith
+      exact h_combo.trans h_bound_compose
     calc ‖R t‖
         ≤ gronwallBound (c₁ * ‖h‖) M (ε_total * ‖h‖) (β - α) := hRt_bd
       _ = (c₁ * ‖h‖) * E_δ + (ε_total * ‖h‖) * E_T := hgb_evald
@@ -1404,8 +1509,6 @@ private theorem linearODESolution_partial_t_continuousOn
   exact h_app_cont.comp_continuousOn h_pair_cont
 
 open Classical in
-set_option maxHeartbeats 800000 in
-
 private theorem variationalW_clm_continuousOn
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
@@ -1445,8 +1548,6 @@ private theorem variationalW_clm_continuousOn
   have hZ₀'_cont : ContinuousOn (fun x => (fderiv ℝ Z₀ x) v) U :=
     (ContinuousLinearMap.apply ℝ G v).continuous.comp_continuousOn hDZ₀_cont
   exact variationalW_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont v hZ₀'_cont
-
-set_option maxHeartbeats 1600000 in
 
 private theorem linearODESolution_hasFDerivAt_joint
     [FiniteDimensional ℝ F]
@@ -1604,8 +1705,6 @@ private theorem linearODESolution_hasFDerivAt_joint
             _ ≤ c / 2 * ‖(h, s)‖ :=
                 mul_le_mul_of_nonneg_left (norm_fst_le (h, s)) (by linarith)
     _ = c * ‖(h, s)‖ := by ring
-
-set_option maxHeartbeats 800000 in
 
 private theorem linearODESolution_contDiffOn_one
     [FiniteDimensional ℝ F]
@@ -1828,8 +1927,6 @@ private theorem variationalForcing_contDiffOn_of_Z_contDiffOn
   exact (h_eval_v.clm_apply hZ).congr h_forcing_eq
 
 end VariationalSolution
-
-set_option maxHeartbeats 1600000 in
 
 theorem linearODESolution_contDiffOn
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]

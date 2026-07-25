@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFr
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -112,13 +110,15 @@ theorem rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace
     (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₀)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₀)
           (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v := by
   classical
   rw [ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian (I := I) (M := M) g₀ g₀
     (iteratedCovGrad (I := I) g₀ 0 2 2 S) x v]
   rw [unitModel_rawTensorConnLapSmooth_eq_frame_sum (I := I) g₀ S x v]
-  exact (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometric_dualTrace_eq_orthoFrame_diag
+  exact
+    (IntrinsicSpectral.DeTurck.cometric_dualTrace_eq_orthoFrame_diag
     (I := I) g₀ (s := 2) x
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x) v).symm

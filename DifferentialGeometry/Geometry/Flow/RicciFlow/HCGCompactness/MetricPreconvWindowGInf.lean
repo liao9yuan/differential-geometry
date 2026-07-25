@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindow
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -39,7 +38,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-set_option maxHeartbeats 800000 in
 
 
 omit [Module.Finite ℝ E] in
@@ -113,7 +111,6 @@ theorem metricPreconvFull
       hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
         (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-set_option maxHeartbeats 800000 in
 
 
 
@@ -307,7 +304,9 @@ theorem netFullDiag
   exact ⟨phi, hphi, gNet, fun n => (hgNet n).1, fun n => (hgNet n).2⟩
 
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem normSq0S_neg
     [Module.Finite ℝ E]
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
@@ -348,7 +347,8 @@ theorem metricDerivNorm_symm
 
 
 omit [Module.Finite ℝ E] in
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem netCauchyAt
@@ -417,7 +417,8 @@ theorem netCauchyAt
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem fullOfSubseq
     [Module.Finite ℝ E]
@@ -451,7 +452,8 @@ theorem fullOfSubseq
 
 
 omit [Module.Finite ℝ E] in
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem infLipOfConv
@@ -501,7 +503,8 @@ theorem infLipOfConv
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem windowOfNet
     [Module.Finite ℝ E]

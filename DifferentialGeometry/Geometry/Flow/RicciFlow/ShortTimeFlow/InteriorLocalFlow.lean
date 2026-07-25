@@ -47,7 +47,8 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem interior_local_flow_existence
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hCont : ContinuousOn (Function.uncurry (fun t x => X_DT t x))
@@ -67,12 +68,12 @@ theorem interior_local_flow_existence
               (Set.Icc (0 : ℝ) T) t) :=
   time_dependent_vf_chart_local_picard_with_lipschitz (I := I) X_DT α hCont hLip
 
-set_option linter.unusedVariables false in
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartcover_orbit_is_bare_integral_curve
-    (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
-    (T : ℝ) (hT : 0 < T) (Φcc : ℝ → M → M)
-    (hΦcc0 : ∀ x : M, Φcc 0 x = x)
+    (X : ℝ → ∀ x : M, TangentSpace I x) (_hX : AutonomizedFieldJointC1 (I := I) X)
+    (T : ℝ) (_hT : 0 < T) (Φcc : ℝ → M → M)
+    (_hΦcc0 : ∀ x : M, Φcc 0 x = x)
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hTle : ∀ α : M, T ≤ (hper α).T)
     (hrepr : ∀ x : M, ∃ α : M, x ∈ (hper α).U ∧ ∀ s : ℝ, Φcc s x =
@@ -179,7 +180,8 @@ private noncomputable def glueFlow
     (hperY : ∀ α : M, ChartLocalPicardData (I := I) Y α) : ℝ → M → M :=
   (time_dependent_vf_global_flow_glue (I := I) Y hperY).choose_spec.2.choose_spec.2.choose
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem glueFlow_spec
     (Y : ℝ → ∀ x : M, TangentSpace I x)
     (hperY : ∀ α : M, ChartLocalPicardData (I := I) Y α) :
@@ -214,7 +216,6 @@ private noncomputable def flowBijectiveHorizon
       (fun x => let ⟨α, _, h⟩ := (glueFlow_spec (I := I) (fun t x => -(X t x)) hperNeg).2 x;
         ⟨α, h⟩)) |>.choose
 
-set_option linter.unusedVariables false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem interior_flow_uniqueness_glue
     (X : ℝ → ∀ x : M, TangentSpace I x) (hX : AutonomizedFieldJointC1 (I := I) X)
@@ -222,10 +223,10 @@ theorem interior_flow_uniqueness_glue
     (hper : ∀ α : M, ChartLocalPicardData (I := I) X α)
     (hperNeg : ∀ α : M, ChartLocalPicardData (I := I) (fun t x => -(X t x)) α)
     (hTle : ∀ α : M, T ≤ (hper α).T)
-    (hTleNeg : ∀ α : M, T ≤ (hperNeg α).T)
-    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hTleNeg : ∀ α : M, T ≤ (hperNeg α).T)
+    (_hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       (X t ((chartAt H α).symm (I.symm y)) : E)))
-    (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       ((-X t ((chartAt H α).symm (I.symm y))) : E)))
     (hinputs : ChartFlowEngineInputs (I := I) X hper hperNeg)
     (hThoriz : T ≤ flowBijectiveHorizon (I := I) X hper hperNeg hinputs)

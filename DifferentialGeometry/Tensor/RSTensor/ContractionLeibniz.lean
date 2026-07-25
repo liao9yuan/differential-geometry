@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -148,24 +147,19 @@ theorem nabla0SFun_product_eval {s q : ℕ}
         A x (fun a : Fin s => V (Fin.castAdd q a) x) *
           nablaB x (Fin.cons (X x) (fun a : Fin q => V (Fin.natAdd s a) x)) := by
   classical
-
   let Vfirst : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) := fun a => V (Fin.castAdd q a)
   let Vlast : Fin q -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) := fun a => V (Fin.natAdd s a)
-
   let P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + q) :=
     MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
       (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B
-
   let af : M -> Real := fun y : M => A y (fun a : Fin s => Vfirst a y)
   let bf : M -> Real := fun y : M => B y (fun a : Fin q => Vlast a y)
-
   have heval :=
     nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) cov X V P x
-
   have hPeval : ∀ y : M, P y (fun a : Fin (s + q) => V a y) = af y * bf y := by
     intro y
     dsimp only [P]
@@ -173,7 +167,6 @@ theorem nabla0SFun_product_eval {s q : ℕ}
       (fun a : Fin (s + q) => V a y) = _
     rw [Bundle.continuousMultilinearMap.product_fun_apply]
     rfl
-
   have haf : MDifferentiableAt I 𝓘(Real, Real) af x :=
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) A Vfirst x).mdifferentiableAt
@@ -182,7 +175,6 @@ theorem nabla0SFun_product_eval {s q : ℕ}
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) B Vlast x).mdifferentiableAt
       (by simp)
-
   have hderiv :
       extDerivFun (I := I) (fun y : M => P y (fun a : Fin (s + q) => V a y)) x (X x) =
         af x * extDerivFun (I := I) bf x (X x) +
@@ -190,14 +182,9 @@ theorem nabla0SFun_product_eval {s q : ℕ}
     rw [show (fun y : M => P y (fun a : Fin (s + q) => V a y)) =
         fun y : M => af y * bf y from funext hPeval]
     exact extDerivFun_mul_real (I := I) (f := af) (h := bf) (X x) haf hbf
-
   have hAeval := TotalNabla0SRealizes.eval_smooth_slots (I := I) hA X Vfirst x
   have hBeval := TotalNabla0SRealizes.eval_smooth_slots (I := I) hB X Vlast x
-
-
-
   rw [heval]
-
   have hsplit :
       (∑ a : Fin (s + q),
           P x (Function.update (fun b : Fin (s + q) => V b x) a
@@ -211,8 +198,7 @@ theorem nabla0SFun_product_eval {s q : ℕ}
                 ((cov (fun p : M => Vlast a p) x) (X x)))) := by
     rw [Fin.sum_univ_add]
     congr 1
-    ·
-      rw [Finset.sum_mul]
+    · rw [Finset.sum_mul]
       refine Finset.sum_congr rfl fun a _ => ?_
       dsimp only [P]
       change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
@@ -220,8 +206,7 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           ((cov (fun p : M => V (Fin.castAdd q a) p) x) (X x))) = _
       rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply]
         by_cases hb : b = a
@@ -229,14 +214,12 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           rw [Function.update_self, Function.update_self]
         · rw [Function.update_of_ne hb,
             Function.update_of_ne (fun h => hb (Fin.castAdd_injective _ _ h))]
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply, Vlast]
         rw [Function.update_of_ne (fun h => by
           exact absurd h.symm (castAdd_natAdd_ne a b))]
-    ·
-      rw [Finset.mul_sum]
+    · rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun a _ => ?_
       dsimp only [P]
       change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
@@ -244,14 +227,12 @@ theorem nabla0SFun_product_eval {s q : ℕ}
           ((cov (fun p : M => V (Fin.natAdd s a) p) x) (X x))) = _
       rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply, Vfirst]
         rw [Function.update_of_ne (fun h => by
           exact absurd h (castAdd_natAdd_ne b a))]
-      ·
-        congr 1
+      · congr 1
         funext b
         simp only [Function.comp_apply]
         by_cases hb : b = a
@@ -260,14 +241,12 @@ theorem nabla0SFun_product_eval {s q : ℕ}
         · rw [Function.update_of_ne hb,
             Function.update_of_ne (fun h => hb (Fin.natAdd_injective _ _ h))]
   rw [hderiv, hsplit]
-
   have hAd : extDerivFun (I := I) af x (X x) =
       nablaA x (Fin.cons (X x) (fun a : Fin s => Vfirst a x)) +
         ∑ a : Fin s,
           A x (Function.update (fun b : Fin s => Vfirst b x) a
             ((cov (fun p : M => Vfirst a p) x) (X x))) := by
     have := hAeval
-
     rw [show af = fun y : M => A y (fun a : Fin s => Vfirst a y) from rfl]
     linarith [this]
   have hBd : extDerivFun (I := I) bf x (X x) =
@@ -279,7 +258,6 @@ theorem nabla0SFun_product_eval {s q : ℕ}
     rw [show bf = fun y : M => B y (fun a : Fin q => Vlast a y) from rfl]
     linarith [this]
   rw [hAd, hBd]
-
   simp only [af, bf, Vfirst, Vlast]
   ring
 
@@ -310,7 +288,6 @@ theorem nabla_product_zero_of_zero {s q : ℕ}
         (n := (∞ : WithTop ℕ∞)) (s + q + 1)) := by
   classical
   intro X x slots
-
   let V : Fin (s + q) -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) :=
     fun a =>
@@ -321,9 +298,7 @@ theorem nabla_product_zero_of_zero {s q : ℕ}
     (ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
       x (slots a)).choose_spec
-
   have hslots : (fun a : Fin (s + q) => V a x) = slots := funext hV
-
   have hmain :=
     nabla0SFun_product_eval (I := I) cov A B
       (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -331,7 +306,6 @@ theorem nabla_product_zero_of_zero {s q : ℕ}
       (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (q + 1))
       hA hB X V x
-
   change (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + q + 1)) x (Fin.cons (X x) slots) =
     nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + q) cov X
@@ -339,7 +313,6 @@ theorem nabla_product_zero_of_zero {s q : ℕ}
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B) x slots
   rw [show slots = (fun a : Fin (s + q) => V a x) from hslots.symm]
   rw [hmain]
-
   simp
 
 
@@ -374,9 +347,6 @@ private theorem nabla_one0_zero
         (n := (∞ : WithTop ℕ∞)) 1) := by
   classical
   intro X x slots
-
-
-
   let V : Fin 0 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) := fun a => Fin.elim0 a
   have heval :=
@@ -449,10 +419,8 @@ theorem nabla_metricPow_zero
   intro r
   induction r with
   | zero =>
-
     exact nabla_one0_zero (I := I) cov
   | succ r ih =>
-
     have hg : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 cov (metricTensorField (I := I) g)
         (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -468,7 +436,6 @@ theorem nabla_metricPow_zero
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 * r)
           (metricTensorField (I := I) g) (metricPow (I := I) g r))
         hprod
-
     have hmp : metricPow (I := I) g (r + 1) =
         hcast ▸ MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 * r)
@@ -515,7 +482,6 @@ theorem nabla0SFun_metricPow_contraction_eval {s r : ℕ}
     (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (2 * r + 1))
     hA (nabla_metricPow_zero (I := I) cov g hmc r) X V x]
-
   simp
 
 end

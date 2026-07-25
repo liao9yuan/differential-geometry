@@ -129,7 +129,8 @@ theorem chartLeviCivita_chartParallelExtend_symm
   congr 1
   exact (christoffelCorrection_symm_cancel (I := I) g α b v (X b)).symm
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] in
 lemma chartParallelExtend_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :

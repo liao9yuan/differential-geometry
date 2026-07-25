@@ -603,7 +603,6 @@ theorem rhs_h1_bdd {ι : Type*}
     exact hD.rhs_bound α hα k b hb (Jdx 0) (Jdx 1)
   obtain ⟨C₀, hC₀, hL2₀⟩ := l2_bdd_of_raw
     (I := I) (M := M) gBase 0 2 S D.rhsBound hD.rhsBound_pos.le hraw0
-
   choose Cα hCα hCα_bd using fun α : M =>
     exists_lowerOrderCoeff_uniform_boundR
       (I := I) (M := M) gBase 0 2 α 0

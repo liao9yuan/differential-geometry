@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators
@@ -58,7 +56,6 @@ lemma inverseMetricSharpFib_ne_zero_of_ne_zero (g : SmoothRiemannianMetric I M) 
     inverseMetricSharpFib (I := I) g x α ≠ 0 := by
   intro hzero
   apply hα
-
   have hdual : cotangentToDualLinear (I := I) (x := x) α = 0 := by
     ext w
     rw [← inverseMetricSharpFib_inner (I := I) g x α w, hzero]
@@ -108,7 +105,6 @@ variable [NeZero (Module.finrank ℝ E)]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [I.Boundaryless] [BoundarylessManifold I M] in
-
 theorem cotangentSection_chartComponent_contMDiffOn
     (Y : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -131,7 +127,6 @@ theorem cotangentSection_chartComponent_contMDiffOn
       (hopen.mem_nhds hx₀base)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
 omit [SigmaCompactSpace M] in
 theorem inverseMetricSharpField_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E →L[ℝ] E)) ∞
@@ -175,7 +170,6 @@ omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold
     inverseMetricSharpField (I := I) g x = inverseMetricSharpFib (I := I) g x := rfl
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem cometricBilin_contMDiff (g : SmoothRiemannianMetric I M)
     (α β : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
@@ -208,7 +202,6 @@ theorem cometricBilin_contMDiff (g : SmoothRiemannianMetric I M)
   exact hsharpβ
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem exists_uniform_cometricBilin_bound [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (α β : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) :

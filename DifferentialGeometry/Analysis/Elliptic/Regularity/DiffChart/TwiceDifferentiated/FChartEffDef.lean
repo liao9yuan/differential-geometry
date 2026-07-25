@@ -135,7 +135,8 @@ theorem density_mul_fChartEffTwice_eq_indicator_numerator
     densityOnEuclid (I := I) g α y *
         effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y =
       Set.indicator (chartImagePOUTsupport (I := I) (M := M) α)
-        (fun z => effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h z) y := by
+        (fun z => effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h z)
+          y := by
   classical
   rw [fChartEffTwice_def_unfold]
   by_cases hy_K : y ∈ chartImagePOUTsupport (I := I) (M := M) α
@@ -154,7 +155,8 @@ theorem fChartEffTwice_supported_in_chartImagePOUTsupport
   unfold effectiveSourceChartSecondOrder
   exact Set.support_indicator_subset
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
     (hf_contOn :
@@ -244,7 +246,8 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -280,7 +283,8 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -815,7 +819,8 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
   unfold effectiveSourceChartSecondOrderNumerator
   convert h_step12 using 2 with y
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun y => 1 / densityOnEuclid (I := I) g α y)

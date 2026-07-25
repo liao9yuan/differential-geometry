@@ -254,7 +254,6 @@ private lemma integrable_cross_3_summand_nonsmooth
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₃_gi_l2 h_dq_u_l2
 
 omit [NeZero d] in
-
 private lemma integrable_const_indicator_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -318,7 +317,6 @@ private lemma integrable_const_indicator_g_sq
     refine mul_nonneg (abs_nonneg _) h_g_sq_nn
 
 omit [NeZero d] in
-
 private lemma integral_const_indicator_g_sq_eq
     {g : Fin d → E → ℝ} (η : E → ℝ) (i : Fin d) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -405,7 +403,8 @@ theorem diffQuot_coeff_cutoff_gradient_bound_nonsmooth_quantitative
   intro h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
-    diffQuot_coeff_cutoff_gradient_pointwise_bound_nonsmooth (d := d) B u g hη_range h_fderiv_eta i j k hM_nn h_M
+    diffQuot_coeff_cutoff_gradient_pointwise_bound_nonsmooth (d := d) B u g hη_range h_fderiv_eta i
+      j k hM_nn h_M
       h_thick_in_Ω' x
   set S : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
         diffQuot k h (fun y : E => B.a y i j) x * (η x) *

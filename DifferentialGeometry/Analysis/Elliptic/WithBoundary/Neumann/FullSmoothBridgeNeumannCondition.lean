@@ -352,7 +352,8 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLapClassical_mul_neumann
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I_half n) (M := M) g
   have h_green :=
-    green_first_eq_boundary_surface_integral (M := M) (n := n) g v.smooth u.smooth h_chart_iden h_int
+    green_first_eq_boundary_surface_integral (M := M) (n := n) g v.smooth u.smooth h_chart_iden
+      h_int
   have h_bdy_zero : ∀ x : (I_half n).boundary M,
       v.toFun x.val *
         g.inner x.val

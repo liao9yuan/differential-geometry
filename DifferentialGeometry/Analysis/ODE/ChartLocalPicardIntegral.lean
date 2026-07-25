@@ -56,7 +56,6 @@ theorem linear_ode_variational_integral
   ode_right_solution_ftc_integral hJcont hJderiv (hAcont.clm_apply hJcont)
 
 omit [CompleteSpace E] in
-
 theorem variational_jacobian_gronwall_bound
     {J : ℝ → E} {A : ℝ → (E →L[ℝ] E)} {T CA : ℝ} (hT : 0 ≤ T) (hCA : 0 ≤ CA)
     (hJcont : ContinuousOn J (Set.Icc 0 T))

@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompact
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -142,10 +141,8 @@ noncomputable def flowUpgrade_of_maps
   have hLm : forall t : Real, t ∈ Set.Icc β ψ -> L.S.family.metric t = co.gInf t :=
     fun t ht => eq_of_heq (hLmetric t ht)
   have hscalar : ScalarPullbackTendsto (I := I) (Φ.compSubseq co.φ co.hφ) := scalar
-
   set mc' := mc.compSubseq co.φ co.hφ with hmc'
   set Φ' := (Φ).compSubseq co.φ co.hφ with hΦ'
-
   refine ⟨co.φ, co.hφ, ?_⟩
   change FlowLimitData (I := I) X mc'
   refine
@@ -157,26 +154,21 @@ noncomputable def flowUpgrade_of_maps
       hσtgt := ?_
       refMetric := ?_
       conv := ?_ }
-  ·
-    intro k
+  · intro k
     exact Geometry.isSigmaCompact_of_isOpen I (PointedCGHMaps.source_open (I := I) Φ' k)
-  ·
-    intro k
+  · intro k
     letI : TopologicalSpace (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).topology
     letI : ChartedSpace H (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).charted
     letI : SigmaCompactSpace (X.term (mc'.subseq k)).M := (X.term (mc'.subseq k)).sigmaCompact
     exact Geometry.isSigmaCompact_of_isOpen I (PointedCGHMaps.target_open (I := I) Φ' k)
-  ·
-    intro k
+  · intro k
     exact fun _ => refRes (I := I) Φ' R
       (fun j => Geometry.isSigmaCompact_of_isOpen I
         (PointedCGHMaps.source_open (I := I) Φ' j)) k
-  ·
-
-
-    intro K hK p a b hab ε hε
+  · intro K hK p a b hab ε hε
     have hbridge := ofRP_supOn_conv (I := I) (Φ) R bf hsrc htgt β ψ
-      co (letI : TopologicalSpace L.M := L.topology; letI : ChartedSpace H L.M := L.charted; letI : IsManifold I ∞ L.M := L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := (by change IsManifold I ∞ L.M; infer_instance); letI : SigmaCompactSpace L.M := L.sigmaCompact; letI : T2Space L.M := L.t2; L.S.family.metric) hLm K hK p ε hε
+      co (letI : TopologicalSpace L.M := L.topology; letI : ChartedSpace H L.M := L.charted; letI :
+                                                                                               IsManifold I ∞ L.M := L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := (by change IsManifold I ∞ L.M; infer_instance); letI : SigmaCompactSpace L.M := L.sigmaCompact; letI : T2Space L.M := L.t2; L.S.family.metric) hLm K hK p ε hε
     obtain ⟨k0, hk0⟩ := hbridge
     refine ⟨k0, fun k hk t ht => ?_⟩
     have htβψ : t ∈ Set.Icc β ψ := hcarrier (hab ht)
@@ -246,7 +238,8 @@ theorem flowLimit_of_co
     (scalar : ScalarPullbackTendsto (I := I)
       ((endgamePhi (I := I) mc L hL0).compSubseq co.φ co.hφ)) :
     CompactnessConclusion (I := I) X :=
-  flowLimit_of_maps (I := I) mc L (L.atTime 0) hL0 rfl (endgamePhi (I := I) mc L hL0) R bf hsrc htgt β ψ
+  flowLimit_of_maps (I := I) mc L (L.atTime 0) hL0 rfl (endgamePhi (I := I) mc L hL0) R bf hsrc htgt
+    β ψ
     hcarrier co (fun t ht => heq_of_eq (hLmetric t ht)) scalar
 
 
@@ -581,9 +574,11 @@ theorem endgameCo_zero
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : IsManifold I ∞ P.M := P.smooth
-    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf 0 = g0 :=
+    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel
+      hShiT hcovSrc hchi hlipG).gInf 0 = g0 :=
   gInf_zero_eq (I := I) Φ R bf hsrc htgt β ψ
-    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG) h0 g0
+    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel
+      hShiT hcovSrc hchi hlipG) h0 g0
     (conv0_of_cp (I := I) Φ R hsrc htgt g0 hcp)
 
 
@@ -714,18 +709,29 @@ theorem flowLimit_endgame
         change IsManifold I ∞ mc.limit.M
         infer_instance
       DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I)
-        ({ base := { metric := (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf } } :
+        ({ base := { metric := (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax
+          hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf } } :
           DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := mc.limit.M) X.D))
     (scalar : ScalarPullbackTendsto (I := I)
-      ((flowOfMetric_atTime (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf hsol 0
+      ((flowOfMetric_atTime (I := I) X.D mc.limit
+        (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel
+        hShiT hcovSrc hchi hlipG).gInf hsol 0
           (endgameCo_zero Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1
             hequivT hrel hShiT hcovSrc hchi hlipG mc.limit.metric h0 hcp)).symm ▸
-        (Φ₀.compSubseq (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).hφ) :
+        (Φ₀.compSubseq (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1
+          hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ
+          (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT
+          hrel hShiT hcovSrc hchi hlipG).hφ) :
         PointedCGHMaps (I := I) X
-          ((flowOfMetric (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf hsol).atTime 0)
-          (mc.subseq ∘ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ))) :
+          ((flowOfMetric (I := I) X.D mc.limit
+            (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT
+            hrel hShiT hcovSrc hchi hlipG).gInf hsol).atTime 0)
+          (mc.subseq ∘ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1
+            hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ))) :
     CompactnessConclusion (I := I) X :=
-  flowLimit_of_mc (I := I) mc Φ₀ R bf hsrc htgt β ψ hcarrier (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG)
+  flowLimit_of_mc (I := I) mc Φ₀ R bf hsrc htgt β ψ hcarrier
+    (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel
+    hShiT hcovSrc hchi hlipG)
     (endgameCo_zero Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1
       hequivT hrel hShiT hcovSrc hchi hlipG mc.limit.metric h0 hcp)
     hsol scalar

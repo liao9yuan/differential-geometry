@@ -210,7 +210,6 @@ private theorem invGram_smooth
     (contDiffOn_ringInverse (R := E →L[Real] E) (𝕜 := Real)
       (∞ : WithTop ℕ∞)) hgram (fun x hx => gramCLM_isUnit (hg_co x hx))
 
-set_option maxHeartbeats 500000 in
 private theorem invGram_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -251,7 +250,6 @@ private theorem koszulRiesz_smooth
     (hg_cd.fderiv_of_isOpen hU
       (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl]))
 
-set_option maxHeartbeats 500000 in
 private theorem koszulRiesz_conv
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
@@ -287,9 +285,6 @@ private theorem raisedOp_smooth
   simpa [raisedKoszulOp] using
     (postBilin (E := E)).isBoundedBilinearMap.contDiff.comp₂_contDiffOn
       (invGram_smooth hg_cd hg_co) (koszulRiesz_smooth hU hg_cd)
-
-set_option maxHeartbeats 700000 in
-
 
 theorem raisedKoszulOp_conv
     [FiniteDimensional Real E]
@@ -327,7 +322,6 @@ theorem raisedKoszulOp_conv
       (fun _ => hpost.contDiffOn) hpost.contDiffOn
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
-set_option maxHeartbeats 700000 in
 omit [ContinuousDualEquiv E] in
 private theorem raisedDiag_conv
     [FiniteDimensional Real E]
@@ -394,9 +388,6 @@ theorem metricSpray_contDiffOn
     (((hR.comp contDiffOn_fst (fun q hq => hq.1)).clm_apply
       contDiffOn_snd).clm_apply contDiffOn_snd)
   simpa only [metricSpray, R] using contDiffOn_snd.prodMk hdiag.neg
-
-set_option maxHeartbeats 500000 in
-
 
 theorem metricSpray_conv
     [FiniteDimensional Real E]

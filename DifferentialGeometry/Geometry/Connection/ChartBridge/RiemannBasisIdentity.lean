@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 400000
 
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -451,9 +449,11 @@ lemma riemannOp_chartBasis_eq_chartRiemannCLM_basis [I.Boundaryless]
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x) := by
     intro l
     rw [chartRiemannTensor_def]
-    have hΓsym1 : (chartChristoffel (I := I) g x k i l) = (chartChristoffel (I := I) g x i k l) := by
+    have hΓsym1 : (chartChristoffel (I := I) g x k i l) =
+      (chartChristoffel (I := I) g x i k l) := by
       funext y; exact chartChristoffel_symm (I := I) g x k i l y
-    have hΓsym2 : (chartChristoffel (I := I) g x j i l) = (chartChristoffel (I := I) g x i j l) := by
+    have hΓsym2 : (chartChristoffel (I := I) g x j i l) =
+      (chartChristoffel (I := I) g x i j l) := by
       funext y; exact chartChristoffel_symm (I := I) g x j i l y
     rw [hΓsym1, hΓsym2]
     have hquad :

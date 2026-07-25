@@ -226,7 +226,7 @@ theorem cross_derivative_term_ibp_second_order_single
   have hK_compact : IsCompact K := hψ_cs
   have hK_in : K ⊆ Ω := hψ_supp
   obtain ⟨δ, φExt, hδ_pos, hδ_subset, hφExt_smooth, hφExt_eq⟩ :=
-    DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.exists_smooth_global_extension
+    exists_smooth_global_extension
       (I := I) (M := M) (φ := φ) α hφ_chart hK_compact hK_in
   have hv_locMemLp : ∀ K' : Set EuclN, IsCompact K' → K' ⊆ Ω →
       MemLp v 2 ((volume : Measure EuclN).restrict K') := by

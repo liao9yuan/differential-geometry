@@ -93,7 +93,8 @@ theorem supersolution_iteration_forward
       rw [moserExponentSeq, show q * (moserChi d)⁻¹ ^ m * moserChi d ^ n =
         q * ((moserChi d)⁻¹ ^ m * moserChi d ^ n) from by ring]
       have hchi_pos := moserChi_pos hd
-      have : n ≤ m := Nat.lt_succ_iff.mp (Nat.lt_of_lt_of_le (Nat.lt_succ_of_le (Nat.le_of_succ_le_succ hn)) le_rfl)
+      have : n ≤ m := Nat.lt_succ_iff.mp
+        (Nat.lt_of_lt_of_le (Nat.lt_succ_of_le (Nat.le_of_succ_le_succ hn)) le_rfl)
       have hprod_le : (moserChi d)⁻¹ ^ m * moserChi d ^ n ≤ 1 := by
         rw [inv_pow]
         have hchi_ge_one := (one_lt_moserChi hd).le

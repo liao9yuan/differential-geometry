@@ -259,7 +259,6 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     measurable_sqrtPou (I := I) (M := M) g r s T α Idx Jdx
   have hw_supp : tsupport w ⊆ Kα :=
     tsupport_sqrtPou_subset (I := I) (M := M) g r s T α Idx Jdx
-
   have h_ptwise : ∀ x : M,
       ‖tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx x‖ ≤ ‖w x‖ := by
     intro x
@@ -296,13 +295,11 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         eLpNorm w 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     eLpNorm_mono h_ptwise
-
   have h_bridge := hCbr (u := w) hw_meas hw_supp
   rw [show DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
         = DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g
       from rfl] at h_bridge
-
   set lhsE : ℝ≥0∞ :=
     eLpNorm (tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) with hlhsE_def
@@ -343,7 +340,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
             ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
               ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
                 ((MeasureTheory.eLpNorm
-                    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+                    (tensorChartComponentScalar
                       (I := I) (M := M) g r s T α Idx Jdx) 2
                     (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
                       (I := I) (M := M) g)).toReal) ^ 2) ≤
@@ -351,14 +348,12 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
   classical
   set Sf : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hSf_def
-
   choose Cα hCα_nn hCα using fun α (_ : α ∈ Sf) =>
     sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand (I := I) (M := M) (E := E) g r s α
   set Cmax : ℝ := ∑ α ∈ Sf.attach, Cα α.val α.property with hCmax_def
   have hCmax_nn : 0 ≤ Cmax :=
     Finset.sum_nonneg (fun α _ => hCα_nn α.val α.property)
   refine ⟨Cmax, hCmax_nn, fun T => ?_⟩
-
   set summand : M → (Fin r → Fin (Module.finrank ℝ E)) →
       (Fin s → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
     fun α Idx Jdx =>
@@ -383,7 +378,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
             (I := I) (M := M) g r s T α Idx Jdx) 2
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             (I := I) (M := M) g)) ^ 2 with hlhsEsq_def
-
   have h_perchart : ∀ α ∈ Sf, ∀ Idx Jdx,
       lhsEsq α Idx Jdx ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
     intro α hα Idx Jdx
@@ -395,7 +389,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
         ≤ ENNReal.ofReal (Cα α hα) * summand α Idx Jdx := hCα α hα T Idx Jdx
       _ ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
           gcongr
-
   have h_sum_le :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx) ≤
         ENNReal.ofReal Cmax * ∑ α ∈ Sf, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -405,7 +398,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     refine Finset.sum_le_sum (fun Idx _ => ?_)
     rw [Finset.mul_sum]
     exact Finset.sum_le_sum (fun Jdx _ => h_perchart α hα Idx Jdx)
-
   have h_summand_eq_normSq :
       tensorPouSobolevHsNormSq (I := I) (M := M) g 0 T =
         ∑' α : M, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -442,7 +434,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     rw [h_summand_eq_normSq]
     refine h_sum_le.trans ?_
     gcongr
-
   have h_lhsEsq_ne_top : ∀ α Idx Jdx, lhsEsq α Idx Jdx ≠ ⊤ := by
     intro α Idx Jdx
     rw [hlhsEsq_def]
@@ -457,7 +448,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_normSq_ne_top
   have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_total_le
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hCmax_nn] at h_toReal
-
   have h_lhs_toReal :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx).toReal =
         ∑ α ∈ Sf, ∑ Idx : Fin r → Fin (Module.finrank ℝ E),

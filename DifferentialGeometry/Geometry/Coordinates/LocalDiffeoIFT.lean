@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import DifferentialGeometry.Analysis.Calculus.CLMNeumann
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -87,7 +86,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
     ∃ Φ : PartialDiffeomorph I J M N n, x ∈ Φ.source ∧ Φ.source ⊆ U ∧ EqOn f Φ Φ.source := by
   classical
   have hn0 : n ≠ 0 := (zero_lt_one.trans_le hn).ne'
-
   have hfx : ContMDiffAt I J n f x := hf.contMDiffAt (hU.mem_nhds hxU)
   have hG : ContDiffAt ℝ n (writtenInExtChartAt I J x f) (extChartAt I x x) := by
     have h := (contMDiffAt_iff.mp hfx).2
@@ -95,13 +93,11 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
   obtain ⟨G', hG'⟩ := hinv
   have hGfd : HasFDerivAt (writtenInExtChartAt I J x f) (G' : E →L[ℝ] F) (extChartAt I x x) := by
     rw [hG']; exact (hG.differentiableAt hn0).hasFDerivAt
-
   set Ψ : OpenPartialHomeomorph E F :=
     hG.toOpenPartialHomeomorph (writtenInExtChartAt I J x f) hGfd hn0 with hΨdef
   have hΨcoe : (Ψ : E → F) = writtenInExtChartAt I J x f :=
     hG.toOpenPartialHomeomorph_coe hGfd hn0
   have ha₀ : extChartAt I x x ∈ Ψ.source := hG.mem_toOpenPartialHomeomorph_source hGfd hn0
-
   set cO : OpenPartialHomeomorph M E :=
     { toPartialEquiv := extChartAt I x
       open_source := isOpen_extChartAt_source x
@@ -115,7 +111,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
       continuousOn_toFun := continuousOn_extChartAt (f x)
       continuousOn_invFun := continuousOn_extChartAt_symm (f x) } with hdO
   set Θ : OpenPartialHomeomorph M N := (cO.trans Ψ).trans dO.symm with hΘ
-
   have hcz : (cO : M → E) = (extChartAt I x : M → E) := rfl
   have hdsz : (dO.symm : F → N) = ((extChartAt J (f x)).symm : F → N) := rfl
   have hEq : ∀ z : M, z ∈ (extChartAt I x).source → f z ∈ (extChartAt J (f x)).source →
@@ -128,7 +123,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
   have hxsrc : x ∈ (extChartAt I x).source := mem_extChartAt_source x
   have hfxsrc : f x ∈ (extChartAt J (f x)).source := mem_extChartAt_source (f x)
   have hΘx : Θ x = f x := hEq x hxsrc hfxsrc
-
   have hxΘ : x ∈ Θ.source := by
     rw [hΘ, OpenPartialHomeomorph.trans_source, OpenPartialHomeomorph.trans_source]
     refine ⟨⟨hxsrc, ?_⟩, ?_⟩
@@ -137,7 +131,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
       simp only [writtenInExtChartAt, Function.comp_apply,
         PartialEquiv.left_inv (extChartAt I x) hxsrc]
       exact (extChartAt J (f x)).map_source hfxsrc
-
   have hΨinv : ContDiffAt ℝ n (Ψ.symm) (extChartAt J (f x) (f x)) := by
     have hGa : writtenInExtChartAt I J x f (extChartAt I x x) = extChartAt J (f x) (f x) := by
       simp only [writtenInExtChartAt, Function.comp_apply,
@@ -149,7 +142,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
     refine Ψ.contDiffAt_symm htgt (f₀' := G') ?_ ?_
     · rw [hsymm_pt]; exact (hΨcoe ▸ hGfd :)
     · rw [hsymm_pt]; exact (hΨcoe ▸ hG :)
-
   have hsymm_pt : Ψ.symm (extChartAt J (f x) (f x)) = extChartAt I x x := by
     have hGa : writtenInExtChartAt I J x f (extChartAt I x x) = extChartAt J (f x) (f x) := by
       simp only [writtenInExtChartAt, Function.comp_apply,
@@ -174,7 +166,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
         ((isOpen_extChartAt_target x).mem_nhds (mem_extChartAt_target x))
     exact h3.comp (f x) (h2.comp (f x) h1)
   obtain ⟨W, hWnhds, hΘsymmW⟩ := (contMDiffAt_iff_contMDiffOn_nhds hn').mp hΘsymm_at
-
   have hSnhds : Θ.source ∩ U ∩ f ⁻¹' (extChartAt J (f x)).source ∩ Θ ⁻¹' W ∈ nhds x := by
     refine Filter.inter_mem (Filter.inter_mem (Filter.inter_mem ?_ ?_) ?_) ?_
     · exact Θ.open_source.mem_nhds hxΘ
@@ -184,7 +175,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
     · exact (Θ.continuousOn.continuousAt (Θ.open_source.mem_nhds hxΘ)).preimage_mem_nhds
         (by rw [hΘx]; exact hWnhds)
   obtain ⟨S, hSsub, hSopen, hxS⟩ := mem_nhds_iff.mp hSnhds
-
   have hEqS : ∀ z ∈ S, f z = Θ z := by
     intro z hz
     have hz' := hSsub hz
@@ -195,7 +185,6 @@ theorem isLocalDiffeomorphAt_of_contMDiffOn' (hn : 1 ≤ n) (hn' : n ≠ ∞) {U
     exact (hEq z hzc hz'.1.2).symm
   have hsymmfz : ∀ z ∈ S, (Θ.symm : N → M) (f z) = z := fun z hz => by
     rw [hEqS z hz]; exact Θ.left_inv (hSsub hz).1.1.1
-
   refine ⟨{
     toFun := f
     invFun := (Θ.symm : N → M)
@@ -332,12 +321,10 @@ theorem hlocAt_infty'
       (fderiv ℝ (writtenInExtChartAt I J y f) (extChartAt I y y)).IsInvertible) :
     ∃ Φ : PartialDiffeomorph I J M N ∞,
       x ∈ Φ.source ∧ Φ.source ⊆ U ∧ EqOn f Φ Φ.source := by
-
   obtain ⟨Φ, hxΦ, hΦU, hEqΦ⟩ :=
     isLocalDiffeomorphAt_of_contMDiffOn' (n := 1) le_rfl
       (by exact_mod_cast (WithTop.one_ne_top : (1 : ℕ∞) ≠ ⊤)) hU hxU
       (hf.of_le (by exact_mod_cast le_top)) (hinv x hxU)
-
   have hsymm_infty : ContMDiffOn J I ∞ (Φ.symm : N → M) Φ.target := by
     rw [contMDiffOn_infty]
     intro k y hy
@@ -345,12 +332,10 @@ theorem hlocAt_infty'
     have hzU : (Φ.symm : N → M) y ∈ U := hΦU hzsrc
     have hfz : f ((Φ.symm : N → M) y) = y := by
       rw [hEqΦ hzsrc]; exact Φ.toPartialEquiv.right_inv hy
-
     obtain ⟨Ψ, hzΨ, hEqΨ⟩ :=
       isLocalDiffeomorphAt_of_contMDiffOn (n := ((max 1 k : ℕ) : WithTop ℕ∞))
         (by exact_mod_cast le_max_left 1 k) (by exact_mod_cast ENat.coe_ne_top (max 1 k))
         hU hzU (hf.of_le (by exact_mod_cast le_top)) (hinv _ hzU)
-
     have hWopen : IsOpen (Φ.target ∩ (Ψ.target ∩ (Ψ.symm : N → M) ⁻¹' Φ.source)) :=
       Φ.open_target.inter (Ψ.symm.contMDiffOn.continuousOn.isOpen_inter_preimage
         Ψ.open_target Φ.open_source)
@@ -364,7 +349,6 @@ theorem hlocAt_infty'
             = (Ψ.symm : N → M) ((Ψ : M → N) ((Φ.symm : N → M) y)) := by rw [h1]
           _ = (Φ.symm : N → M) y := Ψ.toPartialEquiv.left_inv hzΨ
       rw [Set.mem_preimage, hΨsy]; exact hzsrc
-
     have hEqOn : EqOn (Φ.symm : N → M) (Ψ.symm : N → M)
         (Φ.target ∩ (Ψ.target ∩ (Ψ.symm : N → M) ⁻¹' Φ.source)) := by
       rintro y' ⟨hy'Φ, hy'Ψ, hy'pre⟩
@@ -377,13 +361,11 @@ theorem hlocAt_infty'
         rw [← hEqΦ hb, hEqΨ hbΨ]; exact Ψ.toPartialEquiv.right_inv hy'Ψ
       rw [show Φ.toPartialEquiv ((Φ.symm : N → M) y') = y' from h1,
         show Φ.toPartialEquiv ((Ψ.symm : N → M) y') = y' from h2]
-
     have hΨsm : ContMDiffAt J I (k : WithTop ℕ∞) (Ψ.symm : N → M) y :=
       (Ψ.symm.contMDiffOn.contMDiffAt (Ψ.open_target.mem_nhds hyΨt)).of_le
         (by exact_mod_cast le_max_right 1 k)
     exact ((hΨsm.congr_of_eventuallyEq
       (Filter.eventuallyEq_of_mem (hWopen.mem_nhds hyW) hEqOn)).contMDiffWithinAt :)
-
   exact ⟨{ toPartialEquiv := Φ.toPartialEquiv
            open_source := Φ.open_source
            open_target := Φ.open_target
@@ -412,10 +394,6 @@ theorem contMDiffOn_isLocalDiffeomorphOn_infty
   exact ⟨Φ, hxΦ, hEqΦ⟩
 
 omit [I.Boundaryless] [J.Boundaryless] in
-
-
-
-
 omit [CompleteSpace F] in
 theorem hlocAt_of_coord
     [IsManifold I ∞ M] [IsManifold J ∞ N]
@@ -438,8 +416,6 @@ theorem hlocAt_of_coord
       modelWithCornersSelf_coe_symm, Function.comp_apply, id_eq] using hinv z hz
   obtain ⟨Ψ, hcxΨ, hΨV, hEqΨ⟩ :=
     hlocAt_infty' (I := 𝓘(ℝ, E)) (J := 𝓘(ℝ, F)) hV hcxV hGm hinvm
-
-
   let cΨ : PartialDiffeomorph I 𝓘(ℝ, F) M F ∞ :=
     { toPartialEquiv := c.toPartialEquiv.trans Ψ.toPartialEquiv
       open_source := by
@@ -469,7 +445,6 @@ theorem hlocAt_of_coord
         rw [htgt]
         exact c.symm.contMDiffOn_toFun.comp
           (Ψ.symm.contMDiffOn_toFun.mono Set.inter_subset_left) (fun _ hz => hz.2) }
-
   let Θ : PartialDiffeomorph I J M N ∞ :=
     { toPartialEquiv := cΨ.toPartialEquiv.trans d.symm.toPartialEquiv
       open_source := by

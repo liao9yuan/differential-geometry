@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFr
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -121,7 +118,8 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem inner0S_orthoBasis_eq_compContract
     [Module.Finite ℝ E]
     (g : SmoothMetric_gen I M) {x : M} {s : ℕ}
@@ -173,13 +171,10 @@ theorem sum_delta_erase_slot_eq {s : ℕ}
             identityInvMetric (Idx := Idx) (I0 a) (J0 a)) * G J0) =
       ∑ e : Idx, G (Function.update I0 b e) := by
   classical
-
   have hinj : Function.Injective (fun e : Idx => Function.update I0 b e) := by
     intro e e' he
     have := congrFun he b
     simpa [Function.update_self] using this
-
-
   have himg :
       (∑ e : Idx, G (Function.update I0 b e)) =
         ∑ J0 ∈ (Finset.univ : Finset Idx).image
@@ -188,7 +183,6 @@ theorem sum_delta_erase_slot_eq {s : ℕ}
               identityInvMetric (Idx := Idx) (I0 a) (J0 a)) * G J0 := by
     rw [Finset.sum_image (fun a _ b _ h => hinj h)]
     refine Finset.sum_congr rfl fun e _ => ?_
-
     have hprod :
         (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b,
             identityInvMetric (Idx := Idx) (I0 a) (Function.update I0 b e a)) = 1 := by
@@ -197,17 +191,13 @@ theorem sum_delta_erase_slot_eq {s : ℕ}
       rw [identityInvMetric_apply_self]
     rw [hprod, one_mul]
   rw [himg]
-
   refine (Finset.sum_subset (Finset.subset_univ _) ?_).symm
   intro J0 _ hJ0
-
   have hne : J0 ≠ Function.update I0 b (J0 b) := by
     intro h
     exact hJ0 (Finset.mem_image.mpr ⟨J0 b, Finset.mem_univ _, h.symm⟩)
-
   have hsome : ∃ a : Fin s, a ≠ b ∧ I0 a ≠ J0 a := by
     by_contra hnone
-
     apply hne
     funext a
     by_cases hab : a = b
@@ -256,7 +246,6 @@ theorem abs_ricStarArray_le {s : ℕ}
   classical
   have hNB : (0 : Real) ≤ Real.sqrt (compNormSqMulti cB) := Real.sqrt_nonneg _
   unfold ricStarArray
-
   have hstep :
       |∑ b : Fin s, ∑ e : Idx, ric (I0 b) e * cB (Function.update I0 b e)| ≤
         ∑ b : Fin s, ∑ e : Idx, Rbnd * Real.sqrt (compNormSqMulti cB) := by
@@ -269,12 +258,10 @@ theorem abs_ricStarArray_le {s : ℕ}
       (abs_le_sqrt_compNormSqMulti cB (Function.update I0 b e))
       (abs_nonneg _) hRbnd_nonneg
   refine le_trans hstep ?_
-
   rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, Finset.card_univ,
     Fintype.card_fin, nsmul_eq_mul, nsmul_eq_mul]
   rw [show ((Fintype.card Idx : Real) * (Rbnd * Real.sqrt (compNormSqMulti cB))) =
     (Fintype.card Idx : Real) * Rbnd * Real.sqrt (compNormSqMulti cB) from by ring]
-
   rw [show ((s : Real) *
         ((Fintype.card Idx : Real) * Rbnd * Real.sqrt (compNormSqMulti cB))) =
       (s : Real) * (Fintype.card Idx : Real) * Rbnd *
@@ -295,10 +282,7 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
   classical
   unfold ricReactionContract ricStarArray
   congr 1
-
   refine Finset.sum_congr rfl fun I0 _ => ?_
-
-
   have hric : ∀ (J0 : Fin s → Idx) (b : Fin s),
       (∑ p : Idx, ∑ q : Idx,
           identityInvMetric (Idx := Idx) (I0 b) p *
@@ -314,13 +298,11 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
         ring
       · intro h; exact absurd (Finset.mem_univ (J0 b)) h
     · intro p _ hp
-
       refine Finset.sum_eq_zero fun q _ => ?_
       rw [show identityInvMetric (Idx := Idx) (I0 b) p = 0 from
         diagonalInvMetric_eq_zero_of_ne (fun h => hp h.symm)]
       ring
     · intro h; exact absurd (Finset.mem_univ (I0 b)) h
-
   have hstep1 :
       (∑ J0 : Fin s → Idx,
           (∑ b : Fin s,
@@ -334,7 +316,6 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
           (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b,
               identityInvMetric (Idx := Idx) (I0 a) (J0 a)) *
             (ric (I0 b) (J0 b) * cB J0) * cA I0 := by
-
     have hdist :
         (∑ J0 : Fin s → Idx,
             (∑ b : Fin s,
@@ -355,10 +336,8 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
       ring
     rw [hdist, Finset.sum_comm]
   rw [hstep1]
-
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
-
   have hstep2 :
       (∑ J0 : Fin s → Idx,
           (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b,
@@ -374,7 +353,6 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
     ring
   rw [hstep2, sum_delta_erase_slot_eq (Idx := Idx) I0 b
     (fun J0 : Fin s → Idx => ric (I0 b) (J0 b) * cB J0)]
-
   congr 1
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [Function.update_self]
@@ -466,9 +444,6 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
                 (fun i => basis x i) m)
             m := by
   classical
-
-
-
   rw [nablaKRm04ReactionIntrinsic]
   set rmC : (Fin (4 + k) → Idx) → Real :=
     fun I0 => tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
@@ -479,16 +454,10 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
         (nablaKRm04Field (I := I) S t (k + 2) x) with hresid
   set residC : (Fin (4 + k) → Idx) → Real :=
     fun m => tensor0SComponent (I := I) resid (fun i => basis x i) m with hresidC
-
-
   rw [hgInv]
   rw [ricReactionContract_delta_eq_compContract (Idx := Idx) (ric t x) rmC rmC]
-
   rw [inner0S_orthoBasis_eq_compContract (I := I) (S.base.metric t) (basis x) horth
     resid (nablaKRm04Field (I := I) S t k x)]
-
-
-
   have hcombine :
       (∑ I0 : Fin (4 + k) → Idx, rmC I0 * ricStarArray (ric t x) rmC I0) +
           (∑ m : Fin (4 + k) → Idx, residC m * rmC m) =
@@ -498,7 +467,6 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
     refine Finset.sum_congr rfl fun m _ => ?_
     unfold combinedStarArray
     ring
-
   rw [show
       2 * (∑ I0 : Fin (4 + k) → Idx, rmC I0 * ricStarArray (ric t x) rmC I0) +
           2 * (∑ m : Fin (4 + k) → Idx, residC m * rmC m) =

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -40,7 +38,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 open Classical in
-
 omit [CompleteSpace E] in
 private lemma raw_eigenvectorSmoothChart_eq_ite
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -69,7 +66,6 @@ private lemma raw_eigenvectorSmoothChart_eq_ite
       (I := I) (M := M) g r s i α β P₀ hxα
 
 open Classical in
-
 omit [CompleteSpace E] in
 theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

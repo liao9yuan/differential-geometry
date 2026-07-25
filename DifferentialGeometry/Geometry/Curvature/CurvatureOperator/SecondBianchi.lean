@@ -60,7 +60,6 @@ def nablaCurvSec (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 lemma nablaCurvSec_def (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z W : Π b : M, TangentSpace I b) (x : M) :
     nablaCurvSec cov X Y Z W x =
@@ -103,7 +102,6 @@ lemma covApply_riemannSec_section_distrib
   simp only [ContinuousLinearMap.sub_apply]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 lemma covApply_torsionFree_inner_section_eq_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -198,7 +196,6 @@ lemma nablaCurvSec_flat
       riemannSec_def (cov := cov) Y Z (covApply cov X W) x]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 lemma cov_toFun_torsionFree_vector_collapse
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -216,7 +213,6 @@ lemma cov_toFun_torsionFree_vector_collapse
   abel
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 lemma covApply_eq_swap_add_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -235,7 +231,6 @@ lemma covApply_eq_swap_add_mlieBracket
   rw [← htf]; abel
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 lemma mlieBracket_covApply_pair
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -360,14 +355,12 @@ theorem second_bianchi_levi_civita
   classical
   rw [nablaCurvSec_flat cov hY hZ hW, nablaCurvSec_flat cov hZ hX hW,
       nablaCurvSec_flat cov hX hY hW]
-
   have g1XYZ := covApply_outer_torsionFree_collapse cov htor (a := X) (A := Y) (B := Z)
     (x := x) hY hZ hW
   have g1YZX := covApply_outer_torsionFree_collapse cov htor (a := Y) (A := Z) (B := X)
     (x := x) hZ hX hW
   have g1ZXY := covApply_outer_torsionFree_collapse cov htor (a := Z) (A := X) (B := Y)
     (x := x) hX hY hW
-
   have hXat : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hYat : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hZat : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
@@ -377,7 +370,6 @@ theorem second_bianchi_levi_civita
     (S := covApply cov X W) hYat hZat
   have g2ZXY := cov_toFun_torsionFree_vector_collapse cov htor (A := Z) (B := X)
     (S := covApply cov Y W) hZat hXat
-
   have g3 := bianchi_bracket_jacobi_sum_eq_zero cov htor (x := x) hX hY hZ
   have g3W : cov.toFun W x (VectorField.mlieBracket I (covApply cov X Y) Z x)
       + cov.toFun W x (VectorField.mlieBracket I Y (covApply cov X Z) x)

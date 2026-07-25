@@ -3,8 +3,6 @@ import Mathlib.Tactic.Ring
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection

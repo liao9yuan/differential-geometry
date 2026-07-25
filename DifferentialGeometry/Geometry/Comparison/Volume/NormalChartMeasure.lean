@@ -121,8 +121,6 @@ theorem exists_radialJacobi_radius
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem exists_radialJacobi_zero_radius
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -160,7 +158,8 @@ def radialJacobiGram (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
       (radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1)
       (radialJacobiField (I := I) g p x ((chartModelBasis E) j) 1)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 @[simp] lemma radialJacobiGram_apply
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (i j : Fin (Module.finrank ℝ E)) :

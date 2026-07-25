@@ -39,7 +39,6 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem exists_gradVariation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

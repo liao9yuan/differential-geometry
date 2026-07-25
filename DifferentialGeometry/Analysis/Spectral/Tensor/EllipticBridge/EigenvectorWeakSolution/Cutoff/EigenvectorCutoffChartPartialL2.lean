@@ -22,6 +22,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -40,7 +41,8 @@ private lemma cutoffComponentEuclid_contDiff'
       (cutoffComponentEuclid (I := I) (M := M) g r s S.toCcTensor α Idx Jdx) := by
   classical
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  refine DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+  refine
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
     (I := I) (M := M) ?_ ?_
   · exact cutoffComponentScalar_contMDiff
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx
@@ -56,7 +58,8 @@ private lemma cutoffComponentEuclid_hasCompactSupport'
     HasCompactSupport
       (cutoffComponentEuclid (I := I) (M := M) g r s S.toCcTensor α Idx Jdx) := by
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+  exact
+    chartPushedRaw_smooth_hasCompactSupport_local
     (I := I) (M := M)
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)
@@ -70,7 +73,8 @@ private lemma cutoffComponentEuclid_tsupport_subset'
     tsupport (cutoffComponentEuclid (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)
       ⊆ chartTargetEuclid (I := I) (M := M) α := by
   rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
+  exact
+    tsupport_chartPushedRaw_subset_chartTargetEuclid
     (I := I) (M := M)
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S.toCcTensor α Idx Jdx)

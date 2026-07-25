@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReacti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatSolution
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -106,7 +103,8 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_identity_of_orthonormal
     (g : SmoothMetric_gen I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -116,14 +114,12 @@ theorem metricInverseInBasis_identity_of_orthonormal
   classical
   intro i j
   refine ⟨?_, ?_⟩
-  ·
-    rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single i]
     · rw [identityInvMetric_apply_self, one_mul]; exact horth i j
     · intro k _ hk
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hk h.symm), zero_mul]
     · intro h; exact absurd (Finset.mem_univ i) h
-  ·
-    rw [Finset.sum_eq_single j]
+  · rw [Finset.sum_eq_single j]
     · rw [identityInvMetric_apply_self, mul_one]; exact horth i j
     · intro k _ hk
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne hk, mul_zero]
@@ -142,7 +138,8 @@ theorem metricInverseInBasis_identity_of_orthonormal
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
     (g : SmoothMetric_gen I M) {x : M} {s : ℕ}
@@ -157,7 +154,6 @@ theorem compNormSqMulti_orthoBasis_eq_normSq0S
     (metricInverseInBasis_identity_of_orthonormal (I := I) g basis horth) A]
   unfold compNormSqMulti
   refine Finset.sum_congr rfl fun idx _ => ?_
-
   rfl
 
 end FrameInvariance
@@ -198,12 +194,9 @@ theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
         (deltaInvMetric (M := M)) frame (t : Real) x₀ =
       normSq0S (I := I) (S.base.metric (t : Real)) x₀ 4 (S.base.rm04 (t : Real) x₀) := by
   classical
-
   rw [rm04NormSqInFrame_eq_compNormSq4 (I := I) (fun s => S.base.rm04 s)
     (deltaInvMetric (M := M)) frame (t : Real) x₀
     (deltaInvMetric_orthonormal (M := M) (t : Real) x₀)]
-
-
   rw [← compNormSqMulti_orthoBasis_eq_normSq0S (I := I) (S.base.metric (t : Real))
     basis horth (S.base.rm04 (t : Real) x₀)]
   rw [compNormSqMulti_eq_compNormSq4_basis (I := I) (S.base.rm04 (t : Real) x₀) basis]
@@ -241,11 +234,9 @@ theorem nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S
       normSq0S (I := I) (S.base.metric (t : Real)) x₀ 5
         (nablaRm04Field (I := I) S (t : Real) x₀) := by
   classical
-
   rw [nablaRm04NormSqInFrame_eq_compNormSq5 (M := M) _
     (deltaInvMetric (M := M)) (t : Real) x₀
     (deltaInvMetric_orthonormal (M := M) (t : Real) x₀)]
-
   rw [← compNormSqMulti_orthoBasis_eq_normSq0S (I := I) (S.base.metric (t : Real))
     basis horth (nablaRm04Field (I := I) S (t : Real) x₀)]
   rw [compNormSqMulti_eq_compNormSq5
@@ -317,21 +308,13 @@ theorem abs_spatialCommNablaRm_intrinsic_le
               Real.sqrt (normSq0S (I := I) (S.base.metric (t : Real)) x₀ 5
                 (nablaRm04Field (I := I) S (t : Real) x₀))) := by
   classical
-
-
   obtain ⟨n, frame, hortho, hinv, hbnd⟩ :=
     abs_spatialCommNablaRm_orthoFrame_le (I := I) S hS t x₀
-
-
   obtain ⟨n', frame', basis, hframe', horth'⟩ :=
     exists_orthoBasisFrameAt (I := I) S (t : Real) x₀
-
-
-
   refine ⟨n', frame', ?_, deltaInvMetric_orthonormal (M := M) (t : Real) x₀, ?_⟩
   · intro i j; rw [hframe' i, hframe' j]; exact horth' i j
   intro c m
-
   have hbnd' :
       |roughLapNablaRmCompF (I := I) S (t : Real) x₀ frame'
             (deltaInvMetric (M := M) (Idx := Fin n') (t : Real) x₀) c m -
@@ -345,7 +328,6 @@ theorem abs_spatialCommNablaRm_intrinsic_le
                 nablaRm04Field (I := I) S s y (vec5 (I := I)
                   (frame' i y) (frame' j y) (frame' k y) (frame' l y) (frame' p y)))
               (deltaInvMetric (M := M)) (t : Real) x₀)) := by
-
     rw [nablaLapCommF_orthonormalTrace (I := I) S hS t x₀ frame'
       (deltaInvMetric (M := M) (Idx := Fin n') (t : Real) x₀) (fun i j => rfl) c m]
     have hreact := abs_nablaLapCommReactionTerm_diag_orthoBasis_le (I := I) S hS t x₀
@@ -385,12 +367,12 @@ theorem abs_spatialCommNablaRm_intrinsic_le
       refine Finset.sum_congr rfl fun d _ => ?_
       dsimp only
       have htup : (fun p : Fin 5 => basis ((![mi, a, b, c', d] : Fin 5 → Fin n') p)) =
-          vec5 (I := I) (frame' mi x₀) (frame' a x₀) (frame' b x₀) (frame' c' x₀) (frame' d x₀) := by
+          vec5 (I := I) (frame' mi x₀) (frame' a x₀) (frame' b x₀) (frame' c' x₀)
+            (frame' d x₀) := by
         funext p; fin_cases p <;> simp [vec5, hframe']
       rw [htup]
     rw [hRm, hNab] at hreact
     exact hreact
-
   rw [rm04NormSqInFrame_orthoBasis_eq_normSq0S (I := I) S t x₀ frame' basis hframe' horth',
     nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S (I := I) S t x₀ frame' basis hframe' horth']
     at hbnd'

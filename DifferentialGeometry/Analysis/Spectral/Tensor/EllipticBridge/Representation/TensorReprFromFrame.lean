@@ -14,8 +14,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -183,7 +181,7 @@ theorem tensorChartComponent_eLpNorm_le_uniform
     tensorChartComponentScalar_eLpNorm_le_uniform (I := I) (M := M) g r s α
   by_cases hker : (pouChartKernel (I := I) (M := M) α).Nonempty
   · obtain ⟨C₂, hC₂_pos, h_bridge⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
+      eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
         (I := I) (M := M) g α
         (pouChartKernel_isCompact (I := I) (M := M) α) hker
         (pouChartKernel_subset_target (I := I) (M := M) α)

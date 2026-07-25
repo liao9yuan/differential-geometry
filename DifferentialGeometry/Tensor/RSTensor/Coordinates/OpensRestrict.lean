@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -29,10 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
-
-
-
-
 theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source) :
     (tangentBundleCore I V).coordChange (achart H p) (achart H q) x
@@ -54,13 +49,13 @@ theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
         = (chartAt H (p : M)).symm (I.symm y) := by
       rw [TopologicalSpace.Opens.chartAt_eq] at hy' ⊢
       exact OpenPartialHomeomorph.subtypeRestr_symm_apply _ _ hy'
-    show extChartAt I q ((extChartAt I p).symm y)
+    change extChartAt I q ((extChartAt I p).symm y)
         = extChartAt I (q : M) ((extChartAt I (p : M)).symm y)
     have hsy : (extChartAt I p).symm y = ((chartAt H p).symm (I.symm y) : V) := rfl
     have hsy' : (extChartAt I (p : M)).symm y
         = (chartAt H (p : M)).symm (I.symm y) := rfl
     rw [hsy, hsy']
-    show I (chartAt H q ((chartAt H p).symm (I.symm y)))
+    change I (chartAt H q ((chartAt H p).symm (I.symm y)))
         = I (chartAt H (q : M) ((chartAt H (p : M)).symm (I.symm y)))
     rw [← hw]
     rfl
@@ -68,12 +63,6 @@ theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hev.eq_of_nhdsWithin ⟨(chartAt H (p : M)) (x : M), rfl⟩)
 
 omit [CompleteSpace E] in
-
-
-
-
-
-
 theorem tensor0SModelAt_opens (s : ℕ) {V : Opens M} [Nonempty V] (p x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source)
     (A : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := V) s x) :

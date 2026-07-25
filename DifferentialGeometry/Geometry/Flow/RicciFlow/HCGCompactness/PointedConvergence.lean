@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -23,6 +22,8 @@ noncomputable section
 universe u
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
@@ -63,7 +64,7 @@ noncomputable def metricCovDerivStep
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -131,7 +132,7 @@ theorem metricCovDeriv_one_apply_section
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -164,10 +165,12 @@ theorem metricCovDeriv_one_eval_smooth_slots
         ∑ a : Fin 2,
           h.inner x
             ((Function.update (fun b : Fin 2 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                gRef)
                   (fun p : M => V a p) x) (X x))) 0)
             ((Function.update (fun b : Fin 2 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                gRef)
                   (fun p : M => V a p) x) (X x))) 1) := by
   classical
   haveI : IsManifold I 1 M :=
@@ -195,7 +198,8 @@ theorem metricCovDeriv_one_eval_smooth_slots
   rw [hdir, heval]
   simp [hzero, cov, Tensor0SBundle.metricTensorField_apply]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 private theorem extDerivFun_congr_eventually_real
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :
@@ -352,12 +356,10 @@ theorem metricCovDeriv_one_eval_localFrame
           rw [hmain, hderiv, Fin.sum_univ_two]
           simp [V, hsec_x a, hsec_x b, hcov_a_candidate, hcov_b_candidate]
 
-set_option linter.unusedFintypeInType false in
-set_option linter.unusedDecidableInType false in
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_localFrame
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Finite Idx] {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -376,6 +378,7 @@ theorem metricCovDeriv_one_component_localFrame
           h.inner x (frame a x)
             (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame b) x) (frame d x))) := by
+  classical
   rw [Tensor0SBundle.component0S_apply]
   simp only [IsLocalFrameOn.toBasisAt_coe]
   have hslots :
@@ -918,7 +921,8 @@ noncomputable def sourceTargetDiff
     exact contMDiff_openCod (I := I) (U := targetOpen (I := I) Φ k) hbase
   · have hbase :
         ContMDiff I I (∞ : WithTop ℕ∞)
-          (fun y : TargetDomain (I := I) Φ k => e.toPartialEquiv.symm (y : (X.term (subseq k)).M)) := by
+          (fun y : TargetDomain (I := I) Φ k => e.toPartialEquiv.symm
+            (y : (X.term (subseq k)).M)) := by
       intro y
       have hy : (y : (X.term (subseq k)).M) ∈ e.target := y.2
       have hAt :

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -186,7 +185,8 @@ theorem bumpTowerStep_chartConv
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
     (hf : ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f (chartAt H x₀).source) :
     ContDiffOn Real (∞ : WithTop ℕ∞)
@@ -207,7 +207,6 @@ theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
       = f ∘ (extChartAt I x₀).symm := by funext z; simp [writtenInExtChartAt]
   rw [hwrite]; exact hcd
 
-set_option linter.unusedVariables false in
 
 
 
@@ -228,7 +227,7 @@ theorem bumpTower_slotExpand_conv
     {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
     (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
     {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
-    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    (_hUtarget : U ⊆ (extChartAt I x₀).target)
     {ι : Type*} (s : Finset ι)
     (frame : ι → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -253,12 +252,10 @@ theorem bumpTower_slotExpand_conv
       (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
         (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w (fun a => V a w)) z) := by
   classical
-
   have hg : ∀ i, ContDiff Real (∞ : WithTop ℕ∞)
       (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀ (c i) z) :=
     fun i => bumpMul_contDiff (isOpen_extChartAt_target (I := I) x₀) hχ htsupp
       (chartRep_contDiffOn (I := I) (c i) x₀ (hc i))
-
   have hcarrSeq : ∀ (i : ι) (k : ℕ), ContDiff Real (∞ : WithTop ℕ∞)
       (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
         (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
@@ -271,11 +268,9 @@ theorem bumpTower_slotExpand_conv
           (fun a => (Function.update V j (frame i)) a w)) z) :=
     fun i => bumpTowerScalar_contDiff (I := I) gRef A0inf p
       (Function.update V j (frame i)) x₀ hχ htsupp
-
   have hsum := MapCInfConvOnCompacts.sum s
     (fun i => (hconv i).mulLeft (hg i) (fun k => hcarrSeq i k) (hcarrInf i))
     (fun i k => (hg i).mul (hcarrSeq i k)) (fun i => (hg i).mul (hcarrInf i))
-
   have hmulti : ∀ (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2),
       ∀ q ∈ S,
@@ -309,7 +304,6 @@ theorem bumpTower_slotExpand_conv
               (fun a => (Function.update V j (frame i)) a q) := by
             refine Finset.sum_congr rfl fun i _ => ?_
             simp only [smul_eq_mul, hupd i]
-
   refine hsum.congr hU (fun k z hz => ?_) (fun z hz => ?_)
   · have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
     simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
@@ -912,7 +906,7 @@ private theorem engine_input_family
     exact le_trans hbnd
       (Finset.single_le_sum (fun jj _ => hMr0 jj)
         (Finset.mem_range.2 (Nat.lt_succ_of_le hjr)))
-  show ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
+  change ‖iteratedFDeriv Real r (fun x : E => χ x * cr k x) x‖ ≤ _
   simp only [hΦeq]
   exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
     hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x

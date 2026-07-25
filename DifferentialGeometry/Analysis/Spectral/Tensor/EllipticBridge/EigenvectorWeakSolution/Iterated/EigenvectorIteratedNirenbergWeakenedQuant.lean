@@ -82,7 +82,8 @@ private lemma sqrt_geometricEnergy_le
     _ = C₂ * (A + B) := by
         rw [hC₂_def, Real.sqrt_sq (by linarith [hA, hB])]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma eLpNorm_volume_restrict_compact_le_weighted
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -129,7 +130,8 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -177,7 +179,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
@@ -817,7 +818,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     exact eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
       (I := I) (M := M) g r s i α P₀ m directions
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
+    wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
       (d := Module.finrank ℝ E) (k := 2) (p := 2)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
       h_chart_open hΩ''_open hK_compact hK_in_Ω'' h_closureΩ''_in_chart
@@ -838,7 +839,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     _ = ENNReal.ofReal (K_prom * C') * RHS_inner := by
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_prom_pos.le]
 
-set_option maxHeartbeats 1600000 in
 
 omit [CompleteSpace E] in
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
@@ -1008,7 +1008,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
       hΩ'_compact_closure hΩ'_compact_closure.isClosed.measurableSet
       h_closureΩ'_in_chart
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound_uniform⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
+    wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
       (d := Module.finrank ℝ E) (k := 2) (p := 2)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
       h_chart_open hΩ''_open hK_compact hK_in_Ω'' h_closureΩ''_in_chart

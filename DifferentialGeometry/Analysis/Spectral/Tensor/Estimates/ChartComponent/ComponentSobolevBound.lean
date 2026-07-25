@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -95,8 +93,8 @@ theorem tensorChartComponentScalar_add
       unfold tensorTrivProj
       rw [show (S₁ + S₂).toSection x = S₁.toSection x + S₂.toSection x from
         by rw [SmoothCcTensor.toSection_add]; rfl]
-      exact map_add _ _ _]
-    exact map_add _ _ _
+      exact ContinuousLinearMap.map_add _ _ _]
+    exact ContinuousLinearMap.map_add _ _ _
   rw [hraw_add]; ring
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
@@ -119,8 +117,8 @@ theorem tensorChartComponentScalar_smul
       unfold tensorTrivProj
       rw [show (c • S).toSection x = c • S.toSection x from
         by rw [SmoothCcTensor.toSection_smul]; rfl]
-      exact map_smul _ _ _]
-    rw [map_smul]
+      exact ContinuousLinearMap.map_smul _ _ _]
+    rw [ContinuousLinearMap.map_smul]
     rfl
   rw [hraw_smul]; ring
 

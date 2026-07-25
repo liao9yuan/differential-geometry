@@ -329,7 +329,8 @@ def smoothHolderConst (d : ℕ) (p : ℝ) : ℝ :=
   let q : ℝ := p / (p - 1)
   let α : ℝ := (1 - (d : ℝ)) * q
   let dα : ℝ := (d : ℝ) + α
-  let C₁ : ℝ := (2 : ℝ) ^ d / ((d : ℝ) * (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal)
+  let C₁ : ℝ := (2 : ℝ) ^ d /
+    ((d : ℝ) * (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal)
   C₁ * ((d : ℝ) * (volume (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)).toReal *
     (2 : ℝ) ^ dα / dα) ^ (1 / q)
 

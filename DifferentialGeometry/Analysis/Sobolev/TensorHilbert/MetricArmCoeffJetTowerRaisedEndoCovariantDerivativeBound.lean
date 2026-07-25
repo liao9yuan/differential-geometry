@@ -13,8 +13,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -31,7 +29,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+  (metricCauchySchwarzBound ccTensorBilinSymm)
 
 section NormedSpaceModel
 
@@ -41,6 +40,18 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private lemma real_le_of_sq_le_mul_self {N K : ℝ} (hN : 0 ≤ N) (hK : 0 ≤ K)
+    (h : N ^ 2 ≤ K * N) : N ≤ K := by
+  rcases eq_or_lt_of_le hN with h0 | hpos
+  · rw [← h0]; exact hK
+  · nlinarith
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -52,7 +63,8 @@ def gInvDiffRaisedEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   contMDiff_toFun := gInvDiffRaisedEndo_contMDiff (I := I) g₀ g₁
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem inverseMetricSharpFib_g0FlatY_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -69,7 +81,8 @@ theorem inverseMetricSharpFib_g0FlatY_contMDiff
   refine hsharpY.congr (fun x => ?_)
   rw [inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₀ g₁ x (Y x)]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem cotangent_g0FlatY_mdiffAtCotangent
     (g₀ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -140,7 +153,8 @@ theorem endoCov_gInvDiffRaisedField_apply
       (inverseMetricSharpFib (I := I) g₁ x) (g0FlatCLM (I := I) g₀ x gradY) - gradY := by
     change metricComparisonDiffEndo (I := I) g₀ g₁ x gradY = _
     rw [gInvDiffRaisedEndo_apply]
-  have hsplit : (LeviCivita (I := I) g₀) (fun y : M => (gInvDiffRaisedEndoField (I := I) g₀ g₁ y) (Y y)) x v =
+  have hsplit : (LeviCivita (I := I) g₀)
+    (fun y : M => (gInvDiffRaisedEndoField (I := I) g₀ g₁ y) (Y y)) x v =
       (LeviCivita (I := I) g₀).toFun (fun y : M => (inverseMetricSharpFib (I := I) g₁ y) (β y)) x v
         - (LeviCivita (I := I) g₀).toFun (fun y : M => Y y) x v := by
     have hfun : (fun y : M => (gInvDiffRaisedEndoField (I := I) g₀ g₁ y) (Y y)) =
@@ -183,7 +197,8 @@ theorem endoCov_gInvDiffRaisedField_apply
     rw [hβdef, gInvRaisedEndo_apply]]
   abel
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma sqrt_g0_inner_add_le'
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -234,6 +249,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local2
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -377,8 +398,8 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
         mul_le_mul_of_nonneg_left hconnG hNw_nn
       have hpp_le2 : g₀.inner x p p ≤ (C₀ * G * Nv * Nw) * Np := by
         refine hpp_le.trans (hchain.trans ?_)
-        nlinarith [hNw_nn, hNp_nn, mul_nonneg (mul_nonneg hC₀0 hG_nn) hNv_nn]
-      nlinarith [hNp_sq, hNp_nn, hpp_le2, hKnn]
+        exact le_of_eq (by ring)
+      exact real_le_of_sq_le_mul_self hNp_nn hKnn (by rw [hNp_sq]; exact hpp_le2)
     have hsharp := norm_inverseMetricSharpFib_g0Flat_le (I := I) g₀ g₁
       (ccTensorBilinSymm (I := I) g₀ T) (fun y a b => h y a b)
       (by linarith : δ < 1) hδ0 hbound x p
@@ -388,7 +409,8 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
     have hstep : (1 / (1 - δ)) * Np ≤ 2 * Np :=
       mul_le_mul_of_nonneg_right hinv_le hNp_nn
     refine hstep.trans ?_
-    nlinarith [hNp_le, hNp_nn, mul_nonneg (mul_nonneg hC₀0 hG_nn) (mul_nonneg hNv_nn hNw_nn)]
+    calc 2 * Np ≤ 2 * (C₀ * G * Nv * Nw) := by linarith
+      _ = 2 * C₀ * G * Nv * Nw := by ring
   have htri : Real.sqrt (g₀.inner x EC EC) ≤
       Real.sqrt (g₀.inner x T2 T2) + Real.sqrt (g₀.inner x T3 T3) := by
     rw [hEC_eq]
@@ -397,7 +419,7 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
   have hsum : Real.sqrt (g₀.inner x T2 T2) + Real.sqrt (g₀.inner x T3 T3) ≤
       (2 * C₀ * G * Nv * Nw) + (2 * C₀ * G * Nv * Nw) := add_le_add hT2_bound hT3_bound
   refine hsum.trans ?_
-  nlinarith [mul_nonneg (mul_nonneg (mul_nonneg hC₀0 hG_nn) hNv_nn) hNw_nn]
+  exact le_of_eq (by ring)
 
 end InnerProductSpaceModel
 

@@ -89,7 +89,8 @@ theorem exists_deturck_remainder_mild_solution_timeH1
             (fun t => N_cont
               (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)) := by
   obtain ⟨L_R, R, hR, hLip⟩ :=
-    deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz (I := I) (M := M) g_bg a u₀ N_cont repr Nsec
+    deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz (I := I) (M := M) g_bg a u₀ N_cont
+      repr Nsec
       hN_coeff hNsec_realize hrepr_small hNsec_lip
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g_bg

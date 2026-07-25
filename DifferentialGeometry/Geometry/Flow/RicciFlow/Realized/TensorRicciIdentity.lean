@@ -4,4 +4,3 @@ import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Formula
 import DifferentialGeometry.Tensor.RicciIdentity.MixedComponents
 
 set_option autoImplicit false
-set_option linter.style.longLine false

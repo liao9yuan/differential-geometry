@@ -5,8 +5,6 @@ import Mathlib.Algebra.Order.Chebyshev
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -170,7 +168,7 @@ private theorem sharpRawPullCenter_le_jetSum
     have h : Module.finrank ℝ E < 2 * m := by rw [hm_def]; omega
     exact_mod_cast h
   obtain ⟨Cloc, hCloc_nn, hCloc⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.smooth_localBall_L2_pointwise_embedding_supercritical
+    Analysis.Sobolev.Euclidean.smooth_localBall_L2_pointwise_embedding_supercritical
       (d := Module.finrank ℝ E) m hdm (x₀ := y₀) (R := R) hR
   have h_mem_pou : ∀ y ∈ Metric.ball y₀ R,
       y ∈ chartImagePOUTsupport (I := I) (M := M) α := by
@@ -206,7 +204,8 @@ private theorem sharpRawPullCenter_le_jetSum
   have h_l2 : ∀ i : ℕ, ∃ B : ℝ, 0 ≤ B ∧ ∀ (S : SmoothCcTensor g r (s + i))
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin (s + i) → Fin (Module.finrank ℝ E)),
-      eLpNorm (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i) S α Idx Jdx z|) 2
+      eLpNorm (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i) S α Idx Jdx z|)
+        2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         ENNReal.ofReal ((Real.sqrt c⁻¹ * B) *
           tensorL2Norm (I := I) (M := M) g r (s + i) S.toFun) :=
@@ -340,7 +339,8 @@ private theorem sharpRawPullCenter_le_jetSum
       rw [Finset.mem_range] at hj
       omega
     have h_pt : ∀ y ∈ Metric.ball y₀ R,
-        ‖iteratedFDeriv ℝ j (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖ ≤
+        ‖iteratedFDeriv ℝ j (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖
+          ≤
           Cjfun j * ∑ i ∈ Finset.range (m + 1), Zc i y := by
       intro y hy
       refine (hCjfun j hjm T y hy).trans ?_
@@ -361,7 +361,8 @@ private theorem sharpRawPullCenter_le_jetSum
       calc ‖‖iteratedFDeriv ℝ j
               (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖‖
           = ‖iteratedFDeriv ℝ j
-              (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖ := norm_norm _
+              (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖ := norm_norm
+                _
         _ ≤ Cjfun j * ∑ i ∈ Finset.range (m + 1), Zc i z := h_pt z hz
         _ = ‖(Cjfun j • fun z' => ∑ i ∈ Finset.range (m + 1), Zc i z') z‖ := by
             rw [Pi.smul_apply, smul_eq_mul, Real.norm_eq_abs, abs_of_nonneg h2]

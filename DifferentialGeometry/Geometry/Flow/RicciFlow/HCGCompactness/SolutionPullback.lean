@@ -51,7 +51,7 @@ theorem _root_.IsLocalFrameOn.pushforward
       rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
         ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
         Φ.mfderivToContinuousLinearEquiv_coe]
-    show LinearIndependent ℝ (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
+    change LinearIndependent ℝ (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
     rw [hb]
     exact Module.Basis.linearIndependent _
   generating {y} hy := by
@@ -64,7 +64,7 @@ theorem _root_.IsLocalFrameOn.pushforward
       rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
         ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
         Φ.mfderivToContinuousLinearEquiv_coe]
-    show ⊤ ≤ Submodule.span ℝ (Set.range
+    change ⊤ ≤ Submodule.span ℝ (Set.range
       (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y))))
     rw [hb]
     exact (Module.Basis.span_eq _).ge
@@ -113,7 +113,8 @@ theorem gradientFun_pullback
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [IsManifold I ∞ M] [IsManifold I ∞ N] in
 theorem mfderiv_symm_apply
     (Φ : M ≃ₘ⟮I, I⟯ N) (y : M) (v : TangentSpace I (Φ y)) :
     (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v
@@ -210,7 +211,6 @@ theorem metricFamilySmoothOn_pullback
       exact Diffeomorph.pullbackMetric_inner (I := I) (S.family.metric p.1) Φ p.2
         (frame i p.2) (frame j p.2)
     rw [heq]
-
     have hpf := hS.smoothMetric.frameCompSmooth
       (fun k (y : N) => mfderiv I I (Φ : M → N) (Φ.symm y) (frame k (Φ.symm y)))
       (hframe.pushforward Φ) i j
@@ -221,7 +221,6 @@ theorem metricFamilySmoothOn_pullback
         (D.regular ×ˢ u) (D.regular ×ˢ (Φ '' u)) :=
       fun p hp => ⟨hp.1, Set.mem_image_of_mem _ hp.2⟩
     have hcomp := hpf.comp hmap.contMDiffOn hmaps
-
     have hN : ∀ (k : Idx) (x : M),
         (mfderiv I I (Φ : M → N) (Φ.symm (Φ x)) (frame k (Φ.symm (Φ x))) : E)
           = (mfderiv I I (Φ : M → N) x (frame k x) : E) :=
@@ -264,7 +263,6 @@ theorem metricVariationEquation_pullback
   exact hS.equation t (Φ x)
     (mfderiv I I (Φ : M → N) x X) (mfderiv I I (Φ : M → N) x Y)
 
-set_option maxHeartbeats 1000000 in
 
 
 omit [I.Boundaryless] in
@@ -358,7 +356,6 @@ theorem metricRicci_pullback_eval
       funext i; fin_cases i <;> rfl] at hRHS
   rw [hLHS, hpb, ← hRHS]
 
-set_option maxHeartbeats 1000000 in
 
 
 

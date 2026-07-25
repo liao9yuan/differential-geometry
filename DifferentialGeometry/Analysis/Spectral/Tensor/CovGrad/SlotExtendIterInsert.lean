@@ -10,10 +10,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantN
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff
@@ -34,7 +31,8 @@ variable [CompleteSpace E]
 
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem slotExtIter_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -67,7 +65,8 @@ theorem slotExtIter_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
 
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem app_slotExt_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))

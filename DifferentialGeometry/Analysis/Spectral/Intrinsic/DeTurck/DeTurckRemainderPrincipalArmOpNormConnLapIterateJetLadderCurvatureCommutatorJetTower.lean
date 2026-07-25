@@ -132,7 +132,6 @@ private lemma bal_shift_sq_sum_le (u : ℕ → ℝ) (hu : ∀ b, 0 ≤ u b) (j m
   have := Finset.mem_range.mp hi
   exact Finset.mem_range.mpr (by omega)
 
-set_option maxHeartbeats 1000000 in
 private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (j : ℕ) (S : SmoothCcTensor g r s),
@@ -346,7 +345,6 @@ private lemma bal_comm_tower (g : SmoothRiemannianMetric I M) (r s : ℕ) (m : �
       _ = (Kp j + Km (j + 1)) * ∑ b ∈ Finset.range ((m + 1) + j + 2),
             ‖iteratedCovGrad (I := I) g r s b S‖ := by ring
 
-set_option maxHeartbeats 1600000 in
 private lemma bal_G2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c : ℝ, 0 ≤ c ∧ ∀ S : SmoothCcTensor g r s,
       ‖rawTensorConnLapSmooth (I := I) g r s S‖ ≤
@@ -433,13 +431,32 @@ private lemma bal_G2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     nlinarith
   refine le_of_sq_le_sq ?_ hrhs_nn
   have e1 : Kp 0 * a2 * a1 ≤ 2 * (Kp 0 + 1) * a2 * (a1 + a0) := by
-    nlinarith [mul_nonneg ha2_nn ha1_nn, mul_nonneg ha2_nn ha0_nn, hKp_nn 0,
-      mul_nonneg (mul_nonneg (hKp_nn 0) ha2_nn) ha0_nn,
-      mul_nonneg (mul_nonneg (hKp_nn 0) ha2_nn) ha1_nn]
+    have hK_le : Kp 0 ≤ 2 * (Kp 0 + 1) := by linarith [hKp_nn 0]
+    have ha1_le : a1 ≤ a1 + a0 := by linarith
+    calc
+      Kp 0 * a2 * a1 ≤ (2 * (Kp 0 + 1)) * a2 * a1 :=
+        mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hK_le ha2_nn) ha1_nn
+      _ ≤ (2 * (Kp 0 + 1)) * a2 * (a1 + a0) :=
+        mul_le_mul_of_nonneg_left ha1_le
+          (mul_nonneg (by linarith [hKp_nn 0]) ha2_nn)
+      _ = 2 * (Kp 0 + 1) * a2 * (a1 + a0) := by ring
   have e2 : Kp 0 * (a0 + a1) * a1 ≤ (Kp 0 + 1) ^ 2 * (a1 + a0) ^ 2 := by
-    nlinarith [mul_nonneg (mul_nonneg (hKp_nn 0) (add_nonneg ha0_nn ha1_nn)) ha0_nn,
-      mul_nonneg (mul_nonneg (hKp_nn 0) (hKp_nn 0)) (sq_nonneg (a1 + a0)),
-      mul_nonneg (hKp_nn 0) (sq_nonneg (a1 + a0)), sq_nonneg (a1 + a0)]
+    have hsum_nn : 0 ≤ a0 + a1 := add_nonneg ha0_nn ha1_nn
+    have ha1_le : a1 ≤ a0 + a1 := by linarith
+    have hK_le : Kp 0 ≤ (Kp 0 + 1) ^ 2 := by
+      calc
+        Kp 0 ≤ Kp 0 + 1 := by linarith
+        _ = (Kp 0 + 1) * 1 := by ring
+        _ ≤ (Kp 0 + 1) * (Kp 0 + 1) :=
+          mul_le_mul_of_nonneg_left (by linarith [hKp_nn 0]) (by linarith [hKp_nn 0])
+        _ = (Kp 0 + 1) ^ 2 := by ring
+    calc
+      Kp 0 * (a0 + a1) * a1 ≤ Kp 0 * (a0 + a1) * (a0 + a1) :=
+        mul_le_mul_of_nonneg_left ha1_le (mul_nonneg (hKp_nn 0) hsum_nn)
+      _ = Kp 0 * (a0 + a1) ^ 2 := by ring
+      _ ≤ (Kp 0 + 1) ^ 2 * (a0 + a1) ^ 2 :=
+        mul_le_mul_of_nonneg_right hK_le (sq_nonneg _)
+      _ = (Kp 0 + 1) ^ 2 * (a1 + a0) ^ 2 := by ring
   have esplit : Kp 0 * (a0 + a1 + a2) * a1 =
       Kp 0 * (a0 + a1) * a1 + Kp 0 * a2 * a1 := by ring
   have expand : (a2 + (Kp 0 + 1) * (a1 + a0)) ^ 2 =
@@ -447,7 +464,8 @@ private lemma bal_G2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [expand]
   linarith [hsq, e1, e2, esplit]
 
-lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) :
     ∃ c : ℕ → ℝ, (∀ b, 0 ≤ c b) ∧
       ∀ (b : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s b (rawTensorConnLapSmooth (I := I) g r s S)‖ ≤
@@ -575,13 +593,15 @@ private lemma bal_sum_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ)
           ∑ b' ∈ Finset.range (K + 2), ‖iteratedCovGrad (I := I) g r s b' S‖ := by
         rw [Finset.sum_mul]
 
-lemma exists_iteratedCovGrad_connLapSmoothingIterate_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_connLapSmoothingIterate_window_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) :
     ∃ c : ℕ → ℕ → ℝ, (∀ γ q, 0 ≤ c γ q) ∧
       ∀ (γ q : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
           c γ q * ∑ b ∈ Finset.range (γ + 2 * q + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I)
+    (M := M) g r s
   have hmain : ∀ q : ℕ, ∃ c : ℕ → ℝ, (∀ γ, 0 ≤ c γ) ∧
       ∀ (γ : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
@@ -740,7 +760,8 @@ lemma bal_Ccore (g : SmoothRiemannianMetric I M) (r s : ℕ) :
           ‖iteratedCovGrad (I := I) g r s (2 * p + 1) S‖ +
             c p * ∑ b ∈ Finset.range (2 * p + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I)
+    (M := M) g r s
   obtain ⟨cE, hcE_nn, hcE⟩ := bal_lap_jets_exact (I := I) (M := M) g r s
   have hmain : ∀ p : ℕ, ∃ c : ℝ, 0 ≤ c ∧
       ∀ S : SmoothCcTensor g r s,

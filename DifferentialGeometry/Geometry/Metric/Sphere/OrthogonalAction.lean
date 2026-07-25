@@ -94,7 +94,7 @@ theorem mfderiv_incl_sphereDiffeo (e : E ≃ₗᵢ[ℝ] E) (x : sphere (0 : E) 1
     funext y; exact sphereDiffeo_coe e y
   have e1 := mfderiv_comp x hι_φx hφ
   have e2 := mfderiv_comp x he hι_x
-  show mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) (sphereDiffeo (n := n) e x)
+  change mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) (sphereDiffeo (n := n) e x)
         (mfderiv (𝓡 n) (𝓡 n) (sphereDiffeo (n := n) e) x v)
       = e (mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x v)
   rw [← ContinuousLinearMap.comp_apply, ← e1, hcomp, e2]
@@ -122,7 +122,7 @@ theorem pullbackMetric_round_eq (e : E ≃ₗᵢ[ℝ] E) :
         (sphereDiffeo (n := n) e) x) = (roundMetric (E := E) (n := n)).inner := by
     funext x
     refine ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => ?_
-    show (Diffeomorph.pullbackMetric (roundMetric (E := E) (n := n))
+    change (Diffeomorph.pullbackMetric (roundMetric (E := E) (n := n))
         (sphereDiffeo (n := n) e)).inner x v w = (roundMetric (E := E) (n := n)).inner x v w
     rw [Diffeomorph.pullbackMetric_inner]
     exact roundInner_sphereDiffeo e x v w

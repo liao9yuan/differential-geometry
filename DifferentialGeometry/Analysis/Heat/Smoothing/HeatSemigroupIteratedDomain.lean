@@ -163,7 +163,17 @@ private lemma iteratedResolventL2_oneMinusLapHeat_basis
   rw [h_eq_basis] at h_rhs
   exact h_rhs.symm
 
-set_option maxHeartbeats 800000 in
+
+private lemma hasSum_repr_smul_mapL {ι : Type*} {X Y : Type*}
+    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+    [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+    (b : HilbertBasis ι ℝ X) (u : X) (T : X →L[ℝ] Y) :
+    HasSum (fun i => b.repr u i • T (b i)) (T u) := by
+  have h := (b.hasSum_repr u).mapL T
+  have heq : (fun i => T (b.repr u i • b i)) = fun i => b.repr u i • T (b i) := by
+    funext i
+    exact T.map_smul _ _
+  rwa [heq] at h
 
 theorem iteratedResolventL2_oneMinusLapHeat_apply
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
@@ -178,20 +188,10 @@ theorem iteratedResolventL2_oneMinusLapHeat_apply
   let H := heatSemigroup (I := I) (M := M) g t
   have h_LHS_hsum : HasSum
       (fun i => b.repr u i • A (B (b i)))
-      (A (B u)) := by
-    have h := h_hsum.mapL (A.comp B)
-    convert h using 1
-    funext i
-    change b.repr u i • A (B (b i)) = A (B (b.repr u i • b i))
-    rw [B.map_smul, A.map_smul]
+      (A (B u)) := hasSum_repr_smul_mapL b u (A.comp B)
   have h_RHS_hsum : HasSum
       (fun i => b.repr u i • H (b i))
-      (H u) := by
-    have h := h_hsum.mapL H
-    convert h using 1
-    funext i
-    change b.repr u i • H (b i) = H (b.repr u i • b i)
-    rw [H.map_smul]
+      (H u) := hasSum_repr_smul_mapL b u H
   have h_summand_eq :
       (fun i => b.repr u i • A (B (b i))) =
       (fun i => b.repr u i • H (b i)) := by

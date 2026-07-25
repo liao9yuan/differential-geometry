@@ -40,10 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
   [IsManifold I ∞ M] [ChartedSpace H M] in
-
-
-
-
 private lemma lipschitzOnWith_of_tendsto_aux
     {β : Type*} [PseudoMetricSpace β] (g : ℝ → E → β) (g0 : E → β) (K : ℝ≥0)
     (S : Set E) (l : Filter ℝ) [l.NeBot]
@@ -62,11 +58,6 @@ private lemma lipschitzOnWith_of_tendsto_aux
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M] in
-
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 private lemma differentiableAt_chartTrivRepr_of_contMDiff_section
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ)
@@ -99,10 +90,6 @@ private lemma differentiableAt_chartTrivRepr_of_contMDiff_section
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
-
-
 private lemma continuousOn_fderiv_chartTrivRepr
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hgrad : ContinuousOn (fun q : ℝ × M =>
@@ -125,10 +112,6 @@ private lemma continuousOn_fderiv_chartTrivRepr
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
-
-
 private lemma pointwise_tendsto_chartTrivRepr
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (L : ℝ)
     (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
@@ -152,20 +135,22 @@ private lemma pointwise_tendsto_chartTrivRepr
   exact hclm.mono_left nhdsWithin_le_nhds
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
-
-
-
 theorem corrected_chart_field_lipschitz_of_data
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ) (hT : 0 < T)
-    (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
-    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+    (hcont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.univ : Set (ℝ × M)))
+    (hgrad : ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z)
+      (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ L K r : ℝ, 0 < L ∧ 0 < r ∧ 0 ≤ K ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
-        ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
+        ContinuousOn (fun y : E => chartTrivRepr (I := I) α (X t) y)
+          (Metric.closedBall (I ((chartAt H α) α)) r)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L,
-        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.ball (I ((chartAt H α) α)) r)) ∧
+        LipschitzOnWith (Real.toNNReal K) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+          (Metric.ball (I ((chartAt H α) α)) r)) ∧
       Metric.closedBall (I ((chartAt H α) α)) r ⊆ (extChartAt I α).target := by
   classical
   set center : E := extChartAt I α α with hcenter
@@ -188,7 +173,8 @@ theorem corrected_chart_field_lipschitz_of_data
   have hbox_sub : (Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r) ⊆
       (Set.univ : Set ℝ) ×ˢ (extChartAt I α).target := fun p hp =>
     ⟨Set.mem_univ _, interior_subset (hcball_sub hp.2)⟩
-  have hjoint : ContinuousOn (fun p : ℝ × E => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X p.1) z) p.2)
+  have hjoint : ContinuousOn
+    (fun p : ℝ × E => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X p.1) z) p.2)
       ((Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r)) := hjoint_full.mono hbox_sub
   have hcompact : IsCompact ((Set.Icc (0:ℝ) L) ×ˢ (Metric.closedBall center r)) :=
     isCompact_Icc.prod (isCompact_closedBall center r)
@@ -199,11 +185,13 @@ theorem corrected_chart_field_lipschitz_of_data
       ‖fderiv ℝ (fun z => chartTrivRepr (I := I) α (X t) z) z‖ ≤ C := fun t ht z hz =>
     (hC₀ (t, z) ⟨ht, hz⟩).trans (le_max_left _ _)
   have hLipPos : ∀ t ∈ Set.Ioc (0:ℝ) L,
-      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall center r) := by
+      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+        (Metric.closedBall center r) := by
     intro t ht
     have htT : t ∈ Set.Ioo (0:ℝ) T := ⟨ht.1, lt_of_le_of_lt ht.2 hL_lt⟩
     have htIcc : t ∈ Set.Icc (0:ℝ) L := ⟨le_of_lt ht.1, ht.2⟩
-    have hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M => (TotalSpace.mk' E x (X t x) : TangentBundle I M)) := by
+    have hCM : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => (TotalSpace.mk' E x (X t x) : TangentBundle I M)) := by
       have hslice : ContMDiff I (𝓘(ℝ, ℝ).prod I) ∞ (fun x : M => (t, x)) :=
         (contMDiff_const (c := t)).prodMk contMDiff_id
       exact hint.comp_contMDiff hslice (fun x => ⟨htT, Set.mem_univ x⟩)
@@ -214,7 +202,8 @@ theorem corrected_chart_field_lipschitz_of_data
       rw [Real.le_toNNReal_iff_coe_le hC_nonneg]
       exact hbound t htIcc z hz
   have hLipAll : ∀ t ∈ Set.Icc (0:ℝ) L,
-      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y) (Metric.closedBall center r) := by
+      LipschitzOnWith (Real.toNNReal C) (fun y : E => chartTrivRepr (I := I) α (X t) y)
+        (Metric.closedBall center r) := by
     intro t ht
     rcases eq_or_lt_of_le ht.1 with h0 | h0
     · subst h0

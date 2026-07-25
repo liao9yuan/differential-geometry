@@ -201,8 +201,6 @@ private lemma eigenvectorComp_wkpNorm_le_weight (g : SmoothRiemannianMetric I M)
     (2 * k + 1)]
 
 open Classical in
-
-
 private def eigenFinsetSeq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)]
     (n : ℕ) : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :=
@@ -361,7 +359,6 @@ private lemma partialSumFun_wkpNorm_le (g : SmoothRiemannianMetric I M) (r s' : 
     rfl
 
 open Classical in
-
 private lemma partialSumFun_sub_of_subset (g : SmoothRiemannianMetric I M)
     (r s' : ℕ) (u : TensorL2 r s' g) (α : M) (P₀ : TensorCompIdx (E := E) r s')
     {s t : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s')}

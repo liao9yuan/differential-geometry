@@ -93,7 +93,6 @@ theorem chartLocalMeasure_apply_of_disjoint_source
   exact hν_ac hbase_zero
 
 variable (E) in
-
 theorem euclideanChangeOfVariablesMap
     {s : Set E}
     (hs : NullMeasurableSet s (modelHaar (E := E)))
@@ -345,7 +344,6 @@ lemma chartDensity_continuousOn
   (chartDensity_contMDiffOn (I := I) g x₀).continuousOn
 
 variable (I M) in
-
 def riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) : MeasureTheory.Measure M :=
@@ -928,7 +926,7 @@ theorem riemannianMeasure_eq_of_pou_independent
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ ρ' : SmoothPartitionOfUnity M I M univ)
-    (hρ  : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
+    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
     (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source)) :
     riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' := by
   classical
@@ -1018,7 +1016,7 @@ theorem riemannianMeasure_independent_of_atlas
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ ρ' : SmoothPartitionOfUnity M I M univ)
-    (hρ  : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
+    (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
     (hρ' : ρ'.IsSubordinate (fun α : M => (chartAt H α).source)) :
     riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' :=
   riemannianMeasure_eq_of_pou_independent (I := I) g ρ ρ' hρ hρ'

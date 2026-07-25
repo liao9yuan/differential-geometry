@@ -27,7 +27,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [ContMDiffVectorBundle 1 F V I]
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-
 theorem diff_eval (cov₀ cov₁ : CovariantDerivative I F V)
     {σ : Π x, V x} {x : M} (hσ : MDiffAt (T% σ) x) (v : TangentSpace I x) :
     CovariantDerivative.difference cov₁ cov₀ x (σ x) v
@@ -45,7 +44,6 @@ def diffSec (cov₀ cov₁ : CovariantDerivative I F V)
   fun b => CovariantDerivative.difference cov₁ cov₀ b (Z b) (X b)
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-
 theorem covApply_cov1_eq (cov₀ cov₁ : CovariantDerivative I F V)
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {b : M} (hZ : MDiffAt (T% Z) b) :
     covApply cov₁ X Z b = covApply cov₀ X Z b + diffSec cov₀ cov₁ X Z b := by
@@ -54,7 +52,6 @@ theorem covApply_cov1_eq (cov₀ cov₁ : CovariantDerivative I F V)
   abel
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-
 theorem diffSec_eq_sub (cov₀ cov₁ : CovariantDerivative I F V)
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {b : M} (hZ : MDiffAt (T% Z) b) :
     diffSec cov₀ cov₁ X Z b = covApply cov₁ X Z b - covApply cov₀ X Z b := by
@@ -62,7 +59,6 @@ theorem diffSec_eq_sub (cov₀ cov₁ : CovariantDerivative I F V)
   rw [diff_eval cov₀ cov₁ hZ]
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
-
 theorem diffSec_contMDiff (cov₀ cov₁ : CovariantDerivative I F V)
     [CovariantDerivative.ContMDiffCovariantDerivative cov₀ ∞]
     [CovariantDerivative.ContMDiffCovariantDerivative cov₁ ∞]
@@ -95,7 +91,6 @@ variable (cov₀ cov₁ : CovariantDerivative I F V)
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
 include hY hZ in
-
 theorem covApply_cov1_outer_expand (x : M) :
     cov₁.toFun (covApply cov₁ Y Z) x (X x) =
       cov₀.toFun (covApply cov₀ Y Z) x (X x)
@@ -146,7 +141,6 @@ theorem covApply_cov1_outer_expand (x : M) :
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [CovariantDerivative.ContMDiffCovariantDerivative cov₀ ∞]
   [CovariantDerivative.ContMDiffCovariantDerivative cov₁ ∞] hX hY hZ in
-
 theorem covApply_cov1_bracket_expand {x : M} (hZx : MDiffAt (T% Z) x) (w : TangentSpace I x) :
     cov₁.toFun Z x w = cov₀.toFun Z x w
       + CovariantDerivative.difference cov₁ cov₀ x (Z x) w := by
@@ -155,7 +149,6 @@ theorem covApply_cov1_bracket_expand {x : M} (hZx : MDiffAt (T% Z) x) (w : Tange
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
 include hX hY hZ in
-
 theorem riemannSec_difference_raw (x : M) :
     riemannSec cov₁ X Y Z x =
       riemannSec cov₀ X Y Z x
@@ -215,7 +208,6 @@ variable {X Y Z : Π b : M, TangentSpace I b}
 
 omit [BoundarylessManifold I M] in
 include hX hY hZ in
-
 theorem riemannSec_difference (htor : cov₀.torsion = 0) (x : M) :
     riemannSec cov₁ X Y Z x =
       riemannSec cov₀ X Y Z x

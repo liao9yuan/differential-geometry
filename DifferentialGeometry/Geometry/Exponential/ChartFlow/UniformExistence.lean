@@ -32,7 +32,8 @@ section UniformConfinement
 variable [I.Boundaryless] [CompleteSpace E]
 
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [CompleteSpace E] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [CompleteSpace E] in
 lemma exists_uniform_orbit_in_inner_ball
     (p : M)
     {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)

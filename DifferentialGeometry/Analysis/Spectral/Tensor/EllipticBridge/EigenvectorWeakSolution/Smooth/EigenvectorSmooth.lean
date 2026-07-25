@@ -11,8 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransit
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -43,7 +41,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toEuclidean_extChartAt_mem_chartTargetEuclid
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (toEuclidean (E := E)) (extChartAt I α x) ∈
@@ -52,7 +51,8 @@ lemma toEuclidean_extChartAt_mem_chartTargetEuclid
   exact (extChartAt I α).map_source
     (by rw [extChartAt_source (I := I)]; exact hx)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma symm_toEuclidean_symm_toEuclidean_extChartAt
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (extChartAt I α).symm
@@ -181,7 +181,7 @@ lemma tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) β).continuousLinearMapAt ℝ x
         ((eigenvectorSmoothChart (I := I) (M := M) g r s i α).toSection x)
-      from rfl, hsec, map_zero, map_zero]
+      from rfl, hsec, ContinuousLinearMap.map_zero, ContinuousLinearMap.map_zero]
 
 end Unconditional
 

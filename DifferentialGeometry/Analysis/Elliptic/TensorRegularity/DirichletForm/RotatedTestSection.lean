@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cov
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -37,7 +35,20 @@ private noncomputable abbrev rsTriv (r s : ℕ) (α : M) :
   trivializationAt (TensorRSModel r s ℝ E)
     (fun x : M => TensorRSSpace r s I x) α
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+private lemma rsTriv_symmL_sum (r s : ℕ) (α b : M) {ι : Type*} (t : Finset ι)
+    (u : ι → TensorRSModel r s ℝ E) :
+    (rsTriv (I := I) (M := M) r s α).symmL ℝ b (∑ i ∈ t, u i) =
+      ∑ i ∈ t, (rsTriv (I := I) (M := M) r s α).symmL ℝ b (u i) := by
+  classical
+  induction t using Finset.induction with
+  | empty => rw [Finset.sum_empty, Finset.sum_empty, ContinuousLinearMap.map_zero]
+  | insert i A hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, ContinuousLinearMap.map_add, ih]
+
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma rsTriv_baseSet (r s : ℕ) (α : M) :
     (rsTriv (I := I) (M := M) r s α).baseSet = (chartAt H α).source := by
   change ((trivializationAt (Tensor0SModel r ℝ E)
@@ -56,7 +67,8 @@ noncomputable def chartBasisFiberSection (r s : ℕ) (α : M)
   fun b => (rsTriv (I := I) (M := M) r s α).symmL ℝ b
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma continuousLinearMapAt_chartBasisFiberSection (r s : ℕ) (α : M)
     (Q : CompIdx E r s) {b : M} (hb : b ∈ (chartAt H α).source) :
     (rsTriv (I := I) (M := M) r s α).continuousLinearMapAt ℝ b
@@ -68,7 +80,8 @@ private lemma continuousLinearMapAt_chartBasisFiberSection (r s : ℕ) (α : M)
     (rsTriv (I := I) (M := M) r s α) hb'
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartBasisFiberSection_contMDiffOn (r s : ℕ) (α : M)
     (Q : CompIdx E r s) :
     ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -120,7 +133,8 @@ noncomputable def chartBasisTensorSection
       isClosed_tsupport _
     exact isCompact_univ.of_isClosed_subset htsupp_closed (fun _ _ => trivial)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartBasisTensorSection_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -129,7 +143,8 @@ lemma chartBasisTensorSection_toSection_apply
     (chartBasisTensorSection (I := I) (M := M) g r s α χ hχs hχt Q).toSection b =
       χ b • chartBasisFiberSection (I := I) (M := M) r s α Q b := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorTrivProj_chartBasisTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -142,10 +157,11 @@ private lemma tensorTrivProj_chartBasisTensorSection
   unfold tensorTrivProj
   rw [chartBasisTensorSection_toSection_apply (I := I) (M := M) g r s α hχs hχt
     Q b]
-  rw [map_smul]
+  rw [ContinuousLinearMap.map_smul]
   rw [continuousLinearMapAt_chartBasisFiberSection (I := I) (M := M) r s α Q hb]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_chartBasisTensorSection_on_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -162,7 +178,7 @@ private lemma tensorChartComponentRaw_chartBasisTensorSection_on_source
   unfold tensorChartComponentRaw
   rw [tensorTrivProj_chartBasisTensorSection (I := I) (M := M) g r s α hχs hχt
     Q hb]
-  rw [map_smul, smul_eq_mul]
+  rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   congr 1
   rw [tensorChartComponentProjection_basisElement (E := E) r s Idx Q.1 Jdx Q.2]
   by_cases hQ : (Idx, Jdx) = Q
@@ -177,7 +193,8 @@ private lemma tensorChartComponentRaw_chartBasisTensorSection_on_source
       rw [if_neg h2, mul_zero]
     · rw [if_neg h1, zero_mul]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartBasisTensorSection_chartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -205,7 +222,8 @@ noncomputable def gramInvWeight
   covChartMetricGramInv (I := I) (M := M) g r s α
     (toEuclidean (E := E) ((extChartAt I α) b)) Q P₀
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma toEuclidean_extChartAt_contMDiffOn (α : M) :
     ContMDiffOn I 𝓘(ℝ, EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) ∞
       (fun b : M => toEuclidean (E := E) ((extChartAt I α) b))
@@ -218,7 +236,8 @@ private lemma toEuclidean_extChartAt_contMDiffOn (α : M) :
     (toEuclidean (E := E)).toContinuousLinearMap.contMDiff
   exact htoEuc.comp_contMDiffOn hext
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEuclidean_extChartAt_mapsTo (α : M) :
     Set.MapsTo (fun b : M => toEuclidean (E := E) ((extChartAt I α) b))
       ((chartAt H α).source)
@@ -256,7 +275,8 @@ lemma gramInvWeight_mul_bump_contMDiffOn
       ((chartAt H α).source) :=
   (gramInvWeight_contMDiffOn (I := I) (M := M) g r s α P₀ Q).mul hχs
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma gramInvWeight_mul_bump_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s)
@@ -290,7 +310,8 @@ noncomputable def rotatedTestSection
       (gramInvWeight_mul_bump_tsupport (I := I) (M := M) g r s α P₀ Q hχt)
       Q
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorTrivProj_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s) (b : M) :
@@ -305,20 +326,21 @@ private lemma tensorTrivProj_finsetSum
     unfold tensorTrivProj
     rw [show (S₁ + S₂).toSection b = S₁.toSection b + S₂.toSection b from by
       rw [SmoothCcTensor.toSection_add]; rfl]
-    exact map_add _ _ _
+    exact ContinuousLinearMap.map_add _ _ _
   have hzero : tensorTrivProj (I := I) (M := M) g r s
       (0 : SmoothCcTensor g r s) α b = 0 := by
     unfold tensorTrivProj
     rw [show (0 : SmoothCcTensor g r s).toSection b = 0 from by
       rw [SmoothCcTensor.toSection_zero]; rfl]
-    exact map_zero _
+    exact ContinuousLinearMap.map_zero _
   induction t using Finset.induction with
   | empty =>
       rw [Finset.sum_empty, Finset.sum_empty, hzero]
   | insert i A hi ih =>
       rw [Finset.sum_insert hi, Finset.sum_insert hi, hadd, ih]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s)
@@ -393,7 +415,8 @@ theorem rotatedTestSection_chartComp
   · intro hQ
     exact absurd (Finset.mem_univ Q) hQ
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem toSection_eq_sum_chartBasisFiberSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     {b : M} (hb : b ∈ (chartAt H α).source) :
@@ -424,11 +447,11 @@ theorem toSection_eq_sum_chartBasisFiberSection
               (tensorTrivProj (I := I) (M := M) g r s S α b) •
             (rsTriv (I := I) (M := M) r s α).symmL ℝ b
               (tensorChartBasisElement (E := E) r s Idx Jdx) := by
-        rw [map_sum]
+        rw [rsTriv_symmL_sum (I := I) (M := M) r s α b]
         refine Finset.sum_congr rfl (fun Idx _ => ?_)
-        rw [map_sum]
+        rw [rsTriv_symmL_sum (I := I) (M := M) r s α b]
         refine Finset.sum_congr rfl (fun Jdx _ => ?_)
-        rw [map_smul]
+        rw [ContinuousLinearMap.map_smul]
     _ = ∑ Q : CompIdx E r s,
           tensorChartComponentRaw (I := I) (M := M) g r s S α Q.1 Q.2 b •
             chartBasisFiberSection (I := I) (M := M) r s α Q b := by

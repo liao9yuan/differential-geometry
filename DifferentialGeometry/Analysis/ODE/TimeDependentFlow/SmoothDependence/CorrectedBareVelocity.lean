@@ -25,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
-
-
 private lemma chartTrivRepr_eq_tangentCoordChange_of_target
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (s : ℝ) {c : E}
     (hc : c ∈ (extChartAt I α).target) :
@@ -38,7 +34,7 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
   have hq_src : (extChartAt I α).symm c ∈ (chartAt H α).source := by
     rw [← extChartAt_source (I := I) α]
     exact (extChartAt I α).map_target hc
-  show (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
+  change (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((extChartAt I α).symm c)
         (X s ((extChartAt I α).symm c)) = _
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hq_src]
   rfl
@@ -46,11 +42,13 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chartflow_eq_bareflow
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (flow : E → ℝ → E) (y : E) {a b : ℝ}
     (hconf : ∀ t ∈ Set.Ioo a b, flow y t ∈ (extChartAt I α).target)
-    (hode : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t)) (Set.Ioo a b) t) :
+    (hode : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt (flow y) (chartTrivRepr (I := I) α (X t) (flow y t))
+      (Set.Ioo a b) t) :
     ∀ t ∈ Set.Ioo a b,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (extChartAt I α).symm (flow y s)) (Set.Ioo a b) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((extChartAt I α).symm (flow y t)))) := by

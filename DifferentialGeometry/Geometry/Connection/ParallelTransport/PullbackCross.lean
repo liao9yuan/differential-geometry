@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -161,7 +160,8 @@ private theorem covAlong_restrict_at
     exact deriv_repr_comp_at (I := I) gamma Y t hgamma
   rw [hderiv, hchris]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem mfderiv_from_chart
     [I.Boundaryless] [IsManifold I 1 M]
     (f : M → F) (a p : M) (hp : p ∈ (chartAt H a).source)
@@ -225,7 +225,8 @@ private theorem mfderiv_from_chart
   rw [hfield]
   exact hchainApply.symm.trans hwithin
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem triv_mfderiv_cross
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -263,7 +264,8 @@ private theorem triv_mfderiv_cross
         (extChartAt I a p) v := by
       simpa [writtenInExtChartAt, Function.comp_def] using hfixed
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem chartRep_mapCross_ev
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -304,7 +306,8 @@ private theorem chartRep_mapCross_ev
     (triv_mfderiv_cross (I := I) (J := J) Phi (gamma t) (gamma s)
       (Phi (gamma t)) hs hPhis w)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem deriv_fderiv_apply_zero
     (psi : E → F) (u w : ℝ → E) (t : ℝ)
     (hpsi : ContDiffAt ℝ 2 psi (u t))
@@ -316,7 +319,8 @@ private theorem deriv_fderiv_apply_zero
     exact ((hpsi.fderiv_right (m := 1) (by norm_num)).differentiableAt (by norm_num)).comp t hu
   rw [deriv_clm_apply hDpsi hw, hwt, map_zero, zero_add]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
+    [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
 private theorem chartRep_mapCross_diff
     [I.Boundaryless] [J.Boundaryless]
     [IsManifold I 1 M] [IsManifold J 1 N]
@@ -351,7 +355,8 @@ private theorem chartRep_mapCross_diff
     hgamma.continuousAt
   exact hright.congr_of_eventuallyEq (by simpa [a, psi, u, w] using hev)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompleteSpace F] [NeZero (Module.finrank ℝ F)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompleteSpace F]
+    [NeZero (Module.finrank ℝ F)] in
 private theorem covAlong_mapCross_zero
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]

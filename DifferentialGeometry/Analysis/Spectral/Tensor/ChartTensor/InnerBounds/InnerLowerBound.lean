@@ -9,8 +9,6 @@ import Mathlib.Topology.Order.Compact
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap Metric
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -48,7 +46,8 @@ lemma chartRSTwistInv_apply
     (α' : Tensor0SModel r ℝ E) :
     chartRSTwistInv (I := I) (M := M) α b r s T α' =
       (T (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+              b))).compContinuousLinearMap
         (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
   rfl
 
@@ -68,7 +67,8 @@ lemma chartRSTwistInv_chartRSTwist
       ContinuousMultilinearMap.compContinuousLinearMap_apply]
   have hα' :
       (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)).compContinuousLinearMap
+          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+            b)).compContinuousLinearMap
         (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = α' := by
     refine ContinuousMultilinearMap.ext ?_
     intro v
@@ -94,7 +94,8 @@ lemma chartRSTwist_chartRSTwistInv
   rw [chartRSTwist_apply, chartRSTwistInv_apply]
   have hinner :
       (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+          (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α
+            b)).compContinuousLinearMap
         (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b) = α' := by
     refine ContinuousMultilinearMap.ext ?_
     intro v
@@ -141,7 +142,8 @@ lemma chartRSTwist_ne_zero
     rw [chartRSTwistInv_apply]
     change ((0 : TensorRSModel r s ℝ E)
         (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+            b))).compContinuousLinearMap
         (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = 0
     rw [show ((0 : TensorRSModel r s ℝ E)
           (α'.compContinuousLinearMap

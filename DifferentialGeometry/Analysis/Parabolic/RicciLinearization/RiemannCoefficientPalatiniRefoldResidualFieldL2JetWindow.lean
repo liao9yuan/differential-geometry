@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmC
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
@@ -25,8 +25,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -117,7 +115,8 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUnifor
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
   obtain ⟨C, hC_nn, hpt⟩ :=
-    exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffField_window (I := I) (M := M) g₀ hδ₁_lt
+    exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffField_window (I := I)
+      (M := M) g₀ hδ₁_lt
   obtain ⟨Csob, hCsob_nn, hcap1⟩ :=
     exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (I := I) (M := M) g₀ a ha_super
   refine ⟨C 0 * (1 + (Csob * R) ^ 2 + ((Csob * R) ^ 2) ^ 2),
@@ -195,7 +194,8 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
   obtain ⟨C, hC_nn, hpt⟩ :=
-    exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffField_window (I := I) (M := M) g₀ hδ₁_lt
+    exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffField_window (I := I)
+      (M := M) g₀ hδ₁_lt
   obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
     boundedFactorGridWindow_integral_ballUniform_flat_allOrders (I := I) (M := M) g₀ a
       ha_super hR
@@ -313,7 +313,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
   obtain ⟨C, hC_nn, hpt⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDifference_boundedFactorGridWindow_le
+    riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0BgRCommCoeffDiff_gridWindow_le
       (I := I) (M := M) g₀ hδ₁_lt
   obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
     boundedFactorGridWindow_integral_ballUniform_flat_allOrders (I := I) (M := M) g₀ a
@@ -366,7 +366,8 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_
             ((iteratedCovGrad (I := I) g₀ 2 2 i
               (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-                - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)).toSection x) ≤
+                - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)).toSection x)
+                  ≤
           C i * Combinatorics.boundedFactorGridWindow
             (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 1) (i + 3) := by
@@ -482,14 +483,16 @@ private lemma sharpGradKoszulRaw_gridWindow (g₀ : SmoothRiemannianMetric I M) 
       (fun y d => by
         rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) w x
   rw [hperm]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ w 0 3 6
     (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))
     (koszulCovecCc (I := I) g₀ T) x) ?_
   have hΦ : ∀ w₁ : ℕ,
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (6 + w₁) x
         ((iteratedCovGrad (I := I) g₀ 3 6 w₁
-          (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) ≤
+          (slotExtendIter (I := I) (M := M) g₀ 0 3 3
+            (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) ≤
       fr * (fr * (fr * (10 * b (w₁ + 1)))) := by
     intro w₁
     have h3 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 5
@@ -511,7 +514,8 @@ private lemma sharpGradKoszulRaw_gridWindow (g₀ : SmoothRiemannianMetric I M) 
   have hcell : ∀ w₁ ∈ Finset.range (w + 1),
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (6 + w₁) x
           ((iteratedCovGrad (I := I) g₀ 3 6 w₁
-            (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) *
+            (slotExtendIter (I := I) (M := M) g₀ 0 3 3
+              (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) *
         ∑ w₂ ∈ Finset.range (w + 1 - w₁),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + w₂) x
             ((iteratedCovGrad (I := I) g₀ 0 3 w₂ (koszulCovecCc (I := I) g₀ T)).toSection x) ≤
@@ -525,7 +529,8 @@ private lemma sharpGradKoszulRaw_gridWindow (g₀ : SmoothRiemannianMetric I M) 
       Finset.sum_le_sum fun w₂ _ => hK w₂
     have hΦnn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 3 (6 + w₁) x
         ((iteratedCovGrad (I := I) g₀ 3 6 w₁
-          (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) :=
+          (slotExtendIter (I := I) (M := M) g₀ 0 3 3
+            (koszulCovGradRaw (I := I) (M := M) g₀ T))).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 3 (6 + w₁) x _
     have hsum2nn : (0 : ℝ) ≤ ∑ w₂ ∈ Finset.range (w + 1 - w₁), 10 * b (w₂ + 1) :=
       Finset.sum_nonneg fun w₂ _ => mul_nonneg (by norm_num) (hb (w₂ + 1))
@@ -573,7 +578,8 @@ private lemma sharpGradKoszulMvWeight_gridWindow (g₀ : SmoothRiemannianMetric 
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (x : M)
         (_hPT : ∀ l' : ℕ,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
@@ -610,12 +616,14 @@ private lemma sharpGradKoszulMvWeight_gridWindow (g₀ : SmoothRiemannianMetric 
   set W3L : ℝ := Combinatorics.boundedFactorGridWindow b K (l + 3) with hW3L_def
   have hW3L_nn : 0 ≤ W3L := Combinatorics.boundedFactorGridWindow_nonneg b hb K (l + 3)
   rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ τ T T =
-      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+        (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 τ
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
           (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))
           (koszulCovecCc (I := I) g₀ T))) from rfl]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ l 0 6 4
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 τ
@@ -720,7 +728,8 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (i : ℕ) (x : M),
         (∀ l' : ℕ,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
@@ -733,8 +742,10 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
                 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
                 (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))))).toSection x) ≤
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))))).toSection x) ≤
           C i * Combinatorics.boundedFactorGridWindow
             (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 1) (i + 3) := by
@@ -764,91 +775,122 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
   set WT : ℝ := Combinatorics.boundedFactorGridWindow b (i + 1) (i + 3) with hWT_def
   have hWT_nn : 0 ≤ WT :=
     Combinatorics.boundedFactorGridWindow_nonneg b hb (i + 1) (i + 3)
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 2 6 2
     (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))) x) ?_
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))) x) ?_
   have hXiJet : ∀ l : ℕ, l ≤ i →
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 2 6 l
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
       (fr ^ 2 * (16 * CW l)) * Combinatorics.boundedFactorGridWindow b (i + 1) (l + 3) := by
     intro l hl
     have hperm : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 2 6 l
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) =
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
           ((iteratedCovGrad (I := I) g₀ 2 6 l
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) :=
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) :=
       riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
         g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))
         (fun y d => by
           rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
     rw [hperm]
     have h2 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 5
       (slotExtendIter (I := I) (M := M) g₀ 0 4 1
-        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) l x
+        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) l x
     have h1 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 4
-      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) l x
+      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) l x
     have hsub := bdRfns_iCG_sub_le (I := I) (M := M) g₀ 0 4 l
-      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)
-      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T) x
     have hadd12 := bdRfns_iCG_add_le (I := I) (M := M) g₀ 0 4 l
-      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T) (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T)
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) x
     have hadd34 := bdRfns_iCG_add_le (I := I) (M := M) g₀ 0 4 l
-      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T) (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T)
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T) x
     have hW1 := hCW g₁ bdSGKTau1 P T htie hδ_le hδ0 hboundP x hPT l (i + 1) (by omega)
     have hW2 := hCW g₁ bdSGKTau2 P T htie hδ_le hδ0 hboundP x hPT l (i + 1) (by omega)
     have hW3 := hCW g₁ bdSGKTau3 P T htie hδ_le hδ0 hboundP x hPT l (i + 1) (by omega)
     have hW4 := hCW g₁ bdSGKTau4 P T htie hδ_le hδ0 hboundP x hPT l (i + 1) (by omega)
     have hXi4 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
         ((iteratedCovGrad (I := I) g₀ 0 4 l
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))).toSection x) ≤
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))).toSection x) ≤
         (16 * CW l) * Combinatorics.boundedFactorGridWindow b (i + 1) (l + 3) := by
       have hWnn : 0 ≤ Combinatorics.boundedFactorGridWindow b (i + 1) (l + 3) :=
         Combinatorics.boundedFactorGridWindow_nonneg b hb (i + 1) (l + 3)
       nlinarith [hsub, hadd12, hadd34, hW1, hW2, hW3, hW4, hWnn, hCW_nn l,
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
           ((iteratedCovGrad (I := I) g₀ 0 4 l
-            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)).toSection x),
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)).toSection x),
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
           ((iteratedCovGrad (I := I) g₀ 0 4 l
-            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)).toSection x),
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)).toSection x),
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
-          ((iteratedCovGrad (I := I) g₀ 0 4 l (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T)).toSection x),
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T)).toSection x),
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
-          ((iteratedCovGrad (I := I) g₀ 0 4 l (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)).toSection x),
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T)).toSection x),
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
-          ((iteratedCovGrad (I := I) g₀ 0 4 l (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T)).toSection x),
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T)).toSection x),
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x
-          ((iteratedCovGrad (I := I) g₀ 0 4 l (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)).toSection x)]
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)).toSection x)]
     refine le_trans h2 ?_
     have hstep : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (5 + l) x
         ((iteratedCovGrad (I := I) g₀ 1 5 l
           (slotExtendIter (I := I) (M := M) g₀ 0 4 1
-            ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) ≤
+            ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) ≤
         fr * ((16 * CW l) * Combinatorics.boundedFactorGridWindow b (i + 1) (l + 3)) :=
       le_trans h1 (mul_le_mul_of_nonneg_left hXi4 hfr_nn)
     refine le_trans (mul_le_mul_of_nonneg_left hstep hfr_nn) (le_of_eq (by ring))
@@ -861,8 +903,10 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
             ((iteratedCovGrad (I := I) g₀ 2 6 l
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
       (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
         (fr ^ 2 * (16 * CW l)) * Combinatorics.windowPairCellCount (i' + 1) (l + 3)) * WT := by
     intro i' hi'
@@ -880,8 +924,10 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
           ((iteratedCovGrad (I := I) g₀ 2 6 l
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T + sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))))).toSection x) ≤
         ∑ l ∈ Finset.range (i + 1 - i'),
           (fr ^ 2 * (16 * CW l)) *
             Combinatorics.boundedFactorGridWindow b (i + 1) (l + 3) := by
@@ -1062,7 +1108,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
             (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 1) (i + 3) := by
       intro x
-      refine hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s) (convexPerturbation (I := I) g₀ T 0 s) T htie0 hδ_le' hδ0 hδP i x
+      refine hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s) (convexPerturbation (I := I) g₀ T 0 s) T
+        htie0 hδ_le' hδ0 hδP i x
         (fun l' => ?_)
       rw [hcP, iteratedCovGrad_smul_real]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) =
@@ -1143,7 +1190,8 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (_hPT : ∀ (l : ℕ) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
@@ -1252,7 +1300,8 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
               (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) ≤
         C6 m * Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
     intro m
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
       (I := I) (M := M) g₀ m 0 2 6
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T x) ?_
@@ -1323,7 +1372,8 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
                   (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)))).toSection x) ≤
         C7 l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
     intro σw l
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
       (I := I) (M := M) g₀ l 0 6 4
       (cometricDoubleTraceField (I := I) g₀ 4)
       (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
@@ -1421,7 +1471,8 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
                 palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) ≤
       (fr * (fr * (4 * C7 l))) * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
     intro l
-    have hperm := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+    have hperm := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I)
+      (M := M)
       g₀ 2 6 armPairTraceSlotPerm6
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
@@ -1493,7 +1544,8 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
           refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hW4 hfr_nn) hfr_nn
       _ = (fr * (fr * (4 * C7 l))) *
             Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 2 6 2
     (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6

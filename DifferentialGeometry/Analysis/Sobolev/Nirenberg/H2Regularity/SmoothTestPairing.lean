@@ -13,7 +13,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 theorem integrable_w_partial_phi
     {Ω : Set E} {w : E → ℝ} (hw_l2 : MemLp w 2 (volume.restrict Ω))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -34,13 +33,11 @@ theorem integrable_w_partial_phi
   exact MemLp.integrable_mul hw_l2 h_partial_memLp
 
 omit [NeZero d] in
-
 def smoothTestPairing
     (Ω : Set E) (w : E → ℝ) (k : Fin d) (φ : E → ℝ) : ℝ :=
   -∫ x in Ω, w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1)
 
 omit [NeZero d] in
-
 theorem smoothTestPairing_add
     {Ω : Set E} {w : E → ℝ} (hw_l2 : MemLp w 2 (volume.restrict Ω))
     {k : Fin d} {φ ψ : E → ℝ}
@@ -77,7 +74,6 @@ theorem smoothTestPairing_add
   rw [h_int_eq]; ring
 
 omit [NeZero d] in
-
 theorem smoothTestPairing_smul
     {Ω : Set E} (w : E → ℝ) (k : Fin d) (c : ℝ) {φ : E → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :

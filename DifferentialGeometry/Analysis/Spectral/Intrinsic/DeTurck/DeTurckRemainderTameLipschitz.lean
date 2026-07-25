@@ -60,11 +60,31 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform continuousBilinearMap_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local ccTensor02Symm symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
+open DifferentialGeometry.Integral.DivergenceTheorem
+  (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField
+  pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint
+  linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero
+  exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc
+  linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz
+  linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff
+  linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff
+  linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth
+  linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff
+  exists_arm1Koszul_realizedFam_rfns_ballUniform continuousBilinearMap_basis_expand
+  unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local ccTensor02Symm
+  symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection
+  riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt
+  ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo
+  realizedRicciChartSum jointContMDiff_toModel_continuous_slice
+  hasDerivAt_realizedRicciChartSum_general realizedFam)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection
+  symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -76,19 +96,25 @@ private local instance instCompleteSpaceE_tame : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization (lieDeTurckChartSlope deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieArm2PrincipalCoeff deTurckLieArm1Coeff deTurckLieCoeffField deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth deTurckLieArm1Coeff_realizedFam_jointSmooth deTurckLieCoeffField_realizedFam_jointSmooth)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen reindexCoeffFibGen reindexCoeffFibGen_apply reindexCoeffGen_toSection deTurckLieTraceCoeff deTurckLieTraceCoeff_toSection deTurckLieTraceFib traceHessianFib domDomCongrFibPerm_apply domDomCongrFib_apply traceHessianSlotPerm deTurckLieArm2DivSlotPermA deTurckLieArm2DivSlotPermAT traceHessianCoeff_toSection)
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem)
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (lieDeTurckChartSlope deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (deTurckLieArm2PrincipalCoeff deTurckLieArm1Coeff deTurckLieCoeffField
+  deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth deTurckLieArm1Coeff_realizedFam_jointSmooth
+  deTurckLieCoeffField_realizedFam_jointSmooth)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (reindexCoeffGen reindexCoeffFibGen reindexCoeffFibGen_apply reindexCoeffGen_toSection
+  deTurckLieTraceCoeff deTurckLieTraceCoeff_toSection deTurckLieTraceFib traceHessianFib
+  domDomCongrFibPerm_apply domDomCongrFib_apply traceHessianSlotPerm deTurckLieArm2DivSlotPermA
+  deTurckLieArm2DivSlotPermAT traceHessianCoeff_toSection)
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem)
 
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -110,10 +136,9 @@ private lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [show ((A - B) x) = A x - B x from by rw [ContMDiffSection.coe_sub]; rfl]
   rw [slotInsertEndoFib_sub_left, ContinuousLinearMap.sub_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma rsDomDomCongrSection_sub (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 2)) (X Y : SmoothCcTensor g₀ 2 2) :
     rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 σ (X - Y) =
@@ -161,10 +186,9 @@ private lemma rsDomDomCongrSection_sub (g₀ : SmoothRiemannianMetric I M)
   rw [rsDomDomCongr_apply_eval (I := I) (M := M) σ (Y.toSection x) D m]
   rfl
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma reindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 2 2) (ρ : Equiv.Perm (Fin 2)) :
     reindexCoeffGen (I := I) (M := M) g₀ 2 2 (A - B) ρ =
@@ -181,8 +205,6 @@ private lemma reindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     reindexCoeffFibGen_apply, ContinuousLinearMap.sub_apply]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private lemma lc0w_NEndoIns_diff_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
@@ -194,8 +216,6 @@ private lemma lc0w_NEndoIns_diff_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric
     lc0b_NEndoIns_decomp (I := I) (M := M) g₀ g₁ g₀]
   abel
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -230,8 +250,6 @@ private lemma lc0w_insertField_sub (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
             (Equiv.swap (0 : Fin 2) 1) from rfl]
   abel
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField
   deTurckLieDLbFib deTurckLieDLbFib_toModel deTurckLieWEndo) in
@@ -304,11 +322,8 @@ private theorem lc0w_insertField_add_endoArmBase (g₀ g₁ g_bg : SmoothRiemann
   rw [e0, e1]
   ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField) in
-
 private theorem lc0w_lieCorr0_add_endoArmBase_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg +
         deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g₀ =
@@ -335,8 +350,6 @@ private theorem lc0w_lieCorr0_add_endoArmBase_decomp (g₀ g₁ g_bg : SmoothRie
   abel
 
 omit [BoundarylessManifold I M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_le_l2JetWindow (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (i : ℕ) :
@@ -348,8 +361,6 @@ private lemma one_le_l2JetWindow (g₀ : SmoothRiemannianMetric I M) (P : Smooth
   linarith
 
 omit [BoundarylessManifold I M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma l2JetWindow_mono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {q i : ℕ} (h : q ≤ i) :
@@ -360,8 +371,6 @@ private lemma l2JetWindow_mono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCc
     (fun (j : ℕ) _ _ => sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖)
   linarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem appCcRS_l2JetWindow_le (g₀ : SmoothRiemannianMetric I M)
     (p a b : ℕ) (i : ℕ) (WinVal : ℝ) (_hWin1 : 1 ≤ WinVal)
@@ -410,8 +419,6 @@ private theorem appCcRS_l2JetWindow_le (g₀ : SmoothRiemannianMetric I M)
   rw [Finset.sum_mul]
   exact Finset.sum_congr rfl fun q _ => by ring
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem exists_connDiffSection_coeffJetEnvelope (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -451,9 +458,8 @@ private theorem exists_connDiffSection_coeffJetEnvelope (g₀ : SmoothRiemannian
   refine le_trans (Finset.sum_le_sum hterm) (le_of_eq ?_)
   rw [Finset.sum_mul]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-private theorem exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope
+    (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (K : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ K i) ∧
@@ -481,12 +487,11 @@ private theorem exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (g₀ gB 
   exact ⟨(hfeed g₁ P htie hδ_le hδ0 hδ hPball).1,
     fun i => hFw g₁ P htie hδ_le hδ0 hδ hPball i⟩
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (sharpFlatEndoCc) in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricDoubleTraceField) in
-private theorem exists_pureDoubleTraceCoeff_coeffJetEnvelope (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (a : ℕ)
+private theorem exists_pureDoubleTraceCoeff_coeffJetEnvelope (g₀ : SmoothRiemannianMetric I M)
+    (s : ℕ) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (K : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ K i) ∧
@@ -601,10 +606,9 @@ private theorem exists_pureDoubleTraceCoeff_coeffJetEnvelope (g₀ : SmoothRiema
     (c0 0) (fr ^ (s + 1) * Λsf) FcDT (fun q => fr ^ (s + 1) * Fsfw q)
     (hc0_nn 0) (mul_nonneg hfrpow_nn hΛsf_nn) hΦ0 hWpt0 hFΦ hKW
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private theorem exists_deTurckVectorFieldFlat_coeffJetEnvelope (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem exists_deTurckVectorFieldFlat_coeffJetEnvelope (g₀ gB : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (K : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ K i) ∧
@@ -661,10 +665,9 @@ private theorem exists_deTurckVectorFieldFlat_coeffJetEnvelope (g₀ gB : Smooth
     C2 hC2_nn hC2 Λdt Λκ Kdt Kκ hΛdt_nn hΛκ_nn
     (hdt0) (hκ0) hKΦ hKW
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private theorem exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope
+    (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (K : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ K i) ∧
@@ -746,10 +749,9 @@ private theorem exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (g₀ 
     C2 hC2_nn hC2 Λdt (fr2 * Λvf) Kdt (fun q => fr2 * Kvf q)
     hΛdt_nn (mul_nonneg hfr2_nn hΛvf_nn) hre0 hse0' hreL2 hseWin
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private theorem exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope
+    (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (K : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ K i) ∧
@@ -771,7 +773,8 @@ private theorem exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (g�
   obtain ⟨Λcv, Fcv, hΛcv_nn, hFcv_nn, hcv⟩ :=
     lc0b_cdVField_feed (I := I) (M := M) g₀ gB a ha_super hR hδ₀
   obtain ⟨Λiv, Kiv, hΛiv_nn, hKiv_nn, hiv⟩ :=
-    exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (I := I) (M := M) g₀ gB a ha_super hR hδ₀
+    exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (I := I) (M := M) g₀ gB a ha_super hR
+      hδ₀
   obtain ⟨Λcd, Kcd, hΛcd_nn, hKcd_nn, hcd⟩ :=
     exists_connDiffSection_coeffJetEnvelope (I := I) (M := M) g₀ a ha_super hR hδ₀
   obtain ⟨C2, hC2_nn, hC2⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 2 1 1 2
@@ -805,10 +808,9 @@ private theorem exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (g�
     (lc0IVField (I := I) (M := M) g₀ g₁ gB) (connDiffSection (I := I) g₁ g₀)
     C2 hC2_nn hC2 Λiv Λcd Kiv Kcd hΛiv_nn hΛcd_nn hiv0 hcd0 hivWin hcdWin
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem lc0w_comp_sup (g₀ : SmoothRiemannianMetric I M)
     (p a b : ℕ) (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     (ΛΦ ΛW : ℝ) (hΛΦ : 0 ≤ ΛΦ)
@@ -824,8 +826,6 @@ private theorem lc0w_comp_sup (g₀ : SmoothRiemannianMetric I M)
   exact mul_le_mul (hΦ0 x) (hW0 x)
     (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ p a x _) hΛΦ
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem lc0w_vb_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -849,7 +849,8 @@ private theorem lc0w_vb_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   obtain ⟨Λκ, Kκ, hΛκ_nn, hKκ_nn, hκ⟩ :=
     exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
   obtain ⟨Λiv, Kiv, hΛiv_nn, hKiv_nn, hiv⟩ :=
-    exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
+    exists_deTurckVectorFieldInteriorProduct_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super hR
+      hδ₀
   obtain ⟨C2i, hC2i_nn, hC2i⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 1 2 4 1
   obtain ⟨C2o, hC2o_nn, hC2o⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 4 2 2 4
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
@@ -981,8 +982,6 @@ private theorem lc0w_vb_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (Λdt2 * Λin) (fun q => Kout q * Win) i hout0 houtWin
   exact le_trans (hsL2 i le_rfl) (le_of_eq (by ring))
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem lc0w_amixHalf_feed (g₀ g_bg : SmoothRiemannianMetric I M)
     (σlast : Equiv.Perm (Fin 4)) (a : ℕ)
@@ -1015,7 +1014,8 @@ private theorem lc0w_amixHalf_feed (g₀ g_bg : SmoothRiemannianMetric I M)
   obtain ⟨Λκ0, Kκ0, hΛκ0_nn, hKκ0_nn, hκ0f⟩ :=
     exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
   obtain ⟨Λκb, Kκb, hΛκb_nn, hKκb_nn, hκbf⟩ :=
-    exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+    exists_perturbedMetricLoweredConnDiff_coeffJetEnvelope (I := I) (M := M) g₀ g_bg a ha_super hR
+      hδ₀
   obtain ⟨C2a, hC2a_nn, hC2a⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 5 2 3 5
   obtain ⟨C2b, hC2b_nn, hC2b⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 3 2 6 3
   obtain ⟨C2c, hC2c_nn, hC2c⟩ := lc0b_twoArm_fn (I := I) (M := M) g₀ 6 2 4 6
@@ -1271,8 +1271,6 @@ private theorem lc0w_amixHalf_feed (g₀ g_bg : SmoothRiemannianMetric I M)
             (lc0Kappa (I := I) (M := M) g₀ g₁ g₀)))))
     C2d hC2d_nn hC2d Λdt2 Λ3 Kdt2 K3 hΛdt2_nn hΛ3_nn htr20 h30 htr2Win h3Win
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem lc0w_amix_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1332,10 +1330,9 @@ private theorem lc0w_amix_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ
     (2 * ΛhA + 2 * ΛhB) (fun q => 2 * (KhA q * Win) + 2 * (KhB q * Win)) i hadd0 haddL2
   exact le_trans (hsL2 i le_rfl) (le_of_eq (by ring))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private theorem exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -1415,7 +1412,8 @@ private theorem exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (g₀ : Smooth
             (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)
             (lc0RiemRestField (I := I) (M := M) g₀))‖ ^ 2 ≤
       (∑ q' ∈ Finset.range (q + 1),
-        diagonalGridGrowthFactor (E := E) q' * (C2 q' * (Λrr * Kdt2 q' + Λdt2 * Frr q'))) * Win := by
+        diagonalGridGrowthFactor (E := E) q' * (C2 q' * (Λrr * Kdt2 q' + Λdt2 * Frr q'))) *
+          Win := by
     intro q hq
     exact appCcRS_l2JetWindow_le (I := I) (M := M) g₀ 2 4 2 q Win hWin1
       (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)
@@ -1440,11 +1438,8 @@ private theorem exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (g₀ : Smooth
     i hcomp0 hcompWin'
   exact le_trans (hsL2 i le_rfl) (le_of_eq (by ring))
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField) in
-
 private theorem lieDerivativeCorrectionPlusEndoArm_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1469,13 +1464,16 @@ private theorem lieDerivativeCorrectionPlusEndoArm_l2JetWindow
   have hδ₁_nn : 0 ≤ δ₁ := le_max_right _ _
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
   obtain ⟨Λc0, Kc0, hΛc0_nn, hKc0_nn, hc0⟩ :=
-    exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super hR hδ₁_lt
+    exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (I := I) (M := M) g₀ g₀ a ha_super
+      hR hδ₁_lt
   obtain ⟨Λcb, Kcb, hΛcb_nn, hKcb_nn, hcb⟩ :=
-    exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (I := I) (M := M) g₀ g_bg a ha_super hR hδ₁_lt
+    exists_connDiffAppliedToDeTurckVectorField_coeffJetEnvelope (I := I) (M := M) g₀ g_bg a ha_super
+      hR hδ₁_lt
   obtain ⟨Kvb, hKvb_nn, hvb⟩ := lc0w_vb_feed (I := I) (M := M) g₀ a ha_super hR hδ₁_lt
   obtain ⟨Kam, hKam_nn, ham⟩ :=
     lc0w_amix_feed (I := I) (M := M) g₀ g_bg a ha_super hR hδ₁_lt
-  obtain ⟨Kri, hKri_nn, hri⟩ := exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (I := I) (M := M) g₀ a ha_super hR hδ₁_lt
+  obtain ⟨Kri, hKri_nn, hri⟩ := exists_lieDerivativeRiemannCoeff_coeffJetEnvelope (I := I) (M := M)
+    g₀ a ha_super hR hδ₁_lt
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
   have hfr_nn : (0 : ℝ) ≤ fr := Nat.cast_nonneg _
   refine ⟨fun i => 64 * (fr * (Kc0 i + Kcb i)) + 8 * Kvb i + 4 * Kam i + 2 * Kri i,
@@ -1655,14 +1653,11 @@ private theorem lieDerivativeCorrectionPlusEndoArm_l2JetWindow
     linarith [hIΔ_dec, hc0i, hcbi]
   have hfrK : (0 : ℝ) ≤ fr * (Kc0 i + Kcb i) :=
     mul_nonneg hfr_nn (by linarith [hKc0_nn i, hKcb_nn i])
-  nlinarith [k1, k2, k3, k4, hswap, hIΔ_tot, hvbi, hami, hrii,
+  nlinarith only [k1, k2, k3, k4, hswap, hIΔ_tot, hvbi, hami, hrii,
     mul_nonneg hfrK hWinT_nn]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField) in
-
 private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1698,7 +1693,7 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
     lieCorr0Field_realizedFam_rfns_order0_ballUniform (I := I) (M := M) g₀ g_bg a
       ha_super hR hδ₀
   obtain ⟨Λz, hΛz_nn, hsupz⟩ :=
-    DifferentialGeometry.Integral.Connection.deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
+    deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
       (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
   obtain ⟨K, hK_nn, henv⟩ :=
     lieDerivativeCorrectionPlusEndoArm_l2JetWindow (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
@@ -1731,7 +1726,7 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
           (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ u) g₀)
         (δ := δ) (δ' := δ) := by
       have h :=
-        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.dLaBiContrFib_realizedFam_jointContMDiffOn
+        Analysis.Parabolic.TensorSpectral.dLaBiContrFib_realizedFam_jointContMDiffOn
           (I := I) g₀ T 0 hδ hδZ g₀
       refine h.congr (fun p _ => ?_)
       rfl
@@ -1757,7 +1752,8 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
             - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCovDerivArmField
               (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g₀ := by
         rw [eq_sub_iff_add_eq, add_comm]
-        exact (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField_eq_covDerivArm_add_endoArm
+        exact
+          (Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField_eq_covDerivArm_add_endoArm
           (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g₀).symm
       rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
     exact linearizedRicciThreeArmHjoint_add (I := I) (M := M) g₀ 2 _ _ hjA hjB
@@ -1780,10 +1776,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmFi
   deTurckLieCovDerivArmField deTurckLieCoeffField_eq_covDerivArm_add_endoArm
   exists_deTurckLieCovDerivArm_curvatureRefold_data
   exists_deTurckLieEndoArm_backgroundDifference_order0_data) in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1833,7 +1826,8 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
     exists_deTurckLieEndoArm_backgroundDifference_order0_data (I := I) (M := M) g₀ g_bg
       a ha_super hR hδ₀
   obtain ⟨Λrs, -, Krs, hKrs_nn, hRS⟩ :=
-    exists_lieDerivativeCorrectionPlusEndoArm_order0_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+    exists_lieDerivativeCorrectionPlusEndoArm_order0_data (I := I) (M := M) g₀ g_bg a ha_super hR
+      hδ₀
   have hS_nn : (0 : ℝ) ≤ 4 * Λda ^ 2 + 4 * Λdf ^ 2 + 2 * Λrs ^ 2 := by positivity
   refine ⟨Real.sqrt (4 * Λda ^ 2 + 4 * Λdf ^ 2 + 2 * Λrs ^ 2), Real.sqrt_nonneg _,
     fun i => 3 * (Kda i + Kdf i + Krs i),
@@ -1989,8 +1983,6 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
     nlinarith [mul_nonneg (hKda_nn i) hW, mul_nonneg (hKdf_nn i) hW,
       mul_nonneg (hKrs_nn i) hW]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem exists_lieDerivativeCorrection_curvatureRefold_data
@@ -2034,11 +2026,10 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_data
             ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2lc s)‖ ^ 2 ≤
               Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  exists_lieDerivativeCorrection_curvatureRefold_armSplit_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  exists_lieDerivativeCorrection_curvatureRefold_armSplit_data (I := I) (M := M) g₀ g_bg a ha_super
+    hR hδ₀
     hδ₀_half
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem exists_riemannLieDerivativeCorrection_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -2145,7 +2136,7 @@ private theorem exists_riemannLieDerivativeCorrection_curvatureRefold_data
           DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
             (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
         (δ := δ) (δ' := δ) :=
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff_realizedFam_jointContMDiff
+      Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff_realizedFam_jointContMDiff
         (I := I) (M := M) g₀ T 0 hδ hδZ
     exact linearizedRicciThreeArmHjoint_add_smul (I := I) (M := M) g₀ 2 (1 / 2 : ℝ) _ _
       (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T 0 hδ hδZ) hRmJ
@@ -2225,8 +2216,6 @@ private theorem exists_riemannLieDerivativeCorrection_curvatureRefold_data
     rw [hexp]
     linarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 omit [BoundarylessManifold I M] in
@@ -2255,8 +2244,42 @@ private theorem sum_range_shift_two_sq_le (g₀ : SmoothRiemannianMetric I M) (i
           Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => sq_nonneg _)
   linarith
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+private lemma lc0_path_sum_arithmetic {S KS ε A X Y : ℝ}
+    (hstep : S ≤ KS * (1 + A) + 8 * ε ^ 2 * X)
+    (hmul : 8 * ε ^ 2 * X ≤ 8 * ε ^ 2 * (A + Y))
+    (hY : 0 ≤ Y) :
+    S ≤ (KS + 8 * ε ^ 2) * (1 + A) + (3 * ε) ^ 2 * Y := by
+  nlinarith only [hstep, hmul, hY]
+
+private lemma single_sq_le_sum_range_succ (f : ℕ → ℝ) (i : ℕ) :
+    f i ^ 2 ≤ ∑ q ∈ Finset.range (i + 1), f q ^ 2 :=
+  Finset.single_le_sum (fun q _ => sq_nonneg (f q)) (Finset.self_mem_range_succ i)
+
+private lemma lc0_jet_sum_bound (i : ℕ) (f Kc Kr X : ℕ → ℝ) (ε : ℝ)
+    (htotal : 0 ≤ ((∑ q ∈ Finset.range (i + 1), (8 * Kc q + 3 * Kr q)) + 8 * ε ^ 2) *
+      (1 + ∑ j ∈ Finset.range (i + 2), X j) + (3 * ε) ^ 2 * X (i + 2))
+    (hper : ∀ q ∈ Finset.range (i + 1),
+      f q ≤ (8 * Kc q + 3 * Kr q) * (1 + ∑ j ∈ Finset.range (i + 2), X j) +
+        8 * ε ^ 2 * X (q + 2))
+    (hshift : ∑ q ∈ Finset.range (i + 1), X (q + 2) ≤
+      (∑ j ∈ Finset.range (i + 2), X j) + X (i + 2))
+    (hX : 0 ≤ X (i + 2)) :
+    ∑ q ∈ Finset.range (i + 1), f q ≤
+      Real.sqrt (((∑ q ∈ Finset.range (i + 1), (8 * Kc q + 3 * Kr q)) + 8 * ε ^ 2) *
+        (1 + ∑ j ∈ Finset.range (i + 2), X j) + (3 * ε) ^ 2 * X (i + 2)) ^ 2 := by
+  rw [Real.sq_sqrt htotal]
+  have hsum := Finset.sum_le_sum hper
+  have hsum_eq : ∑ q ∈ Finset.range (i + 1),
+        ((8 * Kc q + 3 * Kr q) * (1 + ∑ j ∈ Finset.range (i + 2), X j) +
+          8 * ε ^ 2 * X (q + 2)) =
+      (∑ q ∈ Finset.range (i + 1), (8 * Kc q + 3 * Kr q)) *
+        (1 + ∑ j ∈ Finset.range (i + 2), X j) +
+          8 * ε ^ 2 * ∑ q ∈ Finset.range (i + 1), X (q + 2) := by
+    rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.mul_sum]
+  have hmul := mul_le_mul_of_nonneg_left hshift
+    (by positivity : (0 : ℝ) ≤ 8 * ε ^ 2)
+  exact lc0_path_sum_arithmetic (le_trans hsum (le_of_eq hsum_eq)) hmul hX
+
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope
@@ -2274,7 +2297,8 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     ∃ K₀c : ℕ → ℝ, (∀ i, 0 ≤ K₀c i) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
-          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v) →
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w
+            v) →
         ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
         ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₂r : SmoothCcTensor g₀ 4 2),
           operatorFieldApply (I := I) (M := M) g₀ 2 2
@@ -2286,7 +2310,8 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
                   (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀)))
               (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) =
             operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) +
-              operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂r (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) ∧
+              operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂r (iteratedCovGrad (I := I) g₀ 0 2 2 T₀)
+                ∧
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ Λ₀ ^ 2) ∧
           (∀ x : M,
@@ -2693,15 +2718,11 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
   · intro i
     have hW_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by
-      have hs_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 :=
-        Finset.sum_nonneg fun j _ => sq_nonneg _
-      linarith
+      exact add_nonneg zero_le_one (Finset.sum_nonneg fun j _ => sq_nonneg _)
     have hKS_nn : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q) :=
       Finset.sum_nonneg fun q _ => by
-        have h1 := hKcb_nn q
-        have h2 := hKrl_nn q
-        linarith
+        exact add_nonneg (mul_nonneg (by norm_num) (hKcb_nn q))
+          (mul_nonneg (by norm_num) (hKrl_nn q))
     have hX_nn : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2 := sq_nonneg _
     have htotal_nn : (0 : ℝ) ≤
         ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
@@ -2710,8 +2731,8 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
           (3 * ε) ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2 := by
       have h8 : (0 : ℝ) ≤ 8 * ε ^ 2 := by positivity
       have h9 : (0 : ℝ) ≤ (3 * ε) ^ 2 := sq_nonneg _
-      have h10 := mul_nonneg (add_nonneg hKS_nn h8) hW_nn
-      nlinarith [mul_nonneg h9 hX_nn]
+      exact add_nonneg (mul_nonneg (add_nonneg hKS_nn h8) hW_nn)
+        (mul_nonneg h9 hX_nn)
     have hwin : ∀ q : ℕ, q ≤ i →
         (1 : ℝ) + (∑ j ∈ Finset.range (q + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) ≤
@@ -2721,16 +2742,15 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       have hsub := Finset.sum_le_sum_of_subset_of_nonneg
         (Finset.range_subset_range.mpr (by omega : q + 2 ≤ i + 2))
         (fun j _ _ => sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖))
-      linarith
+      exact add_le_add_right hsub 1
     have hjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (∑ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2) ≤
         Real.sqrt (((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
           (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
-          (3 * ε) ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) ^ 2 := by
+      (3 * ε) ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) ^ 2 := by
       intro s hs
-      rw [Real.sq_sqrt htotal_nn]
       have hper : ∀ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2 ≤
             (8 * Kcb q + 3 * Krl q) *
@@ -2803,23 +2823,11 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
             8 * (ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2) := by ring
         rw [hexp]
         linarith [h1, h2, hcomboE, hcomboW, hC0E', hslack]
-      have hsum1 := Finset.sum_le_sum hper
-      have hsum2 : ∑ q ∈ Finset.range (i + 1),
-            ((8 * Kcb q + 3 * Krl q) *
-              (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
-              8 * ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2) =
-          (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
-            (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
-            8 * ε ^ 2 * ∑ q ∈ Finset.range (i + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 := by
-        rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.mul_sum]
       have hshift := sum_range_shift_two_sq_le (I := I) (M := M) g₀ i T₀
-      have hmul8 := mul_le_mul_of_nonneg_left hshift
-        (by positivity : (0 : ℝ) ≤ 8 * ε ^ 2)
-      have hstep := le_trans hsum1 (le_of_eq hsum2)
-      nlinarith [hstep, hmul8, mul_nonneg (sq_nonneg ε) hX_nn, sq_nonneg ε, hW_nn]
+      exact lc0_jet_sum_bound i
+        (fun q => ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2) Kcb Krl
+        (fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) ε
+        htotal_nn hper hshift hX_nn
     have htower := pathIntegralCoeffField_jetL2_tower_le (I := I) (M := M) g₀ 2 i Φ₀
       hSI hSopen hjΦ₀ (Real.sqrt_nonneg _) hjet
     have hsingle : ‖iteratedCovGrad (I := I) g₀ 2 2 i
@@ -2828,25 +2836,21 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
         ∑ q ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 q
           (pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Φ₀
             (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hjΦ₀)‖ ^ 2 :=
-      Finset.single_le_sum (f := fun q => ‖iteratedCovGrad (I := I) g₀ 2 2 q
-        (pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Φ₀
-          (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hjΦ₀)‖ ^ 2)
-        (fun q _ => sq_nonneg _) (Finset.self_mem_range_succ i)
+      single_sq_le_sum_range_succ
+        (fun q => ‖iteratedCovGrad (I := I) g₀ 2 2 q
+          (pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Φ₀
+            (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hjΦ₀)‖) i
     have hfin := le_trans hsingle htower
     rw [Real.sq_sqrt htotal_nn] at hfin
     exact hfin
   · intro i
     have hW_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by
-      have hs_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 :=
-        Finset.sum_nonneg fun j _ => sq_nonneg _
-      linarith
+      exact add_nonneg zero_le_one (Finset.sum_nonneg fun j _ => sq_nonneg _)
     have hKS_nn : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q) :=
       Finset.sum_nonneg fun q _ => by
-        have h1 := hKcb_nn q
-        have h2 := hKrl_nn q
-        linarith
+        exact add_nonneg (mul_nonneg (by norm_num) (hKcb_nn q))
+          (mul_nonneg (by norm_num) (hKrl_nn q))
     have hε8_nn : (0 : ℝ) ≤ 8 * ε ^ 2 := by positivity
     have hprod_nn : (0 : ℝ) ≤
         ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
@@ -2862,7 +2866,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       have hsub := Finset.sum_le_sum_of_subset_of_nonneg
         (Finset.range_subset_range.mpr (by omega : q + 2 ≤ i + 2))
         (fun j _ _ => sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖))
-      linarith
+      exact add_le_add_right hsub 1
     have hjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (∑ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 4 2 q (C2f s)‖ ^ 2) ≤
@@ -2929,8 +2933,6 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     rw [Real.sq_sqrt hprod_nn] at hfin
     exact hfin
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem deTurckPhiOnePathIntegral_zero_coeffSup_jetEnvelope
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -2943,7 +2945,8 @@ private theorem deTurckPhiOnePathIntegral_zero_coeffSup_jetEnvelope
     ∃ K₁c : ℕ → ℝ, (∀ i, 0 ≤ K₁c i) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
-          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v) →
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w
+            v) →
         ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
@@ -3223,8 +3226,6 @@ private theorem deTurckPhiOnePathIntegral_zero_coeffSup_jetEnvelope
     rw [Real.sq_sqrt hprod_nn] at hfin
     exact hfin
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetEnvelope_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -3243,7 +3244,8 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
     ∃ Λ₁ : ℝ, 0 ≤ Λ₁ ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
-          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v) →
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w
+            v) →
         ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
         ∃ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (C₁ : SmoothCcTensor g₀ (2 + 1) 2)
           (C₂r : SmoothCcTensor g₀ (2 + 2) 2),
@@ -3253,8 +3255,10 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
                 (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
                 (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
                   (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀))) =
-            operatorFieldApply (I := I) (M := M) g₀ (2 + 0) 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) +
-              operatorFieldApply (I := I) (M := M) g₀ (2 + 1) 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 T₀) +
+            operatorFieldApply (I := I) (M := M) g₀ (2 + 0) 2 C₀
+              (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) +
+              operatorFieldApply (I := I) (M := M) g₀ (2 + 1) 2 C₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 T₀) +
               operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2
                 (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
                   (0 : SmoothCcTensor g₀ 0 2)
@@ -3263,7 +3267,8 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
                   (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
                     (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀)))
                 (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) +
-              operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂r (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) ∧
+              operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂r
+                (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) ∧
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 0) 2 x (C₀.toSection x) ≤ Λ₁ ^ 2) ∧
           (∀ x : M,

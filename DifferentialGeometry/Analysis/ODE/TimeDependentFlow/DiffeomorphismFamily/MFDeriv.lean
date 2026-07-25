@@ -28,7 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_flow_hasMFDerivAt_packaging
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (h : ∃ T : ℝ, 0 < T ∧

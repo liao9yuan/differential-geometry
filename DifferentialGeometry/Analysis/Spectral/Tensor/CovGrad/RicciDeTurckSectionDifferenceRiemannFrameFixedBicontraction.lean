@@ -16,8 +16,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -132,7 +130,8 @@ def innerPairBilin (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x �
       map_add' := fun Y Y' => by rw [map_add, add_smul]
       map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem innerPairBilin_apply (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X Y Y' : TangentSpace I x) :
     innerPairBilin (I := I) x K Dd X Y Y' = K X Y * Dd X Y' := by
@@ -168,7 +167,8 @@ def outerPairBilin (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     outerPairBilin (I := I) g x K Dd X X' =
@@ -182,19 +182,19 @@ theorem outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem double_frame_bilin_trace_eq_fixed
     (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
-    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1:ℝ) else 0) :
+    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0) :
     ∑ a, ∑ b, K (B a) (B b) * Dd (B a) (B b) =
       ∑ m, ∑ n, chartInvGramMatrix (I := I) g x x m n *
         (∑ k, ∑ l, chartInvGramMatrix (I := I) g x x k l *
           (K (chartModelBasis E m) (chartModelBasis E k) *
             Dd (chartModelBasis E n) (chartModelBasis E l))) := by
   classical
-
   have hinner : ∀ a, ∑ b, K (B a) (B b) * Dd (B a) (B b) =
       outerPairBilin (I := I) g x K Dd (B a) (B a) := by
     intro a
@@ -204,7 +204,6 @@ theorem double_frame_bilin_trace_eq_fixed
     simp only [innerPairBilin_apply] at h
     rw [h]
   rw [Finset.sum_congr rfl (fun a _ => hinner a)]
-
   have hout := orthonormal_basis_bilin_trace (I := I) (M := M) g (x := x)
     (outerPairBilin (I := I) g x K Dd) B hB
   rw [hout]
@@ -212,19 +211,21 @@ theorem double_frame_bilin_trace_eq_fixed
   refine Finset.sum_congr rfl (fun n _ => ?_)
   rw [outerPairBilin_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem double_frame_bilin_trace_indep
     (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B C : Fin (Module.finrank ℝ E) → TangentSpace I x)
-    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1:ℝ) else 0)
-    (hC : ∀ i j, g.inner x (C i) (C j) = if i = j then (1:ℝ) else 0) :
+    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0)
+    (hC : ∀ i j, g.inner x (C i) (C j) = if i = j then (1 : ℝ) else 0) :
     ∑ a, ∑ b, K (B a) (B b) * Dd (B a) (B b) =
       ∑ a, ∑ b, K (C a) (C b) * Dd (C a) (C b) := by
   rw [double_frame_bilin_trace_eq_fixed (I := I) g x K Dd B hB,
     double_frame_bilin_trace_eq_fixed (I := I) g x K Dd C hC]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_bilinSection_of_chartScalar
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hscalar : ∀ (x₀ : M) (σ : Fin 2 → Fin (Module.finrank ℝ E)),
@@ -316,7 +317,8 @@ theorem riemannKernelBilin_homSection_contMDiff (g₁ : SmoothRiemannianMetric I
   rw [riemannKernelBilin_apply]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_bilinSection_of_homSection
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hHb : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -359,7 +361,6 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
         (E := fun z : M => Tensor0SSpace 2 I z) x
         (riemannBiContrFibFixedFrame (I := I) g₁ B x (Y x))) := by
   classical
-
   have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -392,7 +393,6 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
     refine hsmul.congr ?_
     intro x
     rfl
-
   set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     fun a b =>
@@ -628,7 +628,8 @@ omit [I.Boundaryless] in
 theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
       2 * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         g₁.inner x
             (riemannOp (LeviCivita (I := I) g₁) x (v 0)
@@ -689,10 +690,12 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem symmAbsorbedPrincipalCoeffPure_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
           (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 2 S
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
@@ -713,10 +716,12 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem symmAbsorbedOrder0CurvCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
           (iteratedCovGrad (I := I) g₀ 0 2 0 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
@@ -736,10 +741,12 @@ noncomputable def symmAbsorbedOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMe
 theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
           (iteratedCovGrad (I := I) g₀ 0 2 0 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
     (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)

@@ -60,7 +60,6 @@ private lemma chartSmoothExt_apply_of_notMem_target
   rw [if_neg hy]
 
 omit [IsManifold I_hs ∞ M] in
-
 private lemma chartSmoothExt_eq_chartPushed_on_target
     (ρ : SmoothPartitionOfUnity M I_hs M Set.univ)
     (α : M) (u : M → ℝ) {y : EuN}
@@ -459,7 +458,8 @@ private lemma chartSmoothExt_morrey_sup_uniform
            (eLpNorm (fun z => ‖fderiv ℝ (chartSmoothExt (n := n) (M := M) α
               (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
                 : C^∞⟮I_hs, M; ℝ⟯) x * u x)) z‖) (ENNReal.ofReal p)
-             (volume.restrict (Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α)))).toReal) := by
+             (volume.restrict (Metric.ball (0 : EuN)
+               (chartRadius (n := n) (M := M) α)))).toReal) := by
   classical
   have hR_pos : 0 < chartRadius (n := n) (M := M) α := chartRadius_pos (n := n) (M := M) α
   obtain ⟨C, hC_nn, hbound⟩ :=
@@ -495,7 +495,8 @@ private lemma chartSmoothExt_morrey_sup_uniform
         ((eLpNorm f (ENNReal.ofReal p)
             (volume.restrict (Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α)))).toReal +
          (eLpNorm (fun z => ‖fderiv ℝ f z‖) (ENNReal.ofReal p)
-            (volume.restrict (Metric.ball (0 : EuN) (chartRadius (n := n) (M := M) α)))).toReal) := by
+            (volume.restrict (Metric.ball (0 : EuN)
+              (chartRadius (n := n) (M := M) α)))).toReal) := by
       apply mul_nonneg hC_nn
       linarith
     exact h_RHS_nn
@@ -596,7 +597,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball
     _ = eLpNorm fnNorm q volume := by rw [← h_eq_BR]
 
 omit [CompactSpace M] in
-
 private lemma chartSmoothExt_ae_eq_chartPushed_interior
     (α : M) (u : M → ℝ) :
     chartSmoothExt (n := n) (M := M) α
@@ -1307,7 +1307,6 @@ private lemma per_chart_smooth_sup_bound
     exact le_trans hbound_y h_final
 
 omit [CompactSpace M] in
-
 private lemma chartSmoothExt_pou_mul_apply_at_chart_image
     (α : M) (u : M → ℝ) {x : M} (hx : x ∈ (chartAt (EuclideanHalfSpace n) α).source) :
     chartSmoothExt (n := n) (M := M) α

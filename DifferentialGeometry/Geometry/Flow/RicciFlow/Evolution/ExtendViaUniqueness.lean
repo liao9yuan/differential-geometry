@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -120,18 +119,15 @@ theorem ricci_flow_interior_restart
         (∀ t ∈ Set.Ico (0 : ℝ) TT, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
             ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-
   have hbox := ricci_flow_unif_existence (I := I) (g_fam α)
   obtain ⟨Λ₁, hΛ₁, t₁, ht₁, hell'⟩ := hell
   obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hcov'⟩ := hcov
-
   set Λ : ℝ := max Λ₁ Λ₂ with hΛdef
   have hΛ₁le : Λ₁ ≤ Λ := by rw [hΛdef]; exact le_max_left _ _
   have hΛ₂le : Λ₂ ≤ Λ := by rw [hΛdef]; exact le_max_right _ _
   have hΛ : 1 ≤ Λ := le_trans hΛ₁ hΛ₁le
   have hΛ₁pos : 0 < Λ₁ := lt_of_lt_of_le zero_lt_one hΛ₁
   obtain ⟨τ₀, hτ₀, hexist⟩ := hbox Λ hΛ
-
   set t_star : ℝ := max (max t₁ t₂) (omega - τ₀ / 2) with hts_def
   have ht1_le : t₁ ≤ t_star := le_trans (le_max_left t₁ t₂) (le_max_left _ _)
   have ht2_le : t₂ ≤ t_star := le_trans (le_max_right t₁ t₂) (le_max_left _ _)
@@ -142,7 +138,6 @@ theorem ricci_flow_interior_restart
   have hreach : omega < t_star + τ₀ := by
     have hge : omega - τ₀ / 2 ≤ t_star := by rw [hts_def]; exact le_max_right _ _
     linarith
-
   have hell_star : ∀ x : M, ∀ v : TangentSpace I x,
       Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam t_star).inner x v v ∧
         (g_fam t_star).inner x v v ≤ Λ * (g_fam α).inner x v v := by
@@ -157,7 +152,6 @@ theorem ricci_flow_interior_restart
       MetricCovDerivOrderBoundOn Set.univ a (g_fam t_star) (g_fam α) Λ := by
     intro a ha x hx
     exact ((hcov' t_star hstar_mem_2 a ha) x hx).trans hΛ₂le
-
   obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
@@ -253,7 +247,6 @@ theorem extend_construction_of_restart
   have hωε : omega + ε = t_star + TT := by rw [hε_def]; ring
   set r : ℝ → SmoothRiemannianMetric I M := fun u => rr (u + (omega - t_star)) with hr_def
   set g_ext : ℝ → SmoothRiemannianMetric I M := gluedFamily (I := I) g_fam r omega with hgext_def
-
   have hext_eq_r : ∀ s : ℝ, t_star ≤ s → g_ext s = rr (s - t_star) := by
     intro s hs
     by_cases hso : s < omega
@@ -263,16 +256,13 @@ theorem extend_construction_of_restart
       simp only [hr_def]
       congr 1
       ring
-
   have hagree : ∀ s : ℝ, s < omega → g_ext s = g_fam s := by
     intro s hs; rw [hgext_def]; exact gluedFamily_of_lt (I := I) g_fam r omega hs
-
   have hshift : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
       (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
     (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
   refine ⟨ε, hε, g_ext, hagree, ?_, ?_, ?_⟩
-  ·
-    intro x₀ i j
+  · intro x₀ i j
     apply contMDiffOn_of_locally_contMDiffOn
     intro p hp
     by_cases hpo : p.1 < omega
@@ -293,14 +283,14 @@ theorem extend_construction_of_restart
         exact ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hωε]⟩, hq.2⟩
       have hcomp :
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-            (fun q : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr (q.1 - t_star)) x₀ q.2 i j)
+            (fun q : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr (q.1 - t_star)) x₀ q.2 i
+              j)
             (Set.Ioo t_star (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
         (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
       refine (hcomp.mono Set.inter_subset_right).congr ?_
       intro q hq
       rw [hext_eq_r q.1 (le_of_lt hq.2.1.1)]
-  ·
-    intro x₀ i j
+  · intro x₀ i j
     set B := (trivializationAt E (TangentSpace I) x₀).baseSet with hB
     set m : ℝ := (t_star + omega) / 2 with hm
     have hm1 : t_star < m := by rw [hm]; linarith
@@ -326,7 +316,8 @@ theorem extend_construction_of_restart
       · intro q hq
         simp only [Function.comp_apply]
         rw [hext_eq_r q.1 (le_of_lt (lt_of_lt_of_le hm1 hq.1.1))]
-    have hs_eq : Set.Ico α (omega + ε) ×ˢ B = (Set.Icc α m ×ˢ B) ∪ (Set.Ico m (omega + ε) ×ˢ B) := by
+    have hs_eq : Set.Ico α (omega + ε) ×ˢ B = (Set.Icc α m ×ˢ B) ∪
+      (Set.Ico m (omega + ε) ×ˢ B) := by
       ext q
       simp only [Set.mem_prod, Set.mem_union, Set.mem_Ico, Set.mem_Icc]
       constructor
@@ -356,8 +347,7 @@ theorem extend_construction_of_restart
         rw [closure_prod_eq]
         rintro ⟨hc1, _⟩
         exact absurd (closure_minimal Set.Ico_subset_Icc_self isClosed_Icc hc1).1 (not_le.mpr h2)
-  ·
-    intro t ht x v w
+  · intro t ht x v w
     by_cases hto : t < omega
     · have hfun : (fun s : ℝ => (g_ext s).inner x v w) =ᶠ[𝓝[Set.Ici α] t]
           (fun s : ℝ => (g_fam s).inner x v w) := by
@@ -444,12 +434,10 @@ theorem metricEquiv_of_ricBound
       rw [((g_fam s).inner x).map_zero, ContinuousLinearMap.zero_apply]
     rw [h0α, h0s, mul_zero, mul_zero]
     exact ⟨le_refl 0, le_refl 0⟩
-
   have hpos : ∀ t : ℝ, 0 < (g_fam t).inner x v v := fun t => (g_fam t).pos x v hv
   have hs_lt : s < omega := hs.2
   have hα_le_s : α ≤ s := hs.1
   have hsub : Set.Icc α s ⊆ Set.Ico α omega := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hs_lt⟩
-
   have hderiv : ∀ y ∈ Set.Icc α s,
       HasDerivWithinAt (fun t : ℝ => Real.log ((g_fam t).inner x v v))
         ((-2 : ℝ) * ricciTensor (I := I) (g_fam y) x v v / (g_fam y).inner x v v)
@@ -472,7 +460,8 @@ theorem metricEquiv_of_ricBound
     hderiv hbound (Set.left_mem_Icc.mpr hα_le_s) (Set.right_mem_Icc.mpr hα_le_s)
   have hlogdiff : |Real.log ((g_fam s).inner x v v) - Real.log ((g_fam α).inner x v v)|
       ≤ 2 * K * (s - α) := by
-    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (show (0 : ℝ) ≤ s - α by linarith)] at hmvt
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (show (0 : ℝ) ≤ s - α by linarith)]
+      at hmvt
     exact hmvt
   obtain ⟨hlo, hhi⟩ := expBounds_of_logDiff (hpos α) (hpos s) hlogdiff
   have hfα_nn : 0 ≤ (g_fam α).inner x v v := (hpos α).le
@@ -480,7 +469,8 @@ theorem metricEquiv_of_ricBound
     mul_le_mul_of_nonneg_left (by linarith) (mul_nonneg (by norm_num) hK)
   refine ⟨?_, ?_⟩
   · rw [← Real.exp_neg]
-    exact le_trans (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (neg_le_neg hle_exp)) hfα_nn) hlo
+    exact le_trans (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (neg_le_neg hle_exp)) hfα_nn)
+      hlo
   · exact le_trans hhi (mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr hle_exp) hfα_nn)
 
 end DifferentialGeometry.PDE.RicciFlow

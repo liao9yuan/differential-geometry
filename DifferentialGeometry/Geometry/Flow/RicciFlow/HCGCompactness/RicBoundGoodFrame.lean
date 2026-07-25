@@ -4,7 +4,6 @@ import Mathlib.Topology.Instances.Matrix
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -49,7 +48,8 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem gramInv_inverse
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -96,7 +96,8 @@ theorem gramInv_inverse
       _ = if i = j then 1 else 0 := h
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_symm
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -108,7 +109,9 @@ theorem gramInv_symm
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] in
 theorem gramE_eq_one
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -124,7 +127,8 @@ theorem gramE_eq_one
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_near_id
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -137,7 +141,6 @@ theorem gramInv_near_id
         |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
         |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
   classical
-
   have hentry : ∀ i j : Idx, ContinuousWithinAt
       (fun z => gramE (I := I) e₀ g basisE z i j) e₀.baseSet x := by
     intro i j
@@ -154,7 +157,6 @@ theorem gramInv_near_id
       rw [frameComp0S_apply, metricTensorField_apply, h0, h1]
       rfl
     exact ((h.congr fun z _ => (heq z)).continuousWithinAt hx)
-
   have hmat : ContinuousWithinAt
       (fun z => gramE (I := I) e₀ g basisE z) e₀.baseSet x := by
     have hpi : ContinuousWithinAt
@@ -166,7 +168,6 @@ theorem gramInv_near_id
       intro j
       exact hentry i j
     exact hpi
-
   have hdet1 : (gramE (I := I) e₀ g basisE x).det = 1 := by
     rw [hONx, Matrix.det_one]
   have hinvc : ContinuousAt Inv.inv (gramE (I := I) e₀ g basisE x) := by
@@ -179,7 +180,6 @@ theorem gramInv_near_id
   have hone : (gramE (I := I) e₀ g basisE x)⁻¹ = 1 := by
     rw [hONx]
     exact Matrix.inv_eq_left_inv (by rw [one_mul])
-
   have hev1 : ∀ i j : Idx, ∀ᶠ z in nhdsWithin x e₀.baseSet,
       |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε := by
     intro i j
@@ -196,7 +196,6 @@ theorem gramInv_near_id
       refine Filter.eventually_of_mem hball fun t ht => ?_
       simpa [Metric.mem_closedBall, Real.dist_eq] using ht
     exact hcwa.eventually hb
-
   have hevG1 : ∀ i j : Idx, ∀ᶠ z in nhdsWithin x e₀.baseSet,
       |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
     intro i j
@@ -209,7 +208,6 @@ theorem gramInv_near_id
       refine Filter.eventually_of_mem hball fun t ht => ?_
       simpa [Metric.mem_closedBall, Real.dist_eq] using ht
     exact (hentry i j).eventually hb
-
   have hev : ∀ᶠ z in nhdsWithin x e₀.baseSet, ∀ i j : Idx,
       |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
       |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
@@ -269,7 +267,8 @@ private theorem exists_orthonormalBasis_of_posDef
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem exists_trivONBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
@@ -339,7 +338,8 @@ theorem exists_goodFrame_compBound
           z ∈ u' → ∀ (s : ℕ) (A : Tensor0SSpace s I z),
             (∑ I0 : Fin s → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) A I0 ^ 2) ≤
               2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A) ∧
         ∀ z, ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
@@ -348,7 +348,8 @@ theorem exists_goodFrame_compBound
               ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ s *
               (∑ I0 : Fin s → Fin (Module.finrank Real E),
                 Tensor0SBundle.component0S (I := I)
-                  (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                  (((trivializationAt E (TangentSpace I : M → Type _)
+                    x).isLocalFrameOn_localFrame_baseSet
                       I 1 basisE).toBasisAt hz) A I0 ^ 2) := by
   classical
   obtain ⟨basisE, hONraw⟩ := exists_trivONBasis (I := I) gRef x
@@ -356,7 +357,6 @@ theorem exists_goodFrame_compBound
   have hxbase : x ∈ e₀.baseSet := mem_baseSet_trivializationAt E (TangentSpace I : M → Type _) x
   have hONx : gramE (I := I) e₀ gRef basisE x = 1 :=
     gramE_eq_one (I := I) e₀ gRef basisE hONraw
-
   set n : ℕ := Fintype.card (Fin (Module.finrank Real E)) with hn
   set ε : Real := 1 / (2 * ((n : Real) + 1)) with hε_def
   have hε : 0 < ε := by
@@ -371,18 +371,15 @@ theorem exists_goodFrame_compBound
   refine ⟨basisE, u', ε, hopen, hxu', hsub, hε.le, hsmall,
     (fun z hz i j => (hnear z hz i j).2), hONraw, ?_, ?_⟩
   · intro z hz hzu' s A
-
     have hQlb := quad_lb_of_near_id
       (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) ε hε.le
       (fun i j => (hnear z hzu' i j).1) hsmall
-
     have hkey := Tensor0SBundle.sum_comp_sq_le_pow_normSq0S (I := I) gRef z s
       (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz)
       (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) 2 two_pos
       (gramInv_inverse (I := I) e₀ gRef basisE hz)
       (fun i j => gramInv_symm (I := I) e₀ gRef basisE z i j)
       hQlb A
-
     calc (∑ I0 : Fin s → Fin (Module.finrank Real E),
           Tensor0SBundle.component0S (I := I)
             (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2)
@@ -449,7 +446,8 @@ theorem exists_goodFrame_compBound
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem compL2_tower_le
@@ -471,7 +469,6 @@ theorem compL2_tower_le
       2 ^ (r + j) *
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
           (iterCov (I := I) gM r T j y)) := by
-
   have hsq : compL2Sq (iterCovComp (I := I) frame
       (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gM)
         frame hframe y')
@@ -488,7 +485,6 @@ theorem compL2_tower_le
     funext q
     rw [IsLocalFrameOn.toBasisAt_coe]
     rfl
-
   have hbound := hcomp (r + j) (iterCov (I := I) gM r T j y)
   have hs : Real.sqrt ((2 : Real) ^ (r + j)) ≤ (2 : Real) ^ (r + j) := by
     have h2 : ((2 : Real) ^ (r + j)) ≤ ((2 : Real) ^ (r + j)) ^ 2 := by
@@ -524,7 +520,8 @@ theorem compL2_tower_le
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem metricComp_le
@@ -552,7 +549,8 @@ theorem metricComp_le
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem metricComp_mul
@@ -624,7 +622,8 @@ theorem metricComp_mul
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem sqrt_tower_le_compL2
@@ -703,7 +702,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem ricCompField_mdiffOn
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
@@ -745,7 +745,10 @@ theorem ricCompField_mdiffOn
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
 theorem chrInFrame_mono
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (frame : Idx → (x : M) → TangentSpace I x) {u u' : Set M}
@@ -761,7 +764,8 @@ theorem chrInFrame_mono
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem movingGinv_le
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]

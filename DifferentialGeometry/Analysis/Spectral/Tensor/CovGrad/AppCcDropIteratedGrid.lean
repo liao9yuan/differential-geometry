@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -28,8 +26,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
-private theorem riemannianFiberNormSq_toSection_heq_congr_leibnizTower (g : SmoothRiemannianMetric I M)
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+private theorem riemannianFiberNormSq_toSection_heq_congr_leibnizTower
+    (g : SmoothRiemannianMetric I M)
     {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g 0 a} {Z : SmoothCcTensor g 0 b}
     (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 a x (Y.toSection x) =
@@ -140,7 +140,8 @@ theorem castRankCc_appCcRS_drop_iteratedCovGrad_covGrad (g : SmoothRiemannianMet
         (ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + (w + 1)) + k) ((s₀ + (w + 1)) + p) Ψ
           (iteratedCovGrad g 0 (b₀ + (w + 1)) k (covGrad g 0 (b₀ + w) W))) =
       ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
-        (castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+        (castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+          (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
           (castCcTensorRank g ((b₀ + (w + 1)) + k)
             (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1)) Ψ))
         (iteratedCovGrad g 0 (b₀ + w) (k + 1) W) := by
@@ -164,7 +165,8 @@ theorem dropNormalForm_succ (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   obtain ⟨Ψr1, hΨr1⟩ := hp (w + 1)
   set Tk : (k : ℕ) → SmoothCcTensor g ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1)) := fun k =>
     slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) (Ψr k) -
-      castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+      castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+        (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
         (castCcTensorRank g ((b₀ + (w + 1)) + k)
           (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1)) (Ψr1 k))
     with hTk_def
@@ -186,11 +188,13 @@ theorem dropNormalForm_succ (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   rw [hΨr1 (covGrad g 0 (b₀ + w) W), castRankCc_db_finset_sum]
   rw [show (∑ k ∈ Finset.range (p + 1),
         castCcTensorRank g 0 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
-          (ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + (w + 1)) + k) ((s₀ + (w + 1)) + p) (Ψr1 k)
+          (ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + (w + 1)) + k) ((s₀ + (w + 1)) + p)
+            (Ψr1 k)
             (iteratedCovGrad g 0 (b₀ + (w + 1)) k (covGrad g 0 (b₀ + w) W)))) =
       ∑ k ∈ Finset.range (p + 1),
         ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
-          (castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+          (castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+            (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
             (castCcTensorRank g ((b₀ + (w + 1)) + k)
               (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1)) (Ψr1 k)))
           (iteratedCovGrad g 0 (b₀ + w) (k + 1) W) from
@@ -233,7 +237,8 @@ theorem dropNormalForm_succ (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
           (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) -
       (∑ k ∈ Finset.range (p + 1),
         ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
-          (castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+          (castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+            (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
             (castCcTensorRank g ((b₀ + (w + 1)) + k)
               (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1)) (Ψr1 k)))
           (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) from by
@@ -281,7 +286,8 @@ theorem dropTower_normalForm (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   | succ p ih => exact fun w => dropNormalForm_succ (I := I) (M := M) g b₀ s₀ C p ih w
 
 def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
-    (C : SmoothCcTensor g b₀ s₀) : (p w : ℕ) → (k : ℕ) → SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p)
+    (C : SmoothCcTensor g b₀ s₀) : (p w : ℕ) → (k : ℕ) → SmoothCcTensor g ((b₀ + w) + k)
+      ((s₀ + w) + p)
   | 0, w => fun k => match k with
       | 0 => slotExtendIter (I := I) (M := M) g b₀ s₀ w C
       | (_ + 1) => 0
@@ -295,7 +301,8 @@ def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
             else 0)
           + (slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
               (dropTowerPsi g b₀ s₀ C p w k) -
-            castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+            castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+              (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
               (castCcTensorRank g ((b₀ + (w + 1)) + k)
                 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
                 (dropTowerPsi g b₀ s₀ C p (w + 1) k)))
@@ -342,7 +349,8 @@ theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
                 (iteratedCovGrad g 0 (b₀ + (w + 1)) k (covGrad g 0 (b₀ + w) W)))) =
           ∑ k ∈ Finset.range (p + 1),
             ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
-              (castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+              (castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+                (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
                 (castCcTensorRank g ((b₀ + (w + 1)) + k)
                   (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
                   (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k)))
@@ -365,7 +373,8 @@ theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
             else 0)
           + (slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
               (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k) -
-            castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+            castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+              (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
               (castCcTensorRank g ((b₀ + (w + 1)) + k)
                 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
                 (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k))) := fun k => rfl
@@ -388,7 +397,8 @@ theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
               (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) -
           (∑ k ∈ Finset.range (p + 1),
             ccOperatorFieldComp (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
-              (castCcTensorSourceRank g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+              (castCcTensorSourceRank g ((s₀ + w) + (p + 1))
+                (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
                 (castCcTensorRank g ((b₀ + (w + 1)) + k)
                   (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
                   (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k)))
@@ -482,7 +492,8 @@ theorem dropFibreSup_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
 
 def dropKappa (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : SmoothCcTensor g b₀ s₀) :
     ℕ → ℕ → ℝ :=
-  fun p w => (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k
+  fun p w => (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w
+               k
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -550,7 +561,8 @@ theorem dropTower_rfns_op_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   calc (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), Ck k * a k
       ≤ (p + 1 : ℝ) * ((∑ k ∈ Finset.range (p + 1), Ck k) * ∑ k ∈ Finset.range (p + 1), a k) :=
         mul_le_mul_of_nonneg_left hCa_le (by positivity)
-    _ = (p + 1 : ℝ) * (∑ k ∈ Finset.range (p + 1), Ck k) * ∑ k ∈ Finset.range (p + 1), a k := by ring
+    _ = (p + 1 : ℝ) * (∑ k ∈ Finset.range (p + 1), Ck k) * ∑ k ∈ Finset.range (p + 1), a k :=
+      by ring
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -660,7 +672,8 @@ theorem dropTower_rfns_iteratedCovGrad_grid (g : SmoothRiemannianMetric I M) (b�
           p w j 0 1 (Nat.zero_le _) le_rfl
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
@@ -668,14 +681,16 @@ theorem dropTower_rfns_iteratedCovGrad_grid (g : SmoothRiemannianMetric I M) (b�
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + q) x
             ((iteratedCovGrad g 0 (b₀ + w) q W).toSection x))
           (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 ((b₀ + w) + q) x _)) ?_
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA :=
         gridWindowSum_nonneg (dropKappa_nonneg (I := I) (M := M) g b₀ s₀ C) (p + 1) w j
       have hkB_nn : 0 ≤ kB :=
         gridWindowSum_nonneg (dropKappa_nonneg (I := I) (M := M) g b₀ s₀ C) p (w + 1) j
       have hsA_nn : 0 ≤ sA :=
-        Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 ((b₀ + w) + q) x _
+        Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0
+                                       ((b₀ + w) + q) x _
       have hsB_nn : 0 ≤ sB :=
         Finset.sum_nonneg fun q _ =>
           riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 ((b₀ + w) + (q + 1)) x _
@@ -706,7 +721,8 @@ theorem dropTower_rfns_iteratedCovGrad_grid (g : SmoothRiemannianMetric I M) (b�
             ((iteratedCovGrad g 0 ((s₀ + (w + 1)) + p) j
               (appCcLeibnizTower (I := I) (M := M) g b₀ s₀ C p (w + 1)
                 (covGrad g 0 (b₀ + w) W))).toSection x) :=
-        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g 0 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g 0
+          (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
           (appCcLeibnizTower (I := I) (M := M) g b₀ s₀ C p (w + 1) (covGrad g 0 (b₀ + w) W)) j x
       rw [hb_eq]
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
@@ -716,7 +732,8 @@ omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem dropTowerOp_zero_eq_appCc (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (W : SmoothCcTensor g 0 b₀) :
-    appCcLeibnizTower (I := I) (M := M) g b₀ s₀ C 0 0 W = operatorFieldApply (I := I) (M := M) g b₀ s₀ C W := by
+    appCcLeibnizTower (I := I) (M := M) g b₀ s₀ C 0 0 W = operatorFieldApply (I := I) (M := M) g b₀
+      s₀ C W := by
   change ccOperatorFieldComp (I := I) (M := M) g 0 (b₀ + 0) (s₀ + 0)
       (slotExtendIter (I := I) (M := M) g b₀ s₀ 0 C) W = _
   simp only [slotExtendIter, Nat.add_zero]
@@ -724,10 +741,12 @@ theorem dropTowerOp_zero_eq_appCc (g : SmoothRiemannianMetric I M) (b₀ s₀ : 
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
-theorem appCc_iteratedCovGrad_drop_singleSum_le_explicit (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+theorem appCc_iteratedCovGrad_drop_singleSum_le_explicit (g : SmoothRiemannianMetric I M)
+    (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (W : SmoothCcTensor g 0 b₀) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₀ + j) x
-        ((iteratedCovGrad g 0 s₀ j (operatorFieldApply (I := I) (M := M) g b₀ s₀ C W)).toSection x) ≤
+        ((iteratedCovGrad g 0 s₀ j (operatorFieldApply (I := I) (M := M) g b₀ s₀ C W)).toSection x)
+          ≤
       ((4 : ℝ) ^ j * gridWindowSum (dropKappa (I := I) (M := M) g b₀ s₀ C) 0 0 j) *
         ∑ q ∈ Finset.range (j + 1),
           riemannianFiberNormSq (I := I) (M := M) g 0 (b₀ + q) x
@@ -743,7 +762,8 @@ theorem appCc_iteratedCovGrad_drop_singleSum_le (g : SmoothRiemannianMetric I M)
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (W : SmoothCcTensor g 0 b₀) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s₀ + j) x
-            ((iteratedCovGrad g 0 s₀ j (operatorFieldApply (I := I) (M := M) g b₀ s₀ C W)).toSection x) ≤
+            ((iteratedCovGrad g 0 s₀ j (operatorFieldApply (I := I) (M := M) g b₀ s₀ C W)).toSection
+              x) ≤
           K j * ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (b₀ + q) x
               ((iteratedCovGrad g 0 b₀ q W).toSection x) :=

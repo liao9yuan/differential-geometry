@@ -6,8 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative

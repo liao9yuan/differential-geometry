@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -85,7 +83,8 @@ theorem tensorPouSobolevHsNorm_nonneg
     0 ≤ tensorPouSobolevHsNorm (I := I) (M := M) g k T :=
   zero_le _
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -116,14 +115,14 @@ private lemma tensorChartComponentRaw_comp_euclid_zero_section
         have hsec : (0 : SmoothCcTensor g r s).toSection
             ((extChartAt I α).symm x) = 0 := by rfl
         rw [hsec]
-        exact map_zero _
+        exact ContinuousLinearMap.map_zero _
       unfold tensorChartComponentRaw
       change tensorChartComponentProjection (E := E) r s Idx Jdx
           (tensorTrivProj (I := I) (M := M) g r s
             (0 : SmoothCcTensor g r s) α ((extChartAt I α).symm x)) = 0
       unfold tensorTrivProj
       rw [h0]
-      exact map_zero _
+      exact ContinuousLinearMap.map_zero _
     have := congrFun hraw_comp ((toEuclidean (E := E)).symm y)
     exact this
   exact hM
@@ -314,7 +313,8 @@ theorem tensorPouSobolevHsNorm_le_succ
     exact ENNReal.tsum_le_tsum hper_chart
   exact ENNReal.rpow_le_rpow htsum_le (by norm_num)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_smul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g r s) (α : M)
@@ -335,7 +335,8 @@ private lemma tensorChartComponentRaw_comp_euclid_smul_eq
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
   exact h
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRawEuclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -975,7 +976,8 @@ theorem tensorPouSobolevHsNormSq_lt_top
   exact ENNReal.pow_lt_top
     (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g k T)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_comp_euclid_add_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₁ T₂ : SmoothCcTensor g r s) (α : M)

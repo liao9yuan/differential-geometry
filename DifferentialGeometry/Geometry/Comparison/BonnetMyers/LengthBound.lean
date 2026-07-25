@@ -808,21 +808,6 @@ theorem sum_index_form_bound_by_curvature_hypothesis
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem bonnet_myers_length_le_of_ricci_bound
     [T2Space (TangentBundle I M)] [ConnectedSpace M]
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]

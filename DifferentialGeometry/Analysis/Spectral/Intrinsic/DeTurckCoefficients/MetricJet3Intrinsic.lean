@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -339,9 +338,6 @@ private lemma gram3_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-
-
-
 theorem metricJet2_le_gram (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ g₂ : SmoothRiemannianMetric I M) {y : E},
@@ -440,9 +436,6 @@ theorem metricJet2_le_gram (α : M) :
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
-
-
-
 theorem metricJet3_le_gram (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ g₂ : SmoothRiemannianMetric I M) {y : E},

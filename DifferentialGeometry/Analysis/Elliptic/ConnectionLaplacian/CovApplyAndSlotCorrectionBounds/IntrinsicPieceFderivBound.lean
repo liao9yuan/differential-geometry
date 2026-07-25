@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -29,6 +27,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance intrinsicPieceTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance intrinsicPieceTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
     {N : Type*} [NormedAddCommGroup N] [NormedSpace ℝ N]
@@ -41,6 +47,37 @@ private lemma norm_fderiv_fderiv_eq_iteratedFDeriv_two
       = ‖iteratedFDeriv ℝ 2 F x‖ :=
     norm_iteratedFDeriv_fderiv (𝕜 := ℝ) (f := F) (x := x) (n := 1)
   rw [h1, h2]
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma fderiv_fderiv_apply_norm_le
+    {N : Type*} [NormedAddCommGroup N] [NormedSpace ℝ N]
+    (F : E → N) (u : E → E) (x : E)
+    (hF : DifferentiableAt ℝ (fderiv ℝ F) x)
+    (hu : DifferentiableAt ℝ u x) :
+    ‖fderiv ℝ (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+      ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
+        ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ := by
+  rw [fderiv_clm_apply hF hu]
+  refine le_trans (norm_add_le _ _) ?_
+  have h1 : ‖(fderiv ℝ F x).comp (fderiv ℝ u x)‖ ≤
+      ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ :=
+    ContinuousLinearMap.opNorm_comp_le _ _
+  have h2 : ‖(fderiv ℝ (fderiv ℝ F) x).flip (u x)‖ ≤
+      ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ := by
+    refine le_trans (ContinuousLinearMap.le_opNorm _ (u x)) ?_
+    rw [ContinuousLinearMap.opNorm_flip,
+      norm_fderiv_fderiv_eq_iteratedFDeriv_two (F := F) (x := x)]
+  exact add_le_add h1 h2
+
+private lemma two_product_sum_le
+    {C a b p q : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hp : p ≤ C) (hq : q ≤ C) :
+    b * p + a * q ≤ C * (a + b) := by
+  calc
+    b * p + a * q ≤ b * C + a * C :=
+      add_le_add (mul_le_mul_of_nonneg_left hp hb)
+        (mul_le_mul_of_nonneg_left hq ha)
+    _ = C * (a + b) := by ring
 
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
@@ -199,64 +236,25 @@ theorem intrinsic_piece_fderiv_bound
       exact absurd h (by simp)
     exact ((hu_cd.differentiableOn hne) x hx_mem).differentiableAt
       (hU_open.mem_nhds hx_mem)
-  set c : E → (E →L[ℝ] TensorRSModel r s ℝ E) := fderiv ℝ F with hc_def
-  have hc_diff : DifferentiableAt ℝ c x := hF2_diff
-  have h_clm : fderiv ℝ (fun y : E => c y (u y)) x
-      = (c x).comp (fderiv ℝ u x) + (fderiv ℝ c x).flip (u x) :=
-    fderiv_clm_apply hc_diff hu_diff
   have h_goalLHS_fn : (fun y : E =>
         fderiv ℝ (tensorRSChartE_section_repr (I := I) r s α
             (fun y' : M => T.toSection y') ∘ (extChartAt I α).symm) y
           (trivToE (I := I) α ((extChartAt I α).symm y)
             (B.toFun ((extChartAt I α).symm y)))) =
-      (fun y : E => c y (u y)) := by
+      (fun y : E => (fderiv ℝ F y) (u y)) := by
     funext y; rfl
   rw [h_goalLHS_fn]
   have h_norm_le :
-      ‖fderiv ℝ (fun y : E => c y (u y)) x‖ ≤
-        ‖c x‖ * ‖fderiv ℝ u x‖ + ‖fderiv ℝ c x‖ * ‖u x‖ := by
-    rw [h_clm]
-    refine le_trans (norm_add_le _ _) ?_
-    have h1 : ‖(c x).comp (fderiv ℝ u x)‖ ≤ ‖c x‖ * ‖fderiv ℝ u x‖ :=
-      ContinuousLinearMap.opNorm_comp_le _ _
-    have h2 : ‖(fderiv ℝ c x).flip (u x)‖ ≤ ‖fderiv ℝ c x‖ * ‖u x‖ := by
-      have h2a : ‖(fderiv ℝ c x).flip (u x)‖
-          ≤ ‖(fderiv ℝ c x).flip‖ * ‖u x‖ :=
-        ContinuousLinearMap.le_opNorm _ (u x)
-      rw [ContinuousLinearMap.opNorm_flip] at h2a
-      exact h2a
-    linarith
-  have h_iter : ‖fderiv ℝ c x‖ = ‖iteratedFDeriv ℝ 2 F x‖ := by
-    rw [hc_def]
-    exact norm_fderiv_fderiv_eq_iteratedFDeriv_two
-      (N := TensorRSModel r s ℝ E) F x
-  rw [h_iter] at h_norm_le
-  have h_c_norm : ‖c x‖ = ‖fderiv ℝ F x‖ := by rw [hc_def]
-  rw [h_c_norm] at h_norm_le
+      ‖fderiv ℝ (fun y : E => (fderiv ℝ F y) (u y)) x‖ ≤
+        ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
+          ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ :=
+    fderiv_fderiv_apply_norm_le F u x hF2_diff hu_diff
   obtain ⟨hfd_le, hu_le⟩ := hC_bound b hb.1
-  set N1 : ℝ := ‖iteratedFDeriv ℝ 2 F x‖ with hN1_def
-  set N2 : ℝ := ‖fderiv ℝ F x‖ with hN2_def
-  have hN1_nn : 0 ≤ N1 := norm_nonneg _
-  have hN2_nn : 0 ≤ N2 := norm_nonneg _
-  have h_b1 : N2 * ‖fderiv ℝ u x‖ ≤ C * N2 := by
-    have h := mul_le_mul_of_nonneg_left hfd_le hN2_nn
-    have : N2 * ‖fderiv ℝ u x‖ ≤ N2 * C := h
-    have hcomm : N2 * C = C * N2 := by ring
-    linarith
-  have h_b2 : N1 * ‖u x‖ ≤ C * N1 := by
-    have h := mul_le_mul_of_nonneg_left hu_le hN1_nn
-    have : N1 * ‖u x‖ ≤ N1 * C := h
-    have hcomm : N1 * C = C * N1 := by ring
-    linarith
   have h_final :
       ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ +
         ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ ≤
-        C * (N1 + N2) := by
-    have e1 : ‖fderiv ℝ F x‖ * ‖fderiv ℝ u x‖ = N2 * ‖fderiv ℝ u x‖ := by
-      rw [hN2_def]
-    have e2 : ‖iteratedFDeriv ℝ 2 F x‖ * ‖u x‖ = N1 * ‖u x‖ := by rw [hN1_def]
-    have expand : C * (N1 + N2) = C * N1 + C * N2 := by ring
-    linarith
+        C * (‖iteratedFDeriv ℝ 2 F x‖ + ‖fderiv ℝ F x‖) :=
+    two_product_sum_le (norm_nonneg _) (norm_nonneg _) hfd_le hu_le
   exact le_trans h_norm_le h_final
 
 end Connection

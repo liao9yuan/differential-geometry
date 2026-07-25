@@ -13,8 +13,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Properties
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -41,7 +39,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma trivFromE_apply_eq_zero_of_notMem_baseSet
     (α : M) {b : M} (hb : b ∉ (trivializationAt E (TangentSpace I) α).baseSet)
     (w : E) :
@@ -52,7 +51,8 @@ private lemma trivFromE_apply_eq_zero_of_notMem_baseSet
   exact Bundle.Trivialization.symm_apply_of_notMem
     (trivializationAt E (TangentSpace I) α) hb w
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_apply_eq_zero_of_notMem_baseSet
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∉ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -62,7 +62,8 @@ private lemma chartLeviCivitaParallelCLM_apply_eq_zero_of_notMem_baseSet
   rw [chartLeviCivitaParallelCLM_apply]
   exact trivFromE_apply_eq_zero_of_notMem_baseSet (I := I) α hb _
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma trivToE_chartBasisVecFiber_eq_chartModelBasis
     (α : M) (m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -73,7 +74,8 @@ private lemma trivToE_chartBasisVecFiber_eq_chartModelBasis
       (trivFromE (I := I) α b (chartModelBasis E m)) = _
   exact trivToE_trivFromE (I := I) α hb _
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -278,7 +280,7 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
         |chartGramMatrix (I := I) g α b p q| ≤ Cpq := by
     intro p q
     exact
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartGramMatrix_entry_isBounded_on_compact
+      chartGramMatrix_entry_isBounded_on_compact
         (I := I) (M := M) g α p q hK_M_compact hK_M_sub
   choose Cpq_fn hCpq_pos hCpq_le using h_gram_each
   set s : Finset (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :=
@@ -482,7 +484,7 @@ private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
     rw [this]
     exact Real.sqrt_nonneg _
 
-theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le_uniform_intrinsic
+theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -600,7 +602,7 @@ theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
         ENNReal.ofReal C := by
     intro α k
     exact
-      chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le_uniform_intrinsic
+      chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le
         (I := I) (M := M) g α k
   set Cα_k : M → Fin (Module.finrank ℝ E) → ℝ :=
     fun α k => Classical.choose (hper α k) with hCα_k_def

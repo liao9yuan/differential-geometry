@@ -200,7 +200,8 @@ theorem chartGramMatrix_lifted
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma extChartAt_proj_eq
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :

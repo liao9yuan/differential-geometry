@@ -12,8 +12,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -37,9 +35,36 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private local instance tensorRSModelAdd_local (r s : ℕ) :
+    Add (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.addCommGroup.toAddCommMonoid.toAddCommSemigroup.toAddCommMagma.toAdd
+
+private local instance tensorRSModelSub_local (r s : ℕ) :
+    Sub (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.sub
+
+private local instance tensorRSModelNeg_local (r s : ℕ) :
+    Neg (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.neg
+
+private local instance tensorRSModelZero_local (r s : ℕ) :
+    Zero (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.zero
+
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem gZeroInner_self_le_of_g1_self_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -55,7 +80,8 @@ theorem gZeroInner_self_le_of_g1_self_le
   rw [← htie x v v] at hlb
   linarith
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem gZeroInner_self_le_neumann_of_g1_unit
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -76,7 +102,8 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   have ha : 0 < a := lt_of_lt_of_le hb hab
   rw [inv_le_inv₀ ha hb]; exact hab
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma gNorm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -112,7 +139,8 @@ private lemma gNorm_triangle
   rw [hsq]
   linarith [hcs]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma gNorm_sq_sub_eq_self_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x)

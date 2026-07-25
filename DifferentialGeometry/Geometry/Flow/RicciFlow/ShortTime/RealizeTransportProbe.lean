@@ -1,8 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummability
 
-set_option maxHeartbeats 1600000
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -28,7 +26,8 @@ private theorem weight_sum_high
     (g : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * Module.finrank ℝ E + 4 + (weylSobolevExp (E := E) + 1) ≤ a)
     (x : M) (v w : TangentSpace I x) :
-    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
+    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+      2 =>
       tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
         (eigenBilinScalar (I := I) g x v w i *
           (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) := by
@@ -41,7 +40,8 @@ private theorem weight_sum_high
     rw [hsW_def]
     push_cast
     linarith
-  have hweyl : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
+  have hweyl : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I)
+    (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) :=
     tensorEigen_summable_negpow (I := I) (M := M) g (sW : ℝ) hsW_gt
   obtain ⟨C, hC_pos, hC⟩ :=
@@ -170,8 +170,8 @@ private theorem eval_hasSum_high
       (I := I) (M := M) g τ T hc
   have heq := ccTensorBilinSymm_eigenSeries_eq (I := I) (M := M) g
     (SmoothCcTensor.toL2 T) hmem T (SmoothCcTensor.toL2_apply T) x v w
-    (by simpa [c, e] using hsum)
+    hsum
   rw [heq]
-  simpa [c, e] using hsum.hasSum
+  exact hsum.hasSum
 
 end DifferentialGeometry.PDE.RicciFlow

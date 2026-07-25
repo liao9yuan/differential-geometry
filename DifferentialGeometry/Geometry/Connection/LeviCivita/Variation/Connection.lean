@@ -19,13 +19,12 @@ import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -203,7 +202,8 @@ def metricDotFrame
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
 theorem metricVar_path
     {g : SmoothRiemannianMetric I M} {potential : M -> Real}
-    (path : DifferentialGeometry.Integral.Connection.MetricPotentialVariationPath (I := I) g potential)
+    (path : DifferentialGeometry.Integral.Connection.MetricPotentialVariationPath (I := I) g
+      potential)
     (metricVariation :
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
@@ -211,7 +211,8 @@ theorem metricVar_path
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (hpath :
-      DifferentialGeometry.Integral.Connection.IsMetricPotentialVariationPath (I := I) path metricVariation
+      DifferentialGeometry.Integral.Connection.IsMetricPotentialVariationPath (I := I) path
+        metricVariation
         potentialVariation) :
     metricVarOn (I := I) path.G frame path.base u
       (metricDotFrame (I := I) metricVariation frame) := by
@@ -692,7 +693,7 @@ theorem finiteDiffKoszul
 
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-theorem connDiffLow_eq_sum_gammaSub [DecidableEq Idx]
+theorem connDiffLow_eq_sum_gammaSub
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -799,7 +800,7 @@ theorem connDiffLow_eq_sum_gammaSub [DecidableEq Idx]
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
-theorem metricCov_gammaSub [DecidableEq Idx]
+theorem metricCov_gammaSub
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
@@ -1446,7 +1447,8 @@ theorem normSqRS_connDiff_eq_componentL2Sq3 [DecidableEq Idx]
         IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).1
     · simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric,
         IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).2
-  rw [DifferentialGeometry.Tensor.Coordinates.normSqRS_connectionDifferenceTensorAt_eq_christoffel_sum
+  rw
+    [Tensor.Coordinates.normSqRS_connectionDifferenceTensorAt_eq_christoffel_sum
     (I := I) (g := G.metric var) (G.connection var) (G.connection base)
     frame hframe hx hinvBasis]
   rw [componentL2Sq3_eq_sum_upper_first]
@@ -1534,7 +1536,7 @@ def gammaDerivOn
 
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-theorem varLowDeriv [DecidableEq Idx]
+theorem varLowDeriv
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)

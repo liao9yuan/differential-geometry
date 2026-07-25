@@ -55,7 +55,8 @@ theorem ccTensorContract_l2_twoArm_mixed_orderUniform_le
               + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
                 ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2) := by
   classical
-  set Kf : ℕ → ℝ := fun k => (ccTensorContract_topOrder_l2_twoArm_mixed_ballUniform (I := I) g₀ b₀ s₀ k).choose
+  set Kf : ℕ → ℝ := fun k => (ccTensorContract_topOrder_l2_twoArm_mixed_ballUniform (I := I) g₀ b₀
+    s₀ k).choose
     with hKf_def
   have hKf_nn : ∀ k, 0 ≤ Kf k := fun k =>
     (ccTensorContract_topOrder_l2_twoArm_mixed_ballUniform (I := I) g₀ b₀ s₀ k).choose_spec.1
@@ -85,10 +86,8 @@ theorem ccTensorContract_l2_twoArm_mixed_orderUniform_le
       ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 := by positivity
   linarith
 
-set_option maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 theorem ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order
     (g₀ : SmoothRiemannianMetric I M) (m : ℕ)
     (h_lossy : 2 * Module.finrank ℝ E + 4 ≤ m) :
@@ -101,27 +100,26 @@ theorem ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order
     rw [hkE_def]; omega
   have h4kEm : (4 * kE : ℕ) ≤ m := by
     rw [hkE_def]; omega
-
   obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
     DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck_gNorm
       (I := I) (M := M) g₀ 0 2 kE 0 hkE_super
-
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
     tensorPouSobolevHsNorm_le_ccSpectralEmbed (I := I) (M := M) g₀ (2 * kE)
   refine ⟨C₁ * (C₂ + 1), by positivity, fun T => ?_⟩
   letI : Bundle.RiemannianBundle
       (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-
   have hupper : C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
         (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ ≤
       (C₁ * (C₂ + 1)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ := by
     have hstep2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
           (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ =
-        (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal :=
+        (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀
+          (2 * kE) T).toReal :=
       DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
         (I := I) (M := M) g₀ (2 * kE) T
-    have hstep3 : (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal ≤
+    have hstep3 : (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I)
+      (M := M) g₀ (2 * kE) T).toReal ≤
         C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ := hC₂ T
     have hstep4 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ ≤
         ‖ccSpectralEmbed (I := I) (M := M) g₀ (m : ℝ) T‖ := by
@@ -137,27 +135,24 @@ theorem ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order
       rw [hNm_def, ← hembed_eq]; exact hstep4
     calc C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
             (g := g₀) (r := 0) (s := 2) (2 * kE) T‖
-        = C₁ * (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal := by rw [hstep2]
+        = C₁ * (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I)
+          (M := M) g₀ (2 * kE) T).toReal := by rw [hstep2]
       _ ≤ C₁ * (C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖) :=
           mul_le_mul_of_nonneg_left hstep3 hC₁_pos.le
       _ ≤ C₁ * (C₂ * Nm) :=
           mul_le_mul_of_nonneg_left
             (mul_le_mul_of_nonneg_left hspec_le hC₂_nn) hC₁_pos.le
       _ ≤ (C₁ * (C₂ + 1)) * Nm := by nlinarith [hNm_nn, hC₁_pos.le, hC₂_nn]
-
   have hfibre := fun x : M => le_trans (hC₁ T x) hupper
-
   intro x v w
   have hcs := ccTensorBilin_abs_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ T x
   have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
   have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
   have hmul_nn : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
     mul_nonneg hsv_nn hsw_nn
-
   have hvw := hcs v w
   have hwv := hcs w v
   have hfx := hfibre x
-
   rw [ccTensorBilinSymm_apply]
   have habs : |(1 / 2 : ℝ) *
       (smoothCcTensorBilinForm (I := I) g₀ T x v w + smoothCcTensorBilinForm (I := I) g₀ T x w v)| ≤
@@ -166,7 +161,6 @@ theorem ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order
     rw [abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 1/2)]
     exact mul_le_mul_of_nonneg_left (abs_add_le _ _) (by norm_num)
   refine habs.trans ?_
-
   nlinarith [hvw, hwv, hfx, hsv_nn, hsw_nn, hmul_nn, mul_nonneg hsw_nn hsv_nn,
     mul_le_mul_of_nonneg_right hfx hmul_nn,
     mul_le_mul_of_nonneg_right hfx (mul_nonneg hsw_nn hsv_nn)]
@@ -184,15 +178,19 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUnifo
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
         (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-          smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
+          smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w
+            v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
           (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
               deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
-            (operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-              operatorFieldApply (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-              operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+              operatorFieldApply (I := I) (M := M) g₀ 3 2 C₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤
@@ -203,7 +201,8 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUnifo
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 := by
   classical
   obtain ⟨Ksob, hKsob_pos, hKsob⟩ :=
-    ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order (I := I) (M := M) g₀ (a + 1)
+    ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order (I := I) (M := M) g₀
+      (a + 1)
       (by omega)
   obtain ⟨ΛC, Γ, hΛC_nn, hΓ_nn, hfib⟩ :=
     deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_fibreWeighted_ballUniform_of_symm
@@ -215,9 +214,11 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUnifo
   have hβT_nn : 0 ≤ βT := by rw [hβT_def]; positivity
   have hβT'_nn : 0 ≤ βT' := by rw [hβT'_def]; positivity
   have hcastord : ((a + 1 : ℕ) : ℝ) = (a : ℝ) + 1 := by push_cast; ring
-  have hβTfib : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) βT := by
+  have hβTfib : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T)
+    βT := by
     rw [hβT_def]; exact hKsob T
-  have hβT'fib : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') βT' := by
+  have hβT'fib : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+    βT' := by
     rw [hβT'_def]; exact hKsob T'
   obtain ⟨C₀, C₁, C₂, hid, hC₀sup, hC₁sup, hC₂sup, hC₀jet, hC₁jet, hC₂jet⟩ :=
     hfib T T' hδ_le hδ hδ'_le hδ' hTsymm hT'symm hβT_nn hβT'_nn hβTfib hβT'fib hTball hT'ball
@@ -237,8 +238,101 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUnifo
   refine pow_le_pow_left₀ (mul_nonneg hΛC_nn (mul_nonneg hKsob_pos.le hDm_nn)) ?_ 2
   nlinarith [hΛC_nn, hKsob_pos.le, hDm_nn, mul_nonneg hKsob_pos.le hDm_nn]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+private lemma sq_mul_sq_add_sq_le_augmented (x y z : ℝ) :
+    x ^ 2 * y ^ 2 + z ^ 2 ≤ (x ^ 2 + 1) * (y ^ 2 + z ^ 2 + 1) := by
+  nlinarith [sq_nonneg x, sq_nonneg y, sq_nonneg z,
+    mul_nonneg (sq_nonneg x) (sq_nonneg z)]
+
+private lemma three_term_sqrt_bound {b s t d : ℝ}
+    (hb : 0 ≤ b) (ht : 0 ≤ t) (hd : 0 ≤ d) :
+    b * s + b * s + b * (s + d * t) ≤ 3 * b * (d * t + s) := by
+  nlinarith [mul_nonneg hb ht, mul_nonneg hd ht,
+    mul_nonneg hb (mul_nonneg hd ht)]
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private theorem deTurckRemainderDiff_lowArm_bound
+    (g₀ : SmoothRiemannianMetric I M) (a q m : ℕ) (hq : q ≤ a)
+    (T T' : SmoothCcTensor g₀ 0 2) (Cm : SmoothCcTensor g₀ (2 + m) 2)
+    (Km Kmax Cemb1 Γ ΛC base S₁ : ℝ)
+    (hKm_le : Km ≤ Kmax) (hKmax_nn : 0 ≤ Kmax) (hΛC_nn : 0 ≤ ΛC)
+    (hS₁_nn : 0 ≤ S₁)
+    (hbase_def : base = Kmax * ((Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1)))
+    (hKm : ∀ (Φ : SmoothCcTensor g₀ (2 + m) 2) (W : SmoothCcTensor g₀ 0 (2 + m))
+        (ΛΦ ΛW : ℝ), 0 ≤ ΛΦ → 0 ≤ ΛW →
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x
+          (Φ.toSection x) ≤ ΛΦ ^ 2) →
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x
+          (W.toSection x) ≤ ΛW ^ 2) →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 q
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Φ W)‖ ^ 2 ≤
+        Km * (ΛW ^ 2 * ∑ i ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Φ‖ ^ 2
+            + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l W‖ ^ 2))
+    (hCmsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x
+      (Cm.toSection x) ≤ ΛC ^ 2)
+    (hCmjet : ∑ i ∈ Finset.range (a + 1),
+      ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2 ≤ Γ ^ 2)
+    (hWsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 m (T - T')).toSection x) ≤
+        (Real.sqrt (Cemb1 ^ 2 * S₁)) ^ 2)
+    (hWjet : ∑ l ∈ Finset.range (q + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+        (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 ≤ S₁) :
+    ‖iteratedCovGrad (I := I) g₀ 0 2 q
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
+          (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ≤
+      Real.sqrt (base * S₁) := by
+  have htame := hKm Cm (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))
+    ΛC (Real.sqrt (Cemb1 ^ 2 * S₁)) hΛC_nn (Real.sqrt_nonneg _) hCmsup hWsup
+  have hΛWsq : (Real.sqrt (Cemb1 ^ 2 * S₁)) ^ 2 = Cemb1 ^ 2 * S₁ :=
+    Real.sq_sqrt (by positivity)
+  have hcjet : (∑ i ∈ Finset.range (q + 1),
+      ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2) ≤ Γ ^ 2 := by
+    refine le_trans (Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
+      (fun i _ _ => sq_nonneg _)) hCmjet
+  have hsq : ‖iteratedCovGrad (I := I) g₀ 0 2 q
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
+        (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ^ 2 ≤ base * S₁ := by
+    refine le_trans htame ?_
+    rw [hΛWsq]
+    have ha1 : (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
+          ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2 ≤
+        (Cemb1 ^ 2 * S₁) * Γ ^ 2 :=
+      mul_le_mul_of_nonneg_left hcjet (by positivity)
+    have ha2 : ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+            (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 ≤ ΛC ^ 2 * S₁ :=
+      mul_le_mul_of_nonneg_left hWjet (sq_nonneg _)
+    have hsum_le : (Cemb1 ^ 2 * S₁) * Γ ^ 2 + ΛC ^ 2 * S₁ ≤
+        (Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1) * S₁ := by
+      rw [show (Cemb1 ^ 2 * S₁) * Γ ^ 2 + ΛC ^ 2 * S₁ =
+        (Cemb1 ^ 2 * Γ ^ 2 + ΛC ^ 2) * S₁ by ring]
+      exact mul_le_mul_of_nonneg_right
+        (sq_mul_sq_add_sq_le_augmented Cemb1 Γ ΛC) hS₁_nn
+    have hinner := (add_le_add ha1 ha2).trans hsum_le
+    have hinner_nn : 0 ≤ (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
+          ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2
+        + ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+            (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 := by positivity
+    calc Km * ((Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2
+            + ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+                (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2)
+        ≤ Kmax * ((Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1) * S₁) :=
+          mul_le_mul hKm_le hinner hinner_nn hKmax_nn
+      _ = base * S₁ := by rw [hbase_def]; ring
+  rw [show ‖iteratedCovGrad (I := I) g₀ 0 2 q
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
+          (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ =
+      Real.sqrt (‖iteratedCovGrad (I := I) g₀ 0 2 q
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
+          (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ^ 2) from
+    (Real.sqrt_sq (norm_nonneg _)).symm]
+  exact Real.sqrt_le_sqrt hsq
+
 theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -252,7 +346,8 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
         (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
         (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-          smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
+          smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w
+            v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ q : ℕ, q ≤ a →
@@ -295,9 +390,12 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
     have hS₁_nn : 0 ≤ S₁ := Finset.sum_nonneg fun i _ => sq_nonneg _
     obtain ⟨C₀, C₁, C₂, hid, hC₀sup, hC₁sup, hC₂sup, hC₀jet, hC₁jet, hC₂jet⟩ :=
       hcoeff T T' hδ_le hδ hδ'_le hδ' hTsymm hT'symm hTball hT'ball
-    set A₀ := operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with hA₀
-    set A₁ := operatorFieldApply (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with hA₁
-    set A₂ := operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hA₂
+    set A₀ := operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀
+      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with hA₀
+    set A₁ := operatorFieldApply (I := I) (M := M) g₀ 3 2 C₁
+      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with hA₁
+    set A₂ := operatorFieldApply (I := I) (M := M) g₀ 4 2 C₂
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hA₂
     have hN_split : deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
         deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ' =
           A₀ + A₁ + A₂ := by
@@ -335,18 +433,21 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
                 (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))).toSection x)
               ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
           rw [SmoothCcTensor.norm_def]
-          exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ ((2 + m) + l)
+          exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
+            ((2 + m) + l)
             (iteratedCovGrad (I := I) g₀ 0 (2 + m) l (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))
         have hbridgeR : ‖iteratedCovGrad (I := I) g₀ 0 2 (m + l) (T - T')‖ ^ 2 =
             ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (m + l)) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (m + l) (T - T')).toSection x)
               ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
           rw [SmoothCcTensor.norm_def]
-          exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ (2 + (m + l))
+          exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
+            (2 + (m + l))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + l) (T - T'))
         rw [hbridgeL, hbridgeR]
         refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-        have hrw := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l (T - T') x
+        have hrw := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l (T - T')
+          x
         simpa only [Nat.add_assoc] using hrw
       rw [show (∑ l ∈ Finset.range (q + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
@@ -414,13 +515,13 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
           have hB_nn : 0 ≤ B := by rw [hB_def]; positivity
           have hcoeff_le : Cemb1 ^ 2 * Γ ^ 2 ≤ B := by
             rw [hB_def]
-            nlinarith [sq_nonneg Cemb1, sq_nonneg Γ, sq_nonneg ΛC,
-              mul_nonneg (sq_nonneg Cemb1) (sq_nonneg ΛC)]
+            exact (le_add_of_nonneg_right (sq_nonneg ΛC)).trans
+              (sq_mul_sq_add_sq_le_augmented Cemb1 Γ ΛC)
           have hΛC_le : ΛC ^ 2 ≤ B := by
             rw [hB_def]
-            nlinarith [sq_nonneg Cemb1, sq_nonneg Γ, sq_nonneg ΛC,
-              mul_nonneg (sq_nonneg Cemb1) (sq_nonneg Γ),
-              mul_nonneg (sq_nonneg Cemb1) (sq_nonneg ΛC)]
+            exact (le_add_of_nonneg_left
+              (mul_nonneg (sq_nonneg Cemb1) (sq_nonneg Γ))).trans
+              (sq_mul_sq_add_sq_le_augmented Cemb1 Γ ΛC)
           have hterm1 : (Cemb1 ^ 2 * S₁) * Γ ^ 2 ≤ B * S₁ := by
             rw [show (Cemb1 ^ 2 * S₁) * Γ ^ 2 = (Cemb1 ^ 2 * Γ ^ 2) * S₁ by ring]
             exact mul_le_mul_of_nonneg_right hcoeff_le hS₁_nn
@@ -432,7 +533,7 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
             calc (Cemb1 ^ 2 * S₁) * Γ ^ 2 + (ΛC * Dm) ^ 2 * S₂
                 ≤ B * S₁ + B * (Dm ^ 2 * S₂) := add_le_add hterm1 hterm2
               _ = B * (S₁ + Dm ^ 2 * S₂) := by ring
-          linarith [ha1, ha2, hsum_le]
+          exact (add_le_add ha1 ha2).trans hsum_le
         have hinner_nn : 0 ≤ (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
                 ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2
               + (ΛC * Dm) ^ 2 * ∑ l ∈ Finset.range (q + 1),
@@ -473,7 +574,7 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
             have := mul_nonneg (Real.sqrt_nonneg S₁) (Real.sqrt_nonneg S₂)
             linarith [mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 2) hDm_nn)
               (mul_nonneg (Real.sqrt_nonneg S₁) (Real.sqrt_nonneg S₂))]
-          nlinarith [hbase_nn, hcross_nn, mul_nonneg hbase_nn hcross_nn]
+          exact mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hcross_nn) hbase_nn
         calc Real.sqrt (base * (S₁ + Dm ^ 2 * S₂))
             ≤ Real.sqrt ((Real.sqrt base * (Real.sqrt S₁ + Dm * Real.sqrt S₂)) ^ 2) :=
               Real.sqrt_le_sqrt hle_sq
@@ -483,84 +584,35 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
         (hKm_le : Km ≤ Kmax)
         (hKm : ∀ (Φ : SmoothCcTensor g₀ (2 + m) 2) (W : SmoothCcTensor g₀ 0 (2 + m)) (ΛΦ ΛW : ℝ),
           0 ≤ ΛΦ → 0 ≤ ΛW →
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x (Φ.toSection x) ≤ ΛΦ ^ 2) →
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x (W.toSection x) ≤ ΛW ^ 2) →
-          ‖iteratedCovGrad (I := I) g₀ 0 2 q (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Φ W)‖ ^ 2 ≤
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x (Φ.toSection x) ≤ ΛΦ ^ 2)
+            →
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x (W.toSection x) ≤ ΛW ^ 2)
+            →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+            (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Φ W)‖ ^ 2 ≤
             Km * (ΛW ^ 2 * ∑ i ∈ Finset.range (q + 1),
                   ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Φ‖ ^ 2
                 + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
                   ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l W‖ ^ 2))
-        (hCmsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x (Cm.toSection x) ≤ ΛC ^ 2)
+        (hCmsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ (2 + m) 2 x (Cm.toSection x) ≤
+          ΛC ^ 2)
         (hCmjet : (∑ i ∈ Finset.range (a + 1),
             ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2) ≤ Γ ^ 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 q
             (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
               (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ≤ Real.sqrt (base * S₁) := by
       intro m hm Cm Km hKm_le hKm hCmsup hCmjet
-      have htame := hKm Cm (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))
-        ΛC (Real.sqrt (Cemb1 ^ 2 * S₁)) hΛC_nn (Real.sqrt_nonneg _) hCmsup
-        (hWsup1 m (by omega))
-      have hΛWsq : (Real.sqrt (Cemb1 ^ 2 * S₁)) ^ 2 = Cemb1 ^ 2 * S₁ := Real.sq_sqrt (by positivity)
-      have hcjet : (∑ i ∈ Finset.range (q + 1), ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2) ≤
-          Γ ^ 2 := hcoeffjet_le m Cm (Γ ^ 2) (sq_nonneg _) hCmjet
-      have hwjet : (∑ l ∈ Finset.range (q + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
-              (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2) ≤ S₁ := by
-        have h := hWjet m (by omega)
-        refine le_trans h ?_
+      have hWjetLow : ∑ l ∈ Finset.range (q + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+            (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 ≤ S₁ := by
+        refine (hWjet m (by omega)).trans ?_
         rw [hS₁_def]
         exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
           (fun i _ _ => sq_nonneg _)
-      have hsq : ‖iteratedCovGrad (I := I) g₀ 0 2 q
-          (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
-            (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ^ 2 ≤ base * S₁ := by
-        refine le_trans htame ?_
-        rw [hΛWsq]
-        have ha1 : (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
-              ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2 ≤ (Cemb1 ^ 2 * S₁) * Γ ^ 2 :=
-          mul_le_mul_of_nonneg_left hcjet (by positivity)
-        have ha2 : ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
-                (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 ≤ ΛC ^ 2 * S₁ :=
-          mul_le_mul_of_nonneg_left hwjet (sq_nonneg _)
-        have hinner :
-            (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
-                ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2
-              + ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
-                ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
-                  (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2
-            ≤ (Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1) * S₁ := by
-          have hsum_le : (Cemb1 ^ 2 * S₁) * Γ ^ 2 + ΛC ^ 2 * S₁ ≤
-              (Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1) * S₁ := by
-            have hfactor : (Cemb1 ^ 2 * S₁) * Γ ^ 2 + ΛC ^ 2 * S₁ =
-                (Cemb1 ^ 2 * Γ ^ 2 + ΛC ^ 2) * S₁ := by ring
-            rw [hfactor]
-            refine mul_le_mul_of_nonneg_right ?_ hS₁_nn
-            nlinarith [sq_nonneg Cemb1, sq_nonneg Γ, sq_nonneg ΛC,
-              mul_nonneg (sq_nonneg Cemb1) (sq_nonneg Γ),
-              mul_nonneg (sq_nonneg Cemb1) (sq_nonneg ΛC)]
-          linarith [ha1, ha2, hsum_le]
-        have hinner_nn : 0 ≤ (Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
-                ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2
-              + ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
-                ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
-                  (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2 := by positivity
-        calc Km * ((Cemb1 ^ 2 * S₁) * ∑ i ∈ Finset.range (q + 1),
-                  ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i Cm‖ ^ 2
-                + ΛC ^ 2 * ∑ l ∈ Finset.range (q + 1),
-                  ‖iteratedCovGrad (I := I) g₀ 0 (2 + m) l
-                    (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))‖ ^ 2)
-            ≤ Kmax * ((Cemb1 ^ 2 + 1) * (Γ ^ 2 + ΛC ^ 2 + 1) * S₁) :=
-              mul_le_mul hKm_le hinner hinner_nn hKmax_nn
-          _ = base * S₁ := by rw [hbase_def]; ring
-      rw [show ‖iteratedCovGrad (I := I) g₀ 0 2 q
-            (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
-              (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ =
-          Real.sqrt (‖iteratedCovGrad (I := I) g₀ 0 2 q
-            (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 Cm
-              (iteratedCovGrad (I := I) g₀ 0 2 m (T - T')))‖ ^ 2) from
-        (Real.sqrt_sq (norm_nonneg _)).symm]
-      exact Real.sqrt_le_sqrt hsq
+      exact deTurckRemainderDiff_lowArm_bound
+        (I := I) (M := M) g₀ a q m hq T T' Cm Km Kmax Cemb1 Γ ΛC base S₁
+        hKm_le hKmax_nn hΛC_nn hS₁_nn hbase_def hKm hCmsup hCmjet
+        (hWsup1 m (by omega)) hWjetLow
     have ha0 := harmLow 0 (by norm_num) C₀ K₀ hK₀_le (hK₀ q hq) hC₀sup hC₀jet
     have ha1 := harmLow 1 (by norm_num) C₁ K₁ hK₁_le (hK₁ q hq) hC₁sup hC₁jet
     have hnorm0 : ‖iteratedCovGrad (I := I) g₀ 0 2 q A₀‖ ≤ Real.sqrt (base * S₁) := by
@@ -587,9 +639,7 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_dataWeighted_ballUniform_o
       have hsb_nn : 0 ≤ Real.sqrt base := Real.sqrt_nonneg _
       have hs1_nn : 0 ≤ Real.sqrt S₁ := Real.sqrt_nonneg _
       have hs2_nn : 0 ≤ Real.sqrt S₂ := Real.sqrt_nonneg _
-      nlinarith [hsb_nn, hs1_nn, hs2_nn, hDm_nn,
-        mul_nonneg hsb_nn hs1_nn, mul_nonneg hsb_nn hs2_nn,
-        mul_nonneg (mul_nonneg hDm_nn hsb_nn) hs2_nn]
+      exact three_term_sqrt_bound hsb_nn hs2_nn hDm_nn
     refine hgoal.trans (le_of_eq ?_)
     rw [hS₂_def, hS₁_def]
   · refine ⟨0, le_refl 0, ?_⟩

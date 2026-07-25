@@ -34,7 +34,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma memWkp_succ_of_chosenWeakPartial_memWkp
     {m : ℕ} {Ω : Set EuclN} {u : EuclN → ℝ}
     (h_w1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u Ω)
@@ -79,7 +78,6 @@ theorem eigenvector_chartComponent_memWkp_two_k
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le h_le h_two
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 theorem tensorChartComponent_memWkp_succ_of_diffData
     {m : ℕ} {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
     {u : EuclN → ℝ}

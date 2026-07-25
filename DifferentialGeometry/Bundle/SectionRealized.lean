@@ -268,8 +268,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle n F₁ E₁ I]
 
 omit [FiniteDimensional ℝ F₁] [ContMDiffVectorBundle n F₁ E₁ I] h1n in
-
-
 theorem ContMDiffVectorBundleHom.linearMap_acts_locally_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯)
     (σ : Cₛ^n⟮I; F₁, E₁⟯) {U : Set M} (hU : IsOpen U)
@@ -298,7 +296,6 @@ theorem ContMDiffVectorBundleHom.linearMap_acts_pointwise_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯)
     (σ₁ σ₂ : Cₛ^n⟮I; F₁, E₁⟯) (p : M) (hσ : σ₁ p = σ₂ p) :
     (F σ₁) p = (F σ₂) p := by
-
   haveI : ContMDiffVectorBundle 1 F₁ E₁ I :=
     ContMDiffVectorBundle.of_le (show (1 : WithTop ℕ∞) ≤ (n : WithTop ℕ∞) from
       WithTop.coe_le_coe.mpr h1n.out)
@@ -394,26 +391,18 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) :
     ContMDiffVectorBundleHom ℝ I n F₁ E₁ F₂ E₂ := by
-
   haveI : ContMDiffVectorBundle 1 F₁ E₁ I :=
     ContMDiffVectorBundle.of_le (show (1 : WithTop ℕ∞) ≤ (n : WithTop ℕ∞) from
       WithTop.coe_le_coe.mpr h1n.out)
   haveI : ContMDiffVectorBundle 1 F₂ E₂ I :=
     ContMDiffVectorBundle.of_le (show (1 : WithTop ℕ∞) ≤ (n : WithTop ℕ∞) from
       WithTop.coe_le_coe.mpr h1n.out)
-
   have acts_pointwise := ContMDiffVectorBundleHom.linearMap_acts_pointwise_gen F
-
   have exists_section : ∀ (p : M) (v : E₁ p),
       ∃ (σ : Cₛ^n⟮I; F₁, E₁⟯), σ p = v := ContMDiffSection.exists_eq_at_gen
-
-
-
   let φ : ∀ x : M, E₁ x →ₗ[ℝ] E₂ x := fun x =>
     { toFun := fun v => (F (exists_section x v).choose) x
       map_add' := fun v w => by
-
-
         let σ_v := (exists_section x v).choose
         let σ_w := (exists_section x w).choose
         let σ_vw := (exists_section x (v + w)).choose
@@ -427,13 +416,11 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
           _ = (F σ_v) x + (F σ_w) x := by
                 rw [map_add, ContMDiffSection.coe_add, Pi.add_apply]
       map_smul' := fun c v => by
-
         let σ_v := (exists_section x v).choose
         let σ_cv := (exists_section x (c • v)).choose
         have hv : σ_v x = v := (exists_section x v).choose_spec
         have h_smul : (c • σ_v) x = c • v := by
           simp [ContMDiffSection.coe_smul, Pi.smul_apply, hv]
-
         let c' : C^n⟮I, M; ℝ⟯ := ⟨fun _ => c, contMDiff_const⟩
         have hc_eq : c • σ_v = c' • σ_v := by
           ext y; simp [ContMDiffSection.coe_smulContMDiffMap, ContMDiffSection.coe_smul, c']
@@ -442,35 +429,25 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
                 ((exists_section x (c • v)).choose_spec ▸ h_smul ▸ rfl)
           _ = c • (F σ_v) x := by
                 rw [hc_eq, F.map_smul, ContMDiffSection.coe_smulContMDiffMap]; rfl }
-
   have φ_spec : ∀ (σ : Cₛ^n⟮I; F₁, E₁⟯) (x : M), φ x (σ x) = (F σ) x :=
     fun σ x => acts_pointwise _ σ x (exists_section x (σ x)).choose_spec
-
-
-
   have Φ_smooth : ContMDiff (I.prod 𝓘(ℝ, F₁)) (I.prod 𝓘(ℝ, F₂)) n
       (fun p : TotalSpace F₁ E₁ => (⟨p.proj, φ p.proj p.2⟩ : TotalSpace F₂ E₂)) := by
-
     intro p₀
-
     rw [contMDiffAt_totalSpace]
     refine ⟨?_, ?_⟩
-    ·
-      exact (contMDiff_proj E₁).contMDiffAt
-    ·
-      let e₁ := trivializationAt F₁ E₁ p₀.proj
+    · exact (contMDiff_proj E₁).contMDiffAt
+    · let e₁ := trivializationAt F₁ E₁ p₀.proj
       let e₂ := trivializationAt F₂ E₂ p₀.proj
       let b₁ := Module.finBasis ℝ F₁
       have he₁ : p₀.proj ∈ e₁.baseSet := mem_baseSet_trivializationAt F₁ E₁ p₀.proj
       have he₂ : p₀.proj ∈ e₂.baseSet := mem_baseSet_trivializationAt F₂ E₂ p₀.proj
       have hframe₁ := e₁.isLocalFrameOn_localFrame_baseSet I (↑n) b₁
       obtain ⟨σ', hσ'⟩ := hframe₁.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
-
       have hφ_eq : ∀ᶠ x in nhds p₀,
           (e₂ ⟨x.proj, φ x.proj x.2⟩).2 =
           ∑ i, b₁.repr (e₁ x).2 i •
             (e₂ ⟨x.proj, (F (σ' i)) x.proj⟩).2 := by
-
         have h_base : ∀ᶠ x in nhds p₀,
             x.proj ∈ e₁.baseSet ∧ x.proj ∈ e₂.baseSet :=
           (e₁.open_baseSet.inter e₂.open_baseSet).preimage
@@ -483,7 +460,6 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
         filter_upwards [h_base, h_σ'_pull] with ⟨q, v⟩ ⟨hq₁, hq₂⟩ hσ'q
         let le₁ := e₁.linearEquivAt ℝ q hq₁
         let le₂ := e₂.linearEquivAt ℝ q hq₂
-
         have hv_decomp : v = ∑ i, b₁.repr (le₁ v) i • le₁.symm (b₁ i) := by
           calc v = le₁.symm (le₁ v) := (le₁.symm_apply_apply v).symm
             _ = le₁.symm (∑ i, b₁.repr (le₁ v) i • b₁ i) := by rw [b₁.sum_repr]
@@ -498,31 +474,21 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection_gen
         rw [hφv]
         simp only [show ∀ w : E₂ q, (e₂ ⟨q, w⟩).2 = le₂ w from fun _ => rfl]
         rw [map_sum]; simp only [map_smul]; rfl
-
       refine ContMDiffAt.congr_of_eventuallyEq ?_ hφ_eq
       apply ContMDiffAt.sum
       intro i _
       apply ContMDiffAt.smul
-      ·
-
-        have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
+      · have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
             (fun x => (e₁ x).2) p₀ :=
           (contMDiffAt_totalSpace (f := _root_.id)).mp contMDiffAt_id |>.2
-
-
         have hcl : ContDiff ℝ (↑n) (fun w : F₁ => b₁.repr w i) :=
           (ContinuousLinearMap.proj i |>.comp
             b₁.equivFun.toContinuousLinearEquiv.toContinuousLinearMap).contDiff
         exact hcl.contDiffAt.contMDiffAt.comp _ h_e₁_snd
-      ·
-
-
-        have h_sect : ContMDiffAt I 𝓘(ℝ, F₂) (↑n)
+      · have h_sect : ContMDiffAt I 𝓘(ℝ, F₂) (↑n)
             (fun q => (e₂ ⟨q, (F (σ' i)) q⟩).2) p₀.proj :=
           (contMDiffAt_section p₀.proj).mp (F (σ' i)).contMDiff.contMDiffAt
-
         exact h_sect.comp _ (contMDiff_proj E₁).contMDiffAt
-
   exact ⟨_root_.id, fun p => ⟨p.proj, φ p.proj p.2⟩, Φ_smooth, φ, fun _ _ => rfl⟩
 
 
@@ -540,25 +506,16 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) (σ) :
     F σ = (ofLinearMapSection_gen F).mapSection (ofLinearMapSection_baseMap_gen F) σ := by
   ext x
-
-
-
   exact (linearMap_acts_pointwise_gen F σ _ x
     (ContMDiffSection.exists_eq_at_gen x (σ x)).choose_spec.symm)
 
 omit h1n in
-
-
-
 omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_mapSection_gen
     (Φ Ψ : ContMDiffVectorBundleHom ℝ I n F₁ E₁ F₂ E₂)
     (hΦ : Φ.baseMap = _root_.id) (hΨ : Ψ.baseMap = _root_.id)
     (h_eq : ∀ σ, Φ.mapSection hΦ σ = Ψ.mapSection hΨ σ) :
     Φ.toFun = Ψ.toFun := by
-
-
-
   funext ⟨x, v⟩
   obtain ⟨σ, rfl⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := F₁) (n := n) x v
   rw [Φ.mapSection_apply hΦ, Ψ.mapSection_apply hΨ, h_eq]
@@ -568,7 +525,6 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_mapSection_gen
 noncomputable def ContMDiffVectorBundleEquiv.ofLinearEquivSection_gen
     (F : Cₛ^n⟮I; F₁, E₁⟯ ≃ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) :
     ContMDiffVectorBundleEquiv ℝ I n F₁ E₁ F₂ E₂ := by
-
   let Φ := ContMDiffVectorBundleHom.ofLinearMapSection_gen F.toLinearMap
   let hΦ : Φ.baseMap = _root_.id :=
     ContMDiffVectorBundleHom.ofLinearMapSection_baseMap_gen F.toLinearMap
@@ -579,7 +535,6 @@ noncomputable def ContMDiffVectorBundleEquiv.ofLinearEquivSection_gen
     ContMDiffVectorBundleHom.ofLinearMapSection_baseMap_gen F.symm.toLinearMap
   have hΨ_spec : ∀ σ, F.symm σ = Ψ.mapSection hΨ σ :=
     ContMDiffVectorBundleHom.ofLinearMapSection_spec_gen F.symm.toLinearMap
-
   have hΨΦ : ∀ p, Ψ.toFun (Φ.toFun p) = p := by
     intro ⟨x, v⟩
     obtain ⟨σ, rfl⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := F₁) (n := n) x v
@@ -599,27 +554,16 @@ noncomputable def ContMDiffVectorBundleEquiv.ofLinearEquivSection_gen
   exact ContMDiffVectorBundleEquiv.ofMutualInverseHoms Φ Ψ hΦ hΨΦ hΦΨ
 
 open FiberBundle in
-
-
-
-
-
-
-
-
 noncomputable def ContMDiffVectorBundleHom.ofTensorialAt_gen
     (Ψ : (Π x : M, E₁ x) → (Π x : M, E₂ x))
     (hΨ : ∀ x, TensorialAt I F₁ (fun σ => Ψ σ x) x)
     (hΨ_smooth : ∀ σ : Cₛ^n⟮I; F₁, E₁⟯,
       ContMDiff I (I.prod 𝓘(ℝ, F₂)) n (T% (Ψ ⇑σ))) :
     ContMDiffVectorBundleHom ℝ I n F₁ E₁ F₂ E₂ := by
-
   have h1n' : (1 : WithTop ℕ∞) ≤ (n : WithTop ℕ∞) := WithTop.coe_le_coe.mpr h1n.out
   have hn_ne : (↑n : WithTop ℕ∞) ≠ 0 := (zero_lt_one.trans_le h1n').ne'
   haveI : ContMDiffVectorBundle 1 F₁ E₁ I := ContMDiffVectorBundle.of_le h1n'
   haveI : ContMDiffVectorBundle 1 F₂ E₂ I := ContMDiffVectorBundle.of_le h1n'
-
-
   let φ : ∀ x : M, E₁ x →ₗ[ℝ] E₂ x := fun x =>
     { toFun := fun v => Ψ (extend F₁ v) x
       map_add' := fun v₁ v₂ => by
@@ -633,11 +577,9 @@ noncomputable def ContMDiffVectorBundleHom.ofTensorialAt_gen
           (mdifferentiableAt_extend ..)]
         exact (hΨ x).pointwise (mdifferentiableAt_extend ..)
           (mdifferentiableAt_const.smul_section (mdifferentiableAt_extend ..)) (by simp) }
-
   have φ_spec : ∀ (σ : Cₛ^n⟮I; F₁, E₁⟯) (x : M), φ x (σ x) = Ψ (⇑σ) x :=
     fun σ x => (hΨ x).pointwise (mdifferentiableAt_extend ..)
       (σ.contMDiff.contMDiffAt.mdifferentiableAt hn_ne) (by simp)
-
   have Φ_smooth : ContMDiff (I.prod 𝓘(ℝ, F₁)) (I.prod 𝓘(ℝ, F₂)) n
       (fun p : TotalSpace F₁ E₁ => (⟨p.proj, φ p.proj p.2⟩ : TotalSpace F₂ E₂)) := by
     intro p₀
@@ -650,7 +592,6 @@ noncomputable def ContMDiffVectorBundleHom.ofTensorialAt_gen
     have he₂ : p₀.proj ∈ e₂.baseSet := mem_baseSet_trivializationAt F₂ E₂ p₀.proj
     have hframe₁ := e₁.isLocalFrameOn_localFrame_baseSet I (↑n) b₁
     obtain ⟨σ', hσ'⟩ := hframe₁.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
-
     have hφ_eq : ∀ᶠ x in nhds p₀,
         (e₂ ⟨x.proj, φ x.proj x.2⟩).2 =
         ∑ i, b₁.repr (e₁ x).2 i •
@@ -695,7 +636,6 @@ noncomputable def ContMDiffVectorBundleHom.ofTensorialAt_gen
           (fun q => (e₂ ⟨q, Ψ (⇑(σ' i)) q⟩).2) p₀.proj :=
         (contMDiffAt_section p₀.proj).mp (hΨ_smooth (σ' i)).contMDiffAt
       exact h_sect.comp _ (contMDiff_proj E₁).contMDiffAt
-
   exact ⟨_root_.id, fun p => ⟨p.proj, φ p.proj p.2⟩, Φ_smooth, φ, fun _ _ => rfl⟩
 
 end VBC

@@ -34,11 +34,9 @@ theorem tensorRSSpace_norm_eq_carrier_opNorm {b : M} (T : TensorRSSpace r s I b)
       ∀ x : Tensor0SSpace r I b,
         ‖(T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) x‖ ≤ c * ‖x‖} := by
   classical
-
   have hT_def : ‖T‖
       = ‖tensorRSSpace_continuousLinearEquiv
           (𝕜 := 𝕜) (E := E) (I := I) (M := M) r s b T‖ := rfl
-
   set e_r := tensor0SSpace_continuousLinearEquiv
     (𝕜 := 𝕜) (E := E) (I := I) (M := M) r b with he_r
   set e_s := tensor0SSpace_continuousLinearEquiv
@@ -47,7 +45,6 @@ theorem tensorRSSpace_norm_eq_carrier_opNorm {b : M} (T : TensorRSSpace r s I b)
       tensorRSSpace_continuousLinearEquiv (𝕜 := 𝕜) (E := E) (I := I) (M := M) r s b T
         = e_r.arrowCongr e_s
             (T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) := rfl
-
   set Tcarrier : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b := T with hTcarrier
   have hSetEq :
       {c : ℝ | 0 ≤ c ∧
@@ -85,7 +82,6 @@ theorem tensorRSSpace_norm_eq_carrier_opNorm {b : M} (T : TensorRSSpace r s I b)
           (I := I) (M := M) r b x
       rw [hLHS, ← hRHS]
       exact hy
-
   have hnorm_def :
       ‖e_r.arrowCongr e_s Tcarrier‖
         = sInf {c : ℝ | 0 ≤ c ∧
@@ -109,7 +105,6 @@ theorem tensorRSSpace_norm_apply_le {b : M} (T : TensorRSSpace r s I b)
     (𝕜 := 𝕜) (E := E) (I := I) (M := M) r b with he_r
   set e_s := tensor0SSpace_continuousLinearEquiv
     (𝕜 := 𝕜) (E := E) (I := I) (M := M) s b with he_s
-
   have hbd_model :
       ‖(e_r.arrowCongr e_s
           (T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b)) (e_r x)‖
@@ -117,7 +112,6 @@ theorem tensorRSSpace_norm_apply_le {b : M} (T : TensorRSSpace r s I b)
               (T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b)‖
           * ‖e_r x‖ :=
     ContinuousLinearMap.le_opNorm _ _
-
   have h1 :
       e_r.arrowCongr e_s
           (T : Tensor0SSpace r I b →L[𝕜] Tensor0SSpace s I b) (e_r x)

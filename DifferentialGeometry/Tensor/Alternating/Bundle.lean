@@ -11,8 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -39,7 +37,6 @@ variable [Π x, TopologicalSpace (E₂ x)]
 variable [Π x, ContinuousAdd (E₂ x)]
 
 instance (x : B) : AddCommMonoid (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) := by
-
   dsimp [Bundle.continuousAlternatingMap]
   infer_instance
 
@@ -75,12 +72,14 @@ def continuousAlternatingMapCoordChange
 variable [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁]
 variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
 
-theorem continuousOn_continuousAlternatingMapCoordChange
+omit [Fintype ι] in
+theorem continuousOn_continuousAlternatingMapCoordChange [Finite ι]
     [VectorBundle 𝕜 F₁ E₁] [VectorBundle 𝕜 F₂ E₂]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
     [MemTrivializationAtlas e₂] [MemTrivializationAtlas e₂'] :
   ContinuousOn (continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂')
     ((e₁.baseSet ∩ e₂.baseSet) ∩ (e₁'.baseSet ∩ e₂'.baseSet)) := by
+  letI := Fintype.ofFinite ι
   let f₁ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
     := ContinuousAlternatingMap.compContinuousLinearMapCLM (e₁'.coordChangeL 𝕜 e₁ b)
   let f₂ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
@@ -200,7 +199,6 @@ omit [Fintype ι] in
 variable [Π x, ContinuousAdd (E₂ x)]
 
 omit [Fintype ι] in
-
 theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet)
     (L : (F₁ [⋀^ι]→L[𝕜] F₂)) :
     (continuousAlternatingMap 𝕜 ι e₁ e₂).symm b L =
@@ -353,7 +351,6 @@ variable {F₃ F₄ : Type*}
 local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
 omit [∀ (x : B), IsTopologicalAddGroup (E₂ x)] [∀ (x : B), ContinuousSMul 𝕜 (E₂ x)] in
-
 theorem contMDiffOn_continuousAlternatingMapCoordChange
     [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']

@@ -69,7 +69,7 @@ private theorem MemWkp_two_extend_via_cutoff_aux
     DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
       (d := Module.finrank ℝ E) hK_compact hΩ'_open hK_in_Ω'
   obtain ⟨C, hC_nn, hη_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := Module.finrank ℝ E) hη_smooth hη_compact_support k
   have h_eta_u_in_Ω' : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k 2 (fun x => η x * u x) Ω' :=

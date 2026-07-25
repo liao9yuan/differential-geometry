@@ -8,8 +8,6 @@ import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators Matrix Interval
@@ -97,7 +95,8 @@ noncomputable def slotPermCLM {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M) :
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) d x).toContinuousLinearMap)
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem slotPermCLM_apply {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace d I x) :
     slotPermCLM (I := I) ρ x D =
@@ -119,7 +118,8 @@ noncomputable def tensorProdWithCLM (m k : ℕ) (x : M)
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) k x).toContinuousLinearMap)
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem tensorProdWithCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) (Q : Tensor0SBundle.Tensor0SSpace k I x) :
     tensorProdWithCLM (I := I) m k x P Q =
@@ -177,7 +177,8 @@ noncomputable def tensorProdPairCLM (m k : ℕ) (x : M) :
           ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (m + k) x).symm) c _ }
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem tensorProdPairCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) :
     tensorProdPairCLM (I := I) m k x P = tensorProdWithCLM (I := I) m k x P := rfl
@@ -187,7 +188,8 @@ noncomputable def contractUnitCLM (n : ℕ) (x : M) :
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) n x).symm.toContinuousLinearMap.comp
     ((ContinuousLinearMap.apply ℝ (Tensor0SBundle.Tensor0SModel n ℝ E)
         (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))).comp
-      ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 0 n x).toContinuousLinearMap.comp
+      ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 0 n
+        x).toContinuousLinearMap.comp
         (show Tensor0SBundle.TensorRSSpace 1 (n + 1) I x →L[ℝ]
             Tensor0SBundle.TensorRSSpace 0 n I x from
           Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 n x)))

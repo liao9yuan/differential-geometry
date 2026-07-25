@@ -96,8 +96,6 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [InnerProductSpace ℝ E] in
 theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -245,8 +243,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [InnerProductSpace ℝ E] in
 theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)

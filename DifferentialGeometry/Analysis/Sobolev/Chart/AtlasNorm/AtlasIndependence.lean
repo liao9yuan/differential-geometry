@@ -21,7 +21,6 @@ variable [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPushed_eq_zero_of_pou_zero
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     (hρα_zero : ∀ x : M, (ρ α : C^∞⟮I, M; ℝ⟯) x = 0) :
@@ -88,11 +87,9 @@ theorem wkpNormChartGen_eq_zero_iff
         (chartTargetEuclid (I := I) (M := M) α))).mpr h
 
 omit [IsManifold I ∞ M] in
-
 lemma ennreal_ofReal_one : (ENNReal.ofReal (1 : ℝ)) = 1 := by simp
 
 omit [IsManifold I ∞ M] in
-
 lemma ennreal_ofReal_mul_top_of_pos {C : ℝ} (hC : 0 < C) :
     ENNReal.ofReal C * (⊤ : ℝ≥0∞) = ⊤ := by
   rw [ENNReal.mul_top]
@@ -100,7 +97,6 @@ lemma ennreal_ofReal_mul_top_of_pos {C : ℝ} (hC : 0 < C) :
   exact (ENNReal.ofReal_pos.mpr hC).ne' h
 
 omit [IsManifold I ∞ M] in
-
 lemma ennreal_one_mul_eq (x : ℝ≥0∞) : ENNReal.ofReal 1 * x = x := by
   rw [ennreal_ofReal_one, one_mul]
 theorem wkpNormChartGen_equiv_of_pou

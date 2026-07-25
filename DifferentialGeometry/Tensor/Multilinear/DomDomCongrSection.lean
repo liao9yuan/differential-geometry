@@ -127,7 +127,7 @@ theorem domDomCongr_trans {s s' s'' : ℕ} (e₁ : Fin s ≃ Fin s') (e₂ : Fin
       = domDomCongr (IB := IB) n (e₁.trans e₂) α := by
   refine DFunLike.ext _ _ fun x => ?_
   ext V
-  simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply, Function.comp_def]
+  simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
 
 theorem domDomCongr_add {s s' : ℕ} (e : Fin s ≃ Fin s')
@@ -158,7 +158,7 @@ theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
           (product (IB := IB) n α β) := by
   refine DFunLike.ext _ _ fun x => ?_
   ext V
-  show Bundle.continuousMultilinearMap.product_fun
+  change Bundle.continuousMultilinearMap.product_fun
       ((domDomCongr (IB := IB) n e α) x) (β x) V = _
   rw [domDomCongr_apply, Bundle.continuousMultilinearMap.product_fun_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
@@ -174,11 +174,11 @@ theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
   · congr 1
     funext i
     simp only [Function.comp_apply, Equiv.sumCongr_apply,
-      finSumFinEquiv_symm_apply_castAdd, Sum.map_inl, id_eq, finSumFinEquiv_apply_left]
+      finSumFinEquiv_symm_apply_castAdd, Sum.map_inl, finSumFinEquiv_apply_left]
   · congr 1
     funext j
     simp only [Function.comp_apply, Equiv.sumCongr_apply,
-      finSumFinEquiv_symm_apply_natAdd, Sum.map_inr, id_eq, finSumFinEquiv_apply_right,
+      finSumFinEquiv_symm_apply_natAdd, Sum.map_inr, finSumFinEquiv_apply_right,
       Equiv.refl_apply]
 
 end MultilinearSection

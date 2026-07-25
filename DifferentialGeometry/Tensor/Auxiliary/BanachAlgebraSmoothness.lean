@@ -44,7 +44,6 @@ theorem contDiffOn_continuousLinearMap_comp_oneSub_inverse_clm
   (contDiffOn_oneSub_inverse_clm_mul_const hlt).continuousLinearMap_comp Φ
 
 omit [CompleteSpace A] in
-
 theorem contDiffOn_bilinDiag {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
     {s : Set E} {B : A × A → G} {f h : E → A} {n : WithTop ℕ∞}
     (hB : IsBoundedBilinearMap ℝ B) (hf : ContDiffOn ℝ n f s) (hh : ContDiffOn ℝ n h s) :

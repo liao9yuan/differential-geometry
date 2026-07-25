@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -58,7 +57,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem chartRep_congr_curve
     {γ γ' : ℝ → M}
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (V' : ∀ s : ℝ, TangentSpace I (γ' s))
@@ -85,7 +85,8 @@ theorem chartRep_congr_curve
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem covDerivAlong_congr_curve
     (g : SmoothRiemannianMetric I M) {γ γ' : ℝ → M}
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (V' : ∀ s : ℝ, TangentSpace I (γ' s)) {t : ℝ}
@@ -126,7 +127,8 @@ private lemma riemannOp_congr_point (g : SmoothRiemannianMetric I M)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] [CompleteSpace E] in
 theorem covDerivAlong_const (g : SmoothRiemannianMetric I M) (p : M)
     (V : ℝ → TangentSpace I p) (t : ℝ)
     (hV : DifferentiableAt ℝ (fun s => (V s : E)) t) :
@@ -174,7 +176,6 @@ private lemma clamped_slice_covDeriv_velocity_zero
     calc t₀ * ‖a‖ ≤ 1 * ‖a‖ := mul_le_mul_of_nonneg_right ht₀.2.le (norm_nonneg a)
       _ = ‖a‖ := one_mul _
       _ < _ := ha
-
   have hψMD : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ ψ := by
     rw [contMDiff_iff_contDiff]; exact hψ
   have hsmul : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun v : ℝ => ψ v • a) :=
@@ -186,7 +187,6 @@ private lemma clamped_slice_covDeriv_velocity_zero
   have hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2
       (fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (ψ v • a)) : M)) t₀ :=
     hexpC2.comp t₀ (hsmul.contMDiffAt.of_le ENat.LEInfty.out)
-
   have hgeo_max : HasGeodesicEquationAt (I := I) g
       (fun s : ℝ => maximalGeodesic (I := I) g p a s) t₀ :=
     radial_hasGeodesicEquationAt_of_norm_lt_radius (I := I) g p ha t₀
@@ -212,9 +212,6 @@ private lemma clamped_slice_covDeriv_velocity_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [CompleteSpace E] in
 private lemma clamped_slice_covDeriv_velocity_zero_at_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -286,11 +283,6 @@ private lemma clamped_slice_covDeriv_velocity_zero_at_zero
   exact hcongr.trans (by simpa using hzero)
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential in
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ t₀ ∈ Set.Ioo (0 : ℝ) 1,
@@ -314,7 +306,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
   refine ⟨δ / 26, by positivity, ?_⟩
   intro x w hx hw t₀ ht₀
   have ht₀win : t₀ ∈ Set.Icc (-1 : ℝ) 2 := ⟨by linarith [ht₀.1], by linarith [ht₀.2]⟩
-
   have hslice_norm : ∀ s : ℝ, ‖x + φ s • w‖ < δ / 5 := by
     intro s
     have h1 : ‖x + φ s • w‖ ≤ ‖x‖ + |φ s| * ‖w‖ := by
@@ -340,7 +331,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     calc ‖x + φ s • w‖ < δ / 5 := hslice_norm s
       _ ≤ δ := by linarith [hδpos]
       _ ≤ _ := min_le_right _ _
-
   set F : ℝ → ℝ → M := fun s t =>
     (expMap (I := I) g p (show TangentSpace I p from (ψ t • (x + φ s • w))) : M) with hFdef
   have hFsmooth : IsSmoothVariation (I := I) F := by
@@ -363,7 +353,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
         (fun q : ℝ × ℝ => ψ q.2 • (x + φ q.1 • w)) q :=
       hlaunchMD.contMDiffAt.of_le ENat.LEInfty.out
     exact hexp.comp q hl8
-
   have houterL_field : ∀ s : ℝ,
       covDerivAlong (I := I) g (fun v : ℝ => F s v)
         (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F s u) v (1 : ℝ)) t₀ = 0 := by
@@ -382,7 +371,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
       rw [chartRepAt_apply, houterL_field s]
       exact map_zero _
     exact (hzero.differentiableAt_iff).mpr (differentiableAt_const _)
-
   have hsymm : ∀ v : ℝ,
       covDerivAlong (I := I) g (fun u : ℝ => F u v)
         (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u' : ℝ => F u u') v (1 : ℝ)) 0
@@ -400,7 +388,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
           (fun u : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u' : ℝ => F u u') v (1 : ℝ)) 0) t₀) t₀ := by
     rw [hfields]
     exact variationField_covDeriv_chartRep_differentiableAt (I := I) g F hFsmooth t₀
-
   have hcomm := commute_ds_dt_curvature (I := I) g F hFsmooth t₀ houterL houterR
   have hT1 : covDerivAlong (I := I) g (fun s : ℝ => F s t₀)
       (fun s : ℝ => covDerivAlong (I := I) g (fun v : ℝ => F s v)
@@ -412,8 +399,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     rw [hfun]
     exact covDerivAlong_zero (I := I) g (fun s' : ℝ => F s' t₀) 0
   rw [hT1, hfields, zero_sub, neg_eq_iff_eq_neg] at hcomm
-
-
   set γ : ℝ → M :=
     fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M) with hγdef
   set J : ∀ v : ℝ, TangentSpace I (γ v) := fun v : ℝ =>
@@ -425,7 +410,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     fun v hv => isOpen_Ioo.mem_nhds hv
   have ht₀win' : t₀ ∈ Set.Ioo (-1 : ℝ) 2 := ⟨by linarith [ht₀.1], by linarith [ht₀.2]⟩
   have hφ0 : φ 0 = 0 := hφid 0 ⟨by norm_num, by norm_num⟩
-
   have hcentral_eq : ∀ v ∈ Set.Ioo (-1 : ℝ) 2, F 0 v = γ v := by
     intro v hv
     change (expMap (I := I) g p (show TangentSpace I p from (ψ v • (x + φ 0 • w))) : M) = γ v
@@ -435,7 +419,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     intro v hv
     filter_upwards [hwin_nhds v hv] with u hu
     exact hcentral_eq u hu
-
   have hJ_eq : ∀ v ∈ Set.Ioo (-1 : ℝ) 2,
       (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u v) 0 (1 : ℝ) : E) = (J v : E) := by
     intro v hv
@@ -457,21 +440,18 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     intro v hv
     filter_upwards [hwin_nhds v hv] with u hu
     exact hJ_eq u hu
-
   have hDJ_ev : ∀ᶠ v in 𝓝 t₀,
       ((covDerivAlong (I := I) g (fun v' : ℝ => F 0 v')
         (fun v' : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u v') 0 (1 : ℝ)) v : E))
       = ((covDerivAlong (I := I) g γ J v : E)) := by
     filter_upwards [hwin_nhds t₀ ht₀win'] with v hv
     exact covDerivAlong_congr_curve (I := I) g _ _ (hcentral_ev v hv) (hJ_ev v hv)
-
   have houter_eq : ((covDerivAlong (I := I) g (fun v' : ℝ => F 0 v')
       (fun v : ℝ => covDerivAlong (I := I) g (fun v' : ℝ => F 0 v')
         (fun v' : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u v') 0 (1 : ℝ)) v) t₀ : E))
       = ((covDerivAlong (I := I) g γ
         (fun v : ℝ => covDerivAlong (I := I) g γ J v) t₀ : E)) :=
     covDerivAlong_congr_curve (I := I) g _ _ (hcentral_ev t₀ ht₀win') hDJ_ev
-
   have hfoot0 : F 0 t₀ = γ t₀ := hcentral_eq t₀ ht₀win'
   have hS_eq : (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u t₀) 0 (1 : ℝ) : E) = (J t₀ : E) :=
     hJ_eq t₀ ht₀win'
@@ -482,7 +462,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     rw [show curveVelocity (I := I) γ t₀ = mfderiv (𝓘(ℝ, ℝ)) I γ t₀ (1 : ℝ) from rfl]
     rw [hmf]
     rfl
-
   change covDerivAlong (I := I) g γ (fun v : ℝ => covDerivAlong (I := I) g γ J v) t₀
       + (DifferentialGeometry.Integral.Connection.riemannOp
           (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t₀))
@@ -499,15 +478,6 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
   linear_combination (norm := module) hfinal
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential in
-
-
-
-
-
-
-
-
-
 omit [T2Space M] in
 omit [SigmaCompactSpace M] in
 theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
@@ -533,7 +503,8 @@ theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
                   ((expMap (I := I) g p (show TangentSpace I p from (u • x)) : M)) from
                     mfderiv (𝓘(ℝ, ℝ)) I (fun s : ℝ =>
                       (expMap (I := I) g p
-                        (show TangentSpace I p from (u • (x + s • w))) : M)) 0 (1 : ℝ)) v) t) t) := by
+                        (show TangentSpace I p from (u • (x + s • w))) : M)) 0 (1 : ℝ)) v) t)
+                          t) := by
   classical
   haveI : T2Space M := gauss_t2Space_base (I := I)
   obtain ⟨δ₈, hδ₈pos, hδ₈⟩ :=
@@ -743,16 +714,6 @@ theorem radial_jacobi_one (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
   exact hstep.trans hgoal
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential in
-
-
-
-
-
-
-
-
-
-
 omit [T2Space M] in
 omit [SigmaCompactSpace M] in
 theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : M) :
@@ -776,7 +737,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
   have hδpos : 0 < δ := lt_min hδ₈pos (expMapC2Radius_pos (I := I) g p)
   refine ⟨δ / 26, by positivity, ?_⟩
   intro x w hx hw
-
   have hslice_norm : ∀ s : ℝ, ‖x + φ s • w‖ < δ / 5 := by
     intro s
     have h1 : ‖x + φ s • w‖ ≤ ‖x‖ + |φ s| * ‖w‖ := by
@@ -797,7 +757,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
           have := hslice_norm s
           nlinarith
       _ = δ := by ring
-
   set F : ℝ → ℝ → M := fun s t =>
     (expMap (I := I) g p (show TangentSpace I p from (ψ t • (x + φ s • w))) : M) with hFdef
   have hFsmooth : IsSmoothVariation (I := I) F := by
@@ -820,7 +779,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
         (fun q : ℝ × ℝ => ψ q.2 • (x + φ q.1 • w)) q :=
       hlaunchMD.contMDiffAt.of_le ENat.LEInfty.out
     exact hexp.comp q hl8
-
   set γ : ℝ → M :=
     fun v : ℝ => (expMap (I := I) g p (show TangentSpace I p from (v • x)) : M) with hγdef
   set J : ∀ v : ℝ, TangentSpace I (γ v) := fun v : ℝ =>
@@ -829,7 +787,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
         (expMap (I := I) g p (show TangentSpace I p from (v • (x + s • w))) : M)) 0 (1 : ℝ)
     with hJdef
   have hφ0 : φ 0 = 0 := hφid 0 ⟨by norm_num, by norm_num⟩
-
   have hcentral_eq : ∀ v ∈ Set.Ioo (-1 : ℝ) 2, F 0 v = γ v := by
     intro v hv
     change (expMap (I := I) g p (show TangentSpace I p from (ψ v • (x + φ 0 • w))) : M) = γ v
@@ -857,7 +814,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
       ((mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u v) 0 (1 : ℝ) : E)) = (J v : E) := by
     filter_upwards [isOpen_Ioo.mem_nhds (show (0 : ℝ) ∈ Set.Ioo (-1 : ℝ) 2 by norm_num)] with v hv
     exact hJ_eq v hv
-
   have hF0 : ∀ s : ℝ, F s 0 = p := by
     intro s
     change (expMap (I := I) g p (show TangentSpace I p from (ψ 0 • (x + φ s • w))) : M) = p
@@ -885,7 +841,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
       ((mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F s u) 0 (1 : ℝ) : E))
         = ((show TangentSpace I p from (x + φ s • w) : E)) :=
     Filter.Eventually.of_forall hlaunch
-
   have hφ_ev : φ =ᶠ[𝓝 (0 : ℝ)] id := by
     filter_upwards [isOpen_Ioo.mem_nhds (show (0 : ℝ) ∈ Set.Ioo (-1 : ℝ) 1 by norm_num)] with u hu
     exact hφid u ⟨hu.1.le, hu.2.le⟩
@@ -894,12 +849,9 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
     have h2 : HasDerivAt (fun s : ℝ => x + φ s • w) ((1 : ℝ) • w) 0 :=
       (hφderiv.smul_const w).const_add x
     simpa using h2
-
   have hcomm := commute_ds_dt_intrinsic (I := I) g F hFsmooth 0
-
   have hRHS := covDerivAlong_congr_curve (I := I) g
     (fun v : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F u v) 0 (1 : ℝ)) J hcentral_ev hJ_ev
-
   have hLHS := covDerivAlong_congr_curve (I := I) g
     (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => F s u) 0 (1 : ℝ))
     (fun s : ℝ => (show TangentSpace I p from (x + φ s • w))) hF0_ev hlaunch_ev
@@ -919,9 +871,6 @@ theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : 
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 theorem exists_jacobi_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]

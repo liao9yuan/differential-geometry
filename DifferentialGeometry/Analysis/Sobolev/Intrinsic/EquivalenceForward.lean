@@ -652,7 +652,7 @@ private lemma eLpNorm_gNormGrad_pou_mul_le_const_mul_wkpNormChart_smooth
   have hKα_sub : Kα ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
   obtain ⟨Cbridge, hCbridge_pos, hCbridge_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
+    eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
   set M_g_α : ℝ := gramInvL1SumSupOnPouTsupport (I := I) (M := M) g α
   have hM_nn : 0 ≤ M_g_α := gramInvL1SumSupOnPouTsupport_nonneg (I := I) (M := M) g α
@@ -1269,7 +1269,8 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_zero
     (eLpNorm_eq_zero_iff h_aestronglyMeasurable h_p_ne_zero).mp h_eLp_u_zero
   have hu_cont : Continuous u := hu_smooth.continuous
   have h_zero_cont : Continuous (fun _ : M => (0 : ℝ)) := continuous_const
-  have h_pos : (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g).IsOpenPosMeasure :=
+  have h_pos : (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M
+    g).IsOpenPosMeasure :=
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isOpenPosMeasure
       (I := I) (M := M) g
   have h_u_aeEq_const : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g]
@@ -1499,7 +1500,7 @@ private lemma gNormGrad_le_gNormG_aeEq_smooth_of_HasWeakRiemannianGradLp
           (σ x))
       =ᵐ[DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g]
       (fun _ => 0) :=
-    DifferentialGeometry.Analysis.Sobolev.IntrinsicLp.HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
+    HasWeakRiemannianGradLp.pairing_diff_smooth_aeEq_zero
       (I := I) (M := M) hG_weak hgradFun_weak hG_p1 hgrad_p1 σ
   filter_upwards [h_pair_zero] with x hx
   have hσ_eq :

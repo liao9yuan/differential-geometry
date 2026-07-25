@@ -126,7 +126,8 @@ variable [I.Boundaryless]
 def chartFlowOrbit (Φ : (E × E) × ℝ → E × E) (z₀ : E × E) : ℝ → E × E :=
   fun t => Φ (z₀, t)
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Module.Finite ℝ E]
+    [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbit_apply (Φ : (E × E) × ℝ → E × E) (z₀ : E × E) (t : ℝ) :
     chartFlowOrbit Φ z₀ t = Φ (z₀, t) := rfl
 
@@ -141,13 +142,15 @@ def chartFlowGeodesicCurve (Φ : (E × E) × ℝ → E × E) (p : M) (v_chart : 
   fun t => (extChartAt I p).symm
     (chartFlowOrbit Φ ((extChartAt I p p, v_chart)) t).1
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [I.Boundaryless] in
 @[simp] lemma chartFlowGeodesicCurve_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (v_chart : E) (t : ℝ) :
     chartFlowGeodesicCurve (I := I) Φ p v_chart t =
       (extChartAt I p).symm (Φ ((extChartAt I p p, v_chart), t)).1 := rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [I.Boundaryless] in
 theorem chartFlowGeodesicCurve_zero
     {Φ : (E × E) × ℝ → E × E} {p : M} {v_chart : E}
     (hinit : Φ ((extChartAt I p p, v_chart), 0) = (extChartAt I p p, v_chart)) :
@@ -345,7 +348,8 @@ theorem chartFlowGeodesicCurve_eq_of_chartPhase_solution_eventually
   rw [← hγ_recover, ht_eq_fst]
   rfl
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [CompleteSpace E] in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [I.Boundaryless] [CompleteSpace E] in
 @[simp] theorem chartFlowGeodesicCurve_zero_velocity_eq_const
     (p : M) {Φ : (E × E) × ℝ → E × E}
     (hinit : Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =

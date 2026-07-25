@@ -70,8 +70,6 @@ noncomputable def phaseErr (κ : ℝ≥0) : ℝ≥0 where
       (sub_nonneg.mpr (Real.one_le_exp zero_le_one))
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-
-
 theorem phaseErr_mono {κ κ' : ℝ≥0} (hle : κ ≤ κ') :
     phaseErr κ ≤ phaseErr κ' := by
   apply NNReal.coe_le_coe.mp
@@ -89,8 +87,6 @@ theorem phaseErr_mono {κ κ' : ℝ≥0} (hle : κ ≤ κ') :
       mul_le_mul_of_nonneg_left hexp κ'.coe_nonneg
 
 omit [NormedSpace ℝ E] in
-
-
 theorem phaseField_lip
     {a : E × E → E} {s : Set (E × E)} {κ : ℝ≥0}
     (ha : LipschitzOnWith κ a s) :

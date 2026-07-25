@@ -4,9 +4,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -50,7 +47,8 @@ variable {u : Set M}
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInner_mdiffAt
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -106,7 +104,6 @@ theorem metricFrameComp_fixedBaseSwap_of_solution
   refine fixedBaseOnReg_of_timeDerivWithin (I := I)
     (D.regular_subset) (fun {t} ht => D.regular_mem_nhds ht)
     hSmooth hFdiff hFtdiff ?hTime
-
   intro t ht x
   have heq := hS.equation ⟨t, ht⟩ x (frame a x) (frame b x)
   simpa [ricciCompInFrame] using heq
@@ -142,19 +139,15 @@ theorem metricCovDerivDeriv_of_solution
     MetricCovDerivDerivativeComponentsInFrameOnLocal (I := I) S frame u
       (fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d a b) := by
   intro t x hx d a b
-
-
   have h1 := (metricFrameComp_fixedBaseSwap_of_solution (I := I) S hS frame a b
     (hSmooth a b) (hFdiff a b)
     (fun t' ht' x' hx' => (mdifferentiableAt_const (c := (-2 : Real))).mul
       (hFtdiff a b t' ht' x' hx'))) (t : Real) t.2 x hx (frame d x)
-
   have h2 := hS.equation t x
     ((S.family.connection (t : Real) (frame a) x) (frame d x)) (frame b x)
   have h3 := hS.equation t x
     (frame a x) ((S.family.connection (t : Real) (frame b) x) (frame d x))
   have hcomb := (h1.sub h2).sub h3
-
   have hval :
       extDerivFun (I := I)
             (fun y : M => -2 * ricciCompInFrame (I := I) S frame (t : Real) y a b) x (frame d x) -
@@ -168,7 +161,7 @@ theorem metricCovDerivDeriv_of_solution
     simp only [ricciCovDerivCompInFrame, RicciAtFamily.toTensorField_apply,
       ContinuousLinearMap.smul_apply, smul_eq_mul]
     ring
-  show HasDerivWithinAt
+  change HasDerivWithinAt
       (fun s : Real => metricCovDerivCompInFrameAtBase (I := I) S frame (t : Real) s x d a b)
       ((-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame (t : Real) x d a b)
       D.carrier (t : Real)
@@ -195,7 +188,8 @@ def connectionVariationBlackBox_of_solution
         (fun y : M => ricciCompInFrame (I := I) S frame t y a b) x) :
     ConnectionVariationBlackBoxInFrameOn (I := I) S frame u
       (fun t x d a b => ricciCovDerivCompInFrame (I := I) S frame t x d a b) where
-  metricCovDerivDt := fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d a b
+  metricCovDerivDt := fun t x d a b => (-2 : Real) * ricciCovDerivCompInFrame (I := I) S frame t x d
+                                         a b
   metricCovDerivDerivative :=
     metricCovDerivDeriv_of_solution (I := I) S hS frame hSmooth hFdiff hFtdiff
   metricCovDerivRicciFlow := fun _ _ _ _ _ => rfl

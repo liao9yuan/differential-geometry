@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

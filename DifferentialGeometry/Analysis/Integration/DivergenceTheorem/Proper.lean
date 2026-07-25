@@ -685,7 +685,8 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport
       have hU_int : K ⊆ interior U := by
         rwa [← subset_interior_iff_mem_nhdsSet] at hU_nhds
       have hxU : x ∈ interior U := hU_int hxK
-      have hU_x_nhd : U ∈ 𝓝 x := mem_nhds_iff.mpr ⟨interior U, interior_subset, isOpen_interior, hxU⟩
+      have hU_x_nhd : U ∈ 𝓝 x := mem_nhds_iff.mpr
+        ⟨interior U, interior_subset, isOpen_interior, hxU⟩
       have hev_φα : ∀ α : M, (φ α) =ᶠ[𝓝 x] (fun y => (ρ α : M → ℝ) y) := by
         intro α
         filter_upwards [hU_x_nhd] with y hyU

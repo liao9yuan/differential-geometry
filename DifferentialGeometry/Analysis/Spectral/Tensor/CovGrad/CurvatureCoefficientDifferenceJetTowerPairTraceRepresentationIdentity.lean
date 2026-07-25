@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerCurvDiffGridWindow
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredDifference
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannLoweredGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerRiemannMixedBiContraction
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
@@ -26,8 +26,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -40,7 +38,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+  (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply
+  ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply
+  ccTensorBilinSymm_symm)
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
@@ -55,7 +56,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma appCcRS_zero_left_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (W : SmoothCcTensor g₀ a b) :
     ccOperatorFieldComp (I := I) (M := M) g₀ a b c (0 : SmoothCcTensor g₀ b c) W = 0 := by
@@ -64,7 +66,8 @@ private lemma appCcRS_zero_left_cc (g₀ : SmoothRiemannianMetric I M) (a b c : 
   intro x
   apply ContinuousLinearMap.ext
   intro D
-  rw [show ((ccOperatorFieldComp (I := I) (M := M) g₀ a b c (0 : SmoothCcTensor g₀ b c) W).toSection x) D =
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g₀ a b c (0 : SmoothCcTensor g₀ b c) W).toSection
+    x) D =
       ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from
         (0 : SmoothCcTensor g₀ b c).toSection x)
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W.toSection x) D)) from by
@@ -77,7 +80,8 @@ private lemma appCcRS_zero_left_cc (g₀ : SmoothRiemannianMetric I M) (a b c : 
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma appCcRS_right_zero_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
     ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ (0 : SmoothCcTensor g₀ a b) = 0 := by
@@ -86,7 +90,8 @@ private lemma appCcRS_right_zero_cc (g₀ : SmoothRiemannianMetric I M) (a b c :
   intro x
   apply ContinuousLinearMap.ext
   intro D
-  rw [show ((ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ (0 : SmoothCcTensor g₀ a b)).toSection x) D =
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ (0 : SmoothCcTensor g₀ a b)).toSection
+    x) D =
       ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from
           (0 : SmoothCcTensor g₀ a b).toSection x) D)) from by
@@ -119,7 +124,8 @@ private lemma covGrad_slotExtend_toSection_rsDomDomCongr_b
       Tensor0SSpace.toModel y w = (y : Tensor0SSpace (s + 1 + 1) I x) w := fun _ _ => rfl
   conv_rhs => rw [hfib, rsDomDomCongr_apply_eval (I := I) (M := M) (r := r + 1)
     (Equiv.swap (0 : Fin (s + 1 + 1)) 1)
-    ((slotExtend (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ)).toSection x) d m]
+    ((slotExtend (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ)).toSection x) d
+      m]
   conv_rhs => rw [← hfib]
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g (r + 1) (s + 1)
     (slotExtend (I := I) (M := M) g r s Φ) x d m]
@@ -168,7 +174,8 @@ private lemma covGrad_slotExtend_toSection_rsDomDomCongr_b
   rw [hdir, htail]
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma slotExtend_zero_cc (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     slotExtend (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) = 0 := by
   apply SmoothCcTensor.ext
@@ -191,14 +198,20 @@ private lemma slotExtend_zero_cc (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) =
       (0 : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x).comp
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D) from rfl]
-  rw [ContinuousLinearMap.zero_comp, map_zero]
+  have hcurry0 :
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+          (0 : TangentSpace I x →L[ℝ] Tensor0SSpace s I x) =
+        (0 : Tensor0SSpace (s + 1) I x) :=
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm.map_zero
+  rw [ContinuousLinearMap.zero_comp, hcurry0]
   rw [show ((0 : SmoothCcTensor g (r + 1) (s + 1)).toSection x) =
       (0 : TensorRSSpace (r + 1) (s + 1) I x) from by
     rw [SmoothCcTensor.toSection_zero]; rfl]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma rsDomDomCongrSection_zero_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) :
     rsDomDomCongrSection (I := I) (M := M) g r s σ (0 : SmoothCcTensor g r s) = 0 := by
@@ -264,7 +277,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedCovGrad_appCcRS_parallel (g₀ : SmoothRiemannianMetric I M)
     (a b c : ℕ) (Φ : SmoothCcTensor g₀ b c)
     (hΦ : covGrad (I := I) (M := M) g₀ b c Φ = 0) (W : SmoothCcTensor g₀ a b) :
-    ∀ j : ℕ, iteratedCovGrad (I := I) g₀ a c j (ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ W) =
+    ∀ j : ℕ, iteratedCovGrad (I := I) g₀ a c j (ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ W)
+      =
       ccOperatorFieldComp (I := I) (M := M) g₀ a (b + j) (c + j)
         (slotExtendIter (I := I) (M := M) g₀ b c j Φ)
         (iteratedCovGrad (I := I) g₀ a b j W)
@@ -308,7 +322,8 @@ def pairTraceKernelSlotPerm : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) • unitTensor (I := I) (M := M) x := by
   apply Tensor0SSpace.toModel_injective
@@ -325,7 +340,8 @@ private lemma tensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
   rw [smul_eq_mul, mul_one]
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 lemma slotExtendIter_two_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -408,12 +424,12 @@ lemma slotExtendIter_two_toModel (g₀ : SmoothRiemannianMetric I M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 theorem mixedCoeff_backgroundDifference_eq_pairTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₁ -
         ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ =
-      (2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+      (2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+        (pairTraceKernel (I := I) (M := M) g₀)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             (riemannLoweredBackgroundDifference (I := I) (M := M) g₀ g₁))) := by
@@ -506,7 +522,8 @@ theorem mixedCoeff_backgroundDifference_eq_pairTrace
     rfl
   have hRHS : Tensor0SSpace.toModel
       ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-        ((2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+        ((2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (pairTraceKernel (I := I) (M := M) g₀)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) D) v =
       2 * ∑ b : Fin (Module.finrank ℝ E), ∑ a : Fin (Module.finrank ℝ E),
@@ -516,23 +533,28 @@ theorem mixedCoeff_backgroundDifference_eq_pairTrace
           unitModel (I := I) (M := M) g₀ 4 X x
             ![v 0, v 1, (smoothOrthoFrame (I := I) g₀ x a x : E),
               (smoothOrthoFrame (I := I) g₀ x b x : E)] := by
-    rw [show (((2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+    rw [show (((2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+      (pairTraceKernel (I := I) (M := M) g₀)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) =
-        (2 : ℝ) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+        (2 : ℝ) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (pairTraceKernel (I := I) (M := M) g₀)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
-    rw [show ((2 : ℝ) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+    rw [show ((2 : ℝ) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+      (pairTraceKernel (I := I) (M := M) g₀)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) :
         TensorRSSpace 2 2 I x) D =
-        (2 : ℝ) • (((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+        (2 : ℝ) • (((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (pairTraceKernel (I := I) (M := M) g₀)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) D) from rfl]
     rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     congr 1
-    rw [show (((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (pairTraceKernel (I := I) (M := M) g₀)
+    rw [show (((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+      (pairTraceKernel (I := I) (M := M) g₀)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 pairTraceKernelSlotPerm
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) D) =
         (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from

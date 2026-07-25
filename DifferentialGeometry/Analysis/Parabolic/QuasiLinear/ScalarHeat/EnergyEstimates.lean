@@ -32,9 +32,9 @@ theorem mild_solution_norm_le
     {L : NNReal} (hN : LipschitzWith L N)
     {T : ℝ} (hT : 0 ≤ T) {u : ℝ → scalarHs (I := I) (M := M) g σ}
     (hu_cont : ContinuousOn u (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = heatSemigroupHsExt (I := I) (M := M) g σ t u₀ +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g σ (t - τ) (N (u τ))) :
     ∀ t ∈ Set.Icc (0:ℝ) T,
       ‖u t‖ ≤ (‖u₀‖ + ‖N 0‖ * t) * Real.exp ((L : ℝ) * t) := by

@@ -40,10 +40,12 @@ lemma deGiorgiFderivVec_apply
     {η : E → ℝ} {x : E} (i : Fin d) :
     deGiorgiFderivVec η x i = (fderiv ℝ η x) (EuclideanSpace.single i 1) := by
   calc
-    deGiorgiFderivVec η x i = inner ℝ (deGiorgiFderivVec η x) (EuclideanSpace.single i (1 : ℝ)) := by
+    deGiorgiFderivVec η x i = inner ℝ (deGiorgiFderivVec η x)
+      (EuclideanSpace.single i (1 : ℝ)) := by
       simpa using
         (EuclideanSpace.inner_single_right (i := i) (a := (1 : ℝ)) (deGiorgiFderivVec η x)).symm
-    _ = ((InnerProductSpace.toDual ℝ E) (deGiorgiFderivVec η x)) (EuclideanSpace.single i (1 : ℝ)) := by
+    _ = ((InnerProductSpace.toDual ℝ E) (deGiorgiFderivVec η x))
+      (EuclideanSpace.single i (1 : ℝ)) := by
       rw [InnerProductSpace.toDual_apply_apply]
     _ = (fderiv ℝ η x) (EuclideanSpace.single i 1) := by
       simp [deGiorgiFderivVec]
@@ -213,7 +215,8 @@ private lemma truncGrad_eq_on_superlevel
   let hw_shift : MemW1pWitness 2 (fun x => u x - k) Ω := hu.sub_const hΩ k
   let hw_diff : MemW1pWitness 2 (fun x => u x - k - w x) Ω := hw_shift.sub hw_trunc
   have hcomp :
-      ∀ i : Fin d, ∀ᵐ x ∂(volume.restrict Ω), k < u x → hu.weakGrad x i = hw_trunc.weakGrad x i := by
+      ∀ i : Fin d, ∀ᵐ x ∂(volume.restrict Ω), k < u x → hu.weakGrad x i = hw_trunc.weakGrad x
+        i := by
     intro i
     have hz := hw_diff.weakGrad_ae_eq_zero_on_zeroSet hΩ i
     filter_upwards [hz] with x hx hku
@@ -408,7 +411,8 @@ theorem caccioppoli_weighted_of_subsolution
       Integrable (fun x => gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2) μ := by
     refine Integrable.mono' (hpos_sq_int.const_mul (C₁ ^ 2)) ?_ ?_
     · exact
-        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow 2).aemeasurable).mul
+        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow
+          2).aemeasurable).mul
           hpos_sq_int.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
     · filter_upwards with x
       have hfd_sq_le : gradEtaNorm x ^ 2 ≤ C₁ ^ 2 := by
@@ -430,7 +434,8 @@ theorem caccioppoli_weighted_of_subsolution
     refine Integrable.mono' (hweighted_grad_sq_int.const_mul A.Λ) ?_ ?_
     · exact
         (((hη.continuous.pow 2).aemeasurable).mul
-          (aestronglyMeasurable_bilinFormIntegrandOfCoeff A hw_trunc hw_trunc).aemeasurable).aestronglyMeasurable
+          (aestronglyMeasurable_bilinFormIntegrandOfCoeff A hw_trunc
+            hw_trunc).aemeasurable).aestronglyMeasurable
     · filter_upwards [A.quadratic_upper, hE_nonneg] with x hx_quad hx_nonneg
       have hη_sq_nonneg : 0 ≤ η x ^ 2 := by positivity
       have hdom :
@@ -459,7 +464,8 @@ theorem caccioppoli_weighted_of_subsolution
   have hcross_upper_pt :
       ∀ᵐ x ∂μ,
         crossAbs x ≤
-          (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ * (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2) := by
+          (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ *
+            (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2) := by
     filter_upwards [hcoeff] with x hx
     have hx' :=
       weighted_caccioppoli_pointwise_core
@@ -471,7 +477,8 @@ theorem caccioppoli_weighted_of_subsolution
   have hcross_upper_int :
       Integrable
         (fun x =>
-          (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ * (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2)) μ := by
+          (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ * (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2))
+            μ := by
     simpa [mul_assoc, add_comm, add_left_comm, add_assoc] using
       (hleft_int.const_mul (1 / 2 : ℝ)).add (hbound_int.const_mul (2 * A.Λ))
   have hcrossAbs_int :
@@ -480,8 +487,10 @@ theorem caccioppoli_weighted_of_subsolution
     · simpa [crossAbs, gradEtaNorm, fluxNorm, mul_assoc, mul_left_comm, mul_comm] using
         ((((hη.continuous.aestronglyMeasurable).mul
           hw_trunc.memLp.aestronglyMeasurable).mul
-          ((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aestronglyMeasurable)).mul
-          ((aestronglyMeasurable_matMulE A hw_trunc.weakGrad_memLp.aestronglyMeasurable).norm)).const_mul
+          ((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠
+                                       0)).norm.aestronglyMeasurable)).mul
+          ((aestronglyMeasurable_matMulE A
+            hw_trunc.weakGrad_memLp.aestronglyMeasurable).norm)).const_mul
           (2 : ℝ)
     · filter_upwards [hcross_upper_pt] with x hx
       have hcross_nonneg : 0 ≤ crossAbs x := by
@@ -494,7 +503,8 @@ theorem caccioppoli_weighted_of_subsolution
         dsimp [crossAbs]
         exact mul_nonneg (mul_nonneg hcoeff_nonneg hflux_nonneg) hgrad_nonneg
       have hrhs_nonneg :
-          0 ≤ (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ * (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2) := by
+          0 ≤ (1 / 2 : ℝ) * leftTerm x + 2 * A.Λ *
+            (gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2) := by
         exact le_trans hcross_nonneg hx
       simpa [Real.norm_eq_abs, abs_of_nonneg hcross_nonneg, abs_of_nonneg hrhs_nonneg] using hx
   have hcore_eq_ae :
@@ -586,7 +596,8 @@ theorem caccioppoli_weighted_of_subsolution
           abs_of_nonneg (norm_nonneg _), mul_assoc, mul_left_comm, mul_comm]
           using hcore_integral
       have hcross_int' :
-          Integrable (fun x => 2 * η x * |positivePartSub u k x| * gradEtaNorm x * |fluxNorm x|) μ := by
+          Integrable (fun x => 2 * η x * |positivePartSub u k x| * gradEtaNorm x * |fluxNorm x|)
+            μ := by
         simpa [crossAbs, fluxNorm, gradEtaNorm, abs_of_nonneg positivePartSub_nonneg,
           abs_of_nonneg (norm_nonneg _), mul_assoc, mul_left_comm, mul_comm]
           using hcrossAbs_int
@@ -631,7 +642,8 @@ theorem caccioppoli_weighted_of_subsolution
         ≤ (4 * A.Λ * ∫ x, gradEtaNorm x ^ 2 * |positivePartSub u k x| ^ 2 ∂μ) / A.lam := hdiv
     _ = 4 * ellipticityRatio A *
           ∫ x in Ω, ‖fderiv ℝ η x‖ ^ 2 * |positivePartSub u k x| ^ 2 ∂volume := by
-          simp [μ, ellipticityRatio, gradEtaNorm, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+          simp [μ, ellipticityRatio, gradEtaNorm, div_eq_mul_inv, mul_assoc, mul_left_comm,
+            mul_comm]
 
 /-- Ball-specialized weighted Caccioppoli inequality, using the generalized
 cutoff admissibility theorem from the previous section. -/
@@ -765,7 +777,8 @@ theorem deGiorgi_energy_estimate_on_concentricBalls_of_ballPosPart
         (Metric.ball x₀ s) volume := by
     refine Integrable.mono' (hpos_sq_int.const_mul (Cη ^ 2)) ?_ ?_
     · exact
-        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow 2).aemeasurable).mul
+        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow
+          2).aemeasurable).mul
           hpos_sq_int.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
     · filter_upwards with x
       have hfd_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 := by

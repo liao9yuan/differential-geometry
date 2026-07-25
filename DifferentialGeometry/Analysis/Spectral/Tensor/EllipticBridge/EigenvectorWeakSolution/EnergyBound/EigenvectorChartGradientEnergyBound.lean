@@ -32,7 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma tensorResolventL2_eigenbasisVec_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -52,7 +51,6 @@ private lemma tensorResolventL2_eigenbasisVec_eq
         g r s) i)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma norm_tensorResolventEigenbasisVec_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -65,7 +63,6 @@ private lemma norm_tensorResolventEigenbasisVec_eq_one
       g r s)).norm_eq_one i
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvectorResolvent_h1NormSq_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -97,7 +94,6 @@ theorem eigenvectorResolvent_h1NormSq_eq
   rw [h_self, h_var, h_l2, real_inner_smul_left, real_inner_self_eq_norm_sq]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvectorResolvent_h1Norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -146,7 +142,6 @@ theorem eigenvectorResolvent_h1Norm_le
   exact (abs_le_of_sq_le_sq' h_le_sq h_rhs_nn).2
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -176,9 +171,6 @@ private lemma inv_mul_sqrt_eq_sqrt_inv {μ : ℝ} (hμ : 0 < μ) :
   field_simp
   linarith [h_mul_self]
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 800000 in
-
 private lemma eigenvectorChartPartialCLM_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -188,10 +180,7 @@ private lemma eigenvectorChartPartialCLM_norm_le
       ‖eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k‖ * ‖x‖ :=
   (eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k).le_opNorm x
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvectorChartWeakPartial_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)

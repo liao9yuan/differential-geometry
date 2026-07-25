@@ -123,7 +123,8 @@ private lemma memLp_restrict_of_memLp_restrict
   rw [← h_eq]
   exact hf.restrict K
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ
@@ -161,7 +162,8 @@ private lemma exists_smooth_global_extension
     change η y * φ y = φ y
     rw [hη_one y hy, one_mul]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 theorem generic_per_pair_ibp
     (α : M)
     {v : EuclN → ℝ}
@@ -357,7 +359,6 @@ private lemma integrable_triple
   rw [h_reassoc] at full_int
   exact full_int.restrict
 
-set_option maxHeartbeats 1600000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_diff_variational_identity

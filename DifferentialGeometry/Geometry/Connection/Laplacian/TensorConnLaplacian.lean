@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -251,7 +249,8 @@ theorem rawTensorConnLap_smul [CompleteSpace E]
   rw [h_second_smul, h_smulT]
   simp only [ContinuousLinearMap.smul_apply, smul_sub]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma cov_eq_zero_of_eventually_zero_on_open
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
@@ -402,7 +401,8 @@ section CompactSupport
 
 variable [CompleteSpace E]
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [CompleteSpace E] in
 private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
         (fun x : M => TensorRSSpace r s I x)⟯)

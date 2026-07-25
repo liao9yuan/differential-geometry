@@ -17,7 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] in
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem bareVel_to_chartDeriv
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (γ : ℝ → M) (s : Set ℝ) (t : ℝ)
     (hsrc : γ t ∈ (chartAt H α).source)
@@ -37,10 +36,9 @@ private theorem bareVel_to_chartDeriv
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
-
 private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : ℝ → M)
     (hγ0 : γ 0 = α)
-    (hcw : ContinuousWithinAt γ (Set.Ici (0:ℝ)) 0) :
+    (hcw : ContinuousWithinAt γ (Set.Ici (0 : ℝ)) 0) :
     ∃ δ' : ℝ, 0 < δ' ∧ ∀ t ∈ Set.Icc (0:ℝ) δ',
       γ t ∈ (extChartAt I α).source ∧
         extChartAt I α (γ t) ∈ Metric.ball (extChartAt I α α) a := by
@@ -65,7 +63,8 @@ private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : 
   have hmem : γ t ∈ U := hW_sub ⟨hε_sub htball, ht.1⟩
   exact ⟨hmem.1, hmem.2⟩
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 private theorem weak_datum_uniqueness_core
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a : ℝ≥0} {δ₀ : ℝ} {K : ℝ≥0} (ha_pos : 0 < (a:ℝ)) (hδ₀_pos : 0 < δ₀)

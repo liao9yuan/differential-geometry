@@ -7,9 +7,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -23,6 +20,8 @@ set_option linter.unusedDecidableInType false
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.SlotAlgebra
@@ -279,7 +278,7 @@ omit [FiniteDimensional ℝ E] in
 
 
 theorem one_form_third_comm_of_coord
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
     (alpha :
@@ -310,7 +309,7 @@ theorem one_form_third_comm_of_coord
 
 
 theorem one_form_third_comm_of_coord_ijk
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
     (alpha :
@@ -334,7 +333,8 @@ theorem one_form_third_comm_of_coord_ijk
         (fun a => basis (slots ((Equiv.swap (0 : Fin 3) 1) a))) =
           vec3 (basis (slots 1)) (basis (slots 0)) (basis (slots 2)) := by
       funext q
-      fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [Equiv.swap_apply_def, vec3,
+        DifferentialGeometry.Integral.Connection.vec3]
     simpa [hslots, hswap] using h
 
 
@@ -500,7 +500,7 @@ theorem metricTraceInput_one_eq_vec3 {x : M}
 
 
 theorem oneForm_ricci_trace_comm_of_third_comm
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}

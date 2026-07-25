@@ -2,9 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -175,15 +172,12 @@ theorem sum_trace_coordContract_rough {s : Nat}
       coordContract (s := s) gInv (traceFirst2Comp gInv H2) cT := by
   classical
   unfold coordContract traceFirst2Comp freezeFirst2Comp
-
   trans (∑ i : Idx, ∑ j : Idx, ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
       gInv i j *
         ((∏ a : Fin s, gInv (I0 a) (J0 a)) *
             H2 (Fin.cons i (Fin.cons j I0)) * cT J0))
-  ·
-    simp_rw [Finset.mul_sum]
-  ·
-    rw [sum_comm_blocks (fun i j I0 J0 =>
+  · simp_rw [Finset.mul_sum]
+  · rw [sum_comm_blocks (fun i j I0 J0 =>
       gInv i j *
         ((∏ a : Fin s, gInv (I0 a) (J0 a)) *
             H2 (Fin.cons i (Fin.cons j I0)) * cT J0))]
@@ -210,15 +204,11 @@ theorem sum_trace_coordContract_nabla {s : Nat}
             (freezeFirst1Comp H1 i) (freezeFirst1Comp H1 j)) =
       coordContract (s := s + 1) gInv H1 H1 := by
   classical
-
-
   symm
   unfold coordContract freezeFirst1Comp
   rw [sum_fin_cons2 (fun K L : Fin (s + 1) -> Idx =>
     (∏ a : Fin (s + 1), gInv (K a) (L a)) * H1 K * H1 L)]
-
   simp_rw [Fin.prod_univ_succ, Fin.cons_zero, Fin.cons_succ]
-
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -385,14 +375,12 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
             (metricTrace0S2TensorInBasis (I := I) basis gInv nabla2T) T basis +
         2 * coordInner0S (I := I) (x := x) (s + 1) gInv nablaT nablaT basis := by
   classical
-
   set cT : (Fin s -> Idx) -> Real :=
     fun J0 => tensor0SComponent (I := I) T (fun k => basis k) J0 with hcT
   set cH1 : (Fin (s + 1) -> Idx) -> Real :=
     fun J0 => tensor0SComponent (I := I) nablaT (fun k => basis k) J0 with hcH1
   set cH2 : (Fin (s + 2) -> Idx) -> Real :=
     fun J0 => tensor0SComponent (I := I) nabla2T (fun k => basis k) J0 with hcH2
-
   have hexpand :
       metricTrace0S2InBasis (I := I) basis gInv normSecond Fin.elim0 =
         ∑ i : Idx, ∑ j : Idx,
@@ -406,7 +394,6 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
     refine Finset.sum_congr rfl fun i _ => ?_
     refine Finset.sum_congr rfl fun j _ => ?_
     congr 1
-
     have hinput :
         normSecond (metricTraceInput (I := I) (basis i) (basis j) Fin.elim0) =
           normSecond (vec2 (I := I) (basis i) (basis j)) := by
@@ -417,7 +404,6 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
           DifferentialGeometry.Integral.Connection.vec2]
       · rfl
     rw [hinput, hprod i j]
-
     have hRough :
         coordInner0S (I := I) (x := x) s gInv
             (freezeFirstTwoArgs0S (I := I) nabla2T (basis i) (basis j)) T basis =
@@ -441,7 +427,6 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
       · funext K0; rw [tensor0S_curry_comp (I := I) nablaT basis i K0]
       · funext K0; rw [tensor0S_curry_comp (I := I) nablaT basis j K0]
     rw [hRough, hNab]
-
   rw [hexpand]
   have hsplit :
       (∑ i : Idx, ∑ j : Idx,
@@ -467,11 +452,8 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
     refine Finset.sum_congr rfl fun j _ => ?_
     ring
   rw [hsplit]
-
   rw [sum_trace_coordContract_rough gInv cH2 cT]
   rw [sum_trace_coordContract_nabla gInv cH1]
-
-
   have hRL :
       coordContract (s := s) gInv (traceFirst2Comp gInv cH2) cT =
         coordInner0S (I := I) (x := x) s gInv
@@ -481,7 +463,6 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
     refine congrArg (fun f => coordContract (s := s) gInv f cT) ?_
     funext J0
     rw [metricTrace0S2TensorInBasis_comp (I := I) basis gInv nabla2T J0]
-
   have hNN :
       coordContract (s := s + 1) gInv cH1 cH1 =
         coordInner0S (I := I) (x := x) (s + 1) gInv nablaT nablaT basis := by

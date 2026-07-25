@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -180,7 +177,6 @@ theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
     refine HasDerivWithinAt.fun_sum ?_
     intro m _hm
     have hm := h_dt t x m
-
     have hmul := hm.mul hm
     have hgoal :
         HasDerivWithinAt (fun s : Real => level s x m * level s x m)
@@ -188,7 +184,6 @@ theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
       refine hmul.congr_deriv ?_
       ring
     simpa [pow_two] using hgoal
-
   have hval :
       (∑ m : Fin r → Idx,
           2 * level (t : Real) x m * levelDt (t : Real) x m) =
@@ -235,7 +230,6 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
   classical
   obtain ⟨h_lap_eq, _h_next⟩ := h_lap
   intro t x
-
   have hderiv :
       HasDerivWithinAt
         (fun s : Real => compNormSqMulti (level s x))
@@ -243,7 +237,6 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
         D.carrier
         (t : Real) :=
     hasDerivWithinAt_compNormSqMulti (D := D) level levelDt h_dt t x
-
   have hfun :
       HasDerivWithinAt
         (fun s : Real => normSq s x)
@@ -253,16 +246,12 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
     refine hderiv.congr ?_ ?_
     · intro s _hs; exact h_normSq s x
     · exact h_normSq (t : Real) x
-
-
   have hval :
       normLap (t : Real) x +
           (-2 * nextNormSq (t : Real) x +
             multiReactionDown level levelDt levelLap (t : Real) x) =
         2 * compPairMulti (levelDt (t : Real) x) (level (t : Real) x) := by
     rw [h_lap_eq (t : Real) x]
-
-
     set N : Real := nextNormSq (t : Real) x with hNdef
     have hpair :
         compPairMulti (levelLap (t : Real) x) (level (t : Real) x) +
@@ -275,7 +264,6 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
       refine Finset.sum_congr rfl fun m _ => ?_
       ring
     unfold multiReactionDown
-
     have : 2 * compPairMulti (levelLap (t : Real) x) (level (t : Real) x) + 2 * N +
           (-2 * N +
             2 * compPairMulti

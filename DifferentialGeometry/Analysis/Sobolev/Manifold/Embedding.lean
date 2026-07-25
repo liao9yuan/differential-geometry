@@ -24,7 +24,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 theorem Euclidean.wkpNorm_zero_le_wkpNorm
-    {d : ℕ} {k : ℕ} {p : ℝ≥0∞} {u : EuclideanSpace ℝ (Fin d) → ℝ} {Ω : Set (EuclideanSpace ℝ (Fin d))} :
+    {d : ℕ} {k : ℕ} {p : ℝ≥0∞} {u : EuclideanSpace ℝ (Fin d) → ℝ}
+      {Ω : Set (EuclideanSpace ℝ (Fin d))} :
     eLpNorm u p (MeasureTheory.volume.restrict Ω) ≤
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
@@ -33,7 +34,8 @@ theorem Euclidean.wkpNorm_zero_le_wkpNorm
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
           (d := d) p j α u Ω) p (MeasureTheory.volume.restrict Ω)
-  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω =
+  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u
+    Ω =
       ∑ j ∈ Finset.range (k + 1), innerSum j :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum k p u Ω
   have h_inner0 : innerSum 0 = eLpNorm u p (MeasureTheory.volume.restrict Ω) := by
@@ -229,7 +231,8 @@ theorem chartPushed_memLp_of_memWkpChart_subexp
     chartPushed (I := I) (M := M) ρ α u with hf_def
   let fclean : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     Set.indicator Sα f
-  have hae : f =ᵐ[MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)] fclean := by
+  have hae : f =ᵐ[MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)]
+    fclean := by
     have hae_in_target : ∀ᵐ y ∂(MeasureTheory.volume.restrict
           (chartTargetEuclid (I := I) (M := M) α)),
           y ∈ chartTargetEuclid (I := I) (M := M) α := by
@@ -293,7 +296,8 @@ theorem eLpNorm_chartPushed_q_le_chartPushed_p_subexp
     chartPushed (I := I) (M := M) ρ α u with hf_def
   let fclean : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     Set.indicator Sα f
-  have hae : f =ᵐ[MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)] fclean := by
+  have hae : f =ᵐ[MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)]
+    fclean := by
     have hae_in_target : ∀ᵐ y ∂(MeasureTheory.volume.restrict
           (chartTargetEuclid (I := I) (M := M) α)),
           y ∈ chartTargetEuclid (I := I) (M := M) α := by

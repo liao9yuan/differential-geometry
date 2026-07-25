@@ -64,7 +64,6 @@ variable (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
   (hΦsmooth : ContDiffOn ℝ ∞ Φ U)
 
 include hΦ hf hUopen hΦsmooth in
-
 omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply
     {x : E} {s : ℝ} (hxsU : (x, s) ∈ U)

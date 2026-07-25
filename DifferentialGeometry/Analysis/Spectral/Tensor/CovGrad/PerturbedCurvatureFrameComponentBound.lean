@@ -11,8 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Pertur
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -36,6 +34,32 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private local instance tensorRSModelAdd_local (r s : ℕ) :
+    Add (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.addCommGroup.toAddCommMonoid.toAddCommSemigroup.toAddCommMagma.toAdd
+
+private local instance tensorRSModelSub_local (r s : ℕ) :
+    Sub (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.sub
+
+private local instance tensorRSModelNeg_local (r s : ℕ) :
+    Neg (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.neg
+
+private local instance tensorRSModelZero_local (r s : ℕ) :
+    Zero (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.zero
+
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
@@ -43,7 +67,8 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   have ha : 0 < a := lt_of_lt_of_le hb hab
   rw [inv_le_inv₀ ha hb]; exact hab
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem orthoFrame_to_basis
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -74,7 +99,8 @@ private theorem orthoFrame_to_basis
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -87,7 +113,8 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
       riemannianFiberNormSq (I := I) (M := M) g 2 2 x S := by
   classical
   obtain ⟨bse, hbse⟩ := orthoFrame_to_basis (I := I) (M := M) g x e horth
-  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g 2 2 x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g 2 2 x S e bse rfl hbse
+    horth]
   refine Finset.single_le_sum
     (f := fun K' : Fin 2 → Fin (Module.finrank ℝ E) =>
       ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
@@ -96,7 +123,8 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x) (C : ℝ)
     (_hC : 0 ≤ C)
@@ -117,7 +145,8 @@ private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
   subst hnE
   have horth' : ∀ a b : Fin (Module.finrank ℝ E),
       g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := horth
-  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x S e bse rfl hbse horth']
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x S e bse rfl hbse
+    horth']
   calc (∑ K : Fin 2 → Fin (Module.finrank ℝ E), ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2 S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin 2 → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -170,7 +199,8 @@ private lemma riemannBiContr_fiberComponent_expand
   rw [coframeS_apply, Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 private lemma g_inner_off_frame_le
     (g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -533,7 +563,8 @@ private lemma slice_indicator_sum_eq_dim {n : ℕ} (K : Fin 2 → Fin n) (k : Fi
     rw [Finset.sum_congr rfl (fun a _ => hinner a), Finset.sum_const, Finset.card_univ,
       Fintype.card_fin, nsmul_eq_mul, mul_one]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma slotEndo_fiberComponent_slotk_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -725,7 +756,8 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponentSlice_sq_le_of
           exact_mod_cast this
         have hnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by positivity
         nlinarith [sq_nonneg C0, hC0_nn, hn1, hnn,
-          mul_le_mul_of_nonneg_right hn1 (by positivity : (0:ℝ) ≤ 4 * (Module.finrank ℝ E : ℝ) * C0 ^ 2)]
+          mul_le_mul_of_nonneg_right hn1
+            (by positivity : (0:ℝ) ≤ 4 * (Module.finrank ℝ E : ℝ) * C0 ^ 2)]
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -831,7 +863,8 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponent_sum_sq_le_of_
   intro g₁ P δ hδ_le hδ htie x henv e horth K
   refine le_trans
     (componentSlice_sq_sum_le_riemannianFiberNormSq (I := I) (M := M) g₀ x
-      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x))
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM
+        (ricciArmOrder0CurvCoeffFib (I := I) g₁ x))
       e horth K)
     (hC g₁ P hδ_le hδ htie x henv)
 

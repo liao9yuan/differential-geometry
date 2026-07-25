@@ -6,8 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianc
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -76,7 +74,6 @@ theorem frameSummand_leadingSlot_secondOrder_commutation_orthoFrame
   exact covGrad_covDeriv_leadingSlot_secondOrder_commutation (I := I) (M := M) g s S hB hB x
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [SigmaCompactSpace M] in
 theorem frame_cyclic_second_bianchi_orthoFrame
     (g : SmoothRiemannianMetric I M)
@@ -94,7 +91,6 @@ theorem frame_cyclic_second_bianchi_orthoFrame
   exact second_bianchi_levi_civita_metric (I := I) (M := M) g hB hB hZ hW
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [SigmaCompactSpace M] in
 theorem frameSummed_contracted_second_bianchi_eq_half_nablaScalar
     (g : SmoothRiemannianMetric I M)

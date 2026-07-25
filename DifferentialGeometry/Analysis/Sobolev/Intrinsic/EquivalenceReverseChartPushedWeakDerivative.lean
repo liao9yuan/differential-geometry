@@ -402,7 +402,8 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
         (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) := by
-    have h := DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p (d := Module.finrank ℝ E) (p := p)
+    have h := DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p
+      (d := Module.finrank ℝ E) (p := p)
       (u := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
         (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
       (Ω := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid

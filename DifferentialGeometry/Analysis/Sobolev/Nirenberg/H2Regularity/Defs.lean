@@ -15,7 +15,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 theorem diffQuot_bound_of_smooth_compactSupport
     {f : E → ℝ} (hf : ContDiff ℝ 1 f) (hf_supp : HasCompactSupport f)
     (i : Fin d) :
@@ -323,7 +322,6 @@ theorem bilin_integrand_self_ge {Ω : Set E}
 end SmoothEllipticBilinearForm
 
 omit [NeZero d] in
-
 theorem diffQuot_mul
     (i : Fin d) (h : ℝ) (f g : E → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot i h (fun x => f x * g x) =
@@ -342,7 +340,6 @@ theorem diffQuot_mul
     ring
 
 omit [NeZero d] in
-
 theorem diffQuot_coeff_apply
     (k : Fin d) (h : ℝ) (a v : E → ℝ) (x : E) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot k h (fun y => a y * v y) x =

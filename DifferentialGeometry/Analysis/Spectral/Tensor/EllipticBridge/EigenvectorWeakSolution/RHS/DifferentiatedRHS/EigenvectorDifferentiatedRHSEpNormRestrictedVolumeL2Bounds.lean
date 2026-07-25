@@ -41,7 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 lemma eLpNorm_volume_restrict_contDiffOn_mul_le
     (α : M)
     {c : EuclN → ℝ}
@@ -89,7 +88,6 @@ lemma eLpNorm_volume_restrict_contDiffOn_mul_le
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 lemma eLpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {μ : Measure EuclN} (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -135,7 +133,6 @@ lemma eLpNorm_sum_le_const_mul_aggregate
 section MainBoundUniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 omit [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
     (α : M)
@@ -182,7 +179,6 @@ lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 lemma eLpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {ν : Type*} {μ : Measure EuclN}
     (F : ι → ν → EuclN → ℝ) (A : ν → ℝ≥0∞)
@@ -233,7 +229,6 @@ end MainBoundUniform
 section SharpAtomBounds
 
 omit [CompleteSpace E] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chosenWp_memLp_volume_restrict
     (b : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) {Ω K : Set EuclN}

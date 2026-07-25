@@ -55,7 +55,8 @@ def speedSq
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma arcLength_slice_eq_integral_sqrt_speedSq
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (s L : ℝ) :
     arcLength (I := I) g (fun t : ℝ => f s t) 0 L
@@ -118,7 +119,8 @@ private lemma speedSq_eq_chartGramAlongCurve
     rw [extChartAt_to_inv]
   rw [hroundtrip]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma mfderiv_partial_t_eq
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
     (mfderiv (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (fun p : ℝ × ℝ => f p.1 p.2) (s, t))
@@ -141,7 +143,8 @@ private lemma mfderiv_partial_t_eq
     ContinuousLinearMap.map_zero _
   rw [hzero, zero_add]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma velocity_totalSpace_contMDiff
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
     ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ)
@@ -224,7 +227,8 @@ lemma velocity_totalSpace_contMDiff
         ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2) p₀
   exact h_smooth_mfd.congr_of_eventuallyEq h_eq
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma velocity_totalSpace_continuous
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
     Continuous (fun p : ℝ × ℝ =>
@@ -235,8 +239,8 @@ private lemma velocity_totalSpace_continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma continuous_g_inner_along_param
     (g : SmoothRiemannianMetric I M)
     {b : ℝ × ℝ → M} {v w : ∀ p : ℝ × ℝ, TangentSpace I (b p)}
@@ -255,7 +259,8 @@ private lemma continuous_g_inner_along_param
   intro p
   rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma speedSq_continuous
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :
@@ -263,7 +268,8 @@ lemma speedSq_continuous
   have hvel := velocity_totalSpace_continuous (I := I) (M := M) f hf
   exact continuous_g_inner_along_param (I := I) (M := M) g hvel hvel
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem speed_positivity_on_regular_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f)

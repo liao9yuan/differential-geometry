@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PerturbedRiemannTen
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -99,7 +97,8 @@ theorem exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelop
               ((coeff (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_curvatureCoeff_riemannianFiberNormSq_le_of_perturbedMetric_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB coeff
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_perturbedMetric_jetEnvelope (I := I) (M := M)
+      g₀ hδ₀ B hB coeff
       hcoeff_curvature
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -163,7 +162,8 @@ theorem exists_riemannBiContrFib_riemannianFiberNormSq_le_of_realizedFam_jetEnve
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) x)) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀
+      hδ₀ B hB
       (fun g₁ => ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) (Or.inl rfl)
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -193,7 +193,8 @@ theorem exists_ricciArmOrder0CurvCoeffFib_riemannianFiberNormSq_le_of_realizedFa
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) x)) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀
+      hδ₀ B hB
       (fun g₁ => ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) (Or.inr rfl)
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv

@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Iterate
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory Topology Function
 open scoped Manifold Topology ContDiff BigOperators Matrix InnerProductSpace
@@ -43,7 +41,6 @@ local notation "dimE" => Module.finrank ℝ E
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)] in
-
 private lemma chain_step_le
     {S S' BFp BFp' L : ℝ≥0∞} {a c : ℝ} (ha : 0 ≤ a) (hc : 0 ≤ c)
     (hBF_mono : BFp ≤ BFp')
@@ -72,8 +69,6 @@ private lemma sum_componentNorm_mono_order
       ∑ Q : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) n' 2
         (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'' :=
   Finset.sum_le_sum (fun _Q _ => wkpNorm_mono_order (d := dimE) hn _ _)
-
-set_option maxHeartbeats 3200000 in
 
 theorem tensorComponent_aPriori_estimate
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

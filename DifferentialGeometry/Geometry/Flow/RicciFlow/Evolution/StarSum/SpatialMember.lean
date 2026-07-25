@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarRoutin
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -43,7 +40,8 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_ortho_expand
     [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -67,7 +65,8 @@ private theorem cotangentSharp_ortho_expand
   · intro h
     exact absurd (Finset.mem_univ i) h
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor05_vec5_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -97,7 +96,8 @@ private theorem tensor05_vec5_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)

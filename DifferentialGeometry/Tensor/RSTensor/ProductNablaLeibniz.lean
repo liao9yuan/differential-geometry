@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -97,10 +96,7 @@ theorem nabla0S_product_realizes {s q : ℕ}
   have hslots : (fun a : Fin (s + q) => V a x) = slots := funext hV
   have hmain :=
     nabla0SFun_product_eval (I := I) cov A B nablaA nablaB hA hB X V x
-
-
   rw [show slots = (fun a : Fin (s + q) => V a x) from hslots.symm, hmain]
-
   change
     (ContinuousMultilinearMap.domDomCongr (leibnizLeftEquiv s q)
         ((MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
@@ -117,8 +113,7 @@ theorem nabla0S_product_realizes {s q : ℕ}
   refine congrArg₂ (· + ·)
     (congrArg₂ (· * ·) (congrArg (nablaA x) ?_) (congrArg (B x) ?_))
     (congrArg₂ (· * ·) (congrArg (A x) ?_) (congrArg (nablaB x) ?_))
-  ·
-    funext a
+  · funext a
     refine Fin.cases ?_ (fun a => ?_) a
     · simp only [leibnizLeftEquiv, Function.comp_apply, finCongr_apply, Fin.cons_zero]
       rw [show (Fin.cast (by omega : s + 1 + q = s + q + 1) (Fin.castAdd q (0 : Fin (s + 1))))
@@ -130,15 +125,13 @@ theorem nabla0S_product_realizes {s q : ℕ}
             = (Fin.castAdd q a).succ from by
         ext; simp only [Fin.val_cast, Fin.val_castAdd, Fin.val_succ]]
       simp only [Fin.cons_succ]
-  ·
-    funext a
+  · funext a
     simp only [leibnizLeftEquiv, finCongr_apply, Function.comp_apply]
     rw [show (Fin.cast (by omega : s + 1 + q = s + q + 1) (Fin.natAdd (s + 1) a))
           = (Fin.natAdd s a).succ from by
       ext; simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega]
     rw [Fin.cons_succ]
-  ·
-    funext a
+  · funext a
     have hidx : leibnizRightEquiv s q (Fin.castAdd (q + 1) a) = (Fin.castAdd q a).succ := by
       rw [leibnizRightEquiv, Equiv.trans_apply, finCongr_apply,
         show (Fin.cast (by omega : s + (q + 1) = s + q + 1) (Fin.castAdd (q + 1) a))
@@ -148,8 +141,7 @@ theorem nabla0S_product_realizes {s q : ℕ}
       rw [Fin.val_add_one_of_lt (by simp only [Fin.lt_def, Fin.val_last]; omega)]
       simp [Fin.val_succ]
     simp only [Function.comp_apply, hidx, Fin.cons_succ]
-  ·
-    funext a
+  · funext a
     refine Fin.cases ?_ (fun a => ?_) a
     · have hidx : leibnizRightEquiv s q (Fin.natAdd s (0 : Fin (q + 1))) = 0 := by
         rw [leibnizRightEquiv, Equiv.trans_apply, finCongr_apply,

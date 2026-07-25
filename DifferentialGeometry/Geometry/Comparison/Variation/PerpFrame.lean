@@ -93,7 +93,6 @@ private lemma bGramSchmidt_self_norm
     rw [mul_inv]; ring]
   rw [hs_sq]; exact inv_mul_cancel₀ (ne_of_gt hpos)
 
-set_option maxHeartbeats 4000000 in
 
 private theorem bGramSchmidt_orth_strong_aux
     (B : F →L[ℝ] F →L[ℝ] ℝ)
@@ -369,7 +368,8 @@ theorem perp_to_velocity_preserved_of_parallel
     have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
       have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
       ((hVdiff t₀ ht₀).hasDerivAt)
@@ -538,7 +538,7 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
   · intro t ht i j
     have hconst :=
       DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top))
         (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
@@ -587,7 +587,7 @@ theorem exists_parallel_frame
   intro t ht i j
   have hconst :=
     DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-      (I := I) g γ hN hγ hL.le (Vfun i) (Vfun j)
+      (I := I) g γ hN hγ (Vfun i) (Vfun j)
       (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
   rw [hconst, hV0 i, hV0 j]
   exact hON0 i j
@@ -624,7 +624,8 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
     (hX : IsParallelChart (I := I) g (γ t) γ
@@ -778,7 +779,6 @@ theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
         simpa [Function.support] using hnot_support
       simpa [hchi_zero] using hlam_pos.le
 
-set_option linter.unusedVariables false in
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_on
@@ -856,7 +856,8 @@ theorem perp_to_velocity_preserved_on
     have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
       have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
       ((hVdiff t₀ ht₀).hasDerivAt)
@@ -991,7 +992,6 @@ theorem velocity_chartRepAt_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
@@ -1115,7 +1115,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     intro t ht
     have hconst :=
       parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
-        (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (hγ.of_le (by exact_mod_cast le_top))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
@@ -1138,7 +1138,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     rw [hχi, hχj, one_smul, one_smul]
     have hconst :=
       parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
-        (hγ.of_le (by exact_mod_cast le_top)) hL.le
+        (hγ.of_le (by exact_mod_cast le_top))
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j

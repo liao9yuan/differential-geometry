@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -64,7 +62,8 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_smoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -265,7 +264,6 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
   exact hy ⟨hy_mem, hy_notKc⟩
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorCutoffChartComponent_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -288,7 +286,6 @@ lemma eigenvectorCutoffChartComponent_memW1p
     (I := I) (M := M) g r s i α P k
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -349,7 +346,8 @@ lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
   filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -387,7 +385,8 @@ private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr h_bare
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_offKernelSmoothCoef_mul
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -433,7 +432,8 @@ private lemma memWkp_offKernelSmoothCoef_mul
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hcoef_smooth
     (fun j _hj y _hy => hC_bd y j _hj) hfactor_memWkp
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma recipDensityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -445,7 +445,6 @@ private lemma recipDensityOnEuclid_contDiffOn
       (Laplacian.MetricExtension.densityOnEuclid_pos (I := I) g α hy).ne')
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -512,7 +511,6 @@ private lemma eigenvectorVec_pou_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand1_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -536,7 +534,6 @@ theorem eigenvectorChartRHS_summand1_memWkp
     h_pou α P₀).le_of_le (Nat.le_succ K)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem crossLeftLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -563,7 +560,6 @@ theorem crossLeftLimitComponent_memWkp
       g r s i K h_pou β Q)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem crossRightLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -589,7 +585,6 @@ theorem crossRightLimitComponent_memWkp
     (fun β Q => (h_pou β Q).le_of_le (Nat.le_succ K))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma componentLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -652,7 +647,6 @@ lemma componentLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma componentLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -684,7 +678,6 @@ private lemma componentLpLimit_ae_zero_off_chartPouKernel
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma partialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -761,7 +754,6 @@ lemma partialLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma partialLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -837,7 +829,6 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem cutoffPartialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -930,7 +921,6 @@ theorem cutoffPartialLpLimit_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem weightedGradCoeffDivLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1055,7 +1045,6 @@ theorem weightedGradCoeffDivLimit_memWkp
             (fun p _ => h_leaf P Q k p))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand2_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1127,7 +1116,6 @@ theorem eigenvectorChartRHS_summand2_memWkp
       (fun Q _ => h_leaf P Q))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand3_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1199,7 +1187,6 @@ theorem eigenvectorChartRHS_summand3_memWkp
       (fun Q _ => h_leaf P Q))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand4_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1269,7 +1256,6 @@ theorem eigenvectorChartRHS_summand4_memWkp
           (fun l _ => h_leaf P Q k l))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand5_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1400,7 +1386,6 @@ theorem eigenvectorChartRHS_summand5_memWkp
               (fun p _ => h_leaf P Q k l p)))))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand6_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1447,7 +1432,6 @@ theorem eigenvectorChartRHS_summand6_memWkp
     h_sum h_sum_ae_zero
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand7_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1616,7 +1600,6 @@ theorem eigenvectorChartRHS_summand7_memWkp
     h_div h_div_ae_zero
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

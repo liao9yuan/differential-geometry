@@ -8,9 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.Components
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -23,6 +20,8 @@ set_option linter.unusedDecidableInType false
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -105,7 +104,7 @@ private lemma deltaMulti_update_eq_one_iff {Idx : Type*}
   · simp [deltaMulti, h]
 
 private lemma update_eq_of_update_eq {Idx : Type*}
-    [DecidableEq Idx] {r : ℕ}
+    {r : ℕ}
     {L A : Fin r -> Idx} {p : Fin r} {m : Idx}
     (h : Function.update A p m = L) :
     A = Function.update L p (A p) := by
@@ -117,7 +116,7 @@ private lemma update_eq_of_update_eq {Idx : Type*}
     simpa [Function.update, hpq] using hq
 
 private lemma update_value_eq_of_update_eq {Idx : Type*}
-    [DecidableEq Idx] {r : ℕ}
+    {r : ℕ}
     {L A : Fin r -> Idx} {p : Fin r} {m : Idx}
     (h : Function.update A p m = L) :
     m = L p := by
@@ -125,7 +124,7 @@ private lemma update_value_eq_of_update_eq {Idx : Type*}
   simpa using hp
 
 private lemma update_update_same_apply {Idx : Type*}
-    [DecidableEq Idx] {r : ℕ}
+    {r : ℕ}
     (L : Fin r -> Idx) (p : Fin r) (m : Idx) :
     Function.update (Function.update L p m) p (L p) = L := by
   funext q
@@ -452,7 +451,8 @@ theorem coordDeriv_applyInput_eq_contractUpper
             DifferentialGeometry.Tensor.Coordinates.coordDerivRSAt (I := I) (fun x => X x) x₀
               (fun x => T x) L K)
         K := by
-  rw [DifferentialGeometry.Tensor.Coordinates.coordDeriv0SAt_applyInput_eq_sum (I := I) X T theta x₀ K]
+  rw [DifferentialGeometry.Tensor.Coordinates.coordDeriv0SAt_applyInput_eq_sum (I := I) X T theta x₀
+    K]
   rfl
 
 

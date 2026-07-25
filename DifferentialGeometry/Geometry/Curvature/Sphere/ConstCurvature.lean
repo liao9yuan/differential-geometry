@@ -57,7 +57,6 @@ theorem metricRm04_round_invariant [NeZero n]
     x X Y Z W
   rwa [pullbackMetric_round_eq] at h
 
-set_option maxHeartbeats 800000 in
 
 
 
@@ -71,7 +70,8 @@ theorem roundMetric_sec_value [NeZero n]
     (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x) :
     metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
       = (roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x Y Y
-        - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x X Y := by
+        - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x X
+          Y := by
   haveI : IsManifold (𝓡 n) ∞ (sphere (0 : E) 1) :=
     EuclideanSpace.instIsManifoldSphere.of_le le_top
   obtain ⟨Xc, hXc, hXcx⟩ :=
@@ -111,8 +111,10 @@ omit [FiniteDimensional ℝ E] in
 theorem roundMetric_constPosSec [NeZero n] :
     ∃ c : ℝ, 0 < c ∧ ∀ (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x),
       metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
-        = c * ((roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x Y Y
-            - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x X Y) :=
+        = c * ((roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x
+          Y Y
+            - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x
+              X Y) :=
   ⟨1, one_pos, fun x X Y => by rw [one_mul]; exact roundMetric_sec_value x X Y⟩
 
 end Geometry

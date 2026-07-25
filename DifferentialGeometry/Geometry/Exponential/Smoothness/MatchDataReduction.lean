@@ -65,7 +65,7 @@ theorem exists_chartFlow_combined_witness
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
     extChartAt_self_mem_interior_target (I := I) p
   obtain ⟨b, r, ε, ρ, T, Φ, hr, hε, hρ_pos, hT_pos, hb_sub, hΦ_loc, hcd, hinit⟩ :=
-    DifferentialGeometry.Geometry.Riemannian.Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
+    exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (M := M) (g := g) (α := p)
       (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   have hconst :=
@@ -118,7 +118,8 @@ section ReductionToMatch
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem hasChartFlowGeodesicMatchData_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match t' ρ' : ℝ),

@@ -636,7 +636,8 @@ private lemma partialDeriv_chartCoeffOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma comp_extChartAt_contMDiffOn_source [I.Boundaryless]
     (α : M) {u : E → ℝ}
     (hu : ContDiffOn ℝ ∞ u (interior (extChartAt I α).target)) :

@@ -61,7 +61,8 @@ theorem contMDiffOn_dual_apply
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem extDerivFun_congr_nhds
     {f g : M → ℝ} {x : M} (V : TangentSpace I x) (h : f =ᶠ[𝓝 x] g) :
     extDerivFun (I := I) f x V = extDerivFun (I := I) g x V := by
@@ -85,10 +86,8 @@ theorem contMDiffAt_extDerivFun_apply
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (V y)) u) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞ (fun y => extDerivFun (I := I) f y (V y)) x := by
   classical
-
   obtain ⟨b, -, hb_supp⟩ :=
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) x).mem_iff.mp (hu.mem_nhds hx)
-
   set ftil : M → ℝ := fun y => b y * f y with hftil_def
   have hftil : ContMDiff I 𝓘(ℝ, ℝ) ∞ ftil := by
     apply contMDiff_of_locally_contMDiffOn
@@ -103,7 +102,6 @@ theorem contMDiffAt_extDerivFun_apply
         by_contra hne
         exact hy (subset_tsupport _ hne)
       simp [hftil_def, hb0]
-
   let dα : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯ :=
     ⟨fun y => extDerivFun (I := I) ftil y,
       contMDiff_extDerivFun_section (I := I) (M := M) ⟨ftil, hftil⟩⟩
@@ -113,7 +111,6 @@ theorem contMDiffAt_extDerivFun_apply
   have hAt : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun y => extDerivFun (I := I) ftil y (V y)) x :=
     hpair.contMDiffAt (hu.mem_nhds hx)
-
   refine hAt.congr_of_eventuallyEq ?_
   obtain ⟨w, hw_one, hw_open, hxw⟩ := eventually_nhds_iff.mp b.eventuallyEq_one
   refine eventually_nhds_iff.mpr ⟨w, ?_, hw_open, hxw⟩

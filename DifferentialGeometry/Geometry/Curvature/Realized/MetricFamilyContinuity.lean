@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -71,17 +70,13 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
   intro q₀
   rw [FiberBundle.continuousAt_totalSpace]
   refine ⟨continuous_snd.continuousAt, ?_⟩
-
-  show ContinuousAt
+  change ContinuousAt
       (fun q : {t : Real // t ∈ K} × M =>
         (trivializationAt (Tensor0SModel s Real E)
           (fun x : M => Tensor0SSpace s I x) q₀.2
             ⟨q.2, A q.1.1 q.2⟩).2) q₀
-
   have hopen : {q : {t : Real // t ∈ K} × M | q.2 ∈ N q₀.2} ∈ nhds q₀ :=
     continuous_snd.continuousAt.preimage_mem_nhds (hN q₀.2)
-
-
   have key : ContinuousAt
       (fun q : {t : Real // t ∈ K} × M =>
         DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eval0SCLE (E := E) s
@@ -111,8 +106,6 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
       rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
     rw [hpt]
     exact (hcomp q₀.2 idx).continuousAt hopen
-
-
   have hsymm :=
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eval0SCLE (E := E) s).symm.continuous
   have hcongr : (fun q : {t : Real // t ∈ K} × M =>
@@ -268,7 +261,6 @@ private lemma inCoordinates_metric_eq_chartGram_sum
 
 end MetricCLMSectionAux
 
-set_option linter.unusedVariables false in
 
 
 
@@ -305,17 +297,14 @@ theorem metricCLMSection_jointContMDiffOn_of_chartGram
       (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
       ((g_DT q.1).inner q.2))) q₀).contMDiffWithinAt
   set α : M := q₀.2 with hα
-
   have hbase0 : α ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     rw [hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
   rw [contMDiffAt_hom_bundle]
   refine ⟨contMDiffAt_snd, ?_⟩
-
   apply contMDiffAt_clm_of_pointwise (IB := 𝓘(ℝ, ℝ).prod I) (X := ℝ × M)
   intro v
   apply contMDiffAt_clm_of_pointwise (IB := 𝓘(ℝ, ℝ).prod I) (X := ℝ × M)
   intro w
-
   have hgram_sum : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
@@ -335,11 +324,11 @@ theorem metricCLMSection_jointContMDiffOn_of_chartGram
     refine ContMDiffAt.sum (fun j _ => ?_)
     exact (contMDiffAt_const (c := ((chartModelBasis E).repr v i *
       (chartModelBasis E).repr w j : ℝ))).mul (hgram_sum i j)
-
   refine hscalar.congr_of_eventuallyEq ?_
   have hnhds : (trivializationAt E (TangentSpace I) α).baseSet ∈ nhds q₀.2 :=
     (trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hbase0
-  have hpre : (fun q : ℝ × M => q.2) ⁻¹' (trivializationAt E (TangentSpace I) α).baseSet ∈ nhds q₀ :=
+  have hpre : (fun q : ℝ × M => q.2) ⁻¹' (trivializationAt E (TangentSpace I) α).baseSet ∈ nhds
+    q₀ :=
     (continuous_snd.continuousAt (x := q₀)).preimage_mem_nhds hnhds
   filter_upwards [hpre] with p hp
   change ((ContinuousLinearMap.inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ)
@@ -380,7 +369,8 @@ theorem pullback
             q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
         TotalSpace.mk' E (E := fun y : N => TangentSpace I y) (Φ p.1.2)
           (mfderiv I I (Φ : M → N) p.1.2
-            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2))) := by
+            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k)
+              p.1.2))) := by
     intro k
     have hcomp :
         (fun p : {q : {t : Real // t ∈ K} × M //
@@ -389,7 +379,8 @@ theorem pullback
             (mfderiv I I (Φ : M → N) p.1.2
               (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2)))
           = (tangentMap I I (Φ : M → N)) ∘
-              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k) p.1.2) := by
+              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k)
+                p.1.2) := by
       funext p; rfl
     rw [hcomp]
     refine (Φ.contMDiff.continuous_tangentMap (by simp)).comp ?_
@@ -436,13 +427,13 @@ theorem restrictOpen
       (FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x₀))
   intro x₀ idx
   rw [continuousOn_iff_continuous_restrict]
-
   have hslot : ∀ k : Fin s, Continuous
       (fun p : {q : {t : Real // t ∈ K} × U //
             q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
         TotalSpace.mk' E (E := fun y : M => TangentSpace I y) ((p.1.2 : M))
           (mfderiv I I (Subtype.val : U → M) p.1.2
-            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2))) := by
+            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k)
+              p.1.2))) := by
     intro k
     have hcomp :
         (fun p : {q : {t : Real // t ∈ K} × U //
@@ -451,7 +442,8 @@ theorem restrictOpen
             (mfderiv I I (Subtype.val : U → M) p.1.2
               (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2)))
           = (tangentMap I I (Subtype.val : U → M)) ∘
-              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k) p.1.2) := by
+              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k)
+                p.1.2) := by
       funext p; rfl
     rw [hcomp]
     refine ((contMDiff_subtype_val (I := I) (U := U) (n := ∞)).continuous_tangentMap

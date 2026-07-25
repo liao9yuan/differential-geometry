@@ -15,7 +15,6 @@ import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 
-set_option linter.flexible false
 
 noncomputable section
 
@@ -58,7 +57,6 @@ theorem factorial_nsmul_wedge_product_eq_alternatization
     (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
     (m.factorial * n.factorial) • (g ∧[f] h) v =
       MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
-
   let φ : N ⊗[𝕜] N' →ₗ[𝕜] N'' := TensorProduct.lift
     { toFun := fun n => (f n).toLinearMap
       map_add' := by intro x y; ext; simp [map_add]
@@ -96,31 +94,23 @@ theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜]
     ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
       (elementaryCovector b (Fin.addCases I J) :
         M [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
-
   obtain ⟨B, dual⟩ := exists_predual_basis b
-
   apply ContinuousAlternatingMap.toAlternatingMap_injective
   apply B.ext_alternating
   intro v hv
-
   change ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ v) =
     elementaryCovector b (Fin.addCases I J) (B ∘ v)
-
   rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v]
-
   have lhs_eq := wedge_product_eq_alternatization (elementaryCovector b I)
     (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜) (⇑B ∘ v)
   rw [lhs_eq, MultilinearMap.alternatization_apply]
-
   simp_rw [MultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.coe_coe,
     tensorProductMap_apply, ContinuousLinearMap.mul_apply']
-
   simp_rw [show ∀ (σ : Equiv.Perm (Fin (m' + p))),
     (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.castAdd p = ⇑B ∘ (v ∘ σ ∘ Fin.castAdd p) from fun _ => rfl,
     show ∀ (σ : Equiv.Perm (Fin (m' + p))),
     (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.natAdd m' = ⇑B ∘ (v ∘ σ ∘ Fin.natAdd m') from fun _ => rfl,
     elementaryCovector_basis_eval B b dual]
-
   exact Fin.multiKroneckerDelta_cauchyBinet I J v
 
 theorem uncurryFin_smulRight_elementaryCovector
@@ -434,7 +424,8 @@ private theorem derivShuffleLeft_expanded_summand_eq
   rw [hleft_remove, hright_eval, hk_eval]
   simp only [Fin.removeNth_apply]
   simp only [Units.smul_def, smul_smul, mul_assoc]
-  simp [map_zsmul, smul_smul, mul_assoc]
+  simp only [Int.reduceNeg, Units.val_mul, map_zsmul, ContinuousLinearMap.coe_smul',
+    Pi.smul_apply, smul_smul, mul_assoc]
   congr 1
   rcases Nat.even_or_odd k.val with hq | hq <;>
     rcases Nat.even_or_odd (derivShuffleRank k σ).val with hj | hj
@@ -539,7 +530,6 @@ theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZer
           (ContinuousLinearMap.mul 𝕜 𝕜)) =
       wedge_product (wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)) l
         (ContinuousLinearMap.mul 𝕜 𝕜) from DFunLike.congr_fun h_eq v
-
   set d' := Module.finrank 𝕜 M
   let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
   let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
@@ -552,29 +542,23 @@ theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZer
     fun J => elementaryCovectorBasis_apply B J
   have hbp : ∀ K : Fin p ↪o Fin d', bp K = elementaryCovector b ↑K :=
     fun K => elementaryCovectorBasis_apply B K
-
   rw [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]; simp only [hbm]
   rw [sum_smul_wedge_left (m := m) (n := n + p), domDomCongr_sum_smul,
       sum_smul_wedge_left (m := m) (n := n),
       sum_smul_wedge_left (m := m + n) (n := p)]
   congr 1; ext I; congr 1
-
   rw [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]; simp only [hbn]
   rw [sum_smul_wedge_left (m := n) (n := p),
       sum_smul_wedge_right (m := m) (n := n + p), domDomCongr_sum_smul,
       sum_smul_wedge_right (m := m) (n := n),
       sum_smul_wedge_left (m := m + n) (n := p)]
   congr 1; ext J; congr 1
-
   congr 1; ext J; congr 1
-
   rw [show l = ∑ K, bp.repr l K • bp K from (bp.sum_repr l).symm]; simp only [hbp]
-
   rw [sum_smul_wedge_right (m := n) (n := p)]
   rw [sum_smul_wedge_right (m := m) (n := n + p)]
   rw [domDomCongr_sum_smul (ι := Fin p ↪o Fin d')]
   rw [sum_smul_wedge_right (m := m + n) (n := p)]
-
   simp_rw [elementaryCovector_assoc b I J]
 
 private theorem elementaryCovector_wedge_antisymm
@@ -619,7 +603,8 @@ theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero
   simp only [hbm, hbn]
   simp_rw [sum_smul_wedge_left, sum_smul_wedge_right]
   ext v
-  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply, ContinuousAlternatingMap.domDomCongr_apply, smul_eq_mul]
+  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply,
+    ContinuousAlternatingMap.domDomCongr_apply, smul_eq_mul]
   rw [Finset.mul_sum]
   simp_rw [Finset.mul_sum]
   conv_lhs => rw [Finset.sum_comm]
@@ -628,7 +613,8 @@ theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero
   apply Finset.sum_congr rfl
   intro I _
   have h_anti := DFunLike.congr_fun (elementaryCovector_wedge_antisymm b I J) v
-  simp only [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply, smul_eq_mul] at h_anti
+  simp only [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply,
+    smul_eq_mul] at h_anti
   rw [h_anti]
   ring
 
@@ -641,20 +627,17 @@ theorem elementaryCovector_iprod_wedge_product
       (curryFin (elementaryCovector b I) x ∧[𝕜] (elementaryCovector b J)) +
       (-1 : 𝕜) ^ (m + 1) • domDomCongr Fin.finAddFlipAssoc
         ((elementaryCovector b I) ∧[𝕜] curryFin (elementaryCovector b J) x) := by
-
   rw [elementaryCovector_wedge b I J,
     curryFin_elementaryCovector b I x, sum_smul_wedge_left]
   simp_rw [elementaryCovector_wedge b _ J]
   rw [curryFin_elementaryCovector b J x, sum_smul_wedge_right]
   simp_rw [elementaryCovector_wedge b I _]
-
   ext v; simp only [curryFin_apply, domDomCongr_apply, add_apply, smul_apply,
     sum_apply, smul_eq_mul, elementaryCovector_apply]
   rw [Matrix.det_succ_column_zero]
   simp_rw [show (Fin.cons x v ∘ ⇑Fin.finAddFlipAssoc)
       (0 : Fin ((m + 1) + (n + 1))) = x from by
     simp [Fin.finAddFlipAssoc, finCongr, Fin.cons_zero]]
-
   conv_rhs => rw [Finset.mul_sum]
   rw [show ∀ (f : Fin (m + 1) → 𝕜) (g : Fin (n + 1) → 𝕜),
       (∑ i, f i) + (∑ j, g j) =
@@ -662,7 +645,6 @@ theorem elementaryCovector_iprod_wedge_product
     ((Fin.sum_univ_add (Fin.addCases f g)).symm ▸ by
       simp [Fin.addCases_left, Fin.addCases_right])]
   apply Finset.sum_congr rfl; intro ⟨k, hk⟩ _
-
   by_cases hlt : k < m + 1
   · rw [show (⟨k, hk⟩ : Fin _) = Fin.castAdd (n + 1) ⟨k, hlt⟩ from Fin.ext rfl]
     simp only [Fin.addCases_left, Fin.val_castAdd]
@@ -687,11 +669,10 @@ theorem elementaryCovector_iprod_wedge_product
           Fin.addCases_succAbove_natAdd I J j' i]; congr 1))
 
 theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
-    (g : M [⋀^Fin (m+1)]→L[𝕜] 𝕜) (h : M [⋀^Fin (n+1)]→L[𝕜] 𝕜) (x : M) :
+    (g : M [⋀^Fin (m + 1)]→L[𝕜] 𝕜) (h : M [⋀^Fin (n + 1)]→L[𝕜] 𝕜) (x : M) :
     curryFin (domDomCongr Fin.finAddFlipAssoc (g ∧[𝕜] h)) x =
       (curryFin g x ∧[𝕜] h) +
       (-1 : 𝕜) ^ (m + 1) • domDomCongr Fin.finAddFlipAssoc (g ∧[𝕜] curryFin h x) := by
-
   set d := Module.finrank 𝕜 M with hd_def
   let B : Module.Basis (Fin d) 𝕜 M := Module.finBasis 𝕜 M
   let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
@@ -699,12 +680,10 @@ theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] 
     elementaryCovectorBasis B
   let basisH : Module.Basis (Fin (n + 1) ↪o Fin d) 𝕜 (M [⋀^Fin (n + 1)]→L[𝕜] 𝕜) :=
     elementaryCovectorBasis B
-
   have basisG_eq : ∀ I : Fin (m + 1) ↪o Fin d,
       basisG I = elementaryCovector b ↑I := fun I => elementaryCovectorBasis_apply B I
   have basisH_eq : ∀ J : Fin (n + 1) ↪o Fin d,
       basisH J = elementaryCovector b ↑J := fun J => elementaryCovectorBasis_apply B J
-
   have hg : g = ∑ I : Fin (m + 1) ↪o Fin d, basisG.repr g I • elementaryCovector b ↑I := by
     conv_lhs => rw [← basisG.sum_repr g]
     apply Finset.sum_congr rfl; intro I _
@@ -713,35 +692,25 @@ theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] 
     conv_lhs => rw [← basisH.sum_repr h]
     apply Finset.sum_congr rfl; intro J _
     rw [basisH_eq]
-
   rw [hg, hh]
   rw [sum_smul_wedge_left]
-
   simp_rw [sum_smul_wedge_right]
-
   rw [domDomCongr_sum_smul]
   simp_rw [domDomCongr_sum_smul]
-
   simp_rw [curryFin_sum_smul]
-
   simp_rw [sum_smul_wedge_left, sum_smul_wedge_right]
-
   rw [domDomCongr_sum_smul]
   simp_rw [domDomCongr_sum_smul]
-
   rw [Finset.smul_sum]
   simp_rw [Finset.smul_sum, smul_comm ((-1 : 𝕜) ^ (m + 1))]
-
   rw [Finset.sum_comm
     (f := fun J I => basisH.repr h J •
       basisG.repr g I •
         (curryFin (elementaryCovector b ↑I) x ∧[𝕜] elementaryCovector b ↑J))]
-
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl; intro I _
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl; intro J _
-
   rw [show basisH.repr h J • basisG.repr g I •
       (curryFin (elementaryCovector b ↑I) x ∧[𝕜] elementaryCovector b ↑J) =
       basisG.repr g I • basisH.repr h J •
@@ -750,7 +719,6 @@ theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] 
   rw [← smul_add, ← smul_add]
   congr 1
   congr 1
-
   exact elementaryCovector_iprod_wedge_product b I J x
 
 variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] [FiniteDimensional ℝ M]

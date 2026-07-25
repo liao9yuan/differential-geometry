@@ -4,7 +4,6 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

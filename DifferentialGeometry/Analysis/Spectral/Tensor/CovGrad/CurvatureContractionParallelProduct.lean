@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -35,7 +33,8 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_l
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ (Z : SmoothCcTensor g 0 s) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
-            ((iteratedCovGrad g 0 s j (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
+            ((iteratedCovGrad g 0 s j
+              (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
               x) ≤
           C j * ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
@@ -43,7 +42,6 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_l
   obtain ⟨kappa, hkappa_nn, hbound⟩ :=
     exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le
       (I := I) (M := M) g s hX hY
-
   refine ⟨fun j => (4 : ℝ) ^ j * gridWindowSum kappa 0 s j,
     fun j => mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn 0 s j), fun Z j x => ?_⟩
   exact hbound Z j x

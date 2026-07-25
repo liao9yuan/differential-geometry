@@ -19,7 +19,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem trivToE_mfderiv_eq_chartFderiv_apply
     (F : M → M) (α : M) {x : M} (v : TangentSpace I x)
     (hF : MDifferentiableAt I I F x)
@@ -39,7 +40,8 @@ theorem trivToE_mfderiv_eq_chartFderiv_apply
   have happ := congrArg (fun L : TangentSpace I x →L[ℝ] _ => L v) hchain
   simpa [ContinuousLinearMap.comp_apply, Function.comp] using happ.symm
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem mfderiv_flow_eq_chartFderiv_apply
     (F : M → M) (α : M) {x : M} (v : TangentSpace I x)
     (hF : MDifferentiableAt I I F x)
@@ -60,14 +62,16 @@ theorem mfderiv_flow_eq_chartFderiv_apply
             (mfderiv I 𝓘(ℝ, E) (fun y => extChartAt I α (F y)) x v) := by
           rw [hdict]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem orbit_continuousAt_of_jointContinuous
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M)
     (hcont : Continuous (fun s : ℝ => (Φ_fam s : M → M) x)) :
     ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t :=
   hcont.continuousAt
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem flow_orbit_eventually_mem_chartAt_source
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M)
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
@@ -76,7 +80,8 @@ theorem flow_orbit_eventually_mem_chartAt_source
     (chartAt H (Φ_fam t x)).open_source.mem_nhds (mem_chart_source H (Φ_fam t x))
   exact hcontAt.eventually_mem hsrc_mem
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hagree_of_chartFderiv_witness
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x)
     (Q : E →L[ℝ] E) (d : E) (Dchart : ℝ → (E →L[ℝ] E))

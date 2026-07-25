@@ -7,9 +7,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Interval
 
@@ -119,9 +116,11 @@ private theorem contDiffAt_param_aux :
       exact ae_of_all _ (fun t ht y' hy' => hy'.1 t ht)
     · rw [ae_restrict_iff' measurableSet_uIoc]
       refine ae_of_all _ (fun t ht y' hy' => ?_)
+      have hmem : ((y', t) : H × ℝ) ∈ U ×ˢ S := ⟨hsU hy', hIcc t ht⟩
+      have hgAt : ContDiffAt ℝ ∞ G ((y', t) : H × ℝ) :=
+        hG.contDiffAt (hopen.mem_nhds hmem)
       have hslice : ContDiffAt ℝ ∞ (fun z => G (z, t)) y' :=
-        (hG.contDiffAt (hopen.mem_nhds ⟨hsU hy', hIcc t ht⟩)).comp _
-          (by fun_prop : ContDiffAt ℝ ∞ (fun z : H => (z, t)) y')
+        hgAt.comp₂ contDiffAt_id contDiffAt_const
       exact (hslice.differentiableAt (by simp)).hasFDerivAt
 
 private theorem contDiffAt_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -144,7 +143,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (g : M × ℝ → F) (a b : ℝ) (S : Set ℝ) (hS : IsOpen S)
     (hSI : Set.uIcc a b ⊆ S) (V : Set M) (hV : IsOpen V) (x₀ : M) (hx₀ : x₀ ∈ V)
@@ -185,17 +185,19 @@ def pathIntegralFib (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   TensorRSSpace.ofModel (∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)))
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma pathIntegralFib_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) :
     TensorRSSpace.toModel (pathIntegralFib (I := I) (M := M) g₀ r s Φ x) =
       ∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)) := by
   rw [pathIntegralFib, TensorRSSpace.toModel_ofModel]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem contMDiff_pathIntegralFib_of_jointContMDiff
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1))
@@ -206,7 +208,8 @@ theorem contMDiff_pathIntegralFib_of_jointContMDiff
         (pathIntegralFib (I := I) (M := M) g₀ r s Φ x)) := by
   intro x₀
   rw [Bundle.contMDiffAt_section]
-  set e := trivializationAt (TensorRSModel r s ℝ E) (fun z : M => TensorRSSpace r s I z) x₀ with hedef
+  set e := trivializationAt (TensorRSModel r s ℝ E) (fun z : M => TensorRSSpace r s I z) x₀ with
+    hedef
   set g : M × ℝ → TensorRSModel r s ℝ E :=
     fun p : M × ℝ => (e ⟨p.1, (Φ p.2).toSection p.1⟩).2 with hgdef
   have hbase : x₀ ∈ e.baseSet := mem_baseSet_trivializationAt _ _ _
@@ -275,7 +278,7 @@ theorem contMDiff_pathIntegralFib_of_jointContMDiff
   rw [hRHS, ContinuousLinearMap.intervalIntegral_comp_comm K hIIm]
 
 def pathIntegralCoeffField (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1))
@@ -290,7 +293,7 @@ def pathIntegralCoeffField (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma pathIntegralCoeffField_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1))
@@ -302,7 +305,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [Sig
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma pathIntegralCoeffField_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1))
@@ -316,7 +319,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [Sig
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s' : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s') (W : SmoothCcTensor g₀ 0 r)
-    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s' ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel r s' ℝ E)
         (E := fun z : M => TensorRSSpace r s' I z) p.1 ((Φ p.2).toSection p.1))
@@ -327,33 +330,28 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
         (operatorFieldApply (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ∫ t in (0 : ℝ)..1,
-        unitModel (I := I) (M := M) g₀ s' (operatorFieldApply (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
-
+        unitModel (I := I) (M := M) g₀ s' (operatorFieldApply (I := I) (M := M) g₀ r s' (Φ t) W) x
+          v := by
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hu
-
-  have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
+  have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0
+    1 :=
     ((hcont x).mono hSI).intervalIntegrable
-
   have key : ∀ Ψ : SmoothCcTensor g₀ r s',
       unitModel (I := I) (M := M) g₀ s' (operatorFieldApply (I := I) (M := M) g₀ r s' Ψ W) x v =
         ((TensorRSSpace.toModel (Ψ.toSection x)) (Tensor0SSpace.toModel u)) v := by
     intro Ψ
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
       toModel_tensorRS_apply (I := I) r s' x (Ψ.toSection x) u]
-
   rw [show unitModel (I := I) (M := M) g₀ s'
         (operatorFieldApply (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ((TensorRSSpace.toModel
             ((pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint).toSection x))
           (Tensor0SSpace.toModel u)) v from key _]
-
   rw [pathIntegralCoeffField_toModel]
-
   rw [ContinuousLinearMap.intervalIntegral_apply hIIm (Tensor0SSpace.toModel u)]
-
   have hcontApp : ContinuousOn (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) S :=
     (ContinuousLinearMap.apply ℝ (Tensor0SModel s' ℝ E)
@@ -361,15 +359,15 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
   have hIIapp : IntervalIntegrable (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) volume 0 1 :=
     (hcontApp.mono hSI).intervalIntegrable
-
   rw [show (fun t : ℝ => unitModel (I := I) (M := M) g₀ s'
           (operatorFieldApply (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
-        (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) v) from
+        (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u))
+          v) from
     funext (fun t => key (Φ t))]
-
   exact (ContinuousLinearMap.intervalIntegral_comp_comm
       (ContinuousMultilinearMap.apply ℝ (fun _ : Fin s' => E) ℝ v) hIIapp).symm
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem coeffApp_integrable
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r)

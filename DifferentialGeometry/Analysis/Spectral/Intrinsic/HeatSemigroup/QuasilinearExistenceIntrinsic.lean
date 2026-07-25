@@ -48,13 +48,13 @@ theorem tensor_quasilinear_parabolic_unique
     {T : ℝ} (hT : 0 < T) (hTL : (L : ℝ) * T < 1)
     {u v : ℝ → TensorL2 r s g}
     (hu : ContinuousOn u (Set.Icc 0 T)) (hv : ContinuousOn v (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = tensorHeatSemigroup g r s t T_0 +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           tensorHeatSemigroup g r s (t - τ) (N (u τ)))
-    (hv_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hv_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       v t = tensorHeatSemigroup g r s t T_0 +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           tensorHeatSemigroup g r s (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   refine semilinear_mild_solution_unique

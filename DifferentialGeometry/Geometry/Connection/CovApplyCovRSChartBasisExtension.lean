@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -27,7 +25,8 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] in
 private lemma exists_bump_tsupport_in_goodSet
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ chartLeviCivitaGoodSet (I := I) α) :
     ∃ χ : SmoothBumpFunction I b₀,
@@ -40,7 +39,8 @@ private lemma exists_bump_tsupport_in_goodSet
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) b₀).mem_iff.mp hnhds
   exact ⟨χ, hχ⟩
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] in
 lemma bumpedChartBasis_contMDiff
     (α : M) {b₀ : M}
     (k : Fin (Module.finrank ℝ E))

@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -70,7 +68,7 @@ theorem secondCovGrad_l2NormSq_le_of_cross_bound
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (Ccross : ℝ) (hCcross : 0 ≤ Ccross)
     (hcross :
-      - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+      -tensorL2Inner (I := I) (M := M) g 0 (s + 1)
             (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
                 (covGrad (I := I) (M := M) g 0 s S) -
               covGrad (I := I) (M := M) g 0 s

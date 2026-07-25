@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParal
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -65,7 +63,8 @@ noncomputable def unitScalarRSLift {s : ℕ} (x : M) (T : Tensor0SSpace s I x) :
     (ContinuousLinearMap.smulRight
       (tensor0Iso (I := I) M x).toContinuousLinearMap T)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLift_apply {s : ℕ} (x : M) (T : Tensor0SSpace s I x)
     (D : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
@@ -90,7 +89,8 @@ noncomputable def unitScalarRSLiftSection {s : ℕ} (S : Π y : M, Tensor0SSpace
     Π y : M, TensorRSSpace 0 s I y :=
   fun y => unitScalarRSLift (I := I) (M := M) y (S y)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLiftSection_apply {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y) (y : M) :
     unitScalarRSLiftSection (I := I) (M := M) S y =
@@ -105,7 +105,8 @@ omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
         (unitZeroSec (I := I) (M := M) y) = S y := by
   rw [unitScalarRSLiftSection_apply, unitScalarRSLift_apply_unit]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem unitScalarRSLiftSection_apply_at_section {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y)
     (Y : Π y : M, Tensor0SSpace 0 I y) (y : M) :
@@ -115,7 +116,8 @@ theorem unitScalarRSLiftSection_apply_at_section {s : ℕ}
   rw [unitScalarRSLiftSection_apply, unitScalarRSLift_apply]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem contMDiff_unitScalarRSLiftSection {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y)
     (hS : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
@@ -156,7 +158,8 @@ noncomputable def unitScalarRSLiftCₛ {s : ℕ}
   ⟨fun y : M => unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) y,
    contMDiff_unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) S.contMDiff⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLiftCₛ_apply {s : ℕ}
     (S : Cₛ^∞⟮I; Tensor0SModel s ℝ E, (fun y : M => Tensor0SSpace s I y)⟯) (y : M) :
     unitScalarRSLiftCₛ (I := I) (M := M) S y =

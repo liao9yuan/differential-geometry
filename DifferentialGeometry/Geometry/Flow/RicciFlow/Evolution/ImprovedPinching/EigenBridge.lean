@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.B
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -45,18 +44,22 @@ theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     (hdelta0 : 0 <= delta) :
     DifferentialGeometry.Integral.Connection.PinchEigen3Unordered l1 l2 l3 delta := by
   classical
-  have hscalar : scalar = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := hdiag.1
+  have hscalar : scalar = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 :=
+    hdiag.1
   have h00 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0)) = l1 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using
       hdiag.2 0 0
   have h11 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1)) = l2 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using
       hdiag.2 1 1
   have h22 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2)) = l3 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using
       hdiag.2 2 2
   have hg00 : g.inner x (basis 0) (basis 0) = 1 := by
     simpa [DifferentialGeometry.Integral.Connection.delta3] using horth 0 0
@@ -70,15 +73,18 @@ theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     simpa [h11] using hnonneg (basis 1)
   have hnonneg3 : 0 <= l3 := by
     simpa [h22] using hnonneg (basis 2)
-  have hlower1 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <= l1 := by
+  have hlower1 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <=
+    l1 := by
     have hpin := hpinch (basis 0)
     rw [h00, hg00, hscalar] at hpin
     nlinarith
-  have hlower2 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <= l2 := by
+  have hlower2 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <=
+    l2 := by
     have hpin := hpinch (basis 1)
     rw [h11, hg11, hscalar] at hpin
     nlinarith
-  have hlower3 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <= l3 := by
+  have hlower3 : delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 <=
+    l3 := by
     have hpin := hpinch (basis 2)
     rw [h22, hg22, hscalar] at hpin
     nlinarith
@@ -108,7 +114,8 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
       (I := I) (S.ricciAt t x) (S.scalar t x) l1 l2 l3 basis)
     (hric :
       DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t) x)
+        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
+          x)
     (hpinch :
       DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt (I := I) (M := M)
         (pinchTensor (I := I) (M := M)
@@ -120,9 +127,11 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
   refine pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     (I := I) (M := M) horth hdiag ?_ ?_ hdelta0
   · intro v
-    simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, SolutionOn.ricciAt] using hric v
+    simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, SolutionOn.ricciAt] using
+      hric v
   · intro v
-    simpa [pinchTensor, DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, SolutionOn.ricciAt]
+    simpa [pinchTensor, DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+      SolutionOn.ricciAt]
       using hpinch v
 
 
@@ -140,7 +149,8 @@ theorem cubicQ_sub_nonneg_of_section9_point
     (hric :
       DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt
         (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t) x)
+        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
+          x)
     (hpinch :
       DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt
         (I := I) (M := M)

@@ -264,24 +264,19 @@ private lemma innerModelRS_quadratic_continuous
     Continuous (fun T : TensorRSModel r s ℝ E =>
       tensorInnerPointwise (I := I) (M := M) g r s b T T) := by
   classical
-
   let ι := Fin (Module.finrank ℝ (TensorRSModel r s ℝ E))
   let basis : Module.Basis ι ℝ (TensorRSModel r s ℝ E) :=
     Module.finBasis ℝ (TensorRSModel r s ℝ E)
-
   let φ : ι → (TensorRSModel r s ℝ E →ₗ[ℝ] ℝ) := fun i => basis.coord i
   have hφ_cont : ∀ i, Continuous (φ i) := fun i =>
     LinearMap.continuous_of_finiteDimensional (φ i)
-
   have hexpand : ∀ T : TensorRSModel r s ℝ E,
       T = ∑ i : ι, (φ i T) • basis i := by
     intro T
     have := basis.linearCombination_repr T
-
     rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype] at this
     · exact this.symm
     · intros; rw [zero_smul]
-
   have hgen_left : ∀ (a : ι → ℝ) (S : TensorRSModel r s ℝ E),
       tensorInnerPointwise (I := I) (M := M) g r s b
         (∑ i : ι, a i • basis i) S =
@@ -328,7 +323,6 @@ private lemma innerModelRS_quadratic_continuous
     intro j _
     rw [RR.map_smul]
     rfl
-
   have hbilin_aux : ∀ (T : TensorRSModel r s ℝ E) (a : ι → ℝ),
       T = ∑ i : ι, a i • basis i →
       tensorInnerPointwise (I := I) (M := M) g r s b T T =
@@ -362,14 +356,12 @@ private lemma innerModelRS_quadratic_continuous
           tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j) := by
     intro T
     exact hbilin_aux T (fun i => φ i T) (hexpand T)
-
   have hcont : Continuous (fun T : TensorRSModel r s ℝ E =>
       ∑ i : ι, ∑ j : ι, (φ i T) * (φ j T) *
         tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j)) := by
     refine continuous_finset_sum _ (fun i _ => ?_)
     refine continuous_finset_sum _ (fun j _ => ?_)
     refine ((hφ_cont i).mul (hφ_cont j)).mul continuous_const
-
   refine hcont.congr ?_
   intro T
   exact (hbilin_expand T).symm
@@ -399,7 +391,6 @@ theorem tensorRSRiemannianInnerCLM_diagonal_continuousAt_zero
   (tensorRSRiemannianInnerCLM_diagonal_continuous (I := I) (M := M) g r s b).continuousAt
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 private lemma innerModelRS_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Bornology.IsBounded
@@ -440,7 +431,6 @@ private lemma innerModelRS_diagonal_sublevel_isBounded
     rw [hv0, norm_zero]; exact one_pos
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 private lemma innerModelRS_diagonal_sublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -460,7 +450,6 @@ private lemma tensorRSRiemannianInner_diagonal_clm_apply
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b) T) := by
   rw [tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 800000 in
 theorem tensorRSRiemannianInnerCLM_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -504,13 +493,10 @@ theorem tensorRSRiemannianInnerCLM_isVonNBounded
   rw [← hSetEq]
   exact hImg
 
-set_option maxHeartbeats 800000 in
-set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 noncomputable def tensorRSRiemannianMetric
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Bundle.RiemannianMetric (E := fun b : M => TensorRSSpace r s I b) where

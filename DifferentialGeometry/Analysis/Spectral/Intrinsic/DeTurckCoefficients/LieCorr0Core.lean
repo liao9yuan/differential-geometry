@@ -13,10 +13,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieC
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 6400000
-set_option synthInstance.maxHeartbeats 1600000
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
@@ -254,7 +251,8 @@ noncomputable def lieCorr0RiemFib
       (tensor0SProdKappaFib (I := I) (p := 2) (q := 4) x
         (lieCorr0RiemLoweredFib (I := I) g₀ x))))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem lieCorr0_ddc_section_contMDiff
     {d : ℕ} (ρ : Equiv.Perm (Fin d)) (Z : ∀ x : M, Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -284,7 +282,8 @@ theorem lieCorr0_ddc_section_contMDiff
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem lieCorr0_prod_section_contMDiff
     {p q : ℕ} (Y : ∀ x : M, Tensor0SSpace p I x) (K : ∀ x : M, Tensor0SSpace q I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel p ℝ E)) ∞

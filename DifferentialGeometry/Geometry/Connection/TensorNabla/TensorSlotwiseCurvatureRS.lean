@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -52,7 +50,6 @@ theorem riemannSec_tensorCov_apply_eval
       (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
       (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
       X W τ Y x
-
   have heq :
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
           riemannSec (tensorCov (I := I) g r s)

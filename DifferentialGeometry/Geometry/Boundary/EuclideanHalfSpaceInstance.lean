@@ -474,7 +474,8 @@ private theorem inwardCoordAt_self_charted_eq
       ((trivializationAt (EuclideanSpace ℝ (Fin n))
           (TangentSpace (modelWithCornersEuclideanHalfSpace n))
           (α : EuclideanHalfSpace n)).symmL ℝ (y : EuclideanHalfSpace n)) =
-        (tangentBundleCore (modelWithCornersEuclideanHalfSpace n) (EuclideanHalfSpace n)).coordChange
+        (tangentBundleCore (modelWithCornersEuclideanHalfSpace n)
+          (EuclideanHalfSpace n)).coordChange
           (achart (EuclideanHalfSpace n) (α : EuclideanHalfSpace n))
           (achart (EuclideanHalfSpace n) (y : EuclideanHalfSpace n))
           (y : EuclideanHalfSpace n) :=
@@ -506,7 +507,8 @@ private theorem inwardCoordAt_self_charted_eq
       ∀ z ∈ Set.range (modelWithCornersEuclideanHalfSpace n :
                         EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n)),
         ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n)) ∘
-          (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm) z = z := by
+          (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm) z =
+            z := by
     intro z hz
     rcases hz with ⟨h, rfl⟩
     change (modelWithCornersEuclideanHalfSpace n) ((modelWithCornersEuclideanHalfSpace n).symm
@@ -515,14 +517,17 @@ private theorem inwardCoordAt_self_charted_eq
     rw [(modelWithCornersEuclideanHalfSpace n).left_inv h]
   have h_eq_on_range :
       Set.EqOn ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n)) ∘
-                  (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm)
+                  (extChartAt (modelWithCornersEuclideanHalfSpace n)
+                    (α : EuclideanHalfSpace n)).symm)
                 (id : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n))
                 (Set.range (modelWithCornersEuclideanHalfSpace n)) := by
     intro z hz
     exact h_phi_eq_id_on_range z hz
   have h_fderiv_phi :
-      fderivWithin ℝ ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n)) ∘
-                       (extChartAt (modelWithCornersEuclideanHalfSpace n) (α : EuclideanHalfSpace n)).symm)
+      fderivWithin ℝ ((extChartAt (modelWithCornersEuclideanHalfSpace n) (y : EuclideanHalfSpace n))
+        ∘
+                       (extChartAt (modelWithCornersEuclideanHalfSpace n)
+                         (α : EuclideanHalfSpace n)).symm)
         (Set.range (modelWithCornersEuclideanHalfSpace n)) z₀ =
       ContinuousLinearMap.id ℝ (EuclideanSpace ℝ (Fin n)) := by
     have h_unique :

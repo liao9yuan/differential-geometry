@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -24,6 +22,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -171,7 +170,6 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -250,7 +248,6 @@ private lemma eigenvectorVec_pou_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorChartWeakPartial_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -299,7 +296,6 @@ private lemma eigenvectorChartWeakPartial_memWkp
   exact memWkp_of_hasWeakPartialDeriv (K := K) hΩ_open hg_weak hg_loc hu
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma covGradPouLeibnizCrossLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -324,12 +320,12 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
     chartAtlasPOU_isSubordinate I M β
   have hpou_pushed_smooth : ContDiff ℝ ∞
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M)
       (chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯).contMDiff hpou_supp
   have hpou_pushed_cs : HasCompactSupport
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) hpou_supp
   have hmult_smooth : ContDiff ℝ ∞
       (euclidPartial (E := E) k
@@ -400,7 +396,6 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
   exact h_prod
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma covGradChristoffelLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -558,7 +553,6 @@ private lemma covGradChristoffelLimit_memWkp
   exact h_sum
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorCovGrad_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

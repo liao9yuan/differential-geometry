@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 set_option backward.isDefEq.respectTransparency false
 
 open Manifold MeasureTheory Set Filter Bundle Tensor0SBundle

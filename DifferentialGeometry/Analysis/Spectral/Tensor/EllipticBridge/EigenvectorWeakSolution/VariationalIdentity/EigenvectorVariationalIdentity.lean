@@ -20,8 +20,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -60,7 +58,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartVariationalIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -651,7 +648,6 @@ theorem eigenvectorChartVariationalIdentity
       one_mul]]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def eigenvectorTensorChartBilinearData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -74,7 +74,8 @@ theorem ederivWithin_univ (ω : E → E [⋀^Fin n]→L[ℝ] F) :
   ext1 x
   rw[ederivWithin, ederiv, fderivWithin_univ]
 
-theorem ederivWithin_add (ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F) (s : Set E) {x : E} (hsx : UniqueDiffWithinAt ℝ s x)
+theorem ederivWithin_add (ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F) (s : Set E) {x : E}
+    (hsx : UniqueDiffWithinAt ℝ s x)
     (hω₁ : DifferentiableWithinAt ℝ ω₁ s x) (hω₂ : DifferentiableWithinAt ℝ ω₂ s x) :
     ederivWithin (ω₁ + ω₂) s x = ederivWithin ω₁ s x + ederivWithin ω₂ s x := by
   simp [ederivWithin, fderivWithin_add hsx hω₁ hω₂, uncurryFin_add]
@@ -92,11 +93,13 @@ theorem Filter.EventuallyEq.ederivWithin_eq {ω₁ ω₂ : E → E [⋀^Fin n]�
     (hs : ω₁ =ᶠ[𝓝[s] x] ω₂) (hx : ω₁ x = ω₂ x) : ederivWithin ω₁ s x = ederivWithin ω₂ s x := by
   simp only[ederivWithin, uncurryFin, hs.fderivWithin_eq hx]
 
-theorem Filter.EventuallyEq.ederivWithin_eq_of_mem {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E} {x : E}
+theorem Filter.EventuallyEq.ederivWithin_eq_of_mem {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E}
+    {x : E}
     (hs : ω₁ =ᶠ[𝓝[s] x] ω₂) (hx : x ∈ s) : ederivWithin ω₁ s x = ederivWithin ω₂ s x :=
   hs.ederivWithin_eq (mem_of_mem_nhdsWithin hx hs :)
 
-theorem Filter.EventuallyEq.ederivWithin_eq_of_insert {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E} {x : E}
+theorem Filter.EventuallyEq.ederivWithin_eq_of_insert {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E}
+    {x : E}
     (hs : ω₁ =ᶠ[𝓝[insert x s] x] ω₂) : ederivWithin ω₁ s x = ederivWithin ω₂ s x := by
   apply Filter.EventuallyEq.ederivWithin_eq (nhdsWithin_mono _ (subset_insert x s) hs)
   exact (mem_of_mem_nhdsWithin (mem_insert x s) hs :)
@@ -108,11 +111,13 @@ theorem Filter.EventuallyEq.ederivWithin' {ω₁ ω₂ : E → E [⋀^Fin n]→L
       EventuallyEq.ederivWithin_eq (hs.filter_mono <| nhdsWithin_mono _ ht)
         (hs.self_of_nhdsWithin hys)
 
-protected theorem Filter.EverntuallyEq.ederivWithin {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E} {x : E}
+protected theorem Filter.EverntuallyEq.ederivWithin {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E}
+    {x : E}
     (hs : ω₁ =ᶠ[𝓝[s] x] ω₂) : ederivWithin ω₁ s =ᶠ[𝓝[s] x] ederivWithin ω₂ s :=
   hs.ederivWithin' Subset.rfl
 
-theorem Filter.EventuallyEq.ederivWithin_eq_nhds {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E} {x : E}
+theorem Filter.EventuallyEq.ederivWithin_eq_nhds {ω₁ ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {s : Set E}
+    {x : E}
     (h : ω₁ =ᶠ[𝓝 x] ω₂) : ederivWithin ω₁ s x = ederivWithin ω₂ s x :=
   (h.filter_mono nhdsWithin_le_nhds).ederivWithin_eq h.self_of_nhds
 
@@ -183,7 +188,8 @@ protected theorem Filter.EventuallyEq.ederiv {ω₁ ω₂ : E → E [⋀^Fin n]�
     (h : ω₁ =ᶠ[𝓝 x] ω₂) : ederiv ω₁ =ᶠ[𝓝 x] ederiv ω₂ :=
   h.eventuallyEq_nhds.mono fun _x hx ↦ hx.ederiv_eq
 
-theorem ederiv_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {x : E} (hx : DifferentiableAt ℝ ω x) (v : Fin (n + 1) → E) :
+theorem ederiv_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {x : E} (hx : DifferentiableAt ℝ ω x)
+    (v : Fin (n + 1) → E) :
     ederiv ω x v = ∑ i, (-1) ^ i.val • fderiv ℝ (ω · (i.removeNth v)) x (v i) := by
   simp only [ederiv, ContinuousAlternatingMap.uncurryFin_apply,
     ContinuousAlternatingMap.fderiv_apply hx]
@@ -286,13 +292,16 @@ theorem iprod_iprod (ω : E → E [⋀^Fin (m + 2)]→L[ℝ] ℝ) (v : E → E) 
   rw [eq_neg_iff_add_eq_zero, add_self_eq_zero] at h
   exact h
 
-def wedge_product (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (ω₂ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
-    E → E [⋀^Fin (m + n)]→L[ℝ] F'' := fun e => ContinuousAlternatingMap.wedge_product (ω₁ e) (ω₂ e) f
+def wedge_product (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (ω₂ : E → E [⋀^Fin n]→L[ℝ] F')
+    (f : F →L[ℝ] F' →L[ℝ] F'') :
+    E → E [⋀^Fin (m + n)]→L[ℝ] F'' := fun e => ContinuousAlternatingMap.wedge_product (ω₁ e) (ω₂ e)
+                                                 f
 
 notation ω₁ "∧r["f"]" ω₂ => wedge_product ω₁ ω₂ f
 notation ω₁ "∧r" ω₂ => wedge_product ω₁ ω₂ (ContinuousLinearMap.mul ℝ ℝ)
 
-theorem wedge_product_def {ω₁ : E → E [⋀^Fin m]→L[ℝ] F} {ω₂ : E → E [⋀^Fin n]→L[ℝ] F'} {f : F →L[ℝ] F' →L[ℝ] F''}
+theorem wedge_product_def {ω₁ : E → E [⋀^Fin m]→L[ℝ] F} {ω₂ : E → E [⋀^Fin n]→L[ℝ] F'}
+    {f : F →L[ℝ] F' →L[ℝ] F''}
     {x : E} : (ω₁ ∧r[f] ω₂) x = ContinuousAlternatingMap.wedge_product (ω₁ x) (ω₂ x) f :=
   rfl
 
@@ -314,13 +323,15 @@ theorem wedge_assoc [FiniteDimensional ℝ E]
     ← ContinuousAlternatingMap.domDomCongr_apply]
   exact ContinuousAlternatingMap.wedge_mul_assoc (ω₁ x) (ω₂ x) (ω₃ x) y
 
-theorem add_wedge (ω₁ ω₂ : E → E [⋀^Fin m]→L[ℝ] F) (τ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
+theorem add_wedge (ω₁ ω₂ : E → E [⋀^Fin m]→L[ℝ] F) (τ : E → E [⋀^Fin n]→L[ℝ] F')
+    (f : F →L[ℝ] F' →L[ℝ] F'') :
     ((ω₁ + ω₂) ∧r[f] τ) = (ω₁ ∧r[f] τ) + (ω₂ ∧r[f] τ) := by
   ext1 x
   rw[wedge_product_def, _root_.add_apply, _root_.add_apply, wedge_product_def, wedge_product_def]
   exact ContinuousAlternatingMap.add_wedge (ω₁ x) (ω₂ x) (τ x) f
 
-theorem wedge_add (ω : E → E [⋀^Fin m]→L[ℝ] F) (τ₁ τ₂ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
+theorem wedge_add (ω : E → E [⋀^Fin m]→L[ℝ] F) (τ₁ τ₂ : E → E [⋀^Fin n]→L[ℝ] F')
+    (f : F →L[ℝ] F' →L[ℝ] F'') :
     (ω ∧r[f] (τ₁ + τ₂)) = (ω ∧r[f] τ₁) + (ω ∧r[f] τ₂) := by
   ext1 x
   rw[wedge_product_def, _root_.add_apply, _root_.add_apply, wedge_product_def, wedge_product_def]
@@ -359,7 +370,8 @@ theorem wedge_self_odd_zero [FiniteDimensional ℝ E]
   exact ContinuousAlternatingMap.wedge_self_odd_zero (ω x) m_odd
 
 theorem pullback_wedge (f : G → E) (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (ω₂ : E → E [⋀^Fin n]→L[ℝ] F')
-    (f' : F →L[ℝ] F' →L[ℝ] F'') : pullback f (ω₁ ∧r[f'] ω₂) = pullback f ω₁ ∧r[f'] pullback f ω₂ := by
+    (f' : F →L[ℝ] F' →L[ℝ] F'') : pullback f (ω₁ ∧r[f'] ω₂) = pullback f ω₁ ∧r[f'] pullback f
+      ω₂ := by
   ext x y
   rw[wedge_product_def, pullback, wedge_product_def, pullback, pullback,
     compContinuousLinearMap_apply]

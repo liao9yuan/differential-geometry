@@ -41,7 +41,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 
 
 
@@ -79,7 +78,7 @@ theorem forcing_continuous_interior
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (u₁ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) (R : ℝ)
-    (hu₁ : ∀ s, u₁ s = tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+    (_hu₁ : ∀ s, u₁ s = tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
@@ -88,23 +87,23 @@ theorem forcing_continuous_interior
       DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
     (Nsec : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
       DifferentialGeometry.Integral.L2.SmoothCcTensor g_bg 0 2)
-    (hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+    (_hN_coeff : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
           (I := I) (M := M) g_bg 0 2),
       (N_cont u).coeff i =
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
           (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u)) i)
-    (hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
+    (_hNsec_realize : ∀ (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
         (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x v w =
         ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
-    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+    (_hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
         metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hcont : ∀ ε : ℝ, 0 < ε → ContinuousOn u₁ (Set.Icc ε T))
-    (hball : ∀ ε : ℝ, 0 < ε → ∀ s ∈ Set.Icc ε T,
+    (_hball : ∀ ε : ℝ, 0 < ε → ∀ s ∈ Set.Icc ε T,
       u₁ s ∈ Metric.closedBall
         (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) :
@@ -115,7 +114,6 @@ theorem forcing_continuous_interior
   exact hN_cont.comp_continuousOn (hcont ε hε)
 
 open MeasureTheory in
-set_option linter.unusedVariables false in
 theorem permode_sum_hasderivat
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -124,15 +122,15 @@ theorem permode_sum_hasderivat
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (u₁ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
-    (hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce)
-    (hu₂sol : ∀ s, u₂ s =
+    (_hu : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce)
+    (_hu₂sol : ∀ s, u₂ s =
       maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce s)
-    (hforce : gforce =ᵐ[timeMeasure T]
+    (_hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckGeometricN (I := I) g_bg a
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)))
-    (hu₂ : ∀ s, tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+    (_hu₂ : ∀ s, tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) = timeH1.toFun u s)
-    (hu₁ : ∀ s, u₁ s = tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+    (_hu₁ : ∀ s, u₁ s = tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
       (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
     (hderiv_ae : (u.deriv : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
         =ᵐ[timeMeasure T]

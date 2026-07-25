@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.ContDiff.FaaDiBruno
 import Mathlib.Topology.MetricSpace.Thickening
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -73,9 +72,6 @@ theorem MapCInfConvOnCompacts.comp_tendsto_atTop {U : Set E}
   fun K hK hKU p => (h K hK hKU p).comp_tendsto_atTop hτ
 
 omit [NormedAddCommGroup F] [NormedSpace ℝ F] in
-
-
-
 theorem mapCInf_pair_tail
     {U : Set E} {Φ : ℕ → ℕ → E → G} {Φinf : E → G}
     (hconv : ∀ kn ln : ℕ → ℕ,
@@ -264,9 +260,6 @@ theorem mapCPConvOn_of_tendstoUniformlyOn {U K : Set E} {p : ℕ}
   exact ⟨k0, fun k hk r hr x hx => hk0 k hk r (Set.mem_Iic.mpr hr) x hx⟩
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace ℝ F] in
-
-
-
 theorem TendstoUniformlyOn.isLittleO_sub_const
     {K : Set E} {Fseq : ℕ → E → F} {Flim : E → F}
     (h : TendstoUniformlyOn Fseq Flim atTop K) :
@@ -280,8 +273,6 @@ theorem TendstoUniformlyOn.isLittleO_sub_const
     simpa [dist_eq_norm, norm_sub_rev] using hk x hx
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-
-
 theorem isBoundedUnder_prod_principal_of_forall_le {K : Set E} {u : ℕ × E → ℝ}
     (h : ∃ C : ℝ, ∀ k x, x ∈ K → u (k, x) ≤ C) :
     (atTop ×ˢ Filter.principal K).IsBoundedUnder (· ≤ ·) u := by
@@ -291,8 +282,6 @@ theorem isBoundedUnder_prod_principal_of_forall_le {K : Set E} {u : ℕ × E →
   exact Eventually.of_forall fun k x hx => hC k x hx
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-
-
 theorem isBoundedUnder_prod_principal_of_eventually_forall_le {K : Set E} {u : ℕ × E → ℝ}
     (h : ∃ C : ℝ, ∀ᶠ k in atTop, ∀ x ∈ K, u (k, x) ≤ C) :
     (atTop ×ˢ Filter.principal K).IsBoundedUnder (· ≤ ·) u := by
@@ -302,8 +291,6 @@ theorem isBoundedUnder_prod_principal_of_eventually_forall_le {K : Set E} {u : �
   exact hC
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace ℝ F] in
-
-
 theorem TendstoUniformlyOn.eventually_norm_le
     {K : Set E} {Fseq : ℕ → E → F} {Flim : E → F}
     (h : TendstoUniformlyOn Fseq Flim atTop K)
@@ -322,10 +309,6 @@ theorem TendstoUniformlyOn.eventually_norm_le
   nlinarith [hC x hx, hdist.le]
 
 omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
-
-
-
-
 theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv_comp_moving
     {K : Set E} {V K' : Set F}
     {A : ℕ → F → G} {Ainf : F → G} {B : ℕ → E → F} {Binf : E → F}

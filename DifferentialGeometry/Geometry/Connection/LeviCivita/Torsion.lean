@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

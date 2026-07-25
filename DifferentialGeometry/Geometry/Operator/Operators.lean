@@ -14,7 +14,6 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Trace
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

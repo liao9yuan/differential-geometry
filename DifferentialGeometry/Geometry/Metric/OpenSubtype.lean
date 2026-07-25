@@ -51,8 +51,6 @@ theorem SmoothRiemannianMetric.restrictOpenInner_isVonNBounded
   simpa [SmoothRiemannianMetric.restrictOpenInner] using g.isVonNBounded (x : M)
 
 omit [IsManifold I ∞ M] in
-
-
 theorem hasMFDerivAt_subtype_val (U : TopologicalSpace.Opens M) (x : U) :
     HasMFDerivAt I I (Subtype.val : U → M) x (ContinuousLinearMap.id Real E) := by
   constructor
@@ -197,8 +195,6 @@ theorem SmoothRiemannianMetric.restrictOpen_inner
     (g.restrictOpen (I := I) U).inner x v w = g.inner (x : M) v w := rfl
 
 omit [IsManifold I ∞ M] [FiniteDimensional Real E] in
-
-
 @[simp] theorem mfderiv_opens_incl {U V : TopologicalSpace.Opens M} (hVU : V ≤ U) (x : V) :
     mfderiv I I (TopologicalSpace.Opens.inclusion hVU : V → U) x =
       ContinuousLinearMap.id Real E := by

@@ -56,7 +56,8 @@ lemma tendsto_unitBallApproxEps :
   unfold unitBallApproxEps
   have hbase : Tendsto (fun n : ℕ => n + 5) atTop atTop := tendsto_add_atTop_nat 5
   have h :=
-    ((tendsto_inv_atTop_nhds_zero_nat : Tendsto (fun n : ℕ => ((n : ℝ))⁻¹) atTop (nhds 0)).comp hbase)
+    ((tendsto_inv_atTop_nhds_zero_nat : Tendsto (fun n : ℕ => ((n : ℝ))⁻¹) atTop (nhds 0)).comp
+      hbase)
   refine h.congr' ?_
   exact Filter.Eventually.of_forall fun n => by
     change ((((n + 5 : ℕ) : ℝ))⁻¹) = (((n : ℝ) + 5)⁻¹)
@@ -356,7 +357,8 @@ lemma tendsto_fderiv_smoothUnitBallExtensionApprox_pointwise
       have hEqShell :
           smoothUnitBallExtensionApprox (d := d) (unitBallApproxEps n) ψ =ᶠ[𝓝 x]
             unitBallShellFormula (d := d) ψ := by
-        filter_upwards [hEq, isOpen_unitBallOuterShell (d := d) |>.mem_nhds hxOuter] with y hyEq hyOuter
+        filter_upwards [hEq, isOpen_unitBallOuterShell (d := d) |>.mem_nhds hxOuter] with y hyEq
+          hyOuter
         simpa [unitBallExtension_eq_shellFormula_of_mem_outerShell (d := d) hyOuter] using hyEq
       exact (Filter.EventuallyEq.fderiv_eq (𝕜 := ℝ) hEqShell).symm
     · have hge2 : 2 ≤ ‖x‖ := by linarith
@@ -867,7 +869,8 @@ lemma mem_sphereOneRadial_of_mem_badAnnulusOne {ε : ℝ} (hε : ε < 1) {x : E}
     sphereOneRadial x ∈ Metric.sphere (0 : E) 1 := by
   have hxnorm : 0 < ‖x‖ := by linarith [hx.1, hε]
   have hx0 : ‖x‖ ≠ 0 := ne_of_gt hxnorm
-  rw [Metric.mem_sphere, dist_zero_right, sphereOneRadial, norm_smul, Real.norm_of_nonneg (by positivity),
+  rw [Metric.mem_sphere, dist_zero_right, sphereOneRadial, norm_smul, Real.norm_of_nonneg
+    (by positivity),
     inv_mul_cancel₀ hx0]
 
 omit [NeZero d] in
@@ -993,9 +996,9 @@ lemma norm_sub_le_of_fderiv_bound_closedBall
   simpa [norm_sub_rev] using h
 
 -- Inner proof extracted to a standalone lemma to keep the proof context small.
+set_option maxHeartbeats 1600000 in
+-- elaboration budget for chained fderiv bound on shell annulus
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1600000 in -- elaboration budget for chained fderiv bound on shell annulus
 lemma shellSubPsi_error_bound_at
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     {C : ℝ} (hC_nonneg : 0 ≤ C) (hC : ∀ x ∈ sphereOneControl (d := d),
@@ -1039,6 +1042,7 @@ theorem exists_shellSubPsi_error_bound
   exact ⟨C, hC_nonneg, fun n x hx => shellSubPsi_error_bound_at (d := d) hψ hC_nonneg hC hx⟩
 
 set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 lemma shellFormula_error_bound_at
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1064,7 +1068,8 @@ lemma shellFormula_error_bound_at
     hDiffAt (fun z hz => hC z (hsubset hz)) hxmem (le_of_lt (unitBallApproxEps_pos n))
   have hy0 : unitBallShellFormula (d := d) ψ (sphereTwoRadial x) = 0 :=
     unitBallShellFormula_eq_zero_on_sphereTwo (d := d)
-      (mem_sphereTwoRadial_of_mem_badAnnulusTwo (d := d) (by linarith [unitBallApproxEps_lt_one n]) hx)
+      (mem_sphereTwoRadial_of_mem_badAnnulusTwo (d := d) (by linarith [unitBallApproxEps_lt_one n])
+        hx)
   rw [hy0, sub_zero] at hmvt
   calc
     ‖unitBallShellFormula (d := d) ψ x‖ ≤ C * ‖x - sphereTwoRadial x‖ := hmvt
@@ -1080,9 +1085,9 @@ theorem exists_shellFormula_error_bound
   rcases exists_shellFormula_fderiv_bound (d := d) hψ with ⟨C, hC_nonneg, hC⟩
   exact ⟨C, hC_nonneg, fun n x hx => shellFormula_error_bound_at (d := d) hψ hC_nonneg hC hx⟩
 
+set_option maxHeartbeats 800000 in
+-- elaboration budget for bad-set indicator error bound assembly
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 800000 in -- elaboration budget for bad-set indicator error bound assembly
 theorem exists_fun_error_bound_badSet
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1118,14 +1123,16 @@ theorem exists_fun_error_bound_badSet
                   (unitBallShellFormula (d := d) ψ x - ψ x)‖ := by rw [hEq]
           _ ≤ ‖unitBallShellFormula (d := d) ψ x - ψ x‖ := by
                 rw [norm_mul, Real.norm_eq_abs]
-                nlinarith [abs_of_nonneg (sphereOneBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)),
+                nlinarith [abs_of_nonneg
+                  (sphereOneBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)),
                   sphereOneBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x),
                   norm_nonneg (unitBallShellFormula (d := d) ψ x - ψ x)]
           _ ≤ C1 * unitBallApproxEps n := hC1 n x hx1
           _ ≤ max (C1 / 5) (C2 / 5) := by
                 have := unitBallApproxEps_le_one_fifth n
                 exact le_trans (by nlinarith [hC1_nonneg]) (le_max_left _ _)
-      · have hxOuter : x ∈ unitBallOuterShell (d := d) := ⟨by linarith, by linarith [hx1.2, hεsmall]⟩
+      · have hxOuter : x ∈ unitBallOuterShell (d := d) :=
+          ⟨by linarith, by linarith [hx1.2, hεsmall]⟩
         have hEq :
             smoothUnitBallExtensionApprox (d := d) (unitBallApproxEps n) ψ x -
               exactUnitBallExtensionModel (d := d) ψ x =
@@ -1140,7 +1147,9 @@ theorem exists_fun_error_bound_badSet
           _ ≤ ‖ψ x - unitBallShellFormula (d := d) ψ x‖ := by
                 rw [norm_mul, Real.norm_eq_abs]
                 have h1 : |1 - sphereOneBlend (d := d) (unitBallApproxEps n) x| ≤ 1 := by
-                  rw [abs_of_nonneg (by linarith [sphereOneBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x)])]
+                  have hle : (0 : ℝ) ≤ 1 - sphereOneBlend (d := d) (unitBallApproxEps n) x := by
+                    linarith [sphereOneBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x)]
+                  rw [abs_of_nonneg hle]
                   linarith [sphereOneBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)]
                 nlinarith [norm_nonneg (ψ x - unitBallShellFormula (d := d) ψ x)]
           _ = ‖unitBallShellFormula (d := d) ψ x - ψ x‖ := norm_sub_rev _ _
@@ -1172,7 +1181,9 @@ theorem exists_fun_error_bound_badSet
           _ ≤ ‖unitBallShellFormula (d := d) ψ x‖ := by
                 rw [norm_mul, Real.norm_eq_abs, abs_sub_comm]
                 have h1 : |1 - sphereTwoBlend (d := d) (unitBallApproxEps n) x| ≤ 1 := by
-                  rw [abs_of_nonneg (by linarith [sphereTwoBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x)])]
+                  have hle : (0 : ℝ) ≤ 1 - sphereTwoBlend (d := d) (unitBallApproxEps n) x := by
+                    linarith [sphereTwoBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x)]
+                  rw [abs_of_nonneg hle]
                   linarith [sphereTwoBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)]
                 nlinarith [norm_nonneg (unitBallShellFormula (d := d) ψ x)]
           _ ≤ C2 * unitBallApproxEps n := hC2 n x hx2
@@ -1197,7 +1208,8 @@ theorem exists_fun_error_bound_badSet
                   unitBallShellFormula (d := d) ψ x‖ := by rw [hEq]
           _ ≤ ‖unitBallShellFormula (d := d) ψ x‖ := by
                 rw [norm_mul, Real.norm_eq_abs]
-                nlinarith [abs_of_nonneg (sphereTwoBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)),
+                nlinarith [abs_of_nonneg
+                  (sphereTwoBlend_nonneg (d := d) (ε := unitBallApproxEps n) (x := x)),
                   sphereTwoBlend_le_one (d := d) (ε := unitBallApproxEps n) (x := x),
                   norm_nonneg (unitBallShellFormula (d := d) ψ x)]
           _ ≤ C2 * unitBallApproxEps n := hC2 n x hx2

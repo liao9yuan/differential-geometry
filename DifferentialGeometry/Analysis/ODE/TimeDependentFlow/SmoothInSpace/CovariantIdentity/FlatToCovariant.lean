@@ -22,7 +22,8 @@ def movingTrivCorrection (α : M) (X : Π y : M, TangentSpace I y) (w : E) : E :
   (fderiv ℝ (fun z => chartMovingTriv (I := I) α z) (extChartAt I α α) w)
     (chartRawRepr (I := I) α X (extChartAt I α α))
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π y : M, TangentSpace I y) (w : E)

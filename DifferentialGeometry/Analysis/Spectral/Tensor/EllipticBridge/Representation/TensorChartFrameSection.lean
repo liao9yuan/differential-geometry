@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -38,7 +36,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma component_contDiff_of_contDiffOn (α : M)
     {f : EuclN → ℝ}
     (hf : ContDiffOn ℝ ∞ f (chartTargetEuclid (I := I) (M := M) α))
@@ -58,7 +57,8 @@ private lemma componentBump_contMDiffOn
   chartTestPullback_contMDiffOn (I := I) (M := M) α
     (component_contDiff_of_contDiffOn (I := I) (M := M) α hf hf_supp)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 private lemma componentBump_tsupport_subset
     (α : M) {f : EuclN → ℝ}
     (hf_cs : HasCompactSupport f)
@@ -66,7 +66,8 @@ private lemma componentBump_tsupport_subset
     tsupport (chartTestPullback (I := I) α f) ⊆ (chartAt H α).source :=
   chartTestPullback_tsupport_subset_source (I := I) (M := M) α hf_cs hf_supp
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorTrivProj_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s) (b : M) :
@@ -81,18 +82,19 @@ private lemma tensorTrivProj_sum
     unfold tensorTrivProj
     rw [show (S₁ + S₂).toSection b = S₁.toSection b + S₂.toSection b from by
       rw [SmoothCcTensor.toSection_add]; rfl]
-    exact map_add _ _ _
+    exact ContinuousLinearMap.map_add _ _ _
   have hzero : tensorTrivProj (I := I) (M := M) g r s
       (0 : SmoothCcTensor g r s) α b = 0 := by
     unfold tensorTrivProj
     rw [show (0 : SmoothCcTensor g r s).toSection b = 0 from by
       rw [SmoothCcTensor.toSection_zero]; rfl]
-    exact map_zero _
+    exact ContinuousLinearMap.map_zero _
   induction t using Finset.induction with
   | empty => rw [Finset.sum_empty, Finset.sum_empty, hzero]
   | insert i A hi ih => rw [Finset.sum_insert hi, Finset.sum_insert hi, hadd, ih]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s)

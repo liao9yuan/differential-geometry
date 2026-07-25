@@ -42,7 +42,8 @@ theorem chartAlphaMatrixIdentity_holds_chartSource
   intro i j
   exact chartAlphaMatrixIdentity_holds (I := I) g α hf hx i j
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartAlpha_swap_aux_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (f f' : M → ℝ) (x : M) :
@@ -140,7 +141,8 @@ theorem chartAlpha_swap_aux_holds
       (∑ k : Fin n, ∑ l, ∑ i, ∑ j,
         2 * (G i k * G j l * Hf' i j * Hf k l)) := by
     rw [Finset.sum_comm]
-  rw [h_LHS_reorder1, h_LHS_reorder2, h_LHS_reorder3, h_LHS_reorder4, h_LHS_reorder5, h_LHS_reorder6]
+  rw [h_LHS_reorder1, h_LHS_reorder2, h_LHS_reorder3, h_LHS_reorder4, h_LHS_reorder5,
+    h_LHS_reorder6]
   refine Finset.sum_congr rfl ?_
   intro i _
   refine Finset.sum_congr rfl ?_

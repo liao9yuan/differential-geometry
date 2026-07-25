@@ -170,23 +170,21 @@ lemma uc_trans_truncate_class
       change γ.extend s = p 1
       rw [p.target]
 
-set_option linter.unusedVariables false in
 
 
 lemma uc_truncLift_continuous
     {X : Type*} [TopologicalSpace X] [Inhabited X]
-    {a b : X} (γ : _root_.Path a b)
-    (q : UniversalCover X) (hq : q.1 = a) :
+    {a b : X} (_γ : _root_.Path a b)
+    (q : UniversalCover X) (_hq : q.1 = a) :
     True := trivial
 
-set_option linter.unusedVariables false in
 
 
 lemma uc_liftPath_one_eq
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
-    {x : X} (γ : _root_.Path (default : X) x) :
+    {x : X} (_γ : _root_.Path (default : X) x) :
     True := trivial
 
 end UniversalCover

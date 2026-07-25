@@ -17,6 +17,8 @@ open scoped ENNReal
 namespace DeGiorgi
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 private theorem lintegral_biUnion_finset_le_sum
     {α : Type*} [MeasurableSpace α] {μ : Measure α}
     {ι : Type*} (t : Finset ι) (U : ι → Set α) (f : α → ℝ≥0∞) :
@@ -229,7 +231,8 @@ theorem exists_finite_inner_ball_cover_with_card
           ((ρ / 4) ^ d * volume.real (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := by
     calc
       ∑ c ∈ t, volume.real (Metric.ball c (ρ / 4))
-          = ∑ c ∈ t, ((ρ / 4) ^ d * volume.real (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := by
+          = ∑ c ∈ t, ((ρ / 4) ^ d * volume.real
+            (Metric.ball (0 : EuclideanSpace ℝ (Fin d)) 1)) := by
               refine Finset.sum_congr rfl ?_
               intro c hc
               exact volumeReal_ball_eq c hquarter
@@ -295,7 +298,7 @@ theorem ae_on_set_of_ae_on_finite_cover
     {ι : Type*} {t : Finset ι}
     {s : Set α} {U : ι → Set α} {P : α → Prop}
     (hcover : s ⊆ ⋃ i ∈ t, U i)
-    (hlocal : ∀ i ∈ t, ∀ᵐ x ∂ μ.restrict (U i), P x) :
+    (hlocal : ∀ i ∈ t, ∀ᵐ x ∂μ.restrict (U i), P x) :
     ∀ᵐ x ∂ μ.restrict s, P x := by
   have hunion : ∀ᵐ x ∂ μ.restrict (⋃ i ∈ t, U i), P x := by
     rw [ae_restrict_biUnion_finset_iff]

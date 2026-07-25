@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmC
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
@@ -22,8 +22,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -54,8 +52,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w : TensorRSSpace r s I x) :
@@ -145,8 +143,8 @@ private lemma curvatureRefoldSlotPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 
     armPairTraceSlotPerm6 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (G : Tensor0SSpace 4 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -155,115 +153,59 @@ private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
           (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G) u =
       Tensor0SSpace.toModel G ![u 0, u 1, u 2, u 3] *
         unitModel (I := I) (M := M) g₀ 2 S x (fun k : Fin 2 => u (Fin.natAdd 4 k)) := by
-  rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G) =
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 5 x).symm
-        ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
-          (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G)) from rfl]
-  have hkey1 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 5)
-    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 5 x).symm
-      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G)))
-    (v0 := u 0) (vs := Matrix.vecTail u)
-  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey1
-  rw [show (Fin.cons (u 0) (Matrix.vecTail u) : Fin 6 → TangentSpace I x) = u from by
+  have hu : (fun k : Fin 6 => (u k : E)) =
+      Fin.cons (show E from u 0)
+        (Fin.cons (show E from u 1)
+          (Fin.cons (show E from u 2)
+            (Fin.cons (show E from u 3)
+              (fun k : Fin 2 => (u (Fin.natAdd 4 k) : E))))) := by
     funext k
-    refine Fin.cases rfl (fun i => rfl) k] at hkey1
-  rw [← hkey1]
+    fin_cases k <;> rfl
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (slotExtend (I := I) (M := M) g₀ 3 5
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S)).toSection x) G)
+      (fun k : Fin 6 => (u k : E)) = _
+  rw [hu]
+  rw [slotExtend_toModel_cons (I := I) (M := M) g₀ 3 5
+    (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S) x G (u 0)]
   rw [show ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G) (u 0)) =
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 4 x).symm
-        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
-          (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)))) from rfl]
-  rw [show (Matrix.vecTail u : Fin 5 → TangentSpace I x) =
-      Fin.cons (u 1) (fun k : Fin 4 => u (Fin.natAdd 2 k)) from by
-    funext k
-    refine Fin.cases ?_ (fun i => ?_) k
-    · rfl
-    · change u (Fin.succ (Fin.succ i)) = u (Fin.natAdd 2 i)
-      congr 1
-      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
-  have hkey2 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 4)
-    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 4 x).symm
-      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)))))
-    (v0 := u 1) (vs := fun k : Fin 4 => u (Fin.natAdd 2 k))
-  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey2
-  rw [← hkey2]
+      (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0))) =
+      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+        (slotExtend (I := I) (M := M) g₀ 2 4
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S)).toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0))) from rfl]
+  rw [slotExtend_toModel_cons (I := I) (M := M) g₀ 2 4
+    (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S) x
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)]
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
+      (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0))) (u 1)) =
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x).symm
-        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
-          (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)))) from rfl]
-  rw [show ((fun k : Fin 4 => u (Fin.natAdd 2 k)) : Fin 4 → TangentSpace I x) =
-      Fin.cons (u 2) (fun k : Fin 3 => u (Fin.natAdd 3 k)) from by
-    funext k
-    refine Fin.cases ?_ (fun i => ?_) k
-    · rfl
-    · change u (Fin.natAdd 2 (Fin.succ i)) = u (Fin.natAdd 3 i)
-      congr 1
-      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
-  have hkey3 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 3)
-    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x).symm
-      ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)))))
-    (v0 := u 2) (vs := fun k : Fin 3 => u (Fin.natAdd 3 k))
-  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey3
-  rw [← hkey3]
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1))) =
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (slotExtend (I := I) (M := M) g₀ 1 3
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S)).toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1))) from rfl]
+  rw [slotExtend_toModel_cons (I := I) (M := M) g₀ 1 3
+    (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S) x
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)]
   rw [show ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
+      (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1))) (u 2)) =
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x).symm
-        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
-              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-                (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)))) from rfl]
-  rw [show ((fun k : Fin 3 => u (Fin.natAdd 3 k)) : Fin 3 → TangentSpace I x) =
-      Fin.cons (u 3) (fun k : Fin 2 => u (Fin.natAdd 4 k)) from by
-    funext k
-    refine Fin.cases ?_ (fun i => ?_) k
-    · rfl
-    · change u (Fin.natAdd 3 (Fin.succ i)) = u (Fin.natAdd 4 i)
-      congr 1
-      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
-  have hkey4 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 2)
-    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x).symm
-      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)))))
-    (v0 := u 3) (vs := fun k : Fin 2 => u (Fin.natAdd 4 k))
-  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey4
-  rw [← hkey4]
-  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2))) =
+      ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (slotExtend (I := I) (M := M) g₀ 0 2 S).toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2))) (u 3)) =
-      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
-        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
-          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
-            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
-              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)) (u 3)) from rfl]
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2))) from rfl]
+  rw [slotExtend_toModel_cons (I := I) (M := M) g₀ 0 2 S x
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)) (u 3)]
   set t : Tensor0SSpace 0 I x :=
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
@@ -301,7 +243,6 @@ private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem curvatureRefoldMonomialCoeffField_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (σ : Equiv.Perm (Fin 4)) :
@@ -460,15 +401,18 @@ lemma bdSingle_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq
   rw [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
   rwa [zero_add] at h
 
-private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
+private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow
+    (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (σ : Equiv.Perm (Fin 4)) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P S : SmoothCcTensor g₀ 0 2)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (_hboundS : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
+        (_hboundS : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
+          δ)
         (_hPS : ∀ (l : ℕ) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
@@ -590,7 +534,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
         CS l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
       rcases Nat.eq_zero_or_pos l with hl0 | hl1
       · subst hl0
-        have hzero := riemannianFiberNormSq_symmS_le_of_gFibreOpBound (I := I) (M := M) g₀ S hδ0 hboundS x
+        have hzero := riemannianFiberNormSq_symmS_le_of_gFibreOpBound (I := I) (M := M) g₀ S hδ0
+          hboundS x
         have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith
         have hone : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (0 + 2) :=
           Combinatorics.one_le_antidiagonalTupleGridWindow b hb (by norm_num)
@@ -664,7 +609,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
     rw [curvatureRefoldMonomialCoeffField_eq_pairTrace (I := I) (M := M) g₀ g₁
       (ccTensor02Symm (I := I) (M := M) g₀ S) σ]
   rw [hlift]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 4 6 2
     (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
@@ -761,7 +707,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
-private theorem iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ Kg : ℕ → ℝ, (∀ k, 0 ≤ Kg k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -876,7 +823,8 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
   classical
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
-  obtain ⟨C, hC_nn, hpt⟩ := curvatureRefoldMonomialCoeffField_pointwise_gridWindow (I := I) (M := M) g₀ hδ₁_lt σ
+  obtain ⟨C, hC_nn, hpt⟩ := curvatureRefoldMonomialCoeffField_pointwise_gridWindow (I := I) (M := M)
+    g₀ hδ₁_lt σ
   obtain ⟨Kg, hKg_nn, hKg⟩ :=
     iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (I := I) (M := M) g₀ a ha_super hR
   refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,

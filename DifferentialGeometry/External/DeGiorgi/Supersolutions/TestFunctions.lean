@@ -113,7 +113,8 @@ lemma superFderivVec_apply
     superFderivVec η x i = inner ℝ (superFderivVec η x) (EuclideanSpace.single i (1 : ℝ)) := by
       simpa using
         (EuclideanSpace.inner_single_right (i := i) (a := (1 : ℝ)) (superFderivVec η x)).symm
-    _ = ((InnerProductSpace.toDual ℝ E) (superFderivVec η x)) (EuclideanSpace.single i (1 : ℝ)) := by
+    _ = ((InnerProductSpace.toDual ℝ E) (superFderivVec η x))
+      (EuclideanSpace.single i (1 : ℝ)) := by
       rw [InnerProductSpace.toDual_apply_apply]
     _ = (fderiv ℝ η x) (EuclideanSpace.single i 1) := by
       simp [superFderivVec]
@@ -1673,7 +1674,8 @@ theorem superExactInv_boundTerm_bound_on_ball
           (|superExactShiftPow ε (-(1 + p)) (u x)| ^ 2 /
             (-(deriv (superExactShiftReg ε (-(1 + p))) (u x)))))
         (volume.restrict Ω) := by
-    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 + p))) hlhs_aemeas.aestronglyMeasurable ?_
+    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 + p))) hlhs_aemeas.aestronglyMeasurable
+      ?_
     filter_upwards [ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hx
     have hux : 0 < u x := hu_pos x hx
     have hle :=
@@ -1797,7 +1799,8 @@ theorem superExactFwd_boundTerm_bound_on_ball
           (|superExactShiftPow ε (p - 1) (u x)| ^ 2 /
             (-(deriv (superExactShiftReg ε (p - 1)) (u x)))))
         (volume.restrict Ω) := by
-    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 - p))) hlhs_aemeas.aestronglyMeasurable ?_
+    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 - p))) hlhs_aemeas.aestronglyMeasurable
+      ?_
     filter_upwards [ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hx
     have hux : 0 < u x := hu_pos x hx
     have hle :=

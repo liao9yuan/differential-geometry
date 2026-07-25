@@ -110,7 +110,6 @@ def knRsq (a b c d : Fin 3) : ℝ :=
 
 variable {R}
 
-set_option maxHeartbeats 1000000 in
 
 
 theorem driftG_eq_knRsq (hR : ∀ i j, R i j = R j i) (a b c d : Fin 3) :
@@ -134,7 +133,6 @@ theorem rsq_comm (hR : ∀ i j, R i j = R j i) (i j : Fin 3) :
   refine Finset.sum_congr rfl fun p _ => ?_
   rw [hR i p, hR p j, mul_comm]
 
-set_option maxHeartbeats 2000000 in
 
 theorem cc_closed (hR : ∀ i j, R i j = R j i) (i j : Fin 3) :
     Cc R i j = 2 * Rsq R i j - 3 / 2 * sc R * R i j
@@ -144,7 +142,6 @@ theorem cc_closed (hR : ∀ i j, R i j = R j i) (i j : Fin 3) :
       Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
     (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
 
-set_option maxHeartbeats 4000000 in
 private theorem minor_a0 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     R 0 c * R b d - R 0 d * R b c =
       -(kd 0 c * Rsq R b d + Rsq R 0 c * kd b d
@@ -156,7 +153,6 @@ private theorem minor_a0 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
       Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
     (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
 
-set_option maxHeartbeats 4000000 in
 private theorem minor_a1 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     R 1 c * R b d - R 1 d * R b c =
       -(kd 1 c * Rsq R b d + Rsq R 1 c * kd b d
@@ -168,7 +164,6 @@ private theorem minor_a1 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
       Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
     (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
 
-set_option maxHeartbeats 4000000 in
 private theorem minor_a2 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     R 2 c * R b d - R 2 d * R b c =
       -(kd 2 c * Rsq R b d + Rsq R 2 c * kd b d
@@ -194,7 +189,6 @@ theorem minor_adj3 (hR : ∀ i j, R i j = R j i) (a b c d : Fin 3) :
   · exact minor_a1 hR b c d
   · exact minor_a2 hR b c d
 
-set_option maxHeartbeats 6000000 in
 private theorem bt_a0 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     Bt R 0 b c d = -(R 0 b * R c d) + 2 * R 0 c * R b d
       + kd 0 c * Rsq R b d + Rsq R 0 c * kd b d
@@ -208,7 +202,6 @@ private theorem bt_a0 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
       Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
     (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
 
-set_option maxHeartbeats 6000000 in
 private theorem bt_a1 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     Bt R 1 b c d = -(R 1 b * R c d) + 2 * R 1 c * R b d
       + kd 1 c * Rsq R b d + Rsq R 1 c * kd b d
@@ -222,7 +215,6 @@ private theorem bt_a1 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
       Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
     (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
 
-set_option maxHeartbeats 6000000 in
 private theorem bt_a2 (hR : ∀ i j, R i j = R j i) (b c d : Fin 3) :
     Bt R 2 b c d = -(R 2 b * R c d) + 2 * R 2 c * R b d
       + kd 2 c * Rsq R b d + Rsq R 2 c * kd b d
@@ -274,7 +266,6 @@ theorem bsharp_eq_knC (hR : ∀ i j, R i j = R j i) (a b c d : Fin 3) :
   linear_combination h1 - h2 + h3 - h4 + kd b d * hc1 - kd a d * hc2
     - kd b c * hc3 + kd a c * hc4 + hm
 
-set_option maxHeartbeats 1000000 in
 
 
 theorem reaction_match (hR : ∀ i j, R i j = R j i) (a b c d : Fin 3) :

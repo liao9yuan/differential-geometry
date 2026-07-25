@@ -254,7 +254,8 @@ omit [FiniteDimensional ℝ E] in
 @[simp] lemma inducedMetricInner_apply
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v w : hI.boundaryE) :
-    inducedMetricInner g x v w = g.inner (x : M) (boundaryInclusionMfderiv x v) (boundaryInclusionMfderiv x w) :=
+    inducedMetricInner g x v w = g.inner (x : M) (boundaryInclusionMfderiv x v)
+      (boundaryInclusionMfderiv x w) :=
   ContinuousLinearMap.bilinearComp_apply _ _ _ _ _
 
 omit [FiniteDimensional ℝ E] in
@@ -666,7 +667,8 @@ omit [FiniteDimensional ℝ E] in
 @[simp] lemma inducedMetric_inner_apply
     (g : Measure.SmoothRiemannianMetric I M) (b : BoundaryManifold I M)
     (v w : hI.boundaryE) :
-    (inducedMetric g).inner b v w = g.inner (b : M) (boundaryInclusionMfderiv b v) (boundaryInclusionMfderiv b w) :=
+    (inducedMetric g).inner b v w = g.inner (b : M) (boundaryInclusionMfderiv b v)
+      (boundaryInclusionMfderiv b w) :=
   inducedMetricInner_apply g b v w
 
 end WithBoundary

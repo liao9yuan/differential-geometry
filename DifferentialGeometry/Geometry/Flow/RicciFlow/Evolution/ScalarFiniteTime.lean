@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -157,7 +156,8 @@ theorem of_continuousOn
       (fun p : Real × M => scalar p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
     ScalarBoundedAboveOnSlab (M := M) scalar T := by
-  have hcompact : IsCompact (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+  have hcompact : IsCompact
+    (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
     unfold DifferentialGeometry.Integral.Connection.spacetimeSlab
     exact isCompact_Icc.prod isCompact_univ
   have himage :

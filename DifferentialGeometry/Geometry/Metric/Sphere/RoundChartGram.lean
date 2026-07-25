@@ -24,7 +24,6 @@ instance instNeZeroFinrankModel : NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n
   rw [finrank_euclideanSpace_fin]; infer_instance
 
 omit [NeZero n] in
-
 theorem extChartAt_symm_zero_sphere (x₀ : sphere (0 : E) 1) :
     (extChartAt (𝓡 n) x₀).symm 0 = x₀ := by
   have hchart : (extChartAt (𝓡 n) x₀).symm 0 = (stereographic' n (-x₀)).symm 0 := rfl

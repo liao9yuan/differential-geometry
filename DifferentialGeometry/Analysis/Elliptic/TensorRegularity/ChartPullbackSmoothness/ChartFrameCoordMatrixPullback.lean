@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function NormedSpace
 open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
@@ -60,7 +58,8 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     intro y hy
     have h_src : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
         (chartAt H α).source :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+      DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I)
+        (M := M) α hy
     change (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
       (chartAt H α).source
     exact h_src
@@ -117,7 +116,8 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     partialDeriv (E := E) m (scalarOnE (I := I) α f)
         (extChartAt I α ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) =
-      euclidPartial (E := E) m (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f) y := by
+      euclidPartial (E := E) m (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f)
+        y := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
@@ -160,13 +160,15 @@ private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial_of_mdiff
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
         (chartBasisVecFiber (I := I) α m
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) =
-      euclidPartial (E := E) m (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f) y := by
+      euclidPartial (E := E) m (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f)
+        y := by
   classical
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
     toEuclidean_symm_mem_target (I := I) hy
   have hb_chart : b ∈ (chartAt H α).source :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+    DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I)
+      (M := M) α hy
   have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
     rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
   have hb_int :
@@ -198,7 +200,8 @@ private lemma extDerivFun_pull_eq_euclidPartial_on_target
   intro y hy
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
   have hb_chart : b ∈ (chartAt H α).source :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+    DifferentialGeometry.Analysis.Sobolev.Chart.symm_toEuclidean_symm_mem_chartAtSource (I := I)
+      (M := M) α hy
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     change b ∈ (chartAt H α).source
     exact hb_chart

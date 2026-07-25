@@ -195,10 +195,10 @@ theorem cross_chart_bound_strict_strong_memWkp_k
     have hη_ne : η_γ_loc y ≠ 0 := by intro h0; apply hy; rw [h0]; ring
     exact Function.mem_support.mpr hη_ne
   obtain ⟨C_combined, hC_combined_nn, hC_combined_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       hη_combined_smooth hη_combined_cpt k
   obtain ⟨C_α, hC_α_nn, hC_α_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       hη_α_loc_smooth hη_α_loc_cpt k
   set Ωγ_target : Set EuclN := chartTargetEuclid (I := I) (M := M) γ with hΩγ_target_def
   set Ωα_target : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩα_target_def

@@ -7,7 +7,6 @@ import Mathlib.LinearAlgebra.Trace
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSMetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -30,7 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' := by
   have hM : Tensor0SSpace.toModel T = Tensor0SSpace.toModel T' :=
@@ -38,7 +37,8 @@ private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace 
   exact Tensor0SSpace.toModel_injective hM
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace s I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) = ∑ i ∈ t, Tensor0SSpace.toModel (f i) := by
@@ -69,7 +69,8 @@ def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma slotInsertEndoFib_apply (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace s I x) :
     slotInsertEndoFib (I := I) (M := M) s k x Λ A =
@@ -81,7 +82,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace s I x)
     (m : Fin s → E) :
@@ -101,7 +103,8 @@ lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
     (Λ₁ Λ₂ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (Λ₁ + Λ₂) =
@@ -119,7 +122,8 @@ lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (c • Λ) =
@@ -135,7 +139,8 @@ lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace (s + 1) I x) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x Λ A =
@@ -156,7 +161,8 @@ lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) j.succ x Λ =
@@ -182,7 +188,8 @@ lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
     ∀ (s : ℕ) (k : Fin s) (φ : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x),
       ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -437,6 +444,9 @@ set_option backward.isDefEq.respectTransparency false in
 def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
+  letI : Module ℝ (Tensor0SSpace (s + 1) I x) := tensor0SSpace_module (s + 1) x
+  letI : Module ℝ (TangentSpace I x →L[ℝ] Tensor0SSpace (s + 1) I x) :=
+    ContinuousLinearMap.module
   LinearMap.toContinuousLinearMap
     { toFun := fun A => (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
         (slotFreeCurvUCLM (I := I) (M := M) g s x A)
@@ -452,12 +462,13 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
             apply ContinuousLinearMap.ext
             intro w
             rw [ContinuousLinearMap.add_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
-              slotFreeCurvWCLM_apply,
-              map_add (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
+              slotFreeCurvWCLM_apply]
+            exact (curvatureTensorActionFib (I := I) (M := M) g s x u w).map_add A A'
           rw [ContinuousLinearMap.add_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
-            slotFreeCurvUCLM_apply, hW,
-            map_add ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
-        rw [hU, map_add ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
+            slotFreeCurvUCLM_apply, hW]
+          exact ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm).map_add _ _
+        rw [hU]
+        exact ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_add _ _
       map_smul' := fun c A => by
         have hU : slotFreeCurvUCLM (I := I) (M := M) g s x (c • A) =
             c • slotFreeCurvUCLM (I := I) (M := M) g s x A := by
@@ -468,10 +479,10 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
             apply ContinuousLinearMap.ext
             intro w
             rw [ContinuousLinearMap.smul_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
-              map_smul (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
+              (curvatureTensorActionFib (I := I) (M := M) g s x u w).map_smul]
           rw [ContinuousLinearMap.smul_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
-            hW, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
-        rw [hU, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
+            hW, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm).map_smul]
+        rw [hU, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_smul]
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in

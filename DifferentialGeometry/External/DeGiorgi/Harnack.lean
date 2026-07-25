@@ -34,6 +34,7 @@ local notation "μ1" => volume.restrict (Metric.ball (0 : E) 1)
 local notation "μhalf" => volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ))
 
 set_option maxHeartbeats 5000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- An a.e. upper bound on the half ball upgrades to an essential-supremum
 bound on the half ball. -/
@@ -65,6 +66,7 @@ theorem essSup_halfBall_le_of_ae_bound
   · simpa [not_le] using (ae_iff.mp hbound)
 
 set_option maxHeartbeats 5000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- An a.e. lower bound on the half ball upgrades to an essential-infimum
 bound on the half ball. -/
@@ -365,6 +367,7 @@ private theorem aemeasurable_on_ball_of_isSolution
   exact (huw.restrict Metric.isOpen_ball hsub).memLp.aestronglyMeasurable.aemeasurable
 
 set_option maxHeartbeats 5000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem ae_le_localHarnack_on_eighthBall
     (hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
@@ -654,7 +657,7 @@ private theorem ae_le_localHarnack_on_eighthBall
 
 omit [NeZero d] in
 private theorem const_le_of_ae_const_le {μ : Measure E} (hμ : μ ≠ 0) {a b : ℝ}
-    (h : ∀ᵐ _z ∂ μ, a ≤ b) :
+    (h : ∀ᵐ _z ∂μ, a ≤ b) :
     a ≤ b := by
   by_contra hab
   have hfalse : ∀ᵐ z ∂ μ, False := by
@@ -1047,7 +1050,8 @@ theorem harnack
     have hc_closed : c ∈ Metric.closedBall (0 : E) (1 / 2 : ℝ) := by
       exact Metric.mem_closedBall.2 (le_of_lt (Metric.mem_ball.1 hc))
     have hz_unit : z ∈ Metric.ball (0 : E) 1 :=
-      ball_subset_unitBall_of_mem_closedBall_half (d := d) hc_closed (by positivity) (by norm_num) hz
+      ball_subset_unitBall_of_mem_closedBall_half (d := d) hc_closed (by positivity) (by norm_num)
+        hz
     exact (hu_pos z hz_unit).le
   have hupper0 :
       ∀ᵐ x ∂ μhalf, u x ≤ K ^ 17 * quarterBallInf u 0 := by
@@ -1089,7 +1093,8 @@ theorem harnack
             quarterBallInf u c ≤ K ^ 16 * quarterBallInf u y := by
           simpa [K] using
             quarterBallInf_chain_le (d := d) hd A hu_pos hsol hc_ball hy
-        filter_upwards [ae_le_localHarnack_on_eighthBall (d := d) hd A hu_pos hsol hc_ball] with x hx
+        filter_upwards [ae_le_localHarnack_on_eighthBall (d := d) hd A hu_pos hsol hc_ball] with x
+          hx
         calc
           u x ≤ K * quarterBallInf u c := by simpa [K] using hx
           _ ≤ K * (K ^ 16 * quarterBallInf u y) := by

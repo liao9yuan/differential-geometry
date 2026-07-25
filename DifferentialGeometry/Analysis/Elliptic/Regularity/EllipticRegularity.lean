@@ -89,13 +89,14 @@ theorem chartLocalEuclideanForm_principalIntegrand
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
+    Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
       (chartLocalEuclideanForm (E := E) Ω) u v x =
       ∑ i : Fin (Module.finrank ℝ E),
         ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
           ((fderiv ℝ v x) (EuclideanSpace.single i 1)) := by
   classical
-  unfold DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
+  unfold
+    Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
   refine Finset.sum_congr rfl ?_
   intro i _
   rw [Finset.sum_eq_single i]
@@ -113,7 +114,7 @@ theorem chartLocalEuclideanForm_principalIntegrand_self
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
+    Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
       (chartLocalEuclideanForm (E := E) Ω) u u x =
       ∑ i : Fin (Module.finrank ℝ E),
         ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2 := by
@@ -127,12 +128,13 @@ theorem chartLocalEuclideanForm_principalIntegrand_self_eq_gradient_sq
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
+    Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
       (chartLocalEuclideanForm (E := E) Ω) u u x =
-      ‖DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec
+      ‖Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec
         (chartLocalEuclideanForm (E := E) Ω) u x‖ ^ 2 := by
   rw [chartLocalEuclideanForm_principalIntegrand_self]
-  rw [DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec_norm_sq_eq_sum]
+  rw
+    [Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec_norm_sq_eq_sum]
 
 omit [FiniteDimensional ℝ E] in
 theorem chartLocalEuclideanForm_bilin
@@ -149,7 +151,8 @@ theorem chartLocalEuclideanForm_bilin
   refine integral_congr_ae ?_
   refine Filter.Eventually.of_forall ?_
   intro x
-  change DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
+  change
+    Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.principalIntegrand
       (chartLocalEuclideanForm (E := E) Ω) u v x +
       (chartLocalEuclideanForm (E := E) Ω).c x * u x * v x =
       ∑ i : Fin (Module.finrank ℝ E),

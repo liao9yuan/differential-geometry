@@ -11,8 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorF
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle ContinuousLinearMap
 open scoped Manifold Topology ContDiff BigOperators
@@ -36,13 +34,20 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 def ccTensorMultilinear (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
   MixedSection.toMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
     (E := (TangentSpace I : M → Type _)) ∞ T.toSection
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] theorem ccTensorMultilinear_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorMultilinear (I := I) g T x =
@@ -62,7 +67,8 @@ def smoothCcTensorBilinForm (g : SmoothRiemannianMetric I M)
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (bilinFormToModel E).symm (ccTensorModel (I := I) g T x)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g T x v w =
@@ -71,8 +77,8 @@ theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
     (v w : TangentSpace I x) :
@@ -86,16 +92,13 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   letI instTens : Bundle.RiemannianBundle
       (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-
   obtain ⟨n, e, _hn, horth, hpars, hexpand, hrfns⟩ :=
     tangent_frame_expansion (I := I) (M := M) g₀ x
   set B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
     smoothCcTensorBilinForm (I := I) g₀ T x with hB_def
-
   set coef : Fin n × Fin n → ℝ :=
     fun p => g₀.inner x (e p.1) v * g₀.inner x (e p.2) w with hcoef_def
   set comp : Fin n × Fin n → ℝ := fun p => B (e p.1) (e p.2) with hcomp_def
-
   have hexpV : v = ∑ i : Fin n, g₀.inner x (e i) v • e i := hexpand v
   have hexpW : w = ∑ j : Fin n, g₀.inner x (e j) w • e j := hexpand w
   have hvalue : B v w = ∑ p : Fin n × Fin n, coef p * comp p := by
@@ -129,11 +132,9 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
         (g₀.inner x (e i) v * g₀.inner x (e j) w) • B (e i) (e j))]
     refine Finset.sum_congr rfl (fun p _ => ?_)
     rw [hcoef_def, hcomp_def, smul_eq_mul]
-
   have hCS : (∑ p : Fin n × Fin n, coef p * comp p) ^ 2 ≤
       (∑ p : Fin n × Fin n, coef p ^ 2) * ∑ p : Fin n × Fin n, comp p ^ 2 :=
     Finset.sum_mul_sq_le_sq_mul_sq Finset.univ coef comp
-
   have hcoefsq : (∑ p : Fin n × Fin n, coef p ^ 2) =
       g₀.inner x v v * g₀.inner x w w := by
     rw [Fintype.sum_prod_type (f := fun p : Fin n × Fin n => coef p ^ 2)]
@@ -145,12 +146,10 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
       refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
       rw [hcoef_def]
       ring
-
   have hcomp_fiber : ∀ (K : Fin 0 → Fin n) (i j : Fin n),
       comp (i, j) = fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
         (T.toSection x) n e K (![i, j] : Fin 2 → Fin n) := by
     intro K i j
-
     have hconst : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k : Fin 0 => g₀.inner x (e (K k))) :
           Tensor0SBundle.Tensor0SSpace 0 I x) =
@@ -168,19 +167,16 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
           (fun k => g₀.inner x (e (K k)) (u k)) = 1
       rw [ContinuousMultilinearMap.mkPiAlgebra_apply]
       exact Finset.prod_of_isEmpty _
-
     have hcompij : comp (i, j) = ccTensorModel (I := I) g₀ T x ![e i, e j] := by
       rw [hcomp_def, hB_def]
       exact ccTensorBilin_apply (I := I) g₀ T x (e i) (e j)
     rw [hcompij]
-
     unfold fiberNormSqComponent
     rw [hconst]
     have htuple : (fun k => e ((![i, j] : Fin 2 → Fin n) k)) =
         (![e i, e j] : Fin 2 → TangentSpace I x) := by
       funext k; fin_cases k <;> rfl
     rw [htuple]
-
     change ccTensorModel (I := I) g₀ T x ![e i, e j] =
       ((T.toSection x
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -193,12 +189,10 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
       ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ^ 2 := by
     rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 2 x
       (T.toSection x)]
-
     rw [hrfns (T.toSection x)]
     rw [Fintype.sum_unique (fun K : Fin 0 → Fin n =>
       ∑ J : Fin 2 → Fin n,
         fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 (T.toSection x) n e K J)]
-
     refine (Fintype.sum_equiv (finTwoArrowEquiv (Fin n))
       (fun J : Fin 2 → Fin n =>
         fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 (T.toSection x) n e
@@ -210,7 +204,6 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     simp only [finTwoArrowEquiv_apply, Equiv.toFun_as_coe, piFinTwoEquiv_apply]
     rw [fiberNormSqSummand_eq_component_sq,
       hcomp_fiber (default : Fin 0 → Fin n) (J 0) (J 1), hJ]
-
   have hnorm_nn : 0 ≤ ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ := norm_nonneg _
   have hvv_nn : 0 ≤ g₀.inner x v v :=
     DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x v
@@ -227,7 +220,6 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
             rw [hcoefsq, hcompsq]
       _ = ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ^ 2 *
             (g₀.inner x v v * g₀.inner x w w) := by ring
-
   have hrhs_nn : 0 ≤ ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ *
       Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
     mul_nonneg (mul_nonneg hnorm_nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
@@ -240,7 +232,8 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   · rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hnorm_nn,
       Real.sqrt_mul hvv_nn, mul_assoc]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorBilin_scalar_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     (Y W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -301,7 +294,8 @@ def ccTensorBilinSymm (g : SmoothRiemannianMetric I M)
   (1 / 2 : ℝ) • (smoothCcTensorBilinForm (I := I) g T x +
     (smoothCcTensorBilinForm (I := I) g T x).flip)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] theorem ccTensorBilinSymm_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g T x v w =
@@ -311,7 +305,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
   simp only [ccTensorBilinSymm, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.add_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_symm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g T x v w =
@@ -386,7 +381,8 @@ theorem exists_smooth_metric_of_smooth_tensor_small
   ⟨tensorSectionRealizeMetric (I := I) g T hδ'_lt hδ',
     fun x v w => tensorSectionRealizeMetric_inner (I := I) g T hδ'_lt hδ' x v w⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (c • T) x : Tensor0SSpace 2 I x)
@@ -401,14 +397,16 @@ theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
   rw [ContMDiffSection.coe_smul, Pi.smul_apply, ContinuousLinearMap.smul_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorModel_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (c • T) x = c • ccTensorModel (I := I) g T x := by
   unfold ccTensorModel
   rw [ccTensorMultilinear_smul, Tensor0SSpace.toModel_smul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (c • T) x v w =
@@ -417,7 +415,8 @@ theorem ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :
@@ -457,7 +456,6 @@ theorem exists_smooth_metric_of_tensorHs_small
       (I := I) (M := M) u hu_fs) hδ'_lt hδ'
 
 open scoped Classical in
-
 noncomputable def realizeMetricMap (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) :
     SmoothRiemannianMetric I M :=

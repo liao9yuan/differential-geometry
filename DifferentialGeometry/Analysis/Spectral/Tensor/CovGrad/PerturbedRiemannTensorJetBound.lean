@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -33,7 +31,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -67,7 +66,8 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem riemannianFiberNormSq_le_of_componentSq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
@@ -82,7 +82,8 @@ private theorem riemannianFiberNormSq_le_of_componentSq_sum_le
       ≤ ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
   classical
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_local (I := I) (M := M) g₀ x
-  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse
+    horth]
   calc (∑ K : Fin r → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin r → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -149,7 +150,8 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_rfns_le_of_jetEnvelope
   refine ⟨((Module.finrank ℝ E : ℝ) ^ 2) * C ^ 2, by positivity, ?_⟩
   intro g₁ P δ hδ_le hδ htie x henv
   exact riemannianFiberNormSq_le_of_componentSq_sum_le (I := I) (M := M) g₀ 2 2 x
-    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x)) C
+    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x))
+      C
     (fun e horth K => hC g₁ P hδ_le hδ htie x henv e horth K)
 
 end Curvature

@@ -43,7 +43,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma metricDiff_apply (q h : SmoothRiemannianMetric I M)
     (x : M) (c : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -63,7 +64,8 @@ private lemma metricDiff_apply (q h : SmoothRiemannianMetric I M)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem metricDiff_bilin (q h : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) q
@@ -137,7 +139,8 @@ private theorem metricDiff_eval
     rfl
   · rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem metricDiff_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -562,17 +565,16 @@ theorem scalarFlux_eq_slot (q h : SmoothRiemannianMetric I M) :
     cotangent_slot_apply (I := I) (M := M)]
   rfl
 
-set_option linter.unusedVariables false in
 
 
 theorem scalarFlux_jet_grid
     (q : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (h : SmoothRiemannianMetric I M) (T : SmoothCcTensor q 0 2)
-        (htie : ∀ y v w, h.inner y v w =
+        (_htie : ∀ y v w, h.inner y v w =
           q.inner y v w + ccTensorBilinSymm (I := I) q T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) q
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) q
           (ccTensorBilinSymm (I := I) q T) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) q 1 (1 + i) x
@@ -582,7 +584,7 @@ theorem scalarFlux_jet_grid
             (fun j => riemannianFiberNormSq (I := I) (M := M) q 0 (2 + j) x
               ((iteratedCovGrad (I := I) q 0 2 j T).toSection x)) i := by
   obtain ⟨C, hC, hjet⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
       (I := I) (M := M) q hδ₀
   refine ⟨C, hC, ?_⟩
   intro h T htie δ hδ_le hδ0 hbound i x

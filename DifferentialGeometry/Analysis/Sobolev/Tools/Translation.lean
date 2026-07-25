@@ -12,7 +12,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private theorem sub_translate_eq_integral_fderiv
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ) (x h : E) :
     φ x - φ (x - h) =
@@ -61,7 +60,6 @@ private theorem sub_translate_eq_integral_fderiv
     _ = ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ φ (γ s)) h := hint
 
 omit [NeZero d] in
-
 private theorem rpow_abs_sub_translate_le
     {φ : E → ℝ} (hφ : ContDiff ℝ 1 φ)
     {p : ℝ} (hp_one : 1 ≤ p) (x h : E) :
@@ -181,7 +179,6 @@ private theorem rpow_abs_sub_translate_le
           exact mul_le_mul_of_nonneg_left hJensen hh_pow_nn
 
 omit [NeZero d] in
-
 private theorem lintegral_rpow_translate_sub_le
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr) (h : E) :
@@ -395,7 +392,6 @@ private theorem lintegral_rpow_translate_sub_le
           rw [hPostSwap]
 
 omit [NeZero d] in
-
 theorem eLpNorm_translate_sub_le_smul_eLpNorm_fderiv
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ)

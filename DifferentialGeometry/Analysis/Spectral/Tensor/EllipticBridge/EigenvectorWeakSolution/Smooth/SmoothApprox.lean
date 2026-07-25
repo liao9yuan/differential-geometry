@@ -69,7 +69,6 @@ private lemma inner_smoothToTensorH1Compl_eq_l2_add_dirichlet
   rw [h_l2]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 noncomputable def eigenvectorResolvent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -80,7 +79,6 @@ noncomputable def eigenvectorResolvent
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) i)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvector_eq_resolvent_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -115,7 +113,6 @@ theorem eigenvector_eq_resolvent_smul
   rw [h_eig', smul_smul, inv_mul_cancel₀ hμ_ne, one_smul]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvector_chartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -136,7 +133,6 @@ theorem eigenvector_chartComponent_eq
       (eigenvectorResolvent (I := I) (M := M) g r s i)) α P₀
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem exists_smoothApprox
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -166,7 +162,6 @@ theorem exists_smoothApprox
   exact hx_tendsto
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenWeakEquation
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -189,7 +184,6 @@ theorem eigenWeakEquation
   exact h_var
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem smoothApprox_dirichlet_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

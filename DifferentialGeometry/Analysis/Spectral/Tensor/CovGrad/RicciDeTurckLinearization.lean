@@ -15,8 +15,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -42,7 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroTensor_eq_smul_unitTensor (x : M)
     (D : Tensor0SSpace 0 I x) :
@@ -56,7 +53,6 @@ private theorem zeroTensor_eq_smul_unitTensor (x : M)
   rw [map_smul, hunit, smul_eq_mul, mul_one]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor0s_clm_ext_unit {s : ℕ} {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x}
@@ -67,7 +63,6 @@ private theorem tensor0s_clm_ext_unit {s : ℕ} {x : M}
   rw [zeroTensor_eq_smul_unitTensor (I := I) (M := M) x D, map_smul, map_smul, h]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem smoothCcTensor_ext_of_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
     {S S' : SmoothCcTensor g 0 s}
@@ -88,7 +83,6 @@ theorem smoothCcTensor_ext_of_unitModel (g : SmoothRiemannianMetric I M) {s : �
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem unitModel_add (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S + S') x =
@@ -112,7 +106,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem unitModel_castRankCc (g : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
     (W : SmoothCcTensor g 0 a) (x : M) :
     unitModel (I := I) (M := M) g b (h ▸ W) x =
@@ -239,7 +232,8 @@ theorem riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
     (g : SmoothRiemannianMetric I M) {s : ℕ} (σ : Equiv.Perm (Fin s))
     (S : SmoothCcTensor g 0 s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
-        ((iteratedCovGrad (I := I) (M := M) g 0 s i (domDomCongrSection (I := I) g σ S)).toSection x) =
+        ((iteratedCovGrad (I := I) (M := M) g 0 s i (domDomCongrSection (I := I) g σ S)).toSection
+          x) =
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
         ((iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x) :=
   riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr (I := I) (M := M) g s σ S

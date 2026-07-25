@@ -785,7 +785,6 @@ private lemma cutoffWitness_weakGrad_eq_on_open
         (fderiv ℝ η x) (EuclideanSpace.single j 1) * u x : E)) i = hu.weakGrad x i
   simp [h_eta_x, h_fderiv_zero]
 
-set_option maxHeartbeats 1600000 in
 
 theorem mean_value_inequality_W1p
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
@@ -1595,7 +1594,6 @@ private lemma eLpNorm_weakGrad_component_le_norm_real
   refine h_step1.trans ?_
   exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ hS)
 
-set_option maxHeartbeats 4000000 in
 
 private theorem morrey_representative_of_W1pWitness
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
@@ -2262,7 +2260,8 @@ private theorem morrey_representative_of_W1pWitness
         mul_le_mul_of_nonneg_left h_factor_le hC_sup_nn
       linarith
     exact h_C_left.trans h_C_right
-  refine ⟨ũ, (d : ℝ) * C_pair_smooth, ((d : ℝ) + 1) * C_sup_smooth, hũ_cont, ?_, ?_, h_ae_eq, ?_, ?_⟩
+  refine ⟨ũ, (d : ℝ) * C_pair_smooth, ((d : ℝ) + 1) * C_sup_smooth, hũ_cont, ?_, ?_, h_ae_eq, ?_,
+    ?_⟩
   · exact mul_nonneg hd_pos.le hC_pair_nn
   · exact mul_nonneg (by linarith) hC_sup_nn
   · intro x hx y hy

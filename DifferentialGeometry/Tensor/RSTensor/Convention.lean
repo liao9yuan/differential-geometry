@@ -71,10 +71,6 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Trace
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedSimpArgs false
 
 
 
@@ -183,7 +179,8 @@ theorem component04_apply
     component0S (I := I) basis A
         (fun q : Fin 4 => if q = 0 then i else if q = 1 then j else if q = 2 then k else l) =
       A (fun q : Fin 4 =>
-        if q = 0 then basis i else if q = 1 then basis j else if q = 2 then basis k else basis l) := by
+        if q = 0 then basis i else if q = 1 then basis j else if q = 2 then basis k else basis
+          l) := by
   rw [component0S_apply]
   congr 1
   funext q

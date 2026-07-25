@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Tensor
 import DifferentialGeometry.Geometry.Curvature.Realized.Curvature
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unnecessarySimpa false
 
 
 
@@ -181,7 +179,8 @@ theorem rm13_comp_eq_connection
     rm13Comp (I := I) K.rm13 (fun i y => frame i y) hframe x a b c d =
       hframe.coeff a x ((connectionRiemannCurvatureField (I := I) cov
         (fun y => frame b y) (fun y => frame c y) (fun y => frame d y)) x) :=
-  DifferentialGeometry.Integral.Connection.rm13_comp_eq_connection (I := I) cov K.rm13 frame hframe hRm x a b c d
+  DifferentialGeometry.Integral.Connection.rm13_comp_eq_connection (I := I) cov K.rm13 frame hframe
+    hRm x a b c d
 
 theorem rm04_comp_eq_connection
     {Idx : Type*}
@@ -194,7 +193,8 @@ theorem rm04_comp_eq_connection
     rm04Comp (I := I) K.rm04 (fun i y => frame i y) x a b c d =
       g.inner x (frame d x) ((connectionRiemannCurvatureField (I := I) cov
         (fun y => frame a y) (fun y => frame b y) (fun y => frame c y)) x) :=
-  DifferentialGeometry.Integral.Connection.rm04_comp_eq_connection (I := I) g cov K.rm04 frame hRm x a b c d
+  DifferentialGeometry.Integral.Connection.rm04_comp_eq_connection (I := I) g cov K.rm04 frame hRm x
+    a b c d
 
 theorem ricci_comp_eq_trace
     {Idx : Type*} [Fintype Idx]
@@ -206,7 +206,8 @@ theorem ricci_comp_eq_trace
     ricciComp (I := I) K.ricci frame x i j =
       ∑ k : Idx, ∑ l : Idx,
         gInv x k l * rm04Comp (I := I) K.rm04 frame x k i j l :=
-  DifferentialGeometry.Integral.Connection.ricciComp_eq_trace (I := I) K.ricci K.rm04 gInv frame hRic x i j
+  DifferentialGeometry.Integral.Connection.ricciComp_eq_trace (I := I) K.ricci K.rm04 gInv frame
+    hRic x i j
 
 theorem ricci_comp_eq_connection_trace
     {Idx : Type*} [Fintype Idx]
@@ -228,7 +229,8 @@ theorem ricci_comp_eq_connection_trace
     (fun i y => frame i y) hRic x i j]
   refine Finset.sum_congr rfl fun k _ => ?_
   refine Finset.sum_congr rfl fun l _ => ?_
-  rw [DifferentialGeometry.Integral.Connection.rm04_comp_eq_connection (I := I) g cov K.rm04 frame hRm x k i j l]
+  rw [DifferentialGeometry.Integral.Connection.rm04_comp_eq_connection (I := I) g cov K.rm04 frame
+    hRm x k i j l]
 
 theorem scalar_eq_trace
     {Idx : Type*} [Fintype Idx]
@@ -240,7 +242,8 @@ theorem scalar_eq_trace
     K.scalar x =
       ∑ i : Idx, ∑ j : Idx,
         gInv x i j * ricciComp (I := I) K.ricci frame x i j :=
-  DifferentialGeometry.Integral.Connection.scalarSection_eq_trace (I := I) K.scalar K.ricci gInv frame hScalar x
+  DifferentialGeometry.Integral.Connection.scalarSection_eq_trace (I := I) K.scalar K.ricci gInv
+    frame hScalar x
 
 end CurvatureTensorData
 

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -186,7 +184,8 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
   exact MeasureTheory.Measure.eqOn_open_of_ae_eq hu_ae hΩ_open
     hu_cont.continuousOn continuousOn_const
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorRS_baseSet_eq_chart_source
     (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -202,7 +201,8 @@ private lemma tensorRS_baseSet_eq_chart_source
   rw [Set.inter_self]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {x : M}
@@ -219,7 +219,7 @@ private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
   have hrecover : e.symmL ℝ x (e.continuousLinearMapAt ℝ x (S.toSection x)) =
       S.toSection x :=
     Bundle.Trivialization.symmL_continuousLinearMapAt e hx_base (S.toSection x)
-  rw [hproj, map_zero] at hrecover
+  rw [hproj, ContinuousLinearMap.map_zero] at hrecover
   exact hrecover.symm
 
 omit [NeZero (Module.finrank ℝ E)] in

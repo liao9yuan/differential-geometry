@@ -138,8 +138,6 @@ variable [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
   [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
 private theorem orthonormal_li
     (g : SmoothRiemannianMetric I M) {x : M}
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I x)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Iter
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Manifold Set Filter Topology
 open scoped Manifold Topology ContDiff BigOperators
@@ -27,15 +26,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
-    tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx =
+    tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx =
       tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ (toEuclidean (E := E)).symm := by
   funext y
-  rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, Function.comp_apply, tensorChartComponentOnModel]
+  rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, Function.comp_apply,
+    tensorChartComponentOnModel]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : EuclN}
@@ -50,32 +54,30 @@ lemma norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hO_open : IsOpen O := isOpen_interior
   have hUD : UniqueDiffOn ℝ O := hO_open.uniqueDiffOn
-
   rw [rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx]
-
   have hpre_open : IsOpen (e ⁻¹' O) := hO_open.preimage e.continuous
   have hy_pre : y ∈ e ⁻¹' O := hy
-
-  have hplain : iteratedFDeriv ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) y =
-      iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) (e ⁻¹' O) y :=
+  have hplain : iteratedFDeriv ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) y
+    =
+      iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e)
+        (e ⁻¹' O) y :=
     (iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
       (f := tensorChartComponentOnModel (I := I) (M := M) g S α Jdx ∘ ⇑e) m hpre_open hy_pre).symm
   rw [hplain]
-
-  have hcomp := e.iteratedFDerivWithin_comp_right (f := tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
+  have hcomp := e.iteratedFDerivWithin_comp_right
+    (f := tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
     hUD (x := y) hy m
   rw [hcomp]
-
   refine (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans ?_
   rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-
   have he_norm : ‖(e : EuclN →L[ℝ] E)‖ = ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ := rfl
   rw [he_norm, mul_comm]
 
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma rawCompJet_le
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : E}
@@ -118,7 +120,8 @@ lemma rawCompJet_le
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem bareOnE_le_bare
     (g : SmoothRiemannianMetric I M) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g 0 2) {y : E},

@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmC
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
@@ -24,8 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -82,7 +80,8 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
     intro σ m
     rw [domDomCongrSection_unitModel (I := I) g₀ σ W x,
       ContinuousMultilinearMap.domDomCongr_apply]
-  have hlin : unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
+  have hlin : unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
+    ![c, a, b] =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (0 : Fin 3) 2) W) x ![c, a, b]
@@ -90,7 +89,8 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
               ![c, a, b]
           - unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (1 : Fin 3) 2) W) x ![c, a, b]) := by
-    simp only [koszulCovGradRaw, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
+    simp only [koszulCovGradRaw, unitModel, SmoothCcTensor.toSection_smul,
+      SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply]
     rfl
@@ -149,7 +149,8 @@ private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetr
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma bdSlotExtendIter_three_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 3) (x : M) (D : Tensor0SSpace 3 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -286,12 +287,12 @@ def bdSGKTau4 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (P S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+          (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
             (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
@@ -378,7 +379,8 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
         funext k
         fin_cases k <;> rfl]
   rw [show unitModel (I := I) (M := M) g₀ 4
-      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+        (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
           (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
@@ -405,7 +407,6 @@ def sharpGradKoszulWeightedTerm (g₀ g₁ : SmoothRiemannianMetric I M) (σ : E
         (koszulCovecCc (I := I) g₀ P)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -430,7 +431,8 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
     rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S =
-        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+          (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
             (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
@@ -456,7 +458,8 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
     rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S =
-        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+          (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
             (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
@@ -482,7 +485,8 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
     rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S =
-        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+          (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
             (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
@@ -508,7 +512,8 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
     rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S =
-        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+          (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
             (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
@@ -619,7 +624,6 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -651,7 +655,8 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
               ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) D) =
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection
+                    x)) D) =
       (2 : ℝ) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
         (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
@@ -659,7 +664,8 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
               ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) D) := by
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection
+                    x) D) := by
     rw [show ((((2 : ℝ) •
         ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
@@ -667,15 +673,18 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
               ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) =
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection
+                    x)) =
         (2 : ℝ) •
-          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
                     sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
                   (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                    sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) from by
+                    sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection
+                      x) from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
     rfl
   rw [hRHSsmul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
@@ -762,7 +771,6 @@ private lemma bdKRaw_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -791,14 +799,16 @@ private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T) x]
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) =
-      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+        (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
           (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3
               (koszulCovGradRaw (I := I) (M := M) g₀ (c • T)))
             (koszulCovecCc (I := I) g₀ (c • T)))) from rfl]
   rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T =
-      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+        (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
           (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))
@@ -830,7 +840,8 @@ private lemma bdSGKWeights_pair_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [← smul_add, ← smul_add, ← smul_sub]
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) (w : Fin 6 → E) :
     Tensor0SSpace.toModel
@@ -855,7 +866,6 @@ private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (fun i => w (armPairTraceSlotPerm6 i))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] in
 lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -887,14 +897,16 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
           ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
               sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
             (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) D) =
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) D)
+                =
       (c * c) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
             ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
                 sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
               (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) D) from by
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)
+                  D) from by
     rw [show ((((c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
           ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
@@ -906,7 +918,8 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
             ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
                 sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
               (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) from by
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)
+                  from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
     rfl]
   beta_reduce
@@ -929,7 +942,8 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma bdTensorProd_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (W : Tensor0SSpace 4 I x) (u : Fin 6 → E) :
     Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 x D W) u =
@@ -946,7 +960,8 @@ private lemma bdTensorProd_toModel (x : M) (D : Tensor0SSpace 2 I x)
     fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
@@ -978,7 +993,8 @@ private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     funext k
     fin_cases k <;> rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -1013,7 +1029,8 @@ private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -1048,7 +1065,8 @@ private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem bdTensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     (P : ∀ p : M × ℝ, Tensor0SSpace m I p.1)
     (Q : ∀ p : M × ℝ, Tensor0SSpace k I p.1)
@@ -1422,7 +1440,8 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 (q.2 • T) (q.2 • T) +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 (q.2 • T) (q.2 • T)))))).toSection q.1)) (Y q.1) := by
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 (q.2 • T)
+                    (q.2 • T)))))).toSection q.1)) (Y q.1) := by
       rw [← bdSGK_eq_refold (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)
         (q.2 • T) (q.2 • T) htie]
       rfl
@@ -1452,7 +1471,8 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) =
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1))
+                    (Y q.1)) =
         ((2 : ℝ) * (q.2 * q.2)) •
           ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
             ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
@@ -1466,7 +1486,8 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) from by
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1))
+                    (Y q.1)) from by
       rw [show ((((2 : ℝ) • (q.2 * q.2) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
@@ -1531,7 +1552,8 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) =
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1))
+                    (Y q.1)) =
         cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
           (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
             ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
@@ -1544,7 +1566,8 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                 (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
                   sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T)))).toSection q.1) (Y q.1))) from by
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T)))).toSection q.1)
+                    (Y q.1))) from by
       rw [appCcRS_toSection]
       rfl]
     rw [bdSGKProd_toSection (I := I) (M := M) g₀
@@ -1801,7 +1824,8 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) from by
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1))
+                    from by
       rw [show ((((-(1 / 2) : ℝ) • q.2 • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
           (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
@@ -1843,7 +1867,8 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                   (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
-                    palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) from by
+                    palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)))
+                      from by
       rw [appCcRS_toSection]
       rfl]
   have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)

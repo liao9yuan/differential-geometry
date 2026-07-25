@@ -12,7 +12,6 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -46,7 +45,8 @@ private def connTraceEvalLin
     metricTrace0S2InBasis (I := I)
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
       (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x
+          k l
           (extChartAt I x x))
       (A β) Fin.elim0
   map_add' β γ := by
@@ -94,9 +94,11 @@ def connTraceOneFormAt
   exact metricTrace0S2InBasis_eq_metricTrace (I := I) g
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x)
     (A (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) V))) Fin.elim0
 
 

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -84,9 +83,6 @@ def forbidden (O : M) (lam : ℝ → ℝ) (prior : List M) : Set M :=
   ⋃ c ∈ prior, Metric.ball c (lam (dist c O))
 
 open Classical in
-
-
-
 def netList (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) : ℕ → List M
   | 0 => [O]
   | (α + 1) =>

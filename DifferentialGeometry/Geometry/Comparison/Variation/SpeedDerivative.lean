@@ -101,7 +101,8 @@ theorem speedSq_hasDerivAt
     intro s hs
     have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
     have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice s).mdifferentiableAt (by norm_num)) α hsrc
+      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice s).mdifferentiableAt (by norm_num)) α
+        hsrc
     change V s =
       (trivializationAt E (TangentSpace I) (γ 0)).continuousLinearMapAt ℝ (γ s)
         (Vsec s)
@@ -135,7 +136,8 @@ theorem speedSq_hasDerivAt
       rw [hα]; exact mem_chart_source H (f 0 t)
     have hxtarget : AlongCurve.chartCurve (I := I) α γ 0 ∈ (extChartAt I α).target :=
       (extChartAt I α).map_source hxsrc
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hxtarget
   have hbase := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant
     (I := I) g α γ V V
@@ -226,7 +228,8 @@ theorem speedSq_hasDerivAt
           (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
             (I := I) g γ Vsec 0) := by
     rw [hDV_eq]
-    have hcc := DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong_chartCoord
+    have hcc :=
+      DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong_chartCoord
       (I := I) g γ Vsec 0
     rw [hγ0] at hcc
     exact hcc.symm
@@ -239,16 +242,19 @@ theorem speedSq_hasDerivAt
   have hu0_eq : u0 = extChartAt I α α := by
     rw [hu0, AlongCurve.chartCurve_def, hγ, hα]
   have hGram_eq : ∀ l j : Fin (Module.finrank ℝ E),
-      DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 = chartGramMatrix (I := I) g α α l j := by
+      DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 =
+        chartGramMatrix (I := I) g α α l j := by
     intro l j
-    rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hu0_eq, (extChartAt I α).left_inv (mem_extChartAt_source α)]
+    rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hu0_eq,
+      (extChartAt I α).left_inv (mem_extChartAt_source α)]
   have hinner_sum :
       g.inner α
           (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
             (I := I) g γ Vsec 0)
           (Vsec 0)
         = ∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
-            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 * chartCoord (E := E) l DV
+            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 *
+              chartCoord (E := E) l DV
               * chartCoord (E := E) j (V 0) := by
     have hrt1 : (trivializationAt E (TangentSpace I) α).symmL ℝ α DV
         = DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
@@ -267,27 +273,31 @@ theorem speedSq_hasDerivAt
   rw [hinner_sum]
   have hT2 :
       (∑ i : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
-          DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l u0 * chartCoord (E := E) i (V 0)
+          DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l u0 *
+            chartCoord (E := E) i (V 0)
             * chartCoord (E := E) l DV)
         = ∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
-            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 * chartCoord (E := E) l DV
+            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 *
+              chartCoord (E := E) l DV
               * chartCoord (E := E) j (V 0) := by
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun i _ => ?_))
     rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_symm (I := I) g α i l u0]
     ring
-  change (2 : ℝ) * (∑ l, ∑ j, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0
+  change (2 : ℝ) * (∑ l, ∑ j, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I)
+    g α l j u0
         * chartCoord (E := E) l DV * chartCoord (E := E) j (V 0))
       = (∑ l, ∑ j, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0
           * chartCoord (E := E) l DV * chartCoord (E := E) j (V 0))
-        + (∑ i, ∑ l, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l u0
+        + (∑ i, ∑ l, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l
+          u0
             * chartCoord (E := E) i (V 0) * chartCoord (E := E) l DV)
   rw [hT2]; ring
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma speedSq_contDiff
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :

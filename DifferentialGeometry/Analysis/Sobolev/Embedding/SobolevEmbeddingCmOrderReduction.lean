@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
@@ -73,7 +71,6 @@ theorem iteratedCovGradSobolevNorm_le_topOrder
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
@@ -121,7 +118,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2_of_rankBound
     (g : SmoothRiemannianMetric I M) (k : ℕ)

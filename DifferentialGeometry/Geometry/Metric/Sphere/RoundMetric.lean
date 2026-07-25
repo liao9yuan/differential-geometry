@@ -123,13 +123,9 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
       (V₂ := fun _ : sphere (0 : E) 1 => ℝ)
       (φ := fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x))
     intro W
-
     have hv := dIncl_apply_section_contMDiff (n := n) (fun x => Y x) Y.contMDiff
     have hw := dIncl_apply_section_contMDiff (n := n) (fun x => W x) W.contMDiff
-
     have hg := flatInner_comp_incl_contMDiff (E := E) (n := n)
-
-
     have h_total : ContMDiff (𝓡 n) (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) ∞
         (fun x : sphere (0 : E) 1 => TotalSpace.mk' ℝ
           (E := Bundle.Trivial E ℝ)
@@ -149,7 +145,6 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
         (w := fun x : sphere (0 : E) 1 =>
           mfderiv (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x (W x))
         hg hv hw
-
     have h_scalar : ContMDiff (𝓡 n) 𝓘(ℝ, ℝ) ∞
         (fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x) (W x)) := by
       have h_eq : (fun x : sphere (0 : E) 1 => roundInner (n := n) x (Y x) (W x))
@@ -165,7 +160,6 @@ noncomputable def roundMetric : SmoothRiemannianMetric (𝓡 n) (sphere (0 : E) 
       have h_at := h_total x
       rw [contMDiffAt_totalSpace] at h_at
       exact h_at.2
-
     intro x
     rw [contMDiffAt_section]
     refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_

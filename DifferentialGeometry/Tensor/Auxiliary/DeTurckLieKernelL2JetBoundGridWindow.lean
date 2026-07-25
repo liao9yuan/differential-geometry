@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
@@ -16,8 +16,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDiverg
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -44,11 +42,13 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (realizedFam convexPerturbation realizedFam_inner_of_mem convexPerturbation_gFibreOpBound_abs
     abs_convex_smallConstant_lt_one realizedSmallSet)
-open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg metric_inner_cauchy_schwarz_sq)
+open DifferentialGeometry.Analysis.Laplacian
+  (metric_inner_self_nonneg metric_inner_cauchy_schwarz_sq)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (covGrad connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one dLaBiContrFibFixedFrame_toModel)
 open DifferentialGeometry.Geometry.Curvature
-  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
+  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
+    abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
@@ -131,7 +131,8 @@ private lemma prodTerm_le_antidiagonalTupleGrid_dla (b : ℕ → ℝ) (hb : ∀ 
 
 private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j k : ℕ) :
     Combinatorics.antidiagonalTupleGrid b j * Combinatorics.antidiagonalTupleGrid b k ≤
-      (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
+      (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) *
+        Combinatorics.antidiagonalTupleGrid b (j + k) := by
   classical
   have hpair : ∀ n ∈ Finset.range (j + 1), ∀ e ∈ Finset.Nat.antidiagonalTuple n j,
       ∀ n' ∈ Finset.range (k + 1), ∀ e' ∈ Finset.Nat.antidiagonalTuple n' k,
@@ -183,18 +184,21 @@ private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 
     _ = ∑ n ∈ Finset.range (j + 1), ((Finset.Nat.antidiagonalTuple n j).card : ℝ) *
           (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) := by
         exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_const, nsmul_eq_mul])
-    _ = (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
+    _ = (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) *
+      Combinatorics.antidiagonalTupleGrid b (j + k) := by
         rw [show (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) *
             Combinatorics.antidiagonalTupleGrid b (j + k) =
             antidiagonalTupleTotalCount j *
-              (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) from by
+              (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k))
+                from by
           ring]
         rw [show antidiagonalTupleTotalCount j = ∑ n ∈ Finset.range (j + 1),
             ((Finset.Nat.antidiagonalTuple n j).card : ℝ) from rfl]
         rw [Finset.sum_mul]
 
 def antidiagonalTuplePairCount (m1 m2 : ℕ) : ℝ :=
-  ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 * antidiagonalTupleTotalCount k2
+  ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 *
+    antidiagonalTupleTotalCount k2
 
 lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ antidiagonalTuplePairCount m1 m2 :=
   Finset.sum_nonneg fun k1 _ => Finset.sum_nonneg fun k2 _ =>
@@ -202,7 +206,8 @@ lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ antidiagonalTuplePairCount m1 m2
 
 lemma dLaGridWin_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m1 m2 m3 : ℕ)
     (h3 : m1 + m2 ≤ m3 + 1) :
-    antidiagonalTupleGridPartialSum b m1 * antidiagonalTupleGridPartialSum b m2 ≤ antidiagonalTuplePairCount m1 m2 * antidiagonalTupleGridPartialSum b m3 := by
+    antidiagonalTupleGridPartialSum b m1 * antidiagonalTupleGridPartialSum b m2 ≤
+      antidiagonalTuplePairCount m1 m2 * antidiagonalTupleGridPartialSum b m3 := by
   classical
   have hG_nn : ∀ k, 0 ≤ Combinatorics.antidiagonalTupleGrid b k :=
     fun k => Combinatorics.antidiagonalTupleGrid_nonneg b hb k

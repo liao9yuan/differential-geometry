@@ -24,7 +24,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_self_after_symm_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     (mfderiv I I (⇑Φ) x).comp (mfderiv I I (⇑Φ.symm) (Φ x))
@@ -44,7 +45,8 @@ private lemma mfderiv_self_after_symm_at_image
   rw [hΦatx] at hchain
   exact hchain.symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_apply_mfderiv_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (⇑Φ) x (mfderiv I I (⇑Φ.symm) (Φ x) w) = w := by
@@ -52,7 +54,8 @@ private lemma mfderiv_apply_mfderiv_symm
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f w) h
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_symm_apply_mfderiv
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (⇑Φ.symm) (Φ x) (mfderiv I I (⇑Φ) x v) = v := by

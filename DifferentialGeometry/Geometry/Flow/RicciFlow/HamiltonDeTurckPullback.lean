@@ -111,7 +111,8 @@ theorem deTurck_pullback_eval_value_hasDerivWithinAt
   have h_cancel : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_DT := by ring
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
+    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v
+      w).symm
   have h_value : (((-2 : ℝ) * R_DT + L) + (-L)) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]
   have h_eval' : HasDerivWithinAt

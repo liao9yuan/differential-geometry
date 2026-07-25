@@ -354,7 +354,6 @@ private lemma iteratedFDerivWithin_isOpen_eq_of_isOpen
     iteratedFDerivWithin ℝ n f O₁ z = iteratedFDerivWithin ℝ n f O₂ z := by
   rw [iteratedFDerivWithin_of_isOpen n h₁ hz₁, iteratedFDerivWithin_of_isOpen n h₂ hz₂]
 
-set_option maxHeartbeats 1600000 in
 private theorem pdIter_rawCompOnE_eigenSeries_tsum_eq_local
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (d : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -551,7 +550,6 @@ private theorem pdIter_rawCompOnE_eigenSeries_tsum_eq_local
     _ = ∑' i, d i * DifferentialGeometry.Analysis.iteratedDirDeriv L (ψ i) y := by
         refine tsum_congr (fun i => hmode_eval i)
 
-set_option maxHeartbeats 1600000 in
 private theorem spectralPathFO_rawCompOnE_pdIter_euclidean_contDiffOn_local
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -752,7 +750,8 @@ private theorem anisoOn_realizeGram_det
   classical
   have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
   have hterm : ∀ σp : Equiv.Perm (Fin (Module.finrank ℝ E)),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => (((Equiv.Perm.sign σp : ℤ) : ℝ)) *
           ∏ i : Fin (Module.finrank ℝ E),
             Integral.DivergenceTheorem.chartGramOnE (I := I)
@@ -792,7 +791,8 @@ private theorem anisoOn_realizeGram_adjugate
   classical
   have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
   have hentry : ∀ (r c : Fin (Module.finrank ℝ E)),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => ((Integral.Measure.chartGramMatrix (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
             ((extChartAt I α).symm y)).updateRow b (Pi.single a 1)) r c) := by
@@ -810,7 +810,8 @@ private theorem anisoOn_realizeGram_adjugate
       rw [Matrix.updateRow_apply, if_neg hr]
       rfl
   have hterm : ∀ σp : Equiv.Perm (Fin (Module.finrank ℝ E)),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => (((Equiv.Perm.sign σp : ℤ) : ℝ)) *
           ∏ i : Fin (Module.finrank ℝ E),
             ((Integral.Measure.chartGramMatrix (I := I)
@@ -896,7 +897,8 @@ private theorem anisoOn_realize_chartChristoffel
   have hinv := fun a b => anisoOn_realizeGram_inv hT hδ_lt hδ hφ_smooth hcoeff
     hmodemass α a b
   have hterm : ∀ l : Fin (Module.finrank ℝ E),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => Integral.DivergenceTheorem.chartInvGramMatrix (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
             ((extChartAt I α).symm y) c l *
@@ -942,7 +944,8 @@ private theorem anisoOn_realize_chartDeTurckVFComp
   classical
   have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
   have hterm : ∀ a b : Fin (Module.finrank ℝ E),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => Integral.DivergenceTheorem.chartInvGramMatrix (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
             ((extChartAt I α).symm y) a b *
@@ -987,7 +990,8 @@ private theorem anisoOn_realize_chartRicci
   have hchr := fun a b d => anisoOn_realize_chartChristoffel hT hδ_lt hδ hφ_smooth
     hcoeff hmodemass α a b d
   have hriem : ∀ j : Fin (Module.finrank ℝ E),
-      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+      DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+        (interior (extChartAt I α).target)
         (fun t y => Integral.DivergenceTheorem.chartRiemannTensor (I := I)
           (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j c j y) := by
     intro j
@@ -1047,7 +1051,8 @@ private theorem anisoOn_realize_chartLieDeTurckComp
     hcoeff hmodemass α a b
   have hvf := fun c => anisoOn_realize_chartDeTurckVFComp (g_bg := g_bg) hT hδ_lt hδ
     hφ_smooth hcoeff hmodemass α c
-  have h1 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+  have h1 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+    (interior (extChartAt I α).target)
       (fun t y => ∑ c : Fin (Module.finrank ℝ E),
         chartDeTurckVFComp (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c y *
@@ -1056,7 +1061,8 @@ private theorem anisoOn_realize_chartLieDeTurckComp
               (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j) y) :=
     DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
       (fun c _ => (hvf c).mul hV ((hgram i j).pdShift hV (chartModelBasis E c)))
-  have h2 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+  have h2 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+    (interior (extChartAt I α).target)
       (fun t y => ∑ c : Fin (Module.finrank ℝ E),
         Integral.DivergenceTheorem.chartGramOnE (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α c j y *
@@ -1065,7 +1071,8 @@ private theorem anisoOn_realize_chartLieDeTurckComp
               (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c) y) :=
     DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
       (fun c _ => (hgram c j).mul hV ((hvf c).pdShift hV (chartModelBasis E i)))
-  have h3 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T (interior (extChartAt I α).target)
+  have h3 : DifferentialGeometry.Analysis.AnisotropicJointContDiffOn k T
+    (interior (extChartAt I α).target)
       (fun t y => ∑ c : Fin (Module.finrank ℝ E),
         Integral.DivergenceTheorem.chartGramOnE (I := I)
             (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i c y *
@@ -1110,10 +1117,9 @@ section IterLaplacianInduction
 
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma tensorChartComponentRaw_congr_toSection
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -1135,8 +1141,6 @@ private lemma tensorChartComponentRaw_congr_toSection
   rw [h x]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_sub_eq
     (g : SmoothRiemannianMetric I M) (S₁ S₂ : SmoothCcTensor g 0 2) (α : M)
@@ -1157,8 +1161,6 @@ private lemma tensorChartComponentRaw_sub_eq
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private lemma reconFO_raw_eq_chartRHS
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1256,8 +1258,6 @@ private lemma euclidPartial_eq_pdDir (i : Fin (Module.finrank ℝ E))
     euclidPartial (E := E) i u
       = DifferentialGeometry.Analysis.dirDeriv (EuclideanSpace.single i 1) u := rfl
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1465,7 +1465,6 @@ private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
       rw [← hWm_b]
       simp only [hQm_def, hWm_def, euclidPartial_eq_pdDir]
 
-set_option maxHeartbeats 1600000 in
 private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1549,8 +1548,6 @@ private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
   exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
     (g : SmoothRiemannianMetric I M) {T : ℝ} (k : ℕ)
@@ -1653,8 +1650,20 @@ private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
           ℝ p.1 ((T_rep p.2).toSection p.1) := by
       rw [Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hpbase]
-    rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx,
-      map_sum]
+    rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx]
+    let L : Tensor0SBundle.TensorRSSpace 0 2 I p.1 →L[ℝ]
+        Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+      (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt ℝ p.1
+    change L (∑ Q : CompIdx E 0 2,
+      tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+        chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) = _
+    rw [show L (∑ Q : CompIdx E 0 2,
+        tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+          chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) =
+      ∑ Q : CompIdx E 0 2, L (tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (T_rep p.2) α Q.1 Q.2 p.1 •
+          chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1) from map_sum L _ _]
     refine Finset.sum_congr rfl (fun Q _ => ?_)
     rw [map_smul]
     congr 1
@@ -1692,8 +1701,6 @@ end IterLaplacianInduction
 end FiniteOrderAnisotropicReconstruction
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiffOn
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1717,7 +1724,8 @@ private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiff
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
         ((oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
-          (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2))).toSection p.1))
+          (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2))).toSection
+            p.1))
       ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
   sectionPath_jointContMDiffOn_of_rawChartComponent_pou (I := I) (M := M) (T := T) g₀ k
     (fun t => oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
@@ -1729,8 +1737,6 @@ private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiff
 end FiniteOrderReconJetEnergy
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_pathCoeff_timeContDiff_spectralJetMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1927,8 +1933,6 @@ private theorem deTurckRHSReconSectionFO_pathCoeff_timeContDiff_spectralJetMass
     _ = C ^ 2 * tensorSobolevWeight (I := I) (M := M) i (-sW) := by ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2087,8 +2091,6 @@ private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
       hφκ_smooth hκcoeff hκmass
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realization
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2212,7 +2214,8 @@ private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realizatio
         = (fun s : ℝ => ∫ x, DifferentialGeometry.Integral.L2.tensorInnerPointwise
             (I := I) (M := M) g₀ 0 2 x (eig.toFun x)
             ((deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x) ∂μ) :=
-      funext fun s => hcoeffInt (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))
+      funext fun s => hcoeffInt
+                        (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))
     have hinter := iteratedDerivWithin_integral_param_Icc_finiteOrder μ hT j
       (fun x s => DifferentialGeometry.Integral.L2.tensorInnerPointwise
         (I := I) (M := M) g₀ 0 2 x (eig.toFun x)
@@ -2426,7 +2429,8 @@ private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
   set reconRaw : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i s => tensorL2Coeff (I := I) (M := M) hc
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-        (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i with hreconRaw_def
+        (deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i with
+          hreconRaw_def
   set rawRaw : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i s => tensorL2Coeff (I := I) (M := M) hc
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
@@ -2701,7 +2705,8 @@ theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
             tensorSobolevWeight (I := I) (M := M) i σ *
                 (iteratedDeriv j (ψ i) t) ^ 2 ≤ B i) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
-        (deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ i t) := by
+        (deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ
+          i t) := by
   classical
   obtain ⟨ψ, Rjet, hψ_smooth, hψ_eq, hjet, hcovbnd⟩ :=
     deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection (I := I) (M := M)
@@ -2932,7 +2937,8 @@ theorem deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving
       rw [h0, smoothCcToTensorHs_smul, zero_smul]
     refine ⟨(Classical.choose (deTurckSobolevNHa2_exists_of_super
       (I := I) (M := M) g₀ a ha_super)).2,
-      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t => ?_⟩
+      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t
+        => ?_⟩
     by_cases ht : t ∈ Set.Icc (0 : ℝ) d₂
     · exact hp_ball (F t) (hball_pt t ht)
     · have hF0 : F t = 0 := by simp only [hF_def, ht, if_neg, not_false_iff]

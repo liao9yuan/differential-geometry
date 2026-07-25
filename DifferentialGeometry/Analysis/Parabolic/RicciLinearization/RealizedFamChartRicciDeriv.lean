@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamily
 
 noncomputable section
 
-set_option maxHeartbeats 2400000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Set Function MeasureTheory Bundle
 open scoped Topology Manifold BigOperators ContDiff
@@ -179,11 +177,15 @@ private lemma s_differentiableAt_realizedFam_chartInvGramOnE (g₀ : SmoothRiema
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
     DifferentiableAt ℝ
-      (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l y) s₀ := by
+      (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l y)
+        s₀ := by
   have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
-  have hjoint := chartInvGramOnE_contDiffAt_joint (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x hG k l hs₀ hy
-  have hcomp : (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l y)
-      = (fun p : ℝ × E => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.1) x k l p.2)
+  have hjoint := chartInvGramOnE_contDiffAt_joint (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x
+    hG k l hs₀ hy
+  have hcomp : (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l
+    y)
+      = (fun p : ℝ × E => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.1) x k l
+        p.2)
         ∘ (fun s : ℝ => (s, y)) := by funext s; rfl
   rw [hcomp]
   exact (hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)).differentiableAt (by simp)
@@ -198,7 +200,8 @@ theorem hasDerivAt_realizedFam_chartInvGramOnE (g₀ : SmoothRiemannianMetric I 
     (x : M) (k l : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
-    HasDerivAt (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l y)
+    HasDerivAt (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l
+      y)
       (-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y *
             realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q y *
@@ -206,7 +209,8 @@ theorem hasDerivAt_realizedFam_chartInvGramOnE (g₀ : SmoothRiemannianMetric I 
   classical
   set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s₀ with hgs
   have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
-  have hsub : (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l y)
+  have hsub : (fun s : ℝ => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k l
+    y)
       =ᶠ[nhds s₀] (fun s : ℝ => chartInvGramOnE (I := I) gs x k l y +
         (∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k p y *
@@ -257,7 +261,8 @@ theorem hasDerivAt_realizedFam_chartInvGramOnE (g₀ : SmoothRiemannianMetric I 
     have hA_diff : DifferentiableAt ℝ
         (fun s : ℝ => chartInvGramOnE (I := I)
           (realizedFam (I := I) g₀ T T' hδ hδ' s) x k p y) s₀ :=
-      s_differentiableAt_realizedFam_chartInvGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x k p hy hs₀
+      s_differentiableAt_realizedFam_chartInvGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x k p hy
+        hs₀
     have hAB : HasDerivAt (fun s : ℝ =>
           chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k p y *
             (chartGramOnE (I := I) gs x p q y -
@@ -315,11 +320,14 @@ theorem hasDerivAt_realizedFam_gramBracket (g₀ : SmoothRiemannianMetric I M)
         partialDeriv (E := E) j (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i) y -
         partialDeriv (E := E) l
           (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j) y) s₀ := by
-  have h1 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j i
+  have h1 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j
+    i
     hy hs₀
-  have h2 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i j
+  have h2 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i
+    j
     hy hs₀
-  have h3 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j l
+  have h3 := hasDerivAt_realizedFam_partial_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j
+    l
     hy hs₀
   have hsum := (h1.add h2).sub h3
   have heq : (fun s : ℝ => gramBracket (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j l y) =
@@ -343,7 +351,8 @@ theorem hasDerivAt_realizedFam_chartChristoffel (g₀ : SmoothRiemannianMetric I
     (x : M) (i j k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
-    HasDerivAt (fun s : ℝ => chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y)
+    HasDerivAt (fun s : ℝ => chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j
+      k y)
       ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
         ((-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
               chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y *
@@ -367,7 +376,8 @@ theorem hasDerivAt_realizedFam_chartChristoffel (g₀ : SmoothRiemannianMetric I
   rw [heq]
   refine HasDerivAt.const_mul (1 / 2 : ℝ) ?_
   refine HasDerivAt.fun_sum (fun l _ => ?_)
-  have hG := hasDerivAt_realizedFam_chartInvGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x k l hy hs₀
+  have hG := hasDerivAt_realizedFam_chartInvGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x k l hy
+    hs₀
   have hbr := hasDerivAt_realizedFam_gramBracket (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j l hy hs₀
   exact hG.mul hbr
 
@@ -386,7 +396,8 @@ theorem hasDerivAt_realizedFam_partial_chartChristoffel (g₀ : SmoothRiemannian
         (fun y' => chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y') y)
       (partialDeriv (E := E) m
         (fun y' => deriv (fun s : ℝ =>
-          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y') s₀) y) s₀ := by
+          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y') s₀) y)
+            s₀ := by
   have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
   have hjoint : ContDiffAt ℝ ∞
       (fun r : ℝ × E =>
@@ -409,7 +420,8 @@ theorem hasDerivAt_realizedFam_chartRiemannTensor (g₀ : SmoothRiemannianMetric
     HasDerivAt
       (fun s : ℝ => chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k l y)
       (deriv (fun s : ℝ =>
-        chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k l y) s₀) s₀ := by
+        chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k l y) s₀)
+          s₀ := by
   have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
   have hjoint : ContDiffAt ℝ ∞
       (fun r : ℝ × E =>
@@ -439,7 +451,8 @@ theorem hasDerivAt_realizedFam_chartRicciTensor (g₀ : SmoothRiemannianMetric I
       (fun s : ℝ => chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k y)
       (∑ j : Fin (Module.finrank ℝ E),
         deriv (fun s : ℝ =>
-          chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j y) s₀) s₀ := by
+          chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j y) s₀)
+            s₀ := by
   have heq : (fun s : ℝ =>
         chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k y) =
       (fun s : ℝ => ∑ j : Fin (Module.finrank ℝ E),
@@ -447,7 +460,8 @@ theorem hasDerivAt_realizedFam_chartRicciTensor (g₀ : SmoothRiemannianMetric I
     funext s; rw [chartRicciTensor_def]
   rw [heq]
   refine HasDerivAt.fun_sum (fun j _ => ?_)
-  exact hasDerivAt_realizedFam_chartRiemannTensor (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j k j hy hs₀
+  exact hasDerivAt_realizedFam_chartRiemannTensor (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j k j hy
+    hs₀
 
 omit [CompactSpace M] in
 theorem hasDerivAt_realizedRicciChartSum_general (g₀ : SmoothRiemannianMetric I M)

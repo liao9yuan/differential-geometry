@@ -77,7 +77,8 @@ lemma densityPsi_cont
     refine ContinuousAt.congr ?_ h_ev.symm
     exact continuousAt_const
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 lemma densityPsi_cs
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ) :
@@ -87,7 +88,8 @@ lemma densityPsi_cs
   change densityOnEuclid (I := I) g α y * ψ y = 0
   rw [hψ_y, mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 lemma densityPsi_supp
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ}
@@ -572,7 +574,8 @@ private lemma smoothMulLp_chartWeight_eq_smoothToLp_rhoWeightOn
   rw [hx_w, hx_rhs]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma densityPsi_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :

@@ -497,7 +497,6 @@ private lemma chartDensity_nonneg_of_base
   unfold chartDensity
   exact Real.sqrt_nonneg _
 
-set_option maxHeartbeats 16000000 in
 
 lemma per_chart_hasDerivAt
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -645,11 +644,13 @@ lemma per_chart_hasDerivAt
         intro p hp
         refine ⟨Set.mem_univ _, ?_⟩
         exact h_symm_maps p.2 (hK'_sub_target hp.2)
-      exact h_joint_cont.comp h_symm_pair_contOn hmaps
+      have h := h_joint_cont.comp h_symm_pair_contOn hmaps
+      exact h
     have h_deriv_comp : ContinuousOn
         (fun p : ℝ × E => deriv (fun r : ℝ => f r (symm p.2)) p.1) (I₁ ×ˢ K') := by
-      exact h_deriv_cont_joint.continuousOn.comp h_symm_pair_contOn
+      have h := h_deriv_cont_joint.continuousOn.comp h_symm_pair_contOn
         (fun _ _ => Set.mem_univ _)
+      exact h
     have h_symm_pair_mapsTo : Set.MapsTo (fun p : ℝ × E => ((p.1, symm p.2) : ℝ × M))
         (I₁ ×ˢ K')
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := fun p hp =>

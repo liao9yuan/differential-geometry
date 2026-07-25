@@ -18,7 +18,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private theorem lintegral_sq_diffQuot_le_local
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {K : Set E} (_hK : MeasurableSet K) :
@@ -153,7 +152,6 @@ private theorem lintegral_sq_diffQuot_le_local
         simp [Real.volume_Ioc]
 
 omit [NeZero d] in
-
 theorem integral_sq_diffQuot_le_local
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {K : Set E} (hK : MeasurableSet K)
@@ -313,7 +311,6 @@ noncomputable def gradL2sqOn (Ω' : Set E) (u : E → ℝ) : ℝ :=
     ∂(volume : Measure E)
 
 omit [NeZero d] in
-
 lemma absorbingIntegral_nonneg
     (k : Fin d) (h : ℝ) (η u : E → ℝ) :
     0 ≤ absorbingIntegral (d := d) k h η u := by
@@ -324,7 +321,6 @@ lemma absorbingIntegral_nonneg
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
 omit [NeZero d] in
-
 private lemma gradL2sqOn_nonneg (Ω' : Set E) (u : E → ℝ) :
     0 ≤ gradL2sqOn (d := d) Ω' u := by
   unfold gradL2sqOn

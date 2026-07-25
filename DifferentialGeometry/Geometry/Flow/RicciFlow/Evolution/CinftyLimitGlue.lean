@@ -5,7 +5,6 @@ import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.Order.OrderClosed
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -181,7 +180,8 @@ theorem tendsto_nhdsLT_of_bounded_deriv
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chartGramMatrix_tendsto_nhdsLT_of_bounded_deriv
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαomega : α < omega)
     (x₀ x : M) (i j : Fin (Module.finrank ℝ E))
@@ -282,16 +282,6 @@ theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
   obtain ⟨T, hT, r, hr0, hsmooth, hpde⟩ :=
     ricci_flow_short_time_existence (I := I) (M := M) gomega
   refine ⟨T, hT, r, hr0, hsmooth, ?_, hpde⟩
-
-
-
-
-
-
-
-
-
-
   intro x₀ i j
   exact (hsmooth x₀ i j).continuousOn
 
@@ -310,13 +300,15 @@ def gluedFamily
     ℝ → SmoothRiemannianMetric I M :=
   fun s => if s < omega then g_fam s else r (s - omega)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem gluedFamily_of_lt
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) {s : ℝ} (hs : s < omega) :
     gluedFamily (I := I) g_fam r omega s = g_fam s := by
   simp [gluedFamily, hs]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem gluedFamily_of_ge
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) {s : ℝ} (hs : omega ≤ s) :
     gluedFamily (I := I) g_fam r omega s = r (s - omega) := by
@@ -326,7 +318,8 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem gluedFamily_eq_left
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) :
     ∀ s : ℝ, s < omega → gluedFamily (I := I) g_fam r omega s = g_fam s :=
@@ -334,7 +327,8 @@ theorem gluedFamily_eq_left
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem gluedFamily_at_endpoint
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) :
     gluedFamily (I := I) g_fam r omega omega = r 0 := by
@@ -391,15 +385,11 @@ theorem gluedFamily_pde_cross_of_matching
             (gluedFamily (I := I) g_fam r omega omega) x v w)
         (Set.Iic omega) omega := by
   intro x v w
-
   set f : ℝ → ℝ := fun s => (gluedFamily (I := I) g_fam r omega s).inner x v w with hf
   set g0 : ℝ → ℝ := fun s => (g_fam s).inner x v w with hg0
-
   have hfg0 : ∀ s ∈ Set.Ioo α omega, f s = g0 s := by
     intro s hs
     simp only [hf, hg0, gluedFamily_of_lt (I := I) g_fam r omega hs.2]
-
-
   have hg0_hasDeriv : ∀ s ∈ Set.Ioo α omega,
       HasDerivAt g0
         ((-2 : ℝ) *
@@ -407,37 +397,30 @@ theorem gluedFamily_pde_cross_of_matching
     intro s hs
     have hIci : Set.Ici α ∈ 𝓝 s := Ici_mem_nhds hs.1
     exact (hleft s ⟨le_of_lt hs.1, hs.2⟩ x v w).hasDerivAt hIci
-
   have hf_omega : f omega = (gomega).inner x v w := by
     simp only [hf, gluedFamily_at_endpoint (I := I) g_fam r omega, hr0]
-
   have hric_omega :
       DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
         (gluedFamily (I := I) g_fam r omega omega) x v w =
       DifferentialGeometry.Integral.Connection.ricciTensor (I := I) gomega x v w := by
     simp only [gluedFamily_at_endpoint (I := I) g_fam r omega, hr0]
   rw [hric_omega]
-
   refine hasDerivWithinAt_Iic_of_tendsto_deriv (s := Set.Ioo α omega) (e := (-2 : ℝ) *
       DifferentialGeometry.Integral.Connection.ricciTensor (I := I) gomega x v w)
     (f := f) ?_ ?_ (Ioo_mem_nhdsLT hαomega) ?_
-  ·
-    intro s hs
+  · intro s hs
     have hg0d : DifferentiableWithinAt ℝ g0 (Set.Ioo α omega) s :=
       (hg0_hasDeriv s hs).differentiableAt.differentiableWithinAt
     exact hg0d.congr (fun t ht => hfg0 t ht) (hfg0 s hs)
-  ·
-    have hg0_lim : Tendsto g0 (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) :=
+  · have hg0_lim : Tendsto g0 (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) :=
       (hcont x v w).mono_left (nhdsWithin_mono omega (fun s hs => hs.2))
     have hf_lim : Tendsto f (𝓝[Set.Ioo α omega] omega) (𝓝 ((gomega).inner x v w)) := by
       refine hg0_lim.congr' ?_
       filter_upwards [self_mem_nhdsWithin] with s hs using (hfg0 s hs).symm
     rw [ContinuousWithinAt, hf_omega]
     exact hf_lim
-  ·
-    refine (hderiv_lim x v w).congr' ?_
+  · refine (hderiv_lim x v w).congr' ?_
     filter_upwards [Ioo_mem_nhdsLT hαomega] with s hs
-
     have hev : f =ᶠ[𝓝 s] g0 := by
       filter_upwards [Ioo_mem_nhds hs.1 hs.2] with t ht using hfg0 t ht
     rw [hev.deriv_eq, (hg0_hasDeriv s hs).deriv]
@@ -498,11 +481,9 @@ theorem gluedFamily_pde
         (Set.Ici α) t := by
   intro t ht x v w
   rcases lt_trichotomy t omega with htlt | hteq | htgt
-  ·
-    have hg_t : gluedFamily (I := I) g_fam r omega t = g_fam t :=
+  · have hg_t : gluedFamily (I := I) g_fam r omega t = g_fam t :=
       gluedFamily_of_lt (I := I) g_fam r omega htlt
     have hleftt := hleft t ⟨ht.1, htlt⟩ x v w
-
     have hev : (fun s : ℝ => (gluedFamily (I := I) g_fam r omega s).inner x v w)
         =ᶠ[𝓝[Set.Ici α] t] (fun s : ℝ => (g_fam s).inner x v w) := by
       have hmem : Set.Iio omega ∈ 𝓝[Set.Ici α] t :=
@@ -512,13 +493,9 @@ theorem gluedFamily_pde
     rw [hg_t]
     exact hleftt.congr_of_eventuallyEq hev
       (by rw [gluedFamily_of_lt (I := I) g_fam r omega htlt])
-  ·
-
-    subst hteq
-
+  · subst hteq
     have h0memT : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_refl 0, lt_of_lt_of_le hε hεT⟩
     have hr_pde0 := hright 0 h0memT x v w
-
     have hshift : HasDerivWithinAt (fun s : ℝ => s - t) (1 : ℝ) (Set.Ici t) t := by
       simpa using (hasDerivWithinAt_id t (Set.Ici t)).sub_const t
     have hmaps : Set.MapsTo (fun s : ℝ => s - t) (Set.Ici t) (Set.Ici 0) := by
@@ -536,7 +513,6 @@ theorem gluedFamily_pde
             DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
               (gluedFamily (I := I) g_fam r t t) x v w)
           (Set.Ici t) t := by
-
       have hev : (fun s : ℝ => (gluedFamily (I := I) g_fam r t s).inner x v w)
           =ᶠ[𝓝[Set.Ici t] t] (fun s : ℝ => (r (s - t)).inner x v w) := by
         filter_upwards [self_mem_nhdsWithin] with s hs
@@ -547,9 +523,7 @@ theorem gluedFamily_pde
       refine (hcomp.congr_of_eventuallyEq hev ?_).congr_deriv ?_
       · simp [sub_self]
       · simp
-
     have hleft_one := hcross x v w
-
     have hunion := hleft_one.union hright_one
     rw [Set.Iic_union_Ici] at hunion
     have hderiv : HasDerivAt
@@ -559,14 +533,12 @@ theorem gluedFamily_pde
             (gluedFamily (I := I) g_fam r t t) x v w)
         t := hasDerivWithinAt_univ.mp hunion
     exact hderiv.hasDerivWithinAt
-  ·
-    have hg_t : gluedFamily (I := I) g_fam r omega t = r (t - omega) :=
+  · have hg_t : gluedFamily (I := I) g_fam r omega t = r (t - omega) :=
       gluedFamily_of_ge (I := I) g_fam r omega (le_of_lt htgt)
     have htmem : t - omega ∈ Set.Ico (0 : ℝ) T :=
       ⟨by linarith, by linarith [hε, hεT, ht.2]⟩
     have hr_pdet := hright (t - omega) htmem x v w
     have htpos : (0 : ℝ) < t - omega := by linarith
-
     have hshift : HasDerivAt (fun s : ℝ => s - omega) (1 : ℝ) t := by
       simpa using (hasDerivAt_id t).sub_const omega
     have hcomp : HasDerivAt (fun s : ℝ => (r (s - omega)).inner x v w)
@@ -579,7 +551,6 @@ theorem gluedFamily_pde
           (t - omega) :=
         hr_pdet.hasDerivAt (Ici_mem_nhds htpos)
       exact hr_at.scomp t hshift
-
     have hev : (fun s : ℝ => (gluedFamily (I := I) g_fam r omega s).inner x v w)
         =ᶠ[𝓝[Set.Ici α] t] (fun s : ℝ => (r (s - omega)).inner x v w) := by
       have hmem : Set.Ioi omega ∈ 𝓝[Set.Ici α] t :=
@@ -714,14 +685,9 @@ theorem ricci_flow_extends_construction
             DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
               (g_ext t) x v w)
           (Set.Ici α) t) := by
-
   obtain ⟨T, hT, r, hr0, hr_smooth_closed, _hr_cont, hr_pde⟩ :=
     restart_short_time (I := I) (M := M) limit.limitMetric
-
-
   obtain ⟨ε, hε, hεT, hglue⟩ := glue r T hr0 hT hr_smooth_closed hr_pde
-
-
   have hcont : ∀ x : M, ∀ v w : TangentSpace I x,
       Tendsto (fun s : ℝ => (g_fam s).inner x v w) (𝓝[<] omega)
         (𝓝 ((limit.limitMetric).inner x v w)) := by
@@ -741,11 +707,9 @@ theorem ricci_flow_extends_construction
     gluedFamily_pde_cross_of_matching (I := I) g_fam r limit.limitMetric
       hαomega hr0 hleft hcont hderiv_lim
   refine ⟨ε, hε, gluedFamily (I := I) g_fam r omega, ?_, ?_, ?_, ?_⟩
-  ·
-    exact gluedFamily_eq_left (I := I) g_fam r omega
+  · exact gluedFamily_eq_left (I := I) g_fam r omega
   · exact hglue.gram_smooth
   · exact hglue.gram_cont
-  ·
-    exact gluedFamily_pde (I := I) g_fam r hαomega hε hεT hleft hr_pde hcross
+  · exact gluedFamily_pde (I := I) g_fam r hαomega hε hεT hleft hr_pde hcross
 
 end DifferentialGeometry.PDE.RicciFlow

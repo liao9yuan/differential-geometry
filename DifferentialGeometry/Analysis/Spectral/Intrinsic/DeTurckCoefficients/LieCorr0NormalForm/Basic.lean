@@ -10,8 +10,6 @@ import Mathlib
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option maxHeartbeats 3200000
 
 open scoped BigOperators
 

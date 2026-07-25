@@ -23,13 +23,11 @@ abbrev OperatorSymbol (F : M → Type*)
   ∀ x : M, E → (F x →ₗ[ℝ] F x)
 
 variable (I M) in
-
 abbrev TensorSymbol : Type _ :=
   OperatorSymbol (E := E)
     (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
 
 variable (M) in
-
 abbrev ScalarSymbol : Type _ :=
   OperatorSymbol (E := E) (fun _ : M => ℝ)
 
@@ -106,12 +104,14 @@ def isotropicSymbol (F : M → Type*)
     OperatorSymbol (E := E) F :=
   fun x ξ => (c x ξ) • LinearMap.id
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [TopologicalSpace M] in
 @[simp] lemma isotropicSymbol_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (c : M → E → ℝ) (x : M) (ξ : E) :
     isotropicSymbol (E := E) F c x ξ = (c x ξ) • LinearMap.id := rfl
 
-omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [TopologicalSpace M] in
 @[simp] lemma isotropicSymbol_apply_apply (F : M → Type*)
     [∀ x, AddCommGroup (F x)] [∀ x, Module ℝ (F x)] (c : M → E → ℝ) (x : M) (ξ : E)
     (v : F x) :

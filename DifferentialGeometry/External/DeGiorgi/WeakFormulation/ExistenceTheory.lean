@@ -26,7 +26,10 @@ local notation "E" => AmbientSpace d
 /-! ## Weak Problem Existence (Lax-Milgram) -/
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 set_option synthInstance.maxHeartbeats 100000 in
+-- raised elaboration budget: this declaration exceeds the default synthInstance.maxHeartbeats
 -- Lax-Milgram existence assembly with instance synthesis
 /-- Existence of weak solutions via Lax-Milgram.
 The bilinear form `bilinFormOfCoeff` is bounded and coercive on `H₀¹(Ω)`
@@ -588,7 +591,8 @@ theorem weakProblem_exists
             congr
             ext x
             ring
-          _ = rhs (φ n) + rhs (fun x => (-1) * v x) := hF_add (φ n) (fun x => (-1) * v x) hφ0n hvNeg0
+          _ = rhs (φ n) + rhs (fun x => (-1) * v x) := hF_add (φ n) (fun x => (-1) * v x) hφ0n
+            hvNeg0
           _ = rhs (φ n) + (-1) * rhs v := by rw [hF_smul (-1) v hv0_all]
           _ = rhs (φ n) - rhs v := by ring
       have hbound := hF_bound (fun x => φ n x - v x) hsub0n (hdiff n)
@@ -954,7 +958,8 @@ theorem ae_eq_zero_of_memH01_of_gradLpOfWitness_eq_zero
       (ENNReal.toReal_le_toReal hleft_top hright_top).2 hP
     have hfunEq : ‖smoothFunToLp hΩ (hφtest n)‖ = (eLpNorm (φ n) 2 μ).toReal := by
       rw [smoothFunToLp, Lp.norm_toLp]
-    have hgradEq : ‖smoothGradToLp hΩ (hφtest n)‖ = (eLpNorm (smoothGradNorm (φ n)) 2 μ).toReal := by
+    have hgradEq : ‖smoothGradToLp hΩ (hφtest n)‖ =
+      (eLpNorm (smoothGradNorm (φ n)) 2 μ).toReal := by
       have hgrad_memLp : MemLp (smoothGradField (φ n)) 2 μ := (hφw n).weakGrad_memLp
       calc
         ‖smoothGradToLp hΩ (hφtest n)‖

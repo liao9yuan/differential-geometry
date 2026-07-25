@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix ENNReal NNReal
@@ -213,7 +211,6 @@ end OffKernelCoefBoundUniform
 section MainBoundUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem wkpNorm_crossRightGradCoeffDivLimit_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -526,7 +523,6 @@ end MainBoundUnconditional
 section MainBoundUniformUnconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

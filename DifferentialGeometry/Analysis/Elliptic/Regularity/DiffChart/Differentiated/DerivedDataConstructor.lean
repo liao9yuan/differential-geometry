@@ -293,7 +293,8 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
   exact Metric.ball_subset_closedBall
 
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memLp_top_of_continuousOn_on_compact
     (α : M) {f : EuclN → ℝ}
     (hf_contOn : ContinuousOn f (chartTargetEuclid (I := I) (M := M) α))
@@ -1114,7 +1115,8 @@ theorem derived_variational_identity_holds
         D_base.u_chart y * ψ y) ((volume : Measure EuclN).restrict Ω) := h_A2_int
     have h_B_pi : Integrable (fun y => densityDerivOnEuclid (I := I) g α l y *
         D_base.f_chart y * ψ y) ((volume : Measure EuclN).restrict Ω) := h_B_int
-    rw [MeasureTheory.integral_add' (h_T3_pi.add h_partials_pi |>.add h_cspu_pi |>.sub h_A2_pi) h_B_pi]
+    rw [MeasureTheory.integral_add' (h_T3_pi.add h_partials_pi |>.add h_cspu_pi |>.sub h_A2_pi)
+      h_B_pi]
     rw [MeasureTheory.integral_sub' (h_T3_pi.add h_partials_pi |>.add h_cspu_pi) h_A2_pi]
     rw [MeasureTheory.integral_add' (h_T3_pi.add h_partials_pi) h_cspu_pi]
     rw [MeasureTheory.integral_add' h_T3_pi h_partials_pi]

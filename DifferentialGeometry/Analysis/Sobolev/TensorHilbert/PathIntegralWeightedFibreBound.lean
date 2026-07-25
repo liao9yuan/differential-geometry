@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Bundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -27,7 +25,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [Sig
 theorem riemannianFiberNormSq_pathIntegralCoeffField_le_weighted_sq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
-    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))

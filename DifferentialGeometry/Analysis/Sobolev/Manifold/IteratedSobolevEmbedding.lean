@@ -78,7 +78,6 @@ theorem chosenWeakPartial'_cross_exponent_ae_eq
     h_p_loc h_q_loc
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-
 theorem wkpNorm_succ_eq
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
     iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω =
@@ -167,7 +166,6 @@ theorem wkpNorm_succ_eq
   rw [hiter_eq]
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-
 theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) (i : Fin d) :
     iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
@@ -185,7 +183,6 @@ theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
   exact le_trans h_single (le_add_self)
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-
 theorem eLpNorm_le_wkpNorm
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
     eLpNorm u p (volume.restrict Ω) ≤ iteratedWeakSobolevNorm (d := d) k p u Ω := by
@@ -534,7 +531,8 @@ theorem MemWkp_subcritical_iterated
           (p := p_enn) (f := f) (Ω := Ω)
       calc
         eLpNorm f p_1_enn (volume.restrict Ω) +
-            ∑ i : Fin d, iteratedWeakSobolevNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω
+            ∑ i : Fin d, iteratedWeakSobolevNorm (d := d) k p_1_enn
+              (chosenWeakPartial' p_1_enn i f Ω) Ω
           ≤ ENNReal.ofReal (subcriticalConstantBase d p) *
               iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω +
               ∑ _i : Fin d,
@@ -819,7 +817,8 @@ theorem wkpNormChart_succ_subcritical_step
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p_1_enn
           (f α) (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal C *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1)
+            p_enn
             (f α) (chartTargetEuclid (I := I) (M := M) α) := by
     intro α
     have hp_dim_d : p < (d : ℝ) := by rw [hd_def]; exact hp_dim
@@ -881,7 +880,8 @@ theorem wkpNormChart_succ_subcritical_step
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal C *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1)
+            p_enn
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := by
@@ -891,12 +891,14 @@ theorem wkpNormChart_succ_subcritical_step
   refine ⟨h_mem_chart, ?_⟩
   unfold wkpNormChart
   rw [show ENNReal.ofReal C * ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1)
+          p_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) =
       ∑' α : M, ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1)
+          p_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) from
@@ -1487,7 +1489,7 @@ theorem memWkp_mono_exponent_of_tsupport_subset
           h_indicator_memWkp_p'
       have h_cross_ae : chosenWeakPartial' (d := d) p' i f Ω
           =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure EuN).restrict Ω] g_p :=
-        DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanIterated.chosenWeakPartial'_cross_exponent_ae_eq
+        Analysis.Sobolev.Chart.EuclideanIterated.chosenWeakPartial'_cross_exponent_ae_eq
           (d := d) hp'_one hp_one hΩ_open hf_W1p' hf_W1p i
       exact (MemWkp_congr_ae (d := d) hp'_one hΩ_open h_cross_ae).mpr hg_p_memWkp_p'
 

@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLin
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -105,7 +103,8 @@ theorem realizedLinearizedChristoffelPrincipal_eq_chartLinearizedPrincipal
   have hopen : IsOpen (extChartAt I x).target := isOpen_extChartAt_target x
   have hpd : ∀ a b c : Fin (Module.finrank ℝ E),
       partialDeriv (E := E) a (h b c) y =
-        partialDeriv (E := E) a (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x b c) y := by
+        partialDeriv (E := E) a (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x b c)
+          y := by
     intro a b c
     have hEv : (h b c) =ᶠ[nhds y]
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x b c) :=
@@ -143,11 +142,14 @@ theorem realizedLinearizedChristoffelPrincipal_self_eq_zero
           partialDeriv (E := E) l
             (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x i j) y) = 0 := by
     intro l
-    have h1 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x l j) = fun _ : E => (0 : ℝ) := by
+    have h1 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x l j) = fun _ : E
+      => (0 : ℝ) := by
       funext z; exact realizedGramDeriv_self_eq_zero (I := I) g₀ T hδ_lt hδ x l j z
-    have h2 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x l i) = fun _ : E => (0 : ℝ) := by
+    have h2 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x l i) = fun _ : E
+      => (0 : ℝ) := by
       funext z; exact realizedGramDeriv_self_eq_zero (I := I) g₀ T hδ_lt hδ x l i z
-    have h3 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x i j) = fun _ : E => (0 : ℝ) := by
+    have h3 : (realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ x i j) = fun _ : E
+      => (0 : ℝ) := by
       funext z; exact realizedGramDeriv_self_eq_zero (I := I) g₀ T hδ_lt hδ x i j z
     rw [h1, h2, h3, partialDeriv_const, partialDeriv_const, partialDeriv_const]
     ring

@@ -11,8 +11,6 @@ import Mathlib.Analysis.InnerProductSpace.Completion
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -48,12 +46,14 @@ namespace SmoothCcTensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s k : ℕ}
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[ext] theorem ext {S T : SmoothCcTensorHs g r s k}
     (h : S.toCcTensor = T.toCcTensor) : S = T := by
   cases S; cases T; congr
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma toCcTensor_injective :
     Function.Injective
       (fun S : SmoothCcTensorHs g r s k => S.toCcTensor) := by
@@ -69,19 +69,24 @@ instance : Sub (SmoothCcTensorHs g r s k) :=
 instance : SMul ℝ (SmoothCcTensorHs g r s k) :=
   ⟨fun c S => ⟨c • S.toCcTensor⟩⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_zero :
     (0 : SmoothCcTensorHs g r s k).toCcTensor = 0 := rfl
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_add (S T : SmoothCcTensorHs g r s k) :
     (S + T).toCcTensor = S.toCcTensor + T.toCcTensor := rfl
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_neg (S : SmoothCcTensorHs g r s k) :
     (-S).toCcTensor = -S.toCcTensor := rfl
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_sub (S T : SmoothCcTensorHs g r s k) :
     (S - T).toCcTensor = S.toCcTensor - T.toCcTensor := rfl
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma toCcTensor_smul (c : ℝ) (S : SmoothCcTensorHs g r s k) :
     (c • S).toCcTensor = c • S.toCcTensor := rfl
 

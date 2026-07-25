@@ -41,7 +41,6 @@ variable {d : ℕ} [NeZero d]
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
     {η : EE → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     {S : Set EE} (hS : IsCompact S) (m : ℕ) :
@@ -75,7 +74,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_of_smooth_on_compact
   exact le_trans (hCj_bound j x hx) (hC_ge j hj_mem)
 
 omit [NeZero d] in
-
 private theorem exists_uniform_iteratedFDeriv_bound_on_precompact_open
     {η : EE → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     {Ω : Set EE} (hΩ_compact_closure : IsCompact (closure Ω)) (m : ℕ) :
@@ -88,7 +86,6 @@ private theorem exists_uniform_iteratedFDeriv_bound_on_precompact_open
   exact hC_bound x (subset_closure hx) j hj
 
 omit [NeZero d] in
-
 theorem memWkp_finset_sum
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
@@ -115,7 +112,6 @@ theorem memWkp_finset_sum
       rwa [h_eq] at h_add
 
 omit [NeZero d] in
-
 theorem wkpNorm_finset_sum_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
@@ -222,7 +218,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-set_option maxHeartbeats 1600000 in
 
 theorem perturbedSource_memWkp_of_source_memWkp
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ)
@@ -268,7 +263,8 @@ theorem perturbedSource_memWkp_of_source_memWkp
   refine ⟨K_c + K_div + 1, by positivity, ?_⟩
   intro u f hu_smooth _hu_cpt hf_smooth hu_memWkp hf_memWkp
   set D : ℝ≥0∞ :=
-    iteratedWeakSobolevNorm (d := d) (m + 1) 2 f Ω + iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω with hD_def
+    iteratedWeakSobolevNorm (d := d) (m + 1) 2 f Ω + iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω
+      with hD_def
   set termA : EE → ℝ :=
     fun x => (fderiv ℝ f x) (EuclideanSpace.single l 1) with hA_def
   have hA_mem : MemWkp (d := d) m 2 termA Ω :=
@@ -285,7 +281,8 @@ theorem perturbedSource_memWkp_of_source_memWkp
       iteratedWeakSobolevNorm (d := d) m 2 termB Ω ≤ ENNReal.ofReal K_c * D := by
     refine (hK_c_bound hu_m).2.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-    have h_mono : iteratedWeakSobolevNorm (d := d) m 2 u Ω ≤ iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω :=
+    have h_mono : iteratedWeakSobolevNorm (d := d) m 2 u Ω ≤ iteratedWeakSobolevNorm (d := d)
+      (m + 2) 2 u Ω :=
       wkpNorm_mono_order (d := d) (by omega) u Ω
     exact h_mono.trans le_add_self
   have h_diu_mem : ∀ i : Fin d, MemWkp (d := d) (m + 1) 2
@@ -397,14 +394,16 @@ theorem perturbedSource_memWkp_of_source_memWkp
     simp
   have h_tri₂ :
       iteratedWeakSobolevNorm (d := d) m 2 (fun x => termA x - termB x) Ω ≤
-        iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω := by
+        iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB
+          Ω := by
     have h := wkpNorm_add_le (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
       hA_mem hnegB_mem
     rw [← h_AB_eq, h_negB_norm] at h
     exact h
   have h_combine :
       iteratedWeakSobolevNorm (d := d) m 2 (fun x => (termA x - termB x) + termC x) Ω ≤
-        (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω) +
+        (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB
+          Ω) +
           iteratedWeakSobolevNorm (d := d) m 2 termC Ω :=
     h_tri₁.trans (add_le_add h_tri₂ le_rfl)
   refine h_combine.trans ?_
@@ -415,7 +414,8 @@ theorem perturbedSource_memWkp_of_source_memWkp
     refine mul_le_mul_of_nonneg_left ?_ (by positivity)
     rw [hD_def]; exact le_add_self
   have h_sum_le :
-      (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω) +
+      (iteratedWeakSobolevNorm (d := d) m 2 termA Ω + iteratedWeakSobolevNorm (d := d) m 2 termB Ω)
+        +
           iteratedWeakSobolevNorm (d := d) m 2 termC Ω ≤
         (ENNReal.ofReal 1 * D + ENNReal.ofReal K_c * D) +
           ENNReal.ofReal K_div * D :=

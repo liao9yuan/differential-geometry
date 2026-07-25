@@ -18,8 +18,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 6400000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -100,7 +98,8 @@ lemma euclidPartial_zero_off_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma densityOnEuclid_mul_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -116,7 +115,8 @@ lemma densityOnEuclid_mul_test_memLp
   rw [chartL2Measure]
   exact (h_cd.continuous.memLp_of_hasCompactSupport h_cs).restrict _
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma test_memLp
     (α : M) {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ) :
     MemLp ψ 2 (chartL2Measure (I := I) (M := M) α) := by
@@ -193,7 +193,8 @@ private lemma principalSymbolTest_memLp
     exact hcd.continuous.memLp_of_hasCompactSupport hcs
   exact hsum_memLp.restrict _
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma density_coeff_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -224,7 +225,8 @@ lemma pouSmul_eq_scalarSmul
     pouSmul (I := I) (M := M) g r s α S =
       scalarSmul (I := I) (M := M) g r s (chartAtlasPOU I M α) S := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma density_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M) {w : EuclN → ℝ}
     (hw : MemLp w 2
@@ -252,7 +254,8 @@ lemma density_memLp2_test_integrable
   simp only []
   ring
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma density_coeff_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -378,7 +381,6 @@ private lemma euclidPartial_eigenvectorPouApprox_component_memLp
       (I := I) (M := M) g r s i α P₀ k n)).restrict _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

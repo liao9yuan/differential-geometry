@@ -40,7 +40,8 @@ lemma smoothExtensionTangent_contMDiff (x : M) (v : TangentSpace I x) :
   change ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (fun b => σ b))
   exact σ.contMDiff
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
 lemma smoothExtensionFiber_contMDiff (x : M) (u : V x) :
     ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (smoothExtensionFiber (I := I) (F := F) (V := V) x u)) := by
   classical
@@ -55,14 +56,16 @@ lemma smoothExtensionTangent_mdiff (x : M) (v : TangentSpace I x) :
     MDiff (T% (smoothExtensionTangent (I := I) x v)) :=
   (smoothExtensionTangent_contMDiff (I := I) x v).mdifferentiable (by simp)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
 lemma smoothExtensionFiber_mdiff (x : M) (u : V x) :
     MDiff (T% (smoothExtensionFiber (I := I) (F := F) (V := V) x u)) :=
   (smoothExtensionFiber_contMDiff (I := I) (F := F) (V := V) x u).mdifferentiable (by simp)
 
 variable {cov : CovariantDerivative I F V}
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 lemma covApply_mdifferentiableAt_local
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -80,7 +83,8 @@ lemma covApply_mdifferentiableAt_local
     (hop.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
   exact hop_at.clm_bundle_apply (v := X) hX
 
-omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 lemma tensorialAt_X
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -101,7 +105,8 @@ lemma tensorialAt_X
     exact riemannSec_add_left (cov := cov) (X := X) (X' := X') (Y := Y) (Z := Z) (x := x)
       hX hX' hcXZ hcX'Z
 
-omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 lemma tensorialAt_Y
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -122,7 +127,8 @@ lemma tensorialAt_Y
     exact riemannSec_add_right (cov := cov) (X := X) (Y := Y) (Y' := Y') (Z := Z) (x := x)
       hY hY' hcYZ hcY'Z
 
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I]
+    [FiniteDimensional ℝ F] in
 lemma riemannSec_eq_of_X_eq_at
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X X' Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -137,7 +143,8 @@ lemma riemannSec_eq_of_X_eq_at
   have hX'_at : MDiffAt (T% X') x := (hX' x).mdifferentiableAt (by simp)
   exact (tensorialAt_X (cov := cov) (Y := Y) (Z := Z) hY hZ).pointwise hX_at hX'_at hXX'
 
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I]
+    [FiniteDimensional ℝ F] in
 lemma riemannSec_eq_of_Y_eq_at
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y Y' : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -152,7 +159,9 @@ lemma riemannSec_eq_of_Y_eq_at
   have hY'_at : MDiffAt (T% Y') x := (hY' x).mdifferentiableAt (by simp)
   exact (tensorialAt_Y (cov := cov) (X := X) (Z := Z) hX hZ).pointwise hY_at hY'_at hYY'
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
+    [FiniteDimensional ℝ F] in
 private lemma covApply_eventuallyEq_of_Z_eq
     (cov : CovariantDerivative I F V)
     {Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -174,7 +183,8 @@ private lemma covApply_eventuallyEq_of_Z_eq
   change cov.toFun Z b (Y b) = cov.toFun Z' b (Y b)
   rw [hcov_eq]
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 lemma riemannSec_eq_of_Z_eventuallyEq
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -221,7 +231,8 @@ lemma riemannSec_eq_of_Z_eventuallyEq
       (hZ_mdiff x) (hZ'_mdiff x) Filter.univ_mem hZZ'
   rw [hT1, hT2, hT3]
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma extDerivFun_apply_contMDiff
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {Y : Π b : M, TangentSpace I b} (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
@@ -244,7 +255,8 @@ private lemma extDerivFun_apply_contMDiff
   refine hresult.congr fun b => ?_
   simp [extDerivFun, tangentMap_snd, NormedSpace.fromTangentSpace]
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 private lemma riemannSec_add_third_smooth
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -669,7 +681,8 @@ private lemma riemannOpFun_smul_right
   have hZ_le : ContMDiff I (I.prod 𝓘(ℝ, F)) ((∞ : WithTop ℕ∞) + 1) (T% Z) := by simpa using hZ
   have h_const_smul : Ycw = (fun _ : M => c) • Yw := by funext b; rfl
   rw [h_const_smul]
-  exact riemannSec_smul_right (cov := cov) (f := fun _ : M => c) (X := X) (Y := Yw) (Z := Z) (x := x)
+  exact riemannSec_smul_right (cov := cov) (f := fun _ : M => c) (X := X) (Y := Yw) (Z := Z)
+    (x := x)
     mdifferentiableAt_const ((hYw x).mdifferentiableAt (by simp))
     (covApply_mdifferentiableAt_local (cov := cov) ((hYw x).mdifferentiableAt (by simp)) hZ_le)
 

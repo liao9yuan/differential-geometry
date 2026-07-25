@@ -5,7 +5,8 @@ import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Basics
 /-!
 # Moser Regularized Profiles
 
-This module contains the smooth and exact-on-support scalar profile functions used in the Chapter 06 regularization arguments.
+This module contains the smooth and exact-on-support scalar profile functions used in the Chapter
+06 regularization arguments.
 -/
 
 noncomputable section
@@ -337,7 +338,8 @@ theorem moserExactInput_lower_bound
     have hσL_nonneg : 0 ≤ moserExactLeftTransition ε t := Real.smoothTransition.nonneg _
     have hσR_nonneg : 0 ≤ Real.smoothTransition (N + 1 - t) := Real.smoothTransition.nonneg _
     have hσR_le : Real.smoothTransition (N + 1 - t) ≤ 1 := Real.smoothTransition.le_one _
-    have hterm1 : -ε / 2 ≤ t * moserExactLeftTransition ε t * Real.smoothTransition (N + 1 - t) := by
+    have hterm1 : -ε / 2 ≤ t * moserExactLeftTransition ε t * Real.smoothTransition
+      (N + 1 - t) := by
       have hmul_nonneg :
           0 ≤ moserExactLeftTransition ε t * Real.smoothTransition (N + 1 - t) := by
         positivity
@@ -350,11 +352,13 @@ theorem moserExactInput_lower_bound
           exact mul_le_mul_of_nonneg_right hσL_le hσR_nonneg
         linarith
       by_cases ht_nonneg : 0 ≤ t
-      · have hnonneg_term : 0 ≤ t * moserExactLeftTransition ε t * Real.smoothTransition (N + 1 - t) := by
+      · have hnonneg_term : 0 ≤ t * moserExactLeftTransition ε t * Real.smoothTransition
+          (N + 1 - t) := by
           positivity
         linarith
       · have ht_neg : t < 0 := lt_of_not_ge ht_nonneg
-        have hmono : t ≤ t * (moserExactLeftTransition ε t * Real.smoothTransition (N + 1 - t)) := by
+        have hmono : t ≤ t * (moserExactLeftTransition ε t * Real.smoothTransition
+          (N + 1 - t)) := by
           have hle := mul_le_mul_of_nonpos_left hmul_le_one ht_neg.le
           simpa using hle
         linarith
@@ -472,7 +476,8 @@ theorem moserExactRegPow_deriv_bounded
   have hcont : Continuous (deriv (moserExactRegPow ε N p)) := h1.continuous_deriv_one
   obtain ⟨M, -, hM_max⟩ := (isCompact_Icc (a := (-ε / 2 : ℝ)) (b := N + 1)).exists_isMaxOn
     (Set.nonempty_Icc.2 (by linarith : (-ε / 2 : ℝ) ≤ N + 1)) hcont.norm.continuousOn
-  have hbound : ∀ t : ℝ, ‖deriv (moserExactRegPow ε N p) t‖ ≤ ‖deriv (moserExactRegPow ε N p) M‖ := by
+  have hbound : ∀ t : ℝ, ‖deriv (moserExactRegPow ε N p) t‖ ≤ ‖deriv (moserExactRegPow ε N p)
+    M‖ := by
     intro t
     by_cases ht0 : t < -ε / 2
     · have hloc : moserExactRegPow ε N p =ᶠ[nhds t] fun _ => (0 : ℝ) := by
@@ -519,7 +524,8 @@ theorem moserExactRegTestPow_deriv_bounded
   have hcont : Continuous (deriv (moserExactRegTestPow ε N p)) := h1.continuous_deriv_one
   obtain ⟨M, -, hM_max⟩ := (isCompact_Icc (a := (-ε / 2 : ℝ)) (b := N + 1)).exists_isMaxOn
     (Set.nonempty_Icc.2 (by linarith : (-ε / 2 : ℝ) ≤ N + 1)) hcont.norm.continuousOn
-  have hbound : ∀ t : ℝ, ‖deriv (moserExactRegTestPow ε N p) t‖ ≤ ‖deriv (moserExactRegTestPow ε N p) M‖ := by
+  have hbound : ∀ t : ℝ, ‖deriv (moserExactRegTestPow ε N p) t‖ ≤ ‖deriv
+    (moserExactRegTestPow ε N p) M‖ := by
     intro t
     by_cases ht0 : t < -ε / 2
     · have hloc : moserExactRegTestPow ε N p =ᶠ[nhds t] fun _ => (0 : ℝ) := by

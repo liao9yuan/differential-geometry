@@ -207,8 +207,8 @@ class TensorBundleCore
     letI := fiberBundleInst
     VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)
 
-attribute [instance] TensorBundleCore.totalSpaceTop
-attribute [instance] TensorBundleCore.fiberBundleInst
+attribute [reducible, instance] TensorBundleCore.totalSpaceTop
+attribute [reducible, instance] TensorBundleCore.fiberBundleInst
 attribute [instance] TensorBundleCore.vectorBundleInst
 attribute [instance] TensorBundleCore.toTensorFiberTopologies
 
@@ -230,11 +230,9 @@ noncomputable def totalSpaceTopology :
     TopologicalSpace
       (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) := by
   classical
-
   letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
     Bundle.TensorProduct.tensorFiberTopology
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂) x
-
   exact
     (Bundle.TensorProduct.vectorPrebundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).totalSpaceTopology

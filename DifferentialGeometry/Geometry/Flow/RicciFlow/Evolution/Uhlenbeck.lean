@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -38,7 +35,8 @@ abbrev FourComp (M : Type*) (Idx : Type*) :=
 def MetricCompRicciFlowInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (metricComp Ric : MatrixComp M Idx) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => metricComp s x i j)
       (-2 * Ric (t : Real) x i j)
@@ -51,7 +49,8 @@ def MetricCompRicciFlowInFrameOn
 def FrameRicciODEInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (frameComp ricciOneUp : MatrixComp M Idx) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (a k : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (a k : Idx),
     HasDerivWithinAt
       (fun s : Real => frameComp s x a k)
       (∑ l : Idx, ricciOneUp (t : Real) x l k * frameComp (t : Real) x a l)
@@ -86,7 +85,8 @@ def movingFrameGramInFrame
 def MovingFrameGramDerivativeZeroOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (metricComp frameComp : MatrixComp M Idx) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (a b : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (a b : Idx),
     HasDerivWithinAt
       (fun s : Real => movingFrameGramInFrame metricComp frameComp s x a b)
       0
@@ -108,7 +108,8 @@ abbrev MovingFrameGramConstantOn
 def MovingFrameGramValueConstantOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (metricComp frameComp : MatrixComp M Idx) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (a b : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (a b : Idx),
     movingFrameGramInFrame metricComp frameComp (t : Real) x a b =
       movingFrameGramInFrame metricComp frameComp D.initial x a b
 
@@ -1080,7 +1081,8 @@ def solutionRm04CompInFrame
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     FourComp M Idx :=
-  fun t x i j k l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x i j k l
+  fun t x i j k l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x i j
+                       k l
 
 
 

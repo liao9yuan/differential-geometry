@@ -58,8 +58,6 @@ theorem cc_iter_coeff
       ring
 
 omit [BoundarylessManifold I M] in
-
-
 theorem cc_l2_pair_tsum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) :

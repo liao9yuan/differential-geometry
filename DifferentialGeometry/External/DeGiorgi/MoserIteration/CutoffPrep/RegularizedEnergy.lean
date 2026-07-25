@@ -5,7 +5,8 @@ import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Regulari
 /-!
 # Moser Regularized Energy
 
-This module contains the regularized energy estimates for the Chapter 06 Moser iteration, including the exact-regularized main-ball bounds.
+This module contains the regularized energy estimates for the Chapter 06 Moser iteration,
+including the exact-regularized main-ball bounds.
 -/
 
 noncomputable section
@@ -27,6 +28,7 @@ This follows the Chapter 05 De Giorgi expand-bound-absorb pattern:
 3. Use coercivity + Cauchy-Schwarz + Young to absorb cross terms -/
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Pointwise gradient norm bound for the regularized powered cutoff.
 Extracted as a standalone lemma to keep the surrounding proof context small. -/
 lemma moserRegPowerCutoffWitness_norm_sq_le
@@ -297,14 +299,16 @@ theorem moserExactReg_core_eq_ae
         have hφformula :
             hwφ.weakGrad x =
               (2 * η x * ψ x) • moserFderivVec η x +
-                (η x ^ 2 * deriv (moserExactRegTestPow ε N p) (max (u x) 0)) • hwPos.weakGrad x := by
+                (η x ^ 2 * deriv (moserExactRegTestPow ε N p) (max (u x) 0)) • hwPos.weakGrad
+                  x := by
           apply PiLp.ext
           intro i
           change hwφBig.weakGrad x i =
             (2 * η x * ψ x) * moserFderivVec η x i +
               (η x ^ 2 * deriv (moserExactRegTestPow ε N p) (max (u x) 0)) *
                 hwPosBig.weakGrad x i
-          simpa [ψ, moserFderivVec_apply, hwφBig, hwPosBig, mul_assoc, mul_left_comm, mul_comm] using
+          simpa [ψ, moserFderivVec_apply, hwφBig, hwPosBig, mul_assoc, mul_left_comm, mul_comm]
+            using
             (moserExactRegTestCutoffWitness_grad (d := d) (u := u) (η := η) (ε := ε) (N := N)
               (p := p) (Cη := Cη) hε hN hu1 hη hη_bound hη_grad_bound x i)
         rw [hφformula, hgrad_zero, hψ_zero]
@@ -348,6 +352,7 @@ theorem moserExactReg_core_eq_ae
         ring
 
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem moser_exact_regularized_energy_bound
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u η : E → ℝ} {p ρ Cη ε N : ℝ}
@@ -379,7 +384,8 @@ theorem moser_exact_regularized_energy_bound
   have hball_sub : Ω ⊆ Metric.ball (0 : E) 1 :=
     Metric.ball_subset_ball (le_of_lt hρ1)
   let Aρ : NormalizedEllipticCoeff d Ω :=
-    NormalizedEllipticCoeff.restrict A (Metric.ball_subset_closedBall.trans (Metric.closedBall_subset_ball hρ1))
+    NormalizedEllipticCoeff.restrict A
+      (Metric.ball_subset_closedBall.trans (Metric.closedBall_subset_ball hρ1))
   let huρ : MemW1pWitness 2 u Ω :=
     hu1.restrict Metric.isOpen_ball hball_sub
   let hwPosBig : MemW1pWitness 2 (fun x => max (u x) 0) (Metric.ball (0 : E) 1) :=
@@ -465,7 +471,8 @@ theorem moser_exact_regularized_energy_bound
     exact (hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aemeasurable
   have hfluxNorm_aemeas : AEMeasurable fluxNorm μ := by
     exact
-      (moser_aestronglyMeasurable_matMulE Aρ.1 hwPos.weakGrad_memLp.aestronglyMeasurable).norm.aemeasurable
+      (moser_aestronglyMeasurable_matMulE Aρ.1
+        hwPos.weakGrad_memLp.aestronglyMeasurable).norm.aemeasurable
   have hψ_nonneg : ∀ x, 0 ≤ ψ x := by
     intro x
     exact moserExactRegTestPow_nonneg_of_nonneg (ε := ε) (N := N) (p := p)
@@ -497,7 +504,8 @@ theorem moser_exact_regularized_energy_bound
     refine Integrable.mono' ((hweighted_grad_sq_int.const_mul (Aρ.1.Λ * Kψd))) ?_ ?_
     · exact
         ((((hη.continuous.pow 2).aemeasurable).mul hψd_aemeas).mul
-          (aestronglyMeasurable_bilinFormIntegrandOfCoeff Aρ.1 hwPos hwPos).aemeasurable).aestronglyMeasurable
+          (aestronglyMeasurable_bilinFormIntegrandOfCoeff Aρ.1 hwPos
+            hwPos).aemeasurable).aestronglyMeasurable
     · filter_upwards [Aρ.1.quadratic_upper, Aρ.1.ae_coercive_nonneg] with x hx_quad hx_nonneg
       by_cases hx : x ∈ tsupport η
       · have hψd_eq : ψd x = deriv (moserExactRegTestPow ε N p) (max (u x) 0) := by
@@ -881,7 +889,8 @@ theorem moser_exact_regularized_energy_bound
             _ = (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
                 field_simp [show p - 1 ≠ 0 by linarith]
         · have hgrad_zero : gradEtaNorm x = 0 := by
-            simpa [gradEtaNorm] using moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
+            simpa [gradEtaNorm] using moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη
+              hx
           have hrhs_nonneg :
               0 ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
             have hp1 : 0 < p - 1 := by linarith

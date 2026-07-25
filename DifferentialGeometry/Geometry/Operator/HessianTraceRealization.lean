@@ -16,9 +16,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -924,7 +921,8 @@ theorem scalarLap_canon
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun k l =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x)
   let X :
       CoordinateIdx (𝕜 := Real) E ->
@@ -941,7 +939,7 @@ theorem scalarLap_canon
         (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
         x (basis i)).choose_spec
   exact scalarLaplacianRealizesTraceAt_of_nablaDu (I := I) cov g hmc basis gInv
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x)
     f (duSec (I := I) f hf)
     (fun y : M => hessianSec (I := I) cov hcov f hf y)
@@ -1047,7 +1045,8 @@ theorem lapTrace_nablaSec
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) y
   let gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun k l =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g y k
+        l
         (extChartAt I y y)
   let X :
       CoordinateIdx (𝕜 := Real) E ->
@@ -1064,7 +1063,8 @@ theorem lapTrace_nablaSec
         (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
         y (basis i)).choose_spec
   exact scalarLapTraceAt_of_nablaDu (I := I) cov g hmc basis gInv
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g y)
+    (inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g y)
     f duSec hessF X hfields hdu (hHess y) (hgrad y)
 
 end DifferentialGeometry.Integral.Connection

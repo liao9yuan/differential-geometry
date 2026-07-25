@@ -46,21 +46,17 @@ def tailBallOpen (b : ∀ j, M j) (j₀ n : ℕ) : Opens (M (j₀ + n)) :=
   ⟨Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ n), Metric.isOpen_ball⟩
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
 theorem ballOpen_nonempty (b : ∀ j, M j) (r : ℕ → ℝ) (j : ℕ) (hr : 0 < r j) :
     Nonempty (ballOpen b r j) := by
   refine ⟨⟨b j, ?_⟩⟩
   exact Metric.mem_ball_self hr
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
 theorem tailBall_nonempty (b : ∀ j, M j) (j₀ n : ℕ) :
     Nonempty (tailBallOpen b j₀ n) :=
   ⟨⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩⟩
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
-
 theorem tailBall_le_large (b : ∀ j, M j) (j₀ n : ℕ) :
     tailBallOpen b j₀ n ≤ ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) := by
   intro x hx
@@ -99,7 +95,6 @@ def limitCore (b : ∀ j, M j) (j₀ : ℕ)
   S.toSeqSystem.incl n '' tailCore b j₀ n
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
 theorem core_subset_tail (b : ∀ j, M j) (j₀ n : ℕ) :
     Metric.closedBall (b (j₀ + n)) (coreRadius n) ⊆
       (tailBallOpen b j₀ n : Set (M (j₀ + n))) := by
@@ -112,8 +107,6 @@ theorem core_subset_tail (b : ∀ j, M j) (j₀ n : ℕ) :
   nlinarith
 
 omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
-
 theorem tailCore_compact (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))] : IsCompact (tailCore b j₀ n) := by
   rw [Subtype.isCompact_iff]
@@ -131,7 +124,6 @@ theorem tailCore_compact (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] in
-
 theorem limitCore_closed (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
@@ -142,8 +134,6 @@ theorem limitCore_closed (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
-
 theorem incl_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
     (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
@@ -169,7 +159,6 @@ theorem incl_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
-
 theorem center_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
     (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m)) :
@@ -180,8 +169,6 @@ theorem center_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E]
   [∀ j, SigmaCompactSpace (M j)] in
-
-
 theorem frontier_core_radius (b : ∀ j, M j) (j₀ n : ℕ)
     [ProperSpace (M (j₀ + n))]
     [∀ m, Nonempty (tailBallOpen b j₀ m)]
@@ -454,7 +441,7 @@ theorem chainPullback_step
     (hV : ∀ k, (V : Set (M (j + 1))) ⊆
       (chainComp (I := I) (Mf := M) Ψ (j + 1) k).source)
     (hmap : (chainComp (I := I) (Mf := M) Ψ j 1 : M j → M (j + 1)) ''
-      (U : Set (M j)) ⊆ (V : Set (M (j + 1))) )
+      (U : Set (M j)) ⊆ (V : Set (M (j + 1))))
     (b : ℕ) (x : U) (v w : TangentSpace I x) :
     (chainPullbackSeq (I := I) Ψ g U hU (1 + b)).inner x v w =
       (chainPullbackSeq (I := I) Ψ g V hV b).inner
@@ -520,7 +507,7 @@ noncomputable def chainBallSystem
     (hmap : ∀ n,
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
         M (j₀ + n) → M (j₀ + (n + 1))) '' (U n : Set (M (j₀ + n))) ⊆
-        (U (n + 1) : Set (M (j₀ + (n + 1)))) ) :
+        (U (n + 1) : Set (M (j₀ + (n + 1))))) :
     SmoothSeqSystem I (fun n => U n) :=
   SmoothSeqSystem.ofSucc
     (fun n => PartialDiffeomorph.opensMap
@@ -534,7 +521,8 @@ noncomputable def chainBallSystem
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)]
+    [∀ (j : ℕ), T2Space (M j)] in
 theorem chainMetricCocycle
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     [∀ n, SigmaCompactSpace (U n)]
@@ -544,7 +532,7 @@ theorem chainMetricCocycle
     (hmap : ∀ n,
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
         M (j₀ + n) → M (j₀ + (n + 1))) '' (U n : Set (M (j₀ + n))) ⊆
-        (U (n + 1) : Set (M (j₀ + (n + 1)))) )
+        (U (n + 1) : Set (M (j₀ + (n + 1)))))
     (gInf : ∀ n, SmoothRiemannianMetric I (U n))
     (hstep : ∀ n,
       let F : U n → U (n + 1) := PartialDiffeomorph.opensMap
@@ -613,8 +601,9 @@ variable [NeZero (Module.finrank ℝ E)]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 include I in
-
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), IsManifold I ∞ (M j)] [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), IsManifold I ∞ (M j)]
+    [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)] in
 theorem tailBall_preconn (b : ∀ j, M j) (j₀ n : ℕ) :
     PreconnectedSpace (tailBallOpen b j₀ n) := by
   have hR : 0 < (2 : ℝ) ^ n := by positivity
@@ -650,7 +639,6 @@ theorem tailBall_preconn (b : ∀ j, M j) (j₀ n : ℕ) :
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
   [NeZero (Module.finrank ℝ E)] in
-
 omit [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)] [∀ (j : ℕ), T2Space (M j)] in
 theorem speed_ge_of_c0 {j : ℕ}
     (P : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -688,8 +676,6 @@ theorem speed_ge_of_c0 {j : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_covNorm {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -726,8 +712,6 @@ theorem ballPullback_covNorm {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_cov_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -748,8 +732,6 @@ theorem ballPullback_cov_le {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 theorem prefixTail_cov_le {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -769,21 +751,20 @@ theorem prefixTail_cov_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) q
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) q
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
 theorem chainPrefix_cov_le
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     {j a b : ℕ} {K : Set (M (j + a))} (U : Opens (M j))
@@ -818,7 +799,6 @@ theorem chainPrefix_cov_le
 
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-
 theorem ballPullback_lower {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     {K : Set (M j)} (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -843,7 +823,6 @@ theorem ballPullback_lower {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_upper {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -869,8 +848,6 @@ theorem ballPullback_upper {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_zero_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -909,8 +886,6 @@ theorem ballPullback_zero_le {j l : ℕ}
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackDiff_le {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -960,8 +935,6 @@ theorem pullbackDiff_le {j l : ℕ}
     exact ballPullback_cov_le Φ U hU hUK gRef g D hq1 hqp x
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 omit [I.Boundaryless] in
 theorem limitDiff_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
@@ -996,8 +969,6 @@ theorem limitDiff_le
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chainLimit_base_le
     (b : ∀ j, M j)
@@ -1040,8 +1011,6 @@ theorem chainLimit_base_le
       (g j) (g (j + ρ k)) (D (ρ k)).forward hqp x
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 omit [I.Boundaryless] in
 theorem diffNorm_change_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
@@ -1132,7 +1101,6 @@ noncomputable def limitRefFactor (p : ℕ) : ℝ :=
       (2 + 2 * lemma45CorConst (E := E) 2 p * (r : ℝ))
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem limitRefFactor_pos (p : ℕ) : 0 < limitRefFactor (E := E) p := by
   have hterm : ∀ r : ℕ, 0 ≤ Real.sqrt ((2 : ℝ) ^ (2 + r)) *
@@ -1149,7 +1117,6 @@ theorem limitRefFactor_pos (p : ℕ) : 0 < limitRefFactor (E := E) p := by
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem four_le_refFactor (p : ℕ) : 4 ≤ limitRefFactor (E := E) p := by
   have hterm : ∀ r : ℕ, 0 ≤ Real.sqrt ((2 : ℝ) ^ (2 + r)) *
@@ -1166,8 +1133,6 @@ theorem four_le_refFactor (p : ℕ) : 4 ≤ limitRefFactor (E := E) p := by
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem refTerm_le_factor (p r : ℕ) (hrp : r ≤ p) :
     Real.sqrt ((2 : ℝ) ^ (2 + r)) *
@@ -1189,8 +1154,6 @@ theorem refTerm_le_factor (p r : ℕ) (hrp : r ≤ p) :
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem exists_refDelta (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∃ δ : ℝ, 0 < δ ∧ δ < 1 ∧
@@ -1228,9 +1191,6 @@ theorem exists_refDelta (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-
-
-
 omit [I.Boundaryless] in
 theorem diffNorm_limit_le
     {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
@@ -1346,7 +1306,6 @@ theorem diffNorm_limit_le
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
 theorem prefixTail_zero_le {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -1367,21 +1326,20 @@ theorem prefixTail_zero_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) 0
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) 0
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
 theorem chainPrefix_zero_le
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     {j a b : ℕ} {K : Set (M (j + a))} (U : Opens (M j))
@@ -1417,8 +1375,6 @@ theorem chainPrefix_zero_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem chain_image_open
     (b : ∀ j, M j)
@@ -1466,7 +1422,6 @@ theorem chain_image_open
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem chain_image_ball
     (b : ∀ j, M j)
@@ -1487,7 +1442,6 @@ theorem chain_image_ball
 omit [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)]
   [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [NeZero (Module.finrank ℝ E)] in
-
 omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem tailBall_source
     (b : ∀ j, M j)
@@ -1508,7 +1462,6 @@ theorem tailBall_source
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailBall_image
     (b : ∀ j, M j)
@@ -1554,8 +1507,6 @@ theorem tailBall_image
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailClosed_image
     (b : ∀ j, M j)
@@ -1619,7 +1570,6 @@ theorem tailClosed_image
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 noncomputable def tailBallSystem
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -1647,8 +1597,6 @@ noncomputable def tailBallSystem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailSystem_center
     (b : ∀ j, M j)
@@ -1691,8 +1639,6 @@ theorem tailSystem_center
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailCenter_map
     (b : ∀ j, M j)
@@ -1731,7 +1677,6 @@ theorem tailCenter_map
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailCenter_incl
     (b : ∀ j, M j)
@@ -1766,8 +1711,6 @@ theorem tailCenter_incl
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailSystem_compact
     [∀ j, ProperSpace (M j)]
@@ -1844,7 +1787,6 @@ theorem tailSystem_compact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 theorem tailMetricCocycle
     (b : ∀ j, M j)
@@ -1936,7 +1878,6 @@ theorem tailMetricCocycle
 omit [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)]
   [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [NeZero (Module.finrank ℝ E)] in
-
 omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem chainBall_source
     (b : ∀ j, M j)
@@ -1954,8 +1895,6 @@ theorem chainBall_source
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem chainPullback_bdd
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2051,7 +1990,6 @@ theorem chainPullback_bdd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem exists_chain_limit
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2089,8 +2027,6 @@ theorem exists_chain_limit
 
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-
-
 omit [∀ (j : ℕ), SigmaCompactSpace (M j)] in
 theorem exists_chain_data
     (b : ∀ j, M j)
@@ -2132,9 +2068,6 @@ theorem exists_chain_data
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 theorem exists_limits_diag
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2268,9 +2201,6 @@ theorem exists_limits_diag
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 theorem exists_limits_close
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2404,8 +2334,6 @@ theorem exists_limits_close
 
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
-
-
 theorem half_ambient_le_tail
     (b : ∀ j, M j) (j₀ : ℕ)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -2490,8 +2418,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
   [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem enorm_val_le_two
     (b : ∀ j, M j) (j₀ n : ℕ)
@@ -2536,8 +2462,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
   [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem pathELength_val_le
     (b : ∀ j, M j) (j₀ n : ℕ)
@@ -2580,8 +2504,6 @@ theorem pathELength_val_le
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem path_escape_core
@@ -2701,8 +2623,6 @@ theorem path_escape_core
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_core_of_edist
@@ -2741,7 +2661,6 @@ theorem mem_core_of_edist
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem baseRange_exhausts
@@ -2794,8 +2713,6 @@ theorem baseRange_exhausts
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
-
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem finiteRange_exhausts
@@ -2836,7 +2753,6 @@ theorem finiteRange_exhausts
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tailRangeExhausts
@@ -2940,7 +2856,6 @@ theorem tailRangeExhausts
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem tailLimitComplete
     [∀ j, ProperSpace (M j)]
     (b : ∀ j, M j)
@@ -3028,8 +2943,6 @@ theorem tailLimitComplete
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
   [NeZero (Module.finrank ℝ E)] in
-
-
 omit [I.Boundaryless] in
 theorem tail_derivSup_lt
     (j₀ : ℕ)
@@ -3069,8 +2982,6 @@ theorem tail_derivSup_lt
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tailFlatSup_lt
     (b : ∀ j, M j) (j₀ : ℕ)
@@ -3142,11 +3053,8 @@ theorem tailFlatSup_lt
               ((g (j₀ + n)).restrictOpen (I := I) U) (gInf n) (gInf n) q x
     _ ≤ ε / 2 := hbig
 
-set_option maxHeartbeats 800000 in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
 def ambientCGConverges
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3342,9 +3250,6 @@ def ambientCGConverges
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
-
 def chainCGConverges
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3394,9 +3299,6 @@ def chainCGConverges
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
-
-
-
 def chainAmbientConv
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n)))
     [∀ n, Nonempty (U n)] [∀ n, SigmaCompactSpace (U n)]
@@ -3444,8 +3346,6 @@ def chainAmbientConv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 def tailAmbientConv
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -3519,8 +3419,6 @@ def tailAmbientConv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 def ballSystemOfData
     (b : ∀ j, M j) (r ε : ℕ → ℝ) (hr : ∀ j, 0 < r j) (hε : ∀ j, 0 ≤ ε j)
     (p : ℕ → ℕ)
@@ -3557,9 +3455,6 @@ def ballSystemOfData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 noncomputable def directedBallSystem
     (b : ∀ j, M j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))

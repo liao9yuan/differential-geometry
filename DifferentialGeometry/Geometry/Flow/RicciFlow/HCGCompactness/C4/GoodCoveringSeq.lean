@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.DiagonalSubseq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -557,13 +556,6 @@ theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 
 
 
-set_option maxHeartbeats 800000 in
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -713,7 +705,7 @@ theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real
     have h6 : L.lamInf α ≤ 2 * E1 * lRk := by nlinarith
     have h7 : (25 : Real) * E1 * L.lamInf α ≤ 50 * (E1 * E1) * lRk := by nlinarith
     rw [← hEmul]
-    nlinarith
+    exact le_of_lt (lt_of_lt_of_le h5 h7)
   have hr0 : 0 < hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0) :=
     hd.lambda_pos hD _
   have hcapr :

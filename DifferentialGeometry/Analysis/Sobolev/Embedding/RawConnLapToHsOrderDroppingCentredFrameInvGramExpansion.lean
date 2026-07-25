@@ -58,8 +58,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 section CentredFrameCoordExpansion
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -74,7 +72,8 @@ private noncomputable def centredOrthoFrameCoordMatrix
         (smoothOrthoFrame (I := I) g c i b) k
     else 0
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_of_mem
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -86,7 +85,8 @@ private lemma centredOrthoFrameCoordMatrix_of_mem
   unfold centredOrthoFrameCoordMatrix
   rw [dif_pos hb]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i : Fin (Module.finrank ℝ E)) {b : M}
@@ -104,7 +104,8 @@ private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
   rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
   rw [chartBasisFamily_apply (I := I) α hb k]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma centredFrame_gram_expand
     (g : SmoothRiemannianMetric I M) (α c : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -148,7 +149,8 @@ private noncomputable def centredCoordMatrix
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of (fun i k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b)
 
-omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma centredCoordMatrix_orthonormal_form
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -194,7 +196,8 @@ private lemma centredCoordMatrix_orthonormal_form
   simp only [centredCoordMatrix, Matrix.of_apply]
   ring
 
-omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_orthonormality
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -239,7 +242,8 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -350,7 +354,8 @@ private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma centred_chartBasisVecFiber_mdiffAt
     (α : M) (k : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -448,7 +453,8 @@ private lemma centred_covApply_frameVec_eq_coord_sum
   intro k _
   rw [L.map_smul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma centred_finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
     (r s : ℕ) (f : ι → M → ℝ)
@@ -769,7 +775,8 @@ private noncomputable def chartProjCLM (r s : ℕ) (α : M)
     ((trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma chartProjCLM_apply (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M)
@@ -868,7 +875,8 @@ private lemma chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder
     exact tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
       (I := I) (M := M) g r s T₀ α m (b := b) hb
   rw [hAbstract]
-  have hComp := DifferentialGeometry.Analysis.Laplacian.TensorRegularity.covDerivComponent_eq_euclidPartial_add_lowerOrder
+  have hComp :=
+    covDerivComponent_eq_euclidPartial_add_lowerOrder
     (I := I) (M := M) g r s T₀ α m Idx Jdx (y := y) hy_mem
   rw [chartProjCLM_apply]
   rw [hroundtrip] at hComp
@@ -879,8 +887,6 @@ end CentredFrameCoordExpansion
 section B4Bridge
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -1191,7 +1197,6 @@ private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
       (I := I) (M := M) g r s α Idx Jdx
   refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
   intro T₀ b hb
-
   have hReduce :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),

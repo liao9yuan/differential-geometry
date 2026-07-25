@@ -25,12 +25,12 @@ namespace dominatedCutoffAux
   have h : (4 : ℝ) * 0 - 1 ≤ 0 := by norm_num
   exact Real.smoothTransition.zero_of_nonpos h
 
-theorem zero_of_le_quarter {t : ℝ} (ht : t ≤ 1/4) : dominatedCutoffAux t = 0 := by
+theorem zero_of_le_quarter {t : ℝ} (ht : t ≤ 1 / 4) : dominatedCutoffAux t = 0 := by
   unfold dominatedCutoffAux
   have h : (4 : ℝ) * t - 1 ≤ 0 := by linarith
   exact Real.smoothTransition.zero_of_nonpos h
 
-theorem one_of_half_le {t : ℝ} (ht : (1 : ℝ)/2 ≤ t) : dominatedCutoffAux t = 1 := by
+theorem one_of_half_le {t : ℝ} (ht : (1 : ℝ) / 2 ≤ t) : dominatedCutoffAux t = 1 := by
   unfold dominatedCutoffAux
   have h : (1 : ℝ) ≤ 4 * t - 1 := by linarith
   exact Real.smoothTransition.one_of_one_le h

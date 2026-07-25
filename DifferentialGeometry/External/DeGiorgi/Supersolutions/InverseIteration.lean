@@ -169,7 +169,8 @@ theorem superStepConstInv_le
         div_le_self hp_i.le (by linarith)
       have hdiv_nonneg : 0 ≤ moserExponentSeq d p₀ i / (1 + moserExponentSeq d p₀ i) :=
         div_nonneg hp_i.le (by linarith)
-      nlinarith [sq_nonneg (moserExponentSeq d p₀ i - moserExponentSeq d p₀ i / (1 + moserExponentSeq d p₀ i))]
+      nlinarith [sq_nonneg (moserExponentSeq d p₀ i - moserExponentSeq d p₀ i /
+        (1 + moserExponentSeq d p₀ i))]
     -- pₙ² = p₀² · χ^{2i}
     have hseq_sq : (moserExponentSeq d p₀ i) ^ 2 = p₀ ^ 2 * (moserChi d) ^ (2 * i) := by
       rw [moserExponentSeq]; ring
@@ -253,7 +254,8 @@ theorem supersolution_geometric_majorant_inv
     dsimp [superStepConstInv]
     apply Real.rpow_nonneg
     apply mul_nonneg
-    · exact div_nonneg (le_trans (by norm_num : (0:ℝ) ≤ 1) (one_le_C_MoserAnchor (d := d))) (sq_nonneg _)
+    · exact div_nonneg (le_trans (by norm_num : (0:ℝ) ≤ 1) (one_le_C_MoserAnchor (d := d)))
+        (sq_nonneg _)
     · nlinarith [A.1.Λ_nonneg, sq_nonneg (moserExponentSeq d p₀ i / (1 + moserExponentSeq d p₀ i))]
   have hprod_le :
       ∏ i ∈ Finset.range n, superStepConstInv (d := d) A p₀ i ≤

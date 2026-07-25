@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 4000000
-set_option maxHeartbeats 4000000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -30,6 +28,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+private local instance fiberNormGradientTensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartAtlasPOU_tsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
@@ -43,12 +47,10 @@ private lemma chartAtlasPOU_tsupport_subset_chartSource (α : M) :
       (chartAt H α).source :=
   chartAtlasPOU_isSubordinate (I := I) (M := M) α
 
-set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

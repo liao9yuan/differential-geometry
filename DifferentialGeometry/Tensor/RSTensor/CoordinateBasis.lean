@@ -47,9 +47,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -120,6 +117,7 @@ theorem basisTensor0S_apply
 
 
 
+omit [DecidableEq Idx] in
 theorem tensor0S_apply_eq_sum
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (A : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
@@ -127,6 +125,7 @@ theorem tensor0S_apply_eq_sum
       ∑ slots : Fin s -> Idx,
         component0S (I := I) basis A slots *
           ∏ a : Fin s, basis.coord (slots a) (v a) := by
+  classical
   conv_lhs => rw [← (tensor0SBasis (I := I) basis s).sum_repr A]
   rw [tensor0S_sum_apply]
   refine Finset.sum_congr rfl ?_

@@ -70,12 +70,14 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 def smallNormalBall (p : M) (ρ : ℝ) : Set M :=
   {q : M | riemannianEDist I p q < ENNReal.ofReal ρ}
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 @[simp] lemma mem_smallNormalBall {p q : M} {ρ : ℝ} :
     q ∈ smallNormalBall (I := I) p ρ ↔ riemannianEDist I p q < ENNReal.ofReal ρ :=
   Iff.rfl
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma centre_mem_smallNormalBall (p : M) {ρ : ℝ} (hρ : 0 < ρ) :
     p ∈ smallNormalBall (I := I) p ρ := by
   rw [mem_smallNormalBall, riemannianEDist_self]
@@ -279,7 +281,8 @@ theorem smallNormalBall_radial_confined
   have hbound := intrinsicGeodesic_riemannianEDist_le_radius (I := I) g hEnorm p v ht0
   rw [mem_smallNormalBall]
   refine lt_of_le_of_lt hbound ?_
-  refine lt_of_le_of_lt (ENNReal.ofReal_le_ofReal ?_) (ENNReal.ofReal_lt_ofReal_iff_of_nonneg hc_nn |>.2 hv)
+  refine lt_of_le_of_lt (ENNReal.ofReal_le_ofReal ?_)
+    (ENNReal.ofReal_lt_ofReal_iff_of_nonneg hc_nn |>.2 hv)
   calc c * t ≤ c * 1 := by
         exact mul_le_mul_of_nonneg_left ht1 hc_nn
     _ = c := mul_one c

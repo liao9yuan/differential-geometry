@@ -77,7 +77,7 @@ theorem chartPushed_memWkp_two_min_k_two
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) :=
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
+  chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
     (I := I) (M := M) g α k hu_h
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -103,7 +103,7 @@ theorem laplacianDomainPow_le_of_le_aux
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
     u_h ∈ laplacianDomainPow (I := I) (M := M) g j :=
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.laplacianDomainPow_le_of_le
+  laplacianDomainPow_le_of_le
     (I := I) (M := M) g hjk hu_h
 
 theorem chartSideH2kBridge_min_two_unconditional

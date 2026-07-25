@@ -62,7 +62,8 @@ private theorem rawTensorConnLapSmooth_symmS
       rawTensorConnLapSmooth_domDomCongrSection (I := I) (M := M) g₀
         (Equiv.swap (0 : Fin 2) 1) S]
   have hgoal : ccTensor02Symm (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) =
-      (1 / 2 : ℝ) • (rawTensorConnLapSmooth (I := I) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ S) +
+      (1 / 2 : ℝ) • (rawTensorConnLapSmooth (I := I) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ S)
+        +
         rawTensorConnLapSmooth (I := I) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ S)) := by
     rw [ccTensor02Symm, ← hLV]
   rw [hgoal, smul_add, hhalf]
@@ -89,7 +90,8 @@ theorem deTurckRicci_solution_with_jointReg
     have hlap : ccTensorBilinSymm (I := I) g₀
         (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w =
         ccTensorBilinSymm (I := I) g₀
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ S)) x v w := by
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ S)) x v
+            w := by
       rw [rawTensorConnLapSmooth_symmS (I := I) (M := M) g₀ S,
         symmetricBilinearForm_of_tensorSymmetrization_eq_self (I := I) (M := M) g₀
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w]
@@ -127,7 +129,8 @@ theorem deTurckRicci_solution_with_jointReg
     (deTurckRicciRHS (I := I) g_bg) g₀ (4 * Module.finrank ℝ E + 10) ha_super rfl
     (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg (4 * Module.finrank ℝ E + 10))
     (fun S {δ} hδ_lt hδ => deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
-      (ccTensor02Symm (I := I) (M := M) g₀ S) hδ_lt (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ S hδ))
+      (ccTensor02Symm (I := I) (M := M) g₀ S) hδ_lt
+        (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ S hδ))
     (fun g x v w => deTurckRicciRHS_symm (I := I) g_bg g x v w)
     (deTurckRicciRHS_isStrictlyParabolic_at_self (I := I) g₀ g_bg)
     (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)

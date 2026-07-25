@@ -58,7 +58,6 @@ noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
         (by norm_num : (2 : ℝ) = 0 + 2)).toContinuousLinearEquiv.toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarScaleLap_coeff
@@ -136,7 +135,6 @@ theorem rawLap_cc_scalar
       (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_scalarLap_le
@@ -163,8 +161,6 @@ noncomputable def reprScalar0
     (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection
 
 omit [BoundarylessManifold I M] in
-
-
 theorem reprScalar0_smooth
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -174,8 +170,6 @@ theorem reprScalar0_smooth
     (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection
 
 omit [BoundarylessManifold I M] in
-
-
 theorem repr_eq_lift
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)

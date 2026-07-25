@@ -25,7 +25,6 @@ omit [NeZero d] in
         diffQuot k h u (x + (-h) • EuclideanSpace.single k 1) := rfl
 
 omit [NeZero d] in
-
 lemma nirenbergTestFunction_apply_sub
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) (x : EuclN) :
     nirenbergTestFunction k h η u x =
@@ -34,7 +33,6 @@ lemma nirenbergTestFunction_apply_sub
   simp [nirenbergTestFunction, translate, sub_eq_add_neg, neg_smul]
 
 omit [NeZero d] in
-
 theorem nirenbergTestFunction_support_subset
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) :
     Function.support (nirenbergTestFunction k h η u) ⊆
@@ -52,7 +50,6 @@ theorem nirenbergTestFunction_support_subset
   rw [hη_sq_zero, zero_mul]
 
 omit [NeZero d] in
-
 theorem nirenbergTestFunction_tsupport_subset
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) :
     tsupport (nirenbergTestFunction k h η u) ⊆
@@ -69,7 +66,6 @@ theorem nirenbergTestFunction_tsupport_subset
     (nirenbergTestFunction_support_subset (d := d) k h η u hx)
 
 omit [NeZero d] in
-
 theorem nirenbergTestFunction_hasCompactSupport
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -104,7 +100,6 @@ theorem nirenbergTestFunction_hasCompactSupport
   exact h_pre_compact.of_isClosed_subset (isClosed_tsupport _) h_sub
 
 omit [NeZero d] in
-
 theorem sq_nirenbergTestFunction_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (_hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η) (x : EuclN) :
@@ -133,7 +128,6 @@ theorem sq_nirenbergTestFunction_le
   exact mul_le_mul_of_nonneg_right h_quartic_le h_dq_sq_nn
 
 omit [NeZero d] in
-
 theorem aestronglyMeasurable_nirenbergTestFunction
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     (hη : AEStronglyMeasurable η (volume : Measure EuclN))
@@ -153,7 +147,6 @@ theorem aestronglyMeasurable_nirenbergTestFunction
   exact hg.comp_measurePreserving hMP
 
 omit [NeZero d] in
-
 private lemma lintegral_translate_diffQuot_sq
     (k : Fin d) (h : ℝ) (u : EuclN → ℝ) :
     ∫⁻ x : EuclN,
@@ -193,7 +186,6 @@ private lemma lintegral_translate_diffQuot_sq
   exact h_step
 
 omit [NeZero d] in
-
 theorem eLpNorm_nirenbergTestFunction_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η) :
@@ -307,12 +299,10 @@ theorem eLpNorm_nirenbergTestFunction_le
   rw [h_sqrt_M4]
 
 omit [NeZero d] in
-
 private lemma volume_compact_lt_top {K : Set EuclN} (hK : IsCompact K) :
     (volume : Measure EuclN) K < ∞ := hK.measure_lt_top
 
 omit [NeZero d] in
-
 theorem eLpNorm_nirenbergTestFunction_restrict_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η)
@@ -324,7 +314,6 @@ theorem eLpNorm_nirenbergTestFunction_restrict_le
   exact eLpNorm_mono_measure _ Measure.restrict_le_self
 
 omit [NeZero d] in
-
 private lemma tsupport_translate_subset
     (k : Fin d) (h : ℝ) (φ : EuclN → ℝ) :
     tsupport (translate k (-h) φ) ⊆
@@ -341,7 +330,6 @@ private lemma tsupport_translate_subset
   exact subset_tsupport φ hx
 
 omit [NeZero d] in
-
 private lemma contDiff_translate (k : Fin d) (h : ℝ) {φ : EuclN → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) : ContDiff ℝ (⊤ : ℕ∞) (translate k h φ) := by
   unfold translate
@@ -351,7 +339,6 @@ private lemma contDiff_translate (k : Fin d) (h : ℝ) {φ : EuclN → ℝ}
   exact hφ.comp htrans_smooth
 
 omit [NeZero d] in
-
 private lemma hasCompactSupport_translate (k : Fin d) (h : ℝ) {φ : EuclN → ℝ}
     (hφ_supp : HasCompactSupport φ) :
     HasCompactSupport (translate k h φ) := by
@@ -363,7 +350,6 @@ private lemma hasCompactSupport_translate (k : Fin d) (h : ℝ) {φ : EuclN → 
   exact hφ_supp.comp_homeomorph φ_homeo
 
 omit [NeZero d] in
-
 private lemma fderiv_translate_apply (k j : Fin d) (h : ℝ) {φ : EuclN → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (x : EuclN) :
     (fderiv ℝ (translate k h φ) x) (EuclideanSpace.single j 1) =
@@ -394,12 +380,10 @@ private lemma fderiv_translate_apply (k j : Fin d) (h : ℝ) {φ : EuclN → ℝ
   rw [h_at.fderiv]
 
 omit [NeZero d] in
-
 private lemma tsupport_subset_univ (φ : EuclN → ℝ) :
     tsupport φ ⊆ (Set.univ : Set EuclN) := fun _ _ => trivial
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_translate
     (k j : Fin d) (h : ℝ) {f g : EuclN → ℝ}
     (hwp : DeGiorgi.HasWeakPartialDeriv (d := d) j g f Set.univ) :
@@ -477,7 +461,6 @@ theorem hasWeakPartialDeriv_translate
   exact h_test
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_add_univ
     (j : Fin d) {f₁ f₂ g₁ g₂ : EuclN → ℝ}
     (hf₁_locInt :
@@ -565,7 +548,6 @@ theorem hasWeakPartialDeriv_add_univ
   linarith
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_const_smul_univ
     (j : Fin d) (c : ℝ) {f g : EuclN → ℝ}
     (hf_locInt :
@@ -614,7 +596,6 @@ theorem hasWeakPartialDeriv_const_smul_univ
   rw [this, mul_neg]
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_univ_of_memLp
     {f : EuclN → ℝ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     (hf : MemLp f p (volume : Measure EuclN)) :
@@ -623,7 +604,6 @@ private lemma locallyIntegrable_univ_of_memLp
   exact hf.locallyIntegrable hp
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_translate_aux
     (k : Fin d) (h : ℝ) {u : EuclN → ℝ}
     (hu_locInt :
@@ -651,7 +631,6 @@ private lemma locallyIntegrable_translate_aux
     exact (hMP_τ.integrableOn_comp_preimage hτ_emb (f := u) (s := V)).mpr hf_int
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_diffQuot
     (k j : Fin d) (h : ℝ) {u g_j : EuclN → ℝ}
     (hu_locInt :
@@ -758,7 +737,6 @@ private lemma contDiff_eta_sq {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : �
     ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclN => (η y)^2) := hη.pow 2
 
 omit [NeZero d] in
-
 private lemma fderiv_eta_sq_apply {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     (j : Fin d) (x : EuclN) :
     (fderiv ℝ (fun y : EuclN => (η y)^2) x) (EuclideanSpace.single j 1) =
@@ -773,7 +751,6 @@ private lemma fderiv_eta_sq_apply {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ 
   rw [h_two, smul_eq_mul]
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_eta_sq_diffQuot
     (k j : Fin d) (h : ℝ) {η u g_j : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -867,7 +844,6 @@ theorem hasWeakPartialDeriv_eta_sq_diffQuot
     h_wp_dq h_eta_sq_smooth h_dq_u_locInt h_dq_g_locInt
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_nirenbergTestFunction
     (k j : Fin d) (h : ℝ) {η u g_j : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -889,7 +865,6 @@ theorem hasWeakPartialDeriv_nirenbergTestFunction
   exact hasWeakPartialDeriv_translate (d := d) k j h h_inner_wp
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_nirenbergTestFunction_expanded
     (k j : Fin d) (h : ℝ) {η u g_j : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -923,7 +898,6 @@ theorem hasWeakPartialDeriv_nirenbergTestFunction_expanded
   exact h_general
 
 omit [NeZero d] in
-
 example (k : Fin d) (η u : EuclN → ℝ) :
     nirenbergTestFunction k 0 η u = 0 := by
   funext x

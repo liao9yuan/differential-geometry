@@ -33,7 +33,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 
@@ -58,7 +57,8 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
-omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [SigmaCompactSpace M] [T2Space M] in
 omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_congr_nhds
     {X : (p : M) -> TangentSpace I p} {f h : M -> Real} {x : M}
@@ -69,7 +69,8 @@ private theorem directionalDeriv_congr_nhds
   rw [hfh.mfderiv_eq]
   rw [hx]
 
-omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [SigmaCompactSpace M] [T2Space M] in
 omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_add_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
@@ -84,7 +85,8 @@ private theorem directionalDeriv_add_fun
   rw [extDerivFun_add hf hh]
   rw [ContinuousLinearMap.add_apply]
 
-omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [SigmaCompactSpace M] [T2Space M] in
 omit [FiniteDimensional ℝ E] in
 private theorem directionalDeriv_sub_fun
     (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
@@ -726,7 +728,8 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangen
     simpa [Xc] using hXx
   have hYval : tangentConstAt (I := I) x Y x = Ys x := by
     simpa [Yc] using hYx
-  simp only [connectionRiemannCurvatureField, DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [connectionRiemannCurvatureField,
+    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
@@ -1052,7 +1055,8 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
   change g.inner x W ((connectionRiemannCurvatureField (I := I) cov Xc Yc Zc) x) =
       -g.inner x Z ((connectionRiemannCurvatureField (I := I) cov Xc Yc Wc) x)
   simpa [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc, Bc,
+    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc,
+      Bc,
     hXc_self, hYc_self] using hgoal
 
 
@@ -1171,7 +1175,7 @@ theorem firstBianchi_ofTF
   have hYZX := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 Y Z X W
   have hZXY := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 Z X Y W
   have hBianchi :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
+    connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
       (I := I) cov hcov htf x X Y Z
   have hinner := congrArg (fun V : TangentSpace I x => g.inner x W V) hBianchi
   rw [hXYZ, hYZX, hZXY]
@@ -1201,7 +1205,7 @@ theorem firstBianchiAt_of_leviCivita_realizes
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
       hcov Rm04 hRm04 Z X Y W
   have hBianchi :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
+    connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
       (I := I) (leviCivitaConnectionOfMetric (I := I) g) hcov
       (leviCivitaConnectionOfMetric_isTorsionFree (I := I) g) x X Y Z
   have hinner :=
@@ -1209,7 +1213,8 @@ theorem firstBianchiAt_of_leviCivita_realizes
   rw [hXYZ, hYZX, hZXY]
   simpa [map_add, map_zero] using hinner
 
-omit [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [SigmaCompactSpace M] [T2Space M] in
 omit [FiniteDimensional ℝ E] in
 private theorem rm04_pair_symm_of_input_output_first
     {x : M}

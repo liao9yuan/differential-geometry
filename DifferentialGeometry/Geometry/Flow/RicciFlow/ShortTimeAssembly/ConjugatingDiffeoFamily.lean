@@ -39,7 +39,6 @@ variable
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem contMDiffWithinAt_neg_tangentBundleSection
     (X : ℝ → ∀ x : M, TangentSpace I x)
     {u : Set (ℝ × M)} {q₀ : ℝ × M}

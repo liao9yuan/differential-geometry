@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ModelB
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 

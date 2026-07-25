@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -86,22 +85,24 @@ theorem metricDerivNorm_le_compSq_uniform
         metricDerivNorm (I := I) a gk gInf gRef z ≤
           Cu * Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
             (Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gk gRef a z) I0
               - Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2) := by
   classical
   obtain ⟨basisE, u', ε, hopen, hxu', hsub, hε0, hnε, hgram, hONx, hfwd, hrev⟩ :=
     exists_goodFrame_compBound (I := I) gRef x
-  refine ⟨basisE, u', ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2),
+  refine ⟨basisE, u', ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^
+    (a + 2),
     hopen, hxu', hsub, ?_, fun gk gInf z hzu' hz => ?_⟩
-  ·
-    have hcard : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
+  · have hcard : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
       Nat.cast_nonneg _
     exact one_le_pow₀ (by nlinarith)
-  ·
-    set bz := (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+  · set bz := (((trivializationAt E (TangentSpace I : M → Type _)
+    x).isLocalFrameOn_localFrame_baseSet
         I 1 basisE).toBasisAt hz) with hbz
     have hcomp : ∀ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
         Tensor0SBundle.component0S (I := I) bz
@@ -114,33 +115,42 @@ theorem metricDerivNorm_le_compSq_uniform
             (metricDiffCovDerivAt (I := I) a gk gInf gRef z) I0 ^ 2)
         = ∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
           (Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gk gRef a z) I0
-            - Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2 := by
+            - Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gInf gRef a z) I0) ^
+              2 := by
       refine Finset.sum_congr rfl fun I0 _ => ?_
       rw [hcomp I0]
     have hb := hrev z hz hzu' (a + 2) (metricDiffCovDerivAt (I := I) a gk gInf gRef z)
-    have hCge1 : (1 : Real) ≤ (3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1) := by
+    have hCge1 : (1 : Real) ≤ (3 / 2) *
+      ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1) := by
       have : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) := Nat.cast_nonneg _
       nlinarith
-    have hCpow1 : (1 : Real) ≤ ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) :=
+    have hCpow1 : (1 : Real) ≤ ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1))
+      ^ (a + 2) :=
       one_le_pow₀ hCge1
-    have hsqrtle : Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2))
+    have hsqrtle : Real.sqrt
+      (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2))
         ≤ ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) := by
       have h2 : ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)
-          ≤ (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)) ^ 2 := by
+          ≤ (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)) ^
+            2 := by
         nlinarith [hCpow1]
-      calc Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2))
-          ≤ Real.sqrt ((((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)) ^ 2) :=
+      calc Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^
+        (a + 2))
+          ≤ Real.sqrt ((((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^
+            (a + 2)) ^ 2) :=
             Real.sqrt_le_sqrt h2
         _ = ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) :=
             Real.sqrt_sq (by positivity)
     rw [metricDerivNorm]
     calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef z (a + 2)
             (metricDiffCovDerivAt (I := I) a gk gInf gRef z))
-        ≤ Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) *
+        ≤ Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)
+          *
             ∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I) bz
                 (metricDiffCovDerivAt (I := I) a gk gInf gRef z) I0 ^ 2) := Real.sqrt_le_sqrt hb
-      _ = Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2)) *
+      _ = Real.sqrt (((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^
+        (a + 2)) *
             Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I) bz
                 (metricDiffCovDerivAt (I := I) a gk gInf gRef z) I0 ^ 2) :=
@@ -153,7 +163,8 @@ theorem metricDerivNorm_le_compSq_uniform
       _ = ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) *
             Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
               (Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gk gRef a z) I0
-                - Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2) := by
+                - Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gInf gRef a z) I0)
+                  ^ 2) := by
           rw [hsumeq]
 
 
@@ -174,10 +185,12 @@ theorem metricDerivNorm_le_compSq
         metricDerivNorm (I := I) a gk gInf gRef z ≤
           Cu * Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
             (Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gk gRef a z) I0
               - Tensor0SBundle.component0S (I := I)
-                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2) := by
   obtain ⟨basisE, u', Cu, hopen, hxu', hsub, hCu, h⟩ :=
     metricDerivNorm_le_compSq_uniform (I := I) gRef a x
@@ -191,7 +204,9 @@ theorem metricDerivNorm_le_compSq
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricCInfConvOnCompacts_of_normConv
     [FiniteDimensional Real E]
@@ -217,7 +232,9 @@ theorem metricCInfConvOnCompacts_of_normConv
 
 
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem exists_subseq_hconv
     [FiniteDimensional Real E]
@@ -236,12 +253,10 @@ theorem exists_subseq_hconv
     (fun n φ => ∀ ε : Real, 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p → ∀ x ∈ K,
       metricDerivNorm (I := I) a (gSeq (φ k) (e n)) (gInf (e n)) gRef x < ε)
     hstep ?_ ?_
-  ·
-    intro n φ ψ hψ hP ε hε
+  · intro n φ ψ hψ hP ε hε
     obtain ⟨k0, hk0⟩ := hP ε hε
     exact ⟨k0, fun k hk a hap x hxK => hk0 (ψ k) (le_trans hk hψ.le_apply) a hap x hxK⟩
-  ·
-    intro n φ m hP ε hε
+  · intro n φ m hP ε hε
     obtain ⟨k0, hk0⟩ := hP ε hε
     refine ⟨k0 + m, fun k hk a hap x hxK => ?_⟩
     have hval := hk0 (k - m) (by omega) a hap x hxK
@@ -258,7 +273,8 @@ theorem exists_subseq_hconv
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem windowPreconv_of_perTime
     [FiniteDimensional Real E]

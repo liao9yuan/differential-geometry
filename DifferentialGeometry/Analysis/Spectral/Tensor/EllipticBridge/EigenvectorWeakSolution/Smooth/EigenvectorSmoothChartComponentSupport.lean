@@ -29,7 +29,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

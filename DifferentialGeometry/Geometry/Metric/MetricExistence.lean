@@ -76,13 +76,15 @@ private def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ
   ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E)
 
 private def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-  (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
+  (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)
+    (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
     E →L[ℝ] E →L[ℝ] ℝ)
 
 omit [FiniteDimensional ℝ E] in
 lemma localFiber_apply (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w =
-      inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x w) := rfl
+      inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v)
+        (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x w) := rfl
 
 omit [FiniteDimensional ℝ E] in
 lemma localFiber_symm (x₀ x : M) (v w : TangentSpace I x) :
@@ -140,8 +142,10 @@ lemma inCoordinates_localFiber (x₀ : M) {x : M}
   simp only [ContinuousLinearMap.comp_apply]
   change inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v))
       (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w)) = inner ℝ v w
-  rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
-      show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
+  rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from
+    e₁.continuousLinearMapAt_symmL hx v,
+      show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from
+        e₁.continuousLinearMapAt_symmL hx w]
 
 omit [FiniteDimensional ℝ E] in
 private lemma coord_localFiber (x₀ : M) {x : M}
@@ -155,8 +159,6 @@ private lemma coord_localFiber (x₀ : M) {x : M}
   rw [congrArg Prod.snd h]
   exact inCoordinates_localFiber x₀ hx
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
 
 omit [FiniteDimensional ℝ E] in
 lemma localFiber_contMDiffOn (x₀ : M) :

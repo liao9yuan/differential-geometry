@@ -79,7 +79,6 @@ def chartCutoffEuclidean (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
     else 0
 
 omit [IsManifold I ∞ M] in
-
 lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartCutoffEuclidean (I := I) (M := M) α η_M y =
@@ -89,7 +88,6 @@ lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
   simp [hy]
 
 omit [IsManifold I ∞ M] in
-
 lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartCutoffEuclidean (I := I) (M := M) α η_M y = 0 := by
@@ -293,7 +291,6 @@ lemma contDiff_etaEuclid [I.Boundaryless] [T2Space M] (α : M) (η_M : M → ℝ
       hf_zero_evt
 
 omit [IsManifold I ∞ M] in
-
 lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     (hη_range : Set.range η_M ⊆ Set.Icc (0 : ℝ) 1) :
     Set.range (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆ Set.Icc (0 : ℝ) 1 := by
@@ -370,7 +367,8 @@ lemma exists_grad_bound_etaEuclid [I.Boundaryless] [T2Space M]
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ x : EuclN, ‖fderiv ℝ (chartCutoffEuclidean (I := I) (M := M) α η_M) x‖ ≤ C := by
+    ∃ C : ℝ, 0 < C ∧ ∀ x : EuclN, ‖fderiv ℝ (chartCutoffEuclidean (I := I) (M := M) α η_M) x‖ ≤
+      C := by
   set f : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α η_M
   have hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f :=
     contDiff_etaEuclid (I := I) (M := M) α η_M hη_smooth hη_cpt h_tsupp_chart

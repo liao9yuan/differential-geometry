@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -121,10 +120,8 @@ theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M =>
         TotalSpace.mk' E b (cotangentSharp_gen (I := I) g b (β b))) := by
-
   set cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ :=
     fun b => cotangentToDual_gen (I := I) (β b) with hcv
-
   have hcv_smooth : ∀ (α : M) (j : Fin (Module.finrank ℝ E)),
       ContMDiffOn I 𝓘(ℝ) ∞
         (fun b : M => cv b (chartBasisVecFiber (I := I) α j b))
@@ -137,10 +134,8 @@ theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
       exact cotangentToDual_gen_chartBasis_eval (I := I) α j β b
     rw [heq]
     exact hβ α j
-
   have hmetric :=
     metricSharp_contMDiff_total (I := I) g (cv := cv) hcv_smooth
-
   have hsection_eq :
       (fun b : M =>
           TotalSpace.mk' E b (cotangentSharp_gen (I := I) g b (β b))) =

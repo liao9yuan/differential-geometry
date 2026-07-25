@@ -96,7 +96,7 @@ private theorem hom_integral_eq
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) τ)
       = (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * s) - 1) * u₀.coeff i := by
   set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
@@ -104,7 +104,8 @@ private theorem hom_integral_eq
   have hderiv : ⇑(homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) =ᵐ[timeMeasure T]
       fun t => -lam * (Real.exp (-lam * t) * c) :=
     coeFn_ofContinuousOn _
-  have hint_congr : (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) τ)
+  have hint_congr : (∫ τ in (0:ℝ)..s, (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
+    τ)
       = ∫ τ in (0:ℝ)..s, -lam * (Real.exp (-lam * τ) * c) := by
     refine intervalIntegral.integral_congr_ae ?_
     have hsub : Set.uIoc (0 : ℝ) s ⊆ Set.Icc (0 : ℝ) T :=
@@ -135,7 +136,7 @@ private theorem coeffFun_u_eq
     (gforce : timeL2 (tensorHs (I := I) (M := M) g_bg 0 2 a) T)
     (hT : 0 < T) (hT1 : T ≤ 1)
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     (timeH1.toFun (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce) s).coeff i
       = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * s) * u₀.coeff i
         + ∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) τ := by
@@ -151,7 +152,8 @@ private theorem coeffFun_u_eq
   have hval : (timeH1.toFun u s).coeff i =
       (u.init).coeff i + ∫ τ in (0:ℝ)..s, (u.deriv τ).coeff i := by
     have he : (timeH1.toFun u s).coeff i =
-        (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i) (timeH1.toFun u s) := rfl
+        (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i) (timeH1.toFun u s) :=
+          rfl
     rw [he, timeH1.toFun_apply, map_add, hcomm]
     rfl
   rw [hval]
@@ -190,7 +192,7 @@ private theorem duhamel_integral_abs_le
     {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2)
-    {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) T) :
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) T) :
     |∫ τ in (0:ℝ)..s, (derivModeCoeff (I := I) (M := M) (a := a) hT gforce i) τ|
       ≤ Real.sqrt T * ‖derivModeCoeff (I := I) (M := M) (a := a) hT gforce i‖ := by
   set v := derivModeCoeff (I := I) (M := M) (a := a) hT gforce i with hv_def
@@ -333,13 +335,16 @@ omit [NeZero (Module.finrank ℝ E)] in
 private theorem tsum_singleModeCLM_coeff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
-    (hsum : Summable (fun j => singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)))
+    (hsum : Summable (fun j => singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j
+      (c j)))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
-    (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i = c i := by
+    (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i = c
+      i := by
   classical
   have hmap := ContinuousLinearMap.map_tsum
     (coeffCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) i) hsum
-  have hlhs : (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)).coeff i
+  have hlhs : (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j
+    (c j)).coeff i
       = (coeffCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) i)
           (∑' j, singleModeCLM (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ := σ) j (c j)) := rfl
   rw [hlhs, hmap]
@@ -362,9 +367,11 @@ private theorem continuousOn_coeffFun_u
     (i : TensorEigenIdx (I := I) (M := M) g_bg 0 2) :
     ContinuousOn (fun s => (timeH1.toFun u s).coeff i) (Set.Icc (0:ℝ) T) := by
   have hcomp : ContinuousOn
-      (fun s => coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i (timeH1.toFun u s))
+      (fun s => coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i
+        (timeH1.toFun u s))
       (Set.Icc (0:ℝ) T) :=
-    (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a) i).continuous.comp_continuousOn
+    (coeffCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := a)
+      i).continuous.comp_continuousOn
       u.continuousOn_toFun
   simpa only [coeffCLM_apply] using hcomp
 
@@ -436,7 +443,8 @@ theorem interior_allscale_time_continuity
   set Maj : TensorEigenIdx (I := I) (M := M) g_bg 0 2 → ℝ := fun i => Mhom i + Mduh i with hMaj_def
   have hMaj_sum : Summable Maj := hMhom_sum.add hMduh_sum
   have hbound : ∀ i, ∀ s ∈ Set.Icc ε T,
-      ‖singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)‖ ≤ Maj i := by
+      ‖singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)‖ ≤ Maj
+        i := by
     intro i s hsεT
     have hsT : s ∈ Set.Icc (0:ℝ) T := ⟨le_trans hε.le hsεT.1, hsεT.2⟩
     set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam
@@ -475,16 +483,19 @@ theorem interior_allscale_time_continuity
           mul_le_mul_of_nonneg_left habs hwσsqrt_nn
       _ = Maj i := by rw [hMaj_def, hMhom_def, hMduh_def, hwσsqrt]; ring
   have hsummable : ∀ s ∈ Set.Icc ε T,
-      Summable (fun i => singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s)) := by
+      Summable (fun i => singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i
+        (cfun i s)) := by
     intro s hs
     exact Summable.of_norm_bounded hMaj_sum (fun i => hbound i s hs)
-  refine ⟨fun s => ∑' i, singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i (cfun i s), ?_, ?_⟩
+  refine ⟨fun s => ∑' i, singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i
+    (cfun i s), ?_, ?_⟩
   · refine continuousOn_tsum ?_ hMaj_sum (fun i s hs => hbound i s hs)
     intro i
     have hcfcont : ContinuousOn (fun s => cfun i s) (Set.Icc ε T) :=
       (continuousOn_coeffFun_u (I := I) (M := M) u i).mono
         (fun s hs => ⟨le_trans hε.le hs.1, hs.2⟩)
-    exact (singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ) i).continuous.comp_continuousOn hcfcont
+    exact (singleModeCLM (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (σ := σ)
+      i).continuous.comp_continuousOn hcfcont
   · intro s hs
     refine tensorHs.ext ?_
     funext i

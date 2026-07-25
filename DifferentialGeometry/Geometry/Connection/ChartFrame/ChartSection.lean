@@ -56,7 +56,6 @@ lemma chartE_section_repr_eq_trivialization_snd
         congrFun (T.coe_continuousLinearEquivAt_eq (R := ℝ) hx) (σ x)]
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableWithinAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
@@ -83,7 +82,6 @@ theorem mdifferentiableWithinAt_section_iff_chartE
     · exact (chartE_section_repr_eq_trivialization_snd (I := I) α σ hx).symm
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
@@ -115,7 +113,6 @@ private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
   exact ⟨fun h => h.differentiableAt hrange_nhds, fun h => h.differentiableWithinAt⟩
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableAt_section_iff_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
@@ -133,7 +130,6 @@ theorem mdifferentiableAt_section_iff_chartE_fderiv
   exact mdifferentiableWithinAt_range_iff_differentiableAt_of_interior (α := α) hx_int
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem contMDiffWithinAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
@@ -162,7 +158,6 @@ theorem contMDiffWithinAt_section_iff_chartE
     · exact (chartE_section_repr_eq_trivialization_snd (I := I) α σ hx).symm
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem contMDiffAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
@@ -174,7 +169,6 @@ theorem contMDiffAt_section_iff_chartE
   exact contMDiffWithinAt_section_iff_chartE I α σ hx
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem mfderiv_section_eq_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
@@ -232,7 +226,6 @@ theorem mfderiv_section_eq_chartE_fderiv
   rfl
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem contDiffOn_chartE_pullback_of_contMDiff_section
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x)
@@ -268,17 +261,14 @@ theorem contDiffOn_chartE_pullback_of_contMDiff_section
   exact inter_subset_right
 
 variable (I) in
-
 abbrev trivToE (α x : M) : TangentSpace I x →L[ℝ] E :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x
 
 variable (I) in
-
 abbrev trivFromE (α x : M) : E →L[ℝ] TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ x
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 @[simp] lemma trivFromE_trivToE
     (α : M) {x : M}
@@ -288,7 +278,6 @@ omit [FiniteDimensional ℝ E] in
   (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt (R := ℝ) hx v
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 @[simp] lemma trivToE_trivFromE
     (α : M) {x : M}
@@ -336,7 +325,6 @@ lemma chartE_section_repr_zero (α : M) (x : M) :
   rw [map_zero]
 
 variable (I) in
-
 omit [FiniteDimensional ℝ E] in
 theorem mfderiv_scalar_eq_chart_fderiv
     (α : M) (f : M → ℝ) {x : M}

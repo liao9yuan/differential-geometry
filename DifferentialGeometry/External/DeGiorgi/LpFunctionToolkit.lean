@@ -118,6 +118,8 @@ theorem ae_eq_of_tendsto_eLpNorm_sub
   exact hae_zero.mono fun x hx => by simpa [sub_eq_zero] using hx
 
 set_option maxHeartbeats 6400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- **Scalar Cauchy → limit.** Generic over codomain E and domain α. -/
 theorem scalar_cauchy_to_limit
     [SecondCountableTopology E] [CompleteSpace E]
@@ -216,6 +218,8 @@ private theorem pi_norm_le_sum_norms (f : Fin d → ℝ) :
   exact fun j => Finset.single_le_sum (fun i _ => norm_nonneg _) (Finset.mem_univ j)
 
 set_option maxHeartbeats 3200000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- Vector eLpNorm ≤ sum of component eLpNorms for Pi-valued functions.
 Uses `eLpNorm_mono_real` for the pointwise bound together with
 `eLpNorm_sum_le` for ℝ-valued functions, avoiding Pi instance synthesis. -/
@@ -278,6 +282,8 @@ theorem memLp_pi_component
    lt_of_le_of_lt (eLpNorm_pi_component_le i) hF.eLpNorm_lt_top⟩
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- Vector eLpNorm convergence → component eLpNorm convergence.
 Uses `eLpNorm_pi_component_le` via an explicit function equality to avoid
 expensive defeq checks. -/
@@ -300,6 +306,8 @@ theorem tendsto_eLpNorm_pi_component
     (fun _ => bot_le) hle
 
 set_option maxHeartbeats 6400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- **Combined Cauchy → limit + components for Pi-valued sequences.**
 If G n is Cauchy in eLpNorm and each G n is in Lp, then there exists a bare
 function Gext in Lp with vector and component convergence.

@@ -12,8 +12,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
 open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
@@ -46,7 +44,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq_local (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
@@ -93,7 +92,6 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel_lo
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform_local
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M)
@@ -998,7 +996,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
   classical
   induction m with
   | zero =>
-      simpa using
+      simpa only [Nat.zero_add, zero_add, pow_one] using
         eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
           (I := I) (M := M) g r s
   | succ m ih =>

@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -46,7 +45,6 @@ def deTurckRHSReanchor (g_bg : SmoothRiemannianMetric I M)
       (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)).hasCompactSupport
 
 omit [BoundarylessManifold I M] in
-
 @[simp] theorem deTurckRHSReanchor_toSection (g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g_bg 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ) :

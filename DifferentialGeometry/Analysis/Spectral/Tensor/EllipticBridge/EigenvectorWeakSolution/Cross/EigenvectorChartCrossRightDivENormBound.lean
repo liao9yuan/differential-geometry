@@ -164,7 +164,8 @@ end PerSummandBound
 section MeasurabilityTransfer
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma aestronglyMeasurable_weighted_of_chartL2
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}

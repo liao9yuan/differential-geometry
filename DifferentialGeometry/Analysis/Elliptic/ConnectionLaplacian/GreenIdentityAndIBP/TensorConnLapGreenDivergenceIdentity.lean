@@ -16,8 +16,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -259,6 +257,54 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
       chartBasisVecFiber_self (I := I) b n]
 
 omit [CompactSpace M] in
+private lemma tangentSectionAction_inner_dirichletVF
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    tangentSectionAction (I := I) B
+        (fun y : M => g.inner y
+          (dirichletVFSection (I := I) (M := M) g T v y) (B y)) b =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g
+              (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b))
+          (TensorRSSpace.toModel (v.toSection b))
+        + tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection B b))
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g v.toSection B b)) := by
+  have hfun : (fun y : M => g.inner y
+      (dirichletVFSection (I := I) (M := M) g T v y) (B y)) =
+      tensorInnerScalar (I := I) (M := M) g 0 2
+        (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection := by
+    funext y
+    rw [dirichletVFSection_apply, inner_dirichletVF, dirichletForm_apply,
+      tensorInnerScalar_apply, covDerivAlongVFSection_apply]
+    rfl
+  rw [show tangentSectionAction (I := I) B
+          (fun y : M => g.inner y
+            (dirichletVFSection (I := I) (M := M) g T v y) (B y)) =
+        tangentSectionAction (I := I) B
+          (tensorInnerScalar (I := I) (M := M) g 0 2
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection B)
+            v.toSection) from by rw [hfun]]
+  rw [tangentSectionAction_tensorInnerScalar (I := I) (M := M) g 0 2
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
+  rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    (covDerivAlongVFSection (I := I) (M := M) g
+      (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B)
+    v.toSection b]
+  rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b]
+  rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B)
+    (covDerivAlongVFSection (I := I) (M := M) g v.toSection B) b]
+  rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g
+      T.toSection B b,
+    toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g
+      v.toSection B b]
+
+omit [CompactSpace M] in
 private lemma divergence_dirichletVF_summand_eq
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -291,13 +337,6 @@ private lemma divergence_dirichletVF_summand_eq
     (V := fun y : M => Z y) (W := fun y : M => B y)
     Z.contMDiff B.contMDiff
     (x := b) ((B : ∀ y, TangentSpace I y) b)
-  have hfun : (fun y : M => g.inner y (Z y) (B y)) =
-      tensorInnerScalar (I := I) (M := M) g 0 2
-        (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection := by
-    funext y
-    rw [hZ_def, dirichletVFSection_apply, inner_dirichletVF, dirichletForm_apply,
-      tensorInnerScalar_apply, covDerivAlongVFSection_apply]
-    rfl
   have hprod : tangentSectionAction (I := I) B
         (fun y : M => g.inner y (Z y) (B y)) b =
       tensorInnerPointwise (I := I) (M := M) g 0 2 b
@@ -310,26 +349,8 @@ private lemma divergence_dirichletVF_summand_eq
             (covDerivAlongVFSection (I := I) (M := M) g T.toSection B b))
           (TensorRSSpace.toModel
             (covDerivAlongVFSection (I := I) (M := M) g v.toSection B b)) := by
-    rw [show tangentSectionAction (I := I) B
-            (fun y : M => g.inner y (Z y) (B y)) =
-          tangentSectionAction (I := I) B
-            (tensorInnerScalar (I := I) (M := M) g 0 2
-              (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) from by
-      rw [hfun]]
-    rw [tangentSectionAction_tensorInnerScalar (I := I) (M := M) g 0 2
-      (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
-    congr 1
-    · rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
-        (covDerivAlongVFSection (I := I) (M := M) g
-          (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B)
-        v.toSection b]
-      rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g
-        (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b]
-    · rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
-        (covDerivAlongVFSection (I := I) (M := M) g T.toSection B)
-        (covDerivAlongVFSection (I := I) (M := M) g v.toSection B) b]
-      rw [toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g T.toSection B b,
-        toModel_liftedTensorSection_covDerivAlongVFSection (I := I) (M := M) g v.toSection B b]
+    simpa only [hZ_def] using
+      tangentSectionAction_inner_dirichletVF (I := I) (M := M) g T v B b
   have haccel : g.inner b (Z b)
         ((LeviCivita (I := I) g).toFun (fun y : M => B y) b
           ((B : ∀ y, TangentSpace I y) b)) =
@@ -340,7 +361,6 @@ private lemma divergence_dirichletVF_summand_eq
               ((B : ∀ y, TangentSpace I y) b))))
         (TensorRSSpace.toModel (v.toSection b)) := by
     rw [hZ_def, dirichletVFSection_apply, inner_dirichletVF, dirichletForm_apply]
-  have hsecond := covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T.toSection B b
   have hsummand : g.inner b
         ((LeviCivita (I := I) g).toFun (fun y : M => Z y) b
           ((B : ∀ y, TangentSpace I y) b))
@@ -356,7 +376,8 @@ private lemma divergence_dirichletVF_summand_eq
         ((B : ∀ y, TangentSpace I y) b))
       ((B : ∀ y, TangentSpace I y) b) = _
   rw [hsummand, hprod, haccel]
-  rw [hsecond, TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
+  rw [covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T.toSection B b,
+    TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
   have haccel_eq :
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
           (fun y : M => T.toSection y) b

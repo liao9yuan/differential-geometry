@@ -49,7 +49,8 @@ theorem deriv_ne_zero_implies_isolated_zero {f : ℝ → ℝ} {x : ℝ} {c : ℝ
   obtain ⟨S, hS_mem, hS⟩ := hfilt
   obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.mem_nhds_iff.mp hS_mem
   refine ⟨δ, hδ_pos, fun h hh_pos hh_lt hf_eq => ?_⟩
-  have hh_in : h ∈ S := hδ_sub (by simp only [mem_ball, dist_zero_right, Real.norm_eq_abs]; exact hh_lt)
+  have hh_in : h ∈ S := hδ_sub
+    (by simp only [mem_ball, dist_zero_right, Real.norm_eq_abs]; exact hh_lt)
   have h1 := hS h hh_in
   simp only [hfx, sub_zero, Real.norm_eq_abs, smul_eq_mul] at h1
   rw [hf_eq, zero_sub, abs_neg, abs_mul] at h1
@@ -233,9 +234,11 @@ private theorem exists_antideriv_of_zero_integral {a b : ℝ} (_hab : a < b)
       exact lt_irrefl b (hε_thick (Metric.mem_cthickening_of_dist_le b x ε _ hx
         (by rw [Real.dist_eq, abs_of_nonneg (sub_nonneg.mpr hx_Ioo.2.le)]; linarith))).2
   have hη_zero_lt : ∀ x, x < a + ε → η x = 0 := fun x hx => by
-    by_contra h; exact not_lt.mpr (hη_supp_Icc (subset_tsupport η (Function.mem_support.mpr h))).1 hx
+    by_contra h; exact not_lt.mpr (hη_supp_Icc (subset_tsupport η (Function.mem_support.mpr h))).1
+      hx
   have hη_zero_gt : ∀ x, x > b - ε → η x = 0 := fun x hx => by
-    by_contra h; exact not_lt.mpr (hη_supp_Icc (subset_tsupport η (Function.mem_support.mpr h))).2 hx
+    by_contra h; exact not_lt.mpr (hη_supp_Icc (subset_tsupport η (Function.mem_support.mpr h))).2
+      hx
   have hφ_zero_lt : ∀ x, x < a + ε → φ x = 0 := by
     intro x hx; change ∫ t in a..x, η t = 0
     rw [intervalIntegral.integral_congr (show EqOn η 0 (Set.uIcc a x) from fun t ht => by
@@ -304,7 +307,8 @@ private lemma integrableOn_mul_of_smooth_cs {a b : ℝ} {g f : ℝ → ℝ}
   exact (hg.norm.mul_const M).mono'
     (hg.aestronglyMeasurable.mul hf_cont.measurable.aestronglyMeasurable)
     (ae_of_all _ fun x => by
-      rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs]; exact mul_le_mul_of_nonneg_left (hM x) (abs_nonneg _))
+      rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs]; exact mul_le_mul_of_nonneg_left (hM x)
+        (abs_nonneg _))
 
 private lemma support_sub_tsupport {f g : ℝ → ℝ} :
     support (f - g) ⊆ tsupport f ∪ tsupport g := by
@@ -355,7 +359,8 @@ theorem du_bois_reymond
     have hη₀_smooth : ContDiff ℝ (⊤ : ℕ∞) η₀ := hη.sub (contDiff_const.mul hψ₀_smooth)
     have hη₀_cs : HasCompactSupport η₀ := by
       rw [hasCompactSupport_def]; exact (hη_cs.isCompact.union hαψ₀_cs.isCompact).of_isClosed_subset
-        isClosed_closure (closure_minimal (show support η₀ ⊆ _ from hη₀_def ▸ support_sub_tsupport) hunion_closed)
+        isClosed_closure (closure_minimal (show support η₀ ⊆ _ from hη₀_def ▸ support_sub_tsupport)
+          hunion_closed)
     have hη₀_supp : tsupport η₀ ⊆ Ioo a b :=
       (closure_minimal (hη₀_def ▸ support_sub_tsupport) hunion_closed).trans
         (union_subset hη_supp (hαψ₀_tsup.trans hψ₀_supp))
@@ -523,24 +528,29 @@ private theorem exists_smooth_trunc (ε : ℝ) (hε : 0 < ε) :
   have hΦ_smooth : ContDiff ℝ (⊤ : ℕ∞) Φ := by
     rw [contDiff_infty_iff_deriv]; exact ⟨fun x =>
       (β.continuous.integral_hasStrictDerivAt 0 x).hasDerivAt.differentiableAt,
-      (show deriv Φ = β from funext fun s => Continuous.deriv_integral _ β.continuous 0 s) ▸ hβ_smooth⟩
+      (show deriv Φ = β from funext fun s => Continuous.deriv_integral _ β.continuous 0 s) ▸
+        hβ_smooth⟩
   have hderiv_eq : ∀ s, deriv Φ s = β s := fun s =>
     Continuous.deriv_integral _ β.continuous 0 s
   have hΦ_zero : Φ 0 = 0 := integral_same
   have hΦ_lip : LipschitzWith 1 Φ := by
     apply lipschitzWith_of_nnnorm_deriv_le (hΦ_smooth.differentiable (by norm_cast))
-    intro x; simp only [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one, Real.norm_eq_abs, hderiv_eq]
+    intro x; simp only [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one, Real.norm_eq_abs,
+      hderiv_eq]
     exact abs_le.mpr ⟨by linarith [β.nonneg' x], β.le_one⟩
   have hΦ_abs_le : ∀ s, |Φ s| ≤ |s| := fun s => by
     have := hΦ_lip.dist_le_mul s 0
     simp only [dist_eq_norm, hΦ_zero, sub_zero, Real.norm_eq_abs, NNReal.coe_one, one_mul] at this
     linarith
   have hderiv_vanish : ∀ s, ε ≤ |s| → deriv Φ s = 0 := fun s hs => by
-    rw [hderiv_eq]; exact β.zero_of_le_dist (by simp only [dist_zero_right, Real.norm_eq_abs]; exact hs)
+    rw [hderiv_eq]; exact β.zero_of_le_dist
+      (by simp only [dist_zero_right, Real.norm_eq_abs]; exact hs)
   have hΦ_const_pos : ∀ s, ε ≤ s → Φ s = Φ ε := by
     intro s hs; rcases eq_or_lt_of_le hs with rfl | hlt; · rfl
     exact constant_of_derivWithin_zero (hΦ_smooth.differentiable (by norm_cast)).differentiableOn
-      (fun x ⟨hxl, _⟩ => by rw [DifferentiableAt.derivWithin _ (uniqueDiffOn_Icc hlt x ⟨hxl, by linarith⟩)]
+      (fun x ⟨hxl, _⟩ => by rw
+                              [DifferentiableAt.derivWithin _
+        (uniqueDiffOn_Icc hlt x ⟨hxl, by linarith⟩)]
                             · exact hderiv_vanish x (by rw [abs_of_nonneg (by linarith)]; exact hxl)
                             · exact (hΦ_smooth.differentiable (by norm_cast)) x)
       s (right_mem_Icc.mpr hs)
@@ -556,10 +566,13 @@ private theorem exists_smooth_trunc (ε : ℝ) (hε : 0 < ε) :
   · by_cases h : |s| ≤ ε
     · exact le_trans (hΦ_abs_le s) h
     · push Not at h; cases le_or_gt 0 s with
-      | inl hs => rw [hΦ_const_pos s (by linarith [abs_of_nonneg hs])]; exact le_trans (hΦ_abs_le ε) (by rw [abs_of_pos hε])
-      | inr hs => rw [hΦ_const_neg s (by linarith [abs_of_neg hs])]; exact le_trans (hΦ_abs_le (-ε)) (by rw [abs_neg, abs_of_pos hε])
+      | inl hs => rw [hΦ_const_pos s (by linarith [abs_of_nonneg hs])]; exact le_trans (hΦ_abs_le ε)
+                    (by rw [abs_of_pos hε])
+      | inr hs => rw [hΦ_const_neg s (by linarith [abs_of_neg hs])]; exact le_trans (hΦ_abs_le (-ε))
+                    (by rw [abs_neg, abs_of_pos hε])
   · rw [hderiv_eq, abs_le]; exact ⟨by linarith [β.nonneg' s], β.le_one⟩
-  · rw [hderiv_eq]; exact β.one_of_mem_closedBall (by simp only [mem_closedBall, dist_zero_right, Real.norm_eq_abs]; exact hs)
+  · rw [hderiv_eq]; exact β.one_of_mem_closedBall
+      (by simp only [mem_closedBall, dist_zero_right, Real.norm_eq_abs]; exact hs)
 
 /-- Enhanced smooth truncation: also includes vanishing for |s| ≥ ε. -/
 private theorem exists_smooth_trunc' (ε : ℝ) (hε : 0 < ε) :
@@ -722,7 +735,8 @@ private theorem weakGrad_integral_test_eq_zero
     · intro n
       have h1 : AEStronglyMeasurable (fun x => deriv (Φ n) (u x) * G x i)
           (volume.restrict Ω) := by
-        exact (((hΦ_smooth n).continuous_deriv (by norm_cast)).measurable.comp hu_meas).aestronglyMeasurable.restrict.mul
+        exact (((hΦ_smooth n).continuous_deriv (by norm_cast)).measurable.comp
+          hu_meas).aestronglyMeasurable.restrict.mul
           hGi_li.aestronglyMeasurable
       exact h1.mul hψ.continuous.measurable.aestronglyMeasurable.restrict
     -- (2) Dominator integrable

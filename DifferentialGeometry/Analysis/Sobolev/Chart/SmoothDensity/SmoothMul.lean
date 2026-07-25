@@ -178,7 +178,7 @@ private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
     (toEuclidean (E := E)) ''
         ((extChartAt I α) '' (tsupport f)) ⊆
       chartTargetEuclid (I := I) (M := M) α :=
-  DifferentialGeometry.Analysis.Sobolev.Chart.image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
+  Analysis.Sobolev.Chart.image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_supp
 
 lemma contDiff_smoothExtensionScalar

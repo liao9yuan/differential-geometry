@@ -108,7 +108,7 @@ private lemma iterWeakPartial_cross_exponent_ae_eq
           =ᵐ[(MeasureTheory.volume :
                 MeasureTheory.Measure (EuclideanSpace ℝ (Fin d))).restrict Ω]
           chosenWeakPartial' (d := d) p' (β 0) f Ω :=
-        DifferentialGeometry.Analysis.Sobolev.Chart.EuclideanIterated.chosenWeakPartial'_cross_exponent_ae_eq
+        Analysis.Sobolev.Chart.EuclideanIterated.chosenWeakPartial'_cross_exponent_ae_eq
           (d := d) hp_one hp'_one hΩ_open hfp_W1 hfp'_W1 (β 0)
       have hg_memWkp_p : MemWkp (d := d) j p
           (chosenWeakPartial' (d := d) p (β 0) f Ω) Ω := by

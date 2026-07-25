@@ -119,7 +119,6 @@ private theorem hessSec_chart_comp
   exact chartHessianMatrixIdentity_holds (I := I) g hf x i j
 
 omit [NeZero (Module.finrank Real E)] in
-
 omit [SigmaCompactSpace M] in
 private theorem hessSec_norm_coord
     (g : SmoothRiemannianMetric I M)

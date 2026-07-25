@@ -27,9 +27,6 @@ variable [IsManifold I ∞ M] [CompactSpace M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 omit [CompactSpace M] [SigmaCompactSpace M] [T2Space M] in
-
-
-
 private theorem time_patch
     (f : Real → M → Real) (K : Set Real)
     (hf : ContinuousOn (fun p : Real × M => f p.1 p.2)

@@ -13,8 +13,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap Bornology
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -360,8 +358,6 @@ end DifferentialGeometry
 namespace DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -394,20 +390,74 @@ instance tensorRSSpace_vectorBundle (r s : ℕ) :
     VectorBundle ℝ (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M)) :=
   Tensor0SBundle.tensorRSBundle_vector r s
 
-set_option synthInstance.maxHeartbeats 800000 in
+theorem tensorRSCoordChangeL_continuousAt
+    (r s : ℕ) (α β x : M)
+    (hxα : x ∈ (chartAt H α).source) (hxβ : x ∈ (chartAt H β).source) :
+    ContinuousAt
+      (fun b => ((trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
+        (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) β) b :
+        TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) x := by
+  have h_smooth :
+      ContMDiffOn I 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E) ∞
+        (fun b => ((trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
+          (trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) β) b :
+          TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E))
+        ((trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).baseSet ∩
+        (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) β).baseSet) :=
+    contMDiffOn_coordChangeL (n := (∞ : WithTop ℕ∞)) (IB := I)
+      (F := TensorRSModel r s ℝ E)
+      (E := fun y : M => TensorRSSpace r s I y)
+      (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α)
+      (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) β)
+  have h_base_α :
+      (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).baseSet =
+      (chartAt H α).source := by
+    change (trivializationAt E (TangentSpace I) α).baseSet ∩
+      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source
+    rw [Set.inter_self, TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α]
+  have h_base_β :
+      (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) β).baseSet =
+      (chartAt H β).source := by
+    change (trivializationAt E (TangentSpace I) β).baseSet ∩
+      (trivializationAt E (TangentSpace I) β).baseSet = (chartAt H β).source
+    rw [Set.inter_self, TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) β]
+  have h_continuousOn : ContinuousOn
+      (fun b => ((trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).coordChangeL ℝ
+        (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) β) b :
+        TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E))
+      ((chartAt H α).source ∩ (chartAt H β).source) := by
+    rw [← h_base_α, ← h_base_β]
+    exact h_smooth.continuousOn
+  exact h_continuousOn.continuousAt
+    (((chartAt H α).open_source.inter (chartAt H β).open_source).mem_nhds ⟨hxα, hxβ⟩)
+
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 instance tensorRS_isContinuousRiemannianBundle
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
     IsContinuousRiemannianBundle (TensorRSModel r s ℝ E)
       (fun b : M => TensorRSSpace r s I b) := by
-  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+  letI hRiemannian : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  letI : (b : M) → NormedAddCommGroup (TensorRSSpace r s I b) := fun b =>
+    (hRiemannian.g.toCore b).toNormedAddCommGroupOfTopology
+      (hRiemannian.g.continuousAt b) (hRiemannian.g.isVonNBounded b)
   refine ⟨?_⟩
   refine ⟨fun b => tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b, ?_, ?_⟩
   · exact tensorRSRiemannianInnerCLM_continuous (I := I) (M := M) g r s

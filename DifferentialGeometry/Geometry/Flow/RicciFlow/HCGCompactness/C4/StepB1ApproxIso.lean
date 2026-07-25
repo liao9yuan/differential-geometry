@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -117,12 +116,10 @@ theorem stepB1_glue
       Nonempty (BookApproxIsoPartialData (I := I) (Metric.closedBall Ok r) ε p Phi g h) := by
   obtain ⟨Φ, hsrc, htgt, hEq⟩ := exists_diffeo_of_injOn hloc hU hinj
   have hclosed_sub : Metric.closedBall Ok r ⊆ Φ.source := by rw [hsrc]; exact hKU
-
   have hev_fwd : ∀ x ∈ Metric.closedBall Ok r, (Φ : M → N) =ᶠ[nhds x] F := fun x hx =>
     Filter.eventuallyEq_of_mem (hU.mem_nhds (hKU hx)) hEq
   have fwdΦ : PreApproxIsoDataOn (I := I) (Metric.closedBall Ok r) ε p (Φ : M → N) g h :=
     hfwd.congr hev_fwd
-
   have hsymmEq : Set.EqOn (Φ.symm : N → M) (Function.invFunOn F U) Φ.target := by
     intro z hz
     rw [htgt] at hz

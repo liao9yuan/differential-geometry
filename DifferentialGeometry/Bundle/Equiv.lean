@@ -231,7 +231,6 @@ def symm (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
   baseMap y := (e.toHomeomorph.symm ⟨y, 0⟩).proj
   toHomeomorph := e.toHomeomorph.symm
   fiberLinearEquiv y :=
-
     let x := (e.toHomeomorph.symm ⟨y, 0⟩).proj
     have hx : e.baseMap x = y := by
       have := e.proj_eq (e.toHomeomorph.symm ⟨y, 0⟩)
@@ -412,7 +411,6 @@ omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 
   [TopologicalSpace B₁] [TopologicalSpace B₂]
   [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] in
-
 private lemma fiberBijective_of_bijective'
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     {baseMap : B₁ → B₂}
@@ -516,7 +514,6 @@ private lemma continuous_symm_of_fiberBijective'
       trivializationCoord_isInvertible (baseMap := baseMap) hφ_bij x x ⟨hx₁, hx₂⟩
     have hA_inv_cont : ContinuousAt (ContinuousLinearMap.inverse ∘ A) x :=
       (hA_inv_at_x.contDiffAt_map_inverse (n := 0)).continuousAt.comp hA_cont
-
     have hNice_cont : ContinuousAt
         (fun p : B₂ × F₂ =>
           ContinuousLinearMap.inverse (A (baseMap.symm p.1)) p.2) (e₂ ⟨baseMap x, w⟩) := by

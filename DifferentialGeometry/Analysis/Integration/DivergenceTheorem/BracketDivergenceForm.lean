@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrde
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -48,7 +46,8 @@ def smoothExtensionTangentSection (x : M) (v : TangentSpace I x) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨smoothExtensionTangent (I := I) x v, smoothExtensionTangent_contMDiff (I := I) x v⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 @[simp] lemma smoothExtensionTangentSection_apply (x : M) (v : TangentSpace I x) (b : M) :
     smoothExtensionTangentSection (I := I) (M := M) x v b = smoothExtensionTangent (I := I) x v b :=
   rfl
@@ -60,7 +59,8 @@ def lieBracketSection (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
   ⟨VectorField.mlieBracket I (fun b : M => X b) (fun b : M => Y b),
     mlieBracket_contMDiff (I := I) X.contMDiff Y.contMDiff⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma lieBracketSection_apply
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
     lieBracketSection (I := I) (M := M) X Y b =
@@ -141,7 +141,8 @@ theorem loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul
   rw [loweredCovDerivAlongVF_apply, loweredCovDerivAlongVF_apply]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem divergence_g_finset_sum
     (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
     (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

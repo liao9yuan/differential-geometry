@@ -96,8 +96,7 @@ def ofBase
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ))) :
@@ -195,8 +194,7 @@ def canonicalBundle
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -240,8 +238,7 @@ def iteratedDiffChartBilinearData_canonical
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -267,8 +264,7 @@ theorem fChartEff_at_level_ae_zero_off_K_alpha
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -327,8 +323,7 @@ private def ofBase
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -406,8 +401,7 @@ private def canonicalBundleWithMemWkp_aux
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -468,8 +462,7 @@ def iteratedDiffChartBilinearData_canonicalMemWkp
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))
@@ -504,8 +497,7 @@ theorem fChartEff_at_level_memWkp_K
     (h_base_f_chart_ae_zero :
       (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
           (laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[
-        (volume : Measure EuclN).restrict
+            (I := I) (M := M) g 1 hu_h)).f_chart =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α \
             chartImagePOUTsupport (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)))

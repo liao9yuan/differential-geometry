@@ -26,7 +26,6 @@ private lemma infty_ne_zero_withTopENat : (∞ : WithTop ℕ∞) ≠ 0 := by
   exact ENat.top_ne_zero (WithTop.coe_eq_coe.mp h')
 
 variable (I) (M) in
-
 def BoundaryManifold : Type _ := {x : M // x ∈ I.boundary M}
 
 instance : TopologicalSpace (BoundaryManifold I M) :=
@@ -86,7 +85,6 @@ def boundaryChartFun [Nonempty hI.boundaryH] (x y : BoundaryManifold I M) :
   Function.invFun hI.inclH (chartAt H (x : M) (y : M))
 
 open Classical in
-
 def boundaryChartInvFun (x : BoundaryManifold I M)
     (z : hI.boundaryH) : BoundaryManifold I M :=
   if h : (chartAt H (x : M)).symm (hI.inclH z) ∈ I.boundary M then

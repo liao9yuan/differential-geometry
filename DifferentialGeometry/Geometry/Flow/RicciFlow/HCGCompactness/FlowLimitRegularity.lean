@@ -49,9 +49,6 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M]
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
-
-
-
 theorem chartGramBound_contOn
     (gRef : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : Fin (Module.finrank Real E)) :
@@ -97,7 +94,7 @@ theorem chartGram_sub_le
     have hu' := Tensor0SBundle.metricTensorField_apply (I := I) u' x
       (fun a => (![chartBasisVecFiber (I := I) x₀ i x,
         chartBasisVecFiber (I := I) x₀ j x] : Fin 2 → TangentSpace I x) a)
-    simp only [metricDiffCovDerivAt, ContinuousMultilinearMap.sub_apply]
+    simp only [metricDiffCovDerivAt]
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _
@@ -141,11 +138,9 @@ theorem chartGramLim_contOn
   classical
   intro p₀ hp₀
   obtain ⟨hp₀t, hp₀x⟩ := hp₀
-
   obtain ⟨K, hKc, hKint, hKsub⟩ := exists_compact_subset
     (trivializationAt E (TangentSpace I) x₀).open_baseSet hp₀x
   have hKne : K.Nonempty := ⟨p₀.2, interior_subset hKint⟩
-
   set c : M → ℝ := fun x =>
     Real.sqrt (gRef.inner x (chartBasisVecFiber (I := I) x₀ i x)
         (chartBasisVecFiber (I := I) x₀ i x))
@@ -158,7 +153,6 @@ theorem chartGramLim_contOn
   set Cb : ℝ := c z with hCb
   have hCb0 : 0 ≤ Cb := hcnonneg z
   have hzle : ∀ x ∈ K, c x ≤ Cb := fun x hx => isMaxOn_iff.mp hz x hx
-
   have htu : TendstoUniformlyOn
       (fun (k : ℕ) (p : ℝ × M) => chartGramMatrix (I := I) (gSeq k p.1) x₀ p.2 i j)
       (fun p : ℝ × M => chartGramMatrix (I := I) (gInf p.1) x₀ p.2 i j)
@@ -183,7 +177,6 @@ theorem chartGramLim_contOn
           have hpos : 0 < ε / (Cb + 1) := by positivity
           exact mul_lt_mul_of_pos_left (by linarith) hpos
       _ = ε := div_mul_cancel₀ ε (by positivity)
-
   have hcOn : ContinuousOn
       (fun p : ℝ × M => chartGramMatrix (I := I) (gInf p.1) x₀ p.2 i j)
       (Set.Icc β ψ ×ˢ K) :=
@@ -199,12 +192,6 @@ theorem chartGramLim_contOn
     exact ⟨ht, interior_subset hxK⟩
   exact (hcOn.continuousWithinAt
     ⟨hp₀t, interior_subset hKint⟩).mono_of_mem_nhdsWithin hmem
-
-set_option maxHeartbeats 1000000 in
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricTensorContLim
@@ -230,7 +217,8 @@ theorem metricTensorContLim
       {q : {t : ℝ // t ∈ Set.Icc β ψ} × M |
         q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
     ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
-  exact hlim.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+  have h := hlim.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+  exact h
 
 end HCGCompactness
 end DifferentialGeometry

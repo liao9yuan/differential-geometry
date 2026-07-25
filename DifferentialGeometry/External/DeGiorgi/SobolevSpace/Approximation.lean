@@ -353,7 +353,8 @@ private theorem eLpNorm_normedConvolution_le
       φ.integrable_normed (Filter.Eventually.of_forall φ.nonneg_normed)]
     simpa [ρ, ψ] using φ.integral_normed (μ := volume)
   have hf_loc : LocallyIntegrable f volume := by
-    exact hf.locallyIntegrable (by simpa using (ENNReal.ofReal_le_ofReal hp : ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p))
+    exact hf.locallyIntegrable
+      (by simpa using (ENNReal.ofReal_le_ofReal hp : ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p))
   have hh_int : Integrable (fun x => ‖f x‖ ^ p) volume := by
     simpa [hp_toReal] using hf.integrable_norm_rpow hp0 ENNReal.ofReal_ne_top
   have hψ_int : Integrable ψ volume := by
@@ -469,7 +470,8 @@ private theorem eLpNorm_normedConvolution_le
   calc
     eLpNorm ((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) : E → ℝ)
         (ENNReal.ofReal p) volume
-      = ENNReal.ofReal ((∫ x, ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x)‖ ^ p ∂volume) ^ p⁻¹) := by
+      = ENNReal.ofReal ((∫ x, ‖((ψ ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x)‖ ^ p ∂volume) ^
+        p⁻¹) := by
           simpa [hp_toReal] using
             hconv_memLp.eLpNorm_eq_integral_rpow_norm hp0 ENNReal.ofReal_ne_top
     _ ≤ ENNReal.ofReal ((∫ x, ‖f x‖ ^ p ∂volume) ^ p⁻¹) := by
@@ -536,7 +538,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub_of_continuous
       (fun n =>
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x
+              -
               g x)
           (ENNReal.ofReal p) volume)
       atTop (nhds 0) := by
@@ -553,7 +556,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub_of_continuous
     intro x hx
     exact Metric.mem_cthickening_of_dist_le (x := x) (y := x) (δ := 1)
       (tsupport g) (subset_tsupport g hx) (by simp)
-  have huc : UniformContinuousOn g T := hT_comp.uniformContinuousOn_of_continuous hg_cont.continuousOn
+  have huc : UniformContinuousOn g T := hT_comp.uniformContinuousOn_of_continuous
+    hg_cont.continuousOn
   refine ENNReal.tendsto_nhds_zero.2 ?_
   intro ε hε
   by_cases hε_top : ε = ∞
@@ -593,13 +597,15 @@ private theorem tendsto_eLpNorm_normedConvolution_sub_of_continuous
         tsupport
             (((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g))
           ⊆ S := by
-      refine (tsupport_normed_convolution_subset_cthickening (d := d) (shrinkingBump (d := d) n) hg_comp).trans ?_
+      refine (tsupport_normed_convolution_subset_cthickening (d := d) (shrinkingBump (d := d) n)
+        hg_comp).trans ?_
       simpa [S] using cthickening_mono hrOut_le_one (tsupport g)
     exact hts (subset_tsupport _ hx)
   have hdist :
       ∀ x : E,
         dist
-            (((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            (((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+              x)
             (g x) ≤ ε0 := by
     intro x
     by_cases hx : x ∈ S
@@ -619,10 +625,12 @@ private theorem tendsto_eLpNorm_normedConvolution_sub_of_continuous
         simpa [T] using hyT''
       exact (hδ0 y hyT x hxT (lt_of_lt_of_le hy (le_trans hn.le (min_le_left _ _)))).le
     · have hconvx :
-          (((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x) = 0 := by
+          (((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            = 0 := by
         exact zero_outside_of_tsupport_subset
           (Ω := S)
-          ((tsupport_normed_convolution_subset_cthickening (d := d) (shrinkingBump (d := d) n) hg_comp).trans
+          ((tsupport_normed_convolution_subset_cthickening (d := d) (shrinkingBump (d := d) n)
+            hg_comp).trans
             (by simpa [S] using cthickening_mono hrOut_le_one (tsupport g)))
           hx
       have hgx : g x = 0 := zero_outside_of_tsupport_subset (Ω := S)
@@ -677,7 +685,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
       (fun n =>
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
               f x)
           (ENNReal.ofReal p) volume)
       atTop (nhds 0) := by
@@ -700,7 +709,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
         (fun n =>
           eLpNorm
             (fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x -
                 g x)
             (ENNReal.ofReal p) volume)
         atTop (nhds 0) :=
@@ -709,8 +719,10 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
       ∀ n,
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x)
           (ENNReal.ofReal p) volume ≤
           eLpNorm (fun x => f x - g x) (ENNReal.ofReal p) volume := by
     intro n
@@ -730,14 +742,16 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
   have hB_cont :
       Continuous
         (fun x =>
-          ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x) := by
+          ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+            x) := by
     exact (shrinkingBump (d := d) n).hasCompactSupport_normed.continuous_convolution_left
       (L := ContinuousLinearMap.lsmul ℝ ℝ)
       (shrinkingBump (d := d) n).continuous_normed (hg_memLp.locallyIntegrable hp_enn)
   have hF_cont :
       Continuous
         (fun x =>
-          ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x) := by
+          ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f)
+            x) := by
     exact (shrinkingBump (d := d) n).hasCompactSupport_normed.continuous_convolution_left
       (L := ContinuousLinearMap.lsmul ℝ ℝ)
       (shrinkingBump (d := d) n).continuous_normed (hf.locallyIntegrable hp_enn)
@@ -785,7 +799,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
             f x) =
         (fun x =>
           ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x) +
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+              +
         (fun x =>
           ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
             g x) +
@@ -797,20 +812,26 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
     calc
       eLpNorm
           ((fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x) +
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x) +
             (fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x -
                 g x) +
             (fun x => g x - f x))
           (ENNReal.ofReal p) volume
           ≤
         eLpNorm
             ((fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-                ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x) +
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f)
+                x -
+                ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume]
+                  g) x) +
             (fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x -
                 g x))
             (ENNReal.ofReal p) volume +
           eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume := by
@@ -818,12 +839,15 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
       _ ≤
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x)
           (ENNReal.ofReal p) volume +
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x
+              -
               g x)
           (ENNReal.ofReal p) volume +
         eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume := by
@@ -832,19 +856,24 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
   have houter :
       eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x)
           (ENNReal.ofReal p) volume +
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x
+              -
               g x)
           (ENNReal.ofReal p) volume +
         eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume ≤
       (ENNReal.ofReal (εr / 3) + ENNReal.ofReal (εr / 3)) + ENNReal.ofReal (εr / 3) := by
-    have hfg' : eLpNorm (fun x => f x - g x) (ENNReal.ofReal p) volume ≤ ENNReal.ofReal (εr / 3) := by
+    have hfg' : eLpNorm (fun x => f x - g x) (ENNReal.ofReal p) volume ≤ ENNReal.ofReal
+      (εr / 3) := by
       simpa [sub_eq_add_neg, add_comm] using hfg
-    have hgf' : eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume ≤ ENNReal.ofReal (εr / 3) := by
+    have hgf' : eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume ≤ ENNReal.ofReal
+      (εr / 3) := by
       have hEq :
           eLpNorm (fun x => f x - g x) (ENNReal.ofReal p) volume =
             eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume := by
@@ -855,19 +884,24 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
     have hfirst_le :
         eLpNorm
             (fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-                ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f)
+                x -
+                ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume]
+                  g) x)
             (ENNReal.ofReal p) volume ≤
           ENNReal.ofReal (εr / 3) := (hconv_diff n).trans hfg'
     calc
       eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x -
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x)
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] f) x
+              -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x)
           (ENNReal.ofReal p) volume +
         eLpNorm
           (fun x =>
-            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+            ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x
+              -
               g x)
           (ENNReal.ofReal p) volume +
         eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume
@@ -875,7 +909,8 @@ private theorem tendsto_eLpNorm_normedConvolution_sub
         ENNReal.ofReal (εr / 3) +
           eLpNorm
             (fun x =>
-              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x -
+              ((shrinkingBump (d := d) n).normed volume ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g)
+                x -
                 g x)
             (ENNReal.ofReal p) volume +
           eLpNorm (fun x => g x - f x) (ENNReal.ofReal p) volume := by
@@ -1106,7 +1141,8 @@ theorem exists_smooth_compactSupport_W1p_approx_univ
       let ei : E := EuclideanSpace.single i 1
       have hbump1 : ContDiff ℝ 1 bump := by
         simpa [bump] using
-          ((shrinkingBump (d := d) n).contDiff_normed : ContDiff ℝ 1 ((shrinkingBump (d := d) n).normed volume))
+          ((shrinkingBump (d := d) n).contDiff_normed : ContDiff ℝ 1
+            ((shrinkingBump (d := d) n).normed volume))
       have hfd :=
         (shrinkingBump (d := d) n).hasCompactSupport_normed.hasFDerivAt_convolution_left
           (L := ContinuousLinearMap.lsmul ℝ ℝ)
@@ -1115,7 +1151,8 @@ theorem exists_smooth_compactSupport_W1p_approx_univ
       have hDbump_cont : Continuous Dbump := by
         simpa [Dbump, bump] using hbump1.continuous_fderiv one_ne_zero
       have hDbump_compact : HasCompactSupport Dbump := by
-        simpa [Dbump, bump] using ((shrinkingBump (d := d) n).hasCompactSupport_normed.fderiv (𝕜 := ℝ))
+        simpa [Dbump, bump] using
+          ((shrinkingBump (d := d) n).hasCompactSupport_normed.fderiv (𝕜 := ℝ))
       have hfd' :
           (fderiv ℝ (φ n) x) ei =
             (((Dbump ⋆[
@@ -1133,7 +1170,8 @@ theorem exists_smooth_compactSupport_W1p_approx_univ
               ContinuousLinearMap.precompL E (ContinuousLinearMap.lsmul ℝ ℝ), volume] u) x) ei)
               =
             ((u ⋆[
-              ContinuousLinearMap.precompR E (ContinuousLinearMap.lsmul ℝ ℝ).flip, volume] Dbump) x) ei := by
+              ContinuousLinearMap.precompR E (ContinuousLinearMap.lsmul ℝ ℝ).flip, volume] Dbump) x)
+                ei := by
                 simpa [ContinuousLinearMap.precompL, Dbump] using
                   congrArg (fun F => F x ei)
                     (MeasureTheory.convolution_flip
@@ -1234,6 +1272,8 @@ private theorem tsupport_mul_smooth_bounded_p_weakGrad_component_subset
 -- Global smooth approximation for a local witness whose function and weak
 -- gradient are already supported in a compact set inside the open domain.
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 theorem exists_smooth_W1p_approx_of_supportedWitness
     {Ω K : Set E} (hΩ : IsOpen Ω)
     {p : ℝ} (hp : 1 < p)

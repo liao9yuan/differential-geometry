@@ -88,7 +88,8 @@ def evalFormTwoVar
     (mfderiv I I (Φ_fam p.2 : M → M) x v)
     (mfderiv I I (Φ_fam p.2 : M → M) x w)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem evalFormTwoVar_diag
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -98,7 +99,8 @@ theorem evalFormTwoVar_diag
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w)) := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem evalFormTwoVar_fst
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -108,7 +110,8 @@ theorem evalFormTwoVar_fst
           (mfderiv I I (Φ_fam t : M → M) x v)
           (mfderiv I I (Φ_fam t : M → M) x w)) := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem evalFormTwoVar_snd
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -118,7 +121,8 @@ theorem evalFormTwoVar_snd
           (mfderiv I I (Φ_fam s : M → M) x v)
           (mfderiv I I (Φ_fam s : M → M) x w)) := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem deTurck_evalForm_chain_hasDerivWithinAt
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

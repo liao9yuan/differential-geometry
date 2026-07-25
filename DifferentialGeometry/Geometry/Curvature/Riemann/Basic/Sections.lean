@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped BigOperators Manifold ContDiff Topology

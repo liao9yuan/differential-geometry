@@ -9,8 +9,6 @@ import Mathlib.Topology.Order.Compact
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set IsManifold Tensor0SBundle ContinuousLinearMap Filter
 open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
@@ -28,6 +26,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
 
 section GenericHomOpNorm
 
@@ -187,12 +191,10 @@ section FibrewiseBound
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
 lemma homTensorRS_riemannianFiberNormSq_clm_apply_le
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
@@ -220,12 +222,10 @@ section OpNormContinuity
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem continuous_homTensorRS_opNorm
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
@@ -246,12 +246,10 @@ theorem continuous_homTensorRS_opNorm
     (E₁ := fun z : M => TensorRSSpace r a I z) (E₂ := fun z : M => TensorRSSpace r c I z)
     Ψ hΨ.continuous
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_uniform_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
@@ -274,12 +272,10 @@ theorem exists_uniform_homTensorRS_opNorm_sq
   refine ⟨max C₀ 0, le_max_right _ _, fun x => ?_⟩
   exact le_trans (hC₀ (Set.mem_range_self x)) (le_max_left _ _)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_continuous_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
@@ -301,8 +297,6 @@ section Payoff
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
@@ -328,8 +322,6 @@ theorem exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le
   exact mul_le_mul_of_nonneg_right (hN_bound x)
     (riemannianFiberNormSq_nonneg (I := I) (M := M) g r a x v)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in

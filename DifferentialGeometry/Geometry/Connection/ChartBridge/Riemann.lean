@@ -258,7 +258,8 @@ def chartRiemannCLM (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
-  let outer : TangentSpace I x →ₗ[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
+  let outer : TangentSpace I x →ₗ[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I
+    x :=
     { toFun := fun v =>
         let mid : TangentSpace I x →ₗ[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
           { toFun := fun w =>

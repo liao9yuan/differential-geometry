@@ -191,7 +191,6 @@ section WeightConvergence
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 omit [Fintype ι] in
-
 theorem cutRaw_contDiffOn {U : Set X} {a : ι -> X -> Real}
     (ha : forall i, ContDiffOn Real (∞ : WithTop ℕ∞) (a i) U)
     (i0 i : ι) :
@@ -211,7 +210,6 @@ theorem cutRaw_contDiffOn {U : Set X} {a : ι -> X -> Real}
     exact cutRaw_of_ne (a i0) a i0 i x hi
 
 omit [Fintype ι] in
-
 theorem cutRaw_conv {U : Set X} (hU : IsOpen U)
     {a : Nat -> ι -> X -> Real} {ainf : ι -> X -> Real}
     (hconv : forall i, MapCInfConvOnCompacts U (fun k => a k i) (ainf i))
@@ -249,8 +247,6 @@ theorem cutRaw_conv {U : Set X} (hU : IsOpen U)
       exact cutRaw_of_ne (ainf i0) ainf i0 i x hi
 
 omit [DecidableEq ι] in
-
-
 theorem rawWeights_conv {U : Set X} (hU : IsOpen U)
     {num : Nat -> ι -> X -> Real} {numinf : ι -> X -> Real}
     {delta : Real} (hdelta : 0 < delta)
@@ -265,8 +261,6 @@ theorem rawWeights_conv {U : Set X} (hU : IsOpen U)
     (normWeightsConv hU hdelta hconv hc hcinf hlow hlowinf i)
 
 omit [NormedAddCommGroup X] [NormedSpace Real X] in
-
-
 theorem cutRaw_sum_half {a : ι -> X -> Real} {i0 : ι} {x : X}
     (hbase : a i0 x ∈ Set.Icc (0 : Real) 1)
     (hnn : forall i, 0 <= a i x) (hcover : exists i, a i x = 1) :

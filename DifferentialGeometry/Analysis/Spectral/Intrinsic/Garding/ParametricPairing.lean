@@ -35,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
 
 
 theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)

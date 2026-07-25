@@ -56,7 +56,6 @@ theorem exists_diffeo_of_injOn [Nonempty M]
     ∃ Φ : PartialDiffeomorph I J M N n,
       Φ.source = s ∧ Φ.target = f '' s ∧ EqOn Φ f s := by
   classical
-
   have htgt : IsOpen (f '' s) := by
     rw [isOpen_iff_forall_mem_open]
     rintro y ⟨x, hx, rfl⟩
@@ -66,8 +65,6 @@ theorem exists_diffeo_of_injOn [Nonempty M]
       exact ⟨x', hx's, hEq hx'φ⟩
     · exact φ.toOpenPartialHomeomorph.isOpen_image_of_subset_source
         (hs.inter φ.open_source) inter_subset_right
-
-
   have hinv : ContMDiffOn J I n (invFunOn f s) (f '' s) := by
     apply contMDiffOn_of_locally_contMDiffOn
     rintro y ⟨x, hx, rfl⟩
@@ -85,7 +82,7 @@ theorem exists_diffeo_of_injOn [Nonempty M]
     have hmem : invFunOn f s (φ x') ∈ s := invFunOn_mem ⟨x', hx's, h2⟩
     have happ : f (invFunOn f s (φ x')) = φ x' := invFunOn_eq ⟨x', hx's, h2⟩
     have h1 : φ.toPartialEquiv.symm (φ x') = x' := φ.toPartialEquiv.left_inv hx'φ
-    show invFunOn f s (φ x') = φ.toPartialEquiv.symm (φ x')
+    change invFunOn f s (φ x') = φ.toPartialEquiv.symm (φ x')
     rw [h1]
     exact hinj hmem hx's (by rw [happ, h2])
   refine ⟨{
@@ -120,7 +117,8 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem exists_expBall_diffeo
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ}
     (hr : ENNReal.ofReal r < injRadius (I := I) g p)

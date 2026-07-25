@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -333,7 +331,7 @@ theorem tensorComponent_chartBilinIdentity_of_dirichlet
         hχs hχt hy,
       hscalar, hgrad, hbump_eqOn hy, hPI]
     simp only [mul_add, Finset.mul_sum]
-    ring
+    ring_nf
   have hLHS_setInt :
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *

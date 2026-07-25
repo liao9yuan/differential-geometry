@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cha
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -45,7 +43,8 @@ noncomputable def tensorComponentEuclid
   chartPushedRaw I α
     (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -54,7 +53,8 @@ lemma tensorComponentEuclid_def
       chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2) := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -66,7 +66,8 @@ lemma tensorComponentEuclid_apply_of_mem
   rw [tensorComponentEuclid_def]
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -77,7 +78,8 @@ lemma tensorComponentEuclid_apply_of_notMem
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem tensorComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -87,7 +89,8 @@ theorem tensorComponentEuclid_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α P₀.1 P₀.2
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -98,10 +101,11 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
   classical
   rw [tensorChartComponentRaw_def]
   unfold tensorTrivProj
-  rw [hx, map_zero, map_zero]
+  rw [hx, ContinuousLinearMap.map_zero, ContinuousLinearMap.map_zero]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -119,12 +123,13 @@ lemma tensorChartComponentRaw_tsupport_subset
       (a₁ := T.toSection x) (a₂ := 0)
     apply this
     rw [show (tensorRSSpace_continuousLinearEquiv (I := I) r s x) (T.toSection x) =
-        TensorRSSpace.toModel (T.toSection x) from rfl, hmod, map_zero]
+        TensorRSSpace.toModel (T.toSection x) from rfl, hmod, ContinuousLinearEquiv.map_zero]
   exact hx (tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (I := I) (M := M) g r s T α Idx Jdx hsec)
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

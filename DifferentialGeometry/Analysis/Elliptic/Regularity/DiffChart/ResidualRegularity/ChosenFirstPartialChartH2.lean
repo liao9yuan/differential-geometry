@@ -135,8 +135,9 @@ theorem chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three
   exact chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
     (I := I) (M := M) g α u_h h_chartPushed_memWkp_three l i
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-theorem chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two_via_chartPushed_memWkp_three
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+theorem chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α : M)

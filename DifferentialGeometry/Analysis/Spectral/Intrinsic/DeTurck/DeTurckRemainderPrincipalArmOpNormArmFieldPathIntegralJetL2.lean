@@ -51,8 +51,6 @@ section
 open Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_jointContMDiffOn
@@ -73,9 +71,8 @@ private theorem iteratedCovGrad_jointContMDiffOn
     exact covGrad_step_jointContMDiffOn (I := I) (M := M) g₀ r (sIdx + j)
       (fun t => iteratedCovGrad (I := I) g₀ r sIdx j (Φ t)) S ih
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem riemannianFiberNormSq_jointContinuousOn
@@ -137,8 +134,6 @@ private theorem riemannianFiberNormSq_jointContinuousOn
       ((Ψ t).toSection x),
     DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dscr_pathIntegralCoeffField_congr
@@ -162,8 +157,6 @@ private theorem dscr_pathIntegralCoeffField_congr
   intro x
   rfl
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem iteratedCovGrad_pathIntegralCoeffField_comm
@@ -214,22 +207,23 @@ private theorem iteratedCovGrad_pathIntegralCoeffField_comm
       (fun t => iteratedCovGrad (I := I) g₀ r sIdx (j + 1) (Φ t)) S hS hSI hjgsucc hji
       (by funext t; rw [iteratedCovGrad_succ])
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem armField_pathIntegral_jetL2_perOrder_le
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
-    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ'))
-    (hSopen : IsOpen (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ')))
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet
+      (δ := δ) (δ' := δ'))
+    (hSopen : IsOpen (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ)
+      (δ' := δ')))
     (hjoint : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r Φ (δ := δ) (δ' := δ'))
     (i : ℕ) {B : ℝ} (_hB : 0 ≤ B)
     (hΦjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
       ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ B ^ 2) :
     ‖iteratedCovGrad (I := I) g₀ r 2 i
         (pathIntegralCoeffField (I := I) (M := M) g₀ r 2 Φ
-          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint)‖ ^ 2 ≤ B ^ 2 := by
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ'))
+            hSopen hSI hjoint)‖ ^ 2 ≤ B ^ 2 := by
   classical
   set S : Set ℝ :=
     DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet
@@ -254,7 +248,8 @@ theorem armField_pathIntegral_jetL2_perOrder_le
       TensorRSSpace.toModel ((iteratedCovGrad (I := I) g₀ r 2 i (Φ t)).toSection x))
       (Set.Icc (0 : ℝ) 1) := by
     intro x
-    exact (DifferentialGeometry.PDE.DeTurck.RicciLinearization.jointContMDiff_toModel_continuous_slice
+    exact
+      (DifferentialGeometry.PDE.DeTurck.RicciLinearization.jointContMDiff_toModel_continuous_slice
       (I := I) g₀ r (2 + i)
       (fun t => iteratedCovGrad (I := I) g₀ r 2 i (Φ t)) S hji x).mono
       (by rw [← Set.uIcc_of_le (zero_le_one (α := ℝ))]; exact hSI)

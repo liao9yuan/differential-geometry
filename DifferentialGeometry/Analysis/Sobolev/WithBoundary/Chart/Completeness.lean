@@ -156,7 +156,8 @@ theorem exists_chart_limit
           (wkpChartFun (f N)))
         (chartTargetEuclid (n := n) (M := M) α) := fun N =>
     (wkpChartFun_memWkpChart (f N)) α
-  exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
+  exact
+    Analysis.Sobolev.Euclidean.MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
 

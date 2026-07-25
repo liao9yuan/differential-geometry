@@ -54,9 +54,6 @@ omit [FiniteDimensional ℝ E] in
     (x : sphere (0 : E) 1) : dInclField (n := n) Y x = dIncl (n := n) x (Y x) := rfl
 
 omit [FiniteDimensional ℝ E] in
-
-
-
 theorem dInclField_mdifferentiableAt
     {Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x} {x : sphere (0 : E) 1}
     (hY : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
@@ -101,14 +98,12 @@ omit [FiniteDimensional ℝ E] in
   rfl
 
 omit [FiniteDimensional ℝ E] in
-
 theorem dInclField_add (Y Y' : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x) :
     dInclField (n := n) (Y + Y') = dInclField (n := n) Y + dInclField (n := n) Y' := by
   funext y
   simp only [dInclField, Pi.add_apply, map_add]
 
 omit [FiniteDimensional ℝ E] in
-
 theorem dInclField_smul (g : sphere (0 : E) 1 → ℝ)
     (Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x) :
     dInclField (n := n) (g • Y) = g • dInclField (n := n) Y := by
@@ -130,7 +125,6 @@ omit [FiniteDimensional ℝ E] in
     ambDeriv (n := n) Y x v = mfderiv (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n) Y) x v := rfl
 
 omit [FiniteDimensional ℝ E] in
-
 theorem ambDeriv_add {Y Y' : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x} {x : sphere (0 : E) 1}
     (hY : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
       (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y (Y y))) x)
@@ -147,7 +141,6 @@ theorem ambDeriv_add {Y Y' : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x} 
   rw [h, ContinuousLinearMap.add_apply]
 
 omit [FiniteDimensional ℝ E] in
-
 theorem ambDeriv_smul {Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x}
     {g : sphere (0 : E) 1 → ℝ} {x : sphere (0 : E) 1}
     (hY : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
@@ -167,8 +160,6 @@ noncomputable def projConn (Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) 
     (((ℝ ∙ (↑x : E))ᗮ).orthogonalProjection.comp (ambDeriv (n := n) Y x))
 
 omit [FiniteDimensional ℝ E] in
-
-
 theorem dIncl_projConn (Y : ∀ x : sphere (0 : E) 1, TangentSpace (𝓡 n) x)
     (x : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) x) :
     dIncl (n := n) x (projConn (n := n) Y x v)

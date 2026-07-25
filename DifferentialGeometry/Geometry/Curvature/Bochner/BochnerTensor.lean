@@ -11,7 +11,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -1020,7 +1019,6 @@ omit [FiniteDimensional ℝ E] in
   congr 1
   exact fin_cons_vec3_eq_vec4 (I := I) X Y Z W
 
-set_option linter.flexible false in
 
 
 
@@ -1191,7 +1189,7 @@ theorem freeze02_deriv
         · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
         · simpa [Function.update, DifferentialGeometry.Integral.Connection.vec3] using hZ
         · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-      rw [hZupd, hWupd] at h
+      simp only [hZupd, hWupd] at h
       simpa [CZ, CW] using h
     have htot :
         tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x) v =
@@ -1218,13 +1216,18 @@ theorem freeze02_deriv
             vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
         funext a
         fin_cases a <;> simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-      simp [Fin.sum_univ_succ, V3, V2] at h
+      simp only [Nat.reduceAdd, Fin.isValue, ContinuousLinearMap.coe_comp',
+        ContinuousLinearEquiv.coe_coe, Function.comp_apply, directionalDeriv_eq,
+        Fin.sum_univ_succ, Fin.cons_zero, Fin.cons_succ, Fin.succ_zero_eq_one,
+        ↓reduceIte, Finset.univ_unique, Fin.default_eq_zero, Fin.succ_ne_zero,
+        Finset.sum_singleton, Fin.succ_one_eq_two, V3, V2] at h
       rw [hYupd, hZupd3, hWupd3] at h
       have h' :
           (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) =
             D - (CY + (CZ + CW)) := by
         simpa [D, CY, CZ, CW, V2, V3, hZ, hW,
-          DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3,
+          DifferentialGeometry.Integral.Connection.vec2,
+            DifferentialGeometry.Integral.Connection.vec3,
           DifferentialGeometry.Integral.Connection.vec4, Fin.sum_univ_succ, Fin.sum_univ_two,
           Function.update, Fin.cons_zero, Fin.cons_succ]
           using h
@@ -1443,7 +1446,6 @@ def Tensor02NormSecondProductInBasis
       (tensor02RoughInnerCoord (I := I) basis gInv A roughA +
         tensor02NablaNormCoord (I := I) basis gInv nablaA)
 
-set_option maxHeartbeats 800000 in
 
 omit [FiniteDimensional ℝ E] in
 theorem Tensor02NormSecondProductInBasis.of_hessian_product

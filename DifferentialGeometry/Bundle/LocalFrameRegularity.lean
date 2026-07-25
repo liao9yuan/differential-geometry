@@ -3,10 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Smooth
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.flexible false
 
 
 
@@ -19,6 +15,8 @@ set_option linter.flexible false
 noncomputable section
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open Tensor0SBundle
@@ -68,7 +66,7 @@ theorem covariantDerivative_finset_sum_tangent
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localFrame_coeff_eq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -182,7 +180,7 @@ theorem covariantDerivative_localFrame_coeff_eq
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localFrame_coeff_eq_along
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -271,7 +269,7 @@ theorem localHomCoeff_apply
 
 omit [CompleteSpace E] in
 theorem homLocalFrameCoeff_eq_localHomCoeff
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     {x : M} (hx : x ∈ e.baseSet)
@@ -293,11 +291,11 @@ theorem homLocalFrameCoeff_eq_localHomCoeff
   simp only [eHom, bHom, hsx]
   simp [Bundle.Trivialization.basisAt, localHomCoeff, homModelCoeff,
     continuousLinearMap_homBasis_repr]
-  rw [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
+  simp only [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_eq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -315,7 +313,7 @@ theorem covariantDerivative_localHomCoeff_eq
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_eventuallyEq
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -334,7 +332,7 @@ theorem covariantDerivative_localHomCoeff_eventuallyEq
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -371,7 +369,7 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -627,7 +625,7 @@ theorem localFrameCoeff_extDeriv_contMDiffAt_one
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -654,7 +652,7 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -685,7 +683,7 @@ theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section_one
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_homSection_contMDiffAt_of_coeff
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
@@ -728,7 +726,7 @@ theorem covariantDerivative_homSection_contMDiffAt_of_coeff
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_homSection_contMDiffAt_of_coeff_one
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {ι : Type*} [Finite ι]
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)

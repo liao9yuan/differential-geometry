@@ -306,7 +306,6 @@ theorem covGronwall_ne_zero_at
   have h0Icc : (0 : ℝ) ∈ Icc (0 : ℝ) b := ⟨le_rfl, hb.le⟩
   have hbIcc : b ∈ Icc (0 : ℝ) b := ⟨hb.le, le_rfl⟩
   set L : (ι → ℝ) ≃L[ℝ] EuclideanSpace ℝ ι := (EuclideanSpace.equiv ι ℝ).symm with hL
-
   set Y : ℝ → EuclideanSpace ℝ ι :=
     fun t => L fun i => g.inner (γ t) (F i t) (J t) with hYdef
   set Y' : ℝ → EuclideanSpace ℝ ι :=
@@ -325,7 +324,6 @@ theorem covGronwall_ne_zero_at
       g.inner (γ t) (F i t)
         (covDerivAlong (I := I) g γ
           (fun s => covDerivAlong (I := I) g γ J s) t) := fun t i => rfl
-
   have hder1 : ∀ t ∈ Icc (0 : ℝ) b, HasDerivAt Y (Y' t) t := by
     intro t ht
     have hpi : ∀ i, HasDerivAt (fun s => g.inner (γ s) (F i s) (J s))
@@ -342,7 +340,6 @@ theorem covGronwall_ne_zero_at
         (fun i => g.inner (γ t) (F i t) (covDerivAlong (I := I) g γ J t)) t :=
       hasDerivAt_pi.mpr hpi
     exact (L.toContinuousLinearMap.hasFDerivAt).comp_hasDerivAt t hpi'
-
   have hder2 : ∀ t ∈ Icc (0 : ℝ) b, HasDerivAt Y' (Y'' t) t := by
     intro t ht
     have hpi : ∀ i, HasDerivAt
@@ -367,7 +364,6 @@ theorem covGronwall_ne_zero_at
             (fun s => covDerivAlong (I := I) g γ J s) t)) t :=
       hasDerivAt_pi.mpr hpi
     exact (L.toContinuousLinearMap.hasFDerivAt).comp_hasDerivAt t hpi'
-
   have hnorm : ∀ t ∈ Icc (0 : ℝ) b, ∀ u : TangentSpace I (γ t),
       ‖(L fun i => g.inner (γ t) (F i t) u : EuclideanSpace ℝ ι)‖ ^ 2
         = g.inner (γ t) u u := by
@@ -382,7 +378,6 @@ theorem covGronwall_ne_zero_at
     rw [Finset.sum_congr rfl fun i _ => happ i]
     exact (inner_self_eq_sum_sq g (γ t) (hcard t) (fun i => F i t)
       (hON t ht) u).symm
-
   have hbound : ∀ t ∈ Ico (0 : ℝ) b, ‖Y'' t‖ ≤ K * ‖Y t‖ := by
     intro t ht
     have htI : t ∈ Icc (0 : ℝ) b := Ico_subset_Icc_self ht
@@ -405,7 +400,6 @@ theorem covGronwall_ne_zero_at
       exact hODE t ht
     have hs := Real.sqrt_le_sqrt h2
     rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (by positivity)] at hs
-
   have hY0 : Y 0 = 0 := by
     refine PiLp.ext fun i => ?_
     rw [hYapp 0 i, hJ0]
@@ -420,7 +414,6 @@ theorem covGronwall_ne_zero_at
       rw [hDJ0]
       exact h
     rw [← hsq, Real.sqrt_sq (norm_nonneg _)]
-
   have hYb : Y b ≠ 0 := by
     refine gronwall_ne_zero (Y := Y) (Y' := Y') (Y'' := Y'') hK hb
       (fun t ht => (hder1 t ht).continuousAt.continuousWithinAt)
@@ -430,7 +423,6 @@ theorem covGronwall_ne_zero_at
       hbound hY0 rfl ?_
     rw [hwnorm]
     exact hsmall
-
   intro hJb
   apply hYb
   refine PiLp.ext fun i => ?_

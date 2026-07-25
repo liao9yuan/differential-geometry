@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -163,7 +161,8 @@ variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [Module.Finite ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma scalarOnE_mul_pointwise (α : M) (f g : M → ℝ) :
     scalarOnE (I := I) α (fun x : M => f x * g x) =
       (fun y : E => scalarOnE (I := I) α f y * scalarOnE (I := I) α g y) := by
@@ -171,7 +170,8 @@ private lemma scalarOnE_mul_pointwise (α : M) (f g : M → ℝ) :
   unfold scalarOnE
   rfl
 
-omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)] in
 private lemma scalarOnE_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -450,7 +450,8 @@ theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
     have hb_in_K' : extChartAt I α b ∈ K' := ⟨b, hb, rfl⟩
     exact (hK'_ne ⟨_, hb_in_K'⟩).elim
 
-omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)] in
 private lemma chartBasisVecFiber_eq_trivFromE_chartModelBasis
     (α : M) (k : Fin (Module.finrank ℝ E)) (b : M) :
     chartBasisVecFiber (I := I) α k b =

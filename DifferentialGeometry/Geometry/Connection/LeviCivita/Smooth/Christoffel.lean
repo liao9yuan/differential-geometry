@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 
@@ -163,7 +162,7 @@ private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventua
         (mfderivWithin 𝓘(Real, E) I ((chartAt H x₀).symm ∘ I.symm)
           (Set.range I) y) ((Module.finBasis Real E) j) := by
     simpa [extChartAt] using hj_symm
-  rw [hj_symm']
+  simp only [hj_symm']
   rfl
 
 
@@ -322,7 +321,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
       (coordinateFrameAt_toBasis (I := I) x₀) gInv :=
     inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x₀
   have hformula :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_coordinate_christoffel_formula
+    leviCivitaConnectionOfMetric_coordinate_christoffel_formula
       (I := I) g x₀ gInv hinv i j k
   rw [hformula]
   unfold leviCivitaChristoffelModelRHS
@@ -330,8 +329,7 @@ theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
   refine Finset.sum_congr rfl fun l _ => ?_
   dsimp [gInv]
   congr 1
-  ·
-    have h₁ :
+  · have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (I ((chartAt H x₀) x₀)) ((Module.finBasis Real E) i) =
           directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)
@@ -549,7 +547,7 @@ private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
               (Module.finBasis Real E).sum_repr
                 ((ContinuousLinearMap.inverse A) (ε j))
             exact congrArg (fun v => A ((Module.finBasis Real E) i) v)
-              (by simpa [Module.Basis.coord] using hsum)
+              (by simp [Module.Basis.coord])
       _ = ε j ((Module.finBasis Real E) i) := by
             rw [hA_symm]
             have happ := congrArg
@@ -739,7 +737,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
       (coordinateFrameAt_basis (I := I) x₀ hx) gInv :=
     inverseMetricFlatModelInChart_metricInverseInBasis_of_mem (I := I) g x₀ hx
   have hformula :=
-    DifferentialGeometry.Integral.Connection.coordinateFrame_christoffel_formula_point_of_isLeviCivita
+    coordinateFrame_christoffel_formula_point_of_isLeviCivita
       (I := I) (cov := leviCivitaConnectionOfMetric (I := I) g) g
       (leviCivitaConnectionOfMetric_isLeviCivita (I := I) g)
       x₀ hx gInv hinv i j k
@@ -749,8 +747,7 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
   refine Finset.sum_congr rfl fun l _ => ?_
   dsimp [gInv]
   congr 1
-  ·
-    have h₁ :
+  · have h₁ :
         fderivWithin Real (metricFlatModelInChart_component (I := I) g x₀ j l)
             (Set.range I) (extChartAt I x₀ x) ((Module.finBasis Real E) i) =
           directionalDerivAlong (I := I) (coordinateFrameAt (I := I) x₀ i)

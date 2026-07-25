@@ -12,7 +12,7 @@ private noncomputable def clamp (T : ℝ) (f : ℝ → ℝ) (t : ℝ) : ℝ :=
   f (max 0 (min T t))
 
 private lemma clamp_eq_of_mem {T : ℝ} {f : ℝ → ℝ} {t : ℝ}
-    (ht : t ∈ Set.Icc (0:ℝ) T) : clamp T f t = f t := by
+    (ht : t ∈ Set.Icc (0 : ℝ) T) : clamp T f t = f t := by
   unfold clamp
   obtain ⟨h0, hT⟩ := ht
   rw [min_eq_right hT, max_eq_right h0]
@@ -26,7 +26,7 @@ private lemma continuous_clamp {T : ℝ} (hT : 0 ≤ T) {f : ℝ → ℝ}
   exact hf.comp_continuous hproj hmem
 
 private lemma integral_clamp_eq {T : ℝ} {f : ℝ → ℝ}
-    {t : ℝ} (ht : t ∈ Set.Icc (0:ℝ) T) :
+    {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
     ∫ τ in (0:ℝ)..t, clamp T f τ = ∫ τ in (0:ℝ)..t, f τ := by
   have h0t : Set.uIcc (0:ℝ) t ⊆ Set.Icc 0 T := by
     rw [Set.uIcc_of_le ht.1]
@@ -49,9 +49,9 @@ private lemma primitive_hasDerivAt {f₀ : ℝ → ℝ} (hf₀ : Continuous f₀
 theorem gronwall_integral_le
     {T A K : ℝ} (hT : 0 ≤ T) (_hA : 0 ≤ A) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
-    (_hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
-    (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
-      f t ≤ A + K * ∫ τ in (0:ℝ)..t, f τ) :
+    (_hf_nn : ∀ t ∈ Set.Icc (0 : ℝ) T, 0 ≤ f t)
+    (hf_int : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      f t ≤ A + K * ∫ τ in (0 : ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ A * Real.exp (K * t) := by
   set f₀ : ℝ → ℝ := clamp T f with hf₀def
   have hf₀_cont : Continuous f₀ := continuous_clamp hT hf_cont
@@ -96,9 +96,9 @@ theorem gronwall_integral_le
 theorem integral_gronwall_le_affine
     {T A B K : ℝ} (hT : 0 ≤ T) (_hA : 0 ≤ A) (hB : 0 ≤ B) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
-    (_hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
-    (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
-      f t ≤ A + B * t + K * ∫ τ in (0:ℝ)..t, f τ) :
+    (_hf_nn : ∀ t ∈ Set.Icc (0 : ℝ) T, 0 ≤ f t)
+    (hf_int : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      f t ≤ A + B * t + K * ∫ τ in (0 : ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ (A + B * t) * Real.exp (K * t) := by
   set f₀ : ℝ → ℝ := clamp T f with hf₀def
   have hf₀_cont : Continuous f₀ := continuous_clamp hT hf_cont

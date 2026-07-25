@@ -93,7 +93,6 @@ def eigenIdxFinset (n : ℕ) :
   (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g 0 2 ((n : ℝ) + 1)).toFinset
 
 omit [BoundarylessManifold I M] in
-
 lemma mem_eigenIdxFinset (n : ℕ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     i ∈ eigenIdxFinset (I := I) (M := M) g n ↔
@@ -103,7 +102,6 @@ lemma mem_eigenIdxFinset (n : ℕ)
   rfl
 
 omit [BoundarylessManifold I M] in
-
 lemma eigenIdxFinset_mono : Monotone (eigenIdxFinset (I := I) (M := M) g) := by
   intro m n hmn i hi
   rw [mem_eigenIdxFinset] at hi ⊢
@@ -113,7 +111,6 @@ lemma eigenIdxFinset_mono : Monotone (eigenIdxFinset (I := I) (M := M) g) := by
   linarith
 
 omit [BoundarylessManifold I M] in
-
 lemma exists_mem_eigenIdxFinset
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     ∃ n : ℕ, i ∈ eigenIdxFinset (I := I) (M := M) g n := by
@@ -123,7 +120,6 @@ lemma exists_mem_eigenIdxFinset
   linarith
 
 omit [BoundarylessManifold I M] in
-
 lemma tendsto_eigenIdxFinset_atTop :
     Tendsto (eigenIdxFinset (I := I) (M := M) g) atTop atTop :=
   tendsto_atTop_finset_of_monotone (eigenIdxFinset_mono (I := I) (M := M) g)
@@ -143,7 +139,8 @@ theorem spectralPartialSum_toL2_tendsto (u : TensorL2 0 2 g) :
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) with hb_def
   have hsum : HasSum (fun i => b.repr u i • b i) u := b.hasSum_repr u
   have hpartial : Tendsto
-      (fun s : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) =>
+      (fun s : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+        2) =>
         ∑ i ∈ s, b.repr u i • b i) atTop (𝓝 u) := hsum
   have hcomp := hpartial.comp (tendsto_eigenIdxFinset_atTop (I := I) (M := M) g)
   refine hcomp.congr (fun n => ?_)
@@ -161,7 +158,6 @@ private def weightedPartial (u : TensorL2 0 2 g) (k n : ℕ) : ℝ :=
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i) ^ 2
 
 omit [BoundarylessManifold I M] in
-
 private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     0 ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((2 * k : ℕ) : ℝ) *
@@ -175,7 +171,6 @@ private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
   positivity
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
@@ -219,7 +214,6 @@ private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : 
     rfl
 
 omit [BoundarylessManifold I M] in
-
 private lemma weightedPartial_le_tsum (u : TensorL2 0 2 g) (k n : ℕ)
     (v : tensorHs (I := I) (M := M) g 0 2 ((2 * k : ℕ) : ℝ))
     (hv : ∀ i, v.coeff i = tensorL2Coeff (I := I) (M := M)
@@ -242,7 +236,6 @@ private lemma weightedPartial_le_tsum (u : TensorL2 0 2 g) (k n : ℕ)
   positivity
 
 omit [BoundarylessManifold I M] in
-
 private lemma weightedPartial_cauchySeq (u : TensorL2 0 2 g) (k : ℕ)
     (v : tensorHs (I := I) (M := M) g 0 2 ((2 * k : ℕ) : ℝ))
     (hv : ∀ i, v.coeff i = tensorL2Coeff (I := I) (M := M)
@@ -262,7 +255,6 @@ private lemma weightedPartial_cauchySeq (u : TensorL2 0 2 g) (k : ℕ)
   exact (tendsto_atTop_ciSup hmono hbdd).cauchySeq
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
@@ -279,7 +271,6 @@ private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m 
   rw [Finset.sum_sdiff_eq_sub (eigenIdxFinset_mono (I := I) (M := M) g hmn)]
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 private lemma dist_toHs_spectralPartialSum_le (u : TensorL2 0 2 g) (k : ℕ)
     {C : ℝ} (hC :

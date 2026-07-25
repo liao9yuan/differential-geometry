@@ -111,7 +111,6 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
   classical
   set ι := TensorEigenIdx (I := I) (M := M) g r s
-
   have hnormsq : ∀ n,
       ‖timeL2Inclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           hσ'σ''.le (d n)‖ ^ 2 =
@@ -123,7 +122,6 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n))]
     exact tsum_congr (fun i => by
       rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) hσ'σ''.le (d n) i])
-
   have hsumm' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ' *
         ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) := by
@@ -133,18 +131,15 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n))
     refine h.congr (fun i => ?_)
     rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) hσ'σ''.le (d n) i]
-
   have hsumm'' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ'' *
         ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) :=
     fun n => summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := d n)
-
   have hmass'' : ∀ n,
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 = ‖d n‖ ^ 2 :=
     fun n => (norm_sq_eq_tsum_timeModeCoeff (I := I) (M := M) h_compact (f := d n)).symm
-
   suffices hsq : Tendsto (fun n =>
       ‖timeL2Inclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
@@ -159,11 +154,9 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
     rw [Real.sqrt_zero] at hsqrt
     refine hsqrt.congr (fun n => ?_)
     rw [Real.sqrt_sq (hnn n)]
-
   rw [Metric.tendsto_atTop]
   intro ε hε
   have hexp : σ' - σ'' < 0 := by linarith
-
   obtain ⟨Λ, hΛgt1, hΛtail⟩ :
       ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
     set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
@@ -187,14 +180,12 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
       have hεpos : 0 < ε / 2 := by linarith
       nlinarith [hεpos, hCsq_nn]
     linarith
-
   set F : Finset ι :=
     (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
     with hF_def
   have hmemF : ∀ i : ι, i ∈ F ↔
       1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
     intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
-
   have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
       tensorSobolevWeight (I := I) (M := M) i σ' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 ≤
@@ -228,7 +219,6 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
               (tensorSobolevWeight (I := I) (M := M) i σ'' *
                 ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) :=
             mul_le_mul_of_nonneg_right hratio (by positivity)
-
   have htail : ∀ n,
       ∑' i : { i : ι // i ∉ F },
           tensorSobolevWeight (I := I) (M := M) (i : ι) σ' *
@@ -274,7 +264,6 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
             apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
-
   have hcoeff0 : ∀ i : ι,
       Tendsto (fun n => ‖timeModeCoeff (I := I) (M := M) (d n) i‖) atTop (𝓝 0) := by
     intro i
@@ -300,11 +289,9 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
         simpa using this)
     simpa using h
-
   rw [Metric.tendsto_atTop] at hfin0
   obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
   refine ⟨N, fun n hn => ?_⟩
-
   have hsplit_sum :
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 =

@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -188,7 +186,8 @@ omit [NeZero (Module.finrank ℝ E)] in
     loweredCovDerivAlongVF (I := I) (M := M) g r s S X y =
       loweredCovDerivAt (I := I) (M := M) g r s S y (X y) := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma tensorInnerScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :

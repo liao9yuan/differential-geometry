@@ -27,21 +27,15 @@ class HasSmoothBoundary
   boundaryE : Type*
 
   [boundaryENormedGroup : NormedAddCommGroup boundaryE]
-
   [boundaryENormedSpace : NormedSpace ℝ boundaryE]
-
   [boundaryEInnerProductSpace : InnerProductSpace ℝ boundaryE]
-
   [boundaryEFiniteDimensional : FiniteDimensional ℝ boundaryE]
-
   boundaryH : Type*
 
   [boundaryHTopologicalSpace : TopologicalSpace boundaryH]
-
   boundaryI : ModelWithCorners ℝ boundaryE boundaryH
 
   [boundaryIBoundaryless : boundaryI.Boundaryless]
-
   inclH : boundaryH → H
 
   inclH_continuous : Continuous inclH

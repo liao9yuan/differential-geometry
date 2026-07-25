@@ -70,7 +70,6 @@ omit [NeZero (Module.finrank ℝ E)] in
       c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i := rfl
 
 open scoped Classical in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem singleModeCLM_coeff {σ : ℝ}
@@ -102,7 +101,6 @@ theorem singleModeTimeL2_coeFn (i : TensorEigenIdx (I := I) (M := M) g r s)
   exact h.trans (Eventually.of_forall fun t => singleModeCLM_apply (I := I) (M := M) i (gf t))
 
 open scoped Classical in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem timeModeCoeff_singleModeTimeL2

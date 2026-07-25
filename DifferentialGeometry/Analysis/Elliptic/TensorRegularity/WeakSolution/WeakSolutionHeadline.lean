@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -44,7 +42,8 @@ local notation "chartHaar" =>
 def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
   (extChartAt I α).symm '' ((toEuclidean (E := E)).symm '' tsupport φ)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma euclTestLift_isCompact (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -65,7 +64,8 @@ lemma euclTestLift_isCompact (α : M)
     (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     euclTestLift (I := I) (M := M) α φ ⊆ (chartAt H α).source := by
@@ -82,7 +82,8 @@ lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     rw [← hz_eq]; exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α φ) ⊆
       euclTestLift (I := I) (M := M) α φ := by
@@ -100,7 +101,8 @@ lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α φ hx_src] at hx
     exact (hx rfl).elim
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [SigmaCompactSpace M] in
 lemma chartTestPullback_tsupport_subset_source (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -109,7 +111,8 @@ lemma chartTestPullback_tsupport_subset_source (α : M)
     (euclTestLift_isCompact (I := I) (M := M) α hφ_cs hφ_supp).isClosed).trans
     (euclTestLift_subset_source (I := I) (M := M) α φ hφ_supp)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartTestPullback_contMDiffOn (α : M)
     {φ : EuclN → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
@@ -133,7 +136,8 @@ lemma chartTestPullback_contMDiffOn (α : M)
   refine hcompose.congr (fun x hx => ?_)
   exact chartTestPullback_apply_of_mem (I := I) α φ hx
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma contDiff_of_contDiffOn_chartTarget_zero_off
     (α : M) {P : EuclN → ℝ} {C : Set EuclN}
     (hC : IsClosed C) (hC_target : C ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -152,7 +156,8 @@ lemma contDiff_of_contDiffOn_chartTarget_zero_off
     refine (contDiffAt_const (c := (0 : ℝ))).congr_of_eventuallyEq ?_
     filter_upwards [hC.isOpen_compl.mem_nhds hyC] with z hz using hzero z hz
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma contDiff_mul_chartTest
     (α : M) {h φ : EuclN → ℝ}
     (hh : ContDiffOn ℝ ∞ h (chartTargetEuclid (I := I) (M := M) α))
@@ -170,7 +175,8 @@ lemma hasCompactSupport_mul_chartTest
     HasCompactSupport (fun y => h y * φ y) :=
   hφ_cs.mul_left
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma euclidPartial_contDiffOn_chartTarget
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
@@ -207,7 +213,8 @@ lemma integrable_of_contDiff_hasCompactSupport
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     Set.EqOn (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -225,7 +232,8 @@ lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     rw [(extChartAt I α).right_inv hy', ContinuousLinearEquiv.apply_symm_apply]
   rw [hb_eq]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     (α : M) (φ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     Set.EqOn
@@ -574,7 +582,7 @@ theorem tensorComponent_chartBilinIdentity
         hχs hχt hy,
       hscalar, hgrad, hbump_eqOn hy, hPI]
     simp only [mul_add, Finset.mul_sum]
-    ring
+    ring_nf
   have hLHS_setInt :
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *

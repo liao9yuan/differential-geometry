@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -38,7 +36,6 @@ namespace TensorHsSmoothReprAux
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open scoped Classical in
-
 omit [CompleteSpace E] in
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -120,7 +117,6 @@ private lemma partialSum_empty_unconditional
   unfold partialSum_unconditional; simp
 
 open scoped Classical in
-
 omit [CompleteSpace E] in
 private lemma partialSum_insert_unconditional
     {S : Finset (TensorEigenIdx (I := I) (M := M) g r s)}

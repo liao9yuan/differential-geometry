@@ -32,6 +32,7 @@ Proof: expand `bilinFormOfCoeff` via `bilinFormIntegrand_mul_smooth_eq`,
 apply AM-GM to the cross term, absorb into the principal term. -/
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Weighted Caccioppoli inequality for supersolutions.
 
 For `u > 0` a supersolution on `Ω`, `Ψ` smooth with `Ψ(0) = 0`, bounded derivative,
@@ -168,7 +169,8 @@ theorem weighted_caccioppoli_of_supersolution
       calc |φ x ^ 2| * |deriv Ψ (u x)|
           ≤ 1 * M := by
             exact mul_le_mul
-              (by rw [abs_of_nonneg (sq_nonneg _)]; exact (sq_le_one_iff_abs_le_one _).mpr (hφ_bound x))
+              (by rw [abs_of_nonneg (sq_nonneg _)]; exact (sq_le_one_iff_abs_le_one _).mpr
+                    (hφ_bound x))
               (hM (u x)) (abs_nonneg _) zero_le_one
         _ = M := one_mul M
     have hfmeas : AEStronglyMeasurable (fun x => φ x ^ 2 * deriv Ψ (u x))

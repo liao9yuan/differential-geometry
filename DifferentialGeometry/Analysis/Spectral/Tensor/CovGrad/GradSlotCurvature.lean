@@ -54,8 +54,6 @@ private theorem unitModel_sub
       rfl]
   rw [Tensor0SSpace.toModel_sub]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 
 omit [NeZero (Module.finrank ℝ E)] in

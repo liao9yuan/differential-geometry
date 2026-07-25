@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
@@ -510,7 +508,7 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source := chartAtlasPOU_isSubordinate I M α
   obtain ⟨C, hC_pos, hC_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
+    eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by decide : (2 : ℝ≥0∞) ≠ ⊤)
   obtain ⟨D, hD_nn, hD_bound⟩ :=

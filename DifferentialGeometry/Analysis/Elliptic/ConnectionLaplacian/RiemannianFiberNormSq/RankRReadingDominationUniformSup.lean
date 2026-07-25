@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
@@ -31,7 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_covGradBundleEquivSymm_slice_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
@@ -54,7 +53,8 @@ private lemma fiberNormSqComponent_covGradBundleEquivSymm_slice_eq
   congr 1
   exact (Fin.comp_cons e a J).symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -69,7 +69,8 @@ private lemma riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
@@ -86,7 +87,6 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
       g.inner x (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
   haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
     ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
-
   have he_li : LinearIndependent ℝ eC := by
     rw [linearIndependent_iff']
     intro fs c hsum k hk_mem
@@ -107,13 +107,14 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
   have hbse : ∀ i : Fin (Module.finrank ℝ E), bse i = eC i := fun i => by
     rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   have hnd : Module.finrank ℝ E = Module.finrank ℝ E := rfl
-  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r s x _ eC bse hnd hbse
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r s x _ eC
+    bse hnd hbse
     horthC]
-  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r (s + 1) x T eC bse hnd
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r (s + 1) x
+    T eC bse hnd
     hbse horthC]
   have hBix : B i x = eC i := rfl
   rw [hBix]
-
   have hcomp : ∀ K : Fin r → Fin (Module.finrank ℝ E), ∀ J : Fin s → Fin (Module.finrank ℝ E),
       (fiberNormSqComponent (I := I) (M := M) g x r s
           ((covGradBundleEquiv (I := I) (M := M) r s x).symm T (eC i))
@@ -123,7 +124,6 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
     intro K J
     rw [fiberNormSqComponent_covGradBundleEquivSymm_slice_eq (I := I) (M := M) g r s x T eC K J i]
   rw [Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => hcomp K J))]
-
   refine Finset.sum_le_sum (fun K _ => ?_)
   let consi : (Fin s → Fin (Module.finrank ℝ E)) → (Fin (s + 1) → Fin (Module.finrank ℝ E)) :=
     fun J => Fin.cons i J

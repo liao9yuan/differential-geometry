@@ -26,7 +26,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_sub (α : M)
     (ψ₁ ψ₂ : EuclN → ℝ) :
     chartPullback I α (fun y => ψ₁ y - ψ₂ y) =
@@ -38,7 +37,6 @@ lemma chartPullback_sub (α : M)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_finset_sum (α : M)
     {ι : Type*} (S : Finset ι) (ψ : ι → EuclN → ℝ) :
     chartPullback I α (fun y => ∑ i ∈ S, ψ i y) =
@@ -617,7 +615,8 @@ private theorem MemWkp_of_cross_chart_pushforward
   have hψ_mem_Ωγα : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 p ψ Ω_γα :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
-      (d := Module.finrank ℝ E) 1 hp_one hΩγα_open hη_combined_smooth hη_combined_bound hχ_loc_comp_mem
+      (d := Module.finrank ℝ E) 1 hp_one hΩγα_open hη_combined_smooth hη_combined_bound
+        hχ_loc_comp_mem
   have hψ_supp_Ωγα : tsupport ψ ⊆ Ω_γα := by
     refine Set.Subset.trans ?_ hη_combined_supp_Ωγα
     refine closure_mono ?_
@@ -788,7 +787,8 @@ private theorem MemWkp_of_cross_chart_pushforward
           · exact chartPullback_apply_of_notMem (I := I) (M := M) α v hz_α_src
         simp [hη_γ_loc_y_zero, h_cp_zero]
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
-    (d := Module.finrank ℝ E) hp_one (chartTargetEuclid_isOpen (I := I) (M := M) γ) h_ae_eq).mpr hψ_mem_target
+    (d := Module.finrank ℝ E) hp_one (chartTargetEuclid_isOpen (I := I) (M := M) γ) h_ae_eq).mpr
+      hψ_mem_target
 
 theorem contMDiff_dense_in_WkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -1393,7 +1393,8 @@ theorem contMDiff_dense_in_WkpChart
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ.val
         (fun x => u x - v x))
       (chartTargetEuclid (I := I) (M := M) γ.val)
-  have h_f_bound : ∀ (γ : S), f γ ≤ ∑ α : S, ENNReal.ofReal (K_pair γ α) * ENNReal.ofReal ε_per := by
+  have h_f_bound : ∀ (γ : S), f γ ≤ ∑ α : S, ENNReal.ofReal (K_pair γ α) * ENNReal.ofReal
+    ε_per := by
     intro γ
     dsimp [f]
     simpa [Finset.sum_attach (s := Integral.Measure.chartAtlasPOU_finset), hS_def] using
@@ -1423,7 +1424,7 @@ theorem contMDiff_dense_in_WkpChart
           simp [Finset.sum_mul]
         _ = ENNReal.ofReal ((K_total - 1) * ε_per) := by
           rw [hK_total_def]
-          ring
+          ring_nf
         _ ≤ ENNReal.ofReal (K_total * ε_per) :=
           ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_right (by
             have : 0 ≤ 1 := by norm_num

@@ -24,7 +24,6 @@ noncomputable def autonomizedFlowVF (X : ℝ → ∀ x : M, TangentSpace I x) :
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
-
 theorem autonomizedFlow_snd_hasMFDerivAt (X : ℝ → ∀ x : M, TangentSpace I x)
     (c : ℝ → ℝ × M) (t : ℝ)
     (hc : HasMFDerivAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) c t
@@ -36,7 +35,6 @@ theorem autonomizedFlow_snd_hasMFDerivAt (X : ℝ → ∀ x : M, TangentSpace I 
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
-
 theorem autonomizedFlow_fst_hasDerivAt (X : ℝ → ∀ x : M, TangentSpace I x)
     (c : ℝ → ℝ × M) (t : ℝ)
     (hc : HasMFDerivAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) c t
@@ -50,7 +48,6 @@ theorem autonomizedFlow_fst_hasDerivAt (X : ℝ → ∀ x : M, TangentSpace I x)
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
-
 theorem hasDerivAt_one_eq_self_on_Ioo (φ : ℝ → ℝ) {a b : ℝ}
     (h0mem : (0 : ℝ) ∈ Ioo a b)
     (hφ : ∀ s ∈ Ioo a b, HasDerivAt φ 1 s) (hval : φ 0 = 0) :
@@ -121,7 +118,8 @@ theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
+    [CompactSpace M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_manifold_integral_flow_family
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (_hT : 0 < T) (Φ : ℝ → M → M)

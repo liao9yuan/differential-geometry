@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLower
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -102,7 +100,8 @@ noncomputable def deTurckLieArm1Fib (g₀ g₁ g_bg : SmoothRiemannianMetric I M
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor0SProd_section_contMDiff {p q : ℕ}
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace p I x)
     (K : ∀ x : M, Tensor0SBundle.Tensor0SSpace q I x)
@@ -266,8 +265,10 @@ theorem deTurckLieArm1Fib_contMDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M
         (deTurckLieArm1Fib (I := I) g₀ g₁ g_bg x)) := by
   classical
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E)
+      (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x : M => deTurckLieArm1Fib (I := I) g₀ g₁ g_bg x)
   intro Y
   have hW := interiorProductField_contMDiff (I := I) 2 (fun x => Y x) Y.contMDiff

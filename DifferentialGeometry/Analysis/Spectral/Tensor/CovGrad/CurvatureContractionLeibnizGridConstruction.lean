@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDiffer
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -60,7 +58,8 @@ private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric 
       exact covGrad_heq_congr_lg g r (by omega : (s + 1) + k = s + (k + 1)) ih
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem rfns_toSection_heq_congr_lg (g : SmoothRiemannianMetric I M)
     (r : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
@@ -136,7 +135,8 @@ theorem diffCurvOp_isOrderZeroCurvFactor :
   linear := by
     intro r c₁ c₂ W₁ W₂ x
     rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r (c₁ • W₁ + c₂ • W₂)).toSection x =
-          (curvatureContraction (I := I) (M := M) g r (c₁ • W₁ + c₂ • W₂) hX hY).toSection x from rfl,
+          (curvatureContraction (I := I) (M := M) g r (c₁ • W₁ + c₂ • W₂) hX hY).toSection x from
+            rfl,
       show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₁).toSection x =
           (curvatureContraction (I := I) (M := M) g r W₁ hX hY).toSection x from rfl,
       show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₂).toSection x =
@@ -163,7 +163,8 @@ set_option backward.isDefEq.respectTransparency false in
 noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
     (X Y : Π b : M, TangentSpace I b) (r : ℕ) (x : M) : TensorRSSpace r r I x :=
   (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
-    riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (X x) (Y x) :
+    riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (X x)
+      (Y x) :
     TensorRSSpace r r I x)
 
 set_option backward.isDefEq.respectTransparency false in
@@ -228,10 +229,8 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-
   apply ContinuousLinearMap.ext
   intro d
-
   change (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
       (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x) d =
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
@@ -241,7 +240,6 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
   rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
       (curvatureContraction (I := I) (M := M) g r W hX hY).toSection x from rfl,
     curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
-
   obtain ⟨dSec, hdSec⟩ := ContMDiffSection.exists_eq_at (I := I)
     (F := Tensor0SModel 0 ℝ E) (V := fun y : M => Tensor0SSpace 0 I y) (n := (⊤ : ℕ∞)) x d
   have hWd_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
@@ -249,7 +247,6 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
         (E := fun z : M => Tensor0SSpace r I z) y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y))) :=
     ContMDiff.clm_bundle_apply (b := id) W.toSection.contMDiff dSec.contMDiff
-
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
         riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x)) d =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
@@ -278,7 +275,6 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
     riemannSec_tensor0SCov_zero_eq_zero (I := I) (M := M) g ⟨fun b => X b, hX⟩ ⟨fun b => Y b, hY⟩
       (fun b => dSec b) dSec.contMDiff x]
   rw [map_zero, sub_zero]
-
   rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
         riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
           x (X x) (Y x))
@@ -286,10 +282,12 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
       riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
           (fun b => X b) (fun b => Y b)
           (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
-            (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b)) x from by
+            (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b)) x
+              from by
     rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d =
         HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
-          (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b) x from by
+          (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b) x
+            from by
       rw [HomConnectionGen.pairedSection_apply, show d = dSec x from hdSec.symm]]
     rw [riemannOp_apply_smooth
       (cov := Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) hX hY
@@ -309,7 +307,6 @@ theorem exists_proportional_diffCurvOp_highOrder :
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-
   have hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       covGrad g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
         diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W +
@@ -318,19 +315,16 @@ theorem exists_proportional_diffCurvOp_highOrder :
     intro p r W
     rw [covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W]
     rfl
-
   have hNF : ∀ (p r : ℕ),
       IsIteratedCovGradNormalForm (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) p r :=
     fun p => normalForm_of_base (I := I) (M := M) g
       (diffCurvOp (I := I) (M := M) g hX hY) hcovGrad_op
       (fun r => diffCurvPhi0 (I := I) (M := M) g hX hY r)
       (fun r W => diffCurvOp_zero_eq_appCc (I := I) (M := M) g hX hY r W) p
-
   choose kap hkap_nn hkap using fun p r =>
     exists_jet_bound_of_normalForm (I := I) (M := M) g
       (diffCurvOp (I := I) (M := M) g hX hY) p r (hNF p r)
   refine ⟨fun p r => kap (p + 1) r, fun p r => hkap_nn (p + 1) r, fun p r W x => ?_⟩
-
   have h := hkap (p + 1) r W x
   rw [show (p + 1) + 1 = p + 2 from rfl] at h
   exact h
@@ -344,13 +338,11 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-
   have hgnn : ∀ (x : M) (v : TangentSpace I x), 0 ≤ g.inner x v v := by
     intro x v
     rcases eq_or_ne v 0 with hv0 | hv0
     · rw [hv0]; simp
     · exact (g.pos x v hv0).le
-
   have hgcont : ∀ (Z : Π b : M, TangentSpace I b),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z) → Continuous (fun x : M => g.inner x (Z x) (Z x)) := by
     intro Z hZ
@@ -369,7 +361,6 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
   have hYcont : Continuous (fun x : M => g.inner x (Y x) (Y x)) := hgcont Y hY
   cases p with
   | zero =>
-
       choose Ccurv hCcurv_cont hCcurv_nn hCcurv using
         fun r => exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
           (I := I) (M := M) g r
@@ -377,13 +368,11 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
         fun r => ((hCcurv_cont r).mul hXcont).mul hYcont, fun r x => ?_, fun r W x => ?_⟩
       · exact mul_nonneg (mul_nonneg (hCcurv_nn r x) (hgnn x (X x))) (hgnn x (Y x))
       · rw [Finset.sum_range_one]
-
         rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
             riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x) from
           curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
         exact hCcurv r x (X x) (Y x) (W.toSection x)
   | succ p' =>
-
       obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
         exists_proportional_diffCurvOp_highOrder (I := I) (M := M) g hX hY
       refine ⟨fun r _ => kappaHigh p' r, fun r => continuous_const,
@@ -413,7 +402,8 @@ theorem exists_proportional_diffCurvOp :
     have hCp_le : Cp p r x ≤ sSup (Set.range (Cp p r)) := le_csSup hbdd ⟨x, rfl⟩
     refine (hCp_bound p r W x).trans ?_
     refine mul_le_mul_of_nonneg_right hCp_le ?_
-    exact Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
+    exact Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x
+                                         _
 
 private lemma sum_range_le_succ_of_nonneg (n : ℕ) (f : ℕ → ℝ) (hf : 0 ≤ f n) :
     ∑ i ∈ Finset.range n, f i ≤ ∑ i ∈ Finset.range (n + 1), f i := by
@@ -437,7 +427,6 @@ variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
           ((iteratedCovGrad g 0 r q W).toSection x))
 
 include hkappa_nn hkappa in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
@@ -463,7 +452,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       exact hkappa p r W x
   | succ j ih =>
       intro p r W x
-
       set K : ℝ := gridWindowSum kappa p r (j + 1) with hK_def
       set S : ℝ := ∑ q ∈ Finset.range (p + (j + 1) + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
@@ -472,7 +460,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hS_nn : 0 ≤ S := Finset.sum_nonneg fun q _ =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
       have hpow_nn : (0 : ℝ) ≤ (4 : ℝ) ^ j := by positivity
-
       rw [show riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + (j + 1)) x
             ((iteratedCovGrad g 0 (r + p) (j + 1)
               (diffCurvOp (I := I) (M := M) g hX hY p r W)).toSection x) =
@@ -490,18 +477,14 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
             (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
               (diffCurvOp (I := I) (M := M) g hX hY p (r + 1)
                 (covGrad (I := I) (M := M) g 0 r W)))).toSection x)).trans ?_
-
       set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
-
       set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
-
       set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x) with hsB_def
-
       have hA : riemannianFiberNormSq (I := I) (M := M) g 0 ((r + (p + 1)) + j) x
             ((iteratedCovGrad g 0 (r + (p + 1)) j
               (diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W)).toSection x) ≤
@@ -509,7 +492,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
         refine (ih (p + 1) r W x).trans_eq ?_
         rw [hkA_def, hsA_def, mul_assoc]
       have hB0 := ih p (r + 1) (covGrad (I := I) (M := M) g 0 r W) x
-
       have hBshift : gridWindowSum kappa p (r + 1) j *
             ∑ q ∈ Finset.range (p + j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x
@@ -525,26 +507,25 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           (4 : ℝ) ^ j * (kB * sB) := by
         refine hB0.trans_eq ?_
         rw [mul_assoc, ← hBshift]
-
       have hkA_le : kA ≤ K := by
         rw [hkA_def, hK_def]
         exact gridWindowSum_shift_le hkappa_nn p r j 1 0 le_rfl (Nat.zero_le _)
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
         exact gridWindowSum_shift_le hkappa_nn p r j 0 1 (Nat.zero_le _) le_rfl
-
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
-
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
         refine le_trans (sum_range_shift_le (p + j + 1)
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
             ((iteratedCovGrad g 0 r q W).toSection x))
           (fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)) ?_
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg hkappa_nn (p + 1) r j
       have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg hkappa_nn p (r + 1) j
@@ -553,7 +534,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hsB_nn : 0 ≤ sB :=
         Finset.sum_nonneg fun q _ =>
           riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + (q + 1)) x _
-
       have hprodA : kA * sA ≤ K * S := mul_le_mul hkA_le hsA_le hsA_nn hK_nn
       have hprodB : kB * sB ≤ K * S := mul_le_mul hkB_le hsB_le hsB_nn hK_nn
       have hgoal : (2 : ℝ) * ((4 : ℝ) ^ j * (kA * sA)) +
@@ -572,7 +552,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
         rw [hK_def, hS_def, mul_assoc]
       rw [htarget] at hgoal
       refine le_trans ?_ hgoal
-
       have hb_eq : riemannianFiberNormSq (I := I) (M := M) g 0 (((r + p) + 1) + j) x
             ((iteratedCovGrad g 0 ((r + p) + 1) j
               (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
@@ -592,12 +571,14 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
 end GridInduction
 
 
-theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le_of_construction
+theorem
+    exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le_of_construction
     (s : ℕ) :
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (Z : SmoothCcTensor g 0 s) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
-            ((iteratedCovGrad g 0 s j (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
+            ((iteratedCovGrad g 0 s j
+              (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
               x) ≤
           (4 : ℝ) ^ j * gridWindowSum kappa 0 s j *
             ∑ q ∈ Finset.range (j + 1),
@@ -607,7 +588,6 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
   refine ⟨kappa, hkappa_nn, fun Z j x => ?_⟩
   have hgrid := riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
     hkappa_nn hkappa j 0 s Z x
-
   rw [diffCurvOp_zero g hX hY s Z] at hgrid
   simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 

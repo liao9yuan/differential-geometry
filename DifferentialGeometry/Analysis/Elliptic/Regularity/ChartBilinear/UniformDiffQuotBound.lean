@@ -72,9 +72,9 @@ private lemma lintegral_ofReal_eq_ofReal_integral
 private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
     {n : ℕ} {α : Type*} [MeasurableSpace α] {μ : Measure α}
     (f : Fin n → α → ℝ)
-    (h_sum_int : Integrable (fun x => ∑ l : Fin n, (f l x)^2) μ)
+    (h_sum_int : Integrable (fun x => ∑ l : Fin n, (f l x) ^ 2) μ)
     (i : Fin n) {S : ℝ}
-    (h_sum_le : ∫ x, ∑ l : Fin n, (f l x)^2 ∂μ ≤ S) :
+    (h_sum_le : ∫ x, ∑ l : Fin n, (f l x) ^ 2 ∂μ ≤ S) :
     (eLpNorm (f i) 2 μ)^ 2 ≤ ENNReal.ofReal S := by
   classical
   have h_sum_nn : 0 ≤ᵐ[μ] (fun x => ∑ l : Fin n, (f l x)^2) := by
@@ -105,7 +105,7 @@ private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
   rw [h_sum_int_eq]
   exact ENNReal.ofReal_le_ofReal h_sum_le
 
-private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x^ 2 ≤ y) :
+private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
     x ≤ y ^ ((1 : ℝ) / 2) := by
   have h_xpow : x = (x^ 2) ^ ((1 : ℝ) / 2) := by
     rw [← ENNReal.rpow_natCast x 2]
@@ -127,7 +127,7 @@ private lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
 private lemma eLpNorm_two_le_ofReal_sqrt
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → ℝ}
     {S : ℝ} (hS : 0 ≤ S)
-    (h_sq : (eLpNorm f 2 μ)^ 2 ≤ ENNReal.ofReal S) :
+    (h_sq : (eLpNorm f 2 μ) ^ 2 ≤ ENNReal.ofReal S) :
     eLpNorm f 2 μ ≤ ENNReal.ofReal (Real.sqrt S) := by
   have h_pow := le_sqrt_of_sq_le h_sq
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow

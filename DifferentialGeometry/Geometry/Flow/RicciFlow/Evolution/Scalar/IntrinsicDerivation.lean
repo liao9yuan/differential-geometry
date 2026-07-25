@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -122,11 +121,9 @@ theorem coordNab2Ric_eq_nabla2RicField
   set cov := S.family.connection t with hcov_def
   set frame := coordinateFrameAt (I := I) x₀ with hframe_def
   set nablaA := nablaRicField (I := I) S t with hnablaA_def
-
   obtain ⟨Dsec, hDsec⟩ :=
     ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x₀ (frame d x₀)
-
   let slot : Fin 3 -> CoordinateIdx (𝕜 := Real) E :=
     fun q => if q = 0 then a else if q = 1 then i else j
   let V : Fin 3 -> (p : M) -> TangentSpace I p :=
@@ -138,7 +135,6 @@ theorem coordNab2Ric_eq_nabla2RicField
           (frame a x₀) (frame i x₀) (frame j x₀) := by
     funext q
     fin_cases q <;> simp [V, slot, DifferentialGeometry.Integral.Connection.vec3]
-
   have hV_at : ∀ q : Fin 3,
       ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
         (fun p : M => (⟨p, V q p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
@@ -168,7 +164,6 @@ theorem coordNab2Ric_eq_nabla2RicField
     fun q k =>
       Tensor0SBundle.tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
         (I := I) (V q) x₀ (hV_at q) k
-
   have hnablaA_eval : ∀ p : M,
       nablaA p
           (DifferentialGeometry.Integral.Connection.vec3 (I := I)
@@ -190,11 +185,9 @@ theorem coordNab2Ric_eq_nabla2RicField
       rw [this, hnablaA_eval p]
     rw [heq]
     exact coordNablaReg (I := I) S x₀ t a i j
-
   have hraw := Tensor0SBundle.nabla0SFun_eval_coordFrame_moving_raw
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (s := 3) cov Dsec V nablaA x₀ hpair hV hVmodel hcoord
-
   have hLHS :
       nabla2RicField (I := I) S t x₀
           (DifferentialGeometry.Integral.Connection.vec4 (I := I)
@@ -216,10 +209,8 @@ theorem coordNab2Ric_eq_nabla2RicField
       3 cov Dsec nablaA x₀
       (DifferentialGeometry.Integral.Connection.vec3 (I := I)
         (frame a x₀) (frame i x₀) (frame j x₀))
-
   rw [coordNab2At (I := I) S x₀ t d a i j]
   rw [hLHS, hraw]
-
   have hpair_fun :
       (fun p : M => nablaA p (fun q : Fin 3 => V q p)) =
         fun p : M => nablaRicComp (I := I) S frame t p a i j := by
@@ -230,7 +221,6 @@ theorem coordNab2Ric_eq_nabla2RicField
       funext q
       fin_cases q <;> simp [V, slot, DifferentialGeometry.Integral.Connection.vec3]
     rw [hVp, hnablaA_eval p]
-
   have hcorr :
       (∑ q : Fin 3,
           nablaA x₀
@@ -249,7 +239,6 @@ theorem coordNab2Ric_eq_nabla2RicField
               (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ d j p *
             nablaRicComp (I := I) S frame t x₀ a i p) := by
     let hcf := coordinateFrameAt_isLocalFrame_one (I := I) x₀
-
     have hupd : ∀ (q : Fin 3) (p : CoordinateIdx (𝕜 := Real) E),
         nablaA x₀
             (Function.update (fun r : Fin 3 => V r x₀) q (frame p x₀)) =
@@ -269,7 +258,6 @@ theorem coordNab2Ric_eq_nabla2RicField
           simp [V, slot, Function.update, DifferentialGeometry.Integral.Connection.vec3]
       rw [hupd_vec]
       rfl
-
     have hchris : ∀ q : Fin 3,
         (cov (V q) x₀) (Dsec x₀) =
           ∑ p : CoordinateIdx (𝕜 := Real) E,
@@ -320,7 +308,6 @@ theorem coordNab2Ric_eq_nabla2RicField
       show ((2 : Fin 3) = 0) = False by simp,
       show ((2 : Fin 3) = 1) = False by simp]
   rw [hpair_fun, hcorr, hDsec]
-
   unfold DifferentialGeometry.PDE.RicciFlow.ricciSecondCovDerivCompInFrame
   ring
 
@@ -353,19 +340,15 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
   have hinv :
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) g x₀ basis gInv := by
     simpa [hg_def, hbasis_def, hgInv_def] using coordInvReal (I := I) S x₀ (t : Real)
-
   have hscalar_eq :
       S.scalar (t : Real) = fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y) := by
     funext y
     rw [SolutionOn.scalar_eq_metricTrace, hg_def]
     congr 1
-
   have hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (S.scalar (t : Real)) := by
     rw [hscalar_eq]
     exact trace02_smooth (I := I) g (S.ricci (t : Real))
-
   set nablaA := nablaRicField (I := I) S (t : Real) with hnablaA_def
-
   have hLapTrace :
       DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S)
           (t : Real) (S.scalar (t : Real)) x₀ =
@@ -377,22 +360,17 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
       (hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf x₀) hreal
     simpa [DifferentialGeometry.Integral.Connection.laplacianAt, flowG, hcov_def, hg_def]
       using this
-
-
   have hHess :
       hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf =
         hessianSec (I := I) cov hcov
           (fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y))
           (trace02_smooth (I := I) g (S.ricci (t : Real))) := by
     congr 1
-
   have hnab2 := nabla2Trace02 (I := I) (M := M) cov hcov hcov1 g hmc
     (S.ricci (t : Real)) (Idx := CoordinateIdx (𝕜 := Real) E) (x := x₀)
     basis gInv hinv
-
   rw [hLapTrace, hHess, scalarLapTraceAt]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
-
   have hRHS_comp : ∀ p q : CoordinateIdx (𝕜 := Real) E,
       hessianSec (I := I) cov hcov
           (fun y => metricTracePair0SAt (I := I) g (S.ricci (t : Real) y))
@@ -406,7 +384,6 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
                 (basis p) (basis q) (basis a) (basis b)) := by
     intro p q
     exact hnab2 (basis p) (basis q)
-
   have hLHS_expand :
       scalarLaplacianTraceInFrame (M := M) (coordInv (I := I) S x₀)
           (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀)) (t : Real) x₀ =
@@ -421,14 +398,11 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun i _ => ?_
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [coordRoughRic]
-
-
     congr 1
     refine Finset.sum_congr rfl fun a _ => ?_
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [coordNab2Ric_eq_nabla2RicField (I := I) S x₀ (t : Real) a b i j]
   rw [hLHS_expand]
-
   have hRHS_expand :
       (∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
         gInv i j *
@@ -448,16 +422,13 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [hRHS_comp i j]
   rw [hRHS_expand]
-
   simp only [hbasis_def, coordinateFrameAt_toBasis_apply]
-
   set N : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
     fun p q r s =>
       nabla2RicField (I := I) S (t : Real) x₀
         (DifferentialGeometry.Integral.Connection.vec4 (I := I)
           (frame p x₀) (frame q x₀) (frame r x₀) (frame s x₀)) with hN_def
-
   have hLHS4 :
       (∑ i, ∑ j, gInv i j * ∑ a, ∑ b, gInv a b * N a b i j) =
         ∑ i, ∑ j, ∑ a, ∑ b, gInv i j * (gInv a b * N a b i j) := by
@@ -475,10 +446,8 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [Finset.mul_sum]
   rw [hLHS4, hRHS4]
-
   rw [sum_swap_four_local (Idx := CoordinateIdx (𝕜 := Real) E)
     (fun i j a b => gInv i j * (gInv a b * N a b i j))]
-
   refine Finset.sum_congr rfl fun a _ => ?_
   refine Finset.sum_congr rfl fun b _ => ?_
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -510,7 +479,6 @@ private theorem coordScalarRmTrace_center
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M)
         (S.family.metric (t : Real)) x₀ basis gInv := by
     simpa [hbasis_def, hgInv_def] using coordInvReal (I := I) S x₀ (t : Real)
-
   have hRm13 :
       ∀ τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
         DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -687,7 +655,6 @@ private theorem coordScalarTrace_hasDerivWithinAt_center
     fun (τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
         (i j : CoordinateIdx (𝕜 := Real) E) =>
       coordRicciEvol (I := I) S hS x₀ τ i j
-
   have hbase :
       HasDerivWithinAt
         (fun s : Real =>
@@ -764,12 +731,9 @@ theorem scalarEvolution_of_isSolution
           (t : Real) := by
   classical
   intro G hGm hGc t x
-
   set frame := coordinateFrameAt (I := I) x with hframe_def
   set gInv := coordInv (I := I) S x with hgInv_def
-
   have hderiv := coordScalarTrace_hasDerivWithinAt_center (I := I) S hS x t
-
   have hscalar_eq : ∀ s : Real,
       scalarTraceInFrame (I := I) S gInv frame s x = S.scalar s x := by
     intro s
@@ -778,15 +742,12 @@ theorem scalarEvolution_of_isSolution
       (coordinateFrameAt_mem (I := I) x)]
     rw [SolutionOn.scalar_eq_metricTrace]
     rfl
-
   have hdiff :=
     scalarLaplacianTraceInFrame_coord_eq_laplacianAt (I := I) S hS x t
-
   have hreact :=
     ricciNormSqInFrame_eq_normSq0S (I := I) S gInv frame
       (coordinateFrameAt_isLocalFrame_one (I := I) x) (coordInvLocal (I := I) S x)
       (t : Real) (coordinateFrameAt_mem (I := I) x)
-
   have hGcong :
       DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real)
           (S.scalar (t : Real)) x =
@@ -794,7 +755,6 @@ theorem scalarEvolution_of_isSolution
           (t : Real) (S.scalar (t : Real)) x := by
     simp only [DifferentialGeometry.Integral.Connection.laplacianAt, hGm t, hGc t,
       flowG, SolutionOn.family_metric, SolutionOn.family_connection]
-
   have hfun :
       (fun s : Real => scalarTraceInFrame (I := I) S gInv frame s x) =
         fun s : Real => S.scalar s x := by

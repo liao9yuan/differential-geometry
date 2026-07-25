@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedR
 
 noncomputable section
 
-set_option maxHeartbeats 3200000
-set_option synthInstance.maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -45,7 +43,8 @@ def nablaChartRiemannCoeff (g : SmoothRiemannianMetric I M) (α : M)
             chartRiemannTensor (I := I) g α m q r l y)
 
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -188,7 +187,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
   set S : Π y : M, TangentSpace I y := fun b => riemannSec cov Xq Xr Xs b with hS_def
   have hS_diff : MDiffAt (T% S) x :=
     (riemannSec_contMDiff (cov := cov) hXq hXr hXs x).mdifferentiableAt (by simp)
-
   set Rc : Fin (Module.finrank ℝ E) → M → ℝ :=
     fun m y => chartRiemannTensor (I := I) g α s q r m (extChartAt I α y) with hRc_def
   set term : Fin (Module.finrank ℝ E) → Π y : M, TangentSpace I y :=
@@ -198,7 +196,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
     have hy_good : y ∈ chartLeviCivitaGoodSet (I := I) α := hU_good hy
     have hSval : S y = riemannSec cov Xq Xr Xs y := rfl
     rw [hSval]
-
     rw [← riemannOp_apply_smooth (cov := cov) hXq hXr hXs]
     rw [hXq_eq y hy, hXr_eq y hy, hXs_eq y hy]
     rw [riemannOp_chartBasisVec_alpha_eq (I := I) g α s q r hy_good]
@@ -292,7 +289,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
     intro m
     rw [LeviCivita_chartBasisVec_alpha_basis_apply (I := I) g α p m hx]
   rw [Finset.sum_congr rfl (fun m _ => by rw [hder m, hRc_x m, hinner m])]
-
   set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
     fun l => chartBasisVecFiber (I := I) α l x with he_def
   set D : Fin (Module.finrank ℝ E) → ℝ :=
@@ -396,11 +392,9 @@ private lemma nablaCurvSec_chartBasisVec_alpha_corr_firstAntisym
   classical
   set cov := LeviCivita (I := I) g with hcov_def
   have hcXpXq := covApply_contMDiff (cov := cov) hXp hXq
-
   rw [← riemannOp_apply_smooth (cov := cov) hcXpXq hXr hXs]
   rw [covApply_chartFrame_value (I := I) g α p q hx hXq hU_open hxU hXp_eq hXq_eq,
     hXr_eq x hxU, hXs_eq x hxU]
-
   set er : TangentSpace I x := chartBasisVecFiber (I := I) α r x with her_def
   set es : TangentSpace I x := chartBasisVecFiber (I := I) α s x with hes_def
   have hexpand :
@@ -578,7 +572,6 @@ theorem nablaCurvSec_chartBasisVec_alpha_frame_expand
       hXp hXq hXr hXs hU_open hxU hU_good hXp_eq hXq_eq hXr_eq hXs_eq,
     nablaCurvSec_chartBasisVec_alpha_corr_acted (I := I) g α p q r s hx
       hXp hXq hXr hXs hU_open hxU hU_good hXp_eq hXq_eq hXr_eq hXs_eq]
-
   rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [← sub_smul, ← sub_smul, ← sub_smul]

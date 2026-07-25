@@ -37,8 +37,8 @@ theorem ballAverage_mem_Icc_of_ae_bounds
     {u : E → ℝ} {c : E} {r m M : ℝ}
     (hr : 0 < r)
     (hu_int : IntegrableOn u (Metric.ball c r) volume)
-    (hm : ∀ᵐ z ∂ ballMeasure c r, m ≤ u z)
-    (hM : ∀ᵐ z ∂ ballMeasure c r, u z ≤ M) :
+    (hm : ∀ᵐ z ∂ballMeasure c r, m ≤ u z)
+    (hM : ∀ᵐ z ∂ballMeasure c r, u z ≤ M) :
     m ≤ ⨍ z in Metric.ball c r, u z ∂volume ∧
       ⨍ z in Metric.ball c r, u z ∂volume ≤ M := by
   have hmem : ∀ᵐ z ∂ ballMeasure c r, u z ∈ Set.Icc m M := by

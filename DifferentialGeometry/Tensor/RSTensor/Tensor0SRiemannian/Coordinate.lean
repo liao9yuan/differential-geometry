@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Basic
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -299,7 +298,8 @@ theorem homCLM_normSq_eq_basis
     (A : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData_gen (I := I) g x).metric D).flat A A =
       ∑ i : Idx, ∑ j : Idx,
@@ -319,7 +319,8 @@ theorem homCLM_inner_eq_basis
     (A B : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData_gen (I := I) g x).metric D).flat A B =
       ∑ i : Idx, ∑ j : Idx,
@@ -399,7 +400,7 @@ theorem coordInner0S_one_eq
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_succ_summand_eq
-    {Idx : Type*}  {x : M} (s : Nat)
+    {Idx : Type*} {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
     (A B : Tensor0SSpace (s + 1) I x)
     (basis : Module.Basis Idx Real (TangentSpace I x))

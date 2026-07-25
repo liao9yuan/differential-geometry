@@ -367,7 +367,6 @@ private theorem exists_orbit_tube_local
   rw [h2, dist_eq_norm]
   exact hz
 
-set_option maxHeartbeats 1200000 in
 
 
 
@@ -390,7 +389,6 @@ private theorem hasFDerivAt_flow_at_initial_local
         ((hΦ.continuousOn_fderiv_along_orbit_local hΩ hf_C1 hΩ_flow x₀
           (Metric.mem_closedBall_self (le_of_lt (by exact_mod_cast hr)))).mono hsub)
         hA_bd ht) x₀ := by
-
   have hr' : (0 : ℝ) < r := by exact_mod_cast hr
   have hx₀_in_ball : x₀ ∈ closedBall x₀ r := Metric.mem_closedBall_self (le_of_lt hr')
   set hA_cont :=
@@ -401,7 +399,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     hT hM hMT hA_cont hA_bd with hvSol_def
   set Lmap := variationalLinearMapAt (f := f) (α := fun s => Φ ⟨x₀, s⟩) (t₀ := t₀)
     hT hM hMT hA_cont hA_bd ht with hLmap_def
-
   obtain ⟨L, hL_lip⟩ := hΦ.exists_lipschitz
   have hL_nn : (0 : ℝ) ≤ L := L.coe_nonneg
   have hΦ_lip_diff : ∀ s ∈ Icc tmin tmax, ∀ x ∈ closedBall x₀ r,
@@ -410,19 +407,15 @@ private theorem hasFDerivAt_flow_at_initial_local
     have := (hL_lip s hs).dist_le_mul x hx x₀ hx₀_in_ball
     rw [dist_eq_norm, dist_eq_norm] at this
     exact this
-
   have horbit_cont' : ContinuousOn (fun s : ℝ => Φ ⟨x₀, s⟩) (Icc (t₀ - T) (t₀ + T)) :=
     (hΦ.orbit_continuousOn x₀ hx₀_in_ball).mono hsub
-
   have hgraph_Ω : ∀ τ ∈ Icc (t₀ - T) (t₀ + T), (τ, Φ ⟨x₀, τ⟩) ∈ Ω :=
     fun τ hτ => hΩ_flow x₀ hx₀_in_ball τ (hsub hτ)
   obtain ⟨r_tube, hr_tube_pos, hr_tube⟩ :=
     exists_orbit_tube_local hΦ hΩ hΩ_flow hsub hx₀_in_ball
-
   obtain ⟨δ_K, hδ_K_pos, hδ_K⟩ :=
     exists_uniform_partial_fderiv_local hΩ hf_C1
       (α := fun s => Φ ⟨x₀, s⟩) horbit_cont' hgraph_Ω 1 one_pos
-
   set δ_K_strict : ℝ := min (δ_K / 2) (r_tube / 2) with hδ_K_strict_def
   have hδ_K_strict_pos : 0 < δ_K_strict :=
     lt_min (by positivity) (by positivity)
@@ -438,7 +431,6 @@ private theorem hasFDerivAt_flow_at_initial_local
       (fderiv ℝ (f τ) (Φ ⟨x₀, τ⟩))
     simp at hnorm_add
     linarith [hA_bd τ hτ, h_diff]
-
   set K_lip : ℝ := M + 1 with hK_lip_def
   have hK_lip_pos : 0 < K_lip := by have : (0 : ℝ) ≤ M := hM; linarith
   have hK_lip_nn : 0 ≤ K_lip := le_of_lt hK_lip_pos
@@ -451,7 +443,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     have hcomp : DifferentiableAt ℝ ((uncurry f) ∘ (fun y : E => (τ, y))) z :=
       hDiff_joint.comp z hg
     exact hcomp
-
   have hf_lip_ball : ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
       LipschitzOnWith ⟨K_lip, hK_lip_nn⟩ (f τ)
         (closedBall (Φ ⟨x₀, τ⟩) δ_K_strict) := by
@@ -471,11 +462,9 @@ private theorem hasFDerivAt_flow_at_initial_local
     change (‖fderiv ℝ (f τ) z‖₊ : ℝ≥0) ≤ ⟨K_lip, hK_lip_nn⟩
     rw [← NNReal.coe_le_coe]
     exact hK_bd τ hτ z h_norm_le
-
   rw [hasFDerivAt_iff_isLittleO_nhds_zero]
   rw [Asymptotics.isLittleO_iff]
   intro c hc
-
   set CE := exp (M * T) with hCE_def
   have hCE_pos : 0 < CE := exp_pos _
   have hCE_nn : 0 ≤ CE := le_of_lt hCE_pos
@@ -498,11 +487,9 @@ private theorem hasFDerivAt_flow_at_initial_local
       apply mul_lt_mul_of_pos_left _ hε_target_pos
       rw [hCmul_def]; linarith
     linarith
-
   obtain ⟨δ_uc, hδ_uc_pos, hδ_uc⟩ :=
     exists_uniform_partial_fderiv_local hΩ hf_C1
       (α := fun s => Φ ⟨x₀, s⟩) horbit_cont' hgraph_Ω ε_target hε_target_pos
-
   set Lpos : ℝ := L + 1 with hLpos_def
   have hLpos_pos : 0 < Lpos := by linarith
   set CEpos : ℝ := CE + 1 with hCEpos_def
@@ -518,7 +505,6 @@ private theorem hasFDerivAt_flow_at_initial_local
   refine Filter.eventually_iff_exists_mem.mpr
     ⟨Metric.ball (0 : E) δ_final, Metric.ball_mem_nhds _ hδ_final_pos, fun h hh => ?_⟩
   rw [mem_ball_zero_iff] at hh
-
   have hh_nn : 0 ≤ ‖h‖ := norm_nonneg _
   have hh_lt_r : ‖h‖ < (r : ℝ) :=
     lt_of_lt_of_le (lt_of_lt_of_le hh (min_le_left _ _)) (min_le_left _ _)
@@ -546,7 +532,6 @@ private theorem hasFDerivAt_flow_at_initial_local
   have hh_CE_lt_δuc : CE * ‖h‖ < δ_uc :=
     mk_bd hCE_nn h_CE_le_CEpos hCEpos_pos
       (lt_of_lt_of_le (lt_of_lt_of_le hh (min_le_right _ _)) (min_le_right _ _))
-
   set y_h : ℝ → E := vSol h with hy_h_def
   have hy_h_sol :
       IsVariationalSolutionOn f (fun s => Φ ⟨x₀, s⟩) h t₀ y_h (Icc (t₀ - T) (t₀ + T)) :=
@@ -571,7 +556,6 @@ private theorem hasFDerivAt_flow_at_initial_local
   have hΦc_deriv_full : ∀ s ∈ Icc tmin tmax,
       HasDerivWithinAt (fun s => Φ ⟨x₀, s⟩) (f s (Φ ⟨x₀, s⟩)) (Icc tmin tmax) s :=
     fun s hs => hΦ.hasDerivWithinAt x₀ hx₀_in_ball s hs
-
   have hα_h_close : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       ‖α_h s - Φ ⟨x₀, s⟩‖ ≤ L * ‖h‖ := by
     intro s hs
@@ -580,7 +564,6 @@ private theorem hasFDerivAt_flow_at_initial_local
       hΦ_lip_diff s hs' (x₀ + h) hxh_mem_ball
     have h2 : (x₀ + h) - x₀ = h := by abel
     rw [h2] at h1; exact h1
-
   have hα_h_mem_ball : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       α_h s ∈ closedBall (Φ ⟨x₀, s⟩) δ_K_strict := by
     intro s hs
@@ -593,7 +576,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     change ‖Φ ⟨x₀, s⟩ + y_h s - Φ ⟨x₀, s⟩‖ ≤ δ_K_strict
     have heq : Φ ⟨x₀, s⟩ + y_h s - Φ ⟨x₀, s⟩ = y_h s := by abel
     rw [heq]; exact le_trans (hy_h_bd s hs) hh_CE_bd_le
-
   have hβ_h_deriv : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       HasDerivWithinAt β_h (f s (Φ ⟨x₀, s⟩) + A s (y_h s))
         (Icc (t₀ - T) (t₀ + T)) s := by
@@ -604,7 +586,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     exact h1.add h2
   have hβ_h_cont : ContinuousOn β_h (Icc (t₀ - T) (t₀ + T)) := by
     apply ContinuousOn.add (horbit_cont') hy_h_cont
-
   have h_residual_bound : ∀ s ∈ Icc (t₀ - T) (t₀ + T),
       ‖f s (Φ ⟨x₀, s⟩) + A s (y_h s) - f s (β_h s)‖ ≤ ε_target * ‖y_h s‖ := by
     intro s hs
@@ -644,7 +625,6 @@ private theorem hasFDerivAt_flow_at_initial_local
       abel
     rw [h_eq, norm_neg]
     exact h_residual
-
   set s_set : ℝ → Set E := fun τ => closedBall (Φ ⟨x₀, τ⟩) δ_K_strict with hs_set_def
   have h_diff_right : ∀ τ ∈ Icc t₀ (t₀ + T),
       ‖α_h τ - β_h τ‖ ≤ GfactorR * (ε_target * CE * ‖h‖) := by
@@ -725,7 +705,6 @@ private theorem hasFDerivAt_flow_at_initial_local
       rw [hGfactorR_def]; ring
     rw [h_eq_factor] at h_GB'
     exact le_trans hG h_GB'
-
   have h_diff_left : ∀ τ ∈ Icc (t₀ - T) t₀,
       ‖α_h τ - β_h τ‖ ≤ GfactorR * (ε_target * CE * ‖h‖) := by
     intro τ hτ
@@ -801,7 +780,8 @@ private theorem hasFDerivAt_flow_at_initial_local
       rw [h_simplify] at h_comp
       exact h_comp
     have hβR_deriv_R : ∀ τ' ∈ Ico t₀ (t₀ + T),
-        HasDerivWithinAt βR (-(f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ') (y_h (2 * t₀ - τ'))))
+        HasDerivWithinAt βR (-(f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ')
+          (y_h (2 * t₀ - τ'))))
           (Ici τ') τ' := by
       intro τ' hτ'R
       have hτ'_sub : 2 * t₀ - τ' ∈ Icc (t₀ - T) (t₀ + T) :=
@@ -811,7 +791,8 @@ private theorem hasFDerivAt_flow_at_initial_local
         linarith [hτ'R.2]
       have h_d := hβ_h_deriv (2 * t₀ - τ') hτ'_sub
       have h_d_left :
-          HasDerivWithinAt β_h (f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ') (y_h (2 * t₀ - τ')))
+          HasDerivWithinAt β_h (f (2 * t₀ - τ') (Φ ⟨x₀, 2 * t₀ - τ'⟩) + A (2 * t₀ - τ')
+            (y_h (2 * t₀ - τ')))
             (Iic (2 * t₀ - τ')) (2 * t₀ - τ') :=
         hasDerivWithinAt_Iic_of_Icc h_d hτ'_Ioc_sub
       have hψ_dwa : HasDerivWithinAt ψ (-1 : ℝ) (Ici τ') τ' :=
@@ -911,7 +892,6 @@ private theorem hasFDerivAt_flow_at_initial_local
       rw [hGfactorR_def]; ring
     rw [h_eq_factor] at h_GB'
     exact le_trans hG h_GB'
-
   have h_diff_full : ∀ τ ∈ Icc (t₀ - T) (t₀ + T),
       ‖α_h τ - β_h τ‖ ≤ GfactorR * (ε_target * CE * ‖h‖) := by
     intro τ hτ
@@ -930,7 +910,6 @@ private theorem hasFDerivAt_flow_at_initial_local
     apply mul_le_mul_of_nonneg_right (le_of_lt hε_target_le_one) hh_nn
   exact le_trans h_final_bd h_bound_le
 
-set_option maxHeartbeats 1600000 in
 
 
 
@@ -955,7 +934,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
             hA_bd (Ioo_subset_Icc_self ht))).coprod
         ((ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x₀, t⟩))))
       (x₀, t) := by
-
   have hr' : (0 : ℝ) < r := by exact_mod_cast hr
   have hx₀_in_ball : x₀ ∈ closedBall x₀ r := Metric.mem_closedBall_self (le_of_lt hr')
   set hA_cont :=
@@ -966,21 +944,17 @@ private theorem hasFDerivAt_flow_jointly_center_local
     hT hM hMT hA_cont hA_bd ht_Icc with hLmap_def
   have h_space :=
     hasFDerivAt_flow_at_initial_local hΦ hΩ hf_C1 hΩ_flow hT hM hMT hsub hA_bd hr ht_Icc
-
   set Ltime : ℝ →L[ℝ] E :=
     (ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x₀, t⟩)) with hLtime_def
   set Ljoint : (E × ℝ) →L[ℝ] E := Lmap.coprod Ltime with hLjoint_def
-
   rw [hasFDerivAt_iff_isLittleO_nhds_zero]
   rw [Asymptotics.isLittleO_iff]
   intro c hc
   set c2 : ℝ := c / 2 with hc2_def
   have hc2_pos : 0 < c2 := by positivity
-
   have hf_cont_pt : ContinuousAt (uncurry f) (t, Φ ⟨x₀, t⟩) :=
     hf_C1.continuousOn.continuousAt (hΩ.mem_nhds (hΩ_flow x₀ hx₀_in_ball t (hsub ht_Icc)))
   rcases Metric.continuousAt_iff.mp hf_cont_pt c2 hc2_pos with ⟨η_f, hη_f_pos, hη_f⟩
-
   have hΦ_cont_pt : ContinuousWithinAt Φ
       (closedBall x₀ r ×ˢ Icc tmin tmax) (x₀, t) := by
     apply hΦ.continuousOn
@@ -990,7 +964,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
   have hη_half_pos : 0 < η_half := by positivity
   have hη_half_lt : η_half < η_f := by linarith
   rcases hΦ_cont_pt η_half hη_half_pos with ⟨ρ₀, hρ₀_pos, hΦ_close⟩
-
   set ρ_t_raw : ℝ := min ((t - (t₀ - T)) / 2) (((t₀ + T) - t) / 2) with hρ_t_raw_def
   have hρ_t_raw_pos : 0 < ρ_t_raw := by
     refine lt_min ?_ ?_
@@ -1004,14 +977,11 @@ private theorem hasFDerivAt_flow_jointly_center_local
   have h_t_plus_ρ_t_raw : t + ρ_t_raw ≤ t₀ + T := by
     have h1 : ρ_t_raw ≤ ((t₀ + T) - t) / 2 := min_le_right _ _
     linarith
-
-
   have h_space_io := (hasFDerivAt_iff_isLittleO_nhds_zero.mp h_space)
   rw [Asymptotics.isLittleO_iff] at h_space_io
   have h_space_c2 := h_space_io hc2_pos
   rcases Filter.eventually_iff_exists_mem.mp h_space_c2 with ⟨U_space, hU_space_mem, hU_space⟩
   rcases Metric.mem_nhds_iff.mp hU_space_mem with ⟨ρ_s, hρ_s_pos, hρ_s_sub⟩
-
   set ρ : ℝ := min (min ((r : ℝ)) ρ_s) (min (min ρ_t_raw ρ₀) η_half) with hρ_def
   have hρ_pos : 0 < ρ := by
     refine lt_min (lt_min hr' hρ_s_pos) (lt_min (lt_min hρ_t_raw_pos hρ₀_pos) hη_half_pos)
@@ -1024,7 +994,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
   have hδ_norm : ‖δ‖ < ρ := lt_of_le_of_lt (le_max_left _ _) hp_norm
   have hs_norm_real : ‖s‖ < ρ := lt_of_le_of_lt (le_max_right _ _) hp_norm
   have hs_abs : |s| < ρ := hs_norm_real
-
   have hδ_lt_r' : ‖δ‖ < (r : ℝ) :=
     lt_of_lt_of_le hδ_norm (le_trans (min_le_left _ _) (min_le_left _ _))
   have hδ_lt_ρ_s : ‖δ‖ < ρ_s :=
@@ -1040,11 +1009,9 @@ private theorem hasFDerivAt_flow_jointly_center_local
       (min_le_right _ _)))
   have hs_lt_η_half : |s| < η_half :=
     lt_of_lt_of_le hs_abs (le_trans (min_le_right _ _) (min_le_right _ _))
-
   have hx_in_ball : x₀ + δ ∈ closedBall x₀ r := by
     rw [mem_closedBall, dist_eq_norm, add_sub_cancel_left]
     exact le_of_lt hδ_lt_r'
-
   have h_ab_sub_T : Icc (t - ρ_t_raw) (t + ρ_t_raw) ⊆ Icc (t₀ - T) (t₀ + T) := by
     intro u hu
     exact ⟨h_t_minus_ρ_t_raw.trans hu.1, hu.2.trans h_t_plus_ρ_t_raw⟩
@@ -1057,7 +1024,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
       linarith [hs_lt_ρ_t_raw]
   have ht_in_ab : t ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw) := by
     refine ⟨?_, ?_⟩ <;> linarith [hρ_t_raw_pos]
-
   set α : ℝ → E := fun u => Φ ⟨x₀ + δ, u⟩ with hα_def
   have hα_deriv : ∀ u ∈ Icc (t - ρ_t_raw) (t + ρ_t_raw),
       HasDerivWithinAt α (f u (α u)) (Icc (t - ρ_t_raw) (t + ρ_t_raw)) u := by
@@ -1088,7 +1054,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
   have hu_lo_le_ts : u_lo ≤ t + s := min_le_right _ _
   have hts_le_u_hi : t + s ≤ u_hi := le_max_right _ _
   have hu_lo_le_u_hi : u_lo ≤ u_hi := hu_lo_le_t.trans ht_le_u_hi
-
   have h_uloIcc : t - ρ_t_raw ≤ u_lo := by
     rw [hu_lo_def, le_min_iff]
     refine ⟨by linarith [hρ_t_raw_pos], ?_⟩
@@ -1102,7 +1067,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
   have hseg_sub : Icc u_lo u_hi ⊆ Icc (t - ρ_t_raw) (t + ρ_t_raw) := by
     intro u hu
     exact ⟨h_uloIcc.trans hu.1, hu.2.trans h_uhiIcc⟩
-
   have h_seg_dist : ∀ u ∈ Icc u_lo u_hi, |u - t| ≤ |s| := by
     intro u hu
     rcases le_or_gt 0 s with hs_nn | hs_neg
@@ -1126,7 +1090,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
       rw [abs_of_nonpos h3]
       have habs_s : |s| = -s := abs_of_neg hs_neg
       rw [habs_s]; exact h4
-
   have hpair_dist_seg : ∀ u ∈ Icc u_lo u_hi,
       dist ((x₀ + δ, u) : E × ℝ) (x₀, t) < ρ₀ := by
     intro u hu
@@ -1138,7 +1101,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
     have h3 : ‖δ‖ < ρ₀ := hδ_lt_ρ₀
     have h4 : |u - t| < ρ₀ := lt_of_le_of_lt (h_seg_dist u hu) hs_lt_ρ₀
     exact max_lt h3 h4
-
   have hΦ_seg : ∀ u ∈ Icc u_lo u_hi,
       dist (α u) (Φ ⟨x₀, t⟩) < η_half := by
     intro u hu
@@ -1146,7 +1108,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
       refine ⟨hx_in_ball, ?_⟩
       exact h_ab_sub_tmin (hseg_sub hu)
     exact hΦ_close hpair_in (hpair_dist_seg u hu)
-
   have hpair_dist_f : ∀ u ∈ Icc u_lo u_hi,
       dist ((u, α u) : ℝ × E) (t, Φ ⟨x₀, t⟩) < η_f := by
     intro u hu
@@ -1159,7 +1120,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
     have h2 : dist (α u) (Φ ⟨x₀, t⟩) < η_half := hΦ_seg u hu
     have h3 : max (|u - t|) (dist (α u) (Φ ⟨x₀, t⟩)) < η_half := max_lt hu_t h2
     exact lt_trans h3 hη_half_lt
-
   have hf_close_seg : ∀ u ∈ Icc u_lo u_hi, ‖f u (α u) - v₀‖ ≤ c2 := by
     intro u hu
     have hd := hpair_dist_f u hu
@@ -1167,7 +1127,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
     rw [dist_eq_norm] at h
     change ‖f u (α u) - v₀‖ ≤ c2
     exact le_of_lt h
-
   have hg_deriv_seg : ∀ u ∈ Icc u_lo u_hi,
       HasDerivWithinAt g (f u (α u) - v₀) (Icc u_lo u_hi) u := fun u hu =>
     (hg_deriv u (hseg_sub hu)).mono hseg_sub
@@ -1223,7 +1182,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
       have hs_eq : t - (t + s) = -s := by ring
       rw [hs_eq] at h_mvt'
       rw [abs_of_neg hs_neg]; exact h_mvt'
-
   have h_space_piece : ‖Φ ⟨x₀ + δ, t⟩ - Φ ⟨x₀, t⟩ - Lmap δ‖ ≤ c2 * ‖δ‖ := by
     have hδ_in_U : δ ∈ U_space :=
       hρ_s_sub (by rw [mem_ball_zero_iff]; exact hδ_lt_ρ_s)
@@ -1244,7 +1202,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
       (Φ ⟨x₀ + δ, t⟩ - Φ ⟨x₀, t⟩ - Lmap δ)
     have h_sum_le : c2 * |s| + c2 * ‖δ‖ ≤ c2 * ‖δ‖ + c2 * |s| := by linarith
     linarith [hnorm, h_time_residual, h_space_piece]
-
   have h_norm_pair : ‖(δ, s)‖ = max ‖δ‖ |s| := by
     rw [Prod.norm_def]
     rfl
@@ -1260,7 +1217,6 @@ private theorem hasFDerivAt_flow_jointly_center_local
     have hkey : c2 * ‖(δ, s)‖ + c2 * ‖(δ, s)‖ = c * ‖(δ, s)‖ := by
       rw [hc2_def]; ring
     linarith
-
   have h_Ljoint : Ljoint (δ, s) = Lmap δ + s • v₀ := by
     rw [hLjoint_def, hLtime_def]
     simp [ContinuousLinearMap.coprod_apply, ContinuousLinearMap.smulRight_apply,
@@ -1308,9 +1264,6 @@ private theorem hasFDerivAt_flow_jointly_at_local
             (fun τ hτ => hA_bd x hx τ hτ) (Ioo_subset_Icc_self ht))).coprod
         ((ContinuousLinearMap.id ℝ ℝ).smulRight (f t (Φ ⟨x, t⟩))))
       (x, t) := by
-
-
-
   have hd : dist x x₀ + (r' : ℝ) ≤ (r : ℝ) := by
     rw [mem_closedBall] at hx
     linarith
@@ -1484,7 +1437,8 @@ theorem IsLocalFlow.contDiffOn_top_local
               by linarith [hs.2, hT_lt_mid]⟩ : s ∈ Ioo (t₀ - T_mid) (t₀ + T_mid)))
         have hA_joint_cont : ContinuousOn (uncurry A) U := hcoeff_Cn.continuousOn
         have h_exists : HasLinearODESolution A (t₀ - T) (t₀ + T) t₀ (fun _ => δ) q.1 :=
-          hasLinearODESolution_of_continuousOn hab ht₀_mem isOpen_ball hA_joint_cont (mem_ball.mpr hx')
+          hasLinearODESolution_of_continuousOn hab ht₀_mem isOpen_ball hA_joint_cont
+            (mem_ball.mpr hx')
         have h_uniq := linearODE_unique_on_Ioo (G := E) ht₀_mem hA_cont_Ioo
           (fun s hs => by
             have hs_mid : s ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) :=

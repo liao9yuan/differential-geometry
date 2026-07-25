@@ -17,14 +17,11 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturba
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 
-set_option linter.style.multiGoal false
 
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators Matrix Interval
@@ -82,7 +79,8 @@ theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric
     funext j; fin_cases j <;> rfl
   rwa [hfun] at h
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     (g₁ : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
@@ -582,30 +580,30 @@ private lemma covDerivLowerOrderTerm03_center_eq
           tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![a0, a1, a2] x) *
           ((if b = a0 then (1 : ℝ) else 0) * (if c = a1 then (1 : ℝ) else 0)))]
     congr 1
-    congr 1
-    · rw [← Finset.sum_neg_distrib]
-      refine Finset.sum_congr rfl (fun a0 _ => ?_)
-      rw [Finset.sum_eq_single c]
-      · rw [Finset.sum_eq_single d]
-        · rw [if_pos rfl, if_pos rfl]; ring
-        · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
-        · intro h; exact absurd (Finset.mem_univ d) h
-      · intro a1 _ ha1
-        refine Finset.sum_eq_zero (fun a2 _ => ?_)
-        rw [if_neg (show ¬ c = a1 from fun h => ha1 h.symm), zero_mul]; ring
-      · intro h; exact absurd (Finset.mem_univ c) h
-    · rw [← Finset.sum_neg_distrib]
-      rw [Finset.sum_eq_single b]
-      · refine Finset.sum_congr rfl (fun a1 _ => ?_)
-        rw [Finset.sum_eq_single d]
-        · rw [if_pos rfl, if_pos rfl]; ring
-        · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
-        · intro h; exact absurd (Finset.mem_univ d) h
-      · intro a0 _ ha0
-        refine Finset.sum_eq_zero (fun a1 _ => ?_)
-        refine Finset.sum_eq_zero (fun a2 _ => ?_)
-        rw [if_neg (show ¬ b = a0 from fun h => ha0 h.symm), zero_mul]; ring
-      · intro h; exact absurd (Finset.mem_univ b) h
+    · congr 1
+      · rw [← Finset.sum_neg_distrib]
+        refine Finset.sum_congr rfl (fun a0 _ => ?_)
+        rw [Finset.sum_eq_single c]
+        · rw [Finset.sum_eq_single d]
+          · rw [if_pos rfl, if_pos rfl]; ring
+          · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
+          · intro h; exact absurd (Finset.mem_univ d) h
+        · intro a1 _ ha1
+          refine Finset.sum_eq_zero (fun a2 _ => ?_)
+          rw [if_neg (show ¬ c = a1 from fun h => ha1 h.symm), zero_mul]; ring
+        · intro h; exact absurd (Finset.mem_univ c) h
+      · rw [← Finset.sum_neg_distrib]
+        rw [Finset.sum_eq_single b]
+        · refine Finset.sum_congr rfl (fun a1 _ => ?_)
+          rw [Finset.sum_eq_single d]
+          · rw [if_pos rfl, if_pos rfl]; ring
+          · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
+          · intro h; exact absurd (Finset.mem_univ d) h
+        · intro a0 _ ha0
+          refine Finset.sum_eq_zero (fun a1 _ => ?_)
+          refine Finset.sum_eq_zero (fun a2 _ => ?_)
+          rw [if_neg (show ¬ b = a0 from fun h => ha0 h.symm), zero_mul]; ring
+        · intro h; exact absurd (Finset.mem_univ b) h
     · rw [← Finset.sum_neg_distrib]
       rw [Finset.sum_eq_single b]
       · rw [Finset.sum_eq_single c]
@@ -661,8 +659,10 @@ private lemma lowerOrderCoeff02_eqOn_chartChristoffelEuclid
       ((extChartAt I x).symm ((toEuclidean (E := E)).symm y)) =
       (toEuclidean (E := E)).symm y :=
     (extChartAt I x).right_inv hy_pre
-  rw [chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hb_base m (Jdx' 0) (Jdx 0),
-    chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hb_base m (Jdx' 1) (Jdx 1)]
+  rw [chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hb_base m (Jdx' 0)
+    (Jdx 0),
+    chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hb_base m (Jdx' 1)
+      (Jdx 1)]
   rw [hphi_b]
   rw [show chartChristoffel (I := I) g₀ x (Jdx 0) m (Jdx' 0) ((toEuclidean (E := E)).symm y) =
       chartChristoffelEuclid (I := I) g₀ x (Jdx 0) m (Jdx' 0) y from rfl,
@@ -821,7 +821,8 @@ private lemma euclidPartial_covDerivLowerOrderTerm02_center_eq_sum
       DifferentiableAt ℝ (lowerOrderSummand (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d] p)
         (toEuclidean (E := E) (extChartAt I x x)) := by
     intro p
-    exact ((lowerOrderSummand_contDiffOn (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d] p).differentiableOn
+    exact ((lowerOrderSummand_contDiffOn (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d]
+      p).differentiableOn
       (by norm_cast)).differentiableAt (hopen.mem_nhds hcenter)
   rw [euclidPartial_finsetSum a Finset.univ (fun p _ => hsummand_diff p)]
   refine Finset.sum_congr rfl (fun p _ => ?_)
@@ -897,18 +898,21 @@ private lemma arm2ReadoutPairTerm1_center_eq
       + ((- ∑ r : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g₀ x c b r (extChartAt I x x) *
               euclidPartial (E := E) a
-                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, d]))
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                  ![r, d]))
                 (toEuclidean (E := E) (extChartAt I x x)))
         + (- ∑ r : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g₀ x d b r (extChartAt I x x) *
               euclidPartial (E := E) a
-                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, r]))
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                  ![c, r]))
                 (toEuclidean (E := E) (extChartAt I x x)))) := by
   classical
   set Y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
     toEuclidean (E := E) (extChartAt I x x) with hY
   have hcenter : Y ∈ chartTargetEuclid (I := I) (M := M) x := by
-    rw [hY]; exact toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x (mem_chart_source H x)
+    rw [hY]; exact toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x
+      (mem_chart_source H x)
   have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) x) :=
     chartTargetEuclid_isOpen (I := I) (M := M) x
   rw [euclidPartial_covDerivLowerOrderTerm02_center_eq_sum (I := I) (M := M) g₀ h x a b c d]
@@ -925,7 +929,8 @@ private lemma arm2ReadoutPairTerm1_center_eq
     have hdReq : ∀ J' : Fin 2 → Fin (Module.finrank ℝ E),
         euclidPartial (E := E) a (rawComponentEuclid (I := I) (M := M) g₀ 0 2 x h ![] J') Y =
           euclidPartial (E := E) a
-            (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] J')) Y := by
+            (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] J'))
+              Y := by
       intro J'
       have heqraw : Set.EqOn (rawComponentEuclid (I := I) (M := M) g₀ 0 2 x h ![] J')
           (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] J'))
@@ -938,17 +943,21 @@ private lemma arm2ReadoutPairTerm1_center_eq
             rawComponentEuclid (I := I) (M := M) g₀ 0 2 x h ![] J' Y +
           secondCovDerivLO_gradCoeff (I := I) (M := M) g₀ 0 2 x b ![] ![] ![c, d] J' Y *
             euclidPartial (E := E) a (rawComponentEuclid (I := I) (M := M) g₀ 0 2 x h ![] J') Y =
-          (((fun r => - euclidPartial (E := E) a (chartChristoffelEuclid (I := I) g₀ x c b r) Y) (J' 0) *
+          (((fun r => - euclidPartial (E := E) a (chartChristoffelEuclid (I := I) g₀ x c b r) Y)
+            (J' 0) *
                 (if d = J' 1 then (1 : ℝ) else 0) +
-              (fun r => - euclidPartial (E := E) a (chartChristoffelEuclid (I := I) g₀ x d b r) Y) (J' 1) *
+              (fun r => - euclidPartial (E := E) a (chartChristoffelEuclid (I := I) g₀ x d b r) Y)
+                (J' 1) *
                 (if c = J' 0 then (1 : ℝ) else 0)) *
-            (fun p q => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![p, q] x) (J' 0) (J' 1)) +
+            (fun p q => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![p, q] x) (J' 0)
+              (J' 1)) +
           (((fun r => - chartChristoffel (I := I) g₀ x c b r (extChartAt I x x)) (J' 0) *
                 (if d = J' 1 then (1 : ℝ) else 0) +
               (fun r => - chartChristoffel (I := I) g₀ x d b r (extChartAt I x x)) (J' 1) *
                 (if c = J' 0 then (1 : ℝ) else 0)) *
             (fun p q => euclidPartial (E := E) a
-              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![p, q])) Y)
+              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                ![p, q])) Y)
               (J' 0) (J' 1)) := by
       intro J'
       have hv := valueCoeff02_center_eq (I := I) (M := M) g₀ x b a ![c, d] J'
@@ -969,7 +978,8 @@ private lemma arm2ReadoutPairTerm1_center_eq
         (fun r => - chartChristoffel (I := I) g₀ x c b r (extChartAt I x x))
         (fun r => - chartChristoffel (I := I) g₀ x d b r (extChartAt I x x))
         (fun p q => euclidPartial (E := E) a
-          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![p, q])) Y) c d]
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![p, q])) Y)
+            c d]
     rw [← Finset.sum_neg_distrib, ← Finset.sum_neg_distrib,
       ← Finset.sum_neg_distrib, ← Finset.sum_neg_distrib]
     refine congrArg₂ (· + ·) (congrArg₂ (· + ·) ?_ ?_) (congrArg₂ (· + ·) ?_ ?_) <;>
@@ -1025,7 +1035,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       (- ∑ r : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g₀ x a b r (extChartAt I x x) *
             (euclidPartial (E := E) r
-                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, d]))
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                  ![c, d]))
                 (toEuclidean (E := E) (extChartAt I x x))
               + ((- ∑ t : Fin (Module.finrank ℝ E),
                     chartChristoffel (I := I) g₀ x r c t (extChartAt I x x) *
@@ -1036,7 +1047,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       + (- ∑ r : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g₀ x a c r (extChartAt I x x) *
             (euclidPartial (E := E) b
-                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, d]))
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                  ![r, d]))
                 (toEuclidean (E := E) (extChartAt I x x))
               + ((- ∑ t : Fin (Module.finrank ℝ E),
                     chartChristoffel (I := I) g₀ x b r t (extChartAt I x x) *
@@ -1047,7 +1059,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       + (- ∑ r : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g₀ x a d r (extChartAt I x x) *
             (euclidPartial (E := E) b
-                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, r]))
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                  ![c, r]))
                 (toEuclidean (E := E) (extChartAt I x x))
               + ((- ∑ t : Fin (Module.finrank ℝ E),
                     chartChristoffel (I := I) g₀ x b c t (extChartAt I x x) *
@@ -1065,7 +1078,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       ∑ r : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g₀ x a b r (extChartAt I x x) *
           (euclidPartial (E := E) r
-              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, d]))
+              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                ![c, d]))
               (toEuclidean (E := E) (extChartAt I x x))
             + ((- ∑ t : Fin (Module.finrank ℝ E),
                   chartChristoffel (I := I) g₀ x r c t (extChartAt I x x) *
@@ -1082,7 +1096,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       ∑ r : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g₀ x a c r (extChartAt I x x) *
           (euclidPartial (E := E) b
-              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, d]))
+              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                ![r, d]))
               (toEuclidean (E := E) (extChartAt I x x))
             + ((- ∑ t : Fin (Module.finrank ℝ E),
                   chartChristoffel (I := I) g₀ x b r t (extChartAt I x x) *
@@ -1099,7 +1114,8 @@ private lemma arm2ReadoutPairTerm2_center_eq
       ∑ r : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g₀ x a d r (extChartAt I x x) *
           (euclidPartial (E := E) b
-              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, r]))
+              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                ![c, r]))
               (toEuclidean (E := E) (extChartAt I x x))
             + ((- ∑ t : Fin (Module.finrank ℝ E),
                   chartChristoffel (I := I) g₀ x b c t (extChartAt I x x) *
@@ -1129,17 +1145,20 @@ lemma arm2ReadoutCovDerivPair_center_eq
         + ((- ∑ r : Fin (Module.finrank ℝ E),
               chartChristoffel (I := I) g₀ x c b r (extChartAt I x x) *
                 euclidPartial (E := E) a
-                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, d]))
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                    ![r, d]))
                   (toEuclidean (E := E) (extChartAt I x x)))
           + (- ∑ r : Fin (Module.finrank ℝ E),
               chartChristoffel (I := I) g₀ x d b r (extChartAt I x x) *
                 euclidPartial (E := E) a
-                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, r]))
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                    ![c, r]))
                   (toEuclidean (E := E) (extChartAt I x x)))))
       + ((- ∑ r : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g₀ x a b r (extChartAt I x x) *
               (euclidPartial (E := E) r
-                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, d]))
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                    ![c, d]))
                   (toEuclidean (E := E) (extChartAt I x x))
                 + ((- ∑ t : Fin (Module.finrank ℝ E),
                       chartChristoffel (I := I) g₀ x r c t (extChartAt I x x) *
@@ -1150,7 +1169,8 @@ lemma arm2ReadoutCovDerivPair_center_eq
         + ((- ∑ r : Fin (Module.finrank ℝ E),
               chartChristoffel (I := I) g₀ x a c r (extChartAt I x x) *
                 (euclidPartial (E := E) b
-                    (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, d]))
+                    (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                      ![r, d]))
                     (toEuclidean (E := E) (extChartAt I x x))
                   + ((- ∑ t : Fin (Module.finrank ℝ E),
                         chartChristoffel (I := I) g₀ x b r t (extChartAt I x x) *
@@ -1161,17 +1181,20 @@ lemma arm2ReadoutCovDerivPair_center_eq
           + (- ∑ r : Fin (Module.finrank ℝ E),
               chartChristoffel (I := I) g₀ x a d r (extChartAt I x x) *
                 (euclidPartial (E := E) b
-                    (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, r]))
+                    (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![]
+                      ![c, r]))
                     (toEuclidean (E := E) (extChartAt I x x))
                   + ((- ∑ t : Fin (Module.finrank ℝ E),
                         chartChristoffel (I := I) g₀ x b c t (extChartAt I x x) *
                           tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![t, r] x)
                     + (- ∑ t : Fin (Module.finrank ℝ E),
                         chartChristoffel (I := I) g₀ x b r t (extChartAt I x x) *
-                          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, t] x)))))) := by
+                          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, t]
+                            x)))))) := by
   classical
   rw [arm2ReadoutCovDerivPair]
-  rw [show (Matrix.vecTail (![a, b, c, d] : Fin (2 + 2) → Fin (Module.finrank ℝ E))) = ![b, c, d] from by
+  rw [show (Matrix.vecTail (![a, b, c, d] : Fin (2 + 2) → Fin (Module.finrank ℝ E))) = ![b, c, d]
+    from by
     funext j; fin_cases j <;> rfl]
   rw [show (Matrix.vecTail (![b, c, d] : Fin (2 + 1) → Fin (Module.finrank ℝ E))) = ![c, d] from by
     funext j; fin_cases j <;> rfl]

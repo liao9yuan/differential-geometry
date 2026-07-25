@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieO
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Set Bundle Manifold Tensor0SBundle ContinuousLinearMap
@@ -59,8 +58,6 @@ private theorem unitModel_add_local
     rfl]
   rw [Tensor0SSpace.toModel_add]
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 
 
 theorem lieSlope_eq_arms

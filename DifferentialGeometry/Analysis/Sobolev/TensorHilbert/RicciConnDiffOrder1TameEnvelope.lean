@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulT
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
@@ -152,7 +150,8 @@ theorem ricciCometricFourTraceCastG0_eq_reindex_combination
               (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁) fourTraceSwap13Perm
           - ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁
           - reindexCoeffGen (I := I) (M := M) g₀ 4 2
-              (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁) fourTraceDoubleTranspositionPerm) := by
+              (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
+                fourTraceDoubleTranspositionPerm) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -219,7 +218,8 @@ private lemma fourTrace_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma fourTrace_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -229,6 +229,15 @@ private lemma fourTrace_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
     tensorInnerPointwise_smul_right]
   ring
+
+private lemma fourTrace_le_mul_one_add {a w : ℝ} (ha : 0 ≤ a) (hw : 0 ≤ w) :
+    a ≤ a * (1 + w) := by
+  nlinarith [mul_nonneg ha hw]
+
+private lemma fourTrace_sq_add_tame {u v A D T : ℝ}
+    (hu2 : u ^ 2 ≤ A * T) (hv2 : v ^ 2 ≤ D * T) :
+    (u + v) ^ 2 ≤ (2 * A + 2 * D) * T := by
+  nlinarith [sq_nonneg (u - v)]
 
 
 theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
@@ -252,7 +261,7 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
   classical
   set Φ : SmoothCcTensor g₀ 4 2 := cometricDoubleTraceField (I := I) g₀ 2 with hΦ_def
   obtain ⟨C_base, hC_base_nn, hC_base⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
       (I := I) (M := M) g₀ hδ₀
   obtain ⟨K_t, hK_t_nn, hK_t⟩ :=
     antidiagonalTupleGrid_integral_ballUniform_tameWindow (I := I) (M := M) g₀ a ha_super hR
@@ -457,7 +466,8 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
             simp only [hKW_def]; ring
     have hstep3 : ∀ l : ℕ,
-        ‖iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)‖ ^ 2
+          ≤
           KD l * (1 + ∑ j ∈ Finset.range (l + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
       intro l
@@ -470,7 +480,8 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
                 riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + q) x
                   ((iteratedCovGrad (I := I) g₀ 4 4 q W).toSection x)) := by
         intro x
-        refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+        refine le_trans
+          (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
           (I := I) (M := M) g₀ l 4 4 2 Φ W x) ?_
         rw [mul_assoc]
         refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg _)
@@ -495,7 +506,8 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
         exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 4 (4 + q)
           (iteratedCovGrad (I := I) g₀ 4 4 q W)
       have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 4 (2 + l)
-        (iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)) _ hint hpt
+        (iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)) _
+          hint hpt
       refine le_trans hkey ?_
       rw [MeasureTheory.integral_const_mul,
         MeasureTheory.integral_finset_sum _ (fun q _ =>
@@ -544,19 +556,20 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
           (2 * aL l + 2 * KD l) * (1 + ∑ j ∈ Finset.range (l + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
       intro l
-      rw [hid, iteratedCovGrad_add (I := I) g₀ 4 2 l Φ (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)]
+      rw [hid, iteratedCovGrad_add (I := I) g₀ 4 2 l Φ
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)]
       have haLl : ‖iteratedCovGrad (I := I) g₀ 4 2 l Φ‖ ^ 2 ≤
           aL l * (1 + ∑ j ∈ Finset.range (l + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
         have h1 : aL l = ‖iteratedCovGrad (I := I) g₀ 4 2 l Φ‖ ^ 2 := by simp only [haL_def]
-        nlinarith [haL_nn l, hwin1_nn l]
+        rw [← h1]
+        exact fourTrace_le_mul_one_add (haL_nn l) (hwin1_nn l)
       have hsq := pow_le_pow_left₀ (norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 l Φ +
           iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)))
         (norm_add_le (iteratedCovGrad (I := I) g₀ 4 2 l Φ)
-          (iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W))) 2
-      nlinarith [hsq, hstep3 l, haLl,
-        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 l Φ‖ -
-          ‖iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)‖)]
+          (iteratedCovGrad (I := I) g₀ 4 2 l (ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2 Φ W)))
+            2
+      exact hsq.trans (fourTrace_sq_add_tame haLl (hstep3 l))
     refine ⟨?_, ?_⟩
     · intro x
       rw [Real.sq_sqrt h22nn]
@@ -675,7 +688,8 @@ private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
 private def kernelInnerSlotCyclePerm : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
@@ -751,18 +765,23 @@ omit [SigmaCompactSpace M] in
 private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+            (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
             (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+              (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm
-        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
+        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+          (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
             (connDiffContrInsertionField (I := I) g₀ g₁)
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+              (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+              (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -778,7 +797,8 @@ private theorem armOuter_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
-  refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 3 4 σ
+  refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 3 4
+    σ
     (connDiffContrInsertionField (I := I) g₀ g₁)
     (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁))
@@ -1278,33 +1298,42 @@ theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvel
     rw [hL2]
     have hx : (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁).toSection x =
         -((reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+              (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x
           + (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+                (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
                 (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm).toSection x
-          + (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
+          + (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+            (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
               (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x
           + (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+                (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
                 (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x
           + (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
-                (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm).toSection x) := by
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+                (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
+                (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm).toSection
+                  x) := by
       rw [hcomb]
       rfl
     rw [hx]
     set b1 := (reindexCoeffGen (I := I) (M := M) g₀ 3 4
       (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
-        (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x with hb1
+        (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x with
+          hb1
     set b2 := (reindexCoeffGen (I := I) (M := M) g₀ 3 4
       (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
         (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm).toSection x with hb2
-    set b3 := (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
+    set b3 := (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
+      (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
       (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x with hb3
     set b4 := (reindexCoeffGen (I := I) (M := M) g₀ 3 4
       (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
-        (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x with hb4
+        (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotSwap01Perm).toSection x with
+          hb4
     set b5 := (reindexCoeffGen (I := I) (M := M) g₀ 3 4
       (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
         (connDiffContrInsertionField (I := I) g₀ g₁)) kernelInnerSlotCyclePerm).toSection x with hb5
@@ -1318,11 +1347,13 @@ theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvel
     have e1 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x b1 =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           ((connDiffContrInsertionField (I := I) g₀ g₁).toSection x) := by
-      rw [hb1]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm0312 kernelInnerSlotSwap01Perm x
+      rw [hb1]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm0312
+        kernelInnerSlotSwap01Perm x
     have e2 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x b2 =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           ((connDiffContrInsertionField (I := I) g₀ g₁).toSection x) := by
-      rw [hb2]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm0213 kernelInnerSlotCyclePerm x
+      rw [hb2]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm0213 kernelInnerSlotCyclePerm
+        x
     have e3 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x b3 =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           ((connDiffContrInsertionField (I := I) g₀ g₁).toSection x) := by
@@ -1330,11 +1361,13 @@ theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvel
     have e4 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x b4 =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           ((connDiffContrInsertionField (I := I) g₀ g₁).toSection x) := by
-      rw [hb4]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm1302 kernelInnerSlotSwap01Perm x
+      rw [hb4]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm1302
+        kernelInnerSlotSwap01Perm x
     have e5 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x b5 =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           ((connDiffContrInsertionField (I := I) g₀ g₁).toSection x) := by
-      rw [hb5]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm1203 kernelInnerSlotCyclePerm x
+      rw [hb5]; exact armFull_rfns0_eq (I := I) (M := M) g₀ g₁ kOutPerm1203 kernelInnerSlotCyclePerm
+        x
     have hA1 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 3 4 x b1 b2
     have hA2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 3 4 x (b1 + b2) b3
     have hA3 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 3 4 x (b1 + b2 + b3) b4

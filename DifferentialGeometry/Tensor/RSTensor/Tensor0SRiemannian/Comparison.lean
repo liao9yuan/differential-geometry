@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -742,7 +741,8 @@ private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
 
 
 
-theorem abs_apply_le_sqrt_normSq0S
+omit [Fintype Idx] in
+theorem abs_apply_le_sqrt_normSq0S [Finite Idx]
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : forall i j : Idx,
@@ -752,12 +752,11 @@ theorem abs_apply_le_sqrt_normSq0S
       Real.sqrt (normSq0S (I := I) g x s T) *
         ∏ a : Fin s, Real.sqrt (g.inner x (v a) (v a)) := by
   classical
-
+  letI := Fintype.ofFinite Idx
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
       (identityInvMetric (Idx := Idx)) := by
     intro i j
     constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
-
   have hexp : T v = ∑ I0 : Fin s -> Idx,
       (∏ a : Fin s, basis.repr (v a) (I0 a)) *
         T (fun a : Fin s => basis (I0 a)) := by
@@ -775,7 +774,6 @@ theorem abs_apply_le_sqrt_normSq0S
           refine Finset.sum_congr rfl fun I0 _ => ?_
           rw [T.map_smul_univ, smul_eq_mul]
   rw [hexp]
-
   have hCS2 : (∑ I0 : Fin s -> Idx,
         (∏ a : Fin s, basis.repr (v a) (I0 a)) *
           T (fun a : Fin s => basis (I0 a))) ^ 2 <=
@@ -793,14 +791,12 @@ theorem abs_apply_le_sqrt_normSq0S
       ← Real.sqrt_mul (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
     exact Real.sqrt_le_sqrt hCS2
   refine le_trans habs ?_
-
   have hfac1 : (∑ I0 : Fin s -> Idx,
         (∏ a : Fin s, basis.repr (v a) (I0 a)) ^ 2)
       = ∏ a : Fin s, ∑ i : Idx, basis.repr (v a) i ^ 2 := by
     rw [Finset.prod_univ_sum]
     refine Finset.sum_congr rfl fun I0 _ => ?_
     rw [← Finset.prod_pow]
-
   have hPar : ∀ a : Fin s, (∑ i : Idx, basis.repr (v a) i ^ 2)
       = g.inner x (v a) (v a) := by
     intro a
@@ -815,7 +811,6 @@ theorem abs_apply_le_sqrt_normSq0S
     rw [Finset.sum_ite_eq Finset.univ i
       (fun j => basis.repr (v a) j * basis.repr (v a) i)]
     simp [sq]
-
   have hfac2 : (∑ I0 : Fin s -> Idx, T (fun a : Fin s => basis (I0 a)) ^ 2)
       = normSq0S (I := I) g x s T := by
     rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]

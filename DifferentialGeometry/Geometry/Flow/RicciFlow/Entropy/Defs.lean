@@ -7,7 +7,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Measure.WithDensity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

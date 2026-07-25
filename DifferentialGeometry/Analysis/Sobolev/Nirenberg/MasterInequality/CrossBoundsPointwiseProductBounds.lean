@@ -18,7 +18,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private theorem abs_diffQuot_le_of_bound
     {g : E → ℝ} (hg : ContDiff ℝ 1 g) (k : Fin d) (h : ℝ)
     {x : E} {M : ℝ}
@@ -107,7 +106,6 @@ private theorem abs_diffQuot_le_of_bound
   exact le_trans h_tri h_mono
 
 omit [NeZero d] in
-
 theorem abs_diffQuot_a_le_of_bound_on_set
     {a : E → ℝ} (ha : ContDiff ℝ 1 a) (k : Fin d) (h : ℝ)
     {K : Set E} {M : ℝ}
@@ -119,7 +117,6 @@ theorem abs_diffQuot_a_le_of_bound_on_set
   exact hM y (hx hy)
 
 omit [NeZero d] in
-
 private theorem abs_translate_le_of_bound_on_set
     {a : E → ℝ} (k : Fin d) (h : ℝ)
     {K : Set E} {M : ℝ}
@@ -130,7 +127,6 @@ private theorem abs_translate_le_of_bound_on_set
   exact hM _ hx
 
 omit [NeZero d] in
-
 private theorem shift_in_omega'
     (η : E → ℝ) (k : Fin d) {h h₀ : ℝ}
     {Ω' : Set E}
@@ -149,7 +145,6 @@ private theorem shift_in_omega'
   exact h_abs
 
 omit [NeZero d] in
-
 theorem singleton_cthick_subset
     (η : E → ℝ) {h h₀ : ℝ}
     {Ω' : Set E}

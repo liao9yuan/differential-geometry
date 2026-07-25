@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -28,14 +26,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private lemma ofModel_add {s : ℕ} {x : M}
     (f g : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
     (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x) (f + g) : Tensor0SSpace s I x) =
       Tensor0SSpace.ofModel f + Tensor0SSpace.ofModel g :=
   map_add (tensor0SSpace_continuousLinearEquiv s x).symm f g
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private lemma ofModel_smul {s : ℕ} {x : M} (c : ℝ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
     (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x) (c • f) : Tensor0SSpace s I x) =
@@ -71,7 +71,8 @@ def inputSlotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x
         rw [Tensor0SSpace.toModel_smul, domDomCongr_swap_smul, ofModel_smul]
         rfl }
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotSwapFib_apply (x : M) (D : Tensor0SSpace 2 I x) :
     inputSlotSwapFib (I := I) (M := M) x D =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
@@ -81,7 +82,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 def ccSlotSwapFib (x : M) : TensorRSSpace 2 2 I x :=
   inputSlotSwapFib (I := I) (M := M) x
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] [CompleteSpace E] in
 theorem ccSlotSwapFib_contMDiff :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -136,16 +138,19 @@ def ccInputSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2
       contMDiff_toFun := ccSlotSwapFib_contMDiff (I := I) (M := M) }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 @[simp] lemma ccSlotSwapField_toSection (g : SmoothRiemannianMetric I M) (x : M) :
     (ccInputSlotSwapField (I := I) (M := M) g).toSection x =
       ccSlotSwapFib (I := I) (M := M) x := rfl
 
 def ccInputSlotSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
     SmoothCcTensor g 2 2 :=
-  (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g))
+  (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
+    (ccInputSlotSwapField (I := I) (M := M) g))
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 lemma ccInputSymm_toSection (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (x : M) :
     (ccInputSlotSymm (I := I) (M := M) g C).toSection x =
@@ -161,10 +166,14 @@ theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g
       ccInputSlotSymm (I := I) (M := M) g C + ccInputSlotSymm (I := I) (M := M) g D := by
   simp only [ccInputSlotSymm]
   rw [appCcRS_add_left]
-  rw [show C + D + (ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g)
-      + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g)) =
-      (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g))
-        + (D + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g)) from by
+  rw [show C + D + (ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
+    (ccInputSlotSwapField (I := I) (M := M) g)
+      + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g))
+        =
+      (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
+        (ccInputSlotSwapField (I := I) (M := M) g))
+        + (D + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D
+          (ccInputSlotSwapField (I := I) (M := M) g)) from by
     abel]
   rw [smul_add]
 

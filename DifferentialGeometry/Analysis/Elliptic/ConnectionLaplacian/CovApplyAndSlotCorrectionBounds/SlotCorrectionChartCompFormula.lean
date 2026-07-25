@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -30,7 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartTensorRSInputSlotCorrection_chartComp_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -51,7 +50,8 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
                 (tangentSlotCLM (I := I) r k
                   (chartLeviCivitaParallelCLM (I := I) g α b B) i))))
         (fun j : Fin s =>
-          chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) (Jdx j))) := by
+          chartTrivializationLinearMapSymm (I := I) (M := M) α b
+            ((chartModelBasis E) (Jdx j))) := by
   classical
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb (chartTensorRSInputSlotCorrection (I := I) r s g α T B b k)]
@@ -107,7 +107,8 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
     hsubst
   rw [hsubst_fiber]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartTensorRSOutputSlotCorrection_chartComp_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -127,7 +128,8 @@ theorem chartTensorRSOutputSlotCorrection_chartComp_formula
         (fun j : Fin s =>
           tangentSlotCLM (I := I) s l
             (chartLeviCivitaParallelCLM (I := I) g α b B) j
-            (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))) := by
+            (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+              ((chartModelBasis E) (Jdx j)))) := by
   classical
   rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
     r s α hb (chartTensorRSOutputSlotCorrection (I := I) r s g α T B b l)]
@@ -189,7 +191,8 @@ example (g : SmoothRiemannianMetric I M) (α : M)
         (fun j : Fin 2 =>
           tangentSlotCLM (I := I) 2 l
             (chartLeviCivitaParallelCLM (I := I) g α b B) j
-            (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) (Jdx j)))) :=
+            (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+              ((chartModelBasis E) (Jdx j)))) :=
   chartTensorRSOutputSlotCorrection_chartComp_formula (I := I) (M := M)
     g 1 2 α T B hb l Idx Jdx
 

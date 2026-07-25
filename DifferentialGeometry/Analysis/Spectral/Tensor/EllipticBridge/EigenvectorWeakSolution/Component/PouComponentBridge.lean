@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -87,7 +85,7 @@ private lemma tensorTrivProj_pouSmul
         tensorTrivProj (I := I) (M := M) g r s S α x := by
   unfold tensorTrivProj
   rw [pouSmul_toSection_apply]
-  exact map_smul _ _ _
+  exact ContinuousLinearMap.map_smul _ _ _
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentRaw_smul_pou
@@ -101,7 +99,7 @@ theorem tensorChartComponentRaw_smul_pou
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx x := by
   funext x
   unfold tensorChartComponentRaw
-  rw [tensorTrivProj_pouSmul (I := I) (M := M) g r s α S x, map_smul,
+  rw [tensorTrivProj_pouSmul (I := I) (M := M) g r s α S x, ContinuousLinearMap.map_smul,
     smul_eq_mul]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in

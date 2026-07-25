@@ -79,8 +79,6 @@ private lemma unitModel_zero (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) 
 variable [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 
@@ -112,10 +110,10 @@ theorem phiMet_symm_zero
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.traceHessianCoeff_apply_eq
       (I := I) (M := M) g₀ g W x v
   have hRACraw :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeff_appCc_eq_combinedTrace
+    Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeff_appCc_eq_combinedTrace
       (I := I) (M := M) g₀ g W x v
   have hPure :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
+    Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
       (I := I) (M := M) g₀ g W x v
   have hTH : unitModel (I := I) (M := M) g₀ 2
       (operatorFieldApply (I := I) (M := M) g₀ 4 2
@@ -234,8 +232,6 @@ noncomputable def phiMetCurvCoeff
           (I := I) (M := M) g₀ g)
     (gradSwapCurvCoeff (I := I) g₀)
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
 

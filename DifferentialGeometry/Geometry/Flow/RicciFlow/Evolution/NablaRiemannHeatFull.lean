@@ -3,10 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -234,13 +230,9 @@ theorem nablaRm04NormHeatEquationOn_intrinsic
       (nablaRm04ReactionIntrinsic (I := I) S basis gInv ric Tdot) := by
   classical
   intro t x
-
   have hmc : IsMetricCompatible_gen (I := I)
       (S.family.connection (t : Real)) (S.base.metric (t : Real)) :=
     solution_isMetricCompatible (I := I) S (t : Real)
-
-
-
   have hdt :=
     hasDerivWithinAt_normSq0S_ricciFlow (I := I)
       (s := 5) (x := x) (u := D.carrier) (t := (t : Real))
@@ -259,8 +251,6 @@ theorem nablaRm04NormHeatEquationOn_intrinsic
       (hT t x)
       (fun I0 => rfl)
       (fun i j => rfl)
-
-
   have hsplit :=
     tensorNormBochnerSplit_mc (I := I) (s := 5)
       (cov := S.family.connection (t : Real))
@@ -274,29 +264,20 @@ theorem nablaRm04NormHeatEquationOn_intrinsic
       (nabla3Rm04Field_realizes (I := I) S (t : Real))
       (du := du (t : Real)) (normSecond := normSecond (t : Real))
       (hdu (t : Real)) (hHess (t : Real) x)
-
   refine hdt.congr_deriv ?_
-
   rw [hlapTrace (t : Real) x]
-
   set Rm := nablaRm04Field (I := I) S (t : Real) x with hRm
   set Rm2 := nabla2Rm04Field (I := I) S (t : Real) x with hRm2
   set roughT := metricTrace0S2TensorInBasis (I := I) (basis x) (gInv (t : Real) x)
     (nabla3Rm04Field (I := I) S (t : Real) x) with hroughT
-
   rw [hsplit]
-
   rw [nablaRm04ReactionIntrinsic, nabla2Rm04NormSqIntrinsic]
-
   have hsub :
       inner0S (I := I) (S.base.metric (t : Real)) x 5 (Tdot (t : Real) x - roughT) Rm =
         inner0S (I := I) (S.base.metric (t : Real)) x 5 (Tdot (t : Real) x) Rm -
           inner0S (I := I) (S.base.metric (t : Real)) x 5 roughT Rm := by
     simp only [inner0S, MetricFiberData.inner, map_sub, LinearMap.sub_apply]
   rw [hsub]
-
-
-
   ring
 
 end HeatEquation

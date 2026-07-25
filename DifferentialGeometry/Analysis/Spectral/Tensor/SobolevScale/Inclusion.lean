@@ -274,7 +274,6 @@ namespace tensorHs
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
 
 open scoped Classical in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleEquivL2_smul_basisVec

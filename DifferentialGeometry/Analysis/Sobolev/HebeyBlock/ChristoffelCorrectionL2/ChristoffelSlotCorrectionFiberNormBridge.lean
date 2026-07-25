@@ -65,7 +65,6 @@ private lemma intrinsic_norm_sq_neg_sum_add_sum_le_two_mul
   exact h_sq.trans h_abc
 
 variable (I M) in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem intrinsicG1G3BridgePouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -178,7 +177,6 @@ theorem intrinsicG1G3BridgePouTsupport
   exact h_X_sq_bound.trans h_dominate
 
 variable (I M) in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_intrinsic_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

@@ -302,7 +302,6 @@ instance tangentSpace_moduleFree (x : M) :
   inferInstanceAs (Module.Free 𝕜 E)
 
 omit [FiniteDimensional 𝕜 E] in
-
 private theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
     (inferInstance : TopologicalSpace (Tensor0SSpace s I x)) =
     (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) :=
@@ -362,7 +361,6 @@ theorem finrank_tensorRSSpace [CompleteSpace 𝕜] (r s : ℕ) (x : M) :
     finrank_tensor0SSpace r x, finrank_tensor0SSpace s x, ← pow_add]
 
 omit [FiniteDimensional 𝕜 E] in
-
 private theorem tensor0SSpace_type_eq (s : ℕ) (x : M) :
     Tensor0SSpace s I x =
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 := by
@@ -485,7 +483,6 @@ def tensorRSSpace_continuousLinearEquiv (r s : ℕ) (x : M) :
     (tensor0SSpace_continuousLinearEquiv (I := I) s x)
 
 omit [FiniteDimensional 𝕜 E] in
-
 private theorem tensorRSSpace_type_eq (r s : ℕ) (x : M) :
     TensorRSSpace r s I x =
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E) 𝕜 →L[𝕜]
@@ -678,24 +675,20 @@ noncomputable instance tensorRSBundle_smooth [CompleteSpace 𝕜] (r s : ℕ) :
   ContMDiffVectorBundle.continuousLinearMap
 
 omit [FiniteDimensional 𝕜 E] in
-
 theorem tensor0SSpace_continuousLinearEquiv_apply (s : ℕ) (x : M)
     (T : Tensor0SSpace s I x) :
     tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x T = T := rfl
 
 omit [FiniteDimensional 𝕜 E] in
-
 theorem tensor0SSpace_continuousLinearEquiv_symm_apply (s : ℕ) (x : M)
     (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
     (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm T = T := rfl
 
 omit [FiniteDimensional 𝕜 E] in
-
 theorem tensor0SSpace_continuousLinearEquiv_coe (s : ℕ) (x : M) :
     (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x : _ → _) = id := rfl
 
 omit [FiniteDimensional 𝕜 E] in
-
 theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
     ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
 omit [FiniteDimensional 𝕜 E] in

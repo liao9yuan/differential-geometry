@@ -35,7 +35,6 @@ theorem modelProductₗ_apply (s q : ℕ)
   rfl
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-
 theorem modelProduct_norm_bound (s q : ℕ) (f : MLF s) (g : MLF q) :
     ‖modelProduct (𝕜 := 𝕜) (F := F) s q f g‖ ≤ 1 * ‖f‖ * ‖g‖ := by
   rw [one_mul]
@@ -64,14 +63,12 @@ theorem modelProductL_apply (s q : ℕ)
   rfl
 
 omit [CompleteSpace 𝕜] in
-
 theorem isBoundedBilinearMap_modelProduct (s q : ℕ) :
     IsBoundedBilinearMap 𝕜
       (fun p : (MLF s) × (MLF q) => modelProduct (𝕜 := 𝕜) (F := F) s q p.1 p.2) :=
   (modelProductL (𝕜 := 𝕜) (F := F) s q).isBoundedBilinearMap
 
 omit [CompleteSpace 𝕜] in
-
 theorem hasFDerivAt_modelProduct {X : Type*} [NormedAddCommGroup X] [NormedSpace 𝕜 X]
     (s q : ℕ) {f : X → MLF s} {g : X → MLF q}
     {f' : X →L[𝕜] (MLF s)} {g' : X →L[𝕜] (MLF q)} {x : X}

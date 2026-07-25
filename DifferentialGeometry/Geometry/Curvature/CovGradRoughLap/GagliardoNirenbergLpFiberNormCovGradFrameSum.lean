@@ -43,7 +43,8 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace r (s + 1) I x)
@@ -68,9 +69,9 @@ private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
   congr 1
   exact (Fin.comp_cons e a J).symm
 
-set_option maxHeartbeats 1600000 in
 
-omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : Tensor0SBundle.TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -106,9 +107,9 @@ theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-set_option maxHeartbeats 1600000 in
 
-omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x)
@@ -120,10 +121,9 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
   classical
   set T : Tensor0SBundle.TensorRSSpace r (s + 1) I x :=
     Tensor0SBundle.covGradBundleEquiv (I := I) (M := M) r s x Φ with hT_def
-
-  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r (s + 1) x T e hn
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r
+    (s + 1) x T e hn
     horth]
-
   have hΦeq : ∀ a : Fin n,
       Φ (e a) = (Tensor0SBundle.covGradBundleEquiv (I := I) (M := M) r s x).symm T (e a) := by
     intro a
@@ -136,11 +136,12 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
             n e K (Fin.cons a J)) ^ 2 := by
     intro a
     rw [hΦeq a]
-    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r s x _ e hn horth]
+    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g
+      r s x _ e hn horth]
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
-    rw [fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons (I := I) (M := M) g r s x T e K J a]
+    rw [fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons (I := I) (M := M) g r s x T e
+      K J a]
   rw [Finset.sum_congr rfl (fun a _ => hper a)]
-
   have hcons_bij : Function.Bijective
       (fun p : Fin n × (Fin s → Fin n) => Fin.cons p.1 p.2 : _ → (Fin (s + 1) → Fin n)) := by
     refine ⟨fun p₁ p₂ hp => ?_, fun J'' => ⟨(J'' 0, Fin.tail J''), ?_⟩⟩
@@ -149,7 +150,6 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
       simp only [Fin.cons_zero, Fin.tail_cons] at h0 ht
       exact Prod.ext h0 ht
     · exact Fin.cons_self_tail J''
-
   have hperK : ∀ K : Fin r → Fin n,
       (∑ a : Fin n, ∑ J : Fin s → Fin n,
           (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (s + 1) T
@@ -175,11 +175,11 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
         (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (s + 1) T
           n e K J'') ^ 2)
       (fun p => rfl)
-
   conv_rhs => rw [Finset.sum_comm]
   exact (Finset.sum_congr rfl (fun K _ => hperK K)).symm
 
-omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x) (b : ℝ)

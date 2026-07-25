@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmC
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
@@ -24,8 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -51,6 +49,27 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+private lemma real_sixteen_K_bound {S S12 S34 W1 W2 W3 W4 K : ℝ}
+    (h1 : W1 ≤ K) (h2 : W2 ≤ K) (h3 : W3 ≤ K) (h4 : W4 ≤ K)
+    (h12 : S12 ≤ 2 * W1 + 2 * W2) (h34 : S34 ≤ 2 * W3 + 2 * W4)
+    (hs : S ≤ 2 * S12 + 2 * S34) : S ≤ 16 * K := by
+  linarith
+
+private lemma real_ten_R2_bound {S AB A B C R2 : ℝ}
+    (h1 : S ≤ 2 * AB + 2 * C) (h2 : AB ≤ 2 * A + 2 * B)
+    (hA : A ≤ R2) (hB : B ≤ R2) (hC : C ≤ R2) : S ≤ 10 * R2 := by
+  linarith
+
+private lemma real_quarter_ten_bound {S R2 : ℝ} (hS : S ≤ 10 * R2) (hS0 : 0 ≤ S) :
+    (1 / 2 : ℝ) ^ 2 * S ≤ 10 * R2 := by
+  nlinarith [hS, hS0]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -132,18 +151,16 @@ lemma bdRfns_iCG_koszulCovecCc_le (g₀ : SmoothRiemannianMetric I M)
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB, hbC,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PA,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PC]
-  nlinarith [hsum, hR2_nn,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
+    exact real_ten_R2_bound h1 h2 hbA hbB hbC
+  exact real_quarter_ten_bound hsum
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC))
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
-        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovGradRaw (I := I) (M := M) g₀ T)).toSection x) ≤
+        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovGradRaw (I := I) (M := M) g₀ T)).toSection x)
+          ≤
       10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) T).toSection x) := by
   classical
@@ -214,17 +231,15 @@ lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMe
     have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + i) x PA PB
     rw [hnegC] at h1
     rw [show PA + PB - PC = (PA + PB) + (-PC) from sub_eq_add_neg _ _]
-    nlinarith [h1, h2, hbA, hbB, hbC,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PA,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PB,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x PC]
-  nlinarith [hsum, hR2_nn,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
+    exact real_ten_R2_bound h1 h2 hbA hbB hbC
+  exact real_quarter_ten_bound hsum
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC))
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [BoundarylessManifold I M] in
-theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ Csob : ℝ, 0 ≤ Csob ∧
       ∀ (T : SmoothCcTensor g₀ 0 2) {R : ℝ} (_hR : 0 ≤ R),
@@ -415,7 +430,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
       sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T))))).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-          ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+          ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection
+            x) *
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
           ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -430,7 +446,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
     rw [appCcRS_toSection]
     exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 2 6 2 x _ _
   have hPTO : riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-      ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ CP 0 := by
+      ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤
+        CP 0 := by
     have h := hCP (realizedFam (I := I) g₀ T 0 hδ hδZ s)
       (convexPerturbation (I := I) g₀ T 0 s) htie0 hδ_le' hδ0 hδP 0 x
     rw [iteratedCovGrad_zero] at h
@@ -438,7 +455,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
     rw [Combinatorics.antidiagonalTupleGridWindow, Finset.sum_range_one,
       Combinatorics.antidiagonalTupleGrid_zero, mul_one]
   have hDT4cap : riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-      ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) ≤ C4 0 := by
+      ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        4).toSection x) ≤ C4 0 := by
     have h := hC4 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
       (convexPerturbation (I := I) g₀ T 0 s) htie0 hδ_le' hδ0 hδP 0 x
     rw [iteratedCovGrad_zero] at h
@@ -543,7 +561,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau1 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -576,7 +595,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau2 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -609,7 +629,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau3 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -642,7 +663,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -716,20 +738,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau3 T T).toSection x +
         (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T).toSection x)
-    nlinarith [hW1, hW2, hW3, hW4, hadd12, hadd34, hsub,
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 4 x
-        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau1 T T).toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 4 x
-        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau2 T T).toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 4 x
-        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau3 T T).toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 4 x
-        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T).toSection x),
-      mul_nonneg (hC4_nn 0) hZB_nn]
+    exact real_sixteen_K_bound hW1 hW2 hW3 hW4 hadd12 hadd34 hsub
   have hperm6 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
       ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -891,7 +900,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T))))).toSection x) :=
         mul_le_mul_of_nonneg_right hsq1 hfnn
     _ ≤ 4 * (riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-            ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+            ((armPairTraceOpCc (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1125,7 +1135,8 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
             ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T).toSection x) := by
-        have h := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+        have h := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I)
+          (M := M)
           g₀ 0 6 σw
           (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1166,7 +1177,8 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
           ((cometricDoubleTraceField (I := I) g₀ 4).toSection x) :=
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 6 4 x _
       calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
-            ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+            ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+              (cometricDoubleTraceField (I := I) g₀ 4)
               (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
                 (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
                   (slotExtendIter (I := I) (M := M) g₀ 0 4 2

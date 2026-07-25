@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 
 
 
@@ -66,7 +64,7 @@ def RicciLowerBoundFromPinchingOn
 
 
 def PinchingDecayWeightOn
-    (lambda mu nu weight : Real -> M -> Real) (delta : Real) : Prop :=
+    (_lambda _mu _nu weight : Real -> M -> Real) (delta : Real) : Prop :=
   ∀ (t : Real) (x : M), 0 < delta ∧ 0 ≤ weight t x
 
 
@@ -204,41 +202,55 @@ theorem palpha_over_qbeta_formula
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
-    (hphiDt : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hphiDt : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       HasDerivWithinAt (fun s : Real => phi s x)
         (phiLap (t : Real) x + phiHeat (t : Real) x)
         D.carrier (t : Real))
-    (hpsiDt : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hpsiDt : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       HasDerivWithinAt (fun s : Real => psi s x)
         (psiLap (t : Real) x + psiHeat (t : Real) x)
         D.carrier (t : Real))
-    (hphiLap : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hphiLap : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       phiLap (t : Real) x =
-        DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real) (phi (t : Real)) x)
-    (hpsiLap : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+        DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real) (phi (t : Real))
+          x)
+    (hpsiLap : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       psiLap (t : Real) x =
-        DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real) (psi (t : Real)) x)
-    (hphiDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+        DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real) (psi (t : Real))
+          x)
+    (hphiDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      y,
       MDifferentiableAt I 𝓘(Real, Real) (phi (t : Real)) y)
-    (hpsiDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    (hpsiDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      y,
       MDifferentiableAt I 𝓘(Real, Real) (psi (t : Real)) y)
-    (hphiPos : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    (hphiPos : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      y,
       0 < phi (t : Real) y)
-    (hpsiPos : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    (hpsiPos : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      y,
       0 < psi (t : Real) y)
-    (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
-    (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
-    (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+      D) y,
       MDiffAt (T% fun z : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
-    (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+      D) y,
       MDiffAt (T% fun z : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :

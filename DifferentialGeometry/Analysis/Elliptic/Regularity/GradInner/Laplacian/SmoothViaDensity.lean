@@ -70,7 +70,7 @@ theorem smoothCase_full_unconditional_of_christoffel_discharge
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -127,7 +127,7 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_discharge
     smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
+  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_christoffel_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 

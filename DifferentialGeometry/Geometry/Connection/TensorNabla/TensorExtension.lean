@@ -423,7 +423,147 @@ omit [NeZero (Module.finrank ℝ E)] in
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (x : M) :
     tensor02CovFun cov T x = tensor02CovAt cov T x := rfl
 
-set_option maxHeartbeats 800000 in
+
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma tensor02CovFun_add_of_mdiff
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    {T T' : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
+    (hT : MDiffAtTensor02 T x) (hT' : MDiffAtTensor02 T' x) :
+    tensor02CovFun cov (T + T') x = tensor02CovFun cov T x + tensor02CovFun cov T' x := by
+  classical
+  have hT_t : MDiffAtTensor02 T x := hT
+  have hT'_t : MDiffAtTensor02 T' x := hT'
+  have hsum_T : MDiffAtTensor02 (T + T') x :=
+    mdifferentiableAt_add_section hT hT'
+  apply ContinuousLinearMap.ext
+  intro v
+  apply ContinuousLinearMap.ext
+  intro y
+  apply ContinuousLinearMap.ext
+  intro z
+  set X : Π x : M, TangentSpace I x := FiberBundle.extend E v
+  set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
+  set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
+  have hX : MDiffAt (T% X) x := mdifferentiableAt_extend ..
+  have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
+  have hZ : MDiffAt (T% Z) x := mdifferentiableAt_extend ..
+  have hXx : X x = v := by simp [X]
+  have hYx : Y x = y := by simp [Y]
+  have hZx : Z x = z := by simp [Z]
+  change tensor02CovFun cov (T + T') x v y z =
+    ((tensor02CovFun cov T x) + (tensor02CovFun cov T' x)) v y z
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.add_apply]
+  change tensor02CovFun cov (T + T') x v y z =
+    tensor02CovFun cov T x v y z + tensor02CovFun cov T' x v y z
+  rw [show v = X x from hXx.symm, show y = Y x from hYx.symm,
+      show z = Z x from hZx.symm]
+  rw [tensor02CovFun_apply, tensor02CovFun_apply, tensor02CovFun_apply]
+  rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ,
+      tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ,
+      tensor02CovAt_apply_of_diff_extend cov hT'_t hX hY hZ]
+  change extDerivFun (I := I) (fun b => (T + T') b (Y b) (Z b)) x (X x)
+      - (T + T') x (cov.toFun Y x (X x)) (Z x)
+      - (T + T') x (Y x) (cov.toFun Z x (X x)) =
+    (extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x (X x)
+      - T x (cov.toFun Y x (X x)) (Z x)
+      - T x (Y x) (cov.toFun Z x (X x))) +
+    (extDerivFun (I := I) (fun b => T' b (Y b) (Z b)) x (X x)
+      - T' x (cov.toFun Y x (X x)) (Z x)
+      - T' x (Y x) (cov.toFun Z x (X x)))
+  have hpair_T : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => T b (Y b) (Z b)) x :=
+    mdifferentiableAt_tensor02_pairing hT_t hY hZ
+  have hpair_T' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => T' b (Y b) (Z b)) x :=
+    mdifferentiableAt_tensor02_pairing hT'_t hY hZ
+  have hpair_eq : (fun b : M => (T + T') b (Y b) (Z b)) =
+      (fun b : M => T b (Y b) (Z b)) + (fun b : M => T' b (Y b) (Z b)) := by
+    funext b
+    change (T + T') b (Y b) (Z b) = T b (Y b) (Z b) + T' b (Y b) (Z b)
+    have : (T + T') b = T b + T' b := rfl
+    rw [this, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+  have hext_add : extDerivFun (I := I) (fun b => (T + T') b (Y b) (Z b)) x =
+      extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x +
+      extDerivFun (I := I) (fun b => T' b (Y b) (Z b)) x := by
+    rw [hpair_eq, extDerivFun_add hpair_T hpair_T']
+  rw [hext_add, ContinuousLinearMap.add_apply]
+  have h_add_one : (T + T') x (cov.toFun Y x (X x)) =
+      T x (cov.toFun Y x (X x)) + T' x (cov.toFun Y x (X x)) := by
+    have : (T + T') x = T x + T' x := rfl
+    rw [this, ContinuousLinearMap.add_apply]
+  have h_add_two : (T + T') x (Y x) =
+      T x (Y x) + T' x (Y x) := by
+    have : (T + T') x = T x + T' x := rfl
+    rw [this, ContinuousLinearMap.add_apply]
+  rw [h_add_one, h_add_two]
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+  ring
+
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma tensor02CovFun_leibniz_of_mdiff
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
+    {g : M → ℝ} {x : M}
+    (hT : MDiffAtTensor02 T x) (hg : MDifferentiableAt I 𝓘(ℝ, ℝ) g x) :
+    tensor02CovFun cov (g • T) x =
+      g x • tensor02CovFun cov T x + (extDerivFun (I := I) g x).smulRight (T x) := by
+  classical
+  have hT_t : MDiffAtTensor02 T x := hT
+  have hsum_T : MDiffAtTensor02 (g • T) x := hg.smul_section hT
+  apply ContinuousLinearMap.ext
+  intro v
+  apply ContinuousLinearMap.ext
+  intro y
+  apply ContinuousLinearMap.ext
+  intro z
+  set X : Π x : M, TangentSpace I x := FiberBundle.extend E v
+  set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
+  set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
+  have hX : MDiffAt (T% X) x := mdifferentiableAt_extend ..
+  have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
+  have hZ : MDiffAt (T% Z) x := mdifferentiableAt_extend ..
+  have hXx : X x = v := by simp [X]
+  have hYx : Y x = y := by simp [Y]
+  have hZx : Z x = z := by simp [Z]
+  rw [show v = X x from hXx.symm, show y = Y x from hYx.symm,
+      show z = Z x from hZx.symm]
+  rw [tensor02CovFun_apply, tensor02CovFun_apply]
+  rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ]
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smulRight_apply,
+      ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smul_apply]
+  rw [tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ]
+  change extDerivFun (I := I) (fun b => (g • T) b (Y b) (Z b)) x (X x)
+      - (g • T) x (cov.toFun Y x (X x)) (Z x)
+      - (g • T) x (Y x) (cov.toFun Z x (X x)) =
+    g x • (extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x (X x)
+      - T x (cov.toFun Y x (X x)) (Z x)
+      - T x (Y x) (cov.toFun Z x (X x))) +
+    extDerivFun (I := I) g x (X x) • T x (Y x) (Z x)
+  set h : M → ℝ := fun b => T b (Y b) (Z b) with hh_def
+  have hh : MDifferentiableAt I 𝓘(ℝ, ℝ) h x :=
+    mdifferentiableAt_tensor02_pairing hT_t hY hZ
+  have hg' : MDifferentiableAt I 𝓘(ℝ, ℝ) g x := hg
+  have hpair_eq : (fun b : M => (g • T) b (Y b) (Z b)) = (fun b : M => g b * h b) := by
+    funext b
+    change (g • T) b (Y b) (Z b) = g b * h b
+    have : (g • T) b = g b • T b := rfl
+    rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  rw [hpair_eq, extDerivFun_mul_apply hg' hh]
+  have h_smul_one : (g • T) x (cov.toFun Y x (X x)) (Z x) =
+      g x • T x (cov.toFun Y x (X x)) (Z x) := by
+    have : (g • T) x = g x • T x := rfl
+    rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+  have h_smul_two : (g • T) x (Y x) (cov.toFun Z x (X x)) =
+      g x • T x (Y x) (cov.toFun Z x (X x)) := by
+    have : (g • T) x = g x • T x := rfl
+    rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+  rw [h_smul_one, h_smul_two]
+  have hhx : h x = T x (Y x) (Z x) := rfl
+  rw [hhx]
+  simp only [smul_eq_mul]
+  ring
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor02CovFun_isCovariantDerivativeOn
@@ -432,133 +572,8 @@ lemma tensor02CovFun_isCovariantDerivativeOn
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
       (E →L[ℝ] E →L[ℝ] ℝ)
       (tensor02CovFun cov) Set.univ where
-  add {T T'} {x} hT hT' _hx := by
-    classical
-    have hT_t : MDiffAtTensor02 T x := hT
-    have hT'_t : MDiffAtTensor02 T' x := hT'
-    have hsum_T : MDiffAtTensor02 (T + T') x :=
-      mdifferentiableAt_add_section hT hT'
-    apply ContinuousLinearMap.ext
-    intro v
-    apply ContinuousLinearMap.ext
-    intro y
-    apply ContinuousLinearMap.ext
-    intro z
-    set X : Π x : M, TangentSpace I x := FiberBundle.extend E v
-    set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
-    set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
-    have hX : MDiffAt (T% X) x := mdifferentiableAt_extend ..
-    have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
-    have hZ : MDiffAt (T% Z) x := mdifferentiableAt_extend ..
-    have hXx : X x = v := by simp [X]
-    have hYx : Y x = y := by simp [Y]
-    have hZx : Z x = z := by simp [Z]
-    change tensor02CovFun cov (T + T') x v y z =
-      ((tensor02CovFun cov T x) + (tensor02CovFun cov T' x)) v y z
-    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
-        ContinuousLinearMap.add_apply]
-    change tensor02CovFun cov (T + T') x v y z =
-      tensor02CovFun cov T x v y z + tensor02CovFun cov T' x v y z
-    rw [show v = X x from hXx.symm, show y = Y x from hYx.symm,
-        show z = Z x from hZx.symm]
-    rw [tensor02CovFun_apply, tensor02CovFun_apply, tensor02CovFun_apply]
-    rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ,
-        tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ,
-        tensor02CovAt_apply_of_diff_extend cov hT'_t hX hY hZ]
-    change extDerivFun (I := I) (fun b => (T + T') b (Y b) (Z b)) x (X x)
-        - (T + T') x (cov.toFun Y x (X x)) (Z x)
-        - (T + T') x (Y x) (cov.toFun Z x (X x)) =
-      (extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x (X x)
-        - T x (cov.toFun Y x (X x)) (Z x)
-        - T x (Y x) (cov.toFun Z x (X x))) +
-      (extDerivFun (I := I) (fun b => T' b (Y b) (Z b)) x (X x)
-        - T' x (cov.toFun Y x (X x)) (Z x)
-        - T' x (Y x) (cov.toFun Z x (X x)))
-    have hpair_T : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => T b (Y b) (Z b)) x :=
-      mdifferentiableAt_tensor02_pairing hT_t hY hZ
-    have hpair_T' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => T' b (Y b) (Z b)) x :=
-      mdifferentiableAt_tensor02_pairing hT'_t hY hZ
-    have hpair_eq : (fun b : M => (T + T') b (Y b) (Z b)) =
-        (fun b : M => T b (Y b) (Z b)) + (fun b : M => T' b (Y b) (Z b)) := by
-      funext b
-      change (T + T') b (Y b) (Z b) = T b (Y b) (Z b) + T' b (Y b) (Z b)
-      have : (T + T') b = T b + T' b := rfl
-      rw [this, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
-    have hext_add : extDerivFun (I := I) (fun b => (T + T') b (Y b) (Z b)) x =
-        extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x +
-        extDerivFun (I := I) (fun b => T' b (Y b) (Z b)) x := by
-      rw [hpair_eq, extDerivFun_add hpair_T hpair_T']
-    rw [hext_add, ContinuousLinearMap.add_apply]
-    have h_add_one : (T + T') x (cov.toFun Y x (X x)) =
-        T x (cov.toFun Y x (X x)) + T' x (cov.toFun Y x (X x)) := by
-      have : (T + T') x = T x + T' x := rfl
-      rw [this, ContinuousLinearMap.add_apply]
-    have h_add_two : (T + T') x (Y x) =
-        T x (Y x) + T' x (Y x) := by
-      have : (T + T') x = T x + T' x := rfl
-      rw [this, ContinuousLinearMap.add_apply]
-    rw [h_add_one, h_add_two]
-    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
-    ring
-  leibniz {T g x} hT hg _hx := by
-    classical
-    have hT_t : MDiffAtTensor02 T x := hT
-    have hsum_T : MDiffAtTensor02 (g • T) x := hg.smul_section hT
-    apply ContinuousLinearMap.ext
-    intro v
-    apply ContinuousLinearMap.ext
-    intro y
-    apply ContinuousLinearMap.ext
-    intro z
-    set X : Π x : M, TangentSpace I x := FiberBundle.extend E v
-    set Y : Π x : M, TangentSpace I x := FiberBundle.extend E y
-    set Z : Π x : M, TangentSpace I x := FiberBundle.extend E z
-    have hX : MDiffAt (T% X) x := mdifferentiableAt_extend ..
-    have hY : MDiffAt (T% Y) x := mdifferentiableAt_extend ..
-    have hZ : MDiffAt (T% Z) x := mdifferentiableAt_extend ..
-    have hXx : X x = v := by simp [X]
-    have hYx : Y x = y := by simp [Y]
-    have hZx : Z x = z := by simp [Z]
-    rw [show v = X x from hXx.symm, show y = Y x from hYx.symm,
-        show z = Z x from hZx.symm]
-    rw [tensor02CovFun_apply, tensor02CovFun_apply]
-    rw [tensor02CovAt_apply_of_diff_extend cov hsum_T hX hY hZ]
-    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.smulRight_apply,
-        ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.smul_apply]
-    rw [tensor02CovAt_apply_of_diff_extend cov hT_t hX hY hZ]
-    change extDerivFun (I := I) (fun b => (g • T) b (Y b) (Z b)) x (X x)
-        - (g • T) x (cov.toFun Y x (X x)) (Z x)
-        - (g • T) x (Y x) (cov.toFun Z x (X x)) =
-      g x • (extDerivFun (I := I) (fun b => T b (Y b) (Z b)) x (X x)
-        - T x (cov.toFun Y x (X x)) (Z x)
-        - T x (Y x) (cov.toFun Z x (X x))) +
-      extDerivFun (I := I) g x (X x) • T x (Y x) (Z x)
-    set h : M → ℝ := fun b => T b (Y b) (Z b) with hh_def
-    have hh : MDifferentiableAt I 𝓘(ℝ, ℝ) h x :=
-      mdifferentiableAt_tensor02_pairing hT_t hY hZ
-    have hg' : MDifferentiableAt I 𝓘(ℝ, ℝ) g x := hg
-    have hpair_eq : (fun b : M => (g • T) b (Y b) (Z b)) = (fun b : M => g b * h b) := by
-      funext b
-      change (g • T) b (Y b) (Z b) = g b * h b
-      have : (g • T) b = g b • T b := rfl
-      rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
-    rw [hpair_eq, extDerivFun_mul_apply hg' hh]
-    have h_smul_one : (g • T) x (cov.toFun Y x (X x)) (Z x) =
-        g x • T x (cov.toFun Y x (X x)) (Z x) := by
-      have : (g • T) x = g x • T x := rfl
-      rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
-    have h_smul_two : (g • T) x (Y x) (cov.toFun Z x (X x)) =
-        g x • T x (Y x) (cov.toFun Z x (X x)) := by
-      have : (g • T) x = g x • T x := rfl
-      rw [this, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
-    rw [h_smul_one, h_smul_two]
-    have hhx : h x = T x (Y x) (Z x) := rfl
-    rw [hhx]
-    simp only [smul_eq_mul]
-    ring
+  add hT hT' _hx := tensor02CovFun_add_of_mdiff cov hT hT'
+  leibniz hT hg _hx := tensor02CovFun_leibniz_of_mdiff cov hT hg
 
 def tensor02Cov
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
@@ -602,12 +617,14 @@ def metricTensor02 (g : SmoothRiemannianMetric I M) :
     Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   fun x => g.inner x
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] lemma metricTensor02_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     metricTensor02 g x v w = g.inner x v w := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma metricTensor02_mdiff
     (g : SmoothRiemannianMetric I M) (x : M) :
     MDiffAtTensor02 (metricTensor02 (I := I) g) x := by
@@ -664,7 +681,8 @@ omit [SigmaCompactSpace M] [T2Space M] in
       ((cotangentCov (LeviCivita (I := I) g)).toFun
         (extDerivFun (I := I) f) x v) w := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private theorem tensor02Cov_apply_one_contMDiff
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -682,7 +700,8 @@ private theorem tensor02Cov_apply_one_contMDiff
     (b := fun b : M => b)
     (ϕ := fun b => T b) (v := fun b => Y b) hT hY
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private theorem tensor02Cov_pairing_contMDiff
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -783,7 +802,47 @@ private theorem tensor02Cov_triple_apply_smooth
   intro x
   exact h_eq x
 
-set_option maxHeartbeats 800000 in
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+private lemma tensor02Cov_toFun_contMDiff
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
+    (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (hT_inf : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) x
+        (T x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))) ∞
+      (fun x : M => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := fun x : M => TangentSpace I x →L[ℝ]
+          (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ))) x
+        ((tensor02Cov cov).toFun T x)) := by
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ]
+      (TangentSpace I x →L[ℝ] ℝ))
+    (φ := fun x => (tensor02Cov cov).toFun T x)
+  intro Y
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+    (φ := fun x => (tensor02Cov cov).toFun T x (Y x))
+  intro Z
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun _ : M => ℝ)
+    (φ := fun x => ((tensor02Cov cov).toFun T x (Y x)) (Z x))
+  intro W
+  have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x => (((tensor02Cov cov).toFun T x (Y x)) (Z x)) (W x)) :=
+    tensor02Cov_triple_apply_smooth cov hT_inf Y Z W
+  intro x
+  rw [contMDiffAt_section]
+  refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
+  filter_upwards with y
+  change (((tensor02Cov cov).toFun T y (Y y)) (Z y)) (W y) =
+    (trivializationAt ℝ (Bundle.Trivial M ℝ) x
+      ⟨y, (((tensor02Cov cov).toFun T y (Y y)) (Z y)) (W y)⟩).2
+  rfl
+
 
 instance tensor02Cov_isContMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -799,38 +858,7 @@ instance tensor02Cov_isContMDiff
           have h_le : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) + 1 := by
             rw [ENat.coe_top_add_one]
           exact contMDiffOn_univ.mp (hT.of_le h_le)
-        have hglobal : ContMDiff I
-            (I.prod 𝓘(ℝ, E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))) ∞
-            (fun x : M => TotalSpace.mk'
-              (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
-              (E := fun x : M => TangentSpace I x →L[ℝ]
-                (TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ))) x
-              ((tensor02Cov cov).toFun T x)) := by
-          apply cotangentCov_clmSection_smooth_aux
-            (V₂ := fun x : M => TangentSpace I x →L[ℝ]
-              (TangentSpace I x →L[ℝ] ℝ))
-            (φ := fun x => (tensor02Cov cov).toFun T x)
-          intro Y
-          apply cotangentCov_clmSection_smooth_aux
-            (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
-            (φ := fun x => (tensor02Cov cov).toFun T x (Y x))
-          intro Z
-          apply cotangentCov_clmSection_smooth_aux
-            (V₂ := fun _ : M => ℝ)
-            (φ := fun x => ((tensor02Cov cov).toFun T x (Y x)) (Z x))
-          intro W
-          have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
-              (fun x => (((tensor02Cov cov).toFun T x (Y x)) (Z x)) (W x)) :=
-            tensor02Cov_triple_apply_smooth cov hT_inf Y Z W
-          intro x
-          rw [contMDiffAt_section]
-          refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
-          filter_upwards with y
-          change (((tensor02Cov cov).toFun T y (Y y)) (Z y)) (W y) =
-            (trivializationAt ℝ (Bundle.Trivial M ℝ) x
-              ⟨y, (((tensor02Cov cov).toFun T y (Y y)) (Z y)) (W y)⟩).2
-          rfl
-        exact hglobal.contMDiffOn }
+        exact (tensor02Cov_toFun_contMDiff cov T hT_inf).contMDiffOn }
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

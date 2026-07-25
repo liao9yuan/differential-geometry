@@ -60,14 +60,12 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
           (gradInnerLaplacianCandidateUnconditional
             (I := I) (M := M) g φ hu_h)) := by
   classical
-
   have h_LHS_conv : Tendsto
       (fun n => gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n)))
       atTop (𝓝 (gradInnerCLM (I := I) (M := M) g φ u_h)) := by
     exact ((gradInnerCLM (I := I) (M := M) g φ).continuous.tendsto _).comp
       h_conv_H1Compl
-
   have h_RHS_conv : Tendsto
       (fun n => H1ComplToLp (I := I) (M := M) g
         (resolvent (I := I) (M := M) g
@@ -89,7 +87,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
           (resolvent (I := I) (M := M) g f)) :=
       h_H1ComplToLp_cont.comp h_resolvent_cont
     exact (h_composition_cont.tendsto _).comp h_conv_candidate
-
   have h_smooth_eq : ∀ n,
       gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n)) =
@@ -100,7 +97,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
               (I := I) (M := M) g (h_smooth_seq n)))) := fun n =>
     smoothCase_via_candidate_identification
       (I := I) (M := M) g φ (h_smooth_seq n) (h_smooth_identity n)
-
   have h_seq_eq : (fun n => gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g (h_smooth_seq n))) =
       (fun n => H1ComplToLp (I := I) (M := M) g
@@ -110,7 +106,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
               (I := I) (M := M) g (h_smooth_seq n))))) := by
     funext n
     exact h_smooth_eq n
-
   rw [h_seq_eq] at h_LHS_conv
   exact tendsto_nhds_unique h_LHS_conv h_RHS_conv
 

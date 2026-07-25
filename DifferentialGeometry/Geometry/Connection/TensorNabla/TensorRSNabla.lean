@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SNabla
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 400000
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative

@@ -43,9 +43,34 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+noncomputable local instance secondVariationEndoNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationEndoNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance secondVariationBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance secondVariationTrilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance secondVariationTrilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :=
+  ContinuousLinearMap.toNormedSpace
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
+open Geometry.Riemannian.CovariantDerivativeAlong
 
 def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
     (g : SmoothRiemannianMetric I M)
@@ -79,7 +104,6 @@ lemma indexForm_eq_intervalIntegral
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
@@ -100,8 +124,26 @@ lemma continuousOn_g_inner_along_curve
   intro t _ht
   rfl
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem riemannOp_along_curve_continuousOn
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
+    {v w z : ∀ t : ℝ, TangentSpace I (γ t)}
+    (hγ : ContinuousOn γ s)
+    (hv : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (v t) : TangentBundle I M)) s)
+    (hw : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (w t) : TangentBundle I M)) s)
+    (hz : ContinuousOn (fun t : ℝ => (TotalSpace.mk' E
+      (E := (TangentSpace I : M → Type _)) (γ t) (z t) : TangentBundle I M)) s) :
+    ContinuousOn
+      (fun t : ℝ => (TotalSpace.mk' E
+        (E := (TangentSpace I : M → Type _)) (γ t)
+        ((DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (v t) (w t) (z t)) : TangentBundle I M)) s :=
+  ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
+    (I := I) g).comp_continuousOn hγ).clm_bundle_apply hv).clm_bundle_apply
+      hw).clm_bundle_apply hz
 
 theorem second_variation_of_arcLength_eq_indexForm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
@@ -343,7 +385,8 @@ theorem second_variation_of_arcLength_eq_indexForm
       with hγ'def
     have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
       have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
-        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
+        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
+          (fun v : ℝ => ((0 : ℝ), v)) :=
           contMDiff_const.prodMk contMDiff_id
         exact (hf : ContMDiff _ _ _ _).comp hincl
       exact hfγ ▸ hsmooth_central
@@ -383,7 +426,8 @@ theorem second_variation_of_arcLength_eq_indexForm
         refine (hasDerivWithinAt_const t (Set.Icc 0 L) (0 : ℝ)).congr_of_mem ?_ ht
         intro s hs
         rw [hVsec_eq s]; exact hVperp s hs
-      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
+      have hmc := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
         (hVdiff t) (hγ'diff t)
       have hmcWithin : HasDerivWithinAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s))
           (g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t)
@@ -443,7 +487,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             hslicediff
           have : P (0, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (0, t) (1, 0) := rfl
           rw [this]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t
+            hslicediff).unique
             (hGslice.sqrt (by rw [hG0]; norm_num))
         rw [hPeq]; exact this
       have hP0 : P (0, t) = 0 := by
@@ -458,7 +503,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             simpa using this
           have hPis : P (0, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (0, t) (1, 0) := rfl
           rw [hPis]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t
+            hslicediff).unique
             (hGslice.sqrt (by rw [hG0]; norm_num))
         rw [this]
         have : fderiv ℝ G (0, t) (1, 0) = 0 := hgs
@@ -499,7 +545,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             simpa using this
           have hPis : P (s, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (s, t) (1, 0) := rfl
           rw [hPis]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) s t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) s t
+            hslicediff).unique
             (hGslice.sqrt (ne_of_gt hGpos))
         rw [hPeq]
         have hsqrtne : Real.sqrt (G (s, t)) ≠ 0 := by
@@ -533,7 +580,8 @@ theorem second_variation_of_arcLength_eq_indexForm
         exact this
       have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) c Wsec 0) 0 :=
         slice_secondCovDeriv_chartRep_differentiableAt (I := I) g f hf t
-      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g c Wsec velTsec 0
+      have hmc := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g c Wsec velTsec 0
         hc_smooth hWdiff hvelTdiff
       have hcovW : covDerivAlong (I := I) g c Wsec 0 = W2 t := by
         rw [hW2def, hc, hWsec, hvelTsec]
@@ -735,7 +783,8 @@ theorem second_variation_of_arcLength_eq_indexForm
           HasDerivAt (fun s : ℝ => g.inner (γ s) (Asec s) (γ' s))
             (g.inner (γ t) (Bsec t) (γ' t)) t := by
         intro t ht
-        have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Asec γ' t hγ_smooth
+        have hmc := metric_compat_hasDerivAt_inner (I := I)
+          (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Asec γ' t hγ_smooth
           (hAsecdiff t) (hγ'diff t)
         have hB2 : g.inner (γ t) (Asec t) (covDerivAlong (I := I) g γ γ' t) = 0 := by
           rw [hgeo0 t ht]; simp
@@ -797,10 +846,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             ((DifferentialGeometry.Integral.Connection.riemannOp
               (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
               (V t) (γ' t) (γ' t)) : TangentBundle I M)) (Set.Icc 0 L) :=
-        ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
-            (I := I) g).comp_continuousOn
-            (s := Set.Icc (0 : ℝ) L) hγ_C1On.continuousOn).clm_bundle_apply
-            hV_total).clm_bundle_apply hγ'_total).clm_bundle_apply hγ'_total
+        riemannOp_along_curve_continuousOn (I := I) g
+          hγ_C1On.continuousOn hV_total hγ'_total hγ'_total
       have hRcurv_cont : ContinuousOn
           (fun t : ℝ => g.inner (γ t)
             ((DifferentialGeometry.Integral.Connection.riemannOp
@@ -872,7 +919,8 @@ theorem second_variation_of_arcLength_eq_indexForm
       have hsplit : (∫ t in (0 : ℝ)..L, g_ss t / 2)
           = (∫ t in (0 : ℝ)..L, indexFormIntegrand (I := I) g γ V V t)
             + (∫ t in (0 : ℝ)..L, g.inner (γ t) (Bsec t) (γ' t)) := by
-        rw [← intervalIntegral.integral_add hindexFormIntegrand_intervalIntegrable hBsec_intervalIntegrable]
+        rw [← intervalIntegral.integral_add hindexFormIntegrand_intervalIntegrable
+          hBsec_intervalIntegrable]
         refine intervalIntegral.integral_congr (fun t ht => ?_)
         rw [Set.uIcc_of_le (le_of_lt hL)] at ht
         exact hpt_id t ht
@@ -887,9 +935,6 @@ theorem second_variation_of_arcLength_eq_indexForm
   have hmem : Set.Ioo (-δ) δ ∈ nhds (0 : ℝ) := Ioo_mem_nhds (by linarith) hδpos
   exact hg₁_deriv.congr_of_eventuallyEq
     (Filter.eventuallyEq_of_mem hmem (fun s hs => hderiv_eq s hs))
-
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 4000000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem indexFormIntegrand_intervalIntegrable
@@ -933,7 +978,7 @@ theorem indexFormIntegrand_intervalIntegrable
   have he_total : ContinuousOn
       (fun t : ℝ => (TotalSpace.mk' E (γ t) ((e i).toFun t) : TangentBundle I M))
       (Set.Icc 0 L) :=
-    DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
+    sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
       (I := I) γ (e i).toFun _hγ_C1 (fun t ht => _heDiff i t ht)
   have hA : ContinuousOn (fun t : ℝ => g.inner (γ t) ((e i).toFun t) ((e i).toFun t))
       (Set.Icc 0 L) :=
@@ -978,10 +1023,8 @@ theorem indexFormIntegrand_intervalIntegrable
           (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ))
           (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) L) t (1 : ℝ)))))
       (Set.Icc 0 L) :=
-    ((((DifferentialGeometry.Integral.Connection.riemannOp_section_continuous
-        (I := I) g).comp_continuousOn
-        (s := Set.Icc (0 : ℝ) L) _hγ_C1.continuousOn).clm_bundle_apply
-        he_total).clm_bundle_apply hVW).clm_bundle_apply hVW
+    riemannOp_along_curve_continuousOn (I := I) g
+      _hγ_C1.continuousOn he_total hVW hVW
   have hB : ContinuousOn
       (fun t : ℝ => g.inner (γ t)
         (DifferentialGeometry.Integral.Connection.riemannOp

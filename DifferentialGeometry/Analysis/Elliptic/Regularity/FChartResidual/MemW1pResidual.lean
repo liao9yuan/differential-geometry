@@ -232,8 +232,8 @@ theorem fChartResidual_memW1p_of_iteratedClosure
     (h_mem : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2)
-    (h_support : preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h =ᵐ[
-        riemannianVolumeMeasure (I := I) (M := M) g]
+    (h_support : preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h
+      =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
       fun x => rhoAlphaFun (I := I) (M := M) α x *
         preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2

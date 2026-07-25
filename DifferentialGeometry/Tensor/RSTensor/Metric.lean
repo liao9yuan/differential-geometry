@@ -76,7 +76,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.style.longLine false
 
 
 
@@ -253,7 +252,8 @@ theorem RiemannianMetric_gen.to02Tensor_apply {I : ModelWithCorners ℝ E H} {n 
     (x : M) (v : Fin 2 -> TangentSpace I x) :
     RiemannianMetric_gen.to02Tensor_gen (I := I) (n := n) g x v =
       (Bundle.ContMDiffRiemannianMetric.inner g) x (v 0) (v 1) := by
-  simp [RiemannianMetric_gen.to02Tensor_gen, to02Tensor_eCLM]
+  simp only [to02Tensor_gen, tensor0SBundle_fiber.eq_1, to02Tensor_eCLM,
+    LinearIsometryEquiv.toLinearEquiv_symm, id_eq, ContMDiffSection.coeFn_mk, Fin.isValue]
   change ((Bundle.ContMDiffRiemannianMetric.inner g) x (v 0)) (Fin.tail v 0) =
     ((Bundle.ContMDiffRiemannianMetric.inner g) x (v 0)) (v 1)
   simp [Fin.tail]

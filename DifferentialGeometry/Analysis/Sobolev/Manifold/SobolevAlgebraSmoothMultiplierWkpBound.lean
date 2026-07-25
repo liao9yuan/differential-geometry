@@ -157,7 +157,8 @@ private lemma wkpNorm_eta_target_le_split
         ENNReal.ofReal C1 * eLpNorm u p (volume.restrict Ω) := by
     intro i
     classical
-    have hae := DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
+    have hae :=
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_smul_smooth_bounded_ae
       (d := Module.finrank ℝ E) hp_one hΩ_open hη_smooth hη0_max hη1_max hu_W1p i
     have hηcwp_meas : AEStronglyMeasurable
         (fun x => η x * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
@@ -191,7 +192,8 @@ private lemma wkpNorm_eta_target_le_split
               (d := Module.finrank ℝ E) p i u Ω x) +
               fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)
             p (volume.restrict Ω)
-          ≤ eLpNorm (fun x => η x * DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
+          ≤ eLpNorm (fun x => η x *
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
               (d := Module.finrank ℝ E) p i u Ω x) p (volume.restrict Ω) +
             eLpNorm
               (fun x => (fderiv ℝ η x) (EuclideanSpace.single i (1 : ℝ)) * u x)

@@ -43,8 +43,6 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-set_option maxHeartbeats 1600000 in
-
 private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     (g : SmoothRiemannianMetric I M) (r m : ℕ)
     (w : Integral.L2.SmoothCcTensor g r m) (x : M) :
@@ -65,11 +63,9 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     intro a b
     rw [he_def]
     exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
-
   set T2 : Tensor0SBundle.TensorRSSpace r (m + 1 + 1) I x :=
     (covGrad (I := I) (M := M) g r (m + 1)
       (covGrad (I := I) (M := M) g r m w)).toSection x with hT2_def
-
   have hcomp : ∀ (i : Fin n) (K : Fin r → Fin n) (J : Fin m → Fin n),
       Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r m
           (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
@@ -82,7 +78,6 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     set ωK : Tensor0SBundle.Tensor0SSpace r I x :=
       (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e (K k))) with hωK
-
     have htuple : (fun k : Fin (m + 1 + 1) =>
           e ((Fin.cons i (Fin.cons i J) : Fin (m + 1 + 1) → Fin n) k)) =
         Fin.cons (e i) (Fin.cons (e i) (fun k : Fin m => e (J k))) := by
@@ -93,12 +88,10 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
         refine Fin.cases ?_ ?_ j
         · simp
         · intro l; simp
-
     have hbridge := secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) (M := M) g r m w
       (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i)
       (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i) x ωK
       (fun k : Fin m => e (J k))
-
     change ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace m I x from
           Integral.Connection.tensorSecondCovDeriv (I := I) g r m
             (Integral.Connection.smoothOrthoFrame (I := I) g x i)
@@ -119,7 +112,6 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
       rw [htuple]; rfl]
     rw [hT2_def]
     exact hbridge.symm
-
   have hdiag_term : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g r m x
           (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
@@ -130,15 +122,15 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
           (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
             (Fin.cons i (Fin.cons i J))) ^ 2 := by
     intro i
-    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r m x _ e hn_def
+    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g
+      r m x _ e hn_def
       horth]
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
     rw [hcomp i K J]
-
-  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r (m + 1 + 1) x T2 e
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r
+    (m + 1 + 1) x T2 e
     hn_def horth]
   rw [Finset.sum_congr rfl (fun i _ => hdiag_term i)]
-
   have hfull : ∀ K : Fin r → Fin n,
       (∑ J : Fin (m + 1 + 1) → Fin n,
           (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
@@ -166,19 +158,15 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
               (Fin.cons a J')) ^ 2)
           (fun pr => by simp [Fin.consEquiv])]
     rw [Fintype.sum_prod_type]
-
   conv_lhs => rw [Finset.sum_comm]
   refine Finset.sum_le_sum (fun K _ => ?_)
   rw [hfull K]
-
   refine Finset.sum_le_sum (fun i _ => ?_)
   exact Finset.single_le_sum (f := fun b : Fin n =>
       ∑ J : Fin m → Fin n,
         (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
           (Fin.cons i (Fin.cons b J))) ^ 2)
     (fun b _ => Finset.sum_nonneg (fun J _ => sq_nonneg _)) (Finset.mem_univ i)
-
-set_option maxHeartbeats 1600000 in
 
 theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
     (g : SmoothRiemannianMetric I M) (r m : ℕ)
@@ -198,13 +186,11 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         (covGrad (I := I) (M := M) g r m w)).toSection x) with hcw_def
   have haw_nn : 0 ≤ aw := riemannianFiberNormSq_nonneg (I := I) (M := M) g r m x _
   have hcw_nn : 0 ≤ cw := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
-
   set D : Fin n → Tensor0SBundle.TensorRSSpace r m I x :=
     fun i => Integral.Connection.tensorSecondCovDeriv (I := I) g r m
       (Integral.Connection.smoothOrthoFrame (I := I) g x i)
       (Integral.Connection.smoothOrthoFrame (I := I) g x i)
       (fun y : M => w.toSection y) x with hD_def
-
   have htrace : (rawTensorConnLapSmooth (I := I) g r m w).toFun x =
       Tensor0SBundle.TensorRSSpace.toModel (∑ i : Fin n, D i) := by
     have h1 : (rawTensorConnLapSmooth (I := I) g r m w).toFun x =
@@ -213,7 +199,6 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
     rw [h1, Integral.Connection.rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g r m w x,
       Integral.Connection.rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r m
         (fun y : M => w.toSection y) x]
-
   have hsum_aux : ∀ (s' : Finset (Fin n)),
       Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x
           (Tensor0SBundle.TensorRSSpace.toModel (∑ i ∈ s', D i)) (w.toFun x) =
@@ -233,7 +218,6 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x) := by
     rw [htrace]
     exact hsum_aux Finset.univ
-
   set rr : Fin n → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g r m x (D i) with hrr_def
   have hrr_nn : ∀ i, 0 ≤ rr i := fun i =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r m x (D i)
@@ -307,8 +291,6 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         exact mul_le_mul_of_nonneg_right hsqrt_bound (Real.sqrt_nonneg _)
     _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt aw * Real.sqrt cw := by ring
 
-set_option maxHeartbeats 1600000 in
-
 omit [CompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
@@ -378,8 +360,6 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
   rw [hbridge]
   ring
 
-set_option maxHeartbeats 1600000 in
-
 theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
     (Q : Integral.L2.SmoothCcTensor g r p) (x : M) :
@@ -400,19 +380,19 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
     exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
   set rQ : ℝ := riemannianFiberNormSq (I := I) (M := M) g r p x (Q.toSection x) with hrQ_def
   have hrQ_nn : 0 ≤ rQ := riemannianFiberNormSq_nonneg (I := I) (M := M) g r p x (Q.toSection x)
-
   set V : Fin n → Tensor0SBundle.TensorRSSpace r p I x :=
     fun a => tensorCovDerivAt (I := I) (M := M) g r p Q x (e a) with hV_def
   set ss : Fin n → ℝ := fun a => riemannianFiberNormSq (I := I) (M := M) g r p x (V a) with hss_def
   have hss_nn : ∀ a, 0 ≤ ss a := fun a =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r p x (V a)
-
   have hterm : ∀ a : Fin n,
       (extDerivFun (I := I)
-        (fun y : M => riemannianFiberNormSq (I := I) (M := M) g r p y (Q.toSection y)) x (e a)) ^ 2 ≤
+        (fun y : M => riemannianFiberNormSq (I := I) (M := M) g r p y (Q.toSection y)) x (e a)) ^ 2
+          ≤
         4 * ss a * rQ := by
     intro a
-    rw [mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs (I := I) (M := M) g r p Q x (e a)]
+    rw [mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs (I := I) (M := M) g r p Q x
+      (e a)]
     have hsq := Integral.L2.tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r p x
       (Tensor0SBundle.TensorRSSpace.toModel (V a)) (Q.toFun x)
     have hVself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g r p x
@@ -432,7 +412,6 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
       rw [hV_def]
     rw [hVa_eq] at hsq ⊢
     nlinarith [hsq]
-
   have hframe : ∑ a : Fin n, ss a =
       riemannianFiberNormSq (I := I) (M := M) g r (p + 1) x
         ((covGrad (I := I) (M := M) g r p Q).toSection x) := by
@@ -453,8 +432,6 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
     _ = 4 * rQ * riemannianFiberNormSq (I := I) (M := M) g r (p + 1) x
           ((covGrad (I := I) (M := M) g r p Q).toSection x) := by rw [hframe]; ring
 
-set_option maxHeartbeats 1600000 in
-
 omit [BoundarylessManifold I M] in
 theorem prependCovGradSlot_fiberNormSq_frame_sum_rs
     (g : SmoothRiemannianMetric I M) (r t : ℕ) (ζ : C^∞⟮I, M; ℝ⟯)
@@ -473,13 +450,11 @@ theorem prependCovGradSlot_fiberNormSq_frame_sum_rs
     intro a b
     rw [he_def]
     exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
-
   rw [prependCovGradSlot_toSection_apply (I := I) (M := M) g r t ζ S x]
   rw [riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs (I := I) (M := M) g r t x
     ((extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)) e hn_def horth]
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-
   rw [ContinuousLinearMap.smulRight_apply]
   rw [show ((extDerivFun (I := I) (ζ : M → ℝ) x (e a)) • S.toSection x :
         Tensor0SBundle.TensorRSSpace r t I x) =

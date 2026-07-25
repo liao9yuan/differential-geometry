@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -61,6 +60,24 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
+
+private local instance : NormedAddCommGroup (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+private local instance : NormedSpace Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
 
 
 
@@ -174,10 +191,6 @@ theorem normalMetric_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
 theorem radialEnorm_normal
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (v : E) :
@@ -261,13 +274,10 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-
   have htm := hf.contMDiffOn_tangentMapWithin (m := ∞) le_rfl hU.uniqueMDiffOn
-
   have hσ : ContMDiff 𝓘(Real, E) (𝓘(Real, E)).tangent ∞
       (fun z : E => (TotalSpace.mk' E z v : TangentBundle 𝓘(Real, E) E)) :=
     (contMDiff_vectorSpace_iff_contDiff (V := fun _ : E => v)).mpr contDiff_const
-
   have hcomp : ContMDiffOn 𝓘(Real, E) I.tangent ∞
       (fun z => tangentMapWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U
         (TotalSpace.mk' E z v)) U :=
@@ -284,13 +294,6 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
           (TotalSpace.mk' E z v)
   dsimp only [tangentMapWithin]
   rw [hmf]
-
-set_option synthInstance.maxHeartbeats 800000 in
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_of_smooth
@@ -310,7 +313,6 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-
   have hscalar : ∀ v w : E, ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) ∞
       (fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
           (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
@@ -351,13 +353,6 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   intro w
   rw [← contMDiffOn_iff_contDiffOn]
   exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
-
-set_option synthInstance.maxHeartbeats 800000 in
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn
@@ -515,8 +510,6 @@ theorem sharp_norm_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem abs_apply_le
     {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
@@ -554,10 +547,6 @@ theorem abs_apply_le
 
 end NormalCoordMetricEquivOn
 
-
-
-
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 
@@ -633,9 +622,6 @@ theorem half_le_gpConst
   simpa only [normalMetric_zero (I := I) (X.obj k) x] using
     (h.metric_equiv k x 0 h0 v).1
 
-
-
-set_option synthInstance.maxHeartbeats 800000 in
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -745,7 +731,6 @@ theorem koszulVec_pair_le
           ‖z - y‖ * ‖v‖ * ‖w‖ := by
       ring
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
@@ -753,14 +738,6 @@ private theorem fderiv_eval3
     (d u v w : E) :
     fderiv Real (fun p ↦ fderiv Real G p u v w) q d =
       fderiv Real (fderiv Real G) q d u v w := by
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   have hu : HasFDerivAt (fun _ : E ↦ u) 0 q :=
     hasFDerivAt_const (𝕜 := Real) (x := q) u
   have hv : HasFDerivAt (fun _ : E ↦ v) 0 q :=
@@ -772,11 +749,6 @@ private theorem fderiv_eval3
   have hthird := hsecond.clm_apply hw
   have happ := DFunLike.congr_fun hthird.fderiv d
   simpa using happ
-
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 2000000 in
-
-
 
 theorem koszulVec_lip_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -806,14 +778,6 @@ theorem koszulVec_lip_on
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  letI : NormedAddCommGroup (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] Real) :=
-    ContinuousLinearMap.toNormedSpace
-  letI : NormedAddCommGroup (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedAddCommGroup
-  letI : NormedSpace Real (E →L[Real] (E →L[Real] Real)) :=
-    ContinuousLinearMap.toNormedSpace
   let G := normalCoordMetric (I := I) (X.obj k) x
   let U := Metric.ball (0 : E) r
   have hsm : ContDiffOn Real (⊤ : ℕ∞) G U :=
@@ -1092,21 +1056,17 @@ theorem normalChartAt_contMDiffAt_infty
   set fexp : E → M := fun v => (expMap (I := I) g p (show TangentSpace I p from v)) with hfexp
   set q : M := fexp v₀ with hq
   set χ : M → E := ⇑(extChartAt I q) with hχ
-
   have hf_cd : ContMDiffAt 𝓘(ℝ, E) I ∞ fexp v₀ :=
     expMap_contMDiffAt_infty_of_norm_lt_radius (I := I) g p hv₀
-
   have hmem_ball : v₀ ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) g p) := by
     rw [Metric.mem_ball, dist_zero_right]; exact hv₀
   have hf_diffeo : IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1 fexp v₀ :=
     exp_isLocalDiffeomorphOn_ball (I := I) g p (le_refl _) ⟨v₀, hmem_ball⟩
-
   have hD1_inv : (mfderiv 𝓘(ℝ, E) I fexp v₀).IsInvertible :=
     ⟨hf_diffeo.mfderivToContinuousLinearEquiv one_ne_zero,
       hf_diffeo.mfderivToContinuousLinearEquiv_coe one_ne_zero⟩
   have hD2_inv : (mfderiv I 𝓘(ℝ, E) χ q).IsInvertible :=
     isInvertible_mfderiv_extChartAt (I := I) (mem_extChartAt_source q)
-
   have hχ_cd : ContMDiffAt I 𝓘(ℝ, E) ∞ χ q := contMDiffAt_extChartAt (I := I) (x := q)
   have hF_cd : ContDiffAt ℝ ∞ (χ ∘ fexp) v₀ := (hχ_cd.comp v₀ hf_cd).contDiffAt
   have h1 : HasMFDerivAt 𝓘(ℝ, E) I fexp v₀ (mfderiv 𝓘(ℝ, E) I fexp v₀) :=
@@ -1115,22 +1075,17 @@ theorem normalChartAt_contMDiffAt_infty
     (hχ_cd.mdifferentiableAt hne).hasMFDerivAt
   have hF_mfd : HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, E) (χ ∘ fexp) v₀
       ((mfderiv I 𝓘(ℝ, E) χ q).comp (mfderiv 𝓘(ℝ, E) I fexp v₀)) := h2.comp v₀ h1
-
-
   have hF_fderiv0 := hasMFDerivAt_iff_hasFDerivAt.mp hF_mfd
   have hfd_inv : (fderiv ℝ (χ ∘ fexp) v₀).IsInvertible := by
     rw [hF_fderiv0.fderiv]; exact hD2_inv.comp hD1_inv
   obtain ⟨e, he⟩ := hfd_inv
   have hF_fderiv : HasFDerivAt (χ ∘ fexp) (e : E →L[ℝ] E) v₀ := by
     rw [he]; exact hF_fderiv0.differentiableAt.hasFDerivAt
-
   have hinv := hF_cd.to_localInverse hF_fderiv hne
-
   set Φ : OpenPartialHomeomorph E E :=
     hF_cd.toOpenPartialHomeomorph (χ ∘ fexp) hF_fderiv hne with hΦ
   have hloc_eq : hF_cd.localInverse hF_fderiv hne = Φ.symm := rfl
   rw [hloc_eq] at hinv
-
   have hv₀_Φsrc : v₀ ∈ Φ.source :=
     hF_cd.mem_toOpenPartialHomeomorph_source hF_fderiv hne
   have hv₀_src : v₀ ∈ (expMapDiffeo (I := I) g p).source := by
@@ -1140,11 +1095,9 @@ theorem normalChartAt_contMDiffAt_infty
     have hev : expMapDiffeo (I := I) g p v₀ = q := by
       rw [expMapDiffeo_apply_eq (I := I) g p hv₀_src]
     rw [← hev]; exact (expMapDiffeo (I := I) g p).map_source hv₀_src
-
   have hsymm_cm : ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) ∞ Φ.symm (χ q) :=
     (contMDiffAt_iff_contDiffAt).mpr hinv
   have hcomp : ContMDiffAt I 𝓘(ℝ, E) ∞ (Φ.symm ∘ χ) q := hsymm_cm.comp q hχ_cd
-
   have hΦcoe : (Φ : E → E) = χ ∘ fexp :=
     hF_cd.toOpenPartialHomeomorph_coe hF_fderiv hne
   have hncq : normalChartAt (I := I) g p q = v₀ := by
@@ -1170,13 +1123,13 @@ theorem normalChartAt_contMDiffAt_infty
     have hv'_symmsrc : v' ∈ (normalChartAt (I := I) g p).symm.source :=
       (normalChartAt (I := I) g p).map_source hq'_src
     have hfv' : fexp v' = q' := by
-      show (expMap (I := I) g p (show TangentSpace I p from v') : M) = q'
+      change (expMap (I := I) g p (show TangentSpace I p from v') : M) = q'
       rw [← normalChartAt_symm_apply (I := I) g p hv'_symmsrc]
       exact normalChartAt_left_inv (I := I) g p hq'_src
     have hΦv' : Φ v' = χ q' := by
       have hc : (χ ∘ fexp) v' = χ q' := by rw [Function.comp_apply, hfv']
       rw [hΦcoe]; exact hc
-    show normalChartAt (I := I) g p q' = (Φ.symm ∘ χ) q'
+    change normalChartAt (I := I) g p q' = (Φ.symm ∘ χ) q'
     rw [Function.comp_apply, ← hΦv', Φ.left_inv hq'_pre]
   exact hcomp.congr_of_eventuallyEq heqEv
 

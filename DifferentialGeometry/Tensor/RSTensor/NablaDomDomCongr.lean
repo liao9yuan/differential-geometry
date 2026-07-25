@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
 import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -92,10 +91,8 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
   rw [show slots = (fun a : Fin s' => V a x) from (funext hV).symm, h1,
     show ((fun a : Fin s' => V a x) ∘ e) = (fun a : Fin s => V (e a) x) from rfl, h2]
   refine congrArg₂ (· - ·) ?_ ?_
-  ·
-    congr 1
-  ·
-    refine Fintype.sum_equiv e.symm _ _ ?_
+  · congr 1
+  · refine Fintype.sum_equiv e.symm _ _ ?_
     intro a
     change (ContinuousMultilinearMap.domDomCongr e (Z x)) _ = _
     rw [Tensor0SSpace.domDomCongr_apply]

@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.Inn
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -93,7 +91,7 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
     chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
   obtain ⟨C', hC'_nn, h_diag⟩ :=
-    exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_compact
+    exists_sum_tensorInner_cov_chartBasis_diagonal_le_const_mul_covDerivInner_on_compact
       (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
   refine ⟨K * C', mul_nonneg hK_nn hC'_nn, ?_⟩
   intro S b hb
@@ -148,7 +146,8 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
+theorem
+    exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) {b : M},

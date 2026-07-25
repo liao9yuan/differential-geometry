@@ -64,7 +64,8 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem isConvexWith_smallNormalBall
     (join : M → M → ℝ → M) (O : M) {r : ℝ}
     (hjoin : ∀ a ∈ smallNormalBall (I := I) O r, ∀ b ∈ smallNormalBall (I := I) O r,
@@ -82,13 +83,11 @@ theorem isConvexWith_smallNormalBall
     (ENNReal.lt_ofReal_iff_toReal_lt hane).mp ha
   have htb : (riemannianEDist I O b).toReal < r :=
     (ENNReal.lt_ofReal_iff_toReal_lt hbne).mp hb
-
   have hseg : t ∈ segment ℝ (0 : ℝ) (1 : ℝ) := by
     rw [segment_eq_Icc zero_le_one]; exact ht
   have hmax := (hconv a ha b hb).le_on_segment
     unitInterval.zero_mem unitInterval.one_mem hseg
   rw [h0, h1] at hmax
-
   have htR : (0 : ℝ) ≤ (riemannianEDist I O (join a b t)).toReal :=
     ENNReal.toReal_nonneg
   have htaR : (0 : ℝ) ≤ (riemannianEDist I O a).toReal := ENNReal.toReal_nonneg

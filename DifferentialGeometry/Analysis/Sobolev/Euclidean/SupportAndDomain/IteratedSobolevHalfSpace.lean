@@ -435,7 +435,7 @@ theorem partialDerivWithin_interiorHalfSpace_eq_partialDeriv
         (interiorHalfSpace Ω) i u y =
       DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
         i u y :=
-  DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.partialDerivWithin_eq_partialDeriv_of_isOpen
+  Integral.DivergenceTheorem.WithBoundary.partialDerivWithin_eq_partialDeriv_of_isOpen
     (interiorHalfSpace_isOpen hΩ) hy
 
 section EuclideanHalfSpaceChartTargets

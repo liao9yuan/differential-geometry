@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1200000
-set_option maxHeartbeats 1200000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -117,6 +115,22 @@ lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     rw [sq_abs]
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+
+private lemma add_le_product_growth
+    {a c n q : ℝ} (ha : a ≤ n * q) (hc : 1 ≤ c) (hn : 0 ≤ n) (hq : 0 ≤ q) :
+    a + c ≤ c * (n + 1) * (q + 1) := by
+  have hnq : 0 ≤ n * q := mul_nonneg hn hq
+  calc
+    a + c ≤ n * q + c := by
+      simpa [add_comm] using add_le_add_right ha c
+    _ ≤ c * (n * q) + c :=
+      by
+        simpa [add_comm] using
+          add_le_add_right (mul_le_mul_of_nonneg_right hc hnq) c
+    _ = c * (n * q + 1) := by ring
+    _ ≤ c * ((n + 1) * (q + 1)) := by
+      exact mul_le_mul_of_nonneg_left (by nlinarith) (le_trans zero_le_one hc)
+    _ = c * (n + 1) * (q + 1) := by ring
 
 theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_goodSet
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -445,13 +459,7 @@ theorem rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_on_pouTsupport_g
       bigSumPartial + cardIJ ≤ cardIJ * (nSq + 1) * (bigSumGoal + 1) := by
     have h_bsp_le_goal : bigSumPartial ≤ nSq * bigSumGoal :=
       hBigSumPartial_le.trans (mul_le_mul_of_nonneg_left hBigSumIterFD_le_Goal hnSq_nn)
-    have h1 : nSq * bigSumGoal ≤ cardIJ * (nSq * bigSumGoal) := by
-      have hh : (0 : ℝ) ≤ nSq * bigSumGoal := mul_nonneg hnSq_nn hBigSumGoal_nn
-      nlinarith [hCard_one_le, hh]
-    have h2 : (0 : ℝ) ≤ cardIJ * nSq := mul_nonneg hcardIJ_nn hnSq_nn
-    have h3 : (0 : ℝ) ≤ cardIJ * bigSumGoal :=
-      mul_nonneg hcardIJ_nn hBigSumGoal_nn
-    nlinarith [h_bsp_le_goal, h1, h2, h3]
+    exact add_le_product_growth h_bsp_le_goal hCard_one_le hnSq_nn hBigSumGoal_nn
   calc riemannianFiberNormSq (I := I) (M := M) g r s b
         (rawTensorConnLap (I := I) g r s (fun z : M => T₀.toSection z) b)
       ≤ C_H *

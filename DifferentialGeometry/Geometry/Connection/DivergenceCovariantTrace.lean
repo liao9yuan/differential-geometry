@@ -6,8 +6,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvarian
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
@@ -171,13 +169,15 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma trivToE_chartBasisVecFiber
     (α : M) (m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     trivToE (I := I) α b (chartBasisVecFiber (I := I) α m b) = (chartModelBasis E) m := by
   classical
-  have hcoe : chartBasisVecFiber (I := I) α m b = trivFromE (I := I) α b ((chartModelBasis E) m) := by
+  have hcoe : chartBasisVecFiber (I := I) α m b = trivFromE (I := I) α b
+    ((chartModelBasis E) m) := by
     unfold chartBasisVecFiber trivFromE
     rfl
   rw [hcoe, trivToE_trivFromE (I := I) α hb]
@@ -307,7 +307,8 @@ lemma chartCoord_leviCivita_chartBasis
     · intro hm
       exact absurd (Finset.mem_univ m) hm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tangent_eq_coordSum
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)

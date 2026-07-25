@@ -17,6 +17,8 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite
+
 open Bundle Filter Set
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
@@ -34,7 +36,7 @@ omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 private theorem ricciFrameDiffAt
-    {Idx : Type} [Fintype Idx]
+    {Idx : Type} [Finite Idx]
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
@@ -64,7 +66,7 @@ private theorem ricciFrameDiffAt
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem tailChristoffel
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type} [Fintype Idx]
     {u : Set M}
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -83,6 +85,7 @@ theorem tailChristoffel
         (fun (t : Real) (x : M) (d a b : Idx) => ricciCovDerivCompInFrame (I := I)
           (S.timeRestrict (RealTimeInterval.closedOpen t₀ omega ht₀ω))
           frame t x d a b) := by
+  classical
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     { linearIndependent := hframe.linearIndependent
       generating := hframe.generating
@@ -186,7 +189,7 @@ theorem tailChristoffelReg
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem tailChrOrtho
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type} [Finite Idx] [DecidableEq Idx]
     {u : Set M}
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

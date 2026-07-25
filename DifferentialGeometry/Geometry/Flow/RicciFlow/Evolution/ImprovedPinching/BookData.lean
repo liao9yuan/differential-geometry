@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatAssembly
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -31,8 +30,10 @@ def scalGradSq
     Real -> M -> Real :=
   fun t x =>
     (S.family.metric t).inner x
-      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x)
-      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x)
+      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t
+        (S.scalar t) x)
+      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t
+        (S.scalar t) x)
 
 
 def tfLapBook
@@ -107,12 +108,15 @@ theorem pinchEvol_solSec
       (scalGradSq (I := I) S)
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S))
       epsilon)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       0 < S.scalar (t : Real) x)
-    (htfDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (htfDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       MDifferentiableAt I 𝓘(Real, Real)
         (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) x)
-    (hscalarDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalarDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+      D) x,
       MDifferentiableAt I 𝓘(Real, Real) (S.scalar (t : Real)) x) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt
@@ -138,7 +142,8 @@ theorem pinchEvol_solSec
         Module.Basis Idx Real (TangentSpace I x) :=
     fun _t x => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv :
-      forall (_t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (_x : M),
+      forall (_t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+        (_x : M),
         Idx -> Idx -> Real :=
     fun t x i j => coordInv (I := I) S x (t : Real) x i j
   refine pinchEvol_sec (I := I) (Idx := Idx) (G := flowG (I := I) S)
@@ -182,7 +187,8 @@ theorem pinchEvol_solSec
             DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M)
               (S.base.metric (t : Real)) (S.ricci (t : Real)))
   · intro t y
-    simp [ricciNorm, DifferentialGeometry.Integral.Connection.normSq02, DifferentialGeometry.Integral.Connection.inner02, flowG]
+    simp [ricciNorm, DifferentialGeometry.Integral.Connection.normSq02,
+      DifferentialGeometry.Integral.Connection.inner02, flowG]
   · intro t x
     have hf :
         ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
@@ -216,7 +222,7 @@ theorem ricciSym_can
   have hinv :
       MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis gInv := by
     simpa [basis, gInv] using
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) (S.base.metric t) x
   have hInvSym : ∀ i j, gInv i j = gInv j i :=
     invMetric_symm (I := I) (S.base.metric t) x basis gInv hinv
@@ -225,7 +231,7 @@ theorem ricciSym_can
         (I := I) (E := E) (M := M)
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -241,7 +247,8 @@ theorem ricciSym_can
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 :
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M) (S.base.rm13 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+          (S.base.rm13 t x) := by
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
   have hLowerAt :
@@ -254,7 +261,8 @@ theorem ricciSym_can
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x
   have hTrace :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricciAt t x)
         (S.base.rm04 t x) gInv basis :=
     DifferentialGeometry.Integral.Connection.ricciFirstTraceAt_of_rm13 (I := I) (S.base.metric t)
       basis gInv hinv (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)
@@ -292,7 +300,7 @@ theorem traceData_can
         (I := I) (E := E) (M := M)
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -308,7 +316,8 @@ theorem traceData_can
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 :
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M) (S.base.rm13 t x) := by
+        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+          (S.base.rm13 t x) := by
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
   have hLowerAt :
@@ -322,12 +331,14 @@ theorem traceData_can
       hRm13 hRm04 x
   have hcurv :
       DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
-        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis (S.base.rm04 t x)) :=
-    DifferentialGeometry.Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis
+          (S.base.rm04 t x)) :=
+    Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04) basis
   have hRicFirst :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricciAt t x)
         (S.base.rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis :=
     firstTrace_delta (I := I) (S.base.metric t) horth
       (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)
@@ -387,7 +398,8 @@ theorem tfReactSmooth
   have hinv :
       MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
         DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t) basis horth
+    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t) basis
+      horth
   have hnorm :
       ricciNormAt (I := I) (S.base.ricciAt t x) basis =
         ricciNorm (I := I) S t x := by
@@ -546,7 +558,8 @@ theorem tfHeat_book
       S.scalar
       (ricciNorm (I := I) S)
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S)) := by
-  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real := flowG (I := I) S
+  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
+    flowG (I := I) S
   let scalarLap : Real -> M -> Real :=
     fun t x => DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (S.scalar t) x
   have hmetric : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
@@ -681,7 +694,8 @@ theorem tfNonneg_sol
       hscalar, hnorm, ricciNormAt_diag (I := I) hdiag]
     unfold DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3
       DifferentialGeometry.Integral.Connection.ricciEigenPairwiseGapSq3
-      DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
+        DifferentialGeometry.Integral.Connection.ricciEigenScalar3
     ring
   rw [htf]
   exact DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
@@ -740,7 +754,8 @@ theorem tfGrad_sol
     funext y
     simpa [f, h, flowG, tfRicNormSq, tracefreeRicciNormSqOf,
       tracefreeRicciNormSqAtOf] using
-      DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I) ((flowG (I := I) S).metric (t : Real))
+      DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I)
+        ((flowG (I := I) S).metric (t : Real))
         (hSmooth.ricciRegular.ricci_norm_space (t : Real) ht y)
         (hSmooth.scalarRegular.scalar_sq_div_space (t : Real) ht y)
   have hnormGrad : MDiffAt (T% fun y : M =>
@@ -786,7 +801,8 @@ theorem scalarPowGrad_sol
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (epsilon : Real)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       0 < S.scalar (t : Real) x) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
       MDiffAt (T% fun z : M =>
@@ -817,7 +833,8 @@ theorem scalarPowGrad_sol
             ((flowG (I := I) S).metric (t : Real)) f z := by
     funext z
     simpa [p, f, coeff] using
-      DifferentialGeometry.Integral.Connection.gradientFun_rpow (I := I) ((flowG (I := I) S).metric (t : Real))
+      DifferentialGeometry.Integral.Connection.gradientFun_rpow (I := I)
+        ((flowG (I := I) S).metric (t : Real))
         (p := p)
         (hSmooth.scalarRegular.scalar_space (t : Real) ht z)
         (hscalar t z)
@@ -862,7 +879,8 @@ theorem pinchEvol_sol
     (hdim : forall (_t : Real) (x : M),
       Module.finrank Real (TangentSpace I x) = 3)
     (epsilon : Real)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       0 < S.scalar (t : Real) x) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt

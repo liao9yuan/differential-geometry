@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 
-set_option linter.unnecessarySimpa false
 
 
 noncomputable section
@@ -34,13 +33,13 @@ def ricciEndo (g : SmoothRiemannianMetric I M) (x : M)
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
         φ v w) h
-    simpa [ContinuousLinearMap.add_apply] using happ
+    simp [ContinuousLinearMap.add_apply]
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
         φ v w) h
-    simpa [ContinuousLinearMap.smul_apply] using happ
+    simp [ContinuousLinearMap.smul_apply]
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -123,15 +122,15 @@ private def ricciTensorAuxClm (g : SmoothRiemannianMetric I M) (x : M) :
       have := (ricciTensorBilin (I := I) g x).map_add v v'
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      simpa [LinearMap.add_apply, ContinuousLinearMap.add_apply,
-             LinearMap.coe_toContinuousLinearMap'] using happ
+      simp [ContinuousLinearMap.add_apply,
+             LinearMap.coe_toContinuousLinearMap']
     map_smul' := fun c v => by
       ext w
       have := (ricciTensorBilin (I := I) g x).map_smul c v
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      simpa [LinearMap.smul_apply, ContinuousLinearMap.smul_apply,
-             LinearMap.coe_toContinuousLinearMap', smul_eq_mul] using happ }
+      simp [ContinuousLinearMap.smul_apply,
+             LinearMap.coe_toContinuousLinearMap', smul_eq_mul]}
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -294,7 +293,8 @@ private lemma covApply_smooth_section
   exact (covApply_contMDiffOn (cov := LeviCivita (I := I) g) hY hZ_le).contMDiffAt
     (Filter.univ_mem)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma inner_smooth_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -315,7 +315,8 @@ private lemma inner_smooth_scalar
       (ϕ := fun b => g.inner b) (v := fun b => Y b) hg hY
   exact cotangentCov_pairing_contMDiff hgY hZ
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma inner_mdiffAt_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -518,13 +519,16 @@ theorem riemannSec_metric_skew
         (fun b : M => extDerivFun (I := I) (fun b' => g.inner b' (Z b') (W b')) b (X b))
         x (Y x) =
       g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) +
-        g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) := by
+        g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W)
+          x) := by
     rw [hxy, hyx]
-    have h1 : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) =
+    have h1 : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x)
+      (W x) =
         g.inner x (covApply cov X (covApply cov Y Z) x) (W x) -
           g.inner x (covApply cov Y (covApply cov X Z) x) (W x) := by
       rw [map_sub]; rfl
-    have h2 : g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) =
+    have h2 : g.inner x (Z x)
+      (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) =
         g.inner x (Z x) (covApply cov X (covApply cov Y W) x) -
           g.inner x (Z x) (covApply cov Y (covApply cov X W) x) := by
       rw [map_sub]
@@ -534,7 +538,8 @@ theorem riemannSec_metric_skew
       (VectorField.mlieBracket I X Y x) =
       g.inner x (covApply cov (VectorField.mlieBracket I X Y) Z x) (W x) +
         g.inner x (Z x) (covApply cov (VectorField.mlieBracket I X Y) W x) := hmc_br
-  have hkey : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x) (W x) +
+  have hkey : g.inner x (covApply cov X (covApply cov Y Z) x - covApply cov Y (covApply cov X Z) x)
+    (W x) +
       g.inner x (Z x) (covApply cov X (covApply cov Y W) x - covApply cov Y (covApply cov X W) x) =
       g.inner x (covApply cov (VectorField.mlieBracket I X Y) Z x) (W x) +
         g.inner x (Z x) (covApply cov (VectorField.mlieBracket I X Y) W x) := by
@@ -629,10 +634,10 @@ private def riemannOpEndo
   toFun Z := riemannOp (LeviCivita (I := I) g) x v w Z
   map_add' Z Z' := by
     have h := (riemannOp (LeviCivita (I := I) g) x v w).map_add Z Z'
-    simpa using h
+    simp
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x v w).map_smul c Z
-    simpa using h
+    simp
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -656,12 +661,14 @@ private def gFlat (g : SmoothRiemannianMetric I M) (x : M) :
     rw [(g.inner x).map_smul c v]
     rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [CompleteSpace E] in
 @[simp] private lemma gFlat_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (gFlat (I := I) g x v) w = g.inner x v w := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma gFlat_injective (g : SmoothRiemannianMetric I M) (x : M) :
     Function.Injective (gFlat (I := I) g x) := by
   intro v v' hvv'
@@ -986,7 +993,8 @@ theorem riemannOp_section_continuous (g : SmoothRiemannianMetric I M) :
         b (riemannOp (LeviCivita (I := I) g) b)) :=
   (riemannOp_section_contMDiff g).continuous
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [CompleteSpace E] in
 private lemma trace_eq_chart_sum
     (x : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet)
@@ -1031,7 +1039,8 @@ private noncomputable def localFrameSmoothExtension
   have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [CompleteSpace E] in
 private lemma localFrameSmoothExtension_eqOn_nhd (x : M) :
     let e := trivializationAt E (TangentSpace I : M → Type _) x
     ∀ᶠ b in 𝓝 x, ∀ i, (localFrameSmoothExtension (I := I) x i) b =
@@ -1042,7 +1051,8 @@ private lemma localFrameSmoothExtension_eqOn_nhd (x : M) :
   have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose_spec
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [CompleteSpace E] in
 private lemma localFrameSmoothExtension_contMDiff (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞

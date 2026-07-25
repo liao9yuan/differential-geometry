@@ -40,7 +40,6 @@ private lemma two_abs_mul_le_eps_mul_sq_add_inv_eps_mul_sq (a b ε : ℝ) (hε :
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
 omit [NeZero d] in
-
 private lemma v_test_supported_in_Ω'_nonsmooth_fterm
     {u : E → ℝ}
     {η : E → ℝ}
@@ -56,18 +55,16 @@ private lemma v_test_supported_in_Ω'_nonsmooth_fterm
     (d := d) η u k h).trans (hh_supp_in_Ω' hh_le)
 
 omit [NeZero d] in
-
 private lemma hasCompactSupport_v_test_nonsmooth_fterm
     {η : E → ℝ} (hη_supp : HasCompactSupport η)
     {u : E → ℝ} (k : Fin d) (h : ℝ) :
     HasCompactSupport
       (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
         k h η u) :=
-  DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.hasCompactSupport_nirenbergTestFunction
+  NirenbergTestFunction.hasCompactSupport_nirenbergTestFunction
     hη_supp k h
 
 omit [NeZero d] in
-
 private lemma memLp_eta_sq_diffQuot_u_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -87,7 +84,6 @@ private lemma memLp_eta_sq_diffQuot_u_fterm
   exact memLp_bounded_mul hη_sq_cont.aestronglyMeasurable hM_nn hM h_dq_l2
 
 omit [NeZero d] in
-
 private lemma memLp_v_test_nonsmooth_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -107,7 +103,6 @@ private lemma memLp_v_test_nonsmooth_fterm
   exact memLp_diffQuot_two k (-h) h_inner
 
 omit [NeZero d] in
-
 private lemma pointwise_young_f_v_test
     (f : E → ℝ) (v_test : E → ℝ) {ε : ℝ} (hε : 0 < ε) (x : E) :
     |f x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2 := by
@@ -122,7 +117,6 @@ private lemma pointwise_young_f_v_test
   linarith [h_y, h_div_eq, h_ε_eq]
 
 omit [NeZero d] in
-
 private lemma pointwise_half_sum_f_v_test
     (f v_test : E → ℝ) (x : E) :
     |f x * v_test x| ≤ (1/2) * ((f x)^2 + (v_test x)^2) := by
@@ -200,7 +194,8 @@ theorem f_term_bound_nonsmooth_quantitative
   have h_v_test_memLp : MemLp v_test 2 (volume : Measure E) :=
     memLp_v_test_nonsmooth_fterm (d := d) hu_l2 hη hη_supp k h
   have h_v_test_zero_outside : ∀ x ∉ Ω, v_test x = 0 := fun x hx =>
-    image_eq_zero_of_notMem_tsupport (fun hy => hx (hΩ'_closure (subset_closure (h_v_test_supp hy))))
+    image_eq_zero_of_notMem_tsupport
+      (fun hy => hx (hΩ'_closure (subset_closure (h_v_test_supp hy))))
   have h_v_test_zero_outside_Ω' : ∀ x ∉ Ω', v_test x = 0 := fun x hx =>
     image_eq_zero_of_notMem_tsupport (fun hy => hx (h_v_test_supp hy))
   have hf_memLp : MemLp f 2 (volume.restrict Ω') := hf_l2_loc hΩ'_compact

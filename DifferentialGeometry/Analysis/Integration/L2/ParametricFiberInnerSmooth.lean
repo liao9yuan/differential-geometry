@@ -14,8 +14,6 @@ import Mathlib.Analysis.Normed.Group.Bounded
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Manifold MeasureTheory Set Filter Bundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -30,7 +28,6 @@ theorem contMDiff_partial_deriv_snd
     (F : C^∞⟮I.prod 𝓘(ℝ, ℝ), M × ℝ; ℝ⟯) :
     ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) := by
-
   have hrw : (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) =
       fun p : M × ℝ => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s => F (p.1, s)) p.2) (1 : ℝ) := by
     funext p
@@ -82,7 +79,8 @@ private theorem hasDerivAt_integral_param
     (Filter.Eventually.of_forall (fun t =>
       (hf_cont.comp (by fun_prop : Continuous (fun x : M => (x, t)))).aestronglyMeasurable))
     (integrableOn_univ.mp
-      ((hf_cont.comp (by fun_prop : Continuous (fun x : M => (x, t₀)))).continuousOn.integrableOn_compact
+      ((hf_cont.comp (by fun_prop : Continuous
+                           (fun x : M => (x, t₀)))).continuousOn.integrableOn_compact
         isCompact_univ))
     ((hFd_cont.comp (by fun_prop : Continuous (fun x : M => (x, t₀)))).aestronglyMeasurable)
     (Filter.Eventually.of_forall (fun x => fun t ht => by

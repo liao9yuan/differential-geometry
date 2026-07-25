@@ -16,8 +16,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open MeasureTheory
@@ -48,6 +46,22 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+noncomputable local instance rawConnLapModelDualNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance rawConnLapModelDualNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance rawConnLapModelBilinearNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance rawConnLapModelBilinearNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedSpace
+
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ := by
@@ -71,20 +85,16 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-private lemma scalar_iteratedFDeriv_two_mul_norm_le
+private lemma scalar_fderiv_two_mul_eq
     (f g : E → ℝ) {x : E}
     (hf : ContDiffAt ℝ 2 f x) (hg : ContDiffAt ℝ 2 g x) :
-    |f x| * ‖iteratedFDeriv ℝ 2 g x‖ ≤
-      ‖iteratedFDeriv ℝ 2 (fun y : E => f y * g y) x‖ +
-        |g x| * ‖iteratedFDeriv ℝ 2 f x‖ +
-        2 * ‖fderiv ℝ f x‖ * ‖fderiv ℝ g x‖ := by
-  classical
+    fderiv ℝ (fderiv ℝ (fun y : E => f y * g y)) x =
+      f x • fderiv ℝ (fderiv ℝ g) x + (fderiv ℝ f x).smulRight (fderiv ℝ g x) +
+      (g x • fderiv ℝ (fderiv ℝ f) x + (fderiv ℝ g x).smulRight (fderiv ℝ f x)) := by
   have h1_ne : (1 : WithTop ℕ∞) ≠ 0 := by norm_num
   have h2_ne : (2 : WithTop ℕ∞) ≠ 0 := by norm_num
-  have hf_diffAt : DifferentiableAt ℝ f x :=
-    hf.differentiableAt h2_ne
-  have hg_diffAt : DifferentiableAt ℝ g x :=
-    hg.differentiableAt h2_ne
+  have hf_diffAt : DifferentiableAt ℝ f x := hf.differentiableAt h2_ne
+  have hg_diffAt : DifferentiableAt ℝ g x := hg.differentiableAt h2_ne
   have h2_ne_top : (2 : WithTop ℕ∞) ≠ ((⊤ : ℕ∞) : WithTop ℕ∞) := by decide
   have hf_diff_at_eventually : ∀ᶠ y in nhds x, DifferentiableAt ℝ f y := by
     filter_upwards [hf.eventually h2_ne_top] with y hy
@@ -93,13 +103,9 @@ private lemma scalar_iteratedFDeriv_two_mul_norm_le
     filter_upwards [hg.eventually h2_ne_top] with y hy
     exact hy.differentiableAt h2_ne
   have hf_fderiv_contDiffAt : ContDiffAt ℝ 1 (fderiv ℝ f) x := by
-    have := hf.fderiv_right
-      (m := 1) (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
-    simpa using this
+    simpa using hf.fderiv_right (m := 1) (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
   have hg_fderiv_contDiffAt : ContDiffAt ℝ 1 (fderiv ℝ g) x := by
-    have := hg.fderiv_right
-      (m := 1) (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
-    simpa using this
+    simpa using hg.fderiv_right (m := 1) (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
   have hf_fderiv_diffAt : DifferentiableAt ℝ (fderiv ℝ f) x :=
     hf_fderiv_contDiffAt.differentiableAt h1_ne
   have hg_fderiv_diffAt : DifferentiableAt ℝ (fderiv ℝ g) x :=
@@ -107,31 +113,34 @@ private lemma scalar_iteratedFDeriv_two_mul_norm_le
   have h_fderiv_fg_eventually :
       (fun y : E => fderiv ℝ (fun z : E => f z * g z) y) =ᶠ[nhds x]
         (fun y : E => f y • fderiv ℝ g y + g y • fderiv ℝ f y) := by
-    filter_upwards [hf_diff_at_eventually, hg_diff_at_eventually]
-      with y hfy hgy
+    filter_upwards [hf_diff_at_eventually, hg_diff_at_eventually] with y hfy hgy
     exact fderiv_fun_mul hfy hgy
-  have h_step3 :
-      fderiv ℝ (fderiv ℝ (fun y : E => f y * g y)) x =
-        fderiv ℝ (fun y : E => f y • fderiv ℝ g y + g y • fderiv ℝ f y) x :=
-    h_fderiv_fg_eventually.fderiv_eq
+  rw [h_fderiv_fg_eventually.fderiv_eq]
   have h_split :
       fderiv ℝ (fun y : E => f y • fderiv ℝ g y + g y • fderiv ℝ f y) x =
         fderiv ℝ (fun y : E => f y • fderiv ℝ g y) x +
-        fderiv ℝ (fun y : E => g y • fderiv ℝ f y) x := by
+          fderiv ℝ (fun y : E => g y • fderiv ℝ f y) x := by
     apply fderiv_fun_add
     · exact hf_diffAt.smul hg_fderiv_diffAt
     · exact hg_diffAt.smul hf_fderiv_diffAt
-  have h_f_smul : fderiv ℝ (fun y : E => f y • fderiv ℝ g y) x =
-      f x • fderiv ℝ (fderiv ℝ g) x + (fderiv ℝ f x).smulRight (fderiv ℝ g x) :=
-    fderiv_fun_smul hf_diffAt hg_fderiv_diffAt
-  have h_g_smul : fderiv ℝ (fun y : E => g y • fderiv ℝ f y) x =
-      g x • fderiv ℝ (fderiv ℝ f) x + (fderiv ℝ g x).smulRight (fderiv ℝ f x) :=
-    fderiv_fun_smul hg_diffAt hf_fderiv_diffAt
+  rw [h_split]
+  rw [fderiv_fun_smul hf_diffAt hg_fderiv_diffAt,
+    fderiv_fun_smul hg_diffAt hf_fderiv_diffAt]
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma scalar_iteratedFDeriv_two_mul_norm_le
+    (f g : E → ℝ) {x : E}
+    (hf : ContDiffAt ℝ 2 f x) (hg : ContDiffAt ℝ 2 g x) :
+    |f x| * ‖iteratedFDeriv ℝ 2 g x‖ ≤
+      ‖iteratedFDeriv ℝ 2 (fun y : E => f y * g y) x‖ +
+        |g x| * ‖iteratedFDeriv ℝ 2 f x‖ +
+        2 * ‖fderiv ℝ f x‖ * ‖fderiv ℝ g x‖ := by
+  classical
   have h_total :
       fderiv ℝ (fderiv ℝ (fun y : E => f y * g y)) x =
         f x • fderiv ℝ (fderiv ℝ g) x + (fderiv ℝ f x).smulRight (fderiv ℝ g x) +
         (g x • fderiv ℝ (fderiv ℝ f) x + (fderiv ℝ g x).smulRight (fderiv ℝ f x)) := by
-    rw [h_step3, h_split, h_f_smul, h_g_smul]
+    exact scalar_fderiv_two_mul_eq f g hf hg
   have h_norm_iter_f : ‖iteratedFDeriv ℝ 2 f x‖ = ‖fderiv ℝ (fderiv ℝ f) x‖ := by
     rw [show ‖fderiv ℝ (fderiv ℝ f) x‖ = ‖iteratedFDeriv ℝ 1 (fderiv ℝ f) x‖ from
       (norm_iteratedFDeriv_one (𝕜 := ℝ) (fderiv ℝ f) (x := x)).symm]
@@ -209,7 +218,8 @@ private lemma scalar_iteratedFDeriv_two_mul_norm_le
     mul_nonneg (norm_nonneg (fderiv ℝ f x)) (norm_nonneg (fderiv ℝ g x)),
     mul_nonneg (norm_nonneg (fderiv ℝ g x)) (norm_nonneg (fderiv ℝ f x))]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma iteratedFDeriv_two_repr_opNormSq_le_sum_iteratedFDeriv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -1420,13 +1430,15 @@ theorem chartTargetPouWeightedL2NormSq_iteratedFDeriv_two_repr_le_sum_chartComp_
               ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
                   rIntegrand Idx Jdx y ∂(volume : Measure EuclN))) := by rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma extChartAt_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     extChartAt I α = extChartAt I β := by
   simp only [extChartAt, h_eq]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     chartTargetEuclid (I := I) (M := M) α =
@@ -1720,7 +1732,8 @@ private lemma wkpNorm_two_sq_le_wtwokTwoNorm_sq
     exact ENNReal.le_tsum α
   exact pow_le_pow_left' h_α 2
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangent_continuousLinearMapAt_eq_of_chartAt_eq
     {α β : M} (h_chart : chartAt H α = chartAt H β) (b : M)
     (hb_α : b ∈ (chartAt H α).source) :
@@ -2171,7 +2184,7 @@ private lemma int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
     tensorChartComp_tsupport_subset_chartTargetEuclid
       (I := I) (M := M) g r s T β Idx Jdx
   have h_bridge :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.chartTarget_iteratedFDeriv_two_eLpNorm_le_wkpNorm_two
+    chartTarget_iteratedFDeriv_two_eLpNorm_le_wkpNorm_two
       (d := Module.finrank ℝ E) (Ω := chartTargetEuclid (I := I) (M := M) β)
       h_β_open h_smooth h_cc h_supp_β
   exact pow_le_pow_left' h_bridge 2

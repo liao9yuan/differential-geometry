@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetric
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -46,7 +44,6 @@ noncomputable def metricTrace2
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-
 lemma metricTrace2_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (H : (Π b : M, TangentSpace I b) → (Π b : M, TangentSpace I b) →
@@ -89,7 +86,6 @@ theorem metricTrace2_eq_gWeighted
   exact metricTraceHessian_eq_gWeighted_firstSlot (I := I) g r s T x
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem frame_pairing_locally_const
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -102,7 +98,6 @@ theorem frame_pairing_locally_const
   exact smoothOrthoFrame_orthonormal (I := I) g x hy i j
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [SigmaCompactSpace M] in
 theorem cometric_skew_core
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -135,7 +130,6 @@ theorem cometric_skew_core
   exact hmc.symm
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [SigmaCompactSpace M] in
 theorem cometric_diagonal_skew
     (g : SmoothRiemannianMetric I M) (x : M)

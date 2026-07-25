@@ -72,7 +72,6 @@ theorem loc_chart_pulled
     hΩ'_compact, C, hC_nn, hbound⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 omit [FiniteDimensional ℝ E] in
 theorem memLp_two_continuous_compactSupport_restrict
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)

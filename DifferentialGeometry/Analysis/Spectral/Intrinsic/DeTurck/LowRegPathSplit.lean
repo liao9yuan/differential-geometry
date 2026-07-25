@@ -41,8 +41,6 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
 private theorem phi_dev_joint
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -109,7 +107,8 @@ private theorem reindex_norm_sq
   rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
     norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem reindex_sub
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
@@ -155,11 +154,6 @@ private theorem convex_hs_bound
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-
-
-
 theorem phi_dev_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
@@ -190,10 +184,10 @@ theorem phi_dev_h2
   classical
   obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ := inv_coeff_h2 (I := I) (M := M) hDim g₀
   obtain ⟨CTH, hCTH_nn, hCTH⟩ :=
-    traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff_riemannianFiberNormSq
+    traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨CR, hCR_nn, hCR⟩ :=
-    ricciArmPrincipalCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff_riemannianFiberNormSq
+    ricciArmPrincipalCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g₀
   obtain ⟨DTH, hDTH_nn, hDTH⟩ :=
     traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
@@ -465,11 +459,6 @@ theorem phi_dev_h2
     rw [htarget]
     exact hraw.trans (mul_le_mul_of_nonneg_right
       (by dsimp [K]; linarith [hKpt]) (sq_nonneg _))
-
-set_option maxHeartbeats 3200000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-
-
 
 theorem top_path_dev_h2
     (hDim : Module.finrank ℝ E = 3)

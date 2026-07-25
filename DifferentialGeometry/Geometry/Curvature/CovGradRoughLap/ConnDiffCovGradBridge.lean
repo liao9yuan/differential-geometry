@@ -10,8 +10,6 @@ import DifferentialGeometry.Tensor.Multilinear.Basis
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -37,7 +35,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma tensor0SOne_apply_add (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     om (fun _ : Fin 1 => a + b) = om (fun _ : Fin 1 => a) + om (fun _ : Fin 1 => b) := by
@@ -49,12 +46,12 @@ private lemma tensor0SOne_apply_add (x : M) (om : Tensor0SSpace 1 I x)
       (fun _ : Fin 1 => b) = φ b := by rw [continuousMultilinearCurryFin1_apply]; rfl
   have hab : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
       (fun _ : Fin 1 => a + b) = φ (a + b) := by rw [continuousMultilinearCurryFin1_apply]; rfl
-  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ) (fun _ => a + b) = _
+  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ) (fun _ => a + b) =
+    _
   rw [hab, ha, hb, map_add]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma tensor0SOne_apply_smul (x : M) (om : Tensor0SSpace 1 I x)
     (c : ℝ) (a : TangentSpace I x) :
     om (fun _ : Fin 1 => c • a) = c • om (fun _ : Fin 1 => a) := by
@@ -64,12 +61,12 @@ private lemma tensor0SOne_apply_smul (x : M) (om : Tensor0SSpace 1 I x)
       (fun _ : Fin 1 => a) = φ a := by rw [continuousMultilinearCurryFin1_apply]; rfl
   have hca : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
       (fun _ : Fin 1 => c • a) = φ (c • a) := by rw [continuousMultilinearCurryFin1_apply]; rfl
-  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ) (fun _ => c • a) = _
+  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ) (fun _ => c • a) =
+    _
   rw [hca, ha, map_smul]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma tensor0SOne_apply_neg (x : M) (om : Tensor0SSpace 1 I x)
     (a : TangentSpace I x) :
     om (fun _ : Fin 1 => -a) = -om (fun _ : Fin 1 => a) := by
@@ -79,7 +76,6 @@ private lemma tensor0SOne_apply_neg (x : M) (om : Tensor0SSpace 1 I x)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma tensor0SOne_apply_sub (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     om (fun _ : Fin 1 => a - b) = om (fun _ : Fin 1 => a) - om (fun _ : Fin 1 => b) := by
@@ -120,7 +116,6 @@ def connDiffPairing (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
           (continuous_pi (fun _ => hbil))) } : Tensor0SSpace 2 I x)
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffPairing_apply (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -129,7 +124,6 @@ omit [T2Space M] [SigmaCompactSpace M] in
       om (fun _ : Fin 1 => connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1)) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffPairing_add (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -141,7 +135,6 @@ lemma connDiffPairing_add (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
   exact ContinuousMultilinearMap.add_apply om om' _
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffPairing_smul (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -161,7 +154,6 @@ def connDiffFib (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
         map_smul' := connDiffPairing_smul g₁ g₀ x })
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma connDiffFib_apply (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -170,7 +162,6 @@ omit [T2Space M] [SigmaCompactSpace M] in
       connDiffPairing (I := I) g₁ g₀ x om := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma connDiffFib_apply_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -192,7 +183,6 @@ theorem connDiffFib_contMDiff (g₁ g₀ : SmoothRiemannianMetric I M) :
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
     (φ := fun x : M => (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
       connDiffFib (I := I) g₁ g₀ x))
-
   intro om
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
   have hsec : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -209,12 +199,10 @@ theorem connDiffFib_contMDiff (g₁ g₀ : SmoothRiemannianMetric I M) :
     have he₁ : x₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x₀
     have hframe := e₁.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) b
     obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
-
     have hconn : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
           (((connDiff (I := I) g₁ g₀ x) (Y (σ 0) x)) (Y (σ 1) x))) :=
       connDiff_contMDiff (I := I) g₁ g₀ (Y (σ 0)).contMDiff (Y (σ 1)).contMDiff
-
     have hscalar : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun x : M => Tensor0SSpace.toModel (om x)
           (fun _ : Fin 1 => ((connDiff (I := I) g₁ g₀ x) (Y (σ 0) x)) (Y (σ 1) x))) x₀ :=
@@ -225,20 +213,16 @@ theorem connDiffFib_contMDiff (g₁ g₀ : SmoothRiemannianMetric I M) :
     refine hscalar.congr_of_eventuallyEq ?_
     have h_base₁ : ∀ᶠ x in 𝓝 x₀, x ∈ e₁.baseSet := e₁.open_baseSet.mem_nhds he₁
     filter_upwards [h_base₁, hY] with x hx₁ hYx
-
     rw [continuousMultilinearMap_basis_repr]
-
     have hframe0 : e₁.symmL ℝ x (b (σ 0)) = (Y (σ 0)) x := by
       rw [hYx (σ 0), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
       simp [Trivialization.basisAt]
     have hframe1 : e₁.symmL ℝ x (b (σ 1)) = (Y (σ 1)) x := by
       rw [hYx (σ 1), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
       simp [Trivialization.basisAt]
-
     change (connDiffPairing (I := I) g₁ g₀ x (om x))
         (fun j : Fin 2 => e₁.symmL ℝ x (b (σ j))) = _
     rw [connDiffPairing_apply]
-
     rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
     rw [hframe0, hframe1]
     rfl
@@ -289,7 +273,6 @@ private lemma connDiffSection_tensorCovDerivAt_homSplit
     1 2 (LeviCivita (I := I) g₀)
     (fun y : M => (connDiffSection (I := I) g₁ g₀).toSection y) (fun y : M => om y)
     (fun y : M => X y) hτ hw hV
-
   have hval : (fun y : M =>
         (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 2 I y from
           (connDiffSection (I := I) g₁ g₀).toSection y) (om y)) =
@@ -375,13 +358,10 @@ private lemma connDiffPairing_covariantDerivative02_eval
       (IM := I) (IB := I)
       (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M V y)
       (v := fun y : M => Y y) hCurried hY'
-
   have hpeel1 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 1 V hV Y (X x) ![Z x]
-
   have hpeel2 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff Z (X x) (fun i => Fin.elim0 i)
-
   have hbase : Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
           (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x))
@@ -394,7 +374,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
     refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
     funext b
     rw [scalarFn_eq_toModel_elim0 (I := I) (M := M)]
-
     show Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M W₁ b (Z b))
         (fun i => Fin.elim0 i) = _
     rw [Tensor0SNabla.curriedSection_apply (s := 0) (T := W₁)]
@@ -408,7 +387,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
     simp only [hVdef]
     rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
     rfl
-
   have hcorr2 : Tensor0SSpace.toModel (W₁ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) (fun i => Fin.elim0 i)) =
       om x (fun _ : Fin 1 =>
@@ -423,7 +401,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
     simp only [hVdef]
     rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
     rfl
-
   have hcorr1 : Tensor0SSpace.toModel (V x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
           (Fin.cons (Z x) (fun i => Fin.elim0 i))) =
@@ -433,7 +410,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
     simp only [hVdef]
     rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
     rfl
-
   rw [hpeel1]
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M V y (Y y)) = W₁ from rfl]
   rw [show (![Z x] : Fin 1 → E) = Fin.cons (Z x) (fun i => Fin.elim0 i) from by
@@ -458,19 +434,15 @@ private lemma connDiffPairing_covariantDerivative01_eval
             (LeviCivita (I := I) g₀).toFun
               (fun b => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) x (X x)) := by
   classical
-
   have hWYZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => (⟨b, connDiff (I := I) g₁ g₀ b (Y b) (Z b)⟩ : TotalSpace E (TangentSpace I))) :=
     connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
   set WYZ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (fun b : M => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) hWYZ with hWYZdef
-
   have hom_mdiff : TensorSectionMDiffAt (I := I) 1 (fun y : M => om y) x :=
     om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-
   have hpeel := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 (fun y : M => om y) hom_mdiff WYZ (X x) (fun i => Fin.elim0 i)
-
   have hLHS : connDiffPairing (I := I) g₁ g₀ x
         (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
           (fun y : M => om y) x (X x))
@@ -487,7 +459,6 @@ private lemma connDiffPairing_covariantDerivative01_eval
     rw [hWYZdef]
     rfl
   rw [hLHS, hpeel]
-
   have hbase : Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
           (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x))
@@ -511,9 +482,9 @@ private lemma connDiffPairing_covariantDerivative01_eval
     refine Fin.cases ?_ (fun j => j.elim0) k
     rw [hWYZdef]
     rfl
-
   have hcorr : Tensor0SSpace.toModel ((fun y : M => om y) x)
-        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x)) (fun i => Fin.elim0 i)) =
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x)) (fun i => Fin.elim0 i))
+          =
       om x (fun _ : Fin 1 =>
         (LeviCivita (I := I) g₀).toFun
           (fun b => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) x (X x)) := by
@@ -540,10 +511,8 @@ theorem connDiffSection_covGrad_eq_covDerivConnDiff
         (Fin.cons (X x) (Fin.cons (Y x) ![Z x])) =
       om x (fun _ : Fin 1 => covDerivConnDiff (I := I) g₀ g₁ X Z Y x) := by
   classical
-
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀) x
     (om x) (Fin.cons (X x) (Fin.cons (Y x) ![Z x]))]
-
   rw [show (Fin.cons (X x) (Fin.cons (Y x) ![Z x]) : Fin 3 → TangentSpace I x) 0 = X x from rfl]
   rw [show Matrix.vecTail (Fin.cons (X x) (Fin.cons (Y x) ![Z x]) : Fin 3 → TangentSpace I x)
         = Fin.cons (Y x) ![Z x] from by
@@ -551,11 +520,9 @@ theorem connDiffSection_covGrad_eq_covDerivConnDiff
       refine Fin.cases rfl (fun j => ?_) k
       refine Fin.cases rfl (fun j' => ?_) j
       exact j'.elim0]
-
   rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
       tensorCovDerivAt (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀) x (X x)) (om x)
       = _ from connDiffSection_tensorCovDerivAt_homSplit (I := I) g₁ g₀ om X x]
-
   rw [show Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
             (fun y : M => connDiffPairing (I := I) g₁ g₀ y (om y)) x (X x) -
@@ -573,9 +540,7 @@ theorem connDiffSection_covGrad_eq_covDerivConnDiff
                 (fun y : M => om y) x (X x)))
             (Fin.cons (Y x) ![Z x]) from by
       rw [Tensor0SSpace.toModel_sub]; rfl]
-
   rw [connDiffPairing_covariantDerivative02_eval (I := I) g₁ g₀ om X Y Z x]
-
   rw [show Tensor0SSpace.toModel
         (connDiffPairing (I := I) g₁ g₀ x
           (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
@@ -586,13 +551,11 @@ theorem connDiffSection_covGrad_eq_covDerivConnDiff
           (fun y : M => om y) x (X x))
         (Fin.cons (Y x) ![Z x]) from rfl]
   rw [connDiffPairing_covariantDerivative01_eval (I := I) g₁ g₀ om X Y Z x]
-
   have hvec : covDerivConnDiff (I := I) g₀ g₁ X Z Y x =
       (LeviCivita (I := I) g₀).toFun (fun b => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) x (X x)
         - connDiff (I := I) g₁ g₀ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
         - connDiff (I := I) g₁ g₀ x (Y x)
             ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) := by
-
     have hexpand : covDerivConnDiff (I := I) g₀ g₁ X Z Y x =
         (LeviCivita (I := I) g₀).toFun (fun b => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) x (X x)
           - connDiff (I := I) g₁ g₀ x (Y x)
@@ -603,11 +566,11 @@ theorem connDiffSection_covGrad_eq_covDerivConnDiff
   rw [show (fun _ : Fin 1 => covDerivConnDiff (I := I) g₀ g₁ X Z Y x)
       = (fun _ : Fin 1 =>
           (LeviCivita (I := I) g₀).toFun (fun b => connDiff (I := I) g₁ g₀ b (Y b) (Z b)) x (X x)
-            - connDiff (I := I) g₁ g₀ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
+            - connDiff (I := I) g₁ g₀ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
+              (Z x)
             - connDiff (I := I) g₁ g₀ x (Y x)
                 ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
       from by funext k; rw [hvec]]
-
   rw [tensor0SOne_apply_sub (I := I) x (om x), tensor0SOne_apply_sub (I := I) x (om x)]
   ring
 

@@ -767,7 +767,8 @@ theorem galerkinODE_solution_unique
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1)
         (Set.Ici t) t :=
       hasDerivWithinAt_pi.mpr (fun j => hWderiv t ht j.1 j.2)
-    have hcomp := (e.symm.hasFDerivAt (x := (fun j : {i // i ∈ S} => W t j.1))).comp_hasDerivWithinAt
+    have hcomp := (e.symm.hasFDerivAt
+      (x := (fun j : {i // i ∈ S} => W t j.1))).comp_hasDerivWithinAt
       t hpi
     rw [ContinuousLinearEquiv.coe_coe] at hcomp
     have hval : e.symm

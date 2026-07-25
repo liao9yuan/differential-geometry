@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannOrthoF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -93,7 +90,8 @@ variable {n : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (A B C : TangentSpace I x)
@@ -101,7 +99,6 @@ private theorem tensor04_vec4_sum_last
     Rm04 (vec4 (I := I) A B C (∑ e : Fin n, coef e • vecs e)) =
       ∑ e : Fin n, coef e * Rm04 (vec4 (I := I) A B C (vecs e)) := by
   classical
-
   have hupd : ∀ Z : TangentSpace I x,
       vec4 (I := I) A B C Z =
         Function.update (vec4 (I := I) A B C (0 : TangentSpace I x)) 3 Z := by
@@ -109,7 +106,6 @@ private theorem tensor04_vec4_sum_last
     funext i
     fin_cases i <;> simp [vec4, Function.update]
   rw [hupd]
-
   rw [show Rm04 (Function.update (vec4 (I := I) A B C (0 : TangentSpace I x)) 3
         (∑ e : Fin n, coef e • vecs e)) =
       Rm04.toMultilinearMap (Function.update
@@ -127,7 +123,8 @@ private theorem tensor04_vec4_sum_last
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_orthoBasis_expand
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
@@ -137,7 +134,6 @@ private theorem cotangentSharp_orthoBasis_expand
     cotangentSharp_gen (I := I) g x β =
       ∑ e : Fin n, (β (fun _ : Fin 1 => basis e)) • basis e := by
   classical
-
   set gInv : Fin n → Fin n → Real := fun i j => if i = j then 1 else 0 with hgInv
   have hdiag : ∀ i : Fin n, gInv i i = 1 := by intro i; simp [hgInv]
   have hoff : ∀ i k : Fin n, i ≠ k → gInv i k = 0 := by
@@ -145,19 +141,16 @@ private theorem cotangentSharp_orthoBasis_expand
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv := by
     intro i j
     refine ⟨?_, ?_⟩
-    ·
-      rw [Finset.sum_eq_single i]
+    · rw [Finset.sum_eq_single i]
       · rw [hdiag i, one_mul]; exact horth i j
       · intro k _ hk; rw [hoff i k (fun h => hk h.symm), zero_mul]
       · intro h; exact absurd (Finset.mem_univ i) h
-    ·
-      rw [Finset.sum_eq_single j]
+    · rw [Finset.sum_eq_single j]
       · rw [hdiag j, mul_one]; exact horth i j
       · intro k _ hk; rw [hoff k j hk, mul_zero]
       · intro h; exact absurd (Finset.mem_univ j) h
   rw [cotangentSharp_eq_sum_inv_gen (I := I) g x basis gInv hinv β]
   refine Finset.sum_congr rfl fun i _ => ?_
-
   congr 1
   rw [Finset.sum_eq_single i]
   · rw [hdiag i, one_mul, cotangentToDual_apply_gen]
@@ -173,7 +166,8 @@ private theorem cotangentSharp_orthoBasis_expand
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_orthoBasis_eq_sum
     (g : SmoothRiemannianMetric I M) {x : M} {s : ℕ}
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -193,19 +187,15 @@ theorem curvatureAction0SAt_orthoBasis_eq_sum
   rw [curvatureAction0SAt]
   congr 1
   refine Finset.sum_congr rfl fun q _ => ?_
-
   rw [rm13_apply_eq_rm04_raise (I := I) g (Rm13 x) Rm04 hLower
     (oneFormAtSlot0S (I := I) alpha (fun p => basis (sidx p)) q) (basis a) (basis c)
     (basis (sidx q))]
-
   rw [cotangentSharp_orthoBasis_expand (I := I) g basis horth
     (oneFormAtSlot0S (I := I) alpha (fun p => basis (sidx p)) q)]
   rw [tensor04_vec4_sum_last (I := I) Rm04 (basis a) (basis c) (basis (sidx q))]
   refine Finset.sum_congr rfl fun e _ => ?_
-
   congr 1
   rw [oneFormAtSlot0S_apply]
-
   congr 1
   funext p
   by_cases hp : p = q
@@ -228,7 +218,8 @@ theorem curvatureAction0SAt_orthoBasis_eq_sum
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem abs_curvatureAction0SAt_orthoBasis_le
     (g : SmoothRiemannianMetric I M) {x : M} {s : ℕ}
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -255,11 +246,9 @@ theorem abs_curvatureAction0SAt_orthoBasis_le
   set NA : Real := Real.sqrt (compNormSqMulti A) with hNA
   have hNRnn : 0 ≤ NR := Real.sqrt_nonneg _
   have hNAnn : 0 ≤ NA := Real.sqrt_nonneg _
-
   rw [curvatureAction0SAt_orthoBasis_eq_sum (I := I) g Rm13 Rm04 hLower basis horth
     alpha a c sidx]
   rw [abs_neg]
-
   have hStep :
       |∑ q : Fin s, ∑ e : Fin n, A (Function.update sidx q e) * R a c (sidx q) e| ≤
         ∑ q : Fin s, ∑ e : Fin n, NR * NA := by
@@ -277,7 +266,6 @@ theorem abs_curvatureAction0SAt_orthoBasis_le
           ≤ NA * NR := mul_le_mul hAbnd hRbnd (abs_nonneg _) hNAnn
       _ = NR * NA := by ring
   refine le_trans hStep ?_
-
   have hconst :
       (∑ q : Fin s, ∑ e : Fin n, NR * NA) =
         (s : Real) * (Fintype.card (Fin n) : Real) * (NR * NA) := by
@@ -335,7 +323,6 @@ theorem exists_orthoBasisFrameAt
   · intro i j
     have horth : Orthonormal Real (fun i : Fin n => e i) := e.orthonormal
     have hite := (orthonormal_iff_ite (𝕜 := Real) (E := TangentSpace I x₀)).mp horth i j
-
     change (g.inner x₀) (e i) (e j) = if i = j then (1 : Real) else 0
     rw [← hinner_eq (e i) (e j)]
     simpa using hite
@@ -381,9 +368,7 @@ theorem abs_nablaLapComm_T2_orthoBasis_le
           Real.sqrt (compNormSqMulti (fun idx : Fin 5 → Fin n =>
             nablaRm04Field (I := I) S t x₀ (fun p => basis (idx p))))) := by
   classical
-
   set sidx : Fin 5 → Fin n := Fin.cons b m with hsidx
-
   have hslots :
       nabla3InnerSlotsF (I := I) frame x₀ b m =
         (fun p => basis (sidx p)) := by
@@ -393,13 +378,11 @@ theorem abs_nablaLapComm_T2_orthoBasis_le
     · intro q
       simp [nabla3InnerSlotsF, frameTuple, hframe (m q), hsidx]
   rw [hframe a, hframe c, hslots]
-
   have hmain :=
     abs_curvatureAction0SAt_orthoBasis_le (I := I) (S.family.metric t)
       (S.base.rm13 t) (S.base.rm04 t x₀)
       (solution_rm04LowersRm13At (I := I) S t x₀)
       basis horth (nablaRm04Field (I := I) S t x₀) a c sidx
-
   simpa using hmain
 
 
@@ -432,10 +415,8 @@ theorem compNormSqMulti_eq_compNormSq5
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [sum_pi_fin_succ (fun idx => (A (Fin.cons m (Fin.cons a (Fin.cons b (Fin.cons c idx))))) ^ 2)]
   refine Finset.sum_congr rfl fun d _ => ?_
-
   rw [Finset.sum_eq_single (default : Fin 0 → Idx)]
-  ·
-    have htuple :
+  · have htuple :
         (Fin.cons m (Fin.cons a (Fin.cons b (Fin.cons c
           (Fin.cons d (default : Fin 0 → Idx))))) : Fin 5 → Idx) =
           ![m, a, b, c, d] := by
@@ -482,13 +463,10 @@ theorem abs_nablaLapComm_T2_orthoFrame_le
   classical
   obtain ⟨n, frame, basis, hframe, horth⟩ := exists_orthoBasisFrameAt (I := I) S t x₀
   refine ⟨n, frame, ?_, deltaInvMetric_orthonormal (M := M) t x₀, ?_⟩
-  ·
-    intro i j; rw [hframe i, hframe j]; exact horth i j
+  · intro i j; rw [hframe i, hframe j]; exact horth i j
   · intro a b c m
-
     have hbnd :=
       abs_nablaLapComm_T2_orthoBasis_le (I := I) S t x₀ frame basis hframe horth a b c m
-
     have hRm :
         compNormSq4 (fun i j k l : Fin n =>
             S.base.rm04 t x₀ (vec4 (I := I) (basis i) (basis j) (basis k) (basis l))) =
@@ -502,7 +480,6 @@ theorem abs_nablaLapComm_T2_orthoFrame_le
       refine Finset.sum_congr rfl fun l _ => ?_
       simp only [DifferentialGeometry.Integral.Connection.rm04Comp]
       rw [hframe i, hframe j, hframe k, hframe l]
-
     have hNab :
         compNormSqMulti (fun idx : Fin 5 → Fin n =>
             nablaRm04Field (I := I) S t x₀ (fun p => basis (idx p))) =

@@ -120,7 +120,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
+    [CompactSpace M] [SigmaCompactSpace M] in
 theorem flowFamily_hasMFDerivWithinAt_time
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -132,7 +133,8 @@ theorem flowFamily_hasMFDerivWithinAt_time
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ_fam s x))) :=
   hbare s hs hsT x
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
+    [CompactSpace M] [SigmaCompactSpace M] in
 theorem flowFamily_continuousWithinAt_time
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

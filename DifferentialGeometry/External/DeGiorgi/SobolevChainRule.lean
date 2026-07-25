@@ -74,6 +74,7 @@ private theorem chain_rule_smooth_ibp
 /-! ## Limit passage lemmas -/
 
 set_option maxHeartbeats 400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 private theorem integral_mul_tendsto_of_eLpNorm_tendsto
     {S : Set E} (_hS : MeasurableSet S) (hS_fin : volume S < ⊤)
@@ -292,6 +293,7 @@ private theorem exists_ae_tendsto_of_eLpNorm_tendsto
 /-! ## Main theorem: chain rule on the unit ball -/
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem sobolev_chain_rule_unitBall
     {u : E → ℝ}
     (hw : MemW1pWitness 2 u (Metric.ball (0 : E) 1))
@@ -364,7 +366,8 @@ theorem sobolev_chain_rule_unitBall
     have hφ_deriv_cont : Continuous (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) :=
       (hφ.continuous_fderiv (by simp)).clm_apply continuous_const
     have hφ_bdd : ∃ C, ∀ x, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| ≤ C := by
-      obtain ⟨C, hC⟩ := (hφ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)).exists_bound_of_continuous
+      obtain ⟨C, hC⟩ := (hφ_cs.fderiv_apply (𝕜 := ℝ)
+        (EuclideanSpace.single i 1)).exists_bound_of_continuous
         hφ_deriv_cont
       exact ⟨C, fun x => by rw [← Real.norm_eq_abs]; exact hC x⟩
     exact integral_mul_tendsto_of_eLpNorm_tendsto measurableSet_ball hB_fin
@@ -445,7 +448,8 @@ theorem sobolev_chain_rule_unitBall
         (∫ x in Metric.ball (0 : E) 1, (deriv Φ (u x) * hw.weakGrad x i) * φ x) +
         (∫ x in Metric.ball (0 : E) 1, deriv Φ (ψ (ns n) x) *
           ((fderiv ℝ (ψ (ns n)) x) (EuclideanSpace.single i 1) - hw.weakGrad x i) * φ x) +
-        (∫ x in Metric.ball (0 : E) 1, (deriv Φ (ψ (ns n) x) - deriv Φ (u x)) * (hw.weakGrad x i * φ x)) := by
+        (∫ x in Metric.ball (0 : E) 1, (deriv Φ (ψ (ns n) x) - deriv Φ (u x)) *
+          (hw.weakGrad x i * φ x)) := by
       intro n
       -- Integrability of the three summands (each is bounded × L¹ × bounded on finite measure)
       have hΦ'_cont : Continuous (deriv Φ) := hΦ.continuous_deriv (by simp)
@@ -504,7 +508,8 @@ theorem sobolev_chain_rule_unitBall
         (∫ x in Metric.ball (0 : E) 1, (deriv Φ (u x) * hw.weakGrad x i) * φ x) =
         (∫ x in Metric.ball (0 : E) 1, deriv Φ (ψ (ns n) x) *
           ((fderiv ℝ (ψ (ns n)) x) (EuclideanSpace.single i 1) - hw.weakGrad x i) * φ x) +
-        (∫ x in Metric.ball (0 : E) 1, (deriv Φ (ψ (ns n) x) - deriv Φ (u x)) * (hw.weakGrad x i * φ x)) := by
+        (∫ x in Metric.ball (0 : E) 1, (deriv Φ (ψ (ns n) x) - deriv Φ (u x)) *
+          (hw.weakGrad x i * φ x)) := by
       intro n; simp only [h_split n]; ring
     refine (Filter.Tendsto.congr (fun n => (h_sub_eq n).symm) ?_)
     rw [show (0 : ℝ) = 0 + 0 from by ring]
@@ -699,6 +704,7 @@ private theorem setIntegral_fderiv_eq_of_tsupport_subset
       setIntegral_eq_integral_of_forall_compl_eq_zero h2]
 
 set_option maxHeartbeats 3200000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 -- partition-of-unity decomposition of test functions
 omit [NeZero d] in
 /-- Local-to-global for `HasWeakPartialDeriv'`: if the property holds on every
@@ -806,9 +812,11 @@ private theorem HasWeakPartialDeriv'_of_local
     intro x; rw [hfderiv_sum x, Finset.mul_sum]
   -- Assembly: ∫_Ω f·∂ᵢφ = Σ_k ∫_Ω f·∂ᵢ(ρ_k·φ) = -Σ_k ∫_Ω g·(ρ_k·φ) = -∫_Ω g·φ
   calc ∫ x in Ω, f x * (fderiv ℝ φ x) (EuclideanSpace.single i 1)
-      = ∫ x in Ω, ∑ k ∈ S, f x * (fderiv ℝ (fun x => (ρ k : E → ℝ) x * φ x) x) (EuclideanSpace.single i 1) := by
+      = ∫ x in Ω, ∑ k ∈ S, f x * (fderiv ℝ (fun x => (ρ k : E → ℝ) x * φ x) x)
+        (EuclideanSpace.single i 1) := by
         congr 1; ext x; exact hf_dφ_sum x
-    _ = ∑ k ∈ S, ∫ x in Ω, f x * (fderiv ℝ (fun x => (ρ k : E → ℝ) x * φ x) x) (EuclideanSpace.single i 1) := by
+    _ = ∑ k ∈ S, ∫ x in Ω, f x * (fderiv ℝ (fun x => (ρ k : E → ℝ) x * φ x) x)
+      (EuclideanSpace.single i 1) := by
         rw [integral_finset_sum S (fun k _ => by
           let ψk : E → ℝ := fun x => (ρ k : E → ℝ) x * φ x
           have hψk_cont : Continuous (fun x =>
@@ -850,6 +858,7 @@ private noncomputable def MemW1p.toWitness
     simpa using (hu.2 j).choose_spec.2
 
 set_option maxHeartbeats 400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem sobolev_chain_rule
     {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} {g : E → ℝ} {i : Fin d}

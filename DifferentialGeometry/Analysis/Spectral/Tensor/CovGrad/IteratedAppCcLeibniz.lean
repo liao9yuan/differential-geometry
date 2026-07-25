@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 4000000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -48,7 +46,8 @@ private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c
     (Ψ : (k : ℕ) → SmoothCcTensor g (b + k) (c + i)) (W : SmoothCcTensor g a b) :
     covGrad (I := I) (M := M) g a (c + i)
         (∑ k ∈ Finset.range (i + 1),
-          ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i) (Ψ k) (iteratedCovGrad g a b k W)) =
+          ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i) (Ψ k)
+            (iteratedCovGrad g a b k W)) =
       ∑ k ∈ Finset.range (i + 1),
         (ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
             (covGrad (I := I) (M := M) g (b + k) (c + i) (Ψ k)) (iteratedCovGrad g a b k W) +

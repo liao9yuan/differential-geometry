@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -82,8 +81,6 @@ theorem hasDerivWithinAt_lim
   intro c hc
   have hc4 : (0 : Real) < c / 4 := by positivity
   obtain ⟨k0, hk0⟩ := hunif (c / 4) hc4
-
-
   have hA : ∀ u ∈ s, |f k0 u - g u - (f k0 t - g t)| ≤ 2 * (c / 4) * |u - t| := by
     intro u hu
     have hAm : ∀ m : Nat, k0 ≤ m →
@@ -112,7 +109,6 @@ theorem hasDerivWithinAt_lim
     refine le_of_tendsto hlim ?_
     filter_upwards [Filter.eventually_ge_atTop k0] with m hm
     exact hAm m hm
-
   have hB := hderiv k0 t ht
   rw [hasDerivWithinAt_iff_isLittleO, isLittleO_iff] at hB
   have hBev := hB hc4
@@ -159,7 +155,9 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricInner_tendsto
     [Module.Finite ℝ E]
@@ -212,7 +210,8 @@ theorem metricInner_tendsto
 
 
 
-omit [Module.Finite ℝ E] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricLimit_pde
     [Module.Finite ℝ E]
@@ -234,8 +233,6 @@ theorem metricLimit_pde
     {t : Real} (ht : t ∈ Set.Icc β ψ) :
     HasDerivWithinAt (fun s : Real => (gInf s).inner x v w)
       (-2 * ricciTensor (I := I) (gInf t) x v w) (Set.Icc β ψ) t := by
-
-
   have hkder : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ,
       HasDerivWithinAt (fun s : Real => ((S k).family.metric s).inner x v w)
         (-2 * ricciTensor (I := I) ((S k).family.metric u) x v w)
@@ -276,7 +273,8 @@ theorem metricLimit_pde
 
 
 omit [Module.Finite ℝ E] in
-omit [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricLimit_pdeOn
     [Module.Finite ℝ E]

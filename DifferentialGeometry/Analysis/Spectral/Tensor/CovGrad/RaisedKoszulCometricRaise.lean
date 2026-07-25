@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantN
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -78,7 +76,8 @@ omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from S.toSection x)
           (unitTensor (I := I) (M := M) x)) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma cometricRaiseSlot0Fib_clm_apply (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 2) I x) (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
@@ -121,11 +120,10 @@ lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcT
               ![c, a, b]
           - unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (1 : Fin 3) 2) W) x ![c, a, b]) := by
-    simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
+    simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul,
+      SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply,
-
-
 ]
     rfl
   rw [hlin, hperm, hperm, hperm]

@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -25,9 +23,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSRiemannianNormedAddCommGroup_local
+    (r s : ℕ) [h : Bundle.RiemannianBundle (fun b : M ↦ Tensor0SBundle.TensorRSSpace r s I b)]
+    (b : M) : NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma coframe_arity_one_eq_metric_flat_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
@@ -45,7 +50,8 @@ private lemma coframe_arity_one_eq_metric_flat_apply
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 1 3 I x) (d a b c : TangentSpace I x) :
@@ -218,7 +224,8 @@ theorem abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt
   have hcompsq : (∑ p : (Fin 1 → Fin n) × (Fin 3 → Fin n), comp p ^ 2) =
       ‖(W : Tensor0SBundle.TensorRSSpace 1 3 I x)‖ ^ 2 := by
     rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 1 3 x W]
-    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x W e bse hnE hbse horth]
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x W e bse hnE
+      hbse horth]
     rw [Fintype.sum_prod_type]
   have hnorm_nn : 0 ≤ ‖(W : Tensor0SBundle.TensorRSSpace 1 3 I x)‖ := norm_nonneg _
   have habs_sq : (∑ p : (Fin 1 → Fin n) × (Fin 3 → Fin n), coef p * comp p) ^ 2 ≤

@@ -88,7 +88,6 @@ section ContinuousEmbedding
 variable {f : ℝ → X}
 
 omit [InnerProductSpace ℝ X] [CompleteSpace X] in
-
 theorem memLp_of_continuousOn (hf : ContinuousOn f (Set.Icc (0 : ℝ) T)) :
     MemLp f 2 (timeMeasure T) := by
   have hmeas : AEStronglyMeasurable f (timeMeasure T) := by

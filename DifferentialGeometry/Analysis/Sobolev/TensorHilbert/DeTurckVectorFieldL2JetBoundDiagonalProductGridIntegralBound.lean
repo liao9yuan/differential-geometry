@@ -7,8 +7,6 @@ import Mathlib.Analysis.MeanInequalities
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -384,7 +382,8 @@ private theorem diagonalProductTerm_integral_le
     have hsum_int : MeasureTheory.Integrable
         (fun x => ∑ m ∈ Sset, ((e m : ℝ) / i) *
           (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ))) μ := by
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)))
+              μ := by
       apply MeasureTheory.integrable_finset_sum
       intro m _
       exact (hint_rpow (e m) ((i : ℝ) / (e m : ℝ)) (by positivity)).const_mul _
@@ -393,7 +392,8 @@ private theorem diagonalProductTerm_integral_le
             ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)) ∂μ) =
         ∑ m ∈ Sset, ((e m : ℝ) / i) *
           (∫ x, (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)) ∂μ) := by
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ))
+              ∂μ) := by
       rw [MeasureTheory.integral_finset_sum]
       · apply Finset.sum_congr rfl
         intro m _; rw [MeasureTheory.integral_const_mul]
@@ -453,20 +453,21 @@ theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform_succ
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨Cemb, hCemb_nn, hCemb⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
+    IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
       (I := I) (M := M) g₀ a ha_super
   set Lam : ℝ := Cemb * Real.sqrt ((a + 1 + 1 : ℕ) : ℝ) * R with hLam
   have hLam_nn : 0 ≤ Lam := by rw [hLam]; positivity
   set Cgn : ℕ → ℝ := fun k =>
     if h : 1 ≤ k then
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g₀ 0 2 k h).choose
     else 0 with hCgn
   have hCgn_nn : ∀ k, 0 ≤ Cgn k := by
     intro k
     simp only [hCgn]
     split_ifs with h
-    · exact (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    · exact
+        (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g₀ 0 2 k h).choose_spec.1
     · exact le_refl 0
   set Gfun : ℕ → ℝ := fun k => (k : ℝ) * (max Lam (max R (max (Cgn k) 1))) ^ (7 * k) with hGfun
@@ -490,7 +491,8 @@ theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform_succ
       have hgrid0 : (fun x => ∑ n ∈ Finset.range (0 + 1),
           ∑ e ∈ Finset.Nat.antidiagonalTuple n 0, ∏ m : Fin n,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) = (fun _ : M => (1 : ℝ)) := by
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) =
+                (fun _ : M => (1 : ℝ)) := by
         funext x
         simp only [Nat.zero_add, Finset.sum_range_one, Finset.Nat.antidiagonalTuple_zero_zero,
           Finset.sum_singleton, Finset.univ_eq_empty, Finset.prod_empty]
@@ -536,7 +538,8 @@ theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform_succ
                 mul_le_mul_of_nonneg_left hsum_le (by positivity)
             _ = Cemb ^ 2 * ((a + 1 + 1 : ℕ) : ℝ) * R ^ 2 := by ring
         exact le_trans hsingle hchain
-      have hGNspec := (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      have hGNspec :=
+        (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g₀ 0 2 i hi1).choose_spec.2
       have hGNP : ∀ j : ℕ, 0 < j → j < i →
           (∫ x, (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -545,7 +548,8 @@ theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform_succ
             Cgn i * Lam ^ (2 * (1 - (j : ℝ) / (i : ℝ))) * R ^ (2 * (j : ℝ) / (i : ℝ)) := by
         intro j hj0 hji
         have hb := hGNspec P Lam hLam_nn hΛsup j hj0 hji
-        have hchoose : (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+        have hchoose :
+          (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
             (I := I) (M := M) g₀ 0 2 i hi1).choose = Cgn i := by
           rw [hCgn]; simp only [dif_pos hi1]
         rw [hchoose] at hb

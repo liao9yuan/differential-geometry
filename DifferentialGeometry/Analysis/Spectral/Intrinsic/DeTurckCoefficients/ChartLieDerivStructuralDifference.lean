@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieS
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Set Matrix
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -26,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
 omit [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
@@ -48,7 +45,6 @@ theorem chartDeTurckVFComp_sub_eq
   ring
 
 omit [BoundarylessManifold I M] in
-
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_chartDeTurckVFComp_sub_eq
@@ -82,7 +78,6 @@ theorem partialDeriv_chartDeTurckVFComp_sub_eq
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
-
 theorem chartLieDeTurckCompAdvectionTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -106,7 +101,6 @@ theorem chartLieDeTurckCompAdvectionTerm_sub_eq
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
-
 theorem chartLieDeTurckCompIDerivTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -129,7 +123,6 @@ theorem chartLieDeTurckCompIDerivTerm_sub_eq
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
-
 theorem chartLieDeTurckCompJDerivTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -151,7 +144,6 @@ theorem chartLieDeTurckCompJDerivTerm_sub_eq
   ring
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartLieDeTurckComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)

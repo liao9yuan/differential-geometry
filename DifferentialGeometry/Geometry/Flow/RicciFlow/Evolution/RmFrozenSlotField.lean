@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -141,8 +138,6 @@ noncomputable def freezeAllBut04Field
   refine (contMDiff_multilinearSection_iff_coord (TangentSpace I)
     (∞ : WithTop ℕ∞) b F).mpr ?_
   intro σ x₀
-
-
   have hcoeff :
       ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
         (fun y : M =>
@@ -278,14 +273,11 @@ private theorem allBut04FreezeNabla
   let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 :=
     freezeAllBut04Field (I := I) (M := M) A q Y
-
   obtain ⟨Usec, hUsec, hUcov⟩ :=
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov x U
-
   let V4 : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _) :=
     freezeAllButSlots (I := I) Y q Usec
-
   let V1 : Fin 1 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)
     | _ => Usec
@@ -302,7 +294,6 @@ private theorem allBut04FreezeNabla
   have hAeval :=
     nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) cov X V4 A x
-
   have hderiv :
       extDerivFun (I := I)
           (fun p : M => B p (fun a : Fin 1 => V1 a p)) x (X x) =
@@ -327,8 +318,6 @@ private theorem allBut04FreezeNabla
             A p (Function.update (fun i : Fin 4 => Y i p) q (Usec p)) from
         freezeAllBut04Field_apply_vec (I := I) (M := M) A q Y p (Usec p)]
     rw [hfun]
-
-
   have hBcorr :
       (∑ a : Fin 1,
         B x
@@ -359,25 +348,21 @@ private theorem allBut04FreezeNabla
         A x
           (Function.update (fun i : Fin 4 => Y i x) q
             ((cov (fun p : M => Usec p) x) (X x))) := by
-
     have hV4x :
         (fun a : Fin 4 => V4 a x) =
           Function.update (fun i : Fin 4 => Y i x) q (Usec x) :=
       freezeAllButSlots_apply (I := I) Y q Usec x
     rw [Finset.sum_eq_single q]
-    ·
-      have hVq : (fun p : M => V4 q p) = (fun p : M => Usec p) := by
+    · have hVq : (fun p : M => V4 q p) = (fun p : M => Usec p) := by
         funext p
         simp [V4, freezeAllButSlots]
       rw [hVq, hV4x]
-
       congr 1
       funext i
       by_cases hi : i = q
       · subst hi; simp
       · simp [Function.update_of_ne hi]
-    ·
-      intro a _ ha
+    · intro a _ ha
       have hVa : (fun p : M => V4 a p) = (fun p : M => Y a p) := by
         funext p
         simp [V4, freezeAllButSlots, Function.update_of_ne ha]
@@ -554,8 +539,6 @@ theorem nablaRmFrozenSlot_eval
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection (t : Real)) (1 : WithTop ℕ∞) :=
     connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
-
-
   have hBval :
       nablaRmFrozenSlotField (I := I) S (t : Real) q Y x₀
           (vec2 (I := I) (X x₀) U) =
@@ -564,7 +547,6 @@ theorem nablaRmFrozenSlot_eval
           (rmFrozenSlotField (I := I) S (t : Real) q Y) x₀
           (vec2 (I := I) (X x₀) U) := by
     rfl
-
   have hAval :
       nablaRm04Field (I := I) S (t : Real) x₀
           (Fin.cons (X x₀)

@@ -84,7 +84,8 @@ private theorem ccBilin_sub
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (T - T') x v w =
-      smoothCcTensorBilinForm (I := I) g₀ T x v w - smoothCcTensorBilinForm (I := I) g₀ T' x v w := by
+      smoothCcTensorBilinForm (I := I) g₀ T x v w - smoothCcTensorBilinForm (I := I) g₀ T' x v
+        w := by
   rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ (T - T') x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T' x v w]

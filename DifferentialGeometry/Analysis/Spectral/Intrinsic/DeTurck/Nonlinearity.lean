@@ -21,9 +21,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -68,7 +65,8 @@ private def retag (g₀ : SmoothRiemannianMetric I M)
   toSection := S.toSection
   hasCompactSupport := S.hasCompactSupport
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] private theorem retag_toFun (g₀ : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
     (retag (I := I) g₀ S).toFun = S.toFun := rfl

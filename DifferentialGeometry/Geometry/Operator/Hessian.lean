@@ -63,7 +63,6 @@ theorem bilinForm_trace_sq_le_dim_mul_frobenius_sq
   simpa [Fintype.card_fin] using h
 
 variable (I) in
-
 abbrev pointwiseBilin :=
   ∀ x : M, TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ
 

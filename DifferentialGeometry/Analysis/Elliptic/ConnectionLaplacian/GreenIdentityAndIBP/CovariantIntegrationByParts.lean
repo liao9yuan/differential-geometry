@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationBy
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -39,7 +37,8 @@ def tensorInnerScalar
   fun y => tensorInnerPointwise (I := I) (M := M) g r s y
     (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp]
 lemma tensorInnerScalar_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

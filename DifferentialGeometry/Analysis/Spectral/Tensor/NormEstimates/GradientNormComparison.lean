@@ -10,8 +10,6 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
@@ -68,7 +66,8 @@ theorem
   chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (I := I) (M := M) g r (s + 1) α
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] [I.Boundaryless] in
 lemma tensorInnerPointwise_chartRSTwist_succ_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -93,7 +92,7 @@ variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem
-    chartTrivializationNorm_section_and_grad_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
+    chartTrivializationNorm_section_grad_le_const_mul_chartTensorInner_rs_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       (∀ b : M, b ∈ tsupport (fun x : M =>
@@ -150,7 +149,7 @@ theorem
 omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem
-    chartTrivializationNorm_section_and_grad_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
+    chartTrivializationNorm_section_grad_le_const_mul_tensorInner_chartRSTwist_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       (∀ b : M, b ∈ tsupport (fun x : M =>
@@ -169,7 +168,7 @@ theorem
             (chartRSTwist (I := I) (M := M) α b r (s + 1) T)) := by
   classical
   obtain ⟨K, hK_nn, h_sec, h_grad⟩ :=
-    chartTrivializationNorm_section_and_grad_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
+    chartTrivializationNorm_section_grad_le_const_mul_chartTensorInner_rs_model_on_pouTsupport
       (I := I) (M := M) g r s α
   refine ⟨K, hK_nn, ?_, ?_⟩
   · intro b hb T

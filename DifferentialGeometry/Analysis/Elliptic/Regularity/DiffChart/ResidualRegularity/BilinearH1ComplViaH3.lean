@@ -178,7 +178,8 @@ theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_precompact_open
     h_chartPushed_isWeakPartial_Ω' h_chosenFirst_isWeakPartial_Ω'
     h_chartPushed_locInt h_chosenFirst_locInt
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_sigmaCompact_cover
     (α : M) :
     ∃ K : ℕ → Set EuclN,

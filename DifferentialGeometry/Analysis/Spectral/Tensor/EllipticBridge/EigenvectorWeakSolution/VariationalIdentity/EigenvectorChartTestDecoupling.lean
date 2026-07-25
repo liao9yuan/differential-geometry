@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -39,7 +37,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply,
@@ -48,7 +47,8 @@ private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace
     LinearEquiv.coe_mk]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma covGradBundle_trivFibre_eq
     (r s : ℕ) (α : M) (b : M)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -119,11 +119,12 @@ theorem tensorChartComponentRaw_prependCovGradSlot
       chartBasisVecFiber (I := I) α (Jdx 0) b := rfl
   rw [hsymmL]
   rw [hΦ_def, ContinuousLinearMap.smulRight_apply]
-  rw [map_smul, ContinuousLinearMap.smul_apply,
+  rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma partialDeriv_scalarOnE_eq_euclidPartial
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -204,7 +205,7 @@ private lemma tensorCovDerivAt_sum_smul_dir
         TangentSpace I b) from rfl]
   rw [map_sum]
   refine Finset.sum_congr rfl (fun m _ => ?_)
-  rw [map_smul]
+  rw [ContinuousLinearMap.map_smul]
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
@@ -227,6 +228,35 @@ private lemma symm_mem_chartLeviCivitaGoodSet
   refine ⟨⟨?_, ?_⟩, hb_int⟩
   · rw [extChartAt_source]; exact hb_chart
   · rw [TangentBundle.trivializationAt_baseSet]; exact hb_chart
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+private lemma tensorTrivCLM_sum (r s : ℕ) (α b : M) {ι : Type*} (t : Finset ι)
+    (u : ι → TensorRSSpace r s I b) :
+    (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+        (∑ i ∈ t, u i) =
+      ∑ i ∈ t, (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (u i) := by
+  classical
+  induction t using Finset.induction with
+  | empty => rw [Finset.sum_empty, Finset.sum_empty, ContinuousLinearMap.map_zero]
+  | insert i A hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, ContinuousLinearMap.map_add, ih]
+
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+private lemma tensorChartComponentProjection_sum (r s : ℕ)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    {ι : Type*} (t : Finset ι) (u : ι → TensorRSModel r s ℝ E) :
+    tensorChartComponentProjection (E := E) r s Idx Jdx (∑ i ∈ t, u i) =
+      ∑ i ∈ t, tensorChartComponentProjection (E := E) r s Idx Jdx (u i) := by
+  classical
+  induction t using Finset.induction with
+  | empty => rw [Finset.sum_empty, Finset.sum_empty, ContinuousLinearMap.map_zero]
+  | insert i A hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, ContinuousLinearMap.map_add, ih]
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentRaw_covDerivAlongGrad
@@ -278,9 +308,9 @@ theorem tensorChartComponentRaw_covDerivAlongGrad
   rw [tensorCovDerivAt_sum_smul_dir (I := I) (M := M) g r s S b
     (fun m => gradChartCoeff (I := I) g α (ζ : M → ℝ) m b)
     (fun m => chartBasisVecFiber (I := I) α m b)]
-  rw [map_sum, map_sum]
+  rw [tensorTrivCLM_sum (I := I) (M := M), tensorChartComponentProjection_sum (E := E)]
   refine Finset.sum_congr rfl (fun m _ => ?_)
-  rw [map_smul, map_smul, smul_eq_mul]
+  rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.map_smul, smul_eq_mul]
   congr 1
   rw [tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
     g r s S α m hb_good]

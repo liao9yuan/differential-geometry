@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -73,7 +70,8 @@ theorem coordMetricMdiff
       (fun y : M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           t y a b) x₀ := by
-  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame] using
+  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame]
+    using
     DifferentialGeometry.Tensor.Coordinates.metricComp_mdiffAt (I := I) (S.family.metric t)
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
@@ -93,7 +91,8 @@ theorem coordMetricMdiffOn
       (fun y : M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           t y a b) x := by
-  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame] using
+  simpa [metricCompInFrame, DifferentialGeometry.Tensor.Coordinates.metricCompForMetricInFrame]
+    using
     DifferentialGeometry.Tensor.Coordinates.metricComp_mdiffAt (I := I) (S.family.metric t)
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
@@ -187,7 +186,8 @@ theorem coordRicciMdiff
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have hfun :
       (fun y : M => S.ricci t y (fun q : Fin 2 => V q y)) =
         fun y : M =>
@@ -255,10 +255,12 @@ theorem coordNablaReg
     · simpa [V] using hframeAt j
   have hslots : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hmdiff :=
     tensor0SField_eval_C1_slots_mdiffAt
       (I := I) (M := M) (α := derivs.nablaA) (V := V) x₀ hV_at
@@ -322,10 +324,12 @@ theorem coordNablaRegOn
     · simpa [V] using hframeAt j
   have hslots : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hmdiff :=
     tensor0SField_eval_C1_slots_mdiffAt
       (I := I) (M := M) (α := derivs.nablaA) (V := V) x hV_at
@@ -406,13 +410,15 @@ theorem coordNablaReal
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have heval :=
     TotalNabla0SRealizes.eval_C1_slots (I := I) (s := 2)
       (h := (derivs.first)) X V x₀ hV_at
   have hcons :
       Fin.cons (X x₀) (fun q : Fin 2 => V q x₀) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀) (frame b x₀) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀)
+          (frame b x₀) := by
     rw [hX, hslots x₀]
     funext q
     fin_cases q <;> rfl
@@ -420,7 +426,8 @@ theorem coordNablaReal
   rw [hX] at heval
   have hleft :
       derivs.nablaA x₀
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀) (frame b x₀)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x₀) (frame a x₀)
+            (frame b x₀)) =
         nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀) t x₀ d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection,
       frame]
@@ -445,7 +452,8 @@ theorem coordNablaReal
             ((S.family.connection t) (frame a) x₀ (frame d x₀))
             (frame b x₀) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   have hterm1 :
@@ -463,7 +471,8 @@ theorem coordNablaReal
             (frame a x₀)
             ((S.family.connection t) (frame b) x₀ (frame d x₀)) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   rw [hleft, hfun] at heval
@@ -536,13 +545,15 @@ theorem coordNablaRealOn
         DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have heval :=
     TotalNabla0SRealizes.eval_C1_slots (I := I) (s := 2)
       (h := (derivs.first)) X V x hV_at
   have hcons :
       Fin.cons (X x) (fun q : Fin 2 => V q x) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+          (frame b x) := by
     rw [hX, hslots x]
     funext q
     fin_cases q <;> rfl
@@ -550,7 +561,8 @@ theorem coordNablaRealOn
   rw [hX] at heval
   have hleft :
       derivs.nablaA x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+            (frame b x)) =
         nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection,
       frame]
@@ -575,7 +587,8 @@ theorem coordNablaRealOn
             ((S.family.connection t) (frame a) x (frame d x))
             (frame b x) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   have hterm1 :
@@ -593,7 +606,8 @@ theorem coordNablaRealOn
             (frame a x)
             ((S.family.connection t) (frame b) x (frame d x)) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2,
+        DifferentialGeometry.Integral.Connection.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   rw [hleft, hfun] at heval
@@ -681,13 +695,16 @@ theorem coordNab2Can
     · simpa [V] using hframeAt j
   have hslots3 : ∀ y,
       (fun q : Fin 3 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y) (frame j y) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a y) (frame i y)
+          (frame j y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+      DifferentialGeometry.Integral.Connection.vec3]
   have hslots4 :
       Fin.cons (X x0) (fun q : Fin 3 => V q x0) =
-        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0) := by
     rw [hX, hslots3 x0]
     funext q
@@ -758,9 +775,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame p x0) (frame i x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 p i j]
           simp [N, smul_eq_mul]
@@ -811,9 +830,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0) (frame j x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame p x0)
+                  (frame j x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a p j]
           simp [N, smul_eq_mul]
@@ -864,9 +885,11 @@ theorem coordNab2Can
           rw [(nablaA x0).map_update_smul]
           have hslot :
               Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3) (frame p x0) =
-                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0) (frame p x0) := by
+                DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x0) (frame i x0)
+                  (frame p x0) := by
             funext q
-            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec3,
+              DifferentialGeometry.Integral.Connection.vec3]
           rw [hslot]
           rw [hnabla x0 a i p]
           simp [N, smul_eq_mul]
@@ -882,7 +905,8 @@ theorem coordNab2Can
     rw [hterm0, hterm1, hterm2]
   calc
     nabla2A x0
-        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0) (frame i x0)
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (frame d x0) (frame a x0)
+          (frame i x0)
           (frame j x0)) =
         extDerivFun (I := I)
           (fun y : M =>
@@ -1208,7 +1232,8 @@ private theorem coordDgSmAt
     have hflat :=
       DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component_deriv_of_mem
         (I := I) (g := S.family.metric p.1) x₀ hp a i j
-    simpa [F, X, frame, metricCompInFrame, DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
+    simpa [F, X, frame, metricCompInFrame,
+      DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
   exact hD.congr_of_eventuallyEq heq
 
 

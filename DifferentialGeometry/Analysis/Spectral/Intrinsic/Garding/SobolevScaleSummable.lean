@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -179,7 +177,8 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u : TensorL2 r s g) :
-    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r
+      s =>
       (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2) :=
   tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
@@ -190,9 +189,11 @@ theorem summable_tensorSobolevWeight_of_even
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     {a : ℝ} {k : ℕ} (hak : a ≤ (2 * k : ℕ))
-    (h2k : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+    (h2k : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M)
+      g r s =>
       tensorSobolevWeight (I := I) (M := M) i (2 * k : ℕ) * (c i) ^ 2)) :
-    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r
+      s =>
       tensorSobolevWeight (I := I) (M := M) i a * (c i) ^ 2) := by
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) h2k
   · have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i a :=

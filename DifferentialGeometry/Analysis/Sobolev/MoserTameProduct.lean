@@ -55,10 +55,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
   classical
   refine ⟨(2 : ℝ) ^ k, by positivity, ?_⟩
   intro c w P Λ Λ₀ hΛ hΛ₀ hc hw hP
-
   set Tw : ∀ i, Integral.L2.SmoothCcTensor g 0 (q + (k - i)) :=
     fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (k - i) w with hTw_def
-
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + k) x
@@ -75,7 +73,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     have hc_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
         ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i c).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (p + i) x _
-    have hw_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) :=
+    have hw_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
+      ((Tw i).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (k - i)) x _
     have hchoose : ((k.choose i : ℝ)) ^ 2 ≤ ((2 : ℝ) ^ k) ^ 2 := by
       have h1 : (k.choose i : ℝ) ≤ (2 : ℝ) ^ k := by
@@ -90,13 +89,13 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i c).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x))
         ≤ ((2 : ℝ) ^ k) ^ 2 * (Λ ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x)) := by
+              riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
+                ((Tw i).toSection x)) := by
           apply mul_le_mul hchoose ?_ (by positivity) (by positivity)
           exact mul_le_mul_of_nonneg_right hcΛ hw_nn
       _ = ((2 : ℝ) ^ k * Λ) ^ 2 *
             riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) := by
           ring
-
   have hpack :
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P‖ ≤
         ((2 : ℝ) ^ k * Λ) * ∑ i ∈ Finset.range (k + 1), ‖Tw i‖ :=
@@ -104,7 +103,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => q + (k - i)) Tw
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)
       ((2 : ℝ) ^ k * Λ) (by positivity) hpt
-
   have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Tw i‖) =
       ∑ i ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖ := by
@@ -112,7 +110,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖) (k + 1)
     simpa [hTw_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
-
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)] at hpack
   have hsum_w_eq : (∑ i ∈ Finset.range (k + 1),
@@ -142,7 +139,6 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
           mul_nonneg (by positivity) (mul_nonneg hΛ₀ hSc_nn)
         rw [hexp]; linarith
 
-set_option maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
@@ -188,13 +184,10 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
   classical
   refine ⟨Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k), by positivity, ?_⟩
   intro a b c P Λa Λb Λc hΛa hΛb hΛc ha hb hc hP
-
   set Ta : ∀ i, Integral.L2.SmoothCcTensor g 0 (p + (k - i)) :=
     fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a with hTa_def
-
   set D : ℝ := Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k) * (Λb * Λc) with hD_def
   have hD_nn : 0 ≤ D := by rw [hD_def]; positivity
-
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
@@ -288,7 +281,8 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       exact mul_nonneg
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (i - j)) x _)
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + j) x _)
-    have hDsq : D ^ 2 = ((k : ℝ) + 1) * (((2 : ℝ) ^ k) ^ 2 * ((2 : ℝ) ^ k) ^ 2) * (Λb ^ 2 * Λc ^ 2) := by
+    have hDsq : D ^ 2 = ((k : ℝ) + 1) * (((2 : ℝ) ^ k) ^ 2 * ((2 : ℝ) ^ k) ^ 2) *
+      (Λb ^ 2 * Λc ^ 2) := by
       rw [hD_def]
       have hsq : Real.sqrt ((k : ℝ) + 1) ^ 2 = (k : ℝ) + 1 := Real.sq_sqrt (by positivity)
       have h2 : ((2 : ℝ) ^ (2 * k)) = ((2 : ℝ) ^ k) * ((2 : ℝ) ^ k) := by
@@ -313,7 +307,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       _ = D ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
             ((Ta i).toSection x) := by
           rw [hDsq, hTa_def]; ring
-
   have hpack :
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P‖ ≤
         D * ∑ i ∈ Finset.range (k + 1), ‖Ta i‖ :=
@@ -321,7 +314,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       (fun i => p + (k - i)) Ta
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)
       D hD_nn hpt
-
   have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Ta i‖) =
       ∑ i ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖ := by
@@ -329,7 +321,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖) (k + 1)
     simpa [hTa_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
-
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)] at hpack
   have hsum_a_eq : (∑ i ∈ Finset.range (k + 1),
@@ -367,7 +358,6 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
         apply mul_le_mul_of_nonneg_left _ hC_nn
         linarith
 
-set_option maxHeartbeats 1600000 in
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
@@ -388,7 +378,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
                   ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
                     ∏ m : Fin n,
                       riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)) →
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection
+                            x)) →
         Integral.L2.tensorL2Norm (I := I) g 0 ((∑ m, p m) + k)
             (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toFun ≤
           (C * Real.sqrt K) * ∑ m : Fin n,
@@ -398,12 +389,14 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
                       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
   classical
   refine ⟨Real.sqrt (∑ k' ∈ Finset.range (k + 1),
-      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), by positivity, ?_⟩
+      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), Real.sqrt_nonneg _, ?_⟩
   intro c P Λ K hK hΛ hjet hP
   set i₀ : Fin n := ⟨0, hn⟩ with hi₀
   set Tcard : ℝ := ∑ k' ∈ Finset.range (k + 1),
       ((Finset.Nat.antidiagonalTuple n k').card : ℝ) with hTcard
-  have hTcard_nn : 0 ≤ Tcard := by rw [hTcard]; positivity
+  have hTcard_nn : 0 ≤ Tcard := by
+    rw [hTcard]
+    exact Finset.sum_nonneg (fun _ _ => Nat.cast_nonneg _)
   set C : ℝ := Real.sqrt Tcard with hC
   have hC_nn : 0 ≤ C := by rw [hC]; exact Real.sqrt_nonneg _
   set sK : ℝ := Real.sqrt K with hsK
@@ -741,7 +734,8 @@ private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
             (rawTensorConnLapSmooth (I := I) g 0 s' S).toFun ≤
           K * Integral.L2.tensorL2Norm (I := I) g 0 (s' + 1 + 1)
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
-              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s' S)).toFun :=
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s'
+                S)).toFun :=
   Integral.Connection.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
 
 private theorem l2jet_logConvex_iteratedCovGrad
@@ -758,13 +752,10 @@ private theorem l2jet_logConvex_iteratedCovGrad
   obtain ⟨K, hK1, htrace⟩ := exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm (I := I) (M := M) g
   refine ⟨K, hK1, ?_⟩
   intro u i
-
   simp only [PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s (i + 1) u,
     PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s i u]
-
   set S : Integral.L2.SmoothCcTensor g 0 (s + i) :=
     PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u with hS_def
-
   set aGrad : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S).toFun
     with haGrad_def
@@ -774,18 +765,15 @@ private theorem l2jet_logConvex_iteratedCovGrad
       (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S)).toFun
     with haHess_def
   have haS_nn : 0 ≤ aS := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-
   have hibp : aGrad ^ 2 ≤
       Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := by
     rw [haGrad_def, haS_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g (s + i) S
-
   have htr : Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
         (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun ≤ K * aHess := by
     rw [haHess_def]
     exact htrace (s + i) S
-
   calc aGrad ^ 2
       ≤ Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := hibp
@@ -805,9 +793,7 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
   set μ := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set V : ℝ := (μ Set.univ).toReal with hV
   have hVnn : 0 ≤ V := ENNReal.toReal_nonneg
-
   have hsq := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g s u
-
   have hint_mono : (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ∂μ)
       ≤ ∫ _x : M, Λ₀ ^ 2 ∂μ := by
     apply MeasureTheory.integral_mono
@@ -818,7 +804,6 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
     rw [MeasureTheory.integral_const, smul_eq_mul, hV, MeasureTheory.measureReal_def]
   have hsq_le : Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ^ 2 ≤ V * Λ₀ ^ 2 := by
     rw [hsq]; rw [hconst] at hint_mono; exact hint_mono
-
   have hnn : 0 ≤ Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
   have hrhs_nn : 0 ≤ Λ₀ * Real.sqrt V := mul_nonneg hΛ₀ (Real.sqrt_nonneg V)
@@ -852,18 +837,14 @@ private theorem l2Interp_pow_iteratedCovGrad
     rw [hC]; positivity
   refine ⟨C, hC_nn, ?_⟩
   intro u Λ₀ hΛ₀ hsup j hj0 hjk
-
   set a : ℕ → ℝ := fun i =>
     Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun with ha_def
   have ha_nn : ∀ i, 0 ≤ a i := fun i =>
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-
   have ha_lc : ∀ i, (a (i + 1)) ^ 2 ≤ K * a i * a (i + 2) := fun i => hlc u i
-
   have hpow : (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j :=
     hlp_real a ha_nn K hK1 ha_lc j k hj0 hjk
-
   have ha0_eq : a 0 = Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun := by
     rw [ha_def]
     simp only [Nat.add_zero]
@@ -871,14 +852,11 @@ private theorem l2Interp_pow_iteratedCovGrad
   have ha0_le : a 0 ≤ Λ₀ * V := by
     rw [ha0_eq, hV]
     exact l2Norm_le_sup_mul_sqrt_vol (I := I) (M := M) g s u Λ₀ hΛ₀ hsup
-
   have ha0_pow : (a 0) ^ (k - j) ≤ (Λ₀ * V) ^ (k - j) :=
     pow_le_pow_left₀ (ha_nn 0) ha0_le (k - j)
-
   have hΛ₀V_nn : 0 ≤ Λ₀ * V := mul_nonneg hΛ₀ hVnn
   have hak_pow_nn : 0 ≤ (a k) ^ j := pow_nonneg (ha_nn k) j
   have hKpow_nn : 0 ≤ K ^ (k ^ 3) := pow_nonneg (le_trans zero_le_one hK1) _
-
   have hKV_le_Ck : K ^ (k ^ 3) * V ^ (k - j) ≤ C ^ k := by
     have hVpow : V ^ (k - j) ≤ (max 1 V) ^ k := by
       calc V ^ (k - j) ≤ (max 1 V) ^ (k - j) := pow_le_pow_left₀ hVnn hmaxV (k - j)
@@ -888,7 +866,6 @@ private theorem l2Interp_pow_iteratedCovGrad
       rw [hC, mul_pow, ← pow_mul, hexp]
     rw [hCk]
     apply mul_le_mul_of_nonneg_left hVpow hKpow_nn
-
   calc (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := hpow
     _ ≤ K ^ (k ^ 3) * (Λ₀ * V) ^ (k - j) * (a k) ^ j := by
         apply mul_le_mul_of_nonneg_right _ hak_pow_nn
@@ -922,13 +899,10 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + j) _
   have hak_nn : 0 ≤ ak :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + k) _
-
   have hpow : aj ^ k ≤ C ^ k * Λ₀ ^ (k - j) * ak ^ j := hC u Λ₀ hΛ₀ hsup j hj0 hjk
-
   have hmono : (aj ^ k) ^ ((k : ℝ)⁻¹) ≤ (C ^ k * Λ₀ ^ (k - j) * ak ^ j) ^ ((k : ℝ)⁻¹) :=
     Real.rpow_le_rpow (by positivity) hpow (by positivity)
   rw [Real.pow_rpow_inv_natCast haj_nn hk0] at hmono
-
   have hcast_sub : ((k - j : ℕ) : ℝ) = (k : ℝ) - (j : ℝ) := by
     rw [Nat.cast_sub (le_of_lt hjk)]
   have hexp1 : ((k : ℝ) - (j : ℝ)) * (k : ℝ)⁻¹ = 1 - (j : ℝ) / k := by

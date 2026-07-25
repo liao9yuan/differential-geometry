@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -68,7 +66,8 @@ lemma metricDifferenceCcTensor_eq_symmS (P : SmoothCcTensor g₀ 0 2)
     refine congrArg _ ?_
     funext k
     fin_cases k <;> rfl]
-  rw [unitModel_eq_ccTensorBilin_pt (I := I) (M := M) g₀ (ccTensor02Symm (I := I) g₀ P) x (m 0) (m 1)]
+  rw [unitModel_eq_ccTensorBilin_pt (I := I) (M := M) g₀ (ccTensor02Symm (I := I) g₀ P) x (m 0)
+    (m 1)]
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ P x (m 0) (m 1)]
   rw [htie x (m 0) (m 1)]
   ring
@@ -88,7 +87,6 @@ def ricciFoldWeightB (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
           (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
     (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -193,7 +191,6 @@ private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [SigmaCompactSpace M] in
 private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2) (x : M)
     (p q v0 v1 : TangentSpace I x) :
@@ -202,7 +199,8 @@ private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2)
           ricciFoldWeightB (I := I) (M := M) g₀ S) x
         ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       smoothCcTensorBilinForm (I := I) g₀ S x (riemannOp (LeviCivita (I := I) g₀) x v0 p q) v1 +
-        smoothCcTensorBilinForm (I := I) g₀ S x q (riemannOp (LeviCivita (I := I) g₀) x v0 p v1) := by
+        smoothCcTensorBilinForm (I := I) g₀ S x q
+          (riemannOp (LeviCivita (I := I) g₀) x v0 p v1) := by
   classical
   rw [unitModel_add_pt (I := I) (M := M) g₀ 4
     (ricciFoldWeightA (I := I) (M := M) g₀ S) (ricciFoldWeightB (I := I) (M := M) g₀ S) x,
@@ -365,11 +363,11 @@ private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2)
   rw [hA, hB]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
     ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S =
       (-(1 / 2) : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (ricciFoldWeightA (I := I) (M := M) g₀ S +
@@ -386,25 +384,29 @@ lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
   beta_reduce
   have hRHSsmul : ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
       (((-(1 / 2) : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (ricciFoldWeightA (I := I) (M := M) g₀ S +
                 ricciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x)) D) =
       (-(1 / 2) : ℝ) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (ricciFoldWeightA (I := I) (M := M) g₀ S +
                 ricciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x) D) := by
     rw [show ((((-(1 / 2) : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (ricciFoldWeightA (I := I) (M := M) g₀ S +
                 ricciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x)) =
         (-(1 / 2) : ℝ) •
-          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (ricciFoldWeightA (I := I) (M := M) g₀ S +
@@ -442,16 +444,19 @@ lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
       (v 0) (v 1)]
   ring
 
-lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_boundedFactorGridWindow_le (σ : Equiv.Perm (Fin 6))
+lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_boundedFactorGridWindow_le
+    (σ : Equiv.Perm (Fin 6))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (w K : ℕ) (_hwK : w ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+                (cometricDoubleTraceField (I := I) g₀ 4)
                 (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
                   (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
                     (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -560,8 +565,11 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_bounde
           ∑ w₃ ∈ Finset.range (w₂ + 1), KS w₃ *
             ∑ w₄ ∈ Finset.range (w₂ + 1 - w₃), (fr ^ 2 + 1)) * W := by
     intro w₂ hw₂
-    rw [riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 0 6 σ _ w₂ x]
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+    rw [riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 0 6 σ _
+      w₂ x]
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+      (I := I)
       (M := M) g₀ w₂ 0 2 6
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))
@@ -599,7 +607,9 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_bounde
             ring
           rw [Finset.sum_congr rfl fun w₃ _ => hstep w₃, ← Finset.sum_mul]
           ring
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    (I := I)
     (M := M) g₀ w 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
       (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
@@ -656,10 +666,10 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_bounde
         ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
     ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g =
-      ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g 2)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
+        (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g 2)
         (riemannCometricDoubleTraceFold (I := I) (M := M) g₀) := by
   classical
   apply SmoothCcTensor.ext
@@ -679,7 +689,8 @@ lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
   rw [backgroundRiemannBiContrFibFixedFrame_toModel (I := I) g₀ (smoothOrthoFrame (I := I) g x) x D
     (fun j => (v j : E))]
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g 2)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
+        (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g 2)
         (riemannCometricDoubleTraceFold (I := I) (M := M) g₀)).toSection x) D) =
       cometricDoubleTraceFib (I := I) g 2 x
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
@@ -822,7 +833,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
     (P : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -934,7 +944,6 @@ lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
 end NormedKoszulConnectionDifferenceFoldIdentity
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -1288,13 +1297,13 @@ private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
     ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ (ccTensor02Symm (I := I) g₀ P) =
       (2 : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               ((koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM1 P +
@@ -1313,7 +1322,8 @@ lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
   beta_reduce
   have hRHSsmul : ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
       (((2 : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               ((koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM1 P +
@@ -1321,15 +1331,18 @@ lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
                 (koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM3 P +
                   koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x)) D) =
       (2 : ℝ) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               ((koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM1 P +
                   koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM2 P) -
                 (koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM3 P +
-                  koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x) D) := by
+                  koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x)
+                    D) := by
     rw [show ((((2 : ℝ) •
-        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               ((koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM1 P +
@@ -1337,13 +1350,15 @@ lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
                 (koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM3 P +
                   koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x)) =
         (2 : ℝ) •
-          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 ((koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM1 P +
                     koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM2 P) -
                   (koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM3 P +
-                    koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x) from by
+                    koszulConnDiffFoldWeight (I := I) (M := M) g₀ g₁ tauM4 P))))).toSection x)
+                      from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
     rfl
   rw [hRHSsmul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
@@ -1392,18 +1407,21 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 variable (g₀ : SmoothRiemannianMetric I M)
 
-lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGeneral_boundedFactorGridWindow_le (σ : Equiv.Perm (Fin 6))
+lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeight_gridWindow_le
+    (σ : Equiv.Perm (Fin 6))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (w K : ℕ) (_hwK : w + 1 ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+                (cometricDoubleTraceField (I := I) g₀ 4)
                 (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
                   (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                     (slotExtendIter (I := I) (M := M) g₀ 0 3 3
@@ -1517,8 +1535,11 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGener
               CA w₄ * Combinatorics.windowPairCellCount (w₃ + 2) (w₄ + 2)) *
           Combinatorics.boundedFactorGridWindow b K (w₂ + 3) := by
     intro w₂ hw₂
-    rw [riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 0 6 σ _ w₂ x]
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+    rw [riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 0 6 σ _
+      w₂ x]
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+      (I := I)
       (M := M) g₀ w₂ 0 3 6
       (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovecCc (I := I) g₀ P))
       (connDiffLoweredCc (I := I) g₀ g₁) x) ?_
@@ -1586,7 +1607,9 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGener
             _ = (10 * fr ^ 3) *
                   (CA w₄ * Combinatorics.windowPairCellCount (w₃ + 2) (w₄ + 2)) *
                   Combinatorics.boundedFactorGridWindow b K (w₂ + 3) := by ring
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    (I := I)
     (M := M) g₀ w 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
       (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6

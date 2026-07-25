@@ -34,7 +34,6 @@ theorem time_dependent_vf_bare_local_flow_of_jointC1 [CompleteSpace E]
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
-
 theorem autonomizedLift_hasMFDerivWithinAt (X : ℝ → ∀ x : M, TangentSpace I x)
     (γ : ℝ → M) (s : Set ℝ) (t : ℝ)
     (hγ : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I γ s t
@@ -61,7 +60,6 @@ theorem autonomizedLift_hasMFDerivWithinAt (X : ℝ → ∀ x : M, TangentSpace 
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [T2Space M] in
-
 theorem autonomizedLift_isMIntegralCurveOn_of_bareFlow
     (X : ℝ → ∀ x : M, TangentSpace I x) (Φ : ℝ → M → M) (x : M) (s : Set ℝ)
     (hflow : ∀ t ∈ s,
@@ -132,7 +130,8 @@ theorem time_dependent_vf_bare_local_flow_exists_unique_of_jointC1 [CompleteSpac
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
+    [CompactSpace M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_bare_flow_family
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)

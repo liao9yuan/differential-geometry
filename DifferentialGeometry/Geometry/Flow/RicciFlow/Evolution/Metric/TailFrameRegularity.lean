@@ -16,6 +16,8 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite
+
 open Bundle Filter Set
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
@@ -31,12 +33,10 @@ variable [SigmaCompactSpace M] [T2Space M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
 omit [I.Boundaryless] in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem ricciFrame_mdiffAt
-    {Idx : Type} [Fintype Idx]
+    {Idx : Type} [Finite Idx]
     (g : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}

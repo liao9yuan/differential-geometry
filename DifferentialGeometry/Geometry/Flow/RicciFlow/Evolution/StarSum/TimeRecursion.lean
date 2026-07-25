@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SpatialMem
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -53,12 +50,14 @@ omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRicReal_frame
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (frame : Idx → (y : M) → TangentSpace I y)
     (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u) (hu : IsOpen u) (hx : x ∈ u)
     (d a b : Idx) :
-    nablaRicComp (I := I) S frame t x d a b = ricciCovDerivCompInFrame (I := I) S frame t x d a b := by
+    nablaRicComp (I := I) S frame t x d a b = ricciCovDerivCompInFrame (I := I) S frame t x d a
+      b := by
   classical
+  letI := Fintype.ofFinite Idx
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection t) (∞ : WithTop ℕ∞) := by
@@ -102,7 +101,8 @@ theorem nablaRicReal_frame
       (h := (derivs.first)) X V x hV_at
   have hcons :
       Fin.cons (X x) (fun q : Fin 2 => V q x) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x) := by
+        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+          (frame b x) := by
     rw [hX, hslots x]
     funext q
     fin_cases q <;> rfl
@@ -110,7 +110,8 @@ theorem nablaRicReal_frame
   rw [hX] at heval
   have hleft :
       derivs.nablaA x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x) (frame b x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+            (frame b x)) =
         nablaRicComp (I := I) S frame t x d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection]
   have hfun :
@@ -190,7 +191,6 @@ theorem ricciCovDeriv_trace_nablaRm
       = ∑ e : Idx, nablaKRm04Field (I := I) S t 1 x
           (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x)) := by
   classical
-
   have hcollapse : ∀ f : Idx → Idx → Real,
       (∑ i : Idx, ∑ j : Idx, identityInvMetric i j * f i j) = ∑ e : Idx, f e e := by
     intro f
@@ -200,7 +200,6 @@ theorem ricciCovDeriv_trace_nablaRm
     · intro j _ hj
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne (fun h => hj h.symm), zero_mul]
     · intro h; exact absurd (Finset.mem_univ i) h
-
   have hk : ∀ e : Idx,
       nablaKRm04Field (I := I) S t 1 x
           (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x))
@@ -209,12 +208,9 @@ theorem ricciCovDeriv_trace_nablaRm
             (vec5 (I := I) (frame d x) (frame e x) (frame a x) (frame b x) (frame e x)) := by
     intro e
     rw [nablaKRm04Field_succ, totalNabla0S_apply, nablaKRm04Field_zero]
-
   rw [← nablaRicReal_frame S t frame hframe hu hx d a b, nablaRicComp_apply]
   simp_rw [hk]
-
   simp only [hbasis]
-
   have hinv :=
     metricInverseInBasis_identity_of_orthonormal (I := I) (S.family.metric t) basis horth
   have heq :=
@@ -273,7 +269,8 @@ def lfChr
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 private theorem traceOrthoEq
     [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -289,7 +286,6 @@ private theorem traceOrthoEq
     (metricInverseInBasis_identity_of_orthonormal (I := I) g basis horth) T tail
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 def gammaStarCost (k : ℕ) : Real :=
@@ -490,7 +486,8 @@ private theorem gammaStarU
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtGerm {Idx : Type*} {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     {A1 A2 : M → (Fin r → Idx) → Real} {y : M}
@@ -501,7 +498,6 @@ private theorem frameExtGerm {Idx : Type*} {r : ℕ}
   exact extDerivFun_eventuallyEq_congr (I := I) (frame d y) (hfield.mono fun z hz => congrFun hz m)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
 
 
 
@@ -510,15 +506,6 @@ def resStarCost : ℕ → Real
   | k + 1 => 2 * resStarCost k + commStarCost 3 k + gammaStarCost k
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 theorem resStarLFU
@@ -532,8 +519,6 @@ theorem resStarLFU
     (hdim : ∀ y : M, Module.finrank Real (TangentSpace I y) = 3)
     (horthU : ∀ y : M, y ∈ u → ∀ i j : Fin 3,
       (S.base.metric (t : Real)).inner y (frame i y) (frame j y) = if i = j then (1 : Real) else 0)
-
-
     (hbase : ∀ (y : M) (bas : Module.Basis (Fin 3) Real (TangentSpace I y))
         (_horth : ∀ i j : Fin 3,
           (S.base.metric (t : Real)).inner y (bas i) (bas j) = if i = j then (1 : Real) else 0)
@@ -554,8 +539,6 @@ theorem resStarLFU
                 - drift (fun i j => S.ricciAt (t : Real) y (vec2 (I := I) (bas i) (bas j)))
                       (I0 0) (I0 1) (I0 2) (I0 3)))
           D.carrier (t : Real))
-
-
     (baseDt : Real → M → (Fin 4 → Fin 3) → Real)
     (chrDt : Real → M → Fin 3 → Fin 3 → Fin 3 → Real)
     (hrm : ∀ (y : M), y ∈ u → ∀ m : Fin 4 → Fin 3,
@@ -564,10 +547,6 @@ theorem resStarLFU
     (hchr : ∀ (y : M), y ∈ u → ∀ i a p : Fin 3,
       HasDerivWithinAt (fun s : Real => lfChr (I := I) S frame hframe s y i a p)
         (chrDt (t : Real) y i a p) D.carrier (t : Real))
-
-
-
-
     (hchrId : ∀ (y : M), y ∈ u → ∀ i j p : Fin 3,
       chrDt (t : Real) y i j p =
         - ricciCovDerivCompInFrame (I := I) S frame (t : Real) y i j p
@@ -578,7 +557,8 @@ theorem resStarLFU
         (fun s : Real =>
           extDerivFun (I := I)
             (fun z : M =>
-              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe) (lfBase (I := I) S frame)
+              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
+                (lfBase (I := I) S frame)
                 k' s z m) y (frame d y))
         (extDerivFun (I := I)
           (fun z : M =>
@@ -601,11 +581,9 @@ theorem resStarLFU
   classical
   induction k with
   | zero =>
-
       refine ⟨e0Field (I := I) S (t : Real), ?_, fun y hy I0 => ?_⟩
       · simpa [resStarCost] using e0Field_cost (I := I) S (t : Real)
       obtain ⟨_, _, hcomp⟩ := residualStarSum_zero (I := I) S t hdim hbase
-
       have horthy : ∀ i j : Fin 3,
           (S.base.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)
             = if i = j then (1 : Real) else 0 := by
@@ -615,22 +593,20 @@ theorem resStarLFU
       have hb := hcomp y (hframe.toBasisAt hy) horthy I0
       simpa only [hframe.toBasisAt_coe hy] using hb
   | succ k _ih =>
-
       obtain ⟨Tk, hTk, hIH⟩ := _ih
-
       obtain ⟨Tcomm, hTcomm, hcomm⟩ := spatialCommStarSum (I := I) S hS t k (Idx := Fin 3)
       obtain ⟨Tgamma, hTgamma, hgamma⟩ :=
         gammaStarU (I := I) S (t : Real) k frame hframe hu horthU chrDt hchrId
-
       refine ⟨stNabla (I := I) S (t : Real) Tk + (-1 : Real) • Tcomm + (-1 : Real) • Tgamma, ?_, ?_⟩
       · convert ((hTk.nabla).add (hTcomm.smul (-1))).add (hTgamma.smul (-1)) using 1
         simp only [abs_neg, abs_one, one_mul, Fintype.card_fin, resStarCost]
       · intro y hy I0
-
         have hLHSfun : (fun r : Real =>
-              tensor0SComponent (I := I) (nablaKRm04Field (I := I) S r (k + 1) y) (fun i => frame i y) I0)
+              tensor0SComponent (I := I) (nablaKRm04Field (I := I) S r (k + 1) y)
+                (fun i => frame i y) I0)
             = (fun s : Real =>
-              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe) (lfBase (I := I) S frame)
+              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
+                (lfBase (I := I) S frame)
                 (k + 1) s y I0) := by
           funext s
           rw [show iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
@@ -638,12 +614,10 @@ theorem resStarLFU
               = nablaKRm04Field (I := I) S s (k + 1) y (frameTuple (I := I) frame y I0) from
             iterRmLF_eq_nabla (I := I) S s frame hframe hu (k + 1) hy I0]
           rfl
-
         have hderiv :=
           iteratedRmComp_hasDerivWithinAt (I := I) frame (lfChr (I := I) S frame hframe) chrDt
             (lfBase (I := I) S frame) baseDt y (hrm y hy) (hchr y hy) (hswap y hy) (k + 1) I0
         rw [hLHSfun]
-
         have hval :
             tensor0SComponent (I := I)
                 (metricTrace0S2TensorInBasis (I := I) (hframe.toBasisAt hy)
@@ -655,8 +629,6 @@ theorem resStarLFU
               = iteratedRmCompDt (I := I) frame (lfChr (I := I) S frame hframe) chrDt
                   (lfBase (I := I) S frame) baseDt (k + 1) (t : Real) y I0 := by
           have hmem : D.carrier ∈ nhds (t : Real) := D.regular_mem_nhds t.2
-
-
           have hfieldU : ∀ z, z ∈ u →
               (fun m : Fin (4 + k) → Fin 3 =>
                 iteratedRmCompDt (I := I) frame (lfChr (I := I) S frame hframe) chrDt
@@ -684,7 +656,8 @@ theorem resStarLFU
             rw [hfun_z] at hd1
             have huniq := (hd1.hasDerivAt hmem).unique ((hIH z hz m).hasDerivAt hmem)
             have horth_z : ∀ i j : Fin 3,
-                (S.base.metric (t : Real)).inner z ((hframe.toBasisAt hz) i) ((hframe.toBasisAt hz) j)
+                (S.base.metric (t : Real)).inner z ((hframe.toBasisAt hz) i)
+                  ((hframe.toBasisAt hz) j)
                   = if i = j then (1 : Real) else 0 := by
               intro i j
               rw [hframe.toBasisAt_coe hz i, hframe.toBasisAt_coe hz j]
@@ -694,14 +667,12 @@ theorem resStarLFU
               ContMDiffSection.coe_add, Pi.add_apply, metricTraceFirstTwoField_apply]
             rw [traceOrthoEq (I := I) (S.base.metric (t : Real)) (hframe.toBasisAt hz) horth_z
               (nablaKRm04Field (I := I) S (t : Real) (k + 2) z) (fun a => frame (m a) z)]
-
           have horth_y : ∀ i j : Fin 3,
               (S.base.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)
                 = if i = j then (1 : Real) else 0 := by
             intro i j
             rw [hframe.toBasisAt_coe hy i, hframe.toBasisAt_coe hy j]
             exact horthU y hy i j
-
           have hgam : covDerivStepDt (chrDt (t : Real) y)
                 (iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
                   (lfBase (I := I) S frame) k (t : Real) y) I0
@@ -714,7 +685,6 @@ theorem resStarLFU
               exact iterRmLF_eq_nabla (I := I) S (t : Real) frame hframe hu k hy m
             rw [hiter]
             exact hgamma y hy I0
-
           have hExtEq : (fun z : M =>
                 iteratedRmCompDt (I := I) frame (lfChr (I := I) S frame hframe) chrDt
                   (lfBase (I := I) S frame) baseDt k (t : Real) z)
@@ -723,7 +693,6 @@ theorem resStarLFU
                       (nablaKRm04Field (I := I) S (t : Real) (k + 2)) + Tk) frame := by
             filter_upwards [hu.mem_nhds hy] with z hz
             exact hfieldU z hz
-
           have hcs : covDerivStepComp
                 (frameExtData (I := I) frame
                   (fun z : M => iteratedRmCompDt (I := I) frame (lfChr (I := I) S frame hframe)
@@ -750,7 +719,6 @@ theorem resStarLFU
                 (metricTraceFirstTwoField (I := I) (S.base.metric (t : Real))
                     (nablaKRm04Field (I := I) S (t : Real) (k + 2)) + Tk))
               (stNabla_realizes (I := I) S (t : Real) _) frame hframe hu hy I0
-
           have hsplit : tensor0SComponent (I := I)
                 (stNabla (I := I) S (t : Real)
                   (metricTraceFirstTwoField (I := I) (S.base.metric (t : Real))
@@ -765,7 +733,6 @@ theorem resStarLFU
                     (fun i => frame i y) I0 := by
             rw [stNabla_add]
             simp [tensor0SComponent_apply]
-
           have hc' : tensor0SComponent (I := I)
                 (metricTraceFirstTwo0STensor (I := I) (S.base.metric (t : Real))
                   (nablaKRm04Field (I := I) S (t : Real) (k + 3) y)) (fun i => frame i y) I0
@@ -779,7 +746,6 @@ theorem resStarLFU
               (metricInverseInBasis_identity_of_orthonormal (I := I) (S.base.metric (t : Real))
                 (hframe.toBasisAt hy) horth_y) horth_y I0
             simpa only [tensor0SComponent_apply, hframe.toBasisAt_coe hy] using hc
-
           have htrace : tensor0SComponent (I := I)
                 (metricTrace0S2TensorInBasis (I := I) (hframe.toBasisAt hy)
                   (identityInvMetric (Idx := Fin 3))
@@ -790,7 +756,6 @@ theorem resStarLFU
             simp only [tensor0SComponent_apply]
             exact traceOrthoEq (I := I) (S.base.metric (t : Real)) (hframe.toBasisAt hy) horth_y
               (nablaKRm04Field (I := I) S (t : Real) (k + 1 + 2) y) (fun a => frame (I0 a) y)
-
           have hLHS : tensor0SComponent (I := I)
                 (metricTrace0S2TensorInBasis (I := I) (hframe.toBasisAt hy)
                     (identityInvMetric (Idx := Fin 3))
@@ -810,7 +775,6 @@ theorem resStarLFU
             simp only [tensor0SComponent_apply]
             simp
             ring
-
           have hMfeval : tensor0SComponent (I := I)
                 (stNabla (I := I) S (t : Real)
                   (metricTraceFirstTwoField (I := I) (S.base.metric (t : Real))
@@ -819,9 +783,8 @@ theorem resStarLFU
                 (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (4 + k)
                   (S.family.connection (t : Real))
                   (metricTraceFirstTwoField (I := I) (S.base.metric (t : Real))
-                    (nablaKRm04Field (I := I) S (t : Real) (k + 2))) y) (fun i => frame i y) I0 := rfl
-
-
+                    (nablaKRm04Field (I := I) S (t : Real) (k + 2))) y) (fun i => frame i y) I0 :=
+                      rfl
           rw [hLHS, htrace, iteratedRmCompDt_succ, Pi.sub_apply, hcs, hgam, hsplit, hMfeval]
           linarith [hc']
         rw [hval]

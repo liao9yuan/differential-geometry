@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -75,9 +74,7 @@ theorem lemma45_cor_II_of_intrinsic
   intro r hr0 hrp
   classical
   have hC0 : (0 : Real) ≤ C := le_trans zero_le_one hC
-
   have hFr0 : (0 : Real) ≤ Real.sqrt (C ^ (q₂ + r)) := Real.sqrt_nonneg _
-
   have hconv : ∀ k : ℕ, k ≤ r →
       Real.sqrt (normSq0S (I := I) g x (q₂ + k) (iterCov (I := I) gRef q₂ T k x)) ≤
         Real.sqrt (C ^ (q₂ + r)) *
@@ -85,7 +82,6 @@ theorem lemma45_cor_II_of_intrinsic
     intro k hk
     have hbase := sqrt_normSq0S_le_of_metric_equiv (I := I) gRef g x (q₂ + k) hC hequiv
       (iterCov (I := I) gRef q₂ T k x)
-
     have hpow : C ^ (q₂ + k) ≤ C ^ (q₂ + r) := pow_le_pow_right₀ hC (by omega)
     have hfac : Real.sqrt (C ^ (q₂ + k)) ≤ Real.sqrt (C ^ (q₂ + r)) := Real.sqrt_le_sqrt hpow
     have hgRefnn : (0 : Real) ≤
@@ -97,7 +93,6 @@ theorem lemma45_cor_II_of_intrinsic
       _ ≤ Real.sqrt (C ^ (q₂ + r)) *
             Real.sqrt (normSq0S (I := I) gRef x (q₂ + k) (iterCov (I := I) gRef q₂ T k x)) :=
           mul_le_mul_of_nonneg_right hfac hgRefnn
-
   have hlead := hconv r le_rfl
   have hsum : (∑ k ∈ Finset.range r,
         Real.sqrt (normSq0S (I := I) g x (q₂ + k) (iterCov (I := I) gRef q₂ T k x))) ≤
@@ -105,7 +100,6 @@ theorem lemma45_cor_II_of_intrinsic
         Real.sqrt (normSq0S (I := I) gRef x (q₂ + k) (iterCov (I := I) gRef q₂ T k x)) := by
     rw [Finset.mul_sum]
     exact Finset.sum_le_sum fun k hk => hconv k (le_of_lt (Finset.mem_range.mp hk))
-
   have hsum0 : (0 : Real) ≤ eps * Cc := mul_nonneg heps0 hCc0
   have hrhs :
       Real.sqrt (normSq0S (I := I) g x (q₂ + r) (iterCov (I := I) gRef q₂ T r x)) +

@@ -31,8 +31,6 @@ variable [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank Real E)] in
-
-
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
 theorem divergence_levi_eq
@@ -98,8 +96,6 @@ theorem divergence_levi_eq
   norm_num
 
 omit [NeZero (Module.finrank Real E)] in
-
-
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
 theorem laplacian_levi_eq
@@ -111,8 +107,6 @@ theorem laplacian_levi_eq
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
 
 omit [NeZero (Module.finrank Real E)] in
-
-
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta

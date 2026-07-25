@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -70,14 +69,16 @@ def iterCovComp {r : ℕ}
         (chr x)
         (iterCovComp frame chr base a x)
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 @[simp] theorem iterCovComp_zero {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (base : M → (Fin r → Idx) → Real) :
     iterCovComp (I := I) frame chr base 0 = base := rfl
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem iterCovComp_succ {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -157,8 +158,6 @@ theorem iterCovComp_eq_iterCov
       rfl
   | succ a ih =>
       intro x hx n
-
-
       have hlevela :
           (fun y : M =>
               iterCovComp (I := I) frame
@@ -172,9 +171,7 @@ theorem iterCovComp_eq_iterCov
         intro y hy
         funext m
         simpa [frameComp0S, frameTuple] using ih hy m
-
       rw [iterCovComp_succ]
-
       have hext :
           frameExtData (I := I) frame
               (fun y : M =>
@@ -198,7 +195,6 @@ theorem iterCovComp_eq_iterCov
             frameComp0S (I := I) (iterCov (I := I) gRef r T a) frame x :=
         hlevela.self_of_nhds
       rw [hext, hbase]
-
       exact covDerivStepComp_frameComp_eq
         (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
         (iterCov (I := I) gRef r T a)

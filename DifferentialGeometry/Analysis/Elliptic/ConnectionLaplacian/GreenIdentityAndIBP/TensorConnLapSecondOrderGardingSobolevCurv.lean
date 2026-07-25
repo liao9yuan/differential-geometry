@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -31,6 +29,57 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private lemma second_order_garding_sobolev_curv_real
+    {C nGrad nLap nT nHess : ℝ}
+    (hC : 0 ≤ C)
+    (hstep : nHess ^ 2 ≤ nLap ^ 2 + C * (nT + nGrad + nHess) * nGrad)
+    (horder : nGrad ^ 2 ≤ nLap * nT) :
+    nHess ^ 2 ≤
+      (2 + 3 * C + 2 * C ^ 2) * (nLap ^ 2 + nT ^ 2) := by
+  have hgrad_sq_le : nGrad ^ 2 ≤ (nLap ^ 2 + nT ^ 2) / 2 := by
+    have hy : nLap * nT ≤ (nLap ^ 2 + nT ^ 2) / 2 := by
+      nlinarith [sq_nonneg (nLap - nT)]
+    linarith
+  have hyoung_hess :
+      C * nHess * nGrad ≤ nHess ^ 2 / 2 + C ^ 2 * nGrad ^ 2 / 2 := by
+    nlinarith [sq_nonneg (nHess - C * nGrad)]
+  have hyoung_TG : nT * nGrad ≤ (nT ^ 2 + nGrad ^ 2) / 2 := by
+    nlinarith [sq_nonneg (nT - nGrad)]
+  have hstep2 :
+      nHess ^ 2 ≤ nLap ^ 2 + nHess ^ 2 / 2 +
+        C * (nT * nGrad) + C * nGrad ^ 2 + C ^ 2 * nGrad ^ 2 / 2 := by
+    have hexpand : C * (nT + nGrad + nHess) * nGrad =
+        C * (nT * nGrad) + C * nGrad ^ 2 + C * nHess * nGrad := by ring
+    rw [hexpand] at hstep
+    linarith
+  have hstep3 :
+      nHess ^ 2 ≤ 2 * nLap ^ 2 + 2 * C * (nT * nGrad)
+        + 2 * C * nGrad ^ 2 + C ^ 2 * nGrad ^ 2 := by
+    linarith
+  have hTG_bound : nT * nGrad ≤ nLap ^ 2 / 4 + 3 * nT ^ 2 / 4 := by
+    linarith
+  have hgrad_term1 :
+      2 * C * nGrad ^ 2 ≤ C * nLap ^ 2 + C * nT ^ 2 := by
+    have h := mul_le_mul_of_nonneg_left hgrad_sq_le hC
+    nlinarith
+  have hgrad_term2 :
+      C ^ 2 * nGrad ^ 2 ≤ C ^ 2 * nLap ^ 2 / 2 + C ^ 2 * nT ^ 2 / 2 := by
+    calc
+      C ^ 2 * nGrad ^ 2 ≤ C ^ 2 * ((nLap ^ 2 + nT ^ 2) / 2) :=
+        mul_le_mul_of_nonneg_left hgrad_sq_le (sq_nonneg C)
+      _ = C ^ 2 * nLap ^ 2 / 2 + C ^ 2 * nT ^ 2 / 2 := by ring
+  have hTG_term :
+      2 * C * (nT * nGrad) ≤ C * nLap ^ 2 / 2 + 3 * C * nT ^ 2 / 2 := by
+    have h := mul_le_mul_of_nonneg_left hTG_bound hC
+    nlinarith
+  have hslack_lap :
+      0 ≤ 3 * C * nLap ^ 2 / 2 + 3 * C ^ 2 * nLap ^ 2 / 2 := by
+    positivity
+  have hslack_T :
+      0 ≤ C * nT ^ 2 / 2 + 3 * C ^ 2 * nT ^ 2 / 2 := by
+    positivity
+  nlinarith [sq_nonneg nT]
 
 
 theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
@@ -109,68 +158,7 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
   have horder1 : nGrad ^ 2 ≤ nLap * nT := by
     rw [hnGrad_def, hS_def, hnLap_def, hnT_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self (I := I) (M := M) g T
-  clear_value nGrad nLap nT nCurv nHess
-  have hgrad_sq_le : nGrad ^ 2 ≤ (nLap ^ 2 + nT ^ 2) / 2 := by
-    have hy : nLap * nT ≤ (nLap ^ 2 + nT ^ 2) / 2 := by nlinarith [sq_nonneg (nLap - nT)]
-    linarith [horder1, hy]
-  have hyoung_hess : C₀ * nHess * nGrad ≤ nHess ^ 2 / 2 + C₀ ^ 2 * nGrad ^ 2 / 2 := by
-    nlinarith [sq_nonneg (nHess - C₀ * nGrad), hC₀]
-  have hyoung_TG : nT * nGrad ≤ (nT ^ 2 + nGrad ^ 2) / 2 := by
-    nlinarith [sq_nonneg (nT - nGrad)]
-  have hstep2 :
-      nHess ^ 2 ≤ nLap ^ 2 + nHess ^ 2 / 2 +
-        C₀ * (nT * nGrad) + C₀ * nGrad ^ 2 + C₀ ^ 2 * nGrad ^ 2 / 2 := by
-    have hexpand : C₀ * (nT + nGrad + nHess) * nGrad =
-        C₀ * (nT * nGrad) + C₀ * nGrad ^ 2 + C₀ * nHess * nGrad := by ring
-    have hbound := hstep1
-    rw [hexpand] at hbound
-    linarith [hbound, hyoung_hess]
-  have hstep3 :
-      nHess ^ 2 ≤ 2 * nLap ^ 2 + 2 * C₀ * (nT * nGrad)
-        + 2 * C₀ * nGrad ^ 2 + C₀ ^ 2 * nGrad ^ 2 := by
-    linarith [hstep2]
-  have hTG_bound : nT * nGrad ≤ nLap ^ 2 / 4 + 3 * nT ^ 2 / 4 := by
-    have h1 : nT * nGrad ≤ (nT ^ 2 + nGrad ^ 2) / 2 := hyoung_TG
-    linarith [h1, hgrad_sq_le]
-  have hgrad_term1 : 2 * C₀ * nGrad ^ 2 ≤ C₀ * nLap ^ 2 + C₀ * nT ^ 2 := by
-    have h := mul_le_mul_of_nonneg_left hgrad_sq_le hC₀
-    have he : C₀ * ((nLap ^ 2 + nT ^ 2) / 2) = (C₀ * nLap ^ 2 + C₀ * nT ^ 2) / 2 := by ring
-    rw [he] at h
-    linarith [h]
-  have hgrad_term2 : C₀ ^ 2 * nGrad ^ 2 ≤ C₀ ^ 2 * nLap ^ 2 / 2 + C₀ ^ 2 * nT ^ 2 / 2 := by
-    have h := mul_le_mul_of_nonneg_left hgrad_sq_le (sq_nonneg C₀)
-    have he : C₀ ^ 2 * ((nLap ^ 2 + nT ^ 2) / 2) =
-        C₀ ^ 2 * nLap ^ 2 / 2 + C₀ ^ 2 * nT ^ 2 / 2 := by ring
-    rw [he] at h
-    linarith [h]
-  have hTG_term : 2 * C₀ * (nT * nGrad) ≤ C₀ * nLap ^ 2 / 2 + 3 * C₀ * nT ^ 2 / 2 := by
-    have h := mul_le_mul_of_nonneg_left hTG_bound hC₀
-    have he : C₀ * (nLap ^ 2 / 4 + 3 * nT ^ 2 / 4) = C₀ * nLap ^ 2 / 4 + 3 * C₀ * nT ^ 2 / 4 := by
-      ring
-    rw [he] at h
-    linarith [h]
-  have hslack_lap : 0 ≤ (3 * C₀ / 2 + 3 * C₀ ^ 2 / 2) * nLap ^ 2 := by
-    apply mul_nonneg
-    · nlinarith [hC₀, sq_nonneg C₀]
-    · positivity
-  have hslack_T : 0 ≤ (C₀ / 2 + 3 * C₀ ^ 2 / 2) * nT ^ 2 := by
-    apply mul_nonneg
-    · nlinarith [hC₀, sq_nonneg C₀]
-    · positivity
-  have htarget_eq : (2 + 3 * C₀ + 2 * C₀ ^ 2) * (nLap ^ 2 + nT ^ 2) =
-      2 * nLap ^ 2 + 2 * nT ^ 2 + 3 * C₀ * nLap ^ 2 + 3 * C₀ * nT ^ 2
-        + 2 * C₀ ^ 2 * nLap ^ 2 + 2 * C₀ ^ 2 * nT ^ 2 := by ring
-  have hslack_lap' : 0 ≤ 3 * C₀ * nLap ^ 2 / 2 + 3 * C₀ ^ 2 * nLap ^ 2 / 2 := by
-    have he : (3 * C₀ / 2 + 3 * C₀ ^ 2 / 2) * nLap ^ 2 =
-        3 * C₀ * nLap ^ 2 / 2 + 3 * C₀ ^ 2 * nLap ^ 2 / 2 := by ring
-    rw [he] at hslack_lap; exact hslack_lap
-  have hslack_T' : 0 ≤ C₀ * nT ^ 2 / 2 + 3 * C₀ ^ 2 * nT ^ 2 / 2 := by
-    have he : (C₀ / 2 + 3 * C₀ ^ 2 / 2) * nT ^ 2 =
-        C₀ * nT ^ 2 / 2 + 3 * C₀ ^ 2 * nT ^ 2 / 2 := by ring
-    rw [he] at hslack_T; exact hslack_T
-  rw [htarget_eq]
-  linarith [hstep3, hgrad_term1, hgrad_term2, hTG_term, hslack_lap', hslack_T',
-    sq_nonneg nT]
+  exact second_order_garding_sobolev_curv_real hC₀ hstep1 horder1
 
 end Connection
 end Integral

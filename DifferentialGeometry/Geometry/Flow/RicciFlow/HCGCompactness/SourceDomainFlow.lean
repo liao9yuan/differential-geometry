@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestr
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -93,7 +92,6 @@ noncomputable def sourceFlow
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
     sourceDomSigmaOf (I := I) Φ k hσsrc
-
   letI : SigmaCompactSpace ↥(targetOpen (I := I) Φ k) :=
     targetDomSigmaOf (I := I) Φ k hσtgt
   letI : T2Space ↥(targetOpen (I := I) Φ k) := targetDomT2 (I := I) Φ k
@@ -103,7 +101,6 @@ noncomputable def sourceFlow
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥(targetOpen (I := I) Φ k) := by
     change IsManifold I ∞ ↥(targetOpen (I := I) Φ k)
     infer_instance
-
   letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
   letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
   letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
@@ -180,7 +177,6 @@ theorem isSolutionOn_sourceFlow
     infer_instance
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
     sourceDomSigmaOf (I := I) Φ k hσsrc
-
   letI : SigmaCompactSpace ↥(targetOpen (I := I) Φ k) :=
     targetDomSigmaOf (I := I) Φ k hσtgt
   letI : T2Space ↥(targetOpen (I := I) Φ k) := targetDomT2 (I := I) Φ k
@@ -190,7 +186,6 @@ theorem isSolutionOn_sourceFlow
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥(targetOpen (I := I) Φ k) := by
     change IsManifold I ∞ ↥(targetOpen (I := I) Φ k)
     infer_instance
-
   letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
   letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
   letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
@@ -250,7 +245,8 @@ theorem sourceFlow_metric_eq
       change IsManifold I ∞ (SourceDomain (I := I) Φ k)
       infer_instance
     (sourceFlow (I := I) Φ k hσsrc hσtgt).family.metric t
-      = (SourceDomainMetricData.ofRestrictPullback (I := I) hσsrc hσtgt referenceMetric gInf).pullbackMetric t := by
+      = (SourceDomainMetricData.ofRestrictPullback (I := I) hσsrc hσtgt referenceMetric
+        gInf).pullbackMetric t := by
   rfl
 
 
@@ -274,7 +270,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_restrictOpen
     (K : Set M) (gRef h : SmoothRiemannianMetric I M) (C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
@@ -289,7 +286,8 @@ theorem metricUniformEquivalentOn_restrictOpen
 
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_restrictOpen
     (K : Set M) (β ψ : Real) (gRef : SmoothRiemannianMetric I M)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M) (B : Real -> Real)

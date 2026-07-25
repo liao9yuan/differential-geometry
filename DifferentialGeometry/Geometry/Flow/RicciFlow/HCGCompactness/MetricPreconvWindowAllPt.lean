@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -49,7 +48,9 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem derivNorm_le_cov_add
     [Module.Finite ℝ E]
     (a : Nat) (g h gRef : SmoothRiemannianMetric I M) (x : M) :
@@ -71,7 +72,9 @@ theorem derivNorm_le_cov_add
 
 
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem derivNorm_le_sup_sing
     [Module.Finite ℝ E]
@@ -137,10 +140,7 @@ theorem windowGInfAll_pt
   intro K hK p eps heps
   obtain ⟨k0, hk0⟩ := hsup K hK p eps heps
   refine ⟨k0, fun k hk t ht a hap x hx => ?_⟩
-
   choose Cf hCf using fun q : Nat => hbdd phi hphi t ht q K hK
-
-
   have hbddAbove : BddAbove {r : Real | exists b : Nat, b <= p ∧ exists z : M, z ∈ K ∧
       metricDerivNorm (I := I) b (gSeq (phi k) t) (gInf t) gRef z = r} := by
     refine ⟨(Finset.range (p + 1)).sup' ⟨0, Finset.mem_range.2 (Nat.succ_pos p)⟩

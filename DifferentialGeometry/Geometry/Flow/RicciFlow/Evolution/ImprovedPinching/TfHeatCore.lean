@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Definitions
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -52,7 +51,8 @@ theorem sqLap_at
     DifferentialGeometry.Integral.Connection.half_laplacian_mul_self
       (I := I) (G.connection t) (G.metric t) (f := f) (x := x)
       hf_all hf_x hgrad hfg
-  unfold DifferentialGeometry.Integral.Connection.laplacianAt DifferentialGeometry.Integral.Connection.gradientAt
+  unfold DifferentialGeometry.Integral.Connection.laplacianAt
+    DifferentialGeometry.Integral.Connection.gradientAt
   have hpow :
       (fun y : M => f y ^ 2) = fun y : M => f y * f y := by
     funext y
@@ -61,7 +61,8 @@ theorem sqLap_at
   have hmain :
       DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t) (G.metric t)
           (fun y : M => f y * f y) x =
-        2 * (f x * DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t) (G.metric t) f x +
+        2 * (f x * DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t)
+          (G.metric t) f x +
           (G.metric t).inner x
             (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)
             (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)) := by
@@ -91,21 +92,24 @@ theorem sqLap_realizes
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y) x)
     (hfg : forall t x,
       MDiffAt (T% ((scalar t) • fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y)) x) :
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y))
+          x) :
     ScalarLaplacianRealizesHeatOperatorOn
       (I := I) G T
       (fun t x => scalar t x ^ 2)
       (scalarSqLap scalar scalarLap gradScalarNormSq) := by
   intro t ht x
   have hlap :
-      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t) x := by
+      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t)
+        x := by
     simpa [DifferentialGeometry.Integral.Connection.heatOperator] using hscalarLap t ht x
   have hsq :=
     sqLap_at (I := I) G t (f := scalar t) (x := x)
       (hdf t) (hdf t x) (hgrad t x) (hfg t x)
   calc
     scalarSqLap scalar scalarLap gradScalarNormSq t x =
-        2 * scalar t x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t) x +
+        2 * scalar t x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+          (scalar t) x +
           2 * (G.metric t).inner x
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x)
             (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x) := by

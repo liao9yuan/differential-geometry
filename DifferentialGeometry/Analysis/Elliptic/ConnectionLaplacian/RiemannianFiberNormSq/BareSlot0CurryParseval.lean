@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParal
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
@@ -28,7 +27,8 @@ noncomputable def tensor0SToTensorRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
   (tensor00Scalar (I := I) (M := M) x).smulRight C
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
     (τ : Tensor0SSpace 0 I x) :
     (tensor0SToTensorRS (I := I) (M := M) x C :

@@ -9,8 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section Comp
 
@@ -21,13 +19,14 @@ variable
   {M : Type*} [NormedAddCommGroup M] [NormedSpace 𝕜 M]
   {M' : Type*} [NormedAddCommGroup M'] [NormedSpace 𝕜 M']
   {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
-  {ι : Type*} [Fintype ι]
+  {ι : Type*} [Finite ι]
 
 theorem compContinuousMultilinearMapL_diag_continuous :
     Continuous (fun p : M →L[𝕜] M' ↦
       (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
         ContinuousMultilinearMap 𝕜 (fun _ ↦ M') N →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ ↦ M) N))
   := by
+  letI := Fintype.ofFinite ι
   let φ : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M →L[𝕜] M') _ :=
     ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
     𝕜 (fun _ : ι ↦ M) (fun _ : ι ↦ M') N
@@ -40,7 +39,7 @@ section Continuous
 
 variable
   (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  (ι : Type*) [Fintype ι]
+  (ι : Type*) [Finite ι]
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
@@ -49,6 +48,7 @@ theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous :
   (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
     ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂ →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂))
   := by
+  letI := Fintype.ofFinite ι
   let φ : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ F₁ →L[𝕜] F₁) _ :=
     ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
     𝕜 (fun _ : ι ↦ F₁) (fun _ : ι ↦ F₁) F₂

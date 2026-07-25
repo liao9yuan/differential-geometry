@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -54,7 +52,8 @@ def secondMetricCometricDoubleTraceField (s : ℕ) : SmoothCcTensor g₀ (s + 2)
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma mvDoubleTraceField_self_eq (s : ℕ) :
-    secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₀ s = cometricDoubleTraceField (I := I) g₀ s := by
+    secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₀ s = cometricDoubleTraceField
+      (I := I) g₀ s := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -62,7 +61,8 @@ lemma mvDoubleTraceField_self_eq (s : ℕ) :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma slotInsertEndoCc_add_local (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -85,7 +85,8 @@ private lemma slotInsertEndoCc_add_local (s : ℕ)
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma fullRaisedEndoField_diff_split_local :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -135,7 +136,6 @@ private lemma appCcRS_slotInsert_id_eq (s c : ℕ) (Φ : SmoothCcTensor g₀ (s 
   rw [Function.update_eq_self]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma mvDoubleTraceField_eq_trace_fullRaised (s : ℕ) :
     secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ s =
@@ -307,14 +307,14 @@ def secondMetricPairTraceOp : SmoothCcTensor g₀ 6 2 :=
     (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma mvPairTraceOp_apply_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) D) v =
       ∑ b : Fin (Module.finrank ℝ E), ∑ a : Fin (Module.finrank ℝ E),
@@ -355,7 +355,8 @@ lemma mvPairTraceOp_apply_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
       funext k
       fin_cases k <;> rfl
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+        (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 ricciFoldRemainderSlotPerm
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X))).toSection x) D) =
       cometricDoubleTraceFib (I := I) g₁ 2 x
@@ -389,7 +390,6 @@ def riemannCometricDoubleTraceFold : SmoothCcTensor g₀ 2 4 :=
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
 omit [SigmaCompactSpace M] in
 lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (m : Fin 4 → TangentSpace I x) :
@@ -467,7 +467,8 @@ lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} (hδ₀ 
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (u K : ℕ) (_huK : u ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ (s + 2) (s + u) x
             ((iteratedCovGrad (I := I) g₀ (s + 2) s u
@@ -477,7 +478,7 @@ lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} (hδ₀ 
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) K (u + 1) := by
   classical
   obtain ⟨CΛ, hCΛ_nn, hCΛ⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
       (I := I) (M := M) g₀ hδ₀
   set KD : ℕ → ℝ := fun u =>
     (exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ (s + 2) (s + u)
@@ -578,7 +579,9 @@ lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} (hδ₀ 
         ∑ u₁ ∈ Finset.range (u + 1), KD u₁ *
           ∑ u₂ ∈ Finset.range (u + 1 - u₁),
             (Module.finrank ℝ E : ℝ) ^ (s + 1) * CΛ u₂) * W := by
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+      (I := I)
       (M := M) g₀ u (s + 2) (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
       (endoSlotZeroCcTensor (I := I) (M := M) g₀ (s + 1)
         (gInvDiffRaisedEndoField (I := I) g₀ g₁)) x) ?_
@@ -656,7 +659,8 @@ lemma exists_rfns_icg_mvPairTraceOp_window {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (u K : ℕ) (_huK : u ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + u) x
             ((iteratedCovGrad (I := I) g₀ 6 2 u
@@ -682,7 +686,9 @@ lemma exists_rfns_icg_mvPairTraceOp_window {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) with hb_def
   have hb_nn : ∀ l, 0 ≤ b l :=
     fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I)
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    (I := I)
     (M := M) g₀ u 6 4 2 (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ 2)
     (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ 4) x) ?_
   calc diagonalGridGrowthFactor (E := E) u *

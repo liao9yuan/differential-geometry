@@ -236,6 +236,8 @@ theorem smoothCompactSupport_L2_bound_on_bounded_ge_two
               rfl
 
 set_option maxHeartbeats 400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+-- elaboration of this declaration exceeds the default maxHeartbeats budget
 omit [NeZero d] in
 private lemma indicator_integrable_on_sphere_prod
     {R : ℝ} {F : E → ℝ} (hF : IntegrableOn F (Metric.ball (0 : E) R) volume) :
@@ -556,7 +558,8 @@ private lemma integrableOn_radial_indicator_fderiv
       continuous_const.add (continuous_id.smul continuous_const)
     exact continuous_norm.comp (hfderiv_cont.comp hline_cont)
   have hg_int_Icc : IntegrableOn g (Set.Icc (0 : ℝ) (2 * R)) volume :=
-    (hg_cont.continuousOn.integrableOn_compact (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) (2 * R))))
+    (hg_cont.continuousOn.integrableOn_compact
+      (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) (2 * R))))
   have hS_meas : MeasurableSet S := by
     have hcont : Continuous fun t : ℝ => ‖x + t • (ω : E)‖ :=
       continuous_norm.comp (continuous_const.add (continuous_id.smul continuous_const))
@@ -700,7 +703,8 @@ private theorem translated_ball_sphere_radial_identity
   set B := Metric.ball (0 : E) R
   set g : E → ℝ := fun z => B.indicator (fun y => f y) (x + z)
   have hg_int : IntegrableOn g (Metric.ball (0 : E) (2 * R)) volume := by
-    have hF_int : Integrable (B.indicator f) volume := (integrable_indicator_iff measurableSet_ball).mpr hf
+    have hF_int : Integrable (B.indicator f) volume :=
+      (integrable_indicator_iff measurableSet_ball).mpr hf
     have hcomp : Integrable (fun z => B.indicator f (x + z)) volume := by
       rw [show (fun z => B.indicator f (x + z)) = (B.indicator f) ∘ (· + x) from by
         ext z
@@ -825,7 +829,8 @@ theorem riesz_kernel_integrable
       · simp [mul_zero]
     have h_ind_int : IntegrableOn h_ind (Set.Ioi 0) := by
       apply Integrable.integrableOn
-      exact integrable_indicator_iff measurableSet_Ioo |>.mpr (integrableOn_const (hs := measure_Ioo_lt_top.ne))
+      exact integrable_indicator_iff measurableSet_Ioo |>.mpr
+        (integrableOn_const (hs := measure_Ioo_lt_top.ne))
     exact h_ind_int.congr_fun heq.symm measurableSet_Ioi
   exact (MeasureTheory.integrable_fun_norm_addHaar (μ := volume) (f := g)).mpr h1d
 
@@ -1022,7 +1027,8 @@ theorem representation_formula_smooth
         (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) (2 * R)))).mono_set hsubset
     have hnonneg_lhs :
         0 ≤ᵐ[volume.restrict (Set.Ioo (0 : ℝ) (2 * R))]
-          (fun s : ℝ => s ^ (d - 1 : ℕ) • B.indicator (fun y => ‖u x - u y‖) (x + s • (ω : E))) := by
+          (fun s : ℝ => s ^ (d - 1 : ℕ) • B.indicator (fun y => ‖u x - u y‖)
+            (x + s • (ω : E))) := by
       filter_upwards [ae_restrict_mem measurableSet_Ioo] with s hs
       by_cases hs_ball : x + s • (ω : E) ∈ B
       · simpa [B, hs_ball, smul_eq_mul] using
@@ -1056,7 +1062,8 @@ theorem representation_formula_smooth
           calc
             ‖u x - u (x + s • (ω : E))‖
                 ≤ ∫ t in (0 : ℝ)..‖x - (x + s • (ω : E))‖,
-                    ‖fderiv ℝ u (x + t • (‖x - (x + s • (ω : E))‖⁻¹ • ((x + s • (ω : E)) - x)))‖ := hseg0
+                    ‖fderiv ℝ u (x + t • (‖x - (x + s • (ω : E))‖⁻¹ • ((x + s • (ω : E)) - x)))‖ :=
+                      hseg0
             _ = ∫ t in (0 : ℝ)..s, ‖fderiv ℝ u (x + t • (ω : E))‖ := by
                   rw [hnorm]
                   congr with t
@@ -1427,7 +1434,8 @@ theorem poincare_smooth_unitBall
       have hball_int : IntegrableOn (fun y => K (x - y)) (Metric.ball x (2 : ℝ)) volume := by
         have hmp := measurePreserving_add_right (volume : Measure E) x
         have hemb := (MeasurableEquiv.addRight x : E ≃ᵐ E).measurableEmbedding
-        have hpre : (fun z : E => z + x) ⁻¹' Metric.ball x (2 : ℝ) = Metric.ball (0 : E) (2 : ℝ) := by
+        have hpre : (fun z : E => z + x) ⁻¹' Metric.ball x (2 : ℝ) = Metric.ball (0 : E)
+          (2 : ℝ) := by
           ext z
           simp [Metric.mem_ball]
         rw [← hmp.integrableOn_comp_preimage hemb, hpre]
@@ -1762,7 +1770,8 @@ theorem poincare_smooth_unitBall
         have hdv_ne : (d : ℝ) * (volume (Metric.ball (0 : E) 1)).toReal ≠ 0 :=
           mul_ne_zero hd_pos.ne' hvol_pos.ne'
         rw [mul_one]
-        rw [div_mul_comm, mul_comm ((d : ℝ) * _) 2, mul_div_cancel_of_imp (fun h => absurd h hdv_ne)]
+        rw [div_mul_comm, mul_comm ((d : ℝ) * _) 2, mul_div_cancel_of_imp
+          (fun h => absurd h hdv_ne)]
         calc (2 : ℝ) ^ d * 2 * ↑d = 2 * 2 ^ d * ↑d := by ring
           _ ≥ 2 * 2 ^ d * 1 := by
               nlinarith [pow_pos (show (0 : ℝ) < 2 by norm_num) d,

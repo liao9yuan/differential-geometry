@@ -404,7 +404,8 @@ private theorem quarterBall_lpNorm_mono
   rw [lpNorm_eq_integral_norm_rpow_toReal (p := ENNReal.ofReal r)
       (by simpa [ENNReal.ofReal_eq_zero, not_le] using hr) ENNReal.ofReal_ne_top hu_aesm,
     lpNorm_eq_integral_norm_rpow_toReal (p := ENNReal.ofReal s)
-      (by simpa [ENNReal.ofReal_eq_zero, not_le] using hs_pos) ENNReal.ofReal_ne_top hu_aesm] at hcompare_real
+      (by simpa [ENNReal.ofReal_eq_zero, not_le] using hs_pos) ENNReal.ofReal_ne_top hu_aesm]
+        at hcompare_real
   simpa [μq, Real.norm_eq_abs, ENNReal.toReal_ofReal hr.le,
     ENNReal.toReal_ofReal hs_pos.le] using hcompare_real
 
@@ -856,7 +857,6 @@ private theorem weak_harnack_chain_shifted
   have hp₀_def : p₀ = weakHarnackP0 A := by rfl
   -- Key arithmetic: Λ·p₀² = c'² (dimension-only constant).
   have hΛp₀sq := Λ_mul_p₀_sq A
-
   -- Forward Moser estimate on the rescaled supersolution `v`.
   have hpq' : p₀ < q := by
     simpa [hp₀_def] using hpq
@@ -890,7 +890,6 @@ private theorem weak_harnack_chain_shifted
   -- Substitute COV into hfwd and replace A'.1.Λ with A.1.Λ:
   rw [hcov_lhs, hcov_rhs] at hfwd
   rw [hΛ_eq] at hfwd
-
   -- Crossover estimate on the half-ball.
   have hcross := crossover_estimate_unaveraged hd A hu_pos hsuper
   -- hcross: (∫_{B_{1/2}} |u|^{p₀}) · (∫_{B_{1/2}} |u|^{-p₀}) ≤ C_cross'·vol²
@@ -910,7 +909,6 @@ private theorem weak_harnack_chain_shifted
       (fun x => |(u x)⁻¹| ^ p₀)
   -- Substitute COV into hinv so its integral term matches I_neg:
   rw [hcov_inv] at hinv
-
   -- COV for essInf:
   -- essInf v (volume.restrict (ball 0 (1/2))) = essInf u (volume.restrict (ball 0 (1/4)))
   have hcov_essInf :

@@ -559,7 +559,8 @@ private theorem smooth_full_identity
   rw [h_RHS_split]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma exists_bound_for_invGram_mul_fderiv_psi
     {g : SmoothRiemannianMetric I M} (α : M) (i j : Fin (Module.finrank ℝ E))
     {ψ : EuclN → ℝ} (hψ_cd : ContDiff ℝ (⊤ : ℕ∞) ψ)

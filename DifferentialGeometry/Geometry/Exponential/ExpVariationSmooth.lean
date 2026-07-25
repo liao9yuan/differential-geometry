@@ -32,11 +32,6 @@ section DiagExp
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 def diagExp
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -90,14 +85,12 @@ section JointVariationSmooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle I M :=
   fun s => (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
     (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 private theorem chartVelocityLift_isMIntegralCurveOn
     [CompleteSpace E] [T2Space (TangentBundle I M)]
@@ -174,7 +167,8 @@ private theorem chartVelocityLift_isMIntegralCurveOn
     change extChartAt I α (g_loc s).proj ∈ _
     have h_extsrc : (g_loc s).proj ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact hs_src
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α ((extChartAt I α).map_source h_extsrc)
   have hc_eq : c₁ =ᶠ[𝓝 s₀] c₂ :=
     chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := α)
@@ -212,7 +206,6 @@ private theorem chartVelocityLift_isMIntegralCurveOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
@@ -229,7 +222,8 @@ private theorem chartVelocityLift_proj
       (extChartAt I α).map_source hext_src
     change chartCurve (I := I) α Γ s ∈ _
     rw [chartCurve_def]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hΓ_target
   change ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
     (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)).proj = Γ s
@@ -239,7 +233,6 @@ private theorem chartVelocityLift_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_eq_chartFlow_proj_residual
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -400,7 +393,8 @@ theorem expMapIntrinsic_eq_chartFlow_proj_residual
         change extChartAt I α (g_loc (s₀ + τ)).proj ∈ _
         have h_extsrc : (g_loc (s₀ + τ)).proj ∈ (extChartAt I α).source := by
           rw [extChartAt_source]; exact hτ
-        exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        exact
+          Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
           (I := I) α ((extChartAt I α).map_source h_extsrc)
       have hshift_tendsto : Tendsto (fun τ : ℝ => s₀ + τ) (𝓝 0) (𝓝 s₀) := by
         have : Tendsto (fun τ : ℝ => s₀ + τ) (𝓝 0) (𝓝 (s₀ + 0)) :=
@@ -732,7 +726,6 @@ section Headline
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_variation_contMDiff
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -830,7 +823,6 @@ theorem expMapIntrinsic_variation_contMDiff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_variation_contMDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -864,7 +856,6 @@ theorem expMapIntrinsic_variation_contMDiffAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem expMapIntrinsic_variation_smallField_phaseBall
@@ -935,7 +926,6 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -969,13 +959,6 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem diagExp_variation_contMDiffAt_of_smallField
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1017,22 +1000,6 @@ theorem diagExp_variation_contMDiffAt_of_smallField
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem diagExp_contMDiffAt_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1056,16 +1023,15 @@ theorem diagExp_contMDiffAt_zero
   have hp_src : p ∈ (chartAt H p).source := mem_chart_source H p
   have hΞ0 : Ξ u₀ = ctr := by
     rw [hΞ_def]; simp only
-    rw [extChartAt_tangent_zero_apply_chartFiber (I := I) p (p := u₀) (by rw [hu₀_def]; exact hp_src)]
+    rw [extChartAt_tangent_zero_apply_chartFiber (I := I) p (p := u₀)
+      (by rw [hu₀_def]; exact hp_src)]
     rw [hu₀_def, chartFiberCoord_self_zero (I := I) p]
   have hRctr : R ctr = ctr := by rw [hR_def, hctr_def]; simp
   have hctr_ball : ctr ∈ Metric.ball ((extChartAt I p p, (0 : E)) : E × E) ρ := by
     rw [hctr_def]; exact Metric.mem_ball_self hρ_pos
-
   have hΞ_cd : ContMDiffAt I.tangent 𝓘(ℝ, E × E) (n : ℕ∞) Ξ u₀ := by
     rw [hΞ_def]
     exact (contMDiffAt_extChartAt (I := I.tangent) (x := u₀)).of_le (by exact_mod_cast le_top)
-
   have hR_cd : ContMDiffAt 𝓘(ℝ, E × E) 𝓘(ℝ, E × E) (n : ℕ∞) R (Ξ u₀) := by
     have hReq : R = ⇑((ContinuousLinearMap.fst ℝ E E).prod
         (t'⁻¹ • ContinuousLinearMap.snd ℝ E E)) := by
@@ -1075,12 +1041,10 @@ theorem diagExp_contMDiffAt_zero
     exact hRcd.contMDiff.contMDiffAt
   have hRΞ_cd : ContMDiffAt I.tangent 𝓘(ℝ, E × E) (n : ℕ∞) (fun u => R (Ξ u)) u₀ :=
     hR_cd.comp u₀ hΞ_cd
-
   have hG_at : ContDiffAt ℝ (n : ℕ∞) G (R (Ξ u₀)) := by
     rw [hΞ0, hRctr]
     exact hG_cd.contDiffAt (Metric.isOpen_ball.mem_nhds hctr_ball)
   have hGRΞ := (hG_at.contMDiffAt).comp u₀ hRΞ_cd
-
   have hGRu₀_target : G (R (Ξ u₀)) ∈ (extChartAt I p).target := by
     rw [hΞ0, hRctr]
     have ht'_Icc : t' ∈ Set.Icc (-T) T := Set.Ioo_subset_Icc_self ht'_Ioo
@@ -1092,7 +1056,6 @@ theorem diagExp_contMDiffAt_zero
       contMDiffWithinAt_extChartAt_symm_target (I := I) p hGRu₀_target
     exact hwithin.contMDiffAt (extChartAt_target_mem_nhds' (I := I) hGRu₀_target)
   have hcomp := hsymm.comp u₀ hGRΞ
-
   have h2 : ContMDiffAt I.tangent I (n : ℕ∞)
       (fun u : TangentBundle I M =>
         expMapIntrinsic (I := I) g hEnorm u.proj u.snd) u₀ := by
@@ -1129,7 +1092,6 @@ theorem diagExp_contMDiffAt_zero
       Φ ρ T t' ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
       u.proj hu_src u.snd hphase
     rw [hbridge, harg, hG_def]
-
   have h1 : ContMDiffAt I.tangent I (n : ℕ∞)
       (fun u : TangentBundle I M => u.proj) u₀ := contMDiffAt_proj (TangentSpace I)
   have hpair := h1.prodMk h2

@@ -31,7 +31,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma hasWeakPartialDeriv_congr_ae
     {k : Fin (Module.finrank ℝ E)} {g f g' f' : EuclN → ℝ} {Ω : Set EuclN}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict Ω] f')
@@ -54,7 +53,6 @@ private lemma hasWeakPartialDeriv_congr_ae
   exact h φ hφ hφ_supp hφ_sub
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma hasWeakPartialDeriv_const_smul
     {k : Fin (Module.finrank ℝ E)} {g f : EuclN → ℝ} {Ω : Set EuclN} (c : ℝ)
     (h : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g f Ω) :
@@ -85,7 +83,6 @@ def eigenvectorCutoffChartWeakPartial
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma cutoff_smoothApprox_smul_coe_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -263,7 +260,6 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
       (I := I) (M := M) g r s i α P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma eigenvectorCutoffChartComponentL2_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -288,7 +284,6 @@ private lemma eigenvectorCutoffChartComponentL2_tendsto
   exact h_clm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -351,7 +346,6 @@ private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
       g r s i α P₀ k)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

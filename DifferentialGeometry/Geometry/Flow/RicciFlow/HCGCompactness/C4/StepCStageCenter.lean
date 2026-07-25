@@ -116,9 +116,6 @@ theorem HasSuppConvData.exists_invVel_core
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
-
-
-
 theorem cfg_pairs_tail
     {ι : Type} [Fintype ι] {S : Set E}
     {pts : Nat → E → ι → E}
@@ -160,8 +157,6 @@ theorem cfg_pairs_tail
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
-
-
 theorem cfg_snd_conv
     {ι : Type} [Fintype ι] {S : Set E} (hS : IsOpen S)
     {cfg : Nat → E → (ι → Real) × (ι → E)}

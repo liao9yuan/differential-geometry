@@ -5,9 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option maxHeartbeats 1600000
-set_option synthInstance.maxHeartbeats 1000000
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
   RealInnerProductSpace InnerProductSpace
@@ -40,7 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-
 private lemma mu_mul_inv_pow_le_inv_pow_local
     {μ : ℝ} (hμ_pos : 0 < μ) (hμ_le_one : μ ≤ 1) (eN : ℕ) :
     μ * μ⁻¹ ^ eN ≤ μ⁻¹ ^ eN := by
@@ -228,8 +224,6 @@ private lemma crossRightLimitComponent_coe_ae_eq
     exact h_smul
   filter_upwards [h_eq] with y hy
   rw [hy, smul_eq_mul]
-
-set_option maxHeartbeats 3200000 in
 
 omit [CompleteSpace E] in
 theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional

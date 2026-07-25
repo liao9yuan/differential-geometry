@@ -4,9 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -78,7 +75,8 @@ theorem realizedChr_hasDerivWithinAt
     HasDerivWithinAt
       (fun s : Real => realizedChr (I := I) S x₀ s x i a p)
       (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b)
+        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d
+          a b)
         (t : Real) x i a p)
       D.carrier
       (t : Real) :=
@@ -131,7 +129,8 @@ theorem nablaKRm_timeDeriv_of_solution
           (fun y : M => iteratedRmCompDt (I := I) (coordinateFrameAt (I := I) x₀)
             (realizedChr (I := I) S x₀)
             (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-              (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+              (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
+                t x d a b))
             (realizedRmBase (I := I) S x₀) rm04Dt k (t : Real) y m) x₀
           (coordinateFrameAt (I := I) x₀ d x₀))
         D.carrier (t : Real))
@@ -142,14 +141,16 @@ theorem nablaKRm_timeDeriv_of_solution
       (iteratedRmCompDt (I := I) (coordinateFrameAt (I := I) x₀)
         (realizedChr (I := I) S x₀)
         (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-          (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+          (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x
+            d a b))
         (realizedRmBase (I := I) S x₀) rm04Dt k (t : Real) x₀ n)
       D.carrier
       (t : Real) :=
   iteratedRmComp_hasDerivWithinAt (I := I) (coordinateFrameAt (I := I) x₀)
     (realizedChr (I := I) S x₀)
     (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a
+        b))
     (realizedRmBase (I := I) S x₀) rm04Dt x₀ hrm
     (fun i a p => realizedChr_hasDerivWithinAt (I := I) S hS x₀ gInvDt hmetricFrame
       hSmooth hFdiff hFtdiff t x₀ (coordinateFrameAt_mem (I := I) x₀) i a p)

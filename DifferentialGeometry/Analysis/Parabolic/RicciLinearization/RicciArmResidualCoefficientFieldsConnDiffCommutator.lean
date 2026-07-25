@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmC
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefoldMonomialFibreNormBound
@@ -15,8 +15,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
@@ -99,8 +97,7 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
       map_add' := fun p p' => by
         apply ContinuousLinearMap.ext
         intro q
-        rw [ContinuousLinearMap.add_apply, LinearMap.coe_toContinuousLinearMap',
-          LinearMap.coe_toContinuousLinearMap', LinearMap.coe_toContinuousLinearMap']
+        simp only [ContinuousLinearMap.add_apply, LinearMap.coe_toContinuousLinearMap']
         simp only [LinearMap.coe_mk, AddHom.coe_mk]
         rw [connDiffAACommKernelBilin_apply, connDiffAACommKernelBilin_apply,
           connDiffAACommKernelBilin_apply]
@@ -110,8 +107,7 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         rw [RingHom.id_apply]
         apply ContinuousLinearMap.ext
         intro q
-        rw [ContinuousLinearMap.smul_apply, LinearMap.coe_toContinuousLinearMap',
-          LinearMap.coe_toContinuousLinearMap']
+        simp only [ContinuousLinearMap.smul_apply, LinearMap.coe_toContinuousLinearMap']
         simp only [LinearMap.coe_mk, AddHom.coe_mk]
         rw [connDiffAACommKernelBilin_apply, connDiffAACommKernelBilin_apply]
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]

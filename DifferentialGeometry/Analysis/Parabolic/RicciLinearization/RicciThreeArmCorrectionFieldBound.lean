@@ -15,8 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
@@ -43,9 +41,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def gInvDiffQuadResidualFieldRealizedFam (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+private local instance tensorRSRiemannianNormedAddCommGroup
+    (r s : ℕ)
+    [h : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b)] (b : M) :
+    NormedAddCommGroup (TensorRSSpace r s I b) :=
+  (h.g.toCore b).toNormedAddCommGroupOfTopology
+    (h.g.continuousAt b) (h.g.isVonNBounded b)
+
+def gInvDiffQuadResidualFieldRealizedFam (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   connDiffBiContrCoeffField (I := I) (M := M)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀
@@ -108,8 +115,10 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
       {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
       (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
-      letI : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+      letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (show TensorRSSpace 2 2 I x from
             TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x)) ≤
@@ -118,6 +127,8 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
   classical
   letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
   obtain ⟨C₀, hC₀0, hpw⟩ :=
     connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   refine ⟨((Module.finrank ℝ E : ℝ) ^ 4 * C₀ ^ 2) ^ 2, by positivity, ?_⟩
@@ -129,10 +140,12 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
   have hG_nn : 0 ≤ G := norm_nonneg _
   have hsofnn : ∀ aa : Fin (Module.finrank ℝ E),
-      g₀.inner x (smoothOrthoFrame (I := I) g₀ x aa x) (smoothOrthoFrame (I := I) g₀ x aa x) = 1 := by
+      g₀.inner x (smoothOrthoFrame (I := I) g₀ x aa x) (smoothOrthoFrame (I := I) g₀ x aa x) =
+        1 := by
     intro aa; rw [smoothOrthoFrame_orthonormal_at_center]; simp
   rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
-    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x))
+    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM
+      (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x))
     e bse hnE hbse horth]
   have heach : ∀ (K J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
@@ -269,7 +282,8 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-              ((gInvDiffQuadResidualFieldRealizedFam (I := I) g₀ T T' hδ hδ' s).toSection x) ≤ Λ := by
+              ((gInvDiffQuadResidualFieldRealizedFam (I := I) g₀ T T' hδ hδ' s).toSection x) ≤
+                Λ := by
   classical
   obtain ⟨C, hC0, hbnd⟩ :=
     riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one (I := I) (M := M) g₀
@@ -280,6 +294,8 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
   letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI : ∀ y : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    fun y => tensorRSRiemannianNormedAddCommGroup (I := I) 0 3 (h := instTens) y
   set m : ℝ := max δ₀ 0 with hm_def
   have hm0 : 0 ≤ m := le_max_right _ _
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
@@ -321,13 +337,19 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
         Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ≤ Csob * R := by
     have hCsob_sum := hCsob T T' hR hTball hT'ball s ⟨hs0, hs1⟩ x
     have hterms : ∀ k ∈ Finset.range 3, 0 ≤
-        (letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+        (letI instTensK : Bundle.RiemannianBundle
+            (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
           Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+        letI : ∀ b : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+          fun b => tensorRSRiemannianNormedAddCommGroup (I := I) 0 (2 + k) (h := instTensK) b
         ‖(iteratedCovGrad (I := I) g₀ 0 2 k
             (convexPerturbation (I := I) g₀ T T' s)).toSection x‖) := by
       intro k _
-      letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+      letI instTensK : Bundle.RiemannianBundle
+          (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+      letI : ∀ b : M, NormedAddCommGroup (Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+        fun b => tensorRSRiemannianNormedAddCommGroup (I := I) 0 (2 + k) (h := instTensK) b
       exact norm_nonneg _
     exact le_trans (Finset.single_le_sum hterms
       (show (1 : ℕ) ∈ Finset.range 3 from Finset.mem_range.mpr (by norm_num))) hCsob_sum
@@ -370,11 +392,14 @@ omit [SigmaCompactSpace M] in
 theorem backgroundRiemannKernelBilin_add_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D D' : Tensor0SSpace 2 I x) :
     backgroundRiemannKernelBilin (I := I) g₀ x p (D + D') =
-      backgroundRiemannKernelBilin (I := I) g₀ x p D + backgroundRiemannKernelBilin (I := I) g₀ x p D' := by
+      backgroundRiemannKernelBilin (I := I) g₀ x p D + backgroundRiemannKernelBilin (I := I) g₀ x p
+        D' := by
   apply ContinuousLinearMap.ext; intro v0
   apply ContinuousLinearMap.ext; intro v1
-  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply, backgroundRiemannKernelBilin_apply,
-    backgroundRiemannKernelBilin_apply, backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_add,
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+    backgroundRiemannKernelBilin_apply,
+    backgroundRiemannKernelBilin_apply, backgroundRiemannKernelBilin_apply,
+      Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
@@ -382,11 +407,14 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem backgroundRiemannKernelBilin_smul_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (c : ℝ) (D : Tensor0SSpace 2 I x) :
-    backgroundRiemannKernelBilin (I := I) g₀ x p (c • D) = c • backgroundRiemannKernelBilin (I := I) g₀ x p D := by
+    backgroundRiemannKernelBilin (I := I) g₀ x p (c • D) = c • backgroundRiemannKernelBilin (I := I)
+      g₀ x p D := by
   apply ContinuousLinearMap.ext; intro v0
   apply ContinuousLinearMap.ext; intro v1
-  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, backgroundRiemannKernelBilin_apply,
-    backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply,
+    backgroundRiemannKernelBilin_apply,
+    backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_smul,
+      ContinuousMultilinearMap.smul_apply,
     smul_eq_mul]
 
 def backgroundRiemannSummandFib (g₀ : SmoothRiemannianMetric I M) (x : M) (p : TangentSpace I x) :
@@ -423,7 +451,8 @@ omit [SigmaCompactSpace M] in
     Tensor0SSpace.toModel (backgroundRiemannSummandFib (I := I) g₀ x p D) v =
       Tensor0SSpace.toModel D
         ![riemannOp (LeviCivita (I := I) g₀) x p (v 0) (v 1), p] := by
-  rw [backgroundRiemannSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+  rw [backgroundRiemannSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+    AddHom.coe_mk,
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
   exact backgroundRiemannKernelBilin_apply (I := I) g₀ x p D (v 0) (v 1)
 
@@ -443,7 +472,8 @@ theorem backgroundRiemannBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMe
         Tensor0SSpace.toModel D
           ![riemannOp (LeviCivita (I := I) g₀) x (B c x) (v 0) (v 1), B c x] := by
   classical
-  rw [backgroundRiemannBiContrFibFixedFrame, ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply,
+  rw [backgroundRiemannBiContrFibFixedFrame, ContinuousLinearMap.sum_apply, ←
+    Tensor0SSpace.toModelL_apply,
     map_sum, ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun c _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, backgroundRiemannSummandFib_toModel]
@@ -498,7 +528,8 @@ theorem backgroundRiemannKernelBilin_homSection_contMDiff (g₀ : SmoothRiemanni
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-theorem backgroundRiemannBiContrFibFixedFrame_apply_section_contMDiff (g₀ : SmoothRiemannianMetric I M)
+theorem backgroundRiemannBiContrFibFixedFrame_apply_section_contMDiff
+    (g₀ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
     (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
@@ -593,7 +624,8 @@ theorem backgroundRiemannTraceKernel_apply (g₀ : SmoothRiemannianMetric I M) (
     backgroundRiemannTraceKernel (I := I) g₀ x D v0 v1 p q =
       Tensor0SSpace.toModel D
         ![riemannOp (LeviCivita (I := I) g₀) x p v0 v1, q] := by
-  rw [backgroundRiemannTraceKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  rw [backgroundRiemannTraceKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+    AddHom.coe_mk]
   exact bilinFormToModel_symm_apply (TangentSpace I x) (Tensor0SSpace.toModel D)
     (riemannOp (LeviCivita (I := I) g₀) x p v0 v1) q
 
@@ -603,7 +635,8 @@ def backgroundRiemannBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
-theorem backgroundRiemannBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M)
+theorem backgroundRiemannBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M)
+    (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
     backgroundRiemannBiContrFib (I := I) g₀ g₁ y =
       backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x₀) y := by
@@ -613,7 +646,8 @@ theorem backgroundRiemannBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRie
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [backgroundRiemannBiContrFib, backgroundRiemannBiContrFibFixedFrame_toModel, backgroundRiemannBiContrFibFixedFrame_toModel]
+  rw [backgroundRiemannBiContrFib, backgroundRiemannBiContrFibFixedFrame_toModel,
+    backgroundRiemannBiContrFibFixedFrame_toModel]
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ c : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel D
@@ -660,15 +694,18 @@ def ricciArmOrder0BackgroundCurvatureCoeffField (g₀ g₁ : SmoothRiemannianMet
     SmoothCcTensor g₀ 2 2 where
   toSection :=
     { toFun := fun x : M =>
-        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM
+          (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
       contMDiff_toFun := backgroundRiemannBiContrFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-@[simp] theorem ricciArmOrder0BackgroundCurvatureCoeffField_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
+@[simp] theorem ricciArmOrder0BackgroundCurvatureCoeffField_toSection
+    (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
     (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x =
-      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) :=
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM
+        (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) :=
   rfl
 
 end NormedBackgroundRiemannCoefficientField
@@ -773,7 +810,8 @@ theorem riemannianFiberNormSq_backgroundRiemannBiContrFib_le
       nlinarith [hmono, hkey]
     rw [le_div_iff₀ h1mδ₀]; exact hkey₀
   rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
-    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
+    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM
+      (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
     e bse hnE hbse horth]
   have heach : ∀ (K J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
@@ -848,7 +886,8 @@ theorem riemannianFiberNormSq_backgroundRiemannBiContrFib_le
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform
+theorem
+    exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (_hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

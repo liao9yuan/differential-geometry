@@ -7,8 +7,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 open Bundle Set IsManifold ContinuousLinearMap ContinuousMultilinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -70,7 +68,8 @@ lemma chartRSTwist_opNorm_le
           ≤ ‖T u‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ s := hC
       _ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ s * ‖T u‖ := by ring
   have h_pow_nn : 0 ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ s := by positivity
-  have h_T_le : ‖T u‖ ≤ ‖T‖ * (‖α'‖ * ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ r) := by
+  have h_T_le : ‖T u‖ ≤ ‖T‖ *
+    (‖α'‖ * ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ r) := by
     calc
       ‖T u‖ ≤ ‖T‖ * ‖u‖ := hB
       _ ≤ ‖T‖ * (‖α'‖ * ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ r) := by
@@ -132,7 +131,8 @@ lemma chartRSTwistInv_opNorm_le
           ≤ ‖T u‖ * ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ s := hC
       _ = ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ s * ‖T u‖ := by ring
   have h_pow_nn : 0 ≤ ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ^ s := by positivity
-  have h_T_le : ‖T u‖ ≤ ‖T‖ * (‖α'‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ r) := by
+  have h_T_le : ‖T u‖ ≤ ‖T‖ *
+    (‖α'‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ r) := by
     calc
       ‖T u‖ ≤ ‖T‖ * ‖u‖ := hB
       _ ≤ ‖T‖ * (‖α'‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ^ r) := by

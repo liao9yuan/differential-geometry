@@ -259,7 +259,8 @@ instance instIsManifold :
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem proj_contMDiff :
     ContMDiff I I ∞
@@ -394,7 +395,8 @@ theorem fundamentalGroup_isCountablyGenerated_aux
           JoinedIn (B m ∩ B n) a b) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f :=
-  fundamentalGroup_countable_surjection_of_nullHomotopic_basis X x B hBopen hBpc hBnull hBbasis hpcInter
+  fundamentalGroup_countable_surjection_of_nullHomotopic_basis X x B hBopen hBpc hBnull hBbasis
+    hpcInter
 
 
 
@@ -675,7 +677,9 @@ instance instSigmaCompactSpace :
 
 
 
-omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [LocPathConnectedSpace M] [SemilocallySimplyConnectedSpace M] [Inhabited M] [SecondCountableTopology M] [Nonempty M] in
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [LocPathConnectedSpace M] [SemilocallySimplyConnectedSpace M] [Inhabited M]
+    [SecondCountableTopology M] [Nonempty M] in
 theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :
     LocallyCompactSpace M :=
   Manifold.locallyCompact_of_finiteDimensional I

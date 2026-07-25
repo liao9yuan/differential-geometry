@@ -31,6 +31,7 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
+open Analysis.Sobolev.EquivalenceFull
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -191,7 +192,7 @@ private theorem eLpNorm_diff_smoothApproxSeqWkpThree_tendsto_zero
       atTop (𝓝 0) := by
   classical
   obtain ⟨C, hC_nn, hC_bnd⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceFull.eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
+    eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
       (I := I) (M := M) g (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
@@ -284,7 +285,6 @@ private theorem eLpNorm_diff_smoothApproxSeqWkpThree_tendsto_zero
   rw [h_ε_eq]
   exact ENNReal.ofReal_le_ofReal h_final_real
 
-set_option maxHeartbeats 1600000 in
 private theorem smoothToLp_smoothApproxSeqWkpThree_tendsto
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -361,7 +361,6 @@ private theorem smoothToLp_smoothApproxSeqWkpThree_tendsto
     exact this
   linarith
 
-set_option maxHeartbeats 800000 in
 private lemma inner_smoothToH1Compl_limit_eq_u_h_wkpThree
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}

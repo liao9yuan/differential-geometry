@@ -281,8 +281,6 @@ noncomputable def invVelSum {ι : Type*} [Fintype ι]
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
-
-
 theorem invVelSum_congr_ne {ι : Type*} [Fintype ι]
     (e : OpenPartialHomeomorph (E × E) (E × E))
     (mu : ι → Real) (xi xi' : ι → E) (z : E)
@@ -297,8 +295,6 @@ theorem invVelSum_congr_ne {ι : Type*} [Fintype ι]
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
-
-
 theorem invVelSum_congr_br {ι : Type*} [Fintype ι]
     (e e' : OpenPartialHomeomorph (E × E) (E × E))
     (mu : ι → Real) (xi : ι → E) (z : E) (heq : e ≈ e')
@@ -313,8 +309,6 @@ theorem invVelSum_congr_br {ι : Type*} [Fintype ι]
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
-
-
 theorem invVelSum_fderiv {ι : Type*} [Fintype ι]
     (e : OpenPartialHomeomorph (E × E) (E × E))
     (mu : ι → Real) (xi : ι → E) {z : E}
@@ -337,8 +331,6 @@ theorem invVelSum_fderiv {ι : Type*} [Fintype ι]
       (hvel i).hasFDerivAt.const_smul (mu i))
 
 omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
-
-
 theorem invVelSum_inv {ι : Type*} [Fintype ι]
     (e : OpenPartialHomeomorph (E × E) (E × E))
     (mu : ι → Real) (xi : ι → E) {z : E} {eta : NNReal}

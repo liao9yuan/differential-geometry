@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -52,7 +51,8 @@ def scalHessFrame
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+      hcov
   let nablaRic :=
     totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       2 cov Ric (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
@@ -103,7 +103,8 @@ def frameInvMetric
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem frameInvMetric_real
     [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M)

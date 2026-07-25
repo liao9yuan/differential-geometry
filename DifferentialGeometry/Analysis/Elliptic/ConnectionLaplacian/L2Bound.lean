@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -45,6 +43,25 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private lemma sum_three_sq_le_sq_sum
+    {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) :
+    a ^ 2 + b ^ 2 + c ^ 2 ≤ (a + b + c) ^ 2 := by
+  nlinarith [mul_nonneg ha hb, mul_nonneg ha hc, mul_nonneg hb hc]
+
+private lemma scale_sum_three_sq_le
+    {C a b c : ℝ}
+    (h : a ^ 2 + b ^ 2 + c ^ 2 ≤ (a + b + c) ^ 2) :
+    C ^ 2 * (a ^ 2 + b ^ 2 + c ^ 2) ≤ (C * (a + b + c)) ^ 2 := by
+  calc
+    C ^ 2 * (a ^ 2 + b ^ 2 + c ^ 2) ≤ C ^ 2 * (a + b + c) ^ 2 :=
+      mul_le_mul_of_nonneg_left h (sq_nonneg C)
+    _ = (C * (a + b + c)) ^ 2 := by ring
+
+private lemma nonneg_le_of_sq_le_sq
+    {a b : ℝ} (hb : 0 ≤ b) (h : a ^ 2 ≤ b ^ 2) :
+    a ≤ b := by
+  nlinarith [sq_nonneg (a - b)]
 
 
 omit [BoundarylessManifold I M] in
@@ -174,12 +191,9 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
   have hy_nn : 0 ≤ C₀ * (nT + nGrad + nHess) :=
     mul_nonneg hC₀ (by linarith [hnT_nn, hnGrad_nn, hnHess_nn])
   have hfinal_sq : nCurv ^ 2 ≤ (C₀ * (nT + nGrad + nHess)) ^ 2 := by
-    refine le_trans hsq_bound ?_
-    have hcross : nT ^ 2 + nGrad ^ 2 + nHess ^ 2 ≤ (nT + nGrad + nHess) ^ 2 := by
-      nlinarith [mul_nonneg hnT_nn hnGrad_nn, mul_nonneg hnT_nn hnHess_nn,
-        mul_nonneg hnGrad_nn hnHess_nn]
-    nlinarith [mul_le_mul_of_nonneg_left hcross (sq_nonneg C₀), sq_nonneg C₀]
-  nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C₀ * (nT + nGrad + nHess))]
+    exact hsq_bound.trans
+      (scale_sum_three_sq_le (sum_three_sq_le_sq_sum hnT_nn hnGrad_nn hnHess_nn))
+  exact nonneg_le_of_sq_le_sq hy_nn hfinal_sq
 
 end NormedL2Bounds
 

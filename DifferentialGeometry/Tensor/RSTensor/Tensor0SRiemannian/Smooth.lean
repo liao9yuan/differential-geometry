@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -398,10 +397,12 @@ theorem inner0S_two_nabla
       DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov frame hframe x (X x) i j
   let NA : Idx -> Idx -> Real :=
     fun i j =>
-      (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X A x) (fun q : Fin 2 => if q = 0 then frame i x else frame j x)
+      (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X A x)
+        (fun q : Fin 2 => if q = 0 then frame i x else frame j x)
   let NB : Idx -> Idx -> Real :=
     fun i j =>
-      (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X B x) (fun q : Fin 2 => if q = 0 then frame i x else frame j x)
+      (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X B x)
+        (fun q : Fin 2 => if q = 0 then frame i x else frame j x)
   have hx : x ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
@@ -458,7 +459,8 @@ theorem inner0S_two_nabla
     intro p q
     have hzero := DifferentialGeometry.Tensor.Coordinates.gInvCovZeroAt
       (I := I) g cov X hmc x p q
-    unfold DifferentialGeometry.Tensor.Coordinates.inverseMetricCovDerivForMetricCompAlongInFrame at hzero
+    unfold DifferentialGeometry.Tensor.Coordinates.inverseMetricCovDerivForMetricCompAlongInFrame
+      at hzero
     have hzero' :
         DU p q +
           (∑ a : Idx, Γ a p * U x a q) +
@@ -530,7 +532,8 @@ theorem inner0S_two_nabla
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) p a *
             A x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -548,7 +551,8 @@ theorem inner0S_two_nabla
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) q a *
             A x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -578,7 +582,8 @@ theorem inner0S_two_nabla
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) p a *
                   A x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -586,7 +591,8 @@ theorem inner0S_two_nabla
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) q a *
                   A x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -609,7 +615,8 @@ theorem inner0S_two_nabla
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) p a *
             B x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -627,7 +634,8 @@ theorem inner0S_two_nabla
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) q a *
             B x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -657,7 +665,8 @@ theorem inner0S_two_nabla
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) p a *
                   B x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -665,7 +674,8 @@ theorem inner0S_two_nabla
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) q a *
                   B x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -913,7 +923,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
     intro p q
     have hzero := DifferentialGeometry.Tensor.Coordinates.gInvCovZeroAt
       (I := I) g cov X hmc x p q
-    unfold DifferentialGeometry.Tensor.Coordinates.inverseMetricCovDerivForMetricCompAlongInFrame at hzero
+    unfold DifferentialGeometry.Tensor.Coordinates.inverseMetricCovDerivForMetricCompAlongInFrame
+      at hzero
     have hzero' :
         DU p q +
           (∑ a : Idx, Γ a p * U x a q) +
@@ -987,7 +998,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) p a *
             A x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1005,7 +1017,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) q a *
             A x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1035,7 +1048,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) p a *
                   A x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1043,7 +1057,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) q a *
                   A x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1079,7 +1094,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) p a *
             B x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1097,7 +1113,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
         (∑ a : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I)
+                x)
               x (X x) q a *
             B x (fun r : Fin 2 =>
               DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1127,7 +1144,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) p a *
                   B x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
@@ -1135,7 +1153,8 @@ theorem inner0S_two_metricCompatible_extDerivFun
               ∑ a : Idx,
                 DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
                     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
-                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
+                    (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one
+                      (I := I) x)
                     x (X x) q a *
                   B x (fun r : Fin 2 =>
                     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
