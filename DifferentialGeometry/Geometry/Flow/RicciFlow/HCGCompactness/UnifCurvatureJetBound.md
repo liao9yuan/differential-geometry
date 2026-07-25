@@ -137,6 +137,74 @@ Recommendation: ratify **Finding C** (S1 takes curvature abstractly) and dispatc
 2a-0/2a-hi/2a-pkg.  Before 2a-0, confirm the telescoping route and the
 `g₀`↔`gBase` envelope-connection bridge (Finding D) are acceptable.
 
+## Session 10 (2026-07-24, LANE C, Opus) — 2a-tel (a) LINK LEMMAS; moving-base currency is the block
+
+Mission: extend `unifCurvatureSup_singleLink` (Λ<2) to the full class `Λ ≥ 1` by `convexComb`
+telescoping.  OUTCOME: the two **(a) link lemmas** are landed (comparability + fixed-`gBase`
+jet inheritance); the composition (b) to the full class is NOT closed — it needs the metric
+jets against the MOVING base `g_{t_k}` (`k ≥ 1`), the order-`≤2` change-of-reference-connection
+currency, a declared frontier of the ACTIVE lane `UnifCovSumCross.lean` plus an ungated
+`∇connDiff` bound.  This is the STOP condition the plan flagged for (a)(ii).
+
+### LANDED in `UnifCurvatureJetBound.lean` (leaf; new import `Geometry.Metric.ConvexCombination`)
+- **`convexCombPath g₀ gBase t ht`** (def) `= convexComb g₀ gBase (fun _ => t) …`: the path
+  `g_t = t·g₀ + (1−t)·gBase`, `t=0 ↦ gBase`, `t=1 ↦ g₀`.  `convexCombPath_inner`: fibre
+  `= t·g₀.inner + (1−t)·gBase.inner`.
+- **`convexCombPath_comparable`** (a)(i): `|g_t(v,v) − g_s(v,v)| ≤ |t−s|·Λ(Λ−1)·g_s(v,v)` from
+  `Λ`-comparability of `g₀/gBase`.  Two-sided `(1±μ)` link comparability, `μ = |t−s|·Λ(Λ−1)`,
+  link constant `Λ_link = (1−μ)⁻¹ < 2` when `μ < ½`, i.e. `N ≈ 2Λ(Λ−1)` equal links each land
+  in the single-link `< 2` regime.
+- **`metricTensorField_convexCombPath`** / **`metricCovDeriv_convexCombPath`(`_succ`)**:
+  `metricCovDeriv` is linear in the metric argument at fixed reference (`metricCovDeriv =
+  covDerivOfField ∘ metricTensorField`, `covDerivOfField_add/_smul`), so `∇^{gBase,a} g_t =
+  t·∇^{gBase,a} g₀ + (1−t)·∇^{gBase,a} gBase`; for `a+1` the `gBase`-tower vanishes
+  (`covDeriv_self_succ`) leaving `t·∇^{gBase,a+1} g₀`.
+- **`convexCombPath_jetBound`** (a)(ii): `MetricCovDerivOrderBoundOn (a+1) g₀ gBase Λ ⟹
+  MetricCovDerivOrderBoundOn (a+1) g_t gBase Λ` (`‖∇^{gBase,a+1} g_t‖ = |t|·‖∇^{gBase,a+1} g₀‖
+  ≤ Λ`, `sqrt_normSq0S_smul`).  **Exactly discharges the FIRST link's jets (base = gBase).**
+
+Verification: **GREEN, axiom-clean** (resumed 2026-07-25 once the concurrent lane's marathon
+cleared).  `lake build …HCGCompactness.UnifCurvatureJetBound` EXIT=0, "Build completed
+successfully (9654 jobs)".  `#print axioms` on all five public names (`convexCombPath`,
+`convexCombPath_comparable`, `metricCovDeriv_convexCombPath`, `metricCovDeriv_convexCombPath_succ`,
+`convexCombPath_jetBound`) = **`[propext, Classical.choice, Quot.sound]`** exactly — no `sorryAx`.
+Two elaboration fixes were needed: `le_or_lt`→`le_total`+sign-split in `convexCombPath_comparable`,
+and the section-eval `(t•F) x` in `convexCombPath_jetBound` (`simp only [ContMDiffSection.coe_smul,
+Pi.smul_apply]`, the idiom the leaf's `metricDiff_orderPos_bound` uses for `coe_sub`); all other new
+declarations (incl. the `metricTensorField` double-`DFunLike.ext` and the `covDerivOfField` rw
+chain) elaborated clean on first pass.  `git diff` of the `.lean` = exactly the +1 import and the
++149-line block — no diamond-lane edits mixed into this file (the lane's uncommitted
+`Defs.lean` / `TensorRSContRiemannianBundle.lean` edits are upstream and not ours).
+
+### WHY (b) does not close — the moving-base currency (recon this session)
+Single-link at link `k = (g_{t_k}, g_{t_{k+1}})` needs `MetricCovDerivOrderBoundOn 1/2
+g_{t_{k+1}} g_{t_k} Λ_link` — jets against the MOVING base `g_{t_k}`.  For `k=0` (base `=gBase`)
+these ARE the fixed-`gBase` jets that `convexCombPath_jetBound` discharges.  For `k≥1` the
+reference `g_{t_k} ≠ gBase` is a different connection.  It is NOT shortcuttable: the single-link
+curvature output is uniform ONLY if `Kbase` is chained from `gBase` forward
+(`exists_uniform_riemannOp_LeviCivita_gNorm_bound g` is an UNCONTROLLED per-metric existential),
+so the base must move, so the jets are moving-base.  Recon verdict (exhaustive subagent):
+- change-of-reference IDENTITY exists, all orders, ungated: `iterCov_telescoping`
+  (`MetricCovDerivLinear.lean:421`), bridged via `covDerivOfField_eq_iterCov`
+  (`MetricCovDerivArityBridge.lean:66`);
+- order-1 norm bound exists, ungated: `diffStep_norm_le` (`UnifCovSumCross.lean:324`);
+- order-0 `connDiff` comparability bound exists, ungated: `connDiff_le_covOne`
+  (`AllTimesBounds.lean:2298`) / `lcDiff_norm_le` (`MetricLapDiff.lean:164`),
+  `‖connDiff(h,g)‖ ≤ (3/2)√(C³)·metricCovDerivNorm 1 h g x`;
+- **GAPS (both needed for a=2, which single-link also consumes):** (i) the assembled order-`≥2`
+  iterated change-of-connection norm bound — a DECLARED frontier being actively built in
+  `UnifCovSumCross.lean:24,270–275` (do not touch); (ii) an ungated `∇connDiff` bound (only the
+  `δ<1`-gated `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope` exists;
+  `covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms`,
+  `ConnectionDifferenceJetTower.lean:387`, is the nearest ungated starting identity).
+
+`unifCurvatureSup` is therefore NOT stated: a top-level `sorry` would hide a whole missing
+layer, and taking the moving-base jets as a hypothesis bundle is the forbidden frontier-wrapper
+pattern.  The (a) lemmas here are the exact convex-combination inputs the moving-base bridge
+consumes.  Remaining 2a distance: 2a-tel (b) blocked on the two gaps above; 2a-hi / 2a-pkg
+unchanged.  Full-class order-0 `unifCurvatureSup` as a stated theorem: 0% (not started);
+its convex-comb link infra: (a) done.
+
 ## Session 9 (2026-07-24, LANE C, Opus) — ENVELOPE + Λ<2 single link (normBridge now DISCHARGED)
 
 `normBridge` landed sorry-free in `MetricCovDerivBridge.lean` (session 8's gate is OPEN).

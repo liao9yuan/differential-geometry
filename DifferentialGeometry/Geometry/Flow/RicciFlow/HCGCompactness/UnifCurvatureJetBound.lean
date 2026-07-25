@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+import DifferentialGeometry.Geometry.Metric.ConvexCombination
 
 /-!
 # Uniform curvature-jet bound (item-6 brick 2a)
@@ -728,6 +729,154 @@ theorem unifCurvatureSup_singleLink
       (fun x v w => metricDiff_tie (I := I) (M := M) gBase g₀ x v w) x
       (metricDiff_jetEnvelope (I := I) (M := M) gBase g₀ hΛ hcomp hjet1 hjet2 x) v w u
   exact unifCurvatureSup_singleLink_of_diff (I := I) (M := M) gBase g₀ hΛ hcomp hCd0 hdiff
+
+/-! ### 2a-tel telescoping link lemmas (session 10)
+
+The linear interpolation path `g_t = t·g₀ + (1−t)·gBase` (`convexCombPath`, `t = 0` at
+`gBase`, `t = 1` at `g₀`) supplies the `(a)` link data of the full-class `Λ ≥ 1`
+telescoping (see `UnifCurvatureJetBound.md`, session 10):
+
+* `convexCombPath_comparable` — **(a)(i)** consecutive path metrics are mutually
+  comparable, with the explicit modulus `μ = |t − s|·Λ(Λ−1)`:
+  `|g_t(v,v) − g_s(v,v)| ≤ μ·g_s(v,v)`.  (Two-sided `(1 ± μ)` comparability, hence
+  link constant `Λ_link = (1−μ)⁻¹ < 2` when `μ < ½`.)
+* `convexCombPath_jetBound` — **(a)(ii)** metric-jet inheritance in the **fixed-`gBase`**
+  currency: `∇^{gBase,a+1} g_t = t·∇^{gBase,a+1} g₀` (the `gBase`-tower self-vanishes),
+  so the class bound `MetricCovDerivOrderBoundOn (a+1) g₀ gBase Λ` transfers to `g_t`.
+
+These discharge the FIRST link (base `= gBase`) and are the convex-combination inputs the
+telescoping bridge consumes.  The composition to the full class is NOT closed here: it
+needs the metric jets against the **moving** base `g_{t_k}` (`k ≥ 1`), i.e. the order-`≤2`
+change-of-reference-connection currency, whose order-`2` assembly is a declared frontier
+(`UnifCovSumCross.lean`, active lane) plus the ungated `∇connDiff` bound — see
+`UnifCurvatureJetBound.md`. -/
+
+/-- The constant-weight convex-combination path `g_t = t·g₀ + (1−t)·gBase`. -/
+noncomputable def convexCombPath (g₀ gBase : SmoothRiemannianMetric I M) (t : ℝ)
+    (ht : t ∈ Set.Icc (0 : ℝ) 1) : SmoothRiemannianMetric I M :=
+  g₀.convexComb gBase (fun _ => t) contMDiff_const (fun _ => ht)
+
+set_option linter.unusedSectionVars false in
+/-- The fibre inner product of the convex-combination path is the convex combination of
+the two inner products. -/
+theorem convexCombPath_inner (g₀ gBase : SmoothRiemannianMetric I M) (t : ℝ)
+    (ht : t ∈ Set.Icc (0 : ℝ) 1) (x : M) (v w : TangentSpace I x) :
+    (convexCombPath g₀ gBase t ht).inner x v w =
+      t • g₀.inner x v w + (1 - t) • gBase.inner x v w :=
+  convexComb_inner g₀ gBase (fun _ => t) contMDiff_const (fun _ => ht) x v w
+
+set_option linter.unusedSectionVars false in
+/-- **(a)(i) Link comparability.**  For the interpolation path `g_t = t·g₀ + (1−t)·gBase`,
+consecutive metrics are mutually comparable with modulus `μ = |t − s|·Λ(Λ−1)`:
+`|g_t(v,v) − g_s(v,v)| ≤ μ·g_s(v,v)`.  With `μ < 1` this gives the two-sided bound
+`(1−μ)·g_s ≤ g_t ≤ (1+μ)·g_s`, i.e. `Λ_link`-comparability with `Λ_link = (1−μ)⁻¹`. -/
+theorem convexCombPath_comparable
+    (g₀ gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    {s t : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) (ht : t ∈ Set.Icc (0 : ℝ) 1)
+    (x : M) (v : TangentSpace I x) :
+    |(convexCombPath g₀ gBase t ht).inner x v v -
+        (convexCombPath g₀ gBase s hs).inner x v v| ≤
+      |t - s| * (Λ * (Λ - 1)) * (convexCombPath g₀ gBase s hs).inner x v v := by
+  have hΛ0 : (0 : ℝ) < Λ := lt_of_lt_of_le one_pos hΛ
+  rw [convexCombPath_inner, convexCombPath_inner]
+  simp only [smul_eq_mul]
+  set a := g₀.inner x v v with ha_def
+  set b := gBase.inner x v v with hb_def
+  have hb0 : 0 ≤ b := metric_inner_self_nonneg (I := I) (M := M) gBase x v
+  have ha0 : 0 ≤ a := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+  obtain ⟨hlo, hhi⟩ := hcomp x v
+  -- clear the inverse from the lower comparability: `b ≤ Λ · a`
+  have hlo' : b ≤ Λ * a := by
+    have h := mul_le_mul_of_nonneg_left hlo hΛ0.le
+    rwa [← mul_assoc, mul_inv_cancel₀ hΛ0.ne', one_mul] at h
+  -- `|a − b| ≤ (Λ − 1)·b`
+  have hab : |a - b| ≤ (Λ - 1) * b := by
+    rw [abs_le]
+    refine ⟨?_, ?_⟩
+    · rcases le_total Λ 2 with hle | hge
+      · have hp2 : (0 : ℝ) ≤ (2 - Λ) * (Λ * a - b) :=
+          mul_nonneg (by linarith) (by linarith [hlo'])
+        nlinarith [mul_nonneg (sq_nonneg (Λ - 1)) ha0, hp2]
+      · nlinarith [ha0, mul_nonneg (by linarith : (0 : ℝ) ≤ Λ - 2) hb0]
+    · nlinarith [hhi, hb0]
+  -- `b ≤ Λ · g_s`
+  obtain ⟨hs0, hs1⟩ := hs
+  have hgs : b ≤ Λ * (s * a + (1 - s) * b) := by
+    have hsb : s * b ≤ s * (Λ * a) := mul_le_mul_of_nonneg_left hlo' hs0
+    have hbb : b ≤ Λ * b := by nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ Λ - 1) hb0]
+    have h1sb : (1 - s) * b ≤ (1 - s) * (Λ * b) :=
+      mul_le_mul_of_nonneg_left hbb (by linarith)
+    nlinarith [hsb, h1sb]
+  -- assemble
+  have hts : 0 ≤ |t - s| := abs_nonneg _
+  have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
+  have hGdiff : t * a + (1 - t) * b - (s * a + (1 - s) * b) = (t - s) * (a - b) := by ring
+  rw [hGdiff, abs_mul]
+  calc |t - s| * |a - b|
+      ≤ |t - s| * ((Λ - 1) * b) := mul_le_mul_of_nonneg_left hab hts
+    _ ≤ |t - s| * ((Λ - 1) * (Λ * (s * a + (1 - s) * b))) := by
+        refine mul_le_mul_of_nonneg_left ?_ hts
+        exact mul_le_mul_of_nonneg_left hgs hΛ1
+    _ = |t - s| * (Λ * (Λ - 1)) * (s * a + (1 - s) * b) := by ring
+
+/-- The metric tensor field of the convex-combination path is the convex combination of the
+two metric tensor fields (linearity of `metricTensorField` in the metric argument). -/
+theorem metricTensorField_convexCombPath (g₀ gBase : SmoothRiemannianMetric I M) (t : ℝ)
+    (ht : t ∈ Set.Icc (0 : ℝ) 1) :
+    metricTensorField (convexCombPath g₀ gBase t ht) =
+      t • metricTensorField g₀ + (1 - t) • metricTensorField gBase := by
+  refine DFunLike.ext _ _ (fun x => ?_)
+  refine DFunLike.ext _ _ (fun v => ?_)
+  simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply,
+    Tensor0SSpace.add_apply, Tensor0SSpace.smul_apply, metricTensorField_apply,
+    convexCombPath_inner, smul_eq_mul]
+
+/-- Linearity of the fixed-`gBase` covariant metric derivative in the metric argument, along
+the convex-combination path: `∇^{gBase,a} g_t = t·∇^{gBase,a} g₀ + (1−t)·∇^{gBase,a} gBase`. -/
+theorem metricCovDeriv_convexCombPath (g₀ gBase : SmoothRiemannianMetric I M) (t : ℝ)
+    (ht : t ∈ Set.Icc (0 : ℝ) 1) (a : ℕ) :
+    metricCovDeriv (convexCombPath g₀ gBase t ht) gBase a =
+      t • metricCovDeriv g₀ gBase a + (1 - t) • metricCovDeriv gBase gBase a := by
+  rw [metricCovDeriv_eq_covDerivOfField, metricTensorField_convexCombPath,
+    covDerivOfField_add, covDerivOfField_smul, covDerivOfField_smul,
+    ← metricCovDeriv_eq_covDerivOfField, ← metricCovDeriv_eq_covDerivOfField]
+
+/-- At every order `a + 1 ≥ 1` the `gBase`-self derivative vanishes (metric compatibility),
+so the path derivative is simply `t·∇^{gBase,a+1} g₀`. -/
+theorem metricCovDeriv_convexCombPath_succ (g₀ gBase : SmoothRiemannianMetric I M) (t : ℝ)
+    (ht : t ∈ Set.Icc (0 : ℝ) 1) (a : ℕ) :
+    metricCovDeriv (convexCombPath g₀ gBase t ht) gBase (a + 1) =
+      t • metricCovDeriv g₀ gBase (a + 1) := by
+  rw [metricCovDeriv_convexCombPath, covDeriv_self_succ gBase a, smul_zero, add_zero]
+
+set_option linter.unusedSectionVars false in
+/-- **(a)(ii) Link jet inheritance (fixed-`gBase` currency).**  A class metric-jet bound
+`MetricCovDerivOrderBoundOn (a+1) g₀ gBase Λ` transfers verbatim to every path metric `g_t`:
+`MetricCovDerivOrderBoundOn (a+1) g_t gBase Λ`, since `‖∇^{gBase,a+1} g_t‖ = t·‖∇^{gBase,a+1}
+g₀‖ ≤ Λ` for `t ∈ [0,1]`.  This exactly discharges the FIRST telescoping link's jets. -/
+theorem convexCombPath_jetBound (g₀ gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ0 : 0 ≤ Λ) (a : ℕ) (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1)
+    (hjet : MetricCovDerivOrderBoundOn Set.univ (a + 1) g₀ gBase Λ) :
+    MetricCovDerivOrderBoundOn Set.univ (a + 1) (convexCombPath g₀ gBase t ht) gBase Λ := by
+  obtain ⟨ht0, ht1⟩ := ht
+  intro x _
+  have hfield : metricCovDeriv (convexCombPath g₀ gBase t ⟨ht0, ht1⟩) gBase (a + 1) x =
+      t • metricCovDeriv g₀ gBase (a + 1) x := by
+    rw [metricCovDeriv_convexCombPath_succ]
+    simp only [ContMDiffSection.coe_smul, Pi.smul_apply]
+  have hnorm : metricCovDerivNorm (a + 1) (convexCombPath g₀ gBase t ⟨ht0, ht1⟩) gBase x =
+      |t| * metricCovDerivNorm (a + 1) g₀ gBase x := by
+    unfold metricCovDerivNorm
+    rw [hfield, sqrt_normSq0S_smul]
+  rw [hnorm, abs_of_nonneg ht0]
+  have hjx := hjet x (Set.mem_univ x)
+  calc t * metricCovDerivNorm (a + 1) g₀ gBase x
+      ≤ t * Λ := mul_le_mul_of_nonneg_left hjx ht0
+    _ ≤ 1 * Λ := mul_le_mul_of_nonneg_right ht1 hΛ0
+    _ = Λ := one_mul _
 
 end RicciFlow
 end PDE

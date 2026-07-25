@@ -499,6 +499,20 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-25 (brick 2a-tel (a) link lemmas, LANE C, Opus): **(a) LINK LEMMAS landed** in
+  `HCGCompactness/UnifCurvatureJetBound.lean` — `convexCombPath` (= `convexComb` path
+  `g_t=t·g₀+(1−t)·gBase`), `convexCombPath_comparable` ((a)(i) mutual comparability, modulus
+  `μ=|t−s|·Λ(Λ−1)`, `Λ_link=(1−μ)⁻¹<2` for `μ<½`, `N≈2Λ(Λ−1)` links), and
+  `convexCombPath_jetBound` ((a)(ii) fixed-`gBase` jet inheritance
+  `MetricCovDerivOrderBoundOn (a+1) g_t gBase Λ`, via `metricCovDeriv`-linearity +
+  `covDeriv_self_succ` + `sqrt_normSq0S_smul`).  Composition (b) to the full class NOT closed:
+  it needs the metric jets against the MOVING base `g_{t_k}` (`k≥1`) = order-`≤2`
+  change-of-reference-connection currency, a DECLARED frontier of the active lane
+  `UnifCovSumCross.lean` (order-≥2 iterated `iterCov_telescoping`/`diffStep_norm_le` assembly)
+  PLUS an ungated `∇connDiff` bound (only `δ<1`-gated version exists).  Verification (2026-07-25):
+  **GREEN, axiom-clean** — `lake build …UnifCurvatureJetBound` EXIT=0 (9654 jobs); `#print axioms`
+  on all five public names = `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.  See
+  `UnifCurvatureJetBound.md` session 10.
 - 2026-07-24 (brick 2a ENVELOPE + Λ<2 single link, LANE C, Opus): **2a-0 COMPLETE** — the full
   order-0 curvature sup from comparability + jets alone (Λ<2), sorry-free + axiom-clean
   (`[propext, Classical.choice, Quot.sound]` on all 4 new public theorems; `lake build
