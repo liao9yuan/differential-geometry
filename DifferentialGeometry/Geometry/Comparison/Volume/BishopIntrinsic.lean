@@ -678,6 +678,311 @@ theorem exists_intrMean
       _ = ((d : Real) / ell + (d : Real) * q) * ell := by
         rw [add_mul, div_mul_cancel₀ _ hell.ne']
 
+/-- Whole-tail intrinsic Bishop ratio monotonicity.  Companion to
+`exists_intrMean`: for the same transverse Jacobi frame the density ratio to the
+hyperbolic model is antitone along the complete intrinsic geodesic.  The speed
+`ell = √(g.inner p u u)` scales the model, so the comparison is against
+`hypDensity (q * ell)`.  Assumes a positive transverse dimension (dropping the
+degenerate `finrank = 1` case that `exists_intrMean` handles). -/
+theorem exists_intrRatio
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (p : M) (u : TangentSpace I p) (q b : Real)
+    (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hu : 0 < g.inner p u u)
+    (hno : ∀ t ∈ Set.Ioo (0 : Real) b,
+      ¬ IsConjVec (I := I) g hEnorm p
+        ((t • u : TangentSpace I p) : E))
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    ∃ v : Fin (Module.finrank Real E - 1) → TangentSpace I p,
+      LinearIndependent Real v ∧
+      (∀ i, g.inner p u (v i) = 0) ∧
+      let γ := intrinsicGeodesic (I := I) g hEnorm p u
+      let V := fun i => intrinsicJacobi (I := I) g hEnorm p u (v i)
+      let ell := Real.sqrt (g.inner p u u)
+      AntitoneOn
+        (fun t => curveDensity (I := I) g γ V t /
+          hypDensity (q * ell) (Module.finrank Real E - 1) t)
+        (Set.Ioo (0 : Real) b) := by
+  classical
+  let d : Nat := Module.finrank Real E - 1
+  obtain ⟨v, hON, hperp'⟩ := exists_perp_pos (I := I) g p u hu
+  have hperp : ∀ i, g.inner p u (v i) = 0 := by
+    intro i
+    rw [g.symm p u (v i)]
+    exact hperp' i
+  have hv : LinearIndependent Real v :=
+    linIndep_of_ortho (I := I) g p v hON
+  refine ⟨v, hv, hperp, ?_⟩
+  let γ : Real → M := intrinsicGeodesic (I := I) g hEnorm p u
+  let V : Fin d → ∀ t, TangentSpace I (γ t) := fun i =>
+    intrinsicJacobi (I := I) g hEnorm p u (v i)
+  let ell : Real := Real.sqrt (g.inner p u u)
+  have hell : 0 < ell := by
+    simpa only [ell] using Real.sqrt_pos.2 hu
+  have hγInf : ContMDiff 𝓘(Real, Real) I (8 : Nat) γ :=
+    intrGeodesic_smooth (I := I) g hEnorm p u
+  have hγ : ∀ t ∈ Set.Ioo (0 : Real) b,
+      ContMDiffAt 𝓘(Real, Real) I (2 : WithTop ℕ∞) γ t := by
+    intro t ht
+    exact hγInf.contMDiffAt.of_le (by norm_num)
+  have hspeed : ∀ t ∈ Set.Ioo (0 : Real) b,
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+        (curveVelocity (I := I) γ t) = ell ^ 2 := by
+    intro t ht
+    calc
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+          (curveVelocity (I := I) γ t) =
+          g.inner p u u := by
+        simpa only [γ, curveVelocity] using
+          intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p u t
+      _ = ell ^ 2 := (Real.sq_sqrt hu.le).symm
+  have hVdiff : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      DifferentiableAt Real (chartRepAt (I := I) γ (V i) t) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      (intrJacobi_diff (I := I) g hEnorm p u (v i) t).1
+  have hDVdiff : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      DifferentiableAt Real
+        (chartRepAt (I := I) γ
+          (fun s => covDerivAlong (I := I) g γ (V i) s) t) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      (intrJacobi_diff (I := I) g hEnorm p u (v i) t).2
+  have hVperp : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      g.inner (γ t) (curveVelocity (I := I) γ t) (V i t) = 0 := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrJacobi_perp_ne (I := I) g hEnorm p u (v i) ht.1.ne' (hperp i)
+  have hDVperp : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+        (covDerivAlong (I := I) g γ (V i) t) = 0 := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrJacobi_dperp (I := I) g hEnorm p u (v i) ht.1.ne'
+        (hperp i) (hVdiff t ht i)
+  have hLI : ∀ t ∈ Set.Ioo (0 : Real) b,
+      LinearIndependent Real fun i => V i t := by
+    intro t ht
+    simpa only [γ, V] using
+      intrJacobi_li (I := I) g hEnorm p u v hv ht.1.ne' (hno t ht)
+  have hW : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i j,
+      jacobiWronskian (I := I) g γ (V i) (V j) t = 0 := by
+    intro t ht i j
+    simpa only [γ, V] using
+      intrWronsk_zero (I := I) g hEnorm p u (v i) (v j) b t
+        ⟨ht.1.le, ht.2.le⟩
+  have hJ : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      IsJacobiAt (I := I) g γ (V i) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrinsic_jacobi (I := I) g hEnorm p (u : E) (v i : E) t
+  have hRatio : ∃ C : Real, 0 < C ∧
+      ∀ᶠ t in 𝓝[>] (0 : Real),
+        C ≤ curveDensity (I := I) g γ V t /
+          hypDensity (q * ell) d t := by
+    obtain ⟨C, hC, hraw⟩ :=
+      radialRatio_auto (I := I) g p (u : E) (fun i => (v i : E))
+        (q * ell) (mul_nonneg hq hell.le) hv
+    have hcurve :
+        ∀ᶠ t in 𝓝[>] (0 : Real),
+          γ t = radialCurve (I := I) g p (u : E) t := by
+      filter_upwards [intrJacobi_raw (I := I) g hEnorm p (u : E) (0 : E)]
+        with t ht
+      simpa only [γ] using ht.1
+    have hfield_i : ∀ i,
+        ∀ᶠ t in 𝓝[>] (0 : Real),
+          (V i t : E) =
+            (radialJacobiField (I := I) g p (u : E) (v i : E) t : E) := by
+      intro i
+      filter_upwards [
+        intrJacobi_raw (I := I) g hEnorm p (u : E) (v i : E)] with t ht
+      simpa only [V] using ht.2
+    have hfields :
+        ∀ᶠ t in 𝓝[>] (0 : Real), ∀ i,
+          (V i t : E) =
+            (radialJacobiField (I := I) g p (u : E) (v i : E) t : E) :=
+      Filter.eventually_all.2 hfield_i
+    refine ⟨C, hC, ?_⟩
+    filter_upwards [hraw, hcurve, hfields] with t hrt hct hft
+    have hgram :
+        curveGram (I := I) g γ V t =
+          curveGram (I := I) g
+            (radialCurve (I := I) g p (u : E))
+            (fun i => radialJacobiField (I := I) g p
+              (u : E) (v i : E)) t := by
+      ext i j
+      simp only [curveGram, Matrix.of_apply]
+      rw [hct, hft i, hft j]
+    calc
+      C ≤ curveDensity (I := I) g
+            (radialCurve (I := I) g p (u : E))
+            (fun i => radialJacobiField (I := I) g p
+              (u : E) (v i : E)) t /
+            hypDensity (q * ell) (Fintype.card (Fin d)) t := hrt
+      _ = curveDensity (I := I) g γ V t /
+            hypDensity (q * ell) d t := by
+        rw [Fintype.card_fin]
+        simp only [curveDensity, hgram]
+  have hmean := curveMean_le_hyp
+    (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
+    g γ V q ell b hq hell (Fintype.card_fin d) hd hγ hspeed
+    hVperp hDVperp hVdiff hDVdiff hLI hW hJ hRic hRatio
+  exact curveRatio_anti (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
+    g γ V (q * ell) b d (mul_nonneg hq hell.le) hγ hVdiff hLI hW hmean
+
+/-- Frame-input companion to `exists_intrRatio`.  Given a `gₓ`-orthonormal
+transverse frame `v` (perpendicular to `u`), the transverse-Jacobi density ratio
+to the speed-scaled hyperbolic model is antitone along the complete intrinsic
+geodesic.  Exposing the frame lets a caller feed the SAME frame to the sharp
+pole-limit lemma, so the antitone bound and the pole limit refer to one frame. -/
+theorem intrRatioOfFrame
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (p : M) (u : TangentSpace I p) (q b : Real)
+    (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hu : 0 < g.inner p u u)
+    (v : Fin (Module.finrank Real E - 1) → TangentSpace I p)
+    (hON : ∀ i j, g.inner p (v i) (v j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner p u (v i) = 0)
+    (hno : ∀ t ∈ Set.Ioo (0 : Real) b,
+      ¬ IsConjVec (I := I) g hEnorm p
+        ((t • u : TangentSpace I p) : E))
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    let γ := intrinsicGeodesic (I := I) g hEnorm p u
+    let V := fun i => intrinsicJacobi (I := I) g hEnorm p u (v i)
+    let ell := Real.sqrt (g.inner p u u)
+    AntitoneOn
+      (fun t => curveDensity (I := I) g γ V t /
+        hypDensity (q * ell) (Module.finrank Real E - 1) t)
+      (Set.Ioo (0 : Real) b) := by
+  classical
+  let d : Nat := Module.finrank Real E - 1
+  have hv : LinearIndependent Real v :=
+    linIndep_of_ortho (I := I) g p v hON
+  let γ : Real → M := intrinsicGeodesic (I := I) g hEnorm p u
+  let V : Fin d → ∀ t, TangentSpace I (γ t) := fun i =>
+    intrinsicJacobi (I := I) g hEnorm p u (v i)
+  let ell : Real := Real.sqrt (g.inner p u u)
+  have hell : 0 < ell := by
+    simpa only [ell] using Real.sqrt_pos.2 hu
+  have hγInf : ContMDiff 𝓘(Real, Real) I (8 : Nat) γ :=
+    intrGeodesic_smooth (I := I) g hEnorm p u
+  have hγ : ∀ t ∈ Set.Ioo (0 : Real) b,
+      ContMDiffAt 𝓘(Real, Real) I (2 : WithTop ℕ∞) γ t := by
+    intro t ht
+    exact hγInf.contMDiffAt.of_le (by norm_num)
+  have hspeed : ∀ t ∈ Set.Ioo (0 : Real) b,
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+        (curveVelocity (I := I) γ t) = ell ^ 2 := by
+    intro t ht
+    calc
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+          (curveVelocity (I := I) γ t) =
+          g.inner p u u := by
+        simpa only [γ, curveVelocity] using
+          intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p u t
+      _ = ell ^ 2 := (Real.sq_sqrt hu.le).symm
+  have hVdiff : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      DifferentiableAt Real (chartRepAt (I := I) γ (V i) t) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      (intrJacobi_diff (I := I) g hEnorm p u (v i) t).1
+  have hDVdiff : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      DifferentiableAt Real
+        (chartRepAt (I := I) γ
+          (fun s => covDerivAlong (I := I) g γ (V i) s) t) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      (intrJacobi_diff (I := I) g hEnorm p u (v i) t).2
+  have hVperp : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      g.inner (γ t) (curveVelocity (I := I) γ t) (V i t) = 0 := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrJacobi_perp_ne (I := I) g hEnorm p u (v i) ht.1.ne' (hperp i)
+  have hDVperp : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      g.inner (γ t) (curveVelocity (I := I) γ t)
+        (covDerivAlong (I := I) g γ (V i) t) = 0 := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrJacobi_dperp (I := I) g hEnorm p u (v i) ht.1.ne'
+        (hperp i) (hVdiff t ht i)
+  have hLI : ∀ t ∈ Set.Ioo (0 : Real) b,
+      LinearIndependent Real fun i => V i t := by
+    intro t ht
+    simpa only [γ, V] using
+      intrJacobi_li (I := I) g hEnorm p u v hv ht.1.ne' (hno t ht)
+  have hW : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i j,
+      jacobiWronskian (I := I) g γ (V i) (V j) t = 0 := by
+    intro t ht i j
+    simpa only [γ, V] using
+      intrWronsk_zero (I := I) g hEnorm p u (v i) (v j) b t
+        ⟨ht.1.le, ht.2.le⟩
+  have hJ : ∀ t ∈ Set.Ioo (0 : Real) b, ∀ i,
+      IsJacobiAt (I := I) g γ (V i) t := by
+    intro t ht i
+    simpa only [γ, V] using
+      intrinsic_jacobi (I := I) g hEnorm p (u : E) (v i : E) t
+  have hRatio : ∃ C : Real, 0 < C ∧
+      ∀ᶠ t in 𝓝[>] (0 : Real),
+        C ≤ curveDensity (I := I) g γ V t /
+          hypDensity (q * ell) d t := by
+    obtain ⟨C, hC, hraw⟩ :=
+      radialRatio_auto (I := I) g p (u : E) (fun i => (v i : E))
+        (q * ell) (mul_nonneg hq hell.le) hv
+    have hcurve :
+        ∀ᶠ t in 𝓝[>] (0 : Real),
+          γ t = radialCurve (I := I) g p (u : E) t := by
+      filter_upwards [intrJacobi_raw (I := I) g hEnorm p (u : E) (0 : E)]
+        with t ht
+      simpa only [γ] using ht.1
+    have hfield_i : ∀ i,
+        ∀ᶠ t in 𝓝[>] (0 : Real),
+          (V i t : E) =
+            (radialJacobiField (I := I) g p (u : E) (v i : E) t : E) := by
+      intro i
+      filter_upwards [
+        intrJacobi_raw (I := I) g hEnorm p (u : E) (v i : E)] with t ht
+      simpa only [V] using ht.2
+    have hfields :
+        ∀ᶠ t in 𝓝[>] (0 : Real), ∀ i,
+          (V i t : E) =
+            (radialJacobiField (I := I) g p (u : E) (v i : E) t : E) :=
+      Filter.eventually_all.2 hfield_i
+    refine ⟨C, hC, ?_⟩
+    filter_upwards [hraw, hcurve, hfields] with t hrt hct hft
+    have hgram :
+        curveGram (I := I) g γ V t =
+          curveGram (I := I) g
+            (radialCurve (I := I) g p (u : E))
+            (fun i => radialJacobiField (I := I) g p
+              (u : E) (v i : E)) t := by
+      ext i j
+      simp only [curveGram, Matrix.of_apply]
+      rw [hct, hft i, hft j]
+    calc
+      C ≤ curveDensity (I := I) g
+            (radialCurve (I := I) g p (u : E))
+            (fun i => radialJacobiField (I := I) g p
+              (u : E) (v i : E)) t /
+            hypDensity (q * ell) (Fintype.card (Fin d)) t := hrt
+      _ = curveDensity (I := I) g γ V t /
+            hypDensity (q * ell) d t := by
+        rw [Fintype.card_fin]
+        simp only [curveDensity, hgram]
+  have hmean := curveMean_le_hyp
+    (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
+    g γ V q ell b hq hell (Fintype.card_fin d) hd hγ hspeed
+    hVperp hDVperp hVdiff hDVdiff hLI hW hJ hRic hRatio
+  exact curveRatio_anti (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
+    g γ V (q * ell) b d (mul_nonneg hq hell.le) hγ hVdiff hLI hW hmean
+
 end VolumeComparison
 end Riemannian
 end Geometry
