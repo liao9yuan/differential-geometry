@@ -846,29 +846,33 @@ private theorem armResidual_covDivergence_split (g₀ g₁ : SmoothRiemannianMet
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toSection b) D)) m]
   exact add_comm _ _
 
+def edgeArmCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
+  -(appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+    (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+      (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
+
 private theorem deTurckArm_residual_ibp_zero
     (g₀ g₁ : SmoothRiemannianMetric I M) :
-    ∃ F₀ : SmoothCcTensor g₀ (2 + 1) (2 + 0),
-      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
-        tensorL2Inner (I := I) (M := M) g₀ 0 2
-            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 u₀).toFun
-            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
-          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
-        (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
-            appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) F₀
-              (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) := by
+    ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+      tensorL2Inner (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 u₀).toFun
+          (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+        armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
+      (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
+          appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) := by
   classical
-  refine ⟨-(appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
-      (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-      (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
-          (gInvDiffRaisedEndoField (I := I) g₀ g₁)))), fun u₀ => ?_⟩
+  intro u₀
   set G₀ : SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
     appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
       (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
         (slotInsertEndoCc (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))) with hG₀
+  rw [edgeArmCoeff, ← hG₀]
   set Du : SmoothCcTensor g₀ 0 (2 + 1) := covGrad (I := I) (M := M) g₀ 0 2 u₀ with hDu
   set P : SmoothCcTensor g₀ 0 (2 + 1) :=
     appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
@@ -933,6 +937,17 @@ private theorem deTurckArm_residual_ibp_zero
     tensorL2Inner (I := I) (M := M) g₀ 0 2 u₀.toFun
       (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := rfl
   linarith [hgreen, hY]
+
+theorem edgeArm_ibp (g₀ g₁ : SmoothRiemannianMetric I M)
+    (u₀ : SmoothCcTensor g₀ 0 2) :
+    tensorL2Inner (I := I) (M := M) g₀ 0 2
+        (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 u₀).toFun
+        (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+      armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
+    (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
+        appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) :=
+  deTurckArm_residual_ibp_zero (I := I) (M := M) g₀ g₁ u₀
 
 private theorem armJet_norm_comp (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ)
     (S : SmoothCcTensor g₀ 0 s) :
@@ -3340,6 +3355,20 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
             (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) := htool
   rw [hnorm] at hslot
   exact hslot
+
+theorem edgeArm_slot_le [Nonempty M]
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (u₀ : SmoothCcTensor g₀ 0 2) :
+    armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+      (δ / (1 - δ)) *
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 :=
+  armPrincipalSlotPairing_le_dirichlet_top
+    (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ u₀
 
 private theorem dirichlet_top_le_spectral_add_lower
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :

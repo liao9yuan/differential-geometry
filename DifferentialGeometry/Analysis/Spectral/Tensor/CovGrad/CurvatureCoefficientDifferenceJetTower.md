@@ -38,3 +38,15 @@ three-dimensional order-two inverse-metric estimate.
 The mathematical proof was already present as the private product-term engine;
 this change only gives it a public canonical name.  Verification is still
 running because this module is unusually large.
+
+## 2026-07-19: public moving-trace split
+
+`pureTrace` gives a small public name to the canonical cometric double-trace
+coefficient, and `pureTrace_split` exposes its exact decomposition into the
+fixed parallel trace plus the inverse-metric-difference correction.  This is
+the algebraic input for the low-regularity fixed-curvature `lieCorr0` arm; it
+avoids estimating that arm as an undifferentiated whole.
+
+These aliases are source-complete but await a focused recheck after the
+exclusive shared artifact refresh.  No endpoint theorem is credited by this
+source-only addition.

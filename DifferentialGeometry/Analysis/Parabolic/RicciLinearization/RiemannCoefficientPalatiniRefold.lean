@@ -1227,6 +1227,14 @@ private theorem endoArmField_eq_dLbCoeffField
   refine ContMDiffSection.ext (fun x => ?_)
   rfl
 
+/-- The endomorphism arm in the geometric DeTurck split is exactly the `DLb`
+coefficient field used by the low-regularity intrinsic decomposition. -/
+theorem endo_eq_dlb
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg =
+      deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg :=
+  endoArmField_eq_dLbCoeffField (I := I) (M := M) g₀ g₁ g_bg
+
 set_option linter.unusedSectionVars false in
 
 private theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
@@ -3087,6 +3095,27 @@ private theorem bdEndoArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRiemannian
             (slotInsertEndoCc (I := I) (M := M) g₀ 1
               (bdWEndoSecDiff (I := I) (M := M) g₁ g_bg g₀)))
           (Equiv.swap (0 : Fin 2) 1))).toSection x)]
+
+/-- Pointwise low-order product-grid control of the change in the `DLb`
+coefficient when only the fixed DeTurck background is changed. -/
+theorem dlbDiff_grid (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+                deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+          C i * Combinatorics.antidiagonalTupleGridWindow
+            (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x)) (i + 2) :=
+  bdEndoArmDiff_pointwise_gridWindow (I := I) (M := M) g₀ g_bg hδ₀
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in

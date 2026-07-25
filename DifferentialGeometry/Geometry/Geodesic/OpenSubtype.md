@@ -32,6 +32,27 @@ rewrite.
 Focused verification and the targeted module refresh passed without `sorry` or
 `admit`.
 
+## Component-restriction export
+
+`chartGram_open`, which was already the proved internal Gram-matrix step in the
+chain above, is now public.  Its statement is unchanged:
+
+```text
+chartGramMatrix (g.restrictOpen U) a x i j
+  = chartGramMatrix g (a : M) (x : M) i j
+```
+
+on the ambient chart source.  This is the coordinate producer consumed by
+`Flow/RicciFlow/Pullback/ComponentRestrict.lean`.  Only the visibility and
+documentation changed; the proof body is the existing one through
+`restrictOpen_inner` and the open-subtype chart-basis identity.
+
+The newly public export has received source/static review only in the current
+shared-workspace lane; no Lean process was started.  Its earlier private proof
+was part of the checked producer chain, but the public declaration and new
+downstream consumer still require a focused refresh before being reported as
+currently verified.
+
 ## Project position
 
 This open-domain locality producer is complete (100%). It is only one side of

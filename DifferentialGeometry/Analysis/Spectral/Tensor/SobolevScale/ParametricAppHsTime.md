@@ -102,3 +102,23 @@ Focused verification and the targeted export refresh are green. The generic
 fixed-input and dynamic-input time-regularity APIs are both **100%**. Their
 first scalar consumers are now also complete, so the live frontier has moved
 past `galLimExt_smooth` to compact-interior Galerkin jet majorants.
+
+## 2026-07-19 common derivative export
+
+`exists_appHsFull` has been added as the common-derivative version of the
+fixed-input theorem.  It chooses one jointly smooth coefficient derivative
+`dPhi` and records, for that same `dPhi`, both:
+
+- the componentwise scalar `HasDerivAt` statement obtained by evaluating every
+  fibre input and every output slot; and
+- the strong `HasDerivAt` statement for `appHs (Phi t) U` at every integer
+  Sobolev order and every fixed completed input `U`.
+
+This is the bridge needed to identify a geometrically specified tensor PDE
+with the derivative used by the spectral strong-solution package: uniqueness
+of the scalar derivative identifies the smooth tensor first, after which the
+all-order Sobolev derivative is already attached to that exact tensor.
+
+The new theorem is source-complete and contains no `sorry`.  Its focused Lean
+verification is still pending because a shared named Lean build is active;
+the earlier verified results above are unchanged.

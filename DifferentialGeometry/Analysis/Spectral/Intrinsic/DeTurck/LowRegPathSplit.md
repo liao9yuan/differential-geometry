@@ -37,9 +37,12 @@ curvature commutator loses exactly the two derivatives already budgeted by the
 `reindexCoeffGen` exposes the coefficient difference before additive-group
 normalization.
 
-The remaining mixed remainder work is the separated order-one and order-zero
-path arms, followed by the low-regularity parabolic solver and same-interval
-regularization.
+### Historical pre-extraction frontier
+
+At this checkpoint the remaining mixed remainder work was the separated
+order-one and order-zero path arms, followed by the low-regularity parabolic
+solver and same-interval regularization.  The route-A migration and 2026-07-18
+ruling below supersede this description.
 
 The live high-regularity source contains the exact three-arm path identity,
 but both that theorem and its order-zero/order-one path coefficients are
@@ -54,10 +57,11 @@ chart linearization into `RHSSectionCovGradL2Decomposition`; a read-only
 consult did not return a ruling. Merely exporting an existential equality would
 not expose enough coefficient data for the `LowRegCoeff` bounds.
 
-Uniform low-regularity Ricci--DeTurck existence and
-`ricci_flow_unif_existence` remain theorem-level 0%. The top-arm theorem is
-proved; the mixed `H3 -> H1` remainder theorem itself is still unstated and
-therefore theorem-level 0%.
+At this checkpoint uniform low-regularity Ricci--DeTurck existence and
+`ricci_flow_unif_existence` were theorem-level 0%.  The top-arm theorem was
+proved; the unconditional mixed `H3 -> H1` remainder theorem was unstated and
+therefore theorem-level 0%.  The later conditional theorem
+`rem_h1_of_bounds` does not change that unconditional accounting.
 
 ## 2026-07-16 route-A migration
 
@@ -67,10 +71,18 @@ extracted into small public modules. Every top-path occurrence in this module
 now uses `DeTurckCoefficients.rhsTopPathIntegral`; the old oversized remainder
 file is absent from this import chain.
 
-The migrated source has not yet received its final focused check because two
-new upstream modules need named `.olean` refreshes, and that refresh currently
-stops in the unrelated in-flight `Geometry/Operator/Operators.lean` changes.
-The previously proved top estimate is unchanged mathematically. The mixed
-`H3 -> H1` endpoint remains unstated (0%); dedicated machinery is approximately
-78% complete. Uniform low-regularity Ricci--DeTurck existence remains an
-unstated theorem (0%).
+At this historical checkpoint the migrated source had not yet received its
+final focused check.  The approximately 78% machinery figure is superseded by
+the later route ruling.
+
+## 2026-07-18 verification repair
+
+The migrated proof uses
+the reindexing form of `deTurckPhiMetTotal`, but the dependency split had left
+that algebraic identity private to the oversized high-order remainder module.
+The identity is now the small canonical theorem `phiMet_reindex` in
+`DeTurckTopCoeff`; this module consumes it through the existing small import
+boundary.  No import of `DeTurckRemainderTameLipschitz` is needed.  The final
+focused source check passes without local warnings or `sorry`s, and the named
+downstream target refresh succeeds.  The top-arm chain is 100%; the
+unconditional mixed theorem and uniform-existence endpoint remain 0%.

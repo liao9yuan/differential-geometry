@@ -6455,6 +6455,33 @@ private lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetr
   rw [appCcRS_slotInsert_id_eq (I := I) (M := M) g₀ (s + 1) s
     (cometricDoubleTraceField (I := I) g₀ s)]
 
+/-- The moving cometric double-trace field, retagged to the frozen metric.
+
+This short public name exposes the canonical field used internally by the
+curvature coefficient tower.  Its fibre is the genuine `g₁⁻¹` double trace;
+the frozen metric `g₀` only supplies the Hilbert-bundle tag. -/
+noncomputable def pureTrace (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
+    SmoothCcTensor g₀ (s + 2) s :=
+  pureDoubleTraceField (I := I) (M := M) g₀ g₁ s
+
+/-- Fibre readout of the moving cometric double trace. -/
+@[simp] theorem pureTrace_toSection
+    (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+    (pureTrace (I := I) (M := M) g₀ g₁ s).toSection x =
+      (show TensorRSSpace (s + 2) s I x from
+        cometricDoubleTraceFib (I := I) g₁ s x) := rfl
+
+/-- The moving double trace is the fixed parallel trace plus the exact
+inverse-metric-difference correction. -/
+theorem pureTrace_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
+    pureTrace (I := I) (M := M) g₀ g₁ s =
+      appCcRS (I := I) (M := M) g₀ (s + 2) (s + 2) s
+        (cometricDoubleTraceField (I := I) g₀ s)
+        (slotInsertEndoCc (I := I) (M := M) g₀ (s + 1)
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁)) +
+      cometricDoubleTraceField (I := I) g₀ s := by
+  exact pureDoubleTraceField_cross_split (I := I) (M := M) g₀ g₁ s
+
 set_option linter.unusedVariables false in
 private theorem exists_rfns_iteratedCovGrad_pairTraceOp_diff_grid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -15077,6 +15104,43 @@ theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
       10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) T).toSection x) :=
   rfns_iteratedCovGrad_raisedKoszul_pointwise (I := I) (M := M) g₀ g₁ T htie i x
+
+/-- The lowered Koszul covector costs exactly one metric derivative in `L2`.
+This is the low-regularity form used after the moving lowering metric cancels
+the inverse metric in a self-background connection difference. -/
+theorem koszul_l2_succ
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (n : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ T)‖ ^ 2 ≤
+      10 * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T‖ ^ 2 := by
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 n
+            (koszulCovecCc (I := I) g₀ T)).toSection x) ≤
+        10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T).toSection x) := by
+    intro x
+    exact rfns_iteratedCovGrad_koszulCovecCc_pointwise
+      (I := I) (M := M) g₀ T n x
+  have hF_int : MeasureTheory.Integrable
+      (fun x => 10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    (integrable_riemannianFiberNormSq_toSection
+      (I := I) (M := M) g₀ 0 (2 + (n + 1))
+      (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T)).const_mul _
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g₀ 0 (3 + n)
+    (iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ T))
+    (fun x => 10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T).toSection x))
+    hF_int hpt
+  refine key.trans ?_
+  rw [MeasureTheory.integral_const_mul]
+  rw [← tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+    (I := I) (M := M) g₀ 0 (2 + (n + 1))
+    (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T)]
+  rw [← SmoothCcTensor.norm_def]
 
 end TopSeparatedKoszulExport
 
