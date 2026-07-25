@@ -504,6 +504,69 @@ The committed split + Term1 discharge the `A⋆∇₂S` half and isolate the fro
 mission's "(1) alone green = valid" deliverable; (2)/(3) are stated-before-proving; the norm layer
 awaits (F1)/(F2).
 
+## Session 9 (2026-07-25) — F1 recon: `∇₂A` ALREADY EXISTS as `covDerivConnDiff` (route + home reframing)
+
+Planner RULING accepted F1 (materialize `∇₂A` via `tensorRSCovariantDerivative 1 2 (LC g₂)`, prove
+the eval-level insertion Leibniz, bound `|∇₂A|` by Koszul + order-2 jets → `mixedComm_norm_le`);
+ratified a NEW leaf `ConnectionDifferenceDeriv.lean` beside `connectionDifferenceTensorAt`.  Recon
+surfaced **two material findings that reframe the route and the home** — STOP-AND-PROPOSE.
+
+### FINDING 1 — `∇₂A` is already built as the eval-form `covDerivConnDiff` (do NOT re-materialise)
+`covDerivConnDiff g₀ g₁ X Y Z x` (`Geometry/Curvature/CurvatureOperator/RicciConnDiffPalatini.lean:78`,
+`= covDerivDiff (LC g₀)(LC g₁) X Y Z x`, `ConnectionDifferenceCurvature.lean:274`) IS the directional
+covariant derivative of the connection difference `A = connDiff g₁ g₀ = difference (LC g₁)(LC g₀)`
+under `∇^{g₀}`, eval form `(∇₀_X A)(Y,Z)(x) = ∇₀_X(A(Y,Z)) − A(∇₀_X Y,Z) − A(Y,∇₀_X Z)`.  With
+`g₀:=g₂, g₁:=g₁`, `covDerivConnDiff g₂ g₁ X Y Z x = (∇₂_X A)(Y,Z)(x)` for `A = connectionDifferenceTensorAt
+(LC g₁)(LC g₂)` — **exactly our `∇₂A`, at the eval level, already sorry-free**.
+- The T-B norm layer consumes the **eval-form output-vector g-norm**, NOT a bundled `normSqRS(1,3)`:
+  the a=0 atom `connDiffVec_norm_le` (`FiberMetric/ConnectionDifferenceNorm.lean:60`) bounds
+  `√(g(difference cov cov' Y X, ·)) ≤ √normSqRS(1,2,connectionDifferenceTensorAt)·|X|·|Y|` — an
+  **output-vector** bound.  The a=1 atom needed is its analogue on `covDerivConnDiff`'s output vector,
+  which is EXACTLY the shape of the EXISTING `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope`
+  (`Curvature/CovDerivConnDiffQuadraticBound.lean:235`): `√(g₀(covDerivConnDiff…,·)) ≤ C·|v||w||u|`.
+- **CONSEQUENCE:** building a bundled `nablaConnDiff := tensorRSCovariantDerivative 1 2 (LC g₂) A_field`
+  (F1's letter) would be **parallel API** to `covDerivConnDiff` (Mathlib-discipline violation).  The
+  correct route is to REUSE `covDerivConnDiff` (eval form) throughout — for both the insertion Leibniz
+  and the norm bound.  The bundled `(1,2)` field + `contMDiff_clm_section_of_pointwise` plumbing (~150
+  lines) is therefore **unnecessary**.
+
+### FINDING 2 — HOME mismatch: the insertion Leibniz cannot live in the Tensor-layer leaf
+`ConnectionDifferenceDeriv.lean` beside `connectionDifferenceTensorAt` sits in
+`Tensor/RSTensor/NablaOnTensors/` — UPSTREAM of `HCGCompactness`.  But the insertion Leibniz
+`covStep g₂ (diffStep g₁ g₂ s S) = [covDerivConnDiff-insertion] + diffStep g₁ g₂ (s+1)(covStep g₂ s S)`
+consumes `diffStep`/`covStep` (HCG-layer `MetricCovDerivLinear`) AND `covDerivConnDiff` (Curvature
+layer).  It must live **DOWNSTREAM of both** ⟹ in the HCG layer (a new `HCGCompactness/*.lean` leaf,
+or `MetricCovDerivLinear.lean`), NOT in the Tensor-layer leaf.  The `covDerivConnDiff` **norm bound**
+(B2 below) is independent of `diffStep` and belongs near `covDerivConnDiff` (Curvature) or near
+`connDiffVec_norm_le` (`FiberMetric/ConnectionDifferenceNorm.lean`).  So the single ratified leaf does
+not house either piece cleanly — **home needs re-ratification.**
+
+### REFINED PLAN (eval-form, reuse `covDerivConnDiff`)
+- **B1 — eval insertion Leibniz** (HCG home): `covStep g₂ (s+1)(diffStep g₁ g₂ s S) x (cons w (cons v
+  slots))` expand via `nabla0SFun_eval_smooth_slots` on the field `diffStep g₁ g₂ s S`, `diffStep_apply`,
+  the `extDerivFun` product rule on `y ↦ (S y)(τ_a(y))`, and identify `∂(difference)` = `covDerivConnDiff`
+  (its `covDerivConnDiff_eq`/`covDerivDiff` eval).  Result:
+  `= −∑ₐ (S x)(update slots a (covDerivConnDiff g₂ g₁ Wf (slots a-fld) Vf x)) + [diffStep(covStep g₂ S) terms]`.
+  ~200–300 lines; consumes `covDerivConnDiff` + the a=0 `nabla0SFun_sub_cov` pattern.  This is `mixedComm`'s
+  eval identity, feeding `mixedComm_norm_le` directly.
+- **B2 — ungated `covDerivConnDiff` norm bound** (Curvature/FiberMetric home): the a=1 analogue of
+  `connDiffVec_norm_le`, general Λ.  The δ<1-gated `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope`
+  exists; the **ungated general-Λ** version is the same 2a-tel telescoping sub-frontier (`convexCombPath`
+  links, order-1) — genuinely open.  Constant shape `|∇₂A|_{g₂} ≤ poly(Λ)·(Λ'' + Λ'²)` (order-2 metric
+  jet `Λ''` + order-1 jet-squared `Λ'²`, from Koszul `A~∇₂g₁`, `∇₂A~∇₂²g₁`).
+- **B3 — assemble `mixedComm_norm_le`** (HCG home) from B1 (eval identity) + B2 (bound) + `abs_apply_le_
+  sqrt_normSq0S` frame sum (as in `diffStep_norm_le`).  Then the `D_N` recursion closes in the T-B files.
+
+### RECOMMENDATION to planner
+1. **Re-ratify homes**: B1/B3 in a new **`HCGCompactness/` leaf** (say `MixedCommLeibniz.lean`) or in
+   `MetricCovDerivLinear.lean` (both my original editable set); B2 near `covDerivConnDiff`/`connDiffVec_norm_le`.
+   The Tensor-layer `ConnectionDifferenceDeriv.lean` is not needed (no bundled field to build).
+2. **First brick = B1** (the eval insertion Leibniz) — it is the actual base-Leibniz, unblocks the
+   schematic, and is independent of the B2 telescoping sub-frontier.  B2 (ungated bound) is the same wall
+   2a-tel comp (b) faces and may want a coordinated telescoping build.
+3. No Lean landed this session (recon reframed the route + home before any write, per stop-and-propose).
+   The committed session-8 identity layer is unaffected.
+
 ## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
 
 Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
@@ -589,6 +652,20 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 9, F1 recon — STOP-AND-PROPOSE): **`∇₂A` already exists** as the eval-form
+  `covDerivConnDiff g₂ g₁` (`RicciConnDiffPalatini.lean:78`; `= covDerivDiff (LC g₂)(LC g₁)`), sorry-free,
+  with a δ<1-gated output-vector norm bound (`exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope`,
+  `CovDerivConnDiffQuadraticBound.lean:235`).  **Two reframing findings** (§Session 9): (1) the T-B norm
+  layer consumes the **eval-form output-vector** g-norm (per `connDiffVec_norm_le`), so building a bundled
+  `tensorRSCovariantDerivative 1 2` version = **parallel API** — REUSE `covDerivConnDiff`; the ~150-line
+  bundled-field plumbing is unnecessary; (2) **home mismatch** — the insertion Leibniz consumes HCG
+  `diffStep` + Curvature `covDerivConnDiff`, so it must live DOWNSTREAM (HCG layer, e.g.
+  `MetricCovDerivLinear.lean` [editable] or a new HCG leaf), NOT the ratified Tensor-layer
+  `ConnectionDifferenceDeriv.lean`.  Refined eval-form plan B1 (insertion Leibniz, HCG) / B2 (ungated
+  `covDerivConnDiff` bound = the 2a-tel telescoping sub-frontier, Curvature/FiberMetric) / B3
+  (`mixedComm_norm_le`) recorded.  **No Lean landed** (recon reframed route + home before any write, per
+  stop-and-propose); session-8 identity layer (committed de3364175) unaffected.  Recommend planner
+  re-ratify homes and dispatch B1 first (independent of the B2 telescoping wall).
 - 2026-07-25 (session 8, T-B base-Leibniz): **committed-currency base-Leibniz split LANDED** in
   `MetricCovDerivLinear.lean`: `covStep_smul`, `covStep_sub` (linearity API), **`diffStep_leibniz`**
   (`covStep g₂ (diffStep g₁ g₂ s S) = diffStep g₁ g₂ (covStep g₂ s S) + (covStep g₂ (covStep g₁ S) −
