@@ -58,7 +58,7 @@ theorem continuousMultilinearMapBasisElem_apply
       exact funext h
     exact Finset.prod_eq_zero (Finset.mem_univ a) (if_neg (Ne.symm ha))
 
-omit [Fintype Idx] in
+omit [Fintype Idx] [DecidableEq Idx] in
 theorem continuousMultilinearMapBasisElem_linearIndependent [Finite Idx]
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     LinearIndependent 𝕜 (continuousMultilinearMapBasisElem basis s) := by
@@ -76,7 +76,7 @@ theorem continuousMultilinearMapBasisElem_linearIndependent [Finite Idx]
   simp only [smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true] at h1
   rwa [smul_eq_mul, mul_one] at h1
 
-def continuousMultilinearMapBasis
+def continuousMultilinearMapBasis [DecidableEq Idx]
     (basis : Module.Basis Idx 𝕜 V) (s : Nat) :
     Module.Basis (Fin s -> Idx) 𝕜
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => V) 𝕜) :=
