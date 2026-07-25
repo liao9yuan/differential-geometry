@@ -324,6 +324,44 @@ For the S0 orders `s ≤ a+2 = 4n+12`, the class hypothesis must reach order `�
 Recon → build (T-A) `diffStep_norm_le` (verified j=1 boundary, private hoist-candidate) → j=1
 telescoping norm corollary → report (T-B) base-Leibniz as the remaining frontier.
 
+## Session 5 (2026-07-24) — the eval gate is CROSSED (Session-4 blocker DISSOLVED)
+
+The Session-4 "generic-rank tensor-bundle EVAL instance diamond" was NOT an
+`attribute [-instance]` problem: it was simply that `UnifCovSumCross.lean` lacks
+`set_option backward.isDefEq.respectTransparency false`.  Route (ii) (prove the eval ONCE in
+`MetricCovDerivLinear.lean`, which carries that option) worked on the FIRST attempt.  **LANDED
+sorry-free + verified in `MetricCovDerivLinear.lean`** (`lake build +…MetricCovDerivLinear`
+EXIT=0, 3633 jobs; axioms `[propext, Classical.choice, Quot.sound]` on both, stripped):
+
+- **`diffStep_apply`** — section form:
+  `diffStep g₁ g₂ s S x (Fin.cons (X x) (V·x)) = −∑ₐ (S x)(update (V·x) a ((Γ₁−Γ₂)(V a x))(X x))`.
+  Generic-`(0,s)` lift of `nabla0SFun_sub_cov`; ~15-line r1 proof (`covStep_apply` +
+  `totalNabla0SFun_apply_section` + `nabla0SFun_sub_cov`, fibre sub-apply by `change`).
+- **`diffStep_eval`** — pointwise form on ARBITRARY `v, slots` (the form the norm route needs,
+  since `component0S basis (diffStep x) φ` is an eval on basis vectors).  Via
+  `Geometry.Riemannian.exists_contMDiff_vectorField_eq` (`[T2Space M]`) + `ContMDiffSection.mk`.
+  New import `…Geometry.Metric.SmoothVectorFieldExtGlobal`.
+
+Instance recipe (in `MetricCovDerivLinear.md` §2026-07-24): the haveIs `IsManifold I {1,2,(1+1),∞+1} M`
++ `TangentBundle.contMDiffVectorBundle (n := 1)` for the `[ContMDiffVectorBundle 1 …]` that
+`nabla0SFun_sub_cov` demands.  `IsManifold I (1+1) M` is NOT the `IsManifold I 2 M` haveI (both
+needed).
+
+### Remaining T-A norm atom `diffStep_norm_le` (now unblocked; two sub-frontiers)
+With `diffStep_eval` in hand, `diffStep_norm_le` still needs, in `UnifCovSumCross.lean`:
+1. **`gBase`-orthonormal frame at `x`** — a `Module.Basis Idx ℝ (TangentSpace I x)` with
+   `hON : gBase.inner x (basis i)(basis j) = δᵢⱼ` (and its `MetricInverseInBasis_gen` witness),
+   to feed `normSq0S_identity_eq_sum_sq` / `abs_apply_le_sqrt_normSq0S`
+   (`Tensor0SRiemannian/Comparison.lean`).  Build from the finite-dim inner-product structure of
+   `(TangentSpace I x, gBase.inner x)`.
+2. **Raw connection-difference component C-S** — bound `|(Γ₁−Γ₂)(u)(w)|_{gBase}` by
+   `√normSqRS gBase x 1 2 (connectionDifferenceTensorAt (LC g₁)(LC g₂) x) · |u|·|w|` (sharp
+   constant `s`; the `connectionDifferenceOutput` component route, ~100 lines Finset).  This is
+   the vector-output analogue of `connOut_norm_le` (which is covector-output only).
+Then assemble: `√normSq0S(diffStep x) ≤ s·√normSqRS(connectionDifferenceTensorAt)·√normSq0S(S x)`,
+compose with `lcDiff_norm_le` (jet side) + `MetricCovDerivOrderBoundOn`.  T-B base-Leibniz
+(`covStep g₂ (diffStep …)` re-expansion into all-`∇₂` schematic) remains the multi-session frontier.
+
 ## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
 
 Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
@@ -409,6 +447,14 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-24 (session 5, T eval gate): **eval gate CROSSED** — `diffStep_apply` (section) +
+  `diffStep_eval` (pointwise, arbitrary vectors) LANDED sorry-free + verified in
+  `MetricCovDerivLinear.lean` (`lake build +…MetricCovDerivLinear` EXIT=0, 3633 jobs; axioms
+  standard triple).  Session-4 "instance diamond" was just the missing
+  `backward.isDefEq.respectTransparency false` in `UnifCovSumCross.lean`; route (ii) worked
+  first try in `MetricCovDerivLinear.lean` (which sets it).  Norm atom `diffStep_norm_le` now
+  unblocked but has two sub-frontiers (gBase-orthonormal frame + raw connection-difference
+  component C-S) → see §"Session 5".  T-B base-Leibniz still multi-session.
 - 2026-07-24 (session 4, T recon + identity activation): **route r1 CONFIRMED; identity layer is a
   FALSE WALL (already built)**.  `nabla0SFun_sub_cov` (generic multi-slot connection difference) +
   `diffStep`/`iterCov`/`iterCov_telescoping` (full telescoping identity) all exist sorry-free upstream.

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
+import DifferentialGeometry.Geometry.Metric.SmoothVectorFieldExtGlobal
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -309,6 +310,94 @@ noncomputable def diffStep
     Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s + 1) :=
   covStep (I := I) g₁ s S - covStep (I := I) g₂ s S
+
+/-- **Generic-rank evaluation of the connection-difference step** (`diffStep_apply`).
+
+Contracting the single-step connection difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S`
+against a smooth vector field `X` in the leading (derivative) slot and smooth vector fields
+`V` in the remaining `s` slots gives the tensorial Christoffel-difference slot sum: the
+derivative parts cancel and only `Γ₁ − Γ₂ = CovariantDerivative.difference (LC g₁) (LC g₂)`
+survives, inserted into each lower slot.  This is the generic-`(0,s)` lift of
+`Tensor0SBundle.nabla0SFun_sub_cov` to the bundled tensor field, evaluated where the
+tensor-bundle model instances at rank `s+1` are in scope (this file carries
+`backward.isDefEq.respectTransparency false`, which lets `totalNabla0SFun_apply_section`
+elaborate at the variable rank `s+1`).  It is the evaluation gate of brick T's norm layer:
+the norm atom bounding `normSq0S (diffStep g₁ g₂ s S x)` expands the fibre norm through this
+identity. -/
+theorem diffStep_apply
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    diffStep (I := I) g₁ g₂ s S x
+        (Fin.cons (X x) (fun q : Fin s => V q x)) =
+      -∑ a : Fin s,
+        (S x)
+          (Function.update (fun b : Fin s => V b x) a
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x) (V a x)) (X x))) := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  have hsec : diffStep (I := I) g₁ g₂ s S x =
+      covStep (I := I) g₁ s S x - covStep (I := I) g₂ s S x := by
+    change (covStep (I := I) g₁ s S - covStep (I := I) g₂ s S) x = _
+    rw [ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [hsec]
+  change (covStep (I := I) g₁ s S x) (Fin.cons (X x) (fun q : Fin s => V q x))
+      - (covStep (I := I) g₂ s S x) (Fin.cons (X x) (fun q : Fin s => V q x)) = _
+  rw [covStep_apply, covStep_apply,
+    Tensor0SBundle.totalNabla0SFun_apply_section,
+    Tensor0SBundle.totalNabla0SFun_apply_section]
+  exact Tensor0SBundle.nabla0SFun_sub_cov (I := I)
+    (leviCivitaConnectionOfMetric (I := I) g₁)
+    (leviCivitaConnectionOfMetric (I := I) g₂) X V S x
+
+/-- **Pointwise evaluation of the connection-difference step on arbitrary tangent vectors.**
+
+The pointwise companion of `diffStep_apply`: it drops the smooth-section hypotheses, evaluating
+`diffStep g₁ g₂ s S x` on any leading (derivative-slot) vector `v` and any lower-slot tuple
+`slots`.  Every tangent vector at `x` is the value of a global smooth vector field
+(`Geometry.Riemannian.exists_contMDiff_vectorField_eq`, needing `[T2Space M]`), and the
+Christoffel-difference slot sum on the right depends only on those values, so the
+section-level identity `diffStep_apply` transfers verbatim.  This is the form consumed by the
+component / fibre-norm expansion of `normSq0S (diffStep g₁ g₂ s S x)`: each `component0S` is an
+evaluation of `diffStep g₁ g₂ s S x` on a tuple of basis vectors. -/
+theorem diffStep_eval
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) (v : TangentSpace I x) (slots : Fin s -> TangentSpace I x) :
+    diffStep (I := I) g₁ g₂ s S x (Fin.cons v slots) =
+      -∑ a : Fin s,
+        (S x)
+          (Function.update slots a
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x) (slots a)) v)) := by
+  classical
+  obtain ⟨Xf, hXsm, hXv⟩ :=
+    Geometry.Riemannian.exists_contMDiff_vectorField_eq (I := I) x v
+  choose Vf hVsm hVv using fun a : Fin s =>
+    Geometry.Riemannian.exists_contMDiff_vectorField_eq (I := I) x (slots a)
+  have key := diffStep_apply (I := I) g₁ g₂ s S
+    (ContMDiffSection.mk Xf hXsm)
+    (fun a : Fin s => ContMDiffSection.mk (Vf a) (hVsm a)) x
+  simp only [ContMDiffSection.coeFn_mk, hXv, hVv] at key
+  exact key
 
 /-- The telescoping accumulator `Σ_{i=1}^{N} ∇₁^{N−i}(∇₁−∇₂)∇₂^{i−1}T`, built
 recursively so the rank is `r + N` at every stage with no index casts.  The

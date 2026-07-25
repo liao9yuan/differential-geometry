@@ -251,16 +251,19 @@ identity layer `diffStep` / `iterCov` / `iterCov_telescoping`
 multi-slot connection-difference is not yet a committed lemma" was a FALSE WALL: the identity is
 proved sorry-free upstream.
 
-The *fibre norm* of `diffStep` — brick T's reusable atom, the `(0,s)` generalization of
-`connOut_norm_le` — is the remaining frontier and is NOT landed here.  Bounding `normSq0S(diffStep
-… x)` requires evaluating the generic-rank tensor field `diffStep … x` on inputs, which forces
-`totalNabla0SFun_apply_section` at a *variable* rank `s+1`; the tensor-bundle model instances
-`NormedSpace ℝ (Tensor0SModel (s+1) ℝ E)` / `FiberBundle (Tensor0SModel (s+1) ℝ E) …` do not
-synthesize for a universally-quantified `s` (they resolve only at concrete ranks; no existing
-lemma evaluates `totalNabla0SFun_apply_section` at generic rank).  This is the tensor-bundle
-instance diamond documented in `MetricCovDerivBridge.md` / `RealizedJet2CovGradBound.lean`.  See
-`UnifCovSumCross.md` §"Session 4" for the located route (component Cauchy–Schwarz) and the
-downstream base-Leibniz induction (T-B).
+The generic-rank EVALUATION of `diffStep` is now LANDED upstream (`MetricCovDerivLinear.lean`):
+`diffStep_apply` (section form) and `diffStep_eval` (pointwise, arbitrary tangent vectors) give
+`diffStep g₁ g₂ s S x (Fin.cons v slots) = −∑ₐ (S x)(update slots a ((Γ₁−Γ₂)(slots a))(v))`.  The
+Session-4 "tensor-bundle instance diamond" was a false wall: `totalNabla0SFun_apply_section`
+elaborates fine at variable rank once `set_option backward.isDefEq.respectTransparency false` is
+in scope (this file lacks it; `MetricCovDerivLinear.lean` has it, so the eval was proved there).
+
+The *fibre norm* atom `diffStep_norm_le` — brick T's reusable atom, the `(0,s)` generalization of
+`connOut_norm_le` — is the remaining frontier and is NOT landed here.  With `diffStep_eval` the
+two sub-frontiers are: (a) a `gBase`-orthonormal frame at `x` for `normSq0S_identity_eq_sum_sq` /
+`abs_apply_le_sqrt_normSq0S`; (b) the raw connection-difference component Cauchy–Schwarz bounding
+`|(Γ₁−Γ₂)(u)(w)|_{gBase}` by `√normSqRS(connectionDifferenceTensorAt)·|u|·|w|`.  See
+`UnifCovSumCross.md` §"Session 5" for the recipe and the downstream base-Leibniz induction (T-B).
 
 Hoist candidate: `covStep_zero'`, `iterCov_one_eq` → `MetricCovDerivLinear.lean`.  Kept private
 here pending planner hoist. -/
