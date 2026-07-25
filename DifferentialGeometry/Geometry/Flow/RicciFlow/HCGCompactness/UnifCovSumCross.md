@@ -652,6 +652,24 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 10, B1 — LANDED, GREEN): **`diffStep_leibniz_eval` PROVED sorry-free** in
+  `MetricCovDerivLinear.lean` (HCG home, per §Session-9 recommendation).  `lake build
+  +…MetricCovDerivLinear` EXIT=0; axioms `[propext, Classical.choice, Quot.sound]` (standard triple).
+  The correct clean identity (the §Session-9 tentative RHS second term was slightly off): eval form of
+  the standard tensor Leibniz `covStep g₂ (A⋆S) x (cons w (cons v slots)) = (∇₂A)⋆S + A⋆(∇₂_w S)`, where
+  `(∇₂A)⋆S` is the `covDerivConnDiff g₂ g₁ W V (Vslots a) x` insertion sum (arg order X=∇-dir w, Y=A-dir
+  v, Z=A-section slots_a — a Y/Z transposition vs the §9 draft, dictated by `covDerivDiff`'s `diffSec`
+  convention), and `A⋆(∇₂S)` is the `A`-insertion (dir v) of the DIRECTIONAL derivative `∇₂_w S =
+  covStep g₂ s S x (cons w ·)` — NOT `diffStep(covStep g₂ S)`.  REUSED `covDerivConnDiff` /
+  `covDerivConnDiff_eq` (no new `∇A` object built).  Instance context extended with `[InnerProductSpace
+  Real E] [NeZero (finrank)] [BoundarylessManifold I M]` (mirrors `RicciConnDiffPalatini`; existing
+  `covStep`/`diffStep` layer coexists, no NormedSpace diamond break).  Also added reusable helper
+  `covStep_eval_smooth_slots` (generic-rank `covStep` smooth-slot expansion).  Full route + Lean lessons
+  in `MetricCovDerivLinear.md`.  **B1 unblocks nothing by itself for the consumers** — they still need
+  **B3 `mixedComm_norm_le`** = B1's eval identity + the `abs_apply_le_sqrt_normSq0S` ON-frame sum (as in
+  `diffStep_norm_le`), with the `∇₂A` factor bounded by **B2** (ungated `covDerivConnDiff` output-vector
+  norm bound, general Λ = the 2a-tel telescoping sub-frontier, still OPEN; B3 can take it as an abstract
+  hypothesis `hA1` to stay independent of the B2 wall).
 - 2026-07-25 (session 9, F1 recon — STOP-AND-PROPOSE): **`∇₂A` already exists** as the eval-form
   `covDerivConnDiff g₂ g₁` (`RicciConnDiffPalatini.lean:78`; `= covDerivDiff (LC g₂)(LC g₁)`), sorry-free,
   with a δ<1-gated output-vector norm bound (`exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope`,
