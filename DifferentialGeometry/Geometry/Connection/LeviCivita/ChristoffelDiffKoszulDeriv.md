@@ -69,22 +69,65 @@ Both engines = one `nabla0SFun_eval_smooth_slots` + `abel`; RHS also uses the sl
 `V : Fin n → ContMDiffSection` PARAMETER — inlining `Fin.cons X (…)` in a statement fails constant-motive
 inference ("Function expected at Fin.cons … a").
 
-## REMAINING (the assembly — next session), all algebra now both engines exist
+## REMAINING (the assembly) — EXECUTABLE RECIPE + tools confirmed (session 4 recon)
 
-1. **Differentiate the identity:** `connDiff_koszul_nabla` holds ∀p, so `funext` ⟹ `extDerivFun LHS =
-   extDerivFun RHS`; LHS by `metric_leibniz_extDeriv` (slots `[diffSec-section, Z]`), RHS by
-   `nablaMetric_combo_extDeriv` ×3.  NEEDS: package `diffSec (LC g₂)(LC g₁) X Y` as a `ContMDiffSection`
-   (grep `diffSec_contMDiff` first).
-2. **Identify `covDerivConnDiff`:** `∇₂_W(diffSec …) = covDerivConnDiff g₂ g₁ W X Y x + A-slot corr` via
-   `covDerivConnDiff_eq` + `covDerivDiff` def (`ConnectionDifferenceCurvature.lean:274`).
-3. **Cancel** slot corrections via `connDiff_koszul_nabla` on `∇₂_W`-slot args ⟹
-   `2·g₁(covDerivConnDiff g₂ g₁ W X Y x, Z) = [∇₂²g₁ combo] − 2·(∇₂_W g₁)(A(X,Y),Z)`.  Est. ~100–200 lines.
+Session-4 verdict (STOP-CLEANLY): the assembly is NOT pure algebra — it needs `extDerivFun` linearity over
+a **sum-form** RHS, which requires `MDifferentiableAt` of each of the 3 combo terms (real analysis), plus a
+delicate many-term cancellation.  Stopped at the green boundary (deep context, per planner's red-spill
+guidance).  All tools are located; a fresh successor should close it in one pass:
+
+**Tools confirmed present (do not re-recon):**
+- `diffSec_contMDiff cov₀ cov₁ hX hZ` (`ConnectionDifferenceCurvature.lean:120`) — needs instances
+  `[ContMDiffCovariantDerivative cov₀ ∞]` + `[..cov₁ ∞]`, `hX : ContMDiff … X`, `hZ : ContMDiff …
+  ((∞:WithTop ℕ∞)+1) Z` (Z one level higher).  Instance: `LeviCivita_isContMDiff g :
+  ContMDiffCovariantDerivative (LeviCivita g) ∞` (`LeviCivita/Defs.lean:393`).
+- `extDerivFun_add` (used at `POUReduction.lean:304`) + `extDerivFun_sub'`
+  (`RicciLinearizationConnDiffCoefficients.lean:2679`): `MDifferentiableAt f x → MDifferentiableAt g x →
+  extDerivFun (f±g) x = extDerivFun f x ± extDerivFun g x`.  (Also `extDerivFun_neg_at`.)  For the `½`
+  scalar use the `const_smul`/`smul` extDerivFun lemma or fold `½` in after.
+- combo `MDifferentiableAt`: rewrite combo `nabla0SFun 2 (LC g₂) (V 0) (mtf g₁) p (V.succ·p) = α p (V·p)`
+  (via `totalNabla0SFun_apply_section.symm` + `totalNabla0S_apply.symm` + `Fin.cons_self_tail`, `α =
+  totalNabla0S 2 (LC g₂)(mtf g₁) (metricField_totalReg …)`), then
+  `(TensorMultilinear.contMDiffAt_section_apply_gen (T := fun y => α y) (α.contMDiff.contMDiffAt)
+  (v := fun a => V a) (hv := fun a => (V a).contMDiff.contMDiffAt)).mdifferentiableAt`
+  (`Tensor/Multilinear/BundleSmoothEvalRealized.lean:856`; pattern copied from
+  `nabla0SFun_eval_smooth_slots`'s `hpair`).
+- `metricTensorField_apply` (`Tensor/RSTensor/MetricCompatibility.lean:53`): `metricTensorField g x
+  slots = g.inner x (slots 0)(slots 1)` (s=2) — bridges `connDiff_koszul_nabla`'s LHS `g₁.inner …` to
+  `metric_leibniz_extDeriv`'s `metricTensorField g₁ p (V'·p)` form.
+
+**Recipe:**
+0. `Adiff := ContMDiffSection.mk (diffSec (LC g₂)(LC g₁) X Y) (diffSec_contMDiff …)`.  Note
+   `diffSec (LC g₂)(LC g₁) X Y p = difference (LC g₁)(LC g₂) p (Y p)(X p)` (defeq) = `connDiff_koszul_nabla`'s
+   LHS vector.
+1. `hfun : (fun p => g₁.inner p (Adiff p)(Z p)) = (fun p => ½cX p + ½cY p − ½cZ p)` by `funext p;
+   exact connDiff_koszul_nabla …` (`cX/cY/cZ` = the three `nabla0SFun 2` combo terms).
+2. `congrArg (extDerivFun · x (W x)) hfun` (no differentiability needed here).
+3. LHS: rewrite `g₁.inner p (Adiff p)(Z p) = metricTensorField g₁ p (![Adiff, Z]·p)`
+   (`metricTensorField_apply`), then `metric_leibniz_extDeriv (V := ![Adiff, Z])` ⟹
+   `nabla0SFun 2 (LC g₂) W (mtf g₁) x (Adiff x, Z x) + g₁(∇₂_W Adiff, Z x) + g₁(Adiff x, ∇₂_W Z)`.
+4. RHS: `extDerivFun_add/_sub'` + `½`-smul (using the 3 combo `MDifferentiableAt`), then
+   `nablaMetric_combo_extDeriv` at `V = ![X,Y,Z]`, `![Y,X,Z]`, `![Z,X,Y]`.
+5. Identify `∇₂_W Adiff = (LC g₂)(Adiff) x (W x)` and unfold `covDerivDiff` def
+   (`ConnectionDifferenceCurvature.lean:274`, via `covDerivConnDiff_eq`): `covDerivConnDiff g₂ g₁ W X Y x =
+   ∇₂_W(diffSec X Y) − difference(LC g₁)(LC g₂) x (Y x)(∇₂_W X) − difference(LC g₁)(LC g₂) x (∇₂_W Y)(X x)`,
+   so `∇₂_W Adiff = covDerivConnDiff g₂ g₁ W X Y x + A(∇₂_W X, Y) + A(X, ∇₂_W Y)`-type terms.
+6. **Cancel**: the step-3 `g₁(A(∇₂_W …), Z)` + step-4 slot corrections cancel via `connDiff_koszul_nabla`
+   applied to the `∇₂_W`-slot args (each `2 g₁(A(∇₂_W s, ·), ·)` = its ∇₂g₁-combo).  Surviving:
+   `2·g₁(covDerivConnDiff g₂ g₁ W X Y x, Z x) = [∇₂²g₁ combo from step 4 `nabla0SFun 3`] − 2·nabla0SFun 2
+   (LC g₂) W (mtf g₁) x (Adiff x, Z x)` (= `[∇₂²g₁ combo] − 2·(∇₂_W g₁)(A(X,Y),Z)`).  Est. ~150–250 lines.
 
 ## Status
 
+- 2026-07-25 (B2 session 4): assembly RECON complete; **clean stop at the green boundary (no new Lean)**.
+  Verdict: the assembly needs `extDerivFun` linearity over a sum-form RHS ⟹ `MDifferentiableAt` of 3 combo
+  terms (real analysis) + a delicate many-term cancellation — NOT pure algebra.  All tools located and the
+  EXECUTABLE RECIPE recorded above (`diffSec_contMDiff`+`LeviCivita_isContMDiff`, `extDerivFun_add/_sub'`,
+  `contMDiffAt_section_apply_gen` for combo `MDifferentiableAt`, `metricTensorField_apply`, `covDerivDiff`
+  unfold).  Stopped rather than risk a red spill in deep (438k) context (planner-sanctioned); `.lean`
+  unchanged = committed green (f1e4b8e38).  A fresh successor executes the recipe in one pass.
 - 2026-07-25 (B2 session 3): BOTH differentiation engines LANDED (`metric_leibniz_extDeriv` +
   `nablaMetric_combo_extDeriv`) + `metricField_totalReg`, verified/axiom-clean.  Milestone (slot-0 bridge
-  + one combo) EXCEEDED (general combo covers all 3 terms; LHS engine also done).  Remaining = the
-  assembly (steps 1–3).  Verified-boundary stop.
+  + one combo) EXCEEDED (general combo covers all 3 terms; LHS engine also done).
 - 2026-07-25 (B2 session 2): a=0 base `connDiff_koszul_nabla` LANDED (verified, axiom-clean); home + LC
   currency + instances confirmed in real Lean.
