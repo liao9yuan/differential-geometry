@@ -205,6 +205,125 @@ the real j=1-for-`(0,2)` content (not yet a committed lemma; `MetricDiffCovGradK
 `A`-insertion (cost one jet) and one fibre-slot (cost `√Λ`).  Then integrate with the volume
 comparison (V) and sum over `j≤n` (Cauchy–Schwarz over the `(j+1)`-term inner sum) → `C(Λ,n)`.
 
+## Session 4 (2026-07-24) — T recon: the IDENTITY layer is already built (false wall dissolved)
+
+Planner dispatch (brick T executor e87b): CHECK the two-`abstractDerivEval_aux` subtraction route
+first; decide r1 vs r2; state induction shape + `D_{j+1}=f(D_j,Λ)` + jet budget; if the generic
+slot identity needs > ~100 lines new plumbing, STOP and propose.
+
+### VERDICT — r1 CONFIRMED and the generic slot identity is PRE-BUILT (not > 100 lines; it is 0)
+The recon-§T "generic multi-slot connection difference `∇^{g₀}A − ∇^{gBase}A = ∑_slot Γdiff ⋆ A`
+for `(0,s)` A is not yet a committed lemma" claim is a **FALSE WALL**.  It exists, sorry-free, in
+the connection layer, proved by *exactly* the subtraction route the planner flagged (the two
+Leibniz forms' `∂`-terms cancel, leaving the `CovariantDerivative.difference` slot-sum):
+
+- **`nabla0SFun_sub_cov`** (`Tensor/RSTensor/NablaOnTensors/HigherOrder.lean:659`), generic `(0,s)`,
+  directional:  `(nabla0SFun s cov X α − nabla0SFun s cov' X α) x (V·) =
+  −∑ₐ α x (update (V·) a ((difference cov cov' x)(Vₐ x))(X x))`.  Proof =
+  `nabla0SFun_eval_smooth_slots` (both connections) + `IsCovariantDerivativeOn.difference_apply` +
+  `(α x).map_update_sub`.  This IS route r1 realized at the `nabla0SFun` (chart) level; the abstract
+  `abstractDerivEval_aux` subtraction would give the same thing one layer up — no need, this is done.
+  `nabla0SFun_sub_cov_two` (`:742`) is the `(0,2)` specialization.
+- **`covStep` / `iterCov` / `iterCov_succ` / `diffStep` / `telescAccum` / `iterCov_telescoping`**
+  (`HCGCompactness/MetricCovDerivLinear.lean:212–344`): the GENERIC-`(0,s)` iterated tower and the
+  **full telescoping IDENTITY** `iterCov g₁ r T N = iterCov g₂ r T N + telescAccum g₁ g₂ r T N`,
+  with `diffStep g₁ g₂ s S = covStep g₁ s S − covStep g₂ s S` (the generic-T single-step connection
+  difference) and `telescAccum (N+1) = covStep g₁ (telescAccum N) + diffStep g₁ g₂ (iterCov g₂ N)`.
+  ALL sorry-free (a 6-line induction).  These have NO consumers yet — they are the built-but-unused
+  identity layer awaiting the norm brick (= T).
+
+So the derivative-level *identity* frontier the recon called "the main frontier / from-scratch
+induction" is DONE.  What brick T actually needs is the **NORM layer** on top of it.
+
+### CURRENCY — `normSq0S` / `iterCov` (chart/model), NOT `iteratedCovGrad`
+The mission's j=1 template `cross_point_le` (`Garding/CrossMetricEnergy.lean:88`) works ENTIRELY in
+`normSq0S` (it never touches `iteratedCovGrad`); the fibre atoms `covsumCross_fib*` are `normSq0S`;
+the jet hypothesis `MetricCovDerivOrderBoundOn` is `normSq0S`/`metricCovDeriv`.  So the telescoping
+lives in `normSq0S`/`iterCov`, self-contained, needing NO RS↔0S bridge internally (the sibling
+`MetricCovDerivBridge` `normBridge` bridges to the `iteratedCovGrad` endpoint at ASSEMBLY, later).
+`iterCov gRef r A0 a : Tensor0SField (r+a)` is the generic `∇^a` tower (`covDerivOfField = iterCov`
+for `(0,2)`); `MetricCovDerivOrderBoundOn` bounds jets of the *metric* g₀ (via `metricCovDeriv h
+gRef`), from which iterated `∇^{gBase,a}A` bounds come by Koszul (`connDiff_koszul`).
+
+### REMAINING NORM-LAYER sub-bricks (both located; the frontier is much narrower than §T thought)
+- **(T-A) `diffStep_norm_le` — the generic single-step connection-difference norm.**  The direct
+  generalization of `connOut_norm_le` from `s=1` to `s`:
+  `√normSq0S gBase x (s+1) (diffStep g₁ g₂ s S x) ≤ s · √normSqRS gBase x 1 2
+  (connectionDifferenceTensorAt (LC g₁)(LC g₂) x) · √normSq0S gBase x s (S x)`.
+  Route: lift `nabla0SFun_sub_cov` to the full `(0,s+1)` tensor via `totalNabla0SFun_apply_section`
+  (`diffStep x = −∑ₐ Insₐ`); `√normSq0S` triangle (it is a genuine fibre norm — `normSq0S_eq_inner`
+  + `Bundle.instInnerProductSpaceReal`); per-slot `√normSq0S(Insₐ) ≤ |A|·|S|` by the component
+  Cauchy–Schwarz (expand `normSq0S = ∑_φ (·)²` via `normSq0S_identity_eq_sum_sq`, insert
+  `A_map(eⱼ)(eᵢ)=∑ₖ A^k_{ij} eₖ`, C-S in the contracted index k is SHARP → constant exactly `s`,
+  no dimension factor).  **No existing general slot-contraction HS-norm lemma** (grep-confirmed;
+  `sqrt_normSqRS_apply` is Hom-apply only, and the per-slot mixed tensor `Mₐ` has `|Mₐ|_HS =
+  |A|·n^{(s−1)/2}` — HS overestimates, so the sharp route is the component C-S, not `Mₐ`+apply).
+  Estimated ~100–150 lines of structural Finset work.  **HOME: deserves a connection-layer public
+  home next to `connOut_norm_le` (`FiberMetric/ConnectionDifferenceNorm.lean`)** — per the mission's
+  "if the generic slot identity deserves a connection-layer home, stop and propose".  Since that
+  file is outside this session's editable set, build it PRIVATE in `UnifCovSumCross.lean` (hoist
+  candidate, mirroring the `MatrixDet` section) or propose the hoist.
+- **(T-B) the full norm telescoping** `|iterCov g₁ r T N|_{gBase} ≤ D_N·∑_{k≤N}|iterCov g₂ r T k|_{gBase}`.
+  NOT pointwise-closable from the identity + (T-A) alone: `telescAccum` carries OUTER `covStep g₁`
+  (g₁-derivatives), and `|∇₁ W|` is not bounded by `|W|` pointwise.  Needs the **base-Leibniz rule
+  for the insertion** `covStep g₂ (diffStep …) = (∇₂A)⋆S + A⋆(∇₂S)` to re-expand `telescAccum` into
+  the all-`∇₂` schematic `∑ (∇₂^{a₁}A)⋆…⋆(∇₂^{aₘ}A)⋆∇₂^{k}T` (`a₁+…+aₘ+k ≤ N`, `k ≤ N`), then
+  `∇₂^{a}A` bounds from Koszul + `MetricCovDerivOrderBoundOn`.  This is the genuine multi-session
+  frontier (the base-Leibniz for the connection-difference contraction is a new lemma family).
+
+### INDUCTION SHAPE + CONSTANT RECURSION (state-before-prove)
+j=1 (verified boundary this brick): `iterCov_telescoping` at N=1 gives `iterCov g₁ r T 1 =
+iterCov g₂ r T 1 + diffStep g₁ g₂ r T` (since `telescAccum 1 = diffStep g₁ g₂ r T`); triangle +
+(T-A):
+`|iterCov g₁ r T 1|_{gBase} ≤ |iterCov g₂ r T 1|_{gBase} + D₁·|T|_{gBase}`, `D₁ = s·|A|_{gBase} ≤
+s·(3/2)·√(Λ³)·metricCovDerivNorm 1 g₀ gBase` (via `lcDiff_norm_le`), `≤ s·(3/2)Λ^{3/2}·Λ` by the
+order-1 jet.  Induction `D_{N+1} = f(D_N,Λ,n)`: each telescoping level adds one `A`-insertion (one
+jet `∇₂^{m}A ≤ P(Λ)` via Koszul, `m ≤ N−1`) and one outer `∇₂`; schematically `D_{N} =
+∑_{compositions} ∏ (jet factors)` = polynomial in `Λ` and `n=finrank` of degree ~`N` in the jets.
+Jet-order budget: order-`N` telescoping needs `∇₂^{a}A` for `a ≤ N−1`, i.e. metric jets
+`MetricCovDerivOrderBoundOn … a … Λ` up to `a ≤ N` (Koszul: `A ~ ∇₂ g₀`, so `∇₂^{a}A ~ ∇₂^{a+1}g₀`).
+For the S0 orders `s ≤ a+2 = 4n+12`, the class hypothesis must reach order `≈ a+2`.
+
+### SESSION-4 OUTCOME
+- **LANDED sorry-free + verified** in `UnifCovSumCross.lean` `section DiffStepNorm` (`lake build
+  +…UnifCovSumCross` EXIT=0, 3906 jobs, 27s; `#print axioms` = `[propext, Classical.choice,
+  Quot.sound]` on both, stripped): `covStep_zero'` (`covStep gRef s 0 = 0`, `R`-linearity) and
+  **`iterCov_one_eq`** (`iterCov g₁ r T 1 = iterCov g₂ r T 1 + diffStep g₁ g₂ r T`) — the order-1
+  telescoping reduction and the FIRST consumers of the previously-consumer-less `iterCov_telescoping`.
+  Added `import …MetricCovDerivLinear`.  This is the verified j=1 IDENTITY boundary.
+- **NEW BLOCKER for the j=1 NORM atom `diffStep_norm_le` — the tensor-bundle instance diamond at
+  GENERIC rank.**  Bounding `normSq0S(diffStep … x)` needs `diffStep_eval` (evaluate the generic-rank
+  tensor field on inputs to reach `nabla0SFun_sub_cov`), which forces `totalNabla0SFun_apply_section`
+  at VARIABLE rank `s+1`.  The model/bundle instances `NormedSpace ℝ (Tensor0SModel (s+1) ℝ E)` and
+  `FiberBundle (Tensor0SModel (s+1) ℝ E) (fun x => Tensor0SSpace (s+1) I x)` **do not synthesize for a
+  universally-quantified `s`** — not slowness (fails at 1.6M synthInstance heartbeats), and not the
+  documented `attribute [-instance]` fix (that removal set `…mixed_instNormedAddCommGroup` is an unknown
+  constant in this import scope, and is tuned for the `RiemannianBundle`-on-`TensorRSSpace` norm, not a
+  generic-rank `totalNabla0SFun` eval).  Grep-confirmed: NO existing lemma evaluates
+  `totalNabla0SFun_apply_section` at generic rank — `iterCov_metric_zero`/`Lemma45Engine` only do it at
+  the CONCRETE rank 2.  This is why the whole `covStep`/`iterCov`/`diffStep`/`telescAccum` layer was
+  built via `rfl`/additivity (`covStep_add`/`covStep_zero`) and left consumer-less: evaluation was never
+  crossed.  **This generic-rank tensor-bundle EVAL instance problem is the true gate of brick T's norm
+  layer**, ahead of the component Cauchy–Schwarz (which is straightforward once eval works) and the
+  base-Leibniz induction (T-B).
+- **Route options for the eval gate (for planner):** (i) find/build the correct `attribute [-instance]`
+  removal set for the 0S model at generic rank (the sibling `MetricCovDerivBridge` lane fights the same
+  diamond — coordinate the removal set), plus a `letI`/`haveI` supplying `tensor0SModel_normedSpace
+  (s+1)` (`Defs.lean:384`, a genuine global instance) and `tensor0SSpace_fiberBundle (s+1)`
+  (`Tensor0SInnerSectionContinuity.lean:484`); (ii) prove a generic-rank `totalNabla0S_apply` /
+  `diffStep_apply` eval lemma ONCE in the connection layer (where the instances are in scope), exporting
+  a clean `diffStep g₁ g₂ s S x (cons v slots) = −∑ₐ …` that downstream files reuse without touching the
+  instances; (iii) evaluate via `nabla0SFun`-only currency avoiding `totalNabla0SFun_apply_section`
+  entirely (needs a direct `covStep_apply`-to-`nabla0SFun` bridge that sidesteps the section-eval
+  instance).  Option (ii) is the cleanest and belongs in `MetricCovDerivLinear.lean` (or a new
+  `MetricCovDerivEval.lean`) — recommend proposing it.  Once eval lands, `diffStep_norm_le` = the
+  component route above (sharp constant `s`, or dimension-tolerant `s·n^{(s+1)/2}`), then the T-B
+  base-Leibniz induction remains the multi-session frontier.
+
+### SESSION-4 PLAN (superseded by OUTCOME above)
+Recon → build (T-A) `diffStep_norm_le` (verified j=1 boundary, private hoist-candidate) → j=1
+telescoping norm corollary → report (T-B) base-Leibniz as the remaining frontier.
+
 ## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
 
 Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
@@ -290,6 +409,18 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-24 (session 4, T recon + identity activation): **route r1 CONFIRMED; identity layer is a
+  FALSE WALL (already built)**.  `nabla0SFun_sub_cov` (generic multi-slot connection difference) +
+  `diffStep`/`iterCov`/`iterCov_telescoping` (full telescoping identity) all exist sorry-free upstream.
+  Currency = `normSq0S`/`iterCov` (chart/model, NOT `iteratedCovGrad`).  **LANDED sorry-free + verified**
+  (`lake build +…UnifCovSumCross` EXIT=0, 3906 jobs; axioms `[propext, Classical.choice, Quot.sound]`):
+  `covStep_zero'` + `iterCov_one_eq` (order-1 telescoping reduction `iterCov g₁ 1 = iterCov g₂ 1 +
+  diffStep`, first consumers of `iterCov_telescoping`; `import …MetricCovDerivLinear` added).  **The j=1
+  NORM atom `diffStep_norm_le` is BLOCKED on the generic-rank tensor-bundle EVAL instance diamond** —
+  `totalNabla0SFun_apply_section` will not synthesize `NormedSpace ℝ (Tensor0SModel (s+1) ℝ E)` /
+  `FiberBundle …` at variable rank `s+1` (no existing lemma evaluates it at generic rank; concrete-rank
+  only).  Full analysis + route options in §"Session 4 — OUTCOME".  T-A eval gate + T-B base-Leibniz
+  remain (multi-session).
 - 2026-07-24 (session 3b, V step 4): **`volumeMeasure_cross_le` LANDED sorry-free + verified**
   (public, `HCGCompactness/UnifCovSumCross.lean` `section VolumeMeasure`).  Planner authorized the
   scope-limited `CompactVolumeEquiv.lean:366/:371` latent-break repair (indicator `Set.indicator s 1`

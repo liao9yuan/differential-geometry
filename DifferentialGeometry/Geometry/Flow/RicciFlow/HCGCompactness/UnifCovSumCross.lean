@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
@@ -239,6 +240,65 @@ theorem covsumCross_fibSum
     _ ≤ Real.sqrt (Λ ^ (s + n)) *
           Real.sqrt (normSq0S (I := I) gBase x (s + j) (A j)) :=
         mul_le_mul_of_nonneg_right hmono (Real.sqrt_nonneg _)
+
+/-! ### Derivative level — single-step connection difference (brick T: identity activation)
+
+The generic single-step connection difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` and the
+order-1 telescoping reduction, activating the already-committed (but until now consumer-less)
+identity layer `diffStep` / `iterCov` / `iterCov_telescoping`
+(`HCGCompactness/MetricCovDerivLinear.lean`, themselves built on the subtraction-route atom
+`nabla0SFun_sub_cov`, `Tensor/RSTensor/NablaOnTensors/HigherOrder.lean`).  The recon's "generic
+multi-slot connection-difference is not yet a committed lemma" was a FALSE WALL: the identity is
+proved sorry-free upstream.
+
+The *fibre norm* of `diffStep` — brick T's reusable atom, the `(0,s)` generalization of
+`connOut_norm_le` — is the remaining frontier and is NOT landed here.  Bounding `normSq0S(diffStep
+… x)` requires evaluating the generic-rank tensor field `diffStep … x` on inputs, which forces
+`totalNabla0SFun_apply_section` at a *variable* rank `s+1`; the tensor-bundle model instances
+`NormedSpace ℝ (Tensor0SModel (s+1) ℝ E)` / `FiberBundle (Tensor0SModel (s+1) ℝ E) …` do not
+synthesize for a universally-quantified `s` (they resolve only at concrete ranks; no existing
+lemma evaluates `totalNabla0SFun_apply_section` at generic rank).  This is the tensor-bundle
+instance diamond documented in `MetricCovDerivBridge.md` / `RealizedJet2CovGradBound.lean`.  See
+`UnifCovSumCross.md` §"Session 4" for the located route (component Cauchy–Schwarz) and the
+downstream base-Leibniz induction (T-B).
+
+Hoist candidate: `covStep_zero'`, `iterCov_one_eq` → `MetricCovDerivLinear.lean`.  Kept private
+here pending planner hoist. -/
+section DiffStepNorm
+
+open DifferentialGeometry.Integral.Connection
+
+set_option linter.unusedSectionVars false
+
+-- The connection-difference tower `covStep`/`iterCov`/`diffStep`/`telescAccum` re-enters the
+-- manifold/compactness instances the weakest-hypothesis fibre block above deliberately dropped.
+variable [T2Space M] [SigmaCompactSpace M]
+
+/-- `covStep` of the zero field vanishes (`R`-linearity, via `covStep_add`). -/
+private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
+    covStep (I := I) gRef s 0 = 0 := by
+  have h := covStep_add (I := I) gRef s 0 0
+  rw [add_zero] at h
+  have hc : covStep (I := I) gRef s 0 + covStep (I := I) gRef s 0 =
+      covStep (I := I) gRef s 0 + 0 := by rw [add_zero]; exact h.symm
+  exact add_left_cancel hc
+
+/-- The order-1 case of the telescoping identity: `∇^{g₁} T − ∇^{g₂} T` is exactly the
+single-step connection difference `diffStep g₁ g₂ r T`. -/
+private theorem iterCov_one_eq
+    (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) :
+    iterCov (I := I) g₁ r T 1 =
+      iterCov (I := I) g₂ r T 1 + diffStep (I := I) g₁ g₂ r T := by
+  rw [iterCov_telescoping (I := I) g₁ g₂ r T 1]
+  congr 1
+  change telescAccum (I := I) g₁ g₂ r T 1 = diffStep (I := I) g₁ g₂ r T
+  simp only [telescAccum]
+  rw [covStep_zero', zero_add]
+  rfl
+
+end DiffStepNorm
 
 /-! ### Volume level — chart-Gram / chart-density cross-metric comparison
 

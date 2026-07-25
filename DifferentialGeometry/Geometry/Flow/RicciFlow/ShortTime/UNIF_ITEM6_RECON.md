@@ -499,6 +499,20 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (S0 session 4, LANE C, Opus): **T (connection-change telescoping) recon + identity
+  activation.**  Route r1 CONFIRMED and the identity layer is a **FALSE WALL** — `nabla0SFun_sub_cov`
+  (generic `(0,s)` multi-slot connection difference, proved by the subtraction route) +
+  `diffStep`/`iterCov`/`iterCov_telescoping` (the full pointwise telescoping identity) already exist
+  sorry-free in `HigherOrder.lean` + `MetricCovDerivLinear.lean`.  Currency = `normSq0S`/`iterCov`
+  (chart/model).  **LANDED** in `HCGCompactness/UnifCovSumCross.lean`: `covStep_zero'` + `iterCov_one_eq`
+  (order-1 reduction, first consumers of `iterCov_telescoping`); `lake build` EXIT=0 (3906 jobs), axioms
+  standard triple.  **REMAINING for the S0 `L²` endpoint `covsum_cross_unif`:** the j=1 NORM atom
+  `diffStep_norm_le` is BLOCKED on the **generic-rank tensor-bundle EVAL instance diamond**
+  (`totalNabla0SFun_apply_section` won't synth `NormedSpace ℝ (Tensor0SModel (s+1) ℝ E)` at variable
+  rank — concrete-rank only, no `attribute [-instance]` fix found), then the component Cauchy–Schwarz,
+  then the T-B base-Leibniz induction (multi-session).  Full analysis + 3 route options in
+  `HCGCompactness/UnifCovSumCross.md` §"Session 4".  Plus the RS↔0S currency bridge (sibling
+  `MetricCovDerivBridge` lane) for the final `iteratedCovGrad`-endpoint assembly.
 - 2026-07-24 (S0 session 3b, LANE C, Opus): **VOLUME brick (V) COMPLETE** — step 4
   `volumeMeasure_cross_le` LANDED sorry-free + verified (`dV_{g₀} ≤ √(Λ^n)·dV_{gBase}`, two-sided,
   `HCGCompactness/UnifCovSumCross.lean` `section VolumeMeasure`).  Planner authorized the scope-limited
