@@ -459,6 +459,140 @@ private structure ScaledDistSupport
         (I := I) (flowG (I := I) S) T
         (fun _ y => (0 : TangentSpace I y)) rho t x
 
+/-- Choose the dimension-normalized transverse Ricci comparison coefficient. -/
+private theorem exists_calabi_coeff
+    (g : SmoothRiemannianMetric I M)
+    {Λ : Real}
+    (hΛ : 0 ≤ Λ)
+    (hricQuad : ∀ y : M, ∀ v : TangentSpace I y,
+      |ricciTensor (I := I) g y v v| ≤
+        Λ * g.inner y v v) :
+    let dNat : Nat := Module.finrank Real E
+    let d : Real := (dNat : Real)
+    let nNat : Nat := dNat - 1
+    let n : Real := (nNat : Real)
+    ∃ q : Real,
+      0 ≤ q ∧
+      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
+        (I := I) g (-(n * q ^ 2)) ∧
+      n * q = Real.sqrt ((d - 1) * Λ) := by
+  dsimp only
+  let dNat : Nat := Module.finrank Real E
+  let d : Real := (dNat : Real)
+  let nNat : Nat := dNat - 1
+  let n : Real := (nNat : Real)
+  have hdNat_pos : 0 < dNat := by
+    exact Nat.pos_of_ne_zero (NeZero.ne _)
+  have hdNat_one : 1 ≤ dNat := hdNat_pos
+  have hdn : d - 1 = n := by
+    dsimp only [d, n, nNat]
+    rw [Nat.cast_sub hdNat_one]
+    norm_num
+  let q : Real :=
+    if nNat = 0 then 0 else Real.sqrt (Λ / n)
+  have hq : 0 ≤ q := by
+    dsimp only [q]
+    split_ifs
+    · exact le_rfl
+    · exact Real.sqrt_nonneg _
+  have hRicLower :
+      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
+        (I := I) g (-(n * q ^ 2)) := by
+    by_cases hn0 : nNat = 0
+    · have hd1 : dNat = 1 := by omega
+      simpa only [q, hn0, if_pos, zero_pow, zero_mul, mul_zero, neg_zero,
+        n, nNat, hd1, Nat.cast_zero] using
+        (Geometry.Riemannian.BonnetMyers.ricciLower_dim1
+          (I := I) g hd1)
+    · have hnNat_pos : 0 < nNat := Nat.pos_of_ne_zero hn0
+      have hn : 0 < n := by
+        dsimp only [n]
+        exact_mod_cast hnNat_pos
+      have hq_sq : q ^ 2 = Λ / n := by
+        dsimp only [q]
+        rw [if_neg hn0, Real.sq_sqrt (div_nonneg hΛ hn.le)]
+      intro y v
+      have habs := hricQuad y v
+      have hneg :
+          -(Λ * g.inner y v v) ≤
+            ricciTensor (I := I) g y v v :=
+        neg_le_of_abs_le habs
+      rw [hq_sq]
+      have hcoeff : n * (Λ / n) = Λ := by
+        field_simp
+      rw [hcoeff]
+      simpa only [neg_mul] using hneg
+  have hnq :
+      n * q = Real.sqrt ((d - 1) * Λ) := by
+    by_cases hn0 : nNat = 0
+    · simp only [q, hn0, if_pos, n, Nat.cast_zero, zero_mul, mul_zero,
+        hdn, Real.sqrt_zero]
+    · rw [hdn]
+      have hnNat_pos : 0 < nNat := Nat.pos_of_ne_zero hn0
+      have hn : 0 < n := by
+        dsimp only [n]
+        exact_mod_cast hnNat_pos
+      have hq_def : q = Real.sqrt (Λ / n) := by
+        simp only [q, hn0, if_false]
+      have hq_nonneg : 0 ≤ q := hq
+      have hq_sq : q ^ 2 = Λ / n := by
+        rw [hq_def, Real.sq_sqrt (div_nonneg hΛ hn.le)]
+      have hright_sq :
+          (Real.sqrt (n * Λ)) ^ 2 = n * Λ :=
+        Real.sq_sqrt (mul_nonneg hn.le hΛ)
+      have hleft_nonneg : 0 ≤ n * q := mul_nonneg hn.le hq_nonneg
+      have hright_nonneg :
+          0 ≤ Real.sqrt (n * Λ) := Real.sqrt_nonneg _
+      have hscale : n * q ^ 2 = Λ := by
+        rw [hq_sq]
+        field_simp
+      have hleft_sq : (n * q) ^ 2 = n * Λ := by
+        nlinarith
+      nlinarith
+  exact ⟨q, hq, hRicLower, hnq⟩
+
+/-- Convert the scalar curvature bound into the uniform quadratic Ricci bound. -/
+private theorem ricci_quad_of_curv
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    {T K : Real}
+    (hK : 0 ≤ K)
+    (hcurv : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      nablaKRm04NormSqIntrinsic (I := I) S 0 s y ≤ K) :
+    let d : Real := Module.finrank Real E
+    let Λ : Real := d ^ 2 * Real.sqrt K
+    0 ≤ Λ ∧
+    (∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      ∀ v : TangentSpace I y,
+        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
+          Λ * (S.base.metric s).inner y v v) := by
+  dsimp only
+  let dNat : Nat := Module.finrank Real E
+  let d : Real := (dNat : Real)
+  let Λ : Real := d ^ 2 * Real.sqrt K
+  have hsqrtK : 0 ≤ Real.sqrt K := by
+    rcases hK.eq_or_lt with hK0 | hKpos
+    · rw [← hK0]
+      norm_num
+    · exact (Real.sqrt_pos.2 hKpos).le
+  have hΛ : 0 ≤ Λ := by
+    dsimp only [Λ, d]
+    exact mul_nonneg (sq_nonneg _) hsqrtK
+  have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      Tensor0SBundle.normSq0S (I := I) (S.base.metric s) y 4
+        (S.base.rm04 s y) ≤ K := by
+    intro s hs y
+    simpa only [nablaKRm04NormSqIntrinsic, nablaKRm04Field_zero,
+      Nat.add_zero] using hcurv s hs y
+  have hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      ∀ v : TangentSpace I y,
+        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
+          Λ * (S.base.metric s).inner y v v := by
+    intro s hs y v
+    simpa only [Λ, d, dNat] using
+      (ricci_quad_sol (I := I) S y v (hcurv0 s hs y))
+  exact ⟨hΛ, hricQuad⟩
+
 /-- The unscaled fixed-time Calabi data and broken-path time estimate used
 before multiplying by the exponential Ricci-flow weight. -/
 private structure CalabiFlowCore
@@ -495,12 +629,12 @@ private structure CalabiFlowCore
         (S.base.metric t) rho0 x ≤
       2 * n / r + n * q
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Construct the unscaled Calabi support and its broken-path time estimate. -/
 private theorem calabi_core_of_sol
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [VectorBundle Real E (TangentSpace I : M → Type _)]
-    [∀ y : M, InnerProductSpace Real (TangentSpace I y)]
     [IsContinuousRiemannianBundle E
       (fun y : M => TangentSpace I y)]
     {D : RealTimeInterval}
@@ -516,7 +650,7 @@ private theorem calabi_core_of_sol
     (ht : t ∈ Set.Icc 0 T)
     (htpos : 0 < t)
     (x : M)
-    (hfinite : riemannianEDist I O x ≠ (⊤ : ENNReal))
+    (hfinite : Manifold.riemannianEDist I O x ≠ (⊤ : ENNReal))
     (hOx : O ≠ x)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ =
@@ -526,7 +660,7 @@ private theorem calabi_core_of_sol
     (hRicLower :
       Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
         (I := I) (S.base.metric t) (-(n * q ^ 2)))
-    (hr : r = (riemannianEDist I O x).toReal)
+    (hr : r = (Manifold.riemannianEDist I O x).toReal)
     (hn :
       n = ((Module.finrank Real E - 1 : Nat) : Real)) :
     Nonempty (CalabiFlowCore (I := I) S O T t x Λ r n q) := by
@@ -543,7 +677,8 @@ private theorem calabi_core_of_sol
   let rho0 : M → Real := fun y =>
     tail.left +
       branchRadius (I := I) (S.base.metric t) tail.branch y
-  have hleft_fin : riemannianEDist I O tail.p ≠ (⊤ : ENNReal) := by
+  have hleft_fin :
+      Manifold.riemannianEDist I O tail.p ≠ (⊤ : ENNReal) := by
     rw [tail.left_edist]
     exact ENNReal.ofReal_ne_top
   obtain ⟨vLeft, hvLeft_exp, hvLeft_norm⟩ :=
@@ -620,7 +755,6 @@ private theorem calabi_core_of_sol
     intro y
     rw [show vSupport t y = L₁ t + L₂ t y by rfl,
       hL₁_t, hL₂_t]
-    rfl
   have htarget_ev :
       ∀ᶠ p : Real × M in 𝓝 (t, x), p.2 ∈ tail.branch.dom := by
     exact continuousAt_snd.preimage_mem_nhds
@@ -648,11 +782,15 @@ private theorem calabi_core_of_sol
               ((hδ_smooth p.2).contMDiffOn)
               (hγ_one.trans (hδ_zero p.2).symm)
     have hL₁_nonneg : 0 ≤ L₁ p.1 := by
-      exact Geometry.Riemannian.Variation.arcLength_nonneg
-        (I := I) (S.base.metric p.1) zero_le_one
+      dsimp only [L₁]
+      unfold Geometry.Riemannian.Variation.arcLength
+      exact intervalIntegral.integral_nonneg zero_le_one
+        (fun u _ => Real.sqrt_nonneg _)
     have hL₂_nonneg : 0 ≤ L₂ p.1 p.2 := by
-      exact Geometry.Riemannian.Variation.arcLength_nonneg
-        (I := I) (S.base.metric p.1) zero_le_one
+      dsimp only [L₂]
+      unfold Geometry.Riemannian.Variation.arcLength
+      exact intervalIntegral.integral_nonneg zero_le_one
+        (fun u _ => Real.sqrt_nonneg _)
     have hreal :=
       ENNReal.toReal_mono
         (ENNReal.add_ne_top.mpr
@@ -670,8 +808,9 @@ private theorem calabi_core_of_sol
       intrGeo_vel_ne
         (I := I) (S.base.metric t) hEnorm O vLeft hvLeft_pos u
   have hinv_x : tail.branch.inv x = (tail.u : E) := by
-    rw [← tail.exp_eq]
-    exact tail.branch.left_inv tail.source_mem
+    have hleft := tail.branch.left_inv tail.source_mem
+    rw [tail.exp_eq] at hleft
+    exact hleft
   have hu_pos :
       0 < (S.base.metric t).inner tail.p tail.u tail.u := by
     apply Real.sqrt_pos.mp
@@ -723,7 +862,11 @@ private theorem calabi_core_of_sol
       -Λ * vSupport t x ≤ deriv (fun s => vSupport s x) t := by
     change -Λ * (L₁ t + L₂ t x) ≤
       deriv (fun s => L₁ s + L₂ s x) t
-    rw [deriv_add hL₁_diff hL₂_diff]
+    have hderiv_add :
+        deriv (fun s => L₁ s + L₂ s x) t =
+          deriv L₁ t + deriv (fun s => L₂ s x) t := by
+      simpa only [Pi.add_apply] using deriv_add hL₁_diff hL₂_diff
+    rw [hderiv_add]
     linarith
   have hrho0_ev' :
       ∀ᶠ y in 𝓝 x,
@@ -928,6 +1071,95 @@ private theorem CalabiFlowCore.scale
   rw [hcoef]
   exact hpar
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Assemble the fixed-time Calabi core and apply the exponential time weight
+once the Ricci quadratic bound and time-slice completeness are available. -/
+private theorem scaled_of_quad
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (O : M)
+    {T t Λ : Real}
+    (hT : 0 < T)
+    (hreg : Set.Ioc 0 T ⊆ D.regular)
+    (hΛ : 0 ≤ Λ)
+    (hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      ∀ v : TangentSpace I y,
+        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
+          Λ * (S.base.metric s).inner y v v)
+    (hcomplete_t :
+      RiemannianMetricComplete (I := I) (S.base.metric t))
+    (ht : t ∈ Set.Icc 0 T)
+    (htpos : 0 < t)
+    (x : M)
+    (hfinite :
+      riemannianEDistOf (I := I) (S.base.metric t) O x ≠ ⊤)
+    (hOx : O ≠ x) :
+    let d : Real := Module.finrank Real E
+    let r : Real :=
+      (riemannianEDistOf (I := I) (S.base.metric t) O x).toReal
+    Nonempty (ScaledDistSupport (I := I) S O T t x d Λ r) := by
+  classical
+  dsimp only
+  let dNat : Nat := Module.finrank Real E
+  let d : Real := (dNat : Real)
+  let nNat : Nat := dNat - 1
+  let n : Real := (nNat : Real)
+  let r : Real :=
+    (riemannianEDistOf (I := I) (S.base.metric t) O x).toReal
+  have hdNat_pos : 0 < dNat := by
+    exact Nat.pos_of_ne_zero (NeZero.ne _)
+  have hdNat_one : 1 ≤ dNat := hdNat_pos
+  have hdn : d - 1 = n := by
+    dsimp only [d, n, nNat]
+    rw [Nat.cast_sub hdNat_one]
+    norm_num
+  letI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+    ⟨(S.base.metric t).toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun y : M => TangentSpace I y) :=
+    ⟨⟨(S.base.metric t).inner,
+      (S.base.metric t).contMDiff.continuous,
+      by intro y v w; rfl⟩⟩
+  letI : PseudoEMetricSpace M :=
+    PseudoEMetricSpace.ofRiemannianMetric I M
+  letI : CompleteSpace M := hcomplete_t.complete
+  have hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal
+          (Real.sqrt ((S.base.metric t).inner y w w)) := by
+    intro y w
+    rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+    congr 2
+  have hfinite' :
+      Manifold.riemannianEDist I O x ≠ (⊤ : ENNReal) := by
+    simpa only [riemannianEDistOf] using hfinite
+  obtain ⟨q, hq, hRicLower, hnq⟩ :=
+    exists_calabi_coeff
+      (I := I) (S.base.metric t) hΛ (hricQuad t ht)
+  have hr : r = (Manifold.riemannianEDist I O x).toReal := by
+    simp only [r, riemannianEDistOf]
+  have hnDim :
+      n = ((Module.finrank Real E - 1 : Nat) : Real) := by
+    rfl
+  obtain ⟨core⟩ :=
+    calabi_core_of_sol
+      (I := I) S hS O hreg hricQuad ht htpos x hfinite' hOx
+        hEnorm hq hRicLower hr hnDim
+  have hcoef :
+      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
+        2 * n / r + n * q := by
+    calc
+      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
+          2 * n / r + Real.sqrt ((d - 1) * Λ) := by rw [hdn]
+      _ = 2 * n / r + n * q := by rw [hnq]
+  exact core.scale hT ht hcoef
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Construct the bundled scaled-distance support used by the public
 upper-support theorem. -/
 private theorem scaledDist_support
@@ -957,139 +1189,18 @@ private theorem scaledDist_support
     Nonempty (ScaledDistSupport (I := I) S O T t x d Λ r) := by
   classical
   dsimp only
-  let dNat : Nat := Module.finrank Real E
-  let d : Real := (dNat : Real)
-  let nNat : Nat := dNat - 1
-  let n : Real := (nNat : Real)
-  let Λ : Real := d ^ 2 * Real.sqrt K
-  let r : Real :=
-    (riemannianEDistOf (I := I) (S.base.metric t) O x).toReal
-  have hdNat_pos : 0 < dNat := by
-    exact Nat.pos_of_ne_zero (NeZero.ne _)
-  have hdNat_one : 1 ≤ dNat := hdNat_pos
-  have hdn : d - 1 = n := by
-    dsimp only [d, n, nNat]
-    rw [Nat.cast_sub hdNat_one]
-    norm_num
-  have hΛ : 0 ≤ Λ := by
-    dsimp only [Λ, d]
-    positivity
-  have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
-      Tensor0SBundle.normSq0S (I := I) (S.base.metric s) y 4
-        (S.base.rm04 s y) ≤ K := by
-    intro s hs y
-    simpa only [nablaKRm04NormSqIntrinsic, nablaKRm04Field_zero,
-      Nat.add_zero] using hcurv s hs y
-  have hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
-      ∀ v : TangentSpace I y,
-        |ricciTensor (I := I) (S.base.metric s) y v v| ≤
-          Λ * (S.base.metric s).inner y v v := by
-    intro s hs y v
-    simpa only [Λ, d, dNat] using
-      (ricci_quad_sol (I := I) S y v (hcurv0 s hs y))
+  obtain ⟨hΛ, hricQuad⟩ :=
+    ricci_quad_of_curv (I := I) S hK hcurv
   have hcomplete_t :
       RiemannianMetricComplete (I := I) (S.base.metric t) :=
     complete_of_ricBound
-      (I := I) S hS hslab hreg hΛ hricQuad hcomplete ht
-  letI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
-  letI : T3Space M := inferInstance
-  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
-    ⟨(S.base.metric t).toRiemannianMetric⟩
-  letI : IsContinuousRiemannianBundle E
-      (fun y : M => TangentSpace I y) :=
-    ⟨⟨(S.base.metric t).inner,
-      (S.base.metric t).contMDiff.continuous,
-      by intro y v w; rfl⟩⟩
-  letI : PseudoEMetricSpace M :=
-    PseudoEMetricSpace.ofRiemannianMetric I M
-  letI : CompleteSpace M := hcomplete_t.complete
-  have hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ =
-        ENNReal.ofReal
-          (Real.sqrt ((S.base.metric t).inner y w w)) := by
-    intro y w
-    rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
-  have hfinite' : riemannianEDist I O x ≠ (⊤ : ENNReal) := by
-    simpa only [riemannianEDistOf] using hfinite
-  let q : Real :=
-    if nNat = 0 then 0 else Real.sqrt (Λ / n)
-  have hq : 0 ≤ q := by
-    dsimp only [q]
-    split_ifs
-    · exact le_rfl
-    · exact Real.sqrt_nonneg _
-  have hRicLower :
-      Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
-        (I := I) (S.base.metric t) (-(n * q ^ 2)) := by
-    by_cases hn0 : nNat = 0
-    · have hd1 : dNat = 1 := by omega
-      simpa only [q, hn0, if_pos, zero_pow, mul_zero, neg_zero,
-        n, nNat, hd1, Nat.cast_zero] using
-        (Geometry.Riemannian.BonnetMyers.ricciLower_dim1
-          (I := I) (S.base.metric t) hd1)
-    · have hnNat_pos : 0 < nNat := Nat.pos_of_ne_zero hn0
-      have hn : 0 < n := by
-        exact_mod_cast hnNat_pos
-      have hq_sq : q ^ 2 = Λ / n := by
-        dsimp only [q]
-        rw [if_neg hn0, Real.sq_sqrt (div_nonneg hΛ hn.le)]
-      intro y v
-      have habs := hricQuad t ht y v
-      have hneg :
-          -(Λ * (S.base.metric t).inner y v v) ≤
-            ricciTensor (I := I) (S.base.metric t) y v v :=
-        neg_le_of_abs_le habs
-      rw [hq_sq]
-      have hcoeff : n * (Λ / n) = Λ := by
-        field_simp
-      rw [hcoeff]
-      exact hneg
-  have hnq :
-      n * q = Real.sqrt ((d - 1) * Λ) := by
-    by_cases hn0 : nNat = 0
-    · have hd1 : dNat = 1 := by omega
-      simp only [q, hn0, if_pos, n, nNat, hd1, Nat.cast_zero,
-        zero_mul, hdn, Real.sqrt_zero]
-    · have hnNat_pos : 0 < nNat := Nat.pos_of_ne_zero hn0
-      have hn : 0 < n := by
-        exact_mod_cast hnNat_pos
-      have hq_def : q = Real.sqrt (Λ / n) := by
-        simp only [q, hn0, if_false]
-      have hq_nonneg : 0 ≤ q := hq
-      have hq_sq : q ^ 2 = Λ / n := by
-        rw [hq_def, Real.sq_sqrt (div_nonneg hΛ hn.le)]
-      have hright_sq :
-          (Real.sqrt ((d - 1) * Λ)) ^ 2 = n * Λ := by
-        rw [Real.sq_sqrt]
-        · rw [hdn]
-        · exact mul_nonneg (by exact_mod_cast hnNat_pos.le) hΛ
-      have hleft_nonneg : 0 ≤ n * q := mul_nonneg hn.le hq_nonneg
-      have hright_nonneg :
-          0 ≤ Real.sqrt ((d - 1) * Λ) := Real.sqrt_nonneg _
-      have hscale : n * q ^ 2 = Λ := by
-        rw [hq_sq]
-        field_simp
-      have hleft_sq : (n * q) ^ 2 = n * Λ := by
-        nlinarith
-      rw [hdn] at hright_sq
-      nlinarith
-  have hr : r = (riemannianEDist I O x).toReal := by
-    simp only [r, riemannianEDistOf]
-  have hnDim :
-      n = ((Module.finrank Real E - 1 : Nat) : Real) := by
-    rfl
-  obtain ⟨core⟩ :=
-    calabi_core_of_sol
-      (I := I) S hS O hreg hricQuad ht htpos x hfinite' hOx
-        hEnorm hq hRicLower hr hnDim
-  have hcoef :
-      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
-        2 * n / r + n * q := by
-    calc
-      2 * (d - 1) / r + Real.sqrt ((d - 1) * Λ) =
-          2 * n / r + Real.sqrt ((d - 1) * Λ) := by rw [hdn]
-      _ = 2 * n / r + n * q := by rw [hnq]
-  exact core.scale hT ht hcoef
+      (I := I) (D := D) (a := 0) (b := T)
+        (K := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
+        (s := t) S hS hslab hreg hΛ hricQuad hcomplete ht
+  exact scaled_of_quad
+    (I := I) (D := D) (T := T) (t := t)
+      (Λ := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
+      S hS O hT hreg hΛ hricQuad hcomplete_t ht htpos x hfinite hOx
 
 /-- A positively rescaled evolving distance admits a quantitative smooth
 Calabi upper support at every positive-time point of finite nonzero distance.

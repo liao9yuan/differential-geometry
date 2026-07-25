@@ -50,3 +50,46 @@ be proved as geometry; it must not be accepted as a new input.
 The local support/branch assembly and the scalar model bound are routine
 supporting bricks.  They do not change the endpoint accounting:
 `scaledDist_calabiUpperSupport_of_sol` remains theorem-level 0%.
+
+## 2026-07-24 — source complete, verification performance blocker
+
+The evolving support proof is now mathematically assembled and contains no
+`sorry`, `admit`, or new axiom.  It combines the exact-current fixed-metric
+Calabi provenance, closed-slab metric comparison and completeness transfer,
+two fixed broken-path length variations, local gradient/Laplacian scaling, and
+the final parabolic lower bound.
+
+To avoid one giant dependent proof term, the implementation was factored into
+the private data/API boundary
+
+- `ScaledDistSupport`;
+- `exists_calabi_coeff`;
+- `ricci_quad_of_curv`;
+- `CalabiFlowCore` and `calabi_core_of_sol`;
+- `CalabiFlowCore.scale`; and
+- `scaled_of_quad`.
+
+All of these declarations elaborate without diagnostics.  The remaining
+private orchestrator `scaledDist_support` still deterministically times out at
+`whnf`: it exceeds the default 200000 heartbeats and also a scoped 500000
+heartbeat test.  Three arrangements were tried: the original monolithic
+proof, a bundled-support wrapper with fixed-time core/scale helpers, and a
+separate completeness/setup boundary.  Making the arguments to
+`complete_of_ricBound` and `scaled_of_quad` fully explicit did not remove the
+timeout.  The public theorem then fails only because the private orchestrator
+constant was not created.
+
+This is an elaboration/kernel-normalization performance blocker, not a
+mathematical or missing-API blocker.  The smallest next decision is a
+Lean-native opaque/refinement boundary that prevents reduction of the
+metric-instance/completeness term, or a justified narrowly scoped resource
+setting if no such boundary exists.  The exact repository-specific question,
+including the current helper signatures and the three failed layouts, is
+recorded in
+`HCGCompactness/DISTANCE_BARRIER_PERF_CONSULT.md`.
+
+Honest accounting: `scaledDist_calabiUpperSupport_of_sol` remains theorem-level
+0% until focused and exact verification pass; its dedicated source machinery
+is about 90--95%.  The solution-generated barrier cutoff and trusted
+complete-Shi producer remain theorem-level 0%; whole HCG supporting machinery
+remains about 60%, and unconditional `compactnessSol` remains 0%.
