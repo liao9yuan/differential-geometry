@@ -233,7 +233,7 @@ private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M �
     MDifferentiableAt I 𝓘(ℝ) (t.sum f) x := by
   classical
   induction t using Finset.induction_on with
-  | empty => simp; exact mdifferentiableAt_const
+  | empty => simpa using mdifferentiableAt_const
   | insert i t hit ih =>
       have hfi : MDifferentiableAt I 𝓘(ℝ) (f i) x := hf i (by simp)
       have hft : ∀ j ∈ t, MDifferentiableAt I 𝓘(ℝ) (f j) x :=

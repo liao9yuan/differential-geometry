@@ -424,7 +424,8 @@ private theorem derivShuffleLeft_expanded_summand_eq
   rw [hleft_remove, hright_eval, hk_eval]
   simp only [Fin.removeNth_apply]
   simp only [Units.smul_def, smul_smul, mul_assoc]
-  simp [map_zsmul, smul_smul, mul_assoc]
+  simp only [Int.reduceNeg, Units.val_mul, map_zsmul, ContinuousLinearMap.coe_smul',
+    Pi.smul_apply, smul_smul, mul_assoc]
   congr 1
   rcases Nat.even_or_odd k.val with hq | hq <;>
     rcases Nat.even_or_odd (derivShuffleRank k σ).val with hj | hj

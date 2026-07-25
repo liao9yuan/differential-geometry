@@ -98,7 +98,7 @@ theorem metricFlatModelInChart_center_eq
     change (trivializationAt E (TangentSpace I) x₀).symmL Real x₀ z = z
     rw [hL]
     rfl
-  rw [hsymm v, hsymm w]
+  simp only [hsymm]
   rfl
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in

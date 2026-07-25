@@ -50,13 +50,14 @@ omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRicReal_frame
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (frame : Idx → (y : M) → TangentSpace I y)
     (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u) (hu : IsOpen u) (hx : x ∈ u)
     (d a b : Idx) :
     nablaRicComp (I := I) S frame t x d a b = ricciCovDerivCompInFrame (I := I) S frame t x d a
       b := by
   classical
+  letI := Fintype.ofFinite Idx
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection t) (∞ : WithTop ℕ∞) := by

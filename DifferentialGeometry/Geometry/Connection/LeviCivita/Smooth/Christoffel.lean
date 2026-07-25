@@ -162,7 +162,7 @@ private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventua
         (mfderivWithin 𝓘(Real, E) I ((chartAt H x₀).symm ∘ I.symm)
           (Set.range I) y) ((Module.finBasis Real E) j) := by
     simpa [extChartAt] using hj_symm
-  rw [hj_symm']
+  simp only [hj_symm']
   rfl
 
 

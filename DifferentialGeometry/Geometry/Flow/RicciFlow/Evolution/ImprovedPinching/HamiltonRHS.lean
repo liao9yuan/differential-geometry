@@ -684,7 +684,9 @@ theorem pinchDrift_exp
   rw [hgradScalarSq]
   rw [hnegpow, hnegpow1]
   rw [hpow3, hpow4]
-  simp [phi, R, smul_eq_mul, div_eq_mul_inv]
+  simp only [div_eq_mul_inv, Integral.Connection.gradientAt_eq, Integral.Connection.gradientFun_eq,
+    Integral.Connection.metricSharp_eq, neg_sub, mul_inv_rev, map_add, map_smul, smul_eq_mul,
+    phi, R]
   unfold DifferentialGeometry.Integral.Connection.gradientAt
     DifferentialGeometry.Integral.Connection.gradientFun
     DifferentialGeometry.Integral.Connection.metricSharp at hinnerSymm

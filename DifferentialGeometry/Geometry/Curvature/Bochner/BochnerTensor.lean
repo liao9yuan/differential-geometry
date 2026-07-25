@@ -1189,7 +1189,7 @@ theorem freeze02_deriv
         · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
         · simpa [Function.update, DifferentialGeometry.Integral.Connection.vec3] using hZ
         · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-      rw [hZupd, hWupd] at h
+      simp only [hZupd, hWupd] at h
       simpa [CZ, CW] using h
     have htot :
         tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x) v =
@@ -1216,7 +1216,11 @@ theorem freeze02_deriv
             vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
         funext a
         fin_cases a <;> simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-      simp [Fin.sum_univ_succ, V3, V2] at h
+      simp only [Nat.reduceAdd, Fin.isValue, ContinuousLinearMap.coe_comp',
+        ContinuousLinearEquiv.coe_coe, Function.comp_apply, directionalDeriv_eq,
+        Fin.sum_univ_succ, Fin.cons_zero, Fin.cons_succ, Fin.succ_zero_eq_one,
+        ↓reduceIte, Finset.univ_unique, Fin.default_eq_zero, Fin.succ_ne_zero,
+        Finset.sum_singleton, Fin.succ_one_eq_two, V3, V2] at h
       rw [hYupd, hZupd3, hWupd3] at h
       have h' :
           (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) =

@@ -53,9 +53,9 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
-theorem lcChrist_e_mdiffOn
+theorem lcChrist_e_mdiffOn [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
@@ -140,9 +140,9 @@ def akCompField
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
-theorem akCompField_mdiffOn
+theorem akCompField_mdiffOn [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (gK gRef : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
@@ -244,13 +244,14 @@ theorem gramE_dotVec
 
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
-    [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
-theorem gramE_posDef
+    [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
+theorem gramE_posDef [Finite Idx]
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
     {y : M} (hy : y ∈ e₀.baseSet) :
     (gramE (I := I) e₀ g basisE y).PosDef := by
+  letI := Fintype.ofFinite Idx
   refine Matrix.PosDef.of_dotProduct_mulVec_pos (gramE_herm (I := I) e₀ g basisE y) ?_
   intro c hc
   rw [show (star c : Idx → Real) = c from funext fun i => star_trivial _, gramE_dotVec]

@@ -751,17 +751,17 @@ theorem prefixTail_cov_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) q
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) q
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ ε
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_cov_le Θ W hnext hUK gMid g D hq1 hqp (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in
@@ -1326,17 +1326,17 @@ theorem prefixTail_zero_le {j l m : ℕ}
   letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
   rw [ballPullback_trans]
-  let W : Opens (M l) :=
-    ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
-  letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
-    (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
-  let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
-    PartialDiffeomorph.toOpensDiffeo Φ hU
-  change metricCovDerivNorm (I := I) 0
-      (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
-      (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
-  rw [metricCovDerivNorm_pullback (I := I)]
-  exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
+  · let W : Opens (M l) :=
+      ⟨(Φ : M j → M l) '' (U : Set (M j)), image_opens_isOpen Φ hU⟩
+    letI : SigmaCompactSpace W := isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I W.isOpen)
+    let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
+      PartialDiffeomorph.toOpensDiffeo Φ hU
+    change metricCovDerivNorm (I := I) 0
+        (Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F)
+        (Diffeomorph.pullbackMetric (I := I) (gMid.restrictOpen (I := I) W) F) x ≤ _
+    rw [metricCovDerivNorm_pullback (I := I)]
+    exact ballPullback_zero_le Θ W hnext hUK gMid g D hε (F x)
 
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] in

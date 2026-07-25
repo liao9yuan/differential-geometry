@@ -66,7 +66,7 @@ private theorem ricciFrameDiffAt
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem tailChristoffel
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type} [Fintype Idx]
     {u : Set M}
     {alpha t₀ omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -85,6 +85,7 @@ theorem tailChristoffel
         (fun (t : Real) (x : M) (d a b : Idx) => ricciCovDerivCompInFrame (I := I)
           (S.timeRestrict (RealTimeInterval.closedOpen t₀ omega ht₀ω))
           frame t x d a b) := by
+  classical
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     { linearIndependent := hframe.linearIndependent
       generating := hframe.generating

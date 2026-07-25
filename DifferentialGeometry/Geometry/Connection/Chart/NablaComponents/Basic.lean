@@ -107,7 +107,7 @@ theorem connCoeff_eq_christoffelAlong_coord
     rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
     rw [hbasis (coordinateFrameAt_mem (I := I) x₀)]
     simp [Bundle.Trivialization.basisAt]
-    rw [Bundle.Trivialization.linearMapAt_apply]
+    simp only [Bundle.Trivialization.linearMapAt_apply]
     simp [coordinateTrivializationAt]
   rw [hcoeff]
 

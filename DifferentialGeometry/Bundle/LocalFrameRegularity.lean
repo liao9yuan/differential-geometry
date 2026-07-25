@@ -291,7 +291,7 @@ theorem homLocalFrameCoeff_eq_localHomCoeff
   simp only [eHom, bHom, hsx]
   simp [Bundle.Trivialization.basisAt, localHomCoeff, homModelCoeff,
     continuousLinearMap_homBasis_repr]
-  rw [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
+  simp only [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
 
 omit [CompleteSpace E] in
 theorem covariantDerivative_localHomCoeff_eq

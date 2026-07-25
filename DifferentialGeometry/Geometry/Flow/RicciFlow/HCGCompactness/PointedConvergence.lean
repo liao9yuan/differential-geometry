@@ -359,7 +359,7 @@ theorem metricCovDeriv_one_eval_localFrame
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_localFrame
-    {Idx : Type*} [Finite Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Finite Idx] {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -378,6 +378,7 @@ theorem metricCovDeriv_one_component_localFrame
           h.inner x (frame a x)
             (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame b) x) (frame d x))) := by
+  classical
   rw [Tensor0SBundle.component0S_apply]
   simp only [IsLocalFrameOn.toBasisAt_coe]
   have hslots :

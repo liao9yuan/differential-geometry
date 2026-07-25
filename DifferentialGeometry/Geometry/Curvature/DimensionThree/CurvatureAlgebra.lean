@@ -299,7 +299,7 @@ private theorem residual_ordered_components_of_package
       stdRiemannFromRicciResidual3 R i j k l = 0 := by
   intro i j k l hij hkl hlex
   fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;>
-    simp at hij hkl hlex ⊢
+    simp at hij hkl hlex
   all_goals
     first
     | simpa using pkg.c0101

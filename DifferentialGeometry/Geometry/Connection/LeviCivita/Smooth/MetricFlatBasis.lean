@@ -258,8 +258,13 @@ theorem localMetricFlatBasis_eq_inner {ι : Type*} [Fintype ι]
         = g.inner x
             (∑ i : ι, b.coord i v • e.localFrame b i x)
             (∑ j : ι, b.coord j w • e.localFrame b j x) := by
-          simp [localMetricFlatBasis_apply, localMetricCoeff, map_sum, map_smul,
-            smul_eq_mul, Finset.mul_sum, mul_left_comm, mul_comm]
+          suffices h :
+              ∑ i, ∑ j, (b.repr v) i *
+                  ((b.repr w) j * ((g.inner x) (e.localFrame b i x)) (e.localFrame b j x)) =
+                ∑ i, ∑ j, (b.repr v) j *
+                  ((b.repr w) i * ((g.inner x) (e.localFrame b j x)) (e.localFrame b i x)) by
+            simpa [localMetricFlatBasis_apply, localMetricCoeff, map_sum, map_smul,
+              smul_eq_mul, Finset.mul_sum, mul_left_comm, mul_comm] using h
           conv_rhs => rw [Finset.sum_comm]
     _ = g.inner x (e.symmL Real x v) (e.symmL Real x w) := by
           rw [hv, hw]

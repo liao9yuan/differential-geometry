@@ -741,7 +741,8 @@ private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
 
 
 
-theorem abs_apply_le_sqrt_normSq0S
+omit [Fintype Idx] in
+theorem abs_apply_le_sqrt_normSq0S [Finite Idx]
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hON : forall i j : Idx,
@@ -751,6 +752,7 @@ theorem abs_apply_le_sqrt_normSq0S
       Real.sqrt (normSq0S (I := I) g x s T) *
         ∏ a : Fin s, Real.sqrt (g.inner x (v a) (v a)) := by
   classical
+  letI := Fintype.ofFinite Idx
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
       (identityInvMetric (Idx := Idx)) := by
     intro i j

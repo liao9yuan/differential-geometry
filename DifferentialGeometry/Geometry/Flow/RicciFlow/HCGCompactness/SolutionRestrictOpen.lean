@@ -301,7 +301,7 @@ theorem frameCompSmooth_restrictOpen
     (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
     [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
-    {Idx : Type} [Fintype Idx] (frame : Idx → (x : U) → TangentSpace I x) {u : Set U}
+    {Idx : Type} [Finite Idx] (frame : Idx → (x : U) → TangentSpace I x) {u : Set U}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × U =>
@@ -309,6 +309,7 @@ theorem frameCompSmooth_restrictOpen
           (frame i p.2) (frame j p.2))
       (D.regular ×ˢ u) := by
   classical
+  letI := Fintype.ofFinite Idx
   set frameM : Idx → (y : M) → TangentSpace I y :=
     fun k (y : M) => if h : y ∈ U then frame k ⟨y, h⟩ else 0 with hframeM_def
   have hframeM : IsLocalFrameOn (V := (TangentSpace I : M → Type _)) I E (∞ : WithTop ℕ∞)

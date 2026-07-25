@@ -368,7 +368,7 @@ omit [NormedAddCommGroup E'] [NormedSpace ℝ E'] in
 theorem bumpNum_nonneg {ι : Type*} [DecidableEq ι] {χ : E' → ℝ} {ψ : ι → E' → ℝ}
     {J : ι → E' → E'} {i0 : ι} (hχ : ∀ t, 0 ≤ χ t) (hψ : ∀ i t, 0 ≤ ψ i t) (i : ι) (z : E') :
     0 ≤ bumpNum χ ψ J i0 i z := by
-  by_cases h : i = i0 <;> simp [bumpNum, h]
+  by_cases h : i = i0 <;> simp only [bumpNum, h]
   · exact hψ i0 _
   · exact mul_nonneg (hχ _) (hψ i _)
 

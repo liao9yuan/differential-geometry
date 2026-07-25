@@ -101,7 +101,7 @@ theorem removeNone_inv_mul {α : Type*}
       simp only [Equiv.optionCongr_apply, Equiv.Perm.coe_mul,
         Function.comp_apply, Equiv.Perm.inv_def]
       show Option.map _ none = _
-      simp [h₂]; exact (σ₁.symm_apply_eq.mpr h₁.symm).symm
+      simpa [h₂] using (σ₁.symm_apply_eq.mpr h₁.symm).symm
     | some a =>
       simp only [Equiv.optionCongr_apply, Equiv.Perm.coe_mul,
         Function.comp_apply, Equiv.Perm.inv_def]

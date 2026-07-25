@@ -193,8 +193,7 @@ private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3
           Finsupp.single_apply,
         mul_ite, mul_one, mul_zero])]
     rw [Finset.sum_ite_eq' Finset.univ i]
-    simp
-    rw [cDualBasis_eq_coord' (Module.finBasis ℝ E) i]
+    simp [cDualBasis_eq_coord' (Module.finBasis ℝ E) i]
   have hexp : Tensor0SSpace.toModel β =
       ∑ i : Fin (Module.finrank ℝ E),
         (Tensor0SSpace.toModel β (Fin.cons ((Module.finBasis ℝ E) i) ![])) •

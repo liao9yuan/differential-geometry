@@ -601,7 +601,8 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
         -Rm04 (vec4 (basis 2) (basis i) (basis 2) (basis j)) := by
     simpa [standardRmCompAt_apply, rm04CompAt_apply] using h2'
   rw [Fin.sum_univ_three]
-  simp [delta3]
+  simp only [delta3, Fin.isValue, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq,
+    Finset.mem_univ, ↓reduceIte]
   rw [h0d, h1d, h2d]
   unfold stdRicci3
   simp [standardRmCompAt_apply, rm04CompAt_apply]

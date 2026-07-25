@@ -72,12 +72,14 @@ def continuousAlternatingMapCoordChange
 variable [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁]
 variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
 
-theorem continuousOn_continuousAlternatingMapCoordChange
+omit [Fintype ι] in
+theorem continuousOn_continuousAlternatingMapCoordChange [Finite ι]
     [VectorBundle 𝕜 F₁ E₁] [VectorBundle 𝕜 F₂ E₂]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
     [MemTrivializationAtlas e₂] [MemTrivializationAtlas e₂'] :
   ContinuousOn (continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂')
     ((e₁.baseSet ∩ e₂.baseSet) ∩ (e₁'.baseSet ∩ e₂'.baseSet)) := by
+  letI := Fintype.ofFinite ι
   let f₁ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
     := ContinuousAlternatingMap.compContinuousLinearMapCLM (e₁'.coordChangeL 𝕜 e₁ b)
   let f₂ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)

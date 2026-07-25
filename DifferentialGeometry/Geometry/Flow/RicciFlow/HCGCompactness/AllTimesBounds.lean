@@ -949,7 +949,7 @@ theorem gammaL2_le_of_christoffel
 
 omit [SigmaCompactSpace M] in
 theorem metricCov1_coord
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Fintype Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -963,6 +963,7 @@ theorem metricCov1_coord
         (I := I) g
         (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x d a b := by
+  classical
   let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     localFrameOneOfInf (I := I) frame hframe
@@ -1138,7 +1139,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
 
 omit [SigmaCompactSpace M] in
 theorem metricCov2_coord
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Fintype Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -1601,7 +1602,7 @@ theorem metricCov2_coord
 
 omit [SigmaCompactSpace M] in
 theorem metricCov3_coord
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Fintype Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -1884,7 +1885,7 @@ noncomputable def lcMetricFamily
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_eq_metricCovAtBase
-    {Idx : Type*} [Finite Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Finite Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -1896,6 +1897,7 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
           Fin 3 -> Idx) =
       DifferentialGeometry.Integral.Connection.metricCovAtBase (I := I)
         (lcMetricFamily (I := I) (M := M) g) frame base var x d a b := by
+  classical
   rw [metricCovDeriv_one_component_localFrame (I := I)
     (h := g var) (gRef := g base) frame hframe hu hx d a b]
   unfold DifferentialGeometry.Integral.Connection.metricCovAtBase lcMetricFamily
@@ -1904,7 +1906,7 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
 
 omit [SigmaCompactSpace M] in
 theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Fintype Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -2582,7 +2584,7 @@ theorem normSqRS12_eq_l2
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem applyCons3
-    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (A : Tensor0SBundle.Tensor0SSpace
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -2773,7 +2775,8 @@ theorem covOneCompDiff
           (fun q : Fin 2 => if q = 0 then a else b) := by
     rw [componentRS_eq_gen, Tensor0SBundle.componentRS_connectionDifferenceTensorAt]
     rw [coord_eq_inner_id (I := I) h basis hinv c]
-    simp [alpha, Tensor0SBundle.metricTensorField_apply, hX, hY, hZ]
+    simp only [Fin.isValue, hY, hX, hZ, Tensor0SBundle.metricTensorField_apply,
+      ↓reduceIte, one_ne_zero, alpha]
     exact h.symm x
       (((CovariantDerivative.difference covH covG x) (basis b)) (basis a))
       (basis c)
@@ -2828,7 +2831,7 @@ theorem covOneCompDiff
 
 omit [SigmaCompactSpace M] in
 theorem connDiffBasisSymm
-    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (a b : Idx) :

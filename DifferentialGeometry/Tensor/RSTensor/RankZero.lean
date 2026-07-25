@@ -119,8 +119,8 @@ theorem TensorRSField.scalar0_zero :
         (0 : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) =
       0 := by
   funext x
-  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
-    TensorRSField.rs0_apply]
+  simp only [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply, ContMDiffSection.coe_zero, Pi.zero_apply]
   rw [ContinuousLinearMap.zero_apply, Tensor0SSpace.toModel_zero,
     ContinuousMultilinearMap.zero_apply]
 
@@ -131,8 +131,8 @@ theorem TensorRSField.scalar0_add
     TensorRSField.scalar0 (n := n) (S + T) =
       TensorRSField.scalar0 (n := n) S + TensorRSField.scalar0 (n := n) T := by
   funext x
-  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
-    TensorRSField.rs0_apply]
+  simp only [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply, ContMDiffSection.coe_add, Pi.add_apply]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
@@ -144,8 +144,8 @@ theorem TensorRSField.scalar0_smul
     TensorRSField.scalar0 (n := n) (c • T) =
       c • TensorRSField.scalar0 (n := n) T := by
   funext x
-  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
-    TensorRSField.rs0_apply]
+  simp only [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply, ContMDiffSection.coe_smul, Pi.smul_apply, smul_eq_mul]
   rw [ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 

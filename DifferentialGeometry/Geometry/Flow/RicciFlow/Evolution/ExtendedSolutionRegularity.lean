@@ -701,7 +701,7 @@ theorem metricFrameComp_jointContMDiffOn_of_chartGram
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    {Idx : Type} [Fintype Idx] (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    {Idx : Type} (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => (g p.1).inner p.2 (frame i p.2) (frame j p.2))
