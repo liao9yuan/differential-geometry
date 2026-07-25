@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 import DifferentialGeometry.Geometry.Metric.ChartGram
@@ -488,6 +489,195 @@ theorem diffStep_norm_le
         rw [hcard_eq, Real.sqrt_mul (by positivity), Real.sqrt_sq hBnn]
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) * NA * NS := by
         rw [hB]; ring
+
+/-! #### Jet composition of `diffStep_norm_le` — two micro-bridges + the `j = 1` endpoint
+
+Two grep-confirmed-absent micro-bridges fold `diffStep_norm_le`'s output
+`√normSqRS(g₂, connectionDifferenceTensorAt (LC g₁)(LC g₂) x)` into the
+`MetricCovDerivOrderBoundOn` class currency:
+
+* **Bridge 1** (`connDiffTensor_normSqRS_swap`) — connection-argument-swap antisymmetry
+  `normSqRS(g₀, connectionDifferenceTensorAt cov cov' x) =
+   normSqRS(g₀, connectionDifferenceTensorAt cov' cov x)`, matching `diffStep_eval`'s `(LC g₁)(LC g₂)`
+  order to `lcDiff_norm_le`'s `(LC g₂)(LC g₁)` order.  Built from the `CovariantDerivative.difference`
+  argument swap `diff_swap` (`difference cov cov' = −difference cov' cov`, section-value route) lifted
+  to the `(1,2)` tensor (`connDiffTensor_neg`), then the Hilbert–Schmidt fibre-norm negation
+  invariance `normSqRS_neg`.  Canonical homes: `diff_swap` / `connDiffTensor_neg` beside
+  `CovariantDerivative.difference` (Mathlib — not editable, kept private here); `normSqRS_neg` beside
+  `normSqRS` (`Tensor/RSTensor/FiberMetric/TensorRSMetric.lean`, where only the algebraic
+  `adjointRS`-negation route is in scope — kept private here with the robust component-sum proof).
+  All three are hoist candidates.
+* **Bridge 2** (`metricDeriv_eq_covDeriv_norm`) — the order-`1` identity
+  `metricDerivNorm 1 g₂ g₁ g₁ x = metricCovDerivNorm 1 g₂ g₁ x`.  The two seminorms differ only by
+  the reference metric's own covariant derivative, which vanishes by metric compatibility
+  (`metricCovDeriv g₁ g₁ 1 x = 0`, via `nabla_metric_zero`), so
+  `metricDiffCovDerivAt 1 g₂ g₁ g₁ x = metricCovDeriv g₂ g₁ 1 x` exactly.
+
+`diffStep_jet_one_le` then composes `diffStep_norm_le` + bridge 1 + `lcDiff_norm_le` + bridge 2 +
+the class jet bound to the explicit constant `C(Λ,Λ') = (3/2)·√(Λ³)·Λ'` (confirming the
+Session-6 estimate). -/
+
+/-- **The `CovariantDerivative.difference` argument-swap antisymmetry**:
+`D(cov,cov')(w)(u) = −D(cov',cov)(w)(u)`.  Since `D(cov,cov')(σ x) = ∇^{cov}σ − ∇^{cov'}σ`, swapping
+the two connections negates it (each vector is the value at `x` of a smooth section). -/
+private theorem diff_swap
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)) (x : M)
+    (w u : TangentSpace I x) :
+    ((CovariantDerivative.difference cov cov' x) w) u
+      = -(((CovariantDerivative.difference cov' cov x) w) u) := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  obtain ⟨σ, hσ⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
+    (V := TangentSpace I) (n := (⊤ : ℕ∞)) x w
+  have hd1 := IsCovariantDerivativeOn.difference_apply
+    (hcov := cov.isCovariantDerivativeOnUniv) (hcov' := cov'.isCovariantDerivativeOnUniv)
+    (σ := fun p => (σ p : TangentSpace I p)) (x := x) (hx := trivial)
+    (σ.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+  have hd2 := IsCovariantDerivativeOn.difference_apply
+    (hcov := cov'.isCovariantDerivativeOnUniv) (hcov' := cov.isCovariantDerivativeOnUniv)
+    (σ := fun p => (σ p : TangentSpace I p)) (x := x) (hx := trivial)
+    (σ.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+  have h1 : ((CovariantDerivative.difference cov cov' x) w) u
+      = (cov (fun p => σ p) x) u - (cov' (fun p => σ p) x) u := by
+    have h := congrArg (fun L : TangentSpace I x →L[Real] TangentSpace I x => L u) hd1
+    rw [← hσ]; simpa using h
+  have h2 : ((CovariantDerivative.difference cov' cov x) w) u
+      = (cov' (fun p => σ p) x) u - (cov (fun p => σ p) x) u := by
+    have h := congrArg (fun L : TangentSpace I x →L[Real] TangentSpace I x => L u) hd2
+    rw [← hσ]; simpa using h
+  rw [h1, h2]; abel
+
+/-- **Bridge 1**: swapping the two connection arguments of `connectionDifferenceTensorAt` leaves the
+`g₀`-Hilbert–Schmidt fibre norm unchanged (the connection-argument-swap antisymmetry of
+`normSqRS(connectionDifferenceTensorAt …)`).  Proved componentwise at a `g₀`-orthonormal basis
+(`normSqRS = ∑ component²`): each `(1,2)` component is `basis.coord k (D(cov,cov')(e_j)(e_i))`
+(`componentRS_connectionDifferenceTensorAt`), the swap negates it (`diff_swap` + `map_neg`), and the
+square is unchanged.  This folds the negation invariance of `normSqRS` and the `difference` swap into
+a single component-sum argument (both tensor spaces are non-reducible `def`s, so a standalone
+`normSqRS_neg` / `connectionDifferenceTensorAt` negation would fight the coercions). -/
+private theorem connDiffTensor_normSqRS_swap
+    (g₀ : SmoothRiemannianMetric I M)
+    (cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)) (x : M) :
+    normSqRS (I := I) (g := g₀) (x := x) 1 2 (connectionDifferenceTensorAt (I := I) cov cov' x)
+      = normSqRS (I := I) (g := g₀) (x := x) 1 2 (connectionDifferenceTensorAt (I := I) cov' cov x) := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
+  have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  rw [normSqRS_identity_eq_componentL2SqRS (I := I) g₀ x 1 2 basis hinv
+      (connectionDifferenceTensorAt (I := I) cov cov' x),
+    normSqRS_identity_eq_componentL2SqRS (I := I) g₀ x 1 2 basis hinv
+      (connectionDifferenceTensorAt (I := I) cov' cov x)]
+  unfold componentL2SqRS
+  refine Finset.sum_congr rfl (fun up _ => Finset.sum_congr rfl (fun low _ => ?_))
+  have hup : up = (fun _ : Fin 1 => up 0) := by funext i; fin_cases i; rfl
+  have hlow : low = (fun q : Fin 2 => if q = 0 then low 0 else low 1) := by
+    funext q; fin_cases q <;> rfl
+  have hc1 :
+      componentRS_gen (I := I) basis (connectionDifferenceTensorAt (I := I) cov cov' x) up low
+        = basis.coord (up 0)
+          ((CovariantDerivative.difference cov cov' x (basis (low 1))) (basis (low 0))) := by
+    rw [componentRS_gen_congr_slots basis
+      (connectionDifferenceTensorAt (I := I) cov cov' x) hup hlow]
+    exact componentRS_connectionDifferenceTensorAt (I := I) basis cov cov' (low 0) (low 1) (up 0)
+  have hc2 :
+      componentRS_gen (I := I) basis (connectionDifferenceTensorAt (I := I) cov' cov x) up low
+        = basis.coord (up 0)
+          ((CovariantDerivative.difference cov' cov x (basis (low 1))) (basis (low 0))) := by
+    rw [componentRS_gen_congr_slots basis
+      (connectionDifferenceTensorAt (I := I) cov' cov x) hup hlow]
+    exact componentRS_connectionDifferenceTensorAt (I := I) basis cov' cov (low 0) (low 1) (up 0)
+  rw [hc1, hc2, diff_swap cov cov' x (basis (low 1)) (basis (low 0)), map_neg]
+  ring
+
+/-- The reference metric's own first covariant derivative vanishes (metric compatibility):
+`metricCovDeriv g g 1 x = 0`.  Reduces through `metricCovDeriv_one_apply_section` to
+`nabla0SFun (LC g) (metricTensorField g) = 0` (`nabla_metric_zero`). -/
+private theorem metricCovDeriv_self_one_zero (g : SmoothRiemannianMetric I M) (x : M) :
+    metricCovDeriv (I := I) g g 1 x = 0 := by
+  classical
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
+  refine ContinuousMultilinearMap.ext (fun w => ?_)
+  obtain ⟨X, hX⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
+    (V := TangentSpace I) (n := (⊤ : ℕ∞)) x (w 0)
+  have hw : w = Fin.cons (X x) (Fin.tail w) := by
+    rw [hX]; exact (Fin.cons_self_tail w).symm
+  have hbase : metricCovDeriv (I := I) g g 0 = metricTensorField (I := I) g := rfl
+  conv_lhs => rw [hw]
+  erw [metricCovDeriv_one_apply_section (I := I) g g X x (Fin.tail w), hbase,
+    nabla_metric_zero (I := I) (leviCivitaConnectionOfMetric (I := I) g) g
+      (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) X x]
+  rfl
+
+/-- **Bridge 2**: at order `1` the metric-difference seminorm against the reference metric equals the
+metric covariant-derivative seminorm, `metricDerivNorm 1 g₂ g₁ g₁ x = metricCovDerivNorm 1 g₂ g₁ x`. -/
+private theorem metricDeriv_eq_covDeriv_norm (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
+    metricDerivNorm (I := I) 1 g₂ g₁ g₁ x = metricCovDerivNorm (I := I) 1 g₂ g₁ x := by
+  unfold metricDerivNorm metricCovDerivNorm metricDiffCovDerivAt
+  have h0 : metricCovDeriv (I := I) g₂ g₁ 1 x - metricCovDeriv (I := I) g₁ g₁ 1 x
+      = metricCovDeriv (I := I) g₂ g₁ 1 x := by
+    rw [metricCovDeriv_self_one_zero (I := I) g₁ x]; abel
+  rw [h0]
+
+/-- **The jet-composed `j = 1` endpoint** (brick T, order-1 boundary).  Under Λ-comparability of
+`g₁, g₂` and a first-order metric covariant-derivative bound `Λ'` (both on `K`), the single-step
+connection-difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` is bounded fibre-wise at `x ∈ K` by the
+explicit constant `C(Λ,Λ') = (3/2)·√(Λ³)·Λ'` times the dimension/slot factor `s·n^{(s+1)/2}`:
+`√normSq0S(g₂, diffStep g₁ g₂ s S x) ≤ s·n^{(s+1)/2}·((3/2)·√(Λ³)·Λ')·√normSq0S(g₂, S x)`
+(`n = finrank ℝ E`).  Composes `diffStep_norm_le` (fibre atom), the connection-swap bridge
+`connDiffTensor_normSqRS_swap`, `lcDiff_norm_le` (Koszul/change-of-connection), the seminorm bridge
+`metricDeriv_eq_covDeriv_norm`, and the class jet bound. -/
+theorem diffStep_jet_one_le
+    [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    {Λ Λ' : Real}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    {x : M} (hx : x ∈ K) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (diffStep (I := I) g₁ g₂ s S x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) *
+        ((3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) *
+        Real.sqrt (normSq0S (I := I) g₂ x s (S x)) := by
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  -- bound the Koszul connection-difference fibre norm by the jet constant
+  have hconn :
+      Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+          (connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x)) ≤
+        (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') := by
+    rw [connDiffTensor_normSqRS_swap g₂ (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x]
+    calc
+      Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+            (connectionDifferenceTensorAt (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g₂)
+              (leviCivitaConnectionOfMetric (I := I) g₁) x))
+          ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * metricDerivNorm (I := I) 1 g₂ g₁ g₁ x) :=
+            lcDiff_norm_le (I := I) g₁ g₂ hEq hx
+      _ = (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * metricCovDerivNorm (I := I) 1 g₂ g₁ x) := by
+            rw [metricDeriv_eq_covDeriv_norm]
+      _ ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left (hjet x hx) (Real.sqrt_nonneg _)) (by norm_num)
+  -- compose with the fibre atom
+  refine le_trans (diffStep_norm_le (I := I) g₁ g₂ s S x) ?_
+  refine mul_le_mul_of_nonneg_right ?_ (Real.sqrt_nonneg _)
+  exact mul_le_mul_of_nonneg_left hconn (by positivity)
 
 end DiffStepNorm
 

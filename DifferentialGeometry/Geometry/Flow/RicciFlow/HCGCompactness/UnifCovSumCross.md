@@ -490,6 +490,56 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 7, jet composition): **two micro-bridges + jet-composed j=1 endpoint LANDED
+  sorry-free + verified** in `UnifCovSumCross.lean` `section DiffStepNorm`.  Authoritative
+  `lake build +…UnifCovSumCross` EXIT=0 (8645 jobs, 33s); `#print axioms` = `[propext,
+  Classical.choice, Quot.sound]` on all five new declarations (`diffStep_jet_one_le` public;
+  `connDiffTensor_normSqRS_swap`, `diff_swap`, `metricDeriv_eq_covDeriv_norm`,
+  `metricCovDeriv_self_one_zero` private), then stripped.  New `import …MetricLapDiff` (for
+  `lcDiff_norm_le`).  LESSON: `metricCovDeriv_one_apply_section` and `nabla_metric_zero` rewrites
+  were display-identical to the goal but not defeq-identical (hidden instance args) — `rw` failed,
+  **`erw`** (reducible-defeq rewrite) crossed it; the trailing `(0 : Tensor0SSpace)·slots` closes by
+  `rfl` (`Tensor0SSpace.zero_apply` is rfl) not `simp`; `A − 0` on the def-wrapped tensor needs
+  `abel`, not `sub_zero`.  Deliverables:
+  - **`diff_swap`** (private): the `CovariantDerivative.difference` argument-swap antisymmetry
+    `D(cov,cov')(w)(u) = −D(cov',cov)(w)(u)`, via `exists_eq_at_gen` + `difference_apply` (the
+    `difference_symm_at` `congrArg`/`simpa` pattern).  Canonical home = beside Mathlib's `difference`
+    (not editable) ⟹ kept private (HOIST NOTE).
+  - **`connDiffTensor_normSqRS_swap`** (bridge 1, private): `normSqRS(g₀, connDiff cov cov' x) =
+    normSqRS(g₀, connDiff cov' cov x)`.  ROUTE CHANGE from the recon's "`difference_neg` +
+    `normSqRS_neg`" decomposition to a **direct component-sum route**: `normSqRS =
+    ∑ component²` (`normSqRS_identity_eq_componentL2SqRS` at a g₀-ON basis), each `(1,2)` component
+    `= basis.coord k (D(cov,cov')(e_j)(e_i))` (`componentRS_connectionDifferenceTensorAt` +
+    `componentRS_gen_congr_slots` slot-form match), swap negates it (`diff_swap` + `map_neg`),
+    square unchanged (`ring`).  WHY: `Tensor0SSpace`/`TensorRSSpace` are **non-reducible `def`s**, so
+    a standalone `normSqRS_neg` / `connectionDifferenceTensorAt`-negation fights the generic
+    CLM/CMM `neg_apply` coercions (grep-confirmed: `component0S_neg_gen` exists but the tensor-level
+    neg-apply does not); the component route sidesteps this entirely and folds both mission-requested
+    pieces into one lemma.
+  - **`metricCovDeriv_self_one_zero`** (private) + **`metricDeriv_eq_covDeriv_norm`** (bridge 2,
+    private): the EXACT relation is EQUALITY, `metricDerivNorm 1 g₂ g₁ g₁ x = metricCovDerivNorm 1
+    g₂ g₁ x` (NOT an inequality with a dimension factor).  Both are `√normSq0S gRef x 3 (…)`;
+    `metricDerivNorm` uses `metricCovDeriv g₂ g₁ 1 − metricCovDeriv g₁ g₁ 1` and
+    `metricCovDeriv g₁ g₁ 1 x = 0` by metric compatibility (`metricCovDeriv_one_apply_section` +
+    `nabla_metric_zero` + `leviCivitaConnectionOfMetric_isMetricCompatible`, the
+    `iterCov_metric_zero` base-case pattern in `nabla0SFun` currency), so
+    `metricDiffCovDerivAt 1 g₂ g₁ g₁ x = metricCovDeriv g₂ g₁ 1 x` and the seminorms coincide.
+  - **`diffStep_jet_one_le`** (public endpoint): under `MetricUniformEquivalentOn K g₁ g₂ Λ` +
+    `MetricCovDerivOrderBoundOn K 1 g₂ g₁ Λ'` (+ `[I.Boundaryless] [CompactSpace M]
+    [NeZero (finrank ℝ E)]` for `lcDiff_norm_le`), `√normSq0S(g₂, diffStep g₁ g₂ s S x) ≤
+    s·n^{(s+1)/2}·((3/2)·√(Λ³)·Λ')·√normSq0S(g₂, S x)`.  **Constant `C(Λ,Λ') = (3/2)·√(Λ³)·Λ'`
+    CONFIRMED** (matches the Session-6 estimate).  Composition = `diffStep_norm_le` (fibre atom) →
+    bridge 1 (swap) → `lcDiff_norm_le` (`g:=g₁, h:=g₂, C:=Λ`) → bridge 2 → `MetricCovDerivOrderBoundOn`.
+  - **LESSON (instance mismatch)**: in-proof `haveI : IsManifold I 1 M := IsManifold.of_le …`
+    creates a DIFFERENT instance than the signature-time ambient one, so `rw`/`le_trans`/`calc`
+    against goal terms (which carry the ambient instance) FAIL to match.  Fix = drop the rank-1
+    `of_le` haveI and rely on ambient synthesis (both sides then agree); keep only genuinely-missing
+    ranks not appearing in matched terms (`IsManifold I 2`, `(∞)+1`, canonical `ContMDiffVectorBundle 1`).
+  - **T-B scope confirmed for the planner**: the remaining frontier is the **base-Leibniz family** —
+    re-expanding `telescAccum`'s outer `covStep g₁` (a g₁-derivative, NOT pointwise-bounded by `|·|`)
+    via `covStep g₂ (diffStep …) = (∇₂A)⋆S + A⋆(∇₂S)` into the all-`∇₂` schematic
+    `∑ (∇₂^{a₁}A)⋆…⋆(∇₂^{aₘ}A)⋆∇₂^{k}T`, with `∇₂^{a}A` bounds from Koszul + `MetricCovDerivOrderBoundOn`
+    at orders `a ≤ N`.  This is the genuine multi-session `j ≥ 2` frontier.
 - 2026-07-24 (session 6, T-A assembly): **`diffStep_norm_le` LANDED (fibre form)** sorry-free +
   verified in `UnifCovSumCross.lean` (`lake build +…UnifCovSumCross` EXIT=0, 3909 jobs; axioms
   standard triple; added `import …FiberMetric.ConnectionDifferenceNorm`).  Constant `s·n^{(s+1)/2}`
