@@ -13,7 +13,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chart_alpha_coord_gronwall_uniqueness
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ : M)
     (T r r' : ℝ) (K : NNReal) (_hT_pos : 0 < T) (hr_lt_r' : r < r')
@@ -68,7 +69,8 @@ theorem chart_alpha_coord_gronwall_uniqueness
     (v := f) (s := s) (K := K)
     hv_lip hu_cont hf_u hus hv_cont hf_v hvs heq0
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₁ : ChartLocalPicardData X α₁) (hper₂ : ChartLocalPicardData X α₂)
@@ -186,7 +188,8 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
       ∈ (chartAt H α₁).source := hα₂_in_α₁_source s hs
   exact (chartAt H α₁).left_inv hmem
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chart_overlap_alpha_in_alpha_source_short_time
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₂ : ChartLocalPicardData X α₂)
@@ -276,7 +279,8 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
   have : s ∈ γ₂ ⁻¹' (chartAt H α₁).source := hV_subset ⟨hs_in_V, hs_in_Icc⟩
   exact this
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem chart_overlap_chart_alpha_coord_ode
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₂ : ChartLocalPicardData X α₂)

@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -185,7 +184,6 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
   classical
   obtain ⟨χ, hχ, hχK, hχsupp, hχ01⟩ :=
     exists_bump_one_on (I := I) hK Φ.open_source hKs
-
   set Q : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ := fun x =>
     (ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)).comp
       ((h.inner (Φ x)).comp (mfderiv I I Φ x)) with hQ
@@ -278,14 +276,14 @@ theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 theorem pullInner_pos (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {x : M} (hx : x ∈ Φ.source) (h : SmoothRiemannianMetric I N)
     (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < h.inner ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x v)
         (mfderiv I I (Φ : M → N) x v) := by
   refine h.pos _ _ (fun h0 => hv ?_)
-
   have hfg : (Φ.symm : N → M) ∘ (Φ : M → N) =ᶠ[nhds x] id := by
     filter_upwards [Φ.open_source.mem_nhds hx] with y hy
     exact Φ.left_inv' hy

@@ -53,7 +53,8 @@ private lemma iteratedDeriv_taylorWithinEval_eq (f : ℝ → ℝ) (n : ℕ) (s :
         = ((i ! : ℝ)⁻¹ * iteratedDerivWithin i f s c) * (if j = i then (i ! : ℝ) else 0) := by
     intro i _
     rw [iteratedDeriv_const_mul _ (by fun_prop), hgen i]
-  rw [Finset.sum_congr rfl hsummand, Finset.sum_eq_single_of_mem j (Finset.mem_range.mpr (by omega))]
+  rw [Finset.sum_congr rfl hsummand, Finset.sum_eq_single_of_mem j
+    (Finset.mem_range.mpr (by omega))]
   · have hfac : (j ! : ℝ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero j
     rw [if_pos rfl, mul_right_comm, inv_mul_cancel₀ hfac, one_mul]
   · intro i _ hij
@@ -195,10 +196,12 @@ theorem exists_contDiff_extend_of_contDiffOn_Icc
       · rw [if_neg hyT]
     · intro j hj
       rw [hIciIic, hIciIci]
-      have hlhs : iteratedDerivWithin j GR (Set.Icc 0 T) T = iteratedDerivWithin j g (Set.Icc 0 T) T :=
+      have hlhs : iteratedDerivWithin j GR (Set.Icc 0 T) T = iteratedDerivWithin j g (Set.Icc 0 T)
+        T :=
         iteratedDerivWithin_congr (fun y hy => by simp only [hGR]; rw [if_pos hy.2])
           ⟨hT.le, le_refl T⟩
-      have hrhs : iteratedDerivWithin j GR (Set.Ici T) T = iteratedDerivWithin j PT (Set.Ici T) T := by
+      have hrhs : iteratedDerivWithin j GR (Set.Ici T) T = iteratedDerivWithin j PT (Set.Ici T)
+        T := by
         refine iteratedDerivWithin_congr (fun y hy => ?_) Set.self_mem_Ici
         simp only [hGR]
         by_cases hyT : y ≤ T
@@ -237,8 +240,10 @@ theorem exists_contDiff_extend_of_contDiffOn_Icc
           mem_nhdsWithin_of_mem_nhds (Iic_mem_nhds hT)
         filter_upwards [hmem] with y hy
         simp only [hGR]; rw [if_pos (Set.mem_Iic.mp hy)]
-      have hrhs : iteratedDerivWithin j G (Set.Ici 0) 0 = iteratedDerivWithin j g (Set.Icc 0 T) 0 := by
-        have hGGR : iteratedDerivWithin j G (Set.Ici 0) 0 = iteratedDerivWithin j GR (Set.Ici 0) 0 :=
+      have hrhs : iteratedDerivWithin j G (Set.Ici 0) 0 = iteratedDerivWithin j g (Set.Icc 0 T)
+        0 := by
+        have hGGR : iteratedDerivWithin j G (Set.Ici 0) 0 = iteratedDerivWithin j GR (Set.Ici 0)
+          0 :=
           iteratedDerivWithin_congr (fun y hy => by
             simp only [hG]
             by_cases hy0 : y ≤ 0

@@ -74,14 +74,12 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
             perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t) →
           ‖W‖ ≤ R₀ := by
   classical
-
   have hB_nonneg : ∀ i, 0 ≤ B i := by
     intro i
     refine le_trans ?_ (hB_le i 0 ⟨le_refl 0, hT.le⟩)
     exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2)) (sq_nonneg _)
   set Mass : ℝ := ∑' i, B i with hMass_def
   have hMass_nonneg : 0 ≤ Mass := tsum_nonneg hB_nonneg
-
   set d₂ : ℝ := min T (R₀ ^ 2 / (T * Mass + 1)) with hd₂_def
   have hden_pos : 0 < T * Mass + 1 := by positivity
   have hd₂_pos : 0 < d₂ := by
@@ -93,7 +91,6 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
   obtain ⟨ht0, htd₂⟩ := ht
   have htT : t ≤ T := le_trans htd₂ hd₂_le
   have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht0, htT⟩
-
   have hper_mode : ∀ i,
       tensorSobolevWeight (I := I) (M := M) i (a + 2) * (W.coeff i) ^ 2 ≤ t * (T * B i) := by
     intro i
@@ -102,10 +99,8 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
     have hlam_nonneg : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
     have hwt_nonneg : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (a + 2) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2)
-
     have hCS := perModeConv_sq_le_time_mul_integral
       lam hlam_nonneg (hc_cont i) ht0
-
     have hstep1 : tensorSobolevWeight (I := I) (M := M) i (a + 2) *
           (perModeConv lam (c i) t) ^ 2 ≤
         t * (tensorSobolevWeight (I := I) (M := M) i (a + 2) *
@@ -116,7 +111,6 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
             mul_le_mul_of_nonneg_left hCS hwt_nonneg
         _ = t * (tensorSobolevWeight (I := I) (M := M) i (a + 2) *
               ∫ s in (0 : ℝ)..t, (c i s) ^ 2) := by ring
-
     have hweight_int : tensorSobolevWeight (I := I) (M := M) i (a + 2) *
           ∫ s in (0 : ℝ)..t, (c i s) ^ 2 ≤ t * B i := by
       rw [← intervalIntegral.integral_const_mul]
@@ -137,7 +131,6 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
       _ ≤ t * (T * B i) := by
           refine mul_le_mul_of_nonneg_left ?_ ht0
           exact mul_le_mul_of_nonneg_right htT (hB_nonneg i)
-
   have hW_sum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
       (W.coeff i) ^ 2) := W.weighted_summable
   have hmaj_sum : Summable (fun i => t * (T * B i)) :=
@@ -151,7 +144,6 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
         ≤ ∑' i, t * (T * B i) := htsum_le
       _ = t * (T * Mass) := by
           rw [tsum_mul_left, tsum_mul_left, hMass_def]
-
   have hTMass_nonneg : 0 ≤ T * Mass := mul_nonneg hT.le hMass_nonneg
   have htTMass_le : t * (T * Mass) ≤ d₂ * (T * Mass) :=
     mul_le_mul_of_nonneg_right htd₂ hTMass_nonneg
@@ -165,7 +157,6 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
       _ = R₀ ^ 2 := by field_simp
   have hnorm_sq_le_R₀ : ‖W‖ ^ 2 ≤ R₀ ^ 2 :=
     le_trans hnorm_sq_le (le_trans htTMass_le hd₂TMass_le)
-
   nlinarith [norm_nonneg W, hR₀.le, hnorm_sq_le_R₀]
 
 end QuasiLinear

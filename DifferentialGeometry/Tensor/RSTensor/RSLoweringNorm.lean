@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -44,7 +43,8 @@ noncomputable def lowerAllSpace
 
 
 
-omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem normSqRS_eq_normSq0S_lowerAllSpace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
@@ -89,8 +89,6 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
   rw [hbij]
   refine Finset.sum_congr rfl fun up _ => Finset.sum_congr rfl fun low _ => ?_
   congr 1
-
-
   have hgram : ∀ i j : Idx, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
     intro i j
     have hsum : (∑ k : Idx, identityInvMetric (Idx := Idx) i k * g.inner x (basis k) (basis j))
@@ -102,21 +100,19 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
           diagonalInvMetric_eq_zero_of_ne (Ne.symm hk), zero_mul]
       · intro hni; exact absurd (Finset.mem_univ i) hni
     rw [← hsum]; exact (hinv i j).1
-
   have hsep : separableFormAt (I := I) (M := M) g x r (fun i => basis (up i)) =
       basisTensor0S (I := I) basis up := by
     apply ext0S_basis (I := I) basis
     intro jdx
     rw [basisTensor0S_component]
-    change (∏ i : Fin r, g.inner x (basis (up i)) (basis (jdx i))) = if up = jdx then (1 : Real) else 0
+    change (∏ i : Fin r, g.inner x (basis (up i)) (basis (jdx i))) = if up = jdx then (1 : Real)
+      else 0
     rw [Finset.prod_congr rfl (fun i _ => hgram (up i) (jdx i))]
     by_cases h : up = jdx
     · subst h; simp
     · rw [if_neg h]
       obtain ⟨i, hi⟩ := Function.ne_iff.mp h
       exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
-
-
   rw [componentRS_apply_gen, component0S_apply]
   unfold lowerAllSpace
   rw [show (Tensor0SSpace.ofModel

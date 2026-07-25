@@ -23,7 +23,8 @@ def flowOrbitChartTrivDerivOp (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M)
     (mfderiv I 𝓘(ℝ, E)
       (fun y => extChartAt I α ((Φ_fam s : M → M) y)) x)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma chartCloseDop_apply
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) (v : TangentSpace I x) :
     flowOrbitChartTrivDerivOp (I := I) Φ_fam α x s v
@@ -32,7 +33,8 @@ lemma chartCloseDop_apply
             (fun y => extChartAt I α ((Φ_fam s : M → M) y)) x v) := by
   rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x) :
     (fun s : ℝ =>
@@ -76,7 +78,8 @@ theorem rawVariationalIdentity_of_manifoldFlowFamily_chartClose
     RawVariationalIdentity (I := I) g X Φ_fam t x v :=
   rawVariationalIdentity_of_manifoldFlowFamily (I := I) g X Φ_fam t x v
     (ContinuousLinearMap.id ℝ E) v hcont hDchart
-    (mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp (I := I) Φ_fam t x v) hRdiff hCdiff hsplit
+    (mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp (I := I) Φ_fam t x v) hRdiff hCdiff
+      hsplit
 
 end Close
 

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Bundle.LocalFrameRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

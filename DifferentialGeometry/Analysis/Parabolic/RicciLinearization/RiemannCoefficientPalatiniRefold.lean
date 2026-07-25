@@ -54,12 +54,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private lemma real_sq_add_three_le {a b c K0 K1 K2 W : ℝ}
-    (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c)
+    (_ha : 0 ≤ a) (_hb : 0 ≤ b) (_hc : 0 ≤ c)
     (h0 : a ^ 2 ≤ K0 * W) (h1 : b ^ 2 ≤ K1 * W) (h2 : c ^ 2 ≤ K2 * W)
-    (hK0 : 0 ≤ K0) (hK1 : 0 ≤ K1) (hK2 : 0 ≤ K2) (hW : 0 ≤ W) :
+    (_hK0 : 0 ≤ K0) (_hK1 : 0 ≤ K1) (_hK2 : 0 ≤ K2) (_hW : 0 ≤ W) :
     (a + b + c) ^ 2 ≤ 3 * (K0 + K1 + K2) * W := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c),
-    h0, h1, h2, ha, hb, hc, mul_nonneg hK0 hW, mul_nonneg hK1 hW, mul_nonneg hK2 hW]
+    h0, h1, h2, _ha, _hb, _hc, mul_nonneg _hK0 _hW, mul_nonneg _hK1 _hW, mul_nonneg _hK2 _hW]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -72,7 +72,8 @@ private lemma coeffOpApply_slotSwapField_eq_apply_of_symm (g₀ : SmoothRiemanni
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
       smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v) :
     operatorFieldApply (I := I) (M := M) g₀ 2 2
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g₀)) T =
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D
+          (ccInputSlotSwapField (I := I) (M := M) g₀)) T =
       operatorFieldApply (I := I) (M := M) g₀ 2 2 D T := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
   have hswapfix : inputSlotSwapFib (I := I) (M := M) x
@@ -102,7 +103,8 @@ private lemma coeffOpApply_slotSwapField_eq_apply_of_symm (g₀ : SmoothRiemanni
     exact hTsymm x (v 1) (v 0)
   rw [show unitModel (I := I) (M := M) g₀ 2
       (operatorFieldApply (I := I) (M := M) g₀ 2 2
-        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g₀)) T) x =
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D
+          (ccInputSlotSwapField (I := I) (M := M) g₀)) T) x =
     Tensor0SSpace.toModel
       ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from D.toSection x)
         (inputSlotSwapFib (I := I) (M := M) x
@@ -152,13 +154,16 @@ theorem exists_riemannPalatini_refold_identity_data
     exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUniform (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛB, hΛB_nn, hcapB⟩ :=
-    exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform (I := I) (M := M)
+    exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform
+      (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛS, hΛS_nn, hcapS⟩ :=
-    exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberNormSq_uniformBound (I := I) (M := M)
+    exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberNormSq_uniformBound
+      (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛF, hΛF_nn, hcapF⟩ :=
-    exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq_uniformBound (I := I) (M := M)
+    exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq_uniformBound (I := I)
+      (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨KRm, hKRm_nn, hKRm⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
@@ -272,7 +277,8 @@ theorem exists_riemannPalatini_refold_identity_data
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
           (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
           (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 := by
-      rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ _ _ (fun _ => rfl) s,
+      rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ _ _
+        (fun _ => rfl) s,
         hsymmT, smul_smul]
       rfl
     rw [hfam, appCc_add_left, appCc_smul_left, appCc_smul_left]
@@ -317,7 +323,7 @@ theorem exists_riemannPalatini_refold_identity_data
       rw [h2]
       abel
     have hprim :=
-      ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+      ricciArmOrder0RiemannHalfBgDiff_appCc_eq_residualFieldSum_add_refoldKernelSecondGrad
         (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T) htie hPsymm T
     rw [appCc_add_left, appCc_sub_left, appCc_add_left,
       coeffOpApply_slotSwapField_eq_apply_of_symm (I := I) (M := M) g₀ _ T hTsymm] at hprim
@@ -681,7 +687,8 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     linarith, ?_⟩
   intro T δ hδ_le hδ_half hδ hδZ hball
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
-  refine ⟨riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ
+  refine ⟨riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le (I := I) (M := M) g₀ T hδ_lt
+    hδ_half hδ hδZ
     qA qB hq, ?_⟩
   intro i s hs
   obtain ⟨hs0, hs1⟩ := hs

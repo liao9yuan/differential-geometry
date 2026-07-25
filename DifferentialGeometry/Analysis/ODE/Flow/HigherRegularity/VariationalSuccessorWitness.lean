@@ -212,7 +212,8 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   have h_aug_Cn_plus_1 : ContDiffOn ℝ ((n + 1 : ℕ) : ℕ∞) aΦ
       ((ball p₀ (R_aN : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)) := by
     refine contDiffOn_flow_of_isVariationalFlowProjection_top
-      (f := augmentedVectorField f) (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := tmin_a) (tmax := tmax_a)
+      (f := augmentedVectorField f) (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := tmin_a)
+        (tmax := tmax_a)
       (Φ := aΦ) haΦ hT_a_pos hT_a_lt_mid hT_a_mid_lt_out hM_aug_nn hMTa_mid hsub_T_a_out_aug
       (ρ_out := R_a_outN) (ρ_mid := R_a_midN) (ρ := R_aN) hr'a_pos ?_ ?_ ?_ ?_ hA_bd_a
       (n + 1) hk_pos ?_ hY_ih_at_top

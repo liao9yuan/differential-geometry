@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -97,10 +96,7 @@ theorem nabla0S_product_realizes {s q : ℕ}
   have hslots : (fun a : Fin (s + q) => V a x) = slots := funext hV
   have hmain :=
     nabla0SFun_product_eval (I := I) cov A B nablaA nablaB hA hB X V x
-
-
   rw [show slots = (fun a : Fin (s + q) => V a x) from hslots.symm, hmain]
-
   change
     (ContinuousMultilinearMap.domDomCongr (leibnizLeftEquiv s q)
         ((MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)

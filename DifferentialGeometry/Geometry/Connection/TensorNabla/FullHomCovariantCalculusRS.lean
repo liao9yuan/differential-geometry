@@ -25,19 +25,22 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[reducible] private def fullHomTangentSpaceFiniteDimensional {x : M} :
     FiniteDimensional ℝ (TangentSpace I x) :=
   Tensor0SBundle.tangentSpace_finiteDimensional x
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[reducible] private def fullHomTensorRSSpaceFiniteDimensional {r t : ℕ} {x : M} :
     FiniteDimensional ℝ (TensorRSSpace r t I x) :=
   Tensor0SBundle.tensorRSSpace_finiteDimensional r t x
 
 set_option backward.isDefEq.respectTransparency false in
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[reducible] private def fullHomTensorRSSpaceT2 {r t : ℕ} {x : M} :
     T2Space (TensorRSSpace r t I x) := by
   unfold TensorRSSpace
@@ -46,7 +49,8 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
 set_option backward.isDefEq.respectTransparency false in
 
 def homTensorRSDirCovDeriv (g : SmoothRiemannianMetric I M) (r a c : ℕ)
-    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (v : TangentSpace I x) :
+    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M)
+      (v : TangentSpace I x) :
     TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x :=
   homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x v
 
@@ -56,7 +60,8 @@ omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma homTensorRSCovDirHom_continuous (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) :
-    Continuous (fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v) :=
+    Continuous (fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x
+      v) :=
   (homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x).continuous
 
 set_option backward.isDefEq.respectTransparency false in
@@ -64,7 +69,8 @@ set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma homTensorRSCovDirHom_add (g : SmoothRiemannianMetric I M) (r a c : ℕ)
-    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (v v' : TangentSpace I x) :
+    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M)
+      (v v' : TangentSpace I x) :
     homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (v + v') =
       homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v +
         homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v' := by
@@ -96,7 +102,8 @@ noncomputable def homTensorRSCovGradDirCLM (g : SmoothRiemannianMetric I M) (r a
   LinearMap.toContinuousLinearMap
     { toFun := fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v d
       map_add' := fun v v' => by rw [homTensorRSCovDirHom_add, ContinuousLinearMap.add_apply]
-      map_smul' := fun k v => by rw [homTensorRSCovDirHom_smul, ContinuousLinearMap.smul_apply]; rfl }
+      map_smul' := fun k v => by rw [homTensorRSCovDirHom_smul, ContinuousLinearMap.smul_apply]; rfl
+                                   }
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -107,7 +114,8 @@ omit [NeZero (Module.finrank ℝ E)] in
     (d : TensorRSSpace r a I x) (v : TangentSpace I x) :
     homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x d v =
       homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v d := by
-  rw [homTensorRSCovGradDirCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  rw [homTensorRSCovGradDirCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+    AddHom.coe_mk]
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -254,15 +262,18 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) (x : M) (v : E) :
     (show TensorRSSpace r c I x from
-        tensorCovDerivAt (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x v) =
+        tensorCovDerivAt (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W)
+          x v) =
       (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from
           homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x v) (W.toSection x) +
         (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from Ψ x)
           (show TensorRSSpace r a I x from tensorCovDerivAt (I := I) (M := M) g r a W x v) := by
   have hval : (fun y : M => (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection y) =
-      (fun y : M => (show TensorRSSpace r a I y →L[ℝ] TensorRSSpace r c I y from Ψ y) (W.toSection y)) := by
+      (fun y : M => (show TensorRSSpace r a I y →L[ℝ] TensorRSSpace r c I y from Ψ y)
+        (W.toSection y)) := by
     funext y; rw [appFullRS_toSection (I := I) (M := M) g r a c Ψ hΨ W y]
-  have hΨ_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E))
+  have hΨ_diff : MDifferentiableAt I
+    (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E))
       (fun y : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) y (Ψ y)) x :=
     hΨ.contMDiffAt.mdifferentiableAt (by simp)
@@ -275,7 +286,8 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
   have hV_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (Vsec y)) x :=
     Vsec.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  rw [tensorCovDerivAt_def (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x v,
+  rw [tensorCovDerivAt_def (I := I) (M := M) g r c
+    (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x v,
     hval]
   rw [show v = (Vsec : Π z : M, TangentSpace I z) x from hVx.symm]
   have hprod := homTensorRSCovariantDerivative_apply_of_mdifferentiableAt I M r a c
@@ -338,15 +350,15 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   beta_reduce
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-
-  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r c
+    (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x
     d v]
-
   have hT1val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
           (homTensorRSApply (I := I) (M := M) g r a (c + 1)
             (fun y : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ y)
-            (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W).toSection x) d) v =
+            (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W).toSection x) d) v
+              =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x from
           homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (v 0) (W.toSection x)) d)
@@ -361,7 +373,6 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
       funext (fun j => by simp [Fin.cons_succ])]
   rw [hT1val]
-
   have hT2val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
           (homTensorRSApply (I := I) (M := M) g r (a + 1) (c + 1)
@@ -386,7 +397,6 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
       funext (fun j => by simp [Fin.cons_succ])]
   rw [hT2val]
-
   rw [tensorCovDerivAt_appFullRS_eq (I := I) (M := M) g r a c Ψ hΨ W x (v 0)]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
     homTensorRSDirCovDeriv]

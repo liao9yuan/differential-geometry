@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Metric.BumpExtend
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowSolutions
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -238,9 +237,7 @@ theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
   haveI : LocallyCompactSpace P.M := ChartedSpace.locallyCompactSpace H P.M
   haveI : WeaklyLocallyCompactSpace P.M := inferInstance
   haveI : NormalSpace P.M := inferInstance
-
   set Kx : CompactExhaustion P.M := CompactExhaustion.choice P.M with hKxdef
-
   let Pfit : Nat -> Nat -> Prop := fun k j => (Kx j : Set P.M) ⊆ Φ.source k
   let bidx : Nat -> Nat := fun k => Nat.findGreatest (Pfit k) k
   let fits : Nat -> Prop := fun k => (Kx (bidx k) : Set P.M) ⊆ Φ.source k
@@ -257,7 +254,6 @@ theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
     by_cases h : fits k
     · rw [if_pos h]; exact Kx.isCompact _
     · rw [if_neg h]; exact isCompact_empty
-
   have hgrow_cover : forall K : Set P.M, IsCompact K ->
       exists k0 : Nat, forall k : Nat, k0 <= k -> K ⊆ grow k := by
     intro K hK
@@ -266,26 +262,21 @@ theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
     refine ⟨max j0 m0, fun k hk => ?_⟩
     have hj0k : j0 <= k := le_trans (le_max_left j0 m0) hk
     have hm0k : m0 <= k := le_trans (le_max_right j0 m0) hk
-
     have hPj0 : Pfit k j0 := hm0 k hm0k
     have hle : j0 <= bidx k := Nat.le_findGreatest hj0k hPj0
-
     have hPbidx : Pfit k (bidx k) := Nat.findGreatest_spec hj0k hPj0
     have hfitsk : fits k := hPbidx
     have hsub : (Kx j0 : Set P.M) ⊆ grow k := by
       simp only [grow]; rw [if_pos hfitsk]; exact Kx.subset hle
     exact hj0.trans hsub
-
   have hchoice : forall k : Nat, exists f : P.M -> Real,
       ContMDiff I 𝓘(ℝ, ℝ) ∞ f /\ (forall x : P.M, f x ∈ Set.Icc (0 : Real) 1) /\
         tsupport f ⊆ Φ.source k /\
         (exists W : Set P.M, IsOpen W /\ grow k ⊆ W /\ forall x : P.M, x ∈ W -> f x = 1) := by
     intro k
     have hgc : IsClosed (grow k) := (hgrow_compact k).isClosed
-
     obtain ⟨V, hVopen, hgV, hVcl⟩ :=
       normal_exists_closure_subset hgc (Φ.source_open k) (hgrow_subset k)
-
     obtain ⟨f, hf1, hfsupp, hf01⟩ :=
       exists_contMDiffMap_one_nhds_of_subset_interior (I := I) (M := P.M) (n := (⊤ : ℕ∞))
         hgc (s := grow k) (t := V)
@@ -351,7 +342,8 @@ theorem gSeqExt_inner_of_mem (k : Nat) (t : Real)
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) := sourceDomSigmaOf (I := I) Φ k (hsrc k)
   let sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
-    change SigmaCompactSpace (SourceDomain (I := I) Φ k); exact sourceDomSigmaOf (I := I) Φ k (hsrc k)
+    change SigmaCompactSpace (SourceDomain (I := I) Φ k); exact sourceDomSigmaOf (I := I) Φ k
+      (hsrc k)
   let sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k); exact sourceDomT2 (I := I) Φ k
   exact @bumpExtendOpen_inner_of_mem E _ _ _ H _ I P.M _ _ _ R
@@ -379,7 +371,8 @@ theorem gSeqExt_inner_of_notMem (k : Nat) (t : Real)
   letI : SigmaCompactSpace P.M := P.sigmaCompact
   letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
   let sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := by
-    change SigmaCompactSpace (SourceDomain (I := I) Φ k); exact sourceDomSigmaOf (I := I) Φ k (hsrc k)
+    change SigmaCompactSpace (SourceDomain (I := I) Φ k); exact sourceDomSigmaOf (I := I) Φ k
+      (hsrc k)
   let sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k); exact sourceDomT2 (I := I) Φ k
   exact @bumpExtendOpen_inner_of_notMem_tsupport E _ _ _ H _ I P.M _ _ _ R
@@ -434,7 +427,6 @@ theorem hlow_gSeqExt
   set c := min cLow 1 with hc
   have hc1 : c <= 1 := min_le_right _ _
   have hccLow : c <= cLow := min_le_left _ _
-
   have hRnn : 0 <= R.inner x v v := by
     by_cases hv : v = 0
     · subst hv; simp
@@ -448,13 +440,10 @@ theorem hlow_gSeqExt
     have hχ01 := bf.chi01 (rho k) x
     have hχ0 : 0 <= χ := hχ01.1
     have hχ1 : χ <= 1 := hχ01.2
-
     have hsrc_low := hbound (rho k) t ht ⟨x, hx⟩ v
     set S := (srcMetric (I := I) Φ hsrc htgt (rho k) t).inner ⟨x, hx⟩ v v with hSdef
     set r := R.inner x v v with hrdef
-
     have hsrc_low' : cLow * r <= S := hsrc_low
-
     rw [smul_eq_mul, smul_eq_mul]
     have h1 : χ * (cLow * r) <= χ * S := mul_le_mul_of_nonneg_left hsrc_low' hχ0
     have hterm2 : c * ((1 - χ) * r) <= (1 - χ) * r := by
@@ -514,18 +503,14 @@ theorem hbdd_gSeqExt
   letI : IsManifold I ∞ P.M := P.smooth
   letI : SigmaCompactSpace P.M := P.sigmaCompact
   intro rho hrho t ht q K' hK'
-
   obtain ⟨Ctail, hCtail⟩ := hcovTail q
-
   obtain ⟨k0, hk0⟩ := bf.grow_cover K' hK'
-
   have hhead : forall k : Nat, exists Ck : Real, forall z : P.M, z ∈ K' ->
       metricCovDerivNorm (I := I) q (gSeqExt (I := I) Φ R bf hsrc htgt (rho k) t) R z <= Ck := by
     intro k
     exact metricCovDerivNorm_bddOn (I := I) hK' q
       (gSeqExt (I := I) Φ R bf hsrc htgt (rho k) t) R
   choose Chead hChead using hhead
-
   have hne : (Finset.range (k0 + 1)).Nonempty := ⟨0, Finset.mem_range.2 (Nat.succ_pos k0)⟩
   refine ⟨max Ctail ((Finset.range (k0 + 1)).sup' hne Chead), fun k z hz => ?_⟩
   by_cases hk : k0 <= k
@@ -544,34 +529,6 @@ section Lip
 
 open Tensor0SBundle in
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hgLip_gSeqExt
     (R : letI : TopologicalSpace P.M := P.topology;
@@ -625,17 +582,14 @@ theorem hgLip_gSeqExt
   letI : IsManifold I ∞ P.M := P.smooth
   letI : SigmaCompactSpace P.M := P.sigmaCompact
   intro K' hK' p
-
   obtain ⟨Lt, hLt0, hLt⟩ := hlipTail p
   obtain ⟨k0, hk0⟩ := bf.grow_cover K' hK'
-
   have hhead : forall k : Nat, exists Lk : Real, 0 <= Lk /\
       forall s, s ∈ Set.Icc β ψ -> forall t, t ∈ Set.Icc β ψ ->
         forall a : Nat, a <= p -> forall x, x ∈ K' ->
           metricDerivNorm (I := I) a (gSeqExt (I := I) Φ R bf hsrc htgt k s)
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R x <= Lk * |s - t| := by
     intro k
-
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
     letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
     letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -649,7 +603,6 @@ theorem hgLip_gSeqExt
         (by decide : (2 : WithTop ℕ∞) <= ∞)
     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
       change IsManifold I ∞ (SourceDomain (I := I) Φ k); infer_instance
-
     letI : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := sourceDomSigmaOf (I := I) Φ k (hsrc k)
     letI : T2Space ↥(sourceOpen (I := I) Φ k) := sourceDomT2 (I := I) Φ k
     letI : IsManifold I ∞ ↥(sourceOpen (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
@@ -661,21 +614,17 @@ theorem hgLip_gSeqExt
         (by decide : (2 : WithTop ℕ∞) <= ∞)
     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥(sourceOpen (I := I) Φ k) := by
       change IsManifold I ∞ (SourceDomain (I := I) Φ k); infer_instance
-
     have hKTc : IsCompact (K' ∩ tsupport (bf.chi k)) :=
       hK'.inter_right (isClosed_tsupport (bf.chi k))
     have hKTsub : K' ∩ tsupport (bf.chi k) ⊆ Φ.source k := fun z hz => bf.chi_supp k hz.2
     have hCc : IsCompact (sourceCompactSet (I := I) Φ k (K' ∩ tsupport (bf.chi k))) :=
       sourceCompactSet_isCompact (I := I) Φ k hKTc hKTsub
-
     obtain ⟨Ls, hLs0, hLs⟩ :=
       hlipSrc k (sourceCompactSet (I := I) Φ k (K' ∩ tsupport (bf.chi k))) hCc p
-
     set χ' : SourceDomain (I := I) Φ k -> Real :=
       fun y => bf.chi k (y : P.M) with hχ'def
     have hχ' : ContMDiff I 𝓘(ℝ, ℝ) ∞ χ' :=
       (bf.chi_smooth k).comp (contMDiff_subtype_val (I := I) (U := sourceOpen (I := I) Φ k))
-
     have hχB : forall c : Nat, exists Cc : Real, 0 <= Cc /\
         forall y, y ∈ sourceCompactSet (I := I) Φ k (K' ∩ tsupport (bf.chi k)) ->
           Real.sqrt (normSq0S (I := I)
@@ -701,7 +650,6 @@ theorem hgLip_gSeqExt
     · have hxU : x ∈ Φ.source k := bf.chi_supp k hxsupp
       have hyC : (⟨x, hxU⟩ : SourceDomain (I := I) Φ k) ∈
           sourceCompactSet (I := I) Φ k (K' ∩ tsupport (bf.chi k)) := ⟨hx, hxsupp⟩
-
       obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I)
         (refRes (I := I) Φ R hsrc k)
         (⟨x, hxU⟩ : SourceDomain (I := I) Φ k)
@@ -714,7 +662,6 @@ theorem hgLip_gSeqExt
           (refRes (I := I) Φ R hsrc k) basis hON
         intro i j
         simpa [identityInvMetric, diagonalInvMetric] using h' i j
-
       have hsmul : metricTensorField (I := I)
             ((gSeqExt (I := I) Φ R bf hsrc htgt k s).restrictOpen (I := I)
               (sourceOpen (I := I) Φ k))
@@ -747,7 +694,6 @@ theorem hgLip_gSeqExt
           gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t (y : P.M) y.2 (v 0) (v 1)]
         simp only [hχ'def, smul_eq_mul]
         ring
-
       have hres : metricDerivNorm (I := I) a
             ((gSeqExt (I := I) Φ R bf hsrc htgt k s).restrictOpen (I := I)
               (sourceOpen (I := I) Φ k))
@@ -766,7 +712,6 @@ theorem hgLip_gSeqExt
             (sourceOpen (I := I) Φ k))
           (refRes (I := I) Φ R hsrc k) a basis hinv,
         hsmul]
-
       refine le_trans (iterCov_smulF_le (I := I)
         (refRes (I := I) Φ R hsrc k)
         (⟨x, hxU⟩ : SourceDomain (I := I) Φ k) basis hinv a χ' hχ'
@@ -835,7 +780,6 @@ theorem hgLip_gSeqExt
           _ <= (a.choose c : Real) * Cx * (Ls * |s - t|) :=
               mul_le_mul_of_nonneg_left hsle (mul_nonneg (Nat.cast_nonneg _) hCx0)
       refine le_trans (Finset.sum_le_sum hterm) ?_
-
       have hsum : (∑ c ∈ Finset.range (a + 1), (a.choose c : Real) * Cx * (Ls * |s - t|))
           = (2 : Real) ^ a * Cx * (Ls * |s - t|) := by
         rw [← Finset.sum_mul, ← Finset.sum_mul, ← Nat.cast_sum, Nat.sum_range_choose]
@@ -873,7 +817,6 @@ theorem hgLip_gSeqExt
           = metricDerivNorm (I := I) a (gSeqExt (I := I) Φ R bf hsrc htgt k s)
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R x :=
         metricDerivNorm_restrictOpen (I := I) _ _ _ U₀ a ⟨x, hx0⟩
-
       have hmTF : metricTensorField (I := I)
             ((gSeqExt (I := I) Φ R bf hsrc htgt k s).restrictOpen (I := I) U₀)
           = metricTensorField (I := I)

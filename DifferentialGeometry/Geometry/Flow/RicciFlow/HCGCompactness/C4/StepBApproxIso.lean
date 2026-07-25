@@ -44,13 +44,6 @@ variable {E F : Type*}
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
 omit [FiniteDimensional ℝ E] in
-
-
-
-
-
-
-
 theorem comp_tendsto_id_on
     {U : Set E} {V : Set F} (hV : IsOpen V)
     (B : ℕ → E → F) (Binf : E → F) (A : ℕ → F → E) (Ainf : F → E)
@@ -99,16 +92,6 @@ theorem comp_tendsto_id_on
     _ = ε := by ring
 
 omit [FiniteDimensional ℝ E] in
-
-
-
-
-
-
-
-
-
-
 theorem comp_cInf_id_on
     {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
     (B : ℕ → E → F) (Binf : E → F) (A : ℕ → F → E) (Ainf : F → E)

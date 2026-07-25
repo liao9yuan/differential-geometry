@@ -26,6 +26,7 @@ local notation "Cmo" =>
 Helper lemmas for the John-Nirenberg-based crossover argument. -/
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- Smooth cutoff: φ = 1 on closedBall 0 1, tsupport ⊆ ball 0 (7/6), range ⊆ [0,1].
     Used for the log gradient bound on rescaled cover balls. -/
@@ -481,7 +482,8 @@ theorem regularizedLog_unit_halfBall_meanOscillation
     have hmono := MeasureTheory.setIntegral_mono (μ := volume) (s := Ω)
       (f := fun x => ‖fderiv ℝ η.toFun x‖ ^ 2)
       (g := fun _ : E => (4 * (Mst : ℝ)) ^ 2)
-      hderiv_sq_int (integrableOn_const (μ := volume) (show volume Ω ≠ ∞ by simpa [Ω] using measure_ball_lt_top.ne))
+      hderiv_sq_int (integrableOn_const (μ := volume)
+        (show volume Ω ≠ ∞ by simpa [Ω] using measure_ball_lt_top.ne))
       (by
         intro x
         have hgrad_bd :
@@ -615,7 +617,8 @@ theorem regularizedLog_ball_meanOscillation
       ⨍ y in Metric.ball (0 : E) (1 / 2 : ℝ), regularizedLogFun (u := uR) hε y ∂volume =
         ⨍ y in Metric.ball x₀ (R / 2 : ℝ), v y ∂volume := by
     simpa [uR, v, show R * (1 / 2 : ℝ) = R / 2 by ring] using
-      crossover_average_rescale_ball_radius (x₀ := x₀) (R := R) (ρ := (1 / 2 : ℝ)) hR (by norm_num) v
+      crossover_average_rescale_ball_radius (x₀ := x₀) (R := R) (ρ := (1 / 2 : ℝ)) hR (by norm_num)
+        v
   have hrescale :
       (⨍ x in Metric.ball x₀ (R / 2 : ℝ),
         |v x - ⨍ y in Metric.ball x₀ (R / 2 : ℝ), v y ∂volume| ∂volume) =
@@ -638,7 +641,8 @@ theorem regularizedLog_ball_meanOscillation
         ⨍ y in Metric.ball (0 : E) (1 / 2 : ℝ), v (x₀ + R • y) ∂volume =
           ⨍ y in Metric.ball x₀ (R / 2 : ℝ), v y ∂volume := by
       simpa [show R * (1 / 2 : ℝ) = R / 2 by ring] using
-        crossover_average_rescale_ball_radius (x₀ := x₀) (R := R) (ρ := (1 / 2 : ℝ)) hR (by norm_num) v
+        crossover_average_rescale_ball_radius (x₀ := x₀) (R := R) (ρ := (1 / 2 : ℝ)) hR
+          (by norm_num) v
     have hunit'' :
         (⨍ z in Metric.ball (0 : E) (1 / 2 : ℝ),
           |regularizedLogFun (u := uR) hε z -
@@ -1271,6 +1275,7 @@ theorem regularizedLog_smallBallAverage_to_origin_le
   ring
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem regularizedLog_smallBall_exp_average_le
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u : E → ℝ}
@@ -1554,7 +1559,8 @@ theorem regularizedLog_smallBall_exp_average_le
         (measure_ball_lt_top (μ := volume) (x := x₀) (r := (1 / 48 : ℝ))).ne
     calc
       ∫⁻ z, ENNReal.ofReal (Real.exp (p * f z) - 1) ∂μ
-          = ∫⁻ t in Set.Ioi 0, μ {a : E | t < f a} * ENNReal.ofReal (p * Real.exp (p * t)) := hLayer'
+          = ∫⁻ t in Set.Ioi 0, μ {a : E | t < f a} * ENNReal.ofReal (p * Real.exp (p * t)) :=
+            hLayer'
       _ ≤ ENNReal.ofReal (C_JN d) * μ Set.univ *
           ∫⁻ t in Set.Ioi 0, ENNReal.ofReal (p * Real.exp (-(β / 2) * t)) := hmajor
       _ = ENNReal.ofReal (C_JN d) * μ Set.univ *
@@ -1570,7 +1576,8 @@ theorem regularizedLog_smallBall_exp_average_le
             rw [ENNReal.ofReal_mul (C_JN_pos d).le]
   have hlin_finite :
       ∫⁻ z, ENNReal.ofReal (Real.exp (p * f z) - 1) ∂μ ≠ ∞ := by
-    exact ne_of_lt (lt_of_le_of_lt hlin_bound (by simp : ENNReal.ofReal (C_JN d * μ.real Set.univ) < ∞))
+    exact ne_of_lt (lt_of_le_of_lt hlin_bound
+      (by simp : ENNReal.ofReal (C_JN d * μ.real Set.univ) < ∞))
   have hF_meas :
       AEMeasurable (fun z => ENNReal.ofReal (Real.exp (p * f z) - 1)) μ := by
     exact (hf_meas.const_mul p).exp.sub_const 1 |>.ennreal_ofReal
@@ -1656,6 +1663,7 @@ theorem regularizedLog_smallBall_exp_average_le
   exact ⟨hExp_int_ball, havg_ball⟩
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem regularizedLog_halfBall_exp_average_to_origin_le
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u : E → ℝ}

@@ -21,14 +21,16 @@ noncomputable def fromZeroChartField (X : ℝ → ∀ x : M, TangentSpace I x) (
     ((trivializationAt E (TangentSpace I) α)
       (TotalSpace.mk' E ((extChartAt I α).symm c) (X s ((extChartAt I α).symm c)))).2
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 lemma fromZeroChartField_eq_tangentCoordChange
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (s : ℝ) (c : E) :
     fromZeroChartField (I := I) X α s c
       = tangentCoordChange I ((extChartAt I α).symm c) α ((extChartAt I α).symm c)
           (X s ((extChartAt I α).symm c)) := rfl
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 theorem fromZeroChartField_jointContDiffOn_Ioo
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -86,7 +88,8 @@ theorem fromZeroChartField_jointContDiffOn_Ioo
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 theorem fromZeroChartField_continuousOn_time_from_zero
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T δ : ℝ} (hδT : δ ≤ T)
     (hcont0 : ContinuousOn
@@ -373,7 +376,8 @@ private theorem fromZero_orbit_of_window
     (fun c _ => fromZeroChartField_continuousOn_time_from_zero (I := I) X α hδw_le hcont0 c)
     hnorm hstrict' hr_pos
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] in
 private lemma fromZeroChartField_center_eq
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ) :
     fromZeroChartField (I := I) X α t (extChartAt I α α) = (X t α : TangentSpace I α) := by

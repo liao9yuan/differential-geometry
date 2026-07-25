@@ -43,6 +43,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open Geometry.Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -262,7 +263,8 @@ theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 := by
   classical
   obtain ⟨Λarm1, hΛarm1_nn, hΛarm1⟩ :=
-    exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope (I := I)
+      (M := M) g₀ hδ₀ B hB
   refine ⟨Λarm1, hΛarm1_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
   rw [ricciArmOrder1KoszulCoeff_toSection]
@@ -322,10 +324,10 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv := by
   classical
   obtain ⟨Λ1, hΛ1_nn, hΛ1⟩ :=
-    DifferentialGeometry.Geometry.Curvature.exists_riemannBiContrFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
+    Geometry.Curvature.exists_riemannBiContrFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   obtain ⟨Λ2, hΛ2_nn, hΛ2⟩ :=
-    DifferentialGeometry.Geometry.Curvature.exists_ricciArmOrder0CurvCoeffFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
+    exists_ricciArmOrder0CurvCoeffFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   refine ⟨max Λ1 Λ2, le_trans hΛ1_nn (le_max_left _ _), ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -370,7 +372,8 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
 noncomputable def corrFieldChristoffelBound (g₀ : SmoothRiemannianMetric I M)
     (a : ℕ) (R δ₀ : ℝ) : ℝ :=
   if h : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 then
-    Classical.choose (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
+    Classical.choose
+      (exists_uniformBound_sqrt_riemannianFiberNormSq_linRicciConnDiffCoeff_of_jetEnvelope
         (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)
       + (Real.sqrt (Classical.choose
             (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
@@ -388,7 +391,7 @@ theorem corrFieldChristoffelBound_nonneg (g₀ : SmoothRiemannianMetric I M)
   split
   next h =>
     have hΛ := (Classical.choose_spec
-      (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
+      (exists_uniformBound_sqrt_riemannianFiberNormSq_linRicciConnDiffCoeff_of_jetEnvelope
         (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)).1
     have h1 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
         (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform

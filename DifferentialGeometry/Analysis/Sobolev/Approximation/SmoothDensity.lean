@@ -95,7 +95,6 @@ theorem exists_chartCutoff
     (chartImagePOUTsupport_subset_target (I := I) (M := M) α)
 
 omit [FiniteDimensional ℝ E] in
-
 lemma norm_le_one_of_range_Icc
     {η : EuclN → ℝ}
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1) (x : EuclN) :
@@ -108,7 +107,6 @@ lemma norm_le_one_of_range_Icc
   exact h2
 
 omit [FiniteDimensional ℝ E] in
-
 lemma exists_grad_bound_of_compactSupport_smooth
     {η : EuclN → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)

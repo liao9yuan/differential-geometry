@@ -85,7 +85,6 @@ private lemma eLpNorm_indicatorFactor_mul_atom_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma eLpNorm_finsetSum_le
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     (s : Finset ι) (F : ι → EuclN → ℝ)
@@ -107,7 +106,6 @@ private lemma eLpNorm_finsetSum_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma eLpNorm_finsetSum_le_const_mul_atomSum
     {ι κ : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     (s : Finset ι) (t : Finset κ) (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ)

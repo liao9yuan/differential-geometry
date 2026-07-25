@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.OpensRestrict
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -66,7 +65,6 @@ theorem exists_pullbackField
   classical
   obtain ⟨χ, P₀, hP₀smooth, hχ, hχK, hχsupp, hχ01, hP₀def⟩ :=
     exists_pullbackInner (I := I) Φ hK hKs h
-
   set G : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ := fun x =>
     P₀ x + (1 - χ x) • gM.inner x with hG
   have hGapply : ∀ (x : M) (v w : TangentSpace I x),

@@ -117,7 +117,6 @@ private theorem ccTensorBilinSymm_hasSum_eigenRealizeEval
       (ccTensorBilinSymm (I := I) g_bg T x v w) :=
   ((weyl_pointwise_diagonalKernel_bound_of_closed (I := I) (M := M) g_bg 0 2).2 a ha).2 T x v w
 
-set_option linter.unusedVariables false in
 theorem realize_eval_carrier_factorization
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -199,7 +198,6 @@ theorem pointwise_deriv_through_realize
   · exact hval s
   · exact hval t
 
-set_option linter.unusedVariables false in
 
 
 
@@ -234,7 +232,7 @@ theorem rhs_matches_deturck_at_solution
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2)
     (x : M) (v w : TangentSpace I x)
-    (hreal : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
+    (_hreal : ∀ (s : ℝ) (x' : M) (v' w' : TangentSpace I x'),
       (g_DT s).inner x' v' w'
         = g_bg.inner x' v' w' + ccTensorBilinSymm (I := I) g_bg (T_s s) x' v' w')
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
@@ -254,7 +252,7 @@ theorem rhs_matches_deturck_at_solution
         (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g_bg (Nsec u) x' v' w' =
         ccTensorBilinSymm (I := I) g_bg (repr u) x' v' w')
-    (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
+    (_hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
         metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')

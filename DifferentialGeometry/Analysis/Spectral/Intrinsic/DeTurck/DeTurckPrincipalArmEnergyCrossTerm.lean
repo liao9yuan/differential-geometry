@@ -41,7 +41,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
-    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)] (x : M) :
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)]
+      (x : M) :
     NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I x) :=
   Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
     (E := fun y : M => Tensor0SBundle.TensorRSSpace r s I y) x
@@ -98,7 +99,8 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
   have hCbr : ∀ (m : ℕ) (Z : SmoothCcTensor g₀ 0 2),
       ∑ j ∈ Finset.range (m + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j Z‖ ≤
         Cbr m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) Z‖ :=
-    fun m Z => (exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ m).choose_spec.2 Z
+    fun m Z => (exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀
+      m).choose_spec.2 Z
   obtain ⟨Ktame, hKtame_nn, hKtame⟩ :=
     deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic (I := I) (M := M) g₀ a (by omega)
       (mul_nonneg (hCbr_nn (a + 2)) hR₀) (show (1 : ℝ) / 3 < 1 by norm_num)
@@ -113,10 +115,12 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
     · exact norm_nonneg _
     · exact le_refl 0
   obtain ⟨Cm4in, hCm4in_nn, hCm4in⟩ :=
-    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha_super hR₀ 4 4 2 2 (by omega) (by omega)
+    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha_super hR₀ 4 4 2 2 (by omega)
+      (by omega)
       (fun i => Ktame (i + 2)) (fun i => hKtame_nn _) (fun l => Cbr (l + 2)) (fun l => hCbr_nn _)
   obtain ⟨Cm56in, hCm56in_nn, hCm56in⟩ :=
-    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha_super hR₀ 5 4 1 3 (by omega) (by omega)
+    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha_super hR₀ 5 4 1 3 (by omega)
+      (by omega)
       (fun i => Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1))
       (fun i => mul_nonneg (Real.sqrt_nonneg _) (hKtame_nn _)) (fun l => Cbr (l + 3))
       (fun l => hCbr_nn _)
@@ -147,7 +151,8 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
     fun y v w => tensorSectionRealizeMetric_inner (I := I) g₀ T₀ hδ_lt1 (hδ_fibre T₀ hball) y v w
   have hδC : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ :=
     hδ_fibre T₀ hball
-  have hjetball : ∀ jj : ℕ, jj ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 jj T₀‖ ≤ Cbr (a + 2) * R₀ := by
+  have hjetball : ∀ jj : ℕ, jj ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 jj T₀‖ ≤ Cbr (a + 2) *
+    R₀ := by
     intro jj hjj
     have hsum := hCbr (a + 2) T₀
     have hcast : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a + 2 : ℕ) : ℝ) T₀‖ ≤ R₀ := by
@@ -176,11 +181,14 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
   set Φ6 : SmoothCcTensor g₀ 5 4 :=
     covGrad (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) with hΦ6def
   set t4 : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂ (operatorFieldApply (I := I) (M := M) g₀ 4 4 Φ4 Wdata) with ht4def
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂
+      (operatorFieldApply (I := I) (M := M) g₀ 4 4 Φ4 Wdata) with ht4def
   set t5 : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂ (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ5 Wdata3) with ht5def
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂
+      (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ5 Wdata3) with ht5def
   set t6 : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂ (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ6 Wdata3) with ht6def
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 DT₂
+      (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ6 Wdata3) with ht6def
   set t2 : SmoothCcTensor g₀ 0 2 := operatorFieldApply (I := I) (M := M) g₀ 4 2 C W2 with ht2def
   set t3 : SmoothCcTensor g₀ 0 2 := operatorFieldApply (I := I) (M := M) g₀ 4 2 C W3 with ht3def
   have hDTjet : ∀ i, ‖iteratedCovGrad (I := I) g₀ 4 2 i DT₂‖ ≤
@@ -193,36 +201,43 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
   have hΦ4jet : ∀ i, ‖iteratedCovGrad (I := I) g₀ 4 4 i Φ4‖ ≤
       Ktame (i + 2) * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 : ℕ) : ℝ) T₀‖) := by
     intro i
-    have hcomp : ‖iteratedCovGrad (I := I) g₀ 4 4 i Φ4‖ = ‖iteratedCovGrad (I := I) g₀ 4 2 (2 + i) C‖ := by
+    have hcomp : ‖iteratedCovGrad (I := I) g₀ 4 4 i Φ4‖ = ‖iteratedCovGrad (I := I) g₀ 4 2 (2 + i)
+      C‖ := by
       rw [hΦ4def]; exact iteratedCovGrad_norm_comp (I := I) g₀ 4 2 2 i C
     rw [hcomp, show (2 + i : ℕ) = (i + 2 : ℕ) from by omega]
     exact hCtame (i + 2)
   have hΦslot : ∀ (i : ℕ) (Ψ : SmoothCcTensor g₀ 5 4)
-      (hcov : ‖iteratedCovGrad (I := I) g₀ 5 4 i Ψ‖ ≤ Real.sqrt (Module.finrank ℝ E) * ‖iteratedCovGrad (I := I) g₀ 4 2 (1 + i) C‖),
+      (hcov : ‖iteratedCovGrad (I := I) g₀ 5 4 i Ψ‖ ≤ Real.sqrt (Module.finrank ℝ E) *
+        ‖iteratedCovGrad (I := I) g₀ 4 2 (1 + i) C‖),
       ‖iteratedCovGrad (I := I) g₀ 5 4 i Ψ‖ ≤
-        Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
+        Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) *
+          (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
     intro i Ψ hcov
     rw [show (1 + i : ℕ) = (i + 1 : ℕ) from by omega] at hcov
     refine le_trans hcov ?_
     rw [mul_assoc]
     exact mul_le_mul_of_nonneg_left (hCtame (i + 1)) (Real.sqrt_nonneg _)
   have hΦ5jet : ∀ i, ‖iteratedCovGrad (I := I) g₀ 5 4 i Φ5‖ ≤
-      Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
+      Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) *
+        (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
     intro i
     refine hΦslot i Φ5 ?_
     rw [hΦ5def]
     refine le_trans (iteratedCovGrad_slotExtend_norm_le (I := I) g₀ 4 3 i
       (covGrad (I := I) (M := M) g₀ 4 2 C)) (le_of_eq ?_)
     have heq : ‖iteratedCovGrad (I := I) g₀ 4 3 i (covGrad (I := I) (M := M) g₀ 4 2 C)‖ =
-        ‖iteratedCovGrad (I := I) g₀ 4 2 (1 + i) C‖ := iteratedCovGrad_norm_comp (I := I) g₀ 4 2 1 i C
+        ‖iteratedCovGrad (I := I) g₀ 4 2 (1 + i) C‖ := iteratedCovGrad_norm_comp (I := I) g₀ 4 2 1 i
+          C
     rw [heq]
   have hΦ6jet : ∀ i, ‖iteratedCovGrad (I := I) g₀ 5 4 i Φ6‖ ≤
-      Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
+      Real.sqrt (Module.finrank ℝ E) * Ktame (i + 1) *
+        (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ) T₀‖) := by
     intro i
     refine hΦslot i Φ6 ?_
     have heq : ‖iteratedCovGrad (I := I) g₀ 5 4 i Φ6‖ =
         ‖iteratedCovGrad (I := I) g₀ 5 3 (1 + i) (slotExtend (I := I) (M := M) g₀ 4 2 C)‖ := by
-      rw [hΦ6def]; exact iteratedCovGrad_norm_comp (I := I) g₀ 5 3 1 i (slotExtend (I := I) (M := M) g₀ 4 2 C)
+      rw [hΦ6def]; exact iteratedCovGrad_norm_comp (I := I) g₀ 5 3 1 i
+        (slotExtend (I := I) (M := M) g₀ 4 2 C)
     rw [heq]
     exact iteratedCovGrad_slotExtend_norm_le (I := I) g₀ 4 2 (1 + i) C
   have hSjet : ∀ (m : ℕ), ‖iteratedCovGrad (I := I) g₀ 0 2 m S‖ ≤
@@ -243,7 +258,8 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
       Cbr (l + 3) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + 3 : ℕ) : ℝ) S‖ := by
     intro l
     have heq : ‖iteratedCovGrad (I := I) g₀ 0 5 l Wdata3‖ =
-        ‖iteratedCovGrad (I := I) g₀ 0 2 (3 + l) S‖ := iteratedCovGrad_norm_comp (I := I) g₀ 0 2 3 l S
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (3 + l) S‖ := iteratedCovGrad_norm_comp (I := I) g₀ 0 2 3 l
+          S
     rw [heq, show (3 + l : ℕ) = (l + 3 : ℕ) from by omega]
     exact hSjet (l + 3)
   have hW2 : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 4 l W2‖ ≤
@@ -251,7 +267,8 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + 2 : ℕ) : ℝ) S‖ := by
     intro l
     have hcomp : ‖iteratedCovGrad (I := I) g₀ 0 4 l W2‖ =
-        ‖iteratedCovGrad (I := I) g₀ 0 3 (1 + l) (pointwiseTensorCurv (I := I) (M := M) g₀ 2 S)‖ := by
+        ‖iteratedCovGrad (I := I) g₀ 0 3 (1 + l)
+          (pointwiseTensorCurv (I := I) (M := M) g₀ 2 S)‖ := by
       rw [hW2def]
       exact iteratedCovGrad_norm_comp (I := I) g₀ 0 3 1 l
         (pointwiseTensorCurv (I := I) (M := M) g₀ 2 S)
@@ -276,7 +293,8 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
           ∑ a ∈ Finset.range (l + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 (a + 1) S‖ := by
         refine Finset.sum_congr rfl (fun a _ => ?_)
         have hac : ‖iteratedCovGrad (I := I) g₀ 0 3 a (covGrad (I := I) (M := M) g₀ 0 2 S)‖ =
-            ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + a) S‖ := iteratedCovGrad_norm_comp (I := I) g₀ 0 2 1 a S
+            ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + a) S‖ := iteratedCovGrad_norm_comp (I := I) g₀ 0 2
+              1 a S
         rw [hac, show (1 + a : ℕ) = (a + 1 : ℕ) from by omega]
       rw [heq]
       have hsr := Finset.sum_range_succ' (fun k => ‖iteratedCovGrad (I := I) g₀ 0 2 k S‖) (l + 2)
@@ -298,11 +316,16 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
     fun l => hCm56in p T₀ hball Φ6 hΦ6jet Wdata3 hWdata3 l
   have hbt2 := hCE2 p T₀ hball C hCtame W2 hW2 j
   have hbt3 := hCE3 p T₀ hball C hCtame W3 hW3 j
-  have hbt4 := hCE4 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 4 4 Φ4 Wdata) hINNER4 j
-  have hbt5 := hCE56 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ5 Wdata3) hINNER5 j
-  have hbt6 := hCE56 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ6 Wdata3) hINNER6 j
-  have hdecomp : rawTensorConnLapSmooth (I := I) g₀ 0 2 (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ S) -
-      deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) =
+  have hbt4 := hCE4 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 4 4 Φ4 Wdata)
+    hINNER4 j
+  have hbt5 := hCE56 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ5 Wdata3)
+    hINNER5 j
+  have hbt6 := hCE56 p T₀ hball DT₂ hDTjet (operatorFieldApply (I := I) (M := M) g₀ 5 4 Φ6 Wdata3)
+    hINNER6 j
+  have hdecomp : rawTensorConnLapSmooth (I := I) g₀ 0 2
+    (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ S) -
+      deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)
+        =
       t2 + t3 + t4 + t5 + t6 := by
     have he : rawTensorConnLapSmooth (I := I) g₀ 0 2
           (operatorFieldApply (I := I) (M := M) g₀ 4 2 C (iteratedCovGrad (I := I) g₀ 0 2 2 S)) =
@@ -336,15 +359,20 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
   have hQS_nn : 0 ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := norm_nonneg _
   refine le_trans htri ?_
   have e2 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t2‖ ≤
-      CE2 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast]; exact hbt2
+      CE2 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast];
+                                                                                    exact hbt2
   have e3 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t3‖ ≤
-      CE3 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast]; exact hbt3
+      CE3 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast];
+                                                                                    exact hbt3
   have e4 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t4‖ ≤
-      CE4 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast]; exact hbt4
+      CE4 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast];
+                                                                                    exact hbt4
   have e5 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t5‖ ≤
-      CE56 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast]; exact hbt5
+      CE56 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast];
+                                                                                     exact hbt5
   have e6 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t6‖ ≤
-      CE56 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast]; exact hbt6
+      CE56 j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by rw [← hcast];
+                                                                                     exact hbt6
   calc ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t2‖ +
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t3‖ +
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) t4‖ +
@@ -391,7 +419,8 @@ private theorem arm_covGrad_coeffLower_l2_tame [Nonempty M]
     norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_one (I := I) (M := M) g₀
   have hm_super : 2 * (2 * (Module.finrank ℝ E / 2 + 1) + 1) ≤ a + 2 := by omega
   obtain ⟨Cq, hCq_nn, hCq⟩ :=
-    exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq (I := I) (M := M) g₀ 1 (a + 2) hm_super
+    exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq (I := I) (M := M) g₀ 1 (a + 2)
+      hm_super
   obtain ⟨Cj0, hCj0_nn, hCj0⟩ := iteratedCovGrad_le_connLap_add (I := I) (M := M) g₀ 0
   have hδ_lt1 : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
   have hδ_nn : 0 ≤ δ := delta_nonneg_of_ball_gFibreOpBound (I := I) (M := M) g₀ a hR₀ hδ_fibre
@@ -458,7 +487,8 @@ private theorem arm_covGrad_coeffLower_l2_tame [Nonempty M]
     refine le_trans hperord ?_
     rw [hBsqeq, hBsq_def]
     exact mul_le_mul_of_nonneg_left (add_le_add hj0 hj1) (hCpo_nn 1)
-  refine le_trans (operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g₀ 4 3
+  refine le_trans (operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g₀
+    4 3
     (covGrad (I := I) (M := M) g₀ 4 2 (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁))
     (iteratedCovGrad (I := I) g₀ 0 2 2 S) B hB_nn hΦ) ?_
   have hjet := hCj0 S
@@ -487,9 +517,11 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
 private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s Φ (W₁ - W₂) =
-      operatorFieldApply (I := I) (M := M) g r s Φ W₁ - operatorFieldApply (I := I) (M := M) g r s Φ W₂ := by
+      operatorFieldApply (I := I) (M := M) g r s Φ W₁ - operatorFieldApply (I := I) (M := M) g r s Φ
+        W₂ := by
   have h : operatorFieldApply (I := I) (M := M) g r s Φ (W₁ - W₂) +
-      operatorFieldApply (I := I) (M := M) g r s Φ W₂ = operatorFieldApply (I := I) (M := M) g r s Φ W₁ := by
+      operatorFieldApply (I := I) (M := M) g r s Φ W₂ = operatorFieldApply (I := I) (M := M) g r s Φ
+        W₁ := by
     rw [← appCc_add_right]
     congr 1
     abel
@@ -508,7 +540,8 @@ private lemma deTurckPrincipalCometricArm_sub (g₀ g₁ : SmoothRiemannianMetri
 private lemma smoothCcToTensorHs_subCross (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (u v : SmoothCcTensor g₀ 0 2) :
     smoothCcToTensorHs (I := I) (M := M) g₀ σ (u - v) =
-      smoothCcToTensorHs (I := I) (M := M) g₀ σ u - smoothCcToTensorHs (I := I) (M := M) g₀ σ v := by
+      smoothCcToTensorHs (I := I) (M := M) g₀ σ u - smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        v := by
   refine tensorHs.ext (funext fun i => ?_)
   simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, smoothCcToTensorHs_coeff,
     map_add, map_neg, tensorL2Coeff_eq_inner, inner_add_right, inner_neg_right]
@@ -690,7 +723,8 @@ theorem deTurckPrincipalCometricArm_realize_Hs_norm_succ_le [Nonempty M]
           CEκ * P + (Cgrad + CEκ * Cj1) * Q := by
         rw [hcov]
         refine le_trans (norm_add_le _ _) ?_
-        have hprinc' : ‖operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C)
+        have hprinc' : ‖operatorFieldApply (I := I) (M := M) g₀ 5 3
+          (slotExtend (I := I) (M := M) g₀ 4 2 C)
               (iteratedCovGrad (I := I) g₀ 0 2 3 S)‖ ≤ CEκ * P + CEκ * Cj1 * Q := by
           calc ‖operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C)
                 (iteratedCovGrad (I := I) g₀ 0 2 3 S)‖
@@ -771,7 +805,8 @@ theorem deTurckPrincipalCometricArm_realize_Hs_norm_succ_le [Nonempty M]
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 : ℕ) : ℝ)
               (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)‖ := by
           rw [hcommΔ, ← hA3Δ]
-        have hA3S := smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap (I := I) (M := M) g₀ (i + 1) S
+        have hA3S := smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap (I := I) (M := M) g₀ (i + 1)
+          S
         have hlower : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 1 : ℕ) : ℝ)
               (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)‖ =
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 3 : ℕ) : ℝ) S‖ := by

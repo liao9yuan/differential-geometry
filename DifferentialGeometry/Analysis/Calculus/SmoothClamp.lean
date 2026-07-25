@@ -78,7 +78,6 @@ theorem exists_smooth_clamp (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     refine contDiff_infty_iff_deriv.mpr ⟨hψ_diff, ?_⟩
     rw [hψ_deriv]
     exact χb.contDiff
-
   have hψ_id : ∀ t ∈ Set.Icc a b, ψ t = t := by
     intro t ht
     have hsub : Set.uIcc (0 : ℝ) t ⊆ Set.Icc a b :=
@@ -89,7 +88,6 @@ theorem exists_smooth_clamp (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     simp only
     rw [intervalIntegral.integral_congr hcongr]
     simp
-
   have hψ_le_pos : ∀ t : ℝ, 0 ≤ t → ψ t ≤ t := by
     intro t ht
     have hmono := intervalIntegral.integral_mono_on (μ := volume) ht (hχ_int 0 t) (h1_int 0 t)

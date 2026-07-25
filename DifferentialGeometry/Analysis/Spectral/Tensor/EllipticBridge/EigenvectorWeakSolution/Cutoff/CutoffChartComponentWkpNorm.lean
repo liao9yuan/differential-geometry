@@ -20,6 +20,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -34,7 +35,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -574,11 +576,11 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
   have hKc_in_α : Kc ⊆ (chartAt H α).source := hcM_supp_α
   have hKc_in_β : Kc ⊆ (chartAt H β).source := hcM_supp_β
   have hcE_smooth : ContDiff ℝ ∞ cE :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M) hcM_smooth hcM_supp_α
   have hcE_smooth' : ContDiff ℝ (⊤ : ℕ∞) cE := hcE_smooth
   have hcE_cpt : HasCompactSupport cE :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) hcM_supp_α
   obtain ⟨Ccoeff, hCcoeff_nn, hCcoeff_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport

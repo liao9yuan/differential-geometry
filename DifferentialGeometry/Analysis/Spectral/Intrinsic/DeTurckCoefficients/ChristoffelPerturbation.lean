@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Inve
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -12,6 +10,8 @@ open Bundle Set Matrix
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
@@ -217,7 +217,7 @@ private lemma exists_bound_of_contDiffOn_interior
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_uniform_bound_of_family
-    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {ι : Type*} [Finite ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
     (hf : ∀ i, ContDiffOn ℝ ∞ (f i) (interior (extChartAt I α).target))
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -466,7 +466,8 @@ lemma partialDeriv_gramBracket_eq
   have h2 := partial_chartGramOnE_differentiableAt_int (I := I) g α j l i hy
   have h3 := partial_chartGramOnE_differentiableAt_int (I := I) g α l i j hy
   unfold gramBracket gramBracketDeriv
-  rw [partialDeriv_sub (i := m) (fun y => partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
+  rw [partialDeriv_sub (i := m)
+    (fun y => partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
         partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y)
       (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j)) (h1.add h2) h3,
     partialDeriv_add (i := m) (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j))
@@ -646,7 +647,8 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
     (Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) (fun a _ => hterm a)) ?_
   simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) * jet1 =
-        (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) by ring]
+        (Module.finrank ℝ E : ℝ) *
+          ((Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) by ring]
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma gramBracketDeriv_sub_abs_le
@@ -941,7 +943,6 @@ private lemma abs_add_sub_le (A B C : ℝ) :
     _ = |A| + |B| + |C| := by rw [abs_neg]
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem gramBracket_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) (y : E) {Q : ℝ}
     (hQ : ∀ m a c, |partialDeriv (E := E) m

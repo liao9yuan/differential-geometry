@@ -239,7 +239,6 @@ lemma chartLeviCivitaInnerCLM_apply
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]
 
 open scoped Classical in
-
 def chartLeviCivita (g : SmoothRiemannianMetric I M) (α : M) :
     (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :=

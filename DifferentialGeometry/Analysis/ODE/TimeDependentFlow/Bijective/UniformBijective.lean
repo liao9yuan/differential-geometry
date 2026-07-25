@@ -12,7 +12,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] in
-
 theorem compact_uniform_horizon_extraction
     (U : M → Set M) (S : M → ℝ) (P : ℝ → M → Prop)
     (hU_open : ∀ α : M, IsOpen (U α))
@@ -49,7 +48,8 @@ theorem compact_uniform_horizon_extraction
       ⟨hs.1, lt_of_lt_of_le hs.2 (hTmin_le α hαS)⟩
     exact hP α x hxU s hs_α
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chart_cover_flow_bijective_two_sided_uniform_horizon
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)

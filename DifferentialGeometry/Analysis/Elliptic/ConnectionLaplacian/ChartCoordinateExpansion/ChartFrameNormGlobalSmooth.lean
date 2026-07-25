@@ -27,7 +27,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] : LocallyCompactSpace M := by
   haveI : LocallyCompactSpace H := I.locallyCompactSpace

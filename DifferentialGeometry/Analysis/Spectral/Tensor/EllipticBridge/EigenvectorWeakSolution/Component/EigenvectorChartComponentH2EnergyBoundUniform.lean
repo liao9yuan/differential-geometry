@@ -33,7 +33,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
@@ -126,7 +127,6 @@ private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeF
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 private noncomputable def perAlphaPCConstant
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : ℝ :=
@@ -135,7 +135,6 @@ private noncomputable def perAlphaPCConstant
       (I := I) (M := M) g r s α P₀)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -146,7 +145,6 @@ private lemma perAlphaPCConstant_nonneg
       (I := I) (M := M) g r s α P₀)).1
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma perAlphaPCConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -218,7 +216,6 @@ private lemma perAlphaPCConstant_le_totalActivePCConstant
   exact h_inner_le.trans h_outer_le
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

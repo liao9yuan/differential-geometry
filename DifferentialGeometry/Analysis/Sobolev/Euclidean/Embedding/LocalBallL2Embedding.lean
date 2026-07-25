@@ -603,7 +603,8 @@ theorem smooth_localBall_L2_pointwise_embedding
     refine mul_le_mul_of_nonneg_left ?_ hC₁_nn
     refine h_revbridge.trans ?_
     exact mul_le_mul_of_nonneg_left h_Wsum_le hdpow_nn
-  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+  have h_morrey_chain : ‖χf x‖ ≤ C₂ *
+    (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h0 : ‖iteratedFDeriv ℝ 0 χf x‖ = ‖χf x‖ := by rw [norm_iteratedFDeriv_zero]
     rw [← h0]
     refine h_morrey.trans ?_
@@ -890,7 +891,8 @@ theorem smooth_localBall_L2_pointwise_embedding_supercritical
     refine mul_le_mul_of_nonneg_left ?_ hC₁_nn
     refine h_revbridge.trans ?_
     exact mul_le_mul_of_nonneg_left h_Wsum_le hdpow_nn
-  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+  have h_morrey_chain : ‖χf x‖ ≤ C₂ *
+    (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h0 : ‖iteratedFDeriv ℝ 0 χf x‖ = ‖χf x‖ := by rw [norm_iteratedFDeriv_zero]
     rw [← h0]
     refine h_morrey.trans ?_

@@ -45,7 +45,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem interiorProductField_contMDiff (s : ℕ)
     (α : ∀ x : M, Tensor0SBundle.Tensor0SSpace (s + 1) I x)
     (hα : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)) ∞
@@ -56,7 +57,8 @@ theorem interiorProductField_contMDiff (s : ℕ)
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace s I z) x
         (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x (X x) (α x))) := by
-  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (s + 1)
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (s + 1)
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) s
   intro x₀
   rw [Bundle.contMDiffAt_section (F := Tensor0SBundle.Tensor0SModel s ℝ E)
@@ -70,12 +72,12 @@ theorem interiorProductField_contMDiff (s : ℕ)
           ((trivializationAt E (TangentSpace I) x₀ ⟨x, X x⟩).2)
           ((trivializationAt (Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
             (fun x => Tensor0SBundle.Tensor0SSpace (s + 1) I x) x₀ ⟨x, α x⟩).2)) x₀ :=
-    ((contMDiffAt_const (c := Tensor0SBundle.model_interior_bilinear ℝ E s)).clm_apply hX').clm_apply hα'
+    ((contMDiffAt_const (c := Tensor0SBundle.model_interior_bilinear ℝ E s)).clm_apply
+      hX').clm_apply hα'
   refine h_combine.congr_of_eventuallyEq ?_
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-
   apply ContinuousMultilinearMap.ext
   intro v
   set symmL := (trivializationAt E (TangentSpace I) x₀).symmL ℝ x with hsymmL
@@ -88,7 +90,8 @@ theorem interiorProductField_contMDiff (s : ℕ)
   · change ((X x : TangentSpace I x) : E) = symmL gtilde
     have h := (trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
       (R := ℝ) hx (X x)
-    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x (X x) = gtilde := by
+    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x (X x) =
+      gtilde := by
       change (trivializationAt E (TangentSpace I) x₀).linearMapAt ℝ x (X x) = _
       rw [(trivializationAt E (TangentSpace I) x₀).coe_linearMapAt_of_mem (R := ℝ) hx]
     rw [hcl] at h
@@ -98,7 +101,8 @@ theorem interiorProductField_contMDiff (s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem contractTraceField_contMDiff (r s : ℕ)
     (T : ∀ x : M, Tensor0SBundle.TensorRSSpace (1 + r) (s + 1) I x)
     (hT : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (1 + r) (s + 1) ℝ E)) ∞
@@ -107,11 +111,15 @@ theorem contractTraceField_contMDiff (r s : ℕ)
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x
-        (Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x (T x))) := by
-  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (1 + r) (s + 1)
+        (Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x
+          (T x))) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (1 + r) (s + 1)
   letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
-  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (s + 1)
-  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (1 + r)
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (s + 1)
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (1 + r)
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) s
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r
   intro x₀
@@ -128,9 +136,9 @@ theorem contractTraceField_contMDiff (r s : ℕ)
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-
   set L : E →L[ℝ] E := (trivializationAt E (TangentSpace I) x₀).symmL ℝ x with hLdef
-  set Linv : E →L[ℝ] E := (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x with hLinvdef
+  set Linv : E →L[ℝ] E := (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x with
+    hLinvdef
   set Tx : Tensor0SBundle.TensorRSModel (1 + r) (s + 1) ℝ E :=
     Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x (T x) with hTxdef
   have hL : L.comp Linv = ContinuousLinearMap.id ℝ E := by
@@ -201,7 +209,8 @@ theorem contractTraceField_contMDiff (r s : ℕ)
   have h_output :
       (trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
         (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀
-        ⟨x, Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x (T x)⟩).2 =
+        ⟨x, Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x
+          (T x)⟩).2 =
       (Tensor0SBundle.model_covariantChange (𝕜 := ℝ) (E := E) s L).comp
         ((Tensor0SBundle.model_contract_trace (𝕜 := ℝ) (E := E) r s Tx).comp
           (Tensor0SBundle.model_covariantChange (𝕜 := ℝ) (E := E) r Linv)) := by
@@ -216,12 +225,12 @@ theorem contractTraceField_contMDiff (r s : ℕ)
         ((Tensor0SBundle.model_contract_trace (𝕜 := ℝ) (E := E) r s Tx)
           ((Tensor0SBundle.model_covariantChange (𝕜 := ℝ) (E := E) r Linv) β))) v
     rw [h_cLMAt, Tensor0SBundle.model_covariantChange_apply]
-
     change ((Tensor0SBundle.model_contract_trace (𝕜 := ℝ) (E := E) r s
           ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x) (T x)))
         ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) r x)
           ((trivializationAt (Tensor0SBundle.Tensor0SModel r ℝ E)
-            (fun z : M => Tensor0SBundle.Tensor0SSpace r I z) x₀).symmL ℝ x β))) (fun i => L (v i)) =
+            (fun z : M => Tensor0SBundle.Tensor0SSpace r I z) x₀).symmL ℝ x β))) (fun i => L (v i))
+              =
       (((Tensor0SBundle.model_contract_trace (𝕜 := ℝ) (E := E) r s) Tx)
         ((Tensor0SBundle.model_covariantChange (𝕜 := ℝ) (E := E) r Linv) β)) (fun i => L (v i))
     have hβ2 : (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) r x)
@@ -238,7 +247,8 @@ theorem contractTraceField_contMDiff (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensor0SField_castRank_contMDiff {m n : ℕ} (h : m = n)
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel m ℝ E)) ∞
@@ -251,13 +261,13 @@ theorem tensor0SField_castRank_contMDiff {m n : ℕ} (h : m = n)
           (modelRankCast (E := E) h (Tensor0SBundle.Tensor0SSpace.toModel (Y x))))) := by
   subst h
   refine hY.congr (fun x => ?_)
-
   simp only [modelRankCast_refl, Tensor0SBundle.Tensor0SSpace.ofModel_toModel]
 
 noncomputable def cometricLmodel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E :=
   (inverseMetricSharpFib (I := I) g₀ x).comp
-    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm.toContinuousLinearMap
+    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1
+      x).symm.toContinuousLinearMap
 
 noncomputable def modelDoubleTrace (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
     Tensor0SBundle.Tensor0SModel (s + 2) ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel s ℝ E :=
@@ -285,14 +295,18 @@ theorem modelDoubleTrace_apply (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ
 noncomputable def ricciCometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
   (-2 : ℝ) •
-    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
+    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a)
+      x).symm.toContinuousLinearMap.comp
       ((modelDoubleTrace (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)).comp
         ((modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)).comp
-          (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap))
+          (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a)
+            x).toContinuousLinearMap))
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-@[simp] theorem ricciCometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+@[simp] theorem ricciCometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciCometricDoubleTraceFib (I := I) g₀ a x D) =
       (-2 : ℝ) • modelDoubleTrace (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)
@@ -327,7 +341,6 @@ theorem model_contract_trace_raiseSlot0ModelL (s : ℕ)
     (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) m,
     modelDoubleTrace_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-
   have htw : Tensor0SBundle.model_tensorWithCovector_first (𝕜 := ℝ) (E := E) 0
         (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
           (LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord i)))
@@ -343,7 +356,6 @@ theorem model_contract_trace_raiseSlot0ModelL (s : ℕ)
       Tensor0SBundle.model_covectorOfCLM_apply, Tensor0SBundle.model_covectorOfCLM_apply]
     rfl
   rw [htw, raiseSlot0ModelL_apply]
-
   rw [show ((Module.finBasis ℝ E).cDualBasis i) =
       LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord i) from by
         rw [Module.Basis.cDualBasis, Module.Basis.map_apply]
@@ -353,12 +365,14 @@ theorem model_contract_trace_raiseSlot0ModelL (s : ℕ)
 
 noncomputable def cometricRaiseSlot0Fib (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SBundle.Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SBundle.TensorRSSpace 1 (s + 1) I x :=
-  (Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 1 (s + 1) x).symm.toContinuousLinearMap.comp
+  (Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 1 (s + 1)
+    x).symm.toContinuousLinearMap.comp
     ((raiseSlot0ModelL (E := E) s (cometricLmodel (I := I) g₀ x)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (s + 2) x).toContinuousLinearMap)
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem cometricRaiseSlot0Fib_toModel (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (s + 2) I x) :
     Tensor0SBundle.TensorRSSpace.toModel (cometricRaiseSlot0Fib (I := I) g₀ s x D) =
@@ -367,7 +381,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Bound
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace (s + 2) I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 2) ℝ E)) ∞
@@ -378,12 +393,14 @@ theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 (s + 1) I z) x
         (cometricRaiseSlot0Fib (I := I) g₀ s x (Y x))) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (s + 1) I x)
-    (φ := fun x => (show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I x from
+    (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E)
+      (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (s + 1) I x)
+    (φ := fun x => (show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace
+      (s + 1) I x from
       cometricRaiseSlot0Fib (I := I) g₀ s x (Y x)))
   intro β
-
   have hsharpβ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
         (inverseMetricSharpFib (I := I) g₀ x (β x))) :=
@@ -391,10 +408,8 @@ theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I
       (inverseMetricSharpField_contMDiff (I := I) g₀) β.contMDiff
   let sharpβ : ContMDiffSection I E ∞ (TangentSpace I : M → Type _) :=
     ⟨fun x : M => inverseMetricSharpFib (I := I) g₀ x (β x), hsharpβ⟩
-
   have hcontract := interiorProductField_contMDiff (I := I) (s + 1) (fun x => Y x) hY sharpβ
   refine hcontract.congr (fun x => ?_)
-
   change TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
       (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) x
       (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (s + 1) x (sharpβ x) (Y x)) =
@@ -402,7 +417,6 @@ theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I
       (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) x
       ((show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I x from
         cometricRaiseSlot0Fib (I := I) g₀ s x (Y x)) (β x))
-
   congr 1
 
 
@@ -430,11 +444,12 @@ theorem ricciCometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M
         (E := fun z : M => Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I z) x
         (ricciCometricDoubleTraceFib (I := I) g₀ a x)) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel (4 + a) ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (4 + a) I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel (2 + a) ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (2 + a) I x)
+    (F₁ := Tensor0SBundle.Tensor0SModel (4 + a) ℝ E)
+      (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (4 + a) I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (2 + a) I x)
     (φ := fun x => ricciCometricDoubleTraceFib (I := I) g₀ a x)
   intro Y
-
   let Y' : ∀ x : M, Tensor0SBundle.Tensor0SSpace ((2 + a) + 2) I x :=
     fun x => Tensor0SBundle.Tensor0SSpace.ofModel
       (modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)
@@ -442,42 +457,39 @@ theorem ricciCometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M
   have hY' : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel ((2 + a) + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel ((2 + a) + 2) ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace ((2 + a) + 2) I z) x (Y' x)) :=
-    tensor0SField_castRank_contMDiff (I := I) (by omega : (4 + a) = (2 + a) + 2) (fun x => Y x) Y.contMDiff
-
+    tensor0SField_castRank_contMDiff (I := I) (by omega : (4 + a) = (2 + a) + 2) (fun x => Y x)
+      Y.contMDiff
   have hraise := cometricRaiseSlot0Fib_section_contMDiff (I := I) g₀ (2 + a) Y' hY'
-
   have htrace := contractTraceField_contMDiff (I := I) 0 (2 + a)
     (fun x => cometricRaiseSlot0Fib (I := I) g₀ (2 + a) x (Y' x)) hraise
   have htraceUnit : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
-        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I
+          x from
           Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 (2 + a) x
             (cometricRaiseSlot0Fib (I := I) g₀ (2 + a) x (Y' x)))
           (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
     ContMDiff.clm_bundle_apply (b := id) htrace
       (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff
-
   have hscaled : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
-        ((-2 : ℝ) • ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        ((-2 : ℝ) • ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace
+          (2 + a) I x from
           Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 (2 + a) x
             (cometricRaiseSlot0Fib (I := I) g₀ (2 + a) x (Y' x)))
           (Integral.Connection.unitZeroSec (I := I) (M := M) x)))) :=
     ContMDiff.const_smul_section (a := (-2 : ℝ)) htraceUnit
   refine hscaled.congr (fun x => ?_)
-
   congr 1
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
   beta_reduce
   rw [ricciCometricDoubleTraceFib_toModel, Tensor0SBundle.Tensor0SSpace.toModel_smul]
   congr 1
-
   rw [← model_contract_trace_raiseSlot0ModelL (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)
     (modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)
       (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))]
-
   rw [contract_trace_unitZero_toModel (I := I) (2 + a) x
     (cometricRaiseSlot0Fib (I := I) g₀ (2 + a) x (Y' x))]
   congr 1
@@ -489,10 +501,12 @@ noncomputable def cometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (p 
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) p x).symm.toContinuousLinearMap.comp
     ((modelDoubleTrace (E := E) p (cometricLmodel (I := I) g₀ x)).comp
       ((modelRankCast (E := E) (rfl : (p + 2) = p + 2)).comp
-        (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (p + 2) x).toContinuousLinearMap))
+        (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (p + 2)
+          x).toContinuousLinearMap))
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem cometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₀ p x D) =
@@ -513,13 +527,13 @@ theorem cometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M) (p 
         (E := fun z : M => Tensor0SBundle.TensorRSSpace (p + 2) p I z) x
         (cometricDoubleTraceFib (I := I) g₀ p x)) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel (p + 2) ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (p + 2) I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel p ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace p I x)
+    (F₁ := Tensor0SBundle.Tensor0SModel (p + 2) ℝ E)
+      (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (p + 2) I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel p ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace p I x)
     (φ := fun x => cometricDoubleTraceFib (I := I) g₀ p x)
   intro Y
-
   have hraise := cometricRaiseSlot0Fib_section_contMDiff (I := I) g₀ p (fun x => Y x) Y.contMDiff
-
   have htrace := contractTraceField_contMDiff (I := I) 0 p
     (fun x => cometricRaiseSlot0Fib (I := I) g₀ p x (Y x)) hraise
   have htraceUnit : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel p ℝ E)) ∞
@@ -532,7 +546,6 @@ theorem cometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M) (p 
     ContMDiff.clm_bundle_apply (b := id) htrace
       (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff
   refine htraceUnit.congr (fun x => ?_)
-
   congr 1
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
   beta_reduce
@@ -555,7 +568,8 @@ noncomputable def cometricDoubleTraceField (g₀ : SmoothRiemannianMetric I M) (
 
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
-@[simp] theorem cometricDoubleTraceField_toSection (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
+@[simp] theorem cometricDoubleTraceField_toSection (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (x : M) :
     (cometricDoubleTraceField (I := I) g₀ p).toSection x =
       (show Tensor0SBundle.TensorRSSpace (p + 2) p I x from
         cometricDoubleTraceFib (I := I) g₀ p x) := rfl
@@ -584,7 +598,8 @@ private theorem model_cons_slot0_smul {s : ℕ} (c : ℝ) (u : E)
   rw [h, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
 
-omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
@@ -618,7 +633,8 @@ private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
 
-omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) (u : TangentSpace I y) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -651,7 +667,8 @@ private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M
       rw [hcoeff i, hbse i]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cometricLmodel_dualBasis_inner (g₀ : SmoothRiemannianMetric I M) (y : M)
     (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I y) :
     g₀.inner y (cometricLmodel (I := I) g₀ y
@@ -681,7 +698,8 @@ private theorem cometricLmodel_dualBasis_inner (g₀ : SmoothRiemannianMetric I 
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
 
 
-omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
@@ -810,7 +828,8 @@ private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) 
     rw [hadd, ih, Finset.sum_cons]
 
 
-omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem cometricDoubleTraceFib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     (p : ℕ) (x : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I y) :
@@ -1173,7 +1192,8 @@ theorem cometricDoubleTraceField_covGrad_eq_zero (g₀ : SmoothRiemannianMetric 
     have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel p ℝ E)) ∞
         (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel p ℝ E)
           (E := fun z : M => Tensor0SBundle.Tensor0SSpace p I z) y
-          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace p I y from
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace p I
+            y from
             (cometricDoubleTraceField (I := I) g₀ p).toSection y) (w y))) :=
       ContMDiff.clm_bundle_apply (b := id)
         (cometricDoubleTraceField (I := I) g₀ p).toSection.contMDiff w.contMDiff
@@ -1205,7 +1225,8 @@ theorem cometricDoubleTraceField_covGrad_eq_zero (g₀ : SmoothRiemannianMetric 
     have hfinal : (Tensor0SNabla.tensor0SCovariantDerivative I M p
           (LeviCivita (I := I) g₀)).toFun
           (fun y : M =>
-            (show Tensor0SBundle.Tensor0SSpace (p + 2) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace p I y from
+            (show Tensor0SBundle.Tensor0SSpace (p + 2) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace p I
+              y from
               (cometricDoubleTraceField (I := I) g₀ p).toSection y) (w y)) x v =
         (show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace p I x from
           (cometricDoubleTraceField (I := I) g₀ p).toSection x)

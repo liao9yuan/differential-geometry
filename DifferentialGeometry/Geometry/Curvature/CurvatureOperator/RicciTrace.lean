@@ -42,7 +42,8 @@ private lemma pushforward_eval
   conv_lhs => rw [show b = Φ (Φ.symm b) from (Φ.apply_symm_apply b).symm]
   exact pushforward_eval_at_image (I := I) Φ Y (Φ.symm b)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_symm_compose
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (⇑Φ.symm) (Φ x) (mfderiv I I (⇑Φ) x v) = v := by
@@ -56,7 +57,8 @@ private lemma mfderiv_symm_compose
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f v) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_compose_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (⇑Φ) x (mfderiv I I (⇑Φ.symm) (Φ x) w) = w := by
@@ -162,7 +164,8 @@ private lemma pushforward_covApply_eq
   rw [hLHS_eval, hRHS_pf_Y]
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) y :=
     (hZ y).mdifferentiableAt (by simp)
-  have hchain := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y y) hZ_at
+  have hchain := LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ
+    (Y y) hZ_at
   rw [hchain, hb]
 
 private lemma riemannSec_pullback_pointwise
@@ -192,7 +195,8 @@ private lemma riemannSec_pullback_pointwise
   have hterm1 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ Y Z) x (X x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ Y Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (X x)) :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (X x) hcovYZ_at
+    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (X x)
+      hcovYZ_at
   have hcovXZ_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov₁ X Z)) := by
     have hZ_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% Z) := by simpa using hZ
     intro x'
@@ -202,7 +206,8 @@ private lemma riemannSec_pullback_pointwise
   have hterm2 : mfderiv I I (⇑Φ) x (cov₁.toFun (covApply cov₁ X Z) x (Y x))
       = cov₂.toFun (Diffeomorph.pushforward Φ (covApply cov₁ X Z)) (Φ x)
           (mfderiv I I (⇑Φ) x (Y x)) :=
-    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y x) hcovXZ_at
+    LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ (Y x)
+      hcovXZ_at
   have hZ_at : MDifferentiableAt I I.tangent (T% Z) x :=
     (hZ x).mdifferentiableAt (by simp)
   have hterm3 : mfderiv I I (⇑Φ) x (cov₁.toFun Z x (mlieBracket I X Y x))

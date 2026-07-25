@@ -186,11 +186,15 @@ theorem exists_ricciArmOrder1Coeff
     ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
         ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1) -
-            ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1) =
+            ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0)
+              (v 1) =
           unitModel (I := I) (M := M) g₀ 2
-            (operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hc0, hc1, hc2, hid⟩ :=
     exists_linearizedRicci_threeArm_coeffFields (I := I) (M := M) g₀ g_bg T T'
@@ -219,8 +223,10 @@ theorem exists_ricciArmOrder1Coeff
   have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
       linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
         unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v
-          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v
-          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v := by
+          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁)
+            x v
+          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂)
+            x v := by
     rw [MeasureTheory.ae_iff]
     have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
     refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
@@ -232,18 +238,20 @@ theorem exists_ricciArmOrder1Coeff
     have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 :=
       ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
     exact hsneq (by rw [hid s hsIoo x v, unitModel_add2_apply, unitModel_add2_apply])
-
   rw [intervalIntegral.integral_congr_ae hintegrand]
   have hI0 : IntervalIntegrable
-      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v)
+      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v)
       MeasureTheory.volume 0 1 :=
     threeArm_unitModel_appCc_intervalIntegrable (I := I) g₀ 2 Φ₀ W₀ hSI hc0 x v
   have hI1 : IntervalIntegrable
-      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v)
+      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v)
       MeasureTheory.volume 0 1 :=
     threeArm_unitModel_appCc_intervalIntegrable (I := I) g₀ 3 Φ₁ W₁ hSI hc1 x v
   have hI2 : IntervalIntegrable
-      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v)
+      (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v)
       MeasureTheory.volume 0 1 :=
     threeArm_unitModel_appCc_intervalIntegrable (I := I) g₀ 4 Φ₂ W₂ hSI hc2 x v
   rw [intervalIntegral.integral_add (hI0.add hI1) hI2,
@@ -279,20 +287,26 @@ theorem ricciTensor_realize_sub_eq_threeArm_appCc
                 (smoothRiemannianMetricToInfty (I := I)
                   (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')) x (v 0) (v 1)) =
           unitModel (I := I) (M := M) g₀ 2
-            (operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   obtain ⟨R₀, R₁, R₂, hR⟩ :=
     exists_ricciArmOrder1Coeff (I := I) (M := M) g₀ g_bg T T'
       hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨(-2 : ℝ) • R₀, (-2 : ℝ) • R₁, (-2 : ℝ) • R₂, fun x v => ?_⟩
   set A₀ : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with hA₀
+    operatorFieldApply (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with
+      hA₀
   set A₁ : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with hA₁
+    operatorFieldApply (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with
+      hA₁
   set A₂ : SmoothCcTensor g₀ 0 2 :=
-    operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hA₂
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with
+      hA₂
   rw [appCc_smul_left_local, appCc_smul_left_local, appCc_smul_left_local, ← hA₀, ← hA₁, ← hA₂]
   have hsmulsum : (-2 : ℝ) • A₀ + (-2 : ℝ) • A₁ + (-2 : ℝ) • A₂ =
       (-2 : ℝ) • (A₀ + A₁ + A₂) := by

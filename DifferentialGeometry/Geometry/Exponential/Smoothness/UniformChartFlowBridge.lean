@@ -133,7 +133,8 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : UniformChartFlowBridge (I := I) g p) :
@@ -188,7 +189,8 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     exact hheq
   exact hF_cd.congr_of_eventuallyEq hev
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem expMap_contMDiffAt_zero_exists
     (g : SmoothRiemannianMetric I M) (p : M)
     (huniform : ∃ (Φ : (E × E) × ℝ → E × E) (t' ρ : ℝ), 0 < t' ∧ 0 < ρ ∧

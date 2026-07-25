@@ -39,11 +39,13 @@ theorem tensorL2Inner_covGrad_appCcRS_eq_add (g : SmoothRiemannianMetric I M) (a
             (covGrad (I := I) (M := M) g a b W)).toFun T.toFun := by
   classical
   set A1 : SmoothCcTensor g a (c + 1) :=
-    ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W with hA1
+    ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W with
+      hA1
   set A2 : SmoothCcTensor g a (c + 1) :=
     ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
       (covGrad (I := I) (M := M) g a b W) with hA2
-  have hB : covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) = A1 + A2 :=
+  have hB : covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) = A1
+    + A2 :=
     covGrad_appCcRS_eq (I := I) (M := M) g a b c Φ W
   have hstep := congrArg
     (fun Z : SmoothCcTensor g a (c + 1) =>
@@ -124,7 +126,8 @@ theorem tensorL2Inner_rawConnLap_appCcRS_eq_neg_covGrad_split (g : SmoothRiemann
     (covGrad (I := I) (M := M) g a c A).toFun
     (covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W)).toFun
   have hsymm1 := tensorL2Inner_symm (I := I) (M := M) g a (c + 1)
-    (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W).toFun
+    (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ)
+      W).toFun
     (covGrad (I := I) (M := M) g a c A).toFun
   have hsymm2 := tensorL2Inner_symm (I := I) (M := M) g a (c + 1)
     (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1)

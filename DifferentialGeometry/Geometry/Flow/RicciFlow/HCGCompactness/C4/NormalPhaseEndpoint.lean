@@ -110,7 +110,6 @@ private theorem exists_smooth_q
   · simpa only [threshold] using herrQ
 
 omit [CompleteSpace E] [I.Boundaryless] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem normal_enorm
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :

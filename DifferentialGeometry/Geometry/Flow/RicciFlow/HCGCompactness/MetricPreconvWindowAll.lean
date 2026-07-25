@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -51,7 +50,9 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metric_ext_inner
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (h : forall x : M, g₁.inner x = g₂.inner x) :
@@ -64,7 +65,9 @@ theorem metric_ext_inner
 
 
 
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricInnerApply_diff_le
     (A B gRef : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
@@ -75,7 +78,6 @@ theorem metricInnerApply_diff_le
   classical
   set n : Real := (Module.finrank Real (TangentSpace I x) : Real) with hn
   set D := metricDiffCovDerivAt (I := I) 0 A B gRef x with hD
-
   have hsymmA : A.inner x v w = A.inner x w v := A.symm x v w
   have hsymmB : B.inner x v w = B.inner x w v := B.symm x v w
   have hpol : A.inner x v w - B.inner x v w
@@ -83,7 +85,6 @@ theorem metricInnerApply_diff_le
          - (A.inner x v v - B.inner x v v)
          - (A.inner x w w - B.inner x w w)) / 2 := by
     rw [metric_add_self A x v w, metric_add_self B x v w]; rw [hsymmA, hsymmB]; ring
-
   have hqf : forall u : TangentSpace I x,
       |A.inner x u u - B.inner x u u|
         <= n * metricDerivNorm (I := I) 0 A B gRef x * gRef.inner x u u := fun u =>
@@ -115,7 +116,9 @@ theorem metricInnerApply_diff_le
 
 
 
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricCInf_inner
     (gSeq : ℕ → SmoothRiemannianMetric I M) (gInf gRef : SmoothRiemannianMetric I M)
@@ -162,7 +165,9 @@ theorem metricCInf_inner
 
 
 
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricCInf_unique
     (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -178,7 +183,9 @@ theorem metricCInf_unique
 
 
 
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricInner_cauchy
     (gk : Nat -> SmoothRiemannianMetric I M) (gRef : SmoothRiemannianMetric I M)
@@ -200,7 +207,6 @@ theorem metricInner_cauchy
   have hnnn : 0 <= n := by rw [hn]; positivity
   rw [Metric.cauchySeq_iff]
   intro eps heps
-
   obtain ⟨k0, hk0⟩ := hcauchy (eps / (n * S + 1)) (by positivity)
   refine ⟨k0, fun m hm l hl => ?_⟩
   rw [Real.dist_eq]
@@ -213,7 +219,6 @@ theorem metricInner_cauchy
     hk0 m hm l hl
   have hmdnn : 0 <= metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x := Real.sqrt_nonneg _
   have hdenpos : 0 < n * S + 1 := by positivity
-
   have hkey : n * metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x * S <
       eps := by
     have hprod : n * metricDerivNorm (I := I) 0 (gk m) (gk l) gRef x * S
@@ -235,7 +240,9 @@ theorem metricInner_cauchy
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem metricLimit_uniq
     (gk : Nat -> SmoothRiemannianMetric I M) (A B : SmoothRiemannianMetric I M)
     (hcauchy : forall x : M, forall v w : TangentSpace I x,
@@ -249,7 +256,6 @@ theorem metricLimit_uniq
     A = B := by
   refine metric_ext_inner A B fun x => ?_
   refine ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => ?_
-
   have hAvw : Filter.Tendsto (fun m => (gk (psiA m)).inner x v w) Filter.atTop
       (nhds (A.inner x v w)) := by
     have hc : Continuous fun T : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real =>
@@ -264,7 +270,6 @@ theorem metricLimit_uniq
       (ContinuousLinearMap.apply Real Real w).continuous.comp
         (ContinuousLinearMap.apply Real (TangentSpace I x →L[Real] Real) v).continuous
     exact (hc.tendsto _).comp (hB x)
-
   have hfullA : Filter.Tendsto (fun k => (gk k).inner x v w) Filter.atTop
       (nhds (A.inner x v w)) :=
     tendsto_nhds_of_cauchySeq_of_subseq (hcauchy x v w) hpsiA.tendsto_atTop hAvw
@@ -376,7 +381,6 @@ theorem windowGInfPt (hne : Nonempty M)
         forall a : Nat, a <= p -> forall x, x ∈ K ->
           metricDerivNorm (I := I) a (gInf s) (gInf t) gRef x <= L * |s - t| :=
     infLipOfConv (I := I) K beta psiT p gSeq gInf gRef phi L hgLip hfull
-
   have hwinPt : forall eps : Real, 0 < eps -> exists k0 : Nat, forall k : Nat, k0 <= k ->
       forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= p -> forall x, x ∈ K ->
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
@@ -384,7 +388,8 @@ theorem windowGInfPt (hne : Nonempty M)
     have hLpos : (0 : Real) < L + 1 := by linarith
     set delta : Real := eps / (3 * (L + 1)) with hdeltadef
     have hdeltapos : 0 < delta := by rw [hdeltadef]; positivity
-    have hcover : Set.Icc beta psiT ⊆ ⋃ tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
+    have hcover : Set.Icc beta psiT ⊆ ⋃ tau :
+      {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         Metric.ball (tau : Real) delta := by
       intro t ht
       obtain ⟨n, hn⟩ := hdense t ht delta hdeltapos
@@ -397,7 +402,8 @@ theorem windowGInfPt (hne : Nonempty M)
       (fun _ => Metric.isOpen_ball) hcover
     have hk0 : forall tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= p -> forall x, x ∈ K ->
-          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps /
+            3 :=
       fun tau => hfull (tau : Real) tau.2.2 (eps / 3) (by positivity)
     choose k0fun hk0fun using hk0
     refine ⟨F.sup k0fun, fun k hk t ht a hap x hxK => ?_⟩
@@ -411,15 +417,18 @@ theorem windowGInfPt (hne : Nonempty M)
         <= L * |t - (tau : Real)| := by
       have := hInfLip (tau : Real) tau.2.2 t ht a hap x hxK
       rwa [abs_sub_comm] at this
-    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x <
+      eps / 3 :=
       hk0fun tau k (le_trans (Finset.le_sup htauF) hk) a hap x hxK
     have htri : metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <=
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) gRef x
         + (metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x
           + metricDerivNorm (I := I) a (gInf (tau : Real)) (gInf t) gRef x) := by
       refine le_trans
-        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t) gRef x) ?_
-      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) (gInf t) gRef x
+        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t)
+          gRef x) ?_
+      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real))
+        (gInf t) gRef x
       linarith
     have hdb : L * |t - (tau : Real)| <= L * delta := mul_le_mul_of_nonneg_left hdist.le hL
     have hsmall : 2 * L * delta < 2 * eps / 3 := by
@@ -468,12 +477,8 @@ theorem windowGInfAll
             forall t, t ∈ Set.Icc beta psiT ->
               metricDerivNormSupOn (I := I) K p (gSeq (phi k) t) (gInf t) gRef < eps := by
   classical
-
   let Kx : CompactExhaustion M := CompactExhaustion.choice M
   have hKxc : forall j : Nat, IsCompact (Kx j) := fun j => Kx.isCompact j
-
-
-
   set P : Nat -> (Nat -> Nat) -> Prop := fun j phi =>
     exists gNet : Nat -> SmoothRiemannianMetric I M,
       (forall n : Nat, forall x : M,
@@ -520,7 +525,6 @@ theorem windowGInfAll
       simp only [Nat.sub_add_cancel (show m <= k by omega)] at hval
       exact hval
   obtain ⟨phi, hphi, hPphi⟩ := exists_diag_subseq P hstep hsub hextend
-
   choose gNetF hgNetTend hgNetConv using hPphi
   have hgNetUniq : forall i j : Nat, gNetF i = gNetF j := by
     intro i j
@@ -532,20 +536,18 @@ theorem windowGInfAll
         (nhds ((gNet n).inner x)) := hgNetTend 0
   have hnetConv : forall j : Nat, forall n : Nat, forall eps : Real, 0 < eps ->
       exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j ->
-        forall z, z ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) (e n)) (gNet n) gRef z < eps := by
+        forall z, z ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) (e n)) (gNet n) gRef z <
+          eps := by
     intro j n eps heps
     have := hgNetConv j n eps heps
     rw [show gNetF j = gNet from (hgNetUniq j 0)] at this
     exact this
-
   choose Lf hLf using fun j : Nat => hgLip (Kx j) (hKxc j) j
   have hLfnn : forall j, 0 <= Lf j := fun j => (hLf j).1
-
   have hLipAll : forall j : Nat, forall k : Nat, forall s, s ∈ Set.Icc beta psiT ->
       forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
         metricDerivNorm (I := I) a (gSeq k s) (gSeq k t) gRef x <= Lf j * |s - t| :=
     fun j => (hLf j).2
-
   have hcauchy0 : forall t, t ∈ Set.Icc beta psiT -> forall x : M,
       forall eps : Real, 0 < eps -> exists k0 : Nat, forall m : Nat, k0 <= m ->
         forall l : Nat, k0 <= l ->
@@ -562,7 +564,6 @@ theorem windowGInfAll
     intro t ht x v w
     exact metricInner_cauchy (I := I) (fun k => gSeq (phi k) t) gRef x v w
       (fun eps heps => hcauchy0 t ht x eps heps)
-
   have htime0 : forall t, t ∈ Set.Icc beta psiT ->
       exists psi : Nat -> Nat, StrictMono psi /\
         exists gT : SmoothRiemannianMetric I M,
@@ -587,12 +588,10 @@ theorem windowGInfAll
     fun t => if ht : t ∈ Set.Icc beta psiT then gAt0 t ht else gRef with hgInfDef
   have hgInf_eq : forall t (ht : t ∈ Set.Icc beta psiT), gInf t = gAt0 t ht := by
     intro t ht; rw [hgInfDef]; exact dif_pos ht
-
   have hfullj : forall j : Nat, forall t, t ∈ Set.Icc beta psiT -> forall eps : Real, 0 < eps ->
       exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
     intro j t ht eps heps
-
     obtain ⟨psi, hpsi, gT, hinnerT, hnormT⟩ :=
       metricPreconvFull (I := I) hne (Kx j) (hKxc j) j gRef (fun k => gSeq (phi k) t)
         (hbdd phi hphi t ht) (hlow phi hphi t ht)
@@ -617,22 +616,22 @@ theorem windowGInfAll
         hcauchyj hsubj eps heps
     refine ⟨k0, fun k hk a ha x hx => ?_⟩
     rw [← hgTeq]; exact hk0 k hk a ha x hx
-
   have hInfLipj : forall j : Nat,
       forall s, s ∈ Set.Icc beta psiT -> forall t, t ∈ Set.Icc beta psiT ->
         forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
           metricDerivNorm (I := I) a (gInf s) (gInf t) gRef x <= Lf j * |s - t| := fun j =>
     infLipOfConv (I := I) (Kx j) beta psiT j gSeq gInf gRef phi (Lf j) (hLipAll j)
       (fun t ht eps heps => hfullj j t ht eps heps)
-
   have hwinj : forall j : Nat, forall eps : Real, 0 < eps -> exists k0 : Nat,
       forall k : Nat, k0 <= k -> forall t, t ∈ Set.Icc beta psiT -> forall a : Nat, a <= j ->
-        forall x, x ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x < eps := by
+        forall x, x ∈ Kx j -> metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <
+          eps := by
     intro j eps heps
     have hLpos : (0 : Real) < Lf j + 1 := by linarith [hLfnn j]
     set delta : Real := eps / (3 * (Lf j + 1)) with hdeltadef
     have hdeltapos : 0 < delta := by rw [hdeltadef]; positivity
-    have hcover : Set.Icc beta psiT ⊆ ⋃ tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
+    have hcover : Set.Icc beta psiT ⊆ ⋃ tau :
+      {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         Metric.ball (tau : Real) delta := by
       intro t ht
       obtain ⟨n, hn⟩ := hdense t ht delta hdeltapos
@@ -644,7 +643,8 @@ theorem windowGInfAll
       (fun _ => Metric.isOpen_ball) hcover
     have hk0 : forall tau : {tau : Real // tau ∈ Set.range e ∧ tau ∈ Set.Icc beta psiT},
         exists k0 : Nat, forall k : Nat, k0 <= k -> forall a : Nat, a <= j -> forall x, x ∈ Kx j ->
-          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+          metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps /
+            3 :=
       fun tau => hfullj j (tau : Real) tau.2.2 (eps / 3) (by positivity)
     choose k0fun hk0fun using hk0
     refine ⟨F.sup k0fun, fun k hk t ht a hap x hxK => ?_⟩
@@ -657,15 +657,18 @@ theorem windowGInfAll
         <= Lf j * |t - (tau : Real)| := by
       have := hInfLipj j (tau : Real) tau.2.2 t ht a hap x hxK
       rwa [abs_sub_comm] at this
-    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x < eps / 3 :=
+    have h2 : metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x <
+      eps / 3 :=
       hk0fun tau k (le_trans (Finset.le_sup htauF) hk) a hap x hxK
     have htri : metricDerivNorm (I := I) a (gSeq (phi k) t) (gInf t) gRef x <=
         metricDerivNorm (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) gRef x
         + (metricDerivNorm (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) gRef x
           + metricDerivNorm (I := I) a (gInf (tau : Real)) (gInf t) gRef x) := by
       refine le_trans
-        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t) gRef x) ?_
-      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real)) (gInf t) gRef x
+        (metricDerivNorm_triangle (I := I) a (gSeq (phi k) t) (gSeq (phi k) (tau : Real)) (gInf t)
+          gRef x) ?_
+      have := metricDerivNorm_triangle (I := I) a (gSeq (phi k) (tau : Real)) (gInf (tau : Real))
+        (gInf t) gRef x
       linarith
     have hdb : Lf j * |t - (tau : Real)| <= Lf j * delta :=
       mul_le_mul_of_nonneg_left hdist.le (hLfnn j)
@@ -675,7 +678,6 @@ theorem windowGInfAll
         rw [hdeltadef]; field_simp
       linarith
     nlinarith [htri, h1, h2, h3, hdb, hsmall]
-
   refine ⟨phi, hphi, gInf, ?_⟩
   intro K hK p eps heps
   obtain ⟨j1, hj1⟩ := Kx.exists_superset_of_isCompact hK

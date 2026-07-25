@@ -74,11 +74,15 @@ lemma exists_connLapIterate_appCc_sobolevHs_bound (g₀ : SmoothRiemannianMetric
             B * εa * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 2 : ℕ) : ℝ) T₀‖ +
               KT p * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 1 : ℕ) : ℝ) T₀‖ := by
   classical
-  obtain ⟨CCS, hCCS_nn, hCCS⟩ := riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CCS, hCCS_nn, hCCS⟩ :=
+    riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M)
+    g₀ Kc hKc_nn εa hεa_nn
   obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
-  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I) (M := M) g₀
+  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I)
+    (M := M) g₀
   obtain ⟨c22, hc22_nn, hc22⟩ := bal_Ccore (I := I) (M := M) g₀ 2 2
-  have hgapfam := fun k : ℕ => exists_iteratedCovGrad_succ_le_tensorHs_add_mul_tensorHs (I := I) (M := M) g₀ k
+  have hgapfam := fun k : ℕ => exists_iteratedCovGrad_succ_le_tensorHs_add_mul_tensorHs (I := I)
+                                 (M := M) g₀ k
   choose Cg hCg_nn hCg using hgapfam
   set n : ℕ := Module.finrank ℝ E with hn_def
   have hn1 : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr (NeZero.ne _)

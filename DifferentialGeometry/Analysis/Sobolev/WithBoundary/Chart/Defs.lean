@@ -90,7 +90,6 @@ theorem MemWkpChart_iff
           (chartTargetEuclid (n := n) (M := M) α) := Iff.rfl
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-
 theorem chartPushed_zero
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) :
@@ -135,7 +134,6 @@ theorem wkpNormChart_zero_fun
   exact tsum_zero
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-
 theorem chartPushed_add
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) (u v : M → ℝ) :
@@ -148,7 +146,6 @@ theorem chartPushed_add
   ring
 
 omit [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M] in
-
 theorem chartPushed_const_smul
     (ρ : SmoothPartitionOfUnity M (modelWithCornersEuclideanHalfSpace n) M Set.univ)
     (α : M) (c : ℝ) (u : M → ℝ) :

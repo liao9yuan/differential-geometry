@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

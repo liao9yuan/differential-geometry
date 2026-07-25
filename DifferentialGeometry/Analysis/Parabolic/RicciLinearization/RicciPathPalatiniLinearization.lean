@@ -52,7 +52,8 @@ def ccTensorRetagMetric (g' : SmoothRiemannianMetric I M) {g : SmoothRiemannianM
   { toSection := S.toSection
     hasCompactSupport := S.hasCompactSupport }
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_ccTensorRetagMetric (g' : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) (b : M)
     (u w : TangentSpace I b) :
@@ -92,7 +93,8 @@ lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothC
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g' 3 (covGrad (I := I) (M := M) g' 0 2 S) x ![ζ, u, z]
           + unitModel (I := I) (M := M) g' 3 (covGrad (I := I) (M := M) g' 0 2 S) x ![u, ζ, z]
-          - unitModel (I := I) (M := M) g' 3 (covGrad (I := I) (M := M) g' 0 2 S) x ![z, ζ, u]) := by
+          - unitModel (I := I) (M := M) g' 3 (covGrad (I := I) (M := M) g' 0 2 S) x
+            ![z, ζ, u]) := by
   set G := unitModel (I := I) (M := M) g' 3 (covGrad (I := I) (M := M) g' 0 2 S) x with hG
   have h1 : ((G.toContinuousLinearMap ![ζ, u, 0] 2).toLinearMap) z =
       G ![ζ, u, z] := by
@@ -147,7 +149,8 @@ private lemma continuous_linearizedKoszulCovec_fst (g' : SmoothRiemannianMetric 
 
 def linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x :=
-  DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g' x (linearizedKoszulCovec (I := I) g' S x u ζ)
+  DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g' x
+    (linearizedKoszulCovec (I := I) g' S x u ζ)
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -155,7 +158,8 @@ lemma inner_linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcT
     (x : M) (u ζ z : TangentSpace I x) :
     g'.inner x (linearizedConnSharp (I := I) g' S x u ζ) z =
       linearizedKoszulCovec (I := I) g' S x u ζ z :=
-  DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g' x (linearizedKoszulCovec (I := I) g' S x u ζ) z
+  DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g' x
+    (linearizedKoszulCovec (I := I) g' S x u ζ) z
 
 def covDerivLinearizedConn (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
@@ -181,7 +185,8 @@ variable (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
 
 def realizedVelocityCc
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s₀ : ℝ) : SmoothCcTensor (realizedFam (I := I) g₀ T T' hδ hδ' s₀) 0 2 :=
   ccTensorRetagMetric (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
     (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))
@@ -203,10 +208,12 @@ lemma realizedVelocityCc_bilin
         - (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ').inner b u w := by
   have htrans : smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u w =
-      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) b u w := rfl
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) b u w :=
+        rfl
   have hsub : ∀ (p q : TangentSpace I b),
       smoothCcTensorBilinForm (I := I) g₀ (T - T') b p q =
-        smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p q := by
+        smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p
+          q := by
     intro p q
     rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
     have hmulti : (ccTensorMultilinear (I := I) g₀ (T - T') b : Tensor0SSpace 2 I b) =
@@ -377,7 +384,8 @@ theorem connDiff_realizedFam_eq_smul_sharp
     PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedFam (I := I) g₀ T T' hδ hδ' s₀) b u ζ =
       (s - s₀) •
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u ζ) := by
   classical
@@ -400,7 +408,8 @@ theorem connDiff_realizedFam_eq_smul_sharp
   rw [hXfb, hYfb, hZfb] at hkos
   have hR : (realizedFam (I := I) g₀ T T' hδ hδ' s).inner b
       ((s - s₀) •
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u ζ)) z =
       (s - s₀) *
@@ -439,7 +448,8 @@ private lemma linearizedKoszulCovec_eq_endpoint_flat
       (1 - s₀) *
         linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u ζ z := by
-    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
+    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [LinearMap.smul_apply]
   rw [show (((realizedFam (I := I) g₀ T T' hδ hδ' 1).inner b
       (PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 1)
@@ -507,10 +517,12 @@ private lemma linearizedKoszulCovec_basis_contMDiffOn
 
 private def linearizedKoszulSharpField
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s₀ s : ℝ) (Y Z : Π b : M, TangentSpace I b) : Π b : M, TangentSpace I b :=
   fun b =>
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) b
       (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b (Z b) (Y b))
 
@@ -523,7 +535,8 @@ private lemma sharpPsiField_contMDiff
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) := by
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b')
+          b)) := by
   apply metricSharp_contMDiff_total (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (cv := fun b : M =>
       linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
@@ -541,7 +554,8 @@ private lemma sharpPsiField_jointContMDiffOn
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ p.2 (fun b' => Y b') (fun b' => Z b') p.1))
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ p.2 (fun b' => Y b') (fun b' => Z b')
+          p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   have hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -707,7 +721,8 @@ omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 private lemma continuousOn_realizedFam_invGram_slice
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (x : M) (i j : Fin (Module.finrank ℝ E)) :
     ContinuousOn
       (fun s : ℝ => chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x i j)
@@ -724,9 +739,11 @@ omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 private lemma metricSharp_realizedFam_eq_invGram_sum
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) (x : M) (α₀ : TangentSpace I x →ₗ[ℝ] ℝ) :
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀ =
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀ =
       ∑ i : Fin (Module.finrank ℝ E),
         (∑ j : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x i j *
@@ -743,14 +760,18 @@ omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 private lemma tendsto_metricSharp_realizedFam_fixed
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (x : M) (α₀ : TangentSpace I x →ₗ[ℝ] ℝ) :
     Filter.Tendsto
-      (fun s : ℝ => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀)
+      (fun s : ℝ => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀)
       (𝓝 s₀)
-      (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x α₀)) := by
-  have heq : ∀ s : ℝ, DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀ =
+      (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x α₀)) := by
+  have heq : ∀ s : ℝ, DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀ =
       ∑ i : Fin (Module.finrank ℝ E),
         (∑ j : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x i j *
@@ -774,18 +795,22 @@ omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 private lemma tendsto_metricSharp_realizedFam_varying
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (x : M) {κ : ℝ → TangentSpace I x →ₗ[ℝ] ℝ}
     (hκ : ∀ j : Fin (Module.finrank ℝ E),
       Filter.Tendsto (fun s : ℝ => κ s (chartBasisVecFiber (I := I) x j x)) (𝓝 s₀)
         (𝓝 (κ s₀ (chartBasisVecFiber (I := I) x j x)))) :
     Filter.Tendsto
-      (fun s : ℝ => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (κ s))
+      (fun s : ℝ => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x (κ s))
       (𝓝 s₀)
-      (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x (κ s₀))) := by
+      (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x (κ s₀))) := by
   have heq : ∀ s : ℝ,
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (κ s) =
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x (κ s) =
       ∑ i : Fin (Module.finrank ℝ E),
         (∑ j : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x i j *
@@ -809,22 +834,26 @@ variable (x : M) (v w : TangentSpace I x)
 
 private def covDerivSharp
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s₀ s : ℝ) (X Y Z : Π b : M, TangentSpace I b) : TangentSpace I x :=
   (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
       (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s Y Z) x (X x)
-    - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x
         (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x (Z x)
           (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)) X Y x))
-    - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x
         (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
           (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)) X Z x) (Y x))
 
 private def slopeCore
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s₀ s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
@@ -837,7 +866,8 @@ private def slopeCore
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x w)
         + (s - s₀) •
-            DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+            DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
                 (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
@@ -845,7 +875,8 @@ private def slopeCore
                   (smoothExtensionTangent (I := I) x w) x)
                 (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
         - (s - s₀) •
-            DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+            DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
                 (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
@@ -922,7 +953,8 @@ private lemma covDerivConnDiff_realizedFam_eq_smul_covDerivSharp
   rw [hdiffSec]
   have hσ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) x :=
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b')
+          b)) x :=
     ((sharpPsiField_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs₀ s Y Z)
       x).mdifferentiableAt (by simp)
   have hsmul := (LeviCivita (I := I)
@@ -1004,7 +1036,8 @@ private lemma pathValue_sub_eq_mul_slopeCore
         (smoothExtensionTangent (I := I) x w) x)
       (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x) =
       (s - s₀) • ((s - s₀) •
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) x
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
             (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
@@ -1037,7 +1070,8 @@ private lemma pathValue_sub_eq_mul_slopeCore
         (smoothExtensionTangent (I := I) x w) x)
       (smoothExtensionTangent (I := I) x v x) =
       (s - s₀) • ((s - s₀) •
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) x
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
             (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
@@ -1089,10 +1123,12 @@ private lemma slopeCore_tendsto
   have hterm1 : ∀ (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (e : TangentSpace I x),
       Filter.Tendsto (fun s : ℝ =>
         (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
-          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b)) x e)
+          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b)) x
+            e)
         (𝓝 s₀)
         (𝓝 ((LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
-          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀ (fun b => Y b) (fun b => Z b)) x e)) := by
+          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀ (fun b => Y b) (fun b => Z b)) x
+            e)) := by
     intro Y Z e
     have hC := continuousAt_leviCivita_toFun_slice (I := I)
       (realizedFam (I := I) g₀ T T' hδ hδ' s₀) realizedSmallSet_isOpen hs₀mem
@@ -1103,8 +1139,10 @@ private lemma slopeCore_tendsto
     exact hC.tendsto
   have hfixed : ∀ (α₀ : TangentSpace I x →ₗ[ℝ] ℝ),
       Filter.Tendsto (fun s : ℝ =>
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀) (𝓝 s₀)
-        (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x α₀)) :=
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀) (𝓝 s₀)
+        (𝓝 (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x α₀)) :=
     fun α₀ => tendsto_metricSharp_realizedFam_fixed (I := I) g₀ T T' hδ hδ' hs₀mem x α₀
   have hcovSharp : ∀ (Xf Yf Zf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       Filter.Tendsto (fun s : ℝ =>
@@ -1120,13 +1158,15 @@ private lemma slopeCore_tendsto
   have hquad : ∀ (Yf Zf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (e : TangentSpace I x),
       Filter.Tendsto (fun s : ℝ =>
         (s - s₀) •
-          DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+          DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
               (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
                 (fun b => Yf b) (fun b => Zf b) x) e)) (𝓝 s₀)
         (𝓝 ((s₀ - s₀) •
-          DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x
+          DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
               (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀
@@ -1170,7 +1210,8 @@ private lemma slopeCore_tendsto
 omit [BoundarylessManifold I M] in
 private lemma slopeCore_at_base
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s₀ : ℝ) :
     slopeCore (I := I) g₀ T T' x v w hδ hδ' s₀ s₀ =
       ∑ i : Fin (Module.finrank ℝ E),

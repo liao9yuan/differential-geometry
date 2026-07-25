@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -40,7 +38,7 @@ private theorem reactionErr_lt_gain
     {K epsilon delta c g : Real}
     (hK : 0 ≤ K)
     (hepsilon : 0 < epsilon)
-    (hdelta : 0 < delta)
+    (_hdelta : 0 < delta)
     (hc_nonneg : 0 ≤ c)
     (hc_le : c ≤ 2 * delta)
     (hsmall : 4 * K * delta < 1)

@@ -32,7 +32,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
@@ -56,7 +57,8 @@ private lemma eq_add_of_eq_sub {A : Type*} [AddCommGroup A] {a b c : A}
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_curry_apply_eval_tangent {n : ℕ} {x : M}
     (T : Tensor0SSpace (n + 1) I x) (v₀ : TangentSpace I x)
     (v : Fin n → TangentSpace I x) :
@@ -67,7 +69,8 @@ private lemma tensor0S_curry_apply_eval_tangent {n : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
@@ -177,12 +180,10 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (V := fun z : M => Tensor0SSpace r I z) (n := (⊤ : ℕ∞)) x D
   subst hwx
   set GW : SmoothCcTensor g r (t + 1) := covGrad (I := I) (M := M) g r t W with hGW_def
-
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g r (t + 1) GW x (w x)
     (Fin.cons (X x) (Fin.cons (Y x) m))]
   simp only [Fin.cons_zero]
   rw [vecTail_cons' (X x) (Fin.cons (Y x) m)]
-
   have happly₁ : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
       tensorCovDerivAt (I := I) (M := M) g r (t + 1) GW x (X x)) (w x) =
       Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
@@ -194,7 +195,6 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r (t + 1)
       (LeviCivita (I := I) g) GW.toSection w x (X x)
   rw [happly₁, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-
   have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (t + 1) ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel (t + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (t + 1) I z) y
@@ -212,7 +212,6 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
           GW.toSection y) (w y)) x (hP_smooth x)
-
   rw [show Tensor0SSpace.toModel
       (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
         (fun y : M =>
@@ -240,7 +239,6 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))
   rw [habs, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hGW_def]
-
   have hsec : (fun y : M => Tensor0SNabla.curriedSection I M
       (fun y' : M =>
         (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
@@ -253,12 +251,9 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       g r t W w y (Y y)]
     rfl
   rw [hsec]
-
   rw [covApply_covDeriv_apply_eq_add (I := I) (M := M) g r t W hY w x,
     Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-
   rw [covGrad_covDeriv_eval (I := I) (M := M) g r t W w x m]
-
   have hC₁ : Tensor0SSpace.toModel
       (Tensor0SNabla.curriedSection I M
         (fun y' : M =>
@@ -272,7 +267,6 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     rw [curried_covGrad_apply_eq_tensorCovDerivAt_apply (I := I) (M := M)
       g r t W w x ((LeviCivita (I := I) g).toFun Y x (X x))]
   rw [hC₁]
-
   have hSCD : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
       tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) (w x) =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from

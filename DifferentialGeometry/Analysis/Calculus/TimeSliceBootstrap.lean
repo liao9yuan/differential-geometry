@@ -56,16 +56,13 @@ theorem hasFDerivAt_of_slice {G : ℝ → E → F} {R : ℝ × E → F} {W : E �
     HasFDerivAt (fun p : ℝ × E => G p.1 p.2)
       ((ContinuousLinearMap.fst ℝ ℝ E).smulRight (R p₀)
         + W.comp (ContinuousLinearMap.snd ℝ ℝ E)) p₀ := by
-
   have h₁ : HasFDerivAt (fun p : ℝ × E => G p₀.1 p.2)
       (W.comp (ContinuousLinearMap.snd ℝ ℝ E)) p₀ :=
     hslice.comp p₀ hasFDerivAt_snd
-
   have h₂ : HasFDerivAt (fun p : ℝ × E => G p.1 p.2 - G p₀.1 p.2)
       ((ContinuousLinearMap.fst ℝ ℝ E).smulRight (R p₀)) p₀ := by
     rw [hasFDerivAt_iff_isLittleO, Asymptotics.isLittleO_iff]
     intro ε hε
-
     have hRatt : ContinuousAt R p₀ := hRc.continuousAt (hU.mem_nhds hp₀)
     have hev : ∀ᶠ q in 𝓝 p₀, ‖R q - R p₀‖ ≤ ε ∧ q ∈ U := by
       have h1 : ∀ᶠ q in 𝓝 p₀, ‖R q - R p₀‖ ≤ ε := by
@@ -74,7 +71,6 @@ theorem hasFDerivAt_of_slice {G : ℝ → E → F} {R : ℝ × E → F} {W : E �
       filter_upwards [h1, hU.mem_nhds hp₀] with q hq1 hq2 using ⟨hq1, hq2⟩
     obtain ⟨r, hr0, hball⟩ := Metric.eventually_nhds_iff_ball.1 hev
     filter_upwards [Metric.ball_mem_nhds p₀ hr0] with p hp
-
     have hseg : ∀ s ∈ uIcc p₀.1 p.1, (s, p.2) ∈ Metric.ball p₀ r := by
       intro s hs
       have h1 : |s - p₀.1| ≤ |p.1 - p₀.1| := abs_sub_left_of_mem_uIcc hs
@@ -82,7 +78,6 @@ theorem hasFDerivAt_of_slice {G : ℝ → E → F} {R : ℝ × E → F} {W : E �
         rw [Prod.dist_eq, Prod.dist_eq]
         exact max_le_max (by simpa [Real.dist_eq] using h1) le_rfl
       exact lt_of_le_of_lt h2 hp
-
     have hder : ∀ s ∈ uIcc p₀.1 p.1,
         HasDerivWithinAt (fun s' : ℝ => G s' p.2 - (s' - p₀.1) • R p₀)
           (R (s, p.2) - R p₀) (uIcc p₀.1 p.1) s := by
@@ -95,7 +90,6 @@ theorem hasFDerivAt_of_slice {G : ℝ → E → F} {R : ℝ × E → F} {W : E �
       (hball _ (hseg s hs)).1
     have hMVT := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le hder hbound
       (convex_uIcc p₀.1 p.1) left_mem_uIcc right_mem_uIcc
-
     calc ‖(fun p : ℝ × E => G p.1 p.2 - G p₀.1 p.2) p
             - (fun p : ℝ × E => G p.1 p.2 - G p₀.1 p.2) p₀
             - ((ContinuousLinearMap.fst ℝ ℝ E).smulRight (R p₀)) (p - p₀)‖
@@ -110,7 +104,6 @@ theorem hasFDerivAt_of_slice {G : ℝ → E → F} {R : ℝ × E → F} {W : E �
           have : ‖p.1 - p₀.1‖ ≤ ‖p - p₀‖ := by
             simpa [Prod.fst_sub] using norm_fst_le (p - p₀)
           exact mul_le_mul_of_nonneg_left this hε.le
-
   have h₃ := h₂.add h₁
   refine h₃.congr_of_eventuallyEq ?_
   exact Filter.Eventually.of_forall fun p => (sub_add_cancel _ _).symm

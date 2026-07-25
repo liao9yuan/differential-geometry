@@ -52,7 +52,8 @@ private lemma covAtom_pouTsupport_subset_chartSource (α : M) :
       (chartAt H α).source :=
   chartAtlasPOU_isSubordinate (I := I) (M := M) α
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma covAtom_mem_baseSet_of_mem_chartSource
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source) :
     b ∈ (trivializationAt (TensorRSModel r s ℝ E)
@@ -71,7 +72,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm

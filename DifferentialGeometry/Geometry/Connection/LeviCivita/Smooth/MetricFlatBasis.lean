@@ -6,11 +6,12 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Smooth
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
 open DifferentialGeometry.Integral.Connection
@@ -578,7 +579,7 @@ private theorem lc_christoffel_eq_koszul_sum {ι : Type*} [Fintype ι]
           ring
 
 omit [SigmaCompactSpace M] [T2Space M] in
-theorem lc_christoffel_contMDiffAt {ι : Type*} [Fintype ι]
+theorem lc_christoffel_contMDiffAt {ι : Type*} [Finite ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     (g : SmoothRiemannianMetric I M) {x : M} (hx : x ∈ e.baseSet)

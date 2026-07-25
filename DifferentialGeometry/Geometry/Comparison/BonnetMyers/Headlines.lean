@@ -79,21 +79,6 @@ theorem tangent_closedBall_isCompact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -125,7 +110,7 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
   rw [hdist_ofReal]
   refine ENNReal.ofReal_le_ofReal ?_
   obtain ⟨v, hv_exp, hv_len⟩ :=
-    DifferentialGeometry.Geometry.Riemannian.Exponential.hopf_rinow_expMapIntrinsic_surjective_minimizing
+    hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm x y
   rw [← hr_def] at hv_len
   rcases eq_or_ne r 0 with hr0 | hr_ne
@@ -560,14 +545,8 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min hVbundle
   exact hL_le
 
-set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 theorem bonnet_myers_diameter_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -584,7 +563,7 @@ theorem bonnet_myers_diameter_of_ricci_bound
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
     (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
         ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
-    EMetric.diam (Set.univ : Set M) ≤
+    Metric.ediam (Set.univ : Set M) ≤
       ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   refine Metric.ediam_le ?_
   intro x _ y _
@@ -592,10 +571,6 @@ theorem bonnet_myers_diameter_of_ricci_bound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
 theorem isCompact_image_closedBall_under_expMapIntrinsic
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -620,13 +595,6 @@ theorem isCompact_image_closedBall_under_expMapIntrinsic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
 theorem expMapIntrinsic_surjective_on_closedBall_of_ediam_le
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -660,13 +628,8 @@ theorem expMapIntrinsic_surjective_on_closedBall_of_ediam_le
       ≤ (ENNReal.ofReal R).toReal := ENNReal.toReal_mono ENNReal.ofReal_ne_top hedist
     _ = R := ENNReal.toReal_ofReal hR
 
-set_option linter.deprecated false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
 theorem isCompact_univ
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -700,20 +663,6 @@ theorem isCompact_univ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem bonnet_myers_compactSpace_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -735,22 +684,6 @@ theorem bonnet_myers_compactSpace_of_ricci_bound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
     {M : Type*}
     {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -779,7 +712,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
       IsCoveringMap
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.UniversalCover.proj_isCoveringMap
+    Geometry.Riemannian.Topology.UniversalCover.proj_isCoveringMap
   haveI hpcM : PathConnectedSpace M :=
     PathConnectedSpace.of_locPathConnectedSpace
   let gLift :
@@ -811,7 +744,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         (I := I) g x
   have hRicLift :
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_liftedMetric_of_base
+    Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_liftedMetric_of_base
       (I := I) (g := g) _hRic hBasisLift hBasisBase
   haveI hRegUC :
       RegularSpace
@@ -860,7 +793,7 @@ theorem bonnet_myers_finite_fundamentalGroup_of_ricci_bound
         ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
             DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
           ⁻¹' {x}) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.isCoveringMap_fibre_finite_of_compact
+    Geometry.Riemannian.Topology.UniversalCover.isCoveringMap_fibre_finite_of_compact
       hcov x
   obtain ⟨γ⟩ := PathConnectedSpace.joined (default : M) x
   let e' :

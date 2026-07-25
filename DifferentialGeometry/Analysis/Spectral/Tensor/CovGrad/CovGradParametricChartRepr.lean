@@ -18,7 +18,8 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad covGrad_toSection_apply
   pathIntegralCoeffField pathIntegralFib pathIntegralCoeffField_toSection
   pathIntegralCoeffField_toModel pathIntegralFib_toModel tensorCovDerivAt tensorCovDerivAt_def)
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization (contMDiffOn_clm_section_of_pointwise_joint_manifold_time
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (contMDiffOn_clm_section_of_pointwise_joint_manifold_time
   jointContMDiff_toModel_continuous_slice)
 open Tensor0SBundle TensorRSNabla
 
@@ -41,7 +42,8 @@ private local instance tensorRSModelNormedSpace_local (r s : ℕ) :
     NormedSpace ℝ (TensorRSModel r s ℝ E) :=
   Tensor0SBundle.tensorRSModel_normedSpace r s
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -105,7 +107,8 @@ private theorem chartRepr_jointContMDiffOn
       ((F p.2).toSection p.1) = _
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)

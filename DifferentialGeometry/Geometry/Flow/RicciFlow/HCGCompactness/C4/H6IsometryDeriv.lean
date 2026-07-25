@@ -2002,8 +2002,6 @@ variable {I : ModelWithCorners Real E' H} [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [NeZero (Module.finrank Real E')] in
 theorem normalTrans_isom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) :

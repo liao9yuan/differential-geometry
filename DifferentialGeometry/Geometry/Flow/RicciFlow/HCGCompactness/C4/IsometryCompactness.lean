@@ -43,7 +43,6 @@ def IsometryDerivBounds (Φ : ℕ → E → F) : Prop :=
     ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDeriv ℝ r (Φ k) x‖ ≤ M
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-
 theorem IsometryDerivBounds.comp_subseq {Φ : ℕ → E → F} (h : IsometryDerivBounds Φ)
     (φ : ℕ → ℕ) : IsometryDerivBounds (fun k => Φ (φ k)) := by
   intro r K hK
@@ -64,11 +63,6 @@ theorem isometry_seq_cInf
   exists_cInf_subseq Φ hΦ hbdd
 
 omit [FiniteDimensional ℝ E] in
-
-
-
-
-
 theorem comp_eq_id_of_cInf
     {Φ : ℕ → F → E} {Φinf : F → E} {Ψ : ℕ → E → F} {Ψinf : E → F}
     (hΦ : MapCInfConvOnCompacts Set.univ Φ Φinf) (hΦc : Continuous Φinf)

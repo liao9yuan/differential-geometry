@@ -268,7 +268,6 @@ theorem contDiffOn_tsum_Icc {α F : Type*} [NormedAddCommGroup F] [NormedSpace �
     (left_mem_Icc.mpr hab.le)
 
 open Nat in
-
 theorem contDiffOn_Icc_tsum_pow_div_factorial :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun t : ℝ => ∑' n : ℕ, t ^ n / n !) (Set.Icc (0 : ℝ) 1) := by
   set v : ℕ → ℕ → ℝ := fun k n => (n.descFactorial k : ℝ) / n ! with hv_def

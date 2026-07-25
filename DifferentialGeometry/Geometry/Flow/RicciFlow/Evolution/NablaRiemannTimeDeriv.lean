@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -155,9 +152,7 @@ theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
         covDerivStepDt (chrDt t x) (A t x) n)
       D t := by
   classical
-
   have hlead := hswap (Fin.tail n)
-
   have hcorr :
       HasDerivWithinAt
         (fun s : Real =>
@@ -175,9 +170,6 @@ theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
     refine HasDerivWithinAt.fun_sum ?_
     intro p _hp
     exact (hchr (n 0) (Fin.tail n slot) p).mul (hA (Function.update (Fin.tail n) slot p))
-
-
-
   have hmain :
       HasDerivWithinAt
         (fun s : Real =>
@@ -193,9 +185,6 @@ theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
         D t :=
     hlead.sub hcorr
   refine hmain.congr_deriv ?_
-
-
-
   rw [covDerivStepComp, frameExtData, covDerivStepDt]
   simp only [Finset.sum_add_distrib]
   ring
@@ -285,7 +274,6 @@ theorem iteratedRmComp_one_hasDerivWithinAt
         covDerivStepDt (chrDt (t : Real) x)
           (realizedRmBase (I := I) S x₀ (t : Real) x) n)
       D.carrier (t : Real) := by
-
   have hunfold :
       (fun s : Real =>
         iteratedRmComp (I := I) (coordinateFrameAt (I := I) x₀)

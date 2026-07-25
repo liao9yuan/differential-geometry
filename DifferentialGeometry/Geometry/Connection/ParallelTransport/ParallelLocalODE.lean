@@ -762,10 +762,10 @@ theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source)
     {Y₁ Y₂ : ℝ → E}
     (hY₁ : ∀ t ∈ Set.Icc a b, HasDerivWithinAt Y₁
-        (- chartChristoffelContraction (I := I) g α (uPrime t) (Y₁ t)
+        (-chartChristoffelContraction (I := I) g α (uPrime t) (Y₁ t)
             (chartCurve (I := I) α γ t)) (Set.Icc a b) t)
     (hY₂ : ∀ t ∈ Set.Icc a b, HasDerivWithinAt Y₂
-        (- chartChristoffelContraction (I := I) g α (uPrime t) (Y₂ t)
+        (-chartChristoffelContraction (I := I) g α (uPrime t) (Y₂ t)
             (chartCurve (I := I) α γ t)) (Set.Icc a b) t)
     (h_eq : Y₁ t₀ = Y₂ t₀) :
     Set.EqOn Y₁ Y₂ (Set.Icc a b) := by

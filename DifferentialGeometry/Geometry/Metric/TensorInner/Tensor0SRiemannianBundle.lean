@@ -70,7 +70,6 @@ theorem tensor0SRiemannianInner_smul_left
       c * tensor0SRiemannianInnerCLM (I := I) (M := M) g s b T S := by
   have h := ContinuousLinearMap.map_smul
     (innerBundleCLM (I := I) (M := M) g s b) c T
-
   change innerBundleCLM (I := I) (M := M) g s b (c • T) S = _
   rw [h]
   rfl
@@ -100,7 +99,6 @@ theorem tensor0SRiemannianInner_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Continuous (fun v : Tensor0SSpace s I b =>
       tensor0SRiemannianInnerCLM (I := I) (M := M) g s b v v) := by
-
   have heq : (fun v : Tensor0SSpace s I b =>
       tensor0SRiemannianInnerCLM (I := I) (M := M) g s b v v) =
       (fun v : Tensor0SSpace s I b =>
@@ -143,7 +141,6 @@ private lemma innerModel_diagonal_sublevel_isBounded
     Bornology.IsBounded
       {T : Tensor0SModel s ℝ E |
         innerModelCLM (I := I) (M := M) g s b T T < 1} := by
-
   by_cases hNT : Nontrivial (Tensor0SModel s ℝ E)
   · haveI := hNT
     have hPD : ∀ v : Tensor0SModel s ℝ E,
@@ -195,16 +192,13 @@ theorem tensor0SRiemannianInner_isVonNBounded
     IsVonNBounded ℝ
       {v : Tensor0SSpace s I b |
         tensor0SRiemannianInnerCLM (I := I) (M := M) g s b v v < 1} := by
-
   set e : Tensor0SSpace s I b ≃L[ℝ] Tensor0SModel s ℝ E :=
     Tensor0SBundle.tensor0SSpace_continuousLinearEquiv
       (𝕜 := ℝ) (E := E) (I := I) (M := M) s b with he_def
   have hModel := innerModel_diagonal_sublevel_isVonNBounded
     (I := I) (M := M) g s b
-
   have hImg :=
     hModel.image (e.symm.toContinuousLinearMap)
-
   have hSetEq :
       e.symm.toContinuousLinearMap ''
         {T : Tensor0SModel s ℝ E |
@@ -237,7 +231,6 @@ theorem tensor0SRiemannianInner_isVonNBounded
 
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace in
-
 noncomputable def tensor0SRiemannianMetric
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     Bundle.RiemannianMetric (E := fun b : M => Tensor0SSpace s I b) where

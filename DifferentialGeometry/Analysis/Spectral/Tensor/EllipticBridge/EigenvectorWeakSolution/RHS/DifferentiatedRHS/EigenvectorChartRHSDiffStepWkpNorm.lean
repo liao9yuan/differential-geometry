@@ -291,7 +291,8 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -321,7 +322,6 @@ private lemma memWkp_finset_sum
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -331,7 +331,6 @@ lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma layerA_coeff_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)

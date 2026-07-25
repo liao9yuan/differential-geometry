@@ -16,9 +16,6 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -104,7 +101,7 @@ theorem realizedRmBase_eq_curvCoeff_lower
   have hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection t) (1 : WithTop ℕ∞) := by
     simpa [SolutionFamily.connection, metricCov] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   rw [realizedRmBase_apply, hvec,
     solution_rm04LowersRm13At S t x₀
@@ -154,7 +151,8 @@ theorem realizedRmBase_timeDeriv
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b)))
+        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d
+          a b)))
     (hRm : ∀ s, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection s) (S.base.rm13 s))
@@ -168,16 +166,19 @@ theorem realizedRmBase_timeDeriv
       (∑ p : CoordinateIdx (𝕜 := Real) E,
         ((christoffelVariationCovDerivCoordAt (I := I) (S.family.connection (t : Real))
               (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S
+                  (coordinateFrameAt (I := I) x₀) t x d a b))
               (t : Real) x₀ (m 0) p (m 1) (m 2)
             - christoffelVariationCovDerivCoordAt (I := I) (S.family.connection (t : Real))
               (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S
+                  (coordinateFrameAt (I := I) x₀) t x d a b))
               (t : Real) x₀ (m 1) p (m 0) (m 2))
             * metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀ (m 3) p
           + DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I)
               (S.family.connection (t : Real)) x₀ (m 0) (m 1) (m 2) p
-            * ((-2 : Real) * ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀ (m 3) p)))
+            * ((-2 : Real) * ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real)
+              x₀ (m 3) p)))
       D.carrier
       (t : Real) := by
   have hbase : ∀ s, s ∈ D.carrier ->
@@ -195,21 +196,26 @@ theorem realizedRmBase_timeDeriv
             * metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ (m 3) p)
         ((christoffelVariationCovDerivCoordAt (I := I) (S.family.connection (t : Real))
               (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S
+                  (coordinateFrameAt (I := I) x₀) t x d a b))
               (t : Real) x₀ (m 0) p (m 1) (m 2)
             - christoffelVariationCovDerivCoordAt (I := I) (S.family.connection (t : Real))
               (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+                (fun t x d a b => ricciCovDerivCompInFrame (I := I) S
+                  (coordinateFrameAt (I := I) x₀) t x d a b))
               (t : Real) x₀ (m 1) p (m 0) (m 2))
             * metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀ (m 3) p
           + DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I)
               (S.family.connection (t : Real)) x₀ (m 0) (m 1) (m 2) p
-            * ((-2 : Real) * ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀ (m 3) p))
+            * ((-2 : Real) * ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real)
+              x₀ (m 3) p))
         D.carrier (t : Real) := by
     intro p _
-    have h1 := rm13Deriv_of_solution (I := I) S hS x₀ gInvDt hmetricFrame hSmooth hFdiff hFtdiff hmix
+    have h1 := rm13Deriv_of_solution (I := I) S hS x₀ gInvDt hmetricFrame hSmooth hFdiff hFtdiff
+      hmix
       t (m 0) (m 1) (m 2) p
-    have h2 := metricCompInFrame_timeDeriv (I := I) S hS (coordinateFrameAt (I := I) x₀) t x₀ (m 3) p
+    have h2 := metricCompInFrame_timeDeriv (I := I) S hS (coordinateFrameAt (I := I) x₀) t x₀ (m 3)
+      p
     exact h1.mul h2
   exact (HasDerivWithinAt.sum hterm).congr
     (fun y hy => by rw [Finset.sum_apply]; exact hbase y hy)
@@ -304,34 +310,44 @@ theorem solution_rm04_timeDeriv_kn
       ricYW' D.carrier (t : Real))
     (hSc : HasDerivWithinAt (fun σ : Real => S.scalar σ x) sc' D.carrier (t : Real)) :
     HasDerivWithinAt
-      (fun σ : Real => S.base.rm04 σ x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
+      (fun σ : Real => S.base.rm04 σ x
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
       (-(ricXZ' * (S.base.metric (t : Real)).inner x Y W
           + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z)
-            * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)))
+            * (-2 * S.ricciAt (t : Real) x
+              (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)))
         + (ricYZ' * (S.base.metric (t : Real)).inner x X W
             + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)
-              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)))
+              * (-2 * S.ricciAt (t : Real) x
+                (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)))
         + (ricXW' * (S.base.metric (t : Real)).inner x Y Z
             + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)
-              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)))
+              * (-2 * S.ricciAt (t : Real) x
+                (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)))
         - (ricYW' * (S.base.metric (t : Real)).inner x X Z
             + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)
-              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z)))
+              * (-2 * S.ricciAt (t : Real) x
+                (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z)))
         + (sc' / 2
             * ((S.base.metric (t : Real)).inner x X Z * (S.base.metric (t : Real)).inner x Y W
                 - (S.base.metric (t : Real)).inner x Y Z * (S.base.metric (t : Real)).inner x X W)
           + S.scalar (t : Real) x / 2
-            * ((-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+            * ((-2 * S.ricciAt (t : Real) x
+              (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
                   * (S.base.metric (t : Real)).inner x Y W
                 + (S.base.metric (t : Real)).inner x X Z
-                  * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W))
-                - ((-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z))
+                  * (-2 * S.ricciAt (t : Real) x
+                    (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W))
+                - ((-2 * S.ricciAt (t : Real) x
+                  (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z))
                       * (S.base.metric (t : Real)).inner x X W
                     + (S.base.metric (t : Real)).inner x Y Z
-                      * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W))))))
+                      * (-2 * S.ricciAt (t : Real) x
+                        (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W))))))
       D.carrier (t : Real) := by
   have hfield :
-      (fun σ : Real => S.base.rm04 σ x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
+      (fun σ : Real => S.base.rm04 σ x
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
         = fun σ : Real =>
           -(S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
               * (S.base.metric σ).inner x Y W
@@ -376,7 +392,8 @@ theorem scalar_eq_trace_ortho
     S.scalar t x =
       S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0))
         + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1))
-        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2)) := by
+        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2)
+          (basis 2)) := by
   classical
   have h : DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
         (S.base.metric t) (S.ricciAt t x) =
@@ -392,10 +409,6 @@ theorem scalar_eq_trace_ortho
   simp [DifferentialGeometry.Integral.Connection.delta3, Fin.sum_univ_three]
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem scalarDot_ortho
@@ -435,10 +448,6 @@ theorem scalarDot_ortho
   simp only [hcomp]
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04CompknOrtho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -469,13 +478,6 @@ theorem rm04CompknOrtho
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricDot_ortho
@@ -518,8 +520,6 @@ theorem ricDot_ortho
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricDot_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -606,15 +606,6 @@ theorem ricDot_of_solution
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04BaseEvolution_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -953,8 +944,10 @@ private noncomputable def knScalT
 
 
 private def knE1 : Fin (2 + 2) ≃ Fin (2 + 2) := Equiv.swap 1 2
-private def knE2 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (1 : Fin (2 + 2)) 2).trans (Equiv.swap 0 1)
-private def knE3 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (2 : Fin (2 + 2)) 3).trans (Equiv.swap 1 3)
+private def knE2 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (1 : Fin (2 + 2)) 2).trans
+    (Equiv.swap 0 1)
+private def knE3 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (2 : Fin (2 + 2)) 3).trans
+    (Equiv.swap 1 3)
 private def knE4 : Fin (2 + 2) ≃ Fin (2 + 2) :=
   ((Equiv.swap (3 : Fin (2 + 2)) 2).trans (Equiv.swap 1 3)).trans (Equiv.swap 0 1)
 
@@ -1266,7 +1259,8 @@ private theorem knScal2Realizes
               (S.scalar t) (scalarSmoothOfSol (I := I) S t))
             (fun x v => by
               rw [DifferentialGeometry.Integral.Connection.duSec_apply]
-              exact DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
+              exact
+                DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
                 (I := I) (S.scalar t) x v))
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
 
@@ -1450,10 +1444,8 @@ private theorem rm04Nab2Kn_eq
 
 
 open DifferentialGeometry.Integral.Connection in
-
-
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceRicWit
     [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
@@ -1516,10 +1508,8 @@ private theorem traceRicWit
   rw [metricTraceFirstTwoField_product]
 
 open DifferentialGeometry.Integral.Connection in
-
-
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceScalWit
     [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
@@ -1601,7 +1591,6 @@ private theorem traceScalWit
   rw [metricTraceFirstTwoField_product, metricTraceFirstTwoField_product]
 
 open DifferentialGeometry.Integral.Connection in
-
 private noncomputable def knRicLapT
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1624,7 +1613,6 @@ private noncomputable def knRicLapT
       (metricTensorField (I := I) (S.family.metric t)))
 
 open DifferentialGeometry.Integral.Connection in
-
 private noncomputable def knScalLapT
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1660,8 +1648,6 @@ private noncomputable def lapRm04Kn
         + (-(1 / 2) : Real) • knScalLapT (I := I) S t knE2)
 
 open DifferentialGeometry.Integral.Connection in
-
-
 omit [IsManifold I 1 M] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lapRm04Kn_apply
@@ -1790,11 +1776,6 @@ private theorem lapRm04Kn_apply
   ring
 
 open DifferentialGeometry.Integral.Connection in
-
-
-
-
-
 omit [IsManifold I 1 M] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem traceRm04Kn
@@ -1810,9 +1791,6 @@ theorem traceRm04Kn
   rfl
 
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
-
-
-
 omit [IsManifold I 1 M] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem roughRm04_comp
@@ -1877,8 +1855,6 @@ theorem roughRm04_comp
 end KnField
 
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04Base_of_sol
     {D : RealTimeInterval}
@@ -1965,15 +1941,6 @@ theorem rm04Base_of_sol
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04HrmProducer
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1989,7 +1956,8 @@ theorem rm04HrmProducer
     (hframe0 : forall i : Fin 3, frame i x₀ = basis i)
     (hginv : forall i j : Fin 3, gInv (t : Real) x₀ i j = (if i = j then (1 : Real) else 0))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (hsec : forall v : Fin 4 -> TangentSpace I x₀, Rm04 (t : Real) x₀ v = S.base.rm04 (t : Real) x₀ v)
+    (hsec : forall v : Fin 4 -> TangentSpace I x₀, Rm04 (t : Real) x₀ v = S.base.rm04 (t : Real) x₀
+      v)
     (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
     (hlich : RicciLichnerowiczEquationInFrame (D := D) (I := I) S Rm04 gInv frame roughLapRic)
     (scalarLap : Real -> M -> Real)

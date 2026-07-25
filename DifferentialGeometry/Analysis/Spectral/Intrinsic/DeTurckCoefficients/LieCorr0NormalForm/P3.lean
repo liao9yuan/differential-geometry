@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieC
 
 noncomputable section
 
-set_option linter.style.setOption false
 
 open scoped BigOperators
 

@@ -78,7 +78,6 @@ private def famCoord (x : M) (F : Fin (Module.finrank ℝ E) → TangentSpace I 
       ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x (F i))) m
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem famCoord_gram_eq_one (g : SmoothRiemannianMetric I M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
@@ -111,7 +110,6 @@ private theorem famCoord_gram_eq_one (g : SmoothRiemannianMetric I M) {x : M}
   rw [hchart a b]; rfl
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet)
@@ -138,7 +136,6 @@ private theorem sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) {x
   rw [Matrix.transpose_apply]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem bilin_ortho_family_diag_eq_chartGram_trace
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -256,9 +253,11 @@ theorem connDiff_outerCovDeriv_eq (g g_bg : SmoothRiemannianMetric I M)
       connDiff (I := I) g g_bg x (connDiff (I := I) g g_bg x (Z x) (Y x)) (X x) := by
     rw [← diff_eval cov₀ cov₁ hdiffYZ_at (X x), hAeq]
     rfl
-  have hcA1 : covApply cov₁ X Y x = covApply cov₀ X Y x + connDiff (I := I) g g_bg x (Y x) (X x) := by
+  have hcA1 : covApply cov₁ X Y x = covApply cov₀ X Y x + connDiff (I := I) g g_bg x (Y x)
+    (X x) := by
     rw [covApply_cov1_eq cov₀ cov₁ hYx, hAeq]; rfl
-  have hcA2 : covApply cov₁ X Z x = covApply cov₀ X Z x + connDiff (I := I) g g_bg x (Z x) (X x) := by
+  have hcA2 : covApply cov₁ X Z x = covApply cov₀ X Z x + connDiff (I := I) g g_bg x (Z x)
+    (X x) := by
     rw [covApply_cov1_eq cov₀ cov₁ hZx, hAeq]; rfl
   have hT1' : cov₁.toFun (diffSec cov₀ cov₁ Y Z) x (X x) =
       cov₀.toFun (diffSec cov₀ cov₁ Y Z) x (X x)

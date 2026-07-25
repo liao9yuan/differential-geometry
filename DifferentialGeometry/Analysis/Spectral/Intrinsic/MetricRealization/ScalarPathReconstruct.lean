@@ -162,8 +162,6 @@ theorem scalarSpec_cc
   simpa only [V, ccTensorToHs_coeff] using hsum.tsum_eq
 
 omit [BoundarylessManifold I M] in
-
-
 lemma scalarMode_eq
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -183,8 +181,6 @@ lemma scalarMode_eq
         (I := I) (M := M) α hy))
 
 omit [BoundarylessManifold I M] in
-
-
 lemma scalarSpec_chart
     (g : SmoothRiemannianMetric I M)
     (c : TensorEigenIdx (I := I) (M := M) g 0 0 → ℝ → ℝ)
@@ -404,9 +400,6 @@ private lemma jet_snd_le
   simpa only [L, Function.comp_apply] using hbound
 
 omit [BoundarylessManifold I M] in
-
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem prodMode_majorant

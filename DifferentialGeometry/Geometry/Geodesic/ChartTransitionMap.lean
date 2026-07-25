@@ -65,7 +65,6 @@ theorem chartTransitionMap_contDiffOn (α β : M) :
   exact h
 
 omit [IsManifold I ∞ M] in
-
 omit [Module.Finite ℝ E] in
 lemma extChartAt_mem_chartTransitionSource
     (α β : M) {x : M}

@@ -74,8 +74,6 @@ private theorem lapDiff_rho
     (I := I) G hG T).comp hshift
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem lapDiff_fibreSmall
@@ -116,8 +114,6 @@ theorem lapDiff_fibreSmall
   simpa only [q, ContinuousLinearMap.sub_apply] using hfinal
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem lapDiff_short

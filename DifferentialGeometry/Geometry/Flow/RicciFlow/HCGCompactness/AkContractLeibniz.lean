@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -63,7 +62,6 @@ theorem covD3_starAg_leibniz
       starAg (covD12 Γ A dA) g i j d + starAg A (covD2 Γ g dg) i j d := by
   classical
   unfold covD3 starAg dStarAg covD12 covD2
-
   have hL :
       (∑ k : ι, (dA k i j + (∑ p : ι, Γ k p * A p i j) -
           (∑ p : ι, Γ p i * A k p j) - (∑ p : ι, Γ p j * A k i p)) * g k d) =
@@ -81,13 +79,11 @@ theorem covD3_starAg_leibniz
           (∑ k : ι, A k i j * (∑ p : ι, Γ p d * g k p)) := by
     rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
     exact Finset.sum_congr rfl fun k _ => by ring
-
   have hD :
       (∑ k : ι, (dA k i j * g k d + A k i j * dg k d)) =
         (∑ k : ι, dA k i j * g k d) + (∑ k : ι, A k i j * dg k d) :=
     Finset.sum_add_distrib
   rw [hD, hL, hR]
-
   have hC1 :
       (∑ k : ι, (∑ p : ι, Γ p i * A k p j) * g k d) =
         ∑ p : ι, Γ p i * ∑ k : ι, A k p j * g k d := by
@@ -106,7 +102,6 @@ theorem covD3_starAg_leibniz
     simp only [Finset.mul_sum]
     conv_lhs => rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun k _ => by ring
-
   have hcancel :
       (∑ k : ι, (∑ p : ι, Γ k p * A p i j) * g k d) =
         ∑ k : ι, A k i j * (∑ p : ι, Γ p k * g p d) := by

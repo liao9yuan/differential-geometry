@@ -11,7 +11,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -1020,7 +1019,6 @@ omit [FiniteDimensional ℝ E] in
   congr 1
   exact fin_cons_vec3_eq_vec4 (I := I) X Y Z W
 
-set_option linter.flexible false in
 
 
 
@@ -1224,7 +1222,8 @@ theorem freeze02_deriv
           (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) =
             D - (CY + (CZ + CW)) := by
         simpa [D, CY, CZ, CW, V2, V3, hZ, hW,
-          DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3,
+          DifferentialGeometry.Integral.Connection.vec2,
+            DifferentialGeometry.Integral.Connection.vec3,
           DifferentialGeometry.Integral.Connection.vec4, Fin.sum_univ_succ, Fin.sum_univ_two,
           Function.update, Fin.cons_zero, Fin.cons_succ]
           using h

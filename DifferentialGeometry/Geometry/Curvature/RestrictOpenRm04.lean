@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -54,7 +53,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
         (restrictOpenTangentField (I := I) U (fun p : M => Zs p)) x =
       connectionRiemannCurvatureField (I := I) (metricCov (I := I) (M := M) g)
         (fun p : M => Xs p) (fun p : M => Ys p) (fun p : M => Zs p) (x : M) := by
-
   let ZYs : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
     ⟨fun p : M => (metricCov (I := I) (M := M) g (fun q : M => Zs q) p) (Ys p),
       cov_smooth_apply_contMDiffAt (I := I) (metricCov (I := I) (M := M) g)
@@ -63,8 +61,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
     ⟨fun p : M => (metricCov (I := I) (M := M) g (fun q : M => Zs q) p) (Xs p),
       cov_smooth_apply_contMDiffAt (I := I) (metricCov (I := I) (M := M) g)
         (metricCov_smooth (I := I) (M := M) g) Xs Zs⟩
-
-
   have hZY :
       (fun y : U =>
           (metricCov (I := I) (M := U) (g.restrictOpen (I := I) U)
@@ -85,7 +81,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
     rw [restrictOpenTangentField_apply (I := I) U (fun p : M => ZXs p) y,
       restrictOpenTangentField_apply (I := I) U (fun p : M => Xs p) y]
     exact metricCov_restrictOpen_globalSection (I := I) g U Zs y (Xs (y : M))
-
   have hbr :
       VectorField.mlieBracket I
           (restrictOpenTangentField (I := I) U (fun p : M => Xs p))
@@ -127,7 +122,6 @@ theorem metricRm04StdAt_restrictOpen
   obtain ⟨Ws, hWs⟩ :=
     ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
       (n := (⊤ : ℕ∞)) (x : M) W
-
   have hR :
       metricRm04StdAt (I := I) (M := M) g (x : M) X Y Z W =
         g.inner (x : M) W
@@ -143,7 +137,6 @@ theorem metricRm04StdAt_restrictOpen
             (metricCov_smooth (I := I) (M := M) g) (x : M) from rfl,
       riemannCurvature04At_apply_smooth (I := I) g (metricCov (I := I) (M := M) g)
         (metricCov_smooth (I := I) (M := M) g) Xs Ys Zs Ws (x : M), hWs]
-
   have hL :
       metricRm04StdAt (I := I) (M := U) (g.restrictOpen (I := I) U) x X Y Z W =
         g.inner (x : M) W

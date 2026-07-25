@@ -52,7 +52,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_smul_value_appCc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c : ℝ)
     (v : Tensor0SBundle.TensorRSSpace r s I x) :
@@ -64,7 +65,8 @@ lemma riemannianFiberNormSq_smul_value_appCc
     tensorInnerPointwise_smul_right]
   ring
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gFibreOpBound_mono_local
     (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -78,7 +80,8 @@ lemma gFibreOpBound_mono_local
     mul_nonneg hsv hsw
   nlinarith [hle, hprod]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -113,7 +116,8 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
@@ -128,7 +132,8 @@ private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
       ≤ ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
   classical
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_local (I := I) (M := M) g₀ x
-  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse
+    horth]
   calc (∑ K : Fin r → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin r → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -138,7 +143,8 @@ private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
         simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul,
           Nat.cast_pow]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metricInner_injective_local (g₁ : SmoothRiemannianMetric I M) (x : M)
     {a b : TangentSpace I x}
     (hab : ∀ w : TangentSpace I x, g₁.inner x a w = g₁.inner x b w) : a = b := by
@@ -153,7 +159,8 @@ private lemma metricInner_injective_local (g₁ : SmoothRiemannianMetric I M) (x
     rw [e1]; ring
   exact absurd hzero (ne_of_gt hpos)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma cometric_sum_eq_invSharp (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (b : TangentSpace I x) :
     ∑ k : Fin (Module.finrank ℝ E),
@@ -214,7 +221,8 @@ private lemma cometric_sum_eq_invSharp (g₀ g₁ : SmoothRiemannianMetric I M) 
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [ContinuousLinearMap.map_smul, smul_eq_mul, mul_comm]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma abs_g0_inner_invSharp_le (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -251,7 +259,8 @@ private lemma abs_g0_inner_invSharp_le (g₀ g₁ : SmoothRiemannianMetric I M)
         exact mul_le_mul_of_nonneg_left hsb_le hinv_nn
     _ = 1 / (1 - δ) := by ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma cometric_dualsum_inner_collapse (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (a c : TangentSpace I x) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -398,7 +407,8 @@ private lemma ricciArm_dim1_compSq_le {A C R : ℝ} (hAbound : |A| ≤ R)
     have := sq_abs A; nlinarith [hAbound, abs_nonneg A]
   nlinarith [hA2, sq_nonneg A]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -451,11 +461,13 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
           TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
         (Module.finrank ℝ E) e K J =
         Tensor0SSpace.toModel
-          ((ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x) (coframeS (I := I) (M := M) g₀ x 4 e K))
+          ((ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x)
+            (coframeS (I := I) (M := M) g₀ x 4 e K))
           (fun k => e (J k)) := by
       unfold fiberNormSqComponent coframeS; rfl
     rw [hread, ricciArmPrincipalCoeffFib_toModel,
-      ricciPrincipalCoeffDoubleTraceModel_apply (E := E) (cometricLmodel (I := I) g₁ x) _ (fun k => e (J k))]
+      ricciPrincipalCoeffDoubleTraceModel_apply (E := E) (cometricLmodel (I := I) g₁ x) _
+        (fun k => e (J k))]
     have hev : ∀ (v : Fin 4 → E),
         Tensor0SBundle.Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 4 e K) v =
           ∏ i : Fin 4, g₀.inner x (e (K i)) (v i) :=
@@ -616,7 +628,8 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
       nlinarith [hfin2, hRnn, sq_nonneg R, mul_le_mul_of_nonneg_right hfin2 (sq_nonneg R)]
   exact hbound9
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -628,7 +641,8 @@ theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
-  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀ 4 2 x
+  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀
+    4 2 x
     (show TensorRSSpace 4 2 I x from
       TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
     ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
@@ -638,7 +652,8 @@ theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
   refine hbound.trans (le_of_eq ?_)
   ring
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem traceHessianFib_fiberComponent_Ksum_sq_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -760,7 +775,8 @@ theorem traceHessianFib_fiberComponent_Ksum_sq_le
               (∑ k : Fin (Module.finrank ℝ E), g₀.inner x (e (K 3)) ((Module.finBasis ℝ E) k) •
                 cometricLmodel (I := I) g₁ x
                   (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-                    ((Module.finBasis ℝ E).cDualBasis k))) := (map_sum (g₀.inner x (e (K 2))) _ _).symm
+                    ((Module.finBasis ℝ E).cDualBasis k))) :=
+                      (map_sum (g₀.inner x (e (K 2))) _ _).symm
         _ = g₀.inner x (e (K 2)) fK3 := by rw [hsumeq]
     rw [hcollapse, horth (K 0) (J 0), horth (K 1) (J 1)]
   rw [Finset.sum_congr rfl (fun J _ => by rw [hcomp J])]
@@ -819,7 +835,8 @@ theorem traceHessianFib_fiberComponent_Ksum_sq_le
   have hfinR_nn : 0 ≤ ((Module.finrank ℝ E : ℝ)) * R := by positivity
   nlinarith [hRle, hRnn, hfinR_nn, mul_le_mul hRle hRle hRnn hfinR_nn]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_traceHessianFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -830,7 +847,8 @@ theorem riemannianFiberNormSq_traceHessianFib_le
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
-  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀ 4 2 x
+  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀
+    4 2 x
     (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
     ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
     (fun e horth K =>
@@ -839,7 +857,8 @@ theorem riemannianFiberNormSq_traceHessianFib_le
   refine hbound.trans (le_of_eq ?_)
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma cometricDoubleTraceFib_fiberComponent_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -910,7 +929,8 @@ private lemma cometricDoubleTraceFib_fiberComponent_eq
   rw [hpull, cometric_dualsum_inner_collapse (I := I) g₀ g₁ x (e (K 0)) (e (K 1)),
     horth (K 2) (J 0)]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma cometricDoubleTraceFib_fiberComponent_Ksum_sq_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -970,7 +990,8 @@ private lemma cometricDoubleTraceFib_fiberComponent_Ksum_sq_le
     nlinarith [hqbound, abs_nonneg q]
   exact hqsq
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_cometricDoubleTraceFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)

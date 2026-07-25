@@ -47,7 +47,8 @@ lemma chartGramBilin_eq_innerJinv
                 (chartModelBasis E).equivFun w k *
                 g.inner b
                   (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) j))
-                  (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) k)) := by
+                  (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+                    ((chartModelBasis E) k)) := by
     refine Finset.sum_congr rfl ?_
     intro j _
     refine Finset.sum_congr rfl ?_
@@ -71,7 +72,8 @@ lemma chartGramBilin_eq_innerJinv
                     ((chartModelBasis E) k)) := by
     intro j
     have hRHS_unfold :
-        ((g.inner b (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) j)))
+        ((g.inner b (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+          ((chartModelBasis E) j)))
             (∑ k : Fin (Module.finrank ℝ E),
               (chartModelBasis E).equivFun w k •
                 chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) k)))
@@ -79,7 +81,8 @@ lemma chartGramBilin_eq_innerJinv
               (chartModelBasis E).equivFun w k *
                 g.inner b
                   (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) j))
-                  (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) k)) := by
+                  (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+                    ((chartModelBasis E) k)) := by
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro k _
@@ -207,7 +210,8 @@ theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
         (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b))
   have hAcompose :
       (A.compContinuousLinearMap
-          (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)).compContinuousLinearMap
+          (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α
+            b)).compContinuousLinearMap
         (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = A := by
     refine ContinuousMultilinearMap.ext ?_
     intro m
@@ -218,7 +222,8 @@ theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
     exact chartJ_chartJinv (I := I) (M := M) α hb (m k)
   have hBcompose :
       (B.compContinuousLinearMap
-          (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)).compContinuousLinearMap
+          (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α
+            b)).compContinuousLinearMap
         (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = B := by
     refine ContinuousMultilinearMap.ext ?_
     intro m
@@ -259,7 +264,8 @@ lemma chartRSTwist_apply
     (α' : Tensor0SModel r ℝ E) :
     chartRSTwist (I := I) (M := M) α b r s T α' =
       (T (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b))).compContinuousLinearMap
+            (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α
+              b))).compContinuousLinearMap
         (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b) := by
   rfl
 

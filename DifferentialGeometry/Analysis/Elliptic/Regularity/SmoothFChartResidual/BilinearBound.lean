@@ -36,6 +36,7 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula
 open DifferentialGeometry.Analysis.Sobolev.Chart
+open Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -130,7 +131,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
         (chartPushedRaw (I := I) (M := M) α
           (etaTimesV (I := I) (M := M) α v.toFun))
         (chartTargetEuclid (I := I) (M := M) α) :=
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_chartPushedRaw_of_contMDiff_tsupport
+      memW1p_chartPushedRaw_of_contMDiff_tsupport
         (I := I) (M := M) (α := α) h_smooth h_supp 2
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
   exact hK_bound hH_W12
@@ -419,9 +420,11 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
       chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) := by
   classical
-  unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+  unfold
+    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
-  have h_lp_ae := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
+  have h_lp_ae :=
+    fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (I := I) (M := M) g α v
   have h_fChart_ae := chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α
     (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -434,7 +437,7 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
   have h_rep_meas : Measurable (smoothRep (I := I) (M := M) g α v) :=
     (smoothRep_contMDiff (I := I) (M := M) g α v).continuous.measurable
   have h_smoothRep_eq_fHRep :
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualSmoothRep
+      Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualSmoothRep
         (I := I) (M := M) g α v = smoothRep (I := I) (M := M) g α v := by
     funext x
     rfl
@@ -495,7 +498,7 @@ private lemma memWkp_chartPushedRaw_smoothRep
         (smoothRep (I := I) (M := M) g α v))
       (chartTargetEuclid (I := I) (M := M) α) := by
   have h_w1p :=
-    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_chartPushedRaw_of_contMDiff_tsupport
+    memW1p_chartPushedRaw_of_contMDiff_tsupport
       (I := I) (M := M) (f := smoothRep (I := I) (M := M) g α v) (α := α)
       (smoothRep_contMDiff (I := I) (M := M) g α v)
       (tsupport_smoothRep_subset_source (I := I) (M := M) g α v) 2
@@ -1126,7 +1129,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α v)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2 v.toFun := by
@@ -1157,7 +1160,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
         (gradInnerPiece (I := I) (M := M) g α v.toFun))
       (chartTargetEuclid (I := I) (M := M) α) := by
     have h_w1p :=
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_chartPushedRaw_of_contMDiff_tsupport
+      memW1p_chartPushedRaw_of_contMDiff_tsupport
         (I := I) (M := M)
         (f := gradInnerPiece (I := I) (M := M) g α v.toFun) (α := α)
         (gradInnerPiece_smooth (I := I) (M := M) g α v)
@@ -1169,7 +1172,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
         (lapPiece (I := I) (M := M) g α v.toFun))
       (chartTargetEuclid (I := I) (M := M) α) := by
     have h_w1p :=
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_chartPushedRaw_of_contMDiff_tsupport
+      memW1p_chartPushedRaw_of_contMDiff_tsupport
         (I := I) (M := M)
         (f := lapPiece (I := I) (M := M) g α v.toFun) (α := α)
         (lapPiece_smooth (I := I) (M := M) g α v)

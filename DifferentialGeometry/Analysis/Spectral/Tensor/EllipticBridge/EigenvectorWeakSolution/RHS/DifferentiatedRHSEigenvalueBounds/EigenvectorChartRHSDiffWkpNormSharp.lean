@@ -41,7 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-
 lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -193,7 +192,6 @@ lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 lemma sharpDiff_wkpNorm_indicator_eq
     (α : M) (K : ℕ) {Q : EuclN → ℝ}
@@ -251,7 +249,6 @@ lemma sharpDiff_wkpNorm_indicator_eq
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_indicator_ae_eq_Q
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma sharpDiff_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -304,7 +301,6 @@ lemma sharpDiff_ofReal_const_pow_eigen_inv_le
   exact sharpDiff_pow_eigen_inv_mono (I := I) (M := M) g r s i hke
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 structure eigenvectorChartRHSDiffSharpWkpBounds
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) where
@@ -438,7 +434,6 @@ structure eigenvectorChartRHSDiffSharpWkpBounds
               g r s) i‖
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiff_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -454,7 +449,6 @@ private lemma sharpDiff_diff_memWkp
     (fun β Q => H.h_pou_resolv i (m + 1 + K') β Q)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiff_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -524,7 +518,6 @@ private lemma sharpDiff_level_zero_wkpNorm
   exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiff_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -811,7 +804,6 @@ private lemma sharpDiff_recursion
       exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

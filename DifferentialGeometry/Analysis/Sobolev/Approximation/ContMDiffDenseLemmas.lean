@@ -68,7 +68,6 @@ theorem contMDiff_finset_sum_chartPullback
       exact h_smooth_i.add ih'
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPushed_finset_sum
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {ι : Type*} (S : Finset ι) (f : ι → M → ℝ) :
@@ -81,7 +80,6 @@ lemma chartPushed_finset_sum
   rw [Finset.mul_sum]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPushed_sub
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     (u v : M → ℝ) :

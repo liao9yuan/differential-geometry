@@ -145,7 +145,8 @@ lemma smoothOrthoOpen_open (α : M) :
     IsOpen (smoothOrthoOpen (I := I) (M := M) α) := by
   exact isOpen_interior
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_mem_nhds (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ∈ 𝓝 α := by
   classical
@@ -158,7 +159,8 @@ lemma mem_smoothOrthoOpen (α : M) :
   exact mem_interior_iff_mem_nhds.mpr
     (smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma mem_smoothOrthoFrameNbhd_self (α : M) :
     α ∈ smoothOrthoFrameNbhd (I := I) (M := M) α := by
   classical
@@ -177,7 +179,8 @@ lemma smoothOrthoFrame_eq_on_nbhd
   have hb1 : (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1 := hb
   rw [hb1, one_smul]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_subset_chartAt_source (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ⊆ (chartAt H α).source := by
   classical
@@ -294,7 +297,8 @@ theorem chartFrameNorm_eq_of_chartAt_eq
   unfold chartFrameNorm
   exact (chartFrame_eq_of_chartAt_eq_strong (I := I) g h b i.val i (le_refl _)).2
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma g_inner_sum_right
     (g : SmoothRiemannianMetric I M) (b : M)
     (v : TangentSpace I b)
@@ -313,7 +317,8 @@ private lemma g_inner_sum_right
       rw [map_smul]; rfl]
     rw [ih]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma g_inner_sum_left
     (g : SmoothRiemannianMetric I M) (b : M)
     {ι : Type*} (s : Finset ι) (v : ι → TangentSpace I b)
@@ -759,7 +764,8 @@ theorem smoothOrthoFrame_orthonormal_at_center
   smoothOrthoFrame_orthonormal (I := I) g x
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x) i j
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma g_inner_contMDiffOn_of_sections
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b} {s : Set M}

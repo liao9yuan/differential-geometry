@@ -89,7 +89,8 @@ theorem Diffeomorph.pullbackInnerCross_pos
     have h2 : (hΦeq : TangentSpace I x →L[ℝ] TangentSpace J (Φ x)) v
         = mfderiv I J Φ x v := by
       rw [hΦeq_def]
-      have heq := Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ) (x := x) infty_ne_zero_cross
+      have heq := Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ) (x := x)
+        infty_ne_zero_cross
       exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace J (Φ x) => f v) heq
     have hcoe : (hΦeq : TangentSpace I x → TangentSpace J (Φ x)) v = hΦeq v := rfl
     rw [← h2]; exact fun h => h1 (by simpa [hcoe] using h)

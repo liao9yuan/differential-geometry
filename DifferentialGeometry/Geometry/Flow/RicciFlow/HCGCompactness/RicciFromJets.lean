@@ -10,8 +10,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciConti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
 
 
 
@@ -221,7 +219,6 @@ private lemma sRep_pd2_val
                     (I := I) gRef) σm (W a))) σmm x := by
   have hαtgt : extChartAt I x x ∈ (extChartAt I x).target :=
     (extChartAt I x).map_source (mem_extChartAt_source (I := I) x)
-
   have hgerm := sRep_fderiv_germ gRef x A0 0 W ((chartModelBasis E) m) σm hσm
   have hinner : partialDeriv (E := E) m (sRep gRef x A0 0 W)
       = fun z : E => fderiv Real (sRep gRef x A0 0 W) z ((chartModelBasis E) m) := rfl
@@ -231,7 +228,6 @@ private lemma sRep_pd2_val
           (towerStep (I := I) gRef A0 0 W σm)) (extChartAt I x x) := by
     rw [hinner]
     exact hgerm.fderiv_eq
-
   set corr : Fin 2 → (E → Real) := fun a =>
     sRep gRef x A0 0
       (Function.update W a
@@ -293,7 +289,8 @@ private lemma sRep_pd2_val
 
 
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma eval_le
     [Module.Finite ℝ E]
     (s : ℕ) (slots : Fin s → TangentSpace I x) :
@@ -555,8 +552,10 @@ private lemma gram0_le
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _
-    rw [show (metricCovDeriv (I := I) u gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u x from rfl,
-      show (metricCovDeriv (I := I) u' gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u' x from rfl,
+    rw [show (metricCovDeriv (I := I) u gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u x
+      from rfl,
+      show (metricCovDeriv (I := I) u' gRef 0 x) = Tensor0SBundle.metricTensorField (I := I) u' x
+        from rfl,
       hu, hu']
   rw [hentry]
   have h := hCf (i, j) (metricDiffCovDerivAt (I := I) 0 u u' gRef x)
@@ -718,13 +717,13 @@ private lemma gram2_le
             + metricDerivNorm (I := I) 1 u u' gRef x
             + metricDerivNorm (I := I) 0 u u' gRef x) := by
   classical
-
   have hC1 : ∀ t : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 A0' : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2,
         |towerStep (I := I) gRef A0 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x
-          - towerStep (I := I) gRef A0' 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x| ≤
+          - towerStep (I := I) gRef A0' 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1) x|
+            ≤
         C * (Real.sqrt (normSq0S (I := I) gRef x (1 + 1 + 2)
               (covDerivOfField (I := I) gRef A0 (1 + 1) x
                 - covDerivOfField (I := I) gRef A0' (1 + 1) x))
@@ -732,7 +731,6 @@ private lemma gram2_le
               (covDerivOfField (I := I) gRef A0 1 x
                 - covDerivOfField (I := I) gRef A0' 1 x))) :=
     fun t => towVal_le gRef x 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1)
-
   have hC0 : ∀ t : ((Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) × Fin 2,
       ∃ C : Real, 0 ≤ C ∧
@@ -1031,7 +1029,6 @@ theorem gramJet_le_covNorm
           C * ∑ a ∈ Finset.range 3, metricCovDerivNorm (I := I) a u gRef x) := by
   classical
   obtain ⟨σs, hσs⟩ := exists_slotSections (I := I) x
-
   have hK1 : ∀ t : Fin (Module.finrank Real E) × Fin (Module.finrank Real E)
       × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -1042,7 +1039,6 @@ theorem gramJet_le_covNorm
             + Real.sqrt (normSq0S (I := I) gRef x (0 + 2)
               (covDerivOfField (I := I) gRef A0 0 x))) :=
     fun t => towVal_le' gRef x 0 ![σs t.2.1, σs t.2.2] (σs t.1)
-
   have hK2 : ∀ t : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E), ∃ C : Real, 0 ≤ C ∧
       ∀ A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -1053,7 +1049,6 @@ theorem gramJet_le_covNorm
             + Real.sqrt (normSq0S (I := I) gRef x (1 + 2)
               (covDerivOfField (I := I) gRef A0 1 x))) :=
     fun t => towVal_le' gRef x 1 (Fin.cons (σs t.1.2) ![σs t.2.1, σs t.2.2]) (σs t.1.1)
-
   have hK0 : ∀ t : ((Fin (Module.finrank Real E) × Fin (Module.finrank Real E))
       × Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) × Fin 2,
       ∃ C : Real, 0 ≤ C ∧
@@ -1183,7 +1178,8 @@ open Matrix
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] in
 private lemma gram_quad_low
     [Module.Finite ℝ E]
     :
@@ -1315,7 +1311,6 @@ theorem invGram_le_of_low
   refine ⟨(lam * c0)⁻¹, (inv_nonneg).mpr hμ.le, fun u hlow k l => ?_⟩
   have hdet : IsUnit (chartGramMatrix (I := I) u x x).det :=
     (chartGramMatrix_det_pos (I := I) u x hxbase).ne'.isUnit
-
   have hulow : ∀ ξ : Fin (Module.finrank Real E) → Real,
       lam * c0 * (ξ ⬝ᵥ ξ) ≤ ξ ⬝ᵥ (chartGramMatrix (I := I) u x x) *ᵥ ξ := by
     intro ξ
@@ -1331,7 +1326,6 @@ theorem invGram_le_of_low
       _ ≤ u.inner x (∑ i, ξ i • chartBasisVecFiber (I := I) x i x)
             (∑ j, ξ j • chartBasisVecFiber (I := I) x j x) := hlow _
       _ = ξ ⬝ᵥ (chartGramMatrix (I := I) u x x) *ᵥ ξ := hu.symm
-
   set η : Fin (Module.finrank Real E) → Real :=
     (chartGramMatrix (I := I) u x x)⁻¹ *ᵥ Pi.single l 1 with hη
   have hGη : (chartGramMatrix (I := I) u x x) *ᵥ η = Pi.single l 1 := by
@@ -1426,7 +1420,6 @@ theorem chartRicci_sub_le
     exact hαtgt
   have hψ : (extChartAt I x).symm (extChartAt I x x) = x :=
     (extChartAt I x).left_inv (mem_extChartAt_source (I := I) x)
-
   set nR : Real := (Module.finrank Real E : Real) with hnR
   have hnR0 : 0 ≤ nR := Nat.cast_nonneg _
   set Q : Real := CJ * (3 * B) with hQdef
@@ -1483,7 +1476,6 @@ theorem chartRicci_sub_le
   refine ⟨2 * nR * Cdiff + 4 * nR ^ 2 * Clip * Mg + 1,
     add_pos_of_nonneg_of_pos (add_nonneg hSecondCoeff0 hFirstCoeff0) zero_lt_one,
     fun u u' hlowu hlowu' hcovu hcovu' i k => ?_⟩
-
   have hcS : ∀ (w : SmoothRiemannianMetric I M),
       (∀ a : ℕ, a ≤ 2 → metricCovDerivNorm (I := I) a w gRef x ≤ B) →
       (∑ a ∈ Finset.range 3, metricCovDerivNorm (I := I) a w gRef x) ≤ 3 * B := by
@@ -1493,7 +1485,6 @@ theorem chartRicci_sub_le
     have h1 := hw 1 (by norm_num)
     have h2 := hw 2 (by norm_num)
     linarith
-
   have hQu : ∀ m a b : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartGramOnE (I := I) u x a b) (extChartAt I x x)| ≤ Q := by
     intro m a b
@@ -1513,7 +1504,6 @@ theorem chartRicci_sub_le
     refine ((hCJ u).2 mm m a b).trans ?_
     rw [hQdef]
     exact mul_le_mul_of_nonneg_left (hcS u hcovu) hCJ0.le
-
   have hMbα : ∀ (w : SmoothRiemannianMetric I M),
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ w.inner x ξ ξ) →
       ∀ k' l : Fin (Module.finrank Real E),
@@ -1523,7 +1513,6 @@ theorem chartRicci_sub_le
     exact hMb w hloww k' l
   have hMbu := hMbα u hlowu
   have hMbu' := hMbα u' hlowu'
-
   have hCinvα : ∀ k' l : Fin (Module.finrank Real E),
       |chartInvGramOnE (I := I) u x k' l (extChartAt I x x)
         - chartInvGramOnE (I := I) u' x k' l (extChartAt I x x)| ≤
@@ -1535,7 +1524,6 @@ theorem chartRicci_sub_le
       hxbase (fun p q => hMb u hlowu p q) (fun p q => hMb u' hlowu' p q) k' l
     rw [hCinvdef, hnR]
     exact h
-
   have hPu : ∀ i' j l : Fin (Module.finrank Real E),
       |gramBracket (I := I) u x i' j l (extChartAt I x x)| ≤ P := by
     intro i' j l
@@ -1554,7 +1542,6 @@ theorem chartRicci_sub_le
     have h3 := hQu l i' j
     rw [hPdef]
     linarith
-
   have hRu : ∀ m i' j l : Fin (Module.finrank Real E),
       |gramBracketDeriv (I := I) u x m i' j l (extChartAt I x x)| ≤ R := by
     intro m i' j l
@@ -1579,7 +1566,6 @@ theorem chartRicci_sub_le
     have h3 := hQQu m l i' j
     rw [hRdef]
     linarith
-
   have hDu' : ∀ m k' l : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) u' x k' l) (extChartAt I x x)| ≤ D := by
     intro m k' l
@@ -1624,7 +1610,6 @@ theorem chartRicci_sub_le
       _ = nR * (nR * (Mb * Mb * Q)) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnR]
       _ = D := by rw [hDdef]; ring
-
   have hMgb : ∀ (w : SmoothRiemannianMetric I M),
       (∀ k' l : Fin (Module.finrank Real E),
         |chartInvGramOnE (I := I) w x k' l (extChartAt I x x)| ≤ Mb) →
@@ -1651,7 +1636,6 @@ theorem chartRicci_sub_le
           exact mul_le_mul (hMbw k' l) (hPw i' j l) (abs_nonneg _) hMb0
       _ = nR * (Mb * P) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnR]
-
   have hPu' : ∀ i' j l : Fin (Module.finrank Real E),
       |gramBracket (I := I) u' x i' j l (extChartAt I x x)| ≤ P := by
     intro i' j l
@@ -1672,7 +1656,6 @@ theorem chartRicci_sub_le
     linarith
   have hMgu := hMgb u hMbu hPu
   have hMgu' := hMgb u' hMbu' hPu'
-
   have hCdα : ∀ (m k' l : Fin (Module.finrank Real E)),
       |partialDeriv (E := E) m (chartInvGramOnE (I := I) u x k' l) (extChartAt I x x)
         - partialDeriv (E := E) m (chartInvGramOnE (I := I) u' x k' l) (extChartAt I x x)| ≤
@@ -1682,7 +1665,6 @@ theorem chartRicci_sub_le
       hMb0 hQ0 hCinv0 hMbu hMbu' (fun m' a b => hQu m' a b) hCinvα m k' l
     rw [hCddef, hnR]
     exact h
-
   have hClipα : ∀ i' j k' : Fin (Module.finrank Real E),
       |chartChristoffel (I := I) u x i' j k' (extChartAt I x x)
         - chartChristoffel (I := I) u' x i' j k' (extChartAt I x x)| ≤
@@ -1692,7 +1674,6 @@ theorem chartRicci_sub_le
       hP0 hMb0 hMbu' hPu hCinvα hCinv0 i' j k'
     rw [hClipdef, hnR]
     exact h
-
   have hCdiffα : ∀ m i' j k' : Fin (Module.finrank Real E),
       |partialDeriv (E := E) m (chartChristoffel (I := I) u x i' j k') (extChartAt I x x)
         - partialDeriv (E := E) m (chartChristoffel (I := I) u' x i' j k') (extChartAt I x x)| ≤
@@ -1704,7 +1685,6 @@ theorem chartRicci_sub_le
       (fun i'' j' l => hRu m i'' j' l) hCinvα
     rw [hCdiffdef, hnR]
     exact h
-
   set jet2 : Real := chartMetricJet2DiffSup (I := I) (M := M) u u' x (extChartAt I x x)
     with hjet2def
   have hjet2nn : 0 ≤ jet2 := chartMetricJet2DiffSup_nonneg _ _ _ _

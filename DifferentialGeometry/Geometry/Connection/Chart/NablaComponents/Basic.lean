@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import DifferentialGeometry.Geometry.Connection.Chart.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-set_option linter.flexible false
-set_option linter.unnecessarySimpa false
 
 
 
@@ -100,7 +98,7 @@ theorem connCoeff_eq_christoffelAlong_coord
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀).toBasisAt hx =
           (coordinateTrivializationAt (I := I) x₀).basisAt
             (Module.finBasis Real E)
-            (by simpa [coordinateFrameSet, coordinateTrivializationAt] using hx) := by
+            (by simp [coordinateTrivializationAt]) := by
       ext a
       rw [IsLocalFrameOn.toBasisAt_coe]
       simp [coordinateFrameAt,

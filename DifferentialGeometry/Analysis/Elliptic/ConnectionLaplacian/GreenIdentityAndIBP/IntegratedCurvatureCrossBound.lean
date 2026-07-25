@@ -64,7 +64,6 @@ theorem exists_genuineCurvPureRSection_l2Norm_le_covGrad
   have hsec : genuineCurvatureOnlySection (I := I) (M := M) g s S =
       pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) :=
     (pureRGenuineDiffOp0_eq_GcurvSection (I := I) (M := M) g s S).symm
-
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
           ((genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x) ≤
@@ -77,10 +76,10 @@ theorem exists_genuineCurvPureRSection_l2Norm_le_covGrad
     rw [Finset.sum_range_one,
       DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero] at h
     exact h
-
   have hbound := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
     (covGrad (I := I) (M := M) g 0 s S) (0 : SmoothCcTensor g 0 (s + 1))
-    (genuineCurvatureOnlySection (I := I) (M := M) g s S) (Real.sqrt (kappa 0 (s + 1))) (Real.sqrt_nonneg _)
+    (genuineCurvatureOnlySection (I := I) (M := M) g s S) (Real.sqrt (kappa 0 (s + 1)))
+      (Real.sqrt_nonneg _)
     (fun x => ?_)
   · rw [norm_zero, add_zero] at hbound; exact hbound
   · have hz : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
@@ -154,19 +153,16 @@ theorem exists_integrated_curvatureCrossBound
   classical
   obtain ⟨K_R, K_dR, hK_R_nn, hK_dR_nn, hfibre⟩ :=
     exists_pointwiseTensorCurv_fiberNormSq_bound (I := I) (M := M) g s
-
   set C : ℝ := Real.sqrt 2 * max K_R K_dR with hC_def
   have hmax_nn : 0 ≤ max K_R K_dR := le_max_of_le_left hK_R_nn
   have hC_nn : 0 ≤ C := mul_nonneg (Real.sqrt_nonneg _) hmax_nn
   refine ⟨C, hC_nn, fun S => ?_⟩
   set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgradS_def
-
   have hCurvFun : (pointwiseTensorCurv (I := I) (M := M) g s S).toFun =
       (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S) -
         covGrad (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun := rfl
-
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
           ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x) ≤
@@ -184,7 +180,6 @@ theorem exists_integrated_curvatureCrossBound
     have hrG_nn : 0 ≤ rG := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
     have hrS_nn : 0 ≤ rS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
     have hsqrtC : Real.sqrt rC ≤ K_R * Real.sqrt rG + K_dR * Real.sqrt rS := hfibre S x
-
     have hsqrtC' : Real.sqrt rC ≤ max K_R K_dR * (Real.sqrt rG + Real.sqrt rS) := by
       refine le_trans hsqrtC ?_
       have h1 : K_R * Real.sqrt rG ≤ max K_R K_dR * Real.sqrt rG :=
@@ -200,17 +195,14 @@ theorem exists_integrated_curvatureCrossBound
     rw [hC_sq, hrC_eq, hrG_eq, hrS_eq]
     exact sq_le_two_sq_add_sq (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
       (Real.sqrt_nonneg _) hmax_nn hsqrtC'
-
   have hL2 : ‖pointwiseTensorCurv (I := I) (M := M) g s S‖ ≤
       C * (‖covGrad (I := I) (M := M) g 0 s S‖ + ‖S‖) :=
     tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
       (covGrad (I := I) (M := M) g 0 s S) S
       (pointwiseTensorCurv (I := I) (M := M) g s S) C hC_nn hpt
-
   rw [SmoothCcTensor.norm_def (I := I) (M := M) (pointwiseTensorCurv (I := I) (M := M) g s S),
     SmoothCcTensor.norm_def (I := I) (M := M) (covGrad (I := I) (M := M) g 0 s S),
     SmoothCcTensor.norm_def (I := I) (M := M) S] at hL2
-
   have hcs : |tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun| ≤
       tensorL2Norm (I := I) (M := M) g 0 (s + 1)
@@ -222,14 +214,12 @@ theorem exists_integrated_curvatureCrossBound
       (SmoothCcTensor.memL2_toFun (I := I) (M := M) gradS)
       (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
         (pointwiseTensorCurv (I := I) (M := M) g s S) gradS)
-
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun with hnGrad_def
   set nS : ℝ := tensorL2Norm (I := I) (M := M) g 0 s S.toFun with hnS_def
   set nCurv : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1)
     (pointwiseTensorCurv (I := I) (M := M) g s S).toFun with hnCurv_def
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
   have hnS_nn : 0 ≤ nS := tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
-
   have hval_eq :
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
@@ -241,7 +231,6 @@ theorem exists_integrated_curvatureCrossBound
         (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun := by
     rw [← hgradS_def, ← hCurvFun]
   rw [hval_eq]
-
   have hneg_le : - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun ≤
       |tensorL2Inner (I := I) (M := M) g 0 (s + 1)

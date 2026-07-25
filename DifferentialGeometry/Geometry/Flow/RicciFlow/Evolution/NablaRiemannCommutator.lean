@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -118,7 +115,8 @@ def nabla3FrameTuple
   metricTraceInput (I := I) (frame d₀ x) (frame d₁ x)
     (nabla3InnerSlots (I := I) frame x d₂ m)
 
-omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem nabla3FrameTuple_eq_metricTraceInput
     (frame : CoordinateIdx (𝕜 := Real) E → (x : M) → TangentSpace I x) (x : M)
     (d₀ d₁ d₂ : CoordinateIdx (𝕜 := Real) E) (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
@@ -181,19 +179,12 @@ theorem nablaLapComm_pointwise
         (nabla3FrameTuple (I := I) (coordinateFrameAt (I := I) x₀) x₀ c a b m) =
       nablaLapCommReactionTerm (I := I) S (t : Real) x₀ a b c m := by
   classical
-
-
-
   have hR2 :=
     nablaRm04_ricciIdentityAt (I := I) S hS t x₀
       (coordinateFrameAt (I := I) x₀ a x₀) (coordinateFrameAt (I := I) x₀ c x₀)
       (nabla3InnerSlots (I := I) (coordinateFrameAt (I := I) x₀) x₀ b m)
-
-
-
   rw [nablaLapCommReactionTerm]
   simp only [nabla3FrameTuple, nabla3InnerSlots] at hR2 ⊢
-
   linarith [hR2]
 
 
@@ -302,7 +293,6 @@ theorem nablaLapComm_orthonormalTrace
         nablaLapCommReactionTerm (I := I) S (t : Real) x₀ a a c m := by
   classical
   rw [nablaLapComm_trace (I := I) S hS t x₀ gInv c m]
-
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [Finset.sum_eq_single a]
   · rw [horth a a, if_pos rfl, one_mul]

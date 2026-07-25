@@ -27,14 +27,16 @@ def localSlotCLM (s : ℕ) {b : M}
     (i : Fin s) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 @[simp] lemma localSlotCLM_self (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     localSlotCLM (I := I) s k Φ k = Φ := by
   unfold localSlotCLM
   simp
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 lemma localSlotCLM_other (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin s} (h : i ≠ k) :
@@ -94,7 +96,8 @@ lemma tensor0SPartialEval_apply_tangent (s : ℕ)
   exact TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T b) (v0 := Y b) (vs := vs)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (w : TangentSpace I b) (m : Fin s → TangentSpace I b) :

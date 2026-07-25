@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -143,13 +142,11 @@ theorem koszul_difference
   have h1 := nabla_metric_two_term (I := I) cov cov' g hmc X Y Z x
   have h2 := nabla_metric_two_term (I := I) cov cov' g hmc Y X Z x
   have h3 := nabla_metric_two_term (I := I) cov cov' g hmc Z X Y x
-
   have hsymm1 := difference_symm_at (I := I) cov cov' htf htf' X Y
   have hsymm2 := difference_symm_at (I := I) cov cov' htf htf' X Z
   have hsymm3 := difference_symm_at (I := I) cov cov' htf htf' Y Z
   rw [← hsymm1, hsymm3] at h2
   rw [← hsymm2] at h3
-
   have hg1 := g.symm x (Y x)
     (((CovariantDerivative.difference cov cov' x) (Z x)) (X x))
   linarith [h1, h2, h3, hg1]

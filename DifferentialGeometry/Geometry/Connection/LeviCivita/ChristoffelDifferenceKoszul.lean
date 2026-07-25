@@ -43,11 +43,9 @@ theorem connDiff_koszul (g₁ g₀ : SmoothRiemannianMetric I M)
       metricCovDeriv (I := I) g₁ (LeviCivita (I := I) g₀) X Y Z x
       + metricCovDeriv (I := I) g₁ (LeviCivita (I := I) g₀) Y X Z x
       - metricCovDeriv (I := I) g₁ (LeviCivita (I := I) g₀) Z X Y x := by
-
   have hK1 := koszul_identity (I := I) (g := g₁) (LeviCivita (I := I) g₁)
     (LeviCivita_torsion_eq_zero (I := I) g₁) (LeviCivita_isMetricCompatible (I := I) g₁)
     hX hY hZ
-
   have hTF : ∀ ⦃A B : Π y : M, TangentSpace I y⦄ ⦃y : M⦄,
       MDiffAt (T% A) y → MDiffAt (T% B) y →
       (LeviCivita (I := I) g₀).toFun B y (A y) - (LeviCivita (I := I) g₀).toFun A y (B y)
@@ -57,29 +55,22 @@ theorem connDiff_koszul (g₁ g₀ : SmoothRiemannianMetric I M)
   have tf_XY := hTF hX hY
   have tf_XZ := hTF hX hZ
   have tf_YZ := hTF hY hZ
-
   set nXY := (LeviCivita (I := I) g₀).toFun Y x (X x) with hnXY
   set nYX := (LeviCivita (I := I) g₀).toFun X x (Y x) with hnYX
   set nXZ := (LeviCivita (I := I) g₀).toFun Z x (X x) with hnXZ
   set nZX := (LeviCivita (I := I) g₀).toFun X x (Z x) with hnZX
   set nYZ := (LeviCivita (I := I) g₀).toFun Z x (Y x) with hnYZ
   set nZY := (LeviCivita (I := I) g₀).toFun Y x (Z x) with hnZY
-
   rw [PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ hY (X x)]
-
   unfold metricCovDeriv
   simp only [directionalDeriv_eq, ← hnXY, ← hnYX, ← hnXZ, ← hnZX, ← hnYZ, ← hnZY]
-
   rw [← tf_XY, ← tf_XZ, ← tf_YZ] at hK1
-
   have hlin : ∀ a b c : TangentSpace I x,
       g₁.inner x (a - b) c = g₁.inner x a c - g₁.inner x b c := fun a b c => by
     simp [map_sub, ContinuousLinearMap.sub_apply]
   rw [hlin, hlin, hlin] at hK1
-
   rw [map_sub, ContinuousLinearMap.sub_apply, mul_sub]
   rw [hK1]
-
   rw [g₁.symm x (Y x) nXZ, g₁.symm x (X x) nYZ, g₁.symm x (X x) nZY]
   ring
 

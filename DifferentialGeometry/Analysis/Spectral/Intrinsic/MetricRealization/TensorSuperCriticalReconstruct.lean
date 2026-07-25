@@ -63,7 +63,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
@@ -506,9 +505,6 @@ private lemma ite_finsetSum_eq_finsetSum_ite'
   · simp only [if_neg hp, Finset.sum_const_zero]
 
 open Classical in
-
-
-
 private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum_w (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
@@ -560,9 +556,6 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum_w (w : TensorL2 r s 
     else 0) y
 
 open Classical in
-
-
-
 private lemma raw_wSmoothChart_eq_ite (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
@@ -592,9 +585,6 @@ private lemma raw_wSmoothChart_eq_ite (w : TensorL2 r s g)
       (I := I) (M := M) g r s w h_all α β P₀ hxα
 
 open Classical in
-
-
-
 private lemma wSmoothChart_tensorL2ChartComponent_coeFn_aeEq (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
@@ -818,11 +808,6 @@ private lemma wChartComp_comp_chartTransition_ae_eq_cutoff_mul (w : TensorL2 r s
   exact chartTransitionEuclid_comp_ae_eq_restrict (I := I) (M := M) β γ h_overlap
 
 open Classical in
-
-
-
-
-
 private lemma wSmoothChart_transport_term_aeEq (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2
@@ -1016,10 +1001,6 @@ private lemma wSmoothChart_transport_term_aeEq (w : TensorL2 r s g)
   exact (Filter.EventuallyEq.refl _ W).mul hB_eq.symm
 
 open Classical in
-
-
-
-
 private lemma wSmoothChart_tensorL2ChartComponent_eq_transport_sum
     (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
@@ -1280,10 +1261,6 @@ private lemma transportSum_w_ae_zero_of_notMem (w : TensorL2 r s g)
   rw [Finset.sum_const_zero]
 
 open Classical in
-
-
-
-
 private lemma wSmooth_tensorL2ChartComponent_eq (w : TensorL2 r s g)
     (h_all : ∀ k : ℕ, ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (2 * k) 2

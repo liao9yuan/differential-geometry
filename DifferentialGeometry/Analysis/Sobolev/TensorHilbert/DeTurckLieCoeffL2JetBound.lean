@@ -235,7 +235,8 @@ private theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand
     (Equiv.swap (0 : Fin 2) 1) (Equiv.swap (0 : Fin 2) 1)
     (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
       (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)) i x
-  exact heq.trans_le (riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M) g₀ g₁ g_bg i x)
+  exact heq.trans_le (riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I)
+    (M := M) g₀ g₁ g_bg i x)
 
 theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -279,7 +280,8 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
       (deTurckLieWEndoInsert (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       i (Module.finrank ℝ E : ℝ)
-      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M) g₀
+      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M)
+        g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i x)) ?_
     exact mul_le_mul_of_nonneg_left hWE hfr_nn
   have hL2B : ‖iteratedCovGrad (I := I) g₀ 2 2 i
@@ -300,7 +302,8 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
       (deTurckLieWEndoInsert (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       i (Module.finrank ℝ E : ℝ)
-      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand_le (I := I) (M := M) g₀
+      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand_le (I := I)
+        (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i x)) ?_
     exact mul_le_mul_of_nonneg_left hWE hfr_nn
   have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i
@@ -379,7 +382,8 @@ theorem deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
         (deTurckLieWEndoSection (I := I) (M := M)
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)).toSection x) ≤
       (Module.finrank ℝ E : ℝ) * Λ0 := by
-    have h := riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M) g₀
+    have h := riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M)
+      g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg 0 x
     exact le_trans h (mul_le_mul_of_nonneg_left hWE hfr_nn)
   have hB0 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
@@ -390,7 +394,8 @@ theorem deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)))
         (Equiv.swap (0 : Fin 2) 1)).toSection x) ≤
       (Module.finrank ℝ E : ℝ) * Λ0 := by
-    have h := riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand_le (I := I) (M := M) g₀
+    have h := riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand_le (I := I) (M := M)
+      g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg 0 x
     exact le_trans h (mul_le_mul_of_nonneg_left hWE hfr_nn)
   have hsec : (deTurckLieDLbCoeffField (I := I) g₀

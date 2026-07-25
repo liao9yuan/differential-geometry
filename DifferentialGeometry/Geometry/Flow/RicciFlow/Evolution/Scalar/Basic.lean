@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Algebra.Order.Chebyshev
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -153,7 +152,8 @@ theorem zero_drift
           (fun y : M => (0 : TangentSpace I y)) (scalar t) x := by
   intro t ht x
   calc
-    scalarLap t x = DifferentialGeometry.Integral.Connection.heatOperator (I := I) G t (scalar t) x := h t ht x
+    scalarLap t x = DifferentialGeometry.Integral.Connection.heatOperator (I := I) G t (scalar t) x
+      := h t ht x
     _ = DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
           (fun y : M => (0 : TangentSpace I y)) (scalar t) x := by
         rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift]
@@ -163,7 +163,8 @@ theorem of_laplacianAt
     {G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real}
     {T : Real} {scalar scalarLap : Real -> M -> Real}
     (h : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
-      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t) x) :
+      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t)
+        x) :
     ScalarLaplacianRealizesHeatOperatorOn (I := I) G T scalar scalarLap := by
   intro t ht x
   simpa [DifferentialGeometry.Integral.Connection.heatOperator] using h t ht x

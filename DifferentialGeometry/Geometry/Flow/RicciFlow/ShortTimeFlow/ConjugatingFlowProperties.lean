@@ -148,7 +148,6 @@ theorem conjugating_flow_jointContMDiffOn
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem spatial_pushforward_chartCoord_contMDiffAt
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -202,7 +201,8 @@ private theorem spatial_pushforward_chartCoord_contMDiffAt
   have hpre : (fun p : ℝ × ℝ => (Φ_fam p.2 : M → M) x) ⁻¹' (chartAt H α).source ∈ nhds (t, t) :=
     hcontAt.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds (by rw [hα]; exact hαsrc))
   filter_upwards [hpre] with p hp
-  have hxsrc : (id ((fun _ : ℝ × ℝ => x) p)) ∈ (chartAt H ((fun _ : ℝ × ℝ => x) (t, t))).source := by
+  have hxsrc : (id ((fun _ : ℝ × ℝ => x) p)) ∈
+    (chartAt H ((fun _ : ℝ × ℝ => x) (t, t))).source := by
     simp [mem_chart_source]
   have hysrc : ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) p)
       ∈ (chartAt H ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) (t, t))).source := by
@@ -216,7 +216,8 @@ private theorem spatial_pushforward_chartCoord_contMDiffAt
         (achart H ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) p))
         (achart H ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) (t, t)))
         ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) p)
-      = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((Φ_fam p.2 : M → M) x) := by
+      = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ
+        ((Φ_fam p.2 : M → M) x) := by
     change (tangentBundleCore I M).coordChange (achart H ((Φ_fam p.2 : M → M) x)) (achart H α)
         ((Φ_fam p.2 : M → M) x)
       = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((Φ_fam p.2 : M → M) x)
@@ -231,7 +232,6 @@ private theorem spatial_pushforward_chartCoord_contMDiffAt
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_chartGram_contMDiffAt
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -269,7 +269,8 @@ private theorem flow_chartGram_contMDiffAt
       exact ContMDiffAt.comp (g := fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2)
         (x := (t, t)) (by simpa using hflow_tx) hcomp
     exact contMDiffAt_fst.prodMk hflowAt
-  have hmem_dom : ((t : ℝ), α) ∈ Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet :=
+  have hmem_dom : ((t : ℝ), α) ∈ Set.Ioo (0 : ℝ) T ×ˢ
+    (trivializationAt E (TangentSpace I) α).baseSet :=
     ⟨ht, hbase0⟩
   have hdom_nhds : Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet
       ∈ nhds ((t : ℝ), α) :=
@@ -285,7 +286,6 @@ private theorem flow_chartGram_contMDiffAt
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 open DifferentialGeometry.PDE.RicciFlow.Pullback in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem evalFormTwoVar_hasFDerivWithinAt
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -407,7 +407,6 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.PDE.RicciFlow.Pullback in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem flow_pushforward_slot_hasDerivWithinAt
@@ -700,7 +699,6 @@ theorem conjugating_flow_t0_continuity_data
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_pushforward_chartBasisVec_section_cmwa
     (J : Set ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -793,7 +791,6 @@ private theorem flow_pushforward_chartBasisVec_section_cmwa
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_pushforward_chartCoord_cmwa
     (J : Set ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -834,7 +831,8 @@ private theorem flow_pushforward_chartCoord_cmwa
   refine hsec_fib.congr_of_eventuallyEq ?_ ?_
   · filter_upwards [hpb] with p hp
     change e.continuousLinearMapAt ℝ ((Φ_fam p.1 : M → M) p.2)
-        (mfderiv I I (Φ_fam p.1 : M → M) p.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
+        (mfderiv I I (Φ_fam p.1 : M → M) p.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
       = (e (F p)).2
     rw [hF, e.apply_eq_prod_continuousLinearEquivAt ℝ _ hp,
       e.coe_continuousLinearEquivAt_eq (R := ℝ) hp]
@@ -847,7 +845,6 @@ private theorem flow_pushforward_chartCoord_cmwa
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem chartModelBasis_repr_cmwa {n : ℕ}
     {S : Set (ℝ × M)} {p₀ : ℝ × M} {f : (ℝ × M) → E}
     (hf : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) (n : ℕ) f S p₀)
@@ -864,7 +861,6 @@ private theorem chartModelBasis_repr_cmwa {n : ℕ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_chartGramMatrix_alpha_cmwa
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (J J_g : Set ℝ) (hJJ : J ⊆ J_g) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -925,12 +921,12 @@ private theorem flow_chartGramMatrix_alpha_cmwa
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_pushforward_chartCoord_continuousWithinAt
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x₀ : M) (i : Fin (Module.finrank ℝ E))
     (hΦsection_joint : ContinuousOn (fun p : ℝ × M =>
       (TotalSpace.mk' E ((Φ_fam p.1 : M → M) p.2)
-        (mfderiv I I (Φ_fam p.1 : M → M) p.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
+        (mfderiv I I (Φ_fam p.1 : M → M) p.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
         : TangentBundle I M))
       (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hΦorbit_joint : ContinuousOn (fun p : ℝ × M => (Φ_fam p.1 : M → M) p.2)
@@ -955,7 +951,8 @@ private theorem flow_pushforward_chartCoord_continuousWithinAt
   have hsec_cwa : ContinuousWithinAt F S (t₀, b₀) := hΦsection_joint.continuousWithinAt ht₀b₀
   have hsrc0 : F (t₀, b₀) ∈ e.source := by
     rw [hF, he, Bundle.Trivialization.mem_source]; exact hαbase
-  have hcontTriv : ContinuousWithinAt (fun r : TangentBundle I M => (e r).2) e.source (F (t₀, b₀)) :=
+  have hcontTriv : ContinuousWithinAt (fun r : TangentBundle I M => (e r).2) e.source
+    (F (t₀, b₀)) :=
     (e.continuousOn.continuousWithinAt hsrc0).snd
   have hpre : F ⁻¹' e.source ∈ nhdsWithin (t₀, b₀) S :=
     hsec_cwa.preimage_mem_nhdsWithin (e.open_source.mem_nhds hsrc0)
@@ -971,7 +968,8 @@ private theorem flow_pushforward_chartCoord_continuousWithinAt
       horbit_cwa.preimage_mem_nhdsWithin hbnhds
     filter_upwards [hpb] with p hp
     change e.continuousLinearMapAt ℝ ((Φ_fam p.1 : M → M) p.2)
-        (mfderiv I I (Φ_fam p.1 : M → M) p.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
+        (mfderiv I I (Φ_fam p.1 : M → M) p.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
       = (e (F p)).2
     rw [hF, e.apply_eq_prod_continuousLinearEquivAt ℝ _ hp,
       e.coe_continuousLinearEquivAt_eq (R := ℝ) hp]
@@ -983,7 +981,6 @@ private theorem flow_pushforward_chartCoord_continuousWithinAt
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem chartModelBasis_repr_continuousWithinAt
     {S : Set (ℝ × M)} {p₀ : ℝ × M} {f : (ℝ × M) → E}
     (hf : ContinuousWithinAt f S p₀) (p : Fin (Module.finrank ℝ E)) :
@@ -996,7 +993,6 @@ private theorem chartModelBasis_repr_continuousWithinAt
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem cwa_finset_sum {ι : Type*} {N : Type*} [AddCommMonoid N] [TopologicalSpace N]
     [ContinuousAdd N] {f : ι → (ℝ × M) → N} (s : Finset ι) {t : Set (ℝ × M)} {x : ℝ × M}
     (h : ∀ i ∈ s, ContinuousWithinAt (f i) t x) :
@@ -1011,7 +1007,6 @@ private theorem cwa_finset_sum {ι : Type*} {N : Type*} [AddCommMonoid N] [Topol
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-
 private theorem flow_chartGramMatrix_alpha_continuousWithinAt
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -1045,7 +1040,8 @@ private theorem flow_chartGramMatrix_alpha_continuousWithinAt
     refine Filter.inter_mem self_mem_nhdsWithin ?_
     have hbnhds : eα.baseSet ∈ nhds ((Φ_fam t₀ : M → M) b₀) := eα.open_baseSet.mem_nhds hαbase
     exact horbit_cwa.preimage_mem_nhdsWithin hbnhds
-  have hpair : ContinuousWithinAt (fun r : ℝ × M => (r.1, (Φ_fam r.1 : M → M) r.2)) S' (t₀, b₀) := by
+  have hpair : ContinuousWithinAt (fun r : ℝ × M => (r.1, (Φ_fam r.1 : M → M) r.2)) S'
+    (t₀, b₀) := by
     have hfst : ContinuousWithinAt (fun r : ℝ × M => r.1) S' (t₀, b₀) :=
       continuous_fst.continuousWithinAt
     have hb₂S : ContinuousWithinAt (fun r : ℝ × M => (Φ_fam r.1 : M → M) r.2) S (t₀, b₀) :=
@@ -1184,13 +1180,16 @@ theorem conjugating_flow_pullback_jointGram_data
       obtain ⟨hbE, hsr⟩ := hr
       rw [Integral.Measure.chartGramMatrix_apply, pullbackMetric_inner_eq_inner_mfderiv]
       have hexpand := g_inner_eq_chart_sum (I := I) (g_DT r.1) α hbE hsr
-        (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2))
-        (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
+        (mfderiv I I (Φ_fam r.1 : M → M) r.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2))
+        (mfderiv I I (Φ_fam r.1 : M → M) r.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
       have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
             (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
-          = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q := by
+          = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p
+            q := by
         unfold Integral.DivergenceTheorem.chartGramOnE
         rw [(extChartAt I α).left_inv hsr]
       rw [hgramEq]
@@ -1272,13 +1271,16 @@ theorem conjugating_flow_pullback_jointGram_data
       obtain ⟨hbE, hsr⟩ := hr
       rw [Integral.Measure.chartGramMatrix_apply, pullbackMetric_inner_eq_inner_mfderiv]
       have hexpand := g_inner_eq_chart_sum (I := I) (g_DT r.1) α hbE hsr
-        (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2))
-        (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
+        (mfderiv I I (Φ_fam r.1 : M → M) r.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2))
+        (mfderiv I I (Φ_fam r.1 : M → M) r.2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
       have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
             (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
-          = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q := by
+          = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p
+            q := by
         unfold Integral.DivergenceTheorem.chartGramOnE
         rw [(extChartAt I α).left_inv hsr]
       rw [hgramEq]

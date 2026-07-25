@@ -32,7 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_memWkp_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -111,7 +110,6 @@ private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
         (I := I) (M := M) g r s i α P₀ m l hy.2
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

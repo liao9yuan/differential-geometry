@@ -48,7 +48,8 @@ private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetri
       exact covGrad_heq_congr_dbRS g c (by omega : (s + 1) + k = s + (k + 1)) ih
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
     (c : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b}
     (hYZ : HEq Y Z) (x : M) :
@@ -178,7 +179,8 @@ theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
         exact gridWindowSum_shift_le Φ.kappa_nonneg p r j 0 1 (Nat.zero_le _) le_rfl
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
@@ -186,7 +188,8 @@ theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
           (fun q => riemannianFiberNormSq (I := I) (M := M) g c (r + q) x
             ((iteratedCovGrad g c r q W).toSection x))
           (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g c (r + q) x _)) ?_
-        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+        exact le_of_eq (Finset.sum_congr
+          (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg Φ.kappa_nonneg (p + 1) r j
       have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg Φ.kappa_nonneg p (r + 1) j
@@ -220,7 +223,8 @@ theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
           riemannianFiberNormSq (I := I) (M := M) g c (((r + 1) + p) + j) x
             ((iteratedCovGrad g c ((r + 1) + p) j
               (Φ.op p (r + 1) (covGrad g c r W))).toSection x) :=
-        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g c (by omega : (r + 1) + p = r + (p + 1))
+        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g c
+          (by omega : (r + 1) + p = r + (p + 1))
           (Φ.op p (r + 1) (covGrad g c r W)) j x
       rw [hb_eq]
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))

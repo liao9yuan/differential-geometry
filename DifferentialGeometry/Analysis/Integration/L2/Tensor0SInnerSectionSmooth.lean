@@ -43,12 +43,10 @@ lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ) ∞
       (fun b : M => Φ b (fun k : Fin n => (chartModelBasis E) (φ k))) U := by
-
   set evalCLM :
       Tensor0SModel n ℝ E →L[ℝ] ℝ :=
     ContinuousMultilinearMap.apply ℝ (fun _ : Fin n => E) ℝ
       (fun k : Fin n => (chartModelBasis E) (φ k)) with hevalCLM
-
   have heq : (fun b : M => Φ b (fun k : Fin n => (chartModelBasis E) (φ k)))
       = fun b : M => evalCLM (Φ b) := by
     funext b
@@ -70,7 +68,6 @@ theorem chartTensorInnerPointwise_contMDiffOn
       (fun b : M => chartTensorInnerPointwise
         (I := I) (M := M) g α r s b (T b) (S b))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-
   have hsmooth :
       ContMDiffOn I 𝓘(ℝ) ∞
         (fun b : M => chartTensorInnerPointwise_0s
@@ -114,7 +111,6 @@ theorem chartLocal_contMDiff_inner_of_smooth_sections
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b)
             (S b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-
   have hbridge : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       tensorInnerPointwise (I := I) (M := M) g r s b
         (TensorRSSpace.toModel

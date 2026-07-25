@@ -52,7 +52,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 include I in
-
 omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 theorem manifold_exists_contractible_open_nhd (x : M) :
     ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContractibleSpace U := by
@@ -91,7 +90,6 @@ theorem manifold_exists_contractible_open_nhd (x : M) :
   exact ⟨U, hU_open, hxU, hU_contr⟩
 
 include I in
-
 omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 theorem manifold_semilocallySimplyConnectedSpace :
     SemilocallySimplyConnectedSpace M := ⟨by

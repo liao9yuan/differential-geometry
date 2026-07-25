@@ -100,7 +100,6 @@ theorem MemWkpChartGen_congr_of_pointwise_eq
     exact H α
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_zero_gen
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     chartPushed (I := I) (M := M) ρ α (fun _ => (0 : ℝ)) =
@@ -139,7 +138,6 @@ theorem wkpNormChartGen_zero_fun
   exact tsum_zero
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_add_gen
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u v : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α (fun x => u x + v x) =
@@ -149,7 +147,6 @@ theorem chartPushed_add_gen
   chartPushed_add (I := I) (M := M) ρ α u v
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_const_smul_gen
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (c : ℝ) (u : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α (fun x => c * u x) =
@@ -358,7 +355,6 @@ theorem fintsupport_finite
   ρ.finite_tsupport x₀
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 theorem support_pou_mul_subset
     (ρ ρ' : SmoothPartitionOfUnity M I M Set.univ) (α β : M) :
@@ -370,7 +366,6 @@ theorem support_pou_mul_subset
     apply hx <;> rw [h] <;> ring
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 theorem tsupport_pou_mul_subset
     (ρ ρ' : SmoothPartitionOfUnity M I M Set.univ) (α β : M) :

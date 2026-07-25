@@ -22,7 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor0SBundle_enorm_eq_riemannianBundle_enorm
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

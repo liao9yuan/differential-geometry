@@ -54,7 +54,6 @@ theorem continuousOn_tensorProductCoordChange
     h₁.mono hs1
   have h₂' : ContinuousOn (fun b => (e₂.coordChangeL 𝕜 e₂' b : F₂ →L[𝕜] F₂)) s :=
     h₂.mono hs2
-
   have huncurry : Continuous (fun p : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂) =>
                               TensorProduct.mapLBilinear p.1 p.2) :=
     (TensorProduct.mapLBilinear (𝕜 := 𝕜) (F₁ := F₁) (F₂ := F₂)
@@ -90,7 +89,6 @@ def tensorProduct :
          LinearMap.id := by
         ext w
         simp only [LinearMap.comp_apply, LinearMap.id_apply]
-
         apply Trivialization.symmL_continuousLinearMapAt e₁ h₁
       have eq2 : (e₂.symmL 𝕜 x).toLinearMap.comp (e₂.continuousLinearMapAt 𝕜 x).toLinearMap =
         LinearMap.id := by
@@ -121,7 +119,6 @@ def tensorProduct :
   proj_toFun _ _ := rfl
 
 omit [FiniteDimensional 𝕜 F₂] in
-
 theorem tensorProduct_apply (p : TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :
     (tensorProduct 𝕜 e₁ e₂) p =
       ⟨p.1, TensorProduct.map
@@ -140,13 +137,11 @@ instance tensorProduct.isLinear
       { map_add := ?_
         map_smul := ?_ }
     · intro t t'
-
       simp [Pretrivialization.tensorProduct_apply]
     · intro c t
       simp [Pretrivialization.tensorProduct_apply]
 
 omit [FiniteDimensional 𝕜 F₂] in
-
 theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
     (tensorProduct 𝕜 e₁ e₂).toPartialEquiv.symm p =
       ⟨p.1, TensorProduct.map
@@ -155,13 +150,11 @@ theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
   rfl
 
 omit [FiniteDimensional 𝕜 F₂] in
-
 theorem tensorProduct_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet) (t : F₁ ⊗[𝕜] F₂) :
     (tensorProduct 𝕜 e₁ e₂).symm b t =
       TensorProduct.map
         (e₁.symmL 𝕜 b).toLinearMap
         (e₂.symmL 𝕜 b).toLinearMap t := by
-
   rw [Pretrivialization.symm_apply]
   · rfl
   · exact hb
@@ -170,14 +163,11 @@ theorem tensorProductCoordChange_apply (b : B)
     (hb : b ∈ e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) (t : F₁ ⊗[𝕜] F₂) :
     tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂' b t =
       (tensorProduct 𝕜 e₁' e₂' ⟨b, (tensorProduct 𝕜 e₁ e₂).symm b t⟩).2 := by
-
   simp only [tensorProductCoordChange, TensorProduct.mapL]
-
   simp only [LinearMap.coe_toContinuousLinearMap',
     tensorProduct_symm_apply' (𝕜 := 𝕜) (e₁ := e₁) (e₂ := e₂) hb.1,
     tensorProduct_apply]
   rw [← LinearMap.comp_apply, ← TensorProduct.map_comp]
-
   congr 1 ; ext v
   rename_i v x
   have hb1 : b ∈ e₁.baseSet ∩ e₁'.baseSet := ⟨hb.1.1, hb.2.1⟩
@@ -227,15 +217,12 @@ theorem contMDiffOn_tensorProductCoordChange
     ContMDiffOn IB 𝓘(𝕜, (F₁ ⊗[𝕜] F₂) →L[𝕜] (F₁ ⊗[𝕜] F₂)) n
       (Pretrivialization.tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂')
       (e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) := by
-
   have h₁ : ContMDiffOn IB 𝓘(𝕜, F₁ →L[𝕜] F₁) n
       (fun b => (e₁.coordChangeL 𝕜 e₁' b : F₁ →L[𝕜] F₁))
       (e₁.baseSet ∩ e₁'.baseSet) := contMDiffOn_coordChangeL (IB := IB) e₁ e₁'
-
   have h₂ : ContMDiffOn IB 𝓘(𝕜, F₂ →L[𝕜] F₂) n
       (fun b => (e₂.coordChangeL 𝕜 e₂' b : F₂ →L[𝕜] F₂))
       (e₂.baseSet ∩ e₂'.baseSet) := contMDiffOn_coordChangeL (IB := IB) e₂ e₂'
-
   have h_comp₁ : ContMDiffOn IB 𝓘(𝕜, (F₂ →L[𝕜] F₂) →L[𝕜]
       ((F₁ ⊗[𝕜] F₂) →L[𝕜] (F₁ ⊗[𝕜] F₂))) n
       (fun b => TensorProduct.mapLBilinear (𝕜 := 𝕜)
@@ -243,7 +230,6 @@ theorem contMDiffOn_tensorProductCoordChange
       (e₁.baseSet ∩ e₁'.baseSet) :=
     (TensorProduct.mapLBilinear (𝕜 := 𝕜) (F₁ := F₁) (G₁ := F₁)
       (F₂ := F₂) (G₂ := F₂)).contMDiff.comp_contMDiffOn h₁
-
   have hs1 : e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet) ⊆
       e₁.baseSet ∩ e₁'.baseSet := fun b hb => ⟨hb.1.1, hb.2.1⟩
   have hs2 : e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet) ⊆

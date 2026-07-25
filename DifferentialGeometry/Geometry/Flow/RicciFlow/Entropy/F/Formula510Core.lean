@@ -161,8 +161,6 @@ def densityWeightedDivergenceInFrame
   fun x i j => density x * weightedDivergenceTerm x i j
 
 omit [Fintype Idx] in
-
-
 theorem ricciHessianWeightedDensity_of_divergence
     (weightedDivergenceTerm shiftedHessianTerm ricciHessian :
       M -> Idx -> Idx -> Real)

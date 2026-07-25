@@ -122,7 +122,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
           ENNReal.ofReal C * (‖T‖₊ : ℝ≥0∞) := by
     intro α
     exact
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
+      tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
         (I := I) (M := M) g r s α hC_grad_nn
         (fun T Idx Jdx => hGrad_le' T α Idx Jdx)
   set S : Finset M := chartAtlasPOU_activeFinset (I := I) (M := M)
@@ -163,12 +163,12 @@ theorem tensorChartComponentScalar_wkpNormChart_le_h1Norm_of_grad_l2
     rw [h_coe] at h_per h_envelope
     exact h_per.trans h_envelope
   · have h_zero :=
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartAtlasPOU_eq_zero_of_notMem_activeFinset
+      chartAtlasPOU_eq_zero_of_notMem_activeFinset
         (I := I) (M := M) hα
     have h_scalar_zero :
         tensorChartComponentScalar (I := I) (M := M)
             g r s T.toCcTensor α Idx Jdx = 0 :=
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eq_zero_of_pou_zero
+      tensorChartComponentScalar_eq_zero_of_pou_zero
         (I := I) (M := M) g r s α h_zero T.toCcTensor Idx Jdx
     rw [h_scalar_zero]
     have h_wkp_zero :

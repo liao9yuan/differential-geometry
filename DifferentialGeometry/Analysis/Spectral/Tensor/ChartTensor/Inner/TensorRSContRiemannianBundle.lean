@@ -447,7 +447,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 instance tensorRS_isContinuousRiemannianBundle
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

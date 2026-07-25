@@ -64,7 +64,6 @@ private theorem iteratedCovGrad_convexPerturbation_norm_le
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem exists_Csob_convexPerturbation_pointwise_C2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

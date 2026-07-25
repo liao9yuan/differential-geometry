@@ -33,7 +33,6 @@ private def diffQuotGradient
       (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
 
 omit [NeZero d] in
-
 private lemma diffQuotGradient_norm_sq
     (u : E → ℝ) (k : Fin d) (h : ℝ) (x : E) :
     ‖diffQuotGradient u k h x‖ ^ 2 =
@@ -164,7 +163,6 @@ private theorem principal_integrand_pointwise_decomposition
   ring
 
 omit [NeZero d] in
-
 private lemma continuous_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) (h : ℝ) :
     Continuous (DifferentialGeometry.Analysis.Sobolev.diffQuot k h v) := by
@@ -175,7 +173,6 @@ private lemma continuous_diffQuot_of_contDiff
   · exact (contDiff_diffQuot_of_contDiff (d := d) hv k hh).continuous
 
 omit [NeZero d] in
-
 private lemma continuous_translate_of_continuous
     {v : E → ℝ} (hv : Continuous v) (k : Fin d) (h : ℝ) :
     Continuous (DifferentialGeometry.Analysis.Sobolev.translate k h v) := by

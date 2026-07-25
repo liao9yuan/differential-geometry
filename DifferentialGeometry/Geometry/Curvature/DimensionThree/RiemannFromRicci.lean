@@ -11,7 +11,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -761,7 +760,8 @@ theorem rm04_einstein3_at
   rw [sum_fin_four_fun]
   rw [hXX, hYY, hXY]
   simp_rw [hcompSlots]
-  simp [slots4, DifferentialGeometry.Integral.Connection.vec4, delta3, Fin.sum_univ_three, Fin.prod_univ_four]
+  simp [slots4, DifferentialGeometry.Integral.Connection.vec4, delta3, Fin.sum_univ_three,
+    Fin.prod_univ_four]
   ring
 
 
@@ -872,7 +872,6 @@ theorem rm04_kn_gform
             (g.inner x X Z * g.inner x Y W - g.inner x Y Z * g.inner x X W) := by
   classical
   have horth := h.orthonormal
-
   have hcomp : ∀ a b c d : Fin 3,
       component0S (I := I) basis Rm04 (slots4 a b c d) =
         ricciCompAt (I := I) basis Ric a c * delta3 b d
@@ -884,7 +883,6 @@ theorem rm04_kn_gform
     intro a b c d
     have hd := rm04Comp_displayedRiemannFromRicci3D_at (I := I) h a b d c
     simpa [rm04CompAt] using hd
-
   have hg : ∀ P Q : TangentSpace I x,
       g.inner x P Q = ∑ i : Fin 3, basis.repr P i * basis.repr Q i :=
     fun P Q => inner_eq_sum_repr3 (I := I) horth P Q
@@ -897,7 +895,6 @@ theorem rm04_kn_gform
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun c _ => ?_
     simp [ricciCompAt, slots2, DifferentialGeometry.Integral.Connection.vec2,
       Fin.prod_univ_two, Module.Basis.coord_apply, mul_comm, mul_assoc]
-
   rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X Y Z W), sum_fin_four_fun]
   simp_rw [hcomp, hg, hric]
   simp [DifferentialGeometry.Integral.Connection.vec4, slots4, Fin.prod_univ_four,

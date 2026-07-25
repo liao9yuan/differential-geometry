@@ -240,7 +240,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
     hessPairingLpOnLapDom (I := I) (M := M) g φ
         (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1
-          (DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
+          (Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
             (I := I) (M := M) g v)) =
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
@@ -288,7 +288,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector_of_dis
     hessPairingLpOnLapDom (I := I) (M := M) g φ
         (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1
-          (DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
+          (Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
             (I := I) (M := M) g v)) =
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector

@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -45,6 +42,8 @@ set_option linter.unusedDecidableInType false
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
@@ -174,8 +173,6 @@ theorem iteratedRmComp_eq_nablaKRm04Field
         frameComp0S, hframe_def]
   | succ k ih =>
       intro x hx n
-
-
       have hlevelk :
           (fun y : M =>
               iteratedRmComp (I := I) frame
@@ -187,9 +184,7 @@ theorem iteratedRmComp_eq_nablaKRm04Field
         intro y hy
         funext m
         simpa [frameComp0S, hframe_def] using ih hy m
-
       rw [iteratedRmComp_succ]
-
       have hext :
           frameExtData (I := I) frame
               (fun y : M =>
@@ -207,7 +202,6 @@ theorem iteratedRmComp_eq_nablaKRm04Field
             frameComp0S (I := I) (nablaKRm04Field (I := I) S t k) frame x :=
         hlevelk.self_of_nhds
       rw [hext, hbase]
-
       have hstep :=
         covDerivStepComp_frameComp_eq
           (I := I) (S.family.connection t) (nablaKRm04Field (I := I) S t k)
@@ -216,7 +210,6 @@ theorem iteratedRmComp_eq_nablaKRm04Field
           frame
           (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
           (coordinateFrameSet_open (I := I) x₀) hx n
-
       simpa [realizedChr, hframe_def] using hstep
 
 
@@ -248,7 +241,7 @@ theorem iteratedRmComp_one_eq_nablaKRm04Field
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem iterRmLF_eq_nabla
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (frame : Idx → (y : M) → TangentSpace I y) {u : Set M}
     (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u) (hu : IsOpen u) :
@@ -266,8 +259,6 @@ theorem iterRmLF_eq_nabla
       simp only [iteratedRmComp_zero, nablaKRm04Field_zero, frameComp0S]
   | succ k ih =>
       intro x hx n
-
-
       have hlevelk :
           (fun y : M =>
               iteratedRmComp (I := I) frame

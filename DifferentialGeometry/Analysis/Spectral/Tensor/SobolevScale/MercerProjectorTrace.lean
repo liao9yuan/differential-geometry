@@ -86,7 +86,6 @@ private lemma finiteEigenCombo_toSection_apply (g : SmoothRiemannianMetric I M)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 private lemma eigenProjector_frame_component_sq_le (g : SmoothRiemannianMetric I M)
     {C : ℝ} (hC_nn : 0 ≤ C) (Λ : ℝ) (hΛ : 0 ≤ Λ)
     (hC : ∀ (x : M)
@@ -119,25 +118,20 @@ private lemma eigenProjector_frame_component_sq_le (g : SmoothRiemannianMetric I
   have hD_nn : 0 ≤ D := by
     have : (0 : ℝ) ≤ (1 + Λ) ^ (2 * mercerHalfOrder (E := E)) := pow_nonneg h1Λ_nn _
     exact mul_nonneg hC_nn this
-
   have hL2 : ‖(K : TensorL2 0 2 g)‖ ^ 2 = ∑ i ∈ S, (c i) ^ 2 :=
     DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenCombo_l2NormSq
       (I := I) (M := M) g S c
-
   have hrepro : inner ℝ (K.toSection x) v = ∑ i ∈ S, (c i) ^ 2 := by
     rw [hK, finiteEigenCombo_toSection_apply (I := I) (M := M) g S c x, sum_inner]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [real_inner_smul_left, hc, sq]
-
   have hCS : (∑ i ∈ S, (c i) ^ 2) ≤ ‖K.toSection x‖ * ‖v‖ := by
     rw [← hrepro]
     exact real_inner_le_norm _ _
-
   have hKx : ‖K.toSection x‖ ≤ D * ‖(K : TensorL2 0 2 g)‖ := hC x c
   set N : ℝ := ‖(K : TensorL2 0 2 g)‖ with hN
   have hN_nn : 0 ≤ N := norm_nonneg _
   have hsum_nn : 0 ≤ ∑ i ∈ S, (c i) ^ 2 := Finset.sum_nonneg (fun i _ => sq_nonneg _)
-
   have hNsq : N ^ 2 ≤ D * N * ‖v‖ := by
     rw [hN, hL2]
     calc ∑ i ∈ S, (c i) ^ 2 ≤ ‖K.toSection x‖ * ‖v‖ := hCS
@@ -148,7 +142,6 @@ private lemma eigenProjector_frame_component_sq_le (g : SmoothRiemannianMetric I
     · rw [← hN0]; exact mul_nonneg hD_nn (norm_nonneg _)
     · have h2 : N * N ≤ (D * ‖v‖) * N := by nlinarith [hNsq]
       exact le_of_mul_le_mul_right (by linarith [h2]) hN0
-
   calc ∑ i ∈ S, (c i) ^ 2 = N ^ 2 := by rw [hN, hL2]
     _ ≤ (D * ‖v‖) ^ 2 := by
         have hub : 0 ≤ D * ‖v‖ := mul_nonneg hD_nn (norm_nonneg _)
@@ -157,7 +150,6 @@ private lemma eigenProjector_frame_component_sq_le (g : SmoothRiemannianMetric I
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 < C ∧ ∀ (Λ : ℝ) (x : M),
       ∑ i ∈ eigenSubLevel (I := I) (M := M) g Λ,
@@ -170,11 +162,9 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 2
   set k₂ : ℕ := mercerHalfOrder (E := E) with hk₂
   have hsuper : 2 * k₂ > Module.finrank ℝ E := two_mul_mercerHalfOrder_gt_finrank (E := E)
-
   obtain ⟨C₂, hC₂_pos, hC₂⟩ :=
     DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck
       (I := I) (M := M) (g := g) (r := 0) (s := 2) (k := k₂) (m := 0) (by omega)
-
   obtain ⟨C₁, hC₁_nn, hC₁⟩ :=
     DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.eigenSpan_pouHs_le_spectral
       (I := I) (M := M) g (2 * k₂)
@@ -182,7 +172,6 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
   have hCgard_nn : 0 ≤ Cgard := by
     have : (0 : ℝ) ≤ C₁ * (↑(2 * k₂) + 1) := by positivity
     exact mul_nonneg (le_of_lt hC₂_pos) this
-
   have hCpt : ∀ (Λ : ℝ) (_hΛ : 0 ≤ Λ) (x : M)
       (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ),
       ‖(DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenCombo
@@ -196,31 +185,28 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
     set S := eigenSubLevel (I := I) (M := M) g Λ with hS
     set K := DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenCombo
       (I := I) (M := M) g S c with hK
-
     have h1 : ‖K.toSection x‖ ≤
-        C₂ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k₂) K‖ := hC₂ K x
-
-    have h2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k₂) K‖ =
+        C₂ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g)
+          (r := 0) (s := 2) (2 * k₂) K‖ := hC₂ K x
+    have h2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g)
+      (r := 0) (s := 2) (2 * k₂) K‖ =
         (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k₂) K).toReal :=
       DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
         (I := I) (M := M) g (2 * k₂) K
-
     have h3 : (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k₂) K).toReal ≤
         (C₁ * (↑(2 * k₂) + 1)) *
           ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenComboHs
             (I := I) (M := M) g S c ((2 * (2 * k₂) : ℕ) : ℝ)‖ := hC₁ S c
-
     have h4 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenComboHs
           (I := I) (M := M) g S c ((2 * (2 * k₂) : ℕ) : ℝ)‖ ≤
         (1 + Λ) ^ (2 * k₂) * ‖(K : TensorL2 0 2 g)‖ := by
       have hspec :=
-        DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenComboHs_norm_eq_sqrt_spectral
+        finiteEigenComboHs_norm_eq_sqrt_spectral
           (I := I) (M := M) g S c (2 * k₂)
       rw [hspec]
       have hL2 : ‖(K : TensorL2 0 2 g)‖ ^ 2 = ∑ i ∈ S, (c i) ^ 2 :=
         DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenCombo_l2NormSq
           (I := I) (M := M) g S c
-
       have hsum_le : ∑ i ∈ S,
           (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((2 * (2 * k₂) : ℕ) : ℝ) *
             (c i) ^ 2 ≤
@@ -255,11 +241,11 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
             rw [show ((1 + Λ) ^ (2 * k₂)) ^ 2 * ‖(K : TensorL2 0 2 g)‖ ^ 2 =
                 ((1 + Λ) ^ (2 * k₂) * ‖(K : TensorL2 0 2 g)‖) ^ 2 by ring]
             rw [Real.sqrt_sq (mul_nonneg (pow_nonneg h1Λ_nn _) (norm_nonneg _))]
-
     have hKL2_nn : 0 ≤ ‖(K : TensorL2 0 2 g)‖ := norm_nonneg _
     have hpowΛ_nn : 0 ≤ (1 + Λ) ^ (2 * k₂) := pow_nonneg h1Λ_nn _
     calc ‖K.toSection x‖
-        ≤ C₂ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k₂) K‖ := h1
+        ≤ C₂ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs (g := g)
+          (r := 0) (s := 2) (2 * k₂) K‖ := h1
       _ = C₂ * (tensorPouSobolevHsNorm (I := I) (M := M) g (2 * k₂) K).toReal := by rw [h2]
       _ ≤ C₂ * ((C₁ * (↑(2 * k₂) + 1)) *
             ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.finiteEigenComboHs
@@ -269,10 +255,8 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
           refine mul_le_mul_of_nonneg_left ?_ (le_of_lt hC₂_pos)
           refine mul_le_mul_of_nonneg_left h4 (by positivity)
       _ = Cgard * (1 + Λ) ^ (2 * k₂) * ‖(K : TensorL2 0 2 g)‖ := by rw [hCgard]; ring
-
   set n2 : ℕ := (Module.finrank ℝ E) ^ (0 + 2) with hn2
   refine ⟨(n2 : ℝ) * Cgard ^ 2 + 1, by positivity, fun Λ x => ?_⟩
-
   rcases lt_or_ge Λ 0 with hΛneg | hΛ
   · have hempty : eigenSubLevel (I := I) (M := M) g Λ = ∅ := by
       rw [Finset.eq_empty_iff_forall_notMem]
@@ -285,9 +269,7 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
     rw [hempty, Finset.sum_empty]
     rw [Real.rpow_natCast, mercerSobolevExp, pow_mul]
     positivity
-
   set b := stdOrthonormalBasis ℝ (TensorRSSpace 0 2 I x) with hb
-
   have hparseval : ∀ i,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           ((eigenSmooth (I := I) (M := M) g i).toSection x) =
@@ -296,7 +278,6 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
     rw [riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g 0 2 x _]
     exact (OrthonormalBasis.sum_sq_inner_left b
       ((eigenSmooth (I := I) (M := M) g i).toSection x)).symm
-
   calc ∑ i ∈ eigenSubLevel (I := I) (M := M) g Λ,
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x
             ((eigenSmooth (I := I) (M := M) g i).toSection x)
@@ -334,10 +315,12 @@ private theorem eigenSmooth_toL2_norm_eq_one (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     ‖(eigenSmooth (I := I) (M := M) g i : TensorL2 0 2 g)‖ = 1 := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  set b := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
+  set b :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) (hCompact (I := I) (M := M) g) with hb_def
   have hbi : (eigenSmooth (I := I) (M := M) g i : TensorL2 0 2 g) = b i := by
-    rw [hb_def, DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma_apply
+    rw [hb_def,
+      Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma_apply
       (I := I) (M := M) (hCompact (I := I) (M := M) g) i]
     exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eigenvectorSmooth_toL2
         (I := I) (M := M) g 0 2 i
@@ -378,7 +361,6 @@ theorem eigenProjector_card_le_mercer (g : SmoothRiemannianMetric I M) :
   have hvol_nonneg : 0 ≤ vol := ENNReal.toReal_nonneg
   refine ⟨C * vol + 1, by positivity, fun Λ => ?_⟩
   set F := eigenSubLevel (I := I) (M := M) g Λ with hF_def
-
   have hcard : (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
         1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} : ℝ) = (F.card : ℝ) := by
     have hset : {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
@@ -388,7 +370,6 @@ theorem eigenProjector_card_le_mercer (g : SmoothRiemannianMetric I M) :
         mem_eigenSubLevel (I := I) (M := M) g Λ i]
     rw [hset, Nat.card_coe_set_eq, Set.ncard_coe_finset]
   rw [hcard]
-
   have hcard_sum : (F.card : ℝ) =
       ∫ x, (∑ i ∈ F, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           ((eigenSmooth (I := I) (M := M) g i).toSection x))
@@ -400,7 +381,6 @@ theorem eigenProjector_card_le_mercer (g : SmoothRiemannianMetric I M) :
       (fun i _ => integral_riemannianFiberNormSq_eigenSmooth_eq_one (I := I) (M := M) g i)]
     simp
   rw [hcard_sum]
-
   have hint_le : ∫ x, (∑ i ∈ F, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           ((eigenSmooth (I := I) (M := M) g i).toSection x))
         ∂riemannianVolumeMeasure I M g ≤

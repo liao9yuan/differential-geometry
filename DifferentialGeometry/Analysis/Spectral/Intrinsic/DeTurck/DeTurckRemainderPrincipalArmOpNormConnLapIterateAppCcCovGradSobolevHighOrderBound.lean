@@ -366,7 +366,8 @@ lemma bal_connLapIterate_appCc_covGrad_sobolevHs_bound_of_high_order
         (Real.sqrt (Kc b) * (1 + ∑ j ∈ Finset.range (b + 2), CJ j) + εa * CJ (b + 2)) *
           (1 + f₂) := by
     intro b hb hb2
-    refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv b) ?_
+    refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa
+      hεa_nn C₀ T₀ henv b) ?_
     have hs := henvsum (b + 2) hb
     have hCJsum_nn : (0:ℝ) ≤ ∑ j ∈ Finset.range (b + 2), CJ j :=
       Finset.sum_nonneg (fun j _ => hCJ_nn j)
@@ -406,7 +407,8 @@ lemma bal_connLapIterate_appCc_covGrad_sobolevHs_bound_of_high_order
     have htopC : ‖iteratedCovGrad (I := I) g₀ 2 2 (2 * p) C₀‖ ≤
         (Real.sqrt (Kc (2 * p)) * (1 + ∑ j ∈ Finset.range (2 * p + 2), CJ j)) *
           (1 + f₂) + εa * u₂ := by
-      refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv
+      refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa
+        hεa_nn C₀ T₀ henv
         (2 * p)) ?_
       have hs := henvsum (2 * p + 2) (by omega)
       have hCJsum_nn : (0:ℝ) ≤ ∑ j ∈ Finset.range (2 * p + 2), CJ j :=
@@ -459,7 +461,8 @@ lemma bal_connLapIterate_appCc_covGrad_sobolevHs_bound_of_high_order
       have htopC : ‖iteratedCovGrad (I := I) g₀ 2 2 (2 * p + 1) C₀‖ ≤
           (Real.sqrt (Kc (2 * p + 1)) *
             (1 + ∑ j ∈ Finset.range (2 * p + 3), CJ j)) * (1 + f₂) + εa * u₃ := by
-        refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv
+        refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa
+          hεa_nn C₀ T₀ henv
           (2 * p + 1)) ?_
         have hs := henvsum (2 * p + 3) (by omega)
         have hCJsum_nn : (0:ℝ) ≤ ∑ j ∈ Finset.range (2 * p + 3), CJ j :=

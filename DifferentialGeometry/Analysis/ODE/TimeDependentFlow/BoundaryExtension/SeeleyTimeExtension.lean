@@ -15,7 +15,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartE_jointReading_contMDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -47,7 +48,8 @@ theorem chartE_jointReading_contMDiffOn
   · exact Set.prod_mono (subset_refl _) (subset_univ _)
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem partitionOfUnity_assembled_section_contMDiff
     {ι : Type*} {ρ : SmoothPartitionOfUnity ι I M (univ : Set M)} {U : ι → Set M}
     (hsub : ρ.IsSubordinate U) (hU : ∀ i, IsOpen (U i))
@@ -64,14 +66,11 @@ theorem partitionOfUnity_assembled_section_contMDiff
   refine ⟨contMDiffAt_snd, ?_⟩
   set x₀ : M := q₀.2 with hx₀
   set e := trivializationAt E (TangentSpace I) x₀ with he
-
   set g : ι → ℝ × M → E :=
     fun i q => e.continuousLinearMapAt ℝ q.2 (Y i q.1 q.2) with hg
-
   have hsummand : ∀ i, q₀ ∈ tsupport (fun q : ℝ × M => ρ i q.2) →
       ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞ (g i) q₀ := by
     intro i hi
-
     have hx₀_supp : x₀ ∈ tsupport (ρ i) := by
       have hclosed : IsClosed ((fun q : ℝ × M => q.2) ⁻¹' tsupport (ρ i)) :=
         (isClosed_tsupport (ρ i)).preimage continuous_snd
@@ -85,13 +84,11 @@ theorem partitionOfUnity_assembled_section_contMDiff
     have hbase : x₀ ∈ e.baseSet := by
       rw [he, TangentBundle.trivializationAt_baseSet]
       exact mem_chart_source H x₀
-
     have hopen : IsOpen ((univ : Set ℝ) ×ˢ U i) := isOpen_univ.prod (hU i)
     have hmem : q₀ ∈ (univ : Set ℝ) ×ˢ U i := ⟨mem_univ _, hx₀_U⟩
     have hYat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Y i q.1 q.2) : TangentBundle I M)) q₀ :=
       (hY i q₀ hmem).contMDiffAt (hopen.mem_nhds hmem)
-
     have hYat' : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
         (fun q : ℝ × M => (e (TotalSpace.mk' E q.2 (Y i q.1 q.2))).2) q₀ := by
       have hsrc : (TotalSpace.mk' E q₀.2 (Y i q₀.1 q₀.2) : TangentBundle I M) ∈ e.source := by
@@ -99,7 +96,6 @@ theorem partitionOfUnity_assembled_section_contMDiff
       exact ((e.contMDiffAt_iff (n := ∞) (IM := 𝓘(ℝ, ℝ).prod I) (IB := I)
         (f := fun q : ℝ × M => (TotalSpace.mk' E q.2 (Y i q.1 q.2) : TangentBundle I M))
         hsrc).mp hYat).2
-
     refine hYat'.congr_of_eventuallyEq ?_
     have hpre : (fun q : ℝ × M => q.2) ⁻¹' e.baseSet ∈ 𝓝 q₀ :=
       (continuous_snd.continuousAt) (e.open_baseSet.mem_nhds hbase)
@@ -107,7 +103,6 @@ theorem partitionOfUnity_assembled_section_contMDiff
     show g i q = (e (TotalSpace.mk' E q.2 (Y i q.1 q.2))).2
     rw [← chartE_section_repr_eq_trivialization_snd (I := I) x₀ (Y i q.1) hq]
     rfl
-
   have hfib_eq : (fun q : ℝ × M =>
       (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2)
       =ᶠ[𝓝 q₀] (fun q : ℝ × M => ∑ᶠ i, ρ i q.2 • g i q) := by
@@ -131,7 +126,6 @@ theorem partitionOfUnity_assembled_section_contMDiff
   change ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
     (fun q : ℝ × M => (e (TotalSpace.mk' E q.2 (∑ᶠ i, ρ i q.2 • Y i q.1 q.2))).2) q₀
   refine ContMDiffAt.congr_of_eventuallyEq ?_ hfib_eq
-
   have hlf : LocallyFinite (fun i => Function.support (fun q : ℝ × M => ρ i q.2 • g i q)) := by
     have hpre : LocallyFinite
         (fun i => (Prod.snd : ℝ × M → M) ⁻¹' Function.support (ρ i)) :=
@@ -148,7 +142,8 @@ theorem partitionOfUnity_assembled_section_contMDiff
       (tsupport_smul_subset_left (fun q : ℝ × M => ρ i q.2) (g i)) hi) ∞
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartE_euclideanReading_contDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -183,7 +178,8 @@ private theorem chartE_euclideanReading_contDiffOn
   exact hcomp
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem lift_extended_reading_contMDiffOn
     (α : M) (gext : ℝ → E → E) (V : Set E)
     (hgext : ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V)) :
@@ -211,7 +207,6 @@ private theorem lift_extended_reading_contMDiffOn
     exact hbase hq.2
   have hiff := e.contMDiffOn_iff (n := ∞) (IM := 𝓘(ℝ, ℝ).prod I) (IB := I)
     (f := fun q : ℝ × M => (TotalSpace.mk' E q.2 (Yfib q.1 q.2) : TangentBundle I M)) hmaps
-
   have hgextM : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, E) ∞
       (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V) := by
     rw [← contMDiffOn_iff_contDiffOn, ← chartedSpaceSelf_prod, modelWithCornersSelf_prod] at hgext
@@ -249,20 +244,17 @@ theorem seeley_time_extend
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (Xext q.1 q.2) : TangentBundle I M)) ∧
       (∀ t ∈ Set.Icc 0 T, ∀ x : M, Xext t x = X t x) := by
   classical
-
   set g : M → ℝ → E → E :=
     fun α t z => chartE_section_repr (I := I) α (X t) ((extChartAt I α).symm z) with hg
   have hgC : ∀ α : M, ContDiffOn ℝ ∞ (Function.uncurry (g α))
       (Set.Icc 0 T ×ˢ (extChartAt I α).target) :=
     fun α => chartE_euclideanReading_contDiffOn (I := I) X (Set.Icc 0 T) α hsmooth0
-
   have hz₀tgt : ∀ α : M, extChartAt I α α ∈ (extChartAt I α).target :=
     fun α => mem_extChartAt_target (I := I) α
   have hKexists : ∀ α : M, ∃ K : Set E, IsCompact K ∧ extChartAt I α α ∈ interior K ∧
       K ⊆ (extChartAt I α).target :=
     fun α => exists_compact_subset (isOpen_extChartAt_target (I := I) α) (hz₀tgt α)
   choose K hKcompact hKint hKtgt using hKexists
-
   have hborel : ∀ α : M, ∃ gext : ℝ → E → E, ∃ Vα ∈ nhds (extChartAt I α α),
       ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ Vα) ∧
         ∀ t ∈ Set.Icc (0:ℝ) T, ∀ z ∈ Vα, gext t z = g α t z := by
@@ -272,7 +264,6 @@ theorem seeley_time_extend
     exact DifferentialGeometry.Analysis.borel_interval_extend_param (g α) T hT (K α) (hKcompact α)
       (extChartAt I α α) (hKint α) hgK
   choose gext V hVnhds hgextC hgextEq using hborel
-
   have hVoexists : ∀ α : M, ∃ Vo : Set E, IsOpen Vo ∧ extChartAt I α α ∈ Vo ∧
       Vo ⊆ V α ∧ Vo ⊆ (extChartAt I α).target := by
     intro α
@@ -281,7 +272,6 @@ theorem seeley_time_extend
     obtain ⟨Vo, hVosub, hVoopen, hz₀Vo⟩ := mem_nhds_iff.1 hmem
     exact ⟨Vo, hVoopen, hz₀Vo, fun z hz => (hVosub hz).1, fun z hz => (hVosub hz).2⟩
   choose Vo hVoopen hz₀Vo hVoV hVotgt using hVoexists
-
   set W : M → Set M := fun α => (chartAt H α).source ∩ (extChartAt I α) ⁻¹' Vo α with hW
   have hWopen : ∀ α : M, IsOpen (W α) := by
     intro α
@@ -293,11 +283,9 @@ theorem seeley_time_extend
       simp only [Set.mem_preimage]
       exact hz₀Vo α⟩
   have hWcover : (univ : Set M) ⊆ ⋃ α, W α := fun x _ => mem_iUnion_of_mem x (hWmem x)
-
   obtain ⟨ρ, hρsub⟩ :=
     SmoothPartitionOfUnity.exists_isSubordinate (I := I) (M := M) (ι := M)
       isClosed_univ W hWopen hWcover
-
   set Y : M → ℝ → ∀ x : M, TangentSpace I x :=
     fun α t x => (trivFromE (I := I) α x) (gext α t (extChartAt I α x)) with hY
   have hYsmooth : ∀ α : M, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -305,11 +293,9 @@ theorem seeley_time_extend
       ((univ : Set ℝ) ×ˢ W α) := fun α =>
     lift_extended_reading_contMDiffOn (I := I) α (gext α) (Vo α)
       ((hgextC α).mono (Set.prod_mono_right (hVoV α)))
-
   refine ⟨fun t x => ∑ᶠ α, ρ α x • Y α t x, ?_, ?_⟩
   · exact partitionOfUnity_assembled_section_contMDiff (I := I) hρsub hWopen Y hYsmooth
   · intro t ht x
-
     have hYeq : ∀ α : M, x ∈ tsupport (ρ α) → ρ α x • Y α t x = ρ α x • X t x := by
       intro α hα
       have hxW : x ∈ W α := hρsub α hα

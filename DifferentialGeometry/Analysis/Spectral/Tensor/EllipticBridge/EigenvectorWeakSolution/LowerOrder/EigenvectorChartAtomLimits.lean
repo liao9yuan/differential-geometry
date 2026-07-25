@@ -48,7 +48,6 @@ def approxComponentLp
         g r s i n).toCcTensor α P.1 P.2)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def componentLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -62,7 +61,6 @@ def componentLpLimit
       α P
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma approxComponentLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

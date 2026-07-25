@@ -338,10 +338,10 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     have hη_ne : η_α_loc y ≠ 0 := by intro h0; apply hy; rw [h0]; ring
     exact Function.mem_support.mpr hη_ne
   obtain ⟨C_combined_α, hC_combined_α_nn, hC_combined_α_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       hη_combined_α_smooth hη_combined_α_cpt k
   obtain ⟨C_η_γ_loc, hC_η_γ_loc_nn, hC_η_γ_loc_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       hη_γ_loc_smooth hη_γ_loc_cpt k
   have hη_combined_α_iter_bound :
       ∀ j ≤ k, ∀ y ∈ Ω_α, ‖iteratedFDeriv ℝ j η_combined_α y‖ ≤ C_combined_α := by

@@ -53,7 +53,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 def velocitySecondCovGradCc (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) : SmoothCcTensor g₀ 0 4 where
   toSection :=
     (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -63,7 +64,8 @@ def velocitySecondCovGradCc (g₀ : SmoothRiemannianMetric I M)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)).hasCompactSupport
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_smul_two (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (c • T) x =
@@ -73,7 +75,8 @@ private lemma unitModel_smul_two (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add_two (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x =
@@ -83,7 +86,8 @@ private lemma unitModel_add_two (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_add_two_apply (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -91,11 +95,13 @@ lemma unitModel_add_two_apply (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel_add_two, ContinuousMultilinearMap.add_apply]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_sub_two (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (b : M) (p q : TangentSpace I b) :
     smoothCcTensorBilinForm (I := I) g₀ (T - T') b p q =
-      smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p q := by
+      smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p
+        q := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   have hmulti : (ccTensorMultilinear (I := I) g₀ (T - T') b : Tensor0SBundle.Tensor0SSpace 2 I b) =
       (ccTensorMultilinear (I := I) g₀ T b : Tensor0SBundle.Tensor0SSpace 2 I b)
@@ -119,7 +125,8 @@ private lemma zero_mem_realizedSmallSet' {δ δ' : ℝ} (hδ'_lt : δ' < 1) :
   exact hδ'_lt
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma dualToCotangent_smul_c {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (c • α)
       = c • dualToCotangent (I := I) (x := x) α := by
@@ -128,10 +135,12 @@ private lemma dualToCotangent_smul_c {x : M} (c : ℝ) (α : Module.Dual ℝ (Ta
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma ccTensorBilin_smul_c (g : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g 0 2) (b : M) (p q : TangentSpace I b) :
-    smoothCcTensorBilinForm (I := I) g (c • S) b p q = c * smoothCcTensorBilinForm (I := I) g S b p q := by
+    smoothCcTensorBilinForm (I := I) g (c • S) b p q = c * smoothCcTensorBilinForm (I := I) g S b p
+      q := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply]
   have hmulti : (ccTensorMultilinear (I := I) g (c • S) b : Tensor0SBundle.Tensor0SSpace 2 I b) =
       c • (ccTensorMultilinear (I := I) g S b : Tensor0SBundle.Tensor0SSpace 2 I b) := by
@@ -154,7 +163,8 @@ private lemma iteratedCovGrad_smul_c (g : SmoothRiemannianMetric I M) (r s j : �
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_smul_gen (g : SmoothRiemannianMetric I M) {n : ℕ}
     (c : ℝ) (W : SmoothCcTensor g 0 n) (x : M) :
     unitModel (I := I) (M := M) g n (c • W) x =
@@ -187,7 +197,8 @@ private lemma koszulPair_eq_smul_dual_linearizedKoszul
   rw [koszulCovGradCovec, hcd]
   have hlm : ((realizedFam (I := I) g₀ T T' hδ hδ' 0).inner b
       (((0 : ℝ) - s) •
-        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b
+        DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' 0) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b (Yf b) (Zf b)))).toLinearMap =
       ((0 : ℝ) - s) •
@@ -197,8 +208,10 @@ private lemma koszulPair_eq_smul_dual_linearizedKoszul
     intro z
     rw [LinearMap.smul_apply]
     change ((realizedFam (I := I) g₀ T T' hδ hδ' 0).inner b
-      (((0 : ℝ) - s) • DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 0) b _)) z = _
-    rw [map_smul, ContinuousLinearMap.smul_apply, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
+      (((0 : ℝ) - s) • DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' 0) b _)) z = _
+    rw [map_smul, ContinuousLinearMap.smul_apply,
+      DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [hlm, dualToCotangent_smul_c]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
@@ -225,7 +238,8 @@ omit [BoundarylessManifold I M] in
 private lemma velocity_unitEval_domDomCongr_swap
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) (y : M) :
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s).toSection y)
@@ -313,7 +327,8 @@ lemma unitModel_covGrad_eval (g : SmoothRiemannianMetric I M) (n : ℕ)
   rw [map_zero, sub_zero]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma inverseMetricSharpFib_dualToCotangent (g : SmoothRiemannianMetric I M)
     (x : M) (φ : Module.Dual ℝ (TangentSpace I x)) :
     inverseMetricSharpFib (I := I) g x (dualToCotangent (I := I) φ) =
@@ -321,7 +336,8 @@ private lemma inverseMetricSharpFib_dualToCotangent (g : SmoothRiemannianMetric 
   rw [inverseMetricSharpFib_apply, cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_smul_c {x : M} (c : ℝ) (β : Tensor0SBundle.Tensor0SSpace 1 I x) :
     cotangentToCLM (I := I) (c • β) = c • cotangentToCLM (I := I) β := by
   apply ContinuousLinearMap.ext
@@ -437,7 +453,8 @@ private theorem cotangentCov_linearizedKoszul_eval
       koszulPair_eq_smul_dual_linearizedKoszul (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs Z Y b,
       cotangentToCLM_smul_c, smul_smul, inv_mul_cancel₀ hsne, one_smul]
   have hsc := (cotangentCov
-      (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))).isCovariantDerivativeOnUniv.smul_const
+      (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ'
+        s))).isCovariantDerivativeOnUniv.smul_const
     (σ := fun b : M => cotangentToCLM (I := I)
       (koszulCovGradCovec (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedFam (I := I) g₀ T T' hδ hδ' 0) Z Y b))
@@ -456,7 +473,8 @@ private theorem cotangentCov_linearizedKoszul_eval
 private lemma velocity_covGrad_swap12
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 3
         (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
@@ -502,7 +520,8 @@ private lemma velocity_covGrad_swap12
 private lemma velocity_covGrad_unitEval_domDomCongr_swap12
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) (y : M) :
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I y from
         (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
@@ -541,7 +560,8 @@ private lemma velocity_covGrad_unitEval_domDomCongr_swap12
 private lemma velocity_secondCovGrad_swap23
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) (x : M) (a b c d : TangentSpace I x) :
     unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
         (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -625,7 +645,8 @@ private lemma lkc_eq_endpoint_flat
       (1 - s) *
         linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b u ζ z := by
-    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
+    rw [hkey, map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [LinearMap.smul_apply]
   rw [show (((realizedFam (I := I) g₀ T T' hδ hδ' 1).inner b
       (PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' 1)
@@ -704,7 +725,8 @@ private lemma metricSharp_linearizedKoszulCovec_contMDiff
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) b
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b (Z b) (Y b)))) := by
   apply metricSharp_contMDiff_total (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -750,13 +772,15 @@ private theorem covDerivLinearizedConn_inner_towers
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (Z y) (Y y))))) =
         (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
-          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) y
+          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) y
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (Z y) (Y y)))) := by
       funext y
       rw [inverseMetricSharpFib_dualToCotangent]
     rw [hfun]
-    exact ((metricSharp_linearizedKoszulCovec_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs Y Z x).mdifferentiableAt
+    exact ((metricSharp_linearizedKoszulCovec_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs Y Z
+      x).mdifferentiableAt
       (by simp))
   have hpar := inverseMetricSharpField_covGrad_eq_zero
     (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -784,7 +808,8 @@ private theorem covDerivLinearizedConn_inner_towers
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x (Z x)
       (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (fun b => X b) (fun b => Y b) x) =
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x
       (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x (Z x)
         (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
@@ -793,12 +818,14 @@ private theorem covDerivLinearizedConn_inner_towers
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x
       (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (fun b => X b) (fun b => Z b) x) (Y x) =
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x
       (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) x
         (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
           (fun b => X b) (fun b => Z b) x) (Y x)) from rfl]
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp, DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
+  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp,
+    DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp]
   rw [linearizedKoszulCovec_apply, linearizedKoszulCovec_apply]
   rw [covApply_apply, covApply_apply]
   ring
@@ -860,7 +887,8 @@ private def cmmSlotPairCLM (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q : E) 
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-private lemma tensorRank4OuterSlotBilinearCLM_apply (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q om u : E) :
+private lemma tensorRank4OuterSlotBilinearCLM_apply (D : Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (p q om u : E) :
     cmmSlotPairCLM (E := E) D p q om u = D ![u, p, q, om] := by
   change (D : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
       (Function.update ![(0 : E), p, q, om] 0 u) = D ![u, p, q, om]
@@ -871,14 +899,16 @@ private def sharpCovCLM (g₁ : SmoothRiemannianMetric I M) (x : M) :
   (cometricLmodel (I := I) g₁ x).comp (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E))
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma sharpCovCLM_apply (g₁ : SmoothRiemannianMetric I M) (x : M) (φ : E →L[ℝ] ℝ) :
     sharpCovCLM (I := I) (M := M) g₁ x φ =
       cometricLmodel (I := I) g₁ x
         (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ) := rfl
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma inner_sharpCovCLM (g₁ : SmoothRiemannianMetric I M) (x : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I x) :
     g₁.inner x (sharpCovCLM (I := I) (M := M) g₁ x φ) u = φ (u : E) := by
@@ -901,7 +931,8 @@ lemma cDualBasis_eq_coord (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
 end NormedContinuousDualBasis
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma sharp_dual_coeff_symm (g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) (k l : Fin (Module.finrank ℝ E)) :
     B.cDualBasis l (sharpCovCLM (I := I) (M := M) g₁ x (B.cDualBasis k)) =
@@ -913,7 +944,8 @@ private lemma sharp_dual_coeff_symm (g₁ : SmoothRiemannianMetric I M) (x : M)
   exact g₁.symm x _ _
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma sharpCov_basis_expand (g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) (k : Fin (Module.finrank ℝ E)) :
     sharpCovCLM (I := I) (M := M) g₁ x (B.cDualBasis k) =
@@ -933,7 +965,8 @@ private lemma sharpCov_basis_expand (g₁ : SmoothRiemannianMetric I M) (x : M)
   exact (B.sum_repr (sharpCovCLM (I := I) (M := M) g₁ x (B.cDualBasis k))).symm
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma bilinCLM_diag_swap (g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) (Λ : E →L[ℝ] E →L[ℝ] ℝ) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -972,7 +1005,8 @@ private lemma bilinCLM_diag_swap (g₁ : SmoothRiemannianMetric I M) (x : M)
           rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma slotPair_trace_basis_indep (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q : E) :
     (∑ i : Fin (Module.finrank ℝ E),
@@ -1002,7 +1036,8 @@ private lemma slotPair_trace_basis_indep (g₁ : SmoothRiemannianMetric I M) (x 
   exact h
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma slotPair_trace_swap (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q : E) :
     (∑ i : Fin (Module.finrank ℝ E),
@@ -1034,15 +1069,18 @@ private lemma slotPair_trace_swap (g₁ : SmoothRiemannianMetric I M) (x : M)
   exact hswap
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ Ψ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (Φ - Ψ) W =
-      operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g r s Ψ W := by
+      operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g r s Ψ
+        W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g r s Ψ W).toSection x) =
+  rw [show ((operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g
+    r s Ψ W).toSection x) =
       (operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x -
         (operatorFieldApply (I := I) (M := M) g r s Ψ W).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
@@ -1053,7 +1091,8 @@ private lemma appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.sub_comp]
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma appCc_smul_left' (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (c • Φ) W =
@@ -1069,7 +1108,8 @@ private lemma appCc_smul_left' (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.smul_comp]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_sub_gen (g : SmoothRiemannianMetric I M) {n : ℕ}
     (S S' : SmoothCcTensor g 0 n) (x : M) :
     unitModel (I := I) (M := M) g n (S - S') x =
@@ -1155,23 +1195,28 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
         ((∑ k : Fin (Module.finrank ℝ E),
             unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k])
           + (∑ k : Fin (Module.finrank ℝ E),
               unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 1, v 0, (Module.finBasis ℝ E) k])
           - (∑ k : Fin (Module.finrank ℝ E),
               unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k, v 0, v 1]))
       - (1 / 2 : ℝ) *
           (∑ k : Fin (Module.finrank ℝ E),
             unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                  x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k]) := by
     rw [show linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s =
         ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) -
@@ -1180,9 +1225,11 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
     rw [appCc_sub_left, appCc_smul_left', unitModel_sub_gen, unitModel_smul_gen,
       ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     rw [ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x v]
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x
+        v]
     rw [traceHessianCoeff_apply_eq (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x v]
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x
+        v]
     have hterm : ∀ k : Fin (Module.finrank ℝ E),
         (unitModel (I := I) (M := M) g₀ 4 (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x
             (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
@@ -1201,15 +1248,18 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                 (Fin.cons ((Module.finBasis ℝ E) k) v))) =
         (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k]
           + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 1, v 0, (Module.finBasis ℝ E) k]
           - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k, v 0, v 1]) := by
       intro k
       rw [← hconv k]
@@ -1217,7 +1267,8 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                   ((Module.finBasis ℝ E).cDualBasis k)) (v 0) (v 1) ((Module.finBasis ℝ E) k)]
       rw [finCons_vec3_eq (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k)) (v 1) (v 0) ((Module.finBasis ℝ E) k)]
-      rw [finCons_cons_pair_eq (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+      rw [finCons_cons_pair_eq
+        (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k)) ((Module.finBasis ℝ E) k) v]
       rw [hD4rfl, hD4rfl, hD4rfl]
     have htrace : ∀ k : Fin (Module.finrank ℝ E),
@@ -1233,11 +1284,14 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
               (Fin.cons ((Module.finBasis ℝ E) k) v)) =
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                  x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k] := by
       intro k
       rw [ContinuousMultilinearMap.domDomCongr_apply]
-      have hargs : (fun i => (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+      have hargs : (fun i => (Fin.cons
+        (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k)))
           (Fin.cons ((Module.finBasis ℝ E) k) v) : Fin 4 → TangentSpace I x)
@@ -1267,15 +1321,18 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
         ∑ k : Fin (Module.finrank ℝ E),
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 1, v 0, (Module.finBasis ℝ E) k]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k, v 0, v 1]) from
       Finset.sum_congr rfl (fun k _ => hterm k)]
     rw [show (∑ k : Fin (Module.finrank ℝ E),
@@ -1292,7 +1349,9 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
         ∑ k : Fin (Module.finrank ℝ E),
           unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                  x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k] from
       Finset.sum_congr rfl (fun k _ => htrace k)]
     rw [Finset.sum_sub_distrib, Finset.sum_add_distrib]
@@ -1302,47 +1361,62 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
   rw [hks]
   have hsum : ∀ i : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr
-        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 0))
             (smoothExtensionTangent (I := I) x (v 1)) x
-          - covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+          - covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+            (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
             (smoothExtensionTangent (I := I) x (v 0))
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 1)) x)) i =
       ((1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1])
         - (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1])) := by
     intro i
     have hrepr : ∀ (W : TangentSpace I x),
         ((chartModelBasis E).repr W) i =
-          (realizedFam (I := I) g₀ T T' hδ hδ' s).inner x W (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+          (realizedFam (I := I) g₀ T T' hδ hδ' s).inner x W
+            (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) := by
       intro W
-      rw [(realizedFam (I := I) g₀ T T' hδ hδ' s).symm x W (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+      rw [(realizedFam (I := I) g₀ T T' hδ hδ' s).symm x W
+        (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)), inner_sharpCovCLM, cDualBasis_eq_coord]
       rfl
     rw [map_sub, Finsupp.sub_apply, hrepr, hrepr]
@@ -1355,7 +1429,8 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
     set V1f : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
       ⟨smoothExtensionTangent (I := I) x (v 1),
         smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩ with hV1f
-    have hBix : (Bi x : TangentSpace I x) = (chartModelBasis E) i := smoothExtensionTangent_eq (I := I) x ((chartModelBasis E) i)
+    have hBix : (Bi x : TangentSpace I x) = (chartModelBasis E) i := smoothExtensionTangent_eq
+      (I := I) x ((chartModelBasis E) i)
     have hV0x : (V0f x : TangentSpace I x) = v 0 := smoothExtensionTangent_eq (I := I) x (v 0)
     have hV1x : (V1f x : TangentSpace I x) = v 1 := smoothExtensionTangent_eq (I := I) x (v 1)
     have hA := covDerivLinearizedConn_inner_towers (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs
@@ -1366,51 +1441,68 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                   ((chartModelBasis E).cDualBasis i))
     rw [hBix, hV0x, hV1x] at hA hB
     have hA' : (realizedFam (I := I) g₀ T T' hδ hδ' s).inner x
-        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
           (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
           (smoothExtensionTangent (I := I) x (v 0))
-          (smoothExtensionTangent (I := I) x (v 1)) x) (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+          (smoothExtensionTangent (I := I) x (v 1)) x)
+            (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) =
         (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1]) := hA
     have hB' : (realizedFam (I := I) g₀ T T' hδ hδ' s).inner x
-        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
           (smoothExtensionTangent (I := I) x (v 0))
           (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
-          (smoothExtensionTangent (I := I) x (v 1)) x) (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+          (smoothExtensionTangent (I := I) x (v 1)) x)
+            (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) =
         (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1]) := hB
     rw [hA', hB']
   rw [show (∑ i : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr
-        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+        (covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 0))
             (smoothExtensionTangent (I := I) x (v 1)) x
-          - covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
+          - covDerivLinearizedConn (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+            (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)
             (smoothExtensionTangent (I := I) x (v 0))
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 1)) x)) i) =
@@ -1418,69 +1510,99 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
       ((1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1])
         - (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             + unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]
             - unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1])) from
     Finset.sum_congr rfl (fun i _ => hsum i)]
   rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
     Finset.sum_sub_distrib, Finset.sum_add_distrib, Finset.sum_sub_distrib,
     Finset.sum_add_distrib]
-  have hTA1 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+  have hTA1 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]) =
-      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k] :=
     slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)
-  have hTA2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+  have hTA2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]) =
-      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 1, v 0, (Module.finBasis ℝ E) k] :=
     slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 1) (v 0)
-  have hTA3 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+  have hTA3 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1]) =
-      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k, v 0, v 1] := by
     have hcan : ∀ i : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1] =
           ContinuousMultilinearMap.domDomCongr perm4_0312
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
-            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
+            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] := by
       intro i
       rw [domDomCongr_0312_eval]
@@ -1488,47 +1610,64 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
         ContinuousMultilinearMap.domDomCongr perm4_0312
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
             ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k] =
           unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k, v 0, v 1] := by
       intro k
       rw [domDomCongr_0312_eval]
-    rw [show (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+    rw [show (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 0, v 1]) =
         ∑ i : Fin (Module.finrank ℝ E),
           ContinuousMultilinearMap.domDomCongr perm4_0312
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
-            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
+            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] from
       Finset.sum_congr rfl (fun i _ => hcan i)]
     rw [slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
     exact Finset.sum_congr rfl (fun k _ => hcan' k)
-  have hTB2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+  have hTB2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]) =
-      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      ∑ k : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                  x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k] := by
     have hcan : ∀ i : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] =
           ContinuousMultilinearMap.domDomCongr perm4_1203
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
-            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
+            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] := by
       intro i
       rw [domDomCongr_1203_eval]
@@ -1536,90 +1675,124 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
         ContinuousMultilinearMap.domDomCongr perm4_1203
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
             ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k] =
           unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                  x
                   ((Module.finBasis ℝ E).cDualBasis k), (Module.finBasis ℝ E) k] := by
       intro k
       rw [domDomCongr_1203_eval]
-    rw [show (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+    rw [show (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, v 1, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]) =
         ∑ i : Fin (Module.finrank ℝ E),
           ContinuousMultilinearMap.domDomCongr perm4_1203
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
-            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)
+            ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] from
       Finset.sum_congr rfl (fun i _ => hcan i)]
     rw [slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
     exact Finset.sum_congr rfl (fun k _ => hcan' k)
-  have hmid : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+  have hmid : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)]) =
-      ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1] := by
     have hstep1 : ∀ i : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
-                  ((chartModelBasis E).cDualBasis i)] = unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  ((chartModelBasis E).cDualBasis i)] = unitModel (I := I) (M := M)
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 1] := by
       intro i
       exact velocity_secondCovGrad_swap23 (I := I) g₀ T T' hδ hδ' s x (v 0) ((chartModelBasis E) i)
         (v 1) (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i))
-    have hswap := bilinCLM_diag_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (chartModelBasis E)
+    have hswap := bilinCLM_diag_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+      (chartModelBasis E)
       ((cmmSlotPairCLM (E := E)
         (ContinuousMultilinearMap.domDomCongr perm4_1032
           (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
     have hL : ∀ i : Fin (Module.finrank ℝ E),
         ((cmmSlotPairCLM (E := E)
           (ContinuousMultilinearMap.domDomCongr perm4_1032
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
-          ((chartModelBasis E) i) (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
+          ((chartModelBasis E) i) (sharpCovCLM (I := I) (M := M)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) =
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 1] := by
       intro i
-      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply, domDomCongr_1032_eval]
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply,
+        domDomCongr_1032_eval]
     have hR : ∀ i : Fin (Module.finrank ℝ E),
         ((cmmSlotPairCLM (E := E)
           (ContinuousMultilinearMap.domDomCongr perm4_1032
             (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
           (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) ((chartModelBasis E) i) =
         unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1] := by
       intro i
-      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply, domDomCongr_1032_eval]
-    calc (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply,
+        domDomCongr_1032_eval]
+    calc (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)])
-        = ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+        = ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 1] :=
           Finset.sum_congr rfl (fun i _ => hstep1 i)
       _ = ∑ i : Fin (Module.finrank ℝ E),
@@ -1627,8 +1800,10 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
               (ContinuousMultilinearMap.domDomCongr perm4_1032
                 (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
-              ((chartModelBasis E) i) (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
+              ((chartModelBasis E) i) (sharpCovCLM (I := I) (M := M)
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) :=
           Finset.sum_congr rfl (fun i _ => (hL i).symm)
       _ = ∑ i : Fin (Module.finrank ℝ E),
@@ -1636,12 +1811,15 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
               (ContinuousMultilinearMap.domDomCongr perm4_1032
                 (unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x : ContinuousMultilinearMap ℝ
+                  (fun _ : Fin 4 => E) ℝ)) (v 0) (v 1)).flip)
               (sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)) ((chartModelBasis E) i) := hswap
-      _ = ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
+      _ = ∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
-                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x
+                  ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1] :=
           Finset.sum_congr rfl (fun i _ => hR i)
   rw [hTA1, hTA2, hTA3, hTB2, hmid]

@@ -41,7 +41,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -74,7 +75,8 @@ private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rfl
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -91,7 +93,8 @@ theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
     (P : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
     (Q : ∀ x : M, Tensor0SBundle.Tensor0SSpace k I x)
@@ -107,7 +110,8 @@ private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
         (tensorProdWithCLM (I := I) m k x (P x) (Q x))) := by
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) m
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) k
-  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (m + k)
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (m + k)
   intro x₀
   rw [Bundle.contMDiffAt_section (F := Tensor0SBundle.Tensor0SModel (m + k) ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace (m + k) I z)]
@@ -354,14 +358,16 @@ theorem ricciCometricFourTraceCLM_field_contMDiff (g₁ : SmoothRiemannianMetric
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
 
-noncomputable def linearizedRicciConnDiffOrder1CometricTracedCLM (g₀ g₁ : SmoothRiemannianMetric I M)
+noncomputable def linearizedRicciConnDiffOrder1CometricTracedCLM
+    (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
     Tensor0SBundle.Tensor0SSpace 3 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (ricciCometricFourTraceCLM (I := I) g₁ x).comp
     (linearizedRicciConnDiffOrder1CLM (I := I) x
       ((connDiffSection (I := I) g₁ g₀).toSection x))
 
-noncomputable def linearizedRicciConnDiffOrder0CometricTracedCLM (g₀ g₁ : SmoothRiemannianMetric I M)
+noncomputable def linearizedRicciConnDiffOrder0CometricTracedCLM
+    (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
     Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (ricciCometricFourTraceCLM (I := I) g₁ x).comp
@@ -373,7 +379,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
-theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) x
@@ -398,7 +405,8 @@ set_option backward.isDefEq.respectTransparency false in
 set_option maxRecDepth 8000 in
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) x
@@ -459,7 +467,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 def linearizedRicciConnDiffOrder1Coeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) : SmoothCcTensor g₀ 3 2 :=
   linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -467,7 +476,8 @@ def linearizedRicciConnDiffOrder1Coeff (g₀ : SmoothRiemannianMetric I M)
 def linearizedRicciConnDiffOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -476,7 +486,8 @@ def linearizedRicciConnDiffOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
 theorem linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) :
     linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s =
       linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
@@ -488,7 +499,8 @@ theorem linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub
 theorem linearizedRicciConnDiffOrder1Coeff_eq_base_add_sub
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T')
+      δ')
     (s : ℝ) :
     linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s =
       linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s

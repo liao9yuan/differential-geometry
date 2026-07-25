@@ -26,7 +26,8 @@ private theorem weight_sum_high
     (g : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * Module.finrank ℝ E + 4 + (weylSobolevExp (E := E) + 1) ≤ a)
     (x : M) (v w : TangentSpace I x) :
-    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
+    Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+      2 =>
       tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
         (eigenBilinScalar (I := I) g x v w i *
           (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))⁻¹) ^ 2) := by
@@ -39,7 +40,8 @@ private theorem weight_sum_high
     rw [hsW_def]
     push_cast
     linarith
-  have hweyl : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
+  have hweyl : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I)
+    (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) :=
     tensorEigen_summable_negpow (I := I) (M := M) g (sW : ℝ) hsW_gt
   obtain ⟨C, hC_pos, hC⟩ :=

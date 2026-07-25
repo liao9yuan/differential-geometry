@@ -49,7 +49,8 @@ theorem trace_eq_basis_repr_sum (G : E →ₗ[ℝ] E) :
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemannianMetric I M) (x : M)
     (j k : Fin (Module.finrank ℝ E)) :
     g₁.inner x
@@ -82,8 +83,10 @@ private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemann
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply, Module.Basis.repr_self]
   rw [Finsupp.single_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) (x : M) (G : E →ₗ[ℝ] E) :
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
+theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (G : E →ₗ[ℝ] E) :
     ∑ k : Fin (Module.finrank ℝ E),
         g₁.inner x
           (G (cometricLmodel (I := I) g₁ x
@@ -112,7 +115,8 @@ theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) 
     intro m₁ m₂ hm
     apply SmoothRiemannianMetric.eq_of_inner_eq g₁ (x := x)
     intro ζ
-    have hζ : ζ = ∑ k : Fin (Module.finrank ℝ E), (Module.finBasis ℝ E).repr ζ k • (Module.finBasis ℝ E) k :=
+    have hζ : ζ = ∑ k : Fin (Module.finrank ℝ E), (Module.finBasis ℝ E).repr ζ k •
+      (Module.finBasis ℝ E) k :=
       ((Module.finBasis ℝ E).sum_repr ζ).symm
     rw [hζ]
     simp only [map_sum, map_smul, smul_eq_mul]
@@ -121,7 +125,8 @@ theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) 
     change (Module.finBasis ℝ E).repr ζ k * g₁.inner x m₁ ((Module.finBasis ℝ E) k) =
       (Module.finBasis ℝ E).repr ζ k * g₁.inner x m₂ ((Module.finBasis ℝ E) k)
     rw [g₁.symm x m₁, g₁.symm x m₂]
-    have hk' : g₁.inner x m₁ ((Module.finBasis ℝ E) k) = g₁.inner x m₂ ((Module.finBasis ℝ E) k) := by
+    have hk' : g₁.inner x m₁ ((Module.finBasis ℝ E) k) = g₁.inner x m₂
+      ((Module.finBasis ℝ E) k) := by
       have e1 : ε k m₁ = g₁.inner x m₁ ((Module.finBasis ℝ E) k) := by rw [hε]; rfl
       have e2 : ε k m₂ = g₁.inner x m₂ ((Module.finBasis ℝ E) k) := by rw [hε]; rfl
       rw [← e1, ← e2, hk]
@@ -137,7 +142,8 @@ theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) 
   rw [hrepr, hε]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α + β)
       = dualToCotangent (I := I) (x := x) α + dualToCotangent (I := I) (x := x) β := by
@@ -146,7 +152,8 @@ lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) 
     cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (c • α)
       = c • dualToCotangent (I := I) (x := x) α := by
@@ -154,7 +161,8 @@ lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpac
   rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_subC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α - β)
       = dualToCotangent (I := I) (x := x) α - dualToCotangent (I := I) (x := x) β := by
@@ -285,7 +293,8 @@ private lemma g1Principal_splitC
             intro c w
             rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x (c • w) v =
               c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
-            rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) w) =
+            rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) w)
+              =
       -(cotangentToCLM (I := I)
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)) from rfl]
@@ -325,7 +334,8 @@ private lemma alignedPrincipalEndoC_inner_secondKoszul
   rw [alignedPrincipalEndoC_apply]
   rw [inverseMetricSharpFib_inner (I := I) g₁ x _ ζ, cotangentToDualLinear_apply]
   rw [← hXfx]
-  have hbridge := koszulCovGradCovec_covDeriv_eq_secondCovGrad (I := I) (M := M) g₀ g₁ S hbil Xf Y Z x ζ
+  have hbridge := koszulCovGradCovec_covDeriv_eq_secondCovGrad (I := I) (M := M) g₀ g₁ S hbil Xf Y Z
+    x ζ
   rw [hXfx]
   rw [hXfx] at hbridge
   rw [hbridge]
@@ -374,11 +384,13 @@ private lemma alignedPrincipalEndoC_trace_eq
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     LinearMap.trace ℝ E (alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x) =
       unitModel (I := I) (M := M) g₀ 2
-          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
         + secondKoszulFrameRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
   classical
-  rw [← trace_eq_cometricLmodel_pairing_sum (I := I) (M := M) g₁ x (alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x)]
+  rw [← trace_eq_cometricLmodel_pairing_sum (I := I) (M := M) g₁ x
+    (alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x)]
   rw [covDerivConnDiff_tracedPrincipal_eq_appCc (I := I) (M := M) g₀ g₁ S x ![Z x, Y x]]
   rw [secondKoszulFrameRemainder]
   rw [show (∑ k : Fin (Module.finrank ℝ E),
@@ -469,11 +481,11 @@ theorem palatini_tracedPrincipal_eq_combinedTrace
                   ((chartModelBasis E) i) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
         + palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
   classical
-
   have hsumeq : (∑ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -487,7 +499,8 @@ theorem palatini_tracedPrincipal_eq_combinedTrace
         ((chartModelBasis E).repr
             (alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i
           + (chartModelBasis E).repr
-              (alignedPrincipalCorrectionVec (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i) := by
+              (alignedPrincipalCorrectionVec (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i))
+                i) := by
     refine Finset.sum_congr rfl fun i _ => ?_
     have hsplit := g1Principal_splitC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)
     rw [g1PrincipalVec] at hsplit
@@ -511,9 +524,12 @@ def koszulZSlotPerm3 : Equiv.Perm (Fin 4) :=
 
 
 private theorem zSlotPerm_apply :
-    (koszulZSlotPerm1 0 = 2 ∧ koszulZSlotPerm1 1 = 0 ∧ koszulZSlotPerm1 2 = 3 ∧ koszulZSlotPerm1 3 = 1) ∧
-    (koszulZSlotPerm2 0 = 2 ∧ koszulZSlotPerm2 1 = 3 ∧ koszulZSlotPerm2 2 = 0 ∧ koszulZSlotPerm2 3 = 1) ∧
-    (koszulZSlotPerm3 0 = 2 ∧ koszulZSlotPerm3 1 = 1 ∧ koszulZSlotPerm3 2 = 0 ∧ koszulZSlotPerm3 3 = 3) := by
+    (koszulZSlotPerm1 0 = 2 ∧ koszulZSlotPerm1 1 = 0 ∧ koszulZSlotPerm1 2 = 3 ∧ koszulZSlotPerm1 3 =
+      1) ∧
+    (koszulZSlotPerm2 0 = 2 ∧ koszulZSlotPerm2 1 = 3 ∧ koszulZSlotPerm2 2 = 0 ∧ koszulZSlotPerm2 3 =
+      1) ∧
+    (koszulZSlotPerm3 0 = 2 ∧ koszulZSlotPerm3 1 = 1 ∧ koszulZSlotPerm3 2 = 0 ∧ koszulZSlotPerm3 3 =
+      3) := by
   unfold koszulZSlotPerm1 koszulZSlotPerm2 koszulZSlotPerm3
   refine ⟨⟨?_, ?_, ?_, ?_⟩, ⟨?_, ?_, ?_, ?_⟩, ?_, ?_, ?_, ?_⟩ <;> decide
 
@@ -543,7 +559,8 @@ theorem combinedTrace42ModelZ_apply
                   ((Module.finBasis ℝ E).cDualBasis k)), m 1, (Module.finBasis ℝ E) k]
             + D ![m 0, m 1, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                     ((Module.finBasis ℝ E).cDualBasis k)), (Module.finBasis ℝ E) k]
-            - D ![m 0, (Module.finBasis ℝ E) k, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            - D ![m 0, (Module.finBasis ℝ E) k, L
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                     ((Module.finBasis ℝ E).cDualBasis k)), m 1]) := by
   classical
   have hcongr_eq : ∀ (σ : Equiv.Perm (Fin 4)) (D' : Tensor0SBundle.Tensor0SModel 4 ℝ E),
@@ -553,7 +570,6 @@ theorem combinedTrace42ModelZ_apply
     intro σ D'
     rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-
   have htrace : ∀ (σ : Equiv.Perm (Fin 4)) (tup : Fin (Module.finrank ℝ E) → Fin 4 → E)
       (_htup : ∀ k, (fun j =>
         (![L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -580,18 +596,22 @@ theorem combinedTrace42ModelZ_apply
     ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     hcongr_eq, hcongr_eq, hcongr_eq]
-  rw [htrace koszulZSlotPerm1 (fun k => ![m 0, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+  rw [htrace koszulZSlotPerm1
+    (fun k => ![m 0, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k)), m 1, (Module.finBasis ℝ E) k]) (by
         intro k
         funext j
         fin_cases j <;>
-          simp only [koszulZSlotPerm1, Fin.isValue, Equiv.trans_apply, Equiv.swap_apply_def] <;> rfl)]
-  rw [htrace koszulZSlotPerm2 (fun k => ![m 0, m 1, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          simp only [koszulZSlotPerm1, Fin.isValue, Equiv.trans_apply, Equiv.swap_apply_def] <;>
+            rfl)]
+  rw [htrace koszulZSlotPerm2
+    (fun k => ![m 0, m 1, L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k)), (Module.finBasis ℝ E) k]) (by
         intro k
         funext j
         fin_cases j <;>
-          simp only [koszulZSlotPerm2, Fin.isValue, Equiv.trans_apply, Equiv.swap_apply_def] <;> rfl)]
+          simp only [koszulZSlotPerm2, Fin.isValue, Equiv.trans_apply, Equiv.swap_apply_def] <;>
+            rfl)]
   rw [htrace koszulZSlotPerm3 (fun k => ![m 0, (Module.finBasis ℝ E) k,
         L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k)), m 1]) (by
@@ -608,7 +628,8 @@ noncomputable def ricciArmPrincipalCoeffZSlotFib (g₁ : SmoothRiemannianMetric 
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem ricciArmPrincipalCoeffZFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x D) =
@@ -626,11 +647,12 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
         (ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x)) := by
   classical
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E)
+      (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x)
   intro Y
-
   have hreindex : ∀ (ρ : Equiv.Perm (Fin 4))
       (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
       (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
@@ -662,7 +684,6 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
           ((Module.finBasis ℝ E) (τ j))) = _
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rfl
-
   have hcdt : ∀ (ρ : Equiv.Perm (Fin 4)),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
@@ -675,7 +696,6 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     intro ρ
     exact ContMDiff.clm_bundle_apply (b := id)
       (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) (hreindex ρ (fun x => Y x) Y.contMDiff)
-
   have hcomb := (((hcdt koszulZSlotPerm1).add_section (hcdt koszulZSlotPerm2)).sub_section
     (hcdt koszulZSlotPerm3)).const_smul_section (a := (1 / 2 : ℝ))
   refine hcomb.congr (fun x => ?_)
@@ -718,7 +738,8 @@ noncomputable def ricciArmPrincipalCoeffZSlot (g₀ g₁ : SmoothRiemannianMetri
     SmoothCcTensor g₀ 4 2 where
   toSection :=
     { toFun := fun x : M =>
-        (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x)
+        (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁
+          x)
       contMDiff_toFun := ricciArmPrincipalCoeffZFib_contMDiff (I := I) g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
@@ -727,7 +748,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] theorem ricciArmPrincipalCoeffZ_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁).toSection x =
-      (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x) := rfl
+      (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x)
+        := rfl
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -736,7 +758,8 @@ theorem ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁) W) x v =
       (1 / 2 : ℝ) *
         ∑ k : Fin (Module.finrank ℝ E),
           (unitModel (I := I) (M := M) g₀ 4 W x
@@ -770,69 +793,95 @@ private def secondCovGradZSlotCovec (g₀ : SmoothRiemannianMetric I M) (S : Smo
   LinearMap.toContinuousLinearMap
     { toFun := fun ζ => (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ]
-          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
-          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x])
+          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, W x, e, ζ]
+          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, ζ, e, W x])
       map_add' := by
         intro ζ ζ'
         have h1 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, e, W x, ζ + ζ'] =
-            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ]
-              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ'] := by
+            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, e, W x, ζ]
+              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![V x, e, W x, ζ'] := by
           rw [show (![V x, e, W x, ζ + ζ'] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, e, W x, ζ] 3 (ζ + ζ') from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-            show (Function.update ![V x, e, W x, ζ] 3 ζ : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_add,
+            show (Function.update ![V x, e, W x, ζ] 3 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, e, W x, ζ] from by
               funext j; fin_cases j <;> rfl,
-            show (Function.update ![V x, e, W x, ζ] 3 ζ' : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ'] from by
+            show (Function.update ![V x, e, W x, ζ] 3 ζ' : Fin 4 → TangentSpace I x) =
+              ![V x, e, W x, ζ'] from by
               funext j; fin_cases j <;> rfl]
         have h2 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, W x, e, ζ + ζ'] =
-            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
-              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ'] := by
+            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, W x, e, ζ]
+              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![V x, W x, e, ζ'] := by
           rw [show (![V x, W x, e, ζ + ζ'] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, W x, e, ζ] 3 (ζ + ζ') from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-            show (Function.update ![V x, W x, e, ζ] 3 ζ : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_add,
+            show (Function.update ![V x, W x, e, ζ] 3 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, W x, e, ζ] from by
               funext j; fin_cases j <;> rfl,
-            show (Function.update ![V x, W x, e, ζ] 3 ζ' : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ'] from by
+            show (Function.update ![V x, W x, e, ζ] 3 ζ' : Fin 4 → TangentSpace I x) =
+              ![V x, W x, e, ζ'] from by
               funext j; fin_cases j <;> rfl]
         have h3 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, ζ + ζ', e, W x] =
-            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]
-              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ', e, W x] := by
+            unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, ζ, e, W x]
+              + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![V x, ζ', e, W x] := by
           rw [show (![V x, ζ + ζ', e, W x] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, ζ, e, W x] 1 (ζ + ζ') from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-            show (Function.update ![V x, ζ, e, W x] 1 ζ : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_add,
+            show (Function.update ![V x, ζ, e, W x] 1 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, ζ, e, W x] from by
               funext j; fin_cases j <;> rfl,
-            show (Function.update ![V x, ζ, e, W x] 1 ζ' : Fin 4 → TangentSpace I x) = ![V x, ζ', e, W x] from by
+            show (Function.update ![V x, ζ, e, W x] 1 ζ' : Fin 4 → TangentSpace I x) =
+              ![V x, ζ', e, W x] from by
               funext j; fin_cases j <;> rfl]
         rw [h1, h2, h3]; ring
       map_smul' := by
         intro c ζ
         have h1 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, e, W x, c • ζ] =
-            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ] := by
+            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, e, W x, ζ] := by
           rw [show (![V x, e, W x, c • ζ] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, e, W x, ζ] 3 (c • ζ) from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-            show (Function.update ![V x, e, W x, ζ] 3 ζ : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_smul,
+            show (Function.update ![V x, e, W x, ζ] 3 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, e, W x, ζ] from by
               funext j; fin_cases j <;> rfl]
         have h2 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, W x, e, c • ζ] =
-            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ] := by
+            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, W x, e, ζ] := by
           rw [show (![V x, W x, e, c • ζ] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, W x, e, ζ] 3 (c • ζ) from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-            show (Function.update ![V x, W x, e, ζ] 3 ζ : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_smul,
+            show (Function.update ![V x, W x, e, ζ] 3 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, W x, e, ζ] from by
               funext j; fin_cases j <;> rfl]
         have h3 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
               ![V x, c • ζ, e, W x] =
-            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x] := by
+            c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![V x, ζ, e, W x] := by
           rw [show (![V x, c • ζ, e, W x] : Fin 4 → TangentSpace I x) =
               Function.update ![V x, ζ, e, W x] 1 (c • ζ) from by funext j; fin_cases j <;> rfl,
-            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-            show (Function.update ![V x, ζ, e, W x] 1 ζ : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x] from by
+            (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+              x).map_update_smul,
+            show (Function.update ![V x, ζ, e, W x] 1 ζ : Fin 4 → TangentSpace I x) =
+              ![V x, ζ, e, W x] from by
               funext j; fin_cases j <;> rfl]
         rw [h1, h2, h3]
         simp only [smul_eq_mul, RingHom.id_apply]
@@ -846,8 +895,10 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x e ζ =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ]
-          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
-          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
+          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, W x, e, ζ]
+          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, ζ, e, W x]) := rfl
 
 
 omit [BoundarylessManifold I M] in
@@ -863,35 +914,44 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
   have h1 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, e + e', W x, ζ] =
       unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ]
-        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e', W x, ζ] := by
+        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+          ![V x, e', W x, ζ] := by
     rw [show (![V x, e + e', W x, ζ] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, e, W x, ζ] 1 (e + e') from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-      show (Function.update ![V x, e, W x, ζ] 1 e : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ] from by
+      show (Function.update ![V x, e, W x, ζ] 1 e : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ]
+        from by
         funext j; fin_cases j <;> rfl,
-      show (Function.update ![V x, e, W x, ζ] 1 e' : Fin 4 → TangentSpace I x) = ![V x, e', W x, ζ] from by
+      show (Function.update ![V x, e, W x, ζ] 1 e' : Fin 4 → TangentSpace I x) = ![V x, e', W x, ζ]
+        from by
         funext j; fin_cases j <;> rfl]
   have h2 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, W x, e + e', ζ] =
       unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
-        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e', ζ] := by
+        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+          ![V x, W x, e', ζ] := by
     rw [show (![V x, W x, e + e', ζ] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, W x, e, ζ] 2 (e + e') from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-      show (Function.update ![V x, W x, e, ζ] 2 e : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ] from by
+      show (Function.update ![V x, W x, e, ζ] 2 e : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ]
+        from by
         funext j; fin_cases j <;> rfl,
-      show (Function.update ![V x, W x, e, ζ] 2 e' : Fin 4 → TangentSpace I x) = ![V x, W x, e', ζ] from by
+      show (Function.update ![V x, W x, e, ζ] 2 e' : Fin 4 → TangentSpace I x) = ![V x, W x, e', ζ]
+        from by
         funext j; fin_cases j <;> rfl]
   have h3 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, ζ, e + e', W x] =
       unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]
-        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e', W x] := by
+        + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+          ![V x, ζ, e', W x] := by
     rw [show (![V x, ζ, e + e', W x] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, ζ, e, W x] 2 (e + e') from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_add,
-      show (Function.update ![V x, ζ, e, W x] 2 e : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x] from by
+      show (Function.update ![V x, ζ, e, W x] 2 e : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x]
+        from by
         funext j; fin_cases j <;> rfl,
-      show (Function.update ![V x, ζ, e, W x] 2 e' : Fin 4 → TangentSpace I x) = ![V x, ζ, e', W x] from by
+      show (Function.update ![V x, ζ, e, W x] 2 e' : Fin 4 → TangentSpace I x) = ![V x, ζ, e', W x]
+        from by
         funext j; fin_cases j <;> rfl]
   rw [h1, h2, h3]; ring
 
@@ -906,27 +966,33 @@ private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : Smoo
   rw [ContinuousLinearMap.smul_apply, zPrincipalCovec_apply, zPrincipalCovec_apply]
   have h1 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, c • e, W x, ζ] =
-      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ] := by
+      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+        ![V x, e, W x, ζ] := by
     rw [show (![V x, c • e, W x, ζ] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, e, W x, ζ] 1 (c • e) from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-      show (Function.update ![V x, e, W x, ζ] 1 e : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ] from by
+      show (Function.update ![V x, e, W x, ζ] 1 e : Fin 4 → TangentSpace I x) = ![V x, e, W x, ζ]
+        from by
         funext j; fin_cases j <;> rfl]
   have h2 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, W x, c • e, ζ] =
-      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ] := by
+      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+        ![V x, W x, e, ζ] := by
     rw [show (![V x, W x, c • e, ζ] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, W x, e, ζ] 2 (c • e) from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-      show (Function.update ![V x, W x, e, ζ] 2 e : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ] from by
+      show (Function.update ![V x, W x, e, ζ] 2 e : Fin 4 → TangentSpace I x) = ![V x, W x, e, ζ]
+        from by
         funext j; fin_cases j <;> rfl]
   have h3 : unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
         ![V x, ζ, c • e, W x] =
-      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x] := by
+      c • unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+        ![V x, ζ, e, W x] := by
     rw [show (![V x, ζ, c • e, W x] : Fin 4 → TangentSpace I x) =
         Function.update ![V x, ζ, e, W x] 2 (c • e) from by funext j; fin_cases j <;> rfl,
       (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x).map_update_smul,
-      show (Function.update ![V x, ζ, e, W x] 2 e : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x] from by
+      show (Function.update ![V x, ζ, e, W x] 2 e : Fin 4 → TangentSpace I x) = ![V x, ζ, e, W x]
+        from by
         funext j; fin_cases j <;> rfl]
   rw [h1, h2, h3]
   simp only [smul_eq_mul]; ring
@@ -972,8 +1038,10 @@ private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I
     g₁.inner x (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x e) ζ =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, e, W x, ζ]
-          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
-          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := by
+          + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, W x, e, ζ]
+          - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+            ![V x, ζ, e, W x]) := by
   change g₁.inner x (inverseMetricSharpFib (I := I) g₁ x
     (dualToCotangent (I := I)
       ((secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x e :
@@ -990,10 +1058,12 @@ lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     LinearMap.trace ℝ E (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x) =
       unitModel (I := I) (M := M) g₀ 2
-          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
+            (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![V x, W x] := by
   classical
-  rw [← trace_eq_cometricLmodel_pairing_sum (I := I) (M := M) g₁ x (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x)]
+  rw [← trace_eq_cometricLmodel_pairing_sum (I := I) (M := M) g₁ x
+    (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x)]
   rw [ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁
     (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x]]
   rw [Finset.mul_sum]
@@ -1013,7 +1083,8 @@ theorem alignedPrincipalEndoC_sub_endoCZ_inner (g₀ g₁ : SmoothRiemannianMetr
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
     g₁.inner x
         (alignedPrincipalEndo (I := I) (M := M) g₀ g₁
-            (⟨smoothExtensionTangent (I := I) x e, smoothExtensionTangent_contMDiff (I := I) x e⟩) W x (V x)
+            (⟨smoothExtensionTangent (I := I) x e, smoothExtensionTangent_contMDiff (I := I) x e⟩) W
+              x (V x)
           - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x e) ζ =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
@@ -1076,17 +1147,18 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
               (fun b => cotangentToCLM (I := I)
                 (koszulCovGradCovec (I := I) (M := M) g₀ g₁
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
-                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x (V x) :
+                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x
+                      (V x) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
+            (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![V x, W x]
         + palatiniTracedPrincipalZRemainder (I := I) (M := M) g₀ g₁ S V W x := by
   classical
   rw [← alignedPrincipalEndoCZ_trace_eq (I := I) (M := M) g₀ g₁ S V W x]
   rw [← trace_eq_basis_repr_sum (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x)]
   rw [palatiniTracedPrincipalZRemainder]
-
   have hsumeq : ∀ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -1095,7 +1167,8 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
               (fun b => cotangentToCLM (I := I)
                 (koszulCovGradCovec (I := I) (M := M) g₀ g₁
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
-                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x (V x) :
+                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x
+                      (V x) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i =
         (chartModelBasis E).repr
             (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i)) i
@@ -1103,11 +1176,13 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
               (alignedPrincipalEndo (I := I) (M := M) g₀ g₁
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
                     smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W x (V x)
-                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i)) i
+                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i))
+                  i
             + (chartModelBasis E).repr
                 (alignedPrincipalCorrectionVec (I := I) (M := M) g₀ g₁
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
-                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W x (V x)) i) := by
+                    smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W x (V x))
+                      i) := by
     intro i
     set ei : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
       ⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
@@ -1122,7 +1197,8 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
             (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i)) i
           + (chartModelBasis E).repr
               (alignedPrincipalEndo (I := I) (M := M) g₀ g₁ ei W x (V x)
-                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i)) i from by
+                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ g₁ S V W x ((chartModelBasis E) i))
+                  i from by
       rw [map_sub, Finsupp.sub_apply]; ring]
     rw [add_assoc]
   rw [Finset.sum_congr rfl fun i _ => hsumeq i]

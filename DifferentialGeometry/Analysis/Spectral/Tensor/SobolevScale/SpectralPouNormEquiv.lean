@@ -110,7 +110,9 @@ theorem ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2
 
 theorem tensorL2Coeff_ofCompact_rawTensorConnLapSmooth
     (g : SmoothRiemannianMetric I M)
-    (h_compact : IsCompactOperator (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g 0 2))
+    (h_compact : IsCompactOperator
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g
+      0 2))
     (T : SmoothCcTensor g 0 2) (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     tensorL2Coeff (I := I) (M := M) h_compact
         (SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g 0 2 T)) i =
@@ -131,7 +133,9 @@ theorem tensorL2Coeff_ofCompact_rawTensorConnLapSmooth
 
 theorem tensorL2Coeff_ofCompact_rawTensorConnLapIter
     (g : SmoothRiemannianMetric I M)
-    (h_compact : IsCompactOperator (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g 0 2))
+    (h_compact : IsCompactOperator
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g
+      0 2))
     (T : SmoothCcTensor g 0 2) (i : TensorEigenIdx (I := I) (M := M) g 0 2) (j : ℕ) :
     tensorL2Coeff (I := I) (M := M) h_compact
         (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)) i =

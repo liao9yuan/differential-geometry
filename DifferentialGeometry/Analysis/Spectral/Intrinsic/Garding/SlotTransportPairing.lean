@@ -549,7 +549,8 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun) -
+            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun)
+              -
         slotStage (I := I) (M := M) g σ (m + 1) k (C t) V =
       slotEnergy (I := I) (M := M) g (σ + m) k (Cm t) W +
         tensorL2Inner (I := I) (M := M) g 0 ((σ + m) + 1)
@@ -566,7 +567,8 @@ private theorem slot_stage_unif (g : SmoothRiemannianMetric I M)
             (oneMinusConnLapSmoothIter (I := I) g 0 ((σ + m) + 1) i
               (pointwiseTensorCurv (I := I) (M := M) g (σ + m)
                 (oneMinusConnLapSmoothIter (I := I) g 0 (σ + m) (k - 1 - i) W))).toFun
-            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t) W₁).toFun) := by
+            (ccOperatorFieldComp (I := I) (M := M) g 0 ((σ + m) + 1) ((σ + m) + 1) (E₁ t)
+              W₁).toFun) := by
     ring
   rw [hcancel]
   refine le_trans (abs_add4 _ _ _ _) ?_

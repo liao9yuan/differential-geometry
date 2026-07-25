@@ -58,7 +58,7 @@ private theorem wkpNorm_le_of_memWkp_precompact_uniform
   have hN_meas : MeasurableSet N := hN_closed.measurableSet
   have hK_sub_N : K ⊆ N := Metric.self_subset_cthickening K
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
       (d := d) hχ_smooth hχ_compact k
   obtain ⟨K_prom, hK_prom_pos, hK_prom_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le
@@ -180,7 +180,6 @@ private lemma ennreal_nested_nsmul_collapse
   ring
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -40,7 +40,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurc
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -68,7 +67,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorMultilinear_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (S - T) x : Tensor0SSpace 2 I x)
@@ -88,7 +88,8 @@ theorem ccTensorMultilinear_sub (g : SmoothRiemannianMetric I M)
   rw [ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorModel_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (S - T) x =
@@ -98,7 +99,8 @@ theorem ccTensorModel_sub (g : SmoothRiemannianMetric I M)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g (S - T) x v w =
@@ -108,7 +110,8 @@ theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_sub (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (S - T) x v w =
@@ -162,7 +165,8 @@ omit [BoundarylessManifold I M] in
 theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiff
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁)
+      (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (x : M) (i j : Fin (Module.finrank ℝ E)) :
     chartGramMatrix (I := I) (realizeMetricAt (I := I) g_bg u₁) α x i j -
         chartGramMatrix (I := I) (realizeMetricAt (I := I) g_bg u₂) α x i j =
@@ -183,7 +187,8 @@ omit [BoundarylessManifold I M] in
 theorem chartGramOnE_realizeMetricAt_sub_eq_reprDiff
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
-    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁) (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
+    (hu₁ : isRealizableMetricPerturbationAt (I := I) g_bg u₁)
+      (hu₂ : isRealizableMetricPerturbationAt (I := I) g_bg u₂)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (y : E) :
     chartGramOnE (I := I) (realizeMetricAt (I := I) g_bg u₁) α i j y -
         chartGramOnE (I := I) (realizeMetricAt (I := I) g_bg u₂) α i j y =

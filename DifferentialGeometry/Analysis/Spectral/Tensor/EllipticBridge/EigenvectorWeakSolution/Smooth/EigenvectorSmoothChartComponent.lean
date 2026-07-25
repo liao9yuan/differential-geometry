@@ -84,7 +84,6 @@ private lemma chartPushedPouWeight_toEuclidean_extChartAt
 
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -135,7 +134,6 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     else 0) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -215,7 +213,6 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
   rw [Finset.mul_sum]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -236,7 +233,6 @@ private lemma eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
   · rw [if_neg hw]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -377,7 +373,6 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
   exact ae_eq_of_ae_eq_restrict_of_eqOn_compl hΩ_meas h_on_overlap h_off_overlap
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma transportSum_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -414,7 +409,6 @@ private lemma transportSum_eigenvector_ae_zero_of_notMem
   rw [Finset.sum_const_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorSmooth_tensorL2ChartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

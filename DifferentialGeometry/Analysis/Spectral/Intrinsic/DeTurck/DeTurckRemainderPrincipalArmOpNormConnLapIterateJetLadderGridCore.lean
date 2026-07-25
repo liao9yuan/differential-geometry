@@ -212,7 +212,8 @@ lemma bal_gridcore (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
       rw [hc2_def]
       dsimp only
       ring
-  have hL2 := tensorL2NormSq_le_of_pointwise_fiberNormSq_le_two_sum (I := I) (M := M) g₀ Z (j + 1) (j + 1)
+  have hL2 := tensorL2NormSq_le_of_pointwise_fiberNormSq_le_two_sum (I := I) (M := M) g₀ Z (j + 1)
+    (j + 1)
     (fun _ => c1) c2 (fun _ => hc1_nn) hc2_nn
     (fun _ => 0) sd Df (fun _ => 2) sc Cf hpt2
   have hSAfinal : ∑ l ∈ Finset.range (j + 1), c1 * ‖Df l‖ ^ 2 ≤

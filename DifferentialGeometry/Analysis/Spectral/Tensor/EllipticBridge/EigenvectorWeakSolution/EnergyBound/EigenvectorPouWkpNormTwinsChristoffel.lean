@@ -191,7 +191,6 @@ private lemma wkpNorm_coef_mul_factor_le
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos

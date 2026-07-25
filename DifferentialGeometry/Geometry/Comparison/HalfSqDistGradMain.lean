@@ -37,10 +37,6 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem halfArcLengthSq_deriv
@@ -69,14 +65,11 @@ theorem halfArcLengthSq_deriv
   have hfixL' : ∀ s : ℝ, f s L = γ L := fun s => (hfixL s).trans (hγ ▸ hgL).symm
   have hArc := first_variation_geodesic_fixed_end (I := I) g γ f L hf hL hγ_geoOn hfc hfixL' hUnit
   have hγ0 : γ 0 = q := intrinsicGeodesic_zero (I := I) g hEnorm q u
-
   have harc0 : arcLength (I := I) g (fun t : ℝ => f 0 t) 0 L = L := by
     have hfγ : (fun t : ℝ => f 0 t) = γ := funext hfc
     rw [hfγ, hγ, arcLength_radial (I := I) g hEnorm q u 0 L, hguu, Real.sqrt_one]
     ring
-
   have hA := (hArc.pow 2).const_mul (1 / 2 : ℝ)
-
   have hval : (1 / 2 : ℝ) * (2 * arcLength (I := I) g (fun t : ℝ => f 0 t) 0 L ^ (2 - 1) *
         (- g.inner (γ 0) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u 0) 0 (1 : ℝ))
           (mfderiv (𝓘(ℝ, ℝ)) I γ 0 (1 : ℝ))))
@@ -90,10 +83,8 @@ theorem halfArcLengthSq_deriv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem halfSqDist_curve_hasDerivAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -121,9 +112,9 @@ theorem halfSqDist_curve_hasDerivAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 theorem arcLength_nonneg
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} (hab : a ≤ b) :
     0 ≤ arcLength (I := I) g γ a b := by
@@ -132,12 +123,8 @@ theorem arcLength_nonneg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem dist_le_arcLength
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -162,11 +149,6 @@ theorem dist_le_arcLength
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 omit [T2Space (TangentBundle I M)] in
 theorem halfSqDist_dir_deriv
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
@@ -227,9 +209,6 @@ theorem halfSqDist_dir_deriv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 theorem grad_halfSqDist_min
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -315,11 +294,6 @@ theorem grad_halfSqDist_min
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 theorem halfSqDist_flat
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -366,10 +340,6 @@ theorem halfSqDist_flat
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
 theorem grad_halfSqDist
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

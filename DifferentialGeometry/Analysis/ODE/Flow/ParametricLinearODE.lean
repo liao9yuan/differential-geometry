@@ -157,7 +157,8 @@ theorem inhomogLinearODE_unique_on_Ioo
       abel
     rw [h_eq] at hsub
     exact hsub
-  have h0_deriv : ∀ t ∈ Set.Ioo a b', HasDerivAt (fun _ : ℝ => (0 : G)) (A t ((fun _ => 0) t)) t := by
+  have h0_deriv : ∀ t ∈ Set.Ioo a b', HasDerivAt (fun _ : ℝ => (0 : G)) (A t ((fun _ => 0) t))
+    t := by
     intro t _
     have h0 : HasDerivAt (fun _ : ℝ => (0 : G)) 0 t := hasDerivAt_const _ _
     have h_eq : (A t ((fun _ : ℝ => (0 : G)) t)) = 0 := by

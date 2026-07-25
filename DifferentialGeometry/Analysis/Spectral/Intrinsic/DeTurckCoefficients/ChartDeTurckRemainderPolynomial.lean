@@ -35,7 +35,6 @@ def chartDeTurckRicciRHS (g g_bg : SmoothRiemannianMetric I M) (α : M)
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [I.Boundaryless] in
-
 theorem chartDeTurckRicciRHS_def (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
     chartDeTurckRicciRHS (I := I) g g_bg α i k y =
@@ -72,7 +71,6 @@ theorem deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
   rw [chartDeTurckRicciRHS_def]
 
 omit [BoundarylessManifold I M] in
-
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckRicciRHS_sub_eq
@@ -131,7 +129,6 @@ theorem chartDeTurckRicciRHS_sub_eq
     chartLieDeTurckComp_sub_eq (I := I) g₁ g₂ g_bg α i k y]
 
 omit [BoundarylessManifold I M] in
-
 omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder
@@ -162,7 +159,8 @@ theorem chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder
                     partialDeriv (E := E) k (chartDeTurckVFComp (I := I) g₁ g_bg α kk) y +
                   chartGramOnE (I := I) g₂ α i kk y *
                     (partialDeriv (E := E) k (chartDeTurckVFComp (I := I) g₁ g_bg α kk) y -
-                      partialDeriv (E := E) k (chartDeTurckVFComp (I := I) g₂ g_bg α kk) y))))) := by
+                      partialDeriv (E := E) k (chartDeTurckVFComp (I := I) g₂ g_bg α kk)
+                        y))))) := by
   classical
   rw [chartDeTurckRicciRHS_def, chartDeTurckRicciRHS_def]
   rw [show -2 * chartRicciTensor (I := I) g₁ α i k y +

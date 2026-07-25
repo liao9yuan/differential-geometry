@@ -41,7 +41,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
-    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)] (x : M) :
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)]
+      (x : M) :
     NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I x) :=
   Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
     (E := fun y : M => Tensor0SBundle.TensorRSSpace r s I y) x
@@ -174,14 +175,16 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
       ((iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ).toSection x) ≤ supΦsq i := hCembΦ Φ
   have hWpt : ∀ l x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (b₀ + l) x
       ((iteratedCovGrad (I := I) g₀ 0 b₀ l W).toSection x) ≤ supWsq l := hCembW W
-  have hWl2 : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 ≤ (Kw l) ^ 2 * f (l + dd + 2 * p) ^ 2 := by
+  have hWl2 : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 ≤ (Kw l) ^ 2 * f (l + dd + 2 * p) ^
+    2 := by
     intro l
     have h := hW l
     rw [hfam (l + dd)] at h
     have : ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 ≤ (Kw l * f (l + dd + 2 * p)) ^ 2 :=
       pow_le_pow_left₀ (norm_nonneg _) h 2
     nlinarith [this]
-  have hΦl2 : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2 ≤ (Kc i) ^ 2 * (1 + f (i + dc)) ^ 2 := by
+  have hΦl2 : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2 ≤ (Kc i) ^ 2 * (1 + f (i + dc)) ^
+    2 := by
     intro i
     have : ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2 ≤ (Kc i * (1 + f (i + dc))) ^ 2 :=
       pow_le_pow_left₀ (norm_nonneg _) (hΦ i) 2
@@ -200,10 +203,12 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
           hΦ (i + m)
       _ ≤ Kc (i + m) * (1 + R₀) := by
           refine mul_le_mul_of_nonneg_left ?_ (hKc_nn _)
-          have : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + m + dc : ℕ) : ℝ) T₀‖ = f (i + m + dc) := rfl
+          have : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + m + dc : ℕ) : ℝ) T₀‖ = f
+            (i + m + dc) := rfl
           rw [this]; linarith [hfle]
   have hsupWsum_region2 : ∀ (q i : ℕ), t < i →
-      (∑ l ∈ Finset.range (q + 1 - i), supWsq l) ≤ DW (q - i) * f (q - i + 4 * K + dd + 2 * p) ^ 2 := by
+      (∑ l ∈ Finset.range (q + 1 - i), supWsq l) ≤ DW (q - i) * f (q - i + 4 * K + dd + 2 * p) ^
+        2 := by
     intro q i hi
     rw [hDW, Finset.sum_mul]
     by_cases hle : i ≤ q
@@ -222,11 +227,14 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
         refine le_trans hWlm ?_
         refine mul_le_mul_of_nonneg_left (hmono ?_) (hKw_nn _)
         omega
-      calc CembW l * (∑ m ∈ Finset.range (4 * K + 1), ‖iteratedCovGrad (I := I) g₀ 0 b₀ (l + m) W‖) ^ 2
-          ≤ CembW l * ((∑ m ∈ Finset.range (4 * K + 1), Kw (l + m)) * f (q - i + 4 * K + dd + 2 * p)) ^ 2 := by
+      calc CembW l * (∑ m ∈ Finset.range (4 * K + 1), ‖iteratedCovGrad (I := I) g₀ 0 b₀ (l + m) W‖)
+             ^ 2
+          ≤ CembW l * ((∑ m ∈ Finset.range (4 * K + 1), Kw (l + m)) * f
+            (q - i + 4 * K + dd + 2 * p)) ^ 2 := by
             refine mul_le_mul_of_nonneg_left ?_ (hCembW_nn l)
             refine pow_le_pow_left₀ (Finset.sum_nonneg (fun m _ => norm_nonneg _)) hstep1 2
-        _ = CembW l * (∑ m ∈ Finset.range (4 * K + 1), Kw (l + m)) ^ 2 * f (q - i + 4 * K + dd + 2 * p) ^ 2 := by
+        _ = CembW l * (∑ m ∈ Finset.range (4 * K + 1), Kw (l + m)) ^ 2 * f
+          (q - i + 4 * K + dd + 2 * p) ^ 2 := by
             ring
     · have : q + 1 - i = 0 := by omega
       rw [this, Finset.range_zero, Finset.sum_empty]
@@ -247,7 +255,8 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
     rw [SmoothCcTensor.norm_def,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ b₀ (s₀ + i)]
   rw [hfam (q + 3)]
-  set μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
+  set μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀ with
+    hμ
   have hG_nn : 0 ≤ diagonalGridGrowthFactor (E := E) q := appCcGdiag_nonneg (E := E) q
   set flt1 := (Finset.range (q + 1)).filter (· ≤ t) with hflt1
   set flt2 := (Finset.range (q + 1)).filter (fun i => ¬ i ≤ t) with hflt2
@@ -259,15 +268,18 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
         riemannianFiberNormSq (I := I) (M := M) g₀ b₀ (s₀ + i) x
           ((iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ).toSection x))) with hFW
   have hpt : ∀ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
-      ((iteratedCovGrad (I := I) g₀ 0 s₀ q (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)).toSection x) ≤ FW x := by
+      ((iteratedCovGrad (I := I) g₀ 0 s₀ q
+        (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)).toSection x) ≤ FW x := by
     intro x
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) (M := M) g₀ b₀ s₀ Φ W q x) ?_
+    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I)
+      (M := M) g₀ b₀ s₀ Φ W q x) ?_
     simp only [hFW]
     refine mul_le_mul_of_nonneg_left ?_ hG_nn
     rw [← Finset.sum_filter_add_sum_filter_not (Finset.range (q + 1)) (· ≤ t)]
     refine add_le_add ?_ ?_
     · exact Finset.sum_le_sum (fun i _ => mul_le_mul_of_nonneg_right (hΦpt i x)
-        (Finset.sum_nonneg (fun l _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (b₀ + l) x _)))
+        (Finset.sum_nonneg (fun l _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (b₀ + l)
+          x _)))
     · refine Finset.sum_le_sum (fun i _ => ?_)
       rw [mul_comm]
       exact mul_le_mul_of_nonneg_right (Finset.sum_le_sum (fun l _ => hWpt l x))
@@ -289,7 +301,8 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
   have hFint : MeasureTheory.Integrable FW μ := by
     simp only [hFW]; exact (hint1.add hint2).const_mul _
   have hnormsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 0 (s₀ + q)
-    (iteratedCovGrad (I := I) g₀ 0 s₀ q (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)) FW hFint hpt
+    (iteratedCovGrad (I := I) g₀ 0 s₀ q (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)) FW
+      hFint hpt
   have hF1eq : (∫ x, (∑ i ∈ flt1, supΦsq i * ∑ l ∈ Finset.range (q + 1 - i),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (b₀ + l) x
           ((iteratedCovGrad (I := I) g₀ 0 b₀ l W).toSection x)) ∂μ) =
@@ -315,7 +328,8 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [MeasureTheory.integral_const_mul, hintΦ i]
   have hintFW : ∫ x, FW x ∂μ = diagonalGridGrowthFactor (E := E) q *
-      ((∑ i ∈ flt1, supΦsq i * ∑ l ∈ Finset.range (q + 1 - i), ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2) +
+      ((∑ i ∈ flt1, supΦsq i * ∑ l ∈ Finset.range (q + 1 - i), ‖iteratedCovGrad (I := I) g₀ 0 b₀ l
+        W‖ ^ 2) +
        (∑ i ∈ flt2, (∑ l ∈ Finset.range (q + 1 - i), supWsq l) *
           ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2)) := by
     simp only [hFW]
@@ -357,13 +371,15 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
       have hABB : f (i + dc) * f (q - i + 4 * K + dd + 2 * p) * f (q - i + 4 * K + dd + 2 * p) ≤
           R₀ * f (q + 3 + 2 * p) * f (q + 3 + 2 * p) :=
         mul_le_mul hinterp hfβγ (hf_nn _) (mul_nonneg hR₀ (hf_nn _))
-      have hABAB : (f (i + dc) * f (q - i + 4 * K + dd + 2 * p)) ^ 2 ≤ (R₀ * f (q + 3 + 2 * p)) ^ 2 :=
+      have hABAB : (f (i + dc) * f (q - i + 4 * K + dd + 2 * p)) ^ 2 ≤ (R₀ * f (q + 3 + 2 * p)) ^
+        2 :=
         pow_le_pow_left₀ (mul_nonneg (hf_nn _) (hf_nn _)) hinterp 2
       have hBB : f (q - i + 4 * K + dd + 2 * p) ^ 2 ≤ f (q + 3 + 2 * p) ^ 2 :=
         pow_le_pow_left₀ (hf_nn _) hfβγ 2
       nlinarith [hABB, hABAB, hBB]
     calc (∑ l ∈ Finset.range (q + 1 - i), supWsq l) * ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2
-        ≤ (DW (q - i) * f (q - i + 4 * K + dd + 2 * p) ^ 2) * ((Kc i) ^ 2 * (1 + f (i + dc)) ^ 2) := by
+        ≤ (DW (q - i) * f (q - i + 4 * K + dd + 2 * p) ^ 2) *
+          ((Kc i) ^ 2 * (1 + f (i + dc)) ^ 2) := by
           refine mul_le_mul (hsupWsum_region2 q i hit) (hΦl2 i) (sq_nonneg _)
             (mul_nonneg (hDW_nn _) (sq_nonneg _))
       _ = DW (q - i) * (Kc i) ^ 2 *
@@ -371,7 +387,8 @@ lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
       _ ≤ DW (q - i) * (Kc i) ^ 2 * ((1 + R₀) ^ 2 * f (q + 3 + 2 * p) ^ 2) :=
           mul_le_mul_of_nonneg_left hexpand (mul_nonneg (hDW_nn _) (sq_nonneg _))
       _ = DW (q - i) * (Kc i) ^ 2 * (1 + R₀) ^ 2 * f (q + 3 + 2 * p) ^ 2 := by ring
-  have hfinalsq : ‖iteratedCovGrad (I := I) g₀ 0 s₀ q (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
+  have hfinalsq : ‖iteratedCovGrad (I := I) g₀ 0 s₀ q
+    (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
       (diagonalGridGrowthFactor (E := E) q * (S1 q + S2 q)) * f (q + 3 + 2 * p) ^ 2 := by
     refine le_trans hnormsq (le_trans (le_of_eq hintFW) ?_)
     rw [mul_assoc]
@@ -405,7 +422,8 @@ lemma coeffContract_Hs_bound [Nonempty M]
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖ := by
   classical
   obtain ⟨Cm, hCm_nn, hCm⟩ :=
-    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha hR₀ b₀ 2 dc dd hdc hdd Kc hKc_nn Kw hKw_nn
+    coeffContract_iteratedCovGrad_jet_bound (I := I) (M := M) g₀ a ha hR₀ b₀ 2 dc dd hdc hdd Kc
+      hKc_nn Kw hKw_nn
   have hstep : ∀ j, ∃ c, 0 ≤ c ∧ ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
       (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
       (Φ : SmoothCcTensor g₀ b₀ 2)
@@ -428,7 +446,8 @@ lemma coeffContract_Hs_bound [Nonempty M]
     calc ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j : ℕ) : ℝ)
             (operatorFieldApply (I := I) (M := M) g₀ b₀ 2 Φ W)‖
         ≤ C1 * ∑ q ∈ Finset.range (j + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 q (operatorFieldApply (I := I) (M := M) g₀ b₀ 2 Φ W)‖ :=
+            ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (operatorFieldApply (I := I) (M := M) g₀ b₀ 2 Φ W)‖ :=
           hC1 (operatorFieldApply (I := I) (M := M) g₀ b₀ 2 Φ W)
       _ ≤ C1 * ∑ q ∈ Finset.range (j + 1), Cm q *
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ)

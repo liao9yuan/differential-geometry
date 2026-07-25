@@ -76,7 +76,7 @@ theorem eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
     have hKα_sub : Kα ⊆ (chartAt H α).source :=
       DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
     obtain ⟨C_α, hC_α_pos, hbound⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
+      eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
         (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
     exact ⟨C_α, hC_α_pos, hbound⟩
   set Cα : M → ℝ := fun α => Classical.choose (h_bridge_α α) with hCα_def

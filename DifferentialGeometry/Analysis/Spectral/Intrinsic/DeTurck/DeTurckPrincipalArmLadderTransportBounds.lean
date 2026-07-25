@@ -81,7 +81,8 @@ theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric I M) (n
   · exact mul_nonneg (hCfL_nn 0)
       (mul_nonneg (hCfR_nn 0) (Finset.sum_nonneg (fun q _ => hCfG_nn q)))
   · set GT : SmoothCcTensor g₀ 0 (2 + 0) :=
-      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf
+        (covGrad (I := I) (M := M) g₀ 0 2 u₀)
       with hGT_def
     have hsym := oneMinusConnLapSmoothIter_l2Inner_sym_split (I := I) (M := M) g₀ 0 2 a b u₀ GT
     have hab : a + b = n := by omega
@@ -398,7 +399,8 @@ theorem armAsm_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : �
   exact hsh
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem exists_appFullSec_iteratedCovGrad_shiftedJetWindow_bound (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
+theorem exists_appFullSec_iteratedCovGrad_shiftedJetWindow_bound (g₀ : SmoothRiemannianMetric I M)
+    (base c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) 0 (2 + base) c I) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c p
@@ -556,7 +558,8 @@ theorem armAsm_transport_pairing_jet_le (g₀ : SmoothRiemannianMetric I M)
         ring
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem armSwap_appFullSec_sub_right (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (A B : SmoothCcTensor g 0 (t + 2)) :

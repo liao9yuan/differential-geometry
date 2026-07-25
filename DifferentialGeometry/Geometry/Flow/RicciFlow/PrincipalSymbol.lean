@@ -116,26 +116,30 @@ private def testLinear (x α : M) (ξ : E) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr ξ a * (chartModelBasis E).repr (y - extChartAt I α x) a
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma symbolTestPerturbation_apply (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (c d : Fin (Module.finrank ℝ E)) (y : E) :
     symbolTestPerturbation (I := I) x α ξ t ht c d y =
       (1 / 2 : ℝ) * (testLinear (I := I) x α ξ y) ^ 2 * formComp (I := I) x t c d := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma testLinear_self (x α : M) (ξ : E) :
     testLinear (I := I) x α ξ (extChartAt I α x) = 0 := by
   simp [testLinear]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma symbolTestPerturbation_apply_self (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (c d : Fin (Module.finrank ℝ E)) :
     symbolTestPerturbation (I := I) x α ξ t ht c d (extChartAt I α x) = 0 := by
   rw [symbolTestPerturbation_apply, testLinear_self]; ring
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma testLinear_differentiableAt (x α : M) (ξ : E) (y : E) :
     DifferentiableAt ℝ (testLinear (I := I) x α ξ) y := by
   refine DifferentiableAt.fun_sum (fun a _ => ?_)
@@ -147,7 +151,8 @@ private lemma testLinear_differentiableAt (x α : M) (ξ : E) (y : E) :
   exact (((chartModelBasis E).coord a).toContinuousLinearMap.differentiableAt).comp y
     ((differentiableAt_id).sub (differentiableAt_const _))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma partialDeriv_symbolTestPerturbation_self (x α : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (p c d : Fin (Module.finrank ℝ E)) :

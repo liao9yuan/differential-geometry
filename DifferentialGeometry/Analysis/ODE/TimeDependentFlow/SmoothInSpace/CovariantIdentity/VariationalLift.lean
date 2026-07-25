@@ -29,7 +29,8 @@ theorem hasDerivAt_clm_pre_post
   have := Q.hasFDerivAt.comp_hasDerivAt t hEval
   simpa using this
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem hasDerivAt_mfderiv_flow_of_chart
     (Fam : ℝ → (M → M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (Q : E →L[ℝ] E) (d : E)

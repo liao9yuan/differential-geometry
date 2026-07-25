@@ -269,7 +269,6 @@ theorem gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
   rw [ricciPairingCLM_smoothToH1Compl_eq_smoothToLp (I := I) (M := M) g φ v]
   rw [h_hess]
   apply MeasureTheory.Lp.ext
-
   set A1 := smoothToLp (I := I) (M := M) g
       (gradInnerSmoothBundle (I := I) (M := M) g φ v) with hA1_def
   set A2 := smoothToLp (I := I) (M := M) g

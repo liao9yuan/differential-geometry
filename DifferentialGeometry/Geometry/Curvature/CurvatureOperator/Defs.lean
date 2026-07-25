@@ -222,7 +222,6 @@ variable (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
 variable (htor : cov.torsion = 0)
 
 include htor in
-
 lemma covApply_sub_eq_mlieBracket
     {X Y : Π b : M, TangentSpace I b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
@@ -704,7 +703,8 @@ lemma smoothExtensionTangent_eq (x : M) (v : TangentSpace I x) :
   exact (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v).choose_spec
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
 @[simp]
 lemma smoothExtensionFiber_eq (x : M) (u : V x) :
     smoothExtensionFiber (I := I) (F := F) (V := V) x u x = u := by

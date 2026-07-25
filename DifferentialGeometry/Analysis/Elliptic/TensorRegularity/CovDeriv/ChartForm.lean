@@ -42,7 +42,8 @@ noncomputable def covChartMetricGram
       (tensorChartBasisElement (E := E) r s P.1 P.2)
       (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma covChartMetricGram_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -54,7 +55,8 @@ lemma covChartMetricGram_def
         (tensorChartBasisElement (E := E) r s P.1 P.2)
         (tensorChartBasisElement (E := E) r s Q.1 Q.2) := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem covChartMetricGram_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -68,7 +70,8 @@ theorem covChartMetricGram_symm
     (tensorChartBasisElement (E := E) r s P.1 P.2)
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -130,7 +133,8 @@ theorem covChartMetricGram_contDiffOn
       exact hy
   exact hcomp_eucl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (X Y : TensorRSModel r s ℝ E) :
@@ -225,7 +229,8 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorInnerPointwise_toModel_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -254,7 +259,8 @@ private lemma tensorInnerPointwise_toModel_eq_chart
     (TensorRSSpace.toModel Y)]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tensorInnerPointwise_toModel_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -282,7 +288,8 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartTensorRSCovariantDerivative_locality
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -331,7 +338,8 @@ lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
       (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) b
       (chartBasisVecFiber (I := I) α m b)
   have hXfield' : Xfield.toFun b = chartBasisVecFiber (I := I) α m b := hXfield
-  have hagree := chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I) (M := M)
+  have hagree := chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet (I := I)
+    (M := M)
     g r s α S.toSection Xfield hb
   have hloc := chartTensorRSCovariantDerivative_locality (I := I) r s g α
     S.toSection Xfield.toFun (chartBasisVecFiber (I := I) α m) b hXfield'
@@ -369,7 +377,8 @@ noncomputable def covPrincipalIntegrand
                     (tensorChartComponentRaw (I := I) (M := M)
                       g r s T α Q.1 Q.2)) y
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma covPrincipalIntegrand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

@@ -37,7 +37,6 @@ theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
   have hfa : Tendsto f (𝓝[>] a) (𝓝 (f a)) :=
     (hcont.continuousWithinAt (left_mem_Icc.2 hab.le)).tendsto.mono_left
       (nhdsWithin_le_of_mem hIccmem)
-
   have key : ∀ ε : ℝ, 0 < ε → ∃ c, a < c ∧
       ∀ t ∈ Ioo a c, ‖f t - f a - (t - a) • L‖ ≤ ε * (t - a) := by
     intro ε hε
@@ -86,7 +85,6 @@ theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
       have := inter_mem_nhdsWithin (Ioi a) (Iio_mem_nhds hta)
       rwa [Set.Ioi_inter_Iio] at this
     filter_upwards [hIoomem] with s hs using hmvt s hs
-
   rw [hasDerivWithinAt_iff_tendsto_slope, Set.Ici_diff_left, Metric.tendsto_nhdsWithin_nhds]
   intro ε hε
   obtain ⟨c, hac, hest⟩ := key (ε / 2) (by linarith)

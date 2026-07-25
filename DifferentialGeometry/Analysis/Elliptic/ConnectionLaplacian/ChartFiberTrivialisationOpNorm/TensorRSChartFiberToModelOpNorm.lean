@@ -181,7 +181,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional

@@ -76,13 +76,15 @@ theorem endoCovariantDerivative_g0_self_adjoint
   have hendoY := endoCovariantDerivative_apply (I := I) (M := M) g₀ Λ Y x v
   have hendoZ := endoCovariantDerivative_apply (I := I) (M := M) g₀ Λ Z x v
   have hcovLamY : cov (fun y => lamY y) x v =
-      (endoCovariantDerivative (I := I) (M := M) g₀) Λ x v (Y x) + (Λ x) (cov (fun y => Y y) x v) := by
+      (endoCovariantDerivative (I := I) (M := M) g₀) Λ x v (Y x) + (Λ x)
+        (cov (fun y => Y y) x v) := by
     have heq : ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v) (Y x) =
         cov (fun y => lamY y) x v - (Λ x) (cov (fun y => Y y) x v) := hendoY
     rw [eq_sub_iff_add_eq] at heq
     exact heq.symm
   have hcovLamZ : cov (fun y => lamZ y) x v =
-      (endoCovariantDerivative (I := I) (M := M) g₀) Λ x v (Z x) + (Λ x) (cov (fun y => Z y) x v) := by
+      (endoCovariantDerivative (I := I) (M := M) g₀) Λ x v (Z x) + (Λ x)
+        (cov (fun y => Z y) x v) := by
     have heq : ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v) (Z x) =
         cov (fun y => lamZ y) x v - (Λ x) (cov (fun y => Z y) x v) := hendoZ
     rw [eq_sub_iff_add_eq] at heq
@@ -117,10 +119,12 @@ theorem endoCovariantDerivative_g0_self_adjoint
             + g₀.inner x a ((Λ x) (cov (fun y => Z y) x v))) : ℝ) := hmfderiv_eq
   clear hmfderiv_eq hcancel1 hcancel2 hleft hright hcovLamY hcovLamZ hendoY hendoZ
     hlamYx hlamZx hcoeY hcoeZ hfun_eq
-  generalize (g₀.inner x ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v a) b : ℝ) = A at hreal ⊢
+  generalize (g₀.inner x ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v a) b : ℝ) = A
+    at hreal ⊢
   generalize (g₀.inner x (cov (fun y => Y y) x v) ((Λ x) b) : ℝ) = B at hreal
   generalize (g₀.inner x a ((Λ x) (cov (fun y => Z y) x v)) : ℝ) = C at hreal
-  generalize (g₀.inner x a ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v b) : ℝ) = D at hreal ⊢
+  generalize (g₀.inner x a ((endoCovariantDerivative (I := I) (M := M) g₀) Λ x v b) : ℝ) = D
+    at hreal ⊢
   linarith [hreal]
 
 end Connection

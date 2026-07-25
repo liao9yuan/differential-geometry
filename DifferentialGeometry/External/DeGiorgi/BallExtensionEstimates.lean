@@ -125,12 +125,14 @@ private theorem memLp_euclidean_of_components
   have hsum :
       ∑ i : Fin d, eLpNorm (fun x => G x i) (ENNReal.ofReal p) μ < ∞ := by
     have hsum' :
-        Finset.sum Finset.univ (fun i : Fin d => eLpNorm (fun x => G x i) (ENNReal.ofReal p) μ) < ∞ := by
+        Finset.sum Finset.univ (fun i : Fin d => eLpNorm (fun x => G x i) (ENNReal.ofReal p) μ) <
+          ∞ := by
       exact (ENNReal.sum_lt_top).2 (fun i _ => (hG_comp i).eLpNorm_lt_top)
     simpa using hsum'
   exact hsum
 
 set_option maxHeartbeats 3200000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem exists_smooth_global_approx_of_unitBallExtension
     {p : ℝ} (hp : 1 < p) {u : E → ℝ}
     (hw : MemW1pWitness (ENNReal.ofReal p) u (Metric.ball (0 : E) 1)) :
@@ -450,7 +452,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
     -- Combine: bound = grad_pair + C * (fun_pair + grad_pair), all → 0
     have hC_ne_top : C_unitBallExtensionGrad d p ≠ ⊤ := by
       unfold C_unitBallExtensionGrad
-      exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top (ENNReal.rpow_ne_top_of_nonneg (by linarith) (by simp))
+      exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top
+        (ENNReal.rpow_ne_top_of_nonneg (by linarith) (by simp))
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_
       (fun _ => bot_le) hfull_le
     have hsum := hfun_pair.add hgrad_pair
@@ -720,7 +723,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
           intro n i
           have hmeas :
               Measurable (fun x => (fderiv ℝ (ψ n) x) (EuclideanSpace.single i 1)) := by
-            exact (((hψ_smooth n).continuous_fderiv (by simp)).clm_apply continuous_const).measurable
+            exact (((hψ_smooth n).continuous_fderiv (by simp)).clm_apply
+              continuous_const).measurable
           simpa [gradVec, PiLp.toLp_apply] using hmeas.aestronglyMeasurable
         have hgradVec_aesm : ∀ n, AEStronglyMeasurable (gradVec n) μB := by
           intro n
@@ -789,7 +793,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
                         eLpNorm (fun x => gradVec n x - hw.weakGrad x) (ENNReal.ofReal p) μB := by
                     calc
                       eLpNorm (fun x => hw.weakGrad x - gradVec n x) (ENNReal.ofReal p) μB
-                          = eLpNorm (fun x => -(gradVec n x - hw.weakGrad x)) (ENNReal.ofReal p) μB := by
+                          = eLpNorm (fun x => -(gradVec n x - hw.weakGrad x)) (ENNReal.ofReal p)
+                            μB := by
                               congr 1
                               ext x
                               simp
@@ -850,7 +855,8 @@ theorem exists_smooth_global_approx_of_unitBallExtension
         exact hAn_eq n
       have hC_ne_top : C_unitBallExtensionGrad d p ≠ ⊤ := by
         unfold C_unitBallExtensionGrad
-        exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top (ENNReal.rpow_ne_top_of_nonneg (by linarith) (by simp))
+        exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top
+          (ENNReal.rpow_ne_top_of_nonneg (by linarith) (by simp))
       have hsum := hFn_tendsto.add hAn_tendsto
       have hCmul := ENNReal.Tendsto.const_mul hsum (Or.inr hC_ne_top)
       exact hAn_tendsto.add hCmul

@@ -50,7 +50,6 @@ theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α →
   have hkey := DifferentialGeometry.Analysis.hasFDerivWithinAt_tsum
     hF hFbd hu hs hx₀ hf0 hx
   have hderiv := hkey.hasDerivWithinAt
-
   have hsumF : Summable fun i => ContinuousLinearMap.toSpanSingleton ℝ (f' i x) := by
     refine Summable.of_norm_bounded hu (fun i => ?_)
     rw [ContinuousLinearMap.norm_toSpanSingleton, Real.norm_eq_abs]
@@ -94,7 +93,8 @@ theorem allHs_of_weighted_summable_pub
   have hrhs : (b.repr u) i = tensorL2Coeff (I := I) (M := M) hc u i := rfl
   rw [hlhs, hrhs, tensorHsToL2_tensorL2Coeff]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_toSection_congr
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -138,7 +138,8 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
         C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by
   obtain ⟨C, hC_pos, hC⟩ :=
-    ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order (I := I) (M := M) g m h_lossy
+    ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order (I := I) (M := M) g m
+      h_lossy
   refine ⟨C, hC_pos, fun i => ?_⟩
   have hb := hC (eigenSmooth (I := I) (M := M) g i) x v w
   rw [norm_smoothCcToTensorHs_eigenSmooth (I := I) (M := M) g (m : ℝ) i] at hb
@@ -172,7 +173,6 @@ theorem ccTensorBilinSymm_finiteEigenCombo_eq_sum_eigenBilinScalar
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-
 theorem spectralPartialSum_ccTensorBilinSymm_tendsto_of_representative
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,

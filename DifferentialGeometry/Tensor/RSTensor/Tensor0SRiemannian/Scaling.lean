@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -90,7 +89,7 @@ theorem normSq0S_scale
       DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
         (I := I) g x k l (extChartAt I x x)
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   have hinvScale :
       MetricInverseInBasis_gen (I := I) (scaleMetric (I := I) c hc g) x basis
@@ -126,7 +125,7 @@ theorem normSq0S_two_scale
       DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
         (I := I) g x k l (extChartAt I x x)
   have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
-    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+    Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) g x
   have hinvScale :
       MetricInverseInBasis_gen (I := I) (scaleMetric (I := I) c hc g) x basis

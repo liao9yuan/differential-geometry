@@ -12,7 +12,6 @@ import Mathlib.Analysis.Normed.Operator.Compact
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle

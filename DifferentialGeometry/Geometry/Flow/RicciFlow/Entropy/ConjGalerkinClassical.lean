@@ -50,7 +50,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-
 private theorem rev_gram_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -97,7 +96,6 @@ private theorem rev_gram_smooth
 
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-
 private theorem rev_trace_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -161,7 +159,6 @@ private theorem rev_trace_eq
   ring
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem heatpot_mass_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -242,7 +239,6 @@ theorem heatpot_mass_deriv
   exact hvariation.congr_deriv hmass
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem heatpot_mass_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -588,7 +584,7 @@ private theorem galLim_slice_cc
       (g := S.family.metric (T : Real)) (r := 0) (s := 0) hm
     refine ⟨J (galLimExt hτ hlim m t), ?_⟩
     let b :=
-      _root_.DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
+      Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
         (I := I) (M := M) hc
     apply b.repr.injective
     ext i

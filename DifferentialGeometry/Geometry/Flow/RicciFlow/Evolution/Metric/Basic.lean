@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility
 import DifferentialGeometry.Geometry.Coordinates.Christoffel
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -197,9 +195,11 @@ def InvMetricLocal [DecidableEq Idx]
 
 
 
-@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen" (since := "2026-05-22")]
+@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen"
+    (since := "2026-05-22")]
 def SymmetricInverseMetricComponentsInFrameOn
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) : Prop :=
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
+      Prop :=
   forall t x i j, gInv t x i j = gInv t x j i
 
 
@@ -207,7 +207,8 @@ def SymmetricInverseMetricComponentsInFrameOn
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal" (since := "2026-05-22")]
+@[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal"
+    (since := "2026-05-22")]
 theorem gInv_symm [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -229,7 +230,8 @@ def InverseMetricDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => gInv s x i j)
       (gInvDt (t : Real) x i j)
@@ -290,7 +292,8 @@ structure MetricFrameSpacetimeRegularityInFrameOnLocal
         (fun p : Real × M => metricCompInFrame (I := I) S frame p.1 p.2 i j)
         (D.carrier ×ˢ u)
   frameMetricExtDerivTimeDerivative :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x
+      ∈ u ->
       forall d a b : Idx,
         HasDerivWithinAt
           (fun s : Real =>

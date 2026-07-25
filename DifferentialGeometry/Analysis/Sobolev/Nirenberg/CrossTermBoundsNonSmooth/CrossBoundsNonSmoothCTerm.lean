@@ -152,7 +152,7 @@ theorem c_term_bound_nonsmooth_quantitative
     DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
       k h η u with hv_test_def
   have h_v_test_supp : tsupport v_test ⊆ Ω' :=
-    (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
+    (NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
       (d := d) η u k h).trans h_thick_in_Ω'
   have h_v_test_in_Ω : tsupport v_test ⊆ Ω := fun x hx =>
     hΩ'_closure (subset_closure (h_v_test_supp hx))

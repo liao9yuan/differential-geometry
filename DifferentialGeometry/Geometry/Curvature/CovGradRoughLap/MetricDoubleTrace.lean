@@ -52,7 +52,8 @@ noncomputable def metricDoubleTraceFib (g : SmoothRiemannianMetric I M) (r t : �
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma metricDoubleTraceFib_apply (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
     metricDoubleTraceFib (I := I) (M := M) g r t x V =
@@ -89,7 +90,8 @@ private noncomputable def metricDoubleTraceFibFixedFrame (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
@@ -105,7 +107,8 @@ private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma metricDoubleTraceFib_eq_fixedFrame_moving (g : SmoothRiemannianMetric I M) (r t : ℕ)
     (x : M) :
     metricDoubleTraceFib (I := I) (M := M) g r t x =
@@ -113,7 +116,8 @@ private lemma metricDoubleTraceFib_eq_fixedFrame_moving (g : SmoothRiemannianMet
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
@@ -133,7 +137,6 @@ private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
         (∑ i : Fin (Module.finrank ℝ E),
           curryLastTwoTensorSlots (I := I) (M := M) r t x (Z x) (B i x) (B i x))) := by
     refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
-
     have hA :=
       (covGradBundleEquiv_symm_contMDiff_totalSpace (I := I) (M := M) r (t + 1)).comp Z.contMDiff
     have h1 :=
@@ -153,7 +156,8 @@ private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiemannianMetric I M)
     (r t : ℕ)
     {B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b} (y : M)
@@ -195,7 +199,8 @@ private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiem
                 ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
                   curryLastTwoTensorSlots (I := I) (M := M) r t y V u w) D) m
               map_add' := fun w w' => by
-                rw [map_add (curryLastTwoTensorSlots (I := I) (M := M) r t y V u), ContinuousLinearMap.add_apply,
+                rw [map_add (curryLastTwoTensorSlots (I := I) (M := M) r t y V u),
+                  ContinuousLinearMap.add_apply,
                   Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
               map_smul' := fun c w => by
                 rw [map_smul (curryLastTwoTensorSlots (I := I) (M := M) r t y V u),
@@ -207,7 +212,8 @@ private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiem
               ((curryLastTwoTensorSlots (I := I) (M := M) r t y V (u + u') w) D) m =
             Tensor0SSpace.toModel ((curryLastTwoTensorSlots (I := I) (M := M) r t y V u w) D) m +
               Tensor0SSpace.toModel ((curryLastTwoTensorSlots (I := I) (M := M) r t y V u' w) D) m
-          rw [map_add (curryLastTwoTensorSlots (I := I) (M := M) r t y V), ContinuousLinearMap.add_apply,
+          rw [map_add (curryLastTwoTensorSlots (I := I) (M := M) r t y V),
+            ContinuousLinearMap.add_apply,
             ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
             ContinuousMultilinearMap.add_apply]
         map_smul' := fun c u => by
@@ -215,7 +221,8 @@ private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiem
           change Tensor0SSpace.toModel
               ((curryLastTwoTensorSlots (I := I) (M := M) r t y V (c • u) w) D) m =
             c • Tensor0SSpace.toModel ((curryLastTwoTensorSlots (I := I) (M := M) r t y V u w) D) m
-          rw [map_smul (curryLastTwoTensorSlots (I := I) (M := M) r t y V), ContinuousLinearMap.smul_apply,
+          rw [map_smul (curryLastTwoTensorSlots (I := I) (M := M) r t y V),
+            ContinuousLinearMap.smul_apply,
             ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
             ContinuousMultilinearMap.smul_apply] }
     with hHb_def
@@ -243,7 +250,8 @@ private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiem
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma metricDoubleTraceFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (g : SmoothRiemannianMetric I M) (r t : ℕ) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
@@ -322,7 +330,8 @@ set_option backward.isDefEq.respectTransparency false in
 theorem roughLap_eq_metricDoubleTrace (g : SmoothRiemannianMetric I M) (r t : ℕ)
     (W : SmoothCcTensor g r t) :
     rawTensorConnLapSmooth (I := I) g r t W =
-      homTensorRSFieldApply (I := I) (M := M) g r (t + 2) t (metricDoubleTraceField (I := I) (M := M) (E := E) g r t)
+      homTensorRSFieldApply (I := I) (M := M) g r (t + 2) t
+        (metricDoubleTraceField (I := I) (M := M) (E := E) g r t)
         (iteratedCovGrad g r t 2 W) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext

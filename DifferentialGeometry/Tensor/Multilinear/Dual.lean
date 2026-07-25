@@ -105,12 +105,10 @@ private theorem dualMultilinearInverseAux_basisElem (r : ℕ)
     continuousMultilinearMap_finiteDimensional r
   let b := Module.finBasis 𝕜 F
   let bMLF := continuousMultilinearMap_basis (𝕜 := 𝕜) (F := F) b r
-
   have hb_eq : (bMLF σ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) =
       continuousMultilinearMap_basisElem b r σ :=
     congr_fun (Module.Basis.coe_mk
       (continuousMultilinearMap_basisElem_linearIndependent b r) _) σ
-
   change LinearMap.toContinuousLinearMap
       (bMLF.constr 𝕜 (fun σ => Ψ (fun i =>
         LinearMap.toContinuousLinearMap (b.coord (σ i)))))
@@ -474,7 +472,6 @@ local notation "MLF_dual" => fun r =>
   ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-
 theorem tensorOfDualLinearForms_compContinuousLinearMap_naturality
     {G : Type*}
     [NormedAddCommGroup G] [NormedSpace 𝕜 G] (r : ℕ) (L : G →L[𝕜] F)
@@ -658,7 +655,8 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
       (ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm m
         (ContinuousMultilinearMap.tensorOfDualLinearForms 𝕜 F r γ) = m γ := by
     intro m γ
-    have := (ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).apply_symm_apply m
+    have := (ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).apply_symm_apply
+      m
     have h2 := congr_fun (congr_arg DFunLike.coe this) γ
     exact h2
   rw [h_rt]

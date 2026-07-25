@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackTowerBounds
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -112,7 +111,7 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
     (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
     {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2)
+    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1 / 2)
     (C : ℝ) (hC0 : 0 ≤ C)
     (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
@@ -150,14 +149,11 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
         (PartialDiffeomorph.trans (I := I) Φ Φ' : M → P) g h') := by
   classical
   set Ψ := PartialDiffeomorph.trans (I := I) Φ Φ' with hΨdef
-
   have hsrcU : (U₁ : Set M) ⊆ Ψ.source := by
     intro y hy
     exact ⟨hU₁ hy, hK₂ (himg (Set.mem_image_of_mem _ hy))⟩
   have hKsrc : K ⊆ Ψ.source := fun y hy => hsrcU (hKU hy)
-
   have hΨcoe : ∀ y : M, (Ψ : M → P) y = (Φ' : N → P) ((Φ : M → N) y) := fun _ => rfl
-
   have hchain : ∀ y ∈ (U₁ : Set M), ∀ v : TangentSpace I y,
       mfderiv I I (Ψ : M → P) y v
         = mfderiv I I (Φ' : N → P) ((Φ : M → N) y) (mfderiv I I (Φ : M → N) y v) := by
@@ -173,21 +169,17 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     have h := mfderiv_comp y hΦ'd hΦd
     have happ := DFunLike.congr_fun h v
     simpa [ContinuousLinearMap.comp_apply] using happ
-
   haveI : LocallyCompactSpace M := Manifold.locallyCompact_of_finiteDimensional I
   obtain ⟨KG, hKGcpt, hKKG, hKGU⟩ := exists_compact_between hK U₁.2 hKU
   set V : Opens M := ⟨interior KG, isOpen_interior⟩ with hVdef
   have hKV : K ⊆ (V : Set M) := hKKG
   have hVKG : (V : Set M) ⊆ KG := interior_subset
-
   obtain ⟨P₁, G₁, hPG₁, hG₁inner, hP₁apply⟩ :=
     exists_pullbackField (I := I) Φ hKGcpt
       (fun y hy => hU₁ (hKGU hy)) h g
-
   obtain ⟨P'', G'', hPG'', hG''inner, hP''apply⟩ :=
     exists_pullbackField (I := I) Ψ hKGcpt
       (fun y hy => hsrcU (hKGU hy)) h' g
-
   have hc0T : ∀ x ∈ KG, metricTensorErrorNorm (I := I) P₁ g x ≤ ε := by
     intro x hxKG
     have hval : P₁ x = D₁.forward.pullback x := by
@@ -196,23 +188,19 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     unfold metricTensorErrorNorm
     rw [hval]
     exact D₁.forward.c0_small x (hKGU hxKG)
-
   have hG₁c0 : ∀ x ∈ KG, metricTensorErrorNorm (I := I)
       (Tensor0SBundle.metricTensorField (I := I) G₁) g x ≤ ε := by
     intro x hx
     rw [← hPG₁]
     exact hc0T x hx
   have hEqG₁ := inner_le_of_c0 (I := I) G₁ g hG₁c0
-
   set δ₀ := D₁.forward.pullback - Tensor0SBundle.metricTensorField (I := I) g with hδ₀def
   set δ₁ := P'' - P₁ with hδ₁def
   set δN₂ := D₂.forward.pullback - Tensor0SBundle.metricTensorField (I := I) h with hδN₂def
-
   haveI : SecondCountableTopology H := I.secondCountableTopology
   haveI := ChartedSpace.secondCountable_of_sigmaCompact H M
   haveI : LocallyCompactSpace (V : Set M) := V.2.locallyCompactSpace
   haveI : SigmaCompactSpace (V : Set M) := inferInstance
-
   have hδ₁pt : ∀ x ∈ (V : Set M), ∀ v : Fin 2 → TangentSpace I x,
       δ₁ x v = δN₂ ((Φ : M → N) x)
         (fun q => mfderiv I I (Φ : M → N) x (v q)) := by
@@ -233,26 +221,22 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
       Tensor0SBundle.metricTensorField_apply]
     rw [hchain x hxU (v 0), hchain x hxU (v 1)]
     rfl
-
   have hG₁V : ∀ x ∈ (V : Set M), ∀ v w : TangentSpace I x,
       G₁.inner x v w = h.inner ((Φ : M → N) x)
         (mfderiv I I (Φ : M → N) x v) (mfderiv I I (Φ : M → N) x w) :=
     fun x hx v w => hG₁inner x (hVKG hx) v w
-
   haveI : LocallyCompactSpace N := Manifold.locallyCompact_of_finiteDimensional I
   haveI := ChartedSpace.secondCountable_of_sigmaCompact H N
   haveI : LocallyCompactSpace ((Φ : M → N) '' (V : Set M) : Set N) :=
     (image_opens_isOpen (I := I) Φ
       (fun y hy => hU₁ (hKGU (hVKG hy)))).locallyCompactSpace
   haveI : SigmaCompactSpace ((Φ : M → N) '' (V : Set M) : Set N) := inferInstance
-
   have hδ₁tow : ∀ (hNV : Nonempty V) (a : ℕ) (x : M) (hx : x ∈ (V : Set M)),
       tensor02CovDerivNormWith (I := I) a δ₁ G₁ G₁ x
         = tensor02CovDerivNormWith (I := I) a δN₂ h h ((Φ : M → N) x) := by
     intro hNV a x hx
     exact covNormWith_pd_zone (I := I) Φ (V := V)
       (fun y hy => hU₁ (hKGU (hVKG hy))) h δN₂ δ₁ G₁ hδ₁pt hG₁V a x hx
-
   have hgpt : ∀ x ∈ (V : Set M), ∀ v : Fin 2 → TangentSpace I x,
       Tensor0SBundle.metricTensorField (I := I) g x v
         = D₁.reverse.pullback ((Φ : M → N) x)
@@ -262,7 +246,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     have hxs : x ∈ Φ.source := hU₁ hxU
     have hΦxImg : (Φ : M → N) x ∈ (Φ : M → N) '' (U₁ : Set M) :=
       Set.mem_image_of_mem _ hxU
-
     have hfg : (Φ.symm : N → M) ∘ (Φ : M → N) =ᶠ[nhds x] id := by
       filter_upwards [Φ.open_source.mem_nhds hxs] with y hy
       exact Φ.left_inv' hy
@@ -287,7 +270,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     rw [Tensor0SBundle.metricTensorField_apply]
     have hl : (Φ.symm : N → M) ((Φ : M → N) x) = x := Φ.left_inv' hxs
     rw [happ (v 0), happ (v 1), hl]
-
   have hgKtow : ∀ (hNV : Nonempty V) (a : ℕ) (x : M) (hx : x ∈ (V : Set M)),
       tensor02CovDerivNormWith (I := I) a
           (Tensor0SBundle.metricTensorField (I := I) g) G₁ G₁ x
@@ -296,7 +278,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     exact covNormWith_pd_zone (I := I) Φ (V := V)
       (fun y hy => hU₁ (hKGU (hVKG hy))) h D₁.reverse.pullback
       (Tensor0SBundle.metricTensorField (I := I) g) G₁ hgpt hG₁V a x hx
-
   have hε0 : 0 < ε := D₁.forward.eps_pos
   set ε₀ : ℝ := ε / (1 - ε) with hε₀def
   obtain ⟨h1ε, hε₀0', hε₀1', hεε₀', hε₀2ε'⟩ :=
@@ -304,7 +285,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
   have hε₀0 : 0 ≤ ε₀ := by rw [hε₀def]; exact hε₀0'
   have hε₀1 : ε₀ ≤ 1 := by rw [hε₀def]; exact hε₀1'
   have hεε₀ : ε ≤ ε₀ := by rw [hε₀def]; exact hεε₀'
-
   have hequivF5 : ∀ x ∈ (V : Set M), ∀ v : TangentSpace I x,
       (1 + ε₀)⁻¹ * G₁.inner x v v ≤ g.inner x v v ∧
         g.inner x v v ≤ (1 + ε₀) * G₁.inner x v v := by
@@ -312,7 +292,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     have hE := hEqG₁ x (hVKG hxV) v
     have hgnn : 0 ≤ g.inner x v v := metricInner_nonneg (I := I) g x v
     exact metric_equiv_of_one_sub_bounds hε0 hε2 hε₀def hgnn hE
-
   have hδ₀F5 : ∀ x ∈ (V : Set M), ∀ r : ℕ, 0 < r → r ≤ p →
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (2 + r)
         (iterCov (I := I) g 2 δ₀ r x)) ≤ ε₀ := by
@@ -323,12 +302,12 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
     rw [hδ₀def, hsub, iterCov_metric_zero, sub_zero]
     obtain ⟨basis, hON⟩ :=
       DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal (I := I) g basis hON
+    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      (I := I) g basis hON
     rw [← t02Norm_eq_iterCov (I := I) D₁.forward.pullback g (r' + 1) basis hinv]
     calc tensor02CovDerivNormWith (I := I) (r' + 1) D₁.forward.pullback g g x
         ≤ ε := D₁.forward.cov_deriv_small (r' + 1) (by omega) hrp x (hKGU (hVKG hxV))
       _ ≤ ε₀ := hεε₀
-
   have hgKF5 : ∀ (hNV : Nonempty V), ∀ x ∈ (V : Set M), ∀ j : ℕ, 1 ≤ j → j ≤ p →
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) G₁ x (2 + j)
         (iterCov (I := I) G₁ 2 (Tensor0SBundle.metricTensorField (I := I) g) j x)) ≤ ε₀ := by
@@ -344,7 +323,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
         ≤ ε := D₁.reverse.cov_deriv_small j hj1 hjp ((Φ : M → N) x)
           (Set.mem_image_of_mem _ (hKGU (hVKG hxV)))
       _ ≤ ε₀ := hεε₀
-
   have hδ₁F5 : ∀ (hNV : Nonempty V), ∀ x ∈ (V : Set M), ∀ k : ℕ, k ≤ p →
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) G₁ x (2 + k)
         (iterCov (I := I) G₁ 2 δ₁ k x)) ≤ ε' := by
@@ -378,14 +356,12 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
             unfold tensor02CovDerivNormWith
             rw [hfield]
         _ ≤ ε' := D₂.forward.cov_deriv_small k hk1 hkp ((Φ : M → N) x) hΦxK₂
-
   have hCp := hC (M' := M) (u := (V : Set M)) V.2 g G₁ δ₀ δ₁ ε₀ ε'
     hε₀0 hε₀1 (le_of_lt D₂.forward.eps_pos)
     hequivF5
     (fun x hx j hj1 hjp => hgKF5 ⟨⟨x, hx⟩⟩ x hx j hj1 hjp)
     hδ₀F5
     (fun x hx k hkp => hδ₁F5 ⟨⟨x, hx⟩⟩ x hx k hkp)
-
   have hgermz : ∀ (a : ℕ) (x : M), x ∈ (V : Set M) →
       ∀ slots : Fin (a + 2) → TangentSpace I x,
       covDerivOfField (I := I) g (P₁ - D₁.forward.pullback) a x slots = 0 := by
@@ -405,13 +381,11 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
       (P₁ - D₁.forward.pullback) hA0 a ⟨x, hxV⟩ slots
     rw [← hres, covDOF_zero]
     simp
-
   have hcovP'' : ∀ a : ℕ, 1 ≤ a → a ≤ p → ∀ x ∈ K,
       tensor02CovDerivNormWith (I := I) a P'' g g x ≤ ε₀ + ε' * C := by
     intro a ha1 hap x hxK
     have hxV : x ∈ (V : Set M) := hKV hxK
     obtain ⟨a', rfl⟩ : ∃ a', a = a' + 1 := ⟨a - 1, by omega⟩
-
     have hgermzI : ∀ slots : Fin (2 + (a' + 1)) → TangentSpace I x,
         iterCov (I := I) g 2 (P₁ - D₁.forward.pullback) (a' + 1) x slots = 0 := by
       intro slots
@@ -429,7 +403,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
         rw [Equiv.symm_apply_apply]
       rw [hslots] at hx2
       exact hx2.symm.trans (hgermz (a' + 1) x hxV _)
-
     have hdecI : iterCov (I := I) g 2 P'' (a' + 1) x
         = iterCov (I := I) g 2 (δ₀ + δ₁) (a' + 1) x := by
       have hsplit : (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E)
@@ -448,7 +421,6 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
       (I := I) g basis hON
     rw [t02Norm_eq_iterCov (I := I) P'' g (a' + 1) basis hinv, hdecI]
     exact hCp x hxV (a' + 1) (by omega) hap
-
   have hc0P'' : ∀ x ∈ K,
       metricTensorErrorNorm (I := I) P'' g x ≤ ε + ε' * (1 + ε₀) := by
     intro x hxK
@@ -498,11 +470,8 @@ theorem partialData_comp_forward [I.Boundaryless] [NeZero (Module.finrank ℝ E)
           + Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2 (δ₁ x)) := htri
       _ ≤ ε + (1 + ε₀) * ε' := add_le_add ht0 ht1
       _ = ε + ε' * (1 + ε₀) := by ring
-
   have hε₀2ε : ε₀ ≤ 2 * ε := by rw [hε₀def]; exact hε₀2ε'
   have hε'0 : 0 ≤ ε' := le_of_lt D₂.forward.eps_pos
-
-
   intro ε'' hlb hub
   have hCm0 : (0 : ℝ) ≤ max C 2 := le_trans hC0 (le_max_left _ _)
   have hC_le : C ≤ max C 2 := le_max_left _ _

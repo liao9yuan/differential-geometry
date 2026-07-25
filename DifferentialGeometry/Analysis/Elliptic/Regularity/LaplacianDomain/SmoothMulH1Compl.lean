@@ -37,13 +37,15 @@ noncomputable def smoothScalarMulFun
   toFun := fun x : M => (φ : M → ℝ) x * v.toFun x
   smooth := φ.contMDiff.mul v.smooth
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma smoothScalarMulFun_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (smoothScalarMulFun (I := I) (M := M) g φ v).toFun =
       fun x : M => (φ : M → ℝ) x * v.toFun x := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 lemma smoothScalarMulFun_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v w : SmoothScalar g) :
     smoothScalarMulFun (I := I) (M := M) g φ (v + w) =
@@ -59,7 +61,8 @@ lemma smoothScalarMulFun_add
     smoothScalarMulFun_toFun, smoothScalarMulFun_toFun]
   ring
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 lemma smoothScalarMulFun_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -80,14 +83,16 @@ noncomputable def smoothScalarMulLin
   map_add' v w := smoothScalarMulFun_add (I := I) (M := M) g φ v w
   map_smul' c v := smoothScalarMulFun_smul (I := I) (M := M) g φ c v
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 omit [FiniteDimensional ℝ E] in
 @[simp] lemma smoothScalarMulLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothScalarMulLin (I := I) (M := M) g φ v =
       smoothScalarMulFun (I := I) (M := M) g φ v := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 lemma gradFun_smoothScalarMulFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -100,7 +105,8 @@ lemma gradFun_smoothScalarMulFun
   exact LaplacianDomainVariationalLimitGeneral.gradFun_smul_smooth_eq_pointwise
     (I := I) (M := M) g φ.contMDiff v.smooth x
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma sq_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -118,19 +124,22 @@ private lemma sq_phi_mul_v_le
   rw [h_eq]
   exact mul_le_mul_of_nonneg_right h_phi_sq_le h_v_sq_nn
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v :=
   SmoothRiemannianMetric_inner_self_nonneg g x v
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma inner_grad_self_nonneg
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (x : M) :
     0 ≤ g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g φ x) :=
   metric_inner_self_nonneg (I := I) (M := M) g x _
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma inner_grad_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :

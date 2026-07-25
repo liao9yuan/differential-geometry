@@ -49,9 +49,6 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M]
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
-
-
-
 theorem chartGramBound_contOn
     (gRef : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : Fin (Module.finrank Real E)) :
@@ -141,11 +138,9 @@ theorem chartGramLim_contOn
   classical
   intro p₀ hp₀
   obtain ⟨hp₀t, hp₀x⟩ := hp₀
-
   obtain ⟨K, hKc, hKint, hKsub⟩ := exists_compact_subset
     (trivializationAt E (TangentSpace I) x₀).open_baseSet hp₀x
   have hKne : K.Nonempty := ⟨p₀.2, interior_subset hKint⟩
-
   set c : M → ℝ := fun x =>
     Real.sqrt (gRef.inner x (chartBasisVecFiber (I := I) x₀ i x)
         (chartBasisVecFiber (I := I) x₀ i x))
@@ -158,7 +153,6 @@ theorem chartGramLim_contOn
   set Cb : ℝ := c z with hCb
   have hCb0 : 0 ≤ Cb := hcnonneg z
   have hzle : ∀ x ∈ K, c x ≤ Cb := fun x hx => isMaxOn_iff.mp hz x hx
-
   have htu : TendstoUniformlyOn
       (fun (k : ℕ) (p : ℝ × M) => chartGramMatrix (I := I) (gSeq k p.1) x₀ p.2 i j)
       (fun p : ℝ × M => chartGramMatrix (I := I) (gInf p.1) x₀ p.2 i j)
@@ -183,7 +177,6 @@ theorem chartGramLim_contOn
           have hpos : 0 < ε / (Cb + 1) := by positivity
           exact mul_lt_mul_of_pos_left (by linarith) hpos
       _ = ε := div_mul_cancel₀ ε (by positivity)
-
   have hcOn : ContinuousOn
       (fun p : ℝ × M => chartGramMatrix (I := I) (gInf p.1) x₀ p.2 i j)
       (Set.Icc β ψ ×ˢ K) :=

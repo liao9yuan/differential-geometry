@@ -31,7 +31,8 @@ section BalLadder
 variable (g₀ : SmoothRiemannianMetric I M)
 
 
-lemma exists_deTurckRemainder_connLapIterate_sobolevHs_bound (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+lemma exists_deTurckRemainder_connLapIterate_sobolevHs_bound (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa) :
     ∃ KZ : ℕ → ℕ → ℝ, (∀ q m, 0 ≤ KZ q m) ∧

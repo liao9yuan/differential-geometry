@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Covariant
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -145,7 +143,8 @@ theorem coordInvEvol
   classical
   intro t x hx i j
   let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0
-  let gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E) :=
+  let gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+    (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E) :=
     coordInv (I := I) S x0
   let G : Real -> ((DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real]
       (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real)) :=
@@ -174,11 +173,13 @@ theorem coordInvEvol
         (by
           intro a b
           simpa [gInv, coordInv, frame, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).1)
         (by
           intro a b
           simpa [gInv, coordInv, frame, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).2)
   have hInv :
       HasDerivWithinAt
         (fun s : Real => ContinuousLinearMap.inverse (G s))
@@ -194,45 +195,53 @@ theorem coordInvEvol
       HasDerivWithinAt
         (fun s : Real =>
           ContinuousLinearMap.inverse (G s)
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real)))
         (dInv
-          (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+          (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real)
+            j (1 : Real)))
         D.carrier
         (t : Real) := by
     simpa using
       hInv.clm_apply
         (hasDerivWithinAt_const
           (x := (t : Real)) (s := D.carrier)
-          (c := Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real)))
+          (c := Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real)))
   have hProj :
       HasDerivWithinAt
         (fun s : Real =>
           (ContinuousLinearMap.proj i :
             (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
             (ContinuousLinearMap.inverse (G s)
-              (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+              (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+                Real) j (1 : Real))))
         ((ContinuousLinearMap.proj i :
             (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
           (dInv
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real))))
         D.carrier
         (t : Real) := by
     simpa using
       (hasDerivWithinAt_const
         (x := (t : Real)) (s := D.carrier)
         (c := (ContinuousLinearMap.proj i :
-          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real))).clm_apply hApp
+          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real]
+            Real))).clm_apply hApp
   have hsymm :
       forall a b : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E,
         gInv (t : Real) x a b = gInv (t : Real) x b a := by
     intro a b
     simpa [gInv, coordInv] using
-      DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric (t : Real)) x0 hx a b
+      DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric (t : Real))
+        x0 hx a b
   have hDerivEq :
       (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
           (dInv
-            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))) =
+            (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+              Real) j (1 : Real))) =
         inverseMetricEvolutionRHSInFrame
           (I := I) S gInv frame (t : Real) x i j := by
     have hEq := coordInvCLM_eq (I := I) S x0 hx (t : Real)
@@ -253,7 +262,8 @@ theorem coordInvEvol
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) =>
         (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
-          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real))))
       hEq |>.symm
   · have hEq := coordInvCLM_eq (I := I) S x0 hx (t : Real)
     simpa [G, gInv, frame, sum_mul_pi_single] using congrArg
@@ -261,7 +271,8 @@ theorem coordInvEvol
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) =>
         (ContinuousLinearMap.proj i :
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real] Real)
-          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E => Real) j (1 : Real))))
+          (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
+            Real) j (1 : Real))))
       hEq |>.symm
 
 

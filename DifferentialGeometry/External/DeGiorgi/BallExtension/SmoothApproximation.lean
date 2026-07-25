@@ -65,6 +65,7 @@ private lemma eLpNorm_indicator_le_of_norm_le {F : E → ℝ} {H : E → ℝ}
     · simp
 
 set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem tendsto_eLpNorm_smoothUnitBallExtensionApprox_sub_unitBallExtension
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -126,7 +127,8 @@ private theorem tendsto_eLpNorm_smoothUnitBallExtensionApprox_sub_unitBallExtens
         (d := d) (ψ := ψ) (n := n) hxnot]
   have hH_nonneg : ∀ x, 0 ≤ H x := by
     intro x; unfold H K
-    by_cases hxK : x ∈ Metric.closedBall (0 : E) (9 / 4 : ℝ) <;> simp [Set.indicator, hxK, hC_nonneg]
+    by_cases hxK : x ∈ Metric.closedBall (0 : E) (9 / 4 : ℝ) <;> simp
+      [Set.indicator, hxK, hC_nonneg]
   have hF_dom_norm : ∀ n x, ‖F n x‖ ≤ ‖H x‖ := fun n x => by
     have := hF_dom n x
     simp only [Real.norm_eq_abs] at this ⊢
@@ -161,9 +163,10 @@ private theorem tendsto_eLpNorm_smoothUnitBallExtensionApprox_sub_unitBallExtens
   rw [hEq0] at hLpF0
   simpa [F] using hLpF0
 
+set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1600000 in -- elaboration budget for gradApply error bound on inner bad annulus
+-- elaboration budget for gradApply error bound on inner bad annulus
 private theorem exists_gradApply_error_bound_badAnnulusOne
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -209,7 +212,8 @@ private theorem exists_gradApply_error_bound_badAnnulusOne
     simpa [div_eq_mul_inv, two_mul, mul_assoc, mul_left_comm, mul_comm] using
       sphereOneBlend_fderiv_bound (d := d) hε x
   by_cases hlt1 : ‖x‖ < 1
-  · have hxball : x ∈ Metric.ball (0 : E) 1 := by simpa [Metric.mem_ball, dist_zero_right] using hlt1
+  · have hxball : x ∈ Metric.ball (0 : E) 1 := by simpa [Metric.mem_ball, dist_zero_right] using
+                                                    hlt1
     have hEq :
         smoothUnitBallExtensionApprox (d := d) ε ψ =ᶠ[𝓝 x]
           fun y => ψ y + sphereOneBlend (d := d) ε y * Eerr y := by
@@ -305,7 +309,8 @@ private theorem exists_gradApply_error_bound_badAnnulusOne
     have hShell_hasFDerivAt :
         HasFDerivAt (unitBallShellFormula (d := d) ψ)
           (fderiv ℝ (unitBallShellFormula (d := d) ψ) x) x := by
-      exact ((contDiffAt_unitBallShellFormula (d := d) hψ hx0).differentiableAt (by simp)).hasFDerivAt
+      exact ((contDiffAt_unitBallShellFormula (d := d) hψ hx0).differentiableAt
+        (by simp)).hasFDerivAt
     have hGerr_diff : DifferentiableAt ℝ Gerr x := hγ_diff.mul hEerr_diff
     have hEqDer :
         (fderiv ℝ (smoothUnitBallExtensionApprox (d := d) ε ψ) x)
@@ -351,9 +356,10 @@ private theorem exists_gradApply_error_bound_badAnnulusOne
             linarith
       _ ≤ Cder + Cerr * (↑Mst / 2) := product_bound_cancel_eps hε
 
+set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1600000 in -- elaboration budget for gradApply error bound on outer bad annulus
+-- elaboration budget for gradApply error bound on outer bad annulus
 private theorem exists_gradApply_error_bound_badAnnulusTwo
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -539,10 +545,11 @@ private theorem exists_gradApply_error_bound_badAnnulusTwo
             linarith
       _ ≤ Cder + Cerr * (↑Mst / 2) := product_bound_cancel_eps hε
 
+set_option maxHeartbeats 1600000 in
+-- elaboration budget for fderiv equality off the bad set
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1600000 in -- elaboration budget for fderiv equality off the bad set
-private lemma fderiv_smoothUnitBallExtensionApprox_eq_exactUnitBallExtensionGradApply_of_not_mem_badSet
+private lemma
+    fderiv_smoothUnitBallExtensionApprox_eq_exactUnitBallExtensionGradApply_of_not_mem_badSet
     {ψ : E → ℝ} {n : ℕ} {x : E} {i : Fin d}
     (hx1 : x ∉ Metric.sphere (0 : E) 1)
     (hx2 : x ∉ Metric.sphere (0 : E) 2)
@@ -637,7 +644,8 @@ private lemma fderiv_smoothUnitBallExtensionApprox_eq_exactUnitBallExtensionGrad
             = (fderiv ℝ (unitBallExtension (d := d) ψ) x) (EuclideanSpace.single i 1) := by
                 simpa using congrArg (fun A => A (EuclideanSpace.single i 1)) hDer
         _ = exactUnitBallExtensionGradApply (d := d) ψ i x := by
-              simpa [exactUnitBallExtensionGradApply, exactUnitBallShellGradApply, hxOuter, hlt1] using
+              simpa [exactUnitBallExtensionGradApply, exactUnitBallShellGradApply, hxOuter, hlt1]
+                using
                 congrArg (fun T : E →L[ℝ] ℝ => T (EuclideanSpace.single i 1))
                   (fderiv_unitBallExtension_eq_shellFormula_of_mem_outerShell (d := d) hxOuter)
     · have hgt2 : 2 < ‖x‖ := by
@@ -672,9 +680,9 @@ private lemma fderiv_smoothUnitBallExtensionApprox_eq_exactUnitBallExtensionGrad
         using congrArg (fun A => A (EuclideanSpace.single i 1)) hDer
 
 -- Standalone: pointwise gradient convergence at a point away from spheres.
+set_option maxHeartbeats 1600000 in
+-- elaboration budget for pointwise fderiv convergence
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 1600000 in -- elaboration budget for pointwise fderiv convergence
 private lemma tendsto_fderiv_sub_exactGrad_pointwise
     {ψ : E → ℝ} {x : E} {i : Fin d}
     (hx1 : x ∉ Metric.sphere (0 : E) 1) (hx2 : x ∉ Metric.sphere (0 : E) 2)
@@ -696,10 +704,12 @@ private lemma tendsto_fderiv_sub_exactGrad_pointwise
       (fderiv ℝ (smoothUnitBallExtensionApprox (d := d) (unitBallApproxEps n) ψ) x)
         (EuclideanSpace.single i 1)) atTop
       (nhds ((fderiv ℝ (unitBallExtension (d := d) ψ) x) (EuclideanSpace.single i 1))) :=
-    (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single i 1)).continuous.continuousAt.tendsto.comp hpt
+    (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single i 1)).continuous.continuousAt.tendsto.comp
+      hpt
   rwa [tendsto_sub_nhds_zero_iff]
 
 set_option maxHeartbeats 3200000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem tendsto_eLpNorm_fderiv_smoothUnitBallExtensionApprox_sub_exactGradApply
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -844,9 +854,9 @@ private theorem tendsto_eLpNorm_fderiv_smoothUnitBallExtensionApprox_sub_exactGr
   rw [hEq0] at hLpF0
   simpa [F] using hLpF0
 
+set_option maxHeartbeats 800000 in
+-- elaboration budget for L^p membership of smooth approximant
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 800000 in -- elaboration budget for L^p membership of smooth approximant
 private theorem memLp_smoothUnitBallExtensionApprox_sub_unitBallExtension
     {p : ℝ} (_hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (n : ℕ) :
@@ -915,12 +925,14 @@ private theorem memLp_smoothUnitBallExtensionApprox_sub_unitBallExtension
   have hH_nonneg : ∀ x, 0 ≤ H x := by
     intro x
     unfold H K
-    by_cases hxK : x ∈ Metric.closedBall (0 : E) (9 / 4 : ℝ) <;> simp [Set.indicator, hxK, hC_nonneg]
+    by_cases hxK : x ∈ Metric.closedBall (0 : E) (9 / 4 : ℝ) <;> simp
+      [Set.indicator, hxK, hC_nonneg]
   exact MemLp.of_le hH_memLp hF_meas <|
     (Eventually.of_forall hF_dom).mono fun x hx => by
       simpa [abs_of_nonneg (hH_nonneg x)] using hx
 
 set_option maxHeartbeats 800000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem memLp_fderiv_smoothUnitBallExtensionApprox_sub_exactGradApply
     {p : ℝ} (_hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (n : ℕ) (i : Fin d) :
@@ -1132,7 +1144,8 @@ private lemma differentiableAt_unitBallExtension_of_smooth
 private lemma ae_eq_exactUnitBallExtensionGrad_sub
     {u v : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hv : ContDiff ℝ (⊤ : ℕ∞) v) :
     exactUnitBallExtensionGrad (d := d) (fun x => u x - v x) =ᵐ[volume]
-      (fun x => exactUnitBallExtensionGrad (d := d) u x - exactUnitBallExtensionGrad (d := d) v x) := by
+      (fun x => exactUnitBallExtensionGrad (d := d) u x - exactUnitBallExtensionGrad (d := d) v
+        x) := by
   have hae1 : ∀ᵐ x ∂(volume : Measure E), x ∉ Metric.sphere (0 : E) 1 := by
     rw [ae_iff]
     simpa [Metric.sphere, dist_zero_right] using
@@ -1167,6 +1180,7 @@ private lemma ae_eq_exactUnitBallExtensionGrad_sub
   exact congrArg (· (EuclideanSpace.single i 1)) (fderiv_sub hdu hdv)
 
 set_option maxHeartbeats 1600000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem exactUnitBallExtensionGrad_bound
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -1363,9 +1377,9 @@ theorem smooth_input_unitBallExtension_smoothing
   filter_upwards with x; simp [hwExt]
 
 
+set_option maxHeartbeats 800000 in
+-- elaboration budget for component-vs-norm lintegral bound
 omit [NeZero d] in
-set_option linter.style.setOption false in
-set_option maxHeartbeats 800000 in -- elaboration budget for component-vs-norm lintegral bound
 /-- Lintegral component bound: ∫ |F · i|^p ≤ ∫ ‖F‖^p. Uses lintegral_mono. -/
 theorem lintegral_rpow_abs_component_le_lintegral_rpow_norm
     {p : ℝ} (hp : 0 < p) {F : E → E} (i : Fin d) {μ : Measure E} :

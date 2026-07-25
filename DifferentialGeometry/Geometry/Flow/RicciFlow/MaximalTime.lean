@@ -12,7 +12,6 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -56,11 +55,13 @@ def SolutionAgreesOn
 def ExtendsPastEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ∃ eps : Real, 0 < eps ∧
     ∃ hwide : alpha < omega + eps,
       ∃ Shat : SolutionOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + eps) hwide),
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + eps)
+          hwide),
         IsSolutionOn (I := I) Shat ∧
           SolutionAgreesOn (I := I) S Shat (Set.Ico alpha omega)
 
@@ -68,7 +69,8 @@ def ExtendsPastEndpoint
 def IsMaximalAtEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ¬ ExtendsPastEndpoint (I := I) hαω S
 
 
@@ -76,7 +78,8 @@ def IsMaximalAtEndpoint
 def Rm04RealizesSolutionConnectionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D,
     DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I)
       (S.family.metric (t : Real)) (S.family.connection (t : Real))
@@ -84,7 +87,8 @@ def Rm04RealizesSolutionConnectionOn
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [BoundarylessManifold I M]
+    [I.Boundaryless] in
 theorem rm04Realizes_metric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -106,7 +110,8 @@ def curvatureNormSq
   fun t x =>
     Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4 ((Rm04 t) x)
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] in
 @[simp] theorem curvatureNormSq_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -122,7 +127,8 @@ def Rm04NormSqUnboundedAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   forall K : Real, ∃ t : Real, ∃ x : M,
     alpha <= t ∧ t < omega ∧ K < curvatureNormSq (I := I) S Rm04 t x
 
@@ -132,14 +138,16 @@ def Rm04NormSqBoundedAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) : Prop :=
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)) :
+      Prop :=
   ∃ K : Real, forall t : Real, forall x : M,
     alpha <= t -> t < omega ->
       curvatureNormSq (I := I) S Rm04 t x <= K
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] in
 theorem rmBounded_of_not_unbounded
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -166,16 +174,13 @@ theorem extends_of_rmBounded
     (_hbound : Rm04NormSqBoundedAt (I := I) S Rm04) :
     ExtendsPastEndpoint (I := I) hαω S := by
   let g_fam := S.base.metric
-
   have hleft := ricciFlowPDE_Ici_of_soln (I := I) _hS
-
   obtain ⟨K', hK'bound⟩ := _hbound
   have hbound_raw : ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
       Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K' := by
     intro t x ht1 ht2
     have h := hK'bound t x ht1 ht2
     simpa [curvatureNormSq, SolutionOn.family] using h
-
   have hRmRaw : ∀ t ∈ Set.Ico alpha omega,
       Rm04RealizesConnection (I := I) (S.base.metric t)
         (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t) := by
@@ -184,20 +189,16 @@ theorem extends_of_rmBounded
     simpa [SolutionOn.family, SolutionFamily.connection, metricCov] using h
   have hric := ric_quad_le_of_soln (I := I) hRmRaw hbound_raw
   have hbound_can := rm04_bound_can (I := I) Rm04 hRmRaw ⟨K', hbound_raw⟩
-
   obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) hdim _hS
     (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric hbound_can
-
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
     ricci_flow_interior_restart (I := I) g_fam hαω hell hcov
   have ht1 : alpha ≤ t_star := ht_star.1
   have ht2 : t_star < omega := ht_star.2
-
   have hsmooth_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
     chartGram_smooth_of_soln (I := I) _hS x₀ i j
   have hcont_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
     chartGram_cont_of_soln (I := I) _hS x₀ i j
-
   have hshift : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
       (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
     (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
@@ -263,14 +264,13 @@ theorem extends_of_rmBounded
     fun s hs =>
       (ricci_flow_forward_unique (I := I) g_fam (fun t => rr (t - t_star)) ht2
         h1smooth h1cont h2smooth h2cont h1pde h2pde h0 s hs).symm
-
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
     extend_construction_of_restart (I := I) g_fam hαω hleft hsmooth_left hcont_left
       ht1 ht2 hreach rr hrr_smooth hrr_cont hrr_pde hagree_overlap
-
   have hwide : alpha < omega + ε := by linarith
   let Shat : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε) hwide) :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε)
+        hwide) :=
     { base := { metric := g_ext } }
   refine ⟨ε, hε, hwide, Shat, ?_, ?_⟩
   · exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
@@ -316,7 +316,8 @@ theorem rmUnbounded_of_maximal
 def FormsSingularityAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   ∃ Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M),
     Rm04RealizesSolutionConnectionOn (I := I) S Rm04 ∧
       Rm04NormSqUnboundedAt (I := I) S Rm04
@@ -355,7 +356,8 @@ theorem formsSing_of_maximal_metric
 def SingularIffMaximalAtEndpoint
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) : Prop :=
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
+        Prop :=
   FormsSingularityAt (I := I) S ↔
     IsMaximalAtEndpoint (I := I) hαω S
 

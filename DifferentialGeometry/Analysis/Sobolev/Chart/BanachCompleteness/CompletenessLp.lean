@@ -56,7 +56,6 @@ lemma chartPushedRaw_pou_mul_ae_eq_chartPushed_on_target
     (I := I) (M := M) ρ α u hy).symm
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 lemma support_pou_mul_fun_subset
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
@@ -69,7 +68,6 @@ lemma support_pou_mul_fun_subset
   rw [h]; ring
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 lemma tsupport_pou_mul_fun_subset
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
@@ -86,13 +84,11 @@ lemma tsupport_pou_mul_fun_subset_chartAt_source
   (tsupport_pou_mul_fun_subset (I := I) (M := M) ρ α u).trans (hρ α)
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 lemma pou_continuous (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     Continuous ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := (ρ α).contMDiff.continuous
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 lemma pou_measurable (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     Measurable ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=

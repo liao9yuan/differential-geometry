@@ -12,7 +12,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivFrame
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -32,6 +31,8 @@ noncomputable section
 universe u uE uH
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
@@ -146,16 +147,6 @@ theorem affineGronwall_of_abs_deriv_le
   linarith [hbpos]
 
 open scoped RealInnerProductSpace in
-
-
-
-
-
-
-
-
-
-
 theorem hasDerivAt_normSq_abs_deriv_le
     {F : Type*} [NormedAddCommGroup F] [InnerProductSpace Real F]
     {c : Real -> F} {c' : F} {t : Real}
@@ -259,7 +250,8 @@ theorem norm_componentVec3
     (A : Idx -> Idx -> Idx -> Real) :
     ‖componentVec3 A‖ = Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 A) := by
   rw [EuclideanSpace.norm_eq]
-  simp [componentVec3, DifferentialGeometry.Integral.Connection.componentL2Sq3, Real.norm_eq_abs, sq_abs]
+  simp [componentVec3, DifferentialGeometry.Integral.Connection.componentL2Sq3, Real.norm_eq_abs,
+    sq_abs]
 
 
 
@@ -953,7 +945,6 @@ theorem gammaL2_le_of_christoffel
     exact DifferentialGeometry.PDE.RicciFlow.christoffelRHS_id
       (M := M) gInv nablaRic (hinv_id s hs) i j k
 
-set_option linter.unusedDecidableInType false in
 
 
 omit [SigmaCompactSpace M] in
@@ -982,14 +973,16 @@ theorem metricCov1_coord
   have ha :
       (cov (frame a) x) (frame d x) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p
+            •
             frame p x :=
     DifferentialGeometry.Tensor.Coordinates.covariantDerivative_eq_sum_christoffel
       (I := I) cov frame hframe1 hx d a
   have hb :
       (cov (frame b) x) (frame d x) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p
+            •
             frame p x :=
     DifferentialGeometry.Tensor.Coordinates.covariantDerivative_eq_sum_christoffel
       (I := I) cov frame hframe1 hx d b
@@ -1019,7 +1012,8 @@ theorem metricCovDeriv_two_eval_smooth_slots
         ∑ a : Fin 3,
           metricCovDeriv (I := I) h gRef 1 x
             (Function.update (fun b : Fin 3 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                gRef)
                   (fun p : M => V a p) x) (X x))) := by
   classical
   haveI : IsManifold I 1 M :=
@@ -1040,7 +1034,7 @@ theorem metricCovDeriv_two_eval_smooth_slots
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -1090,7 +1084,8 @@ theorem metricCovDeriv_three_eval_smooth_slots
         ∑ a : Fin 4,
           metricCovDeriv (I := I) h gRef 2 x
             (Function.update (fun b : Fin 4 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                gRef)
                   (fun p : M => V a p) x) (X x))) := by
   classical
   haveI : IsManifold I 1 M :=
@@ -1111,7 +1106,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -1139,7 +1134,6 @@ theorem metricCovDeriv_three_eval_smooth_slots
               ((cov (fun p : M => V a p) x) (X x)))
   exact hmain
 
-set_option linter.unusedDecidableInType false in
 
 
 omit [SigmaCompactSpace M] in
@@ -1192,7 +1186,8 @@ theorem metricCov2_coord
   have hslots :
       (fun q : Fin 4 =>
           hframe.toBasisAt hx
-            ((Fin.cons d (DifferentialGeometry.Tensor.Coordinates.slots3 a b c) : Fin 4 -> Idx) q)) =
+            ((Fin.cons d (DifferentialGeometry.Tensor.Coordinates.slots3 a b c) : Fin 4 -> Idx) q))
+              =
         Fin.cons (X x) (fun q : Fin 3 => V q x) := by
     funext q
     cases q using Fin.cases with
@@ -1258,7 +1253,8 @@ theorem metricCov2_coord
   have hcov_slot (i : Idx) :
       (cov (frame i) x) (frame d x) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d i p •
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d i p
+            •
             frame p x :=
     DifferentialGeometry.Tensor.Coordinates.covariantDerivative_eq_sum_christoffel
       (I := I) cov frame hframe1 hx d i
@@ -1267,13 +1263,15 @@ theorem metricCov2_coord
         (Function.update (fun q : Fin 3 => V q x) 0
           ((cov (fun y : M => V 0 y) x) (X x))) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x p b c := by
     have hcov0 :
         (cov (fun y : M => V 0 y) x) (X x) =
           ∑ p : Idx,
-            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a
+              p •
               frame p x := by
       have hV0 : MDiffAt (T% (fun y : M => V 0 y)) x :=
         (V 0).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -1300,26 +1298,30 @@ theorem metricCov2_coord
         A
           (Function.update slots 0
             (∑ p : Idx,
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                a p •
                 frame p x)) := by
           rw [hcov0]
       _ =
         ∑ p : Idx,
           A
             (Function.update slots 0
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d a p •
                 frame p x)) := by
           have hsum :=
             A.toMultilinearMap.map_update_sum
               (Finset.univ : Finset Idx) (0 : Fin 3)
               (fun p : Idx =>
-                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                  d a p •
                   frame p x) slots
           simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
             Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x p b c := by
           refine Finset.sum_congr rfl ?_
@@ -1329,7 +1331,8 @@ theorem metricCov2_coord
           rw [Tensor0SBundle.component0S_apply] at hcomp
           have hsmul :=
             A.map_update_smul slots (0 : Fin 3)
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p)
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d a p)
               (frame p x)
           have hslots0 :
               Function.update slots 0 (frame p x) =
@@ -1340,7 +1343,8 @@ theorem metricCov2_coord
             rw [slots3_cons p b c]
             funext q
             fin_cases q <;>
-              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update, hsec_x b, hsec_x c]
+              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update,
+                hsec_x b, hsec_x c]
           have hframeComp :
               A (Function.update slots 0 (frame p x)) =
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
@@ -1350,15 +1354,18 @@ theorem metricCov2_coord
           calc
             A
                 (Function.update slots 0
-                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
+                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame
+                    hframe1 x d a p •
                     frame p x))
                 =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                a p *
                 A (Function.update slots 0 (frame p x)) := by
                 rw [hsmul]
                 simp [smul_eq_mul]
             _ =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                a p *
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
                   (I := I) g cov frame hframe1 x p b c := by
                 rw [hframeComp]
@@ -1367,13 +1374,15 @@ theorem metricCov2_coord
         (Function.update (fun q : Fin 3 => V q x) 1
           ((cov (fun y : M => V 1 y) x) (X x))) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x a p c := by
     have hcov1 :
         (cov (fun y : M => V 1 y) x) (X x) =
           ∑ p : Idx,
-            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b
+              p •
               frame p x := by
       have hV1 : MDiffAt (T% (fun y : M => V 1 y)) x :=
         (V 1).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -1400,26 +1409,30 @@ theorem metricCov2_coord
         A
           (Function.update slots 1
             (∑ p : Idx,
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                b p •
                 frame p x)) := by
           rw [hcov1]
       _ =
         ∑ p : Idx,
           A
             (Function.update slots 1
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d b p •
                 frame p x)) := by
           have hsum :=
             A.toMultilinearMap.map_update_sum
               (Finset.univ : Finset Idx) (1 : Fin 3)
               (fun p : Idx =>
-                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                  d b p •
                   frame p x) slots
           simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
             Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x a p c := by
           refine Finset.sum_congr rfl ?_
@@ -1429,7 +1442,8 @@ theorem metricCov2_coord
           rw [Tensor0SBundle.component0S_apply] at hcomp
           have hsmul :=
             A.map_update_smul slots (1 : Fin 3)
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p)
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d b p)
               (frame p x)
           have hslots1 :
               Function.update slots 1 (frame p x) =
@@ -1440,7 +1454,8 @@ theorem metricCov2_coord
             rw [slots3_cons a p c]
             funext q
             fin_cases q <;>
-              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update, hsec_x a, hsec_x c]
+              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update,
+                hsec_x a, hsec_x c]
           have hframeComp :
               A (Function.update slots 1 (frame p x)) =
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
@@ -1450,15 +1465,18 @@ theorem metricCov2_coord
           calc
             A
                 (Function.update slots 1
-                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
+                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame
+                    hframe1 x d b p •
                     frame p x))
                 =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                b p *
                 A (Function.update slots 1 (frame p x)) := by
                 rw [hsmul]
                 simp [smul_eq_mul]
             _ =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                b p *
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
                   (I := I) g cov frame hframe1 x a p c := by
                 rw [hframeComp]
@@ -1467,13 +1485,15 @@ theorem metricCov2_coord
         (Function.update (fun q : Fin 3 => V q x) 2
           ((cov (fun y : M => V 2 y) x) (X x))) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x a b p := by
     have hcov2 :
         (cov (fun y : M => V 2 y) x) (X x) =
           ∑ p : Idx,
-            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c
+              p •
               frame p x := by
       have hV2 : MDiffAt (T% (fun y : M => V 2 y)) x :=
         (V 2).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -1500,26 +1520,30 @@ theorem metricCov2_coord
         A
           (Function.update slots 2
             (∑ p : Idx,
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                c p •
                 frame p x)) := by
           rw [hcov2]
       _ =
         ∑ p : Idx,
           A
             (Function.update slots 2
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d c p •
                 frame p x)) := by
           have hsum :=
             A.toMultilinearMap.map_update_sum
               (Finset.univ : Finset Idx) (2 : Fin 3)
               (fun p : Idx =>
-                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
+                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                  d c p •
                   frame p x) slots
           simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
             Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p
+            *
             DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g cov frame hframe1 x a b p := by
           refine Finset.sum_congr rfl ?_
@@ -1529,7 +1553,8 @@ theorem metricCov2_coord
           rw [Tensor0SBundle.component0S_apply] at hcomp
           have hsmul :=
             A.map_update_smul slots (2 : Fin 3)
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p)
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                d c p)
               (frame p x)
           have hslots2 :
               Function.update slots 2 (frame p x) =
@@ -1540,7 +1565,8 @@ theorem metricCov2_coord
             rw [slots3_cons a b p]
             funext q
             fin_cases q <;>
-              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update, hsec_x a, hsec_x b]
+              simp [slots, V, DifferentialGeometry.Tensor.Coordinates.slots3, Function.update,
+                hsec_x a, hsec_x b]
           have hframeComp :
               A (Function.update slots 2 (frame p x)) =
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
@@ -1550,15 +1576,18 @@ theorem metricCov2_coord
           calc
             A
                 (Function.update slots 2
-                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
+                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame
+                    hframe1 x d c p •
                     frame p x))
                 =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                c p *
                 A (Function.update slots 2 (frame p x)) := by
                 rw [hsmul]
                 simp [smul_eq_mul]
             _ =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d
+                c p *
                 DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
                   (I := I) g cov frame hframe1 x a b p := by
                 rw [hframeComp]
@@ -1568,7 +1597,6 @@ theorem metricCov2_coord
   unfold DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
   ring
 
-set_option linter.unusedDecidableInType false in
 
 
 omit [SigmaCompactSpace M] in
@@ -1617,7 +1645,8 @@ theorem metricCov3_coord
         simp [DifferentialGeometry.Tensor.Coordinates.slots4]
     | succ q =>
         rw [Fin.cons_succ]
-        fin_cases q <;> simp [DifferentialGeometry.Tensor.Coordinates.slots3, DifferentialGeometry.Tensor.Coordinates.slots4]
+        fin_cases q <;> simp [DifferentialGeometry.Tensor.Coordinates.slots3,
+          DifferentialGeometry.Tensor.Coordinates.slots4]
   have slots4_eta (s : Fin 4 -> Idx) :
       (Fin.cons (s 0) (DifferentialGeometry.Tensor.Coordinates.slots3 (s 1) (s 2) (s 3)) :
         Fin 4 -> Idx) = s := by
@@ -1631,7 +1660,8 @@ theorem metricCov3_coord
   have hslots :
       (fun q : Fin 5 =>
           hframe.toBasisAt hx
-            ((Fin.cons m (DifferentialGeometry.Tensor.Coordinates.slots4 d a b c) : Fin 5 -> Idx) q)) =
+            ((Fin.cons m (DifferentialGeometry.Tensor.Coordinates.slots4 d a b c) : Fin 5 -> Idx)
+              q)) =
         Fin.cons (X x) (fun q : Fin 4 => V q x) := by
     funext q
     cases q using Fin.cases with
@@ -1657,7 +1687,8 @@ theorem metricCov3_coord
         (fun q : Fin 4 => V q y) =
           fun q : Fin 4 => frame (slot q) y := by
       funext q
-      fin_cases q <;> simp [V, slot, DifferentialGeometry.Tensor.Coordinates.slots4, hsd, hsa, hsb, hsc]
+      fin_cases q <;> simp [V, slot, DifferentialGeometry.Tensor.Coordinates.slots4, hsd, hsa, hsb,
+        hsc]
     have hcomp :=
       metricCov2_coord (I := I) g h frame hframe hu hy d a b c
     rw [Tensor0SBundle.component0S_apply] at hcomp
@@ -1693,7 +1724,8 @@ theorem metricCov3_coord
   have hcov_slot (i : Idx) :
       (cov (frame i) x) (frame m x) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m i p •
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m i p
+            •
             frame p x :=
     DifferentialGeometry.Tensor.Coordinates.covariantDerivative_eq_sum_christoffel
       (I := I) cov frame hframe1 hx m i
@@ -1704,7 +1736,8 @@ theorem metricCov3_coord
         (Function.update slotsT r
           ((cov (fun y : M => V r y) x) (X x))) =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+            (slot r) p *
             DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
               (I := I) g cov frame hframe1 x
               ((Function.update slot r p) 0)
@@ -1714,7 +1747,8 @@ theorem metricCov3_coord
     have hcovr :
         (cov (fun y : M => V r y) x) (X x) =
           ∑ p : Idx,
-            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+              (slot r) p •
               frame p x := by
       have hVr : MDiffAt (T% (fun y : M => V r y)) x :=
         (V r).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -1739,26 +1773,30 @@ theorem metricCov3_coord
         A
           (Function.update slotsT r
             (∑ p : Idx,
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+                (slot r) p •
                 frame p x)) := by
           rw [hcovr]
       _ =
         ∑ p : Idx,
           A
             (Function.update slotsT r
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                m (slot r) p •
                 frame p x)) := by
           have hsum :=
             A.toMultilinearMap.map_update_sum
               (Finset.univ : Finset Idx) r
               (fun p : Idx =>
-                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
+                DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                  m (slot r) p •
                   frame p x) slotsT
           simpa [A, slotsT, ContinuousMultilinearMap.map_update_smul,
             Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
-          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p *
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+            (slot r) p *
             DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
               (I := I) g cov frame hframe1 x
               ((Function.update slot r p) 0)
@@ -1774,7 +1812,8 @@ theorem metricCov3_coord
           rw [Tensor0SBundle.component0S_apply] at hcomp
           have hsmul :=
             A.map_update_smul slotsT r
-              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p)
+              (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x
+                m (slot r) p)
               (frame p x)
           have hslotsUpdate :
               Function.update slotsT r (frame p x) =
@@ -1785,7 +1824,8 @@ theorem metricCov3_coord
               simp [slot', Function.update]
             · simp [slot', slotsT, V, Function.update, hqr, hsec_x (slot q)]
           have hslotEta :
-              (Fin.cons (slot' 0) (DifferentialGeometry.Tensor.Coordinates.slots3 (slot' 1) (slot' 2) (slot' 3)) :
+              (Fin.cons (slot' 0) (DifferentialGeometry.Tensor.Coordinates.slots3 (slot' 1)
+                (slot' 2) (slot' 3)) :
                 Fin 4 -> Idx) = slot' :=
             slots4_eta slot'
           have hframeComp :
@@ -1798,15 +1838,18 @@ theorem metricCov3_coord
           calc
             A
                 (Function.update slotsT r
-                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
+                  (DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame
+                    hframe1 x m (slot r) p •
                     frame p x))
                 =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+                (slot r) p *
                 A (Function.update slotsT r (frame p x)) := by
                 rw [hsmul]
                 simp [smul_eq_mul]
             _ =
-              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p *
+              DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m
+                (slot r) p *
                 DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
                   (I := I) g cov frame hframe1 x
                   (slot' 0) (slot' 1) (slot' 2) (slot' 3) := by
@@ -1841,7 +1884,7 @@ noncomputable def lcMetricFamily
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_eq_metricCovAtBase
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
@@ -2393,7 +2436,8 @@ theorem covOne_le_diff
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x))) := by
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x))) := by
   let pair : Real -> SmoothRiemannianMetric I M :=
     fun s => if s = (0 : Real) then gRef else h
   have hEq' :
@@ -2439,7 +2483,8 @@ theorem diff_le_covOne
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
           metricCovDerivNorm (I := I) 1 h gRef x) := by
@@ -2537,7 +2582,7 @@ theorem normSqRS12_eq_l2
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem applyCons3
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (A : Tensor0SBundle.Tensor0SSpace
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
@@ -2783,7 +2828,7 @@ theorem covOneCompDiff
 
 omit [SigmaCompactSpace M] in
 theorem connDiffBasisSymm
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (h gRef : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (a b : Idx) :
@@ -2933,14 +2978,16 @@ theorem covOne_le_diff_basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x)
               (fun _ : Fin 1 => b)
               (fun q : Fin 2 => if q = 0 then a else c) +
             Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x)
               (fun _ : Fin 1 => c)
               (fun q : Fin 2 => if q = 0 then a else b)) :
     Real.sqrt
@@ -2952,7 +2999,8 @@ theorem covOne_le_diff_basis
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
               (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) := by
+              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                x)) := by
   classical
   let A0 :=
     metricCovDeriv (I := I) h gRef 1 x
@@ -3008,7 +3056,8 @@ theorem covOne_le_diff_basis_lc
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
               (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) := by
+              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                x)) := by
   exact covOne_le_diff_basis (I := I) h gRef basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
 
@@ -3033,7 +3082,8 @@ theorem diff_le_covOne_basis
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
               (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                x)
             (fun _ : Fin 1 => e)
             (fun q : Fin 2 => if q = 0 then a else b) =
           Tensor0SBundle.component0S (I := I) basis
@@ -3050,7 +3100,8 @@ theorem diff_le_covOne_basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              x)) <=
       (3 / 2 : Real) *
         Real.sqrt
           (Tensor0SBundle.normSq0S (I := I) h x 3
@@ -3177,7 +3228,8 @@ theorem diff_le_covOne_basis_lc
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              x)) <=
       (3 / 2 : Real) *
         Real.sqrt
           (Tensor0SBundle.normSq0S (I := I) h x 3
@@ -3208,14 +3260,16 @@ theorem covOne_le_diff_basis_ref
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x)
               (fun _ : Fin 1 => b)
               (fun q : Fin 2 => if q = 0 then a else c) +
             Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x)
               (fun _ : Fin 1 => c)
               (fun q : Fin 2 => if q = 0 then a else b)) :
     metricCovDerivNorm (I := I) 1 h gRef x <=
@@ -3227,7 +3281,8 @@ theorem covOne_le_diff_basis_ref
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x))) := by
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x))) := by
   let A0 :=
     metricCovDeriv (I := I) h gRef 1 x
   have hcompare :
@@ -3264,7 +3319,8 @@ theorem covOne_le_diff_basis_ref_lc
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x))) := by
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef) x))) := by
   exact covOne_le_diff_basis_ref (I := I) h gRef hxK C hEq basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
 
@@ -3288,7 +3344,8 @@ theorem diff_le_covOne_basis_ref
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
               (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                x)
             (fun _ : Fin 1 => e)
             (fun q : Fin 2 => if q = 0 then a else b) =
           Tensor0SBundle.component0S (I := I) basis
@@ -3306,7 +3363,8 @@ theorem diff_le_covOne_basis_ref
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
           metricCovDerivNorm (I := I) 1 h gRef x) := by
@@ -3344,7 +3402,8 @@ theorem diff_le_covOne_basis_ref_lc
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
           metricCovDerivNorm (I := I) 1 h gRef x) := by
@@ -3447,7 +3506,8 @@ theorem covOne_le_christoffel
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
               (I := I) (S.family.metric b))
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x) =
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+              =
         DifferentialGeometry.Integral.Connection.componentL2Sq3
           (fun i j k : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
@@ -3467,7 +3527,8 @@ theorem covOne_le_christoffel
             (I := I)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
               (I := I) (S.family.metric a))
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x) =
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+              =
         DifferentialGeometry.Integral.Connection.componentL2Sq3
           (fun i j k : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
@@ -3514,7 +3575,8 @@ theorem covOne_le_christoffel
               (I := I)
               (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
                 (I := I) (S.family.metric b))
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)) <=
+              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                x)) <=
         3 * R * |b - a| +
           (3 / 2 : Real) *
             (Real.sqrt (Ca ^ 3) *

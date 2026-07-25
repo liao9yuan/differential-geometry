@@ -34,7 +34,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -511,7 +510,6 @@ private lemma eigenvectorChartWeakPartial_ae_eq_iteratedPartial_one
 namespace eigenvectorIteratedTensorChartBilinearData
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def ofBase
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

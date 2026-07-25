@@ -46,7 +46,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
 omit [NeZero (Module.finrank ℝ E)] in
 lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -105,7 +104,8 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
   have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
     have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α ((extChartAt I α).map_source hxsrc)
   have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ := hVdiff.hasDerivAt
   have hWrep_hasDerivAt : HasDerivAt Wrep (deriv Wrep t₀) t₀ := hWdiff.hasDerivAt
@@ -140,9 +140,11 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
       = chartCovDerivAlong (I := I) g α γ Wrep t₀ := by
     have := covDerivAlong_chartCoord (I := I) g γ W t₀
     rw [hα_def, hWrep_def]; exact this
-  have hVt₀_coord : (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α (V t₀) = Vrep t₀ := by
+  have hVt₀_coord : (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α (V t₀) = Vrep
+    t₀ := by
     rw [hVrep_def, chartRepAt_apply, hα_def]
-  have hWt₀_coord : (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α (W t₀) = Wrep t₀ := by
+  have hWt₀_coord : (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α (W t₀) = Wrep
+    t₀ := by
     rw [hWrep_def, chartRepAt_apply, hα_def]
   have hrtV : (trivializationAt E (TangentSpace I) α).symmL ℝ α (Vrep t₀) = V t₀ := by
     rw [← hVt₀_coord]
@@ -192,7 +194,6 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
   simp only [← hDVchart, ← hDWchart]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_deriv_at
@@ -217,7 +218,6 @@ lemma inner_deriv_at
     hγ.continuousAt hchartDeriv hVdiff hWdiff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma metric_compat_hasDerivAt_inner
@@ -233,7 +233,6 @@ lemma metric_compat_hasDerivAt_inner
   exact inner_deriv_at (I := I) hn g γ V W t₀ hγ.contMDiffAt hVdiff hWdiff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma commute_ds_dt_intrinsic
@@ -276,7 +275,8 @@ lemma commute_ds_dt_intrinsic
     filter_upwards [hopenL.mem_nhds h0L] with s hs
     have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
     have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice_u s).mdifferentiableAt (by norm_num)) α hsrc
+      (I := I) (M := M) (γ := fun u : ℝ => f s u) ((hslice_u s).mdifferentiableAt (by norm_num)) α
+        hsrc
     change (trivializationAt E (TangentSpace I) ((fun s : ℝ => f s t) 0)).continuousLinearMapAt ℝ
         ((fun s : ℝ => f s t) s) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
       = fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ)
@@ -293,7 +293,8 @@ lemma commute_ds_dt_intrinsic
     filter_upwards [hopenR.mem_nhds h0R] with v hv
     have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
     have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α hsrc
+      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α
+        hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ))
       = fderiv ℝ (fun u : ℝ => extChartAt I α (f u v)) 0 (1 : ℝ)
@@ -321,7 +322,6 @@ lemma commute_ds_dt_intrinsic
 
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_commute_transverse_longitudinal_of_variation
@@ -403,7 +403,8 @@ theorem covDerivAlong_commute_transverse_longitudinal_of_variation
   rw [hchartL, hchartR]
   rw [hcommute']
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartPulled_contDiffAt_infty
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (α : M) (s₀ t₀ : ℝ)
     (hsrc : f s₀ t₀ ∈ (chartAt H α).source) :
@@ -417,8 +418,8 @@ lemma chartPulled_contDiffAt_infty
   exact hcomp
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma variationField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -469,7 +470,8 @@ lemma variationField_chartRep_differentiableAt
     filter_upwards [hopen.mem_nhds h0] with v hv
     have hsrc : (fun u : ℝ => f u v) 0 ∈ (chartAt H α).source := hv
     have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α hsrc
+      (I := I) (M := M) (γ := fun u : ℝ => f u v) ((hslice_v v).mdifferentiableAt (by norm_num)) α
+        hsrc
     change (trivializationAt E (TangentSpace I) ((fun v : ℝ => f 0 v) t₀)).continuousLinearMapAt ℝ
         ((fun v : ℝ => f 0 v) v) (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u v) 0 (1 : ℝ)) = sec v
     rw [hsec, show (fun v : ℝ => f 0 v) t₀ = α from hα.symm]
@@ -480,8 +482,8 @@ lemma variationField_chartRep_differentiableAt
   exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma velocityField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -532,8 +534,8 @@ lemma velocityField_chartRep_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma g_inner_along_curve_contMDiff
     {n : WithTop ℕ∞} [ENat.LEInfty n] (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)}
@@ -620,7 +622,8 @@ theorem first_variation_of_arcLength_fixed_endpoints
         (g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
           + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)) t := by
     intro t _ht
-    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g
+      γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   have hV0 : V 0 = 0 := by
     change mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f u 0) 0 (1 : ℝ) = 0
     have hconst : (fun u : ℝ => f u 0) = (fun _ : ℝ => f 0 0) := by funext u; exact hfix0 u
@@ -646,7 +649,8 @@ theorem first_variation_of_arcLength_fixed_endpoints
     refine hcomp.congr (fun t => ?_)
     rfl
   have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
-      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I M)) := by
+      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I
+        M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
     have hcomp := hbase.comp
       (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
@@ -659,7 +663,8 @@ theorem first_variation_of_arcLength_fixed_endpoints
   have hbd'_eq_deriv : ∀ t : ℝ, hbd' t = deriv hbd t := by
     intro t
     have hd : HasDerivAt hbd (hbd' t) t := by
-      have := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+      have := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
       exact this
     exact (hd.deriv).symm
   have hbd'_cont : Continuous hbd' := by
@@ -668,7 +673,8 @@ theorem first_variation_of_arcLength_fixed_endpoints
     hbd'_cont.continuousOn.intervalIntegrable
   have hFTC : (∫ t in (0 : ℝ)..L, hbd' t) = hbd L - hbd 0 := by
     refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => ?_) hbd'_int
-    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g
+      γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   have hbdL0 : hbd L = 0 := by
     change g.inner (γ L) (V L) (γ' L) = 0
     rw [hVL, map_zero, ContinuousLinearMap.zero_apply]
@@ -823,7 +829,8 @@ theorem first_variation_of_arcLength_free_endpoints
         (g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
           + g.inner (γ t) (V t) (covDerivAlong (I := I) g γ γ' t)) t := by
     intro t _ht
-    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g
+      γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   set hbd : ℝ → ℝ := fun s : ℝ => g.inner (γ s) (V s) (γ' s) with hbd_def
   set hbd' : ℝ → ℝ := fun t : ℝ =>
     g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
@@ -841,7 +848,8 @@ theorem first_variation_of_arcLength_free_endpoints
     refine hcomp.congr (fun t => ?_)
     rfl
   have hγ'total : ContMDiff (𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ) (fun t : ℝ =>
-      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I M)) := by
+      (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ t) (γ' t) : TangentBundle I
+        M)) := by
     have hbase := velocity_totalSpace_contMDiff (I := I) (M := M) f hf
     have hcomp := hbase.comp
       (contMDiff_const.prodMk contMDiff_id : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (7 : ℕ)
@@ -854,7 +862,8 @@ theorem first_variation_of_arcLength_free_endpoints
   have hbd'_eq_deriv : ∀ t : ℝ, hbd' t = deriv hbd t := by
     intro t
     have hd : HasDerivAt hbd (hbd' t) t := by
-      have := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+      have := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
       exact this
     exact (hd.deriv).symm
   have hbd'_cont : Continuous hbd' := by
@@ -863,7 +872,8 @@ theorem first_variation_of_arcLength_free_endpoints
     hbd'_cont.continuousOn.intervalIntegrable
   have hFTC : (∫ t in (0 : ℝ)..L, hbd' t) = hbd L - hbd 0 := by
     refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => ?_) hbd'_int
-    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
+    exact metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g
+      γ V γ' t hγ_smooth (hVdiff t) (hγ'diff t)
   set A : ℝ → ℝ := fun t : ℝ => g.inner (γ t) (covDerivAlong (I := I) g γ V t) (γ' t)
     with hA_def
   set D2num : ℝ → ℝ := fun t : ℝ =>

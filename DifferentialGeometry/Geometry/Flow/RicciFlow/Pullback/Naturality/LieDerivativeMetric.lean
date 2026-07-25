@@ -58,8 +58,10 @@ theorem lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise
   have hY_mdiff : MDifferentiableAt I I.tangent
       (fun y : M => (TotalSpace.mk' E y (Y y) : TangentBundle I M)) x :=
     (hY_smooth x).mdifferentiableAt hinfty
-  rw [LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ v hY_mdiff,
-      LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ w hY_mdiff]
+  rw [LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ v
+    hY_mdiff,
+      LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise (I := I) g Φ w
+        hY_mdiff]
 
 theorem assemble_lie_deriv_naturality
     (g : SmoothRiemannianMetric I M)
@@ -77,6 +79,7 @@ theorem assemble_lie_deriv_naturality
             ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
               (mfderiv I I Φ x v) (mfderiv I I Φ x w) :=
   fun x v w =>
-    lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise g Φ Y hY_smooth hPush_smooth x v w
+    lie_derivative_metric_pullback_natural_under_diffeomorphism_pointwise g Φ Y hY_smooth
+      hPush_smooth x v w
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback

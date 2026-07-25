@@ -33,7 +33,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 omit [FiniteDimensional ℝ E] in
 private lemma memLp_two_contDiff_hasCompactSupport_restrict
     {f : EuclN → ℝ} (hf_cd : ContDiff ℝ ∞ f) (hf_cs : HasCompactSupport f)

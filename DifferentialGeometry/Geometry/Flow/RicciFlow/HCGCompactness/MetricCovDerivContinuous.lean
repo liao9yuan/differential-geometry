@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -157,19 +156,15 @@ theorem metricCovDerivNorm_continuousAt
     (q : Nat) (h gRef : SmoothRiemannianMetric I M) (z₀ : M) :
     ContinuousAt (fun z : M => metricCovDerivNorm (I := I) q h gRef z) z₀ := by
   classical
-
-
   have hnbhd : smoothOrthoFrameNbhd (I := I) (M := M) z₀ ∈ nhds z₀ :=
     smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) z₀
   have hz₀ : z₀ ∈ smoothOrthoFrameNbhd (I := I) (M := M) z₀ :=
     mem_smoothOrthoFrameNbhd_self (I := I) (M := M) z₀
-
   set g : M -> Real := fun z =>
     Real.sqrt (∑ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
       (metricCovDeriv (I := I) h gRef q z
           (fun a : Fin (q + 2) =>
             smoothOrthoFrame (I := I) gRef z₀ (slots a) z)) ^ 2) with hg_def
-
   have hcomp_cont : ∀ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
       Continuous (fun z : M =>
         metricCovDeriv (I := I) h gRef q z
@@ -189,7 +184,6 @@ theorem metricCovDerivNorm_continuousAt
           (fun a : Fin (q + 2) => smoothOrthoFrame (I := I) gRef z₀ (slots a) z)) :=
       fun z => hsmooth z
     exact this.continuous
-
   have hsum_cont : Continuous (fun z : M =>
       ∑ slots : Fin (q + 2) -> Fin (Module.finrank Real E),
         (metricCovDeriv (I := I) h gRef q z
@@ -198,7 +192,6 @@ theorem metricCovDerivNorm_continuousAt
     continuous_finset_sum _ (fun slots _ => (hcomp_cont slots).pow 2)
   have hg_cont : Continuous g := by
     rw [hg_def]; exact Real.continuous_sqrt.comp hsum_cont
-
   have heq : (fun z : M => metricCovDerivNorm (I := I) q h gRef z) =ᶠ[nhds z₀] g := by
     filter_upwards [hnbhd] with z hz
     exact metricCovDerivNorm_eq_sum_sq_on_nbhd (I := I) q h gRef z₀ hz
@@ -249,7 +242,8 @@ theorem metricCovDerivNorm_le_of_isCompact
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem smoothRiemannianMetric_eq_of_inner
     {h₁ h₂ : SmoothRiemannianMetric I M}
     (hinner : (fun x => h₁.inner x) = fun x => h₂.inner x) :

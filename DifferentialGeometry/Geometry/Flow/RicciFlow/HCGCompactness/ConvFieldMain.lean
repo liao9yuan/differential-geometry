@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAsse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -361,11 +360,9 @@ noncomputable def convOut
   intro K hK p ε hε
   obtain ⟨k0, hk0⟩ := hAA.choose_spec.2.choose_spec K hK p ε hε
   refine ⟨k0, fun k hk t ht a hap x hx => ?_⟩
-
   choose Cf hCf using fun q : Nat =>
     hbdd_gSeqExt (I := I) Φ R bf hsrc htgt β ψ hcovTail
       hAA.choose hAA.choose_spec.1 t ht q K hK
-
   have hbddAbove : BddAbove {r : Real | exists b : Nat, b <= p ∧ exists z : P.M, z ∈ K ∧
       metricDerivNorm (I := I) b (gSeqExt (I := I) Φ R bf hsrc htgt (hAA.choose k) t)
         (hAA.choose_spec.2.choose t) R z = r} := by
@@ -436,16 +433,6 @@ private theorem ofRP_supOn_def
           (refRes (I := I) Φ R hsrc k) := rfl
 
 open Tensor0SBundle in
-
-
-
-
-
-
-
-
-
-
 include finiteE in
 omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_eq
@@ -491,11 +478,8 @@ theorem ofRP_supOn_eq
       (by decide : (1 : WithTop ℕ∞) <= ∞)
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
     change IsManifold I ∞ (SourceDomain (I := I) Φ k); infer_instance
-
   have hKsrc : K ⊆ Φ.source k := hKgrow.trans (bf.grow_subset k)
-
   obtain ⟨W, hWopen, hgrowW, hW1⟩ := bf.chi_one k
-
   let O : TopologicalSpace.Opens (SourceDomain (I := I) Φ k) :=
     ⟨Subtype.val ⁻¹' W, hWopen.preimage continuous_subtype_val⟩
   letI : ChartedSpace H ↥O :=
@@ -508,8 +492,6 @@ theorem ofRP_supOn_eq
       (by decide : (1 : WithTop ℕ∞) <= ∞)
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥O := by
     change IsManifold I ∞ ↥O; infer_instance
-
-
   have hmTF : metricTensorField (I := I)
         ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O)
       = metricTensorField (I := I)
@@ -529,7 +511,6 @@ theorem ofRP_supOn_eq
       ((y : SourceDomain (I := I) Φ k) : P.M) hysrc (v 0) (v 1)]
     rw [hW1 _ hyW]
     simp
-
   have hpt : forall z, z ∈ sourceCompactSet (I := I) Φ k K -> forall a : Nat, a <= p ->
       metricDerivNorm (I := I) a (srcMetric (I := I) Φ hsrc htgt k t)
         (resSrc (I := I) Φ hsrc k gIt) (refRes (I := I) Φ R hsrc k) z
@@ -557,8 +538,6 @@ theorem ofRP_supOn_eq
             (resSrc (I := I) Φ hsrc k (gSeqExt (I := I) Φ R bf hsrc htgt k t))
             (resSrc (I := I) Φ hsrc k gIt) (refRes (I := I) Φ R hsrc k) z :=
           metricDerivNorm_restrictOpen (I := I) _ _ _ O a (⟨z, hzW⟩ : ↥O)
-
-
   calc (SourceDomainMetricData.ofRestrictPullback (I := I) (Φ := Φ) (k := k)
         (hsrc k) (htgt k)
         (fun _ => refRes (I := I) Φ R hsrc k) gInf).derivNormSupOn (I := I) K p t
@@ -679,13 +658,11 @@ theorem gInf_zero_eq
   refine metric_ext_inner (I := I) (co.gInf 0) g0 (fun x => ?_)
   refine ContinuousLinearMap.ext (fun v => ?_)
   refine ContinuousLinearMap.ext (fun w => ?_)
-
   have hRnn : forall u : TangentSpace I x, 0 <= R.inner x u u := by
     intro u
     by_cases hu : u = 0
     · subst hu; simp
     · exact (R.pos x u hu).le
-
   have hT1 : Tendsto
       (fun k => (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) 0).inner x v w)
       atTop (nhds ((co.gInf 0).inner x v w)) := by
@@ -721,8 +698,6 @@ theorem gInf_zero_eq
             rw [mul_comm]
             exact div_mul_cancel₀ ε hden.ne'
     exact lt_of_le_of_lt (le_trans hbound h1) h2
-
-
   have hT2 : Tendsto
       (fun k => (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) 0).inner x v w)
       atTop (nhds (g0.inner x v w)) := by

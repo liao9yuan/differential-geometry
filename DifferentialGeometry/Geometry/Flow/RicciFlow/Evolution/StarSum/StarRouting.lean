@@ -1,10 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarSum2
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.unnecessarySeqFocus false
 
 
 
@@ -27,6 +23,8 @@ set_option linter.unnecessarySeqFocus false
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
@@ -94,8 +92,9 @@ theorem sigmaCurvPos_nat_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-theorem wRoute_val {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+theorem wRoute_val {Idx : Type*} [Finite Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x)) (k : ℕ) (i j : Idx)
     (m : Fin (4 + (k + 1)) → Idx) (idx : Fin (((4 + (k + 1)) + 2) + 2)) :
     metricTraceInput (I := I) (basis i) (basis i)
@@ -136,17 +135,20 @@ theorem curvactStarPos
     starBaseField (I := I) S t (k + 1) (k + 1) 0 0 (sigmaCurvPos k q hq) x (fun p => basis (m p))
       = ∑ j : Idx, ∑ i : Idx,
           nablaKRm04Field (I := I) S t (k + 1) x
-              (Function.update (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i) (fun l : Fin (4 + k) => basis (m l.succ))) q (basis j))
+              (Function.update (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i)
+                (fun l : Fin (4 + k) => basis (m l.succ))) q (basis j))
             * nablaKRm04Field (I := I) S t 0 x
               (vec4 (I := I) (basis i) (basis (m 0))
-                (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i) (fun l : Fin (4 + k) => basis (m l.succ)) q) (basis j)) := by
+                (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i)
+                  (fun l : Fin (4 + k) => basis (m l.succ)) q) (basis j)) := by
   rw [starBaseProd_eq (I := I) S t (k + 1) (k + 1) 0 basis horth (sigmaCurvPos k q hq) m]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => ?_
   have hqlt := q.isLt
   have hL : (fun p => metricTraceInput (I := I) (basis i) (basis i)
         (metricTraceInput (I := I) (basis j) (basis j) (fun p => basis (m p)))
         ((sigmaCurvPos k q hq) (Fin.castAdd (4 + 0) p)))
-      = Function.update (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i) (fun l : Fin (4 + k) => basis (m l.succ))) q (basis j) := by
+      = Function.update (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i)
+        (fun l : Fin (4 + k) => basis (m l.succ))) q (basis j) := by
     funext p
     have hplt := p.isLt
     have hcons : ∀ r : Fin (4 + (k + 1)), r ≠ 0 →
@@ -158,7 +160,7 @@ theorem curvactStarPos
     rw [wRoute_val basis k i j m, Function.update_apply]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaCurvPos k q hq) (Fin.castAdd (4 + 0) p)).val = 0 := by
-        rw [sigmaCurvPos_cast_val]; split_ifs <;> omega
+        rw [sigmaCurvPos_cast_val]; split_ifs ; omega
       rw [if_pos hcv, if_neg (Fin.ne_of_val_ne (by omega)),
         Fin.ext (a := p) (b := 0) h0, Fin.cons_zero]
     · rcases eq_or_ne p.val q.val with hq2 | hq2
@@ -177,13 +179,14 @@ theorem curvactStarPos
         (metricTraceInput (I := I) (basis j) (basis j) (fun p => basis (m p)))
         ((sigmaCurvPos k q hq) (Fin.natAdd (4 + (k + 1)) p)))
       = vec4 (I := I) (basis i) (basis (m 0))
-          (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i) (fun l : Fin (4 + k) => basis (m l.succ)) q) (basis j) := by
+          (@Fin.cons (4 + k) (fun _ => TangentSpace I x) (basis i)
+            (fun l : Fin (4 + k) => basis (m l.succ)) q) (basis j) := by
     funext p
     have hplt := p.isLt
     rw [wRoute_val basis k i j m, vec4]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaCurvPos k q hq) (Fin.natAdd (4 + (k + 1)) p)).val = 1 := by
-        rw [sigmaCurvPos_nat_val]; split_ifs <;> omega
+        rw [sigmaCurvPos_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_pos hcv, if_pos (Fin.ext h0)]
     · rcases eq_or_ne p.val 1 with h1 | h1
       · have hcv : ((sigmaCurvPos k q hq) (Fin.natAdd (4 + (k + 1)) p)).val = 4 := by
@@ -291,7 +294,7 @@ theorem curvactStar0
     rw [wRoute_val basis k i j m, Function.update_apply]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaCurv0 k) (Fin.castAdd (4 + 0) p)).val = 2 := by
-        rw [sigmaCurv0_cast_val]; split_ifs <;> omega
+        rw [sigmaCurv0_cast_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega), if_pos hcv,
         if_pos (Fin.ext h0)]
     · have hcv : ((sigmaCurv0 k) (Fin.castAdd (4 + 0) p)).val = 4 + p.val := by
@@ -310,7 +313,7 @@ theorem curvactStar0
     rw [wRoute_val basis k i j m, vec4]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaCurv0 k) (Fin.natAdd (4 + (k + 1)) p)).val = 0 := by
-        rw [sigmaCurv0_nat_val]; split_ifs <;> omega
+        rw [sigmaCurv0_nat_val]; split_ifs ; omega
       rw [if_pos hcv, if_pos (Fin.ext h0)]
     · rcases eq_or_ne p.val 1 with h1 | h1
       · have hcv : ((sigmaCurv0 k) (Fin.natAdd (4 + (k + 1)) p)).val = 4 := by
@@ -416,7 +419,7 @@ theorem slotdiffStarA
     rw [wRoute_val basis k i e m, vec5]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaDiffA k q) (Fin.castAdd (4 + k) p)).val = 0 := by
-        rw [sigmaDiffA_cast_val]; split_ifs <;> omega
+        rw [sigmaDiffA_cast_val]; split_ifs ; omega
       rw [if_pos hcv, if_pos (Fin.ext h0)]
     · rcases eq_or_ne p.val 1 with h1 | h1
       · have hcv : ((sigmaDiffA k q) (Fin.castAdd (4 + k) p)).val = 1 := by
@@ -464,7 +467,7 @@ theorem slotdiffStarA
     rcases eq_or_ne p.val q.val with hp | hp
     · have hpq : p = q := Fin.ext hp
       have hcv : ((sigmaDiffA k q) (Fin.natAdd 5 p)).val = 3 := by
-        rw [sigmaDiffA_nat_val]; split_ifs <;> omega
+        rw [sigmaDiffA_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_pos hcv, if_pos hpq]
     · have hpq : p ≠ q := by
@@ -568,7 +571,7 @@ theorem slotdiffStarB
     rw [wRoute_val basis k i e m, vec4]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaDiffB k q) (Fin.castAdd (4 + (k + 1)) p)).val = 0 := by
-        rw [sigmaDiffB_cast_val]; split_ifs <;> omega
+        rw [sigmaDiffB_cast_val]; split_ifs ; omega
       rw [if_pos hcv, if_pos (Fin.ext h0)]
     · rcases eq_or_ne p.val 1 with h1 | h1
       · have hcv : ((sigmaDiffB k q) (Fin.castAdd (4 + (k + 1)) p)).val = 4 := by
@@ -611,7 +614,7 @@ theorem slotdiffStarB
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hp0 : p = 0 := Fin.ext h0
       have hcv : ((sigmaDiffB k q) (Fin.natAdd 4 p)).val = 1 := by
-        rw [sigmaDiffB_nat_val]; split_ifs <;> omega
+        rw [sigmaDiffB_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_pos hcv, hp0]
       simp
     · rcases eq_or_ne p.val (q.val + 1) with hq | hq
@@ -736,7 +739,7 @@ theorem slotRic1
     rw [wRoute_val basis k i e m, vec5]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaRic1 k q) (Fin.castAdd (4 + k) p)).val = 4 := by
-        rw [sigmaRic1_cast_val]; split_ifs <;> omega
+        rw [sigmaRic1_cast_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega), if_pos (Fin.ext h0)]
       congr 2
@@ -781,7 +784,7 @@ theorem slotRic1
     rcases eq_or_ne p.val q.val with hp | hp
     · have hpq : p = q := Fin.ext hp
       have hcv : ((sigmaRic1 k q) (Fin.natAdd 5 p)).val = 3 := by
-        rw [sigmaRic1_nat_val]; split_ifs <;> omega
+        rw [sigmaRic1_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_pos hcv, if_pos hpq]
     · have hpq : p ≠ q := by
@@ -874,7 +877,7 @@ theorem slotRic2
     rw [wRoute_val basis k i e m, vec5]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaRic2 k q) (Fin.castAdd (4 + k) p)).val = 5 + q.val := by
-        rw [sigmaRic2_cast_val]; split_ifs <;> omega
+        rw [sigmaRic2_cast_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega), if_pos (Fin.ext h0)]
       congr 2
@@ -919,7 +922,7 @@ theorem slotRic2
     rcases eq_or_ne p.val q.val with hp | hp
     · have hpq : p = q := Fin.ext hp
       have hcv : ((sigmaRic2 k q) (Fin.natAdd 5 p)).val = 3 := by
-        rw [sigmaRic2_nat_val]; split_ifs <;> omega
+        rw [sigmaRic2_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_pos hcv, if_pos hpq]
     · have hpq : p ≠ q := by
@@ -1012,7 +1015,7 @@ theorem slotRic3
     rw [wRoute_val basis k i e m, vec5]
     rcases eq_or_ne p.val 0 with h0 | h0
     · have hcv : ((sigmaRic3 k q) (Fin.castAdd (4 + k) p)).val = 2 := by
-        rw [sigmaRic3_cast_val]; split_ifs <;> omega
+        rw [sigmaRic3_cast_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega), if_pos hcv,
         if_pos (Fin.ext h0)]
     · rcases eq_or_ne p.val 1 with h1 | h1
@@ -1058,7 +1061,7 @@ theorem slotRic3
     rcases eq_or_ne p.val q.val with hp | hp
     · have hpq : p = q := Fin.ext hp
       have hcv : ((sigmaRic3 k q) (Fin.natAdd 5 p)).val = 3 := by
-        rw [sigmaRic3_nat_val]; split_ifs <;> omega
+        rw [sigmaRic3_nat_val]; split_ifs ; omega
       rw [if_neg (by rw [hcv]; omega), if_neg (by rw [hcv]; omega),
         if_neg (by rw [hcv]; omega), if_pos hcv, if_pos hpq]
     · have hpq : p ≠ q := by

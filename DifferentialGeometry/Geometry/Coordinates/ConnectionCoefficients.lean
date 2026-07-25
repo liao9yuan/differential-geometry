@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -47,7 +46,6 @@ theorem tangentConstInChart_eq_coordinateFrame_eventually
   rw [coordinateFrameAt_apply_of_mem (I := I) (x₀ := x₀) (x := x) hx i]
   rfl
 
-set_option linter.flexible false in
 
 
 theorem connCoeff_eq_christoffelAlong_coord

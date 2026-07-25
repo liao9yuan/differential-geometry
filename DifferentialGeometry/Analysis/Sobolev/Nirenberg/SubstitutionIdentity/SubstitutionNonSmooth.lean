@@ -525,7 +525,7 @@ theorem nirenberg_master_inequality_nonsmooth
     have h_v_supp : tsupport
         (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
           k h η u) ⊆ Ω :=
-      ((DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
+      ((tsupport_nirenbergTestFunction_subset
         (d := d) η u k h)).trans h_thick
     have h_Q_to_Ω :
         ∫ x, B.c x * u x *
@@ -544,7 +544,8 @@ theorem nirenberg_master_inequality_nonsmooth
               (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
                 k h η u) := fun hin => hx (h_v_supp hin)
         rw [h_test_eq]
-        have h_zero : (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
+        have h_zero :
+          (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u) x = 0 := image_eq_zero_of_notMem_tsupport hx_not
         rw [h_zero]; ring
       have h_eq_int :
@@ -579,7 +580,8 @@ theorem nirenberg_master_inequality_nonsmooth
               (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
                 k h η u) := fun hin => hx (h_v_supp hin)
         rw [h_test_eq]
-        have h_zero : (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
+        have h_zero :
+          (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u) x = 0 := image_eq_zero_of_notMem_tsupport hx_not
         rw [h_zero]; ring
       have h_eq_int :
@@ -643,7 +645,6 @@ theorem nirenberg_master_inequality_nonsmooth
     hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k
     h_FK_diffQuot_u_bound h_v_test_sq_bound
     h_master_nonsmooth
-set_option linter.unusedVariables false in
 
 
 
@@ -664,19 +665,20 @@ set_option linter.unusedVariables false in
 
 
 theorem nirenberg_substitution_identity_nonsmooth
-    {Ω : Set EuclN} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
+    {Ω : Set EuclN} (_hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : EuclN → ℝ}
-    (hu_l2 : MemLp u 2 (volume : Measure EuclN))
-    (hf_l2 : MemLp f 2 (volume : Measure EuclN))
+    (_hu_l2 : MemLp u 2 (volume : Measure EuclN))
+    (_hf_l2 : MemLp f 2 (volume : Measure EuclN))
     {g : Fin d → EuclN → ℝ}
-    (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure EuclN))
-    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
-    (h_weak : DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.IsWeakSolution
+    (_hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure EuclN))
+    (_h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    (_h_weak :
+      SmoothEllipticBilinearForm.IsWeakSolution
       (Ω := Ω) (B := B) u f)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ ⊤ η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_Ω : tsupport η ⊆ Ω)
-    (k : Fin d) {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick_in_Ω : Metric.cthickening |h| (tsupport η) ⊆ Ω)
+    {η : EuclN → ℝ} (_hη : ContDiff ℝ ⊤ η) (_hη_supp : HasCompactSupport η)
+    (_hη_supp_in_Ω : tsupport η ⊆ Ω)
+    (k : Fin d) {R₀ : ℝ} {h : ℝ} (_hh : h ≠ 0) (_hh_le : |h| ≤ R₀)
+    (_h_thick_in_Ω : Metric.cthickening |h| (tsupport η) ⊆ Ω)
     (h_substitution_identity_holds :
       ∫ x, (∑ i : Fin d, ∑ j : Fin d,
           (DifferentialGeometry.Analysis.Sobolev.translate k h

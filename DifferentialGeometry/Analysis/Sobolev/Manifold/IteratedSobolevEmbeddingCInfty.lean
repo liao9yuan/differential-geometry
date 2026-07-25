@@ -491,7 +491,8 @@ private lemma continuousOn_chartPushed_of_continuous
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α).contMDiff.continuous
   exact (hρ_cont.comp_continuousOn h_inv_cont).mul (hũ_cont.comp_continuousOn h_inv_cont)
 
-omit [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] in
+omit [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    [NeZero (Module.finrank ℝ E)] in
 private lemma exists_ball_subset_chartTargetEuclid
     (α : M) {y₀ : EuclN} (hy₀ : y₀ ∈ chartTargetEuclid (I := I) (M := M) α) :
     ∃ R : ℝ, 0 < R ∧ Metric.ball y₀ R ⊆ chartTargetEuclid (I := I) (M := M) α := by

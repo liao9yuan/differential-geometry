@@ -19,6 +19,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFr
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
+
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
@@ -50,7 +52,8 @@ theorem compNormSqMulti_le_card {Idx : Type*} [Fintype Idx] {r : ℕ}
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem normSq0S_le_card
     [Module.Finite ℝ E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -69,7 +72,7 @@ theorem normSq0S_le_card
 
 
 
-theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx]
     (level resid : (Fin (4 + k) → Idx) → Real) (ric : Idx → Idx → Real)
     (w : ℕ → Real)
     (hlevel : compNormSqMulti level ≤ w k)
@@ -94,7 +97,6 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
   set Bres : Real := Cres * Ssum with hBres
   have hBr0 : 0 ≤ Br := by rw [hBr]; positivity
   have hBres0 : 0 ≤ Bres := by rw [hBres]; positivity
-
   have hcomb : ∀ m : Fin (4 + k) → Idx,
       |ricStarArray ric level m + resid m| ≤ Br + Bres := by
     intro m
@@ -107,12 +109,10 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
         ≤ ((4 + k : ℕ) : Real) * card * (card * Real.sqrt (w 0)) * Real.sqrt (w k) :=
           mul_le_mul_of_nonneg_left hsq (by positivity)
       _ = Br := by rw [hBr]; ring
-
   have hcombnorm :
       compNormSqMulti (fun m : Fin (4 + k) → Idx => ricStarArray ric level m + resid m)
         ≤ Ncard * (Br + Bres) ^ 2 :=
     compNormSqMulti_le_card _ (Br + Bres) hcomb
-
   have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ level
     (fun m : Fin (4 + k) → Idx => ricStarArray ric level m + resid m)
   have hAbs : |∑ m : Fin (4 + k) → Idx, level m * (ricStarArray ric level m + resid m)|
@@ -121,14 +121,12 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
             (fun m : Fin (4 + k) → Idx => ricStarArray ric level m + resid m)) := by
     rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul (compNormSqMulti_nonneg _)]
     exact Real.sqrt_le_sqrt hcs
-
   have hsqcomb : Real.sqrt (compNormSqMulti
         (fun m : Fin (4 + k) → Idx => ricStarArray ric level m + resid m))
       ≤ Real.sqrt Ncard * (Br + Bres) := by
     refine le_trans (Real.sqrt_le_sqrt hcombnorm) ?_
     rw [Real.sqrt_mul hNcard0, Real.sqrt_sq (by positivity)]
   have hsqlevel : Real.sqrt (compNormSqMulti level) ≤ Real.sqrt (w k) := Real.sqrt_le_sqrt hlevel
-
   have hmain : |2 * ∑ m : Fin (4 + k) → Idx, level m * (ricStarArray ric level m + resid m)|
       ≤ 2 * (Real.sqrt (w k) * (Real.sqrt Ncard * (Br + Bres))) := by
     rw [abs_mul, abs_two]
@@ -136,23 +134,21 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
     refine le_trans hAbs ?_
     exact mul_le_mul hsqlevel hsqcomb (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   refine le_trans hmain ?_
-
   have hj0 : Real.sqrt (w 0) * Real.sqrt (w k) ≤ Ssum := by
     have hmem : 0 ∈ Finset.range (k + 1) := Finset.mem_range.mpr (Nat.succ_pos k)
     have := Finset.single_le_sum
       (f := fun j => Real.sqrt (w j) * Real.sqrt (w (k - j)))
       (fun j _ => mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)) hmem
     simpa using this
-
   have hRHS : ∑ j ∈ Finset.range (k + 1),
         (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) *
           (Real.sqrt (w j) * Real.sqrt (w (k - j)) * Real.sqrt (w k))
-      = (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) * Real.sqrt (w k) * Ssum := by
+      = (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) * Real.sqrt (w k) *
+        Ssum := by
     rw [hSsum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     ring
   rw [hRHS]
-
   have hBrBres : Br + Bres ≤ (((4 + k : ℕ) : Real) * card ^ 2 + Cres) * Ssum := by
     rw [hBr, hBres, add_mul]
     refine add_le_add ?_ (le_of_eq (by ring))
@@ -165,7 +161,8 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
     _ ≤ 2 * Real.sqrt Ncard * Real.sqrt (w k) *
           ((((4 + k : ℕ) : Real) * card ^ 2 + Cres) * Ssum) :=
         mul_le_mul_of_nonneg_left hBrBres (by positivity)
-    _ = (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) * Real.sqrt (w k) * Ssum := by
+    _ = (2 * Real.sqrt Ncard * (((4 + k : ℕ) : Real) * card ^ 2 + Cres)) * Real.sqrt (w k) *
+      Ssum := by
         ring
 
 
@@ -237,7 +234,8 @@ theorem nablaKReaction_le
     (basis : (x : M) → Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real → M → Idx → Idx → Real)
     (ric : Real → M → Idx → Idx → Real)
-    (Tdot : Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (4 + k) x)
+    (Tdot : Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (4 + k)
+      x)
     (t : Real) (x : M) (w : ℕ → Real → M → Real)
     (horth : ∀ i j : Idx,
       (S.base.metric t).inner x (basis x i) (basis x j) = if i = j then (1 : Real) else 0)

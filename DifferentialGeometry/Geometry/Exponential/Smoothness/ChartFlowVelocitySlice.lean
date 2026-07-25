@@ -281,7 +281,8 @@ lemma chartFlowCandidate_contMDiffAt_zero_at_origin
     have hsimp_base : (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)) (0 : E) =
         (0 : E) := by simp
     rw [hsimp_base, hsimp_range]
-    have hsymm_id : ∀ v : E, (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm v = v := by
+    have hsymm_id : ∀ v : E, (extChartAt (𝓘(ℝ, E) : ModelWithCorners ℝ E E) (0 : E)).symm v =
+      v := by
       intro v; simp
     change ContDiffWithinAt ℝ 1
         (extChartAt I p ∘ chartFlowCandidate (I := I) Φ p 0 ∘

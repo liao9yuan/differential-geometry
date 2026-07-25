@@ -16,7 +16,6 @@ variable {d : ℕ} [NeZero d]
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_local
     {v : EuclN → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {Ω' Ω'' : Set EuclN}
@@ -197,7 +196,6 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
     _ = ∫⁻ y in Ω', FF y ∂(volume : Measure EuclN) := h_indicator_to_restrict
 
 omit [NeZero d] in
-
 private lemma eLpNorm_two_restrict_le_of_sup_bound
     {K : Set EuclN} (hK_meas : MeasurableSet K)
     {f : EuclN → ℝ} {C : ℝ} (hf : ∀ x ∈ K, ‖f x‖ ≤ C) :
@@ -224,7 +222,6 @@ private lemma eLpNorm_two_restrict_le_of_sup_bound
   exact h_bound
 
 omit [NeZero d] in
-
 private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
     {ι : Type*} {l : Filter ι}
     {K : Set EuclN} (hK_meas : MeasurableSet K)
@@ -522,7 +519,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   rw [h_sum]
 
 omit [NeZero d] in
-
 private lemma eLpNorm_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -538,7 +534,6 @@ private lemma eLpNorm_le_of_eLpNorm_sub_le
   exact add_le_add le_rfl h_le
 
 omit [NeZero d] in
-
 private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -549,7 +544,6 @@ private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
   pow_le_pow_left' (eLpNorm_le_of_eLpNorm_sub_le hf_aestron hg_aestron h_le) 2
 
 omit [NeZero d] in
-
 private lemma lintegral_enorm_sq_eq_eLpNorm_sq
     {μ : Measure EuclN} (f : EuclN → ℝ) :
     ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ = (eLpNorm f 2 μ) ^ 2 := by

@@ -507,7 +507,8 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
     have h_bound_ψn :
         iteratedWeakSobolevNorm (d := d) k p (fun x => ψ n (Φ.toFun x)) Ω ≤
           ENNReal.ofReal K_const *
-            (iteratedWeakSobolevNorm (d := d) k p u Ω' + ENNReal.ofReal ((1 : ℝ) / (n + 1 : ℝ))) := by
+            (iteratedWeakSobolevNorm (d := d) k p u Ω' + ENNReal.ofReal
+              ((1 : ℝ) / (n + 1 : ℝ))) := by
       refine h_smooth_bound.trans ?_
       exact mul_le_mul_of_nonneg_left h_ψn_le_u (zero_le _)
     refine le_trans (add_le_add (le_refl _) h_bound_ψn) ?_

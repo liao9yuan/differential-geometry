@@ -25,7 +25,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem variational_flow_inner_slot1_derivative
     (g : SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -51,7 +50,6 @@ theorem variational_flow_inner_slot1_derivative
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem variational_flow_inner_slot2_derivative
     (g : SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -74,7 +72,6 @@ theorem variational_flow_inner_slot2_derivative
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem variational_flow_inner_total_derivative
     (g : SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

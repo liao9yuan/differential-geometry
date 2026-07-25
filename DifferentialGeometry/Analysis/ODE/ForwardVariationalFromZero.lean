@@ -12,7 +12,6 @@ namespace DifferentialGeometry.Analysis.ODE
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 omit [CompleteSpace E] in
-
 lemma hasDerivWithinAt_Ici_zero_of_Icc {y : ℝ → E} {y' : E} {b τ : ℝ}
     (h : HasDerivWithinAt y y' (Icc (0 : ℝ) b) τ) (hτ : τ ∈ Ico (0 : ℝ) b) :
     HasDerivWithinAt y y' (Ici (0 : ℝ)) τ := by
@@ -135,7 +134,6 @@ theorem forward_variational_solution_from_zero
     exact hasDerivWithinAt_Ici_zero_of_Icc (hJd t htIcc) ht
 
 omit [CompleteSpace E] in
-
 theorem forward_variational_gronwall_bound
     {A : ℝ → (E →L[ℝ] E)} {J : ℝ → E} {M δ : ℝ} (hM : 0 ≤ M)
     (hJcont : ContinuousOn J (Icc (0 : ℝ) δ))
@@ -165,7 +163,6 @@ theorem forward_variational_gronwall_bound
       apply mul_le_mul_of_nonneg_left hexp_mono (norm_nonneg _)
 
 omit [CompleteSpace E] in
-
 theorem forward_variational_unique
     {A : ℝ → (E →L[ℝ] E)} {J₁ J₂ : ℝ → E} {M δ : ℝ} (hM : 0 ≤ M)
     (hAbd : ∀ t ∈ Icc (0 : ℝ) δ, ‖A t‖ ≤ M)
@@ -187,7 +184,6 @@ theorem forward_variational_unique
     hJ₂cont (fun t ht => hJ₂deriv t ht) (fun t _ => mem_univ _) hinit
 
 omit [CompleteSpace E] in
-
 theorem forward_orbit_dist_le
     {f : ℝ → E → E} {γ₁ γ₂ : ℝ → E} {S : Set E} {K : ℝ≥0} {δ : ℝ}
     (hlip : ∀ t ∈ Ico (0 : ℝ) δ, LipschitzOnWith K (f t) S)
@@ -205,7 +201,6 @@ theorem forward_orbit_dist_le
   simpa [sub_zero] using h
 
 omit [NormedSpace ℝ E] [CompleteSpace E] in
-
 theorem forward_flow_jointContinuousOn
     {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {K : ℝ≥0} {δ : ℝ}
     (hcont_t : ∀ x ∈ closedBall x₀ r, ContinuousOn (fun s : ℝ => Φ x s) (Icc (0 : ℝ) δ))
@@ -215,7 +210,6 @@ theorem forward_flow_jointContinuousOn
     (fun p : E × ℝ => Φ p.1 p.2) K hcont_t hlip_x
 
 omit [NormedSpace ℝ E] [CompleteSpace E] in
-
 theorem forward_orbit_jointContinuousAt_zero
     {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {K : ℝ≥0} {δ : ℝ} (hr : 0 ≤ r) (hδ : 0 ≤ δ)
     (hcont_t : ∀ x ∈ closedBall x₀ r, ContinuousOn (fun s : ℝ => Φ x s) (Icc (0 : ℝ) δ))
@@ -232,7 +226,6 @@ section Operator
 variable {A : ℝ → (E →L[ℝ] E)} {M δ : ℝ}
 
 omit [CompleteSpace E] in
-
 lemma hasDerivWithinAt_Ici_of_Ici_zero {y : ℝ → E} {y' : E} {τ : ℝ}
     (h : HasDerivWithinAt y y' (Ici (0 : ℝ)) τ) (hτ : 0 ≤ τ) :
     HasDerivWithinAt y y' (Ici τ) τ :=

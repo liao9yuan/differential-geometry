@@ -369,7 +369,8 @@ private theorem spectralPathFO_rawChartComponent_jointContMDiffOn_local
         tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α ![] Jdx p.1)
       ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) := by
   set G : ℝ × E → ℝ :=
-    fun q : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g (T_rep q.1) α Jdx q.2 with hG_def
+    fun q : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g (T_rep q.1) α Jdx q.2 with
+                       hG_def
   have hGEuclid : ContDiffOn ℝ (kk : ℕ) G
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     spectralPathFO_rawCompOnE_euclidean_contDiffOn_local (I := I) (M := M)

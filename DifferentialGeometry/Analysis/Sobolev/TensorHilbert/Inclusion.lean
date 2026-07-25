@@ -341,7 +341,8 @@ theorem tensorPouSobolevNorm_ne_top
   exact tensorPouSobolevNorm_inner_integral_lt_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_euclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannCommutator
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -125,7 +122,8 @@ theorem solution_rm04LowersRm13At
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem rm13_apply_eq_rm04_raise
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm13 : Tensor13At (I := I) (M := M) x)
@@ -135,19 +133,14 @@ theorem rm13_apply_eq_rm04_raise
     (X Y Z : TangentSpace I x) :
     Rm13 β (vec3 (I := I) X Y Z) =
       Rm04 (vec4 (I := I) X Y Z (cotangentSharp_gen (I := I) g x β)) := by
-
   have hL := hLower X Y Z (cotangentSharp_gen (I := I) g x β)
-
   rw [hL]
-
   have hβ :
       dualToCotangent_gen (I := I)
           ((tangentFlatLinear_gen (I := I) g x) (cotangentSharp_gen (I := I) g x β)) = β := by
-
     refine cotangentToDualLinear_injective_gen (I := I) (x := x) ?_
     rw [cotangentToDualLinear_apply_gen, cotangentToDualLinear_apply_gen,
       cotangentToDual_dualToCotangent_gen]
-
     ext X
     rw [tangentFlatLinear_apply_gen, cotangentToDual_apply_gen,
       cotangentSharp_inner_eval]
@@ -169,7 +162,8 @@ theorem rm13_apply_eq_rm04_raise
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_eq_rm04_raise
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -183,7 +177,6 @@ theorem curvatureAction0SAt_eq_rm04_raise
         Rm04 (vec4 (I := I) X Y (slots q)
           (cotangentSharp_gen (I := I) g x
             (oneFormAtSlot0S (I := I) alpha slots q))) := by
-
   change
     -∑ q : Fin s,
       Rm13 x (oneFormAtSlot0S (I := I) alpha slots q)

@@ -50,7 +50,6 @@ theorem riemannSec_tensorCov_apply_eval
       (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
       (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
       X W τ Y x
-
   have heq :
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
           riemannSec (tensorCov (I := I) g r s)

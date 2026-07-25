@@ -42,13 +42,15 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp (g₀ : SmoothRiemannianMetri
       (fun s : ℝ =>
         chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j y)
       (deriv (fun s : ℝ =>
-        chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j y) s₀) s₀ := by
+        chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j y) s₀)
+          s₀ := by
   have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
   have hjoint : ContDiffAt ℝ ∞
       (fun r : ℝ × E =>
         chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' r.1) g_bg x i j r.2)
       (s₀, y) :=
-    gen_joint_chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x hG g_bg i j hs₀ hy
+    gen_joint_chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x hG g_bg i j hs₀
+      hy
   have hcomp : (fun s : ℝ =>
         chartLieDeTurckComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j y) =
       (fun r : ℝ × E =>
@@ -216,7 +218,8 @@ theorem hasDerivAt_realizedFam_partial_chartDeTurckVFComp (g₀ : SmoothRiemanni
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
     HasDerivAt
       (fun s : ℝ => partialDeriv (E := E) m
-        (fun y' => chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y') y)
+        (fun y' => chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y')
+          y)
       (partialDeriv (E := E) m
         (deTurckVFDerivRaw (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x
           (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x) k) y) s₀ := by
@@ -282,12 +285,14 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiem
             chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k j y *
               partialDeriv (E := E) i
                 (fun y' =>
-                  chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y') y)
+                  chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y')
+                    y)
         + (∑ k : Fin (Module.finrank ℝ E),
             chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k y *
               partialDeriv (E := E) j
                 (fun y' =>
-                  chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y') y)) := by
+                  chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x k y')
+                    y)) := by
     funext s; rw [chartLieDeTurckComp_def]
   rw [heq]
   have hT1 : HasDerivAt
@@ -319,7 +324,8 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiem
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x k j y *
             partialDeriv (E := E) i
               (fun y' =>
-                chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x k y') y +
+                chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x k y') y
+                  +
           chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k j y *
             partialDeriv (E := E) i
               (deTurckVFDerivRaw (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x
@@ -340,7 +346,8 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiem
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y *
             partialDeriv (E := E) j
               (fun y' =>
-                chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x k y') y +
+                chartDeTurckVFComp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x k y') y
+                  +
           chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i k y *
             partialDeriv (E := E) j
               (deTurckVFDerivRaw (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x

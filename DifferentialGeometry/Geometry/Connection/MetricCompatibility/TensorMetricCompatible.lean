@@ -28,7 +28,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 lemma scalarFn_eq_toModel_elim0
     (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = (Tensor0SSpace.toModel (T x)) (fun i => Fin.elim0 i) := by
@@ -69,7 +70,8 @@ lemma tensor0SCovariantDerivative_zero_toModel_apply
     mfderiv I 𝓘(ℝ, ℝ) (scalarFn I M T) x v
   rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma tensorInnerPointwise_0s_zero_eq_scalarFn_mul
     (g : SmoothRiemannianMetric I M)
     (W T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
@@ -143,8 +145,8 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_zero
   ring
 
 open Tensor0SBundle in
-
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_tensor0S_curry_eq_curryLeft {s : ℕ} {x : M}
     (A : Tensor0SSpace (s + 1) I x) (v : TangentSpace I x) :
     Tensor0SSpace.toModel (tensor0S_curry (I := I) (M := M) s x A v) =
@@ -160,7 +162,8 @@ private noncomputable def mixedGramMatrix
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i a => g.inner x ((chartModelBasis E) i) (frame a)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma mixedGramMatrix_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -168,7 +171,8 @@ private lemma mixedGramMatrix_apply
     mixedGramMatrix (I := I) (M := M) g x frame i a =
       g.inner x ((chartModelBasis E) i) (frame a) := rfl
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma orthonormal_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -195,7 +199,8 @@ private lemma orthonormal_expansion
   · intro hb
     exact absurd (Finset.mem_univ a) hb
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma gramMatrixAt_eq_mixed_mul_transpose
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -224,7 +229,8 @@ private lemma gramMatrixAt_eq_mixed_mul_transpose
           mixedGramMatrix_apply, Matrix.transpose_apply, mixedGramMatrix_apply]
         ring
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma mixedGramMatrix_isUnit
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -242,7 +248,8 @@ private lemma mixedGramMatrix_isUnit
   rw [h] at hdetG
   simp at hdetG
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma mixedGram_transpose_mul_inv_mul
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -264,7 +271,8 @@ private lemma mixedGram_transpose_mul_inv_mul
   rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_nonsing_inv Sᵀ hSTdet,
     Matrix.one_mul, Matrix.nonsing_inv_mul S hSdet]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensorInnerPointwise_0s_sum_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
@@ -280,7 +288,8 @@ private lemma tensorInnerPointwise_0s_sum_smul_left
       rw [Finset.sum_insert hi, tensorInnerPointwise_0s_add_left,
         tensorInnerPointwise_0s_smul_left, ih, Finset.sum_insert hi]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensorInnerPointwise_0s_sum_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
@@ -296,7 +305,8 @@ private lemma tensorInnerPointwise_0s_sum_smul_right
       rw [Finset.sum_insert hi, tensorInnerPointwise_0s_add_right,
         tensorInnerPointwise_0s_smul_right, ih, Finset.sum_insert hi]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensorInnerPointwise_0s_bisum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (c d : ι → ℝ)
@@ -327,7 +337,8 @@ private lemma curryLeft_sum_smul {s : ℕ}
   | insert a A ha ih =>
       rw [Finset.sum_insert ha, map_add, map_smul, ih, Finset.sum_insert ha]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensorInnerPointwise_0s_succ_orthoFrame
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -460,7 +471,8 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
   · intro ha
     exact absurd (Finset.mem_univ a) ha
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma linearIndependent_of_orthonormal
     (g : SmoothRiemannianMetric I M) {y : M}
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I y)
@@ -508,7 +520,6 @@ private lemma smoothOrthoBasis_apply
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
 open Tensor0SNabla in
-
 noncomputable def tensorMetricCompatDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W T : Π x : M, Tensor0SSpace s I x) (x : M) :
@@ -540,7 +551,6 @@ lemma tensorMetricCompatDiff_apply
   rfl
 
 open Tensor0SNabla HomConnection in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_curriedSection_hom_leibniz
@@ -588,7 +598,6 @@ lemma tensor0SCovariantDerivative_curriedSection_hom_leibniz
   abel
 
 open Tensor0SNabla HomConnection in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_succ_consEval_peel
@@ -608,7 +617,6 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
   classical
   have hleib := tensor0SCovariantDerivative_curriedSection_hom_leibniz
     (I := I) (M := M) g s W hW Y v
-
   have hterm1 : Tensor0SSpace.toModel
         (tensor0S_curry (I := I) (M := M) s x
           (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) W x v) (Y x)) m =
@@ -618,7 +626,6 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) W x v)
       (v0 := Y x) (vs := m)
-
   have hterm2 : Tensor0SSpace.toModel
         (curriedSection I M W x ((LeviCivita (I := I) g).toFun (fun y => Y y) x v)) m =
       Tensor0SSpace.toModel (W x)
@@ -631,7 +638,6 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
   ring
 
 open TensorRSNabla in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_apply_eq_of_vanishing
@@ -688,7 +694,6 @@ private lemma smoothOrthoFrame_connection_skew
   exact hmc.symm
 
 open Tensor0SNabla in
-
 private noncomputable def smoothOrthoFrameSection
     (g : SmoothRiemannianMetric I M) (x : M) (a : Fin (Module.finrank ℝ E)) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -702,8 +707,8 @@ private lemma smoothOrthoFrameSection_apply
       smoothOrthoFrame (I := I) g x a y := rfl
 
 open Tensor0SNabla in
-
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensorSectionMDiffAt_curriedSection_apply
     (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -725,7 +730,6 @@ private lemma tensorSectionMDiffAt_curriedSection_apply
     (v := fun y : M => Y y) hCurried hY
 
 open Tensor0SNabla in
-
 omit [CompleteSpace E] in
 private lemma tensorMetricCompatDiff_succ_eq_sum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -948,7 +952,6 @@ private lemma tensorMetricCompatDiff_succ_eq_sum
   rw [hmain, herror, add_zero]
 
 open Tensor0SNabla in
-
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_aux
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -1028,7 +1031,6 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_aux
       rwa [tensorMetricCompatDiff_succ_eq_sum (I := I) (M := M) g s W T hW hT] at hSum'
 
 open Tensor0SNabla in
-
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_0s_mfderiv_metricCompatible
     (g : SmoothRiemannianMetric I M) (s : ℕ)

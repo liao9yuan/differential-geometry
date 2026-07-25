@@ -50,7 +50,8 @@ noncomputable def densityMthDerivOnEuclid
           (densityMthDerivOnEuclid g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] theorem weightedInvGramMthDerivOnEuclid_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -58,7 +59,8 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
     weightedInvGramMthDerivOnEuclid (I := I) (M := M) g α i j 0 idx y =
       weightedInvGramOnEuclid (I := I) g α i j y := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem weightedInvGramMthDerivOnEuclid_succ
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -69,14 +71,16 @@ theorem weightedInvGramMthDerivOnEuclid_succ
             g α i j m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] theorem densityMthDerivOnEuclid_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 0 → Fin (Module.finrank ℝ E)) (y : EuclN) :
     densityMthDerivOnEuclid (I := I) (M := M) g α 0 idx y =
       densityOnEuclid (I := I) g α y := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem densityMthDerivOnEuclid_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (idx : Fin (m + 1) → Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -86,7 +90,8 @@ theorem densityMthDerivOnEuclid_succ
             g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -96,7 +101,8 @@ theorem weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
   funext y
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 1 → Fin (Module.finrank ℝ E)) :
@@ -105,7 +111,8 @@ theorem densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
   funext y
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -122,7 +129,8 @@ theorem weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEucli
   rw [h_init_0]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem densityMthDerivOnEuclid_two_eq_densitySecondDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 2 → Fin (Module.finrank ℝ E)) :

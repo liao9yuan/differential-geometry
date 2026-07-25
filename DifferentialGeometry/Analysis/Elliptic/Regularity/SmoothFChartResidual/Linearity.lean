@@ -37,7 +37,8 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalar_eq_sub_of_toFun_eq
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -142,7 +143,7 @@ theorem smoothFChartResidual_ae_sub
     fun y =>
       DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v₁ y -
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        smoothFChartResidual
           (I := I) (M := M) g α v₂ y := by
   classical
   have h_smoothToH1Compl_sub :=

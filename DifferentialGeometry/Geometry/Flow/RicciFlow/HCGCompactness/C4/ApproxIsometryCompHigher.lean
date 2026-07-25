@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsom
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -70,9 +69,11 @@ theorem comp_cov_le
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + j)
         (iterCov (I := I) g₁ 2 (Tensor0SBundle.metricTensorField (I := I) g₀) j x)) ≤ eps0)
     (hδ₀ : ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r) (iterCov (I := I) g₀ 2 δ₀ r x)) ≤ eps0)
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r) (iterCov (I := I) g₀ 2 δ₀ r x)) ≤
+        eps0)
     (hδ₁ : ∀ x ∈ u, ∀ k, k ≤ p →
-      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k) (iterCov (I := I) g₁ 2 δ₁ k x)) ≤ eps1) :
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k) (iterCov (I := I) g₁ 2 δ₁ k x)) ≤
+        eps1) :
     ∃ Cp : Real, 0 ≤ Cp ∧ ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
         (iterCov (I := I) g₀ 2 (δ₀ + δ₁) r x)) ≤ eps0 + eps1 * Cp := by
@@ -82,10 +83,8 @@ theorem comp_cov_le
   have hCp0 : (0 : Real) ≤ Real.sqrt ((2 : Real) ^ (2 + p)) * (1 + Cc * (p : Real)) :=
     mul_nonneg (Real.sqrt_nonneg _) (by positivity)
   refine ⟨Real.sqrt ((2 : Real) ^ (2 + p)) * (1 + Cc * (p : Real)), hCp0, fun x hx r hr0 hrp => ?_⟩
-
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv := metricInverseInBasis_of_orthonormal (I := I) g₀ basis hON
-
   have hsplit : iterCov (I := I) g₀ 2 (δ₀ + δ₁) r x =
       iterCov (I := I) g₀ 2 δ₀ r x + iterCov (I := I) g₀ 2 δ₁ r x := by
     rw [iterCov_add]
@@ -93,11 +92,8 @@ theorem comp_cov_le
   rw [hsplit]
   have htri := sqrt_normSq0S_add_le (I := I) g₀ (iterCov (I := I) g₀ 2 δ₀ r x)
     (iterCov (I := I) g₀ 2 δ₁ r x) basis hinv
-
   have ht0 := hδ₀ x hx r hr0 hrp
-
   have ht1 := hcorII x hx r hr0 hrp
-
   have hfac : Real.sqrt ((1 + eps0) ^ (2 + r)) ≤ Real.sqrt ((2 : Real) ^ (2 + p)) := by
     apply Real.sqrt_le_sqrt
     calc (1 + eps0) ^ (2 + r) ≤ (2 : Real) ^ (2 + r) :=
@@ -105,10 +101,8 @@ theorem comp_cov_le
       _ ≤ (2 : Real) ^ (2 + p) := pow_le_pow_right₀ (by norm_num) (by omega)
   have hfac0 : (0 : Real) ≤ Real.sqrt ((1 + eps0) ^ (2 + r)) := Real.sqrt_nonneg _
   have hsq0 : (0 : Real) ≤ Real.sqrt ((2 : Real) ^ (2 + p)) := Real.sqrt_nonneg _
-
   have hlead : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + r)
       (iterCov (I := I) g₁ 2 δ₁ r x)) ≤ eps1 := hδ₁ x hx r hrp
-
   have hsum : (∑ k ∈ Finset.range r,
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
         (iterCov (I := I) g₁ 2 δ₁ k x))) ≤ (r : Real) * eps1 := by
@@ -118,7 +112,6 @@ theorem comp_cov_le
       fun k hk => hδ₁ x hx k (le_trans (le_of_lt (Finset.mem_range.mp hk)) hrp)
     have h1 := Finset.sum_le_card_nsmul (Finset.range r) _ eps1 hb
     rwa [Finset.card_range, nsmul_eq_mul] at h1
-
   have hsum0 : (0 : Real) ≤ ∑ k ∈ Finset.range r,
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
         (iterCov (I := I) g₁ 2 δ₁ k x)) :=
@@ -137,7 +130,6 @@ theorem comp_cov_le
     nlinarith [hlead, mul_le_mul_of_nonneg_left hsum hCc0,
       mul_nonneg (sub_nonneg.mpr heps0_1) hCcS0,
       mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hrp' heps1_0) hCc0]
-
   have ht1' : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
       (iterCov (I := I) g₀ 2 δ₁ r x)) ≤
       Real.sqrt ((2 : Real) ^ (2 + p)) * (eps1 * (1 + Cc * (p : Real))) := by
@@ -207,10 +199,8 @@ theorem comp_cov_le_unif
   intro M' _ _ _ _ _ _ _ _ u hu g₀ g₁ δ₀ δ₁ eps0 eps1 heps0_0 heps0_1 heps1_0
     hequiv hgK hδ₀ hδ₁ x hx r hr0 hrp
   have hcorII' := hcorII hu g₀ g₁ δ₁ eps0 heps0_0 heps0_1 hequiv hgK
-
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv := metricInverseInBasis_of_orthonormal (I := I) g₀ basis hON
-
   have hsplit : iterCov (I := I) g₀ 2 (δ₀ + δ₁) r x =
       iterCov (I := I) g₀ 2 δ₀ r x + iterCov (I := I) g₀ 2 δ₁ r x := by
     rw [iterCov_add]
@@ -218,11 +208,8 @@ theorem comp_cov_le_unif
   rw [hsplit]
   have htri := sqrt_normSq0S_add_le (I := I) g₀ (iterCov (I := I) g₀ 2 δ₀ r x)
     (iterCov (I := I) g₀ 2 δ₁ r x) basis hinv
-
   have ht0 := hδ₀ x hx r hr0 hrp
-
   have ht1 := hcorII' x hx r hr0 hrp
-
   have hfac : Real.sqrt ((1 + eps0) ^ (2 + r)) ≤ Real.sqrt ((2 : Real) ^ (2 + p)) := by
     apply Real.sqrt_le_sqrt
     calc (1 + eps0) ^ (2 + r) ≤ (2 : Real) ^ (2 + r) :=
@@ -230,10 +217,8 @@ theorem comp_cov_le_unif
       _ ≤ (2 : Real) ^ (2 + p) := pow_le_pow_right₀ (by norm_num) (by omega)
   have hfac0 : (0 : Real) ≤ Real.sqrt ((1 + eps0) ^ (2 + r)) := Real.sqrt_nonneg _
   have hsq0 : (0 : Real) ≤ Real.sqrt ((2 : Real) ^ (2 + p)) := Real.sqrt_nonneg _
-
   have hlead : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + r)
       (iterCov (I := I) g₁ 2 δ₁ r x)) ≤ eps1 := hδ₁ x hx r hrp
-
   have hsum : (∑ k ∈ Finset.range r,
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
         (iterCov (I := I) g₁ 2 δ₁ k x))) ≤ (r : Real) * eps1 := by
@@ -243,7 +228,6 @@ theorem comp_cov_le_unif
       fun k hk => hδ₁ x hx k (le_trans (le_of_lt (Finset.mem_range.mp hk)) hrp)
     have h1 := Finset.sum_le_card_nsmul (Finset.range r) _ eps1 hb
     rwa [Finset.card_range, nsmul_eq_mul] at h1
-
   have hsum0 : (0 : Real) ≤ ∑ k ∈ Finset.range r,
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
         (iterCov (I := I) g₁ 2 δ₁ k x)) :=
@@ -262,7 +246,6 @@ theorem comp_cov_le_unif
     nlinarith [hlead, mul_le_mul_of_nonneg_left hsum hCc0,
       mul_nonneg (sub_nonneg.mpr heps0_1) hCcS0,
       mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hrp' heps1_0) hCc0]
-
   have ht1' : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
       (iterCov (I := I) g₀ 2 δ₁ r x)) ≤
       Real.sqrt ((2 : Real) ^ (2 + p)) * (eps1 * (1 + Cc * (p : Real))) := by

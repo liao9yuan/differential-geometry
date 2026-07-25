@@ -25,7 +25,8 @@ def RawVariationalIdentityFlat
   HasDerivAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
     (T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v) t
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_iff_flat_value
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v : TangentSpace I x) (T' P' : E →L[ℝ] E)
@@ -37,7 +38,8 @@ theorem rawVariationalIdentityFlat_iff_flat_value
   exact (Filter.EventuallyEq.hasDerivAt_iff
     (chartCloseDop_eventuallyEq_mfderiv_orbit (I := I) Φ_fam t x v hcontAt)).symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_of_orbitODE_factors
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v : TangentSpace I x)

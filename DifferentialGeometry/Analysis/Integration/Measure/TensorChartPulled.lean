@@ -27,7 +27,6 @@ local notation "EuclN" =>
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable (I) in
-
 def tensorTrivProjPushedNormSq
     (_g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) : EuclN → ℝ := by

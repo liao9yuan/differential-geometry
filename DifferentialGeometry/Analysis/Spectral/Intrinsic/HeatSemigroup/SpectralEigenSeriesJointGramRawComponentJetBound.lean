@@ -54,9 +54,11 @@ private local instance tensorRSRiemannianNormedAddCommGroup_local
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma ccTensorBilinSymm_eq_half_rawComponent
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (α : M) (a b : Fin (Module.finrank ℝ E)) {p : M}
@@ -104,7 +106,8 @@ lemma ccTensorBilinSymm_eq_half_rawComponent
     rfl
   rw [hrawAB, hrawBA, hbilin a b, hbilin b a]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : E}
@@ -120,7 +123,8 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hO_open : IsOpen O := isOpen_interior
   have hcompose : tensorChartComponentOnModel (I := I) (M := M) g S α Jdx =
-      (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) ∘ ⇑e := by
+      (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
+        (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) ∘ ⇑e := by
     have h := rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx
     funext z
     have := congrFun h (e z)
@@ -132,14 +136,17 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR
   have hUDe : UniqueDiffOn ℝ Oe := hOe_open.uniqueDiffOn
   have hpre : (⇑e) ⁻¹' Oe = O := by rw [hOe_def, Set.preimage_image_eq _ e.injective]
   have hey : e y ∈ Oe := ⟨y, hy, rfl⟩
-  have hOe_sub : Oe ⊆ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
+  have hOe_sub : Oe ⊆ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I)
+    (M := M) α := by
     rw [hOe_def]
     rintro z ⟨x, hx, rfl⟩
-    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_eq_preimage_symm (I := I) (M := M)]
+    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_eq_preimage_symm (I := I)
+      (M := M)]
     simp only [Set.mem_preimage, he_def, ContinuousLinearEquiv.symm_apply_apply]
     exact interior_subset hx
   have hcr := e.iteratedFDerivWithin_comp_right
-    (f := tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
+    (f := tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
     hUDe (x := y) hey m
   rw [hpre] at hcr
   rw [hcr]
@@ -166,10 +173,12 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
   set O : Set E := interior (extChartAt I α).target with hO_def
   set K : Set EuclN := (toEuclidean (E := E)) '' B with hK_def
   have hK_compact : IsCompact K := hB_compact.image (toEuclidean (E := E)).continuous
-  have hK_sub : K ⊆ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
+  have hK_sub : K ⊆ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
+    α := by
     rw [hK_def]
     rintro z ⟨x, hx, rfl⟩
-    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_eq_preimage_symm (I := I) (M := M)]
+    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_eq_preimage_symm (I := I)
+      (M := M)]
     simp only [Set.mem_preimage, ContinuousLinearEquiv.symm_apply_apply]
     exact interior_subset (hB hx)
   set KM : Set M := (extChartAt I α).symm '' B with hKM_def
@@ -189,7 +198,8 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
   have hz_per : ∀ i : ℕ, ∃ Cz : ℝ, 0 ≤ Cz ∧ ∀ (S : SmoothCcTensor g 0 2) {b : M}, b ∈ KM →
       tensorComponentAbsSum (I := I) (M := M) g 0 (2 + i)
           (iteratedCovGrad g 0 2 i S) α (toEuclidean (E := E) (extChartAt I α b)) ≤
-        Cz * (letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
+        Cz * (letI : Bundle.RiemannianBundle
+                (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
           ‖(iteratedCovGrad g 0 2 i S).toSection b‖) := by
     intro i
@@ -198,7 +208,8 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
         hKM_compact hKM_sub
     exact ⟨Cz, hCz_nn, fun S b hb => hCz (iteratedCovGrad g 0 2 i S) hb⟩
   choose Czf hCzf_nn hCzf using hz_per
-  set Czmax : ℝ := (Finset.range (m + 1)).sup' (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero m)) Czf with hCzmax_def
+  set Czmax : ℝ := (Finset.range (m + 1)).sup' (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero m))
+    Czf with hCzmax_def
   have hCzmax_nn : 0 ≤ Czmax := by
     rw [hCzmax_def]
     exact le_trans (hCzf_nn 0) (Finset.le_sup' Czf (Finset.mem_range.mpr (Nat.succ_pos m)))
@@ -216,7 +227,8 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
   have hb_mem : b ∈ KM := ⟨y, hy, rfl⟩
   have hyB : toEuclidean (E := E) y ∈ K := ⟨y, hy, rfl⟩
   have hy_eq : extChartAt I α b = y := by rw [hb_def]; exact (extChartAt I α).right_inv hyt
-  have hrev := norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR (I := I) (M := M) g S α Jdx m (hB hy)
+  have hrev := norm_iteratedFDerivWithin_rawCompOnE_le_rawPullR (I := I) (M := M) g S α Jdx m
+    (hB hy)
   refine le_trans hrev ?_
   have hpeel_y := hpeel S m (le_refl m) 0 (by omega) (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx
     (toEuclidean (E := E) y) hyB
@@ -225,7 +237,8 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
         tensorComponentAbsSum (I := I) (M := M) g 0 (2 + (0 + i))
           (iteratedCovGrad g 0 2 (0 + i) S) α (toEuclidean (E := E) y) ≤
       Czmax * ∑ i ∈ Finset.range (m + 1),
-        (letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
+        (letI : Bundle.RiemannianBundle
+           (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
         ‖(iteratedCovGrad g 0 2 i S).toSection b‖) := by
     rw [Finset.mul_sum]
@@ -246,17 +259,20 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
           tensorComponentAbsSum (I := I) (M := M) g 0 (2 + (0 + i))
             (iteratedCovGrad g 0 2 (0 + i) S) α (toEuclidean (E := E) y) ≤
         Cpeel * (Czmax * ∑ i ∈ Finset.range (m + 1),
-          (letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
+          (letI : Bundle.RiemannianBundle
+             (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
           ‖(iteratedCovGrad g 0 2 i S).toSection b‖)) :=
       mul_le_mul_of_nonneg_left hsum_fiber hCpeel_nn
     refine le_trans hstep1 ?_
     have hfiber_le : ∑ i ∈ Finset.range (m + 1),
-          (letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
+          (letI : Bundle.RiemannianBundle
+             (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
           ‖(iteratedCovGrad g 0 2 i S).toSection b‖) ≤ Cemb * N := hemb
     have hthis : Czmax * ∑ i ∈ Finset.range (m + 1),
-          (letI : Bundle.RiemannianBundle (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
+          (letI : Bundle.RiemannianBundle
+             (fun bb : M => Tensor0SBundle.TensorRSSpace 0 (2 + i) I bb) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
           ‖(iteratedCovGrad g 0 2 i S).toSection b‖) ≤ Czmax * (Cemb * N) :=
       mul_le_mul_of_nonneg_left hfiber_le hCzmax_nn
@@ -267,7 +283,8 @@ lemma exists_rawCompOnE_jet_le_toHs_on_compact
         mul_le_mul_of_nonneg_left hpeel_y' hCnorm_nn
     _ = Cnorm * (Cpeel * (Czmax * Cemb)) * N := by ring
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 lemma exists_rawCompOnE_eigen_jet_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ)

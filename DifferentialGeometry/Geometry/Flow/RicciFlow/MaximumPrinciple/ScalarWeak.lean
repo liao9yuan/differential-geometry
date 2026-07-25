@@ -7,7 +7,6 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Tactic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

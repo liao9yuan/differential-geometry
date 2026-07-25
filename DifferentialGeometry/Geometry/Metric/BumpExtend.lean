@@ -49,7 +49,7 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 noncomputable section
 
 open Bundle Manifold Set ContinuousLinearMap Bornology TopologicalSpace
-open scoped Manifold Topology ContDiff Classical
+open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
 
@@ -62,6 +62,7 @@ namespace Geometry
 
 
 
+open scoped Classical in
 def extZeroForm (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (x : M) :
@@ -69,6 +70,7 @@ def extZeroForm (U : Opens M)
   if hx : x ∈ U then gU.inner ⟨x, hx⟩ else 0
 
 omit [FiniteDimensional ℝ E] in
+open scoped Classical in
 @[simp] lemma extZeroForm_of_mem (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) {x : M} (hx : x ∈ U)
@@ -78,6 +80,7 @@ omit [FiniteDimensional ℝ E] in
   exact DFunLike.congr_fun (DFunLike.congr_fun h v) w
 
 omit [FiniteDimensional ℝ E] in
+open scoped Classical in
 lemma extZeroForm_of_not_mem (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) {x : M} (hx : x ∉ U)
@@ -276,7 +279,6 @@ lemma bumpForm_coeff_contMDiffOn (R : SmoothRiemannianMetric I M) (U : Opens M)
       (fun x => bumpForm (I := I) R U gU χ x
         (frameVec (I := I) x₀ i x) (frameVec (I := I) x₀ j x))
       (trivializationAt E (TangentSpace I) x₀).baseSet := by
-
   have hrw : (fun x => bumpForm (I := I) R U gU χ x
         (frameVec (I := I) x₀ i x) (frameVec (I := I) x₀ j x))
       = (fun x => (χ x • extZeroForm (I := I) U gU x
@@ -286,9 +288,7 @@ lemma bumpForm_coeff_contMDiffOn (R : SmoothRiemannianMetric I M) (U : Opens M)
     rw [bumpForm_apply]
     simp [smul_eq_mul]
   rw [hrw]
-
   have hχgU := chiGU_coeff_cmdiffOn (I := I) U gU χ hχ hχsupp x₀ i j
-
   have hR : ContMDiffOn I 𝓘(ℝ) ∞
       (fun x => (1 - χ x) * R.inner x
         (frameVec (I := I) x₀ i x) (frameVec (I := I) x₀ j x))

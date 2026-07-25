@@ -32,7 +32,8 @@ omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma evalEmptyCLM_apply (F : Tensor0SModel 0 ℝ E) :
     evalEmptyCLM (E := E) F = F (fun i : Fin 0 => Fin.elim0 i) := rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensor0SChartE_section_repr_zero_empty (α : M)
     (T : Π b' : M, Tensor0SSpace 0 I b') {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -48,7 +49,8 @@ private lemma tensor0SChartE_section_repr_zero_empty (α : M)
   funext i
   exact i.elim0
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma tensor0SChartFiberFromModel_zero_empty (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (w : Tensor0SModel 0 ℝ E) :
@@ -66,7 +68,8 @@ private lemma tensor0SChartFiberFromModel_zero_empty (α : M) {b : M}
   funext i
   exact i.elim0
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma chartE_eval_eq_scalar (α : M)
     (T : Π b' : M, Tensor0SSpace 0 I b') {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -77,7 +80,8 @@ private lemma chartE_eval_eq_scalar (α : M)
   rw [evalEmptyCLM_apply]
   exact tensor0SChartE_section_repr_zero_empty (I := I) α T hb'
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma evalEmpty_chartPullback_eventually_eq_scalar
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -116,7 +120,8 @@ private lemma evalEmpty_chartPullback_eventually_eq_scalar
   rintro y ⟨_hy_int, hy_base⟩
   exact chartE_eval_eq_scalar (I := I) α T (b' := φ.symm y) hy_base
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -170,7 +175,8 @@ private lemma mdifferentiableAt_scalarFn_of_tensorSectionMDiffAt
     rw [chartE_eval_eq_scalar (I := I) α T hb']
   exact hcomp.congr_of_eventuallyEq hev
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv
     (α : M) (T : Π b' : M, Tensor0SSpace 0 I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

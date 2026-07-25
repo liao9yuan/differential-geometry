@@ -23,7 +23,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 theorem hasDerivAt_clm_comp_right
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (R : E →L[ℝ] E) :
@@ -36,7 +35,6 @@ theorem hasDerivAt_clm_comp_right
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 theorem chartCloseFderiv_eq_eucl_comp_trivToE
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ)
     (Φ_eucl : E → ℝ → E)
@@ -72,7 +70,6 @@ theorem chartCloseFderiv_eq_eucl_comp_trivToE
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 theorem chartCloseFderiv_hasDerivAt_of_eucl
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl : E →L[ℝ] E}
@@ -103,8 +100,8 @@ section MovingTrivInverse
 variable [CompleteSpace E]
 
 omit [CompleteSpace E] in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartMovingTriv_basepoint_isUnit (α : M) :
     IsUnit (chartMovingTriv (I := I) α (extChartAt I α α)) := by
   have h1 : chartMovingTriv (I := I) α (extChartAt I α α) = (1 : E →L[ℝ] E) := by
@@ -115,7 +112,6 @@ theorem chartMovingTriv_basepoint_isUnit (α : M) :
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] in
 theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ)
@@ -157,7 +153,8 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     _ = chartCloseTriv (I := I) Φ_fam α x s := by
           rw [Ring.inverse_mul_cancel _ hunit, one_mul]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartCloseTriv_hasDerivAt_of_movingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) {g' : E →L[ℝ] E}
     (hg : HasDerivAt

@@ -56,7 +56,6 @@ def IsometryDerivBoundsOn (U : Set E) (Φ : ℕ → E → F) : Prop :=
     ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDeriv ℝ r (Φ k) x‖ ≤ M
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-
 theorem IsometryDerivBoundsOn.comp_subseq {U : Set E} {Φ : ℕ → E → F}
     (h : IsometryDerivBoundsOn U Φ) (φ : ℕ → ℕ) :
     IsometryDerivBoundsOn U (fun k => Φ (φ k)) := by
@@ -65,8 +64,6 @@ theorem IsometryDerivBoundsOn.comp_subseq {U : Set E} {Φ : ℕ → E → F}
   exact ⟨M, fun k x hx => hM (φ k) x hx⟩
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-
-
 theorem IsometryDerivBoundsOn.pi
     {ι : Type*} [Fintype ι] {U : Set E} {Φ : ℕ → E → (ι → F)}
     (hU : IsOpen U)
@@ -93,21 +90,11 @@ theorem IsometryDerivBoundsOn.pi
       Finset.single_le_sum (fun j _ => le_max_right (M j) 0) (Finset.mem_univ i)
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
-
 theorem IsometryDerivBounds.toOn {Φ : ℕ → E → F} (h : IsometryDerivBounds Φ)
     (U : Set E) : IsometryDerivBoundsOn U Φ :=
   fun r K hK _ => h r K hK
 
 omit [FiniteDimensional ℝ E] in
-
-
-
-
-
-
-
-
-
 theorem comp_eq_id_of_cInf_on
     {U : Set E} {V : Set F}
     {Φ : ℕ → F → E} {Φinf : F → E} {Ψ : ℕ → E → F} {Ψinf : E → F}

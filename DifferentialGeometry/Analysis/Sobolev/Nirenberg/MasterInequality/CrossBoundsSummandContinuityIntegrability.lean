@@ -106,7 +106,6 @@ private lemma continuous_diffQuot_partial_u
   exact continuous_diffQuot_smooth (d := d) h_smooth k hh
 
 omit [NeZero d] in
-
 lemma continuous_partial_u
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i : Fin d) :
     Continuous (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single i 1)) := by
@@ -230,7 +229,8 @@ lemma integrable_const_indicator_diffQuot_sq
   rw [h_eq]
   have h_inner_cont : Continuous (fun y : E => c * (diffQuot k h u y)^2) :=
     continuous_const.mul h_diffQuot_u_sq_cont
-  exact (ContinuousOn.integrableOn_compact h_tsupp_compact h_inner_cont.continuousOn).integrable_indicator
+  exact (ContinuousOn.integrableOn_compact h_tsupp_compact
+    h_inner_cont.continuousOn).integrable_indicator
     h_tsupp_meas
 
 private lemma cross_2_summand_continuous
@@ -420,9 +420,10 @@ omit [NeZero d] in
 lemma hasCompactSupport_v_test
     {u : E → ℝ} {η : E → ℝ} (hη_supp : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :
-    HasCompactSupport (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
+    HasCompactSupport
+      (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
       k h η u) :=
-  DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.hasCompactSupport_nirenbergTestFunction
+  hasCompactSupport_nirenbergTestFunction
     hη_supp k h
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds

@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -257,7 +256,8 @@ theorem iterCov_product_one [FiniteDimensional Real E] {s q : ℕ}
 
 
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [IsManifold I 2 M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [IsManifold I 2 M] in
 theorem sqrt_normSq0S_add_le [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) {s : ℕ} {x : M}
@@ -300,7 +300,8 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B) m x)) ≤
       ∑ c ∈ Finset.range (m + 1), (m.choose c : Real) *
         Real.sqrt (normSq0S (I := I) gRef x (s + c) (iterCov (I := I) gRef s A c x)) *
-        Real.sqrt (normSq0S (I := I) gRef x (q + (m - c)) (iterCov (I := I) gRef q B (m - c) x)) := by
+        Real.sqrt (normSq0S (I := I) gRef x (q + (m - c))
+          (iterCov (I := I) gRef q B (m - c) x)) := by
   induction m with
   | zero =>
       intro s q A B
@@ -317,7 +318,6 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
       rw [normSq0S_product (I := I) gRef x basis hinv A B, Real.sqrt_mul hnn]
   | succ m ih =>
       intro s q A B
-
       have hL : Real.sqrt (normSq0S (I := I) gRef x ((s + q + 1) + m)
           (iterCov (I := I) gRef (s + q + 1)
             (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
@@ -326,8 +326,10 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
                 (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := q)
                 (iterCov (I := I) gRef s A 1) B)) m x)) ≤
           ∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) *
-            Real.sqrt (normSq0S (I := I) gRef x (s + (c + 1)) (iterCov (I := I) gRef s A (c + 1) x)) *
-            Real.sqrt (normSq0S (I := I) gRef x (q + (m - c)) (iterCov (I := I) gRef q B (m - c) x)) := by
+            Real.sqrt (normSq0S (I := I) gRef x (s + (c + 1)) (iterCov (I := I) gRef s A (c + 1) x))
+              *
+            Real.sqrt (normSq0S (I := I) gRef x (q + (m - c))
+              (iterCov (I := I) gRef q B (m - c) x)) := by
         rw [normSq0S_iterCov_domDomCongr (I := I) gRef (leibnizLeftEquiv s q)
           (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := q)
@@ -335,7 +337,6 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
         refine le_trans (ih (iterCov (I := I) gRef s A 1) B) (le_of_eq ?_)
         refine Finset.sum_congr rfl fun c _ => ?_
         rw [normSq0S_iterCov_shift (I := I) gRef A c x basis hinv, iterCov_one]
-
       have hR : Real.sqrt (normSq0S (I := I) gRef x ((s + q + 1) + m)
           (iterCov (I := I) gRef (s + q + 1)
             (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
@@ -345,7 +346,8 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
                 A (iterCov (I := I) gRef q B 1))) m x)) ≤
           ∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) *
             Real.sqrt (normSq0S (I := I) gRef x (s + c) (iterCov (I := I) gRef s A c x)) *
-            Real.sqrt (normSq0S (I := I) gRef x (q + (m - c + 1)) (iterCov (I := I) gRef q B (m - c + 1) x)) := by
+            Real.sqrt (normSq0S (I := I) gRef x (q + (m - c + 1))
+              (iterCov (I := I) gRef q B (m - c + 1) x)) := by
         rw [normSq0S_iterCov_domDomCongr (I := I) gRef (leibnizRightEquiv s q)
           (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q + 1)
@@ -353,7 +355,6 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
         refine le_trans (ih A (iterCov (I := I) gRef q B 1)) (le_of_eq ?_)
         refine Finset.sum_congr rfl fun c _ => ?_
         rw [normSq0S_iterCov_shift (I := I) gRef B (m - c) x basis hinv, iterCov_one]
-
       calc Real.sqrt (normSq0S (I := I) gRef x ((s + q) + (m + 1))
               (iterCov (I := I) gRef (s + q)
                 (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
@@ -362,7 +363,8 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
               (iterCov (I := I) gRef (s + q + 1)
                 (iterCov (I := I) gRef (s + q)
                   (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
-                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B) 1) m x)) := by
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B) 1) m
+                      x)) := by
             rw [normSq0S_iterCov_shift (I := I) gRef
               (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
                 (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s) (q := q) A B) m x basis hinv,
@@ -386,10 +388,12 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
         _ ≤ _ := add_le_add hL hR
         _ = ∑ c ∈ Finset.range (m + 1 + 1), ((m + 1).choose c : ℝ) *
               (Real.sqrt (normSq0S (I := I) gRef x (s + c) (iterCov (I := I) gRef s A c x)) *
-              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c)) (iterCov (I := I) gRef q B (m + 1 - c) x))) := by
+              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c))
+                (iterCov (I := I) gRef q B (m + 1 - c) x))) := by
             rw [← pascal_sum m (fun c => Real.sqrt (normSq0S (I := I) gRef x (s + c)
                 (iterCov (I := I) gRef s A c x)) *
-              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c)) (iterCov (I := I) gRef q B (m + 1 - c) x)))]
+              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c))
+                (iterCov (I := I) gRef q B (m + 1 - c) x)))]
             congr 1
             · refine Finset.sum_congr rfl fun c hc => ?_
               have : m + 1 - (c + 1) = m - c := by omega
@@ -400,14 +404,16 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
               rw [this]; ring
         _ = ∑ c ∈ Finset.range (m + 1 + 1), ((m + 1).choose c : ℝ) *
               Real.sqrt (normSq0S (I := I) gRef x (s + c) (iterCov (I := I) gRef s A c x)) *
-              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c)) (iterCov (I := I) gRef q B (m + 1 - c) x)) :=
+              Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c))
+                (iterCov (I := I) gRef q B (m + 1 - c) x)) :=
             Finset.sum_congr rfl fun c _ => by ring
 
 
 
 
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless] [IsManifold I 2 M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [IsManifold I 2 M] in
 theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
     (φ : M → Real) (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
     (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

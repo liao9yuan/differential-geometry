@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Uhlenbeck
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -214,7 +211,6 @@ theorem abs_rmReactionDown_le
   set N : Real := compNormSq4 R with hN
   have hNnonneg : 0 ≤ N := compNormSq4_nonneg R
   have hsqrt_nonneg : 0 ≤ Real.sqrt N := Real.sqrt_nonneg _
-
   have hInner :
       |∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
           R a b c d *
@@ -243,7 +239,6 @@ theorem abs_rmReactionDown_le
         mul_nonneg (by positivity) hNnonneg
       linarith
     exact mul_le_mul hbnd1 hbnd2 (abs_nonneg _) hsqrt_nonneg
-
   have hConst :
       (∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
           (Real.sqrt N * (4 * ((Fintype.card Idx : Real) ^ 2 * N)))) =
@@ -376,10 +371,7 @@ private theorem uhlenbeckBTensorInFrame_orthonormal
     fun a' b' c' d' =>
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a' b' c' d'
     with hRdef
-
-
   refine Finset.sum_congr rfl fun e _ => ?_
-
   have hg : ∀ f r : Idx,
       (∑ g : Idx, (if e = g then (1 : Real) else 0) * (if f = r then 1 else 0) *
           R a e b f * R c g d r) =
@@ -455,7 +447,8 @@ theorem abs_rmReactionInFrame_le
       16 * (Fintype.card Idx : Real) ^ 6 *
         (rm04NormSqInFrame (I := I) Rm04 gInv frame t x) ^ (3 / 2 : Real) := by
   set R : Idx → Idx → Idx → Idx → Real :=
-    fun a b c d => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d
+    fun a b c d => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c
+                     d
     with hR
   rw [rmReactionInFrame_eq_rmReactionDown (I := I) Rm04 gInv frame t x horth]
   rw [rm04NormSqInFrame_eq_compNormSq4 (I := I) Rm04 gInv frame t x horth]

@@ -335,7 +335,8 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
     have hxtarget : AlongCurve.chartCurve (I := I) α γ t ∈
         (extChartAt I α).target :=
       (extChartAt I α).map_source hxsrc
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hxtarget
   have hbase := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant
     (I := I) g α γ V W
@@ -448,7 +449,8 @@ theorem exists_uniform_chart_partition
     (chartAt H (γ τ)).open_source.preimage hγ
   have hcover : Set.Icc (0 : ℝ) L ⊆ ⋃ τ, c τ := by
     intro x _hx
-    exact Set.mem_iUnion.2 ⟨x, by simp only [hc_def, Set.mem_preimage]; exact mem_chart_source H (γ x)⟩
+    exact Set.mem_iUnion.2 ⟨x, by simp only [hc_def, Set.mem_preimage]; exact mem_chart_source H
+                                    (γ x)⟩
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     lebesgue_number_lemma_of_metric (isCompact_Icc (a := (0 : ℝ)) (b := L)) hc_open hcover
   obtain ⟨N₀, hN₀⟩ := exists_nat_gt (L / δ)
@@ -548,7 +550,8 @@ theorem exists_piece_parallel_section [I.Boundaryless]
         exact_mod_cast this)
     exact (hderiv_cd.continuousOn).mono hIcc_sub_U
   have hγa_src : γ t₀ ∈ (chartAt H α).source := hsrc t₀ ht₀
-  set y₀ : E := (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t₀) v₀ with hy₀_def
+  set y₀ : E := (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t₀) v₀ with
+    hy₀_def
   obtain ⟨Y, hY_deriv, hY_init⟩ :=
     parallel_local_existence_on_Icc (I := I) g α γ uPrime hab.le ht₀
       huPrimeCont hcurveCont hsrc y₀
@@ -724,7 +727,8 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
       have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ := (hVdiff t₀ ht₀).hasDerivAt
     have hWrep_hasDerivAt : HasDerivAt Wrep (deriv Wrep t₀) t₀ := (hWdiff t₀ ht₀).hasDerivAt
@@ -852,7 +856,8 @@ theorem exists_uniform_chart_radius
   have hc_open : ∀ τ, IsOpen (c τ) := fun τ => (chartAt H (γ τ)).open_source.preimage hγ
   have hcover : Set.Icc (-1 : ℝ) (L + 1) ⊆ ⋃ τ, c τ := by
     intro x _hx
-    exact Set.mem_iUnion.2 ⟨x, by simp only [hc_def, Set.mem_preimage]; exact mem_chart_source H (γ x)⟩
+    exact Set.mem_iUnion.2 ⟨x, by simp only [hc_def, Set.mem_preimage]; exact mem_chart_source H
+                                    (γ x)⟩
   obtain ⟨δ, hδ_pos, hδ⟩ :=
     lebesgue_number_lemma_of_metric (isCompact_Icc (a := (-1 : ℝ)) (b := L + 1)) hc_open hcover
   refine ⟨min (δ / 2) 1, lt_min (by positivity) one_pos, ?_⟩
@@ -875,7 +880,7 @@ theorem exists_uniform_chart_radius
 
 theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ,ℝ) I (N : ℕ∞) γ)
+    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
     {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
     ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
       V 0 = v₀ ∧
@@ -923,7 +928,8 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     have hsrc' : ∀ t ∈ Set.Icc (p - step) (p + 2 * step), γ t ∈ (chartAt H α).source :=
       fun t ht => hα t (hsub ht)
     have hlt : p - step < p + 2 * step := by linarith [hstep_pos]
-    have hp_mem : p ∈ Set.Icc (p - step) (p + 2 * step) := ⟨by linarith [hstep_pos], by linarith [hstep_pos]⟩
+    have hp_mem : p ∈ Set.Icc (p - step) (p + 2 * step) :=
+      ⟨by linarith [hstep_pos], by linarith [hstep_pos]⟩
     obtain ⟨Vp, hVp_init, hVp_diff, hVp_par⟩ :=
       exists_piece_parallel_section (I := I) g α γ hN hγ hlt hp_mem hsrc' w
     exact ⟨Vp, hVp_init, hVp_diff, hVp_par⟩
@@ -1047,7 +1053,7 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
 
 theorem exists_parallel_transport_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ,ℝ) I (N : ℕ∞) γ)
+    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ)
     {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
     ∃ V : ∀ t, TangentSpace I (γ t),
       V 0 = v₀ ∧

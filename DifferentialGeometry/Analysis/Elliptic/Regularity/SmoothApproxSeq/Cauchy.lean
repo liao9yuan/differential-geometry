@@ -46,7 +46,8 @@ private noncomputable def smoothScalarSub
   { toFun := fun x => v₁.toFun x - v₂.toFun x
     smooth := v₁.smooth.sub v₂.smooth }
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :
@@ -60,11 +61,11 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α
             (DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull.smoothApproxSeq
               (I := I) (M := M) g hu_h m) y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α
             (DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull.smoothApproxSeq
               (I := I) (M := M) g hu_h n) y)
@@ -99,14 +100,14 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α vm y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α vn y)
         (chartTargetEuclid (I := I) (M := M) α) =
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) := by
     refine DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
@@ -124,7 +125,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
   have h_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal C *

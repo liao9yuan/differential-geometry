@@ -32,7 +32,8 @@ theorem pullback_metric_evaluation_formula
   unfold Diffeomorph.pullbackInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 theorem mfderiv_time_derivative_along_flow
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v : TangentSpace I x)

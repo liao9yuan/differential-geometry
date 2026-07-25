@@ -68,7 +68,6 @@ end DifferentialForm
 noncomputable def iprod (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (hv : ContDiff ℝ ⊤ v) : Ω^m⟮E, F⟯ where
   toFun := fun e => ContinuousAlternatingMap.curryFin (ω e) (v e)
   smooth := by
-
     have hbl : IsBoundedLinearMap ℝ (curryFin (𝕜 := ℝ) (E := E) (F := F) (n := m)) :=
       ⟨⟨curryFin_add, fun c f => curryFin_smul c f⟩, 1, one_pos, fun g => by
         simp only [one_mul]
@@ -85,7 +84,8 @@ theorem iprod_apply (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (hv : ContDiff ℝ
     iprod ω v hv e = ContinuousAlternatingMap.curryFin (ω e) (v e) :=
   rfl
 
-noncomputable def DifferentialForm.wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'') : Ω^(m+n)⟮E, F''⟯ where
+noncomputable def DifferentialForm.wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')
+    : Ω^(m+n)⟮E, F''⟯ where
   toFun := fun x => ω.toFun x ∧[f] τ.toFun x
   smooth := by
     have hω : ContDiff ℝ ⊤ ω.toFun := ω.smooth
@@ -132,16 +132,12 @@ theorem _root_.ederiv_smul_const (a : E → ℝ) (e : E [⋀^Fin m]→L[ℝ] ℝ
     (ha : DifferentiableAt ℝ a y) (v : Fin (m + 1) → E) :
     _root_.ederiv (fun z ↦ a z • e) y v =
       ∑ k : Fin (m + 1), (-1 : ℤ) ^ k.val • (fderiv ℝ a y (v k)) • e (k.removeNth v) := by
-
   have hd : HasFDerivAt (fun z ↦ a z • e) ((fderiv ℝ a y).smulRight e) y :=
     ha.hasFDerivAt.smul_const e
-
   have hfderiv : fderiv ℝ (fun z ↦ a z • e) y = (fderiv ℝ a y).smulRight e := hd.fderiv
-
   change ContinuousAlternatingMap.uncurryFin (fderiv ℝ (fun z ↦ a z • e) y) v = _
   rw [hfderiv, ContinuousAlternatingMap.uncurryFin_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
-
   simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply]
 
 theorem _root_.ederiv_basis_expansion
@@ -157,11 +153,14 @@ theorem _root_.ederiv_basis_expansion
 
 theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')
     (v : E → E) (hv : ContDiff ℝ ⊤ v) :
-      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v hv = ((iprod ω v hv) ∧[f] τ)
-        + (-1 : ℝ)^(m + 1) • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] (iprod τ v hv))) := by
+      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v hv =
+        ((iprod ω v hv) ∧[f] τ)
+        + (-1 : ℝ)^(m + 1) • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc
+          (ω ∧[f] (iprod τ v hv))) := by
   ext e x
   erw[DifferentialForm.add_apply, ContinuousAlternatingMap.add_apply]
-  simp only [Nat.add_eq, iprod_apply, DifferentialForm.domDomCongr_apply, DifferentialForm.smul_apply, coe_smul]
+  simp only [Nat.add_eq, iprod_apply, DifferentialForm.domDomCongr_apply,
+    DifferentialForm.smul_apply, coe_smul]
   sorry
 
 namespace DifferentialForm
@@ -247,10 +246,12 @@ variable [Π (x : M), NormedAddCommGroup (TangentSpace IM x)]
 def minteriorProduct (α : Ω^k,(m + 1)⟮EM,IM,M⟯) (V : Π (x : M), TangentSpace IM x) :
     (x : M) → TangentSpace IM x [⋀^Fin m]→L[ℝ] Trivial M ℝ x := by
   intro x
-  let triv_α := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let triv_α := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin
+    (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   let α_local := (triv_α ⟨x, α x⟩).2
   let ip_local := ContinuousAlternatingMap.curryFin α_local (V x)
-  let triv_ip := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let triv_ip := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin
+    m⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   exact triv_ip.symm x ip_local
 
 end minteriorProduct
@@ -263,12 +264,16 @@ variable
 def mwedgeProduct (α : Ω^k,m⟮EM,IM,M⟯) (β : Ω^l,n⟮EM,IM,M⟯) :
     (x : M) → TangentSpace IM x [⋀^Fin (m + n)]→L[ℝ] Trivial M ℝ x := by
   intro x
-  let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
-  let triv_β := trivializationAt (EM [⋀^Fin n]→L[ℝ] ℝ) ⋀^Fin n⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin
+    m⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
+  let triv_β := trivializationAt (EM [⋀^Fin n]→L[ℝ] ℝ) ⋀^Fin
+    n⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   let α_local := (triv_α ⟨x, α x⟩).2
   let β_local := (triv_β ⟨x, β x⟩).2
-  let wedge_local := ContinuousAlternatingMap.wedge_product α_local β_local (ContinuousLinearMap.mul ℝ ℝ)
-  let triv_wedge := trivializationAt (EM [⋀^Fin (m + n)]→L[ℝ] ℝ) ⋀^Fin (m + n)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let wedge_local := ContinuousAlternatingMap.wedge_product α_local β_local
+    (ContinuousLinearMap.mul ℝ ℝ)
+  let triv_wedge := trivializationAt (EM [⋀^Fin (m + n)]→L[ℝ] ℝ) ⋀^Fin
+    (m + n)⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   exact triv_wedge.symm x wedge_local
 
 end mwedgeProduct
@@ -278,30 +283,36 @@ section mederiv
 variable (α : Ω^k,m⟮EM,IM,M⟯)
 
 def mederivWithin (s : Set M) (x : M) : TangentSpace IM x [⋀^Fin (m + 1)]→L[ℝ] Trivial M ℝ x :=
-  let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin
+    m⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   let α_local (e : EM) := (triv_α ⟨(extChartAt IM x).symm e, α ((extChartAt IM x).symm e)⟩).2
   let s_local := (extChartAt IM x).symm ⁻¹' s ∩ range IM
   let dα_local := ederivWithin α_local s_local
-  let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+  let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin
+    (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
   triv_dα.symm x (dα_local (extChartAt IM x x))
 
 lemma mederivWithin_def (s : Set M) :
   mederivWithin IM M α s = fun x ↦
-    let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+    let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin
+      m⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
     let α_local (e : EM) := (triv_α ⟨(extChartAt IM x).symm e, α ((extChartAt IM x).symm e)⟩).2
     let s_local := (extChartAt IM x).symm ⁻¹' s ∩ range IM
     let dα_local := ederivWithin α_local s_local
-    let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+    let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin
+      (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
     triv_dα.symm x (dα_local (extChartAt IM x x)) :=
   rfl
 
 lemma mederivWithin_apply (s : Set M) (x : M) :
   mederivWithin IM M α s x =
-    let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+    let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin
+      m⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
     let α_local (e : EM) := (triv_α ⟨(extChartAt IM x).symm e, α ((extChartAt IM x).symm e)⟩).2
     let s_local := (extChartAt IM x).symm ⁻¹' s ∩ range IM
     let dα_local := ederivWithin α_local s_local
-    let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
+    let triv_dα := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin
+      (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Trivial M ℝ⟯ x
     triv_dα.symm x (dα_local (extChartAt IM x x)) :=
   rfl
 

@@ -168,7 +168,8 @@ def tensorComponentEuclideanChart (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -179,7 +180,8 @@ lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx := rfl
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -201,7 +203,8 @@ lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (rawPullR_contDiffOn (I := I) (M := M) g r s S α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eventuallyEq_rawPullR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -219,13 +222,15 @@ def tensorComponentAbsSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y|
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma zeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ tensorComponentAbsSum (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -250,7 +255,8 @@ lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     fderiv ℝ (tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx') y
         (EuclideanSpace.single m 1) =
-      tensorComponentEuclideanChart (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S)
+      tensorComponentEuclideanChart (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s S)
           α Idx (Matrix.vecCons m Jdx') y -
         covDerivLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx' y := by
   classical
@@ -272,7 +278,8 @@ lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       g r s S α Idx Jdx' hy
     rw [Filter.EventuallyEq.fderiv_eq h_ev]
   have hform' :
-      tensorComponentEuclideanChart (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S)
+      tensorComponentEuclideanChart (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s S)
           α Idx (Matrix.vecCons m Jdx') y =
         fderiv ℝ (tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx') y
             (EuclideanSpace.single m 1) +
@@ -892,13 +899,15 @@ private def tensorComponentSqSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| ^ 2
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma hsZeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ tensorComponentSqSum (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma zeroContentR_sq_le_card_mul_hsZeroContentR
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
@@ -1003,7 +1012,8 @@ private lemma reverse_pointwise_integrand_le
               (fun i => EuclideanSpace.basisFun (Fin n) ℝ (bIdx i))| ^ 2 ≤ Fop ^ 2 := by
         intro bIdx
         have h_le := abs_apply_basisTupleE_le_opNorm (E := E)
-          (iteratedFDeriv ℝ j (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y) bIdx
+          (iteratedFDeriv ℝ j (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2)
+            y) bIdx
         have h_abs_nn : 0 ≤ |(iteratedFDeriv ℝ j
             (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y)
             (fun i => EuclideanSpace.basisFun (Fin n) ℝ (bIdx i))| := abs_nonneg _
@@ -1177,22 +1187,26 @@ private lemma rawPullRIntegrand_aemeasurable
       (fun y : EuclN => ENNReal.ofReal
         (((chartAtlasPOU I M α : M → ℝ)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
-          |(iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2) y)
+          |(iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2)
+            y)
               (fun i => EuclideanSpace.basisFun
                 (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
       ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_iter_contOn :
-      ContinuousOn (iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2))
+      ContinuousOn (iteratedFDeriv ℝ l
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2))
         (chartTargetEuclid (I := I) (M := M) α) := by
     intro y hy
-    have h_cd : ContDiffAt ℝ ∞ (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2) y :=
+    have h_cd : ContDiffAt ℝ ∞ (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2)
+      y :=
       rawPullR_contDiffAt (I := I) (M := M) g r s S α q.1 q.2 hy
     exact (h_cd.continuousAt_iteratedFDeriv (k := l)
       (by exact_mod_cast le_top)).continuousWithinAt
   have h_eval : ContinuousOn
-      (fun y : EuclN => (iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2) y)
+      (fun y : EuclN => (iteratedFDeriv ℝ l
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2) y)
           (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx i)))
       (chartTargetEuclid (I := I) (M := M) α) :=
     (continuous_eval_const _).comp_continuousOn h_iter_contOn
@@ -1214,7 +1228,8 @@ private lemma rawPullRIntegrand_aemeasurable
   have h_real : ContinuousOn
       (fun y : EuclN => ((chartAtlasPOU I M α : M → ℝ)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
-          |(iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2) y)
+          |(iteratedFDeriv ℝ l (tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2)
+            y)
               (fun i => EuclideanSpace.basisFun
                 (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -1374,7 +1389,8 @@ private lemma sumIntegrals_eq_integral_sumR
                     (((chartAtlasPOU I M α : M → ℝ)
                         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
                       |(iteratedFDeriv ℝ j
-                            (tensorComponentEuclideanChart (I := I) (M := M) g r' s' S α IJ.1 IJ.2) y)
+                            (tensorComponentEuclideanChart (I := I) (M := M) g r' s' S α IJ.1 IJ.2)
+                              y)
                           (fun i => EuclideanSpace.basisFun
                             (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2))
               ((volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)) := by

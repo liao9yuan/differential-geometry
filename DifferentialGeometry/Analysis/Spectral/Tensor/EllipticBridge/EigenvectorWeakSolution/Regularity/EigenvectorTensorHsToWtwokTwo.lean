@@ -36,7 +36,6 @@ namespace TensorHsSmoothReprAux
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open scoped Classical in
-
 omit [CompleteSpace E] in
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -118,7 +117,6 @@ private lemma partialSum_empty_unconditional
   unfold partialSum_unconditional; simp
 
 open scoped Classical in
-
 omit [CompleteSpace E] in
 private lemma partialSum_insert_unconditional
     {S : Finset (TensorEigenIdx (I := I) (M := M) g r s)}

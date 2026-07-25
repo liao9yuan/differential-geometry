@@ -46,7 +46,8 @@ private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c
     (Ψ : (k : ℕ) → SmoothCcTensor g (b + k) (c + i)) (W : SmoothCcTensor g a b) :
     covGrad (I := I) (M := M) g a (c + i)
         (∑ k ∈ Finset.range (i + 1),
-          ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i) (Ψ k) (iteratedCovGrad g a b k W)) =
+          ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i) (Ψ k)
+            (iteratedCovGrad g a b k W)) =
       ∑ k ∈ Finset.range (i + 1),
         (ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
             (covGrad (I := I) (M := M) g (b + k) (c + i) (Ψ k)) (iteratedCovGrad g a b k W) +

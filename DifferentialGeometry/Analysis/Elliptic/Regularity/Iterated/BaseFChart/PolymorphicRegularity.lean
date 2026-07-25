@@ -34,6 +34,7 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularity
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
+open Analysis.Sobolev.EquivalenceFull
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -50,7 +51,8 @@ private noncomputable def smoothScalarSub
   { toFun := fun x => v₁.toFun x - v₂.toFun x
     smooth := v₁.smooth.sub v₂.smooth }
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :
@@ -176,10 +178,10 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α
             (smoothApproxSeqWkpM (I := I) (M := M) g m hu a) y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α
             (smoothApproxSeqWkpM (I := I) (M := M) g m hu b) y)
         (chartTargetEuclid (I := I) (M := M) α) ≤ ENNReal.ofReal ε := by
@@ -213,14 +215,14 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α va y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α vb y)
         (chartTargetEuclid (I := I) (M := M) α) =
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) := by
     refine DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
@@ -238,7 +240,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
   have h_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        (smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal C *
@@ -444,7 +446,7 @@ private theorem eLpNorm_diff_smoothApproxSeqWkpM_tendsto_zero
       atTop (𝓝 0) := by
   classical
   obtain ⟨C, hC_nn, hC_bnd⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceFull.eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
+    eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
       (I := I) (M := M) g (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :
@@ -792,7 +794,8 @@ private lemma smoothFChartResidual_aestronglyMeasurable
     AEStronglyMeasurable
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
         (I := I) (M := M) g α v) μ := by
-  unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+  unfold
+    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
   exact (Lp.stronglyMeasurable _).aestronglyMeasurable.mono_measure (le_refl _)
 
@@ -815,7 +818,7 @@ private lemma exists_subseq_ae_volume_restrict
         (chartTargetEuclid (I := I) (M := M) α)))
     (h_tendsto : Tendsto (fun n =>
       eLpNorm (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v n) y - F_lim y) 2
         ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)))
@@ -824,7 +827,7 @@ private lemma exists_subseq_ae_volume_restrict
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
         Tendsto (fun n =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v (σ n)) y) atTop
           (𝓝 (F_lim y)) := by
   classical
@@ -838,7 +841,7 @@ private lemma exists_subseq_ae_volume_restrict
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α))
       (fun n =>
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        smoothFChartResidual
           (I := I) (M := M) g α (v n))
       atTop F_lim :=
     MeasureTheory.tendstoInMeasure_of_tendsto_eLpNorm
@@ -857,7 +860,7 @@ private lemma exists_subseq_ae_weighted_restrict
         (chartTargetEuclid (I := I) (M := M) α)))
     (h_tendsto : Tendsto (fun n =>
       eLpNorm (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v n) y - F y) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)))
@@ -866,7 +869,7 @@ private lemma exists_subseq_ae_weighted_restrict
       ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
         Tendsto (fun n =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v (σ n)) y) atTop
           (𝓝 (F y)) := by
   classical
@@ -880,7 +883,7 @@ private lemma exists_subseq_ae_weighted_restrict
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
       (fun n =>
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        smoothFChartResidual
           (I := I) (M := M) g α (v n))
       atTop F :=
     MeasureTheory.tendstoInMeasure_of_tendsto_eLpNorm
@@ -904,7 +907,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
         DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) m 2
           (fun y =>
-            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+            smoothFChartResidual
               (I := I) (M := M) g α
               (smoothApproxSeqWkpM (I := I) (M := M) g m hu_chart n) y -
             F_lim y)
@@ -936,14 +939,14 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
   have h_eLpNorm_volume_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
-            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+            smoothFChartResidual
               (I := I) (M := M) g α (v n) y - F_lim y) 2
           ((volume : Measure EuclN).restrict
             (chartTargetEuclid (I := I) (M := M) α)))
         atTop (𝓝 0) :=
     eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero m
       (u := fun n =>
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+        smoothFChartResidual
           (I := I) (M := M) g α (v n))
       (F_lim := F_lim)
       (Ω := chartTargetEuclid (I := I) (M := M) α)
@@ -955,7 +958,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
   have h_eLpNorm_weighted_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>
-            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+            smoothFChartResidual
               (I := I) (M := M) g α (v n) y -
             DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
               (I := I) (M := M) g α u_h y) 2
@@ -970,7 +973,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
   have h_eLpNorm_weighted_subseq :
       Tendsto (fun n =>
         eLpNorm (fun y =>
-            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+            smoothFChartResidual
               (I := I) (M := M) g α (v (σ n)) y -
             DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
               (I := I) (M := M) g α u_h y) 2
@@ -988,7 +991,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
         Tendsto (fun n =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v (σ (τ n))) y) atTop
           (𝓝 (F_lim y)) := by
     filter_upwards [hσ_ae] with y hy
@@ -1003,7 +1006,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
         Tendsto (fun n =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
+          smoothFChartResidual
             (I := I) (M := M) g α (v (σ (τ n))) y) atTop
           (𝓝 ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
               (I := I) (M := M) g α u_h) y)) :=

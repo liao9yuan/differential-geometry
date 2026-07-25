@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -73,7 +70,8 @@ theorem rm13Deriv_of_solution
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b)))
+        (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d
+          a b)))
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
     (i k j m : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
@@ -83,19 +81,22 @@ theorem rm13Deriv_of_solution
       (christoffelVariationCovDerivCoordAt (I := I)
           (S.family.connection (t : Real))
           (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-            (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+            (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t
+              x d a b))
           (t : Real) x₀ i m k j -
         christoffelVariationCovDerivCoordAt (I := I)
           (S.family.connection (t : Real))
           (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-            (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+            (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t
+              x d a b))
           (t : Real) x₀ k m i j)
       D.carrier
       (t : Real) :=
   christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (I := I) S hS
     (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
-      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b))
+      (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a
+        b))
     x₀
     (christoffelEvolution_of_solution (I := I) S hS (coordInv (I := I) S x₀) gInvDt
       (coordinateFrameAt (I := I) x₀) (coordinateFrameAt_isLocalFrame_one (I := I) x₀)

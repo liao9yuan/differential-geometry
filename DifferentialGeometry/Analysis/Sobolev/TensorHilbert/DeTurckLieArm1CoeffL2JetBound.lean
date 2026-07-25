@@ -100,17 +100,21 @@ theorem deTurckLieArm1Coeff_eq_lieArm1Piece_sum (g₀ g₁ g_bg : SmoothRiemanni
               (connDiffSection (I := I) g₁ g₀)
             - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaF (Equiv.refl (Fin 3))
               (connDiffSection (I := I) g₁ g₀))
-          + (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaASwap (Equiv.refl (Fin 3))
+          + (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaASwap
+            (Equiv.refl (Fin 3))
               (connDiffSection (I := I) g₁ g₀)
-            + deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaASwap (Equiv.refl (Fin 3))
+            + deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaASwap
+              (Equiv.refl (Fin 3))
               (lieArm1PsiB (I := I) (M := M) g₀ g₁ g_bg)
-            - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaCSwap (Equiv.refl (Fin 3))
+            - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaCSwap
+              (Equiv.refl (Fin 3))
               (connDiffSection (I := I) g₁ g₀)
             - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaDSwap lieArm1RhoSlot0
               (connDiffSection (I := I) g₁ g₀)
             - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaESwap lieArm1RhoSlot1
               (connDiffSection (I := I) g₁ g₀)
-            - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaFSwap (Equiv.refl (Fin 3))
+            - deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ lieArm1SigmaFSwap
+              (Equiv.refl (Fin 3))
               (connDiffSection (I := I) g₁ g₀))
           + deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ g₁ (Equiv.refl (Fin 4)) lieArm1RhoSlot0
               (connDiffSection (I := I) g₁ g₀)).toSection x) D := by
@@ -138,7 +142,8 @@ theorem lieArm1Piece_connDiff_realizedFam_jetL2_perOrder_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀))‖ ^ 2 ≤
             P i := by
   by_cases hM : Nonempty M
@@ -239,7 +244,8 @@ theorem lieArm1Piece_connDiffBg_realizedFam_jetL2_perOrder_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (lieArm1ConnDiffBgCc (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ^ 2 ≤ P i := by
   by_cases hM : Nonempty M
@@ -398,7 +404,8 @@ theorem lieArm1Piece_psiB_realizedFam_jetL2_perOrder_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              (deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (lieArm1PsiB (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ^ 2 ≤ P i := by
   by_cases hM : Nonempty M
@@ -501,7 +508,8 @@ theorem lieArm1Piece_connDiff_realizedFam_rfns_order0_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
                   g₀)).toSection x) ≤ Λ := by
   by_cases hM : Nonempty M
@@ -558,7 +566,8 @@ theorem lieArm1Piece_connDiffBg_realizedFam_rfns_order0_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (lieArm1ConnDiffBgCc (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)).toSection x) ≤ Λ := by
   by_cases hM : Nonempty M
@@ -629,7 +638,8 @@ theorem lieArm1Piece_psiB_realizedFam_rfns_order0_ballUniform
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
+              ((deTurckLieTraceCoeffPiece (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (lieArm1PsiB (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)).toSection x) ≤ Λ := by
   by_cases hM : Nonempty M
@@ -930,7 +940,8 @@ theorem deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform
   have h14 := hcd (Equiv.refl (Fin 4)) lieArm1RhoSlot0
   linarith [htri1, htri2, htri3, hblock1, hblock2]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -942,7 +953,8 @@ private theorem lieArm1_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [lieArm1_rfns_neg (I := I) (M := M) g r s x b] at h
   exact h
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_block6_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (b1 b2 b3 b4 b5 b6 : TensorRSSpace r s I x) :
@@ -962,7 +974,8 @@ private theorem lieArm1_rfns_block6_le (g : SmoothRiemannianMetric I M) (r s : �
   have hn6 := riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x b6
   linarith
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_rfns_block6_le' (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (b1 b2 b3 b4 b5 b6 : TensorRSSpace r s I x) :

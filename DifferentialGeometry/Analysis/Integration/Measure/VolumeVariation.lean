@@ -43,7 +43,8 @@ abbrev volumeMeasureFamily [T2Space M] [SigmaCompactSpace M]
 
 @[simp]
 theorem volumeMeasureFamily_eq [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) (t : Real) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+      (t : Real) :
     volumeMeasureFamily (I := I) (M := M) G t =
       Measure.volumeMeasureAt (I := I) (M := M) G t := rfl
 
@@ -57,7 +58,8 @@ abbrev volumeMeasureFamilyOn [T2Space M] [SigmaCompactSpace M]
 @[simp]
 theorem volumeMeasureFamilyOn_eq [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) (t : Real) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D)
+      (t : Real) :
     volumeMeasureFamilyOn (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M)
         (G.metric t) := rfl
@@ -72,27 +74,31 @@ theorem volumeMeasureFamilyOn_eq_volumeMeasureOn [T2Space M] [SigmaCompactSpace 
 
 
 abbrev traceTimeDerivMetricAt
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) (t : Real) (x : M) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+      (t : Real) (x : M) :
     Real :=
   traceTimeDerivMetric (I := I) (metricFamilyForMeasure (I := I) (M := M) G) t x
 
 @[simp]
 theorem traceTimeDerivMetricAt_eq
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) (t : Real) (x : M) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+      (t : Real) (x : M) :
     traceTimeDerivMetricAt (I := I) G t x =
       traceTimeDerivMetric (I := I) (metricFamilyForMeasure (I := I) (M := M) G) t x := rfl
 
 
 abbrev traceTimeDerivMetricOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) (t : Real) (x : M) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D)
+      (t : Real) (x : M) :
     Real :=
   traceTimeDerivMetric (I := I) (metricFamilyForMeasureOn (I := I) (M := M) G) t x
 
 @[simp]
 theorem traceTimeDerivMetricOn_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D) (t : Real) (x : M) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn (I := I) (M := M) D)
+      (t : Real) (x : M) :
     traceTimeDerivMetricOn (I := I) G t x =
       traceTimeDerivMetric (I := I) (metricFamilyForMeasureOn (I := I) (M := M) G) t x := rfl
 

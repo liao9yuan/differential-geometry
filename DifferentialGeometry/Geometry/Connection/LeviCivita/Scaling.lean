@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -28,7 +27,8 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem mfderiv_const_smul_ne
     {f : M -> Real} {x : M} {c : Real} (hc : c ≠ 0) :
     mfderiv I 𝓘(Real, Real) (c • f) x =
@@ -49,7 +49,8 @@ private theorem mfderiv_const_smul_ne
     rw [smul_zero]
     rfl
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] in
 private theorem directionalDeriv_const_mul_ne
     (X : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M)
     {c : Real} (hc : c ≠ 0) :

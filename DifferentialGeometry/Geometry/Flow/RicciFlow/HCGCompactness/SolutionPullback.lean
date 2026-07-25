@@ -113,7 +113,8 @@ theorem gradientFun_pullback
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I ∞ N] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [IsManifold I ∞ M] [IsManifold I ∞ N] in
 theorem mfderiv_symm_apply
     (Φ : M ≃ₘ⟮I, I⟯ N) (y : M) (v : TangentSpace I (Φ y)) :
     (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v
@@ -210,7 +211,6 @@ theorem metricFamilySmoothOn_pullback
       exact Diffeomorph.pullbackMetric_inner (I := I) (S.family.metric p.1) Φ p.2
         (frame i p.2) (frame j p.2)
     rw [heq]
-
     have hpf := hS.smoothMetric.frameCompSmooth
       (fun k (y : N) => mfderiv I I (Φ : M → N) (Φ.symm y) (frame k (Φ.symm y)))
       (hframe.pushforward Φ) i j
@@ -221,7 +221,6 @@ theorem metricFamilySmoothOn_pullback
         (D.regular ×ˢ u) (D.regular ×ˢ (Φ '' u)) :=
       fun p hp => ⟨hp.1, Set.mem_image_of_mem _ hp.2⟩
     have hcomp := hpf.comp hmap.contMDiffOn hmaps
-
     have hN : ∀ (k : Idx) (x : M),
         (mfderiv I I (Φ : M → N) (Φ.symm (Φ x)) (frame k (Φ.symm (Φ x))) : E)
           = (mfderiv I I (Φ : M → N) x (frame k x) : E) :=

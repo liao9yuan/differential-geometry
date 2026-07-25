@@ -29,13 +29,15 @@ noncomputable def riemannianFrameScalar
     (g : SmoothRiemannianMetric I M) (b : M) (S : TensorRSSpace 0 2 I b) : ℝ :=
   (riemannianFiberNormSq_le_pointwise_witness (I := I) (M := M) g 0 2 b S).choose
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma riemannianFrameScalar_nonneg
     (g : SmoothRiemannianMetric I M) (b : M) (S : TensorRSSpace 0 2 I b) :
     0 ≤ riemannianFrameScalar (I := I) (M := M) g b S :=
   (riemannianFiberNormSq_le_pointwise_witness (I := I) (M := M) g 0 2 b S).choose_spec.1
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma riemannianFiberNormSq_le_frameScalar_sq
     (g : SmoothRiemannianMetric I M) (b : M) (S : TensorRSSpace 0 2 I b) :
     riemannianFiberNormSq (I := I) (M := M) g 0 2 b S ≤

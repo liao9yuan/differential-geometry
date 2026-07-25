@@ -52,14 +52,13 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 section LengthBookkeeping
 
 
-set_option linter.unusedVariables false in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hfin : pathELength I γ a b ≠ ⊤)
-    (hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
+    (_hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
     riemannianEDist I (γ s) (γ t) = pathELength I γ s t := by
   set L_left := pathELength I γ a s with hL_left_def
   set L_mid := pathELength I γ s t with hL_mid_def
@@ -417,12 +416,11 @@ private theorem mfderiv_expMap_injective_of_norm_lt_radius
   rw [hA_eq]
   exact hΦinj
 
-set_option linter.unusedVariables false in
 theorem normalBall_radial_length_le_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
@@ -1214,12 +1212,11 @@ private theorem radial_minimizer_radiality
     rw [hcv₂_eq] at hradial
     exact hradial
 
-set_option linter.unusedVariables false in
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < expRadiusGp (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a < b)
@@ -1759,7 +1756,8 @@ private theorem path_confined_to_normalBall
   have hL₀_lt_R : L₀ < R := by
     rw [hL₀_def]; exact (ENNReal.lt_ofReal_iff_toReal_lt hlen_ne_top).mp hlen
   have hL₀_nn : 0 ≤ L₀ := ENNReal.toReal_nonneg
-  have hcsrc : c ∈ ψ.source := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g c
+  have hcsrc : c ∈ ψ.source := by
+    rw [hψ_def]; exact NormalCoordinates.normalChartAt_source (I := I) g c
   have hψc : ψ c = 0 := by rw [hψ_def]; exact NormalCoordinates.normalChartAt_centre (I := I) g c
   have hopen_src : IsOpen ψ.source := by
     rw [hψ_def]; exact NormalCoordinates.normalChartAt_open_source (I := I) g c
@@ -1908,7 +1906,8 @@ private theorem path_confined_to_normalBall
             have hmaps : Set.MapsTo γ (Set.Ioo 0 t₀) ψ.source :=
               fun z hz => (hpre z ⟨hz.1.le, hz.2.le⟩ hz.2).1
             exact (hψcont _ hγt₀_src).comp h1 hmaps
-          exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+          exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt
+            hcomp)
         have htend : Filter.Tendsto ρ (nhdsWithin t₀ (Set.Ioo 0 t₀)) (nhds (ρ t₀)) :=
           hρcontWithin
         have hev : ∀ᶠ s in nhdsWithin t₀ (Set.Ioo 0 t₀), ρ s ≤ L₀ := by
@@ -1937,7 +1936,8 @@ private theorem path_confined_to_normalBall
         have hmaps : Set.MapsTo γ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) ψ.source :=
           fun s hs => hs.2
         exact (hψcont _ hγt₀_src).comp h1 hmaps
-      exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt hcomp)
+      exact ((psd_sqrt_lipschitz B hBsym hBnn).continuous.continuousAt.comp_continuousWithinAt
+        hcomp)
     have hρ_small_nhds : {s | ρ s < R} ∈
         nhdsWithin t₀ (Set.Icc (0 : ℝ) 1 ∩ γ ⁻¹' ψ.source) := by
       have : Set.Iio R ∈ nhds (ρ t₀) := isOpen_Iio.mem_nhds hρt₀_lt

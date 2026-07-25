@@ -520,7 +520,8 @@ private theorem wkpNormChartL2_add_le_aux
     rw [h_chartL2Sq_V]
     exact (ENNReal.sum_lt_top.mpr fun α _ =>
       ENNReal.pow_lt_top (h_finiteness_fV α)).ne
-  have h_chartL2Sq_UV_finite : wkpNormChartL2Sq (I := I) (M := M) g k (fun x => u x + v x) ≠ (⊤ : ℝ≥0∞) := by
+  have h_chartL2Sq_UV_finite : wkpNormChartL2Sq (I := I) (M := M) g k (fun x => u x + v x) ≠
+    (⊤ : ℝ≥0∞) := by
     rw [h_chartL2Sq_UV]
     exact (ENNReal.sum_lt_top.mpr fun α _ =>
       ENNReal.pow_lt_top (h_finiteness_fUV α)).ne

@@ -395,7 +395,7 @@ private theorem exists_unified_chartFlow_data_two
   have hx₀_target : x₀ ∈ (extChartAt I p).target :=
     (extChartAt I p).map_source hx₀_src
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
-    DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) p hx₀_target
   obtain ⟨b, r, ε, ρ_V4, T_V4, Φ, hr, hε, hρ_V4_pos, hT_V4_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V4_two, hΦ_init0⟩ :=
@@ -698,7 +698,7 @@ private theorem exists_unified_chartFlow_data_inf
   have hx₀_target : x₀ ∈ (extChartAt I p).target :=
     (extChartAt I p).map_source hx₀_src
   have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
-    DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) p hx₀_target
   obtain ⟨b, r, ε, ρ_V4, T_V4, Φ, hr, hε, hρ_V4_pos, hT_V4_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V4_inf, hΦ_init0⟩ :=
@@ -1178,7 +1178,7 @@ theorem exists_chartExp_jointContDiffOn_infty
   have hx₀_target : x₀ ∈ (extChartAt I α).target :=
     (extChartAt I α).map_source hx₀_src
   have hx₀_interior : x₀ ∈ interior (extChartAt I α).target :=
-    DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hx₀_target
   obtain ⟨b, r, ε, ρ_V, T_V, Φ, hr, hε, hρ_V_pos, hT_V_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V, hΦ_init0⟩ :=

@@ -24,15 +24,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem field_time_clamp_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (hcont0 : ContinuousOn (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2)) (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z) (extChartAt I α q.2)) (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+    (hcont0 : ContinuousOn (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M, ContinuousOn
+      (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X_DT q.1) z)
+      (extChartAt I α q.2)) (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
     ∃ Xext : ℝ → ∀ x : M, TangentSpace I x,
       (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ x : M, Xext s x = X_DT s x) ∧
       ContinuousOn (fun q : ℝ × M => (Xext q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)) ∧
-      (∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (Xext q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M))) := by
+      (∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ
+        (fun z => chartTrivRepr (I := I) α (Xext q.1) z) (extChartAt I α q.2))
+        (Set.univ : Set (ℝ × M))) := by
   classical
   set c : ℝ → ℝ := fun s => max 0 (min s T) with hc
   have hc_cont : Continuous c := continuous_const.max (continuous_id.min continuous_const)

@@ -34,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem joint_rfns_cont
@@ -154,8 +152,6 @@ theorem joint_jet_rfns
     (covGrad_iter_joint (I := I) (M := M) g₀ r s i Φ S hjoint)
 
 omit [T2Space M] [SigmaCompactSpace M] in
-
-
 private theorem joint_small
     (f : ℝ → M → ℝ) {S : Set ℝ} {t₀ : ℝ}
     (hS : S ∈ 𝓝 t₀)

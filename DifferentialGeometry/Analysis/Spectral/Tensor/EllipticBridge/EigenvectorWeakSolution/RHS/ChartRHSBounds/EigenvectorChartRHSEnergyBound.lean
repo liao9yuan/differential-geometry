@@ -37,7 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma eigenvalue_mem_Ioc
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -60,7 +59,6 @@ private lemma eigenvalue_mem_Ioc
       exact one_ne_zero h_norm.symm)
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -154,7 +152,6 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
   rw [h_pow_eq, smul_eq_mul]
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -528,7 +525,6 @@ private lemma ofReal_mul_muPow_le_ofReal {C μ : ℝ} (hC : 0 ≤ C)
       _ = C := mul_one C
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_eLpNorm_le_energy
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

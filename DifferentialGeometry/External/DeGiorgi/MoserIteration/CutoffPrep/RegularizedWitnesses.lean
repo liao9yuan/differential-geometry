@@ -5,7 +5,8 @@ import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.ExactReg
 /-!
 # Moser Regularized Witnesses
 
-This module packages the regularized clipped positive-part, power-cutoff, and test-cutoff witnesses used in the Chapter 06 energy argument.
+This module packages the regularized clipped positive-part, power-cutoff, and test-cutoff
+witnesses used in the Chapter 06 energy argument.
 -/
 
 noncomputable section
@@ -150,7 +151,8 @@ theorem moserRegTestCutoff_memH01
     (hη_grad_bound : ∀ x, ‖fderiv ℝ η x‖ ≤ Cη)
     (hη_sub_ball : tsupport η ⊆ Metric.ball (0 : E) s) :
     MemH01 (moserRegTestCutoff η u ε N p) (Metric.ball (0 : E) s) := by
-  let hwTest := moserRegTestCutoffWitness (d := d) (p := p) hs hs1 hε hN hu1 hη hη_bound hη_grad_bound
+  let hwTest := moserRegTestCutoffWitness (d := d) (p := p) hs hs1 hε hN hu1 hη hη_bound
+    hη_grad_bound
   have hv_support : tsupport (moserRegTestCutoff η u ε N p) ⊆ Metric.ball (0 : E) s :=
     moserRegTestCutoff_tsupport_subset (d := d) hη_sub_ball
   have hv_compact : HasCompactSupport (moserRegTestCutoff η u ε N p) :=
@@ -162,6 +164,7 @@ theorem moserRegTestCutoff_memH01
   simpa using hv_memW01p
 
 set_option maxHeartbeats 400000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- The gradient of `moserRegPowerCutoffWitness` decomposes as η · (chain rule) + (product rule).
 This is the analogue of `deGiorgiCutoffTestWitnessWeighted_grad` from Chapter 05. -/
 lemma moserRegPowerCutoffWitness_grad

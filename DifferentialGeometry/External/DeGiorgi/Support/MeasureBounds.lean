@@ -71,8 +71,8 @@ omit [NeZero d] in
 theorem essSup_le_of_ae_bdd
     {μ : Measure E} (hμ : μ ≠ 0)
     {u : E → ℝ} {K C : ℝ}
-    (hlow : ∀ᵐ x ∂ μ, K ≤ u x)
-    (hupp : ∀ᵐ x ∂ μ, u x ≤ C) :
+    (hlow : ∀ᵐ x ∂μ, K ≤ u x)
+    (hupp : ∀ᵐ x ∂μ, u x ≤ C) :
     essSup u μ ≤ C := by
   rw [essSup_eq_sInf]
   refine csInf_le ?_ ?_
@@ -101,8 +101,8 @@ omit [NeZero d] in
 theorem le_essInf_of_ae_bdd
     {μ : Measure E} (hμ : μ ≠ 0)
     {u : E → ℝ} {c C : ℝ}
-    (hlow : ∀ᵐ x ∂ μ, c ≤ u x)
-    (hupp : ∀ᵐ x ∂ μ, u x ≤ C) :
+    (hlow : ∀ᵐ x ∂μ, c ≤ u x)
+    (hupp : ∀ᵐ x ∂μ, u x ≤ C) :
     c ≤ essInf u μ := by
   rw [essInf_eq_sSup]
   refine le_csSup ?_ ?_

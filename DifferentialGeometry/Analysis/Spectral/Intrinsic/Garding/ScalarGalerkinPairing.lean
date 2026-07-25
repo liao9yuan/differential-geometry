@@ -43,7 +43,7 @@ theorem cc_finite_diss
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     (hsmall :
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+      MetricRealization.metricCauchySchwarzBound
         (I := I) q k ((1 : ℝ) / 4)) (n : ℕ) :
     ∃ Cmid : ℝ, 0 ≤ Cmid ∧
       ∀ (T : tensorHs (I := I) (M := M) q 0 0 0)
@@ -199,7 +199,7 @@ theorem cc_a2_closure
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       h.inner y v w = q.inner y v w + k y v w)
     (hsmall :
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+      MetricRealization.metricCauchySchwarzBound
         (I := I) q k ((1 : ℝ) / 4)) (n : ℕ) :
     ∃ Cmid : ℝ, 0 ≤ Cmid ∧
       ∀ (S : Finset

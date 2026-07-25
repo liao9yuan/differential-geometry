@@ -202,7 +202,8 @@ lemma abs_coeff_le_norm {σ : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s)
     have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) j σ :=
       tensorSobolevWeight_nonneg (I := I) (M := M) j σ
     positivity
-  have hsq : (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |T.coeff i|) ^ 2 ≤ ‖T‖ ^ 2 := by
+  have hsq : (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |T.coeff i|) ^ 2 ≤ ‖T‖ ^
+    2 := by
     rw [mul_pow, Real.sq_sqrt hw_pos.le, sq_abs]; exact h_term_le
   have hle : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |T.coeff i| ≤ ‖T‖ := by
     have h1 : 0 ≤ Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |T.coeff i| :=
@@ -388,9 +389,11 @@ lemma ae_abs_finset_crossPairing_le :
             ‖u.hiL2 τ‖ * ‖u.lo.deriv τ‖ := by
   filter_upwards [u.ae_coeffFun_eq_hiL2] with τ hs S
   set f : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
-    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a + 2)) * u.coeffFun i τ with hf_def
+    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a + 2)) * u.coeffFun i τ with
+               hf_def
   set d : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
-    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a) * (u.lo.deriv τ).coeff i with hd_def
+    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a) * (u.lo.deriv τ).coeff i with
+               hd_def
   have hsummand : ∀ i,
       tensorSobolevWeight (I := I) (M := M) i (a + 1) *
         (u.coeffFun i τ * (u.lo.deriv τ).coeff i) = f i * d i := by
@@ -483,7 +486,8 @@ lemma exists_uniform_bound (hT : 0 < T) :
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [u.coeffFun_sq_eq i ht₀mem ht, mul_add]
   rw [hsum_ftc]
-  have hterm0 : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t₀) ^ 2 ≤ R := by
+  have hterm0 : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t₀) ^ 2 ≤
+    R := by
     rw [hR_def]
     have heq : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t₀) ^ 2 =
         ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 1) * ((u.hiL2 t₀).coeff i) ^ 2 :=
@@ -574,7 +578,6 @@ lemma summable_coeffFun_sq (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (fun S => hB t ht S)
 
 open Classical in
-
 def repr (t : ℝ) : tensorHs (I := I) (M := M) g r s (a + 1) :=
   if h : Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2) then

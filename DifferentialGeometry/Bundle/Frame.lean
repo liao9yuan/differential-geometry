@@ -29,10 +29,8 @@ theorem exists_contMDiffSection_eqOn_nhd
     [ContMDiffVectorBundle n F V I] [IsManifold I ∞ M] [T2Space M]
     (hs : ∀ i, CMDiff[u] n (T% (s i))) (hu : IsOpen u) (hp : p ∈ u) :
     ∃ (s' : ι → Cₛ^n⟮I; F, V⟯), ∀ᶠ x in 𝓝 p, ∀ i, s' i x = s i x := by
-
   obtain ⟨χ, -, hχ⟩ :=
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) p).mem_iff.mp (hu.mem_nhds hp)
-
   refine ⟨fun i => ⟨fun x => χ x • s i x, ?_⟩, ?_⟩
   · exact (χ.contMDiff.of_le (by exact_mod_cast le_top)).contMDiffOn.smul_section_of_tsupport
       hu hχ (hs i)
@@ -44,10 +42,8 @@ theorem IsLocalFrameOn.exists_contMDiffSection_eqOn_nhd
     [ContMDiffVectorBundle n F V I] [IsManifold I ∞ M] [T2Space M]
     (hs : IsLocalFrameOn I F n s u) (hu : IsOpen u) (hp : p ∈ u) :
     ∃ (s' : ι → Cₛ^n⟮I; F, V⟯), ∀ᶠ x in 𝓝 p, ∀ i, s' i x = s i x := by
-
   obtain ⟨χ, -, hχ⟩ :=
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) p).mem_iff.mp (hu.mem_nhds hp)
-
   refine ⟨fun i => ⟨fun x => χ x • s i x, ?_⟩, ?_⟩
   · exact (χ.contMDiff.of_le (by exact_mod_cast le_top)).contMDiffOn.smul_section_of_tsupport
       hu hχ (hs.contMDiffOn i)

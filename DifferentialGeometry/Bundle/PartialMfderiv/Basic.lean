@@ -329,25 +329,20 @@ theorem contMDiff_partial_deriv_fst_gen
     (F : C^∞⟮𝓘(ℝ, ℝ).prod I, ℝ × M; ℝ⟯) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) := by
-
-
   have hrw : (fun p : ℝ × M => deriv (fun t => F (t, p.2)) p.1) =
       fun p : ℝ × M => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t => F (t, p.2)) p.1) (1 : ℝ) := by
     funext p
     rw [mfderiv_eq_fderiv]
     exact (fderiv_apply_one_eq_deriv (f := fun t => F (t, p.2)) (x := p.1)).symm
   rw [hrw]
-
   rw [contMDiff_infty]
   intro n p₀
-
   have harg : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
       (fun q : (ℝ × M) × ℝ => (q.2, q.1.2)) :=
     ContMDiff.prodMk contMDiff_snd contMDiff_fst.snd
   have hF : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2)) :=
     F.contMDiff.comp harg
-
   have h_apply :=
     ContMDiffAt.mfderiv_apply
       (I := 𝓘(ℝ, ℝ)) (I' := 𝓘(ℝ, ℝ))
@@ -362,8 +357,6 @@ theorem contMDiff_partial_deriv_fst_gen
       contMDiffAt_id
       contMDiffAt_const
       le_rfl
-
-
   simpa [inTangentCoordinates_model_space] using h_apply
 
 
@@ -473,7 +466,6 @@ theorem extDerivFun_finset_sum_mul_at
         (U i x * extDerivFun (I := I) (B i) x v +
           B i x * extDerivFun (I := I) (U i) x v) := by
   classical
-
   have hsumdiff :
       ∀ (s : Finset ι), (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x) →
         (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x) →
@@ -481,7 +473,8 @@ theorem extDerivFun_finset_sum_mul_at
             (fun y : M => ∑ i ∈ s, U i y * B i y) x := by
     intro s
     induction s using Finset.induction_on with
-    | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+    | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ))
+                 (c := (0 : ℝ))
     | insert a s has ih =>
         intro hUs hBs
         have hUa : MDifferentiableAt I 𝓘(ℝ, ℝ) (U a) x := hUs a (by simp)
@@ -595,7 +588,6 @@ theorem extDerivFun_finset_sum_sum_mul_at
         (U i j x * extDerivFun (I := I) (B i j) x v +
           B i j x * extDerivFun (I := I) (U i j) x v) := by
   classical
-
   have hinner_diff :
       ∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ)
         (fun y : M => ∑ j ∈ t, U i j y * B i j y) x := by
@@ -606,7 +598,8 @@ theorem extDerivFun_finset_sum_sum_mul_at
             MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y : M => ∑ j ∈ r, U i j y * B i j y) x := by
       intro r
       induction r using Finset.induction_on with
-      | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+      | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ))
+                   (c := (0 : ℝ))
       | insert a r har ih =>
           intro hUr hBr
           have hUa := hUr a (by simp)

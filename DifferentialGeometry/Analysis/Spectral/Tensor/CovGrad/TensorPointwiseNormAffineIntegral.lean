@@ -53,8 +53,8 @@ theorem tensorPointwiseNorm_intervalIntegral_sq_le_of_affine_bound
       intro t
       convert (hasDerivAt_const t c).mul
         (((hasDerivAt_const t ((u - v) / 2)).mul ((hasDerivAt_id t).pow 2)).add
-          ((hasDerivAt_const t v).mul (hasDerivAt_id t))) using 1 <;>
-        simp only [id_eq] <;> ring
+          ((hasDerivAt_const t v).mul (hasDerivAt_id t))) using 1 ;
+        simp only [id_eq] ; ring
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hderiv t) hint2]
     ring
   have hnorm_nonneg : (0 : ℝ) ≤ tensorPointwiseNorm (I := I) (M := M) g r s x

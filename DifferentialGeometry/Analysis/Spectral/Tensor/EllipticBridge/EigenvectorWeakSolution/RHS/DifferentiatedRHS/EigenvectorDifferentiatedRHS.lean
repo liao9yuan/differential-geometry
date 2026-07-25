@@ -38,7 +38,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma chosenWeakPartial'_memLp_volume_unconditional
     {Ω : Set EuclN} (k : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) :
     MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k w Ω) 2
@@ -51,7 +50,6 @@ private lemma chosenWeakPartial'_memLp_volume_unconditional
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_div_densityOnEuclid_contDiffOn'
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -62,7 +60,6 @@ private lemma one_div_densityOnEuclid_contDiffOn'
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 lemma memLp_volume_compact_contDiffOn_mul
     (α : M)
     {c : EuclN → ℝ}
@@ -99,7 +96,6 @@ lemma memLp_volume_compact_contDiffOn_mul
     (hw.const_smul (C : ℝ)).2
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def eigenvectorChartComponentFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -112,7 +108,6 @@ def eigenvectorChartComponentFun
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorChartComponentFun_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

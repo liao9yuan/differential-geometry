@@ -174,9 +174,11 @@ private theorem integral_pou_perDirCross_eq
     (i : Fin (Module.finrank ℝ E)) :
     ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirGradPairing (I := I) (M := M) g T v α i b
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      -(∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+      -(∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v
+        α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g))
-      - (∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α i b
+      - (∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α
+        i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       - (∫ b, frameDirWeightDerivPairing (I := I) (M := M) g T v α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
@@ -366,10 +368,12 @@ theorem integral_pou_tensorCovDerivPointwiseInner_eq_neg_second_div_weight
           * tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       -(∑ i : Fin (Module.finrank ℝ E),
-          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T
+            v α i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       - (∑ i : Fin (Module.finrank ℝ E),
-          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α i b
+          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α
+            i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       - (∑ i : Fin (Module.finrank ℝ E),
           ∫ b, frameDirWeightDerivPairing (I := I) (M := M) g T v α i b

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -87,7 +86,8 @@ theorem rm13Section_realizes
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
     Rm13RealizesConnection (I := I) cov
-      (DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section (I := I) (M := M) cov hcov) := by
+      (DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section (I := I) (M := M)
+        cov hcov) := by
   intro X Y Z x alpha
   exact
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm13Section_apply_smooth
@@ -100,7 +100,8 @@ theorem rm04Section_realizes
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
     Rm04RealizesConnection (I := I) g cov
-      (DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov) := by
+      (DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov
+        hcov) := by
   intro X Y Z W x
   exact
     DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section_apply_smooth

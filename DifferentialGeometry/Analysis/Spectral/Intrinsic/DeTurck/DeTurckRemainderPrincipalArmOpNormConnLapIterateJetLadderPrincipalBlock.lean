@@ -56,10 +56,15 @@ lemma bal_block1 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
             CB q j * ‖smoothCcToTensorHs (I := I) (M := M) g₀
               ((j + 2 * q + 3 : ℕ) : ℝ) T₀‖ := by
   classical
-  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
-  obtain ⟨CCS, hCCS_nn, hCCS⟩ := riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
-  obtain ⟨CDL, hCDL_nn, hCDL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_le_mul_tensorHs (I := I) (M := M) g₀
-  obtain ⟨CDS, hCDS_nn, hCDS⟩ := riemannianFiberNormSq_iteratedCovGrad_rawTensorConnLapSmooth_le_sq_tensorHs (I := I) (M := M) g₀
+  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs
+    (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CCS, hCCS_nn, hCCS⟩ :=
+    riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M)
+    g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CDL, hCDL_nn, hCDL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_le_mul_tensorHs
+    (I := I) (M := M) g₀
+  obtain ⟨CDS, hCDS_nn, hCDS⟩ :=
+    riemannianFiberNormSq_iteratedCovGrad_rawTensorConnLapSmooth_le_sq_tensorHs (I := I) (M := M) g₀
   refine ⟨fun q j => Real.sqrt (diagonalGridGrowthFactor (E := E) j *
       ((∑ i ∈ Finset.range (j + 1), (CCS i q * (1 + R₀)) ^ 2) *
         (∑ l ∈ Finset.range (j + 1), (CDL l) ^ 2) +
@@ -132,7 +137,8 @@ lemma bal_DTwrap (g₀ : SmoothRiemannianMetric I M) :
   have hCDT_nn : 0 ≤ CDT :=
     mul_nonneg (sq_nonneg _) (Finset.sum_nonneg (fun t _ => sq_nonneg _))
   refine ⟨CDT, hCDT_nn, fun Y j x => ?_⟩
-  have hgrid := riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) (M := M) g₀ (2 + 2) 2
+  have hgrid := riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) (M := M)
+    g₀ (2 + 2) 2
     DT₂ Y j x
   refine le_trans hgrid ?_
   have hDTsup : ∀ i' : ℕ,

@@ -12,7 +12,6 @@ import DifferentialGeometry.Tensor.RSTensor.Metric
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -26,6 +25,8 @@ set_option linter.style.longLine false
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open scoped Manifold ContDiff BigOperators
 open Tensor0SBundle
@@ -187,11 +188,15 @@ theorem cubicQ_pinchOn
         cubicQAt
             (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x))
             (DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 (l1 t x) (l2 t x) (l3 t x))
-            (DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x)) -
-          epsilon * DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 (l1 t x) (l2 t x) (l3 t x) *
+            (DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 (l1 t x) (l2 t x)
+              (l3 t x)) -
+          epsilon * DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 (l1 t x) (l2 t x)
+            (l3 t x) *
             tfRicNormSqAt
-              (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x))
-              (DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 (l1 t x) (l2 t x) (l3 t x)) := by
+              (DifferentialGeometry.Integral.Connection.ricciEigenScalar3 (l1 t x) (l2 t x)
+                (l3 t x))
+              (DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 (l1 t x) (l2 t x)
+                (l3 t x)) := by
   intro t x
   exact cubicQ_pinch (hctx t x) hepsilon
 
@@ -210,8 +215,10 @@ theorem react3_diag (l1 l2 l3 : Real) :
         DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 i j *
           DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 k l) =
       ricciReact3 l1 l2 l3 := by
-  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3 DifferentialGeometry.Integral.Connection.ricciDiag3
-    DifferentialGeometry.Integral.Connection.ricciEigenScalar3 DifferentialGeometry.Integral.Connection.delta3
+  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3
+    DifferentialGeometry.Integral.Connection.ricciDiag3
+    DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      DifferentialGeometry.Integral.Connection.delta3
   simp [Fin.sum_univ_three]
   ring
 
@@ -222,8 +229,10 @@ theorem curv3_diag_eq (l1 l2 l3 : Real) :
         DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 i j *
           DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 k l) =
       ricciReact3 l1 l2 l3 := by
-  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3 DifferentialGeometry.Integral.Connection.ricciDiag3
-    DifferentialGeometry.Integral.Connection.ricciEigenScalar3 DifferentialGeometry.Integral.Connection.delta3
+  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3
+    DifferentialGeometry.Integral.Connection.ricciDiag3
+    DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      DifferentialGeometry.Integral.Connection.delta3
   simp [Fin.sum_univ_three]
   ring
 
@@ -237,8 +246,10 @@ theorem curv3_neg_eq (l1 l2 l3 : Real) :
         DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 i j *
           DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 k l) =
       -ricciReact3 l1 l2 l3 := by
-  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3 DifferentialGeometry.Integral.Connection.ricciDiag3
-    DifferentialGeometry.Integral.Connection.ricciEigenScalar3 DifferentialGeometry.Integral.Connection.delta3
+  unfold ricciReact3 DifferentialGeometry.Integral.Connection.stdRmDiag3
+    DifferentialGeometry.Integral.Connection.ricciDiag3
+    DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      DifferentialGeometry.Integral.Connection.delta3
   simp [Fin.sum_univ_three]
   ring
 
@@ -286,7 +297,8 @@ theorem tfRel_eigen (l1 l2 l3 : Real)
           (DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 l1 l2 l3)) /
         DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
   unfold ricciReact3 tfRicNormSqAt tracefreeRicciNormSqAtOf cubicQAt
-    DifferentialGeometry.Integral.Connection.ricciEigenScalar3 DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
+    DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
     DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3
   have hR' : l1 + l2 + l3 ≠ 0 := by
     simpa [DifferentialGeometry.Integral.Connection.ricciEigenScalar3] using hR
@@ -323,7 +335,8 @@ theorem tfRel_from_eigen
       (cubicQ scalar ricciNormSq ricciTraceCube) reaction := by
   intro t x hR
   have hR' :
-      DifferentialGeometry.Integral.Connection.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x) ≠ 0 := by
+      DifferentialGeometry.Integral.Connection.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x) ≠
+        0 := by
     simpa [hscalar t x] using hR
   rw [hreaction t x, hscalar t x, hnorm t x]
   rw [tfRicNormSq, tracefreeRicciNormSqOf, cubicQ, hscalar t x, hnorm t x,
@@ -543,7 +556,8 @@ theorem ricciEnd_diagVec {x : M}
       (I := I) Ric scalar l1 l2 l3 basis) :
     DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis 0) = l1 • basis 0 /\
       DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis 1) = l2 • basis 1 /\
-      DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis 2) = l3 • basis 2 := by
+      DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis 2) = l3 • basis
+        2 := by
   classical
   let T := DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
   have hdiagComp := hdiag.2
@@ -553,7 +567,8 @@ theorem ricciEnd_diagVec {x : M}
     calc
       g.inner x (T (basis 0)) (basis j) =
           Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis j)) := by
-            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 0) (basis j)
+            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 0)
+              (basis j)
       _ = DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 0 j := by
             simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] using hdiagComp 0 j
       _ = g.inner x (l1 • basis 0) (basis j) := by
@@ -565,7 +580,8 @@ theorem ricciEnd_diagVec {x : M}
     calc
       g.inner x (T (basis 1)) (basis j) =
           Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis j)) := by
-            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 1) (basis j)
+            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 1)
+              (basis j)
       _ = DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 1 j := by
             simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] using hdiagComp 1 j
       _ = g.inner x (l2 • basis 1) (basis j) := by
@@ -577,7 +593,8 @@ theorem ricciEnd_diagVec {x : M}
     calc
       g.inner x (T (basis 2)) (basis j) =
           Ric (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis j)) := by
-            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 2) (basis j)
+            exact DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) g Ric (basis 2)
+              (basis j)
       _ = DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3 2 j := by
             simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] using hdiagComp 2 j
       _ = g.inner x (l3 • basis 2) (basis j) := by
@@ -625,7 +642,8 @@ theorem ricciCubeInv_diag {x : M}
   rw [linearMap_trace_eq_sum_inv_inner_apply (I := I) g x basis
     DifferentialGeometry.Integral.Connection.delta3 hinv]
   unfold DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3
-  simp only [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, LinearMap.coe_comp,
+  simp only [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    LinearMap.coe_comp,
     Function.comp_apply]
   rw [show T (T (T (basis 0))) = (l1 ^ 3) • basis 0 by
         simpa [LinearMap.comp_apply] using hT0c,
@@ -667,7 +685,8 @@ private theorem prod_delta4
 private theorem sum_delta4
     (F G : (Fin 4 -> Fin 3) -> Real) :
     (∑ I0 : Fin 4 -> Fin 3, ∑ J0 : Fin 4 -> Fin 3,
-        (∏ a : Fin 4, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0) =
+        (∏ a : Fin 4, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0)
+          =
       ∑ I0 : Fin 4 -> Fin 3, F I0 * G I0 := by
   classical
   apply Finset.sum_congr rfl
@@ -733,7 +752,8 @@ theorem curvRic_inner {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3) :
+    (hinv : MetricInverseInBasis_gen (I := I) g x basis
+      DifferentialGeometry.Integral.Connection.delta3) :
     curvRicAt (I := I) Ric Rm04 basis =
       inner0S (I := I) g x 4 Rm04 (ricciPair04 (I := I) Ric) := by
   rw [inner0S_eq_coord (I := I) g x 4 basis DifferentialGeometry.Integral.Connection.delta3 hinv]
@@ -754,7 +774,8 @@ theorem reactAt_eq_react
   have hinv :
       MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
         DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t) basis horth
+    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t) basis
+      horth
   unfold reactAt ricciReact
   rw [curvRic_inner (I := I) (S.base.metric t) (S.ricciAt t x)
     (S.base.rm04 t x) basis hinv]
@@ -770,9 +791,11 @@ theorem react_frame {x : M}
     (h₂ : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis₂) :
     reactAt (I := I) Ric Rm04 basis₁ =
       reactAt (I := I) Ric Rm04 basis₂ := by
-  have hinv₁ : MetricInverseInBasis_gen (I := I) g x basis₁ DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv₁ : MetricInverseInBasis_gen (I := I) g x basis₁
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis₁ h₁
-  have hinv₂ : MetricInverseInBasis_gen (I := I) g x basis₂ DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv₂ : MetricInverseInBasis_gen (I := I) g x basis₂
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis₂ h₂
   unfold reactAt
   rw [curvRic_inner (I := I) g Ric Rm04 basis₁ hinv₁,
@@ -800,14 +823,16 @@ private theorem prod_delta2
 private theorem sum_delta2
     (F G : (Fin 2 -> Fin 3) -> Real) :
     (∑ I0 : Fin 2 -> Fin 3, ∑ J0 : Fin 2 -> Fin 3,
-        (∏ a : Fin 2, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0) =
+        (∏ a : Fin 2, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0)
+          =
       ∑ I0 : Fin 2 -> Fin 3, F I0 * G I0 := by
   classical
   apply Finset.sum_congr rfl
   intro I0 _
   calc
     (∑ J0 : Fin 2 -> Fin 3,
-        (∏ a : Fin 2, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0) =
+        (∏ a : Fin 2, DifferentialGeometry.Integral.Connection.delta3 (I0 a) (J0 a)) * F I0 * G J0)
+          =
         ∑ J0 : Fin 2 -> Fin 3, (if I0 = J0 then 1 else 0) * F I0 * G J0 := by
           apply Finset.sum_congr rfl
           intro J0 _
@@ -851,17 +876,20 @@ private theorem coordRic02 {x : M}
   unfold coordInner0S ricciNormAt
   rw [sum_delta2]
   rw [sum2ij]
-  simp [tensor0SComponent, DifferentialGeometry.Integral.Connection.ricciCompAt, DifferentialGeometry.Integral.Connection.slots2]
+  simp [tensor0SComponent, DifferentialGeometry.Integral.Connection.ricciCompAt,
+    DifferentialGeometry.Integral.Connection.slots2]
 
 omit [IsManifold I 1 M] in
 theorem ricciNorm_inner {x : M}
     (g : SmoothMetric_gen I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3) :
+    (hinv : MetricInverseInBasis_gen (I := I) g x basis
+      DifferentialGeometry.Integral.Connection.delta3) :
     ricciNormAt (I := I) Ric basis =
       normSq0S (I := I) g x 2 Ric := by
-  rw [normSq0S_eq_coord (I := I) g x 2 basis DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
+  rw [normSq0S_eq_coord (I := I) g x 2 basis DifferentialGeometry.Integral.Connection.delta3 hinv
+    Ric]
   exact (coordRic02 (I := I) Ric basis).symm
 
 omit [IsManifold I 1 M] in
@@ -873,9 +901,11 @@ theorem ricciNorm_frame {x : M}
     (h₂ : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis₂) :
     ricciNormAt (I := I) Ric basis₁ =
       ricciNormAt (I := I) Ric basis₂ := by
-  have hinv₁ : MetricInverseInBasis_gen (I := I) g x basis₁ DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv₁ : MetricInverseInBasis_gen (I := I) g x basis₁
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis₁ h₁
-  have hinv₂ : MetricInverseInBasis_gen (I := I) g x basis₂ DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv₂ : MetricInverseInBasis_gen (I := I) g x basis₂
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis₂ h₂
   rw [ricciNorm_inner (I := I) g Ric basis₁ hinv₁,
     ricciNorm_inner (I := I) g Ric basis₂ hinv₂]
@@ -885,7 +915,8 @@ theorem ricciNormAt_diag {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis) :
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      basis) :
     ricciNormAt (I := I) Ric basis =
       DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 l1 l2 l3 := by
   classical
@@ -902,7 +933,8 @@ theorem reactAt_diag {x : M}
     {Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x}
     {scalar l1 l2 l3 : Real}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis)
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      basis)
     (hRm : ∀ i j k l : Fin 3,
       DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis Rm04 i k j l =
         DifferentialGeometry.Integral.Connection.stdRmDiag3 (-l1) (-l2) (-l3) i k j l) :
@@ -924,7 +956,8 @@ theorem tfRel_basis {x : M}
     {Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     {scalar l1 l2 l3 ricciTraceCube : Real}
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis)
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      basis)
     (hcube :
       ricciTraceCube = DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 l1 l2 l3)
     (hRm : ∀ i j k l : Fin 3,
@@ -954,7 +987,8 @@ theorem diag_neg {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     {scalar l1 l2 l3 : Real}
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis) :
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      basis) :
     DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) (-Ric) (-scalar)
       (-l1) (-l2) (-l3) basis := by
   rcases hdiag with ⟨hscalar, hric⟩
@@ -964,7 +998,8 @@ theorem diag_neg {x : M}
   · intro i j
     have hij := hric i j
     fin_cases i <;> fin_cases j <;>
-      simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using
+      simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+        DifferentialGeometry.Integral.Connection.ricciDiag3] using
         congrArg Neg.neg hij
 
 
@@ -979,7 +1014,8 @@ theorem tfRel_trace {x : M}
     (htrace :
       DifferentialGeometry.Integral.Connection.RiemannFromRicci3DTraceDataAt
         (I := I) g (-Ric) (-scalar) Rm04 basis)
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis)
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      basis)
     (hcube :
       ricciTraceCube = DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 l1 l2 l3)
     (hR : scalar ≠ 0) :
@@ -1015,7 +1051,8 @@ theorem tfRel_point {x : M}
     (htrace :
       DifferentialGeometry.Integral.Connection.RiemannFromRicci3DTraceDataAt
         (I := I) g (-Ric) (-scalar) Rm04 eigBasis)
-    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3 eigBasis)
+    (hdiag : DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) Ric scalar l1 l2 l3
+      eigBasis)
     (hcube :
       ricciTraceCube = DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 l1 l2 l3)
     (hR : scalar ≠ 0) :
@@ -1069,9 +1106,11 @@ theorem sec6_norm_at
   classical
   have hRicAt : ∀ i j : Fin 3,
       ricciCompInFrame (I := I) S frame t x i j =
-        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i j := by
+        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i
+          j := by
     intro i j
-    simp [ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciCompAt_apply, hbasis i, hbasis j]
+    simp [ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciCompAt_apply, hbasis i,
+      hbasis j]
   have hraisedFrame : ∀ i j : Fin 3,
       raisedRicciCompInFrame (I := I) S gInv frame t x i j =
         ricciCompInFrame (I := I) S frame t x i j := by
@@ -1081,7 +1120,8 @@ theorem sec6_norm_at
     simpa [DifferentialGeometry.Integral.Connection.delta3] using hInv a b
   have hraised : ∀ i j : Fin 3,
       raisedRicciCompInFrame (I := I) S gInv frame t x i j =
-        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i j := by
+        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i
+          j := by
     intro i j
     rw [hraisedFrame i j, hRicAt i j]
   rw [ricciNormSqInFrame_apply]
@@ -1106,9 +1146,11 @@ theorem sec6_react_at
   classical
   have hRicAt : ∀ i j : Fin 3,
       ricciCompInFrame (I := I) S frame t x i j =
-        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i j := by
+        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i
+          j := by
     intro i j
-    simp [ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciCompAt_apply, hbasis i, hbasis j]
+    simp [ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciCompAt_apply, hbasis i,
+      hbasis j]
   have hraisedFrame : ∀ i j : Fin 3,
       raisedRicciCompInFrame (I := I) S gInv frame t x i j =
         ricciCompInFrame (I := I) S frame t x i j := by
@@ -1118,14 +1160,16 @@ theorem sec6_react_at
     simpa [DifferentialGeometry.Integral.Connection.delta3] using hInv a b
   have hraised : ∀ i j : Fin 3,
       raisedRicciCompInFrame (I := I) S gInv frame t x i j =
-        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i j := by
+        DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (S.ricciAt t x) i
+          j := by
     intro i j
     rw [hraisedFrame i j, hRicAt i j]
   have hRmAt : ∀ i j k l : Fin 3,
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x i k j l =
         DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis (Rm04 t x) i k j l := by
     intro i j k l
-    simp [DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
+    simp [DifferentialGeometry.Integral.Connection.rm04Comp,
+      DifferentialGeometry.Integral.Connection.rm04Comp,
       DifferentialGeometry.Integral.Connection.rm04CompAt_apply,
       hbasis i, hbasis k, hbasis j, hbasis l]
   unfold ricciNormCurvatureReactionInFrame reactAt
@@ -1211,9 +1255,11 @@ theorem tfRel_pfirst
         (I := I) (S.base.metric t) x (eigBasis t x))
     (hcurv : ∀ (t : Real) (x : M),
       DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
-        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) (eigBasis t x) (Rm04 t x)))
+        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) (eigBasis t x)
+          (Rm04 t x)))
     (hRicFirst : ∀ (t : Real) (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricciAt t x)
         (Rm04 t x) DifferentialGeometry.Integral.Connection.delta3 (eigBasis t x))
     (hScalarTrace : ∀ (t : Real) (x : M),
       DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (scalar t x)
@@ -1254,13 +1300,16 @@ theorem scalar_eq_diag {x : M}
   rcases hdiag with ⟨hscalar0, hric⟩
   have h00 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (basis 0) (basis 0)) = l1 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 0 0
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 0 0
   have h11 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (basis 1) (basis 1)) = l2 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 1 1
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 1 1
   have h22 :
       Ric (DifferentialGeometry.Integral.Connection.vec2 (basis 2) (basis 2)) = l3 := by
-    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 2 2
+    simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
+      DifferentialGeometry.Integral.Connection.ricciDiag3] using hric 2 2
   rw [hScalar, hscalar0]
   rw [Fin.sum_univ_three]
   simp [DifferentialGeometry.Integral.Connection.delta3, h00, h11, h22,
@@ -1308,7 +1357,8 @@ theorem firstTrace_delta
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   have hInvSym :
       ∀ i j : Fin 3,
-        DifferentialGeometry.Integral.Connection.delta3 i j = DifferentialGeometry.Integral.Connection.delta3 j i := by
+        DifferentialGeometry.Integral.Connection.delta3 i j =
+          DifferentialGeometry.Integral.Connection.delta3 j i := by
     intro i j
     unfold DifferentialGeometry.Integral.Connection.delta3
     by_cases hij : i = j
@@ -1320,7 +1370,8 @@ theorem firstTrace_delta
     DifferentialGeometry.Integral.Connection.delta3 hinv Ric Rm13 Rm04 hRic hLower hInvSym
 
 theorem delta3_symm (i j : Fin 3) :
-    DifferentialGeometry.Integral.Connection.delta3 i j = DifferentialGeometry.Integral.Connection.delta3 j i := by
+    DifferentialGeometry.Integral.Connection.delta3 i j =
+      DifferentialGeometry.Integral.Connection.delta3 j i := by
   unfold DifferentialGeometry.Integral.Connection.delta3
   by_cases hij : i = j
   · subst j
@@ -1364,7 +1415,7 @@ private theorem vec2_update_one {x : M}
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_of_basis
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx]
     {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (A : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -1429,18 +1480,22 @@ theorem ricciSym_of_basis
           then cx ((fun a : Fin 2 => if a = 0 then j else i) a)
           else cy ((fun a : Fin 2 => if a = 0 then j else i) a)) •
             basis ((fun a : Fin 2 => if a = 0 then j else i) a)) =
-        DifferentialGeometry.Integral.Connection.vec2 (I := I) (cx j • basis j) (cy i • basis i) := by
+        DifferentialGeometry.Integral.Connection.vec2 (I := I) (cx j • basis j)
+          (cy i • basis i) := by
     funext a
-    fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   have hright :
       (fun a : Fin 2 =>
         (if a = 0
           then cy ((fun a : Fin 2 => if a = 0 then i else j) a)
           else cx ((fun a : Fin 2 => if a = 0 then i else j) a)) •
             basis ((fun a : Fin 2 => if a = 0 then i else j) a)) =
-        DifferentialGeometry.Integral.Connection.vec2 (I := I) (cy i • basis i) (cx j • basis j) := by
+        DifferentialGeometry.Integral.Connection.vec2 (I := I) (cy i • basis i)
+          (cx j • basis j) := by
     funext a
-    fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec2]
   rw [hleft, hright]
   have hL :
       A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (cx j • basis j) (cy i • basis i)) =
@@ -1455,18 +1510,22 @@ theorem ricciSym_of_basis
     calc
       A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (cx j • basis j) (cy i • basis i))
           = (cx j) *
-              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis j) (cy i • basis i)) := by
-              simpa only [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2,
+              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis j)
+                (cy i • basis i)) := by
+              simpa only [DifferentialGeometry.Integral.Connection.vec2,
+                DifferentialGeometry.Integral.Connection.vec2,
                 vec2_update_zero,
                 smul_eq_mul] using h0
       _ = (cx j) * ((cy i) *
               A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis j) (basis i))) := by
               congr 1
-              simpa only [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2,
+              simpa only [DifferentialGeometry.Integral.Connection.vec2,
+                DifferentialGeometry.Integral.Connection.vec2,
                 vec2_update_one,
                 smul_eq_mul] using h1
       _ = (cx j) * (cy i) *
-              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis j) (basis i)) := by ring
+              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis j) (basis i)) :=
+                by ring
   have hR :
       A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (cy i • basis i) (cx j • basis j)) =
         (cy i) * (cx j) *
@@ -1480,18 +1539,22 @@ theorem ricciSym_of_basis
     calc
       A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (cy i • basis i) (cx j • basis j))
           = (cy i) *
-              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (cx j • basis j)) := by
-              simpa only [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2,
+              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i)
+                (cx j • basis j)) := by
+              simpa only [DifferentialGeometry.Integral.Connection.vec2,
+                DifferentialGeometry.Integral.Connection.vec2,
                 vec2_update_zero,
                 smul_eq_mul] using h0
       _ = (cy i) * ((cx j) *
               A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j))) := by
               congr 1
-              simpa only [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2,
+              simpa only [DifferentialGeometry.Integral.Connection.vec2,
+                DifferentialGeometry.Integral.Connection.vec2,
                 vec2_update_one,
                 smul_eq_mul] using h1
       _ = (cy i) * (cx j) *
-              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) := by ring
+              A (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) :=
+                by ring
   rw [hL, hR, hsym j i]
   ring
 
@@ -1499,13 +1562,14 @@ theorem ricciSym_of_basis
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_rm04
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
-    (hTrace : DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) Ric Rm04
+    (hTrace : DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) Ric
+      Rm04
       gInv basis)
     (hPair : ∀ W X Y Z : TangentSpace I x,
       Rm04 (DifferentialGeometry.Integral.Connection.vec4 (I := I) W X Y Z) =
@@ -1578,7 +1642,8 @@ theorem tfRel_frame
           DifferentialGeometry.Integral.Connection.ricciDiag3]
     rw [ricciNormSqInFrame_apply]
     simp only [hraised]
-    unfold DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 DifferentialGeometry.Integral.Connection.ricciDiag3
+    unfold DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
+      DifferentialGeometry.Integral.Connection.ricciDiag3
     simp only [Fin.sum_univ_three]
     rw [hRic t x 0 0, hRic t x 1 1, hRic t x 2 2]
     simp [DifferentialGeometry.Integral.Connection.ricciDiag3]
@@ -1647,8 +1712,10 @@ theorem tfRel_data
     have hcomp :=
       DifferentialGeometry.Integral.Connection.stdRmComp_eq_diag (I := I) (htrace t x) hneg
     have h := hcomp i k j l
-    simpa [DifferentialGeometry.Integral.Connection.standardRmCompAt_apply, DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04CompAt_apply,
+    simpa [DifferentialGeometry.Integral.Connection.standardRmCompAt_apply,
+      DifferentialGeometry.Integral.Connection.rm04Comp,
+      DifferentialGeometry.Integral.Connection.rm04Comp,
+        DifferentialGeometry.Integral.Connection.rm04CompAt_apply,
       hbasis t x i, hbasis t x k, hbasis t x j, hbasis t x l] using h
   exact tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
     l1 l2 l3 hscalar hcube hInv hRic hRm

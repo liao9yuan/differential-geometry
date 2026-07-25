@@ -693,7 +693,8 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
       (I := I) (M := M) g p u :=
     MemW1pIntrinsicLp_withBoundary_of_contMDiff (I := I) (M := M) g p hu
   obtain ⟨hu_p, G, hG_weak, hG_p⟩ := hmem
-  unfold DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+  unfold
+    DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
   rw [ENNReal.add_lt_top]
   refine ⟨hu_p.2, ?_⟩
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
@@ -721,7 +722,8 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
     MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
       (I := I) (M := M) g p hu hu_int
   obtain ⟨hu_p, G, hG_weak, hG_p⟩ := hmem
-  unfold DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+  unfold
+    DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
   rw [ENNReal.add_lt_top]
   refine ⟨hu_p.2, ?_⟩
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
@@ -733,7 +735,8 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
     (g : SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
-    (h_zero : DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+    (h_zero :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
       (I := I) (M := M) g p u = 0) :
     u = (fun _ => (0 : ℝ)) := by
   classical
@@ -744,9 +747,10 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
   have h_eLp_u_zero : eLpNorm u p (riemannianVolumeMeasure I M g) = 0 := by
     have h_le_sum :
         eLpNorm u p (riemannianVolumeMeasure I M g) ≤
-        DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+        w1pNormIntrinsicLp_withBoundary
           (I := I) (M := M) g p u := by
-      unfold DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+      unfold
+        w1pNormIntrinsicLp_withBoundary
       exact le_self_add
     rw [h_zero] at h_le_sum
     exact le_antisymm h_le_sum (zero_le _)
@@ -788,7 +792,7 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
           (n := n) (M := M) g 1 p u ≤
         ENNReal.ofReal C *
-          DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+          w1pNormIntrinsicLp_withBoundary
             (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
   classical
   have h_intr_lt_top :
@@ -821,7 +825,8 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
   rw [show DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
       (n := n) (M := M) g 1 p u = ENNReal.ofReal a from
     (ENNReal.ofReal_toReal h_chart_ne_top).symm]
-  rw [show DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+  rw [show
+    DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
       (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u = ENNReal.ofReal b from
     (ENNReal.ofReal_toReal h_intr_ne_top).symm]
   rw [← ENNReal.ofReal_mul hC_nn]
@@ -845,14 +850,14 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
         DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
             (n := n) (M := M) g 1 p u ≤
           ENNReal.ofReal C *
-            DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+            w1pNormIntrinsicLp_withBoundary
               (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
   intro u hu_smooth h_int
   classical
   have h_mem_chart :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart
         (n := n) (M := M) g 1 p u :=
-    DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart_of_contMDiff_AllChartsInteriorSupport
+    Analysis.Sobolev.WithBoundary.MemWkpChart_of_contMDiff_AllChartsInteriorSupport
       (n := n) (M := M) g hp_one hu_smooth h_int
   have h_chart_lt_top :
       DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
@@ -890,7 +895,7 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_uniform
         DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
             (n := n) (M := M) g 1 p u ≤
           ENNReal.ofReal C *
-            DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+            w1pNormIntrinsicLp_withBoundary
               (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u :=
   wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
     (n := n) (M := M) g hp_one hp_top

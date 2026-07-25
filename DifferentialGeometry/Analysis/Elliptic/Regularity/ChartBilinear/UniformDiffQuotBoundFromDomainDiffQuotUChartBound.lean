@@ -103,7 +103,7 @@ theorem chartBilinearFK_diffQuot_u_discharge
     rw [h_eq] at hx'
     exact hδ_in_chart hx'
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := Metric.cthickening r (tsupport η))
       (Ω' := chartTargetEuclid (I := I) (M := M) α)

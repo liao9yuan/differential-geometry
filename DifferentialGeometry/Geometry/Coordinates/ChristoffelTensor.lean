@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

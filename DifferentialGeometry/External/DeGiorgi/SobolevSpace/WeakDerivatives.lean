@@ -112,7 +112,8 @@ theorem HasWeakPartialDeriv.of_contDiff {Ω : Set E} (hΩ : IsOpen Ω)
     (hf.continuous_fderiv one_ne_zero).clm_apply continuous_const
   have hφ_fderiv_supp : HasCompactSupport (fun x => (fderiv ℝ φ x) v) :=
     hφ_supp.fderiv_apply (𝕜 := ℝ) v
-  rw [setIntegral_eq_integral_of_forall_compl_eq_zero, setIntegral_eq_integral_of_forall_compl_eq_zero]
+  rw [setIntegral_eq_integral_of_forall_compl_eq_zero,
+    setIntegral_eq_integral_of_forall_compl_eq_zero]
   · exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable
       ((hfderiv_f_cont.mul hφ_cont).integrable_of_hasCompactSupport hφ_supp.mul_left)
       ((hf_cont.mul hfderiv_φ_cont).integrable_of_hasCompactSupport hφ_fderiv_supp.mul_left)
@@ -244,7 +245,8 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero_p
     Tendsto (fun n => ∫ x, f x * g n x ∂μ) atTop (nhds 0) := by
   have hpqR : p.HolderConjugate q := Real.holderConjugate_iff.mpr ⟨hp, hpq⟩
   let C : ℝ := MeasureTheory.lpNorm f (ENNReal.ofReal q) μ
-  have hlim' : Tendsto (fun n => MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ) atTop (nhds 0) := by
+  have hlim' : Tendsto (fun n => MeasureTheory.lpNorm (g n) (ENNReal.ofReal p) μ) atTop
+    (nhds 0) := by
     have hlim_toReal :
         Tendsto (fun n => (eLpNorm (g n) (ENNReal.ofReal p) μ).toReal) atTop (nhds 0) :=
       (ENNReal.tendsto_toReal_zero_iff (fun n => (hg n).eLpNorm_ne_top)).2 hlim

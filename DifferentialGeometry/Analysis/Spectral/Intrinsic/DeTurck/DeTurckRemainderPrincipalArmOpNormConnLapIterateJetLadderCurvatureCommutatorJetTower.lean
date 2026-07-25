@@ -464,7 +464,8 @@ private lemma bal_G2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [expand]
   linarith [hsq, e1, e2, esplit]
 
-lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) :
     ∃ c : ℕ → ℝ, (∀ b, 0 ≤ c b) ∧
       ∀ (b : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s b (rawTensorConnLapSmooth (I := I) g r s S)‖ ≤
@@ -592,13 +593,15 @@ private lemma bal_sum_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ)
           ∑ b' ∈ Finset.range (K + 2), ‖iteratedCovGrad (I := I) g r s b' S‖ := by
         rw [Finset.sum_mul]
 
-lemma exists_iteratedCovGrad_connLapSmoothingIterate_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_connLapSmoothingIterate_window_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) :
     ∃ c : ℕ → ℕ → ℝ, (∀ γ q, 0 ≤ c γ q) ∧
       ∀ (γ q : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
           c γ q * ∑ b ∈ Finset.range (γ + 2 * q + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I)
+    (M := M) g r s
   have hmain : ∀ q : ℕ, ∃ c : ℕ → ℝ, (∀ γ, 0 ≤ c γ) ∧
       ∀ (γ : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
@@ -757,7 +760,8 @@ lemma bal_Ccore (g : SmoothRiemannianMetric I M) (r s : ℕ) :
           ‖iteratedCovGrad (I := I) g r s (2 * p + 1) S‖ +
             c p * ∑ b ∈ Finset.range (2 * p + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I)
+    (M := M) g r s
   obtain ⟨cE, hcE_nn, hcE⟩ := bal_lap_jets_exact (I := I) (M := M) g r s
   have hmain : ∀ p : ℕ, ∃ c : ℝ, 0 ≤ c ∧
       ∀ S : SmoothCcTensor g r s,

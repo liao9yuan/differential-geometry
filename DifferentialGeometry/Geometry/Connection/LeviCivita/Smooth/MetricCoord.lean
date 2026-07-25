@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 

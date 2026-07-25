@@ -212,6 +212,7 @@ private lemma euclidean_norm_le_sum_norms (v : EuclideanSpace ℝ (Fin d)) :
         abs_of_nonneg (Finset.sum_nonneg fun i _ => hnv i)
 
 set_option maxHeartbeats 3200000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Poincare inequality for `W^{1,p}` witnesses on the unit ball.
 Proved by density of smooth functions + `ge_of_tendsto`. -/
 private theorem poincare_unitBall_W1p
@@ -735,10 +736,12 @@ private noncomputable def smooth_memW1pWitness_unitBall
       (hu.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).clm_apply continuous_const
     obtain ⟨C, hC⟩ := ((isCompact_closedBall (0 : E) 1).image_of_continuousOn
       hcont_i.continuousOn).isBounded.exists_norm_le
-    have hbound : ∀ᵐ x ∂(volume.restrict B), ‖(fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) x‖ ≤ C := by
+    have hbound : ∀ᵐ x ∂(volume.restrict B), ‖(fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1))
+      x‖ ≤ C := by
       filter_upwards [ae_restrict_mem measurableSet_ball] with x hx
       exact hC _ ⟨x, ball_subset_closedBall hx, rfl⟩
-    exact (memLp_top_of_bound (hcont_i.aestronglyMeasurable.restrict (s := B)) C hbound).mono_exponent
+    exact (memLp_top_of_bound (hcont_i.aestronglyMeasurable.restrict (s := B)) C
+      hbound).mono_exponent
       le_top
   · intro i
     simpa [G, PiLp.toLp_apply] using

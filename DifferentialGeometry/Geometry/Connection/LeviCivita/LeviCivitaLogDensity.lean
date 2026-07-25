@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

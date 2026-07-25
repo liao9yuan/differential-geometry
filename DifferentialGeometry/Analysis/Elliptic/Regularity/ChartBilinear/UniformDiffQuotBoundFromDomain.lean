@@ -266,7 +266,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     intro x hx
     exact hδ_in_chart (Metric.thickening_subset_cthickening _ _ hx)
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := K_χ)
       (Ω' := Metric.thickening δ (closure Ω'))

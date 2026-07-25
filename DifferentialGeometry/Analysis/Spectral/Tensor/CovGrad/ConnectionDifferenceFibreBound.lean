@@ -48,7 +48,8 @@ private lemma le_of_two_sq_le_two_mul {p K : ℝ} (hK : 0 ≤ K)
     (h : 2 * p ^ 2 ≤ 2 * K * p) : p ≤ K := by
   nlinarith only [hK, h]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma frame03_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -236,7 +237,8 @@ theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
     rw [Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
     ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma frame04_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -618,7 +620,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
   have hNw_nn : 0 ≤ Nw := Real.sqrt_nonneg _
   have hNp_nn : 0 ≤ Np := Real.sqrt_nonneg _
   have hGnorm_nn : 0 ≤ Gnorm := norm_nonneg _
-
   have hpp_eq : g₀.inner x p p = g₁.inner x u (Z x) := by
     have h1 : g₀.inner x p p =
         cotangentToDualLinear (I := I) θ p := by
@@ -629,7 +630,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
     rw [hθ_def]
     rw [koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x (Z x)]
     rw [hu_eq]
-
   have hkoszul : 2 * g₁.inner x u (Z x) =
       covGrad3Eval (I := I) (M := M) g₀ T X Y Z x
         + covGrad3Eval (I := I) (M := M) g₀ T Y X Z x
@@ -637,12 +637,10 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
     have h := connDiff_inner_eq_half_covGrad3Eval (I := I) (M := M) g₀ g₁ T hg₁ X Y Z x
     rw [hu_eq] at h
     exact h
-
   have hbd1 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T X Y Z x
   have hbd2 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T Y X Z x
   have hbd3 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T Z X Y x
   rw [hXx, hYx, hZx, ← hGnorm_def, ← hNv_def, ← hNw_def, ← hNp_def] at hbd1 hbd2 hbd3
-
   have htriple : |2 * g₀.inner x p p| ≤ 3 * Gnorm * Nv * Nw * Np := by
     rw [hpp_eq, hkoszul]
     have hsum : |covGrad3Eval (I := I) (M := M) g₀ T X Y Z x
@@ -659,7 +657,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       linarith [ht1, ht2]
     refine hsum.trans ?_
     nlinarith [hbd1, hbd2, hbd3, hGnorm_nn, hNv_nn, hNw_nn, hNp_nn]
-
   have hNp_le : Np ≤ (3 / 2) * Gnorm * Nv * Nw := by
     have hpp_nn : 0 ≤ g₀.inner x p p := metric_inner_self_nonneg (I := I) (M := M) g₀ x p
     have hNp_sq : Np ^ 2 = g₀.inner x p p := by
@@ -674,7 +671,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       2 * Np ^ 2 = 2 * g₀.inner x p p := by rw [hNp_sq]
       _ ≤ 3 * Gnorm * Nv * Nw * Np := htriple'
       _ = 2 * ((3 / 2) * Gnorm * Nv * Nw) * Np := by ring
-
   have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
     have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
@@ -687,7 +683,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       rw [hu_sharp, ← hθ_flat]
     rw [huu]
     exact hsfib
-
   have hsymmnorm := norm_covGrad_symmS_le (I := I) (M := M) g₀ T x
   rw [← hGnorm_def] at hsymmnorm
   have hiter_norm : ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
@@ -703,7 +698,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hGt_def
   have hGt_nn : 0 ≤ Gt := norm_nonneg _
   have hGle : Gnorm ≤ Gt := hsymmnorm
-
   have hinv_le : 1 / (1 - δ) ≤ 2 := by
     rw [div_le_iff₀ hcoeff]; linarith
   have hstep : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * ((3 / 2) * Gnorm * Nv * Nw) := by

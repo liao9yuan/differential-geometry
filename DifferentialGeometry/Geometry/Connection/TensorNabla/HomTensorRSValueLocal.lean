@@ -23,12 +23,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 @[reducible] private def fullHomTensorRSSpaceFiniteDimensional {r t : ℕ} {x : M} :
     FiniteDimensional ℝ (TensorRSSpace r t I x) :=
   Tensor0SBundle.tensorRSSpace_finiteDimensional r t x
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[reducible] private def fullHomTensorRSSpaceT2 {r t : ℕ} {x : M} :
     T2Space (TensorRSSpace r t I x) := by
   unfold TensorRSSpace
@@ -40,7 +42,8 @@ private noncomputable def chooseSecAtFull
     (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
     SmoothCcTensor g r a where
   toSection :=
-    letI : NormedAddCommGroup (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
+    letI : NormedAddCommGroup (TensorRSModel r a ℝ E) :=
+      Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
     letI : NormedSpace ℝ (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedSpace r a
     Classical.choose (ContMDiffSection.exists_eq_at (I := I) (F := TensorRSModel r a ℝ E)
       (V := fun z : M => TensorRSSpace r a I z) (n := (⊤ : ℕ∞)) x v)
@@ -48,11 +51,13 @@ private noncomputable def chooseSecAtFull
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma chooseSecAtFull_eq
     (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
     (chooseSecAtFull (I := I) (M := M) g r a x v).toSection x = v :=
-  letI : NormedAddCommGroup (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
+  letI : NormedAddCommGroup (TensorRSModel r a ℝ E) :=
+    Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
   letI : NormedSpace ℝ (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedSpace r a
   Classical.choose_spec (ContMDiffSection.exists_eq_at (I := I) (F := TensorRSModel r a ℝ E)
     (V := fun z : M => TensorRSSpace r a I z) (n := (⊤ : ℕ∞)) x v)
@@ -60,7 +65,6 @@ private lemma chooseSecAtFull_eq
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 private noncomputable def valueLocalLinearHomFib
     (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
@@ -106,8 +110,8 @@ private noncomputable def valueLocalLinearHomFib
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma valueLocalLinearHomFib_apply
     (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
@@ -139,7 +143,8 @@ private lemma valueLocalLinearHomFib_apply
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem valueLocalLinearHomFib_contMDiff
     (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
@@ -169,7 +174,8 @@ private theorem valueLocalLinearHomFib_contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 theorem exists_value_local_appFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
     (hadd : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
@@ -180,9 +186,11 @@ theorem exists_value_local_appFullSec (g : SmoothRiemannianMetric I M) (r a c : 
       W₁.toSection x = W₂.toSection x → (F W₁).toSection x = (F W₂).toSection x) :
     ∃ Θ : HomTensorRSField (E := E) (M := M) r a c I,
       ∀ (W : SmoothCcTensor g r a), F W = homTensorRSFieldApply (I := I) (M := M) g r a c Θ W := by
-  refine ⟨{ toFun := fun x : M => valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x
+  refine ⟨{ toFun := fun x : M =>
+              valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x
             contMDiff_toFun :=
-              valueLocalLinearHomFib_contMDiff (I := I) (M := M) g r a c F hadd hsmul hloc }, fun W => ?_⟩
+              valueLocalLinearHomFib_contMDiff (I := I) (M := M) g r a c F hadd hsmul hloc }, fun W
+                => ?_⟩
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x

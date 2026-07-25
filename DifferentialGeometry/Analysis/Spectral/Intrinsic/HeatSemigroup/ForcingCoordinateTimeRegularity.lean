@@ -170,7 +170,6 @@ private lemma tensorL2_eq_of_coeff_eq (g₀ : SmoothRiemannianMetric I M)
   exact h k
 
 open scoped Classical in
-
 private lemma tensorL2Coeff_sum_smul_basis (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
@@ -276,7 +275,8 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
     (X : SmoothCcTensor g₀ 0 2)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
-        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i =
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i
+          =
       (1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X) i +
         ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
@@ -326,7 +326,8 @@ private lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) X) j = φ j t)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
-        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i =
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (ccTensor02Symm (I := I) (M := M) g₀ X)) i
+          =
       symmCoeffPath (I := I) (M := M) g₀ φ i t := by
   rw [tensorL2Coeff_toL2_symmS_eq_blockSum (I := I) (M := M) g₀ X i, hX i]
   unfold symmCoeffPath
@@ -416,7 +417,6 @@ private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           (iteratedDeriv k (φ j) t) ^ 2 :=
         le_trans hcs (mul_le_of_le_one_left hsum_nn
           (sum_sq_swapEigenCoeff_le_one (I := I) (M := M) g₀ i))
-
       have hstep : tensorSobolevWeight (I := I) (M := M) i τ *
           ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i, (iteratedDeriv k (φ j) t) ^ 2 =
           tensorSobolevWeight (I := I) (M := M) i (-ρ) *
@@ -539,7 +539,8 @@ private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
       (I := I) (M := M) g₀ a ha_super)).2 < 1 :=
     lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))
   rw [deTurckSobolevNHa2Symm_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super X hδ_lt
-    (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ X (hp_ball X hball)) hball]
+    (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ X (hp_ball X hball))
+      hball]
   exact (deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
     (ccTensor02Symm (I := I) (M := M) g₀ X) hδ_lt
     (fiberwiseOperatorNormBound_of_tensorSymmetrization (I := I) (M := M) g₀ X (hp_ball X hball))

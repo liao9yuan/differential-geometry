@@ -47,7 +47,8 @@ section ChartDirectionPartialBound
 private def euclSupp (α : M) (u : M → ℝ) : Set EuclN :=
   (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport u))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma euclSupp_isCompact {α : M} {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     IsCompact (euclSupp (I := I) (M := M) α u) := by
@@ -62,7 +63,8 @@ private lemma euclSupp_isCompact {α : M} {u : M → ℝ}
     exact hsrc
   exact h_tsupp_cpt.image_of_continuousOn h_cont_on
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma euclSupp_subset_chartTargetEuclid {α : M} {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     euclSupp (I := I) (M := M) α u ⊆ chartTargetEuclid (I := I) (M := M) α := by
@@ -75,7 +77,8 @@ private lemma euclSupp_subset_chartTargetEuclid {α : M} {u : M → ℝ}
     rw [← hxz]; exact (extChartAt I α).map_source hx_ext
   exact ⟨z, hz_target, hzy⟩
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eq_zero_off_euclSupp {α : M} {u : M → ℝ}
     {y : EuclN} (hy : y ∉ euclSupp (I := I) (M := M) α u) :
     chartPushedRaw (I := I) (M := M) α u y = 0 := by
@@ -85,7 +88,8 @@ private lemma chartPushedRaw_eq_zero_off_euclSupp {α : M} {u : M → ℝ}
       (I := I) (M := M) (u := u) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma chartPushedRaw_smooth_hasCompactSupport_local
     {α : M} {u : M → ℝ} (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α u) := by
@@ -98,7 +102,8 @@ lemma chartPushedRaw_smooth_hasCompactSupport_local
     (chartPushedRaw_eq_zero_off_euclSupp (I := I) (M := M)
       (α := α) (u := u) hy_off)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
     {α : M} {u : M → ℝ} (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     tsupport (chartPushedRaw (I := I) (M := M) α u) ⊆

@@ -3,7 +3,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -969,7 +968,6 @@ omit [NeZero (Module.finrank ℝ E)] in
       f := rfl
 
 open scoped Classical in
-
 def tensorHsBasisVec {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ)
     (j : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorHs (I := I) (M := M) g r s σ :=

@@ -40,7 +40,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
-    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)] (x : M) :
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)]
+      (x : M) :
     NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I x) :=
   Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
     (E := fun y : M => Tensor0SBundle.TensorRSSpace r s I y) x
@@ -483,7 +484,8 @@ lemma iteratedCovGrad_le_connLap_add (g₀ : SmoothRiemannianMetric I M) (k : �
           Cj * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((k + 1 : ℕ) : ℝ) S‖ := by
   classical
   obtain ⟨Cgap, hCgap_nn, hgap⟩ :=
-    exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower (I := I) (M := M) g₀ (k + 1)
+    exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower (I := I) (M := M) g₀
+      (k + 1)
   refine ⟨Real.sqrt 2 + Real.sqrt Cgap, by positivity, fun S => ?_⟩
   have hgapS := hgap S
   have hJeq : SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (k + 1 + 1) S) =
@@ -575,7 +577,8 @@ lemma arm_covGrad_slotExtend_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
         (Module.finrank ℝ E : ℝ) ^ 3 * κ ^ 2)
     (S : SmoothCcTensor g₀ 0 2) :
     ‖operatorFieldApply (I := I) (M := M) g₀ 5 3
-        (slotExtend (I := I) (M := M) g₀ 4 2 (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁))
+        (slotExtend (I := I) (M := M) g₀ 4 2
+          (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 3 S)‖ ≤
       deTurckArmFibreConst (Module.finrank ℝ E) * κ *
         ‖iteratedCovGrad (I := I) g₀ 0 2 3 S‖ := by
@@ -584,7 +587,8 @@ lemma arm_covGrad_slotExtend_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
   set W := iteratedCovGrad (I := I) g₀ 0 2 3 S with hW_def
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
-          ((operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) W).toSection x) ≤
+          ((operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C)
+            W).toSection x) ≤
         (Module.finrank ℝ E : ℝ) ^ 3 * κ ^ 2 *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 5 x (W.toSection x) := by
     intro x
@@ -596,11 +600,13 @@ lemma arm_covGrad_slotExtend_l2_le (g₀ g₁ : SmoothRiemannianMetric I M)
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 5 x (W.toSection x))
       (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 5 W).const_mul _
-  have hsq : ‖operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) W‖ ^ 2 ≤
+  have hsq : ‖operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) W‖
+    ^ 2 ≤
       (Module.finrank ℝ E : ℝ) ^ 3 * κ ^ 2 * ‖W‖ ^ 2 := by
     have h1 := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
       (I := I) (M := M) g₀ 0 3
-      (operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) W) _ hFint hpt
+      (operatorFieldApply (I := I) (M := M) g₀ 5 3 (slotExtend (I := I) (M := M) g₀ 4 2 C) W) _
+        hFint hpt
     rw [MeasureTheory.integral_const_mul] at h1
     have hbridge := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
       (I := I) (M := M) g₀ 0 5 W
@@ -669,8 +675,10 @@ lemma iteratedCovGrad_norm_comp (g₀ : SmoothRiemannianMetric I M) (r s l m : �
         (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ ^ 2 =
       ‖iteratedCovGrad (I := I) g₀ r s (l + m) Ψ‖ ^ 2 := by
     simp only [SmoothCcTensor.norm_def]
-    rw [tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ r ((s + l) + m),
-      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ r (s + (l + m))]
+    rw [tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ r
+      ((s + l) + m),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ r
+        (s + (l + m))]
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ r s l m Ψ x
   nlinarith [hsq, hnn1, hnn2,

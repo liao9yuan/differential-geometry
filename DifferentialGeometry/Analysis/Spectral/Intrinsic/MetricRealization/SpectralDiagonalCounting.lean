@@ -59,7 +59,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
 noncomputable section
 
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators

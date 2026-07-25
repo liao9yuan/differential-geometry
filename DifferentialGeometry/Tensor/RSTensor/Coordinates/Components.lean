@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 noncomputable section
@@ -127,7 +125,6 @@ theorem extRS_basis
       componentRS (I := I) basis A upper lower =
         componentRS (I := I) basis B upper lower) :
     A = B := by
-
   have key : ∀ input : Tensor0SSpace r I x, A input = B input := by
     intro input
     apply ext0S_basis (I := I) basis

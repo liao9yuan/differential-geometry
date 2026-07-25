@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Components.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -101,7 +98,8 @@ theorem rm04LowersRm13At_of_realizes
         g.inner x W
           ((connectionRiemannCurvatureField (I := I) cov
             (fun p : M => Xsec p) (fun p : M => Ysec p) (fun p : M => Zsec p)) x) := by
-    simpa [alpha, hXsec, hYsec, hZsec, tangentFlatLinear_apply_gen, cotangentToDual_apply_gen] using h13
+    simpa [alpha, hXsec, hYsec, hZsec, tangentFlatLinear_apply_gen, cotangentToDual_apply_gen] using
+      h13
   exact h04'.trans h13'.symm
 
 

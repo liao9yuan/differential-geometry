@@ -77,7 +77,6 @@ private lemma eigenIdx_val_le_one
 end MainBound
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 def rhsZeroAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

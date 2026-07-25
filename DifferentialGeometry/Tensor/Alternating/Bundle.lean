@@ -11,8 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -39,7 +37,6 @@ variable [Π x, TopologicalSpace (E₂ x)]
 variable [Π x, ContinuousAdd (E₂ x)]
 
 instance (x : B) : AddCommMonoid (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) := by
-
   dsimp [Bundle.continuousAlternatingMap]
   infer_instance
 
@@ -200,7 +197,6 @@ omit [Fintype ι] in
 variable [Π x, ContinuousAdd (E₂ x)]
 
 omit [Fintype ι] in
-
 theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet)
     (L : (F₁ [⋀^ι]→L[𝕜] F₂)) :
     (continuousAlternatingMap 𝕜 ι e₁ e₂).symm b L =
@@ -353,7 +349,6 @@ variable {F₃ F₄ : Type*}
 local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
 omit [∀ (x : B), IsTopologicalAddGroup (E₂ x)] [∀ (x : B), ContinuousSMul 𝕜 (E₂ x)] in
-
 theorem contMDiffOn_continuousAlternatingMapCoordChange
     [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']

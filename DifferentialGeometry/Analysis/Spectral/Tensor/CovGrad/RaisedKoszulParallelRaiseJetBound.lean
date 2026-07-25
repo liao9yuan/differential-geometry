@@ -47,7 +47,8 @@ private lemma iteratedCovGrad_smul' (g : SmoothRiemannianMetric I M) (r s j : �
   | succ j ih =>
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_smul' (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -101,7 +102,8 @@ theorem rfns_iteratedCovGrad_symmS_le
   calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
           ((1 / 2 : ℝ) • (A.toSection x) + (1 / 2 : ℝ) • (B.toSection x))
       ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x ((1 / 2 : ℝ) • (A.toSection x)) +
-          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x ((1 / 2 : ℝ) • (B.toSection x)) :=
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
+            ((1 / 2 : ℝ) • (B.toSection x)) :=
         riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + k) x _ _
     _ = (1 / 2 : ℝ) * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x (A.toSection x) +
           (1 / 2 : ℝ) * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x (B.toSection x) := by

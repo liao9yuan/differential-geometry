@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -383,10 +381,10 @@ def TensorBarrierUniformStrictOnSlab
 def TensorFirstNullScalarSigns
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
-    (X : TimeDependentVectorField (I := I) (M := M))
-    (N : TwoTensorReaction (I := I) (M := M))
+    (_X : TimeDependentVectorField (I := I) (M := M))
+    (_N : TwoTensorReaction (I := I) (M := M))
     (epsilon delta t0 : Real)
-    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) : Prop :=
+    (_d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) : Prop :=
   ∃ timeDeriv laplacian drift reaction : Real,
     timeDeriv ≤ 0 ∧
     0 ≤ laplacian ∧

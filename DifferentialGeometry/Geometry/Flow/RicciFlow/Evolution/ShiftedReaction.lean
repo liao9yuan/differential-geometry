@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.TensorBackedReaction
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -97,7 +95,8 @@ theorem ricciReactNull
       (l2 - l3) ^ 2 := by
   subst l1
   unfold ricciPresReact ricciSq3 DifferentialGeometry.Integral.Connection.stdRmDiag3
-    DifferentialGeometry.Integral.Connection.ricciDiag3 DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+    DifferentialGeometry.Integral.Connection.ricciDiag3
+      DifferentialGeometry.Integral.Connection.ricciEigenScalar3
     DifferentialGeometry.Integral.Connection.delta3
   simp [Fin.sum_univ_three]
   ring
@@ -137,8 +136,10 @@ theorem pinchReactNull
             2 * delta * l1 - delta * l2 - delta * l3 + 2 * l1 - l2 - l3) := by
     dsimp [lhs, rhs]
     unfold pinchReact ricciPresReact ricciSq3 ricciNorm3 ricciScal3
-      DifferentialGeometry.Integral.Connection.stdRmDiag3 DifferentialGeometry.Integral.Connection.ricciDiag3
-      DifferentialGeometry.Integral.Connection.ricciEigenScalar3 DifferentialGeometry.Integral.Connection.delta3
+      DifferentialGeometry.Integral.Connection.stdRmDiag3
+        DifferentialGeometry.Integral.Connection.ricciDiag3
+      DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+        DifferentialGeometry.Integral.Connection.delta3
     simp [Fin.sum_univ_three]
     ring
   have hzero : lhs - rhs = 0 := by
@@ -149,7 +150,7 @@ theorem pinchReactNull
 
 theorem pinchReact_ge
     (delta l1 l2 l3 : Real)
-    (hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
+    (_hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
     (hnull : l1 = delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) :
     0 <= pinchReact delta (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
       (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 := by
@@ -158,7 +159,8 @@ theorem pinchReact_ge
       DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^ 2 := by
     have hdelta_sq : 0 <= delta ^ 2 := sq_nonneg delta
     have hcoeff : 0 <= 1 - 3 * delta := by nlinarith
-    have hscalar_sq : 0 <= DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^ 2 :=
+    have hscalar_sq : 0 <= DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^
+      2 :=
       sq_nonneg _
     positivity
   have h2 : 0 <= (1 - delta) * (l2 - l3) ^ 2 := by
@@ -494,14 +496,16 @@ theorem metricTrace_metric3
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis) :
     metricTracePair0SAt (I := I) g
         (metricTensorField (I := I) g x) = 3 := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
         DifferentialGeometry.Integral.Connection.delta3 i j := horth
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
     DifferentialGeometry.Integral.Connection.delta3 hinv]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2]
 
 
@@ -516,7 +520,8 @@ theorem shiftScalar_add_g
         (A + c • metricTensorField (I := I) g x) =
       shiftScalar3At (I := I) (M := M) δ g A +
         (3 * c) / (1 - 3 * δ) := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
@@ -527,7 +532,8 @@ theorem shiftScalar_add_g
       (A + c • metricTensorField (I := I) g x)]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
     DifferentialGeometry.Integral.Connection.delta3 hinv A]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
     Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
@@ -568,7 +574,8 @@ theorem shiftScalar3At_pinch
           metricTensorField (I := I) g x) =
       metricTracePair0SAt (I := I) g Ric := by
   let R : Real := metricTracePair0SAt (I := I) g Ric
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   have hR :
       R =
@@ -589,7 +596,8 @@ theorem shiftScalar3At_pinch
     DifferentialGeometry.Integral.Connection.delta3 hinv]
   rw [show metricTracePair0SAt (I := I) g Ric = R by rfl]
   rw [hR]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, metricTensorField_apply,
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
     Tensor0SBundle.Tensor0SSpace.sub_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
@@ -626,10 +634,13 @@ theorem shiftScalar3At_of_shiftBlock
     (hreal : Tensor02RealizesRawAt (I := I) (M := M) Araw x A)
     (hblock : ShiftBlockAt (I := I) (M := M) g Araw x basis a b c) :
     shiftScalar3At (I := I) (M := M) δ g A = shiftScal3 δ a b := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis hblock.orthonormal
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
+    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis
+      hblock.orthonormal
   rw [shiftScalar3At, shiftScal3,
-    metricTracePair0SAt_eq_sum_basis (I := I) g basis DifferentialGeometry.Integral.Connection.delta3 hinv A]
+    metricTracePair0SAt_eq_sum_basis (I := I) g basis
+      DifferentialGeometry.Integral.Connection.delta3 hinv A]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3]
   rw [hreal (basis 0) (basis 0), hreal (basis 1) (basis 1),
     hreal (basis 2) (basis 2), hblock.components 0 0,
@@ -840,7 +851,8 @@ theorem rm04OfRic3At_comp_orthonormal
         (vec4 (I := I) (basis i) (basis j) (basis k) (basis l)) =
       stdRmOfRic3 (fun a b : Fin 3 => Ric (vec2 (I := I) (basis a) (basis b)))
         i j k l := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   have htrace :
       metricTracePair0SAt (I := I) g Ric =
@@ -1196,12 +1208,14 @@ theorem ricciEnd_repr_orthonormal
     (i k : Fin 3) :
     basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k =
       Ric (vec2 (I := I) (basis i) (basis k)) := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   rw [basis_repr_eq_sum_inv_inner (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3
     hinv]
   fin_cases k <;>
-    simp [DifferentialGeometry.Integral.Connection.delta3, DifferentialGeometry.Integral.Connection.ricciEnd_inner]
+    simp [DifferentialGeometry.Integral.Connection.delta3,
+      DifferentialGeometry.Integral.Connection.ricciEnd_inner]
 
 omit [IsManifold I 2 M] in
 theorem ricciQuadAt_comp_orthonormal
@@ -1218,7 +1232,8 @@ theorem ricciQuadAt_comp_orthonormal
   have hEnd :
       DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i) =
         ∑ k : Fin 3,
-          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k •
+          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))
+            k •
             basis k := by
     exact (basis.sum_repr
       (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))).symm
@@ -1226,12 +1241,14 @@ theorem ricciQuadAt_comp_orthonormal
   rw [show
       vec2 (I := I)
           (∑ k : Fin 3,
-            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k •
+            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
+              (basis i)) k •
               basis k)
           (basis j) =
         Fin.cons
           (∑ k : Fin 3,
-            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k •
+            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
+              (basis i)) k •
               basis k)
           (fun _ : Fin 1 => basis j) by
     funext q
@@ -1239,13 +1256,15 @@ theorem ricciQuadAt_comp_orthonormal
   rw [← DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons
     (I := I) (M := M) (s := 1) Ric
       (∑ k : Fin 3,
-        basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k •
+        basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k
+          •
           basis k)
       (fun _ : Fin 1 => basis j)]
   change
     ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x Ric)
         (∑ k : Fin 3,
-          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k •
+          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))
+            k •
             basis k))
         (fun _ : Fin 1 => basis j) =
       ricciSq3
@@ -1266,7 +1285,8 @@ theorem ricciNorm3_comp_orthonormal
     inner0S (I := I) g x 2 Ric Ric =
       ricciNorm3 (fun a b : Fin 3 =>
         Ric (vec2 (I := I) (basis a) (basis b))) := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 hinv]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, ricciNorm3,
@@ -1282,7 +1302,8 @@ theorem metricTrace_comp_orthonormal
     metricTracePair0SAt (I := I) g Ric =
       ricciScal3 (fun a b : Fin 3 =>
         Ric (vec2 (I := I) (basis a) (basis b))) := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
     DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
@@ -1301,12 +1322,14 @@ theorem rm04Contr_comp_orthonormal
       ∑ k : Fin 3, ∑ l : Fin 3,
         Rm04 (vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
           Ric (vec2 (I := I) (basis k) (basis l)) := by
-  have hinv : MetricInverseInBasis_gen (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 :=
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+    DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   rw [rm04RicciContrAt_apply]
   rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 hinv]
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, rm04Mid02At_apply,
-    vec2, vec4, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec4]
+    vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.Integral.Connection.vec4]
   simp [fin2_const_eq_vec2, fin2_if_eq_vec2, rm04Mid02At_apply]
   ring_nf
 

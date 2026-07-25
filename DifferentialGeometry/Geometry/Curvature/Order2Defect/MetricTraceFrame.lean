@@ -187,7 +187,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private noncomputable def coBchangeChartα (α : M) {b : M}
     (B : Fin (Module.finrank ℝ E) → TangentSpace I b) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -195,7 +194,6 @@ private noncomputable def coBchangeChartα (α : M) {b : M}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma decompose_in_chartBasisα (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I b) (i : Fin (Module.finrank ℝ E)) :
@@ -224,7 +222,6 @@ private lemma decompose_in_chartBasisα (α : M) {b : M}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma bilin_expand_chartBasisα {A : Type*} [AddCommGroup A] [Module ℝ A]
     [TopologicalSpace A] [IsTopologicalAddGroup A] [ContinuousSMul ℝ A]
     (α : M) {b : M}
@@ -272,7 +269,6 @@ private lemma bilin_expand_chartBasisα {A : Type*} [AddCommGroup A] [Module ℝ
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma orthonormal_matrix_form_chartα
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -315,7 +311,6 @@ private lemma orthonormal_matrix_form_chartα
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma sum_coBchangeChartα_eq_invGram
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -354,7 +349,6 @@ private lemma sum_coBchangeChartα_eq_invGram
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem orthonormal_basis_bilin_trace_chartα {A : Type*} [AddCommGroup A] [Module ℝ A]
     [TopologicalSpace A] [IsTopologicalAddGroup A] [ContinuousSMul ℝ A]
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}

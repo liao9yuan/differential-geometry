@@ -24,13 +24,11 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (I M) in
-
 def chartAtlasPOU [T2Space M] [SigmaCompactSpace M] :
     SmoothPartitionOfUnity M I M univ :=
   (SmoothPartitionOfUnity.exists_isSubordinate_chartAt_source I M).choose
 
 variable (I M) in
-
 lemma chartAtlasPOU_isSubordinate [T2Space M] [SigmaCompactSpace M] :
     (chartAtlasPOU I M).IsSubordinate (fun x : M => (chartAt H x).source) :=
   (SmoothPartitionOfUnity.exists_isSubordinate_chartAt_source I M).choose_spec

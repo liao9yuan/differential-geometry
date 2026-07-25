@@ -21,7 +21,8 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_inner_gInvDiffRaisedEndo_sub_le
     (g₀ ga gb : SmoothRiemannianMetric I M)
     (ha hb : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -36,7 +37,8 @@ theorem sqrt_inner_gInvDiffRaisedEndo_sub_le
     (x : M) (v : TangentSpace I x) :
     Real.sqrt (g₀.inner x
         (metricComparisonDiffEndo (I := I) g₀ ga x v - metricComparisonDiffEndo (I := I) g₀ gb x v)
-        (metricComparisonDiffEndo (I := I) g₀ ga x v - metricComparisonDiffEndo (I := I) g₀ gb x v)) ≤
+        (metricComparisonDiffEndo (I := I) g₀ ga x v - metricComparisonDiffEndo (I := I) g₀ gb x v))
+          ≤
       (δab / ((1 - δa) * (1 - δb))) * Real.sqrt (g₀.inner x v v) := by
   classical
   have hcoeff_a : 0 < 1 - δa := by linarith

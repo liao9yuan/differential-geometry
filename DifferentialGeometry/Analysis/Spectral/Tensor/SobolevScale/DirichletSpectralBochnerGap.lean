@@ -490,7 +490,8 @@ private lemma contract_eq_covGradBundleEquiv_symm_local
   rw [Tensor0SBundle.covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 s x A v D m]
   rfl
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)
@@ -511,7 +512,8 @@ private lemma riemannianFiberNormSq_eq_sum_contract_orthoFrame_local
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [← hAeq, contract_eq_covGradBundleEquiv_symm_local (I := I) (M := M) s x (e a) A, hΦ_def]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_contract_le_succ_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : TensorRSSpace 0 (s + 1) I x)

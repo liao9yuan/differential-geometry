@@ -20,7 +20,6 @@ import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -138,7 +137,8 @@ def ham3RealFamilyCore
     by_cases ht : t ∈ D.carrier
     · simpa [ht] using S.family.metricCompatible ⟨t, ht⟩
     · simpa [ht] using
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g0)
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+          (I := I) g0)
 
 
 
@@ -431,7 +431,8 @@ def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
   forall x : L.N,
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x = 0
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x = 0
 
 
 
@@ -453,7 +454,8 @@ def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
   forall x : L.N, forall η : Real, 0 < η ->
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x <= η
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x <= η
 
 
 
@@ -826,7 +828,8 @@ def Ham3Section9Pinch
       0 < delta /\ delta < (1 : Real) / 3 /\
         DifferentialGeometry.PDE.RicciFlow.PinchPres (I := I) (M := M)
           (fun t : Real => P.S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
           P.S.scalar T delta
 
 
@@ -839,7 +842,8 @@ def Ham3Section9PinchFixed
       forall T : Real, 0 <= T -> T < omega ->
         DifferentialGeometry.PDE.RicciFlow.PinchPres (I := I) (M := M)
           (fun t : Real => P.S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
           P.S.scalar T delta
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -882,7 +886,8 @@ def Ham3PinchEstimate
   exists epsilon C : Real,
     0 < epsilon /\ epsilon < 1 /\ 0 <= C /\
       DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M)
-        (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+        (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+          (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
         P.S.scalar
         (DifferentialGeometry.PDE.RicciFlow.pinchWeight (M := M) P.S.scalar epsilon)
         C P.D.carrier
@@ -1050,7 +1055,8 @@ theorem ham3_scalar0_cont74
     funext y
     have hmetric :
         Tensor0SBundle.metricTensorField (I := I) (P.S.family.metric 0) y =
-          DifferentialGeometry.Integral.Connection.metricTensor0S (I := I) (P.S.family.metric 0) y := by
+          DifferentialGeometry.Integral.Connection.metricTensor0S (I := I) (P.S.family.metric 0)
+            y := by
       ext v
       rw [Tensor0SBundle.metricTensorField_apply,
         DifferentialGeometry.Integral.Connection.metricTensor0S_apply]
@@ -1061,7 +1067,8 @@ theorem ham3_scalar0_cont74
         DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P) 0 y
     rw [DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace,
       DifferentialGeometry.Integral.Connection.metricTracePair0SAt, hmetric]
-    simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+    simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
       DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci_apply]
   exact (hfun ▸ hmdiff.continuousAt)
 
@@ -1075,7 +1082,8 @@ theorem ham3_ricci_pos0
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
     DifferentialGeometry.PDE.RicciFlow.RicciPosInit (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) := by
+      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+        P.S.ricci) := by
   intro x v hv
   have hmetric0 : P.S.family.metric 0 = g0 := by
     have hinit : P.D.initial = 0 := by
@@ -1087,8 +1095,10 @@ theorem ham3_ricci_pos0
         (P.S.family.metric 0) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) := by
     rw [hmetric0]
     exact hpos x v hv
-  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
-    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
+  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hpos0
 
 
@@ -1190,7 +1200,8 @@ theorem ham3_evol74
         (D := P.D)
         (ham3Solution (I := I) P).scalar
         (fun t x =>
-          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (ham3RealFamily (I := I) P) t
+          DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (ham3RealFamily (I := I) P)
+            t
             ((ham3Solution (I := I) P).scalar t) x)
         (fun t x =>
           Tensor0SBundle.normSq0S (I := I)
@@ -1271,7 +1282,8 @@ theorem ham3_ricBound74
   classical
   letI : Nonempty (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :=
     ⟨⟨0, by simp [hdim]⟩⟩
-  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) Real
+  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
+    Real
       (TangentSpace I x) :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv :
@@ -1284,19 +1296,21 @@ theorem ham3_ricBound74
       Tensor0SBundle.MetricInverseInBasis (I := I) (P.S.family.metric t) x
         basis gInv := by
     simpa [basis, gInv] using
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) (P.S.family.metric t) x
   have h :=
     DifferentialGeometry.Integral.Connection.metricTracePair0SAt_sq_div_rank_le_normSq0S
       (I := I) (g := P.S.family.metric t) (basis := basis)
       (gInv := gInv) hinv (P.S.ricciAt t x)
   have hcard :
-      (1 / (Fintype.card (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) : Real)) =
+      (1 / (Fintype.card (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+        Real)) =
         (1 / 3 : Real) := by
     simp [DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hdim]
   have hcoef : ((Module.finrank Real E : Real)⁻¹) = (3⁻¹ : Real) := by
     simp [hdim]
-  simpa [ham3Scalar, ham3RicNormSq, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard, hcoef]
+  simpa [ham3Scalar, ham3RicNormSq, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard,
+    hcoef]
     using h
 
 
@@ -1343,7 +1357,8 @@ theorem ham3_lip74
       DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier_denominator_pos_on_Icc_of_lt_blowup
         (n := 3) (c0 := c0) (by norm_num) hc0 hPole
     have hbar_cont :
-        ContinuousOn (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0) (Set.Icc 0 T) := by
+        ContinuousOn (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)
+          (Set.Icc 0 T) := by
       unfold DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier
       have hden_cont :
           ContinuousOn (fun t : Real => 1 - (2 / 3 : Real) * c0 * t)
@@ -1483,7 +1498,8 @@ private theorem ham3_rm_scalar_ctl
         (100 : Real) ^ 2 * (ham3Scalar (I := I) P t x) ^ 2 := by
   classical
   rcases hM with ⟨_hcompact, _hconnected, _hboundaryless, hdim⟩
-  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+    h0ω).carrier := by
     simpa [hD] using htD
   have ht0 : 0 <= t := htD'.1
   have htω : t < omega := htD'.2
@@ -1493,7 +1509,8 @@ private theorem ham3_rm_scalar_ctl
   have hricNonneg :
       DifferentialGeometry.Integral.Connection.RicciNonnegAt (I := I) (P.S.ricciAt t x) := by
     intro v
-    simpa [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
+    simpa [DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
       hricOn t ⟨ht0, le_rfl⟩ x v
   have hricSym :
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (P.S.ricciAt t x) :=
@@ -1516,7 +1533,8 @@ private theorem ham3_rm_scalar_ctl
       ⟨basis, l1, l2, l3, horth, hdiag, h1, h2, h3⟩
     have hScalarTrace :
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-          (P.S.scalar t x) (P.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+          (P.S.scalar t x) (P.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3
+            basis := by
       have htr :=
         DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (P.S.base.metric t)
           (P.S.ricciAt t x) horth
@@ -1706,13 +1724,15 @@ theorem ham3_point_select
   have hraw_nonneg : ∀ i : Nat, 0 <= rawTime i := by
     intro i
     have hmem : rawTime i ∈
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
       simpa [hD] using (hraw_spec i).1
     exact hmem.1
   have hraw_lt_omega : ∀ i : Nat, rawTime i < omega := by
     intro i
     have hmem : rawTime i ∈
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
       simpa [hD] using (hraw_spec i).1
     exact hmem.2
   have hmax_exists : ∀ i : Nat, ∃ tmax : Real, ∃ xmax : M,
@@ -1871,7 +1891,8 @@ theorem ham3_pinch9_fixed
   letI : Nonempty M := inferInstance
   have hpos0 :
       DifferentialGeometry.PDE.RicciFlow.RicciPosInit (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) :=
+        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+          P.S.ricci) :=
     ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
   have hinit : DifferentialGeometry.PDE.RicciFlow.PinchInitLt (I := I) (M := M)
       (fun t : Real => P.S.base.metric t)
@@ -1879,7 +1900,8 @@ theorem ham3_pinch9_fixed
       P.S.scalar :=
     DifferentialGeometry.PDE.RicciFlow.pinchInitLt_pos (I := I) (M := M)
       (G := fun t : Real => P.S.base.metric t)
-      (Ric := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+      (Ric := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+        P.S.ricci)
       (scalar := P.S.scalar)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0 (I := I) (M := M) P.S)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0_pos (I := I) (M := M) P.S hpos0)
@@ -1943,14 +1965,16 @@ theorem ham3_ric_nonneg9
   have hpos0 := ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
   have hinit : DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeAtTime
       (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) 0 := by
+      (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+        0 := by
     intro x v
     by_cases hv : v = 0
     · subst v
       have hbilin := DifferentialGeometry.Integral.Connection.twoTensorSecToFamily_bilin
         (I := I) (M := M) P.S.ricci 0 x
       have hzero :
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+            P.S.ricci)
               0 x 0 0 = 0 := by
         have h := hbilin.smul_left 0
           (0 : TangentSpace I x) (0 : TangentSpace I x)
@@ -2022,8 +2046,10 @@ theorem ham3_rescaled_ric_nonneg
   have htau : ham3RescaledTime (I := I) P Q i s ∈ Set.Icc 0 (Q.time i) :=
     ⟨htau0, htauT⟩
   have hraw := hnonneg (ham3RescaledTime (I := I) P Q i s) htau x v
-  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
-    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
+  simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci,
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hraw
 
 
@@ -2116,7 +2142,8 @@ theorem ham3_scalar_pos
       (DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.lowerBound (M := M) hinit_min) hF
   intro t htD x
   have ht_closed :
-      t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+      t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        h0ω).carrier := by
     simpa [hD] using htD
   rcases ht_closed with ⟨ht0, htω⟩
   by_cases ht_zero : t = 0
@@ -2205,14 +2232,16 @@ theorem ham3_pinch_imp
     ⟨epsilon, C, _heps0, _heps1, _hC0, hest⟩
   let tracefreeRmNormSq : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierZeroExt (M := M) P.D
-      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
+      (DifferentialGeometry.PDE.RicciFlow.tfRicNormSq P.S.scalar
+        (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) P.S))
   let scalar : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierScalarExt (M := M) P.D P.S.scalar
   let weight : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierWeightExt (M := M) P.D P.S.scalar epsilon
   refine ⟨tracefreeRmNormSq, scalar, weight, C, ?_⟩
   have hdisplay :
-      DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M) tracefreeRmNormSq scalar weight C Set.univ := by
+      DifferentialGeometry.PDE.RicciFlow.PinchEstimateOn (M := M) tracefreeRmNormSq scalar weight C
+        Set.univ := by
     simpa [tracefreeRmNormSq, scalar, weight] using
       DifferentialGeometry.PDE.RicciFlow.pinchEstimate_ext (M := M) (D := P.D) hest
   intro t x
@@ -2241,7 +2270,8 @@ theorem ham3_rm_bound
   have hricNonneg :
       DifferentialGeometry.Integral.Connection.RicciNonnegAt (I := I) (P.S.ricciAt τ x) := by
     intro v
-    simpa [τ, DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
+    simpa [τ, DifferentialGeometry.Integral.Connection.vec2,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt] using
       hric i s x v hsleft hsright
   have hricSym :
       DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (P.S.ricciAt τ x) :=
@@ -2264,7 +2294,8 @@ theorem ham3_rm_bound
       ⟨basis, l1, l2, l3, horth, hdiag, h1, h2, h3⟩
     have hScalarTrace :
         DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-          (P.S.scalar τ x) (P.S.ricciAt τ x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+          (P.S.scalar τ x) (P.S.ricciAt τ x) DifferentialGeometry.Integral.Connection.delta3
+            basis := by
       have htr :=
         DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (P.S.base.metric τ)
           (P.S.ricciAt τ x) horth
@@ -2621,7 +2652,8 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 0 0
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0)) = l1 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0))
+          = l1 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hl2 : 0 <= l2 := by
@@ -2629,7 +2661,8 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 1 1
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1)) = l2 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1))
+          = l2 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hl3 : 0 <= l3 := by
@@ -2637,12 +2670,14 @@ theorem limit_scalar_nonneg
     have hcomp := hdiag.2 2 2
     rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply] at hcomp
     have hval :
-        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2)) = l3 := by
+        L.S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2))
+          = l3 := by
       simpa [DifferentialGeometry.Integral.Connection.ricciDiag3] using hcomp
     rwa [hval] at h
   have hScalarTrace :
       DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-        (L.S.scalar t x) (L.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+        (L.S.scalar t x) (L.S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3
+          basis := by
     have htr :=
       DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (L.S.base.metric t)
         (L.S.ricciAt t x) horth
@@ -2742,7 +2777,8 @@ theorem limit_tf_zero_of_decay
   letI : T2Space L.N := L.t2
   intro x
   let q : Real :=
-    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x
+    DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
+      (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x
   have hnonneg : 0 <= q := by
     have hdimT :
         forall (_t : Real) (y : L.N),
@@ -2806,7 +2842,8 @@ theorem limitEinstein_of_tf0
     simpa using hdim
   have hsym : DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (M := L.N) Ric :=
     DifferentialGeometry.PDE.RicciFlow.ricciSym_can (I := I) (M := L.N) L.S t0 x
-  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (M := L.N) g Ric hdimT hsym with
+  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (M := L.N) g Ric hdimT
+    hsym with
     ⟨basis, l1, l2, l3, horth, hdiag⟩
   have hscalarTrace :=
     DifferentialGeometry.PDE.RicciFlow.scalarTrace_delta (I := I) (M := L.N) g Ric horth
@@ -2818,7 +2855,8 @@ theorem limitEinstein_of_tf0
             (L.S.family.metric t0) (L.S.ricciAt t0 x) :=
             DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace (I := I) (M := L.N)
               L.S t0 x
-      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N) g Ric := by
+      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N) g
+        Ric := by
             rfl
       _ = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
             exact DifferentialGeometry.PDE.RicciFlow.scalar_eq_diag (I := I) hscalarTrace hdiag
@@ -2839,10 +2877,12 @@ theorem limitEinstein_of_tf0
   have htf_eigen :
       DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3 l1 l2 l3 = 0 := by
     have htf_x := htf x
-    rw [DifferentialGeometry.PDE.RicciFlow.tfRicNormSq, DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
+    rw [DifferentialGeometry.PDE.RicciFlow.tfRicNormSq,
+      DifferentialGeometry.PDE.RicciFlow.tracefreeRicciNormSqOf,
       hscalar, hnorm,
       DifferentialGeometry.PDE.RicciFlow.ricciNormAt_diag (I := I) (M := L.N) hdiag] at htf_x
-    simpa [DifferentialGeometry.PDE.RicciFlow.tfRicNormSqAt, DifferentialGeometry.PDE.RicciFlow.tfRic_eigen] using htf_x
+    simpa [DifferentialGeometry.PDE.RicciFlow.tfRicNormSqAt,
+      DifferentialGeometry.PDE.RicciFlow.tfRic_eigen] using htf_x
   have heq :=
     (DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_eq_zero_iff l1 l2 l3).1
       htf_eigen
@@ -2885,7 +2925,8 @@ theorem limitEinstein_of_tf0
   calc
     L.S.ricciAt t0 x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
         g.inner x (T v) w := by
-          exact (DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) (M := L.N) g Ric v w).symm
+          exact (DifferentialGeometry.Integral.Connection.ricciEnd_inner (I := I) (M := L.N) g Ric v
+            w).symm
     _ = g.inner x (l1 • v) w := by rw [hT_all]
     _ = l1 * g.inner x v w := by simp
     _ = (L.S.scalar t0 x / 3) * (L.S.base.metric t0).inner x v w := by
@@ -2925,8 +2966,10 @@ theorem limit_round_of_ein
     intro y v w
     have h := heinstein y v w
     simpa [g, LimitEinsteinAt, DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
-      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt, DifferentialGeometry.PDE.RicciFlow.metricRicciAt,
-      DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt,
+        DifferentialGeometry.PDE.RicciFlow.metricRicciAt,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
+        DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using h
   have hdScalar :
       ∀ x : L.N, ∀ X : TangentSpace I x,
@@ -2946,16 +2989,19 @@ theorem limit_round_of_ein
     have hinv :
         Tensor0SBundle.MetricInverseInBasis (I := I) (M := L.N) g x basis
           DifferentialGeometry.Integral.Connection.delta3 :=
-      DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (M := L.N) g basis horth
+      DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (M := L.N) g basis
+        horth
     exact DifferentialGeometry.Integral.Connection.dScalar_zero_ein3_at (I := I) (M := L.N) g basis
       DifferentialGeometry.Integral.Connection.delta3 hinv hEinStatic X
-  rcases DifferentialGeometry.Integral.Connection.metricScalar_const_of_dScalar_zero (I := I) (M := L.N) g
+  rcases DifferentialGeometry.Integral.Connection.metricScalar_const_of_dScalar_zero (I := I)
+    (M := L.N) g
       hdScalar with
     ⟨R0, hR0_metric⟩
   have hR0_scalar : ∀ x : L.N, L.S.scalar t0 x = R0 := by
     intro x
     have hx := hR0_metric x
-    simpa [g, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar, DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
+    simpa [g, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
+      DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar,
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using hx
   have hR0_pos : 0 < R0 := by
     have hb := hscalar L.basepoint
@@ -2984,7 +3030,8 @@ theorem limit_round_of_ein
     DifferentialGeometry.PDE.RicciFlow.traceData_can (I := I) (M := L.N) L.S
       (t := t0) (x := x) (basis := basis) horth
   have hEinCompNeg : ∀ i j : Fin 3,
-      DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (-(L.S.ricciAt t0 x)) i j =
+      DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis (-(L.S.ricciAt t0 x)) i j
+        =
         ((-L.S.scalar t0 x) / 3) * DifferentialGeometry.Integral.Connection.delta3 i j := by
     intro i j
     have hij := heinstein x (basis i) (basis j)

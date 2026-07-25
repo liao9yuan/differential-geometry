@@ -182,7 +182,8 @@ theorem connTraceUTrace
                   (A x) (fun _ : Fin 1 => d)
                   (fun q : Fin 2 => if q = 0 then i else a))) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem connTraceATrace
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -287,14 +288,16 @@ theorem connTraceATrace
       i j
   simpa [Acomp, Gamma] using h
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem gInvFun_mdifferentiableAt
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     MDifferentiableAt I 𝓘(Real, Real) (gInvFun (I := I) g x i j) x :=
   (gInvComp_contMDiffAt (I := I) g x i j).mdifferentiableAt (by norm_num)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem compFun_mdifferentiableAt
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -307,7 +310,8 @@ private theorem compFun_mdifferentiableAt
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem compFun_center
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -338,7 +342,8 @@ private theorem compFun_center
   simp [hconst, component0S, coordinateFrameAt_basis_apply]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem gInvFun_center
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -347,7 +352,8 @@ private theorem gInvFun_center
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem connTraceCoeff_one_center
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -410,7 +416,6 @@ private theorem connTraceRawDiv_eq_productSum
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a)) := by
   classical
   set Z := DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A with hZ
-
   have hbridge :=
     DifferentialGeometry.Integral.Connection.divergence_g_eq_coordinateFrame_covariant_divergence
       (I := I) g Z x
@@ -418,9 +423,7 @@ private theorem connTraceRawDiv_eq_productSum
       connTraceRawDiv (I := I) g A x =
         DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g Z x := rfl
   rw [hrawdef, hbridge]
-
   subst hcov
-
   rw [Finset.sum_add_distrib]
   congr 1
   · refine Finset.sum_congr rfl fun p _ => ?_
@@ -464,7 +467,6 @@ private theorem connTraceRawDiv_eq_productSum
               gInvFun (I := I) g x i j x * compFun (I := I) A x l i j x := by
       intro l
       exact connTraceCoeff_one_center (I := I) g A x l
-
     calc
       (∑ p : CoordinateIdx (𝕜 := Real) E,
         ∑ l : CoordinateIdx (𝕜 := Real) E,
@@ -475,7 +477,8 @@ private theorem connTraceRawDiv_eq_productSum
           =
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           (∑ p : CoordinateIdx (𝕜 := Real) E,
-            christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            christoffelSymbolInFrame
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x p l p) *
             (∑ i : CoordinateIdx (𝕜 := Real) E,
@@ -492,7 +495,8 @@ private theorem connTraceRawDiv_eq_productSum
             ∑ j : CoordinateIdx (𝕜 := Real) E,
               gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x) *
             (∑ a : CoordinateIdx (𝕜 := Real) E,
-              christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a) := by
           exact symmetric_trace_sum_mul
@@ -574,7 +578,6 @@ theorem connTraceRaw_eq_gamma
     connTraceRawDiv (I := I) g A x =
       gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x := by
   classical
-
   set dU : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
       CoordinateIdx (𝕜 := Real) E -> Real :=
     fun d i j =>
@@ -600,16 +603,12 @@ theorem connTraceRaw_eq_gamma
       christoffelSymbolInFrame cov
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a c with hGammaDef
-
   have hUtrace :=
     connTraceUTrace (I := I) (cov := cov) g A dU x (fun d i j => rfl) hzero
-
   have hAtrace :=
     connTraceATrace (I := I) (cov := cov) A nablaChristoffelVariation
       (fun d k i j => dA d k i j) x hNabla hGamma
-
   have hprod := connTraceRawDiv_eq_productSum (I := I) (cov := cov) g A x hcov hGamma
-
   have hraw := rawDivTraceAlg
     (U := U) (dU := dU) (A := Acomp) (dA := dA)
     (nablaA := fun d k i j => nablaChristoffelVariation x d k i j)
@@ -622,7 +621,6 @@ theorem connTraceRaw_eq_gamma
       intro i j
       have h := hAtrace i j
       simpa [Acomp, Gamma] using h)
-
   rw [hprod]
   rw [show
       (∑ p : CoordinateIdx (𝕜 := Real) E,
@@ -652,7 +650,6 @@ theorem connTraceRaw_eq_gamma
               (∑ a : CoordinateIdx (𝕜 := Real) E, Gamma d a a)) from by
       simp only [hdU, hdA, hU, hAcomp, hGammaDef, compFun_center]]
   rw [hraw]
-
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [hU]
   rfl

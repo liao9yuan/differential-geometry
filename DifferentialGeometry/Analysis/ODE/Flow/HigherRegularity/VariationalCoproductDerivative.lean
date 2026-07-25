@@ -439,7 +439,8 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
   have hsub_mid_orig : Icc (t₀ - T_mid) (t₀ + T_mid) ⊆ Icc tmin tmax := by
     refine Icc_subset_Icc ?_ ?_ <;> [linarith [hT_mid_lt_outer]; linarith [hT_mid_lt_outer]]
   have ht_Ioo_mid : t ∈ Ioo (t₀ - T_mid) (t₀ + T_mid) := by
-    refine ⟨?_, ?_⟩ <;> [linarith [ht_Ioo_final.1, hT_final_lt_mid]; linarith [ht_Ioo_final.2, hT_final_lt_mid]]
+    refine ⟨?_, ?_⟩ <;> [linarith [ht_Ioo_final.1, hT_final_lt_mid]; linarith
+      [ht_Ioo_final.2, hT_final_lt_mid]]
   have hx_closed_ρ_outerN : x ∈ closedBall x₀ (ρ_outerN : ℝ) := by
     change dist x x₀ ≤ ρ_outer
     rw [mem_closedBall] at hx_closed_ρ_outer

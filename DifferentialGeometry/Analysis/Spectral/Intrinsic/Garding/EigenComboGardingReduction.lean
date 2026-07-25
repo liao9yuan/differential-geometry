@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable (g : SmoothRiemannianMetric I M)
 
 open scoped Classical in
-
 theorem finiteEigenCombo_iterRawConnLap_l2NormSq_le_spectral
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -86,7 +85,6 @@ theorem finiteEigenCombo_iterRawConnLap_l2Norm_le_spectral
   exact le_of_sq_le_sq h_sq (norm_nonneg _)
 
 open scoped Classical in
-
 theorem eigenSpan_pouHs_le_spectral_of_elliptic
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (k : ℕ)

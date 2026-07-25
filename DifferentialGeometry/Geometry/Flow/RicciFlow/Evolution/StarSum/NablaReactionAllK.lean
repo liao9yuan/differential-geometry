@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.FrozenSlot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReactionBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -135,7 +132,8 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
           exact hx₀))
   have h_eval := TensorMultilinear.contMDiffAt_section_apply_gen
     (𝕜 := Real) (I := I) (M := M) (n := 1) (x₀ := x₀)
-    (T := fun b : M => (freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y) b)
+    (T := fun b : M => (freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y)
+      b)
     ((freezeAllBut0SField (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y).contMDiff x₀)
     (v := fun _ : Fin 1 => fun b : M => chartBasisVecFiber (I := I) α j b)
     (fun _ => hv_at)
@@ -143,8 +141,6 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-
-
 def nablaKRmFrozenSlotSharpSection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
@@ -175,8 +171,6 @@ omit [SigmaCompactSpace M] in
   rfl
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
@@ -255,10 +249,6 @@ def nablaKRmRaiseSlotSections
   ![Vb, Vc, Vm q, nablaKRmFrozenSlotSharpSection (I := I) S t k q Vm]
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
@@ -393,7 +383,8 @@ def nablaKSlotSections {k : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaKSlotSections_apply {k : ℕ}
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -448,7 +439,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   set cov := S.family.connection (t : Real) with hcov_def
   set Wbc := nablaKSlotSections (I := I) (k := k) Vb Vc Vm with hWbc_def
   set Wcb := nablaKSlotSections (I := I) (k := k) Vc Vb Vm with hWcb_def
-
   have hWbc_cov : ∀ a : Fin (4 + (k + 2)), (cov (fun p : M => Wbc a p) x₀) (X x₀) = 0 := by
     intro a
     refine Fin.cases ?_ (fun j => ?_) a
@@ -463,7 +453,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
     · refine Fin.cases ?_ (fun l => ?_) j
       · simpa [hWcb_def, nablaKSlotSections] using hVb
       · simpa [hWcb_def, nablaKSlotSections] using hVm l
-
   have hbc :=
     (nablaKRm04Field_realizes (I := I) S (t : Real) (k + 2)).eval_smooth_slots X Wbc x₀
   have hcb :=
@@ -495,8 +484,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   rw [hcb_corr, sub_zero] at hcb
   rw [hWbc_x] at hbc
   rw [hWcb_x] at hcb
-
-
   have ebc :
       nablaKRm04Field (I := I) S (t : Real) (k + 3) x₀
           (Fin.cons (X x₀)
@@ -517,14 +504,16 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   have hmdiff_bc :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
-          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wbc a p)) x₀ :=
+          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wbc a p))
+            x₀ :=
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nablaKRm04Field (I := I) S (t : Real) (k + 2)) Wbc x₀).mdifferentiableAt (by simp)
   have hmdiff_cb :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
-          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wcb a p)) x₀ :=
+          nablaKRm04Field (I := I) S (t : Real) (k + 2) p (fun a : Fin (4 + (k + 2)) => Wcb a p))
+            x₀ :=
     (tensor0SField_eval_smooth_slots_contMDiffAt
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nablaKRm04Field (I := I) S (t : Real) (k + 2)) Wcb x₀).mdifferentiableAt (by simp)
@@ -532,7 +521,8 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
   have hfield :
       (fun y : M =>
           nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wbc a y) -
-            nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wcb a y)) =
+            nablaKRm04Field (I := I) S (t : Real) (k + 2) y (fun a : Fin (4 + (k + 2)) => Wcb a y))
+              =
         fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
             (nablaKRm04Field (I := I) S (t : Real) k y)
@@ -589,7 +579,6 @@ theorem nablaK_antisym_eq_rm04_raise_leibniz
                   (nablaKRmNablaFrozenSlotField (I := I) S (t : Real) k q Vm x₀) (X x₀))))) := by
   classical
   rw [nablaK_antisym_eq_covDeriv_curvatureAction (I := I) S hS t k x₀ X Vb Vc Vm hVb hVc hVm]
-
   have hKfield :
       (fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
@@ -742,7 +731,6 @@ theorem abs_nablaK_antisym_covConst_le
           (Fintype.card (Fin n) : Real) * (NRm * Nk1) := by
     intro q
     refine le_trans (abs_add_le _ _) ?_
-
     have hT1a :
         |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -791,7 +779,6 @@ theorem abs_nablaK_antisym_covConst_le
           (nablaKRm04Field (I := I) S (t : Real) k x₀) basis m q
       exact mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNnabnn) hcardnn
-
     have hT1b :
         |S.base.rm04 (t : Real) x₀
             (vec4 (I := I) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -968,9 +955,6 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
               nablaKRm04Field (I := I) S (t : Real) (k + 1) x₀ (fun p => basis (idx p))))) := by
   classical
   refine le_trans (abs_add_le _ _) ?_
-
-
-
   have hAB1 := congrArg (nablaKRm04Field (I := I) S (t : Real) (k + 3) x₀)
     (show metricTraceInput (I := I) (basis i) (basis j)
           (Fin.cons (basis c') (fun p : Fin (4 + k) => basis (m' p)))
@@ -985,9 +969,6 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
       from rfl)
   rw [hAB1, hAB2]
   refine add_le_add (abs_nablaK_antisym_basis_le (I := I) S hS t k x₀ basis horth i j c' m') ?_
-
-
-
   have hslot :
       (Fin.cons (basis j) (fun p : Fin (4 + k) => basis (m' p)) :
           Fin (4 + k + 1) → TangentSpace I x₀) =
@@ -1064,7 +1045,6 @@ theorem abs_spatialComm_nablaKRm_ortho_le
       · intro h; exact absurd (Finset.mem_univ j) h
   rw [spatialComm_nablaKRm_split (I := I) S hS t k basis gInv hinv (basis c')
     (fun p : Fin (4 + k) => basis (m' p))]
-
   simp only [hgInv, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine le_trans (Finset.sum_le_sum fun i _ =>

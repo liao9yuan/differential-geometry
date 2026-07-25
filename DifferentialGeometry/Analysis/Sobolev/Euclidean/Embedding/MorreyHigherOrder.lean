@@ -507,7 +507,8 @@ private lemma exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
   have hCj_nn : ∀ j, 0 ≤ Cj j := fun j => (Classical.choose_spec (h_per_j j)).1
   have hCj_bound : ∀ j, ∀ x : E, ‖iteratedFDeriv ℝ j η x‖ ≤ Cj j := fun j =>
     (Classical.choose_spec (h_per_j j)).2
-  have h_nonempty : (Finset.range (m + 1)).Nonempty := ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
+  have h_nonempty : (Finset.range (m + 1)).Nonempty :=
+    ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
   let C : ℝ := (Finset.range (m + 1)).sup' h_nonempty Cj
   have hC_ge : ∀ j ∈ Finset.range (m + 1), Cj j ≤ C := fun j hj =>
     Finset.le_sup' Cj hj
@@ -559,7 +560,8 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
             (eLpNorm (fun z => ‖iteratedFDeriv ℝ i h z‖) (ENNReal.ofReal p)
               (volume.restrict (Metric.ball x₀ R))).toReal) := fun j _ hh =>
     (Classical.choose_spec (h_per_j j)).2 hh
-  have h_nonempty : (Finset.range (m + 1)).Nonempty := ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
+  have h_nonempty : (Finset.range (m + 1)).Nonempty :=
+    ⟨0, Finset.mem_range.mpr (Nat.zero_lt_succ _)⟩
   let C : ℝ := (Finset.range (m + 1)).sup' h_nonempty CjFun
   have hC_ge : ∀ j ∈ Finset.range (m + 1), CjFun j ≤ C := fun j hj =>
     Finset.le_sup' CjFun hj
@@ -879,7 +881,8 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
       have h_at_x := h_iter_eq.self_of_nhds
       rw [h_at_x, iteratedFDeriv_fun_zero, Pi.zero_apply]
     rw [h_iter_zero, norm_zero]
-    have hN_nn : 0 ≤ (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+    have hN_nn : 0 ≤ (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
+      (fun y => f y - g y)
       (Metric.ball x₀ R)).toReal := ENNReal.toReal_nonneg
     have hC_nn : 0 ≤ C_leibniz * ↑(m + 1) * C_inner := by positivity
     exact mul_nonneg hC_nn hN_nn
@@ -1246,8 +1249,10 @@ theorem morrey_iteratedFDeriv_representative
             iteratedFDeriv ℝ j (fun y => g n y - g n' y) x := by
         have h_fn_eq : (fun y => g n y - g n' y) = g n - g n' := rfl
         rw [h_fn_eq, iteratedFDeriv_sub_apply
-          ((hg_smooth n).of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
-          ((hg_smooth n').of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
+          ((hg_smooth n).of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤
+                                     ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
+          ((hg_smooth n').of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤
+                                      ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
       have h_diff_eq : (fun y => g n y - g n' y) = fun y => ψ y * (φ n y - φ n' y) := by
         funext y; simp [g]; ring
       rw [h_iter_sub, h_diff_eq]
@@ -1265,8 +1270,10 @@ theorem morrey_iteratedFDeriv_representative
             iteratedFDeriv ℝ j (fun y => g n y - g n' y) x := by
         have h_fn_eq : (fun y => g n y - g n' y) = g n - g n' := rfl
         rw [h_fn_eq, iteratedFDeriv_sub_apply
-          ((hg_smooth n).of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
-          ((hg_smooth n').of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
+          ((hg_smooth n).of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤
+                                     ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
+          ((hg_smooth n').of_le (by exact_mod_cast le_top : (j : WithTop ℕ∞) ≤
+                                      ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
       have h_diff_eq : (fun y => g n y - g n' y) = fun y => ψ y * (φ n y - φ n' y) := by
         funext y; simp [g]; ring
       rw [h_iter_sub, h_diff_eq]
@@ -1295,8 +1302,10 @@ theorem morrey_iteratedFDeriv_representative
         iteratedFDeriv ℝ 0 (fun y => g n y - g n' y) x := by
       have h_fn_eq : (fun y => g n y - g n' y) = g n - g n' := rfl
       rw [h_fn_eq, iteratedFDeriv_sub_apply
-        ((hg_smooth n).of_le (by exact_mod_cast le_top : (0 : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
-        ((hg_smooth n').of_le (by exact_mod_cast le_top : (0 : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
+        ((hg_smooth n).of_le (by exact_mod_cast le_top : (0 : WithTop ℕ∞) ≤
+                                   ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt
+        ((hg_smooth n').of_le (by exact_mod_cast le_top : (0 : WithTop ℕ∞) ≤
+                                    ((⊤ : ℕ∞) : WithTop ℕ∞))).contDiffAt]
     rw [h_sub, norm_iteratedFDeriv_zero] at this
     exact this
   set u_smooth := cauchyLimitFun g hg_unif_cauchy_C0 with hu_smooth_def
@@ -1409,7 +1418,8 @@ theorem morrey_iteratedFDeriv_representative
   have h_g_eq_φ : ∀ n, g n y = φ n y := fun n => by
     simp [g, h_psi_one_R4 y h_y_in_R4]
   have h_g_ns_tendsto : Filter.Tendsto (fun k => g (ns k) y) Filter.atTop (𝓝 (u_smooth y)) :=
-    h_g_tendsto.comp (Filter.tendsto_atTop_atTop_of_monotone (fun a b hab => _hns_strict.le_iff_le.mpr hab) (fun n => ⟨n, _hns_strict.id_le n⟩))
+    h_g_tendsto.comp (Filter.tendsto_atTop_atTop_of_monotone
+      (fun a b hab => _hns_strict.le_iff_le.mpr hab) (fun n => ⟨n, _hns_strict.id_le n⟩))
   simp_rw [h_g_eq_φ] at h_g_ns_tendsto
   have h_chi_y : χ y * u y = u y := by rw [h_chi_one_R4 y h_y_in_R4, one_mul]
   rw [h_chi_y] at h_φ_ns_tendsto

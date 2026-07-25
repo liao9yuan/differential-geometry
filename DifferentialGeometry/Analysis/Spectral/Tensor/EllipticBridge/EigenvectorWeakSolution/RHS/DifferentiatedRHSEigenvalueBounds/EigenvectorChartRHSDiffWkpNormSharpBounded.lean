@@ -38,7 +38,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 structure eigenvectorChartRHSDiffSharpWkpBoundsUpToOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ) where
@@ -180,7 +179,6 @@ structure eigenvectorChartRHSDiffSharpWkpBoundsUpToOrder
               g r s) i‖
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiffBdd_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -195,7 +193,6 @@ private lemma sharpDiffBdd_diff_memWkp
     m K' l (fun β Q => H.h_pou_resolv i (m + 1 + K') β Q hN)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma rhsZeroAggregate_le_energy_perK_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -889,7 +886,6 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
   rw [hRhs_eff_def, ← mul_assoc, ← ENNReal.ofReal_mul hCagg_nn]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiffBdd_level_zero_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -955,7 +951,6 @@ private lemma sharpDiffBdd_level_zero_wkpNorm
   exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma sharpDiffBdd_recursion
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1248,7 +1243,6 @@ private lemma sharpDiffBdd_recursion
       exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

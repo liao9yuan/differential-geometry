@@ -164,7 +164,8 @@ theorem chartTriv_opNorm_isBounded_on_compact_unconditional
   have hN_pos : ∀ y₀, 0 < N y₀ := by
     intro y₀; simp only [N]
     split_ifs with hy
-    · exact (exists_W_and_constant_tangent (I := I) (M := M) g α y₀ hy).choose_spec.2.2.choose_spec.1
+    · exact (exists_W_and_constant_tangent (I := I) (M := M) g α y₀
+      hy).choose_spec.2.2.choose_spec.1
     · exact one_pos
   have hN_bound : ∀ y₀, y₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       ∀ b ∈ W y₀,

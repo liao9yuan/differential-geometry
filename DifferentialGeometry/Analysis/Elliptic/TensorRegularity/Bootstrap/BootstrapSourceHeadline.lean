@@ -764,8 +764,10 @@ theorem tensorComponentWeakRHS_wkpNorm_le
   have h_tri :
       iteratedWeakSobolevNorm (d := dimE) m 2
           (fun y => G1 y + (-G2 y) + (-G3 y) + G4 y) Ω'' ≤
-        iteratedWeakSobolevNorm (d := dimE) m 2 G1 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' +
-          iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G4 Ω'' := by
+        iteratedWeakSobolevNorm (d := dimE) m 2 G1 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G2
+          Ω'' +
+          iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2
+            G4 Ω'' := by
     refine (wkpNorm_add_le (d := dimE) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       hΩ''_open h123_mem hG4_mem).trans ?_
     refine add_le_add ?_ le_rfl
@@ -787,7 +789,8 @@ theorem tensorComponentWeakRHS_wkpNorm_le
     refine hG1_le.trans (mul_le_mul_of_nonneg_right ?_ (zero_le _))
     exact ENNReal.ofReal_le_ofReal (by linarith)
   have hG234_final :
-      iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' +
+      iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G3
+        Ω'' +
         iteratedWeakSobolevNorm (d := dimE) m 2 G4 Ω'' ≤
         ENNReal.ofReal (Kc1 + Kc2 + Kc3 + Kc4) * ST := by
     refine (add_le_add (add_le_add hG2_le hG3_le) hG4_le).trans ?_
@@ -795,10 +798,13 @@ theorem tensorComponentWeakRHS_wkpNorm_le
       ← ENNReal.ofReal_add (by positivity) hKc4_nn]
     exact mul_le_mul_of_nonneg_right
       (ENNReal.ofReal_le_ofReal (by linarith)) (zero_le _)
-  calc iteratedWeakSobolevNorm (d := dimE) m 2 G1 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' +
-        iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G4 Ω''
+  calc iteratedWeakSobolevNorm (d := dimE) m 2 G1 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G2
+         Ω'' +
+        iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G4
+          Ω''
       = iteratedWeakSobolevNorm (d := dimE) m 2 G1 Ω'' +
-          (iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2 G3 Ω'' +
+          (iteratedWeakSobolevNorm (d := dimE) m 2 G2 Ω'' + iteratedWeakSobolevNorm (d := dimE) m 2
+            G3 Ω'' +
             iteratedWeakSobolevNorm (d := dimE) m 2 G4 Ω'') := by ring
     _ ≤ ENNReal.ofReal (Kc1 + Kc2 + Kc3 + Kc4) * SF +
           ENNReal.ofReal (Kc1 + Kc2 + Kc3 + Kc4) * ST :=

@@ -210,7 +210,8 @@ theorem wkpNormChartL2Sq_lt_top_of_memWkpChart
   apply ENNReal.sum_lt_top.mpr
   intro α _
   rw [hf_def]
-  exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
+  exact
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
     (d := n) (hu α)
 
 theorem wkpNormChartL2_lt_top_of_memWkpChart
@@ -357,12 +358,14 @@ private theorem wkpNormChartL2_add_le_aux
   have h_finiteness_fU : ∀ α : M, fU α < (⊤ : ℝ≥0∞) := by
     intro α
     rw [hfU_def]
-    exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_lt_top_of_memWkpHalfSpace
+    exact
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_lt_top_of_memWkpHalfSpace
       (d := n) (hu α)
   have h_finiteness_fV : ∀ α : M, fV α < (⊤ : ℝ≥0∞) := by
     intro α
     rw [hfV_def]
-    exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_lt_top_of_memWkpHalfSpace
+    exact
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_lt_top_of_memWkpHalfSpace
       (d := n) (hv α)
   have h_finiteness_fUV : ∀ α : M, fUV α < (⊤ : ℝ≥0∞) := by
     intro α
@@ -512,7 +515,7 @@ private theorem wkpNormChartL2_add_le_aux
         ∑' α : M, (fU α) ^ (2 : ℕ) from
       tsum_congr (fun α => by
         rw [hfU_def,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
+          Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
     exact htsum_eq_USq
   have h_chartL2Sq_V : wkpNormChartL2Sq (n := n) (M := M) g k v =
       ∑ α ∈ hS_finite.toFinset, (fV α) ^ (2 : ℕ) := by
@@ -527,7 +530,7 @@ private theorem wkpNormChartL2_add_le_aux
         ∑' α : M, (fV α) ^ (2 : ℕ) from
       tsum_congr (fun α => by
         rw [hfV_def,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
+          Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
     exact htsum_eq_VSq
   have h_chartL2Sq_UV : wkpNormChartL2Sq (n := n) (M := M) g k (fun x => u x + v x) =
       ∑ α ∈ hS_finite.toFinset, (fUV α) ^ (2 : ℕ) := by
@@ -543,7 +546,7 @@ private theorem wkpNormChartL2_add_le_aux
         ∑' α : M, (fUV α) ^ (2 : ℕ) from
       tsum_congr (fun α => by
         rw [hfUV_def,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
+          Analysis.Sobolev.Euclidean.wkpNormL2HalfSpace_sq_eq_wkpNormL2SqHalfSpace])]
     exact htsum_eq_UVSq
   have h_chartL2Sq_U_finite :
       wkpNormChartL2Sq (n := n) (M := M) g k u ≠ (⊤ : ℝ≥0∞) := by
@@ -1086,7 +1089,8 @@ private theorem wkpNormChartL2Sq_toReal_eq_finsum
             (modelWithCornersEuclideanHalfSpace n) M) α u)
         (chartTargetEuclid (n := n) (M := M) α) ≠ ⊤ := by
     intro α _
-    exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
+    exact
+      (Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
       (d := n) (hu α)).ne
   rw [tsum_eq_sum h_zero_outside]
   rw [ENNReal.toReal_sum h_finiteness]
@@ -1141,7 +1145,8 @@ private theorem wkpChartL2_norm_sq_eq_inner
   rw [wkpInnerChartL2_self_eq_finsum (n := n) (M := M) g k (wkpChartL2Fun u)]
   refine Finset.sum_congr rfl ?_
   intro α _
-  exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_toReal_eq_wkpInnerL2HalfSpace_self
+  exact
+    Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_toReal_eq_wkpInnerL2HalfSpace_self
     (d := n) (hu_mem α)
 
 private theorem wkpInnerChartL2_apply_comm

@@ -16,7 +16,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma contDiff_kdi_partial_aux
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i k : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
@@ -39,7 +38,6 @@ private lemma contDiff_kdi_partial_aux
   exact h_apply_k.comp h_fderiv_partial
 
 omit [NeZero d] in
-
 private lemma contDiff_partial_aux
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -52,7 +50,6 @@ private lemma contDiff_partial_aux
   exact h_apply_i.comp h_fderiv_smooth
 
 omit [NeZero d] in
-
 private lemma hasCompactSupport_partial_aux
     {u : E → ℝ} (hu_supp : HasCompactSupport u) (i : Fin d) :
     HasCompactSupport
@@ -60,7 +57,6 @@ private lemma hasCompactSupport_partial_aux
   hu_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single i 1)
 
 omit [NeZero d] in
-
 private lemma hasCompactSupport_kdi_partial_aux
     {u : E → ℝ} (hu_supp : HasCompactSupport u) (i k : Fin d) :
     HasCompactSupport (fun y : E =>
@@ -72,7 +68,6 @@ private lemma hasCompactSupport_kdi_partial_aux
   exact h_partial_supp.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single k 1)
 
 omit [NeZero d] in
-
 private lemma memLp_two_continuous_compact_support_restrict
     {f : E → ℝ} (hf_cont : Continuous f) (hf_supp : HasCompactSupport f)
     (S : Set E) :
@@ -80,7 +75,6 @@ private lemma memLp_two_continuous_compact_support_restrict
   (hf_cont.memLp_of_hasCompactSupport hf_supp).restrict S
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_kdi_partial_of_smooth
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω : Set E} (hΩ : IsOpen Ω) (i k : Fin d) :
@@ -102,7 +96,6 @@ theorem hasWeakPartialDeriv_kdi_partial_of_smooth
     h_partial_C1
 
 omit [NeZero d] in
-
 theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω'' : Set E}
@@ -222,7 +215,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
   exact (ENNReal.rpow_le_rpow_iff h_2_pos).mp h_eLpNorm_sq_le
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_of_strong_L2_limit
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (i k : Fin d)

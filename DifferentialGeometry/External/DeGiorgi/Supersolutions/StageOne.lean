@@ -23,6 +23,7 @@ local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 /-! ### Main theorems -/
 
 set_option maxHeartbeats 5000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- First stage of weak Harnack: inverse-power iteration for positive
 supersolutions.
 
@@ -102,7 +103,8 @@ theorem weak_harnack_stage_one_inverse
     have hroot_ae :
         ∀ᵐ x ∂μhalf, (c0⁻¹) ^ (1 / p₀) ≤ u x := by
       filter_upwards [hclose, ae_restrict_mem measurableSet_ball] with x hxclose hxhalf
-      have hux_pos : 0 < u x := hu_pos x ((Metric.ball_subset_ball (by norm_num : (1 / 2 : ℝ) ≤ 1)) hxhalf)
+      have hux_pos : 0 < u x := hu_pos x
+        ((Metric.ball_subset_ball (by norm_num : (1 / 2 : ℝ) ≤ 1)) hxhalf)
       have hupow_pos : 0 < u x ^ p₀ := Real.rpow_pos_of_pos hux_pos p₀
       have hpow_inv : (u x ^ p₀)⁻¹ ≤ c0 := by
         calc
@@ -481,6 +483,7 @@ private theorem weak_harnack_stage_one_forward_power_upgrade
           dsimp [weakHarnackForwardUpgradeRHS, C_weakHarnack0Forward, V, χ, X, β]
 
 set_option maxHeartbeats 5000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Second stage of weak Harnack: forward low-power iteration for positive
 supersolutions.
 

@@ -15,7 +15,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
     {f g : E → ℝ} (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (hf_continuous : Continuous f) (hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -135,7 +134,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
   rw [div_neg, neg_neg]
 
 omit [NeZero d] in
-
 theorem nirenbergTestFunction_is_admissible_test
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -151,7 +149,6 @@ theorem nirenbergTestFunction_is_admissible_test
   · exact (tsupport_nirenbergTestFunction_subset (d := d) η u k h).trans hh_supp
 
 omit [NeZero d] in
-
 private lemma fderiv_diffQuot_pointwise
     {g : E → ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) :

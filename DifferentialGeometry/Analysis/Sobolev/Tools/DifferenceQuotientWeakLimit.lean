@@ -62,7 +62,6 @@ private lemma smoothCSSubmodule_smul_coe
     ((c • φ : (smoothCSSubmodule (d := d))) : E → ℝ) = c • φ.1 := rfl
 
 omit [NeZero d] in
-
 private lemma memLp_two_of_smoothCS
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ) :
     MemLp φ 2 (volume : Measure E) :=
@@ -157,7 +156,6 @@ lemma denseRange_smoothCSToLp :
     exact mem_ball.mp hh_mem
 
 omit [NeZero d] in
-
 private lemma integrable_w_partial_phi_univ
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -297,7 +295,6 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening
     simp
 
 omit [NeZero d] in
-
 private lemma abs_diffQuot_le_lipschitz_bound
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (k : Fin d) :
@@ -332,7 +329,6 @@ private lemma abs_diffQuot_le_lipschitz_bound
     exact hLip_apply
 
 omit [NeZero d] in
-
 private lemma abs_partialDeriv_le_lipschitz_bound
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (k : Fin d) :
@@ -355,7 +351,6 @@ private lemma abs_partialDeriv_le_lipschitz_bound
   rwa [Real.norm_eq_abs] at h_app_le
 
 omit [NeZero d] in
-
 private lemma abs_integral_mul_le_eLpNorm_two
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     ENNReal.ofReal |∫ x, f x * g x ∂μ| ≤ eLpNorm f 2 μ * eLpNorm g 2 μ := by
@@ -392,7 +387,6 @@ private lemma abs_integral_mul_le_eLpNorm_two
     _ = eLpNorm f 2 μ * eLpNorm g 2 μ := mul_comm _ _
 
 omit [NeZero d] in
-
 private lemma abs_integral_mul_le_norm_lp_mul_norm_lp
     {f g : E → ℝ} (hf : MemLp f 2 (volume : Measure E))
     (hg : MemLp g 2 (volume : Measure E)) :
@@ -413,7 +407,6 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp
   exact h_toReal
 
 omit [NeZero d] in
-
 private lemma volume_cthickening_lt_top
     {K : Set E} (hK : IsCompact K) (r : ℝ) :
     (volume : Measure E) (Metric.cthickening r K) < ∞ := by

@@ -77,7 +77,6 @@ theorem MemWkpChart_iff
           (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_zero
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     chartPushed (I := I) (M := M) ρ α (fun _ => (0 : ℝ)) =
@@ -87,7 +86,6 @@ theorem chartPushed_zero
   simp
 
 omit [IsManifold I ∞ M] in
-
 theorem chartTargetEuclid_isOpen
     [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) := by
@@ -128,7 +126,6 @@ theorem wkpNormChart_zero_fun
   exact tsum_zero
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_add
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     (u v : M → ℝ) :
@@ -141,7 +138,6 @@ theorem chartPushed_add
   ring
 
 omit [IsManifold I ∞ M] in
-
 theorem chartPushed_const_smul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     (c : ℝ) (u : M → ℝ) :

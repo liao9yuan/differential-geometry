@@ -89,8 +89,6 @@ section UniformRestart
 variable [CompleteSpace E] [FiniteDimensional ℝ E]
 
 omit [CompleteSpace E] in
-
-
 theorem orbit_unique_Icc
     {v : E → E} (hv : ContDiff ℝ ∞ v)
     {f g : ℝ → E} {a b : ℝ}
@@ -163,9 +161,6 @@ theorem orbit_unique_Icc
     exact Set.eqOn_empty f g
 
 omit [CompleteSpace E] in
-
-
-
 theorem orbit_unique_Icc_on
     {Ω : Set E} (hΩ : IsOpen Ω)
     {v : E → E} (hv : ContDiffOn ℝ ∞ v Ω)

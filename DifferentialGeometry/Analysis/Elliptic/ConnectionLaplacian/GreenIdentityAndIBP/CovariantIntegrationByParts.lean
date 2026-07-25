@@ -37,7 +37,8 @@ def tensorInnerScalar
   fun y => tensorInnerPointwise (I := I) (M := M) g r s y
     (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp]
 lemma tensorInnerScalar_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

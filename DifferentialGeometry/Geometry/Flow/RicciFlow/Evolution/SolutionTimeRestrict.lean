@@ -163,14 +163,17 @@ theorem tailFrameTimeReg
   · intro x _hx i j
     have hsmooth := hS.smoothMetric.coeff x (frame i x) (frame j x)
     have hsub :
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).carrier ⊆
-          (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω).regular := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).carrier
+          ⊆
+          (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega
+            hαω).regular := by
       intro t ht
       exact ⟨lt_of_lt_of_le hαt₀ ht.1, ht.2⟩
     simpa [metricCompInFrame, SolutionOn.timeRestrict, SolutionOn.family] using
       hsmooth.mono hsub
   · intro t
     exact (uniqueDiffOn_Ico t₀ omega).uniqueDiffWithinAt
-      ((DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega ht₀ω).regular_subset t.2)
+      ((DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen t₀ omega
+        ht₀ω).regular_subset t.2)
 
 end DifferentialGeometry.PDE.RicciFlow

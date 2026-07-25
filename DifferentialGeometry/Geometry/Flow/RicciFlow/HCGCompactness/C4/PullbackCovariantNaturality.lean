@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDiffeomorphOpens
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -109,7 +108,6 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
   haveI : Nonempty W := ⟨⟨(Φ : M → N) x, x, hx, rfl⟩⟩
   set F := PartialDiffeomorph.toOpensDiffeo Φ hV with hFdef
   set xV : V := ⟨x, hx⟩ with hxVdef
-
   have hmfd : ∀ (p : V) (v : TangentSpace I p),
       mfderiv I I (F : V → W) p v = mfderiv I I (Φ : M → N) (p : M) v := by
     intro p v
@@ -137,14 +135,12 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     simpa [ContinuousLinearMap.comp_apply,
       mfderiv_subtype_val (I := I) W (F p),
       mfderiv_subtype_val (I := I) V p] using happ
-
   set δMV := restrictOpen0S (I := I) 2 (V := V) δM with hδMVdef
   set δNW := restrictOpen0S (I := I) 2 (V := W) δN with hδNWdef
   have hδMV_apply : ∀ (p : V) (slots : Fin 2 → TangentSpace I p),
       δMV p slots = δM (p : M) slots := fun _ _ => rfl
   have hδNW_apply : ∀ (q : W) (slots : Fin 2 → TangentSpace I q),
       δNW q slots = δN (q : N) slots := fun _ _ => rfl
-
   have hswap : G.restrictOpen (I := I) V
       = Diffeomorph.pullbackMetric (I := I) (g'.restrictOpen (I := I) W) F := by
     apply srm_ext
@@ -157,7 +153,6 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
       rfl
     rw [hL, hR, hmfd, hmfd]
     exact hG (p : M) p.2 v w
-
   have hA0 : ∀ (p : V) (slots : Fin 2 → TangentSpace I p),
       δMV p slots = δNW (F p) (fun q => mfderiv I I (F : V → W) p (slots q)) := by
     intro p slots
@@ -166,14 +161,10 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     congr 1
     funext q
     rw [hmfd]
-
   have hres1 := covDerivOfField_restrictOpen (I := I) G V δMV δM hδMV_apply a xV
-
   have hpull := covDerivOfField_pullback (I := I) (g'.restrictOpen (I := I) W) F δMV δNW
     hA0 a xV
-
   have hres2 := covDerivOfField_restrictOpen (I := I) g' W δNW δN hδNW_apply a (F xV)
-
   have htensor1 : ∀ slots : Fin (a + 2) → TangentSpace I x,
       covDerivOfField (I := I) G δM a x slots
         = covDerivOfField (I := I) (Diffeomorph.pullbackMetric (I := I)
@@ -190,7 +181,6 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     rw [hpull]
     have := hres2 (fun q => mfderiv I I (F : V → W) xV (slots q))
     convert this using 2
-
   have hT1 : covDerivOfField (I := I) G δM a x
       = covDerivOfField (I := I) (Diffeomorph.pullbackMetric (I := I)
           (g'.restrictOpen (I := I) W) F) δMV a xV :=
@@ -198,7 +188,6 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
   have hT2 : covDerivOfField (I := I) g' δN a ((Φ : M → N) x)
       = covDerivOfField (I := I) (g'.restrictOpen (I := I) W) δNW a (F xV) :=
     (ContinuousMultilinearMap.ext hres2).symm
-
   unfold tensor02CovDerivNormWith
   rw [tensor02_eq_covDOF, tensor02_eq_covDOF]
   obtain ⟨basis, hONb⟩ := DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I)

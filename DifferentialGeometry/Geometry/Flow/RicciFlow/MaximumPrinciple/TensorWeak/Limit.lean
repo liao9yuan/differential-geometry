@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedVariables false
 set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Integral.Connection
@@ -163,7 +161,7 @@ theorem barrierLimitClosure_of_continuous
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
     {T : Real}
-    (hT : 0 ≤ T)
+    (_hT : 0 ≤ T)
     (hcont : ∀ x, ∀ v w : TangentSpace I x,
       ContinuousOn (fun t : Real => S t x v w) (Set.Icc 0 T)) :
     TensorBarrierLimitClosureOn (I := I) (M := M) G S T := by
@@ -559,10 +557,10 @@ theorem ofSmoothMetric
   ofTotal (I := I) (M := M)
     (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
-    (fun delta t0 hdelta hsub =>
+    (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
         (I := I) (M := M) G hG
-        (fun t ht => hTsub (hsub ht)))
+        (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed
 
 
@@ -821,10 +819,10 @@ theorem ofSmoothMetric
   ofTotal (I := I) (M := M)
     (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
-    (fun delta t0 hdelta hsub =>
+    (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
         (I := I) (M := M) G hG
-        (fun t ht => hTsub (hsub ht)))
+        (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed hSigns
 
 

@@ -28,7 +28,8 @@ set_option backward.isDefEq.respectTransparency false
 
 local instance (r : ℕ) : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) :=
   continuousMultilinearMap_finiteDimensional r
-local instance (r : ℕ) : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜) :=
+local instance (r : ℕ) : FiniteDimensional 𝕜
+    (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜) :=
   continuousMultilinearMap_finiteDimensional r
 
 local instance (r : ℕ) : NormedAddCommGroup

@@ -40,7 +40,8 @@ lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M)
             (chartBasisVecFiber (I := I) α j x)
             (chartBasisVecFiber (I := I) α k x) := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M]
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_vector
     {x : M}
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -62,7 +63,8 @@ private lemma clm_bilinear_expand_two_sums_vector
   intro q _
   rw [map_smul, smul_smul]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_scalar
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (a b : Fin n → ℝ) (u w : Fin n → TangentSpace I x) :

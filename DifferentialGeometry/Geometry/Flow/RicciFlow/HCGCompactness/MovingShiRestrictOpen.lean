@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -113,7 +112,6 @@ theorem covDerivOfField_restrictOpen
       exact hA0 x slots
   | succ a ih =>
       intro x slots
-
       obtain ⟨X, hX⟩ :=
         ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
           (n := (⊤ : ℕ∞)) (x : M) (slots 0)
@@ -127,7 +125,6 @@ theorem covDerivOfField_restrictOpen
         exact
           (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
             (n := (⊤ : ℕ∞)) (x : M) (slots q.succ)).choose_spec
-
       let XU : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : U → Type _) :=
         restrictOpenTangentSection (I := I) U X
       let VU : Fin (a + 2) →
@@ -143,7 +140,6 @@ theorem covDerivOfField_restrictOpen
         have hright :=
           covDerivOfField_succ_eval (I := I) gRef A0M a X V (x : M)
         rw [hleft, hright]
-
         have hderiv :
             extDerivFun (I := I)
                 (fun y : U => covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a y
@@ -171,7 +167,6 @@ theorem covDerivOfField_restrictOpen
           exact extDerivFun_restrictOpen (I := I) U
             (fun z : M => covDerivOfField (I := I) gRef A0M a z
               (fun q : Fin (a + 2) => V q z)) x (X (x : M)) hf
-
         have hsum :
             (∑ p : Fin (a + 2),
               covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a x
@@ -185,23 +180,18 @@ theorem covDerivOfField_restrictOpen
                         (fun z : M => V p z) (x : M)) (X (x : M)))) := by
           apply Finset.sum_congr rfl
           intro p _
-
           set covL : TangentSpace I x :=
             ((leviCivitaConnectionOfMetric (I := I) (gRef.restrictOpen (I := I) U))
               (fun y : U => VU p y) x) (XU x) with hcovL_def
           set covR : TangentSpace I (x : M) :=
             ((leviCivitaConnectionOfMetric (I := I) gRef)
               (fun z : M => V p z) (x : M)) (X (x : M)) with hcovR_def
-
           have hcov : covL = covR := by
             have hcov' := metricCov_restrictOpen_globalSection (I := I) gRef U (V p) x (X (x : M))
-
-
             rw [hcovL_def, hcovR_def]
             have hXU : XU x = X (x : M) := restrictOpenTangentSection_apply (I := I) U X x
             rw [hXU]
             exact hcov'
-
           have hslots : (fun q : Fin (a + 2) =>
               Function.update (fun q : Fin (a + 2) => VU q x) p covL q) =
               (fun q : Fin (a + 2) =>
@@ -213,7 +203,6 @@ theorem covDerivOfField_restrictOpen
               exact hcov
             · rw [Function.update_of_ne hqp, Function.update_of_ne hqp]
               simp only [VU, restrictOpenTangentSection_apply]
-
           have hih := ih x (Function.update (fun q : Fin (a + 2) => VU q x) p covL)
           calc
             covDerivOfField (I := I) (gRef.restrictOpen (I := I) U) A0U a x
@@ -224,7 +213,6 @@ theorem covDerivOfField_restrictOpen
                     (Function.update (fun q : Fin (a + 2) => V q (x : M)) p covR) :=
                   congrArg _ hslots
         rw [hderiv, hsum]
-
       have hslotsU :
           slots = Fin.cons (slots 0) (fun q : Fin (a + 2) => slots q.succ) := by
         funext q
@@ -274,8 +262,6 @@ theorem ricciSection_restrictOpen
           (leviCivitaConnectionOfMetric (I := I) g)
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g)
           (x : M) slots := by
-
-
   have hLHS :
       CovariantDerivative.ricciSection (I := I)
           (leviCivitaConnectionOfMetric (I := I) (g.restrictOpen (I := I) U))
@@ -342,8 +328,6 @@ theorem ricCovTower_restrictOpen
       (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g))
     (ricciSection_restrictOpen (I := I) g U) s x (slots ∘ (acEquiv s).symm)
   rw [covDerivOfField_apply_eq_iterCov', covDerivOfField_apply_eq_iterCov'] at hrestrict
-
-
   convert hrestrict using 2 <;>
     · funext i
       simp only [Function.comp_apply, Equiv.symm_apply_apply]
@@ -367,7 +351,6 @@ theorem ricCovTower_normSq0S_restrictOpen
           (ricCovTower (I := I) g g s (x : M)) := by
   rw [normSq0S_restrictOpen_apply (I := I) g U (2 + s) x
     (ricCovTower (I := I) (g.restrictOpen (I := I) U) (g.restrictOpen (I := I) U) s x)]
-
   have htensor :
       ricCovTower (I := I) (g.restrictOpen (I := I) U) (g.restrictOpen (I := I) U) s x
         = ricCovTower (I := I) g g s (x : M) := by

@@ -64,7 +64,8 @@ private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -74,7 +75,8 @@ private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma extChartAtSymmGlobal_measurable (α : M) :
     Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
   classical
@@ -85,7 +87,8 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F) := by
@@ -145,7 +148,8 @@ private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
         ∫⁻ x, Ftilde x ∂(chartLocalMeasure (I := I) g α) := by
     change ∫⁻ x, Ftilde x ∂(riemannianMeasure (I := I) g (chartAtlasPOU I M)) =
       ∫⁻ x, Ftilde x ∂(chartLocalMeasure (I := I) g α)
-    exact DifferentialGeometry.Analysis.Sobolev.Chart.riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
+    exact
+      riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
       (I := I) (M := M) g α hFtilde_meas hFtilde_zero_off
   have h_off_zero :
       (chartLocalMeasure (I := I) g α) ((chartAt H α).source)ᶜ = 0 :=
@@ -271,7 +275,8 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal h_two_ne_zero h_two_ne_top]
   rw [h_two_toReal]
   refine ENNReal.rpow_lt_top_of_nonneg (by positivity) ?_
-  show ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w ≠ ⊤
+  show ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w ≠
+    ⊤
   have h_lint_eq :
       ∫⁻ y, ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F y‖ₑ ^ (2 : ℝ) ∂μ_w =
         ∫⁻ y in DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -310,9 +315,11 @@ private lemma chartPushedRaw_memLp_chartPulledWeighted
   have h_c_E_pos : (0 : ℝ≥0∞) <
       (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) := by
     exact_mod_cast DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor_pos
-  have h_c_E_ne_zero : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠ 0 :=
+  have h_c_E_ne_zero : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠
+    0 :=
     ne_of_gt h_c_E_pos
-  have h_c_E_ne_top : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠ ⊤ :=
+  have h_c_E_ne_top : (DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞) ≠
+    ⊤ :=
     DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor_ennreal_ne_top
   have h_bound :=
     lintegral_density_chartPushedRaw_pow_le (I := I) (M := M) g α (p := 2) hF_meas
@@ -540,7 +547,8 @@ lemma chartPushedRawLpFromLp_tendsto
           ((chartPulledWeightedMeasure (I := I) g α).restrict
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
               (I := I) (M := M) α))) atTop (𝓝 0) := by
-    set c := ((DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞))⁻¹ ^ ((1 : ℝ)/2)
+    set c := ((DifferentialGeometry.Analysis.Sobolev.Chart.euclideanHaarFactor E : ℝ≥0∞))⁻¹ ^
+      ((1 : ℝ)/2)
       with hc_def
     have h_const_tendsto :
         Tendsto (fun n => c *
@@ -654,7 +662,8 @@ private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (I := I) (M := M) α v.toFun hy]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [CompactSpace M] in
 private lemma psi_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -825,7 +834,8 @@ lemma chartPushedRaw_aeEq_of_aeEq
     filter_upwards [h_integrand_ae_zero, h_density_pos_ae] with y hy h_pos
     rcases mul_eq_zero.mp hy with h | h
     · exact absurd h h_pos.ne'
-    · have h_enorm_zero : ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ = 0 := by
+    · have h_enorm_zero : ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ =
+        0 := by
         have : (‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ) ^ (2 : ℝ) =
             ‖DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y‖ₑ ^ (2 : ℝ) := rfl
         rw [this] at h
@@ -834,7 +844,8 @@ lemma chartPushedRaw_aeEq_of_aeEq
         rcases h_rpow with ⟨h1, _⟩ | ⟨_, h2⟩
         · exact h1
         · exact absurd h2 (by norm_num)
-      exact (enorm_eq_zero (a := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d y)).mp h_enorm_zero
+      exact (enorm_eq_zero (a := DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α d
+        y)).mp h_enorm_zero
   have h_abs_cts :
       (chartPulledWeightedMeasure (I := I) g α).restrict
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -1121,8 +1132,10 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
       have hx_notin_tsupport : x ∉ tsupport φ := fun hx => hx_notin_Ω' (h_tsupport_in_Ω' hx)
       rw [h_fderiv_zero x hx_notin_tsupport]
       simp
-    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := Ω')]
-    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
+    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := Ω')]
+    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
       intro x hx
       by_cases hx_in_chart : x ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α
@@ -1165,8 +1178,10 @@ theorem hasWeakPartialDeriv_chartPushedWeakPartialLp_on_chartTarget
       have hx_notin_tsupport : x ∉ tsupport φ := fun hx => hx_notin_Ω' (h_tsupport_in_Ω' hx)
       have hφ_x_zero : φ x = 0 := image_eq_zero_of_notMem_tsupport hx_notin_tsupport
       rw [hφ_x_zero, mul_zero]
-    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := Ω')]
-    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _) (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
+    rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := Ω')]
+    · rw [MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero (μ := volume) (f := _)
+      (s := DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)]
       intro x hx
       by_cases hx_in_chart : x ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α

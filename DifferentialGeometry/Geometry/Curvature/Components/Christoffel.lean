@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -466,7 +463,8 @@ theorem connection_curvature_coord_of_christoffel
     (connectionRiemannCurvatureField (I := I) cov (frame i) (frame k) (frame j)) x₀
         = (cov Vkj x₀) (frame i x₀) - (cov Vij x₀) (frame k x₀) := by
           simp [connectionRiemannCurvatureField,
-            DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, Vkj, Vij, frame, hbracket]
+            DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, Vkj, Vij,
+              frame, hbracket]
     _ = ∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x₀ i k j m • frame m x₀ := by
           have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ :=
@@ -493,12 +491,10 @@ theorem connection_curvature_coord_of_christoffel
               hframe.coeff a x₀ (Vkj x₀) =
                 christoffelCoordAt (I := I) cov x₀ k j a := by
             simp [Vkj, christoffelCoordAt, frame]
-
           have hVij_coeff (a : CoordinateIdx (𝕜 := Real) E) :
               hframe.coeff a x₀ (Vij x₀) =
                 christoffelCoordAt (I := I) cov x₀ i j a := by
             simp [Vij, christoffelCoordAt, frame]
-
           simp_rw [hVkj_coeff, hVij_coeff]
           simp
           ring
@@ -611,7 +607,8 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_coordFrame
     simpa [Xc] using hXx
   have hYval : coordinateFrameAt (I := I) x₀ k x₀ = Ys x₀ := by
     simpa [Yc] using hYx
-  simp only [connectionRiemannCurvatureField, DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [connectionRiemannCurvatureField,
+    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 

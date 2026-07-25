@@ -35,8 +35,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [NeZero (Module.finrank Real E)] in
 theorem H6Isometry.normalTrans_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
@@ -94,9 +92,6 @@ theorem H6Isometry.normalTrans_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [NeZero (Module.finrank Real E)] in
 theorem NormalCoordMetricEquivOn.symm_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -209,8 +204,6 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem NormalCoordMetricEquivOn.chart_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

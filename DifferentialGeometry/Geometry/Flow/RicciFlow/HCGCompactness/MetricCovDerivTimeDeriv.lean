@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -100,13 +99,11 @@ theorem covDerivOfField_eval_hasDerivWithinAt
       exact hbase t ht x v
   | succ p ih =>
       intro hpN t ht x v
-
       have hext : ∀ a : Fin (p + 3),
           ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
             σ x = v a :=
         fun a => ContMDiffSection.exists_eq_at_gen x (v a)
       choose σ hσ using hext
-
       have hcl := Tensor0SBundle.totalNabla0SFun_hasDerivWithinAt_pt (I := I)
         (leviCivitaConnectionOfMetric (I := I) gRef)
         (σ 0) (fun a : Fin (p + 2) => σ a.succ)
@@ -119,7 +116,6 @@ theorem covDerivOfField_eval_hasDerivWithinAt
           (Function.update (fun b : Fin (p + 2) => σ b.succ x) a
             (((leviCivitaConnectionOfMetric (I := I) gRef)
               (fun q : M => σ a.succ q) x) (σ 0 x))))
-
       have hv : (Fin.cons (σ 0 x) (fun a : Fin (p + 2) => σ a.succ x) :
           Fin (p + 3) → TangentSpace I x) = v := by
         funext b
@@ -194,7 +190,8 @@ theorem covDerivOfField_swapReg
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_contMDiffAt
     (gRef : SmoothRiemannianMetric I M)
@@ -220,7 +217,6 @@ theorem covDerivOfField_eval_contMDiffAt
           (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
         ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) gRef isOpen_univ⟩
-
       have hWsec : ∀ a : Fin (p + 2),
           ContMDiff I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
             (fun y : M =>
@@ -236,7 +232,6 @@ theorem covDerivOfField_eval_contMDiffAt
         ⟨fun y : M =>
           ((leviCivitaConnectionOfMetric (I := I) gRef)
             (fun q : M => V a.succ q) y) ((V 0) y), hWsec a⟩
-
       have hdec : ∀ q : Real × M,
           (covDerivOfField (I := I) gRef (A q.1) (p + 1)) q.2
               (fun a : Fin (p + 3) => V a q.2)
@@ -311,7 +306,8 @@ theorem covDerivOfField_eval_contMDiffAt
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_smoothAt
     (gRef : SmoothRiemannianMetric I M)
@@ -423,7 +419,8 @@ theorem covDerivOfField_eval_smoothAt
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_eval_mdiffAt
     (gRef : SmoothRiemannianMetric I M)
@@ -476,7 +473,8 @@ noncomputable def solnEvolField
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem solnRicField_eq_ricciAt
     {D : RealTimeInterval}
@@ -490,7 +488,8 @@ theorem solnRicField_eq_ricciAt
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem solnMetricDeriv
     {D : RealTimeInterval}
@@ -632,7 +631,6 @@ theorem solnMetricJointAt
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he
   set b := Module.finBasis Real E with hb
   have hxe : x ∈ e.baseSet := by simp [he]
-
   have hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) (e.localFrame b) e.baseSet :=
     Bundle.Trivialization.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) e b
   have hcompOn := hS.smoothMetric.frameCompSmooth (e.localFrame b) hframe
@@ -644,12 +642,10 @@ theorem solnMetricJointAt
         (S.family.metric q.1).inner q.2 (e.localFrame b i q.2) (e.localFrame b j q.2))
       (t, x) := fun i j =>
     (hcompOn i j).contMDiffAt hmemProd
-
   have hcoeff : ∀ (a : Fin 2) i, ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun y : M => e.localFrame_coeff I b i y ((V a) y)) x := fun a i =>
     _root_.contMDiffAt_localFrame_coeff (I := I) b hxe
       ((V a).contMDiff.contMDiffAt) i
-
   have hsum : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun q : Real × M =>
         ∑ i, ∑ j,
@@ -660,7 +656,6 @@ theorem solnMetricJointAt
     refine ContMDiffAt.sum fun i _ => ContMDiffAt.sum fun j _ => ?_
     exact (((hcoeff 0 i).comp (t, x) contMDiffAt_snd).mul
       ((hcoeff 1 j).comp (t, x) contMDiffAt_snd)).mul (hcompAt i j)
-
   refine hsum.congr_of_eventuallyEq ?_
   have hev0 := Bundle.Trivialization.eventually_eq_localFrame_sum_coeff_smul
     (I := I) e b (s := fun y => (V 0) y) hxe

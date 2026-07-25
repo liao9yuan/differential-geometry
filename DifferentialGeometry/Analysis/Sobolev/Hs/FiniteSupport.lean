@@ -54,7 +54,6 @@ omit [NeZero (Module.finrank ℝ E)] in
     (ofFiniteSupport (I := I) (M := M) g σ f hf).coeff = f := rfl
 
 open scoped Classical in
-
 def basisVec (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i : EigenIdx (I := I) (M := M) g) :
     scalarHs (I := I) (M := M) g σ :=
@@ -139,7 +138,6 @@ theorem hasSum_smul_basisVec_of_finite
     simp [hzero]
 
 open scoped Classical in
-
 omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleEquivL2_smul_basisVec
     (T : scalarHs (I := I) (M := M) g σ)

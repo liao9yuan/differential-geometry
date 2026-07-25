@@ -96,7 +96,8 @@ theorem wkpNormChartRaw_zero_section
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (α : M) (ρ u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -121,7 +122,8 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy]
     rw [mul_zero]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
     (α : M) (ρ u : M → ℝ) :
     (chartPushedRaw (I := I) (M := M) α (fun x : M => ρ x * u x)) =

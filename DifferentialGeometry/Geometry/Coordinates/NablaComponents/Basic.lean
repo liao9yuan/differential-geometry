@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Coordinates.ConnectionCoefficients
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

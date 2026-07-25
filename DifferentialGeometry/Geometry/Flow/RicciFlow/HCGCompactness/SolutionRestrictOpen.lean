@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -91,10 +90,12 @@ theorem metricRicci_restrictOpen_eval
   have hLHS : metricRicci (I := I) (M := U) (g.restrictOpen (I := I) U) x slots
       = ricciTensor (I := I) (M := U) (g.restrictOpen (I := I) U) x (slots 0) (slots 1) := by
     have hcmm : metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x slots
-        = metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x (vec2 (slots 0) (slots 1)) :=
+        = metricRicciAt (I := I) (M := U) (g.restrictOpen (I := I) U) x
+          (vec2 (slots 0) (slots 1)) :=
       congrArg _ (by funext i; fin_cases i <;> rfl)
     rw [metricRicci_apply, hcmm]
-    exact metricRicciAt_apply_eq_ricciTensor (I := I) (g.restrictOpen (I := I) U) x (slots 0) (slots 1)
+    exact metricRicciAt_apply_eq_ricciTensor (I := I) (g.restrictOpen (I := I) U) x (slots 0)
+      (slots 1)
   have hRHS : metricRicci (I := I) (M := M) g (x : M) slots
       = ricciTensor (I := I) (M := M) g (x : M) (slots 0) (slots 1) := by
     have hcmm : metricRicciAt (I := I) (M := M) g (x : M) slots
@@ -207,10 +208,8 @@ def solutionOn_restrictOpen
   base := { metric := fun t => (S.base.metric t).restrictOpen (I := I) U }
 
 open Classical in
-
-
-
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 2 M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 2 M] in
 theorem restrictOpenPush_contMDiffWithinAt
     {Idx : Type} (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
@@ -220,10 +219,7 @@ theorem restrictOpenPush_contMDiffWithinAt
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
         (if h : y ∈ U then frame i ⟨y, h⟩ else 0)) (Subtype.val '' u) (x : M) := by
   haveI : Inhabited U := ⟨x⟩
-
   set cor : M → U := fun y => if h : y ∈ U then ⟨y, h⟩ else default with hcor_def
-
-
   have hcorval : ∀ z : U, cor (z : M) = z := by
     intro z; rw [hcor_def]; simp only [dif_pos z.2, Subtype.coe_eta]
   have hcor : ContMDiffAt I I (∞ : WithTop ℕ∞) cor (x : M) := by
@@ -231,22 +227,18 @@ theorem restrictOpenPush_contMDiffWithinAt
     have hid : (fun z : U => cor (z : M)) = id := by funext z; simpa using hcorval z
     rw [hid]
     exact contMDiffAt_id
-
   have hpush : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) u x :=
     ((contMDiff_subtype_val (I := I) (U := U) (n := ∞)).contMDiff_tangentMap
       (by simp)).contMDiffAt.comp_contMDiffWithinAt x (hframe.contMDiffOn i x hxu)
-
   have hmaps : Set.MapsTo cor (Subtype.val '' u) u := by
     rintro y ⟨z, hz, rfl⟩
     rw [hcorval z]; exact hz
-
   have hpush' : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) u (cor (x : M)) := by
     rw [hcorval x]; exact hpush
-
   have hgcor : ∀ z : M, (hz : z ∈ U) →
       (fun z : U => tangentMap I I (Subtype.val : U → M)
         (TotalSpace.mk' E (E := fun w : U => TangentSpace I w) z (frame i z))) (cor z)
@@ -262,20 +254,14 @@ theorem restrictOpenPush_contMDiffWithinAt
         (mfderiv I I (Subtype.val : U → M) (⟨z, hz⟩ : U) (frame i ⟨z, hz⟩))
       = TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (frame i ⟨z, hz⟩)
     rw [mfderiv_subtype_val_apply]
-
   refine (hpush'.comp (x : M) hcor.contMDiffWithinAt hmaps).congr_of_eventuallyEq ?_ ?_
   · filter_upwards [nhdsWithin_le_nhds ((U.isOpen).mem_nhds x.2)] with z hz
     exact (hgcor z hz).symm
   · exact (hgcor (x : M) x.2).symm
 
 open Classical in
-
-
-
-
-
-
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 2 M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 2 M] in
 theorem isLocalFrameOn_restrictOpenPush
     {Idx : Type} (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U]
@@ -298,9 +284,6 @@ theorem isLocalFrameOn_restrictOpenPush
       funext i; rw [dif_pos hxU]
     exact hval ▸ hframe.generating hxu
   contMDiffOn i := by
-
-
-
     intro y hy
     obtain ⟨x, hxu, rfl⟩ := hy
     exact restrictOpenPush_contMDiffWithinAt (I := I) U hframe i x hxu
@@ -326,13 +309,11 @@ theorem frameCompSmooth_restrictOpen
           (frame i p.2) (frame j p.2))
       (D.regular ×ˢ u) := by
   classical
-
   set frameM : Idx → (y : M) → TangentSpace I y :=
     fun k (y : M) => if h : y ∈ U then frame k ⟨y, h⟩ else 0 with hframeM_def
   have hframeM : IsLocalFrameOn (V := (TangentSpace I : M → Type _)) I E (∞ : WithTop ℕ∞)
       frameM (Subtype.val '' u) := isLocalFrameOn_restrictOpenPush (I := I) U hframe
   have hpf := hS.smoothMetric.frameCompSmooth frameM hframeM i j
-
   have hmap : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) (∞ : WithTop ℕ∞)
       (fun p : ℝ × U => (p.1, (p.2 : M))) :=
     contMDiff_fst.prodMk ((contMDiff_subtype_val (I := I) (U := U)).comp contMDiff_snd)
@@ -501,9 +482,6 @@ theorem ricciNorm_restrictOpen
     (t : ℝ) (x : U) :
     ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t x
       = ricciNorm (I := I) S t (x : M) := by
-
-
-
   have hsec : metricRicci (I := I) (M := U) ((S.base.metric t).restrictOpen (I := I) U) x
       = metricRicci (I := I) (M := M) (S.base.metric t) (x : M) := by
     ext slots
@@ -516,7 +494,8 @@ theorem ricciNorm_restrictOpen
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciNormSpace_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
@@ -538,7 +517,8 @@ theorem ricciNormSpace_restrictOpen
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+    [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem smoothConnection_restrictOpen
     (S : SolutionOn (I := I) (M := M) D) (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]

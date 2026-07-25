@@ -119,7 +119,8 @@ private lemma chosenChartFirstWeakPartial_ae_zero_off_support
         (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
       (chartTargetEuclid (I := I) (M := M) α) := by
-    have h := DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness.chartH2NonSmoothPOUWitness_of_laplacianDomain
+    have h :=
+      chartH2NonSmoothPOUWitness_of_laplacianDomain
       (I := I) (M := M) g hu_h α
     exact h.memWkp_two
   have h_memW1p_Ω : DeGiorgi.MemW1p 2
@@ -148,7 +149,8 @@ private lemma chosenChartFirstWeakPartial_ae_zero_off_support
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
         (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) Ω :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem h_memW1p_Ω j
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
+      h_memW1p_Ω j
   have h_partial_Ω_on_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) j
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 j
@@ -168,7 +170,8 @@ private lemma chosenChartFirstWeakPartial_ae_zero_off_support
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
         (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) V :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem h_memW1p_V j
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
+      h_memW1p_V j
   have h_loc_Ω : LocallyIntegrable
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
         (d := Module.finrank ℝ E) 2 j
@@ -478,7 +481,8 @@ private lemma cutoffHessianPhiPub_bounded
     intro y
     by_cases hyK : y ∈ Kη
     · have h := hy₀_max hyK
-      have h_eq : |DifferentialGeometry.Analysis.Laplacian.HessianTensorChartSmooth.cutoffHessianPhiPub
+      have h_eq :
+        |DifferentialGeometry.Analysis.Laplacian.HessianTensorChartSmooth.cutoffHessianPhiPub
             (I := I) (M := M) g α φ i j y| =
           ‖DifferentialGeometry.Analysis.Laplacian.HessianTensorChartSmooth.cutoffHessianPhiPub
             (I := I) (M := M) g α φ i j y‖ := rfl
@@ -608,7 +612,7 @@ theorem chartTensorPairingLocal_memLp_two
               ∑ l : Fin (Module.finrank ℝ E),
                 cutoffInvGram (I := I) (M := M) g α i k y *
                   cutoffInvGram (I := I) (M := M) g α j l y *
-                  DifferentialGeometry.Analysis.Laplacian.HessianTensorChartSmooth.cutoffHessianPhiPub
+                  Analysis.Laplacian.HessianTensorChartSmooth.cutoffHessianPhiPub
                     (I := I) (M := M) g α φ i j y *
                   chartTensorWeakHessianRaw (I := I) (M := M) g α hu_h k l y) 2
       ((volume : Measure EuclN).restrict
@@ -839,7 +843,7 @@ private lemma tensorContribSurrogate_ae_eq
     by_contra h_ne
     exact hy_not_bad h_ne
   have hpre_null :=
-    DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.riemannianVolumeMeasure_pullback_null
+    riemannianVolumeMeasure_pullback_null
       (I := I) (M := M) g α hN_meas hN_null_inter
   rw [Filter.EventuallyEq, MeasureTheory.ae_iff]
   refine MeasureTheory.measure_mono_null ?_ hpre_null
@@ -937,7 +941,7 @@ private lemma tensorContribSurrogate_memLp_two
       (chartAt H α).source :=
     tensorContribSurrogate_tsupport_subset (I := I) (M := M) g φ α hu_h
   obtain ⟨C_α, hC_α_pos, hC_α_bnd⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
+    eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
       (I := I) (M := M) g α (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤) h_c_meas h_c_tsupp
   have h_chart_le : eLpNorm

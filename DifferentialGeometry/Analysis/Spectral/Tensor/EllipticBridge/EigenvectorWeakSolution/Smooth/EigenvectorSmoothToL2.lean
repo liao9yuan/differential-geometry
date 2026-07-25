@@ -35,7 +35,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorSmooth_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -51,7 +50,6 @@ theorem eigenvectorSmooth_toL2
       (I := I) (M := M) g r s i β P₀)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem tensorEigenvector_exists_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

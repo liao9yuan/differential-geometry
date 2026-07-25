@@ -18,7 +18,6 @@ noncomputable def standardNirenbergTest
   diffQuot k (-h) (fun x => (η x)^2 * diffQuot k h u x)
 
 omit [NeZero d] in
-
 theorem standardNirenbergTest_apply
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) (x : EuclN) (hh : h ≠ 0) :
     standardNirenbergTest k h η u x =
@@ -37,7 +36,6 @@ omit [NeZero d] in
   simp [diffQuot]
 
 omit [NeZero d] in
-
 theorem standardNirenbergTest_support_subset
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (_hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -75,7 +73,6 @@ theorem standardNirenbergTest_support_subset
       exact subset_tsupport η hηx
 
 omit [NeZero d] in
-
 theorem standardNirenbergTest_tsupport_subset
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -96,7 +93,6 @@ theorem standardNirenbergTest_tsupport_subset
   exact standardNirenbergTest_support_subset (d := d) k h hη_cs u
 
 omit [NeZero d] in
-
 theorem standardNirenbergTest_hasCompactSupport
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -133,7 +129,6 @@ theorem standardNirenbergTest_hasCompactSupport
   exact h_union_compact.of_isClosed_subset (isClosed_tsupport _) h_sub
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_diffQuot
     (k : Fin d) (h : ℝ) {u : EuclN → ℝ}
     (hu_locInt : LocallyIntegrable u (volume : Measure EuclN)) :
@@ -186,7 +181,6 @@ private lemma locallyIntegrable_diffQuot
     exact h1.add h2
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_continuous_mul
     {η f : EuclN → ℝ} (hη : Continuous η)
     (hf_locInt : LocallyIntegrable f (volume : Measure EuclN)) :
@@ -197,7 +191,6 @@ private lemma locallyIntegrable_continuous_mul
   exact LocallyIntegrableOn.continuousOn_mul hf_locInt hη.continuousOn hcl
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_of_restrict_univ
     {f : EuclN → ℝ}
     (hf : LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ)) :
@@ -205,14 +198,12 @@ private lemma locallyIntegrable_of_restrict_univ
   rwa [Measure.restrict_univ] at hf
 
 omit [NeZero d] in
-
 private lemma locallyIntegrable_to_restrict_univ
     {f : EuclN → ℝ} (hf : LocallyIntegrable f (volume : Measure EuclN)) :
     LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ) := by
   rwa [Measure.restrict_univ]
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_standardNirenbergTest
     (k j : Fin d) (h : ℝ) {η u g_j : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -305,7 +296,6 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
     h_F_locInt_restrict h_partial_locInt_restrict h_inner_wp
 
 omit [NeZero d] in
-
 private lemma eLpNorm_const_mul
     (c : ℝ) (f : EuclN → ℝ) :
     eLpNorm (fun x => c * f x) 2 (volume : Measure EuclN) =
@@ -317,7 +307,6 @@ private lemma eLpNorm_const_mul
   simp [Real.enorm_eq_ofReal_abs]
 
 omit [NeZero d] in
-
 private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
     eLpNorm (translate k h F) 2 (volume : Measure EuclN) =
       eLpNorm F 2 (volume : Measure EuclN) := by
@@ -335,7 +324,6 @@ private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
 omit [NeZero d] in
-
 private lemma eLpNorm_diffQuot_neg_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -391,7 +379,6 @@ private lemma eLpNorm_diffQuot_neg_le
         rw [ENNReal.div_eq_inv_mul]
 
 omit [NeZero d] in
-
 private lemma eLpNorm_eta_sq_diffQuot_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (_hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η) :
@@ -502,7 +489,6 @@ private lemma eLpNorm_eta_sq_diffQuot_le
   rw [h_sqrt_M4]
 
 omit [NeZero d] in
-
 theorem eLpNorm_standardNirenbergTest_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {η u : EuclN → ℝ}

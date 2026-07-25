@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -87,7 +86,8 @@ private theorem flatNested_mfderiv {U V : Opens M} (hVU : V ≤ U) (x : V) :
     mfderiv_subtype_val (I := I) (nestedOpen hVU) (F x)] at hcomp
   simpa [F] using hcomp.symm
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem metric_ext
     {U : Opens M} {g g' : SmoothRiemannianMetric I U}
     (h : ∀ (x : U) (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) :

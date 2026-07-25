@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -131,13 +130,15 @@ structure IsRealizedRicciFlowSolutionOn
     {D : RealTimeInterval}
     (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D) : Prop where
   smoothMetric : MetricFamilySmoothOn (I := I) (M := M) D S.family
-  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
+  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I)
+    (M := M) S.family
   leviCivita : DifferentialGeometry.Integral.Connection.IsLeviCivitaFamilyOn (I := I) S.family
   equation : MetricVariationEquationOn (I := I) S.family S.ricci
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [IsManifold I 1 M] in
 theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)

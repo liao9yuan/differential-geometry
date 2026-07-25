@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -509,19 +508,22 @@ theorem log_integrable_of_sol
         (-2 : Real) * S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
       (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := hS.ricciCont) (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun p => hsub p.2) continuous_const (v := fun _ _ => v) (fun _ => continuous_const)
     refine continuous_const.mul ?_
     refine hev.congr ?_
     intro p
-    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v from by
+    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v
+      from by
       funext i; fin_cases i <;> rfl]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt]
   have hden : ContinuousOn (fun s : Real => (S.family.metric s).inner x v v) (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
-    have hev := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have hev :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := DifferentialGeometry.Integral.Connection.metricTensor_cont_of_metricFamilySmoothOn
         S.family hS.smoothMetric)
       (P := {s : Real // s ∈ Set.uIcc t0 t})

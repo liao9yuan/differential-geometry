@@ -424,7 +424,6 @@ private lemma christoffelCorrection_summand_opNorm_le_unconditional
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
     [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -554,7 +553,6 @@ theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
     [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

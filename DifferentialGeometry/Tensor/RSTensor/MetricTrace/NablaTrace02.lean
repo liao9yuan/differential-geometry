@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

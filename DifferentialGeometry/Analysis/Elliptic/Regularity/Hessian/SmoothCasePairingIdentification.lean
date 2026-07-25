@@ -63,7 +63,8 @@ private lemma h1ComplToLp_smoothToH1Compl_measurable
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   (Lp.stronglyMeasurable _).measurable
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalar_toFun_measurable
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     Measurable (v.toFun : M → ℝ) :=
@@ -232,7 +233,8 @@ noncomputable def hessPairingSmoothOnEuclid
     (smoothScalarToContMDiffMap (I := I) (g := g) v)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma hessPairingSmoothOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -441,7 +443,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_connector
     hessPairingLpOnLapDom (I := I) (M := M) g φ
         (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1
-          (DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
+          (Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
             (I := I) (M := M) g v)) =
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
@@ -459,7 +461,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_connector_perChart_ae
     hessPairingLpOnLapDom (I := I) (M := M) g φ
         (DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1
-          (DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
+          (Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
             (I := I) (M := M) g v)) =
       hessPairingSmoothLp (I := I) (M := M) g φ v :=
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_ae

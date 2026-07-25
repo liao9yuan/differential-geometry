@@ -418,7 +418,8 @@ private lemma niceInvFun_right_inv
 
 private lemma niceInvFun_contMDiffOn
     (g : SmoothRiemannianMetric I M) (p : M) :
-    ContMDiffOn I 𝓘(ℝ, E) 1 (expLocalDiffeoInvFun (I := I) g p) (expLocalDiffeoTarget (I := I) g p) := by
+    ContMDiffOn I 𝓘(ℝ, E) 1 (expLocalDiffeoInvFun (I := I) g p)
+      (expLocalDiffeoTarget (I := I) g p) := by
   classical
   have hext : ContMDiffOn I 𝓘(ℝ, E) 1 (extChartAt I p) (chartAt H p).source :=
     contMDiffOn_extChartAt (I := I) (x := p) (n := 1)

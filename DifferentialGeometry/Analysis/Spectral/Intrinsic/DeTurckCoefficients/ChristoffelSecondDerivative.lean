@@ -40,8 +40,6 @@ noncomputable def gramBracketDeriv2 (g : SmoothRiemannianMetric I M) (α : M)
         (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j))) y
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 theorem gramBracketD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) (y : E) {Q : ℝ}
     (hQ : ∀ d m c a b, |partialDeriv (E := E) d
@@ -58,8 +56,6 @@ theorem gramBracketD2_abs_le
     _ = 3 * Q := by ring
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
 theorem gramBracketD2_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (d m i j l : Fin (Module.finrank ℝ E)) :

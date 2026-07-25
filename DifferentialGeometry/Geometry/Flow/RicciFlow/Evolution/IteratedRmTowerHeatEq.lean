@@ -5,10 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannTimeDe
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -446,13 +442,9 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
       (nablaKRm04ReactionIntrinsic (I := I) S k basis gInv ric Tdot) := by
   classical
   intro t x
-
   have hmc : IsMetricCompatible_gen (I := I)
       (S.family.connection (t : Real)) (S.base.metric (t : Real)) :=
     solution_isMetricCompatible (I := I) S (t : Real)
-
-
-
   have hdt :=
     hasDerivWithinAt_normSq0S_ricciFlow (I := I)
       (s := 4 + k) (x := x) (u := D.carrier) (t := (t : Real))
@@ -471,8 +463,6 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
       (hT t x)
       (fun I0 => rfl)
       (fun i j => rfl)
-
-
   have hsplit :=
     tensorNormBochnerSplit_mc (I := I) (s := 4 + k)
       (cov := S.family.connection (t : Real))
@@ -486,15 +476,8 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
       (nablaKRm04Field_realizes (I := I) S (t : Real) (k + 1))
       (du := du (t : Real)) (normSecond := normSecond (t : Real))
       (hdu (t : Real)) (hHess (t : Real) x)
-
   refine hdt.congr_deriv ?_
-
   rw [hlapTrace (t : Real) x, nablaKRm04ReactionIntrinsic, nablaKRm04NormSqIntrinsic]
-
-
-
-
-
   set A := ricReactionContract (gInv (t : Real) x) (ric (t : Real) x)
       (fun I0 : Fin (4 + k) -> Idx =>
         tensor0SComponent (I := I) (nablaKRm04Field (I := I) S (t : Real) k x)
@@ -503,7 +486,6 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
         tensor0SComponent (I := I) (nablaKRm04Field (I := I) S (t : Real) k x)
           (fun i => basis x i) J0) with hA
   set Rm := nablaKRm04Field (I := I) S (t : Real) k x with hRm
-
   have hsub :
       inner0S (I := I) (S.base.metric (t : Real)) x (4 + k)
           (Tdot (t : Real) x -
@@ -515,15 +497,11 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
               (nablaKRm04Field (I := I) S (t : Real) (k + 2) x)) Rm := by
     simp only [inner0S, MetricFiberData.inner, map_sub, LinearMap.sub_apply]
   rw [hsub]
-
-
-
   set B := inner0S (I := I) (S.base.metric (t : Real)) x (4 + k) (Tdot (t : Real) x) Rm
     with hB
   set C := inner0S (I := I) (S.base.metric (t : Real)) x (4 + k)
       (metricTrace0S2TensorInBasis (I := I) (basis x) (gInv (t : Real) x)
         (nablaKRm04Field (I := I) S (t : Real) (k + 2) x)) Rm with hC
-
   have hsplit' :
       metricTrace0S2InBasis (I := I) (basis x) (gInv (t : Real) x)
           (normSecond (t : Real) x) Fin.elim0 =
@@ -678,8 +656,6 @@ theorem iteratedRmComp_hasDerivWithinAt
       simpa [iteratedRmComp_zero, iteratedRmCompDt_zero] using hrm n
   | succ k ih =>
       intro n
-
-
       rw [show
           (fun s : Real => iteratedRmComp (I := I) frame chr base (k + 1) s x n) =
             fun s : Real =>
@@ -690,8 +666,6 @@ theorem iteratedRmComp_hasDerivWithinAt
                 (iteratedRmComp (I := I) frame chr base k s x) n from by
         funext s; rw [iteratedRmComp_succ]]
       rw [iteratedRmCompDt_succ]
-
-
       exact covDerivStepComp_hasDerivWithinAt
         (I := I) frame
         (iteratedRmComp (I := I) frame chr base k)

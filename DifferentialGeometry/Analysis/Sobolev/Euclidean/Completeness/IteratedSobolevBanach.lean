@@ -115,11 +115,13 @@ private theorem wkpNorm_telescope_sum
             iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω :=
         wkpNorm_add_le (d := d) hp hΩ hA_mem hC_mem
       have hL_norm_eq :
-          iteratedWeakSobolevNorm (d := d) k p L Ω = iteratedWeakSobolevNorm (d := d) k p (fun x => A x + C x) Ω := by
+          iteratedWeakSobolevNorm (d := d) k p L Ω = iteratedWeakSobolevNorm (d := d) k p
+            (fun x => A x + C x) Ω := by
         rw [hL_eq]
       have hL_le :
           iteratedWeakSobolevNorm (d := d) k p L Ω ≤
-            iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω := by
+            iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C
+              Ω := by
         rw [hL_norm_eq]
         exact h_le_triangle
       have h_ih_le_sum :
@@ -143,7 +145,8 @@ private theorem wkpNorm_telescope_sum
       calc
         iteratedWeakSobolevNorm (d := d) k p (fun x => v (n + (ℓ + 1)) x - v n x) Ω
             = iteratedWeakSobolevNorm (d := d) k p L Ω := rfl
-        _ ≤ iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω := hL_le
+        _ ≤ iteratedWeakSobolevNorm (d := d) k p A Ω + iteratedWeakSobolevNorm (d := d) k p C Ω :=
+          hL_le
         _ ≤ (∑ i ∈ Finset.range ℓ,
               iteratedWeakSobolevNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω) +

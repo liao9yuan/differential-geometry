@@ -237,7 +237,6 @@ private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
   ring
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 noncomputable def covGradPouLeibnizCrossLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -253,7 +252,6 @@ noncomputable def covGradPouLeibnizCrossLimit
         EuclN → ℝ) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -283,7 +281,6 @@ theorem covGradPouLeibnizCrossLimit_memLp
   rw [crossMultiplier_eq (I := I) (M := M) β k y]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma cutoffComponent_smoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -422,7 +419,6 @@ private lemma crossTermApprox_memLp
       g r s i β P₀ k n).symm
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -600,7 +596,6 @@ private lemma christoffelTerm_tendsto
   congr 1
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 private lemma covGrad_chartComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -634,7 +629,6 @@ private lemma covGrad_chartComponent_tendsto
       g r s (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

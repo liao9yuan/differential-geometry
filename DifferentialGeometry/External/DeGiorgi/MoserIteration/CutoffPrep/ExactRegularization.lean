@@ -4,7 +4,8 @@ import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Profiles
 /-!
 # Moser Exact Regularization
 
-This module contains the exact-on-support witnesses, derivative identities, and epsilon-limit lemmas for the Chapter 06 regularization scheme.
+This module contains the exact-on-support witnesses, derivative identities, and epsilon-limit
+lemmas for the Chapter 06 regularization scheme.
 -/
 
 noncomputable section
@@ -350,7 +351,8 @@ lemma moserExactRegPowerCutoffWitness_grad
         (moserPosPartWitnessUnitBall (d := d) (u := u) hu1).weakGrad x i +
       (fderiv ℝ η x) (EuclideanSpace.single i 1) *
         moserExactRegPow ε N p (max (u x) 0) := by
-  simp only [moserExactRegPowerCutoffWitness, moserExactRegPosPartWitness, moserPosPartWitnessUnitBall,
+  simp only [moserExactRegPowerCutoffWitness, moserExactRegPosPartWitness,
+    moserPosPartWitnessUnitBall,
     MemW1pWitness.mul_smooth_bounded, MemW1pWitness.comp_smooth_bounded,
     WithLp.ofLp_add, WithLp.ofLp_smul, smul_eq_mul, Pi.add_apply, Pi.smul_apply]
   ring
@@ -369,7 +371,8 @@ lemma moserExactRegTestCutoffWitness_grad
         moserExactRegTestPow ε N p (max (u x) 0) +
       η x ^ 2 * deriv (moserExactRegTestPow ε N p) (max (u x) 0) *
         (moserPosPartWitnessUnitBall (d := d) (u := u) hu1).weakGrad x i := by
-  simp only [moserExactRegTestCutoffWitness, moserPosPartWitnessUnitBall, MemW1pWitness.mul_smooth_bounded,
+  simp only [moserExactRegTestCutoffWitness, moserPosPartWitnessUnitBall,
+    MemW1pWitness.mul_smooth_bounded,
     MemW1pWitness.comp_smooth_bounded, WithLp.ofLp_add, WithLp.ofLp_smul,
     smul_eq_mul, Pi.add_apply, Pi.smul_apply]
   ring
@@ -472,7 +475,8 @@ theorem moserExactRegTestPow_hasDerivAt_shifted
       moserExactRegTestPow ε N p =ᶠ[nhds t]
         fun y : ℝ => (ε + y) ^ (p - 1) - ε ^ (p - 1) := by
     filter_upwards [Ioo_mem_nhds ht0 htN] with y hy
-    rw [moserExactRegTestPow_eq_shifted_of_nonneg_le_N (ε := ε) (N := N) (p := p) hε hy.1.le hy.2.le]
+    rw [moserExactRegTestPow_eq_shifted_of_nonneg_le_N (ε := ε) (N := N) (p := p) hε hy.1.le
+      hy.2.le]
   have hbase :
       HasDerivAt (fun y : ℝ => (ε + y) ^ (p - 1) - ε ^ (p - 1))
         ((p - 1) * (ε + t) ^ (p - 2)) t := by
@@ -503,7 +507,8 @@ theorem moserExactInput_hasDerivAt_zero
       linarith
     simp [moserExactInput, hσR]
   have hσL_diff : DifferentiableAt ℝ (moserExactLeftTransition ε) 0 := by
-    exact ((moserExactLeftTransition_contDiff (ε := ε) hε).differentiable (by simp)).differentiableAt
+    exact ((moserExactLeftTransition_contDiff (ε := ε) hε).differentiable
+      (by simp)).differentiableAt
   have hprod :
       HasDerivAt (fun t : ℝ => t * moserExactLeftTransition ε t)
         (1 * moserExactLeftTransition ε 0 + 0 * deriv (moserExactLeftTransition ε) 0) 0 := by
@@ -621,7 +626,8 @@ theorem moserExactRegPow_sq_le_rpow_of_nonneg_le_N
     moserExactRegPow ε N p t ^ 2 ≤ (ε + t) ^ p := by
   have hp0 : 0 < p := by linarith
   have hle := moserExactRegPow_le_rpow_of_nonneg_le_N (ε := ε) (N := N) (p := p) hε ht0 htN hp0
-  have hnn := moserExactRegPow_nonneg_of_nonneg_le_N (ε := ε) (N := N) (p := p) hε ht0 htN (by linarith)
+  have hnn := moserExactRegPow_nonneg_of_nonneg_le_N (ε := ε) (N := N) (p := p) hε ht0 htN
+    (by linarith)
   have hbase : 0 ≤ ε + t := by linarith
   calc
     moserExactRegPow ε N p t ^ 2 ≤ ((ε + t) ^ (p / 2)) ^ 2 := sq_le_sq' (by linarith) hle

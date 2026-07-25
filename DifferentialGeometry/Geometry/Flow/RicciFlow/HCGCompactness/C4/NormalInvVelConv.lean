@@ -26,8 +26,6 @@ variable [FiniteDimensional Real E]
 variable {Q : Type*} [NormedAddCommGroup Q] [NormedSpace Real Q]
 
 omit [FiniteDimensional Real E] in
-
-
 theorem invVelSum_contDiff
     {ι : Type*} [Fintype ι]
     {U : Set Q} {V : Set (E × E)}

@@ -68,7 +68,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem uc_coverChartAt_extend_conjugacy
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a).extend I : _ → E)
@@ -130,7 +131,8 @@ theorem uc_coverChartAt_extend_conjugacy
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem uc_tangentBundleCore_coordChange_agree
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -268,7 +270,8 @@ theorem uc_tangentBundleCore_coordChange_agree
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem uc_hom_bundle_inCoordinates_pullback
     (g : SmoothRiemannianMetric I M)
@@ -289,7 +292,8 @@ theorem uc_hom_bundle_inCoordinates_pullback
           (proj a) (proj x) (proj a) (proj x) (g.inner (proj x)) := by
   have hx_UC : x ∈ (trivializationAt E
       (TangentSpace I :
-        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).baseSet := by
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _)
+          a).baseSet := by
     change x ∈ (chartAt H a).source; exact hx
   have hxAA : x ∈ (chartAt H a).source ∩ (chartAt H a).source := ⟨hx, hx⟩
   have hpx_M : proj x ∈ (trivializationAt E (TangentSpace I : M → Type _) (proj a)).baseSet := by
@@ -323,7 +327,8 @@ theorem uc_hom_bundle_inCoordinates_pullback
     exact uc_tangentBundleCore_coordChange_agree (I := I) a x ⟨hx, mem_chart_source H x⟩
   have hCLM :
       ((trivializationAt E (TangentSpace I :
-          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).continuousLinearMapAt
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _)
+            a).continuousLinearMapAt
             ℝ x : E →L[ℝ] E)
         = ((trivializationAt E (TangentSpace I : M → Type _) (proj a)).continuousLinearMapAt
             ℝ (proj x) : E →L[ℝ] E) := by
@@ -407,7 +412,8 @@ theorem uc_hom_bundle_inCoordinates_pullback
 
 
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem uc_liftedMetric_contMDiff
     (g : SmoothRiemannianMetric I M) :

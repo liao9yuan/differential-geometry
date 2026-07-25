@@ -140,7 +140,6 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
     Tensor0SBundle.TensorRSSpace.toModel_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorMainDir_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

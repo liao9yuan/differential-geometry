@@ -368,8 +368,10 @@ private lemma divergence_dirichletVFRS_summand_eq
     · rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g r s
         (covDerivAlongVFSectionRS (I := I) (M := M) g r s T.toSection B)
         (covDerivAlongVFSectionRS (I := I) (M := M) g r s v.toSection B) b]
-      rw [toModel_liftedTensorSection_covDerivAlongVFSectionRS (I := I) (M := M) g r s hint T.toSection B b,
-        toModel_liftedTensorSection_covDerivAlongVFSectionRS (I := I) (M := M) g r s hint v.toSection B b]
+      rw [toModel_liftedTensorSection_covDerivAlongVFSectionRS (I := I) (M := M) g r s hint
+        T.toSection B b,
+        toModel_liftedTensorSection_covDerivAlongVFSectionRS (I := I) (M := M) g r s hint
+          v.toSection B b]
   have haccel : g.inner b (Z b)
         ((LeviCivita (I := I) g).toFun (fun y : M => B y) b
           ((B : ∀ y, TangentSpace I y) b)) =
@@ -380,7 +382,8 @@ private lemma divergence_dirichletVFRS_summand_eq
               ((B : ∀ y, TangentSpace I y) b))))
         (TensorRSSpace.toModel (v.toSection b)) := by
     rw [hZ_def, dirichletVFSectionRS_apply, inner_dirichletVFRS, dirichletFormRS_apply]
-  have hsecond := covDerivAlongRS_covDerivAlongVFSectionRS_eq (I := I) (M := M) g r s T.toSection B b
+  have hsecond := covDerivAlongRS_covDerivAlongVFSectionRS_eq (I := I) (M := M) g r s T.toSection B
+    b
   have hsummand : g.inner b
         ((LeviCivita (I := I) g).toFun (fun y : M => Z y) b
           ((B : ∀ y, TangentSpace I y) b))

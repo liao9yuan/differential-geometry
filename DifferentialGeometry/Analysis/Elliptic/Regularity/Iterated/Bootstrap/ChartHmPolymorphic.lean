@@ -138,7 +138,7 @@ theorem chartPushed_memWkp_succ_step
       ∀ (idx : Fin m → Fin (Module.finrank ℝ E)),
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) 2 2
-          (DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU
+          (Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU
             (I := I) (M := M) g α u_h m idx)
           (chartTargetEuclid (I := I) (M := M) α)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp

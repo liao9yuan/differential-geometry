@@ -219,7 +219,8 @@ theorem representation_formula_smooth_translated
     have hfd_add : fderiv ℝ (fun w : E => x₀ + w) z = ContinuousLinearMap.id ℝ E := by
       have h1 : fderiv ℝ (fun w : E => x₀ + w) z =
           fderiv ℝ (fun w : E => x₀) z + fderiv ℝ (fun w : E => w) z := by
-        exact fderiv_add (differentiable_const _).differentiableAt differentiable_id.differentiableAt
+        exact fderiv_add (differentiable_const _).differentiableAt
+          differentiable_id.differentiableAt
       rw [h1]
       simp
     rw [hv_def]
@@ -361,7 +362,8 @@ theorem riesz_kernel_memLp
     have hint_origin :
         IntegrableOn (fun y : E => ‖y‖ ^ α) (Metric.ball (0 : E) (R + dist x z)) volume :=
       riesz_kernel_integrable_of_gt_neg_dim (d := d) hα_gt hRR_pos
-    have hint_at_x : IntegrableOn (fun y : E => ‖x - y‖ ^ α) (Metric.ball x (R + dist x z)) volume := by
+    have hint_at_x : IntegrableOn (fun y : E => ‖x - y‖ ^ α) (Metric.ball x (R + dist x z))
+      volume := by
       have hmp := measurePreserving_add_right (volume : Measure E) x
       have hemb := (MeasurableEquiv.addRight x : E ≃ᵐ E).measurableEmbedding
       have hpre : ((· + x) ⁻¹' Metric.ball x (R + dist x z)) =

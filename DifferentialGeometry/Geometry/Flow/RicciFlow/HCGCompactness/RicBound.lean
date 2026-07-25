@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -72,9 +71,9 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 open DifferentialGeometry.PDE.RicciFlow in
-
-
-omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem normSq0S_nonneg'
     [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
@@ -94,7 +93,8 @@ private theorem normSq0S_nonneg'
 
 
 
-omit [Module.Finite ℝ E] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [IsManifold I 1 M] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -127,7 +127,7 @@ noncomputable def ricCovTower
     (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
       (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g)) s
 
 
@@ -224,7 +224,6 @@ private theorem perDomain
                 (fun a y' => e₀.localFrame basisE a y')) N x) + Cppp := by
   classical
   have hBmax0 : (0 : Real) < Bmax := lt_of_lt_of_le one_pos hBmax1
-
   set Kg : Real := ∑ j ∈ Finset.range (N + 1), 2 ^ (2 + j) * max (Cg j) 0 with hKgdef
   have hKg0 : 0 ≤ Kg :=
     Finset.sum_nonneg fun j _ => by positivity
@@ -232,7 +231,6 @@ private theorem perDomain
     Real.sqrt (Fintype.card (Fin (Module.finrank Real E))) * (2 * Bmax) with hC0def
   set KShiC : Real := 2 ^ (2 + N) * Bmax ^ (2 + N) * KShi with hKShiCdef
   have hKShiC0 : 0 ≤ KShiC := by positivity
-
   have hCLgen := fun c : ℕ => claim1_LC (I := I) hwopen gRef
     (fun a y' => e₀.localFrame basisE a y')
     ((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE).mono hwsub)
@@ -243,7 +241,6 @@ private theorem perDomain
         (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) hwsub hz d i j))
     C0 Kg c
   choose CL hCL0 hCLb using hCLgen
-
   obtain ⟨Cpp, Cppp, hpp0, hppp0, haN⟩ := aN_component (r₀ := 2) (rg := 2) (I := I) hwopen
     (fun a y' => e₀.localFrame basisE a y')
     (fun y' => christoffelSymbolInFrame
@@ -260,7 +257,6 @@ private theorem perDomain
     (CL (N - 1)) (hCL0 (N - 1)) KShiC hKShiC0
   refine ⟨Cpp, Cppp, hpp0, hppp0, ?_⟩
   intro g hequivW hmcd hShiPt x hx
-
   have hchrGw : ∀ d i j : Fin (Module.finrank Real E), ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun y => christoffelSymbolInFrame
         (leviCivitaConnectionOfMetric (I := I) g)
@@ -272,7 +268,6 @@ private theorem perDomain
         (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) hwsub hz d i j)
   have hgsmW := fun k => (gCompField_mdiffOn e₀ g basisE k).mono hwsub
   have hRicSmW := fun k => (ricCompField_mdiffOn e₀ g basisE k).mono hwsub
-
   have hGinvW : ∀ z ∈ w, compL2 (ginvCompField (I := I) e₀ g basisE z) ≤ C0 := by
     intro z hz
     exact movingGinv_le (I := I) e₀ g gRef basisE Bmax hBmax0
@@ -284,7 +279,6 @@ private theorem perDomain
         ginvCompField (I := I) e₀ g basisE z (Fin.snoc (fun _ : Fin 1 => e) l)) =
       if c = e then 1 else 0 :=
     fun z hz c e => ginv_hinv (I := I) e₀ g basisE (hwsub hz) c e
-
   have hgB : ∀ z ∈ w, ∀ j : ℕ, 1 ≤ j → j ≤ N - 1 →
       compL2 (iterCovComp (I := I)
         (fun a y' => e₀.localFrame basisE a y')
@@ -323,7 +317,6 @@ private theorem perDomain
       _ ≤ 2 ^ (2 + j) * max (Cg j) 0 :=
           mul_le_mul_of_nonneg_left (le_trans hcg (le_max_left _ _)) h2p
       _ ≤ Kg := hKgterm
-
   have hDlow : ∀ c : ℕ, c < N - 1 → ∀ z ∈ w,
       compL2 (iterCovCompU (I := I)
         (fun a y' => e₀.localFrame basisE a y')
@@ -382,7 +375,6 @@ private theorem perDomain
     have h := hCLb (N - 1) g hchrGw hgsmW (ginvCompField (I := I) e₀ g basisE)
       hinvW hGinvW (fun z' hz' j h1 h2 => hgB z' hz' j h1 h2) z hz
     rwa [show N - 1 + 1 = N from by omega] at h
-
   have hShiComp : ∀ z ∈ w, ∀ s : ℕ, s ≤ N →
       compL2 (iterCovComp (I := I)
         (fun a y' => e₀.localFrame basisE a y')
@@ -506,7 +498,6 @@ private theorem perDomain
             _ ≤ 2 ^ (2 + N) * (Bmax ^ (2 + N) * KShi) :=
                 mul_le_mul_of_nonneg_left hb (by positivity)
       _ = KShiC := by rw [hKShiCdef]; ring
-
   exact haN
     (fun y' => christoffelSymbolInFrame
       (leviCivitaConnectionOfMetric (I := I) g)
@@ -556,14 +547,11 @@ private theorem ric_tower_const
                 (ricCovTower (I := I) (gSeq i t) gRef N x)) <=
               Cpp * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + Cppp := by
   classical
-
   choose basisE u' eps hopen hxu hsubB heps0 hepsSm hGnear hON hFwd hRev using
     fun x : M => exists_goodFrame_compBound (I := I) gRef x
-
   obtain ⟨tF, htF⟩ := hKc.elim_finite_subcover (fun x : M => u' x ∩ U)
     (fun x => (hopen x).inter hU)
     (fun z hz => Set.mem_iUnion.mpr ⟨z, ⟨hxu z, hKU hz⟩⟩)
-
   have hPD := fun x₀ : M => perDomain (I := I) gRef
     (trivializationAt E (TangentSpace I : M → Type _) x₀) (basisE x₀)
     ((hopen x₀).inter hU)
@@ -573,7 +561,6 @@ private theorem ric_tower_const
     (fun z hz hzw s A => hFwd x₀ z hz hzw.1 s A)
     N hN Bmax hBmax1 Cg KShi hKShi0
   choose Cpp' Cppp' hpp0 hppp0 hPDb using hPD
-
   set Cu : Real :=
     (3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1) with hCudef
   have hCu1 : (1 : Real) ≤ Cu := by
@@ -590,11 +577,9 @@ private theorem ric_tower_const
     mul_nonneg hCuP0 (hppp0 x₀)
   refine ⟨CppF, CpppF, hCppF0, hCpppF0, ?_⟩
   intro β ψ gSeq B hequiv hBmax hBprev hShi i t ht x hxK
-
   have hxcov := htF hxK
   rw [Set.mem_iUnion₂] at hxcov
   obtain ⟨x₀, hx₀F, hxw⟩ := hxcov
-
   have hequivIt := hequiv i t ht
   have hBt1 : (1 : Real) ≤ B t := hequivIt.1
   have hBtBm : B t ≤ Bmax := hBmax t ht
@@ -632,7 +617,6 @@ private theorem ric_tower_const
           _ ≤ B t * (gSeq i t).inner z v v :=
               mul_le_mul_of_nonneg_left h2.1 hBt0.le
       nlinarith [hg0, hBtBm, hstep]
-
   have hmcdW : ∀ z ∈ (u' x₀ ∩ U), ∀ j : ℕ, 1 ≤ j → j < N →
       metricCovDerivNorm (I := I) j (gSeq i t) gRef z ≤ Cg j :=
     fun z hz j h1 hj => hBprev j h1 hj i t ht z hz.2
@@ -644,14 +628,11 @@ private theorem ric_tower_const
             (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
               (I := I) (M := M) (gSeq i t))) s z)) ≤ KShi :=
     fun z hz s hs => hShi s hs i t ht z hz.2
-
   have hAN := hPDb x₀ (gSeq i t) hpack hmcdW hShiW x hxw
-
   have hxbase : x ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet :=
     ((Set.inter_subset_left).trans (hsubB x₀)) hxw
   have hwsub₀ : (u' x₀ ∩ U) ⊆ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet :=
     (Set.inter_subset_left).trans (hsubB x₀)
-
   have hLHS := sqrt_tower_le_compL2 (I := I) gRef
     (CovariantDerivative.ricciSection (I := I) (M := M)
       (leviCivitaConnectionOfMetric (I := I) (gSeq i t))
@@ -662,7 +643,6 @@ private theorem ric_tower_const
         I 1 (basisE x₀)).mono hwsub₀)
     ((hopen x₀).inter hU) hxw Cu hCu1
     (fun s A => hRev x₀ x hxbase hxw.1 s A) N
-
   have hRHS := compL2_tower_le (I := I) gRef gRef
     (Tensor0SBundle.metricTensorField (I := I) (gSeq i t))
     (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')
@@ -674,7 +654,6 @@ private theorem ric_tower_const
   have hmcd0 : 0 ≤ metricCovDerivNorm (I := I) N (gSeq i t) gRef x := by
     rw [hmc]
     exact Real.sqrt_nonneg _
-
   have hppF : Cu ^ (2 + N) * Cpp' x₀ * 2 ^ (2 + N) ≤ CppF := by
     rw [hCppFdef]
     exact Finset.single_le_sum
@@ -685,41 +664,51 @@ private theorem ric_tower_const
     exact Finset.single_le_sum
       (f := fun x₁ => Cu ^ (2 + N) * Cppp' x₁)
       (fun x₁ _ => mul_nonneg hCuP0 (hppp0 x₁)) hx₀F
-
   have hcompRic0 : 0 ≤ compL2 (iterCovComp (I := I)
-      (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')
+      (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a
+        y')
       (fun y' => christoffelSymbolInFrame
         (leviCivitaConnectionOfMetric (I := I) gRef)
-        (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y'')
+        (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a
+          y'')
         (((trivializationAt E (TangentSpace I : M → Type _) x₀).isLocalFrameOn_localFrame_baseSet
             I 1 (basisE x₀)).mono hwsub₀) y')
       (frameComp0S (I := I) (metricTensorField (I := I) (gSeq i t))
-        (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')) N x) :=
+        (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a
+          y')) N x) :=
     compL2_nonneg _
   calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
         (ricCovTower (I := I) (gSeq i t) gRef N x))
       ≤ Cu ^ (2 + N) * compL2 (iterCovComp (I := I)
-          (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')
+          (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀)
+            a y')
           (fun y' => christoffelSymbolInFrame
             (leviCivitaConnectionOfMetric (I := I) gRef)
-            (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y'')
-            (((trivializationAt E (TangentSpace I : M → Type _) x₀).isLocalFrameOn_localFrame_baseSet
+            (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+              (basisE x₀) a y'')
+            (((trivializationAt E (TangentSpace I : M → Type _)
+              x₀).isLocalFrameOn_localFrame_baseSet
                 I 1 (basisE x₀)).mono hwsub₀) y')
           (frameComp0S (I := I)
             (CovariantDerivative.ricciSection (I := I) (M := M)
               (leviCivitaConnectionOfMetric (I := I) (gSeq i t))
               (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
                 (I := I) (M := M) (gSeq i t)))
-            (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')) N x) := hLHS
+            (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+              (basisE x₀) a y')) N x) := hLHS
     _ ≤ Cu ^ (2 + N) * (Cpp' x₀ * compL2 (iterCovComp (I := I)
-          (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')
+          (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀)
+            a y')
           (fun y' => christoffelSymbolInFrame
             (leviCivitaConnectionOfMetric (I := I) gRef)
-            (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y'')
-            (((trivializationAt E (TangentSpace I : M → Type _) x₀).isLocalFrameOn_localFrame_baseSet
+            (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+              (basisE x₀) a y'')
+            (((trivializationAt E (TangentSpace I : M → Type _)
+              x₀).isLocalFrameOn_localFrame_baseSet
                 I 1 (basisE x₀)).mono hwsub₀) y')
           (frameComp0S (I := I) (metricTensorField (I := I) (gSeq i t))
-            (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')) N x) + Cppp' x₀) :=
+            (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+              (basisE x₀) a y')) N x) + Cppp' x₀) :=
         mul_le_mul_of_nonneg_left hAN hCuP0
     _ ≤ Cu ^ (2 + N) * (Cpp' x₀ * (2 ^ (2 + N) *
           metricCovDerivNorm (I := I) N (gSeq i t) gRef x) + Cppp' x₀) := by
@@ -727,14 +716,18 @@ private theorem ric_tower_const
         refine add_le_add ?_ le_rfl
         refine mul_le_mul_of_nonneg_left ?_ (hpp0 x₀)
         calc compL2 (iterCovComp (I := I)
-              (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')
+              (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+                (basisE x₀) a y')
               (fun y' => christoffelSymbolInFrame
                 (leviCivitaConnectionOfMetric (I := I) gRef)
-                (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y'')
-                (((trivializationAt E (TangentSpace I : M → Type _) x₀).isLocalFrameOn_localFrame_baseSet
+                (fun a y'' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+                  (basisE x₀) a y'')
+                (((trivializationAt E (TangentSpace I : M → Type _)
+                  x₀).isLocalFrameOn_localFrame_baseSet
                     I 1 (basisE x₀)).mono hwsub₀) y')
               (frameComp0S (I := I) (metricTensorField (I := I) (gSeq i t))
-                (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame (basisE x₀) a y')) N x)
+                (fun a y' => (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+                  (basisE x₀) a y')) N x)
             ≤ 2 ^ (2 + N) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
                 (iterCov (I := I) gRef 2
                   (Tensor0SBundle.metricTensorField (I := I) (gSeq i t)) N x)) := hRHS
@@ -794,7 +787,8 @@ noncomputable def nablaRicReal
     (ricCovTower (I := I) (gSeq i s) gRef p x).domDomCongr (acEquiv p)
 
 
-omit [Module.Finite ℝ E] [I.Boundaryless] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [Module.Finite ℝ E] [I.Boundaryless] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem nablaRicReal_normSq
@@ -895,7 +889,8 @@ theorem ric_bound_field
 
 
 omit [Module.Finite ℝ E] in
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem normsq_evol_of_comp
     [Module.Finite ℝ E]
@@ -920,7 +915,6 @@ theorem normsq_evol_of_comp
     have h' := metricInverseInBasis_of_orthonormal (I := I) gRef basis hON
     intro i' j'
     simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h' i' j'
-
   have hcomp : ∀ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
       HasDerivAt
         (fun r => Tensor0SBundle.component0S (I := I) basis
@@ -930,7 +924,6 @@ theorem normsq_evol_of_comp
     intro I0
     have happ := hev i x hx s hs (fun q => basis (I0 q))
     simpa [Tensor0SBundle.component0S_apply] using happ
-
   have hU_eq : (fun r : Real => metricCovDerivNorm (I := I) p (gSeq i r) gRef x ^ 2) =
       (fun r : Real => ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
         Tensor0SBundle.component0S (I := I) basis
@@ -940,7 +933,6 @@ theorem normsq_evol_of_comp
       (metricCovDeriv (I := I) (gSeq i r) gRef p x)
     rw [metricCovDerivNorm, Real.sq_sqrt hnn,
       Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (p + 2) basis hinv]
-
   have hders : HasDerivAt
       (fun r : Real => ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
         Tensor0SBundle.component0S (I := I) basis
@@ -1243,7 +1235,6 @@ theorem covOrderBound_tower
     obtain ⟨L, hLc, hKL, hLU⟩ := exists_compact_between hK'c hU' hK'U'
     have hLsubU : (interior L : Set M) ⊆ U := fun x hx =>
       hU'U (hLU (interior_subset hx))
-
     have hex : ∀ q : Nat, ∃ Cq : Real, 1 ≤ q → q < r →
         MetricCovDerivOrderBoundOnWindow (I := I) (interior L) β ψ gSeq gRef q Cq := by
       intro q

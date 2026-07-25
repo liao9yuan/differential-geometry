@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -49,7 +46,8 @@ def ConnectionVariationPairingEquationInFrameOn
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j l : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j l : Idx),
     HasDerivWithinAt
       (fun s : Real =>
         (S.family.metric (t : Real)).inner x (frame l x)
@@ -65,7 +63,8 @@ def ConnectionVariationPairingEquationInFrameOnLocal
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j l : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -95,7 +94,8 @@ theorem connectionPairDt_eq_metricVariationRHS
         (I := I) S frame u metricCovDerivDt)
     (hunique : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real))
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (hx : x ∈ u)
     (i j l : Idx) :
     pairDt (t : Real) x i j l =
       connectionVariationLoweredRHSFromMetricVariationInFrame
@@ -169,7 +169,8 @@ theorem connectionVariationPairing_of_metricVariation
         (I := I) S frame u metricCovDerivDt)
     (hunique : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x
+      ∈ u ->
       forall i j l : Idx,
         HasDerivWithinAt
           (fun s : Real =>

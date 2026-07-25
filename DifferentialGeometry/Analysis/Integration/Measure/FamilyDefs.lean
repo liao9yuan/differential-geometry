@@ -141,7 +141,6 @@ theorem hasDerivAt_chartDensityFamily_eq_half_trace_inv_mul
 end ChartDensityFamily
 
 variable (I) in
-
 def traceTimeDerivMetric
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) (x : M) : ℝ :=
   Matrix.trace ((chartGramMatrix (I := I) (g_fam t) x x)⁻¹ *

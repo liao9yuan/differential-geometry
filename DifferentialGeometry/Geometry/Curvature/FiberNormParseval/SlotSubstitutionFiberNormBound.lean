@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 lemma gFrame_adjoint_parseval_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x) (Kw : ℝ) (hKw : 0 ≤ Kw)
@@ -102,7 +101,6 @@ def embedRS (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) : TensorRSSpace 0 s I x
   ContinuousLinearMap.smulRight (Tensor0SBundle.tensor0SSpace_evalScalar (𝕜 := ℝ) (I := I) x) A0
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
@@ -117,7 +115,6 @@ lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
   rw [he, one_smul]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -140,7 +137,6 @@ lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
   rfl
 
 omit [CompleteSpace E] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fiberNormSqComponent_embedRS
@@ -172,7 +168,6 @@ lemma fiberNormSqComponent_embedRS
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : Fin s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a : Fin n → ℝ) (m : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel A0 (Function.update m k (∑ j, a j • e j)) =
@@ -188,7 +183,6 @@ lemma toModel_update_sum_slot (s : ℕ) (x : M) (A0 : Tensor0SSpace s I x) (k : 
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (d : Fin n → ℝ)
     (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) :
@@ -212,7 +206,6 @@ private lemma gFrame_gram_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma frame_double_sum_slotSub_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (A0 : Tensor0SSpace s I x) (k : Fin s)
@@ -300,7 +293,6 @@ private lemma frame_double_sum_slotSub_le
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_slotSub_apply (x : M) (s : ℕ)
     (A0 : Tensor0SSpace s I x) (W : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -308,7 +300,8 @@ private lemma toModel_slotSub_apply (x : M) (s : ℕ)
     Tensor0SSpace.toModel
       (- ∑ k : Fin s, tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) A0)
       (fun i => e (J i)) =
-    - ∑ k : Fin s, Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k)))) := by
+    - ∑ k : Fin s, Tensor0SSpace.toModel A0
+      (Function.update (fun i => e (J i)) k (W (e (J k)))) := by
   rw [Tensor0SSpace.toModel_neg]
   rw [show Tensor0SSpace.toModel (∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
         (tangentSlotCLM (I := I) s k W) A0)
@@ -372,12 +365,14 @@ theorem riemannianFiberNormSq_slotSub_le
       ∑ J : Fin s → Fin n,
         (Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k))))) ^ 2 ≤
       Kw * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 :=
-    fun k => frame_double_sum_slotSub_le (I := I) (M := M) g x s A0 k W Kw hKw hW e horth hpars hexpand
+    fun k => frame_double_sum_slotSub_le (I := I) (M := M) g x s A0 k W Kw hKw hW e horth hpars
+               hexpand
   calc (s : ℝ) * ∑ k : Fin s, ∑ J : Fin s → Fin n,
           (Tensor0SSpace.toModel A0 (Function.update (fun i => e (J i)) k (W (e (J k))))) ^ 2
       ≤ (s : ℝ) * ∑ _k : Fin s,
           Kw * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 := by
-        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun k _ => hslot k)) (Nat.cast_nonneg _)
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun k _ => hslot k))
+          (Nat.cast_nonneg _)
     _ = (s ^ 2 * Kw) * ∑ J : Fin s → Fin n, (Tensor0SSpace.toModel A0 (fun i => e (J i))) ^ 2 := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring

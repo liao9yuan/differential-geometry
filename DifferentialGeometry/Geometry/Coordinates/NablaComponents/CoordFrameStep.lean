@@ -28,7 +28,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 

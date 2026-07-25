@@ -33,8 +33,8 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
     (b : ℝ) (v : TangentSpace I p) :
     g.inner p (b • v) (b • v) = b ^ 2 * g.inner p v v := by
@@ -45,8 +45,8 @@ lemma gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma sqrt_gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
     {b : ℝ} (hb : 0 ≤ b) (v : TangentSpace I p) :
     Real.sqrt (g.inner p (b • v) (b • v)) = b * Real.sqrt (g.inner p v v) := by
@@ -55,8 +55,8 @@ lemma sqrt_gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) : 0 ≤ g.inner p v v := by
   rcases eq_or_ne v 0 with hv | hv
@@ -65,32 +65,32 @@ lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma continuous_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (fun v : TangentSpace I p => g.inner p v v) :=
   (g.inner p).continuous.clm_apply continuous_id
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma continuous_sqrt_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (fun v : TangentSpace I p => Real.sqrt (g.inner p v v)) :=
   Real.continuous_sqrt.comp (continuous_gInner_self (I := I) g p)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gUnitSphere_isClosed (g : SmoothRiemannianMetric I M) (p : M) :
     IsClosed {w : TangentSpace I p | g.inner p w w = 1} :=
   isClosed_eq (continuous_gInner_self (I := I) g p) continuous_const
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gUnitSphere_isBounded (g : SmoothRiemannianMetric I M) (p : M) :
     Bornology.IsBounded {w : TangentSpace I p | g.inner p w w = 1} := by
   obtain ⟨r, hr⟩ :=
@@ -112,8 +112,8 @@ lemma gUnitSphere_isBounded (g : SmoothRiemannianMetric I M) (p : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gUnitSphere_isCompact (g : SmoothRiemannianMetric I M) (p : M) :
     IsCompact {w : TangentSpace I p | g.inner p w w = 1} := by
   haveI : ProperSpace (TangentSpace I p) :=
@@ -123,8 +123,8 @@ lemma gUnitSphere_isCompact (g : SmoothRiemannianMetric I M) (p : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] [ConnectedSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)]
+    [ConnectedSpace M] in
 lemma continuous_riemannianEDist_to
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (q : M) :
@@ -137,7 +137,6 @@ lemma continuous_riemannianEDist_to
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem radialRay_continuous
@@ -157,8 +156,8 @@ theorem radialRay_continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem riemannianEDist_ne_top
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (p q : M) : riemannianEDist I p q ≠ (⊤ : ℝ≥0∞) := by
@@ -208,7 +207,6 @@ theorem riemannianEDist_ne_top
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 theorem radialDistToReal_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -233,7 +231,6 @@ theorem radialDistToReal_continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 theorem propagationSet_isClosed
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -270,8 +267,8 @@ theorem propagationSet_isClosed
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] [ConnectedSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)]
+    [ConnectedSpace M] in
 theorem riemannianEDist_eq_zero_imp_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -286,7 +283,6 @@ theorem riemannianEDist_eq_zero_imp_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_speedSq_eq
@@ -316,7 +312,6 @@ theorem intrinsicGeodesic_speedSq_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_velocity_enorm_le
@@ -343,7 +338,6 @@ theorem intrinsicGeodesic_velocity_enorm_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_riemannianEDist_le
@@ -393,7 +387,6 @@ theorem intrinsicGeodesic_riemannianEDist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_zero
@@ -421,7 +414,6 @@ theorem expMapIntrinsic_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem exists_expMapIntrinsic_eq_expMap_radius
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -447,7 +439,6 @@ theorem exists_expMapIntrinsic_eq_expMap_radius
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem radial_riemannianEDist_eq_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -471,7 +462,8 @@ theorem radial_riemannianEDist_eq_of_small
     rw [hvδ_def, sqrt_gInner_smul_self (I := I) g p hδ_nn u, hu, Real.sqrt_one, mul_one]
   have hvδ_lt_ρ₀ : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < ρ₀ := by
     rw [hnorm_vδ]; exact lt_of_lt_of_le hδ (min_le_left _ _)
-  have hvδ_lt_gp : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < metricCoerciveExpRadius (I := I) g p := by
+  have hvδ_lt_gp : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < metricCoerciveExpRadius (I := I) g
+    p := by
     rw [hnorm_vδ]; exact lt_of_lt_of_le hδ (min_le_right _ _)
   have hagree_vδ : expMapIntrinsic (I := I) g hEnorm p vδ = expMap (I := I) g p vδ :=
     hagree hvδ_lt_ρ₀
@@ -507,7 +499,6 @@ theorem radial_riemannianEDist_eq_of_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem radial_riemannianEDist_eq_of_small'
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -549,7 +540,6 @@ theorem radial_riemannianEDist_eq_of_small'
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expMapIntrinsic_local_surjective
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -598,8 +588,8 @@ theorem expMapIntrinsic_local_surjective
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem chartCurve_contDiffAt_top_of_isGeodesicOn
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -635,7 +625,7 @@ theorem chartCurve_contDiffAt_top_of_isGeodesicOn
     intro r hr
     have hu_d : HasDerivAt u (deriv u r) r := by
       have hev :=
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
+        hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
           (I := I) g α (γ := γ) (t := r) (hW'_contAt r hr) (hW'_src r hr)
           (hW'_geo r hr)
       simpa [hu_def] using hev.self_of_nhds
@@ -643,7 +633,7 @@ theorem chartCurve_contDiffAt_top_of_isGeodesicOn
         (- DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction
             (I := I) g α (deriv u r) (deriv u r) (u r)) r := by
       simpa [hu_def] using
-        DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
+        hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
           (I := I) g α (γ := γ) (t := r) (hW'_contAt r hr) (hW'_src r hr)
           (hW'_geo r hr)
     have hprod : HasDerivAt Z
@@ -659,7 +649,8 @@ theorem chartCurve_contDiffAt_top_of_isGeodesicOn
       rw [hu_def,
         DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
     rw [hur]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α
       ((extChartAt I α).map_source (by rw [extChartAt_source]; exact hW'_src r hr))
   obtain ⟨ε, hε_pos, hball⟩ := Metric.isOpen_iff.mp hW'_open t htW'
@@ -706,8 +697,8 @@ theorem chartCurve_contDiffAt_top_of_isGeodesicOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem isGeodesicOn_contMDiffAt_top
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -733,7 +724,8 @@ theorem isGeodesicOn_contMDiffAt_top
   have htarget_nhds : (extChartAt I α).target ∈ 𝓝 (u t) := by
     have hut_int : u t ∈ interior (extChartAt I α).target := by
       rw [hut_eq]
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hα_ext_src)
     exact mem_nhds_iff.mpr ⟨interior (extChartAt I α).target, interior_subset,
       isOpen_interior, hut_int⟩
@@ -759,8 +751,8 @@ theorem isGeodesicOn_contMDiffAt_top
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem isGeodesicOn_contMDiffOn_top
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
     (hs : IsOpen s)
@@ -772,7 +764,6 @@ theorem isGeodesicOn_contMDiffOn_top
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem isGeodesic_contMDiff
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
@@ -786,7 +777,6 @@ theorem isGeodesic_contMDiff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem exists_geodesicSphere_point_edist_eq_sub_delta
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -919,7 +909,8 @@ theorem exists_geodesicSphere_point_edist_eq_sub_delta
       metricBall_subset_normalBall (I := I) g x hEnorm hz_fin hz_lt_R
     rw [hdxz_real] at hvz_norm
     set wz : TangentSpace I x := (δ⁻¹ : ℝ) • (show TangentSpace I x from vz) with hwz_def
-    have hgvz : g.inner x (show TangentSpace I x from vz) (show TangentSpace I x from vz) = δ ^ 2 := by
+    have hgvz : g.inner x (show TangentSpace I x from vz) (show TangentSpace I x from vz) = δ ^
+      2 := by
       have := Real.sq_sqrt (gInner_self_nonneg (I := I) g x (show TangentSpace I x from vz))
       rw [hvz_norm] at this; linarith [this]
     have hwz_unit : g.inner x wz wz = 1 := by
@@ -975,7 +966,9 @@ theorem exists_geodesicSphere_point_edist_eq_sub_delta
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma chartSlice_mfderiv_value
     (c : M) (y₀ c₀ : E) (ηf : ℝ → ℝ)
     (hη_smooth : ContDiff ℝ ∞ ηf) (hη0 : ηf 0 = 0) (hη'0 : HasDerivAt ηf 1 0)
@@ -1017,7 +1010,9 @@ private lemma chartSlice_mfderiv_value
   rw [fderiv_apply_one_eq_deriv]
   exact hderiv.deriv
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma isSmoothVariation_of_chartGlue
     (c : M) (ξ : ℝ → M) (βf ηf : ℝ → ℝ) (w : E)
     (hξ : ContMDiff 𝓘(ℝ, ℝ) I ∞ ξ)
@@ -1070,7 +1065,6 @@ private lemma isSmoothVariation_of_chartGlue
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma broken_piece_firstVariation
@@ -1249,7 +1243,9 @@ private lemma broken_piece_firstVariation
     exact riemannianEDist_le_pathELength (I := I) (γ := fun t : ℝ => Fξ s t)
       (a := 0) (b := len) hC1 rfl rfl hlen.le
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma exists_broken_bump
     (c : M) {ξ : ℝ → M} {jt fe : ℝ} (hjtfe : jt ≠ fe) (hjtc : ξ jt = c)
     (hξsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ ξ) :
@@ -1308,7 +1304,6 @@ private lemma exists_broken_bump
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem broken_minimizer_velocity_match
@@ -1573,7 +1568,8 @@ theorem broken_minimizer_velocity_match
   change (mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ) : E) = (mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ) : E)
   rw [← hTminus_def, ← hTplus_def]; exact hTeq.symm
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 private lemma hasGeodesicEquationAt_comp_add_const
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} (T t : ℝ)
     (h : DifferentialGeometry.Geometry.Riemannian.Geodesic.HasGeodesicEquationAt
@@ -1617,7 +1613,6 @@ private lemma hasGeodesicEquationAt_comp_add_const
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_continuation
@@ -1682,7 +1677,6 @@ theorem intrinsicGeodesic_continuation
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1708,7 +1702,8 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
       exact ENNReal.toReal_pos hpq_pos hr_ne_top
     have hpq_eq : riemannianEDist I p q = ENNReal.ofReal r := by
       rw [hr_def, ENNReal.ofReal_toReal hr_ne_top]
-    obtain ⟨Rp, hRp_pos, hbase⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g hEnorm p q hr_pos hpq_eq
+    obtain ⟨Rp, hRp_pos, hbase⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g hEnorm
+      p q hr_pos hpq_eq
     set δ₀ : ℝ := min (Rp / 2) (r / 2) with hδ₀_def
     have hδ₀_pos : 0 < δ₀ := lt_min (by linarith) (by linarith)
     have hδ₀_Rp : δ₀ < Rp := lt_of_le_of_lt (min_le_left _ _) (by linarith)
@@ -1784,7 +1779,8 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
         rw [hsplit] at htri
         exact (ENNReal.add_le_add_iff_right ENNReal.ofReal_ne_top).mp htri
       have hpc_eq : riemannianEDist I p c = ENNReal.ofReal t₀ := le_antisymm hpc_le hpc_ge
-      obtain ⟨Rc, hRc_pos, hcjump⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g hEnorm c q hρc_pos hcq_eq
+      obtain ⟨Rc, hRc_pos, hcjump⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g
+        hEnorm c q hρc_pos hcq_eq
       set δ' : ℝ := min (Rc / 2) (ρc / 2) with hδ'_def
       have hδ'_pos : 0 < δ' := lt_min (by linarith) (by linarith)
       have hδ'_Rc : δ' < Rc := lt_of_le_of_lt (min_le_left _ _) (by linarith)
@@ -1885,13 +1881,6 @@ theorem intrinsicSphere_isCompact
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
 omit [ConnectedSpace M] in
 theorem exists_min_riemannianEDist_on_intrinsicSphere
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1943,13 +1932,6 @@ theorem exists_min_riemannianEDist_on_intrinsicSphere
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
 noncomputable def expDiffeoRadius
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1964,7 +1946,6 @@ noncomputable def expDiffeoRadius
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem expDiffeoRadius_pos
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1981,8 +1962,6 @@ theorem expDiffeoRadius_pos
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem expDiffeo_mem_of_lt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -2003,8 +1982,6 @@ theorem expDiffeo_mem_of_lt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [ConnectedSpace M] in
 theorem expDiffeo_eq_intr
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

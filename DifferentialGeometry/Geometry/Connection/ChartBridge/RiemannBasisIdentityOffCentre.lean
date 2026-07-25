@@ -408,9 +408,11 @@ lemma riemannOp_chartBasisVec_alpha_eq [I.Boundaryless]
       chartRiemannTensor (I := I) g α i j k l (extChartAt I α x) := by
     intro l
     rw [chartRiemannTensor_def]
-    have hΓsym1 : (chartChristoffel (I := I) g α k i l) = (chartChristoffel (I := I) g α i k l) := by
+    have hΓsym1 : (chartChristoffel (I := I) g α k i l) =
+      (chartChristoffel (I := I) g α i k l) := by
       funext y; exact chartChristoffel_symm (I := I) g α k i l y
-    have hΓsym2 : (chartChristoffel (I := I) g α j i l) = (chartChristoffel (I := I) g α i j l) := by
+    have hΓsym2 : (chartChristoffel (I := I) g α j i l) =
+      (chartChristoffel (I := I) g α i j l) := by
       funext y; exact chartChristoffel_symm (I := I) g α j i l y
     rw [hΓsym1, hΓsym2]
     have hquad :

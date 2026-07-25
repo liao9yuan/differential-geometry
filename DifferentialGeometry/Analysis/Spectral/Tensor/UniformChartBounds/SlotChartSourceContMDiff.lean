@@ -37,7 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance parallelGeneral_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] in
 private lemma chartE_section_repr_contMDiffOn_chartSource
     (α : M) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -461,7 +462,8 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_c
     hcoord_smooth.comp_contMDiffOn hΦv_smooth
   exact hfinal
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [CompactSpace M] in
 private lemma chartJ_chartJinv_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
     chartTrivializationLinearMap (I := I) (M := M) α b
@@ -470,7 +472,8 @@ private lemma chartJ_chartJinv_on_chartSource
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJ_chartJinv (I := I) (M := M) α hbase v
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [CompactSpace M] in
 private lemma chartJinv_chartJ_self_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b
@@ -493,7 +496,8 @@ private lemma eval0SCLE_symm_pi_single_at_basis_tuple
   have h' := congr_fun h φ
   simpa [eval0SCLE_apply] using h'
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
+    [CompactSpace M] in
 private lemma slotSubst_trivProj_entry_closedForm
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) (k : Fin r)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -972,7 +976,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance slotCorrection_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
+    [CompactSpace M] in
 private lemma triv_compInput_eq_trivT_compL_trivS
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace r r I b) :
@@ -1094,8 +1099,10 @@ private lemma triv_compInput_eq_trivT_compL_trivS
   have hinner_round_trip :
       ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
             (α'.compContinuousLinearMap
-              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
-              (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+                b))).compContinuousLinearMap
+              (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α
+                b)).compContinuousLinearMap
             (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)) =
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
           (α'.compContinuousLinearMap
@@ -1113,13 +1120,16 @@ private lemma triv_compInput_eq_trivT_compL_trivS
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
         ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace r I b from Sb)
               (α'.compContinuousLinearMap
-                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
-                (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+                  b))).compContinuousLinearMap
+                (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α
+                  b)).compContinuousLinearMap
               (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))
       (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hinner_round_trip]
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
+    [CompactSpace M] in
 private lemma triv_compOutput_eq_trivS_compL_trivT
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace s s I b) :
@@ -1239,8 +1249,10 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
   have hround :
       ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
             (α'.compContinuousLinearMap
-              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
-              (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+              (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+                b))).compContinuousLinearMap
+              (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α
+                b)).compContinuousLinearMap
             (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)) =
         ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
           (α'.compContinuousLinearMap
@@ -1258,8 +1270,10 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
       (show Tensor0SSpace s I b →L[ℝ] Tensor0SSpace s I b from Sb)
         ((((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from Tb)
               (α'.compContinuousLinearMap
-                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
-                (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+                (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α
+                  b))).compContinuousLinearMap
+                (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α
+                  b)).compContinuousLinearMap
               (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)))
       (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hround]

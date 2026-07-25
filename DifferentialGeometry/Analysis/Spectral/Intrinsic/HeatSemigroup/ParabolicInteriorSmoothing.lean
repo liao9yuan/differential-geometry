@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 
 noncomputable section
 
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators

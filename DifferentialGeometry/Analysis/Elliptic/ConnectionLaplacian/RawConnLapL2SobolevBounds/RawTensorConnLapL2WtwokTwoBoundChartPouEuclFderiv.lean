@@ -223,7 +223,8 @@ private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma tensorChartComponentRaw_symm_contDiffOn_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

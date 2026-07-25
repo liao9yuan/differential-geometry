@@ -124,7 +124,6 @@ private theorem covGradBundle_baseSet_eq (r s : ℕ) (α : M) :
   rw [tensorRSBundle_baseSet_eq (I := I) r s α, Set.inter_self]
 
 open TensorMultilinear in
-
 private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) α).baseSet)
@@ -148,7 +147,6 @@ private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
   exact hkey
 
 open TensorMultilinear in
-
 theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -171,13 +169,10 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
       (fun x : M => Tensor0SSpace s I x) α).baseSet := hb
   have hb_s1 : b ∈ (trivializationAt (Tensor0SModel (s + 1) ℝ E)
       (fun x : M => Tensor0SSpace (s + 1) I x) α).baseSet := hb
-
   apply ContinuousLinearMap.ext
   intro D
-
   apply ContinuousMultilinearMap.ext
   intro v
-
   have hLHS_fibre :
       (trivializationAt (TensorRSModel r (s + 1) ℝ E)
         (fun y : M => TensorRSSpace r (s + 1) I y) α
@@ -188,7 +183,6 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
             covGradBundleEquiv (I := I) (M := M) r s b Φ).comp
           ((trivializationAt (Tensor0SModel r ℝ E)
             (fun x : M => Tensor0SSpace r I x) α).symmL ℝ b)) := rfl
-
   have hG_fibre :
       (trivializationAt (E →L[ℝ] TensorRSModel r s ℝ E)
         (fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y) α
@@ -196,7 +190,6 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
       ((trivializationAt (TensorRSModel r s ℝ E)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b).comp
         (Φ.comp ((trivializationAt E (TangentSpace I) α).symmL ℝ b)) := rfl
-
   have hRS_fibre : ∀ Ψ : TensorRSSpace r s I b,
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α ⟨b, Ψ⟩).2 =
@@ -206,7 +199,6 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
           ((trivializationAt (Tensor0SModel r ℝ E)
             (fun x : M => Tensor0SSpace r I x) α).symmL ℝ b)) :=
     fun Ψ => rfl
-
   have hclmAt_r : ∀ Z : Tensor0SSpace r I b,
       (trivializationAt (Tensor0SModel r ℝ E)
         (fun x : M => Tensor0SSpace r I x) α).continuousLinearMapAt ℝ b Z =
@@ -240,11 +232,9 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
     rw [Trivialization.continuousLinearMapAt_apply,
       Trivialization.coe_linearMapAt_of_mem _ (show b ∈ _ from
         (tensorRSBundle_baseSet_eq (I := I) r s α).symm ▸ hb)]
-
   set Dr : Tensor0SSpace r I b :=
     (trivializationAt (Tensor0SModel r ℝ E)
       (fun x : M => Tensor0SSpace r I x) α).symmL ℝ b D with hDr
-
   have hLHS :
       (trivializationAt (TensorRSModel r (s + 1) ℝ E)
         (fun y : M => TensorRSSpace r (s + 1) I y) α
@@ -262,7 +252,6 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
             covGradBundleEquiv (I := I) (M := M) r s b Φ) Dr) v = _
     rw [hclmAt_s1, tensor0S_trivFibre_apply (I := I) (M := M) (s + 1) α hb_s1]
     rw [covGradBundleEquiv_apply_eval (I := I) (M := M) r s b Φ Dr]
-
   have hRHS :
       covGradModelEquiv (E := E) r s
         ((trivializationAt (E →L[ℝ] TensorRSModel r s ℝ E)

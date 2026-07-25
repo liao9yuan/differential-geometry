@@ -94,7 +94,8 @@ noncomputable def pureRFrozenEndoFib
   covGradBundleEquiv (I := I) (M := M) 0 m x
     (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem pureRFrozenSlot0Sec_contMDiff
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -135,7 +136,6 @@ private theorem pureRFrozenDirCLM_homSection_contMDiff
     (fun Y => ?_)
   have hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (fun b : M => (Y : Π b : M, TangentSpace I b) b)) :=
     Y.contMDiff
-
   have hsum : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 m ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 m ℝ E)
         (E := fun z : M => TensorRSSpace 0 m I z) x
@@ -253,10 +253,10 @@ private lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
   set bse : Module.Basis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ (TangentSpace I x) :=
     basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
   have hbse_eq : ∀ i, bse i = e i := by
-    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard)
+      i
   have hbse_orth : ∀ i j, g.inner x (bse i) (bse j) = if i = j then (1 : ℝ) else 0 := by
     intro i j; rw [hbse_eq i, hbse_eq j]; exact horth i j
-
   have hstep : riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
       ∑ ψ : Fin s → Fin (Module.finrank ℝ (TangentSpace I x)),
         Tensor0SSpace.toModel
@@ -313,11 +313,9 @@ private lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
       have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
       rw [this]
   rw [hstep]
-
   rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
   · refine Finset.sum_congr rfl (fun J _ => ?_)
     rw [fiberNormSqSummand_eq_component_sq]
-
     have hweight : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e ((fun k : Fin 0 => k.elim0) k))) : Tensor0SSpace 0 I x) =
         unitZeroSec (I := I) (M := M) x := by
@@ -412,12 +410,10 @@ private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
     riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x m e hreprS _ K₀]
   refine Finset.sum_congr rfl (fun J _ => ?_)
   congr 1
-
   unfold fiberNormSqComponent
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK
-
   have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
           slot0Curry (I := I) (M := M) g x m e K₀
             (pureRFrozenEndoFib (I := I) (M := M) g m B W x) a) ωK =
@@ -436,7 +432,6 @@ private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
       simp
     rw [hscalar, one_smul]
   rw [hslot]
-
   rw [show (tensor0S_curry (I := I) (M := M) m x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
           pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (e a)
@@ -449,7 +444,6 @@ private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
       pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (v0 := e a) (vs := fun k => e (J k))]
-
   rw [pureRFrozenEndoFib]
   rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 m x
     (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x) ωK
@@ -457,7 +451,8 @@ private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
   rw [Fin.cons_zero]
   congr 1
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma covGradBundleEquiv_symm_reading_rfns_le
     (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M)
     (T : TensorRSSpace 0 (m + 1) I x)
@@ -487,7 +482,6 @@ private lemma covGradBundleEquiv_symm_reading_rfns_le
     set ωK : Tensor0SSpace 0 I x :=
       (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e (K₀ k))) with hωK
-
     have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
             slot0Curry (I := I) (M := M) g x m e K₀ T a) ωK =
           tensor0S_curry (I := I) (M := M) m x
@@ -502,7 +496,6 @@ private lemma covGradBundleEquiv_symm_reading_rfns_le
           coframeS_apply (I := I) (M := M) g x 0 e K₀]
         simp
       rw [hscalar, one_smul]
-
     rw [show ((((covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) ωK)
           (fun k => e (J k)) : ℝ) =
         Tensor0SSpace.toModel
@@ -510,7 +503,6 @@ private lemma covGradBundleEquiv_symm_reading_rfns_le
             (covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) ωK)
           (fun k => e (J k)) from rfl]
     rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 m x T (e a) ωK (fun k => e (J k))]
-
     rw [hslot]
     rw [show ((tensor0S_curry (I := I) (M := M) m x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from T) ωK) (e a))
@@ -569,7 +561,6 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
           kappa0 r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
   classical
   set N : ℝ := (Module.finrank ℝ E : ℝ) with hN_def
-
   choose Csup hCsup_nonneg hCsup using fun m =>
     exists_uniform_riemannOp_tensorCov_proportional (I := I) (M := M) g m
   refine ⟨fun r => match r with | 0 => 0 | (m + 1) => N ^ 3 * Csup m,
@@ -577,14 +568,12 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
   · cases r with
     | zero => exact le_refl 0
     | succ m => exact mul_nonneg (by positivity) (hCsup_nonneg m)
-
   rw [show (pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
         (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) 0 r W) =
       pureRFrozenEndo0 (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
         (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) r W from rfl]
   cases r with
   | zero =>
-
       rw [show ((pureRFrozenEndo0 (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
             (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) 0 W).toSection x₀ :
             TensorRSSpace 0 (0 + 0) I x₀) = (0 : TensorRSSpace 0 (0 + 0) I x₀) from rfl]
@@ -593,17 +582,14 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
           | 0 => (0 : ℝ) | (m + 1) => N ^ 3 * Csup m) 0 = 0 := rfl
       rw [hrhs0, zero_mul]
   | succ m =>
-
       set B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b := smoothOrthoFrame (I := I) g x₀
         with hB_def
       have hBorth : ∀ i j : Fin (Module.finrank ℝ E),
           g.inner x₀ (B i x₀) (B j x₀) = if i = j then (1 : ℝ) else 0 := by
         intro i j; rw [hB_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x₀ i j
-
       obtain ⟨n, e, _bse, hn, _hbse_eq, horth, _hpars, _hexp, _hreprm1⟩ :=
         tangent_orthonormalBasisS_witness (I := I) (M := M) g (m + 1) x₀
       set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
-
       have hreprS : ∀ S : TensorRSSpace 0 m I x₀,
           riemannianFiberNormSq (I := I) (M := M) g 0 m x₀ S =
             ∑ K : Fin 0 → Fin n, ∑ J : Fin m → Fin n,
@@ -616,14 +602,11 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
               fiberNormSqSummand (I := I) (M := M) g x₀ 0 (m + 1) S n e K J :=
         fun S => rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g (m + 1) x₀ S e
           (by rw [hn]) horth
-
       rw [show (pureRFrozenEndo0 (I := I) (M := M) g B
             (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) (m + 1) W).toSection x₀ =
           pureRFrozenEndoFib (I := I) (M := M) g m B W x₀ from rfl]
-
       rw [riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame (I := I) (M := M) g m x₀ e K₀
         hreprS hreprSucc (pureRFrozenEndoFib (I := I) (M := M) g m B W x₀)]
-
       have hslice : ∀ a : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
               (slot0Curry (I := I) (M := M) g x₀ m e K₀
@@ -632,7 +615,6 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
               (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x₀ (e a)) :=
         fun a => pureRFrozenEndoFib_slot0Curry_rfns_eq (I := I) (M := M) g m B W x₀ e K₀ hreprS a
       rw [Finset.sum_congr rfl (fun a (_ : a ∈ Finset.univ) => hslice a)]
-
       set Csm : ℝ := Csup m with hCsm_def
       have hper : ∀ a : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
@@ -641,15 +623,12 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
               riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ (W.toSection x₀))) := by
         intro a
         rw [pureRFrozenDirCLM_apply (I := I) (M := M) g m B (fun y : M => W.toSection y) x₀ (e a)]
-
         refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 m x₀
           (Finset.univ : Finset (Fin (Module.finrank ℝ E))) _) ?_
         rw [Finset.card_univ, Fintype.card_fin]
-
         have hcard_le : (Module.finrank ℝ E : ℝ) = (n : ℝ) := by rw [hn]; rfl
         rw [hcard_le]
         refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg n)
-
         have hsummand : ∀ i : Fin (Module.finrank ℝ E),
             riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
                 (riemannOp (tensorCov (I := I) g 0 m) x₀ (B i x₀) (e a)
@@ -665,12 +644,10 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
           rw [hgB, hge, mul_one, mul_one, ← hCsm_def] at hbound
           refine le_trans hbound ?_
           refine mul_le_mul_of_nonneg_left ?_ (by rw [hCsm_def]; exact hCsup_nonneg m)
-
           exact covGradBundleEquiv_symm_reading_rfns_le_centreFrame (I := I) (M := M) g m x₀
             (W.toSection x₀) B hBorth i
         refine le_trans (Finset.sum_le_sum (fun i _ => hsummand i)) ?_
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hcard_le]
-
       refine le_trans (Finset.sum_le_sum (fun a _ => hper a)) ?_
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       have hn_eq : (n : ℝ) = N := by rw [hn, hN_def]; rfl

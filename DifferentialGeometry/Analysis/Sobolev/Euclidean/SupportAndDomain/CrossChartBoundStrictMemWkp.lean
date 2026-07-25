@@ -669,7 +669,8 @@ lemma wkpNorm_eq_of_tsupport_subset_general
               k f hf_mem hf_zero
           simpa [hf_def] using h_inner
         exact (MemWkp_congr_ae (d := d) hp_one hΩ' h_partial_ae.symm).mpr h_partial_mem_Ω'
-  have h_norm_eq : iteratedWeakSobolevNorm (d := d) k p u Ω = iteratedWeakSobolevNorm (d := d) k p u Ω' := by
+  have h_norm_eq : iteratedWeakSobolevNorm (d := d) k p u Ω = iteratedWeakSobolevNorm (d := d) k p u
+    Ω' := by
     unfold iteratedWeakSobolevNorm
     refine Finset.sum_congr rfl ?_
     intro j hj
@@ -880,7 +881,8 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_general
             have hZero_isWeak : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
                 (fun _ => (0 : ℝ)) v U := by
               intro φ hφ hφ_supp hφ_sub
-              have h_integrand_zero : (fun x => v x * (fderiv ℝ φ x) (EuclideanSpace.single (α' 0) 1))
+              have h_integrand_zero : (fun x => v x * (fderiv ℝ φ x)
+                (EuclideanSpace.single (α' 0) 1))
                   =ᵐ[volume.restrict U] (fun _ => (0 : ℝ)) := by
                 filter_upwards [hv_zero] with x hx
                 simp [hx]
@@ -905,7 +907,8 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small_general
             exact ih (fun i : Fin j' => α' i.succ)
               (chosenWeakPartial' (d := d) p (α' 0) v Ω) h_chosen_zero_U
           · rw [chosenWeakPartial'_of_not_mem hv_memW1p_Ω]
-            have h0 : (0 : EuclideanSpace ℝ (Fin d) → ℝ) =ᵐ[volume.restrict Ω] (fun _ => 0) := by rfl
+            have h0 : (0 : EuclideanSpace ℝ (Fin d) → ℝ) =ᵐ[volume.restrict Ω] (fun _ => 0) :=
+              by rfl
             have htemp := iterWeakPartial_ae_zero_of_input_ae_zero (d := d) hp_one hΩ
               j' (fun i : Fin j' => α' i.succ) h0
             have hUmeas : MeasurableSet U := hU_open.measurableSet

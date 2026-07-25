@@ -80,7 +80,8 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
 theorem contractCcTensor_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₁ T₂ : SmoothCcTensor g (1 + r) (s + 1)) :
     contractCcTensor (I := I) (M := M) g r s (T₁ + T₂) =
-      contractCcTensor (I := I) (M := M) g r s T₁ + contractCcTensor (I := I) (M := M) g r s T₂ := by
+      contractCcTensor (I := I) (M := M) g r s T₁ + contractCcTensor (I := I) (M := M) g r s
+        T₂ := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -114,8 +115,8 @@ theorem contractCcTensor_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
 private lemma riemannianFiberNormSq_eq_bundle_norm_sq_gen
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
@@ -137,8 +138,8 @@ private lemma riemannianFiberNormSq_eq_bundle_norm_sq_gen
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_tensorRS_clm_apply_le
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ) (x : M)
@@ -163,7 +164,8 @@ theorem riemannianFiberNormSq_tensorRS_clm_apply_le
       pow_le_pow_left₀ (norm_nonneg _) (φg.le_opNorm v) 2
     _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by rw [mul_pow]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_contract_trace_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :

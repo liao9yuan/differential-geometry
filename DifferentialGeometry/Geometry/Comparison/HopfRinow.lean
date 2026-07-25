@@ -55,7 +55,9 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Iio_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b : ℝ}
@@ -69,7 +71,9 @@ theorem isGeodesicOn_Iio_extend
     isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
   exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t : ℝ}
     (heq : γ =ᶠ[nhds t] γ') (h : HasGeodesicEquationAt (I := I) g γ' t) :
@@ -78,7 +82,9 @@ private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at (I := I) (g := g)
     (heq.eq_of_nhds) heq h
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Ici_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
@@ -187,7 +193,9 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     obtain ⟨a, ha, hab⟩ := hbS
     exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartCurve_contDiffAt_one_of_isGeodesicOn
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -201,7 +209,8 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
     hcont.continuousAt (hs.mem_nhds ht)
   have hsrc_nhds : (fun s' => γ s') ⁻¹' (chartAt H α).source ∈ 𝓝 t := by
     have : α ∈ (chartAt H α).source := hα_src
-    exact hcontAt_t.preimage_mem_nhds ((chartAt H α).open_source.mem_nhds (by rw [hα_def] at this ⊢; exact this))
+    exact hcontAt_t.preimage_mem_nhds
+      ((chartAt H α).open_source.mem_nhds (by rw [hα_def] at this ⊢; exact this))
   obtain ⟨V, hV_nhds, hV_src⟩ := Filter.eventually_iff_exists_mem.mp
     (Filter.eventually_of_mem hsrc_nhds (fun _ h => h))
   set W : Set ℝ := V ∩ s with hW_def
@@ -242,8 +251,9 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_contMDiffAt_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -290,8 +300,9 @@ theorem isGeodesicOn_contMDiffAt_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_contMDiffOn_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
     (hs : IsOpen s)
@@ -301,7 +312,6 @@ theorem isGeodesicOn_contMDiffOn_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem isGeodesicOn_Ici_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -328,7 +338,9 @@ theorem isGeodesicOn_Ici_of_complete
     hc_nonneg (hγ_smooth.mono hsub) (fun τ hτ => hSpeedBound τ (hsub hτ))
     (fun s hs => hSpeedSq s (hsub hs)) (hγ.mono hsub)
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_Ioo_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a₀ b : ℝ} (ha₀b : a₀ < b)
@@ -400,7 +412,9 @@ theorem isGeodesicOn_Ioo_extend
   intro t ht
   simp only [hG_def, if_pos ht]
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem isGeodesicOn_Ioi_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
     (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
@@ -541,7 +555,6 @@ theorem isGeodesicOn_Ioi_of_endpointContinuation
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem isGeodesicOn_Ici_of_complete_Ioo
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -552,10 +565,10 @@ theorem isGeodesicOn_Ici_of_complete_Ioo
     (hreg : ∀ (γ : ℝ → M) (b : ℝ), 0 < b → IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b) →
       ContinuousOn γ (Set.Ioo a₀ b) →
       (∀ t, a₀ < t → t < b₀ → t < b → γ t = γ₀ t) →
-      ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ,ℝ) I 1 γ (Set.Ioo a₀ b) ∧
-        (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ,ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
-        (∀ s ∈ Set.Ioo a₀ b, (g.inner (γ s)) (mfderiv 𝓘(ℝ,ℝ) I γ s 1)
-          (mfderiv 𝓘(ℝ,ℝ) I γ s 1) ≤ c^2)) :
+      ∃ c : ℝ, 0 ≤ c ∧ ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a₀ b) ∧
+        (∀ τ ∈ Set.Ioo a₀ b, ‖mfderiv 𝓘(ℝ, ℝ) I γ τ 1‖ₑ ≤ ENNReal.ofReal c) ∧
+        (∀ s ∈ Set.Ioo a₀ b, (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
+          (mfderiv 𝓘(ℝ, ℝ) I γ s 1) ≤ c ^ 2)) :
     ∃ γ : ℝ → M, IsGeodesicOn (I := I) g γ (Set.Ioi a₀) ∧
       (∀ t, t < b₀ → γ t = γ₀ t) := by
   have hcont : ∀ (γ : ℝ → M) (b : ℝ), 0 < b →
@@ -584,7 +597,10 @@ section MinimiserExistence
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem path_length_minimising_sequence
     (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
     ∃ γ : ℕ → ℝ → M,
@@ -666,7 +682,9 @@ theorem minimizing_path_is_smooth_geodesic
         IsGeodesicOn (I := I) g η (Set.Icc 0 L) := by
   sorry
 
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem isGeodesicOn_affineReparam
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b c d : ℝ}

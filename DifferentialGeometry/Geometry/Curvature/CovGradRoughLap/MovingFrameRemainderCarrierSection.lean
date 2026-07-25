@@ -26,7 +26,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem orthonormalFrame_parseval_expand
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -129,7 +130,6 @@ theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
   obtain ⟨n, e, hn, horth, hGcurv⟩ :=
     GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR (I := I) (M := M) g s S x
   refine ⟨n, e, hn, horth, fun w m => ?_⟩
-
   have hsub : Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (genuineCurvPureRSubtracted (I := I) (M := M) g s S).toSection x)
@@ -160,7 +160,6 @@ theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
       ContinuousLinearMap.sub_apply _ _ _]
     rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hsub]
-
   rw [pointwiseTensorCurv_toSection_eq_genuine_add_bracket_ofOrthonormal
     (I := I) (M := M) g s S x e hn horth w m]
   rw [genuineThirdCurvFieldFib_eq_pureR_add_covDeriv (I := I) (M := M) g s S x e w m]
@@ -170,7 +169,8 @@ theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
 noncomputable def movingFrameRemainderSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
-  pointwiseTensorCurv (I := I) (M := M) g s S - genuineCurvatureOnlySection (I := I) (M := M) g s S -
+  pointwiseTensorCurv (I := I) (M := M) g s S - genuineCurvatureOnlySection (I := I) (M := M) g s S
+    -
     genuineDiffCurvSection (I := I) (M := M) g s S - ricTraceSection (I := I) (M := M) g s S
 
 @[simp] lemma movingFrameRemainderSection_toSection

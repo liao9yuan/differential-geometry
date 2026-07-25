@@ -41,7 +41,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toEuclidean_extChartAt_mem_chartTargetEuclid
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (toEuclidean (E := E)) (extChartAt I α x) ∈
@@ -50,7 +51,8 @@ lemma toEuclidean_extChartAt_mem_chartTargetEuclid
   exact (extChartAt I α).map_source
     (by rw [extChartAt_source (I := I)]; exact hx)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma symm_toEuclidean_symm_toEuclidean_extChartAt
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (extChartAt I α).symm

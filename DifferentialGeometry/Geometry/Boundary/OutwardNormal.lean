@@ -262,7 +262,8 @@ theorem outwardDir_mem_normalSubspace :
       g.inner (x : M) (inwardCoord (M := M) x) (boundaryInclusionMfderiv (M := M) x w) := by
     rw [map_sub, ContinuousLinearMap.sub_apply]
   rw [hsub]
-  have h1 : g.inner (x : M) (inwardTangentialPart (M := M) g x) (boundaryInclusionMfderiv (M := M) x w) =
+  have h1 : g.inner (x : M) (inwardTangentialPart (M := M) g x)
+    (boundaryInclusionMfderiv (M := M) x w) =
       inducedMetricInner (M := M) g x (boundaryComponentOfInward (M := M) g x) w := by
     rw [inducedMetricInner_apply, inwardTangentialPart_def]
   rw [h1]
@@ -518,11 +519,13 @@ theorem outwardDirAt_mem_normalSubspace
   have hsub : g.inner (x : M)
         (inwardTangentialPartAt (M := M) g α₀ x - inwardCoordAt (M := M) α₀ x)
         (boundaryInclusionMfderiv (M := M) x w) =
-      g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (boundaryInclusionMfderiv (M := M) x w) -
+      g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x)
+        (boundaryInclusionMfderiv (M := M) x w) -
       g.inner (x : M) (inwardCoordAt (M := M) α₀ x) (boundaryInclusionMfderiv (M := M) x w) := by
     rw [map_sub, ContinuousLinearMap.sub_apply]
   rw [hsub]
-  have h1 : g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x) (boundaryInclusionMfderiv (M := M) x w) =
+  have h1 : g.inner (x : M) (inwardTangentialPartAt (M := M) g α₀ x)
+    (boundaryInclusionMfderiv (M := M) x w) =
       inducedMetricInner (M := M) g x (boundaryComponentOfInwardAt (M := M) g α₀ x) w := by
     rw [inducedMetricInner_apply, inwardTangentialPartAt_def]
   rw [h1]
@@ -1134,7 +1137,8 @@ private lemma boundaryFlatCharted_clmAt_bdy_BC_eq
           ((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).continuousLinearMapAt
             ℝ b (boundaryComponentOfInwardAt (M := M) g α₀ b))) =
         boundaryComponentOfInwardAt (M := M) g α₀ b := by
-    have := (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).symmL_continuousLinearMapAt
+    have := (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI)
+      α₀).symmL_continuousLinearMapAt
       (R := ℝ) hb_bdy_baseSet (boundaryComponentOfInwardAt (M := M) g α₀ b)
     simpa using this
   rw [h_round_BC]
@@ -1181,7 +1185,8 @@ private lemma inwardTangentialPartAtCharted_eq
           ((trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).continuousLinearMapAt
             ℝ b (boundaryComponentOfInwardAt (M := M) g α₀ b))) =
         boundaryComponentOfInwardAt (M := M) g α₀ b := by
-    have := (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).symmL_continuousLinearMapAt
+    have := (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI)
+      α₀).symmL_continuousLinearMapAt
       (R := ℝ) hb_bdy_baseSet (boundaryComponentOfInwardAt (M := M) g α₀ b)
     simpa using this
   rw [h_round_bdy]
@@ -1406,7 +1411,8 @@ private lemma metricPullback_surjective
   refine ⟨boundaryInclusionMfderiv (M := M) y u, ?_⟩
   refine LinearMap.ext fun w => ?_
   rw [metricPullback_apply]
-  rw [show g.inner (y : M) (boundaryInclusionMfderiv (M := M) y u) (boundaryInclusionMfderiv (M := M) y w) =
+  rw [show g.inner (y : M) (boundaryInclusionMfderiv (M := M) y u)
+    (boundaryInclusionMfderiv (M := M) y w) =
         inducedMetricInner (M := M) g y u w from
         (inducedMetricInner_apply g y u w).symm]
   rw [show inducedMetricInner (M := M) g y u w = boundaryFlatMap (M := M) g y u w from rfl]
@@ -1651,7 +1657,8 @@ private lemma inwardCoordAt_mem_range_iff_of_orientation
         inwardCoordAt (M := M) α₁ y := by
       rw [← mul_smul, inv_mul_cancel₀ hc_ne, one_smul]
     have h_target_inv : inwardCoordAt (M := M) α₁ y =
-        (c : ℝ)⁻¹ • ((boundaryInclusionMfderiv (M := M) y) u - (boundaryInclusionMfderiv (M := M) y) w') := by
+        (c : ℝ)⁻¹ • ((boundaryInclusionMfderiv (M := M) y) u - (boundaryInclusionMfderiv (M := M) y)
+          w') := by
       rw [← h_inv_smul, h_target]
       rfl
     rw [h_target_inv, ContinuousLinearMap.map_smul, map_sub]
@@ -1710,7 +1717,8 @@ theorem outwardNormalAt_chart_invariance_of_orientation
     outwardNormalAt (M := M) g α₀ y = outwardNormalAt (M := M) g α₁ y := by
   classical
   by_cases h_trans₁ : inwardCoordAt (M := M) α₁ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y)
-  · have h_trans₀ : inwardCoordAt (M := M) α₀ y ∈ Set.range (boundaryInclusionMfderiv (M := M) y) := by
+  · have h_trans₀ : inwardCoordAt (M := M) α₀ y ∈ Set.range
+      (boundaryInclusionMfderiv (M := M) y) := by
       have h_iff := inwardCoordAt_mem_range_iff_of_orientation (M := M) α₀ α₁ y c hc h_w
       exact h_iff.mpr h_trans₁
     have h0_α₀ : outwardDirAt (M := M) g α₀ y = 0 :=
@@ -1732,9 +1740,11 @@ theorem outwardNormalAt_chart_invariance_of_orientation
       rw [dif_neg]
       rw [h_q_α₁]; exact lt_irrefl 0
     rw [h_normal_α₀, h_normal_α₁]
-  · have h_trans₁_ne : inwardCoordAt (M := M) α₁ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) :=
+  · have h_trans₁_ne : inwardCoordAt (M := M) α₁ y ∉ Set.range
+      (boundaryInclusionMfderiv (M := M) y) :=
       h_trans₁
-    have h_trans₀_ne : inwardCoordAt (M := M) α₀ y ∉ Set.range (boundaryInclusionMfderiv (M := M) y) := by
+    have h_trans₀_ne : inwardCoordAt (M := M) α₀ y ∉ Set.range
+      (boundaryInclusionMfderiv (M := M) y) := by
       have h_iff := inwardCoordAt_not_mem_range_iff_of_orientation (M := M) α₀ α₁ y c hc h_w
       exact h_iff.mpr h_trans₁_ne
     have hN₀_mem : outwardNormalAt (M := M) g α₀ y ∈ normalSubspace (M := M) g y :=

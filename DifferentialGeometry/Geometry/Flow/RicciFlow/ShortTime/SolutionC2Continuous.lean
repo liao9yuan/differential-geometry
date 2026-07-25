@@ -44,7 +44,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 theorem deturck_solution_c2_continuous_icc0
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
     (ha : 2 * a > Module.finrank ℝ E + 4)

@@ -829,7 +829,8 @@ lemma deGiorgi_cutoff_gradient_bound_of_weighted
         (volume.restrict (Metric.ball x₀ s)) := by
     refine Integrable.mono' (hpos_sq_int.const_mul (Cη ^ 2)) ?_ ?_
     · exact
-        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow 2).aemeasurable).mul
+        ((((hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.pow
+          2).aemeasurable).mul
           hpos_sq_int.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
     · filter_upwards with x
       have hfd_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 := by
@@ -948,7 +949,8 @@ lemma deGiorgi_cutoff_gradient_bound_of_weighted
     calc
       2 * ∫ x in Metric.ball x₀ s, η x ^ 2 * ‖hw_trunc.weakGrad x‖ ^ 2 ∂volume
           ≤ 2 * (4 * Cw *
-              ∫ x in Metric.ball x₀ s, ‖fderiv ℝ η x‖ ^ 2 * |positivePartSub u k x| ^ 2 ∂volume) := by
+              ∫ x in Metric.ball x₀ s, ‖fderiv ℝ η x‖ ^ 2 * |positivePartSub u k x| ^ 2
+                ∂volume) := by
                 gcongr
       _ = 8 * Cw *
             ∫ x in Metric.ball x₀ s, ‖fderiv ℝ η x‖ ^ 2 * |positivePartSub u k x| ^ 2 ∂volume := by

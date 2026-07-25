@@ -31,7 +31,6 @@ private def Φ_euclLocal (ΦE : E × ℝ → E) (Φ_fam : ℝ → M ≃ₘ⟮I, 
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
 theorem precompMap_chartPoint
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α x : M)
@@ -42,8 +41,8 @@ theorem precompMap_chartPoint
   rw [(extChartAt I α).left_inv hx_src]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
-
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [BoundarylessManifold I M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [BoundarylessManifold I M]
+    [I.Boundaryless] in
 theorem hagree_of_cocycle_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (ΦE : E × ℝ → E)
     (hrealΨ : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
@@ -63,7 +62,6 @@ theorem hagree_of_cocycle_realisation
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [CompleteSpace E] in
 theorem hasDerivAt_clm_comp_right_local
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
@@ -76,7 +74,6 @@ theorem hasDerivAt_clm_comp_right_local
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
 theorem spatial_fderiv_precomp_factor
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α : M) (t s : ℝ) (ΦE : E × ℝ → E) (z₀ : E)
@@ -90,8 +87,8 @@ theorem spatial_fderiv_precomp_factor
   rw [hcomp, fderiv_comp z₀ hΦE_diff hprecomp_diff]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [IsManifold I ∞ M]
+    [I.Boundaryless] in
 theorem chartPrecomp_spatialFderiv_hasDerivAt
     {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
     (hΦE : IsLocalFlow f t x₀ r tmin tmax ΦE)
@@ -134,7 +131,6 @@ theorem chartPrecomp_spatialFderiv_hasDerivAt
   exact hpost.congr_of_eventuallyEq hev
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] in
 theorem precompMap_differentiableAt
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α x : M)
@@ -166,7 +162,8 @@ theorem precompMap_differentiableAt
     hmdW.mdifferentiableAt (by rw [hrange]; exact univ_mem)
   rwa [mdifferentiableAt_iff_differentiableAt] at hmd
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem rawVariationalIdentityFlat_of_localGeometricFlow
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x)
     {f : ℝ → E → E} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
@@ -226,7 +223,8 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
       (fun s : ℝ => fderiv ℝ (fun z => Φ_eucl z s) z₀)
       (((fderiv ℝ (f t) (ΦE (w₀, t))).comp (fderiv ℝ (fun w => ΦE (w, t)) w₀)).comp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀)) t :=
-    chartPrecomp_spatialFderiv_hasDerivAt (I := I) hΦE hf hUopen hΦsmooth Φ_fam α x hprecomp_diff hzsU hz ht
+    chartPrecomp_spatialFderiv_hasDerivAt (I := I) hΦE hf hUopen hΦsmooth Φ_fam α x hprecomp_diff
+      hzsU hz ht
       hΦsmooth_time
   have heucl_diff : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => Φ_eucl z s) z₀ := by

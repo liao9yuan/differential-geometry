@@ -220,7 +220,8 @@ theorem fderiv_chartPushed_pou_self_eq_fderiv_chartSmoothExt_sq
     (Filter.eventually_of_mem
       ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy) ?_)
   intro z hz
-  exact (DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chartSmoothExt_eq_chartPushed_pou_on_target
+  exact
+    (Analysis.Sobolev.EquivalenceReverse.chartSmoothExt_eq_chartPushed_pou_on_target
     (I := I) (M := M) α
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) hz).symm
 

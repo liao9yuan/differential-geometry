@@ -52,19 +52,22 @@ def formComp (x : M)
     (c d : Fin (Module.finrank ℝ E)) : ℝ :=
   t ((chartModelBasis E) c) ((chartModelBasis E) d)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] lemma formComp_def (x : M)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x t c d =
       t ((chartModelBasis E) c) ((chartModelBasis E) d) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] lemma formComp_zero (x : M) (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x
       (0 : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) c d = 0 := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma formComp_add (x : M)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
@@ -72,14 +75,16 @@ lemma formComp_add (x : M)
       formComp (I := I) x t c d + formComp (I := I) x t' c d := by
   simp [formComp]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma formComp_smul (x : M) (a : ℝ)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (c d : Fin (Module.finrank ℝ E)) :
     formComp (I := I) x (a • t) c d = a * formComp (I := I) x t c d := by
   simp [formComp]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma formComp_symm (x : M)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (c d : Fin (Module.finrank ℝ E)) :

@@ -39,7 +39,8 @@ theorem curvOpField_apply_eq_pureRGenuineDiffOp
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
       pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-  (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g) s S).symm
+  (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g)
+    s S).symm
 
 noncomputable def genuineDiffCurvSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
@@ -69,9 +70,11 @@ theorem genuineDiffCurvSection_eq_covGrad_sub_slotExtend
             (curvOpField (I := I) (M := M) g s))
           (covGrad (I := I) (M := M) g 0 (s + 0) S) := by
   classical
-  have hbase : operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+  have hbase : operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0)
+    (curvOpField (I := I) (M := M) g s) S =
       pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-    (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g) s S).symm
+    (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M)
+      g) s S).symm
   have hB := covGrad_operatorFieldApply_eq (I := I) (M := M) g (s + 0) (s + 0)
     (curvOpField (I := I) (M := M) g s) S
   have hgds : operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0 + 1)
@@ -130,9 +133,11 @@ theorem covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator
               tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
           vs := by
   classical
-  have hbase : operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+  have hbase : operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0)
+    (curvOpField (I := I) (M := M) g s) S =
       pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-    (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g) s S).symm
+    (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M)
+      g) s S).symm
   have hB := covGrad_operatorFieldApply_eq (I := I) (M := M) g (s + 0) (s + 0)
     (curvOpField (I := I) (M := M) g s) S
   rw [hbase] at hB
@@ -214,7 +219,8 @@ theorem appCc_slotExtend_covGrad_curvOpField_covGrad_unit_eval
         (Fin.cons v0 vs) =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
-          (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)).toSection x)
+          (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+            (curvOpField (I := I) (M := M) g s)).toSection x)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
             tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
         vs := by

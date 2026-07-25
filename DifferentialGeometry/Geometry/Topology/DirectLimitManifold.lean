@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Bundle.ClmSectionSmooth
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -369,14 +368,12 @@ theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
   set m := max k ℓ with hm
   have hkm : k ≤ m := le_max_left k ℓ
   have hℓm : ℓ ≤ m := le_max_right k ℓ
-
   have hFeq : ∀ w ∈ (S.toSeqSystem.transitionHomeo k ℓ).source,
       S.toSeqSystem.F hℓm (S.toSeqSystem.transitionHomeo k ℓ w) = S.toSeqSystem.F hkm w := by
     intro w hw
     apply S.toSeqSystem.incl_injective m
     rw [S.toSeqSystem.incl_comp hℓm, S.toSeqSystem.incl_comp hkm,
       S.toSeqSystem.incl_transitionHomeo hw]
-
   have hpt : ∀ w ∈ (S.toSeqSystem.transitionHomeo k ℓ).source,
       S.toSeqSystem.transitionHomeo k ℓ w
         = (Function.invFun (S.toSeqSystem.F hℓm) ∘ S.toSeqSystem.F hkm) w := by
@@ -385,7 +382,6 @@ theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
       (S.toSeqSystem.F hkm w)
     rw [← hFeq w hw,
       Function.leftInverse_invFun (S.toSeqSystem.isOpenEmb hℓm).injective]
-
   have hrange : (S.toSeqSystem.transitionHomeo k ℓ).source ⊆
       S.toSeqSystem.F hkm ⁻¹' range (S.toSeqSystem.F hℓm) := by
     intro w hw
@@ -409,7 +405,6 @@ instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   set T' := ((chartAt H a).symm.trans (S.toSeqSystem.transitionHomeo k ℓ)).trans (chartAt H b)
     with hT'
   apply modelSpace_contDiffOn
-
   have key : ContMDiffOn I I ∞
       (⇑(chartAt H b) ∘ ⇑(S.toSeqSystem.transitionHomeo k ℓ) ∘ ⇑(chartAt H a).symm)
       (((chartAt H a).target ∩ (chartAt H a).symm ⁻¹' (S.toSeqSystem.transitionHomeo k ℓ).source) ∩
@@ -547,7 +542,6 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
   refine (hsymm.comp _ hchart).congr_of_eventuallyEq ?_
   filter_upwards [(S.toSeqSystem.limChart (H := H) k a).open_source.mem_nhds
     (S.toSeqSystem.mem_limChart_source (H := H) k a)] with z' hz'
-
   rw [SeqSystem.limChart, OpenPartialHomeomorph.trans_source] at hz'
   obtain ⟨hz'r, hz'c⟩ := hz'
   rw [OpenPartialHomeomorph.symm_source, S.toSeqSystem.inclHomeo_target] at hz'r
@@ -556,7 +550,6 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
       (by rw [S.toSeqSystem.inclHomeo_target]; exact hz'r)
     rwa [← S.toSeqSystem.inclHomeo_apply]
   have hmem_c : (S.toSeqSystem.inclHomeo k).symm z' ∈ (chartAt H a).source := hz'c
-
   rw [← hz'eq, Function.leftInverse_invFun (S.toSeqSystem.incl_injective k)]
   change (S.toSeqSystem.inclHomeo k).symm z'
     = ((chartAt H a).symm ∘ (S.toSeqSystem.limChart k a)) (S.toSeqSystem.incl k _)
@@ -788,7 +781,6 @@ theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Metr
       = S.toSeqSystem.F hkm a := by
     conv_lhs => rw [← hcomp]
     exact Function.leftInverse_invFun hinjm _
-
   have hev : (S.toSeqSystem.F hkm) ∘ (Function.invFun (S.toSeqSystem.incl k))
       =ᶠ[nhds (S.toSeqSystem.incl k a)] Function.invFun (S.toSeqSystem.incl m) := by
     filter_upwards [(S.toSeqSystem.incl_isOpenEmb k).isOpen_range.mem_nhds ⟨a, rfl⟩] with z' hz'
@@ -800,7 +792,6 @@ theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.Metr
     rw [Function.leftInverse_invFun hinjm _]
   have hφk_at : ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k))
       (S.toSeqSystem.incl k a) := S.contMDiffAt_invIncl k ⟨a, rfl⟩
-
   have hD : (mfderiv I I (S.toSeqSystem.F hkm)
         (Function.invFun (S.toSeqSystem.incl k) (S.toSeqSystem.incl k a))).comp
       (mfderiv I I (Function.invFun (S.toSeqSystem.incl k)) (S.toSeqSystem.incl k a))
@@ -881,15 +872,12 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
       (φ := fun z => S.stageInner g (S.toSeqSystem.rep z).1 z (Y z))
     intro W z₀
     rw [Bundle.contMDiffAt_section]
-
     have hstage : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun z => S.stageInner g (S.toSeqSystem.rep z).1 z (Y z) (W z)) z₀ := by
-
       set k₀ := (S.toSeqSystem.rep z₀).1 with hk₀
       have hz₀ : z₀ ∈ Set.range (S.toSeqSystem.incl k₀) := S.mem_range_rep z₀
       have hs_open : IsOpen (Set.range (S.toSeqSystem.incl k₀)) :=
         (S.toSeqSystem.incl_isOpenEmb k₀).isOpen_range
-
       have hφ : ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k₀)) z₀ :=
         S.contMDiffAt_invIncl k₀ hz₀
       have hg' : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -912,7 +900,6 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
           (Bundle.TotalSpace.proj ⁻¹' (Set.range (S.toSeqSystem.incl k₀)) :
             Set (TangentBundle I S.toSeqSystem.Lim)) :=
         hs_open.preimage (FiberBundle.continuous_proj E (TangentSpace I))
-
       have hsec : ∀ Y' : Cₛ^∞⟮I; E, (TangentSpace I : S.toSeqSystem.Lim → Type _)⟯,
           ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
             (fun z => TotalSpace.mk' E (E := fun b : A k₀ => TangentSpace I b)
@@ -936,7 +923,6 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderivWithin I I (Function.invFun (S.toSeqSystem.incl k₀))
               (Set.range (S.toSeqSystem.incl k₀)) z (Y' z))
         rw [mfderivWithin_of_isOpen hs_open hz]
-
       have h_total : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) ∞
           (fun z => TotalSpace.mk' ℝ (E := Bundle.Trivial (A k₀) ℝ)
             (Function.invFun (S.toSeqSystem.incl k₀) z)
@@ -954,7 +940,6 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderiv I I (Function.invFun (S.toSeqSystem.incl k₀)) z (W z))) z₀ := by
         rw [contMDiffAt_totalSpace] at h_total
         convert h_total.2 using 1
-
       refine h_scalar.congr_of_eventuallyEq ?_
       filter_upwards [hs_open.mem_nhds hz₀] with z hz
       rw [show S.stageInner g (S.toSeqSystem.rep z).1 z = S.stageInner g k₀ z from

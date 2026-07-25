@@ -71,7 +71,8 @@ private lemma pureRSlot0BilinAt_frame_summand
     (i : Fin (Module.finrank ℝ E)) (y : M) (v : TangentSpace I y) :
     riemannOp (tensorCov (I := I) g 0 m) y (B i y) v
         ((covGradBundleEquiv (I := I) (M := M) 0 m y).symm (W.toSection y) (B i y)) =
-      pureRSlot0BilinAt (I := I) (M := M) g m (fun b : M => W.toSection b) y v (B i y) (B i y) := rfl
+      pureRSlot0BilinAt (I := I) (M := M) g m (fun b : M => W.toSection b) y v (B i y) (B i y) :=
+        rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -96,7 +97,6 @@ private theorem pureRFrozenDirCLM_frame_independent
     inferInstanceAs (T2Space (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y))
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 m I y) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y))
-
   set scalarize : TensorRSSpace 0 m I y →L[ℝ] ℝ :=
     LinearMap.toContinuousLinearMap
       { toFun := fun T => Tensor0SSpace.toModel
@@ -116,7 +116,6 @@ private theorem pureRFrozenDirCLM_frame_independent
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y from T) D) mtail := by
     intro T
     rw [hscalarize_def, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
-
   set Hb : TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ :=
     LinearMap.toContinuousLinearMap
       { toFun := fun X => scalarize.comp
@@ -145,11 +144,11 @@ private theorem pureRFrozenDirCLM_frame_independent
   have hHb_apply : ∀ X Y : TangentSpace I y,
       Hb X Y = Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y from
-          pureRSlot0BilinAt (I := I) (M := M) g m (fun b : M => W.toSection b) y v X Y) D) mtail := by
+          pureRSlot0BilinAt (I := I) (M := M) g m (fun b : M => W.toSection b) y v X Y) D)
+            mtail := by
     intro X Y
     rw [hHb_def, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
       ContinuousLinearMap.comp_apply, hscalarize_apply]
-
   have hframe : ∀ (F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b),
       Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y from
@@ -304,7 +303,8 @@ private lemma pureRGenuineEndoFib_local
   rw [hx]
 
 private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMetric I M) :
-    IsPointwiseLinearLocalOperator (I := I) (M := M) g (pureRGenuineDiffOp (I := I) (M := M) g) where
+    IsPointwiseLinearLocalOperator (I := I) (M := M) g
+      (pureRGenuineDiffOp (I := I) (M := M) g) where
   linear := by
     intro r c₁ c₂ W₁ W₂ x
     cases r with
@@ -321,7 +321,8 @@ private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMe
         rw [h0, h0, h0]
         simp
     | succ m =>
-        rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) (c₁ • W₁ + c₂ • W₂)).toSection x =
+        rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) (c₁ • W₁ + c₂ • W₂)).toSection x
+          =
               pureRGenuineEndoFib (I := I) (M := M) g m (c₁ • W₁ + c₂ • W₂) x from rfl,
           show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W₁).toSection x =
               pureRGenuineEndoFib (I := I) (M := M) g m W₁ x from rfl,

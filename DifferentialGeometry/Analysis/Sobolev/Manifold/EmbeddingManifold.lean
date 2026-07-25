@@ -55,7 +55,6 @@ private lemma chartPushed_eq_chartPushedRaw_pou_ae'
     (I := I) (M := M) ρ α u hy
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 private lemma tsupport_pou_mul_subset_tsupport_pou'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
@@ -69,7 +68,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou'
     (f := fun x : M => ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 private lemma measurable_pou_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)

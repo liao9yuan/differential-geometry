@@ -2260,7 +2260,8 @@ private theorem morrey_representative_of_W1pWitness
         mul_le_mul_of_nonneg_left h_factor_le hC_sup_nn
       linarith
     exact h_C_left.trans h_C_right
-  refine ⟨ũ, (d : ℝ) * C_pair_smooth, ((d : ℝ) + 1) * C_sup_smooth, hũ_cont, ?_, ?_, h_ae_eq, ?_, ?_⟩
+  refine ⟨ũ, (d : ℝ) * C_pair_smooth, ((d : ℝ) + 1) * C_sup_smooth, hũ_cont, ?_, ?_, h_ae_eq, ?_,
+    ?_⟩
   · exact mul_nonneg hd_pos.le hC_pair_nn
   · exact mul_nonneg (by linarith) hC_sup_nn
   · intro x hx y hy

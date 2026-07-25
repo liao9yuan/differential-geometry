@@ -89,8 +89,6 @@ private lemma linParam_one (t₀ t₁ : ℝ) :
 end TruncateHomotopy
 
 open TruncateHomotopy in
-
-
 lemma truncateOfLE_homotopic_subpath
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)
     {t₀ t₁ : ℝ} (h : t₀ ≤ t₁) (ht₀ : t₀ ∈ I) (ht₁ : t₁ ∈ I) :

@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Pairing
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -38,7 +35,8 @@ def ChristoffelVariationEquationInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (rhs : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j k : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -129,7 +127,8 @@ theorem christoffelMetricVariation_hasDerivWithinAt
     (h :
       ChristoffelMetricVariationEquationInFrameOn
         (I := I) S gInv frame hframe metricCovDerivDt)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (hx : x ∈ u)
     (i j k : Idx) :
     HasDerivWithinAt
       (fun s : Real =>
@@ -149,7 +148,8 @@ def ChristoffelEvolutionEquationInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+    u ->
     forall i j k : Idx,
       HasDerivWithinAt
         (fun s : Real =>
@@ -234,7 +234,8 @@ theorem christoffelVariationEquationInFrameOn_of_pairing_local
     (loweredRHS : Real -> M -> Idx -> Idx -> Idx -> Real)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair :
-      forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+      forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+        x ∈ u ->
         forall i j l : Idx,
           HasDerivWithinAt
             (fun s : Real =>

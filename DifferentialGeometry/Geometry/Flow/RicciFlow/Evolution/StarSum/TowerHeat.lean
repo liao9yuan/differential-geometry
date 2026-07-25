@@ -31,14 +31,6 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Dim3Reaction in
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 theorem resStarBoundLF
@@ -90,7 +82,8 @@ theorem resStarBoundLF
         (fun s : Real =>
           extDerivFun (I := I)
             (fun z : M =>
-              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe) (lfBase (I := I) S frame)
+              iteratedRmComp (I := I) frame (lfChr (I := I) S frame hframe)
+                (lfBase (I := I) S frame)
                 k' s z m) y (frame d y))
         (extDerivFun (I := I)
           (fun z : M =>
@@ -116,22 +109,20 @@ theorem resStarBoundLF
             C * ∑ j ∈ Finset.range (k + 1),
               Real.sqrt (stNormSq (I := I) S (t : Real) j y (hframe.toBasisAt hy)) *
                 Real.sqrt (stNormSq (I := I) S (t : Real) (k - j) y (hframe.toBasisAt hy))) := by
-
   obtain ⟨T, hTcost, hcomp⟩ :=
-    resStarLFU (I := I) S hS k t frame hframe hu hdim horthU hbase baseDt chrDt hrm hchr hchrId hswap
+    resStarLFU (I := I) S hS k t frame hframe hu hdim horthU hbase baseDt chrDt hrm hchr hchrId
+      hswap
   have hT := hTcost.mem
   have hC0 := hTcost.nonneg
   have hCbound := hTcost.bound
   refine ⟨T, hT, resStarCost k, rfl, hC0, hcomp, ?_⟩
   intro y hy m
-
   have horthFam : ∀ i j : Fin 3,
       (S.family.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)
         = if i = j then (1 : Real) else 0 := by
     intro i j
     rw [hframe.toBasisAt_coe hy i, hframe.toBasisAt_coe hy j]
     exact horthU y hy i j
-
   have hb := hCbound y (hframe.toBasisAt hy) horthFam m
   have htuple : (fun p => (hframe.toBasisAt hy) (m p)) = (fun p => frame (m p) y) := by
     funext p; exact hframe.toBasisAt_coe hy (m p)

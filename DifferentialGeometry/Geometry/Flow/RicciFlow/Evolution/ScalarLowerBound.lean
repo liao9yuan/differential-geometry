@@ -5,7 +5,6 @@ import Mathlib.Analysis.Normed.Group.Uniform
 import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -107,7 +106,8 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
-    (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u c)) :
+    (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u
+      c)) :
     ∃ K : NNReal,
       ∀ t : Real, t ∈ Set.Icc 0 T ->
         LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
@@ -169,7 +169,8 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
           (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x)
     (hparabolic : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X scalar t x)
+        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X scalar t
+          x)
     (hinit : ∀ x : M, c0 <= scalar 0 x)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
@@ -177,7 +178,8 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
-  refine DifferentialGeometry.Integral.Connection.scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
+  refine
+    Integral.Connection.scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     (I := I) G T (le_of_lt hT) X scalar (scalarLowerBarrier n c0)
     (scalarLowerReaction n) K hw_cont hw_mdiff hw_grad hscalar_time ?_
     hscalar_space hdiff_space hdiff_grad hparabolic ?_ ?_ hF_lip
@@ -320,7 +322,8 @@ theorem scalarRegOfSmooth
   have hbar_cont : ContinuousOn
       (fun p : Real × M => scalarLowerBarrier n c0 p.1)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-    have hden_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T ->
+    have hden_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab
+      (M := M) T ->
         1 - (2 / n) * c0 * p.1 ≠ 0 := by
       intro p hp
       exact hden p.1 hp.1
@@ -697,13 +700,15 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
       scalarLowerBarrier n c0 t <= scalar t x := by
   have hslab :
       Set.Icc 0 T ⊆
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
     intro t ht
     change t ∈ Set.Ico 0 omega
     exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
   have hregular :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
-        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).regular := by
+        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).regular := by
     intro t ht htpos
     change t ∈ Set.Ioo 0 omega
     exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
@@ -914,13 +919,15 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
         scalarTraceInFrame (I := I) S gInv frame t x := by
   have hslab :
       Set.Icc 0 T ⊆
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).carrier := by
     intro t ht
     change t ∈ Set.Ico 0 omega
     exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
   have hregular :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
-        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).regular := by
+        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+          h0ω).regular := by
     intro t ht htpos
     change t ∈ Set.Ioo 0 omega
     exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩

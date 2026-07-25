@@ -129,7 +129,6 @@ theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum
   obtain ⟨Chebey, hChebey_nn, hChebey⟩ :=
     exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 k
   refine ⟨Cl2 * Cdrop * Chebey, by positivity, fun S => ?_⟩
-
   have hembed_eq : smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S =
       ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S :=
     tensorHs.ext (funext (fun i => rfl))
@@ -147,7 +146,6 @@ theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum
       nlinarith [hsq, hnn1, hnn2]
     rw [h1, h2]
   rw [hnorm_eq]
-
   have hjet_eq : ∀ j : ℕ,
       tensorL2Norm (I := I) (M := M) g₀ 0 (2 + j) (iteratedCovGrad (I := I) g₀ 0 2 j S).toFun =
         ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := fun j =>
@@ -284,7 +282,8 @@ private theorem covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd
           (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ (2 * i + 1) :=
         pow_le_pow_left₀ hbase_nn hbase_le (2 * i + 1)
       exact mul_le_mul_of_nonneg_right hpow_le (sq_nonneg c)
-    · have hsummable := (ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i + 1 : ℕ) : ℝ) S).weighted_summable
+    · have hsummable := (ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i + 1 : ℕ) : ℝ)
+      S).weighted_summable
       refine Summable.of_nonneg_of_le ?_ ?_ hsummable
       · intro m
         have hbase_nn : (0 : ℝ) ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
@@ -386,24 +385,20 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_odd
     refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ S
     have : (σ : ℕ) ≤ (2 * k + 1 : ℕ) := hσ
     exact_mod_cast this
-
   have hlow_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ ≤ Nspec := by
     have hembed2k : smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S =
         ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S :=
       tensorHs.ext (funext (fun i => rfl))
     rw [hembed2k]
     exact hccmono (2 * k) (by omega)
-
   have hlowsum : ∑ j ∈ Finset.range (2 * k + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤ Clow * Nspec := by
     refine le_trans (hClow S) ?_
     exact mul_le_mul_of_nonneg_left hlow_le hClow_nn
-
   have heven_le : ∑ j ∈ Finset.range (2 * k + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤ Ceven * Nspec := by
     refine le_trans (hCeven S) ?_
     exact mul_le_mul_of_nonneg_left hlow_le hCeven_nn
-
   have hccoeff_le : ∀ i ∈ Finset.range (k + 1),
       ‖rawTensorConnLapIter (I := I) g₀ 0 3 i
           (covGrad (I := I) (M := M) g₀ 0 2 S)‖ ≤
@@ -452,7 +447,6 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_odd
         ≤ Nspec + Ccomm i * Ceven * Nspec :=
           add_le_add hmain hcommterm
       _ = (1 + Ccomm i * Ceven) * Nspec := by ring
-
   have htop_le : ‖iteratedCovGrad (I := I) g₀ 0 2 (2 * k + 1) S‖ ≤
       Cgard * (((k + 1 : ℕ) : ℝ) + Ccommsum * Ceven) * Nspec := by
     have hbridge : ‖iteratedCovGrad (I := I) g₀ 0 2 (2 * k + 1) S‖ =
@@ -503,7 +497,6 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_odd
       _ ≤ Cgard * ((((k + 1 : ℕ) : ℝ) + Ccommsum * Ceven) * Nspec) :=
           mul_le_mul_of_nonneg_left hsumcoeff hCgard_nn
       _ = Cgard * (((k + 1 : ℕ) : ℝ) + Ccommsum * Ceven) * Nspec := by ring
-
   rw [Finset.sum_range_succ (fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖) (2 * k + 1)]
   calc ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ +
         ‖iteratedCovGrad (I := I) g₀ 0 2 (2 * k + 1) S‖
@@ -660,7 +653,8 @@ theorem exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general
         (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
           (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 ≤
         Cmode j * (∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 :=
-    fun j => (exists_spectralModeTsum_le_iteratedCovGrad_sum_sq (I := I) (M := M) g₀ j).choose_spec.2
+    fun j => (exists_spectralModeTsum_le_iteratedCovGrad_sum_sq (I := I) (M := M) g₀
+      j).choose_spec.2
   set Csum : ℝ := ∑ j ∈ Finset.range (n + 1), Cmode j with hCsum_def
   have hCsum_nn : 0 ≤ Csum := Finset.sum_nonneg (fun j _ => hCmode_nn j)
   refine ⟨Real.sqrt ((2 : ℝ) ^ n * Csum), Real.sqrt_nonneg _, fun S => ?_⟩

@@ -199,7 +199,8 @@ private theorem continuousMultilinearMap_norm_le_sum_abs_basis_apply
     rw [abs_mul]
     have h_prod_le : |∏ i : Fin j, m i (β i)| ≤ ∏ i : Fin j, ‖m i‖ := by
       rw [Finset.abs_prod]
-      refine Finset.prod_le_prod (fun i _ => abs_nonneg _) (fun i _ => euclN_coord_le_norm (m i) (β i))
+      refine Finset.prod_le_prod (fun i _ => abs_nonneg _)
+        (fun i _ => euclN_coord_le_norm (m i) (β i))
     exact mul_le_mul_of_nonneg_right h_prod_le (abs_nonneg _)
   refine (Finset.sum_le_sum (fun β _ => h_inner_bound β)).trans ?_
   have h_factor :
@@ -234,7 +235,8 @@ private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem rawPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -461,7 +463,8 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
                         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))) *
                       |(iteratedFDeriv ℝ j f z)
                           (fun i => EuclideanSpace.basisFun
-                            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)) ∂(volume : Measure EuclN) := by
+                            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2))
+                              ∂(volume : Measure EuclN) := by
     refine lintegral_mono_ae ?_
     refine (ae_restrict_iff' hball_meas).2 ?_
     filter_upwards with z hz
@@ -737,7 +740,8 @@ private theorem uniformRawPull_le_hsNorm
         ≤ D * ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T'‖ := by
   classical
   rcases Set.eq_empty_or_nonempty Kc with hKc_empty | hKc_ne
-  · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy (Set.notMem_empty y)⟩
+  · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy
+                                             (Set.notMem_empty y)⟩
   obtain ⟨δ, hδ_pos, hδ_ball⟩ :=
     lebesgue_number_lemma_of_metric (s := Kc) (c := fun _ : Unit => O)
       hKc_compact (fun _ => hO_open) (by intro x hx; exact Set.mem_iUnion.mpr ⟨(), hKcO hx⟩)
@@ -819,7 +823,6 @@ private theorem superlevel_compact_subset_source
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 private theorem chartFiberNorm_le_hsNorm_on_superlevel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
@@ -979,7 +982,6 @@ private theorem chartFiberNorm_le_hsNorm_on_superlevel
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem tensorPouSobolevHilbert_embedding_Ck_gNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)

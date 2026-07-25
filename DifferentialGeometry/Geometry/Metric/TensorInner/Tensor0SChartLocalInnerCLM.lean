@@ -111,7 +111,6 @@ noncomputable def curryLeftAtCLM (s : ℕ) (v : E) :
     ‖v‖
     (fun S => by
       change ‖S.curryLeft v‖ ≤ _
-
       refine (ContinuousMultilinearMap.opNorm_le_bound
         (M := ‖S‖ * ‖v‖) ?_ ?_).trans (by ring_nf; rfl)
       · exact mul_nonneg (norm_nonneg _) (norm_nonneg _)
@@ -134,7 +133,6 @@ private noncomputable def composeCurryAtIJ (s : ℕ)
       ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ →L[ℝ] ℝ :=
   let CLi := curryLeftAtCLM (E := E) s ((chartModelBasis E) i)
   let CLj := curryLeftAtCLM (E := E) s ((chartModelBasis E) j)
-
   let postCompCLj :
       (Tensor0SModel s ℝ E →L[ℝ] ℝ) →L[ℝ]
         (ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ →L[ℝ] ℝ) :=
@@ -166,7 +164,6 @@ private lemma chartTensorInnerPointwise_0sCLM_succ_eq
   refine ContinuousLinearMap.ext ?_
   intro T
   rw [chartTensorInnerPointwise_0sCLM_apply, chartTensorInnerPointwise_0s_succ]
-
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl ?_
   intro i _

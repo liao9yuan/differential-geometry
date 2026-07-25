@@ -45,7 +45,8 @@ lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
     (chartModelBasis E a) (chartModelBasis E b)]
   exact unitModel_basisChart_eq_tensorChartComponent (I := I) (M := M) g₀ W x a b
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma cometricFinBasisTrace_eq_chartInvGram_bilin
     (g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -117,7 +118,8 @@ lemma unitModel4SlotBilin_apply
     quadrilinearMapSlotBilinearAt (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma partialDeriv_scalarOnE_eq_euclidPartial_local
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -154,7 +156,8 @@ lemma partialDeriv_scalarOnE_eq_euclidPartial_local
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m₁ m₂ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
@@ -251,12 +254,14 @@ lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
     rw [← extChartAt_source (I := I)]
     exact (extChartAt I x).map_target hy_tgt
   rw [realizedGramDeriv]
-  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
+  rw
+    [IntrinsicSpectral.DeTurckCoefficients.chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b y hp]
   rw [scalarOnE_def, scalarOnE_def]
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -351,7 +356,8 @@ lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
         scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![a, b]
       have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
         extChartAt_target_subset_interior_of_boundaryless (I := I) x
-          ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+          ((extChartAt I x).map_source
+            (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
       filter_upwards [isOpen_interior.mem_nhds hint] with z hz
       exact ((hcd.mono interior_subset).contDiffAt
         (isOpen_interior.mem_nhds hz)).differentiableAt (by simp)
@@ -361,7 +367,8 @@ lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
         scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![b, a]
       have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
         extChartAt_target_subset_interior_of_boundaryless (I := I) x
-          ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+          ((extChartAt I x).map_source
+            (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
       filter_upwards [isOpen_interior.mem_nhds hint] with z hz
       exact ((hcd.mono interior_subset).contDiffAt
         (isOpen_interior.mem_nhds hz)).differentiableAt (by simp)
@@ -488,7 +495,8 @@ lemma partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial
       scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![a, b]
     have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
       extChartAt_target_subset_interior_of_boundaryless (I := I) x
-        ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+        ((extChartAt I x).map_source
+          (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
     exact ((hcd.mono interior_subset).contDiffAt
       (isOpen_interior.mem_nhds hint)).differentiableAt (by simp)
   have hdba : DifferentiableAt ℝ (scalarOnE (I := I) x fba) (extChartAt I x x) := by
@@ -496,7 +504,8 @@ lemma partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial
       scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![b, a]
     have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
       extChartAt_target_subset_interior_of_boundaryless (I := I) x
-        ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+        ((extChartAt I x).map_source
+          (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
     exact ((hcd.mono interior_subset).contDiffAt
       (isOpen_interior.mem_nhds hint)).differentiableAt (by simp)
   have hpd_eq : partialDeriv (E := E) m
@@ -548,7 +557,8 @@ private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
   rfl
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma covDerivLowerOrderTerm02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m p q : Fin (Module.finrank ℝ E)) :
@@ -670,7 +680,8 @@ lemma covDerivLowerOrderTerm02_center_eq
   · intro h; exact absurd (Finset.mem_univ _) h
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma covDerivLowerOrderTerm03_center_hout
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m b c d : Fin (Module.finrank ℝ E))
@@ -735,7 +746,8 @@ private lemma sum_fin3_collapse_gen
   rw [show (default : Fin 1) = (0 : Fin 1) from rfl]
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma covDerivLowerOrderTerm03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
     (m b c d : Fin (Module.finrank ℝ E)) :
@@ -894,7 +906,8 @@ lemma euclidPartial_covDerivLowerOrderTerm02_center_eq_sum
       DifferentiableAt ℝ (lowerOrderSummand (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d] p)
         (toEuclidean (E := E) (extChartAt I x x)) := by
     intro p
-    exact ((lowerOrderSummand_contDiffOn (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d] p).differentiableOn
+    exact ((lowerOrderSummand_contDiffOn (I := I) (M := M) g₀ 0 2 x h b ![] ![c, d]
+      p).differentiableOn
       (by norm_cast)).differentiableAt (hopen.mem_nhds hcenter)
   rw [euclidPartial_finsetSum a Finset.univ (fun p _ => hsummand_diff p)]
   refine Finset.sum_congr rfl (fun p _ => ?_)

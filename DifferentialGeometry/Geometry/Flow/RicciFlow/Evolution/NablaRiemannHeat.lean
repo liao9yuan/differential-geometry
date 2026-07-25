@@ -5,9 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -262,7 +259,6 @@ theorem abs_nablaRmReactionDown_le
   have hNTnonneg : 0 ≤ NT := compNormSq5_nonneg T
   have hsqrtT_nonneg : 0 ≤ Real.sqrt NT := Real.sqrt_nonneg _
   have hsqrtR_nonneg : 0 ≤ Real.sqrt NR := Real.sqrt_nonneg _
-
   have hInner :
       |∑ m : Idx, ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
           T m a b c d * nablaStarRm R T m a b c d| ≤
@@ -290,7 +286,6 @@ theorem abs_nablaRmReactionDown_le
         (Fintype.card Idx : Real) ^ 2 * (Real.sqrt NR * Real.sqrt NT) :=
       mul_nonneg (by positivity) (mul_nonneg hsqrtR_nonneg hsqrtT_nonneg)
     exact mul_le_mul hbnd1 hbnd2 (abs_nonneg _) hsqrtT_nonneg
-
   have hConst :
       (∑ m : Idx, ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
           (Real.sqrt NT *
@@ -300,7 +295,6 @@ theorem abs_nablaRmReactionDown_le
             ((Fintype.card Idx : Real) ^ 2 * (Real.sqrt NR * Real.sqrt NT))) := by
     simp [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     ring
-
   have hsqrtT_sq : Real.sqrt NT * Real.sqrt NT = NT :=
     Real.mul_self_sqrt hNTnonneg
   rw [hNT, hNR] at hInner hConst ⊢
@@ -379,14 +373,12 @@ theorem abs_nablaRmReactionMulti_le {k : ℕ}
   unfold nablaRmReactionMulti
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
   refine Finset.sum_le_sum fun j hj => ?_
-
   rw [abs_mul]
   have h2 : |(2 : Real)| = 2 := by norm_num
   rw [h2]
   have hsqrtk : 0 ≤ Real.sqrt (w k) := Real.sqrt_nonneg _
   have hsqrtj : 0 ≤ Real.sqrt (w j) := Real.sqrt_nonneg _
   have hsqrtkj : 0 ≤ Real.sqrt (w (k - j)) := Real.sqrt_nonneg _
-
   have hinner :
       |∑ m : Fin (4 + k) → Idx, Tk m * star j m| ≤
         ∑ m : Fin (4 + k) → Idx,
@@ -402,7 +394,6 @@ theorem abs_nablaRmReactionMulti_le {k : ℕ}
         (Fintype.card Idx : Real) ^ 2 * (Real.sqrt (w j) * Real.sqrt (w (k - j))) :=
       hstar j hj m
     exact mul_le_mul hTk hst (abs_nonneg _) hsqrtk
-
   have hcardpi :
       (Fintype.card (Fin (4 + k) → Idx) : Real) =
         (Fintype.card Idx : Real) ^ (4 + k) := by
@@ -470,18 +461,12 @@ theorem nablaRm04NormSqInFrame_eq_compNormSq5
   classical
   unfold nablaRm04NormSqInFrame compNormSq5
   unfold InverseMetricOrthonormalAt at horth
-
-
   refine Finset.sum_congr rfl fun a _ => ?_
-
   rw [Finset.sum_eq_single a]
   · refine Finset.sum_congr rfl fun i _ => ?_
     refine Finset.sum_congr rfl fun j _ => ?_
     refine Finset.sum_congr rfl fun k _ => ?_
     refine Finset.sum_congr rfl fun l _ => ?_
-
-
-
     rw [Finset.sum_eq_single i]
     · rw [Finset.sum_eq_single j]
       · rw [Finset.sum_eq_single k]
@@ -584,7 +569,8 @@ theorem nablaRm04NormHeatBoundSharp_of_components
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRmNormLap nabla2RmNormSq : Real -> M -> Real)
-    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       InverseMetricOrthonormalAt (M := M) gInv (t : Real) x)
     (h_heat : NablaRm04NormHeatEquationOn
       (D := D) (nablaRm04NormSqInFrame (M := M) nablaRm04 gInv)
@@ -602,7 +588,6 @@ theorem nablaRm04NormHeatBoundSharp_of_components
                 nablaRm04NormSqInFrame (M := M) nablaRm04 gInv (t : Real) x) := by
   intro t x
   refine ⟨_, h_heat t x, ?_⟩
-
   set u : Real := nablaRm04NormSqInFrame (M := M) nablaRm04 gInv (t : Real) x with hu
   set v : Real := rm04NormSqInFrame (I := I) Rm04 gInv frame (t : Real) x with hv
   have hreact_le :
@@ -612,12 +597,10 @@ theorem nablaRm04NormHeatBoundSharp_of_components
       (t : Real) x (horth t x)
     rw [← hu, ← hv] at habs
     exact le_trans (le_abs_self _) habs
-
   have hrewrite :
       2 * (Fintype.card Idx : Real) ^ 7 * (u * Real.sqrt v) =
         (2 * (Fintype.card Idx : Real) ^ 7) * Real.sqrt v * u := by ring
   rw [hrewrite] at hreact_le
-
   linarith [hreact_le]
 
 
@@ -639,9 +622,11 @@ theorem nablaRm04NormHeatBoundOn_of_components
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRmNormLap nabla2RmNormSq : Real -> M -> Real)
-    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       InverseMetricOrthonormalAt (M := M) gInv (t : Real) x)
-    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+      D)
       (x : M), 0 ≤ nabla2RmNormSq (t : Real) x)
     (h_heat : NablaRm04NormHeatEquationOn
       (D := D) (nablaRm04NormSqInFrame (M := M) nablaRm04 gInv)
@@ -656,7 +641,6 @@ theorem nablaRm04NormHeatBoundOn_of_components
     nablaRm04NormHeatBoundSharp_of_components (I := I) Rm04 nablaRm04 gInv frame
       nablaRmNormLap nabla2RmNormSq horth h_heat t x
   refine ⟨d, hderiv, ?_⟩
-
   have hdrop : 0 ≤ 2 * nabla2RmNormSq (t : Real) x := by
     have := hnabla2_nonneg t x; linarith
   linarith [hle, hdrop]

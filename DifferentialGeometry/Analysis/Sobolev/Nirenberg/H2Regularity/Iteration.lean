@@ -16,7 +16,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma contDiff_partial
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (l : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -30,7 +29,6 @@ private lemma contDiff_partial
   exact h_apply_smooth.comp h_fderiv_smooth
 
 omit [NeZero d] in
-
 private lemma contDiff_partial_partial
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (l i : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -40,7 +38,6 @@ private lemma contDiff_partial_partial
   contDiff_partial (contDiff_partial hu l) i
 
 omit [NeZero d] in
-
 private lemma integral_partial_eq_zero_of_compactSupport
     {F : E → ℝ} (hF : ContDiff ℝ (⊤ : ℕ∞) F) (hF_supp : HasCompactSupport F)
     (l : Fin d) :
@@ -107,7 +104,6 @@ private lemma integral_partial_eq_zero_of_compactSupport
   linarith
 
 omit [NeZero d] in
-
 private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
     {F : E → ℝ} (hF : ContDiff ℝ (⊤ : ℕ∞) F) (hF_supp : HasCompactSupport F)
     {Ω : Set E} (h_supp_Ω : tsupport F ⊆ Ω) (l : Fin d) :
@@ -128,7 +124,6 @@ private lemma setIntegral_partial_eq_zero_of_compactSupport_subset
   exact integral_partial_eq_zero_of_compactSupport hF hF_supp l
 
 omit [NeZero d] in
-
 private lemma fderiv_triple_mul_apply_diff
     {a b c : E → ℝ} {x : E}
     (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x)
@@ -150,7 +145,6 @@ private lemma fderiv_triple_mul_apply_diff
   ring
 
 omit [NeZero d] in
-
 private lemma fderiv_triple_mul_apply
     {a b c : E → ℝ}
     (ha : ContDiff ℝ (⊤ : ℕ∞) a) (hb : ContDiff ℝ (⊤ : ℕ∞) b)
@@ -163,7 +157,6 @@ private lemma fderiv_triple_mul_apply
     (hb.differentiable (by simp) x) (hc.differentiable (by simp) x) l
 
 omit [NeZero d] in
-
 private lemma fderiv_binary_mul_apply_diff
     {a b : E → ℝ} {x : E}
     (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x) (l : Fin d) :
@@ -179,7 +172,6 @@ private lemma fderiv_binary_mul_apply_diff
   ring
 
 omit [NeZero d] in
-
 private lemma fderiv_binary_mul_apply
     {a b : E → ℝ}
     (ha : ContDiff ℝ (⊤ : ℕ∞) a) (hb : ContDiff ℝ (⊤ : ℕ∞) b)
@@ -602,7 +594,6 @@ private lemma contDiff_perturbedSource
   exact contDiff_partial (h_dla.mul h_diu) j
 
 omit [NeZero d] in
-
 private lemma ibp_smooth_against_test
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -728,7 +719,6 @@ private lemma bilin_decomp
     (fun j _ => h_summand_int i j)]
 
 omit [NeZero d] in
-
 private lemma mixed_partial_symm
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (x : E) (i l : Fin d) :
     (fderiv ℝ (fun y : E =>

@@ -468,11 +468,13 @@ private lemma chartSmoothExt_morrey_sup_uniform
           ((eLpNorm (chartSmoothExt (I := I) (M := M) α
               (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
                 : C^∞⟮I, M; ℝ⟯) x * u x)) (ENNReal.ofReal p)
-              (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal +
+              (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal
+                +
            (eLpNorm (fun z => ‖fderiv ℝ (chartSmoothExt (I := I) (M := M) α
               (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
                 : C^∞⟮I, M; ℝ⟯) x * u x)) z‖) (ENNReal.ofReal p)
-             (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal) := by
+             (volume.restrict (Metric.ball (0 : EuclN)
+               (chartRadius (I := I) (M := M) α)))).toReal) := by
   classical
   have hR_pos : 0 < chartRadius (I := I) (M := M) α := chartRadius_pos (I := I) (M := M) α
   obtain ⟨C, hC_nn, hbound⟩ :=
@@ -507,7 +509,8 @@ private lemma chartSmoothExt_morrey_sup_uniform
         ((eLpNorm f (ENNReal.ofReal p)
             (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal +
          (eLpNorm (fun z => ‖fderiv ℝ f z‖) (ENNReal.ofReal p)
-            (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal) := by
+            (volume.restrict (Metric.ball (0 : EuclN)
+              (chartRadius (I := I) (M := M) α)))).toReal) := by
       apply mul_nonneg hC_nn
       linarith
     exact h_RHS_nn
@@ -705,7 +708,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball_eq_restri
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 lemma chartSmoothExt_ae_eq_chartPushed
     (α : M) (u : M → ℝ) :
@@ -1178,7 +1180,6 @@ private lemma per_chart_smooth_sup_bound
     exact le_trans hbound_y h_final
 
 omit [I.Boundaryless] in
-
 omit [CompactSpace M] in
 private lemma chartSmoothExt_pou_mul_apply_at_chart_image
     (α : M) (u : M → ℝ) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -1945,7 +1946,8 @@ theorem norm_sub_le_sum_pou_diff
       ∑ α ∈ S,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x -
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) y * u y) := by
-    rw [Finset.sum_sub_distrib, ← Finset.sum_mul, ← Finset.sum_mul, hsum_x, hsum_y, one_mul, one_mul]
+    rw [Finset.sum_sub_distrib, ← Finset.sum_mul, ← Finset.sum_mul, hsum_x, hsum_y, one_mul,
+      one_mul]
   rw [h_diff_eq]
   exact norm_sum_le (E := ℝ) S (fun α =>
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x -

@@ -17,8 +17,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -210,7 +208,8 @@ def timeShift
     SolutionFamily (I := I) (M := M) where
   metric := fun s => G.metric (s + τ)
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] in
 @[simp] theorem timeShift_metric
     (G : SolutionFamily (I := I) (M := M)) (τ s : Real) :
     (G.timeShift τ).metric s = G.metric (s + τ) := by
@@ -220,7 +219,8 @@ omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompac
 noncomputable def connection
     (G : SolutionFamily (I := I) (M := M)) :
     Real -> CovariantDerivative I E (TangentSpace I : M -> Type _) :=
-  fun t => DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) (G.metric t)
+  fun t => DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+             (G.metric t)
 
 
 noncomputable def rm13At
@@ -284,8 +284,10 @@ omit [SigmaCompactSpace M] [T2Space M] in
     (G : SolutionFamily (I := I) (M := M))
     (t : Real) (x : M) :
     G.scalar t x =
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (G.metric t) (G.ricciAt t x) := by
-  simp [scalar, metricScalarAt, DifferentialGeometry.Integral.Connection.metricScalarAt, ricciAt, metricRicciAt]
+      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (G.metric t)
+        (G.ricciAt t x) := by
+  simp [scalar, metricScalarAt, DifferentialGeometry.Integral.Connection.metricScalarAt, ricciAt,
+    metricRicciAt]
 
 
 def MetricCompatibleOn
@@ -315,14 +317,17 @@ def timeShift {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     SolutionOn (I := I) (M := M) (D.timeShift τ) where
   base := S.base.timeShift τ
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] in
 @[simp] theorem timeShift_base {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
     (S.timeShift τ).base = S.base.timeShift τ := by
   rfl
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem timeShift_base_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] in
+@[simp] theorem timeShift_base_metric
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).base.metric s = S.base.metric (s + τ) := by
   rfl
@@ -396,7 +401,8 @@ omit [SigmaCompactSpace M] [T2Space M] in
   rfl
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem scalar_eq_metricTrace {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+@[simp] theorem scalar_eq_metricTrace
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
     S.scalar t x =
@@ -405,7 +411,8 @@ omit [SigmaCompactSpace M] [T2Space M] in
   simp [scalar, SolutionFamily.scalar_apply]
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem timeShift_family_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+@[simp] theorem timeShift_family_metric
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).family.metric s = S.family.metric (s + τ) := by
   rfl
@@ -438,7 +445,8 @@ theorem timeShift_initial_metric {D : DifferentialGeometry.Integral.Connection.R
   simp [DifferentialGeometry.Integral.Connection.RealTimeInterval.timeShift, sub_add_cancel]
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem timeShift_self_initial_metric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+@[simp] theorem timeShift_self_initial_metric
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     (S.timeShift D.initial).family.metric 0 = S.family.metric D.initial := by
   simp
@@ -451,7 +459,8 @@ def toRealizedCandidate {D : DifferentialGeometry.Integral.Connection.RealTimeIn
   ricci := RicciAtFamily.toTensorField (I := I) S.ricciAt
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[simp] theorem toRealizedCandidate_family {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+@[simp] theorem toRealizedCandidate_family
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.toRealizedCandidate.family = S.family := by
   rfl
@@ -534,8 +543,10 @@ def ricciReact
 structure IsSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
-  smoothMetric : DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn (I := I) (M := M) D S.family
-  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
+  smoothMetric : DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn (I := I) (M := M) D
+    S.family
+  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I)
+    (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S
 
 
@@ -551,11 +562,13 @@ structure IsSolutionOn
       DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t
 
   ricciCont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+      D.carrier
       (fun t x => S.ricci t x)
 
   rm04Cont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+      D.carrier
       (fun t x => S.base.rm04 t x)
 
   ricciNormSpace :
@@ -644,11 +657,13 @@ structure CanonicalScalarRegularOn
   scalar_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) x
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+          (S.scalar t) y) x
   scalar_mul_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% ((S.scalar t) • fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t) (S.scalar t) y)) x
+        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+          (S.scalar t) y)) x
   scalar_sq_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDifferentiableAt I 𝓘(Real, Real)
@@ -702,10 +717,12 @@ structure CanonicalRicciRegularOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   ricci_cont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+      D.carrier
       (fun t x => S.ricci t x)
   rm04_cont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+      D.carrier
       (fun t x => S.base.rm04 t x)
   ricci_norm_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
@@ -724,7 +741,8 @@ theorem ricciTensorFamilyContinuousOnSet
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hreg : CanonicalRicciRegularOn (I := I) (M := M) S) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+      D.carrier
       (fun t x => S.ricci t x) :=
   hreg.ricci_cont
 
@@ -735,7 +753,8 @@ theorem rm04FamilyContinuousOnSet
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hreg : CanonicalRicciRegularOn (I := I) (M := M) S) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+      D.carrier
       (fun t x => S.base.rm04 t x) :=
   hreg.rm04_cont
 
@@ -808,7 +827,8 @@ theorem isSolutionOn_timeShift
       have htime : Continuous (fun s : Real => s + τ) :=
         (continuous_id.add continuous_const)
       have hcont :=
-        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I)
+          (M := M)
           hS.smoothMetric.metricTensor_cont htime hmaps
       simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift]
         using hcont
@@ -839,13 +859,16 @@ theorem isSolutionOn_timeShift
         using hcomp
   smoothConnection := by
     intro t
-    let t' : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D := ⟨(t : Real) + τ, t.2⟩
+    let t' : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D :=
+      ⟨(t : Real) + τ, t.2⟩
     have hOld := hS.smoothConnection t'
     simpa [t', SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
-      DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt, SolutionFamily.connection] using hOld
+      DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt,
+        SolutionFamily.connection] using hOld
   equation := by
     intro t x X Y
-    let t' : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨(t : Real) + τ, t.2⟩
+    let t' : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
+      ⟨(t : Real) + τ, t.2⟩
     have hOld := hS.equation t' x X Y
     have hshift :
         HasDerivWithinAt (fun s : Real => s + τ) 1
@@ -898,7 +921,8 @@ theorem isSolutionOn_timeShift
     have htime : Continuous (fun s : Real => s + τ) :=
       continuous_id.add continuous_const
     have hcont :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I)
+        (M := M)
         hS.ricciCont htime hmaps
     simpa [SolutionOn.ricci, SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
   rm04Cont := by
@@ -909,7 +933,8 @@ theorem isSolutionOn_timeShift
     have htime : Continuous (fun s : Real => s + τ) :=
       continuous_id.add continuous_const
     have hcont :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I)
+        (M := M)
         hS.rm04Cont htime hmaps
     simpa [SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
   ricciNormSpace := by
@@ -930,7 +955,8 @@ theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSolutionOn (I := I) S) :
-    DifferentialGeometry.Integral.Connection.IsRealizedRicciFlowSolutionOn (I := I) S.toRealizedCandidate := by
+    DifferentialGeometry.Integral.Connection.IsRealizedRicciFlowSolutionOn (I := I)
+      S.toRealizedCandidate := by
   exact
     { smoothMetric := hS.smoothMetric
       smoothConnection := hS.smoothConnection

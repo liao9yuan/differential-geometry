@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiHigher
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -201,7 +198,6 @@ theorem prod_delta_eq {r : ℕ} (m n : Fin r → Idx) :
   · subst h
     simp
   · rw [if_neg h]
-
     obtain ⟨s, hs⟩ := Function.ne_iff.mp h
     refine Finset.prod_eq_zero (Finset.mem_univ s) ?_
     rw [if_neg hs]
@@ -220,7 +216,6 @@ theorem multiNormInFrame_eq_compNormSqMulti {r : ℕ}
     multiNormRaised (r := r) gInv A = compNormSqMulti A := by
   classical
   unfold multiNormRaised compNormSqMulti
-
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [Finset.sum_eq_single m]
   · have hprod : (∏ s : Fin r, gInv (m s) (m s)) = 1 := by
@@ -375,15 +370,12 @@ theorem iteratedRmTower_heatBoundSharp
           towerReactionSum (M := M) w (2 * (Fintype.card Idx : Real) ^ (6 + k))
             k (t : Real) x) := by
   refine ⟨_, T.heatEq k t x, ?_⟩
-
-
   have hreact_le :
       towerReactionMulti (level · (t : Real) x) (star · (t : Real) x) k ≤
         towerReactionSum (M := M) w (2 * (Fintype.card Idx : Real) ^ (6 + k))
           k (t : Real) x := by
     refine le_trans (le_abs_self _) ?_
     refine le_trans (abs_towerReactionMulti_le T k (t : Real) x) ?_
-
     unfold towerReactionSum
     apply le_of_eq
     refine Finset.sum_congr rfl fun j _ => ?_

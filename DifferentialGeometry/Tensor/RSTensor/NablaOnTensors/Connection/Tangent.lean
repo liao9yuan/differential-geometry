@@ -178,8 +178,6 @@ theorem tangentField_eq_sum_modelCoord_tangentConst_eventually
     (𝕜 := 𝕜) (I := I) x₀ V (FiberBundle.mem_baseSet_trivializationAt' x₀)
 
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-
-
 omit [IsManifold I n M] in
 lemma tangentConstInChart_contMDiffOn_baseSet (x₀ : M) (v : E)
     [IsManifold I (n + 1) M] :

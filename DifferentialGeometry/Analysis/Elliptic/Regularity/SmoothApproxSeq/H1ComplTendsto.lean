@@ -24,6 +24,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
+open Analysis.Sobolev.EquivalenceFull
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -79,7 +80,7 @@ private lemma eLpNorm_smoothScalar_le_const_mul_wkpNormChart_one
             wkpNormChart (I := I) (M := M) g 1 2 f.toFun := by
   classical
   obtain ⟨C, hC_nn, hbound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceFull.eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
+    eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
       (I := I) (M := M) g (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   refine ⟨C, hC_nn, ?_⟩
@@ -98,7 +99,7 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
             wkpNormChart (I := I) (M := M) g 1 2 f.toFun := by
   classical
   obtain ⟨C, hC_nn, hbound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceFull.eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
+    Analysis.Sobolev.EquivalenceFull.eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
       (I := I) (M := M) g (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   refine ⟨C, hC_nn, ?_⟩
@@ -438,7 +439,7 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
       atTop (𝓝 0) := by
   classical
   obtain ⟨C, hC_nn, hC_bnd⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceFull.eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
+    eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
       (I := I) (M := M) g (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
   set u : M → ℝ := ((H1ComplToLp (I := I) (M := M) g u_h :

@@ -41,7 +41,6 @@ local notation "dimE" => Module.finrank ℝ E
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)] in
-
 private lemma chain_step_le
     {S S' BFp BFp' L : ℝ≥0∞} {a c : ℝ} (ha : 0 ≤ a) (hc : 0 ≤ c)
     (hBF_mono : BFp ≤ BFp')

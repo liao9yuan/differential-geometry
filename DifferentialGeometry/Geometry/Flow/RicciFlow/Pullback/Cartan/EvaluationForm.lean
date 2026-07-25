@@ -93,7 +93,8 @@ theorem hasDerivAt_deTurck_pullback_eval_form
     ring
   have h_ric_nat : R_DT = R_fam := by
     rw [hR_fam_def, hR_DT_def]
-    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v w).symm
+    exact (ricci_tensor_pullback_natural_under_diffeomorphism (I := I) (g_DT t) (Φ_fam t) x v
+      w).symm
   have h_value :
       (((-2 : ℝ) * R_DT + L) + Lpush) = (-2 : ℝ) * R_fam := by
     rw [h_cancel, h_ric_nat]

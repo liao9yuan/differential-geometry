@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatCompositionPoints
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -105,7 +104,8 @@ theorem hatPOUDataTwo
   letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
   change x ∈ Metric.closedBall (X.obj (L.φ n)).basepoint r at hx
   simpa [Finset.sum_apply] using
-    (NetLimitData.hatPOU_active_data (I := I) (X := X) (hd := hd) (D := D) (P := P) (L := L) (pb := pb) (r := r) (k := n) (ρ := rho) (hρ := hrho) (x := x) hx)
+    (NetLimitData.hatPOU_active_data (I := I) (X := X) (hd := hd) (D := D) (P := P) (L := L)
+      (pb := pb) (r := r) (k := n) (ρ := rho) (hρ := hrho) (x := x) hx)
 
 
 

@@ -69,7 +69,6 @@ private theorem covDerivCrossLeft_weight_bound_rs
   have hb_nn : 0 ≤ b := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x (Q.toSection x)
   have hc_nn : 0 ≤ c := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
   have hAsq : riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) ≤ A ^ 2 := _hsup x
-
   set P : Integral.L2.SmoothCcTensor g r (m + 1) :=
     prependCovGradSlot (I := I) (M := M) g r m ζ w with hP_def
   have hcross_eq : tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x =
@@ -77,7 +76,6 @@ private theorem covDerivCrossLeft_weight_bound_rs
         (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
         (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x)) :=
     tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad (I := I) (M := M) g r m ζ w w x
-
   set rP : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (P.toSection x) with hrP_def
   have hrP_nn : 0 ≤ rP := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x _
   have hCS2 : |tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x| ≤
@@ -90,22 +88,22 @@ private theorem covDerivCrossLeft_weight_bound_rs
         (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
         (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) = b := by
       rw [show b = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (Q.toSection x) from rfl,
-        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x (Q.toSection x)]
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
+          (Q.toSection x)]
     have hPself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
         (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x))
         (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x)) = rP := by
       rw [show rP = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (P.toSection x) from rfl,
-        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x (P.toSection x)]
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
+          (P.toSection x)]
     rw [hQself, hPself] at hsq
     rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul hb_nn]
     exact Real.sqrt_le_sqrt hsq
-
   have hrP_eq : rP = (∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
           (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
         riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) :=
     prependCovGradSlot_fiberNormSq_frame_sum_rs (I := I) (M := M) g r m ζ w x
-
   have hbfun_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) bfun x := by
     have hb_eq_scalar : bfun = Integral.Connection.tensorInnerScalar (I := I) (M := M) g r (m + 1)
         Q.toSection Q.toSection := by
@@ -149,12 +147,10 @@ private theorem covDerivCrossLeft_weight_bound_rs
       rw [Nat.cast_sub _hk, Nat.cast_one]
     have hexp : k - 1 - 1 = k - 2 := by omega
     rw [show (bfun x) = b from rfl, hkcast, hexp]
-
   have hkato : ∑ a : Fin n,
       (extDerivFun (I := I) bfun x (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
         4 * b * c :=
     kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs (I := I) (M := M) g r (m + 1) Q x
-
   have hdζsum : (∑ a : Fin n,
       (extDerivFun (I := I) (ζ : M → ℝ) x
         (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
@@ -173,7 +169,6 @@ private theorem covDerivCrossLeft_weight_bound_rs
     rw [hrw]
     have hcoeff_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 := by positivity
     exact mul_le_mul_of_nonneg_left hkato hcoeff_nn
-
   have hrP_bound : rP ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) * A ^ 2 := by
     rw [hrP_eq]
     have hrfnsw_le : riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) ≤ A ^ 2 := hAsq
@@ -331,7 +326,8 @@ theorem weightedCovIBP_lpFiberJet_sup_rs
     rw [hdir] at hgreen
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
   have hb_cont : Continuous b := hb_smooth.continuous
-  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1) ggw
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r
+    (m + 1 + 1) ggw
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     simp only [hζ_apply]; exact hb_cont.pow (k - 1)
   have htcdpi_cont : Continuous (tensorCovDerivPointwiseInner (I := I) (M := M) g r m w v) :=
@@ -493,7 +489,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set n : ℕ := Module.finrank ℝ E with hn_def
-
   set p : ℝ := (k : ℝ) / (i + 1) with hp_def
   set pm1 : ℝ := p - 1 with hpm1_def
   have hi1R : (0 : ℝ) < (i : ℝ) + 1 := by positivity
@@ -501,13 +496,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     rw [hp_def, lt_div_iff₀ hi1R, one_mul]; exact_mod_cast _hik
   have hpm1_pos : 0 < pm1 := by rw [hpm1_def]; linarith
   have hpm1_nn : 0 ≤ pm1 := le_of_lt hpm1_pos
-
   set gw : Integral.L2.SmoothCcTensor g r (m + 1) := covGrad (I := I) (M := M) g r m w with hgw
   set ggw : Integral.L2.SmoothCcTensor g r (m + 1 + 1) :=
     covGrad (I := I) (M := M) g r (m + 1) gw with hggw
   set Lw : Integral.L2.SmoothCcTensor g r m :=
     rawTensorConnLapSmooth (I := I) g r m w with hLw
-
   set a : M → ℝ := fun y => riemannianFiberNormSq (I := I) (M := M) g r m y (w.toSection y) with ha
   set b : M → ℝ := fun y => riemannianFiberNormSq (I := I) (M := M) g r (m + 1) y (gw.toSection y)
     with hb
@@ -519,7 +512,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) y (gw.toSection y)
   have hc_nonneg : ∀ y, 0 ≤ c y := fun y =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) y (ggw.toSection y)
-
   have hb_eq_scalar : b = Integral.Connection.tensorInnerScalar (I := I) (M := M) g r (m + 1)
       gw.toSection gw.toSection := by
     funext y
@@ -530,13 +522,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     rw [hb_eq_scalar]
     exact Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g r (m + 1)
       gw.toSection gw.toSection
-
   set bε : M → ℝ := fun y => b y + ε with hbε
   have hbε_smooth : ContMDiff I 𝓘(ℝ) ∞ bε := hb_smooth.add contMDiff_const
   have hbε_pos : ∀ y, 0 < bε y := fun y => by rw [hbε]; linarith [hb_nonneg y]
   have hbε_ne : ∀ y, bε y ≠ 0 := fun y => ne_of_gt (hbε_pos y)
   have hbε_nonneg : ∀ y, 0 ≤ bε y := fun y => le_of_lt (hbε_pos y)
-
   have hζ_smooth : ContMDiff I 𝓘(ℝ) ∞ (fun y => bε y ^ pm1) := by
     intro y
     exact (Real.contDiffAt_rpow_const_of_ne (p := pm1) (hbε_ne y)).comp_contMDiffAt
@@ -545,16 +535,13 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
   have hζ_apply : (ζ : M → ℝ) = fun y => bε y ^ pm1 := rfl
   have hζ_nonneg : ∀ y, 0 ≤ (ζ : M → ℝ) y := by
     intro y; rw [hζ_apply]; exact Real.rpow_nonneg (hbε_nonneg y) _
-
   set v : Integral.L2.SmoothCcTensor g r m :=
     scalarSmul (I := I) (M := M) g r m ζ w with hv
-
   have hdiag : ∀ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r m w w x = b x := by
     intro x
     rw [tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad (I := I) (M := M) g r m w w x,
       ← riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
         ((covGrad (I := I) (M := M) g r m w).toSection x)]
-
   have hsplit : ∀ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r m w v x =
       (ζ : M → ℝ) x * b x + tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x := by
     intro x
@@ -569,14 +556,12 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     simp only [Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_smul,
       hwx, Integral.L2.tensorInnerPointwise_add_right, Integral.L2.tensorInnerPointwise_smul_right]
     ring
-
   have hpull : ∀ x, Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x
         (Lw.toFun x) (v.toFun x) =
       (ζ : M → ℝ) x * Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x
         (Lw.toFun x) (w.toFun x) := by
     intro x
     rw [hv, scalarSmul_toFun_apply, Integral.L2.tensorInnerPointwise_smul_right]
-
   have hcentral : ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r m w v x ∂μ =
       - ∫ x, Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x
           (Lw.toFun x) (v.toFun x) ∂μ := by
@@ -586,10 +571,10 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       (I := I) (M := M) g r m w v
     rw [hdir] at hgreen
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
-
   have hb_cont : Continuous b := hb_smooth.continuous
   have ha_cont : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r m w
-  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1) ggw
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r
+    (m + 1 + 1) ggw
   have hbε_cont : Continuous bε := hbε_smooth.continuous
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     rw [hζ_apply]; exact hbε_cont.rpow_const (fun y => Or.inl (hbε_ne y))
@@ -602,7 +587,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
           (ζ : M → ℝ) x * b x := by
       funext x; rw [hsplit x]; ring
     rw [heq]; exact htcdpi_cont.sub hζb_cont
-
   set dw : M → ℝ := fun x => Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x
     (Lw.toFun x) (w.toFun x) with hdw
   have hdw_eq : dw = Integral.Connection.tensorInnerScalar (I := I) (M := M) g r m
@@ -615,12 +599,10 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     exact (Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g r m
       Lw.toSection w.toSection).continuous
   have hζdw_cont : Continuous (fun x => (ζ : M → ℝ) x * dw x) := hζ_cont.mul hdw_cont
-
   have hint : ∀ f : M → ℝ, Continuous f → MeasureTheory.Integrable f μ := by
     intro f hf
     exact (hf.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _) (p := 1)).integrable
       (le_refl 1)
-
   set F : M → ℝ := fun x => (a x) ^ (1 / 2 : ℝ) * (ζ : M → ℝ) x * (c x) ^ (1 / 2 : ℝ) with hF
   have hF_nonneg : ∀ x, 0 ≤ F x := fun x => by
     rw [hF]
@@ -630,11 +612,9 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     rw [hF]
     exact ((ha_cont.rpow_const (fun x => Or.inr (by norm_num))).mul hζ_cont).mul
       (hc_cont.rpow_const (fun x => Or.inr (by norm_num)))
-
   have hLHS_eq : (∫ x, b x * (b x + ε) ^ pm1 ∂μ) = ∫ x, (ζ : M → ℝ) x * b x ∂μ := by
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     simp only [hζ_apply, hbε]; ring
-
   have hLHS_split : (∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r m w v x ∂μ) =
       (∫ x, (ζ : M → ℝ) x * b x ∂μ) +
         ∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x ∂μ := by
@@ -647,11 +627,9 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x ∂μ) =
       - ∫ x, (ζ : M → ℝ) x * dw x ∂μ := by
     rw [← hLHS_split, ← hRHS_pull]; exact hcentral
-
   have hcrossB : ∀ x, |tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x| ≤
       2 * pm1 * F x := by
     intro x
-
     set Q : Integral.L2.SmoothCcTensor g r (m + 1) := covGrad (I := I) (M := M) g r m w with hQ_def
     set bfun : M → ℝ := fun y =>
       riemannianFiberNormSq (I := I) (M := M) g r (m + 1) y (Q.toSection y) with hbfun_def
@@ -659,13 +637,12 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     set cv : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
         ((covGrad (I := I) (M := M) g r (m + 1) Q).toSection x) with hcv_def
     set av : ℝ := riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) with hav_def
-    have hbv_nn : 0 ≤ bv := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x (Q.toSection x)
+    have hbv_nn : 0 ≤ bv := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x
+      (Q.toSection x)
     have hcv_nn : 0 ≤ cv := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
     have hav_nn : 0 ≤ av := riemannianFiberNormSq_nonneg (I := I) (M := M) g r m x (w.toSection x)
     have hbεx_pos : 0 < bv + ε := by linarith
-
     have hFx : F x = av ^ (1 / 2 : ℝ) * (bv + ε) ^ pm1 * cv ^ (1 / 2 : ℝ) := rfl
-
     set P : Integral.L2.SmoothCcTensor g r (m + 1) :=
       prependCovGradSlot (I := I) (M := M) g r m ζ w with hP_def
     have hcross_eq : tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x =
@@ -684,22 +661,24 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       have hQself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) = bv := by
-        rw [show bv = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (Q.toSection x) from rfl,
-          riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x (Q.toSection x)]
+        rw [show bv = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (Q.toSection x) from
+          rfl,
+          riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
+            (Q.toSection x)]
       have hPself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
           (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x))
           (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x)) = rP := by
-        rw [show rP = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (P.toSection x) from rfl,
-          riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x (P.toSection x)]
+        rw [show rP = riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (P.toSection x) from
+          rfl,
+          riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (m + 1) x
+            (P.toSection x)]
       rw [hQself, hPself] at hsq
       rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul hbv_nn]
       exact Real.sqrt_le_sqrt hsq
-
     have hrP_eq : rP = (∑ a : Fin n,
           (extDerivFun (I := I) (ζ : M → ℝ) x
             (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) * av :=
       prependCovGradSlot_fiberNormSq_frame_sum_rs (I := I) (M := M) g r m ζ w x
-
     have hbfun_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) bfun x := by
       have hb_eq_scalar : bfun = Integral.Connection.tensorInnerScalar (I := I) (M := M) g r (m + 1)
           Q.toSection Q.toSection := by
@@ -710,13 +689,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       rw [hb_eq_scalar]
       exact (Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g r (m + 1)
         Q.toSection Q.toSection).mdifferentiableAt (by norm_num)
-
     have hbεbfun_ne : bfun x + ε ≠ 0 := ne_of_gt hbεx_pos
     have hchain : ∀ v : TangentSpace I x,
         extDerivFun (I := I) (ζ : M → ℝ) x v =
           (pm1 * (bv + ε) ^ (pm1 - 1)) * extDerivFun (I := I) bfun x v := by
       intro v
-
       have hshift : HasDerivAt (fun t : ℝ => t + ε) 1 (bfun x) :=
         (hasDerivAt_id' (bfun x)).add_const ε
       have houterReal : HasDerivAt (fun t : ℝ => (t + ε) ^ pm1)
@@ -739,12 +716,10 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
           (1 * pm1 * (bfun x + ε) ^ (pm1 - 1)) * extDerivFun (I := I) bfun x v
         ring
       rw [hext, hζeq, hCLM, one_mul, hbv_def]
-
     have hkato : ∑ a : Fin n,
         (extDerivFun (I := I) bfun x (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
           4 * bv * cv :=
       kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs (I := I) (M := M) g r (m + 1) Q x
-
     have hdζsum : (∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
           (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
@@ -770,7 +745,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
           ≤ (pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv)) * av :=
             mul_le_mul_of_nonneg_right hdζsum hav_nn
         _ = pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by ring
-
     have hRHS_nn : (0 : ℝ) ≤ 2 * pm1 * F x := by
       exact mul_nonneg (mul_nonneg (by norm_num) (le_of_lt hpm1_pos)) (hF_nonneg x)
     refine le_trans hCS2 ?_
@@ -804,7 +778,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       _ ≤ pm1 ^ 2 * (4 * av * cv) * ((bv + ε) ^ pm1) ^ 2 := by
           apply mul_le_mul_of_nonneg_left _ (by positivity)
           exact pow_le_pow_left₀ hfac0_nn hfac1 2
-
   have hA_bound : ∀ x, (ζ : M → ℝ) x * |dw x| ≤
       Real.sqrt (Module.finrank ℝ E : ℝ) * F x := by
     intro x
@@ -819,7 +792,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
             Real.sqrt (a x) * Real.sqrt (c x)) :=
           mul_le_mul_of_nonneg_left hcA (hζ_nonneg x)
       _ = Real.sqrt (Module.finrank ℝ E : ℝ) * F x := hζF
-
   have hintF : MeasureTheory.Integrable F μ := hint _ hF_cont
   have hcrossL_int_bound_neg :
       -(∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x ∂μ) ≤
@@ -845,12 +817,10 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
           exact hA_bound x
       _ = Real.sqrt (Module.finrank ℝ E : ℝ) * ∫ x, F x ∂μ :=
           MeasureTheory.integral_const_mul _ _
-
   have hζb_eq : (∫ x, (ζ : M → ℝ) x * b x ∂μ) =
       -(∫ x, (ζ : M → ℝ) x * dw x ∂μ) -
         (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r m ζ w w x ∂μ) := by
     have := hmaster; linarith [this]
-
   have hassembled : (∫ x, (ζ : M → ℝ) x * b x ∂μ) ≤
       (2 * pm1 + Real.sqrt (Module.finrank ℝ E : ℝ)) * ∫ x, F x ∂μ := by
     rw [hζb_eq]
@@ -862,7 +832,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
           have h2 := hcrossL_int_bound_neg
           linarith [h1, h2]
       _ = (2 * pm1 + Real.sqrt (Module.finrank ℝ E : ℝ)) * (∫ x, F x ∂μ) := by ring
-
   change (∫ x, b x * (b x + ε) ^ pm1 ∂μ) ≤
       (2 * pm1 + Real.sqrt (Module.finrank ℝ E : ℝ)) * ∫ x, F x ∂μ
   rw [hLHS_eq]
@@ -913,7 +882,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
   have hp0 : 0 < p := lt_trans one_pos hp1
   have hpm1_pos : (0 : ℝ) < p - 1 := by linarith
   have hpm1_nn : (0 : ℝ) ≤ p - 1 := le_of_lt hpm1_pos
-
   set a : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) with ha
   set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
     ((covGrad (I := I) (M := M) g r m w).toSection x) with hb
@@ -927,11 +895,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
   have hac : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r m w
   have hbc : Continuous b :=
-    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1)
+      (covGrad (I := I) (M := M) g r m w)
   have hcc : Continuous c :=
     continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1)
       (covGrad (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w))
-
   have hε_pos : ∀ n : ℕ, (0 : ℝ) < 1 / ((n : ℝ) + 1) := fun n => by positivity
   have hε_le_one : ∀ n : ℕ, (1 : ℝ) / ((n : ℝ) + 1) ≤ 1 := by
     intro n
@@ -940,7 +908,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     linarith
   have hε_tendsto : Filter.Tendsto (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1)) Filter.atTop (𝓝 0) :=
     tendsto_one_div_add_atTop_nhds_zero_nat
-
   have hrpow_lim : ∀ x : M, Filter.Tendsto
       (fun n : ℕ => (b x + 1 / ((n : ℝ) + 1)) ^ (p - 1)) Filter.atTop (𝓝 ((b x) ^ (p - 1))) := by
     intro x
@@ -948,7 +915,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
       have := hε_tendsto
       simpa using (tendsto_const_nhds.add this)
     exact hbase.rpow_const (Or.inr hpm1_nn)
-
   have hbεn_base_nn : ∀ (n : ℕ) (x : M), 0 ≤ b x + 1 / ((n : ℝ) + 1) := fun n x => by
     have : (0 : ℝ) ≤ 1 / ((n : ℝ) + 1) := by positivity
     linarith [hb0 x]
@@ -961,7 +927,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     Real.rpow_nonneg (by linarith [hb0 x]) _
   have hbεn_nn : ∀ (n : ℕ) (x : M), 0 ≤ (b x + 1 / ((n : ℝ) + 1)) ^ (p - 1) := fun n x =>
     Real.rpow_nonneg (hbεn_base_nn n x) _
-
   have hint : ∀ f : M → ℝ, Continuous f → MeasureTheory.Integrable f μ := by
     intro f hf
     exact (hf.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _) (p := 1)).integrable
@@ -974,7 +939,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     hcc.rpow_const (fun x => Or.inr (by norm_num))
   have ha12_nn : ∀ x, 0 ≤ (a x) ^ (1 / 2 : ℝ) := fun x => Real.rpow_nonneg (ha0 x) _
   have hc12_nn : ∀ x, 0 ≤ (c x) ^ (1 / 2 : ℝ) := fun x => Real.rpow_nonneg (hc0 x) _
-
   have hbp : (∫ x, b x * (b x) ^ (p - 1) ∂μ) = ∫ x, (b x) ^ p ∂μ := by
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     have hadd := Real.rpow_one_add' (hb0 x) (show (1 : ℝ) + (p - 1) ≠ 0 by linarith)
@@ -1022,11 +986,9 @@ theorem weightedCovIBP_lpFiberJet_fin_rs
               ((covGrad (I := I) (M := M) g r (m + 1)
                 (covGrad (I := I) (M := M) g r m w)).toSection x)) ^ (1 / 2 : ℝ)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
-
   set D' : ℝ := 2 * ((k : ℝ) / (i + 1) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) with hD'
   obtain ⟨hLlim, hRlim⟩ :=
     weightedCovIBP_lpFiberJet_fin_regLimit_rs (I := I) (M := M) g k m i r _hk _hi _hik w
-
   have hreg : ∀ n : ℕ, (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
               ((covGrad (I := I) (M := M) g r m w).toSection x)) *
             ((riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
@@ -1045,7 +1007,6 @@ theorem weightedCovIBP_lpFiberJet_fin_rs
     have hεpos : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
     exact weightedCovIBP_lpFiberJet_fin_regIneq_rs (I := I) (M := M) g k m i r _hk _hi _hik w
       (1 / ((n : ℝ) + 1)) hεpos
-
   exact le_of_tendsto_of_tendsto' hLlim (hRlim.const_mul D') hreg
 
 end GeneralValenceRS

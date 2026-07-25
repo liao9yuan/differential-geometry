@@ -49,7 +49,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
-    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)] (x : M) :
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace r s I y)]
+      (x : M) :
     NormedAddCommGroup (Tensor0SBundle.TensorRSSpace r s I x) :=
   Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
     (E := fun y : M => Tensor0SBundle.TensorRSSpace r s I y) x
@@ -209,7 +210,8 @@ theorem exists_sobolev_pointwise_bound_first_order (g₀ : SmoothRiemannianMetri
   nlinarith [h1', hb, hnn, mul_nonneg hCsob_nn hR]
 
 
-private theorem riemannCurvatureCoeffFieldGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0) :
+private theorem riemannCurvatureCoeffFieldGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ)
+    (hΛ0 : 0 ≤ Λ0) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         (_hT0 : ∀ x : M,
@@ -265,7 +267,8 @@ private theorem riemannCurvatureCoeffFieldGridWindow (g₀ : SmoothRiemannianMet
         (diagonalGridGrowthFactor (E := E) w * ∑ i' ∈ Finset.range (w + 1),
           cF i' * (((w + 1 - i' : ℕ) : ℝ) * (Λ0 + 1))) * W := by
     intro F cF hcF_nn hcF
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
       (I := I) (M := M) g₀ w 0 2 4 F T x) ?_
     have hcell2 : ∀ i' ∈ Finset.range (w + 1),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + i') x
@@ -301,14 +304,17 @@ private theorem riemannCurvatureCoeffFieldGridWindow (g₀ : SmoothRiemannianMet
       (appCcGdiag_nonneg (E := E) w)) ?_
     rw [← Finset.sum_mul, ← mul_assoc]
   have hsplit : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 w (riemannCurvatureCoeffField (I := I) (M := M) g₀ T)).toSection x) ≤
+      ((iteratedCovGrad (I := I) g₀ 0 4 w
+        (riemannCurvatureCoeffField (I := I) (M := M) g₀ T)).toSection x) ≤
       2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
           ((iteratedCovGrad (I := I) g₀ 0 4 w
-            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (riemannLoweredContractionA (I := I) (M := M) g₀)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+              (riemannLoweredContractionA (I := I) (M := M) g₀)
               T)).toSection x)
         + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
-              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (riemannLoweredContractionB (I := I) (M := M) g₀)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
+                (riemannLoweredContractionB (I := I) (M := M) g₀)
                 T)).toSection x) := by
     rw [riemannCurvatureCoeffField]
     exact bdRfns_iCG_add_le (I := I) (M := M) g₀ 0 4 w _ _ x
@@ -325,7 +331,8 @@ private theorem lrOmegaHat_gridWindow (g₀ : SmoothRiemannianMetric I M)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (l : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 3 l
@@ -356,7 +363,8 @@ private theorem lrOmegaHat_gridWindow (g₀ : SmoothRiemannianMetric I M)
   set W : ℝ := Combinatorics.antidiagonalTupleGridWindow b (l + 2) with hW_def
   have hW_nn : (0 : ℝ) ≤ W := Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (l + 2)
   rw [connDiffGmLoweredTensor]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ l 0 3 3
     (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (fullRaisedEndoField (I := I) (M := M) g₁ g₀))
     (domDomCongrSection (I := I) g₀ (finRotate 3) (connDiffLoweredCc (I := I) g₀ g₁)) x) ?_
@@ -469,7 +477,8 @@ private theorem connDiffQuadraticCurvatureTermGridWindow (g₀ : SmoothRiemannia
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
         (w K : ℕ) (_hwK : w + 1 ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
@@ -519,7 +528,8 @@ private theorem connDiffQuadraticCurvatureTermGridWindow (g₀ : SmoothRiemannia
               S)).toSection x) ≤
         CQ w * W := by
     intro S hS
-    refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+    refine le_trans
+      (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
       (I := I) (M := M) g₀ w 0 3 4
       (armSlotEndoCc (I := I) (M := M) g₀ 2 (connDiffEndo (I := I) (M := M) g₀ g₁)) S x) ?_
     have hcell : ∀ u' ∈ Finset.range (w + 1),
@@ -653,12 +663,14 @@ private theorem connDiffQuadraticCurvatureTermGridWindow (g₀ : SmoothRiemannia
   have hQA := hbase (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 3) 1)
     (connDiffGmLoweredTensor (I := I) (M := M) g₀ g₁)) hΩswap
   have hQB' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 w (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      ((iteratedCovGrad (I := I) g₀ 0 4 w
+        (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ g₁)).toSection x) ≤
       CQ w * W := by
     rw [connDiffQuadraticPairedTensor]
     exact hQB
   have hQA' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 w (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      ((iteratedCovGrad (I := I) g₀ 0 4 w
+        (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁)).toSection x) ≤
       CQ w * W := by
     rw [connDiffQuadraticComposedTensor]
     exact hQA
@@ -706,12 +718,17 @@ private theorem connDiffQuadraticCurvatureTermGridWindow (g₀ : SmoothRiemannia
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + w) x
         ((iteratedCovGrad (I := I) g₀ 0 4 w (F1 + F2)).toSection x)]
   have h6 := hsum6
-    (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ g₁))
+    (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1)
+      (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ g₁))
     (connDiffQuadraticPairedTensor (I := I) (M := M) g₀ g₁)
-    (domDomCongrSection (I := I) g₀ lrPermA (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
-    (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 2) (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
-    (domDomCongrSection (I := I) g₀ lrPermB (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
-    (domDomCongrSection (I := I) g₀ lrPermC (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
+    (domDomCongrSection (I := I) g₀ lrPermA
+      (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
+    (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 2)
+      (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
+    (domDomCongrSection (I := I) g₀ lrPermB
+      (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
+    (domDomCongrSection (I := I) g₀ lrPermC
+      (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ g₁))
     (hddcQ _ _ hQB') hQB' (hddcQ _ _ hQA') (hddcQ _ _ hQA') (hddcQ _ _ hQA')
     (hddcQ _ _ hQA')
   refine le_trans h6 (le_of_eq ?_)
@@ -729,7 +746,8 @@ private lemma lrGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b 
   exact Finset.prod_le_prod (fun m _ => hb (e m)) (fun m _ => hbb (e m))
 
 
-private theorem riemannCurvatureRemainderGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
+private theorem riemannCurvatureRemainderGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ)
+    (hΛ0 : 0 ≤ Λ0)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
@@ -823,7 +841,8 @@ private theorem riemannCurvatureRemainderGridWindow (g₀ : SmoothRiemannianMetr
     have hsq : (-(s / 2) : ℝ) * -(s / 2) ≤ 1 := by nlinarith
     have hsq0 : (0 : ℝ) ≤ (-(s / 2) : ℝ) * -(s / 2) := by nlinarith
     have hrfns_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + w) x
-      ((iteratedCovGrad (I := I) g₀ 0 4 w (riemannCurvatureCoeffField (I := I) (M := M) g₀ T)).toSection x)
+      ((iteratedCovGrad (I := I) g₀ 0 4 w
+        (riemannCurvatureCoeffField (I := I) (M := M) g₀ T)).toSection x)
     nlinarith [le_trans hbase hbase', hrfns_nn]
   have hB : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
       ((iteratedCovGrad (I := I) g₀ 0 4 w
@@ -841,7 +860,8 @@ private theorem riemannCurvatureRemainderGridWindow (g₀ : SmoothRiemannianMetr
   linarith [hsub, hA, hB]
 
 
-theorem deTurckLieCovDerivArmDifferenceGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
+theorem deTurckLieCovDerivArmDifferenceGridWindow (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ)
+    (hΛ0 : 0 ≤ Λ0)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
@@ -962,7 +982,8 @@ theorem deTurckLieCovDerivArmDifferenceGridWindow (g₀ : SmoothRiemannianMetric
     rw [riemannianFiberNormSq_smul]
     norm_num
   rw [hlift]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 2 6 2
     (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
@@ -985,7 +1006,8 @@ theorem deTurckLieCovDerivArmDifferenceGridWindow (g₀ : SmoothRiemannianMetric
           ((iteratedCovGrad (I := I) g₀ 2 6 w
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
               (lrR4 (I := I) (M := M) g₀ T hδ hδZ s))).toSection x) :=
-      riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
+      riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 2 6
+        armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
           (lrR4 (I := I) (M := M) g₀ T hδ hδZ s))
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6

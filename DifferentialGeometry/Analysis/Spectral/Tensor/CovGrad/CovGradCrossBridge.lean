@@ -59,7 +59,8 @@ private noncomputable def prependGradCLM
     TangentSpace I x →L[ℝ] TensorRSSpace r s I x :=
   (extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma prependGradCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -67,7 +68,8 @@ private lemma prependGradCLM_apply
       (extDerivFun (I := I) (ζ : M → ℝ) x v) • S.toSection x := by
   rw [prependGradCLM, ContinuousLinearMap.smulRight_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma smulRight_add_right (r s : ℕ) {x : M}
     (φ : TangentSpace I x →L[ℝ] ℝ) (t₁ t₂ : TensorRSSpace r s I x) :
     φ.smulRight (t₁ + t₂) = φ.smulRight t₁ + φ.smulRight t₂ := by
@@ -77,7 +79,8 @@ private lemma smulRight_add_right (r s : ℕ) {x : M}
     ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smulRight_apply,
     smul_add]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma smulRight_smul_right (r s : ℕ) {x : M}
     (φ : TangentSpace I x →L[ℝ] ℝ) (c : ℝ) (t : TensorRSSpace r s I x) :
     φ.smulRight (c • t) = c • φ.smulRight t := by
@@ -193,7 +196,8 @@ omit [NeZero (Module.finrank ℝ E)] in
   have h := prependCovGradSlot_smul (I := I) (M := M) g r s ζ (0 : ℝ) 0
   rwa [zero_smul, zero_smul] at h
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma crossLeft_tensorRSSpace_toModel_apply
     (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
     (Dm : Tensor0SModel r ℝ E) :
@@ -373,7 +377,8 @@ private lemma crossLeft_lower_prependCovGradSlot_insertNth_basis
         (fun a : Fin (s + 1) => (chartModelBasis E) (J' (Fin.natAdd r a)))]
   rw [hdir, hupper, hcov, smul_eq_mul]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma crossLeft_gramInv_prod_insertNth_split
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     (k l : Fin (Module.finrank ℝ E))

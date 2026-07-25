@@ -45,8 +45,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 open Classical in
-
-
 def scalarGalVec
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -61,7 +59,6 @@ def scalarGalVec
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalVec_coeff
@@ -75,7 +72,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_supp
@@ -95,7 +91,6 @@ theorem scalarGalVec_supp
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_finite
@@ -108,7 +103,6 @@ theorem scalarGalVec_finite
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_inc
@@ -124,8 +118,6 @@ theorem scalarGalVec_inc
   simp only [tensorHsInclusion_coeff_apply, scalarGalVec_coeff]
 
 omit [BoundarylessManifold I M] in
-
-
 theorem scalarGalRepr_eq
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
@@ -175,7 +167,6 @@ noncomputable def scalarGalEmbed
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalEmbed_apply
@@ -189,8 +180,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 open Classical in
 omit [BoundarylessManifold I M] in
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarGalVec_cont
@@ -237,7 +226,6 @@ noncomputable def scalarGalRestrict
         (I := I) (M := M) (a := (0 : Real)) j.1))
 
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalRest_apply
@@ -274,7 +262,6 @@ noncomputable def scalarGalDiag
   (scalarGalDiagLM (I := I) (M := M) q F).toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarGalDiag_apply
@@ -457,8 +444,6 @@ theorem scalarGalCoefficients_of_not_mem
   simp only [scalarGalCoefficients, dif_neg hi]
 
 open Classical in
-
-
 structure IsConjGalSol
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (tau : Real)

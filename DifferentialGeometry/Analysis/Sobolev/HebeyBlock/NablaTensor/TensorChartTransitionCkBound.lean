@@ -24,7 +24,8 @@ noncomputable def transitionCoeffOnEuclid
   transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma transitionCoeffOnEuclid_def
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (y : EuclN) :
@@ -36,14 +37,16 @@ noncomputable def chartTransitionEuclidOverlap (α β : M) : Set EuclN :=
   {y | y ∈ chartTargetEuclid (I := I) (M := M) α ∧
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source}
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 @[simp] lemma mem_chartTransitionEuclidOverlap {α β : M} {y : EuclN} :
     y ∈ chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β ↔
       y ∈ chartTargetEuclid (I := I) (M := M) α ∧
         (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source :=
   Iff.rfl
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
     IsOpen (chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β) := by
   classical
@@ -83,7 +86,8 @@ private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
   rw [h_eq]
   exact h_pre_open
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma transitionCoeffOnEuclid_contDiffOn
     (r s : ℕ) (α β : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :

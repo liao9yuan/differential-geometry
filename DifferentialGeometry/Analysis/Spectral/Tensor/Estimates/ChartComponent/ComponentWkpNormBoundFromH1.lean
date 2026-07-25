@@ -108,7 +108,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
         (I := I) (M := M) g r s α β
     obtain ⟨C_env, hC_env_nn, h_env⟩ :=
-      DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
+      Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
         (I := I) (M := M) g β (p := (2 : ℝ≥0∞)) hp_one hp_top
     have hper_k : ∀ k : Fin (Module.finrank ℝ E),
         ∀ (S : SmoothCcTensorH1 g r s)

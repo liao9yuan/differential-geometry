@@ -28,7 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -229,7 +230,8 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     exact absurd ⟨(b, ξ₀), hb, hξ₀⟩ hK_ne
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma gInner_self_eq_chartGram_quadForm
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I x) :
@@ -311,7 +313,6 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     intro i j k
     have hgood : x ∈ chartLeviCivitaGoodSet (I := I) α := hx_good
     exact riemannOp_chartBasisVec_alpha_eq (I := I) g α i j k hgood
-
   have htri : riemannOp (cov := LeviCivita (I := I) g) x v w u =
       ∑ i, ∑ k, ∑ j, (c i * (b k * a j)) •
         riemannOp (cov := LeviCivita (I := I) g) x (eα j) (eα k) (eα i) := by
@@ -319,7 +320,6 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
       ContinuousLinearMap.smul_apply, Finset.smul_sum, smul_smul]
   rw [htri]
-
   have hexpand : (∑ i, ∑ k, ∑ j, (c i * (b k * a j)) •
         riemannOp (cov := LeviCivita (I := I) g) x (eα j) (eα k) (eα i)) =
       ∑ i, ∑ k, ∑ j, ∑ l,
@@ -334,7 +334,6 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     congr 1
     ring
   rw [hexpand]
-
   set t : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → TangentSpace I x :=
     fun i j k l => (c i * a j * b k *
@@ -352,21 +351,16 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [Finset.sum_smul]
   rw [hRHS_distr]
-
   rw [show (∑ i, ∑ k, ∑ j, ∑ l, t i j k l) = ∑ i, ∑ k, ∑ l, ∑ j, t i j k l from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.sum_comm]]
-
   rw [show (∑ i, ∑ k, ∑ l, ∑ j, t i j k l) = ∑ i, ∑ l, ∑ k, ∑ j, t i j k l from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.sum_comm]]
-
   rw [Finset.sum_comm]
-
   refine Finset.sum_congr rfl (fun l _ => ?_)
   refine Finset.sum_congr rfl (fun i _ => ?_)
-
   rw [Finset.sum_comm]
 
 omit [CompactSpace M] in
@@ -400,11 +394,9 @@ private lemma riemannOp_normSq_le_chartConstants
   set R : Fin n → Fin n → Fin n → Fin n → ℝ :=
     fun i j k l => chartRiemannTensor (I := I) g α i j k l (extChartAt I α x) with hR_def
   set coeff : Fin n → ℝ := fun l => ∑ i, ∑ j, ∑ k, c i * a j * b k * R i j k l with hcoeff_def
-
   have hRvwu : riemannOp (cov := LeviCivita (I := I) g) x v w u =
       ∑ l, coeff l • chartBasisVecFiber (I := I) α l x := by
     rw [riemannOp_LeviCivita_chartAlpha_frame_expand (I := I) g α hx_base hx_good v w u]
-
   have hgnorm_eq : g.inner x (riemannOp (cov := LeviCivita (I := I) g) x v w u)
         (riemannOp (cov := LeviCivita (I := I) g) x v w u) =
       ∑ l, ∑ l', chartGramMatrix (I := I) g α x l l' * coeff l * coeff l' := by
@@ -420,14 +412,12 @@ private lemma riemannOp_normSq_le_chartConstants
         (riemannOp (cov := LeviCivita (I := I) g) x v w u) ≤
       CG * ∑ l, coeff l ^ 2 := by
     rw [hgnorm_eq]; exact hCGbound coeff
-
   set Sa : ℝ := ∑ j, |a j| with hSa_def
   set Sb : ℝ := ∑ k, |b k| with hSb_def
   set Sc : ℝ := ∑ i, |c i| with hSc_def
   have hSa_nonneg : 0 ≤ Sa := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSb_nonneg : 0 ≤ Sb := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSc_nonneg : 0 ≤ Sc := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-
   have hk_collapse : ∀ i j : Fin n,
       (∑ k, |c i| * |a j| * |b k|) = |c i| * |a j| * Sb := by
     intro i j
@@ -469,7 +459,6 @@ private lemma riemannOp_normSq_le_chartConstants
       rw [Finset.sum_mul]
     rw [heq, hprod_factor]
     exact le_of_eq (by ring)
-
   have hcoeff_sq : ∀ l, coeff l ^ 2 ≤ CR ^ 2 * (Sc * Sa * Sb) ^ 2 := by
     intro l
     have h1 : |coeff l| ≤ CR * (Sc * Sa * Sb) := hcoeff_abs l
@@ -485,7 +474,6 @@ private lemma riemannOp_normSq_le_chartConstants
           Finset.sum_le_sum (fun l _ => hcoeff_sq l)
       _ = (n : ℝ) * (CR ^ 2 * (Sc * Sa * Sb) ^ 2) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-
   have hSa_sq : Sa ^ 2 ≤ (n : ℝ) * ∑ j, a j ^ 2 := by
     have h := sq_sum_le_card_mul_sum_sq (s := (Finset.univ : Finset (Fin n)))
       (f := fun j => |a j|)
@@ -510,7 +498,6 @@ private lemma riemannOp_normSq_le_chartConstants
       Finset.sum_congr rfl (fun i _ => sq_abs _)
     rw [heq] at h
     exact h
-
   have hgvv_eq : g.inner x v v =
       ∑ i, ∑ j, chartGramMatrix (I := I) g α x i j * a i * a j := by
     rw [gInner_self_eq_chartGram_quadForm (I := I) g α hx_base v]
@@ -535,9 +522,7 @@ private lemma riemannOp_normSq_le_chartConstants
   have hQa_nonneg : 0 ≤ ∑ j, a j ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hQb_nonneg : 0 ≤ ∑ k, b k ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hQc_nonneg : 0 ≤ ∑ i, c i ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
   have hCG_nonneg : 0 ≤ CG := hCG
-
   have hScab_sq : (Sc * Sa * Sb) ^ 2 ≤
       (n : ℝ) ^ 3 * ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by
     have hexp : (Sc * Sa * Sb) ^ 2 = Sc ^ 2 * Sa ^ 2 * Sb ^ 2 := by ring
@@ -556,7 +541,6 @@ private lemma riemannOp_normSq_le_chartConstants
   have hn_nonneg : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   have hcg_inv_nonneg : (0 : ℝ) ≤ cg⁻¹ := le_of_lt (inv_pos.mpr hcg)
   have hCR2_nonneg : (0 : ℝ) ≤ CR ^ 2 := sq_nonneg _
-
   have hsum_coeff_sq' : ∑ l, coeff l ^ 2 ≤
       CR ^ 2 * (n : ℝ) ^ 4 * ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by
     calc ∑ l, coeff l ^ 2 ≤ (n : ℝ) * (CR ^ 2 * (Sc * Sa * Sb) ^ 2) := hsum_coeff_sq
@@ -565,14 +549,12 @@ private lemma riemannOp_normSq_le_chartConstants
           gcongr
       _ = CR ^ 2 * (n : ℝ) ^ 4 *
             ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by ring
-
   have hQprod_le : (∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2) ≤
       cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w) := by
     calc (∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)
         ≤ (cg⁻¹ * g.inner x u u) * (cg⁻¹ * g.inner x v v) * (cg⁻¹ * g.inner x w w) := by
           gcongr
       _ = cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w) := by ring
-
   calc g.inner x (riemannOp (cov := LeviCivita (I := I) g) x v w u)
         (riemannOp (cov := LeviCivita (I := I) g) x v w u)
       ≤ CG * ∑ l, coeff l ^ 2 := hgnorm_le_CGcoeff
@@ -596,7 +578,6 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
           Kbase * g.inner x v v * g.inner x w w * g.inner x u u := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-
   have hCR_ex : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ b ∈ tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         ∀ i j k l : Fin n,
@@ -618,7 +599,6 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
     refine le_trans (le_of_eq ?_) h
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
     rw [chartGramMatrix_apply]
-
   choose CR hCR0 hCRbound using hCR_ex
   choose CG hCG0 hCGbound using hCG_ex
   choose cg hcg0 hcgbound using fun α =>
@@ -636,7 +616,6 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
   refine ⟨∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α, ?_, ?_⟩
   · exact Finset.sum_nonneg (fun α _ => hKα_nonneg α)
   intro x v w u
-
   have hsum := DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
     (I := I) (M := M) x
   have hex_pos : ∃ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -661,13 +640,11 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
     pouTsupport_subset_goodSet (I := I) α hx_tsupport
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
-
   have hpt := riemannOp_normSq_le_chartConstants (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun i j k l => hCRbound α x hx_tsupport i j k l)
     (fun ξ => hCGbound α x hx_tsupport ξ)
     (fun ξ => hcgbound α x hx_tsupport ξ) v w u
-
   have hKα_le : Kα α ≤ ∑ β ∈ chartAtlasPOU_finset (I := I) (M := M), Kα β :=
     Finset.single_le_sum (fun β _ => hKα_nonneg β) hα_mem
   have hgvv_nonneg : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) g x v

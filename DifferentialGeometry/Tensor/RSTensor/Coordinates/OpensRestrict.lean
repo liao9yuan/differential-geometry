@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -29,10 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
-
-
-
-
 theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source) :
     (tangentBundleCore I V).coordChange (achart H p) (achart H q) x
@@ -68,12 +63,6 @@ theorem tangentCoordChange_opens {V : Opens M} [Nonempty V] (p q x : V)
     (hev.eq_of_nhdsWithin ⟨(chartAt H (p : M)) (x : M), rfl⟩)
 
 omit [CompleteSpace E] in
-
-
-
-
-
-
 theorem tensor0SModelAt_opens (s : ℕ) {V : Opens M} [Nonempty V] (p x : V)
     (hxp : (x : M) ∈ (chartAt H (p : M)).source)
     (A : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := V) s x) :

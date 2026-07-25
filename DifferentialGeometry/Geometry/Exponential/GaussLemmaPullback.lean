@@ -451,7 +451,8 @@ private def gaussVariation (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     ℝ → ℝ → M :=
   fun s t => expMap (I := I) g p (show TangentSpace I p from (t • (v + s • w)))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     (γ : ℝ → M) (t₀ : ℝ) (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀) :
     DifferentiableAt ℝ
@@ -614,12 +615,14 @@ lemma radialSpeedSq_eq_inner
     have hconv : Convex ℝ (Set.Ioo (0 : ℝ) 1) := convex_Ioo 0 1
     have hdiffOn : DifferentiableOn ℝ (radialSpeedSq (I := I) g p a) (Set.Ioo (0 : ℝ) 1) :=
       fun z hz =>
-        ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z hz).differentiableAt).differentiableWithinAt
+        ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z
+          hz).differentiableAt).differentiableWithinAt
     apply Convex.is_const_of_fderivWithin_eq_zero hconv hdiffOn _ hx hy
     intro z hz
     have hfd : HasFDerivWithinAt (radialSpeedSq (I := I) g p a) (0 : ℝ →L[ℝ] ℝ)
         (Set.Ioo (0 : ℝ) 1) z := by
-      have h := ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z hz).hasFDerivAt).hasFDerivWithinAt
+      have h := ((radialSpeedSq_hasDerivAt_zero (I := I) g p a ha z
+        hz).hasFDerivAt).hasFDerivWithinAt
         (s := Set.Ioo (0 : ℝ) 1)
       rwa [show (ContinuousLinearMap.toSpanSingleton ℝ (0 : ℝ)) = (0 : ℝ →L[ℝ] ℝ) from by
         ext; simp] at h
@@ -660,7 +663,8 @@ lemma radialSpeedSq_eq_inner
     exact tendsto_nhds_unique h1 h2
   rw [← h0val, hval0]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 private lemma variationFieldChartRep_differentiableAt_of_contDiffAt2
     (f : ℝ → ℝ → M) (t₀ : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (f 0 t₀) (f q.1 q.2)) (0, t₀))
@@ -705,7 +709,8 @@ private lemma variationFieldChartRep_differentiableAt_of_contDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 private lemma longitVelChartRep_differentiableAt_of_contDiffAt2
     (f : ℝ → ℝ → M) (t₀ : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun q : ℝ × ℝ => extChartAt I (f 0 t₀) (f q.1 q.2)) (0, t₀))
@@ -745,7 +750,8 @@ private lemma longitVelChartRep_differentiableAt_of_contDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 private lemma launchSpeedSq_s_hasDerivAt
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
     HasDerivAt (fun s : ℝ => g.inner p (v + s • w) (v + s • w))
@@ -916,7 +922,8 @@ private lemma gauss_phi_hasDerivAt
           (fun s : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F s u) t₀ (1 : ℝ)) 0
         = covDerivAlong (I := I) g (fun u : ℝ => F 0 u)
           (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => F s u) 0 (1 : ℝ)) t₀ :=
-    covDerivAlong_commute_transverse_longitudinal_of_variation (I := I) g F t₀ hF2 hslice_u_ev hslice_v_ev
+    covDerivAlong_commute_transverse_longitudinal_of_variation (I := I) g F t₀ hF2 hslice_u_ev
+      hslice_v_ev
       htransverse_cont hcentral_cont
   set γ : ℝ → M := fun t : ℝ => F 0 t with hγ
   set V : ∀ t, TangentSpace I (γ t) :=
@@ -1181,10 +1188,9 @@ private lemma gauss_phi_continuousOn
       (fun t ht => (hγC2 t ht).continuousAt.continuousWithinAt) hWdiff
   exact Variation.continuousOn_g_inner_along_curve (I := I) g hsecV hsecW
 
-set_option linter.unusedVariables false in
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
     g.inner (expMap (I := I) g p (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I

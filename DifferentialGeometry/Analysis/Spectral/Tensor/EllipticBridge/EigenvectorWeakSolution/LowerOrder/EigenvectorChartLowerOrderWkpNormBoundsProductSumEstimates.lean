@@ -242,7 +242,6 @@ lemma memWkp_finsetSum
 
 omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 lemma wkpNorm_finsetSum_le_const_mul_atomSum
     {α : M} {K : ℕ} {ι κ : Type*}
@@ -308,7 +307,6 @@ lemma wkpNorm_finsetSum_le_const_mul_atomSum
               (chartTargetEuclid (I := I) (M := M) α) := by rw [h_cast]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 private lemma memWkp_of_weakPartial_of_memWkp_succ
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -341,7 +339,6 @@ private lemma memWkp_of_weakPartial_of_memWkp_succ
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-
 lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -408,7 +405,6 @@ lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 lemma exists_uniform_const_of_finite_wkpNorm_bounds
     {α : M} {K : ℕ} {ι κ : Type*} [Finite ι]
     (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ) (proj : ι → κ)

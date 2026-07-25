@@ -74,7 +74,6 @@ theorem eigenChartIncrementMode_contDiffOn
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   set S := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
     (I := I) (M := M) g 0 2 i with hS_def
-
   have hB : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -101,7 +100,6 @@ theorem eigenChartIncrementMode_contDiffOn
     have hpx := happ x hx
     rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
     exact hpx.2
-
   rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)] at hScal
   have hsource_eq : (chartAt H α).source = (extChartAt I α).source := by
     rw [extChartAt_source (I := I)]
@@ -126,7 +124,6 @@ theorem eigenChartIncrementMode_contDiffOn
         (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y)))
       (interior (extChartAt I α).target) :=
     hcomp.contDiffOn
-
   have htime : ContDiffOn ℝ ∞ (fun q : ℝ × E => φ i q.1)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
@@ -138,8 +135,8 @@ theorem eigenChartIncrementMode_contDiffOn
     hSpace.comp contDiffOn_snd (Set.mapsTo_snd_prod)
   exact htime.mul hspaceComp
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
-
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 private def eigenSpatialFactor
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) : E → ℝ :=
@@ -150,15 +147,18 @@ private def eigenSpatialFactor
       (chartBasisVecFiber (I := I) α i' ((extChartAt I α).symm y))
       (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y))
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 omit [BoundarylessManifold I M] in
 private lemma eigenSpatialFactor_eqOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     Set.EqOn (eigenSpatialFactor (I := I) (M := M) g α i' j' i)
       (fun y : E => (1 / 2 : ℝ) *
-        (tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
-          tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y))
+        (tensorChartComponentOnModel (I := I) (M := M) g
+          (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
+          tensorChartComponentOnModel (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y))
       (interior (extChartAt I α).target) := by
   intro y hy
   have hsrc : (extChartAt I α).symm y ∈ (chartAt H α).source := by
@@ -170,7 +170,8 @@ private lemma eigenSpatialFactor_eqOn
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α i' j' hsrc]
   rfl
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 omit [BoundarylessManifold I M] in
 private lemma eigenSpatialFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
@@ -179,14 +180,19 @@ private lemma eigenSpatialFactor_contDiffOn
       (interior (extChartAt I α).target) := by
   refine ContDiffOn.congr ?_ (eigenSpatialFactor_eqOn (I := I) (M := M) g α i' j' i)
   have hadd : ContDiffOn ℝ ∞
-      (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
-          tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y)
+      (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
+          tensorChartComponentOnModel (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y)
       (interior (extChartAt I α).target) :=
-    (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j']).add
-      (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'])
+    (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α
+      ![i', j']).add
+      (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α
+        ![j', i'])
   exact contDiffOn_const.mul hadd
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E)) (m : ℕ)
     {B : Set E} (hB_compact : IsCompact B) (hB : B ⊆ interior (extChartAt I α).target) :
@@ -198,9 +204,7 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
   classical
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hUDO : UniqueDiffOn ℝ O := isOpen_interior.uniqueDiffOn
-
   set kE : ℕ := Module.finrank ℝ E + 2 * m + 1 with hkE_def
-
   have hper : ∀ m' : ℕ, m' ≤ m → ∃ Cm' : ℝ, 0 ≤ Cm' ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
         ‖iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y‖ ≤
@@ -208,14 +212,15 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
    intro m' hm'
    have h_super : 2 * kE > Module.finrank ℝ E + 2 * m' := by rw [hkE_def]; omega
    obtain ⟨Cab, hCab_nn, hCab⟩ :=
-     exists_rawCompOnE_jet_le_toHs_on_compact (I := I) (M := M) g α ![i', j'] m' kE h_super hB_compact hB
+     exists_rawCompOnE_jet_le_toHs_on_compact (I := I) (M := M) g α ![i', j'] m' kE h_super
+       hB_compact hB
    obtain ⟨Cba, hCba_nn, hCba⟩ :=
-     exists_rawCompOnE_jet_le_toHs_on_compact (I := I) (M := M) g α ![j', i'] m' kE h_super hB_compact hB
+     exists_rawCompOnE_jet_le_toHs_on_compact (I := I) (M := M) g α ![j', i'] m' kE h_super
+       hB_compact hB
    obtain ⟨Cdec, hCdec_nn, hCdec⟩ :=
      eigenvectorSmooth_toHs_norm_le_lambda_pow (I := I) (M := M) g kE
    refine ⟨(1 / 2 : ℝ) * (Cab + Cba) * Cdec, by positivity, fun i y hy => ?_⟩
    set S := eigenvectorSmooth (I := I) (M := M) g 0 2 i with hS_def
-
    have hcongr : iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y =
        iteratedFDerivWithin ℝ m'
          ((1 / 2 : ℝ) • (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j'] +
@@ -225,20 +230,28 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
      rw [eigenSpatialFactor_eqOn (I := I) (M := M) g α i' j' i hz]
      simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul, hS_def]
    rw [hcongr]
-   have hcd_ab : ContDiffWithinAt ℝ (m' : ℕ∞) (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y :=
+   have hcd_ab : ContDiffWithinAt ℝ (m' : ℕ∞)
+     (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y :=
      ((rawCompOnE_contDiffOn (I := I) (M := M) g S α ![i', j']).contDiffWithinAt (hB hy)).of_le
        (by exact_mod_cast le_top)
-   have hcd_ba : ContDiffWithinAt ℝ (m' : ℕ∞) (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y :=
+   have hcd_ba : ContDiffWithinAt ℝ (m' : ℕ∞)
+     (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y :=
      ((rawCompOnE_contDiffOn (I := I) (M := M) g S α ![j', i']).contDiffWithinAt (hB hy)).of_le
        (by exact_mod_cast le_top)
-   rw [iteratedFDerivWithin_const_smul_apply (f := tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j'] +
-         tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) (hcd_ab.add hcd_ba) hUDO (hB hy),
+   rw [iteratedFDerivWithin_const_smul_apply
+     (f := tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j'] +
+         tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) (hcd_ab.add hcd_ba) hUDO
+           (hB hy),
      iteratedFDerivWithin_add_apply hcd_ab hcd_ba hUDO (hB hy)]
    refine le_trans (norm_smul_le (1 / 2 : ℝ)
-     (iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
-       iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y)) ?_
-   have htri : ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
-         iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖ ≤
+     (iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y
+       +
+       iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O
+         y)) ?_
+   have htri : ‖iteratedFDerivWithin ℝ m'
+     (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+         iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O
+           y‖ ≤
        Cab * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * kE) S‖ +
          Cba * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * kE) S‖ :=
      le_trans (norm_add_le _ _) (add_le_add (hCab S y hy) (hCba S y hy))
@@ -247,18 +260,24 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
    have hdec : N ≤ Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := hCdec i
    have hbase_nn : (0 : ℝ) ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) :=
      pow_nonneg (by have := tensor_lambda_nonneg (I := I) (M := M) i; linarith) _
-   calc ‖(1 / 2 : ℝ)‖ * ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
-           iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖
+   calc ‖(1 / 2 : ℝ)‖ * ‖iteratedFDerivWithin ℝ m'
+          (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+           iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i'])
+             O y‖
        ≤ ‖(1 / 2 : ℝ)‖ * ((Cab + Cba) * N) := by
          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
-         calc ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
-               iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖
+         calc ‖iteratedFDerivWithin ℝ m'
+                (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+               iteratedFDerivWithin ℝ m'
+                 (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖
              ≤ Cab * N + Cba * N := htri
            _ = (Cab + Cba) * N := by ring
-     _ ≤ ‖(1 / 2 : ℝ)‖ * ((Cab + Cba) * (Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE))) := by
+     _ ≤ ‖(1 / 2 : ℝ)‖ * ((Cab + Cba) *
+       (Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE))) := by
          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
          exact mul_le_mul_of_nonneg_left hdec (by positivity)
-     _ = (1 / 2 : ℝ) * (Cab + Cba) * Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := by
+     _ = (1 / 2 : ℝ) * (Cab + Cba) * Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+       (2 * kE) := by
          rw [Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]; ring
   choose Cf hCf_nn hCf using hper
   set Cmax : ℝ := (Finset.range (m + 1)).sup'
@@ -276,7 +295,8 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
     refine mul_le_mul_of_nonneg_right (hCmax_ge m' hm') ?_
     exact pow_nonneg (by have := tensor_lambda_nonneg (I := I) (M := M) i; linarith) _
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  (eigenvectorSmooth tensorChartComponentRaw) in
 theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -299,46 +319,41 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
   set O : Set E := interior (extChartAt I α).target with hO_def
   set s : Set (ℝ × E) := Set.Icc (0 : ℝ) T ×ˢ B with hs_def
   have hUD : UniqueDiffOn ℝ s := (uniqueDiffOn_Icc hT).prod hB_uniq
-
   obtain ⟨Csp, pSp, hCsp_nn, hCsp⟩ :=
     exists_eigenSpatialFactor_jet_le_lambda_pow (I := I) (M := M) g α i' j' k hB_compact hB
-
   set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
   set σ0 : ℝ := 2 * (pSp : ℝ) + 2 * (sW : ℝ) with hσ0_def
   have hσ0_nn : (0 : ℝ) ≤ σ0 := by rw [hσ0_def]; positivity
-
   have htime : ∀ a : ℕ, ∃ Cm : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cm ∧
       ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
         tensorSobolevWeight (I := I) (M := M) i σ0 * (iteratedDeriv a (φ i) t) ^ 2 ≤ Cm i :=
     fun a => hmodemass a σ0 hσ0_nn
   choose Cmf hCmf_summable hCmf using htime
-
   have hweyl : Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-(2 * (sW : ℝ)))) := by
     refine tensorEigen_summable_negpow (I := I) (M := M) g (2 * (sW : ℝ)) ?_
     rw [hsW_def]; push_cast; have := weylSobolevExp_gt_finrank (E := E); push_cast at this ⊢
     have h0 : (0:ℝ) ≤ (weylSobolevExp (E := E) : ℝ) := by positivity
     nlinarith [h0]
-
   have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
       (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
     have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
   have htime_pt : ∀ (j : ℕ) (i : TensorEigenIdx (I := I) (M := M) g 0 2) (t : ℝ),
       t ∈ Set.Icc (0 : ℝ) T →
       |iteratedDeriv j (φ i) t| ≤
-        Real.sqrt (Cmf j i) * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) := by
+        Real.sqrt (Cmf j i) * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+          (-(((pSp : ℝ)) + (sW : ℝ))) := by
     intro j i t ht
     have hmm := hCmf j i t ht
-
     have hw : tensorSobolevWeight (I := I) (M := M) i σ0 =
         ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ))) ^ 2 := by
       unfold tensorSobolevWeight
       rw [hσ0_def, show 2 * (pSp : ℝ) + 2 * (sW : ℝ) = ((pSp : ℝ) + (sW : ℝ)) * 2 by ring,
         Real.rpow_mul (hbase_pos i).le, Real.rpow_two]
     rw [hw] at hmm
-    set W : ℝ := (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ)) with hW_def
+    set W : ℝ := (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ)) with
+      hW_def
     have hW_pos : 0 < W := Real.rpow_pos_of_pos (hbase_pos i) _
-
     have hCm_nn : 0 ≤ Cmf j i := le_trans (by positivity) hmm
     have habs : |iteratedDeriv j (φ i) t| ≤ Real.sqrt (Cmf j i) / W := by
       rw [le_div_iff₀ hW_pos]
@@ -346,11 +361,11 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
         rw [Real.sq_sqrt hCm_nn, mul_pow, sq_abs]
         nlinarith [hmm, hW_pos.le]
       have hlhs_nn : 0 ≤ |iteratedDeriv j (φ i) t| * W := by positivity
-      nlinarith [Real.sqrt_nonneg (Cmf j i), h2, hlhs_nn, sq_nonneg (|iteratedDeriv j (φ i) t| * W - Real.sqrt (Cmf j i))]
+      nlinarith [Real.sqrt_nonneg (Cmf j i), h2, hlhs_nn, sq_nonneg
+        (|iteratedDeriv j (φ i) t| * W - Real.sqrt (Cmf j i))]
     rw [Real.rpow_neg (hbase_pos i).le]
     rw [div_eq_mul_inv] at habs
     rwa [← hW_def]
-
   set Kconst : ℝ := (2 : ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
     (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k *
     Csp with hKconst_def
@@ -399,11 +414,13 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     have hbase_nn : (0 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := (hbase_pos i).le
     have hcd_fst : ContDiffOn ℝ ∞ (fun p : ℝ × E => φ i p.1) s :=
       ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
-    have hcd_snd : ContDiffOn ℝ ∞ (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s := by
+    have hcd_snd : ContDiffOn ℝ ∞
+      (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s := by
       refine (eigenSpatialFactor_contDiffOn (I := I) (M := M) g α i' j' i).comp contDiffOn_snd ?_
       intro p hp; exact hB hp.2
     have heqmode : eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i =
-        (fun p : ℝ × E => φ i p.1) * (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) := by
+        (fun p : ℝ × E => φ i p.1) *
+          (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) := by
       funext p; rw [eigenChartIncrementMode]; rfl
     rw [heqmode]
     have hleib := norm_iteratedFDerivWithin_mul_le (𝕜 := ℝ) (f := fun p : ℝ × E => φ i p.1)
@@ -413,7 +430,6 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     change _ ≤ ∑ a ∈ Finset.range (k + 1), termf a i
     refine Finset.sum_le_sum (fun a ha => ?_)
     have hak : a ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)
-
     set Cφa : ℝ := (∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) *
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) with hCφa_def
     have hCφa_nn : 0 ≤ Cφa := by
@@ -433,14 +449,13 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
       (eigenSpatialFactor_contDiffOn (I := I) (M := M) g α i' j' i) hB hUD (k - a) q hq
       (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
       (fun jj hjj => hCsp jj (by omega) i q.2 hqB)
-
     have hfn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ := norm_nonneg _
     have hgn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ (k - a)
-        (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖ := norm_nonneg _
+        (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖ := norm_nonneg
+          _
     have hchoose_nn : (0:ℝ) ≤ (k.choose a : ℝ) := by positivity
     have hF1 := hfst_bnd
     have hG1 := hsnd_bnd
-
     have hsp_nn : 0 ≤ Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp :=
       mul_nonneg hCsp_nn (pow_nonneg hbase_nn _)
     have hprod : ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
@@ -456,15 +471,18 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
               (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖
         = (k.choose a : ℝ) * (‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
             ‖iteratedFDerivWithin ℝ (k - a)
-              (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖) := by ring
-      _ ≤ (k.choose a : ℝ) * (((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
-            (((k - a).factorial : ℝ) * (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
+              (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖) :=
+                by ring
+      _ ≤ (k.choose a : ℝ) * (((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a)
+        *
+            (((k - a).factorial : ℝ) * (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
+              *
               (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a))) :=
           mul_le_mul_of_nonneg_left hprod hchoose_nn
       _ ≤ termf a i := by
           simp only [htermf_def, hCφa_def, hKconst_def, hwfun_def]
-
-          have hcollapse : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) *
+          have hcollapse : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+            (-(((pSp : ℝ)) + (sW : ℝ))) *
               (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp =
               tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) := by
             unfold tensorSobolevWeight
@@ -486,23 +504,27 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           have hsnd_pow : (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a) ≤
               (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k :=
             pow_le_pow_right₀ (by linarith [norm_nonneg (ContinuousLinearMap.snd ℝ ℝ E)]) (by omega)
-
           have hlhs_eq : (k.choose a : ℝ) * (((a.factorial : ℝ) *
-                (Ssqrt * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ)))) *
+                (Ssqrt * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                  (-(((pSp : ℝ)) + (sW : ℝ)))) *
                 (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
-              (((k - a).factorial : ℝ) * (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
+              (((k - a).factorial : ℝ) *
+                (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
                 (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a))) =
               ((k.choose a : ℝ) * (a.factorial : ℝ) * ((k-a).factorial : ℝ) *
                 (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a *
                 (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a) * Csp) *
-              (Ssqrt * ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) *
+              (Ssqrt * ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                (-(((pSp : ℝ)) + (sW : ℝ))) *
                 (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)) := by ring
           rw [hlhs_eq, hcollapse]
           have hrhs_eq : (2 : ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
-                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k * Csp *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^
+                  k * Csp *
               (Ssqrt * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) =
               ((2 : ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
-                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k * Csp) *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^
+                  k * Csp) *
               (Ssqrt * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by ring
           rw [hrhs_eq]
           refine mul_le_mul ?_ (le_refl _) ?_ (by positivity)
@@ -513,7 +535,8 @@ theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
                 (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a *
                 (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a) * Csp ≤
                 (2:ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
-                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k * Csp := by
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^
+                  k * Csp := by
               have hfst_nn : (0:ℝ) ≤ (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) := by positivity
               have hsnd_nn : (0:ℝ) ≤ (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) := by positivity
               gcongr

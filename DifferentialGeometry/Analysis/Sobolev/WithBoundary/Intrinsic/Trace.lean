@@ -360,16 +360,16 @@ theorem trace_via_inclEuclidean_eq_zero_of_tsupport_subset_openHalfSpace
       tsupport u ⊆ openHalfSpaceEuclid (n := n))
     (x' : EuclideanSpace ℝ (Fin (n - 1))) :
     u
-        (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+        (EuclideanHalfSpaceInstance.inclEuclidean
           n x') =
       0 := by
   refine zero_on_boundary_of_tsupport_subset_openHalfSpace
     (n := n) h_supp ?_
   change
-    (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+    (EuclideanHalfSpaceInstance.inclEuclidean
         n x') 0 = 0
   exact
-    DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean_zero_coord
+    EuclideanHalfSpaceInstance.inclEuclidean_zero_coord
       n x'
 
 theorem trace_via_inclEuclidean_eq_zero_of_tsupport_subset_interiorHalfSpace
@@ -379,16 +379,16 @@ theorem trace_via_inclEuclidean_eq_zero_of_tsupport_subset_interiorHalfSpace
       tsupport u ⊆ interiorHalfSpaceEuclid (n := n) Ω)
     (x' : EuclideanSpace ℝ (Fin (n - 1))) :
     u
-        (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+        (EuclideanHalfSpaceInstance.inclEuclidean
           n x') =
       0 := by
   refine zero_on_boundaryHyperplane_of_tsupport_subset_interiorHalfSpace
     (n := n) (Ω := Ω) (u := u) h_supp ?_
   change
-    (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+    (EuclideanHalfSpaceInstance.inclEuclidean
         n x') 0 = 0
   exact
-    DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean_zero_coord
+    EuclideanHalfSpaceInstance.inclEuclidean_zero_coord
       n x'
 
 theorem eLpNorm_trace_eq_zero_of_tsupport_subset_openHalfSpace
@@ -400,13 +400,13 @@ theorem eLpNorm_trace_eq_zero_of_tsupport_subset_openHalfSpace
     eLpNorm
         (fun x' : EuclideanSpace ℝ (Fin (n - 1)) =>
           u
-            (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+            (EuclideanHalfSpaceInstance.inclEuclidean
               n x'))
         p μ = 0 := by
   have h_zero :
       (fun x' : EuclideanSpace ℝ (Fin (n - 1)) =>
         u
-          (DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance.inclEuclidean
+          (EuclideanHalfSpaceInstance.inclEuclidean
             n x')) =
       (fun _ : EuclideanSpace ℝ (Fin (n - 1)) => (0 : ℝ)) := by
     funext x'

@@ -184,7 +184,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
@@ -219,7 +218,8 @@ theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
   have hN_pos : ∀ y₀, 0 < N y₀ := by
     intro y₀; simp only [N]
     split_ifs with hy
-    · exact (exists_W_and_constant_symmL (I := I) (M := M) g r s α y₀ hy).choose_spec.2.2.choose_spec.1
+    · exact (exists_W_and_constant_symmL (I := I) (M := M) g r s α y₀
+      hy).choose_spec.2.2.choose_spec.1
     · exact one_pos
   have hN_bound : ∀ y₀ (hy : y₀ ∈ (chartAt H α).source), ∀ b ∈ W y₀,
       ∀ v : TensorRSModel r s ℝ E,
@@ -229,7 +229,8 @@ theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
     intro y₀ hy b hb v
     simp only [W, dif_pos hy] at hb
     simp only [N, dif_pos hy]
-    exact (exists_W_and_constant_symmL (I := I) (M := M) g r s α y₀ hy).choose_spec.2.2.choose_spec.2
+    exact (exists_W_and_constant_symmL (I := I) (M := M) g r s α y₀
+      hy).choose_spec.2.2.choose_spec.2
       b hb v
   have h_cover : K ⊆ ⋃ y₀ ∈ K, W y₀ := fun b hb =>
     Set.mem_iUnion₂.mpr ⟨b, hb, hW_mem b (hKsub hb)⟩

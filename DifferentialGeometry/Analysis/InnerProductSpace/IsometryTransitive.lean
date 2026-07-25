@@ -41,7 +41,6 @@ theorem exists_linearIsometryEquiv_unit {u v : E} (hu : ‖u‖ = 1) (hv : ‖v�
   let i0 : Fin (finrank ℝ E) := ⟨0, hn⟩
   have card_eq : finrank ℝ E = Fintype.card (Fin (finrank ℝ E)) :=
     (Fintype.card_fin _).symm
-
   have hsingle : ∀ (w : E), ‖w‖ = 1 →
       Orthonormal ℝ (({i0} : Set (Fin (finrank ℝ E))).restrict (fun _ => w)) := by
     intro w hw

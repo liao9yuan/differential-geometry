@@ -16,7 +16,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-
 theorem chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
     (α : M) (u : ℝ → E) (s : Set ℝ) (t : ℝ) (vel : E)
     (htgt_t : u t ∈ (extChartAt I α).target)

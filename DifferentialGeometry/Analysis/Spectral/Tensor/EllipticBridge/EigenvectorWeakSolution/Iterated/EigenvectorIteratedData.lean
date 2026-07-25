@@ -43,7 +43,8 @@ omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \
       chartPouKernel (I := I) (M := M) α) :=
-  (DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
+  (DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen (I := I)
+    (M := M) α).sdiff
     (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
@@ -69,7 +70,9 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set V : Set EuclN := chartTargetEuclid (I := I) (M := M) α \
     chartPouKernel (I := I) (M := M) α with hV_def
-  have hΩ_open : IsOpen Ω := DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen (I := I) (M := M) α
+  have hΩ_open : IsOpen Ω :=
+    DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen (I := I)
+    (M := M) α
   have hV_open : IsOpen V :=
     chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α
   have hV_sub : V ⊆ Ω := chartTargetEuclid_sdiff_chartPouKernel_subset (I := I) (M := M) α
@@ -113,7 +116,6 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
     exact Filter.Eventually.of_forall (fun _ => rfl)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -203,7 +205,6 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     h_wp_loc h_zero_loc
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -297,7 +298,6 @@ lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
     (I := I) (M := M) g α m hy, zero_mul]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-
 omit [CompleteSpace E] in
 lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

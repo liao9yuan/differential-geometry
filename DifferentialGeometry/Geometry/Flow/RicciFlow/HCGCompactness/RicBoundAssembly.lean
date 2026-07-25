@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -43,7 +42,8 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem tower_bound_to_intrinsic
@@ -85,7 +85,8 @@ theorem tower_bound_to_intrinsic
 
 
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem aN_intrinsic_point
@@ -144,7 +145,6 @@ theorem aN_intrinsic_point
         Cpp * Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (2 + N)
           (iterCov (I := I) gRef 2 (metricTensorField (I := I) g) N y)) + Cppp := by
   classical
-
   have hBd : ∀ c : ℕ, ∃ Bc, 0 ≤ Bc ∧ (c < N - 1 → ∀ z ∈ u,
       compL2 (iterCovCompU (I := I) frame
         (fun y' => christoffelSymbolInFrame
@@ -170,7 +170,6 @@ theorem aN_intrinsic_point
       nlinarith [hC0, hg, hcb, hgnn]
     · exact ⟨0, le_rfl, fun h => absurd h hc⟩
   choose B hB0 hBb using hBd
-
   obtain ⟨Ctop, hCtop0, htopGen⟩ := claim1_LC hu gRef frame hframe hframeS hchrH
     C0 Kg (N - 1)
   have htop := htopGen g hchrG hgsm Ginv hinv hGinv
@@ -191,7 +190,6 @@ theorem aN_intrinsic_point
     intro x hx
     have h := htop x hx
     rwa [show N - 1 + 1 = N from by omega] at h
-
   obtain ⟨Cpp, Cppp, hpp0, hppp0, hcompGen⟩ := aN_component (r₀ := 2) (rg := 2)
     hu frame
     (fun y' => christoffelSymbolInFrame

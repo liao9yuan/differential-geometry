@@ -23,7 +23,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem trilinear_eval_hasDerivWithinAt
     {B : ℝ → (E →L[ℝ] E →L[ℝ] ℝ)} {a b : ℝ → E} {S : Set ℝ} {t : ℝ}
     {B' : E →L[ℝ] E →L[ℝ] ℝ} {a' b' : E}
@@ -37,7 +36,6 @@ theorem trilinear_eval_hasDerivWithinAt
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-
 theorem trilinear_eval_hasDerivAt
     {B : ℝ → (E →L[ℝ] E →L[ℝ] ℝ)} {a b : ℝ → E} {t : ℝ}
     {B' : E →L[ℝ] E →L[ℝ] ℝ} {a' b' : E}
@@ -48,7 +46,8 @@ theorem trilinear_eval_hasDerivAt
   have step2 := step1.clm_apply hb
   convert step2 using 1
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem pullback_eval_form_hasDerivAt_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -71,7 +70,8 @@ theorem pullback_eval_form_hasDerivAt_of_slots
         + ((g_fam t).inner (Φ_fam t x)) (mfderiv I I (Φ_fam t : M → M) x v) b') t :=
   trilinear_eval_hasDerivAt hB ha hb
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem pullback_eval_form_hasDerivWithinAt_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -94,7 +94,8 @@ theorem pullback_eval_form_hasDerivWithinAt_of_slots
         + ((g_fam t).inner (Φ_fam t x)) (mfderiv I I (Φ_fam t : M → M) x v) b') S t :=
   trilinear_eval_hasDerivWithinAt hB ha hb
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem pullback_eval_form_total_hasDerivAt
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -123,7 +124,8 @@ theorem pullback_eval_form_total_hasDerivAt
   rw [hG', hA', hB_val]
   exact pullback_eval_form_hasDerivAt_of_slots g_fam Φ_fam t x v w B' a' b' hB ha hb
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem pullback_eval_form_chain_hasDerivAt
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

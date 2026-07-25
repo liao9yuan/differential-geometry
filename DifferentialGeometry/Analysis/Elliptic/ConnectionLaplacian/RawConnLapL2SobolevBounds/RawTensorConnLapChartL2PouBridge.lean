@@ -73,13 +73,11 @@ omit [NeZero (Module.finrank ℝ E)] in
           ∂(volume : Measure EuclN) := rfl
 
 variable (I M) in
-
 private noncomputable def chartAtlasPOU_tsupp_nonempty
     (α : M) : Prop :=
   (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)).Nonempty
 
 variable (I M) in
-
 noncomputable def chartDensitySupPou
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
   open Classical in
@@ -122,7 +120,6 @@ lemma chartDensitySupPou_le
   convert h using 2
 
 variable (I M) in
-
 noncomputable def chartSobolevRawNormPouBridgeConstant
     (g : SmoothRiemannianMetric I M) : ℝ :=
   ((chartAtlasPOU_finset (I := I) (M := M)).card : ℝ) *

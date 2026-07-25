@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -288,8 +287,10 @@ theorem exists_freezeLastTwo0S3 {x : M}
   congr 1
   funext a
   fin_cases a
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3]
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec3]
+  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
+    DifferentialGeometry.Integral.Connection.vec3]
+  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
+    DifferentialGeometry.Integral.Connection.vec3]
   · change (vec2 (I := I) X Z) 1 = Z
     norm_num [DifferentialGeometry.Integral.Connection.vec2]
 
@@ -851,7 +852,8 @@ def metricTraceFirstTwo0STensor
   metricTrace0S2TensorInBasis (I := I)
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
     T
 
@@ -868,9 +870,11 @@ theorem metricTraceFirstTwo0STensor_apply
   exact metricTrace0S2InBasis_eq_metricTrace (I := I) g
     (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
     (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k
+        l
         (extChartAt I x x))
-    (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x)
     T tail
 
 

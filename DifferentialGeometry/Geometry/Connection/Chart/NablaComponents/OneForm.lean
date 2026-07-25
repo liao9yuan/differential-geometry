@@ -162,7 +162,8 @@ theorem tensor0S_one_eval_coordFrame_sum
             αx (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b]
 
-omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem tensor0S_one_eval_finset_sum
     {ι : Type*} {x : M}
     (αx : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -191,7 +192,8 @@ private theorem tensor0S_one_eval_finset_sum
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [hupdate]
 
-omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem mdifferentiableAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -210,7 +212,8 @@ private theorem mdifferentiableAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
-omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -243,7 +246,8 @@ private theorem extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
-omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_mul
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -259,7 +263,8 @@ private theorem extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -304,7 +309,8 @@ private theorem coordinateFrame_coeff_at_base_eq_coord
   rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
   rw [hbasis]
 
-omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_congr_eventually
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :

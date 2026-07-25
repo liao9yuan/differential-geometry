@@ -40,12 +40,14 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable (g : SmoothRiemannianMetric I M)
 
 abbrev eigenSmooth
-    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) : SmoothCcTensor g 0 2 :=
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
+      SmoothCcTensor g 0 2 :=
   eigenvectorSmooth (I := I) (M := M) g 0 2 i
 
 def finiteEigenCombo
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
-    (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) : SmoothCcTensor g 0 2 :=
+    (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
+      SmoothCcTensor g 0 2 :=
   ∑ i ∈ F, c i • eigenSmooth (I := I) (M := M) g i
 
 omit [BoundarylessManifold I M] in
@@ -82,7 +84,6 @@ theorem finiteEigenCombo_toL2
     eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i]
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 theorem tensorL2Coeff_ofCompact_eigenSmooth
     (i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -102,7 +103,6 @@ theorem tensorL2Coeff_ofCompact_eigenSmooth
   exact horth i j
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 theorem finiteEigenCombo_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -206,7 +206,6 @@ theorem rawConnLapIter_tensorL2Coeff
       ring
 
 open scoped Classical in
-
 private lemma finiteEigenCombo_iterRawConnLap_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (j : ℕ)
@@ -263,7 +262,6 @@ theorem finiteEigenCombo_l2NormSq
   simp
 
 open scoped Classical in
-
 def finiteEigenComboHs
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) :
@@ -277,7 +275,6 @@ def finiteEigenComboHs
     ring
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

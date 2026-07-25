@@ -77,10 +77,14 @@ lemma bal_block23 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
             CB q j * ‖smoothCcToTensorHs (I := I) (M := M) g₀
               ((j + 2 * q + 3 : ℕ) : ℝ) T₀‖ := by
   classical
-  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
-  obtain ⟨CCS, hCCS_nn, hCCS⟩ := riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs
+    (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CCS, hCCS_nn, hCCS⟩ :=
+    riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M)
+    g₀ Kc hKc_nn εa hεa_nn
   obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
-  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I) (M := M) g₀
+  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I)
+    (M := M) g₀
   obtain ⟨CDT, hCDT_nn, hCDT⟩ := bal_DTwrap (I := I) (M := M) g₀
   set n : ℕ := Module.finrank ℝ E with hn_def
   set G : ℕ → ℝ := fun j => diagonalGridGrowthFactor (E := E) j * CDT *
@@ -141,7 +145,8 @@ lemma bal_block23 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
         (show l + (Module.finrank ℝ E / 2 + 2) =
           (1 + l) + (Module.finrank ℝ E / 2 + 1) from by omega)]
       exact hCDS0 T₀ (1 + l) x
-  have hGd_mono : ∀ {l' : ℕ}, l' ≤ j → diagonalGridGrowthFactor (E := E) l' ≤ diagonalGridGrowthFactor (E := E) j := by
+  have hGd_mono : ∀ {l' : ℕ}, l' ≤ j → diagonalGridGrowthFactor (E := E) l' ≤
+    diagonalGridGrowthFactor (E := E) j := by
     intro l' hl'
     have hbase : (1 : ℝ) ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) := by
       have : (0:ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
@@ -194,7 +199,8 @@ lemma bal_block23 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
                 (covGrad (I := I) (M := M) g₀ 0 2 T₀))).toSection x) ≤
           diagonalGridGrowthFactor (E := E) j * (n : ℝ) * gridj := by
       intro l' hl'
-      have hgrid := riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) (M := M) g₀
+      have hgrid := riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I)
+        (M := M) g₀
         (2 + 1) (2 + 2) Cf' (covGrad (I := I) (M := M) g₀ 0 2 T₀) l' x
       refine le_trans hgrid ?_
       have hterm : ∀ α ∈ Finset.range (l' + 1),

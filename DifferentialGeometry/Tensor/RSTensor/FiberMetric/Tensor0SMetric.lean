@@ -394,7 +394,8 @@ def tensor0SMetricStep
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x).toLinearEquiv
     (@MetricFiberData.homCLM
       (TangentSpace I x) (Tensor0SSpace s I x)
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd0 hContSMul0 inferInstance
       (tangentMetricData (I := I) g x).metric D)
 
@@ -678,7 +679,8 @@ private theorem homCLM_normSq_eq_basis
     (A : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData (I := I) g x).metric D).flat A A =
       ∑ i : Idx, ∑ j : Idx,
@@ -698,7 +700,8 @@ private theorem homCLM_inner_eq_basis
     (A B : TangentSpace I x →L[Real] W) :
     (@MetricFiberData.homCLM
       (TangentSpace I x) W
-      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+        inferInstance
       inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
       (tangentMetricData (I := I) g x).metric D).flat A B =
       ∑ i : Idx, ∑ j : Idx,
@@ -1089,7 +1092,7 @@ private theorem tensor0SMetricStep_inner_eq_coordStep
 
 omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_succ_summand_eq
-    {Idx : Type*}  {x : M} (s : Nat)
+    {Idx : Type*} {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
     (A B : Tensor0SSpace (s + 1) I x)
     (basis : Module.Basis Idx Real (TangentSpace I x))

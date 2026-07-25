@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -61,7 +60,6 @@ theorem implicitDeriv_one_le
     (hB : ‖Dj‖ ≤ B)
     (hrel : ∀ᶠ params in nhds params₀, G (f params) params = 0) :
     ‖Df‖ ≤ Λ * B := by
-
   have hk : HasFDerivAt (fun z : E => (z, params₀))
       (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) z₀ :=
     (hasFDerivAt_id z₀).prodMk (hasFDerivAt_const params₀ z₀)
@@ -80,13 +78,11 @@ theorem implicitDeriv_one_le
         = (a, (0 : (ι → ℝ) × (ι → E))) + ((0 : E), b) :=
       Prod.ext (add_zero a).symm (zero_add b).symm
     rw [hdecomp, map_add, hDv]
-
-
-
   have hpair : HasFDerivAt (fun params : (ι → ℝ) × (ι → E) => (f params, params))
       (Df.prod (ContinuousLinearMap.id ℝ ((ι → ℝ) × (ι → E)))) params₀ :=
     hf.prodMk (hasFDerivAt_id params₀)
-  have hGf : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) Dj (f params₀, params₀) := by
+  have hGf : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) Dj
+    (f params₀, params₀) := by
     rw [hf0]; exact hG
   have hcomp := HasFDerivAt.comp (𝕜 := ℝ) (E := (ι → ℝ) × (ι → E))
       (F := E × ((ι → ℝ) × (ι → E))) (G := E)
@@ -285,7 +281,6 @@ theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ
     have h : Ring.inverse ((Dj params₀).comp (ContinuousLinearMap.inl ℝ E P))
         = (↑u⁻¹ : E →L[ℝ] E) := by rw [← hu, Ring.inverse_unit]
     rw [← h]; exact hΛ
-
   have hinv_d : HasFDerivAt (Ring.inverse : (E →L[ℝ] E) → (E →L[ℝ] E))
       (-(ContinuousLinearMap.mulLeftRight ℝ (E →L[ℝ] E) ↑u⁻¹ ↑u⁻¹))
       ((Dj params₀).comp (ContinuousLinearMap.inl ℝ E P)) := by
@@ -426,13 +421,11 @@ theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [Nor
     have h : p ∈ (fun p : P => (f p, p)) ⁻¹' interior t := interior_subset hp.2
     exact Set.mem_preimage.mp h
   have hgrx : ((f x, x) : E × P) ∈ interior t := hmaps hxs
-
   have hC' : ∀ i, i ≤ m →
       ‖iteratedFDerivWithin ℝ i H (interior t) ((f x, x) : E × P)‖ ≤ C := by
     intro i him
     rw [iteratedFDerivWithin_of_isOpen i isOpen_interior hgrx]
     exact hC i him
-
   have hD' : ∀ i, 1 ≤ i → i ≤ m →
       ‖iteratedFDerivWithin ℝ i (fun p : P => (f p, p)) s x‖ ≤ D ^ i := by
     intro i hi him
@@ -467,15 +460,6 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
 structure CmHessianBoundInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -492,8 +476,6 @@ structure CmHessianBoundInput
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [T3Space M] in
 omit [ConnectedSpace M] in
 theorem CmHessianBoundInput.toInv
@@ -509,18 +491,6 @@ theorem CmHessianBoundInput.toInv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
 def CmGDerivBound
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -535,19 +505,6 @@ def CmGDerivBound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure CmHessianNbhdInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -570,11 +527,6 @@ structure CmHessianNbhdInput
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
 omit [T3Space M] in
 omit [ConnectedSpace M] in
 theorem cmChartFDerivLe
@@ -600,23 +552,12 @@ theorem cmChartFDerivLe
       ≤ hbd.Λ * B1 := by
   rw [norm_iteratedFDeriv_one, hcderiv.fderiv]
   exact implicitDeriv_one_le (fun z params => chartCmEqn' (I := I) g hEnorm p z params) z₀ params₀
-    (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df Dj hbd.L hbd.Λ B1
+    (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df Dj hbd.L hbd.Λ
+      B1
     hc0 hcderiv hG hbd.hL hbd.hLinv hB hc_solves
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-
-
-
-
-
 omit [T3Space M] in
 omit [ConnectedSpace M] in
 theorem cmChartDerivLe2
@@ -667,7 +608,6 @@ theorem cmChartDerivLe2
           (fderiv ℝ (fun q' => (NormalCoordinates.normalChartAt (I := I) g p (c q') : E)) q) q := by
       filter_upwards [hf2.eventually (by simp)] with q hq
       exact (hq.differentiableAt (by norm_num)).hasFDerivAt
-
     have htend : Filter.Tendsto
         (fun q => ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q))
         (nhds params₀) (nhds (z₀, params₀)) := by
@@ -676,7 +616,6 @@ theorem cmChartDerivLe2
           (nhds params₀) (nhds z₀) := by
         rw [← hc0]; exact hf2.continuousAt
       exact hf_cont.prodMk_nhds Filter.tendsto_id
-
     have hG_ev : ∀ᶠ q in nhds params₀,
         HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
           (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
@@ -684,7 +623,6 @@ theorem cmChartDerivLe2
           ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q) := by
       filter_upwards [htend.eventually (hG2.eventually (by simp))] with q hq
       exact (hq.differentiableAt (by norm_num)).hasFDerivAt
-
     have hB1 : ‖Dj‖ ≤ B 1 := by
       have h := hGbd 1 (by omega)
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
@@ -724,7 +662,6 @@ theorem cmChartDerivLe2
         rw [← norm_iteratedFDeriv_one]
         exact norm_iteratedFDeriv_fderiv
       rw [heq2]; exact h
-
     obtain ⟨A', hAd, hA'le⟩ := graphBlockDeriv
       (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2))
       (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀ Df _
@@ -743,7 +680,6 @@ theorem cmChartDerivLe2
     have hb₂ : ‖B'‖ ≤ B 2 * (hbd.Λ * B 1 + 1) :=
       hB'le.trans (mul_le_mul hH'le hmax_le
         (le_trans zero_le_one (le_max_right _ _)) hB2nonneg)
-
     have hfam0 : fderiv ℝ
         (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
         ((NormalCoordinates.normalChartAt (I := I) g p (c params₀) : E), params₀) = Dj := by
@@ -759,7 +695,6 @@ theorem cmChartDerivLe2
             (ContinuousLinearMap.norm_inr_le_one ℝ E ((ι → ℝ) × (ι → E))) (norm_nonneg _)
             (le_trans (norm_nonneg _) hB1)
         _ = B 1 := mul_one _
-
     have hmain := implicitDeriv_two_le
       (fun z params => chartCmEqn' (I := I) g hEnorm p z params)
       (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀

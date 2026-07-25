@@ -60,7 +60,8 @@ private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : �
   · exact (h_e_cont.tendsto).congr'
       (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) h_derivEq).symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor2_eval_contOn {K : Set ℝ}
     {A : (t : ℝ) → (x : M) →
       Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2 x}
@@ -146,7 +147,8 @@ theorem hell_of_soln
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     (g.inner x u v) ^ 2 ≤ g.inner x u u * g.inner x v v := by
@@ -190,7 +192,8 @@ private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem chartGramEntry_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)
     {Q : Set M} (hequiv : MetricUniformEquivalentOn Q gRef g C)
@@ -198,10 +201,10 @@ private theorem chartGramEntry_le_of_equiv
       chartGramMatrix gRef α₀ b a a ≤ M0)
     (i j : Fin (Module.finrank ℝ E)) {x : M} (hx : x ∈ Q) :
     |chartGramMatrix g α₀ x i j| ≤ C * M0 := by
-
   have hdiag : ∀ a : Fin (Module.finrank ℝ E),
       0 ≤ g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ∧
-        g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ≤ C * M0 := by
+        g.inner x (chartBasisVecFiber (I := I) α₀ a x) (chartBasisVecFiber (I := I) α₀ a x) ≤ C *
+          M0 := by
     intro a
     set e := chartBasisVecFiber (I := I) α₀ a x with he
     have hnn : 0 ≤ g.inner x e e := by
@@ -216,7 +219,6 @@ private theorem chartGramEntry_le_of_equiv
       _ = C * chartGramMatrix gRef α₀ x a a := by rw [hg]
       _ ≤ C * M0 := by
         apply mul_le_mul_of_nonneg_left (hgRef a x hx) hC0
-
   rw [chartGramMatrix_apply]
   set ei := chartBasisVecFiber (I := I) α₀ i x
   set ej := chartBasisVecFiber (I := I) α₀ j x
@@ -232,7 +234,8 @@ private theorem chartGramEntry_le_of_equiv
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀ : M)
     {Q : Set M} (hQc : IsCompact Q) (hQs : Q ⊆ (chartAt H α₀).source) :
     ∃ M0 : ℝ, 0 ≤ M0 ∧ ∀ (a : Fin (Module.finrank ℝ E)) (b : M), b ∈ Q →
@@ -249,14 +252,16 @@ private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀
         Finset.single_le_sum (fun i _ => (hCi_pos i).le) (Finset.mem_univ a)
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem goodSet_subset_chartSource (α₀ : M) :
     chartLeviCivitaGoodSet (I := I) α₀ ⊆ (chartAt H α₀).source :=
   fun _ hz => extChartAt_source I α₀ ▸ hz.1.1
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem chartJet0_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)
     {Q : Set M} (hQ : Q ⊆ chartLeviCivitaGoodSet (I := I) α₀)
@@ -352,7 +357,8 @@ theorem ric_quad_le_of_realizes
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 theorem chartGram_smooth_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -382,7 +388,8 @@ theorem chartGram_smooth_of_soln
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 theorem chartGram_cont_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}

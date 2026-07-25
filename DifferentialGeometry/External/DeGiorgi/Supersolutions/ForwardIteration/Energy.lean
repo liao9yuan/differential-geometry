@@ -21,6 +21,7 @@ local notation "E" => AmbientSpace d
 local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 -- forward energy bound assembly
 theorem superPowerCutoffFwd_energy_bound_reg
     (_hd : 2 < (d : ℝ))
@@ -117,7 +118,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
     exact (hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aemeasurable
   have hfluxNorm_aemeas : AEMeasurable fluxNorm μ := by
     exact
-      (((super_aestronglyMeasurable_matMulE A.1 hu1.weakGrad_memLp.aestronglyMeasurable).mono_measure
+      (((super_aestronglyMeasurable_matMulE A.1
+        hu1.weakGrad_memLp.aestronglyMeasurable).mono_measure
         (Measure.restrict_mono_set volume hΩ_sub_Ω1)).norm.aemeasurable)
   have hcore_eq :
       ∀ x, coreIntegrand x = bilinFormIntegrandOfCoeff A.1 hu1 hwφ x := by
@@ -168,7 +170,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
       simpa [μ, hu, MemW1pWitness.restrict] using hu.weakGrad_norm_memLp.integrable_sq
     refine Integrable.mono' hbase ?_ ?_
     · exact
-        (((hη.continuous.pow 2).aemeasurable).mul hbase.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
+        (((hη.continuous.pow 2).aemeasurable).mul
+          hbase.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
     · filter_upwards with x
       have hη_sq_le : η x ^ 2 ≤ 1 := by
         have hη_sq_le' : η x ^ 2 ≤ (1 : ℝ) ^ 2 := by
@@ -196,7 +199,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
         IntegrableOn (fun x => superExactShiftPow ε p (u x)) Ω volume :=
       superExactFwd_shiftPow_integrableOn_ball (u := u) (ε := ε) (p := p) (s := s)
         hε hp hp1 hs (fun x hx => hu_pos x (hΩ_sub_Ω1 hx)) hu hpInt
-    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 - p))) hbound_aemeas.aestronglyMeasurable ?_
+    refine Integrable.mono' (hpow_int.const_mul (Cη ^ 2 / (1 - p)))
+      hbound_aemeas.aestronglyMeasurable ?_
     filter_upwards [ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hx
     have hux : 0 < u x := hu_pos x (hΩ_sub_Ω1 hx)
     have hlhs_nonneg :
@@ -239,7 +243,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
       exact ae_restrict_of_ae_restrict_of_subset hΩ_sub_Ω1 <| by
         filter_upwards [A.1.ae_coercive_nonneg] with x hx
         simpa [Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using hx (hu1.weakGrad x)
-    filter_upwards [hquad, hnonneg, ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hxq hxn hx
+    filter_upwards [hquad, hnonneg, ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hxq hxn
+      hx
     have hux : 0 < u x := hu_pos x (hΩ_sub_Ω1 hx)
     have hψd_nonneg : 0 ≤ ψd x := by
       dsimp [ψd]
@@ -367,7 +372,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
       calc
         ∫ x in Ω1, bilinFormIntegrandOfCoeff A.1 hu1 hwφ x ∂volume
             = ∫ x in Ω1, coreIntegrand x ∂volume := by
-                exact setIntegral_congr_fun Metric.isOpen_ball.measurableSet fun x _ => (hcore_eq x).symm
+                exact setIntegral_congr_fun Metric.isOpen_ball.measurableSet fun x _
+                  => (hcore_eq x).symm
         _ = ∫ x in Ω, coreIntegrand x ∂volume := hcore_integral_eq
     rw [← hbilin_eq]
     exact hsuper_test
@@ -438,7 +444,8 @@ theorem superPowerCutoffFwd_energy_bound_reg
         exact h1.continuous_deriv_one.measurable.comp_aemeasurable
           hu.memLp.aestronglyMeasurable.aemeasurable
       exact ((((hη.continuous.pow 2).aemeasurable).mul (hα_aemeas.pow aemeasurable_const)).mul
-        (hu.weakGrad_memLp.aestronglyMeasurable.aemeasurable.norm.pow aemeasurable_const)).aestronglyMeasurable
+        (hu.weakGrad_memLp.aestronglyMeasurable.aemeasurable.norm.pow
+          aemeasurable_const)).aestronglyMeasurable
     · filter_upwards [hTermA_pt] with x hx
       have hterm_nonneg : 0 ≤ termAfun x := by
         dsimp [termAfun]
@@ -631,6 +638,7 @@ theorem superExactFwd_energy_mainBall
           ∫ x in Ω, superExactShiftPow (superEpsSeq n) p (u x) ∂volume := henergyReg
 
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
     (hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
@@ -894,7 +902,8 @@ theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
     exact (hBn_memLp n i).sub (hB_memLp i)
   have hBn_tendsto :
       ∀ i : Fin d,
-        Filter.Tendsto (fun n => eLpNorm (fun x => Bn n i x - B i x) 2 μ) Filter.atTop (nhds 0) := by
+        Filter.Tendsto (fun n => eLpNorm (fun x => Bn n i x - B i x) 2 μ) Filter.atTop
+          (nhds 0) := by
     intro i
     have hdom :
         ∀ n, ∀ᵐ x ∂μ, |Bn n i x - B i x| ≤ (2 * Cη) * Hdom x := by
@@ -1190,11 +1199,14 @@ theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
         simp [hsq.liminf_eq]
       calc
         ∫⁻ x, ENNReal.ofReal ((Asing i x) ^ 2) ∂μ
-            = ∫⁻ x, Filter.liminf (fun n => ENNReal.ofReal ((AsingSeq n i x) ^ 2)) Filter.atTop ∂μ := by
+            = ∫⁻ x, Filter.liminf (fun n => ENNReal.ofReal ((AsingSeq n i x) ^ 2)) Filter.atTop
+              ∂μ := by
                 exact lintegral_congr_ae hlim.symm
-        _ ≤ Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal ((AsingSeq n i x) ^ 2) ∂μ) Filter.atTop := hleft
+        _ ≤ Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal ((AsingSeq n i x) ^ 2) ∂μ) Filter.atTop :=
+          hleft
     have hBound_ne_top :
-        Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal ((AsingSeq n i x) ^ 2) ∂μ) Filter.atTop ≠ ⊤ := by
+        Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal ((AsingSeq n i x) ^ 2) ∂μ) Filter.atTop ≠
+          ⊤ := by
       apply ne_of_lt
       have htop : ENNReal.ofReal (2 * (CE * J) + 2 * (Cη ^ 2 * J)) < ⊤ := by simp
       have hle :
@@ -1420,7 +1432,8 @@ theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
     simpa [G, hwv, Gn] using htoLp.comp hpi
   have hFatou :
       ∫⁻ x, ENNReal.ofReal (‖hwv.weakGrad x‖ ^ 2) ∂μ ≤
-        Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2) ∂μ) Filter.atTop := by
+        Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2) ∂μ)
+          Filter.atTop := by
     have hmeas :
         ∀ n, AEMeasurable (fun x => ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2)) μ := by
       intro n
@@ -1441,9 +1454,11 @@ theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
       exact hsq.liminf_eq
     calc
       ∫⁻ x, ENNReal.ofReal (‖hwv.weakGrad x‖ ^ 2) ∂μ
-          = ∫⁻ x, Filter.liminf (fun n => ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2)) Filter.atTop ∂μ := by
+          = ∫⁻ x, Filter.liminf (fun n => ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2)) Filter.atTop
+            ∂μ := by
               exact lintegral_congr_ae hlim.symm
-      _ ≤ Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2) ∂μ) Filter.atTop := hleft
+      _ ≤ Filter.liminf (fun n => ∫⁻ x, ENNReal.ofReal (‖(wfn n).weakGrad x‖ ^ 2) ∂μ) Filter.atTop
+        := hleft
   have hRhs_meas :
       ∀ n, AEStronglyMeasurable (fun x => superExactShiftPow (superEpsSeq n) p (u x)) μ := by
     intro n

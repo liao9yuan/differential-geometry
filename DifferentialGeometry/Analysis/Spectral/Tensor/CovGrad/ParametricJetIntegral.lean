@@ -39,7 +39,6 @@ private local instance instCompleteSpaceE : CompleteSpace E :=
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -75,7 +74,6 @@ theorem joint_rs_sub {r s : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem joint_rs_add {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞

@@ -31,10 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
-
-
 private lemma intervalIntegrable_chartTrivRepr_along_orbit
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (g : ℝ → E) (Tα C s : ℝ)
     (hs0 : 0 ≤ s) (hsT : s ≤ Tα)
@@ -76,8 +72,11 @@ private lemma intervalIntegrable_chartTrivRepr_along_orbit
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chart_anchor_flow_build
     (X : ℝ → ∀ x : M, TangentSpace I x)
-    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2)) (Set.univ : Set (ℝ × M)))
-    (hgrad : ∀ α : M, ContinuousOn (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2)) (Set.univ : Set (ℝ × M)))
+    (hCont : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.univ : Set (ℝ × M)))
+    (hgrad : ∀ α : M, ContinuousOn
+      (fun q : ℝ × M => fderiv ℝ (fun z => chartTrivRepr (I := I) α (X q.1) z) (extChartAt I α q.2))
+      (Set.univ : Set (ℝ × M)))
     (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -85,17 +84,16 @@ theorem corrected_chart_anchor_flow_build
     ∃ (σ : ℝ) (_ : 0 < σ) (Φ0 : ℝ → M → M),
       (∀ x : M, Φ0 0 x = x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) σ, ∀ x : M,
-        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ0 t x)))) ∧
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ0 s x) (Set.Ioo (0 : ℝ) σ) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ0 t x)))) ∧
       (∀ x : M, ∃ α : M, ∃ δ : ℝ, ∃ C : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
         ∀ s ∈ Set.Ico (0 : ℝ) (min δ σ), Φ0 s x ∈ (chartAt H α).source ∧
-          (extChartAt I α (Φ0 s x) = extChartAt I α x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α (X r) (extChartAt I α (Φ0 r x)))
+          (extChartAt I α (Φ0 s x) = extChartAt I α x + ∫ r in (0 : ℝ)..s, chartTrivRepr (I := I) α
+            (X r) (extChartAt I α (Φ0 r x)))
           ∧ ‖chartTrivRepr (I := I) α (X s) (extChartAt I α (Φ0 s x))‖ ≤ C) ∧
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) 0) := by
   classical
   set center : M → E := fun α => I ((chartAt H α) α) with hcenter
-
-
-
   have hper : ∀ α : M, ∃ (Tα rα r'α Cα : ℝ),
       0 < Tα ∧ 0 < rα ∧ 0 < r'α ∧ 0 ≤ Cα ∧
       Metric.closedBall (center α) rα ⊆ (extChartAt I α).target ∧
@@ -103,18 +101,18 @@ theorem corrected_chart_anchor_flow_build
         ∀ y ∈ Metric.closedBall (center α) r'α,
           flowα y 0 = y ∧
           ∀ t ∈ Set.Icc (0 : ℝ) Tα,
-            HasDerivWithinAt (flowα y) (chartTrivRepr (I := I) α (X t) (flowα y t)) (Set.Icc (0 : ℝ) Tα) t ∧
+            HasDerivWithinAt (flowα y) (chartTrivRepr (I := I) α (X t) (flowα y t))
+              (Set.Icc (0 : ℝ) Tα) t ∧
             flowα y t ∈ Metric.closedBall (center α) rα ∧
             ‖chartTrivRepr (I := I) α (X t) (flowα y t)‖ ≤ Cα := by
     intro α
     obtain ⟨L, K, rα, hL, hrα, hK, hContBall, hLipBall, hsub⟩ :=
       corrected_chart_field_lipschitz_of_data (I := I) X α T hT hCont (hgrad α) hint
     obtain ⟨Tα, hTα, r'α, hr'α, Cα, hCα, flowα, hflowα⟩ :=
-      corrected_chart_local_picard_from_zero (I := I) X α rα hrα hCont ⟨L, K, hL, hK, hContBall, hLipBall⟩
+      corrected_chart_local_picard_from_zero (I := I) X α rα hrα hCont
+        ⟨L, K, hL, hK, hContBall, hLipBall⟩
     exact ⟨Tα, rα, r'α, Cα, hTα, hrα, hr'α, hCα, hsub, flowα, hflowα⟩
   choose! Tα rα r'α Cα hTα hrα hr'α hCα hsub flowα hflowα using hper
-
-
   set U : M → Set M := fun α =>
     (chartAt H α).source ∩ ((chartAt H α) ⁻¹' (I ⁻¹' Metric.ball (center α) (r'α α))) with hU
   have hU_open : ∀ α : M, IsOpen (U α) := by
@@ -128,7 +126,6 @@ theorem corrected_chart_anchor_flow_build
     intro α x hx
     rw [extChartAt_coe]
     exact Metric.ball_subset_closedBall hx.2
-
   have hCover : (Set.univ : Set M) ⊆ ⋃ α : M, U α := fun x _ =>
     Set.mem_iUnion.mpr ⟨x, hU_mem x⟩
   obtain ⟨S, hS⟩ := isCompact_univ.elim_finite_subcover U hU_open hCover
@@ -139,7 +136,6 @@ theorem corrected_chart_anchor_flow_build
   set αRep : M → M := fun x => (hMem x).choose with hαRep
   have hαRep_U : ∀ x : M, x ∈ U (αRep x) := fun x => (hMem x).choose_spec.2
   have hαRep_S : ∀ x : M, αRep x ∈ S := fun x => (hMem x).choose_spec.1
-
   obtain ⟨σ, hσ_pos, hσ_le⟩ :
       ∃ σ : ℝ, 0 < σ ∧ ∀ x : M, σ ≤ Tα (αRep x) := by
     rcases S.eq_empty_or_nonempty with hSe | hSne
@@ -149,11 +145,8 @@ theorem corrected_chart_anchor_flow_build
       · obtain ⟨α₀, _, hα₀⟩ := Finset.mem_image.mp (Finset.min'_mem (S.image Tα) _)
         rw [← hα₀]; exact hTα α₀
       · exact Finset.min'_le _ _ (Finset.mem_image.mpr ⟨αRep x, hαRep_S x, rfl⟩)
-
   set Φ0 : ℝ → M → M := fun s x =>
     (extChartAt I (αRep x)).symm (flowα (αRep x) (extChartAt I (αRep x) x) s) with hΦ0
-
-
   have hxsrc : ∀ x : M, x ∈ (chartAt H (αRep x)).source := fun x => (hαRep_U x).1
   have hxinit : ∀ x : M,
       extChartAt I (αRep x) x ∈ Metric.closedBall (center (αRep x)) (r'α (αRep x)) :=
@@ -164,10 +157,11 @@ theorem corrected_chart_anchor_flow_build
         HasDerivWithinAt (flowα (αRep x) (extChartAt I (αRep x) x))
           (chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t))
           (Set.Icc (0 : ℝ) (Tα (αRep x))) t ∧
-        flowα (αRep x) (extChartAt I (αRep x) x) t ∈ Metric.closedBall (center (αRep x)) (rα (αRep x)) ∧
-        ‖chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t)‖ ≤ Cα (αRep x) :=
+        flowα (αRep x) (extChartAt I (αRep x) x) t ∈ Metric.closedBall (center (αRep x))
+          (rα (αRep x)) ∧
+        ‖chartTrivRepr (I := I) (αRep x) (X t) (flowα (αRep x) (extChartAt I (αRep x) x) t)‖ ≤ Cα
+          (αRep x) :=
     fun x => hflowα (αRep x) (extChartAt I (αRep x) x) (hxinit x)
-
   have hxsrc_ext : ∀ x : M, x ∈ (extChartAt I (αRep x)).source := by
     intro x; rw [extChartAt_source]; exact hxsrc x
   have hΦ0_init : ∀ x : M, Φ0 0 x = x := by
@@ -175,13 +169,10 @@ theorem corrected_chart_anchor_flow_build
     change (extChartAt I (αRep x)).symm (flowα (αRep x) (extChartAt I (αRep x) x) 0) = x
     rw [(hspec x).1]
     exact (extChartAt I (αRep x)).left_inv (hxsrc_ext x)
-
   have hconf : ∀ x : M, ∀ t ∈ Set.Icc (0 : ℝ) (Tα (αRep x)),
       flowα (αRep x) (extChartAt I (αRep x) x) t ∈ (extChartAt I (αRep x)).target := by
     intro x t ht
     exact hsub (αRep x) ((hspec x).2 t ht).2.1
-
-
   have horbit_cont : ∀ x : M,
       ContinuousWithinAt (fun s : ℝ => Φ0 s x) (Set.Ici (0 : ℝ)) 0 := by
     intro x
@@ -189,7 +180,8 @@ theorem corrected_chart_anchor_flow_build
     have hg_cont : ContinuousWithinAt (flowα (αRep x) (extChartAt I (αRep x) x))
         (Set.Icc (0 : ℝ) (Tα (αRep x))) 0 :=
       (((hspec x).2 0 h0mem).1).continuousWithinAt
-    have hg0_target : flowα (αRep x) (extChartAt I (αRep x) x) 0 ∈ (extChartAt I (αRep x)).target := by
+    have hg0_target : flowα (αRep x) (extChartAt I (αRep x) x) 0 ∈
+      (extChartAt I (αRep x)).target := by
       rw [(hspec x).1]; exact (extChartAt I (αRep x)).map_source (hxsrc_ext x)
     have hsymm_cont : ContinuousAt (extChartAt I (αRep x)).symm
         (flowα (αRep x) (extChartAt I (αRep x) x) 0) :=
@@ -223,12 +215,10 @@ theorem corrected_chart_anchor_flow_build
     rw [lt_min_iff] at hsmin
     obtain ⟨hsTα, hsσ⟩ := hsmin
     have hsIcc : s ∈ Set.Icc (0 : ℝ) (Tα α) := ⟨hs0, hsTα.le⟩
-
     have hgs_target : g s ∈ ext.target := hconf x s hsIcc
     have hext_round : ∀ u ∈ Set.Icc (0 : ℝ) (Tα α), ext ((ext).symm (g u)) = g u := fun u hu =>
       (ext).right_inv (hconf x u hu)
     have hΦ0_eq : ∀ u : ℝ, Φ0 u x = (ext).symm (g u) := fun u => rfl
-
     have hΦ0s_src : Φ0 s x ∈ (chartAt H α).source := by
       rw [hΦ0_eq s, ← extChartAt_source (I := I) α]
       exact (ext).map_target hgs_target

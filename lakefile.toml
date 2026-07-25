@@ -5,24 +5,11 @@ defaultTargets = ["DifferentialGeometry", "DeclIndex"]
 
 [leanOptions]
 pp.unicode.fun = true
-relaxedAutoImplicit = false
-weak.linter.mathlibStandardSet = true
-maxSynthPendingDepth = 3
 autoImplicit = false
+maxSynthPendingDepth = 3
+weak.linter.mathlibStandardSet = true
 linter.style.longLine = false
-linter.style.emptyLine = false
 linter.style.whitespace = false
-linter.style.maxHeartbeats = false
-linter.style.setOption = false
-linter.unusedFintypeInType = false
-linter.unusedDecidableInType = false
-linter.flexible = false
-linter.unnecessarySimpa = false
-linter.style.cases = false
-weak.linter.unnecessarySeqFocus = false
-weak.linter.unreachableTactic = false
-weak.linter.unusedTactic = false
-weak.linter.style.multiGoal = false
 
 [[require]]
 name = "mathlib"

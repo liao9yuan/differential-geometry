@@ -10,7 +10,6 @@ import Mathlib
 
 noncomputable section
 
-set_option linter.style.setOption false
 
 open scoped BigOperators
 

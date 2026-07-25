@@ -13,7 +13,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma measurePreserving_constSub_E (z : E) :
     MeasurePreserving (fun t : E => z - t) volume volume := by
   have h_neg : MeasurePreserving (fun t : E => -t) volume volume :=
@@ -26,7 +25,6 @@ private lemma measurePreserving_constSub_E (z : E) :
   exact h_addL.comp h_neg
 
 omit [NeZero d] in
-
 lemma eLpNorm_translate_eq
     {p : ℝ≥0∞} {f : E → ℝ}
     (hf : AEStronglyMeasurable f volume) (h : E) :
@@ -73,7 +71,6 @@ theorem lintegral_pow_le_pow_lintegral_prob
   rw [← ENNReal.rpow_mul, show (1 / pr) * pr = 1 by field_simp, ENNReal.rpow_one]
 
 omit [NeZero d] in
-
 private lemma convolution_sub_eq_integral_aux
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -108,7 +105,6 @@ private lemma convolution_sub_eq_integral_aux
   rw [h1, hsub_eq, h2]
 
 omit [NeZero d] in
-
 private lemma integrable_eta_smul_translate_sub
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -133,14 +129,12 @@ private lemma integrable_eta_smul_translate_sub
   exact hint_etaUsmul.sub hint_etaUx
 
 omit [NeZero d] in
-
 private lemma norm_eta_smul_eq_eta_mul_norm
     {η : E → ℝ} (hη_nonneg : ∀ y, 0 ≤ η y) (s : E) (r : ℝ) :
     ‖η s • r‖ = η s * ‖r‖ := by
   rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (hη_nonneg s)]
 
 omit [NeZero d] in
-
 private lemma enorm_convolution_sub_le_lintegral
     {η u : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -182,7 +176,6 @@ private lemma enorm_convolution_sub_le_lintegral
   exact hf_norm_e.trans (le_of_eq hReal_to_lint)
 
 omit [NeZero d] in
-
 theorem lintegral_rpow_convolution_sub_le_translationAverage
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr)
     {η : E → ℝ}
@@ -289,7 +282,6 @@ theorem lintegral_rpow_convolution_sub_le_translationAverage
   rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
 
 omit [NeZero d] in
-
 theorem eLpNorm_convolution_sub_le_of_ae_translation_bound
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {η : E → ℝ}
@@ -394,7 +386,6 @@ theorem eLpNorm_convolution_sub_le_of_ae_translation_bound
   rw [show pr * (1 / pr) = 1 by field_simp, ENNReal.rpow_one]
 
 omit [NeZero d] in
-
 private lemma memLp_of_continuous_of_support_subset
     {p : ℝ≥0∞}
     {K : Set E} (hK_compact : IsCompact K)
@@ -407,7 +398,6 @@ private lemma memLp_of_continuous_of_support_subset
   exact hg_cont.memLp_of_hasCompactSupport (μ := volume) hg_compact
 
 omit [NeZero d] in
-
 private lemma volume_lt_top_of_compact
     {K : Set E} (hK_compact : IsCompact K) :
     (volume : Measure E) K < ∞ :=
@@ -529,7 +519,6 @@ theorem tendsto_lp_of_tendstoUniformlyOn_compact
       exact this
 
 omit [NeZero d] in
-
 private lemma integrable_of_memLp_compactSupp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {K : Set E} (hK_compact : IsCompact K)
@@ -544,7 +533,6 @@ private lemma integrable_of_memLp_compactSupp
   exact (memLp_one_iff_integrable.mp hu_memLp_one)
 
 omit [NeZero d] in
-
 private lemma convolution_support_subset_cthickening
     {ε : ℝ} (_hε : 0 ≤ ε)
     {K : Set E} {u η : E → ℝ}
@@ -576,7 +564,6 @@ private lemma convolution_support_subset_cthickening
   simp [h_zero_integrand]
 
 omit [NeZero d] in
-
 private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)
@@ -663,7 +650,6 @@ private lemma cauchy_lp_of_uniformly_cauchy_on_compact_supp
     exact h
 
 omit [NeZero d] in
-
 private lemma lintegral_of_nonneg_eta_eq_one
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -1144,7 +1130,8 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
     rw [hSplit]
     have h_step1 := eLpNorm_add_le hAesm1 (hAesm2.add hAesm3) hp_one
     have h_step2 := eLpNorm_add_le hAesm2 hAesm3 hp_one
-    have hε_split : ENNReal.ofReal ε = ENNReal.ofReal ε' + (ENNReal.ofReal ε' + ENNReal.ofReal ε') := by
+    have hε_split : ENNReal.ofReal ε = ENNReal.ofReal ε' +
+      (ENNReal.ofReal ε' + ENNReal.ofReal ε') := by
       rw [hε'_def]
       rw [← ENNReal.ofReal_add hε'_pos.le hε'_pos.le, ← ENNReal.ofReal_add hε'_pos.le
         (add_nonneg hε'_pos.le hε'_pos.le)]

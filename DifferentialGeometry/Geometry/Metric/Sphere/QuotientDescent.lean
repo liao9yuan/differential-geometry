@@ -334,11 +334,9 @@ theorem gQuot_constPosSec :
   haveI : NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n))) := by
     rw [finrank_euclideanSpace_fin]; infer_instance
   set S := D.section_at x with hS
-
   have hB : metricRm04StdAt (I := 𝓡 n) D.gQuot x X Y Y X
       = metricRm04StdAt (I := 𝓡 n) (D.gQuot.restrictOpen S.W) ⟨x, S.mem⟩ X Y Y X :=
     (metricRm04StdAt_restrictOpen (I := 𝓡 n) D.gQuot S.W ⟨x, S.mem⟩ X Y Y X).symm
-
   have hmetric : D.gQuot.restrictOpen S.W
       = Diffeomorph.pullbackMetric
           ((roundMetric (E := E) (n := n)).restrictOpen S.V) S.s := by
@@ -346,7 +344,6 @@ theorem gQuot_constPosSec :
     intro r v w
     rw [SmoothRiemannianMetric.restrictOpen_inner, D.gQuot_inner]
     exact D.gm_locallyEq (x₁ := x) r.2 v w
-
   have hC : metricRm04StdAt (I := 𝓡 n)
         (Diffeomorph.pullbackMetric
           ((roundMetric (E := E) (n := n)).restrictOpen S.V) S.s) ⟨x, S.mem⟩ X Y Y X
@@ -359,7 +356,6 @@ theorem gQuot_constPosSec :
         S.V S.W S.s ⟨x, S.mem⟩ X Y Y X,
       S.mfderiv_toSphere_apply ⟨x, S.mem⟩ X, S.mfderiv_toSphere_apply ⟨x, S.mem⟩ Y]
     rfl
-
   have hbridge : ∀ v w : TangentSpace (𝓡 n) x,
       (roundMetric (E := E) (n := n)).inner (S.toSphere ⟨x, S.mem⟩)
           (mfderiv (𝓡 n) (𝓡 n) S.toSphere ⟨x, S.mem⟩ v)

@@ -36,7 +36,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma component_contDiff_of_contDiffOn (α : M)
     {f : EuclN → ℝ}
     (hf : ContDiffOn ℝ ∞ f (chartTargetEuclid (I := I) (M := M) α))
@@ -56,7 +57,8 @@ private lemma componentBump_contMDiffOn
   chartTestPullback_contMDiffOn (I := I) (M := M) α
     (component_contDiff_of_contDiffOn (I := I) (M := M) α hf hf_supp)
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 private lemma componentBump_tsupport_subset
     (α : M) {f : EuclN → ℝ}
     (hf_cs : HasCompactSupport f)
@@ -64,7 +66,8 @@ private lemma componentBump_tsupport_subset
     tsupport (chartTestPullback (I := I) α f) ⊆ (chartAt H α).source :=
   chartTestPullback_tsupport_subset_source (I := I) (M := M) α hf_cs hf_supp
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorTrivProj_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s) (b : M) :
@@ -90,7 +93,8 @@ private lemma tensorTrivProj_sum
   | empty => rw [Finset.sum_empty, Finset.sum_empty, hzero]
   | insert i A hi ih => rw [Finset.sum_insert hi, Finset.sum_insert hi, hadd, ih]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {ι : Type*} (t : Finset ι) (S : ι → SmoothCcTensor g r s)

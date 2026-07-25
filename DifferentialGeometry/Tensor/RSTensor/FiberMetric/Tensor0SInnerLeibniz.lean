@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -71,13 +70,11 @@ private theorem sum_reorder_b_out {s : Nat} {α : Type*} [AddCommMonoid α]
     (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx, ∑ b : Fin s, F I0 J0 b) =
       ∑ b : Fin s, ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx, F I0 J0 b := by
   classical
-
   rw [show
       (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx, ∑ b : Fin s, F I0 J0 b) =
         ∑ I0 : Fin s -> Idx, ∑ b : Fin s, ∑ J0 : Fin s -> Idx, F I0 J0 b from by
     refine Finset.sum_congr rfl fun I0 _ => ?_
     rw [Finset.sum_comm (f := fun J0 b : _ => F I0 J0 b)]]
-
   rw [Finset.sum_comm
     (f := fun I0 b : _ => ∑ J0 : Fin s -> Idx, F I0 J0 b)]
 
@@ -151,8 +148,6 @@ theorem coordContractDt_firstPart_slot {s : Nat}
         (∏ a : Fin s, gInv (I0 a) (J0 a)) *
           (∑ c : Idx, Γ (I0 b) c * cA (Function.update I0 b c)) * cB J0 := by
   classical
-
-
   rw [Finset.sum_comm
     (f := fun I0 J0 : Fin s -> Idx =>
       (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
@@ -162,7 +157,6 @@ theorem coordContractDt_firstPart_slot {s : Nat}
       (∏ a : Fin s, gInv (I0 a) (J0 a)) *
         (∑ c : Idx, Γ (I0 b) c * cA (Function.update I0 b c)) * cB J0)]
   refine Finset.sum_congr rfl fun J0 _ => ?_
-
   have hL :
       (∑ I0 : Fin s -> Idx,
           (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
@@ -211,7 +205,6 @@ theorem coordContractDt_firstPart_slot {s : Nat}
         rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun c _ => hexp c]
     ring
   rw [hL, hR]
-
   rw [← Equiv.sum_comp (slotSwap (Idx := Idx) (s := s) b)
     (fun p : (Fin s -> Idx) × Idx =>
       (∏ a : Fin s, gInv (p.1 a) (J0 a)) *
@@ -219,7 +212,6 @@ theorem coordContractDt_firstPart_slot {s : Nat}
   refine Finset.sum_congr rfl fun p _ => ?_
   obtain ⟨I0, c⟩ := p
   simp only [slotSwap, Equiv.coe_fn_mk]
-
   rw [Function.update_self, Function.update_idem]
   rw [Function.update_eq_self]
   rw [← Finset.mul_prod_erase (Finset.univ : Finset (Fin s)) _ (Finset.mem_univ b)]
@@ -246,7 +238,6 @@ theorem coordContractDt_secondPart_slot {s : Nat}
         (∏ a : Fin s, gInv (I0 a) (J0 a)) *
           cA I0 * (∑ c : Idx, Γ (J0 b) c * cB (Function.update J0 b c)) := by
   classical
-
   refine Finset.sum_congr rfl fun I0 _ => ?_
   have hL :
       (∑ J0 : Fin s -> Idx,
@@ -326,8 +317,6 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
       - coordContract gInv (christoffelCorrComp Γ cA) cB
         - coordContract gInv cA (christoffelCorrComp Γ cB) := by
   classical
-
-
   have hStep1 :
       coordContractDt gInv DU cA cB =
         - (∑ b : Fin s, ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
@@ -337,7 +326,6 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
             (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
               (∑ c : Idx, Γ c (J0 b) * gInv (I0 b) c) * cA I0 * cB J0) := by
     unfold coordContractDt
-
     rw [show
         (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
             (∑ b : Fin s,
@@ -353,7 +341,6 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
       refine Finset.sum_congr rfl fun b _ => ?_
       rw [hDU (I0 b) (J0 b)]
       ring]
-
     rw [sum_reorder_b_out (fun I0 J0 b =>
       (- ((∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
             (∑ c : Idx, Γ c (I0 b) * gInv c (J0 b)) * cA I0 * cB J0) -
@@ -365,7 +352,6 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
     refine Finset.sum_congr rfl fun I0 _ => ?_
     rw [← Finset.sum_neg_distrib, ← Finset.sum_sub_distrib]
   rw [hStep1]
-
   rw [show
       (∑ b : Fin s, ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
           (∏ a ∈ (Finset.univ : Finset (Fin s)).erase b, gInv (I0 a) (J0 a)) *
@@ -384,15 +370,12 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
             cA I0 * (∑ c : Idx, Γ (J0 b) c * cB (Function.update J0 b c)) from by
     refine Finset.sum_congr rfl fun b _ => ?_
     exact coordContractDt_secondPart_slot gInv Γ cA cB b]
-
-
   have hContrA :
       coordContract gInv (christoffelCorrComp Γ cA) cB =
         ∑ b : Fin s, ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
           (∏ a : Fin s, gInv (I0 a) (J0 a)) *
             (∑ c : Idx, Γ (I0 b) c * cA (Function.update I0 b c)) * cB J0 := by
     unfold coordContract christoffelCorrComp
-
     rw [show
         (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
             (∏ a : Fin s, gInv (I0 a) (J0 a)) *
@@ -472,7 +455,6 @@ theorem extDerivFun_finset_prod_real
       rw [hsplit, extDerivFun_mul_real (I := I) v hfi hprodt, ih hft]
       rw [Finset.sum_insert hit]
       rw [Finset.erase_insert hit]
-
       have hother :
           (∑ j ∈ t, (∏ k ∈ (insert i t).erase j, f k x) *
               extDerivFun (I := I) (f j) x v) =
@@ -518,11 +500,8 @@ theorem extDerivFun_coordContract_summand {s : Nat}
     simpa [Finset.prod_fn] using this
   have hAB : MDifferentiableAt I 𝓘(Real, Real)
       (fun y : M => (∏ a : Fin s, U y (I0 a) (J0 a)) * cA y I0) x := hprodU.mul hcA
-
   rw [extDerivFun_mul_real (I := I) v hAB hcB]
-
   rw [extDerivFun_mul_real (I := I) v hprodU hcA]
-
   rw [extDerivFun_finset_prod_real (Finset.univ : Finset (Fin s))
     (fun a y => U y (I0 a) (J0 a)) v (fun a _ => hU (I0 a) (J0 a))]
   ring
@@ -587,7 +566,6 @@ theorem extDerivFun_coordContract {s : Nat}
             (∏ a : Fin s, U y (I0 a) (J0 a)) * cA y I0 * cB y J0 := by
       funext y; rw [Finset.sum_apply]
     rwa [heqfun] at hsum
-
   rw [show
       (fun y : M => coordContract (U y) (cA y) (cB y)) =
         fun y : M => ∑ I0 : Fin s -> Idx,
@@ -599,7 +577,6 @@ theorem extDerivFun_coordContract {s : Nat}
     (fun I0 y => ∑ J0 : Fin s -> Idx,
       (∏ a : Fin s, U y (I0 a) (J0 a)) * cA y I0 * cB y J0) v
     (fun I0 _ => hG1mdiff I0)]
-
   rw [show
       (∑ I0 : Fin s -> Idx,
           extDerivFun (I := I)
@@ -621,7 +598,6 @@ theorem extDerivFun_coordContract {s : Nat}
       (fun J0 _ => hGmdiff I0 J0)]
     refine Finset.sum_congr rfl fun J0 _ => ?_
     exact extDerivFun_coordContract_summand U cA cB v I0 J0 hU (hcA I0) (hcB J0)]
-
   unfold coordContractDt coordContract
   simp only [Finset.sum_add_distrib]
   rw [← add_assoc]
@@ -673,7 +649,6 @@ theorem inner0S_nabla {s : Nat}
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     simpa using (inferInstance : IsManifold I (∞ : WithTop ℕ∞) M)
-
   have hUmdiff : ∀ i j : Idx,
       MDifferentiableAt I 𝓘(Real, Real) (fun y : M => U y i j) x := by
     intro i j
@@ -691,14 +666,12 @@ theorem inner0S_nabla {s : Nat}
     have h := DifferentialGeometry.Tensor.Coordinates.tensor0S_eval_coordinateFrame_contMDiffAt
       (I := I) (𝕜 := Real) B x J0
     exact h.mdifferentiableAt (by simp)
-
   set Γ : Idx -> Idx -> Real :=
     fun p q =>
       DifferentialGeometry.Tensor.Coordinates.christoffelAlongInFrame cov
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x)
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x)
         x (X x) p q with hΓ
-
   have hDU : ∀ p q : Idx,
       extDerivFun (I := I) (fun y => U y p q) x (X x) =
         - ((∑ c : Idx, Γ c p * U x c q) + (∑ c : Idx, Γ c q * U x p c)) := by
@@ -713,7 +686,6 @@ theorem inner0S_nabla {s : Nat}
           (∑ c : Idx, Γ c q * U x p c) = 0 := by
       simpa [U, Γ, hframe, Idx] using hzero
     linarith
-
   have hlocal :
       (fun y : M => inner0S (I := I) g y s (A y) (B y)) =ᶠ[𝓝 x]
         fun y : M => coordContract (U y) (cA y) (cB y) := by
@@ -737,10 +709,8 @@ theorem inner0S_nabla {s : Nat}
       refine congrArg (fun w => B y w) ?_
       funext a
       rw [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply]
-
   rw [DifferentialGeometry.Tensor.Coordinates.deriv_congr_nhds (I := I) (x := x) (X x) hlocal]
   rw [extDerivFun_coordContract U cA cB (X x) hUmdiff hcAmdiff hcBmdiff]
-
   rw [show
       coordContractDt (U x) (fun i j => extDerivFun (I := I) (fun y => U y i j) x (X x))
           (cA x) (cB x) =
@@ -752,7 +722,6 @@ theorem inner0S_nabla {s : Nat}
   rw [coordContractDt_eq_neg_christoffelCorr (U x) Γ
     (fun i j => - ((∑ c : Idx, Γ c i * U x c j) + (∑ c : Idx, Γ c j * U x i c)))
     (cA x) (cB x) (fun p q => rfl)]
-
   have hcompA : ∀ I0 : Fin s -> Idx,
       extDerivFun (I := I) (fun y => cA y I0) x (X x) -
           christoffelCorrComp Γ (cA x) I0 =
@@ -825,7 +794,6 @@ theorem inner0S_nabla {s : Nat}
     refine congrArg (fun w => (B x) w) ?_
     funext c
     rw [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
-
   have hbasis : ∀ (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
       (S : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x),
       coordContract (U x)
@@ -842,7 +810,6 @@ theorem inner0S_nabla {s : Nat}
     rw [← inner0S_eq_coord (I := I) g x s
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis (I := I) x hx)
       (U x) (DifferentialGeometry.Tensor.Coordinates.gInvBasisAt (I := I) g x hx) T S]
-
   have hgroupA :
       coordContract (U x)
             (fun I0 => extDerivFun (I := I) (fun y => cA y I0) x (X x)) (cB x) -

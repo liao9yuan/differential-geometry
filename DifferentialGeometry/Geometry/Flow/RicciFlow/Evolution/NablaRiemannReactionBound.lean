@@ -5,9 +5,6 @@ import DifferentialGeometry.Geometry.Operator.CotangentSharpSmooth
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -59,15 +56,6 @@ theorem solution_isMetricCompatible
 open DifferentialGeometry.Integral.DivergenceTheorem
   DifferentialGeometry.Integral.Measure in
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rmFrozenSlot_chartBasis_contMDiffOn
@@ -81,9 +69,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
         rmFrozenSlotField (I := I) S t q Y b
           (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b))
       (chartAt H α).source := by
-
-
-
   have hval : ∀ b : M,
       rmFrozenSlotField (I := I) S t q Y b
           (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b) =
@@ -93,7 +78,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
   simp only [hval]
   intro x₀ hx₀
   refine ContMDiffAt.contMDiffWithinAt ?_
-
   have hv_at :
       ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
         (fun b : M =>
@@ -104,8 +88,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
         (by
           rw [trivializationAt_baseSet_eq_chartAt_source (I := I) (M := M)]
           exact hx₀))
-
-
   have h_eval := TensorMultilinear.contMDiffAt_section_apply_gen
     (𝕜 := Real) (I := I) (M := M) (n := 1) (x₀ := x₀)
     (T := fun b : M => (freezeAllBut04Field (I := I) (M := M) (S.base.rm04 t) q Y) b)
@@ -115,10 +97,6 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -138,10 +116,6 @@ theorem rmFrozenSlotSharp_mdiffAt
     (fun α j => rmFrozenSlot_chartBasis_contMDiffOn (I := I) S t q Y α j) x
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-
-
-
-
 def rmFrozenSlotSharpSection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -239,19 +213,15 @@ theorem rmRaise_summand_covDeriv
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)))) := by
   classical
   set cov := S.family.connection (t : Real) with hcov_def
-
   set W : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _) :=
     rmRaiseSlotSections (I := I) S (t : Real) q Vb Vc Vm with hW_def
-
   have hW0 : W 0 = Vb := rfl
   have hW1 : W 1 = Vc := rfl
   have hW2 : W 2 = Vm q := rfl
   have hW3 : W 3 = rmFrozenSlotSharpSection (I := I) S (t : Real) q Vm := rfl
-
   have heval :=
     (nablaRm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X W x₀
-
   have hscalar :
       (fun y : M => S.base.rm04 (t : Real) y (fun a : Fin 4 => W a y)) =
         fun y : M =>
@@ -265,7 +235,6 @@ theorem rmRaise_summand_covDeriv
     fin_cases a <;>
       simp [hW_def, rmRaiseSlotSections, vec4, rmFrozenSlotSharpSection_apply,
         Matrix.cons_val_zero, Matrix.cons_val_one]
-
   have hcons :
       (Fin.cons (X x₀) (fun a : Fin 4 => W a x₀) : Fin 5 → TangentSpace I x₀) =
         vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -278,7 +247,6 @@ theorem rmRaise_summand_covDeriv
       fin_cases j <;>
         simp [hW_def, rmRaiseSlotSections, vec5, rmFrozenSlotSharpSection_apply,
           Matrix.cons_val_zero, Matrix.cons_val_one]
-
   have hcorr :
       (∑ a : Fin 4,
           S.base.rm04 (t : Real) x₀
@@ -290,11 +258,9 @@ theorem rmRaise_summand_covDeriv
               (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)))) := by
     rw [Fin.sum_univ_four]
-
     have hc0 : (cov (fun p : M => W 0 p) x₀) (X x₀) = 0 := by rw [hW0]; exact hVb
     have hc1 : (cov (fun p : M => W 1 p) x₀) (X x₀) = 0 := by rw [hW1]; exact hVc
     have hc2 : (cov (fun p : M => W 2 p) x₀) (X x₀) = 0 := by rw [hW2]; exact hVm q
-
     have hc3 :
         (cov (fun p : M => W 3 p) x₀) (X x₀) =
           cotangentSharp_gen (I := I) (S.base.metric (t : Real)) x₀
@@ -310,11 +276,8 @@ theorem rmRaise_summand_covDeriv
           X x₀
           (rmFrozenSlotSharp_mdiffAt (I := I) S (t : Real) q Vm x₀)
       rw [hW3]
-
       simpa [rmFrozenSlotSharpSection_apply] using hsharp
-
     rw [hc0, hc1, hc2, hc3]
-
     rw [show
         S.base.rm04 (t : Real) x₀
             (Function.update (fun b : Fin 4 => W b x₀) 0 (0 : TangentSpace I x₀)) = 0 from
@@ -328,15 +291,11 @@ theorem rmRaise_summand_covDeriv
             (Function.update (fun b : Fin 4 => W b x₀) 2 (0 : TangentSpace I x₀)) = 0 from
       (S.base.rm04 (t : Real) x₀).map_update_zero _ 2]
     simp only [zero_add, add_zero]
-
     congr 1
     funext b
     fin_cases b <;>
       simp [hW_def, rmRaiseSlotSections, vec4, Function.update]
-
   rw [← hscalar]
-
-
   rw [hcons] at heval
   rw [hcorr] at heval
   linarith [heval]
@@ -361,7 +320,8 @@ def nabla2SlotSections
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nabla2SlotSections_apply
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -419,10 +379,8 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
         x₀ (X x₀) := by
   classical
   set cov := S.family.connection (t : Real) with hcov_def
-
   set Wbc := nabla2SlotSections (I := I) Vb Vc Vm with hWbc_def
   set Wcb := nabla2SlotSections (I := I) Vc Vb Vm with hWcb_def
-
   have hWbc_cov : ∀ a : Fin 6, (cov (fun p : M => Wbc a p) x₀) (X x₀) = 0 := by
     intro a
     refine Fin.cases ?_ (fun j => ?_) a
@@ -437,12 +395,10 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
     · refine Fin.cases ?_ (fun k => ?_) j
       · simpa [hWcb_def, nabla2SlotSections] using hVb
       · simpa [hWcb_def, nabla2SlotSections] using hVm k
-
   have hbc :=
     (nabla3Rm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X Wbc x₀
   have hcb :=
     (nabla3Rm04Field_realizes (I := I) S (t : Real)).eval_smooth_slots X Wcb x₀
-
   have hbc_corr :
       (∑ a : Fin 6,
           nabla2Rm04Field (I := I) S (t : Real) x₀
@@ -459,7 +415,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
     refine Finset.sum_eq_zero fun a _ => ?_
     rw [hWcb_cov a]
     exact (nabla2Rm04Field (I := I) S (t : Real) x₀).map_update_zero _ a
-
   have hWbc_x : (fun a : Fin 6 => Wbc a x₀) =
       metricTraceInput (I := I) (Vb x₀) (Vc x₀) (fun i : Fin 4 => Vm i x₀) :=
     nabla2SlotSections_apply (I := I) Vb Vc Vm x₀
@@ -470,9 +425,7 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
   rw [hcb_corr, sub_zero] at hcb
   rw [hWbc_x] at hbc
   rw [hWcb_x] at hcb
-
   rw [hbc, hcb]
-
   have hmdiff_bc :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun p : M =>
@@ -488,7 +441,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (nabla2Rm04Field (I := I) S (t : Real)) Wcb x₀).mdifferentiableAt (by simp)
   rw [← extDerivFun_sub_at (I := I) (X x₀) hmdiff_bc hmdiff_cb]
-
   have hfield :
       (fun y : M =>
           nabla2Rm04Field (I := I) S (t : Real) y (fun a : Fin 6 => Wbc a y) -
@@ -561,11 +513,8 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
                 (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                   (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀))))) := by
   classical
-
   rw [nabla3_antisym_eq_covDeriv_curvatureAction_covConst (I := I) S hS t x₀
     X Vb Vc Vm hVb hVc hVm]
-
-
   have hKfield :
       (fun y : M =>
           curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
@@ -581,17 +530,13 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
       (S.base.rm13 (t : Real)) (S.base.rm04 (t : Real) y)
       (solution_rm04LowersRm13At (I := I) S (t : Real) y)
       (S.base.rm04 (t : Real) y) (Vb y) (Vc y) (fun i : Fin 4 => Vm i y)]
-
-
     rfl
   rw [hKfield]
-
   set g : Fin 4 → M → Real := fun q y =>
     S.base.rm04 (t : Real) y
       (vec4 (I := I) (Vb y) (Vc y) (Vm q y)
         (cotangentSharp_gen (I := I) (S.base.metric (t : Real)) y
           (rmFrozenSlotField (I := I) S (t : Real) q Vm y))) with hg_def
-
   have hmdiff_q : ∀ q : Fin 4,
       MDifferentiableAt I 𝓘(Real, Real) (g q) x₀ := by
     intro q
@@ -608,7 +553,6 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     fin_cases a <;>
       simp [rmRaiseSlotSections, vec4, rmFrozenSlotSharpSection_apply,
         Matrix.cons_val_zero, Matrix.cons_val_one]
-
   have hstep3 :
       extDerivFun (I := I) (fun y : M => -∑ q : Fin 4, g q y) x₀ (X x₀) =
         -∑ q : Fin 4, extDerivFun (I := I) (g q) x₀ (X x₀) := by
@@ -627,7 +571,6 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     rw [DifferentialGeometry.Tensor.Coordinates.extDerivFun_finset_sum_real (I := I)
       (t := (Finset.univ : Finset (Fin 4))) g (X x₀) (fun q _ => hmdiff_q q)]
   rw [hstep3]
-
   congr 1
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [hg_def]
@@ -648,7 +591,8 @@ variable {n : ℕ}
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem cotangentSharp_orthoBasis_expand'
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis (Fin n) Real (TangentSpace I x))
@@ -682,7 +626,8 @@ theorem cotangentSharp_orthoBasis_expand'
   · intro h; exact absurd (Finset.mem_univ i) h
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor05_vec5_sum_last
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
@@ -711,7 +656,8 @@ theorem tensor05_vec5_sum_last
   simp [smul_eq_mul]
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor04_vec4_sum_last'
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
@@ -747,7 +693,8 @@ theorem tensor04_vec4_sum_last'
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor05_sharp_last_le
     [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -791,7 +738,8 @@ theorem abs_tensor05_sharp_last_le
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor04_sharp_last_le
     [FiniteDimensional Real E]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -836,7 +784,8 @@ theorem abs_tensor04_sharp_last_le
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x)
@@ -889,16 +838,6 @@ theorem rmFrozenSlot_basis_component
   rmFrozenSlotField_apply_vec (I := I) S t q Vm x₀ e
 
 open TensorLieDeriv in
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapComm_T1_covConst_le
@@ -943,13 +882,10 @@ theorem abs_nablaLapComm_T1_covConst_le
   have hNnabnn : 0 ≤ Nnab := Real.sqrt_nonneg _
   have hNRmnn : 0 ≤ NRm := Real.sqrt_nonneg _
   have hcardnn : (0 : Real) ≤ (Fintype.card (Fin n) : Real) := by positivity
-
   rw [nablaLapComm_T1_eq_rm04_raise_leibniz (I := I) S hS t x₀ X Vb Vc Vm
     hVbcov hVccov hVmcov]
   rw [abs_neg]
-
   refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
-
   have hper : ∀ q : Fin 4,
       |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -963,7 +899,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (2 : Real) * (Fintype.card (Fin n) : Real) * (Nnab * NRm) := by
     intro q
     refine le_trans (abs_add_le _ _) ?_
-
     have hT1a :
         |nablaRm04Field (I := I) S (t : Real) x₀
             (vec5 (I := I) (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -975,7 +910,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (X x₀) (Vb x₀) (Vc x₀) (Vm q x₀)
         (rmFrozenSlotField (I := I) S (t : Real) q Vm x₀)
       refine le_trans hCS ?_
-
       have hf1 :
           Real.sqrt (∑ e : Fin n,
               (nablaRm04Field (I := I) S (t : Real) x₀
@@ -990,7 +924,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         simp only [hidx]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (nablaRm04Field (I := I) S (t : Real) x₀) basis ![a, b, c, m q, a] 4
-
       have hf2 :
           Real.sqrt (∑ e : Fin n,
               (rmFrozenSlotField (I := I) S (t : Real) q Vm x₀
@@ -1014,7 +947,6 @@ theorem abs_nablaLapComm_T1_covConst_le
           (S.base.rm04 (t : Real) x₀) basis m q
       exact mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNnabnn) hcardnn
-
     have hT1b :
         |S.base.rm04 (t : Real) x₀
             (vec4 (I := I) (Vb x₀) (Vc x₀) (Vm q x₀)
@@ -1028,7 +960,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
           (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀))
       refine le_trans hCS ?_
-
       have hf1 :
           Real.sqrt (∑ e : Fin n,
               (S.base.rm04 (t : Real) x₀
@@ -1043,13 +974,11 @@ theorem abs_nablaLapComm_T1_covConst_le
         simp only [hidx]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (S.base.rm04 (t : Real) x₀) basis ![b, c, m q, b] 3
-
       have hf2 :
           Real.sqrt (∑ e : Fin n,
               (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)
                 (fun _ : Fin 1 => basis e)) ^ 2) ≤ Nnab := by
-
         have hcomb : ∀ e : Fin n,
             (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x₀
                 (nablaRmFrozenSlotField (I := I) S (t : Real) q Vm x₀) (X x₀)
@@ -1087,7 +1016,6 @@ theorem abs_nablaLapComm_T1_covConst_le
         rw [Finset.sum_congr rfl (fun e (_ : e ∈ (Finset.univ : Finset (Fin n))) => hcomb e)]
         exact sum_sq_update_le_compNormSqMulti (I := I)
           (nablaRm04Field (I := I) S (t : Real) x₀) basis (Fin.cons a m) q.succ
-
       refine le_trans (mul_le_mul_of_nonneg_left
         (mul_le_mul hf1 hf2 (Real.sqrt_nonneg _) hNRmnn) hcardnn) ?_
       rw [mul_comm NRm Nnab]
@@ -1111,14 +1039,6 @@ theorem abs_nablaLapComm_T1_covConst_le
   rfl
 
 open TensorLieDeriv in
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapComm_T1_orthoBasis_le
@@ -1146,19 +1066,15 @@ theorem abs_nablaLapComm_T1_orthoBasis_le
             S.base.rm04 (t : Real) x₀ (fun p => basis (idx p))))) := by
   classical
   have hconn := connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
-
   obtain ⟨Xa, hXa, _⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis a)
   obtain ⟨Vb, hVb, hVbcov⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis b)
   obtain ⟨Vc, hVc, hVccov⟩ := exists_cov_zero_at_apply (I := I)
     (S.family.connection (t : Real)) hconn x₀ (basis c)
-
   choose Vm hVm hVmcov using fun i : Fin 4 =>
     exists_cov_zero_at_apply (I := I)
       (S.family.connection (t : Real)) hconn x₀ (basis (m i))
-
-
   have hmtail : frameTuple (I := I) frame x₀ m = (fun i : Fin 4 => Vm i x₀) := by
     funext i
     change frame (m i) x₀ = Vm i x₀
@@ -1208,7 +1124,8 @@ private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_eq_compNormSq4_basis
     {x₀ : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x₀)
@@ -1329,7 +1246,6 @@ theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
     with hNRm
   set Nnab : Real := Real.sqrt (compNormSqMulti (fun idx : Fin 5 → Fin n =>
       nablaRm04Field (I := I) S (t : Real) x₀ (fun p => basis (idx p)))) with hNnab
-
   have hper : ∀ a : Fin n,
       |nablaLapCommReactionTermF (I := I) S (t : Real) x₀ frame a a c m| ≤
         (13 : Real) * (Fintype.card (Fin n) : Real) * (NRm * Nnab) := by
@@ -1400,13 +1316,10 @@ theorem abs_spatialCommNablaRm_orthoFrame_le
   refine ⟨n, frame, ?_, deltaInvMetric_orthonormal (M := M) (t : Real) x₀, ?_⟩
   · intro i j; rw [hframe i, hframe j]; exact horth i j
   intro c m
-
   rw [nablaLapCommF_orthonormalTrace (I := I) S hS t x₀ frame
     (deltaInvMetric (M := M) (Idx := Fin n) (t : Real) x₀) (fun i j => rfl) c m]
-
   have hbnd := abs_nablaLapCommReactionTerm_diag_orthoBasis_le (I := I) S hS t x₀
     frame basis hframe horth c m
-
   have hRm :
       compNormSq4 (fun i j k l : Fin n =>
           S.base.rm04 (t : Real) x₀ (vec4 (I := I) (basis i) (basis j) (basis k) (basis l))) =

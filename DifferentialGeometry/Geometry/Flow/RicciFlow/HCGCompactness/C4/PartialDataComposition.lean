@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDataCompositionReverse
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -48,7 +47,7 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
     (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
     {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2) (hε'2 : ε' ≤ 1/2)
+    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1 / 2) (hε'2 : ε' ≤ 1 / 2)
     (C : ℝ) (hC0 : 0 ≤ C)
     (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
       [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']

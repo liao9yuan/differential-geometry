@@ -29,7 +29,6 @@ local notation "EuclN" =>
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable (I M) in
-
 noncomputable def chartL2BridgeMα
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
@@ -54,7 +53,6 @@ lemma chartL2BridgeMα_le
     (I := I) (M := M) g α).choose_spec.2 y hy
 
 variable (I M) in
-
 noncomputable def chartTargetL2BridgeConstant
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) : ℝ :=

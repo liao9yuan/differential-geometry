@@ -51,7 +51,8 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
             : C^∞⟮I, M; ℝ⟯) : M → ℝ) z * u z)) y
           (EuclideanSpace.single k (1 : ℝ))) := by
   have hp_one : (1 : ℝ≥0∞) ≤ (2 : ℝ≥0∞) := by norm_num
-  exact DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chosenWeakPartial_chartPushed_ae_eq_fderiv
+  exact
+    Analysis.Sobolev.EquivalenceReverse.chosenWeakPartial_chartPushed_ae_eq_fderiv
     (I := I) (M := M) α hp_one hu k
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
@@ -62,7 +63,7 @@ theorem chartPushed_eq_chartSmoothExt_on_target
       chartSmoothExt (I := I) (M := M) α
         (fun z : M => ((chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) : M → ℝ) z * u z) y :=
-  (DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chartSmoothExt_eq_chartPushed_pou_on_target
+  (Analysis.Sobolev.EquivalenceReverse.chartSmoothExt_eq_chartPushed_pou_on_target
     (I := I) (M := M) α u hy).symm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
@@ -219,7 +220,8 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartPushed
       (I := I) (M := M) (α := α) (u := u) hu k)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLpNorm_fderiv_chartSmoothExt
+theorem
+    eLpNorm_chosenWeakPartial'_chartPushed_tensorComponentScalar_eq_eLpNorm_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -249,7 +251,8 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLp
       (I := I) (M := M) g r s S α Idx Jdx) k
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLpNorm_fderiv_chartPushed
+theorem
+    eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLpNorm_fderiv_chartPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

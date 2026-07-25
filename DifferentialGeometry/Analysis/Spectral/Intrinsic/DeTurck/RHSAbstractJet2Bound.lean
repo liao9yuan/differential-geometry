@@ -92,7 +92,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -423,7 +422,8 @@ theorem abstractRHSFrameComponent_diff_eq_chartCarrier_diff
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma symm_mem_chartLeviCivitaGoodSet_of_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     (extChartAt I α).symm y ∈ chartLeviCivitaGoodSet (I := I) α ∧

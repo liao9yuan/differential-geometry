@@ -42,7 +42,6 @@ import Mathlib.Topology.Order.Compact
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Set IsManifold ContinuousLinearMap Metric Function
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
@@ -64,8 +63,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 omit [FiniteDimensional ℝ E] in
-
-
 private lemma sphere_isCompact :
     IsCompact {ξ : Fin (Module.finrank ℝ E) → ℝ |
       ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 = 1} := by

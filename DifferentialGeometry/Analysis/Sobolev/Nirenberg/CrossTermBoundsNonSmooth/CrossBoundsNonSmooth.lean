@@ -191,7 +191,6 @@ private theorem cross_1_pointwise_bound_nonsmooth
     linarith
 
 omit [NeZero d] in
-
 private lemma memLp_translate_two
     (k : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v 2 (volume : Measure E)) :
@@ -199,7 +198,6 @@ private lemma memLp_translate_two
   memLp_translate (d := d) (p := 2) k h hv
 
 omit [NeZero d] in
-
 lemma memLp_diffQuot_two
     (k : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v 2 (volume : Measure E)) :
@@ -233,7 +231,6 @@ lemma memLp_diffQuot_two
     exact h1.add h2
 
 omit [NeZero d] in
-
 lemma exists_bound_of_continuous_compactSupport
     {f : E → ℝ} (hf_cont : Continuous f) (hf_supp : HasCompactSupport f) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x, |f x| ≤ M := by
@@ -249,7 +246,6 @@ lemma exists_bound_of_continuous_compactSupport
   exact h.trans (le_max_left _ _)
 
 omit [NeZero d] in
-
 lemma memLp_bounded_mul
     {f g : E → ℝ}
     (hf_aesm : AEStronglyMeasurable f (volume : Measure E))
@@ -323,7 +319,6 @@ private lemma integrable_cross_1_summand_nonsmooth
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₁_dqg_l2 h_dq_u_l2
 
 omit [NeZero d] in
-
 lemma integrable_const_eta_sq_diffQuot_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -403,7 +398,6 @@ lemma integrable_const_eta_sq_diffQuot_g_sq
   exact mul_le_mul_of_nonneg_right h_ic_eta_sq h_dq_sq_nn
 
 omit [NeZero d] in
-
 lemma integrable_const_indicator_diffQuot_u_sq
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη_supp : HasCompactSupport η)
@@ -470,7 +464,6 @@ lemma integrable_const_indicator_diffQuot_u_sq
     refine mul_nonneg (abs_nonneg _) h_dq_sq_nn
 
 omit [NeZero d] in
-
 lemma integral_const_indicator_eq
     {u : E → ℝ} (k : Fin d) (h : ℝ) (η : E → ℝ) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -495,7 +488,6 @@ lemma integral_const_indicator_eq
   rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
 
 omit [NeZero d] in
-
 private lemma integrable_eta_sq_diffQuot_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -512,14 +504,12 @@ private lemma integrable_eta_sq_diffQuot_g_sq
   exact hint
 
 omit [NeZero d] in
-
 private noncomputable def absorbingIntegral_nonsmooth
     (k : Fin d) (h : ℝ) (η : E → ℝ) (g : Fin d → E → ℝ) : ℝ :=
   ∫ x, (η x)^2 * ∑ i : Fin d, (diffQuot k h (g i) x)^2
     ∂(volume : Measure E)
 
 omit [NeZero d] in
-
 private noncomputable def gradL2sqOn_nonsmooth
     (Ω' : Set E) (g : Fin d → E → ℝ) : ℝ :=
   ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E)

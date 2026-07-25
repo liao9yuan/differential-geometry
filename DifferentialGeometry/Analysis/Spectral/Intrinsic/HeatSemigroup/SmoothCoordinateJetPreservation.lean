@@ -233,7 +233,8 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ ψ T ∧
         ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
-          (deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ i t := by
+          (deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i =
+            ψ i t := by
   classical
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   set Rem : ℝ → SmoothCcTensor g₀ 0 2 :=
@@ -300,7 +301,8 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
         have hmass : tensorSobolevWeight (I := I) (M := M) i σ' * u ^ 2 ≤
             ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ ^ 2 := by
           rw [tensorHs.norm_sq_eq_tsum]
-          have hsummable := (smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).weighted_summable
+          have hsummable := (smoothCcToTensorHs (I := I) (M := M) g₀ σ'
+            (Rjet j t)).weighted_summable
           have hle := hsummable.le_tsum i (fun i' _ =>
             mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i' σ') (sq_nonneg _))
           rw [hcoeff_eq] at hle
@@ -470,7 +472,8 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       rw [h0, smoothCcToTensorHs_smul, zero_smul]
     refine ⟨(Classical.choose (deTurckSobolevNHa2_exists_of_super
       (I := I) (M := M) g₀ a ha_super)).2,
-      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t => ?_⟩
+      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t
+        => ?_⟩
     by_cases ht : t ∈ Set.Icc (0 : ℝ) d₂
     · exact hp_ball (F t) (hball_pt t ht)
     · have hF0 : F t = 0 := by simp only [hF_def, ht, if_neg, not_false_iff]

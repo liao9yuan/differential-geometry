@@ -49,15 +49,15 @@ private lemma nirenberg_product_rule_square_bound
     {η u g G_F : EuclN → ℝ} (N : ℝ) (hN : 0 ≤ N)
     (k : Fin (Module.finrank ℝ E)) (h : ℝ)
     (hG_F_def : G_F = fun y =>
-      (η y)^2 *
+      (η y) ^ 2 *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k h g y +
-        ((fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single k 1)) *
+        ((fderiv ℝ (fun z => (η z) ^ 2) y) (EuclideanSpace.single k 1)) *
           DifferentialGeometry.Analysis.Sobolev.diffQuot
             (d := Module.finrank ℝ E) k h u y)
-    (hη_sq_le_one : ∀ x, (η x)^2 ≤ 1)
+    (hη_sq_le_one : ∀ x, (η x) ^ 2 ≤ 1)
     (h_eta_sq_fderiv_bound : ∀ y,
-      |(fderiv ℝ (fun z => (η z)^2) y) (EuclideanSpace.single k 1)| ≤ 2 * N) :
+      |(fderiv ℝ (fun z => (η z) ^ 2) y) (EuclideanSpace.single k 1)| ≤ 2 * N) :
     ∀ x : EuclN,
       (G_F x)^2 ≤
         8 * N^2 *
@@ -267,7 +267,7 @@ theorem chartBilinear_v_test_sq_discharge
     rw [h_eq] at hx'
     exact hδ_in_chart hx'
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := Metric.cthickening r (tsupport η))
       (Ω' := chartTargetEuclid (I := I) (M := M) α)
@@ -315,7 +315,7 @@ theorem chartBilinear_v_test_sq_discharge
         (fun y => (η y)^2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h u_g y)
         Set.univ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergDiffQuotTestFunction.hasWeakPartialDeriv_eta_sq_diffQuot
+    hasWeakPartialDeriv_eta_sq_diffQuot
       (d := Module.finrank ℝ E) k k h hη hu_g_locInt (hG_locInt k) (hG_isWP k)
   have h_self_subset_cthick :
       tsupport η ⊆ Metric.cthickening |h| (tsupport η) :=

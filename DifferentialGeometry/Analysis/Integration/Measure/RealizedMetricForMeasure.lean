@@ -50,13 +50,15 @@ theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
 
 
 abbrev volumeMeasureAt [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time)
+      (t : Time) :
     MeasureTheory.Measure M :=
   riemannianVolumeMeasure (I := I) (M := M) (G.metric t)
 
 @[simp]
 theorem volumeMeasureAt_eq [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time)
+      (t : Time) :
     volumeMeasureAt (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M) (G.metric t) := rfl
 
@@ -85,20 +87,23 @@ theorem volumeMeasureOn_eq_metric [T2Space M] [SigmaCompactSpace M]
       riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real)) := rfl
 
 theorem volumeMeasureAt_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time)
+      (t : Time) :
     IsLocallyFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M)
     (G.metric t)
 
 theorem volumeMeasureAt_sigmaFinite [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time)
+      (t : Time) :
     SigmaFinite (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_sigmaFinite (I := I) (M := M)
     (G.metric t)
 
 theorem volumeMeasureAt_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Time)
+      (t : Time) :
     IsFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
     (I := I) (M := M) (G.metric t)

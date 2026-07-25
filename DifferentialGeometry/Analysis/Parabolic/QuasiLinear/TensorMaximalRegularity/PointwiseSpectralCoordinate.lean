@@ -157,7 +157,8 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     have hcomp : ContinuousOn
         (fun t => (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i)
           (u.toFun t)) (Set.Icc (0 : ℝ) T) :=
-      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
+      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a)
+        i).continuous.comp_continuousOn
         u.continuousOn_toFun
     simpa only [coeffCLM_apply] using hcomp
   have hRHS_cont : ContinuousOn (fun t => perModeConv lam φi t) (Set.Icc (0 : ℝ) T) :=
@@ -226,7 +227,8 @@ theorem carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (hT : 0 < T) (hT1 
     have hcomp : ContinuousOn
         (fun t => (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i)
           (u.toFun t)) (Set.Icc (0 : ℝ) d₂) :=
-      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
+      (coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a)
+        i).continuous.comp_continuousOn
         (u.continuousOn_toFun.mono (Set.Icc_subset_Icc le_rfl hd₂_le))
     simpa only [coeffCLM_apply] using hcomp
   have hRHS_cont : ContinuousOn (fun t => perModeConv lam φi t) (Set.Icc (0 : ℝ) d₂) :=

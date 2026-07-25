@@ -1,9 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateIdentities
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -45,7 +42,8 @@ theorem evol_ricci_inFrame_of_variation_commutators
       (nablaGammaDtFromNabla2RicInFrame (M := M) gInv nabla2Ric))
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx) :
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (i j : Idx) :
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j -
@@ -90,7 +88,8 @@ def RicciTraceDerivativeSimplifiesInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     ricciTraceDerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
         (t : Real) x i j =
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -138,7 +137,8 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
           ∑ l : Idx,
             (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
                 (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k i j l +
+              DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k
+                i j l +
             gInv (t : Real) x k l * rm04Dt (t : Real) x k i j l))
         (s := D.carrier) (x := (t : Real))
         (fun k _hk =>
@@ -148,11 +148,13 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
                 (u := (Finset.univ : Finset Idx))
                 (A := fun l s =>
                   gInv s x k l *
-                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 s) frame x k i j l)
+                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 s) frame x k i
+                      j l)
                 (A' := fun l =>
                   inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
                       (t : Real) x k l *
-                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x k i j l +
+                    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                      frame x k i j l +
                   gInv (t : Real) x k l * rm04Dt (t : Real) x k i j l)
                 (s := D.carrier) (x := (t : Real))
                 (fun l _hl =>
@@ -235,7 +237,8 @@ def RicciLichnerowiczEquationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -256,7 +259,8 @@ def RicciLichnerowiczSpecializesInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (ricciCompInFrame (I := I) S frame)
         (raisedRicciCompInFrame (I := I) S gInv frame)
@@ -467,11 +471,13 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (h_left : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h_left : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M) (i j : Idx),
       ricciLeftActionCompInFrame (I := I) S gInv frame
           (ricciCompInFrame (I := I) S frame) (t : Real) x i j =
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j)
-    (h_right : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h_right : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M) (i j : Idx),
       ricciRightActionCompInFrame (I := I) S gInv frame
           (ricciCompInFrame (I := I) S frame) (t : Real) x i j =
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j) :
@@ -549,7 +555,8 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
@@ -557,8 +564,10 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
+      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+        (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (hinv : InvMetricLocal (I := I) S gInv frame u) :
     RicciLichnerowiczSpecializesInFrame
@@ -646,7 +655,8 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
@@ -654,8 +664,10 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
+      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+        (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
@@ -682,7 +694,8 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
     (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv :
-      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
+      Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+        (CoordinateIdx (𝕜 := Real) E))
     (gInvDt :
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
     (nablaRic :
@@ -702,11 +715,14 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
     (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s)
+        (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (Rm13 s))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
-      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
+      DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
+        (S.family.connection s) x₀)
     (hmix :
       ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)

@@ -592,7 +592,8 @@ private lemma chosenSecondPartialWeakPartialDeriv_memLp
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_memW1p l₂
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memLp_restrict_of_memLp_chartTarget
     (α : M)
     {f : EuclN → ℝ}

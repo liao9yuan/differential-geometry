@@ -48,15 +48,12 @@ private lemma convexCombForm_apply (g₁ g₂ : SmoothRiemannianMetric I M) (χ 
   simp [convexCombForm, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
 
 omit [FiniteDimensional ℝ E] in
-
 private lemma convexCombForm_symm (g₁ g₂ : SmoothRiemannianMetric I M) (χ : M → ℝ)
     (x : M) (v w : TangentSpace I x) :
     convexCombForm (I := I) g₁ g₂ χ x v w = convexCombForm (I := I) g₁ g₂ χ x w v := by
   rw [convexCombForm_apply, convexCombForm_apply, g₁.symm x v w, g₂.symm x v w]
 
 omit [FiniteDimensional ℝ E] in
-
-
 private lemma convexCombForm_pos (g₁ g₂ : SmoothRiemannianMetric I M) (χ : M → ℝ)
     (hχ01 : ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :

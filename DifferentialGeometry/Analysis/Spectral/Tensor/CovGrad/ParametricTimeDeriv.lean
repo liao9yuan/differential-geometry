@@ -34,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [FiniteDimensional ℝ E] [CompactSpace M] in
-
-
 private theorem timeDeriv2_at
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
     {f : M × ℝ → F} {p₀ : M × ℝ} {m n : WithTop ℕ∞}
@@ -230,8 +228,6 @@ private theorem coord_deriv_eq
   exact hcomp.deriv.symm
 
 omit [CompactSpace M] in
-
-
 private theorem timeDeriv_joint
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)

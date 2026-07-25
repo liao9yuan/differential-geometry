@@ -13,7 +13,6 @@ import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle
@@ -36,7 +35,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
-omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     cometricDoubleTraceFib (I := I) h 0 x D =
@@ -188,7 +188,8 @@ theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
                     (smoothOrthoFrame (I := I) h x c x) *
                   Tensor0SSpace.toModel D
                     (Fin.cons ((smoothOrthoFrame (I := I) q x a x : TangentSpace I x) : E)
-                      (Fin.cons ((smoothOrthoFrame (I := I) h x c x : TangentSpace I x) : E) mm)) := by
+                      (Fin.cons ((smoothOrthoFrame (I := I) h x c x : TangentSpace I x) : E)
+                        mm)) := by
           change ((Tensor0SSpace.toModel D).curryLeft
               (∑ a : Fin (Module.finrank ℝ E),
                 q.inner x (smoothOrthoFrame (I := I) q x a x)

@@ -5,7 +5,8 @@ import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Regulari
 /-!
 # Moser Witness Construction
 
-This module constructs the limiting power-cutoff witness from the exact-on-support regularized witnesses.
+This module constructs the limiting power-cutoff witness from the exact-on-support regularized
+witnesses.
 -/
 
 noncomputable section
@@ -26,6 +27,7 @@ with fixed qualitative cutoff level `N` and ε → 0.
 Uses `HasWeakPartialDeriv.of_eLpNormApprox_p` and dominated convergence,
 simplified by the Chapter 05 a.e. boundedness of `u₊`. -/
 set_option maxHeartbeats 1000000 in
+-- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem moserPowerCutoff_memW1pWitness
     (hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
@@ -241,7 +243,8 @@ theorem moserPowerCutoff_memW1pWitness
       have hf_abs_bound : |f x| ≤ (1 + N) ^ (p / 2) := by
         simpa [Real.norm_eq_abs] using hf_bound
       calc
-        |fn n x - f x| ≤ ‖fn n x‖ + ‖f x‖ := by simpa [Real.norm_eq_abs] using norm_sub_le (fn n x) (f x)
+        |fn n x - f x| ≤ ‖fn n x‖ + ‖f x‖ := by simpa [Real.norm_eq_abs] using norm_sub_le (fn n x)
+                                                  (f x)
         _ ≤ Cfun := by
             dsimp [Cfun]
             nlinarith [hfn_abs_bound, hf_abs_bound, hpow_nonneg]
@@ -646,7 +649,8 @@ theorem moserPowerCutoff_memW1pWitness
                 = (moserEpsSeq n + |max (u x) 0|) ^ p := by
                     rw [abs_of_nonneg (Real.rpow_nonneg hsum_nonneg _)]
             _ ≤ (1 + |max (u x) 0|) ^ p := by
-                exact Real.rpow_le_rpow hsum_nonneg (by linarith [moserEpsSeq_le_one n]) (by linarith)
+                exact Real.rpow_le_rpow hsum_nonneg (by linarith [moserEpsSeq_le_one n])
+                  (by linarith)
             _ ≤ (2 : ℝ) ^ p * (1 + |max (u x) 0| ^ p) := by
                 exact one_add_rpow_le_two_rpow_mul_one_add_rpow hbase_nonneg (by linarith)
         simpa [Real.norm_eq_abs] using hpt)
@@ -712,7 +716,8 @@ theorem moserPowerCutoff_memW1pWitness
       calc
         (moserEpsSeq n + |max (u x) 0|) ^ p
             ≤ (1 + |max (u x) 0|) ^ p := by
-                exact Real.rpow_le_rpow hsum_nonneg (by linarith [moserEpsSeq_le_one n]) (by linarith)
+                exact Real.rpow_le_rpow hsum_nonneg (by linarith [moserEpsSeq_le_one n])
+                  (by linarith)
         _ ≤ (2 : ℝ) ^ p * (1 + |max (u x) 0| ^ p) := by
             exact one_add_rpow_le_two_rpow_mul_one_add_rpow hbase_nonneg (by linarith)
     have hmainρ :
@@ -957,7 +962,8 @@ theorem moserPowerCutoff_memW1pWitness
         have hmeas :
             ∀ n, AEMeasurable (fun x => ENNReal.ofReal ((AsingSeq n i x) ^ 2)) μ := by
           intro n
-          exact (((hAsingSeq_memLp n i).aestronglyMeasurable.aemeasurable.pow_const 2).ennreal_ofReal)
+          exact (((hAsingSeq_memLp n i).aestronglyMeasurable.aemeasurable.pow_const
+            2).ennreal_ofReal)
         have hleft :=
           MeasureTheory.lintegral_liminf_le' (μ := μ) hmeas
         have hlim :
@@ -1222,7 +1228,8 @@ theorem moserPowerCutoff_memW1pWitness
                             |hwPos.weakGrad x i| := by
                       calc
                         ‖Asing i x‖ = |Asing i x| := by rw [Real.norm_eq_abs]
-                        _ = |η x * ((p / 2) * (max (u x) 0) ^ (p / 2 - 1)) * hwPos.weakGrad x i| := by
+                        _ = |η x * ((p / 2) * (max (u x) 0) ^ (p / 2 - 1)) * hwPos.weakGrad x
+                          i| := by
                               simp [Asing, hux, mul_assoc]
                         _ = η x * ((p / 2) * (max (u x) 0) ^ (p / 2 - 1)) *
                               |hwPos.weakGrad x i| := by
@@ -1302,7 +1309,8 @@ theorem moserPowerCutoff_memW1pWitness
           atTop (nhds 0) := by
       simpa [μ] using hfn_tendsto
     have hGn_fun_memLp' :
-        ∀ n, MemLp (fun x => Gn n i x - gComp i x) (ENNReal.ofReal (2 : ℝ)) (volume.restrict Ω) := by
+        ∀ n, MemLp (fun x => Gn n i x - gComp i x) (ENNReal.ofReal (2 : ℝ))
+          (volume.restrict Ω) := by
       intro n
       simpa [μ] using hGn_fun_memLp n i
     have hGn_tendsto' :
@@ -1351,7 +1359,8 @@ theorem moserPowerCutoff_memW1pWitness
       exact hGn_comp_tendsto_ae i
     filter_upwards [hcoords] with x hx
     have hpi :
-        Tendsto (fun n : ℕ => fun i : Fin d => Gn n i x) atTop (nhds fun i : Fin d => gComp i x) := by
+        Tendsto (fun n : ℕ => fun i : Fin d => Gn n i x) atTop
+          (nhds fun i : Fin d => gComp i x) := by
       rw [tendsto_pi_nhds]
       intro i
       exact hx i

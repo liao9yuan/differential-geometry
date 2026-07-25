@@ -22,7 +22,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem ricci_identity_vector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y V : Π b : M, TangentSpace I b) (x : M) :
@@ -259,7 +260,8 @@ noncomputable def localConnLap_vector
     (cov.toFun (covApply cov (B i) V) x (B i x) -
       cov.toFun V x (cov.toFun (B i) x (B i x)))
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma localConnLap_vector_def
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -437,7 +439,8 @@ theorem inner_cov_gradFun_eq_abstractHessian [I.Boundaryless]
   have hmc' : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) =
       g.inner x (cov.toFun (fun b => gradFun (I := I) g f b) x (X x)) (Y x) +
         g.inner x (gradFun (I := I) g f x) (cov.toFun Y x (X x)) := by
-    have hext_eq : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x) =
+    have hext_eq : extDerivFun (I := I) (fun b => g.inner b (gradFun (I := I) g f b) (Y b)) x (X x)
+      =
         (mfderiv I 𝓘(ℝ) (fun b : M => g.inner b (gradFun (I := I) g f b) (Y b)) x) (X x) := rfl
     rw [hext_eq, hmc]
   have h_lhs_eq : extDerivFun (I := I) (fun b : M => θ b (Y b)) x (X x) =

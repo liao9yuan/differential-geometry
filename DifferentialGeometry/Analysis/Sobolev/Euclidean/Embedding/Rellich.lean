@@ -13,7 +13,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ ‖v‖ := by
   rw [EuclideanSpace.norm_eq]
   have : ‖v i‖ ^ 2 ≤ ∑ j, ‖v j‖ ^ 2 := by
@@ -29,7 +28,6 @@ private lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ �
     _ ≤ Real.sqrt (∑ j, ‖v j‖ ^ 2) := Real.sqrt_le_sqrt this
 
 omit [NeZero d] in
-
 theorem eLpNorm_weakGrad_component_le
     {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
     (hw : DeGiorgi.MemW1pWitness p u Ω) (i : Fin d) :
@@ -40,7 +38,6 @@ theorem eLpNorm_weakGrad_component_le
   exact euclidean_component_norm_le (hw.weakGrad x) i
 
 omit [NeZero d] in
-
 private lemma fderiv_norm_le_sum_components
     {φ : E → ℝ} (x : E) :
     ‖fderiv ℝ φ x‖ ≤ ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
@@ -551,14 +548,12 @@ theorem eLpNorm_translate_sub_le_of_memW01p
   exact le_of_tendsto_of_tendsto' tendsto_const_nhds h_sum_tendsto hLHS_le
 
 omit [NeZero d] in
-
 private lemma isCompact_closure_of_bounded
     {Ω : Set E} (hΩ_bdd : Bornology.IsBounded Ω) :
     IsCompact (closure Ω) :=
   hΩ_bdd.isCompact_closure
 
 omit [NeZero d] in
-
 private lemma indicator_supp_subset_closure
     {Ω : Set E} {u : E → ℝ} (x : E) (hx : x ∉ closure Ω) :
     Ω.indicator u x = 0 := by

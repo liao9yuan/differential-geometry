@@ -38,7 +38,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 open Classical in
-
 omit [CompleteSpace E] in
 private lemma raw_eigenvectorSmoothChart_eq_ite
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -67,7 +66,6 @@ private lemma raw_eigenvectorSmoothChart_eq_ite
       (I := I) (M := M) g r s i α β P₀ hxα
 
 open Classical in
-
 omit [CompleteSpace E] in
 theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

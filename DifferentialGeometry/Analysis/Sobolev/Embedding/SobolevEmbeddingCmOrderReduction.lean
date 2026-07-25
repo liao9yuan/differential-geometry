@@ -71,7 +71,6 @@ theorem iteratedCovGradSobolevNorm_le_topOrder
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
@@ -119,7 +118,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2_of_rankBound
     (g : SmoothRiemannianMetric I M) (k : ℕ)

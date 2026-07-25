@@ -41,7 +41,6 @@ def gramD3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : �
             (chartGramOnE (I := I) g₂ α p.2.2.2.1 p.2.2.2.2))) y|
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem gramD3_sub_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (d c m a b : Fin (Module.finrank ℝ E)) :
@@ -68,7 +67,6 @@ theorem gramD3_sub_le
   simpa only [gramD3DiffSup, p] using h
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem gramD3DiffSup_nonneg
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ gramD3DiffSup (I := I) (M := M) g₁ g₂ α y := by
@@ -81,7 +79,6 @@ def metricJet3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) 
     gramD3DiffSup (I := I) (M := M) g₁ g₂ α y
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem metricJet3_nonneg
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ metricJet3DiffSup (I := I) (M := M) g₁ g₂ α y :=
@@ -89,7 +86,6 @@ theorem metricJet3_nonneg
     (gramD3DiffSup_nonneg (I := I) (M := M) g₁ g₂ α y)
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem metricJet2_le_jet3
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y ≤
@@ -97,7 +93,6 @@ theorem metricJet2_le_jet3
   le_add_of_nonneg_right (gramD3DiffSup_nonneg (I := I) (M := M) g₁ g₂ α y)
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem gramD3_le_jet3
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     gramD3DiffSup (I := I) (M := M) g₁ g₂ α y ≤

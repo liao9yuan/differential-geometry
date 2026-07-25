@@ -75,7 +75,7 @@ theorem hsC0_fiber_sq
           ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 s
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le
     (I := I) (M := M) g s (Module.finrank ℝ E / 2 + 1)
@@ -115,8 +115,6 @@ theorem hsC0_fiber_sq
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
-
-
 theorem scalar0_fiber_sq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 0) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 0 x (T.toSection x) =
@@ -172,7 +170,7 @@ theorem hs2_fiber_sq
         C ^ 2 * ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖ ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 s
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le (I := I) (M := M) g s 2
   refine ⟨Cpt * Chs, mul_nonneg hCpt hChs, ?_⟩
@@ -241,7 +239,7 @@ theorem hs3_grad_low2
         (C * ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) T‖) ^ 2 := by
   classical
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 0 (s + 1)
   obtain ⟨Chs, hChs, hhs⟩ := hsJet_le (I := I) (M := M) g s 3
   let C : ℝ := Cpt * Chs + Chs + 1
@@ -319,8 +317,6 @@ theorem hs3_grad_low2
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-
 theorem hs2_op_bound
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

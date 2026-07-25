@@ -8,7 +8,6 @@ import Mathlib.Topology.Order.OrderClosed
 import Mathlib.Topology.Order.Real
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 open scoped Topology
 

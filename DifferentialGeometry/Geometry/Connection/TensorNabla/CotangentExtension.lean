@@ -373,13 +373,15 @@ def metricFlat (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x)
     Π x : M, TangentSpace I x →L[ℝ] ℝ :=
   fun b => g.inner b (X b)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 @[simp] lemma metricFlat_apply
     (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x)
     (b : M) (Y : TangentSpace I b) :
     metricFlat g X b Y = g.inner b (X b) Y := rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma metricFlat_mdiff_total
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
@@ -398,7 +400,8 @@ lemma metricFlat_mdiff_total
     (b := fun b : M => b)
     (ϕ := fun b => g.inner b) (v := fun b => X b) hg hX
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma metricFlat_mdiff
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
@@ -533,7 +536,8 @@ theorem cotangentCov_extDerivFun_smooth
     ContinuousLinearMap.coe_id', id_eq]
   rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem cotangentCov_pairing_contMDiff
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ}
     (hθ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -553,7 +557,8 @@ theorem cotangentCov_pairing_contMDiff
   intro x
   exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem cotangentCov_covApply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

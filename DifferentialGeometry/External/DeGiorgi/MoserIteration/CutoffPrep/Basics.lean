@@ -5,7 +5,8 @@ import Mathlib.Topology.MetricSpace.Thickening
 /-!
 # Moser Cutoff Preparation Basics
 
-This module contains the basic cutoff, derivative, Sobolev-preparation, and local support lemmas for the Chapter 06 Moser iteration.
+This module contains the basic cutoff, derivative, Sobolev-preparation, and local support lemmas
+for the Chapter 06 Moser iteration.
 -/
 
 noncomputable section
@@ -44,7 +45,8 @@ lemma moserFderivVec_apply
     moserFderivVec η x i = inner ℝ (moserFderivVec η x) (EuclideanSpace.single i (1 : ℝ)) := by
       simpa using
         (EuclideanSpace.inner_single_right (i := i) (a := (1 : ℝ)) (moserFderivVec η x)).symm
-    _ = ((InnerProductSpace.toDual ℝ E) (moserFderivVec η x)) (EuclideanSpace.single i (1 : ℝ)) := by
+    _ = ((InnerProductSpace.toDual ℝ E) (moserFderivVec η x))
+      (EuclideanSpace.single i (1 : ℝ)) := by
       rw [InnerProductSpace.toDual_apply_apply]
     _ = (fderiv ℝ η x) (EuclideanSpace.single i 1) := by
       simp [moserFderivVec]
@@ -801,7 +803,8 @@ lemma positivePartSub_grad_eq_on_superlevel
       MemW1pWitness 2 (fun x => u x - k + (-1 : ℝ) * w x) Ω :=
     hw_shift.add (hw_trunc.smul (-1))
   have hcomp :
-      ∀ i : Fin d, ∀ᵐ x ∂(volume.restrict Ω), k < u x → hu.weakGrad x i = hw_trunc.weakGrad x i := by
+      ∀ i : Fin d, ∀ᵐ x ∂(volume.restrict Ω), k < u x → hu.weakGrad x i = hw_trunc.weakGrad x
+        i := by
     intro i
     have hz := hw_diff.weakGrad_ae_eq_zero_on_zeroSet hΩ i
     filter_upwards [hz] with x hx hku
@@ -856,10 +859,12 @@ lemma moserClippedPosPartWitness_grad_eq_on_midrange
     hu1.restrict Metric.isOpen_ball (Metric.ball_subset_ball hs1)
   let hw0 : MemW1pWitness 2 (positivePartSub u 0) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1 hu1)
+      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1
+        hu1)
   let hwN : MemW1pWitness 2 (positivePartSub u N) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1 hu1)
+      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1
+        hu1)
   have h0_eq := positivePartSub_grad_eq_on_superlevel (d := d) Metric.isOpen_ball huS hw0
   have hN_zero := positivePartSub_grad_zero_on_sublevel (d := d) Metric.isOpen_ball hwN
   filter_upwards [h0_eq, hN_zero] with x hx0 hxN hu_pos hu_ltN
@@ -878,16 +883,19 @@ lemma moserClippedPosPartWitness_grad_zero_on_nonpos
     (hu1 : MemW1pWitness 2 u (Metric.ball (0 : E) 1)) :
     ∀ᵐ x ∂(volume.restrict (Metric.ball (0 : E) s)),
       u x ≤ 0 →
-        (moserClippedPosPartWitness (d := d) (u := u) (s := s) (N := N) hs hs1 hN hu1).weakGrad x = 0 := by
+        (moserClippedPosPartWitness (d := d) (u := u) (s := s) (N := N) hs hs1 hN hu1).weakGrad x =
+          0 := by
   let Ω := Metric.ball (0 : E) s
   let huS : MemW1pWitness 2 u Ω :=
     hu1.restrict Metric.isOpen_ball (Metric.ball_subset_ball hs1)
   let hw0 : MemW1pWitness 2 (positivePartSub u 0) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1 hu1)
+      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1
+        hu1)
   let hwN : MemW1pWitness 2 (positivePartSub u N) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1 hu1)
+      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1
+        hu1)
   have h0_zero := positivePartSub_grad_zero_on_sublevel (d := d) Metric.isOpen_ball hw0
   have hN_zero := positivePartSub_grad_zero_on_sublevel (d := d) Metric.isOpen_ball hwN
   filter_upwards [h0_zero, hN_zero] with x hx0 hxN hu_nonpos
@@ -906,7 +914,8 @@ lemma moserClippedPosPartWitness_grad_zero_on_toplevel
     (hu1 : MemW1pWitness 2 u (Metric.ball (0 : E) 1)) :
     ∀ᵐ x ∂(volume.restrict (Metric.ball (0 : E) s)),
       N ≤ u x →
-        (moserClippedPosPartWitness (d := d) (u := u) (s := s) (N := N) hs hs1 hN hu1).weakGrad x = 0 := by
+        (moserClippedPosPartWitness (d := d) (u := u) (s := s) (N := N) hs hs1 hN hu1).weakGrad x =
+          0 := by
   let Ω := Metric.ball (0 : E) s
   letI : IsFiniteMeasure (volume.restrict Ω) := by
     dsimp [Ω]
@@ -917,16 +926,19 @@ lemma moserClippedPosPartWitness_grad_zero_on_toplevel
   let huSN : MemW1pWitness 2 (fun x => u x - N) Ω := huS.sub_const Metric.isOpen_ball N
   let hw0 : MemW1pWitness 2 (positivePartSub u 0) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1 hu1)
+      hs huS 0 (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := 0) hs hs1
+        hu1)
   let hwN : MemW1pWitness 2 (positivePartSub u N) Ω :=
     positivePartSub_memW1pWitness_on_ball (d := d) (x₀ := (0 : E)) (s := s)
-      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1 hu1)
+      hs huS N (moser_shiftApprox_on_ball_of_unitBall (d := d) (u := u) (s := s) (θ := N) hs hs1
+        hu1)
   have h0_eq := positivePartSub_grad_eq_on_superlevel (d := d) Metric.isOpen_ball huS hw0
   have h0_zero := positivePartSub_grad_zero_on_sublevel (d := d) Metric.isOpen_ball hw0
   have hN_eq := positivePartSub_grad_eq_on_superlevel (d := d) Metric.isOpen_ball huS hwN
   have hN_zero := positivePartSub_grad_zero_on_sublevel (d := d) Metric.isOpen_ball hwN
   have hzN := huSN.weakGrad_ae_eq_zero_on_zeroSet Metric.isOpen_ball
-  filter_upwards [h0_eq, h0_zero, hN_eq, hN_zero, ae_all_iff.2 hzN] with x hx0eq hx0zero hxNeq hxNzero hz hNu
+  filter_upwards [h0_eq, h0_zero, hN_eq, hN_zero, ae_all_iff.2 hzN] with x hx0eq hx0zero hxNeq
+    hxNzero hz hNu
   by_cases hlt : N < u x
   · have hu_pos : 0 < u x := by linarith
     ext i

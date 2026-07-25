@@ -151,7 +151,8 @@ private theorem riemannOp_tensorCov_homNatural
       hΞd_smooth]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma covGradBundleEquiv_symm_apply_eq_curry
     (m : ℕ) (x : M)
     (τ : TensorRSSpace 0 (m + 1) I x) (w : TangentSpace I x) (d : Tensor0SSpace 0 I x) :
@@ -347,7 +348,6 @@ private lemma pureRGenuineEndoFib_eq_comp
   intro d
   apply tensor0SSpace_ext (𝕜 := ℝ) (m + 1) x
   intro v
-
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
         pureRGenuineEndoFib (I := I) (M := M) g m W x) d v =
       Tensor0SSpace.toModel
@@ -361,14 +361,14 @@ private lemma pureRGenuineEndoFib_eq_comp
     rfl]
   rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
     (W.toSection x) d v]
-
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
         TensorRSSpace.ofCLM
           ((pureREndoOpFib (I := I) (M := M) g m x).comp
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x))) d v =
       Tensor0SSpace.toModel
         (pureREndoOpFib (I := I) (M := M) g m x
-          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)) v from rfl]
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)) v from
+            rfl]
   rw [pureREndoOpFib_apply (I := I) (M := M) g m x
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)]
   rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
@@ -423,7 +423,6 @@ private theorem pureREndoOp_contMDiff (g : SmoothRiemannianMetric I M) (m : ℕ)
   intro Z
   set Wσ : SmoothCcTensor g 0 (m + 1) :=
     ⟨unitScalarRSLiftCₛ (I := I) (M := M) Z, HasCompactSupport.of_compactSpace _⟩ with hWσ_def
-
   have hpt : ∀ x : M, pureREndoOpFib (I := I) (M := M) g m x (Z x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
         pureRGenuineEndoFib (I := I) (M := M) g m Wσ x) (unitZeroSec (I := I) (M := M) x) := by
@@ -456,7 +455,6 @@ theorem exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (g : SmoothRiemanni
         pureRGenuineDiffOp (I := I) (M := M) g 0 r W =
           operatorFieldApply (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W := by
   classical
-
   refine ⟨fun r => match r with
     | 0 => 0
     | (m + 1) =>
@@ -467,7 +465,6 @@ theorem exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (g : SmoothRiemanni
   intro r W
   cases r with
   | zero =>
-
       apply SmoothCcTensor.ext
       apply ContMDiffSection.ext
       intro x
@@ -482,7 +479,6 @@ theorem exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (g : SmoothRiemanni
       rw [ContinuousLinearMap.zero_comp]
       rfl
   | succ m =>
-
       apply SmoothCcTensor.ext
       apply ContMDiffSection.ext
       intro x
@@ -501,20 +497,17 @@ theorem exists_proportional_pureRGenuineDiffOp_highOrder (g : SmoothRiemannianMe
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-
   obtain ⟨Φ₀, hΦ₀⟩ := exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g
-
   have hNF : ∀ (p r : ℕ),
-      IsIteratedCovGradNormalForm (I := I) (M := M) g (pureRGenuineDiffOp (I := I) (M := M) g) p r :=
+      IsIteratedCovGradNormalForm (I := I) (M := M) g (pureRGenuineDiffOp (I := I) (M := M) g) p
+        r :=
     fun p => normalForm_of_base (I := I) (M := M) g
       (pureRGenuineDiffOp (I := I) (M := M) g)
       (covGrad_pureRGenuineDiffOp_eq (I := I) (M := M) g) Φ₀ hΦ₀ p
-
   choose kap hkap_nn hkap using fun p r =>
     exists_jet_bound_of_normalForm (I := I) (M := M) g
       (pureRGenuineDiffOp (I := I) (M := M) g) p r (hNF p r)
   refine ⟨fun p r => kap (p + 1) r, fun p r => hkap_nn (p + 1) r, fun p r W x => ?_⟩
-
   have h := hkap (p + 1) r W x
   rw [show (p + 1) + 1 = p + 2 from rfl] at h
   exact h
@@ -528,7 +521,6 @@ theorem exists_proportional_pureRGenuineDiffOp (g : SmoothRiemannianMetric I M) 
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-
   obtain ⟨kappa0, hkappa0_nn, hkappa0⟩ :=
     exists_proportional_pureRFrozenFrameDiffOp_orderZero (I := I) (M := M) g
   obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
@@ -540,7 +532,6 @@ theorem exists_proportional_pureRGenuineDiffOp (g : SmoothRiemannianMetric I M) 
     | succ p' => exact hkappaHigh_nn p' r
   · cases p with
     | zero =>
-
         have h := hkappa0 r W x
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p' + 1) => kappaHigh p' r) 0 r = kappa0 r from rfl]
@@ -551,13 +542,11 @@ theorem exists_proportional_pureRGenuineDiffOp (g : SmoothRiemannianMetric I M) 
           | zero => rfl
           | succ m => rfl
         rw [hsec, Finset.sum_range_one]
-
         exact h
     | succ p' =>
         have h := hkappaHigh p' r W x
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p'' + 1) => kappaHigh p'' r) (p' + 1) r = kappaHigh p' r from rfl]
-
         rw [show (p' + 1) + 1 = p' + 2 from rfl]
         exact h
 

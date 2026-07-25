@@ -4,9 +4,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -577,7 +574,8 @@ theorem lc_bochner_rm04
     oneFormThirdCovDerivCommAt_of_leviCivita (I := I)
       g Rm13 duSec nablaDuSec (differential1FormFun (I := I) u x)
       (nabla2DuSec x) hRm13 (by simpa [duField] using hdu x) hnabla2
-  exact DifferentialGeometry.Integral.Connection.fundamental_bochner_of_lc_terms_of_rm04_skew (I := I)
+  exact DifferentialGeometry.Integral.Connection.fundamental_bochner_of_lc_terms_of_rm04_skew
+    (I := I)
     g Ric Rm13 Rm04 gInvFrame frame hRm13 hRm04 hRic13 hRic04 u
     (fun y : M => nablaDuSec y) (fun y : M => nablaDuSec y)
     roughDu basis gInvAt hinv X duSec nablaDuSec (nabla2DuSec x)

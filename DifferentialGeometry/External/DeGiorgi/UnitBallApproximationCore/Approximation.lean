@@ -806,7 +806,8 @@ private theorem exists_delta_unitBallDilate_scaled_close_of_memLp
         (MeasureTheory.Measure.quasiMeasurePreserving_smul (μ := volume) (r := lam⁻¹)
           (inv_ne_zero (ne_of_gt hlam_pos))).mono_left
           Measure.restrict_le_self.absolutelyContinuous
-    have hdil0_aesm : AEStronglyMeasurable (fun x => DeGiorgi.unitBallDilate (d := d) lam f0 x) μB := by
+    have hdil0_aesm : AEStronglyMeasurable (fun x => DeGiorgi.unitBallDilate (d := d) lam f0 x)
+      μB := by
       dsimp [DeGiorgi.unitBallDilate]
       simpa using hf0.aestronglyMeasurable.comp_quasiMeasurePreserving hqmp
     exact hdil0_aesm.congr hEqAe.symm
@@ -1046,7 +1047,8 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
         eLpNorm
           (fun x => lam⁻¹ * DeGiorgi.unitBallDilate (d := d) lam (fun y => hw.weakGrad y i) x -
             hw.weakGrad x i)
-          (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1)) < ENNReal.ofReal (ε / 2) := by
+          (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1)) < ENNReal.ofReal
+            (ε / 2) := by
     intro i
     exact hδG i hlam_gt_one (hlam_lt_G i)
   obtain ⟨η, hη_sub⟩ := exists_unitBallCutoff_inside (d := d) hlam_gt_one
@@ -1074,11 +1076,13 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
     dsimp [v, Ω, udil]
     exact (tsupport_smul_subset_left η.toFun (DeGiorgi.unitBallDilate (d := d) lam u)).trans hη_sub
   have hv_compact : HasCompactSupport v := by
-    apply HasCompactSupport.intro' (isCompact_closedBall (0 : E) ((1 + lam) / 2)) isClosed_closedBall
+    apply HasCompactSupport.intro' (isCompact_closedBall (0 : E) ((1 + lam) / 2))
+      isClosed_closedBall
     intro x hx
     exact zero_outside_of_tsupport_subset
       (Ω := Metric.closedBall (0 : E) ((1 + lam) / 2))
-      ((tsupport_smul_subset_left η.toFun (DeGiorgi.unitBallDilate (d := d) lam u)).trans η.support_subset) hx
+      ((tsupport_smul_subset_left η.toFun (DeGiorgi.unitBallDilate (d := d) lam u)).trans
+        η.support_subset) hx
   have hKΩ : Metric.closedBall (0 : E) ((1 + lam) / 2) ⊆ Ω := by
     dsimp [Ω]
     exact Metric.closedBall_subset_ball (midpoint_lt_of_one_lt hlam_gt_one)
@@ -1090,7 +1094,8 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
     apply closure_mono
     refine Function.support_subset_iff'.2 ?_
     intro x hx
-    have hηx : η.toFun x = 0 := zero_outside_of_tsupport_subset (Ω := Metric.closedBall (0 : E) ((1 + lam) / 2))
+    have hηx : η.toFun x = 0 := zero_outside_of_tsupport_subset
+      (Ω := Metric.closedBall (0 : E) ((1 + lam) / 2))
       η.support_subset hx
     have hηdx :
         (fderiv ℝ η.toFun x) (EuclideanSpace.single i 1) = 0 :=
@@ -1103,7 +1108,8 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
   rcases exists_smooth_W1p_approx_of_supportedWitness
       (d := d) (Ω := Ω) (K := Metric.closedBall (0 : E) ((1 + lam) / 2))
       isOpen_ball hp hwLoc (isCompact_closedBall (0 : E) ((1 + lam) / 2)) hKΩ
-      ((tsupport_smul_subset_left η.toFun (DeGiorgi.unitBallDilate (d := d) lam u)).trans η.support_subset)
+      ((tsupport_smul_subset_left η.toFun (DeGiorgi.unitBallDilate (d := d) lam u)).trans
+        η.support_subset)
       hgrad_sub with
     ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
   have hB_sub_Ω : B ⊆ Ω := unitBall_subset_ball_of_one_lt (d := d) hlam_gt_one
@@ -1244,7 +1250,8 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
     rw [hΩ_ind]
     change hwLoc.weakGrad x i - hw.weakGrad x i =
       lam⁻¹ * DeGiorgi.unitBallDilate (d := d) lam (fun y => hw.weakGrad y i) x - hw.weakGrad x i
-    simp [hwLoc, MemW1pWitness.mul_smooth_bounded_p, hwDil, MemW1pWitness.unitBallDilate_largeBall, v, udil, DeGiorgi.unitBallDilate, hηx, hηdx, smul_eq_mul]
+    simp [hwLoc, MemW1pWitness.mul_smooth_bounded_p, hwDil, MemW1pWitness.unitBallDilate_largeBall,
+      v, udil, DeGiorgi.unitBallDilate, hηx, hηdx, smul_eq_mul]
   have hgrad_final :
       ∀ i : Fin d,
         eLpNorm
@@ -1279,7 +1286,8 @@ theorem exists_smooth_W1p_oneShot_on_unitBall
           Measure.restrict_le_self.absolutelyContinuous).sub hgiLoc_memLp_B.aestronglyMeasurable)
     have hloc_minus_grad_aesm :
         AEStronglyMeasurable (fun x => giLoc x - hw.weakGrad x i) (volume.restrict B) := by
-      exact hgiLoc_memLp_B.aestronglyMeasurable.sub (hw.weakGrad_component_memLp i).aestronglyMeasurable
+      exact hgiLoc_memLp_B.aestronglyMeasurable.sub
+        (hw.weakGrad_component_memLp i).aestronglyMeasurable
     have hsum_ae :
         (fun x => (fderiv ℝ ψ x) ei - hw.weakGrad x i) =ᵐ[volume.restrict B]
           (fun x => ((fderiv ℝ ψ x) ei - giLoc x) + (giLoc x - hw.weakGrad x i)) := by

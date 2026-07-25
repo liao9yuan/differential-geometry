@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -140,7 +139,9 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
 
 
-omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem sqrtNormSq0S_add_le
     (gRef : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (u w : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -170,7 +171,8 @@ theorem sqrtNormSq0S_add_le
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_triangle
     (a : Nat) (A B C gRef : SmoothRiemannianMetric I M) (x : M) :
@@ -185,7 +187,9 @@ theorem metricDerivNorm_triangle
   exact sqrtNormSq0S_add_le (I := I) gRef x (a + 2) _ _
 
 
-omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_le_of_forall
     (K : Set M) (p : Nat) (gk gInf gRef : SmoothRiemannianMetric I M)
@@ -207,7 +211,8 @@ theorem metricDerivNormSupOn_le_of_forall
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem timeLipschitz_of_hasDerivAt
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
@@ -264,7 +269,8 @@ theorem timeLipschitz_of_hasDerivAt
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
 theorem windowPreconv
     (K : Set M) (β ψ : Real) (p : Nat)
@@ -288,7 +294,6 @@ theorem windowPreconv
   have hLpos : (0 : Real) < L + 1 := by linarith
   set δ : Real := ε / (3 * (L + 1)) with hδdef
   have hδpos : 0 < δ := by rw [hδdef]; positivity
-
   have hcover : Set.Icc β ψ ⊆ ⋃ τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ},
       Metric.ball (τ : Real) δ := by
     intro t ht
@@ -299,7 +304,6 @@ theorem windowPreconv
   obtain ⟨F, hF⟩ := (isCompact_Icc (a := β) (b := ψ)).elim_finite_subcover
     (fun τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ} => Metric.ball (τ : Real) δ)
     (fun _ => Metric.isOpen_ball) hcover
-
   have hk0 : ∀ τ : {τ : Real // τ ∈ S ∧ τ ∈ Set.Icc β ψ},
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ a : Nat, a ≤ p → ∀ x ∈ K,
         metricDerivNorm (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) gRef x < ε / 3 :=
@@ -316,14 +320,14 @@ theorem windowPreconv
   refine lt_of_le_of_lt
     (metricDerivNormSupOn_le_of_forall (I := I) K p (gSeq k t) (gInf t) gRef c hcnn ?_) hc_lt
   intro a hap x hxK
-
   obtain ⟨τ, hτF, htτ⟩ := Set.mem_iUnion₂.1 (hF ht)
   have hdist : |t - (τ : Real)| < δ := by
     rw [Metric.mem_ball, Real.dist_eq] at htτ; exact htτ
-
-  have h1 : metricDerivNorm (I := I) a (gSeq k t) (gSeq k (τ : Real)) gRef x ≤ L * |t - (τ : Real)| :=
+  have h1 : metricDerivNorm (I := I) a (gSeq k t) (gSeq k (τ : Real)) gRef x ≤ L * |t -
+    (τ : Real)| :=
     hgLip k t ht (τ : Real) τ.2.2 a hap x hxK
-  have h3 : metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x ≤ L * |t - (τ : Real)| := by
+  have h3 : metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x ≤ L * |t -
+    (τ : Real)| := by
     have := hInfLip (τ : Real) τ.2.2 t ht a hap x hxK
     rwa [abs_sub_comm] at this
   have h2 : metricDerivNorm (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) gRef x < ε / 3 :=
@@ -334,7 +338,8 @@ theorem windowPreconv
         + metricDerivNorm (I := I) a (gInf (τ : Real)) (gInf t) gRef x) := by
     refine le_trans
       (metricDerivNorm_triangle (I := I) a (gSeq k t) (gSeq k (τ : Real)) (gInf t) gRef x) ?_
-    have := metricDerivNorm_triangle (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) (gInf t) gRef x
+    have := metricDerivNorm_triangle (I := I) a (gSeq k (τ : Real)) (gInf (τ : Real)) (gInf t) gRef
+      x
     linarith
   have hδbound : L * |t - (τ : Real)| ≤ L * δ := mul_le_mul_of_nonneg_left hdist.le hL
   nlinarith [htri, h1, h2, h3, hδbound, hcdef.ge]

@@ -39,7 +39,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum
     {ι κ : Type*} [Fintype κ]
     (S : Finset ι) (W : ι → κ → ℝ≥0∞) (aggr : ι → ℝ≥0∞)
@@ -102,7 +101,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 private lemma wkpNorm_doubleSum_le_const_mul_aggregateSum_uniform
     {δ ι κ : Type*} [Fintype κ]
     (S : Finset ι) (W : δ → ι → κ → ℝ≥0∞) (aggr : δ → ι → ℝ≥0∞)

@@ -435,7 +435,8 @@ theorem metricTrace_eq_ricciEnd
       LinearMap.trace Real (TangentSpace I x)
         (ricciEndAt (I := I) g Ric) := by
   classical
-  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) Real
+  let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
+    Real
       (TangentSpace I x) :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv :
@@ -446,9 +447,10 @@ theorem metricTrace_eq_ricciEnd
   have hinv :
       MetricInverseInBasis_gen (I := I) g x basis gInv := by
     simpa [basis, gInv] using
-      DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) g x
-  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
+  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis (I := I) g basis
+    gInv hinv]
   rw [linearMap_trace_eq_sum_inv_inner_apply (I := I) g x basis gInv hinv]
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_

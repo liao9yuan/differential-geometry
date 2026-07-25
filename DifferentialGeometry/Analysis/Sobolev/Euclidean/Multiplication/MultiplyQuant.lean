@@ -154,7 +154,8 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     {C : ℝ} (hC_nonneg : 0 ≤ C)
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C) :
     ∃ K : ℝ, 0 < K ∧ ∀ {u : EuclideanSpace ℝ (Fin d) → ℝ} (_hu : MemWkp k p u Ω),
-      iteratedWeakSobolevNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * iteratedWeakSobolevNorm k p u Ω := by
+      iteratedWeakSobolevNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K *
+        iteratedWeakSobolevNorm k p u Ω := by
   match k, hk with
   | 0, _ =>
     have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by

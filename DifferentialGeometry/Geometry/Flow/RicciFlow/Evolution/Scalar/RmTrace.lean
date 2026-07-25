@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -56,14 +55,17 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (hcover x)))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hRicSym : forall t x i j,
@@ -75,7 +77,8 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
   let basis := hframe.toBasisAt (hcover x)
   have hRicAt : forall i j : Idx,
       (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis i) (basis j)) =
-        (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis j) (basis i)) := by
+        (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis j)
+          (basis i)) := by
     intro i j
     simpa [basis, ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
       DifferentialGeometry.Integral.Connection.ricciComp, IsLocalFrameOn.toBasisAt_coe] using
@@ -94,10 +97,13 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
       hRicAt (invMetric_symm (I := I) (M := M)
         (S.family.metric (t : Real)) x basis
         (fun i j : Idx => gInv (t : Real) x i j) hinvAt)
-  simpa [basis, DifferentialGeometry.Integral.Connection.rm04RicciContractionAt, DifferentialGeometry.Integral.Connection.raised02CompAt,
+  simpa [basis, DifferentialGeometry.Integral.Connection.rm04RicciContractionAt,
+    DifferentialGeometry.Integral.Connection.raised02CompAt,
     rmRicciContractionCompInFrame, raisedRicciCompInFrame,
-    ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
-    ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp, DifferentialGeometry.Integral.Connection.ricciComp,
+    ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.rm04Comp,
+      DifferentialGeometry.Integral.Connection.rm04Comp,
+    ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
+      DifferentialGeometry.Integral.Connection.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
 
@@ -115,14 +121,17 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (hcover x)))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      (x : M),
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame) :
@@ -132,7 +141,8 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
   let basis := hframe.toBasisAt (hcover x)
   have hRicAt : forall i j : Idx,
       (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis i) (basis j)) =
-        (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis j) (basis i)) := by
+        (S.ricci (t : Real) x) (DifferentialGeometry.Integral.Connection.vec2 (basis j)
+          (basis i)) := by
     intro i j
     simpa [basis, ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
       DifferentialGeometry.Integral.Connection.ricciComp, IsLocalFrameOn.toBasisAt_coe] using
@@ -151,10 +161,13 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
       hRicAt (invMetric_symm (I := I) (M := M)
         (S.family.metric (t : Real)) x basis
         (fun i j : Idx => gInv (t : Real) x i j) hinvAt)
-  simpa [basis, DifferentialGeometry.Integral.Connection.rm04RicciContractionAt, DifferentialGeometry.Integral.Connection.raised02CompAt,
+  simpa [basis, DifferentialGeometry.Integral.Connection.rm04RicciContractionAt,
+    DifferentialGeometry.Integral.Connection.raised02CompAt,
     rmRicciContractionCompInFrame, raisedRicciCompInFrame,
-    ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.rm04Comp, DifferentialGeometry.Integral.Connection.rm04Comp,
-    ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp, DifferentialGeometry.Integral.Connection.ricciComp,
+    ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.rm04Comp,
+      DifferentialGeometry.Integral.Connection.rm04Comp,
+    ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
+      DifferentialGeometry.Integral.Connection.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
 
@@ -416,7 +429,8 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (scalarLap : Real -> M -> Real)
     (h_lap : ScalarLaplacianTraceInFrame (M := M) gInv roughLapRic scalarLap)
-    (hInvSym : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x i j,
+    (hInvSym : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x i j,
       gInv (t : Real) x i j = gInv (t : Real) x j i)
     (hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame)
     (hRmTrace : ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame)

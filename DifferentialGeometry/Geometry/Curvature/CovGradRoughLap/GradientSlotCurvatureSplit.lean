@@ -34,7 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem baseSlotCurv_eq_riemannOp
@@ -193,7 +192,6 @@ private lemma slot_skew_cancel {n s : ℕ} (k : Fin (s + 1)) (Rmat : Fin n → F
   rw [hrw, hs, zero_mul]
 
 omit [CompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma curv_inner_left_reduce
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -300,7 +298,6 @@ private lemma curv_inner_left_reduce
   rw [Finset.sum_comm]
 
 omit [CompactSpace M] in
-
 theorem tensor0SCov_riemannSec_metric_skew_section
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -399,7 +396,6 @@ theorem tensor0SCov_riemannSec_metric_skew_section
   exact hgoal_eq
 
 omit [CompactSpace M] in
-
 theorem tensor0SCov_riemannOp_metric_skew
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (v w : TangentSpace I x) (T U : Tensor0SSpace (s + 1) I x) :

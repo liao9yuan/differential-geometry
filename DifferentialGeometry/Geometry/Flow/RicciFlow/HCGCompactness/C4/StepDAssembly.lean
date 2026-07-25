@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompactnessSubseq
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -111,7 +110,6 @@ private theorem alignedProper
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 noncomputable def tailMemberMaps
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) (σ : ℕ → ℕ) :
@@ -216,13 +214,11 @@ noncomputable def tailMemberMaps
           (tailCenter_map (I := I) b Ψ hbase g (by
             intro j x v
             simpa using
-              (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+              (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                 (I := I) (g j) x v)) j₀ D₀ n)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 noncomputable def tailMemberConv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) (σ : ℕ → ℕ) :
@@ -338,7 +334,7 @@ noncomputable def tailMemberConv
           (tailCenter_map (I := I) b Ψ hbase g (by
             intro j x v
             simpa using
-              (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+              (Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
                 (I := I) (g j) x v)) j₀ D₀ n)
   have Cr : PointedRiemannianCGConverges (I := I) (XTail.repoint bTail) L id Φr := by
     change PointedRiemannianCGConverges (I := I)
@@ -352,9 +348,6 @@ noncomputable def tailMemberConv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 noncomputable def compactness_of_b1
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k))

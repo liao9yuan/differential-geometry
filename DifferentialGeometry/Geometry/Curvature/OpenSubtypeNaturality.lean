@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -48,7 +47,8 @@ theorem SmoothRiemannianMetric.eq_of_inner_eq_gen
 
 
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 theorem extDerivFun_restrictOpen
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]
     (f : M -> Real) (x : U) (v : TangentSpace I x)
@@ -72,7 +72,8 @@ noncomputable def restrictOpenTangentField
     (Y : (p : M) -> TangentSpace I p) : (y : U) -> TangentSpace I y :=
   VectorField.mpullback I I (Subtype.val : U -> M) Y
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [IsManifold I ∞ M]
+    [SigmaCompactSpace M] in
 @[simp]
 theorem restrictOpenTangentField_apply
     (U : TopologicalSpace.Opens M) [SigmaCompactSpace U] [T2Space U]

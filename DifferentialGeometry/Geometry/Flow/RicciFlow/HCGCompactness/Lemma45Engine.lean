@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Covari
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -435,7 +432,8 @@ theorem covDerivStepComp_chr_sub {r : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 omit [DecidableEq Idx] in
 theorem iterCov_one_chr_change {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -451,7 +449,8 @@ theorem iterCov_one_chr_change {r : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
     (f : ι → M → Real) (hf : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => f i y) u) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ i ∈ t, f i y) u := by
@@ -466,7 +465,8 @@ private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
 
 
 omit [DecidableEq Idx] in
-omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
     (D : M → Idx → Idx → Idx → Real)
     (hD : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u)
@@ -477,7 +477,8 @@ theorem contMDiffOn_chrCorrField {r : ℕ} {u : Set M}
   contMDiffOn_finsetSum' Finset.univ _ (fun p _ => (hD _ _ p).mul (hX _))
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -496,7 +497,8 @@ theorem iterCovComp_zero_field {r : ℕ} {u : Set M} (hu : IsOpen u)
     zero_mul]
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_finsetSum {ι : Type*} {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -548,7 +550,8 @@ private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -584,7 +587,8 @@ theorem compL2_iterCov_chrCorr_le {r' : ℕ} {u : Set M} (hu : IsOpen u)
   rw [compL2_iterCovComp_compReindex (slotRotEquiv s) frame chrH X (k - c) x]
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
@@ -615,7 +619,8 @@ theorem iterCovComp_sub {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -640,7 +645,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
   set D : M → Idx → Idx → Idx → Real := fun z d b p => chrG z d b p - chrH z d b p with hDdef
   have hDsm : ∀ d b p : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => D y d b p) u :=
     fun d b p => (hchrG d b p).sub (hchrH d b p)
-
   have hsplit : (fun y => iterCovComp (I := I) frame chrG X 1 y) =
       fun z (n : Fin (r + 1) → Idx) =>
         iterCovComp (I := I) frame chrH X 1 z n -
@@ -656,7 +660,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
   have hcorrSum_sm : ∀ m : Fin (r + 1) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ s : Fin r, chrCorrField D X s y m) u :=
     fun m => contMDiffOn_finsetSum' Finset.univ _ (fun s _ => hcorr_sm s m)
-
   have harr : iterCovComp (I := I) frame chrH
       (fun y => iterCovComp (I := I) frame chrG X 1 y) k x =
       fun n => iterCovComp (I := I) frame chrH
@@ -670,7 +673,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
         hframe hchrH hHstep_sm hcorrSum_sm k x hx n,
       iterCovComp_finsetSum hu frame chrH hframe hchrH Finset.univ
         (fun s => chrCorrField D X s) (fun s _ m => hcorr_sm s m) k x hx n]
-
   have htri : compL2 (iterCovComp (I := I) frame chrH
       (fun y => iterCovComp (I := I) frame chrG X 1 y) k x) ≤
       compL2 (iterCovComp (I := I) frame chrH
@@ -681,12 +683,10 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
     have hsum := compL2_finsetSum_le (Finset.univ : Finset (Fin r))
       (fun s => iterCovComp (I := I) frame chrH (chrCorrField D X s) k x)
     linarith
-
   have hshift : compL2 (iterCovComp (I := I) frame chrH
       (fun z m => iterCovComp (I := I) frame chrH X 1 z m) k x) =
       compL2 (iterCovComp (I := I) frame chrH X (k + 1) x) :=
     (compL2_iterCovComp_shift frame chrH X k x).symm
-
   have hXsum0 : (0 : Real) ≤ ∑ j ∈ Finset.range (k + 1),
       compL2 (iterCovComp (I := I) frame chrH X j x) :=
     Finset.sum_nonneg fun j _ => compL2_nonneg _
@@ -705,7 +705,6 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
         norm_num
       rw [h0, mul_zero, zero_mul]
     | succ r' =>
-
       have hslot : ∀ s : Fin (r' + 1),
           compL2 (iterCovComp (I := I) frame chrH (chrCorrField D X s) k x) ≤
             eps * (∑ c ∈ Finset.range (k + 1), (k.choose c : Real) * B c) *
@@ -786,7 +785,8 @@ theorem mixed_oneStep_le {r : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -832,7 +832,8 @@ theorem lemma45_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component₀ {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -904,14 +905,12 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
   set covH := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
     with hcovH
   funext idx
-
   obtain ⟨Xa, hXa⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 0) y)
   obtain ⟨Xb, hXb⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 1) y)
   obtain ⟨Xe, hXe⟩ := ContMDiffSection.exists_eq_at_gen (I := I) (F := E)
     (V := TangentSpace I) (n := (⊤ : ℕ∞)) y (frame (idx 2) y)
-
   have hexp : ∀ v : TangentSpace I y, (∑ c : Idx, hframe.coeff c y v • frame c y) = v := by
     intro v
     have h := Module.Basis.sum_repr (hframe.toBasisAt hy) v
@@ -922,7 +921,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
           congr 1
           simp [IsLocalFrameOn.coeff, hy]
       _ = v := h
-
   have hLHS : contrTail
       (chrDiffField
         (fun z => christoffelSymbolInFrame covG frame hframe z)
@@ -980,7 +978,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
               · rw [if_neg hq, show q = 1 from Fin.eq_one_of_ne_zero q hq, hB1]]
             simp]
           congr 1
-
           show christoffelSymbolInFrame covG frame hframe y (idx 0) (idx 1) c -
               christoffelSymbolInFrame covH frame hframe y (idx 0) (idx 1) c = _
           rw [show christoffelSymbolInFrame covG frame hframe y (idx 0) (idx 1) c =
@@ -1004,7 +1001,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
             (((CovariantDerivative.difference covG covH y) (frame (idx 1) y))
               (frame (idx 0) y)) := by
           rw [hexp]
-
   have htower : ∀ (P : Equiv.Perm (Fin 3))
       (S : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
       S y = frame (idx (P 0)) y →
@@ -1033,7 +1029,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
       have hq' : q' = 0 := Subsingleton.elim q' 0
       rw [hq']
       rfl
-
   have hK := Tensor0SBundle.koszul_difference (I := I) covG covH g
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) g)
@@ -1049,7 +1044,6 @@ theorem hkoszul_of_leviCivita {u : Set M} (hu : IsOpen u)
     (by rw [hXb, show ((Equiv.swap (0 : Fin 3) 1) (0 : Fin 3)) = 1 from by decide])
   have h3 := htower ((finRotate 3).symm) Xe
     (by rw [hXe, show (((finRotate 3).symm) (0 : Fin 3)) = 2 from by decide])
-
   rw [show ((Equiv.refl (Fin 3)) (1 : Fin 3)) = 1 from rfl,
     show ((Equiv.refl (Fin 3)) (2 : Fin 3)) = 2 from rfl] at h1
   rw [show ((Equiv.swap (0 : Fin 3) 1) (1 : Fin 3)) = 0 from by decide,
@@ -1156,9 +1150,11 @@ theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
       funext (iterCovComp_add hu frame chr _ _ hframe hchr (hFsm c₂ P₂) (hFsm c₃ P₃) m' x hx)]
   have h23 := compL2_add_le
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₂ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₂ j))) m'
+        x)
     (iterCovComp (I := I) frame chr
-      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m' x)
+      (fun z (k : Fin 3 → Idx) => c₃ * iterCovComp (I := I) frame chr g 1 z (fun j => k (P₃ j))) m'
+        x)
   rw [hterm c₂ P₂, hterm c₃ P₃] at h23
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
@@ -1234,7 +1230,8 @@ theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
 
 
 
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrG chrH : M → Idx → Idx → Idx → Real)
@@ -1336,7 +1333,8 @@ theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   classical
   set chrG : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
@@ -1416,7 +1414,8 @@ theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   let B : ℕ → Real := fun c =>
     claim1MulConst C0 (|(1 / 2 : Real)| + |(1 / 2 : Real)| + |-(1 / 2 : Real)|) L c
@@ -1474,7 +1473,8 @@ theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range ρ,
             compL2 (iterCovComp (I := I) frame
               (fun z => christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                  gRef)
                 frame hframe z) T j x) := by
   refine lemma45_F3_mul hu g gRef frame hframe hframeS hchrG hchrH hgsm T hT Ginv hinv
     C0 1 eps zero_le_one heps0 heps1 hGinv p ?_

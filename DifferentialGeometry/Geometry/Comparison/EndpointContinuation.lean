@@ -50,7 +50,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem isGeodesicOn_extends_past_finite_endpoint
     (g : SmoothRiemannianMetric I M) {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
@@ -72,7 +74,9 @@ def HasEndpointContinuation
     (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_orbit_uniqueness_Icc_left
@@ -99,7 +103,6 @@ theorem chartPhaseVF_orbit_uniqueness_Icc_left
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 theorem hasEndpointContinuation_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -458,7 +461,8 @@ theorem hasEndpointContinuation_of_complete
   have hcη_contOn : ContinuousOn cη (Set.Icc a'' b) := by
     intro s hs
     rcases lt_or_eq_of_le hs.2 with hlt | heq
-    · exact ((hcη_deriv_at s (ha'_all s (hIcc_lt_sub' s hs hlt)).2.2).continuousAt).continuousWithinAt
+    · exact ((hcη_deriv_at s
+      (ha'_all s (hIcc_lt_sub' s hs hlt)).2.2).continuousAt).continuousWithinAt
     · rw [show s = b from heq]
       exact hContAt_b cη (extChartAt I y y, wγ) hcη_b hcη_lim
   have hcγ_in_K : ∀ s ∈ Set.Ioc a'' b, cγ s ∈ Kset := by

@@ -180,8 +180,6 @@ def LeviCivita (g : SmoothRiemannianMetric I M) :
   leviCivitaConnectionOfMetric (I := I) g
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem LeviCivita_eq_leviCivitaConnectionOfMetric (g : SmoothRiemannianMetric I M) :
     LeviCivita (I := I) g = leviCivitaConnectionOfMetric (I := I) g := rfl

@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

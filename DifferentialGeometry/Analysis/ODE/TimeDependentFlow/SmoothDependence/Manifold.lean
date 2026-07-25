@@ -268,12 +268,14 @@ theorem chartODE_genuineF_on_Ioo
     (hρ''_le : ρ'' ≤ ρ')
     (hflow : IsLocalFlow G t₀ (extChartAt I p₀ p₀) r tmin tmax Φ_E)
     (hIoo_sub : Set.Ioo (t₀ - T') (t₀ + T') ⊆ Set.Icc tmin tmax)
-    (hball_sub : Metric.ball (extChartAt I p₀ p₀) ρ' ⊆ Metric.closedBall (extChartAt I p₀ p₀) (r : ℝ))
+    (hball_sub : Metric.ball (extChartAt I p₀ p₀) ρ' ⊆ Metric.closedBall (extChartAt I p₀ p₀)
+      (r : ℝ))
     (hGF : ∀ (s : ℝ), ∀ y ∈ Metric.ball (extChartAt I p₀ p₀) ρ', G s y = F s y)
     (hconf : ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ'', ∀ s ∈ Set.Ioo (t₀ - T') (t₀ + T'),
         Φ_E (c, s) ∈ Metric.ball (extChartAt I p₀ p₀) ρ') :
     ∀ c ∈ Metric.ball (extChartAt I p₀ p₀) ρ'', ∀ t ∈ Set.Ioo (t₀ - T') (t₀ + T'),
-      HasDerivWithinAt (fun s => Φ_E (c, s)) (F t (Φ_E (c, t))) (Set.Ioo (t₀ - T') (t₀ + T')) t := by
+      HasDerivWithinAt (fun s => Φ_E (c, s)) (F t (Φ_E (c, t))) (Set.Ioo (t₀ - T') (t₀ + T'))
+        t := by
   intro c hc t ht
   have hc_closed : c ∈ Metric.closedBall (extChartAt I p₀ p₀) (r : ℝ) :=
     hball_sub (Metric.ball_subset_ball hρ''_le hc)
@@ -303,10 +305,12 @@ theorem pushforward_velocity_cancellation (p₀ q : M)
     (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I) (extChartAt I p₀ q))
         (tangentCoordChange I q p₀ q v) = v := by
   have hqq : q ∈ (extChartAt I q).source := mem_extChartAt_source q
-  have hTc₀ : (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm) (extChartAt I q q) = extChartAt I p₀ q := by
+  have hTc₀ : (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm) (extChartAt I q q) = extChartAt I p₀
+    q := by
     simp only [Function.comp_apply, (extChartAt I q).left_inv hqq]
   have hg : MDifferentiableWithinAt 𝓘(ℝ, E) I (extChartAt I p₀).symm (Set.range I)
-      (extChartAt I p₀ q) := mdifferentiableWithinAt_extChartAt_symm ((extChartAt I p₀).map_source hq)
+      (extChartAt I p₀ q) := mdifferentiableWithinAt_extChartAt_symm
+        ((extChartAt I p₀).map_source hq)
   have hfd : HasFDerivWithinAt (extChartAt I p₀ ∘ ⇑(extChartAt I q).symm)
       (tangentCoordChange I q p₀ q) (Set.range I) (extChartAt I q q) :=
     hasFDerivWithinAt_tangentCoordChange (I := I) (x := q) (y := p₀) (z := q) ⟨hqq, hq⟩

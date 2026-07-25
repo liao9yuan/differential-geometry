@@ -10,8 +10,6 @@ import Mathlib
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option linter.unusedVariables false
 
 open scoped BigOperators
 
@@ -86,7 +84,11 @@ def d0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     (dg dig ga0 ga1 gbg gb f3 : Fin n → Fin n → Fin n → ℝ)
     (ddg dga0 dga1 dgbg dgb : Fin n → Fin n → Fin n → Fin n → ℝ)
     (m k : Fin n) : ℝ :=
-  ∑ a, ∑ b, ((-(∑ q, ∑ p, (dig m a p * f p q * ig q b + ig a p * f p q * dig m q b))) * (ga1 a b k - gbg a b k) + (-(∑ q, ∑ p, ig a p * f p q * ig q b)) * (dga1 m a b k - dgbg m a b k) + dig m a b * chrCorrF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb a b k + ig a b * ((1 / 2 : ℝ) * (∑ l, ((-(∑ q, ∑ p, (dig m k p * f p q * ig q l + ig k p * f p q * dig m q l))) * gb a b l + (-(∑ q, ∑ p, ig k p * f p q * ig q l)) * dgb m a b l))))
+  ∑ a, ∑ b, ((-(∑ q, ∑ p, (dig m a p * f p q * ig q b + ig a p * f p q * dig m q b))) *
+    (ga1 a b k - gbg a b k) + (-(∑ q, ∑ p, ig a p * f p q * ig q b)) * (dga1 m a b k - dgbg m a b k)
+    + dig m a b * chrCorrF ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb a b k + ig a b *
+    ((1 / 2 : ℝ) * (∑ l, ((-(∑ q, ∑ p, (dig m k p * f p q * ig q l + ig k p * f p q * dig m q l))) *
+    gb a b l + (-(∑ q, ∑ p, ig k p * f p q * ig q l)) * dgb m a b l))))
 
 
 def o0F {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)

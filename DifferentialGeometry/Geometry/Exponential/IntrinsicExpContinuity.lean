@@ -32,7 +32,6 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
 theorem intrinsicGeodesic_compactArc
@@ -48,7 +47,6 @@ theorem intrinsicGeodesic_compactArc
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
 theorem intrinsicGeodesic_arc_lebesgue_mesh
@@ -86,7 +84,6 @@ theorem intrinsicGeodesic_arc_lebesgue_mesh
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
 theorem intrinsicGeodesic_arc_finite_chart_cover
@@ -129,8 +126,8 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [InnerProductSpace ℝ E] in
 theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
     (g : SmoothRiemannianMetric I M)
@@ -184,7 +181,8 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
         (extChartAt I y).map_source hp_ext_src
       have : (c₁ s).1 = extChartAt I y (γ s) := by simp [hc₁_def, hw_def]
       rw [this]
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) y hp_target
   set c₂ : ℝ → E × E := chartPushLift (I := I) f₁ t with hc₂_def
   have hπ_cont : Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
@@ -214,7 +212,8 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
         rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hs
       have hp_target : extChartAt I y (f₁ s).proj ∈ (extChartAt I y).target :=
         (extChartAt I y).map_source hp_ext_src
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) y hp_target
   have hc₁_t : c₁ t = (extChartAt I y y, v) := by
     have hwt : w t = extChartAt I y y := by simp [hw_def, hy_def]
@@ -233,7 +232,8 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy_src
     have hp_target : extChartAt I y y ∈ (extChartAt I y).target :=
       (extChartAt I y).map_source hp_ext_src
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) y hp_target
   have hceq : c₁ =ᶠ[𝓝 t] c₂ :=
     chartPhaseVF_orbit_uniqueness_at (I := I) (g := g) (q := y)
@@ -254,14 +254,14 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 private def flowProj (α : M) (Φ : (E × E) × ℝ → E × E) (z : E × E) (s : ℝ) : M :=
   (extChartAt I α).symm (Φ (z, s)).1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem flowProj_continuousOn
     [I.Boundaryless]
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T : ℝ}
@@ -299,7 +299,6 @@ private theorem flowProj_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
 private theorem perChart_jointContinuity_of_flowIdentifiedOn
@@ -363,8 +362,8 @@ private theorem dist_le_of_speed_bound_on_Icc
     {c : ℝ → F} {c' : ℝ → F} {z₀ : F} {R M T'' : ℝ}
     (hMpos : 0 < M) (hMT'' : M * T'' ≤ R) (hT''_pos : 0 < T'')
     (hc0 : c 0 = z₀)
-    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) T'', HasDerivWithinAt c (c' s) (Set.Icc 0 T'') s)
-    (hbound : ∀ s ∈ Set.Icc (0:ℝ) T'', dist (c s) z₀ ≤ R → ‖c' s‖ ≤ M) :
+    (hderiv : ∀ s ∈ Set.Icc (0 : ℝ) T'', HasDerivWithinAt c (c' s) (Set.Icc 0 T'') s)
+    (hbound : ∀ s ∈ Set.Icc (0 : ℝ) T'', dist (c s) z₀ ≤ R → ‖c' s‖ ≤ M) :
     ∀ s ∈ Set.Icc (0:ℝ) T'', dist (c s) z₀ ≤ M * s := by
   classical
   have hR_pos : 0 < R := lt_of_lt_of_le (by positivity) hMT''
@@ -372,7 +371,6 @@ private theorem dist_le_of_speed_bound_on_Icc
     with hG_def
   have hc_cont : ContinuousOn c (Set.Icc 0 T'') :=
     fun s hs => (hderiv s hs).continuousWithinAt
-
   have hbd_on_G : ∀ t ∈ G, ∀ s ∈ Set.Icc (0:ℝ) t, dist (c s) z₀ ≤ M * s := by
     intro t ht s hs
     obtain ⟨ht_Icc, ht_R⟩ := ht
@@ -419,7 +417,6 @@ private theorem dist_le_of_speed_bound_on_Icc
         filter_upwards [self_mem_nhdsWithin] with r hr
         obtain ⟨t, ht_G, hrt⟩ := exists_lt_of_lt_csSup hG_ne hr.2
         exact ht_G.2 r ⟨hr.1, le_of_lt hrt⟩
-
   have ht0_eq : t0 = T'' := by
     by_contra hne
     have ht0_lt : t0 < T'' := lt_of_le_of_ne ht0_le hne
@@ -451,14 +448,14 @@ private theorem dist_le_of_speed_bound_on_Icc
         rw [Set.mem_preimage, Set.mem_setOf_eq] at hres
         exact le_of_lt hres
     exact absurd (le_csSup hG_bdd ht1_G) (not_le.mpr ht1_gt)
-
   intro s hs
   rw [← ht0_eq] at hs
   exact hbd_on_G t0 ht0_G s hs
 
 
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [I.Boundaryless] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem chartPhaseVF_bddOn_closedBall
@@ -477,13 +474,14 @@ private theorem chartPhaseVF_bddOn_closedBall
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem orbit_speed_confined_fwd
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : ℝ → E × E} {z₀ : E × E} {R ρ M T_f : ℝ}
     (hMpos : 0 < M) (hRρ : ρ < R) (hT_f : 0 < T_f)
     (hz_c : dist (c 0) z₀ ≤ ρ)
-    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min T_f ((R - ρ) / M)),
+    (hderiv : ∀ s ∈ Set.Icc (0 : ℝ) (min T_f ((R - ρ) / M)),
       HasDerivWithinAt c (chartPhaseVF (I := I) g α (c s))
         (Set.Icc 0 (min T_f ((R - ρ) / M))) s)
     (hM : ∀ x ∈ Metric.closedBall z₀ R, ‖chartPhaseVF (I := I) g α x‖ ≤ M) :
@@ -516,11 +514,8 @@ private theorem orbit_speed_confined_fwd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem flowOrbit_speed_confined_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {N : Type*} [TopologicalSpace N]
@@ -552,20 +547,14 @@ private theorem flowOrbit_speed_confined_uniform
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-
-
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem flowOrbit_cutoff_confined_explicit
     (g : SmoothRiemannianMetric I M) (α : M)
     {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
     (hMpos : 0 < Mb) (hρ_lt : ρ < b.rIn) (hεPL : 0 < εPL)
     (hzc : dist z_c z₀ ≤ ρ) (horbit0 : orbit 0 = z_c)
-    (hderiv : ∀ s ∈ Set.Icc (0:ℝ) (min εPL ((b.rIn - ρ) / Mb)),
+    (hderiv : ∀ s ∈ Set.Icc (0 : ℝ) (min εPL ((b.rIn - ρ) / Mb)),
       HasDerivWithinAt orbit
         (chartPhaseVFTime (I := I) g α z₀ b s (orbit s))
         (Set.Icc 0 (min εPL ((b.rIn - ρ) / Mb))) s)
@@ -605,11 +594,8 @@ private theorem flowOrbit_cutoff_confined_explicit
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem flowOrbit_cutoff_confined_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     {orbit : ℝ → E × E} {z₀ z_c : E × E} (b : ContDiffBump z₀) {ρ Mb εPL : ℝ}
@@ -675,7 +661,6 @@ private theorem flowOrbit_cutoff_confined_symm
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem flowOrbit_uniform_confinement
     {N : Type*} [TopologicalSpace N]
@@ -746,8 +731,8 @@ private theorem flowOrbit_uniform_confinement
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem geodesic_chartPhaseVF_on_open
@@ -778,12 +763,12 @@ private theorem geodesic_chartPhaseVF_on_open
   have hsU_nhds : U ∈ 𝓝 s := hU_open.mem_nhds hs
   have hs_src : γ s ∈ (chartAt H α).source := hγ_src s hs
   have hev_first : ∀ᶠ r in 𝓝 s, HasDerivAt w (deriv w r) r :=
-    DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
+    hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
       (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
   have hfirst : HasDerivAt w (deriv w s) s := hev_first.self_of_nhds
   have hsecond : HasDerivAt (deriv w)
       (- chartChristoffelContraction (I := I) g α (deriv w s) (deriv w s) (w s)) s :=
-    DifferentialGeometry.Geometry.Riemannian.Geodesic.hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
+    hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
       (I := I) g α hγ_cont.continuousAt hs_src (hγ s)
   refine ⟨?_, ?_⟩
   · have hpair : HasDerivAt
@@ -802,12 +787,12 @@ private theorem geodesic_chartPhaseVF_on_open
       (extChartAt I α).map_source hp_ext_src
     have hval : w s = extChartAt I α (γ s) := by simp [hw_def]
     rw [hval]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α hp_target
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -921,7 +906,6 @@ private theorem perJunction_flowIdentification
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1233,7 +1217,6 @@ private theorem intrinsicGeodesic_window_of_junction_data
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 private def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1246,7 +1229,6 @@ private def intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1263,7 +1245,6 @@ private theorem intrinsicVelocityLift_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1313,7 +1294,6 @@ private theorem chartFiberCoord_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1349,7 +1329,6 @@ private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1681,7 +1660,6 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1879,7 +1857,6 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1922,7 +1899,8 @@ private theorem intrinsicVelocityLift_continuousOn_step
     have hsrc : α ∈ (extChartAt I α).source := mem_extChartAt_source (I := I) α
     have htgt : extChartAt I α α ∈ (extChartAt I α).target :=
       (extChartAt I α).map_source hsrc
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α htgt
   have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
   have hα_src : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (chartAt H α).source := by
@@ -1936,8 +1914,6 @@ private theorem intrinsicVelocityLift_continuousOn_step
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -1984,8 +1960,6 @@ private theorem intrinsicGeodesic_phasePoint_continuous_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2041,9 +2015,8 @@ private theorem intrinsicGeodesic_window_of_flowData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem exists_chartFlowData_of_zContinuousAt
     {N : Type*} [TopologicalSpace N]
@@ -2066,8 +2039,6 @@ private theorem exists_chartFlowData_of_zContinuousAt
   obtain ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hflow, hΦ_C1, hΦ_init⟩ :=
     exists_chartPhase_contDiffOn_isLocalFlow_combined (I := I) g α
       (x₀ := (z₀).1) (v₀ := (z₀).2) hx₀
-
-
   set ρ_f : ℝ := min ρ (rN : ℝ) with hρf_def
   set T_f : ℝ := min T εN with hTf_def
   have hρf_pos : 0 < ρ_f := lt_min hρ_pos (by exact_mod_cast hrN)
@@ -2118,9 +2089,8 @@ private theorem exists_chartFlowData_of_zContinuousAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem exists_chartFlow_confined
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -2145,13 +2115,11 @@ private theorem exists_chartFlow_confined
   set ρ_f : ℝ := min ρ (rN : ℝ) with hρf_def
   have hρf_pos : 0 < ρ_f := lt_min hρ_pos (by exact_mod_cast hrN)
   have hρf_le_rN : ρ_f ≤ (rN : ℝ) := min_le_right _ _
-
   have hballIn_sub : Metric.closedBall z₀ b.rIn ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
     subset_trans (Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)) hb_sub
   obtain ⟨Mb, hMb_pos, hMb⟩ :=
     chartPhaseVF_bddOn_closedBall (I := I) g α z₀ hballIn_sub
-
   set ρ_z : ℝ := b.rIn - min b.rIn (Mb * εN) / 2 with hρz_def
   have hmin_pos : 0 < min b.rIn (Mb * εN) := lt_min b.rIn_pos (by positivity)
   have hρz_pos : 0 < ρ_z := by
@@ -2180,7 +2148,6 @@ private theorem exists_chartFlow_confined
   have hT'_le_Tconf : T' ≤ Tconf := min_le_left _ _
   have hT'_le_T : T' ≤ T := min_le_right _ _
   have hT'_lt_εN : T' < εN := lt_of_le_of_lt hT'_le_Tconf hTconf_lt_εN
-
   have hΦ_in : ∀ w ∈ Metric.ball z₀ ρ_w, ∀ s ∈ Set.Ioo (-T') T',
       Φ (w, s) ∈ Metric.closedBall z₀ b.rIn := by
     intro w hw s hs
@@ -2216,8 +2183,6 @@ private theorem exists_chartFlow_confined
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2249,15 +2214,12 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
   have hγ_geo : IsGeodesic (I := I) g γ :=
     intrinsicGeodesic_isGeodesic (I := I) g hEnorm p v
   have hγ_cont : Continuous γ := intrinsicGeodesic_continuous (I := I) g hEnorm p v
-
-
   set K : Set ℝ := Set.Ioo (tₖ - T') (tₖ + T') with hK_def
   set cγ : ℝ → E × E := fun t =>
     ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ t,
       deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α γ) t)
       : E × E) with hcγ_def
   set phiS : ℝ → E × E := fun t => φ (t - tₖ) with hphiS_def
-
   have hphiS_phase : ∀ t ∈ K, HasDerivAt phiS (chartPhaseVF (I := I) g α (phiS t)) t := by
     intro t ht
     have hts : t - tₖ ∈ Set.Ioo (-T') T' := by
@@ -2271,7 +2233,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
       rw [hK_def, Set.mem_Ioo] at ht
       exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
     exact hφ_tgt (t - tₖ) hts
-
   set psiS : ℝ → M := fun t => (extChartAt I α).symm (phiS t).1 with hpsiS_def
   have hpsiS_src : ∀ t ∈ K, psiS t ∈ (chartAt H α).source := by
     intro t ht
@@ -2285,8 +2246,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     have h2 : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
       continuousOn_extChartAt_symm (I := I) α
     exact h2.comp h1 (fun t ht => interior_subset (hphiS_tgt t ht))
-
-
   have hpos_of_phase : ∀ t ∈ K, γ t ∈ (chartAt H α).source → cγ t = phiS t →
       γ t = psiS t := by
     intro t ht hsrc hphase
@@ -2299,8 +2258,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     rw [← h1]
     exact ((extChartAt I α).left_inv
       (by rw [extChartAt_source (I := I) α]; exact hsrc)).symm
-
-
   suffices hKagree : ∀ t ∈ K, γ t ∈ (chartAt H α).source ∧ cγ t = phiS t by
     intro s hs
     have ht : tₖ + s ∈ K := by
@@ -2310,13 +2267,9 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     refine ⟨hsrc, ?_⟩
     have hps : phiS (tₖ + s) = φ s := by simp only [hphiS_def, add_sub_cancel_left]
     exact hphase.trans hps
-
-
   set A : Set ℝ := {t ∈ K | γ t ∈ (chartAt H α).source ∧ cγ t = phiS t} with hA_def
   have hK_open : IsOpen K := isOpen_Ioo
   have hK_conn : IsPreconnected K := isPreconnected_Ioo
-
-
   have hA_rel_open : ∀ t ∈ A, ∃ U : Set ℝ, IsOpen U ∧ t ∈ U ∧ U ∩ K ⊆ A := by
     intro t₀ ht₀A
     obtain ⟨ht₀K, ht₀src, ht₀phase⟩ := ht₀A
@@ -2327,7 +2280,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     have ht₀_W : t₀ ∈ W := ⟨ht₀src, ht₀K⟩
     have hgeo := geodesic_chartPhaseVF_on_open (I := I) hγ_geo hγ_cont hW_open
       (fun s hs => hs.1)
-
     set c₁ : ℝ → E × E := fun r => cγ (t₀ + r) with hc₁_def
     set c₂ : ℝ → E × E := fun r => phiS (t₀ + r) with hc₂_def
     set z₀ : E × E := cγ t₀ with hz₀_def
@@ -2364,7 +2316,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
       · simpa [hc₂_def] using hphiS_tgt (t₀ + r) hr
     have huniq : c₁ =ᶠ[nhds (0:ℝ)] c₂ :=
       chartPhaseVF_orbit_uniqueness (I := I) hz₀_mem hc₁0 hc₂0 hd1 hd2
-
     have heq_t₀ : ∀ᶠ t in nhds t₀, cγ t = phiS t := by
       have hshift_back : Filter.Tendsto (fun t : ℝ => t - t₀) (nhds t₀) (nhds (0:ℝ)) := by
         have h : Filter.Tendsto (fun t : ℝ => t - t₀) (nhds t₀) (nhds (t₀ - t₀)) :=
@@ -2377,8 +2328,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
       filter_upwards [hVsrc_open.mem_nhds ht₀src, heq_t₀] with t hs he using ⟨hs, he⟩
     obtain ⟨U, hU_sub, hU_open, ht₀U⟩ := _root_.mem_nhds_iff.mp hcomb
     exact ⟨U, hU_open, ht₀U, fun x hx => ⟨hx.2, (hU_sub hx.1).1, (hU_sub hx.1).2⟩⟩
-
-
   have hA_closed : closure A ∩ K ⊆ A := by
     rintro t₀ ⟨ht₀_cl, ht₀K⟩
     rw [mem_closure_iff_seq_limit] at ht₀_cl
@@ -2386,7 +2335,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     have hu_K : ∀ n, u n ∈ K := fun n => (hu_A n).1
     have hu_within : Filter.Tendsto u Filter.atTop (nhdsWithin t₀ K) :=
       tendsto_nhdsWithin_iff.mpr ⟨hu_lim, Filter.Eventually.of_forall hu_K⟩
-
     have hγψ : (fun n => γ (u n)) = (fun n => psiS (u n)) :=
       funext fun n => hpos_of_phase (u n) (hu_A n).1 (hu_A n).2.1 (hu_A n).2.2
     have hlim_γ : Filter.Tendsto (fun n => γ (u n)) Filter.atTop (nhds (γ t₀)) :=
@@ -2397,7 +2345,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
       rw [hγψ] at hlim_γ
       exact tendsto_nhds_unique hlim_γ hlim_ψ
     have ht₀src : γ t₀ ∈ (chartAt H α).source := by rw [hγt₀]; exact hpsiS_src t₀ ht₀K
-
     set W₀ : Set ℝ := (γ ⁻¹' (chartAt H α).source) ∩ K with hW₀_def
     have hW₀_open : IsOpen W₀ :=
       ((chartAt H α).open_source.preimage hγ_cont).inter hK_open
@@ -2480,8 +2427,6 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2519,7 +2464,6 @@ private theorem intrinsicVelocityLift_window_of_flow
           intrinsicVelocityLift (I := I) g hEnorm p vt.1 vt.2)
         ((Metric.ball v₀ r) ×ˢ Set.Ioo (tₖ - T') (tₖ + T')) := by
   classical
-
   have hz_pre : z ⁻¹' Metric.ball z₀ ρ ∈ nhds v₀ :=
     (hz_cont.continuousAt (Metric.ball_mem_nhds _ hrz)).preimage_mem_nhds
       (Metric.isOpen_ball.mem_nhds hz0)
@@ -2533,7 +2477,6 @@ private theorem intrinsicVelocityLift_window_of_flow
   have hballIn_sub : Metric.closedBall z₀ b.rIn ⊆
       (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) :=
     subset_trans (Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)) hballOut
-
   have hB2 : ∀ v ∈ Metric.ball v₀ rfin, ∀ s ∈ Set.Ioo (-T') T',
       intrinsicGeodesic (I := I) g hEnorm p v (tₖ + s) ∈ (chartAt H α).source ∧
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
@@ -2638,8 +2581,6 @@ private theorem intrinsicVelocityLift_window_of_flow
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2682,7 +2623,8 @@ private theorem intrinsicGeodesic_window_of_zContinuousOn
     rw [hα_def]
   have hx₀ : (z v₀).1 ∈ interior (extChartAt I α).target := by
     rw [hx₀_eq]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α ((extChartAt I α).map_source (mem_extChartAt_source (I := I) α))
   have hzca : ContinuousAt z v₀ := hz_cont.continuousAt (Metric.ball_mem_nhds v₀ hr₀)
   obtain ⟨Φ, S, T', R, ρ, hS_open, hv₀_S, hT'_pos, hR_pos, hρ_pos,
@@ -2693,8 +2635,6 @@ private theorem intrinsicGeodesic_window_of_zContinuousOn
   have hr_pos : 0 < r := lt_min hrS_pos hr₀
   have hr_S : Metric.ball v₀ r ⊆ S := fun x hx =>
     hrS_sub (Metric.ball_subset_ball (min_le_left _ _) hx)
-
-
   have hB2 : ∀ v ∈ Metric.ball v₀ r, ∀ s ∈ Set.Ioo (-T') T',
       intrinsicGeodesic (I := I) g hEnorm p v (tₖ + s) ∈ (chartAt H α).source ∧
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
@@ -2732,8 +2672,6 @@ private theorem intrinsicGeodesic_window_of_zContinuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2766,7 +2704,8 @@ private theorem intrinsicVelocityLift_window_base
     rw [intrinsicGeodesic_zero (I := I) g hEnorm p v₀]
   have hx₀ : x₀ ∈ interior (extChartAt I p).target := by
     rw [hx₀_eq]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) p ((extChartAt I p).map_source (mem_extChartAt_source (I := I) p))
   have hz_cont_all : Continuous z :=
     intrinsicGeodesic_phasePoint_continuous_zero (I := I) g hEnorm p
@@ -2790,12 +2729,10 @@ private theorem intrinsicVelocityLift_window_base
           deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
             (intrinsicGeodesic (I := I) g hEnorm p v)) 0) : E × E) = z v) := by
     intro b hb_sub
-
     obtain ⟨Φ, S, T', R, ρ, hS_open, hv₀_S, hT'_pos, hR_pos, hρ_pos,
         hball, hΦ_cont, hΦ_phase, hΦ_in, hΦinit, hz_ball⟩ :=
       exists_chartFlowData_of_zContinuousAt (I := I) g p hx₀ hz_cont_all.continuousAt rfl
     obtain ⟨rS, hrS_pos, hrS_sub⟩ := Metric.isOpen_iff.mp hS_open v₀ hv₀_S
-
     have hB2 : ∀ v ∈ Metric.ball v₀ rS, ∀ s ∈ Set.Ioo (-T') T',
         intrinsicGeodesic (I := I) g hEnorm p v (0 + s) ∈ (chartAt H p).source ∧
         ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
@@ -2810,8 +2747,6 @@ private theorem intrinsicVelocityLift_window_base
         (hΦinit v (hrS_sub hv)).symm
         (by rw [intrinsicGeodesic_zero (I := I) g hEnorm p v]; exact mem_chart_source H p)
         s hs
-
-
     set W : Set (TangentSpace I p × ℝ) :=
       (Metric.ball v₀ rS) ×ˢ Set.Ioo (-T') T' with hW_def
     have hW_open : IsOpen W := Metric.isOpen_ball.prod isOpen_Ioo
@@ -2832,7 +2767,6 @@ private theorem intrinsicVelocityLift_window_base
       refine ⟨⟨Metric.mem_ball_self hrS_pos, ⟨by linarith, hT'_pos⟩⟩, ?_⟩
       rw [Set.mem_preimage, hF_v₀0]; exact Metric.mem_ball_self b.rIn_pos
     obtain ⟨δ, hδ_pos, hδ_sub⟩ := Metric.isOpen_iff.mp hpre_open _ hpt_pre
-
     have hz_pre : z ⁻¹' Metric.ball ((x₀, w₀) : E × E) b.rIn ∈ nhds v₀ :=
       (hz_cont_all.continuousAt).preimage_mem_nhds
         (by rw [hz0]; exact Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self b.rIn_pos))
@@ -2860,7 +2794,6 @@ private theorem intrinsicVelocityLift_window_base
       have hmatch := (hB2 v hvS t htT').2
       rw [zero_add] at hmatch
       rw [hmatch]
-
       have hvt_δ : (v, t) ∈ Metric.ball ((v₀, 0) : TangentSpace I p × ℝ) δ := by
         rw [Metric.mem_ball, Prod.dist_eq]
         refine max_lt ?_ ?_
@@ -2883,8 +2816,6 @@ private theorem intrinsicVelocityLift_window_base
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -2940,15 +2871,14 @@ private theorem intrinsicVelocityLift_step_uniformWidth
     rw [hx₀_eq]
     have hsrc' : intrinsicGeodesic (I := I) g hEnorm p v₀ τ ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact hα_src
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α ((extChartAt I α).map_source hsrc')
   have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
-
   obtain ⟨rz, hrz, hz_cont, _hgeo⟩ :=
     intrinsicGeodesic_junctionData_of_lift_continuousOn (I := I) g hEnorm p v₀ τ
       (α := α) hα_src (z := z) hz_def (x₀ := x₀) (w₀ := w₀) hx₀_def hw₀_def hx₀ hz0
       hr₀ hτ_mem hlift_cont
-
   set L : TangentSpace I p × ℝ → TangentBundle I M :=
     fun vs => intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2 with hL_def
   have hfoot_cont : ContinuousOn (fun vs : TangentSpace I p × ℝ => (L vs).proj)
@@ -2973,7 +2903,6 @@ private theorem intrinsicVelocityLift_step_uniformWidth
       rw [Metric.mem_ball, Prod.dist_eq]
       exact max_lt (Metric.mem_ball.mp hv) (by rw [dist_self]; exact hδ_pos)
     exact (hδ_sub hvτ).2
-
   refine intrinsicVelocityLift_window_of_flow (I := I) g hEnorm p v₀ α
     (z₀ := z₀) (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hballOut
     hΦ_cont hΦ_phase hΦ_in hΦinit
@@ -2988,8 +2917,6 @@ private theorem intrinsicVelocityLift_step_uniformWidth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -3009,8 +2936,6 @@ theorem intrinsicGeodesic_jointContinuity
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
   have key : ∀ t ∈ Set.Icc (0:ℝ) 1, ∃ r₀ a c : ℝ, 0 < r₀ ∧ t ∈ Set.Ioo a c ∧
       ContinuousOn (fun vs : TangentSpace I p × ℝ =>
         intrinsicVelocityLift (I := I) g hEnorm p vs.1 vs.2)
@@ -3032,8 +2957,6 @@ theorem intrinsicGeodesic_jointContinuity
     have hS_gt1 : 1 < S := by
       by_contra hle
       push Not at hle
-
-
       set αS : M := intrinsicGeodesic (I := I) g hEnorm p v₀ S with hαS_def
       have hzc1_int :
           ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
@@ -3043,7 +2966,8 @@ theorem intrinsicGeodesic_jointContinuity
             interior (extChartAt I αS).target := by
         simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
         rw [← hαS_def]
-        exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+        exact
+          Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
           (I := I) αS ((extChartAt I αS).map_source (mem_extChartAt_source (I := I) αS))
       obtain ⟨Φ, b, T', ρ, hT'_pos, hρ_pos, hballOut, hΦ_cont, hΦ_phase, hΦ_in, hΦinit⟩ :=
         exists_chartFlow_confined (I := I) g αS
@@ -3051,7 +2975,6 @@ theorem intrinsicGeodesic_jointContinuity
               (intrinsicGeodesic (I := I) g hEnorm p v₀) S,
             deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) αS
               (intrinsicGeodesic (I := I) g hEnorm p v₀)) S) : E × E)) hzc1_int
-
       have hγcont : Continuous (intrinsicGeodesic (I := I) g hEnorm p v₀) :=
         intrinsicGeodesic_continuous (I := I) g hEnorm p v₀
       have hαS_src : intrinsicGeodesic (I := I) g hEnorm p v₀ S ∈ (chartAt H αS).source := by
@@ -3080,7 +3003,6 @@ theorem intrinsicGeodesic_jointContinuity
         hζ_contAt.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ_pos)
       obtain ⟨δS, hδS_pos, hδS_sub⟩ :=
         Metric.mem_nhds_iff.mp (Filter.inter_mem hpre1 hUpre)
-
       have hmin_pos : 0 < min δS T' := lt_min hδS_pos hT'_pos
       obtain ⟨c', hc'_Good, hc'_gt⟩ :=
         exists_lt_of_lt_csSup hGood_ne (show S - min δS T' / 2 < S from by linarith)
@@ -3125,8 +3047,6 @@ theorem intrinsicGeodesic_jointContinuity
           (Φ := Φ) (b := b) (T' := T') (ρ := ρ) hballOut
           hΦ_cont hΦ_phase hΦ_in hΦinit hα_src_τ hphase_near
           (r₀ := r') (a := a') (c := c') hr' hτ_mem hcont'
-
-
       set rg : ℝ := min r' r'' with hrg_def
       set cg : ℝ := max c' (τ + T') with hcg_def
       have hglue : ContinuousOn L ((Metric.ball v₀ rg) ×ˢ Set.Ioo a' cg) := by
@@ -3186,7 +3106,8 @@ theorem intrinsicGeodesic_jointContinuity
     have hsrc : α ∈ (extChartAt I α).source := mem_extChartAt_source (I := I) α
     have htgt : extChartAt I α α ∈ (extChartAt I α).target :=
       (extChartAt I α).map_source hsrc
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) α htgt
   have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
   obtain ⟨rz, hrz, hz_cont, hgeo⟩ :
@@ -3209,8 +3130,6 @@ theorem intrinsicGeodesic_jointContinuity
               (intrinsicGeodesic (I := I) g hEnorm p v) t,
             deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
               (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E) = z v)) := by
-
-
     obtain ⟨r₀, a, c, hr₀, ht_mem, hlift⟩ :
         ∃ r₀ a c : ℝ, 0 < r₀ ∧ t ∈ Set.Ioo a c ∧
           ContinuousOn (fun vs : TangentSpace I p × ℝ =>
@@ -3227,7 +3146,6 @@ theorem intrinsicGeodesic_jointContinuity
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -3271,8 +3189,6 @@ theorem expMapIntrinsic_continuous_of_jointContinuity
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 omit [Module.Finite ℝ E] in
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in

@@ -75,7 +75,8 @@ lemma norm_chartPushedPartialLp
     ‖chartPushedPartialLp (I := I) (M := M) g α j v h‖ =
       ENNReal.toReal (eLpNorm (chartPushedPartial (I := I) (M := M) g α j v) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
-          (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α))) := by
+          (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M)
+            α))) := by
   unfold chartPushedPartialLp
   exact MeasureTheory.Lp.norm_toLp _ _
 

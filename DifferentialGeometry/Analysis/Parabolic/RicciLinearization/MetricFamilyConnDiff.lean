@@ -257,7 +257,8 @@ private theorem connDiff_app_joint
       (Bcmm.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiffAt
         (x := Bcmm.equivFun
           (e ⟨p₀.1, (show Tensor0SSpace 1 I p₀.1 →L[ℝ] Tensor0SSpace 2 I p₀.1 from
-            (connDiffSection (I := I) (G.metric p₀.2) q).toSection p₀.1) (om p₀.1)⟩).2)).comp_contMDiffWithinAt
+            (connDiffSection (I := I) (G.metric p₀.2) q).toSection p₀.1)
+              (om p₀.1)⟩).2)).comp_contMDiffWithinAt
         p₀ hcoordVec
     refine hequiv.congr_of_eventuallyEq ?_ ?_
     · filter_upwards [self_mem_nhdsWithin] with z _

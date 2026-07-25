@@ -64,8 +64,6 @@ noncomputable def scalarCc (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
 @[simp] theorem scalar0_scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -88,8 +86,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] in
-
-
 theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
     IsEmpty M ∨
       ∃ u0 : SmoothCcTensor g 0 0,
@@ -150,8 +146,6 @@ theorem app_scalarCc (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] in
-
-
 theorem scalar0_smul_cc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -208,8 +202,6 @@ private theorem joint_rs_smul {r s : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
 theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S : Set ℝ}
     (hzeta : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞

@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -134,7 +132,6 @@ theorem inner0S_mdiff {s : ℕ}
   have hx : x ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x :=
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := inferInstance
-
   have hUmdiff : ∀ i j : Idx,
       MDifferentiableAt I 𝓘(Real, Real) (fun y : M => U y i j) x := by
     intro i j
@@ -152,7 +149,6 @@ theorem inner0S_mdiff {s : ℕ}
     have h := DifferentialGeometry.Tensor.Coordinates.tensor0S_eval_coordinateFrame_contMDiffAt
       (I := I) (𝕜 := Real) B x J0
     exact h.mdifferentiableAt (by simp)
-
   have hlocal :
       (fun y : M => inner0S (I := I) g y s (A y) (B y)) =ᶠ[𝓝 x]
         fun y : M => coordContract (U y) (cA y) (cB y) := by
@@ -176,8 +172,6 @@ theorem inner0S_mdiff {s : ℕ}
       refine congrArg (fun w => B y w) ?_
       funext a
       rw [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply]
-
-
   have hcontr :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => coordContract (U y) (cA y) (cB y)) x := by
@@ -268,9 +262,7 @@ theorem nabla_partialEval0S {s : ℕ}
   classical
   set B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s := partialEval0SField (I := I) nablaT Y with hBdef
-
   ext v
-
   let V : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) :=
     fun a =>
@@ -282,30 +274,24 @@ theorem nabla_partialEval0S {s : ℕ}
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
       x (v a)).choose_spec
   have hVx : (fun a : Fin s => V a x) = v := funext hV
-
   let V3 : Fin (s + 1) -> ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) := Fin.cons Y V
-
   have hfree_raw :=
     Tensor0SBundle.nabla0SFun_eval_smooth_slots (I := I) cov X V B x
   have htot_raw :=
     TotalNabla0SRealizes.eval_smooth_slots (I := I) h2 X V3 x
-
   set D : Real :=
     extDerivFun (I := I)
       (fun p : M => nablaT p (fun a : Fin (s + 1) => V3 a p)) x (X x) with hDdef
-
   have hV30 : ∀ p : M, V3 0 p = Y p := fun p => by
     simp only [V3, Fin.cons_zero]
   have hV3succ : ∀ (b : Fin s) (p : M), V3 b.succ p = V b p := fun b p => by
     simp only [V3, Fin.cons_succ]
-
   have hBeval : ∀ (p : M) (w : Fin s -> TangentSpace I p),
       B p w = nablaT p (Fin.cons (Y p) w) := by
     intro p w
     rw [hBdef, partialEval0SField_apply]
     exact tensor0S_curry_apply_cons (I := I) s (nablaT p) (Y p) w
-
   have hDfree :
       extDerivFun (I := I)
           (fun p : M => B p (fun a : Fin s => V a p)) x (X x) = D := by
@@ -319,7 +305,6 @@ theorem nabla_partialEval0S {s : ℕ}
     refine Fin.cases ?_ (fun b => ?_) a
     · rw [Fin.cons_zero, hV30 p]
     · rw [Fin.cons_succ, hV3succ b p]
-
   have hLHS :
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           s cov X B x v =
@@ -328,13 +313,11 @@ theorem nabla_partialEval0S {s : ℕ}
             ((cov (fun p : M => V b p) x) (X x))) := by
     rw [← hVx]
     rw [hfree_raw, hDfree]
-
   have hV3x : (fun a : Fin (s + 1) => V3 a x) = Fin.cons (Y x) v := by
     funext a
     refine Fin.cases ?_ (fun b => ?_) a
     · rw [Fin.cons_zero]; exact hV30 x
     · rw [Fin.cons_succ, hV3succ b x]; exact hV b
-
   have hcorrSplit :
       (∑ a : Fin (s + 1),
           nablaT x (Function.update (fun a : Fin (s + 1) => V3 a x) a
@@ -358,10 +341,8 @@ theorem nabla_partialEval0S {s : ℕ}
         ((cov (fun p : M => V b p) x) (X x)))]
       congr 1
       rw [hV3x]
-
       rw [← Fin.cons_update]
       rw [hVx]
-
   have hRHStot :
       nabla2T x (Fin.cons (X x) (fun a : Fin (s + 1) => V3 a x)) =
         D - (nablaT x (Fin.cons ((cov (fun p : M => Y p) x) (X x)) v) +
@@ -369,7 +350,6 @@ theorem nabla_partialEval0S {s : ℕ}
             B x (Function.update (fun a : Fin s => V a x) b
               ((cov (fun p : M => V b p) x) (X x)))) := by
     rw [htot_raw, hcorrSplit]
-
   have hfreeze :
       freezeFirstTwoArgs0S (I := I) (nabla2T x) (X x) (Y x) v =
         nabla2T x (Fin.cons (X x) (fun a : Fin (s + 1) => V3 a x)) := by
@@ -381,7 +361,6 @@ theorem nabla_partialEval0S {s : ℕ}
         nablaT x (Fin.cons ((cov (fun p : M => Y p) x) (X x)) v) :=
     tensor0S_curry_apply_cons (I := I) s (nablaT x)
       ((cov (fun p : M => Y p) x) (X x)) v
-
   change nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       s cov X B x v =
     (freezeFirstTwoArgs0S (I := I) (nabla2T x) (X x) (Y x) +
@@ -430,15 +409,12 @@ theorem freeze0S_deriv {s : ℕ}
             (partialEval0SField (I := I) nablaT X x)) := by
   set B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s := partialEval0SField (I := I) nablaT Y with hBdef
-
   have hf : MDifferentiableAt I 𝓘(Real, Real)
       (fun y : M => inner0S (I := I) g y s (B y) (T y)) x :=
     inner0S_mdiff (I := I) g B T x
   have hscale := congrArg (fun L => L (X x))
     (DifferentialGeometry.extDerivFun_const_mul I (2 : Real) hf)
-
   have hinner := inner0S_nabla (I := I) cov g hmc B T X x
-
   have hAderiv :
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           s cov X T x =
@@ -446,9 +422,7 @@ theorem freeze0S_deriv {s : ℕ}
     ext v
     rw [partialEval0SField_apply, tensor0S_curry_apply_cons]
     exact (TotalNabla0SRealizes.apply (I := I) hA X x v).symm
-
   have hBderiv := nabla_partialEval0S (I := I) cov nablaT nabla2T h2 X Y x
-
   have hadd : ∀ (P Q R : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
       (M := M) s x),
       inner0S (I := I) g x s (P + Q) R =
@@ -509,7 +483,6 @@ theorem du_norm0S {s : ℕ}
   obtain ⟨Wsec, hWsec⟩ :=
     ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x W
-
   have hAderiv :
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           s cov Wsec T x =
@@ -575,7 +548,6 @@ theorem hess_norm0S {s : ℕ}
       (nabla2T x) (normSecond x) := by
   classical
   intro i j
-
   have hfun :
       (fun y : M => du y (fun _ : Fin 1 => Xb j y)) =
         fun y : M =>
@@ -584,7 +556,6 @@ theorem hess_norm0S {s : ℕ}
     funext y
     rw [du_norm0S (I := I) cov g hmc T nablaT hA du hdu (Xb j y)]
     rw [partialEval0SField_apply]
-
   have hnablaDu :
       nablaDuAt (I := I) cov (Xb i) du x (fun _ : Fin 1 => basis j) =
         extDerivFun (I := I) (fun y : M => du y (fun _ : Fin 1 => Xb j y))
@@ -593,12 +564,10 @@ theorem hess_norm0S {s : ℕ}
     have h := DifferentialGeometry.Tensor.Coordinates.nabla0SFun_one_eval_smooth_slots
       (I := I) cov (Xb i) (Xb j) du x
     simpa [nablaDuAt, hfields j] using h
-
   have hder := freeze0S_deriv (I := I) cov g hmc T nablaT nabla2T hA h2
     (Xb i) (Xb j) x
   have hcorr := du_norm0S (I := I) cov g hmc T nablaT hA du hdu
     ((cov (fun y : M => Xb j y) x) (Xb i x))
-
   have hraw :
       normSecond x (vec2 (I := I) (basis i) (basis j)) =
         2 *
@@ -645,8 +614,6 @@ theorem hess_norm0S {s : ℕ}
                 (partialEval0SField (I := I) nablaT (Xb j) x)
                 (partialEval0SField (I := I) nablaT (Xb i) x)) := by
             rw [hfields i, hfields j]
-
-
   rw [hraw]
   rw [inner0S_eq_coord (I := I) g x s basis gInv hinv
     (freezeFirstTwoArgs0S (I := I) (nabla2T x) (basis i) (basis j)) (T x)]

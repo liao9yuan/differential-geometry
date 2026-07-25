@@ -34,23 +34,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivita_contMDiffCovariantDerivativeLocally (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally (LeviCivita (I := I) g) ∞ := by
   simpa [LeviCivita, metricCov] using (metricCov_smooth (I := I) g)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita
     (g : SmoothRiemannianMetric I M)
@@ -63,10 +52,6 @@ theorem connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita
   simp [LeviCivita]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem riemannCurvatureAt_lcOfMetric_eq_leviCivita
     (g : SmoothRiemannianMetric I M)
@@ -102,15 +87,6 @@ theorem riemannCurvatureAt_lcOfMetric_eq_leviCivita
     (connectionRiemannCurvatureField_lcOfMetric_eq_leviCivita (I := I) g X Y Z x)
 
 omit [NeZero (Module.finrank ℝ E)] in
-
-
-
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem riemannCurvatureAux_tangentConst_eq_riemannOp
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -184,10 +160,6 @@ theorem metricRicciAt_apply_eq_ricciTensor
   exact ricciCurvatureAt_leviCivita_apply_eq_ricciTensor (I := I) g x v w
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricRm13At_eq_riemannCurvatureAt
     (g : SmoothRiemannianMetric I M) (x : M) :
@@ -200,11 +172,6 @@ theorem metricRm13At_eq_riemannCurvatureAt
   exact riemannCurvatureAt_lcOfMetric_eq_leviCivita (I := I) g x
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricRm04At_eq_riemannCurvature04At
     (g : SmoothRiemannianMetric I M) (x : M) :

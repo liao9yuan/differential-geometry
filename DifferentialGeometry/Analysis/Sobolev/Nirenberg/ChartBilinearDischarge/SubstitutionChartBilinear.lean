@@ -63,7 +63,7 @@ lemma integral_F_diffQuot_neg_eq_neg_integral_diffQuot_F
           (d := Module.finrank ℝ E) k h F x * G x
         ∂(volume : Measure EuclN) := by
   have h_ibp :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitution.integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
+    integral_diffQuot_mul_eq_neg_integral_mul_diffQuot_locally_supported
       (d := Module.finrank ℝ E) (k := k) (f := F) (g := G) hh hF_cont
       hG_smooth hG_supp
   linarith [h_ibp]

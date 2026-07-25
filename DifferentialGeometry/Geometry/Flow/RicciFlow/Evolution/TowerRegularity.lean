@@ -14,6 +14,8 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
+
 open Bundle
 open scoped Manifold ContDiff
 
@@ -26,7 +28,7 @@ variable [IsManifold I ∞ M]
 
 
 theorem iterRmComp_smoothAt
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)

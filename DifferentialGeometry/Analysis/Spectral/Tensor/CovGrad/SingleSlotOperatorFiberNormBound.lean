@@ -30,8 +30,8 @@ private local instance tensorRSRiemannianNormedAddCommGroup_local
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] in
 lemma riemannianFiberNormSq_eq_bundle_norm_sq'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
@@ -53,8 +53,8 @@ lemma riemannianFiberNormSq_eq_bundle_norm_sq'
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem riemannianFiberNormSq_clm_apply_le_of_sqrt_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (φ : TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x) (μ : ℝ) (hμ : 0 ≤ μ)
@@ -74,7 +74,6 @@ theorem riemannianFiberNormSq_clm_apply_le_of_sqrt_le
   have htgt_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 s x (φ v) :=
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x (φ v)
   have hb := hbound v
-
   have hrhs_nn : 0 ≤ μ * Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 r x v) :=
     mul_nonneg hμ (Real.sqrt_nonneg _)
   have hsq :

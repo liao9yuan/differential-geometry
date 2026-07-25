@@ -42,6 +42,7 @@ open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
 open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
+open Analysis.Laplacian.DiffChartBilinearH1ComplH3
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -62,9 +63,9 @@ private lemma base_weak_partial_ae_eq_chartPushedChosenFirstPartial
           (I := I) (M := M) g 1 hu_h)).weak_partial i =ᵐ[
       (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)]
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3.chartPushedChosenFirstPartial
+      Analysis.Laplacian.DiffChartBilinearH1ComplH3.chartPushedChosenFirstPartial
         (I := I) (M := M) g α u_h i :=
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3.chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
+  chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
     (I := I) (M := M) g α hu_h i
 
 private lemma base_weak_partial_memW1p
@@ -141,7 +142,8 @@ private lemma chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_aeEq l₂
   exact h_congr
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma exists_smooth_global_extension_chart
     {φ : EuclN → ℝ} {α : M}
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))

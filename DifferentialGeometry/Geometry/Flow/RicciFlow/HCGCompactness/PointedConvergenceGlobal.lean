@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import Mathlib.Topology.Connected.Clopen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -36,9 +35,6 @@ namespace PointedRiemannianManifold
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
-
 omit [CompleteSpace E] in
 theorem compact_of_ricci
     [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]

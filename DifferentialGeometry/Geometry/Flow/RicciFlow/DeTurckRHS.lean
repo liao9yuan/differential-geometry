@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
-set_option linter.unnecessarySimpa false
 
 
 namespace DifferentialGeometry
@@ -39,15 +38,15 @@ private noncomputable def lieDerivMetricClmAux
       have := (lieDerivMetric (I := I) g W x).map_add v v'
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      simpa [LinearMap.add_apply, ContinuousLinearMap.add_apply,
-             LinearMap.coe_toContinuousLinearMap'] using happ
+      simp [ContinuousLinearMap.add_apply,
+             LinearMap.coe_toContinuousLinearMap']
     map_smul' := fun c v => by
       ext w
       have := (lieDerivMetric (I := I) g W x).map_smul c v
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      simpa [LinearMap.smul_apply, ContinuousLinearMap.smul_apply,
-             LinearMap.coe_toContinuousLinearMap', smul_eq_mul] using happ }
+      simp [ContinuousLinearMap.smul_apply,
+             LinearMap.coe_toContinuousLinearMap', smul_eq_mul]}
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma lieDerivMetricClmAux_apply

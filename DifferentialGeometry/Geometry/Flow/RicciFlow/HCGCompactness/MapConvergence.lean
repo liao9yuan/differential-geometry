@@ -58,10 +58,6 @@ theorem cmm_finiteDimensional (r : ℕ) :
         (fun _ : Fin (r + 1) => E) F).symm.toLinearEquiv).finiteDimensional
 
 omit [FiniteDimensional ℝ F] in
-
-
-
-
 private theorem equicont_iteratedFDeriv
     (Φ : ℕ → E → F) (hΦ : ∀ k, ContDiff ℝ (⊤ : ℕ∞) (Φ k))
     (hbdd : ∀ r : ℕ, ∀ K : Set E, IsCompact K →
@@ -76,7 +72,6 @@ private theorem equicont_iteratedFDeriv
   have hx1 : x ∈ Metric.closedBall x₀ 1 :=
     Metric.mem_closedBall.mpr (hx.trans_le (min_le_left _ _)).le
   have hx₀1 : x₀ ∈ Metric.closedBall x₀ 1 := Metric.mem_closedBall_self zero_le_one
-
   have hlip : ‖iteratedFDeriv ℝ r (Φ k) x - iteratedFDeriv ℝ r (Φ k) x₀‖
       ≤ max M 0 * ‖x - x₀‖ := by
     refine Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le
@@ -126,11 +121,9 @@ theorem exists_cInf_subseq
       StrictMono φ ∧ ContDiff ℝ (⊤ : ℕ∞) Φinf ∧
         MapCInfConvOnCompacts Set.univ (fun k => Φ (φ k)) Φinf := by
   classical
-
   let Fb : (r : ℕ) → ℕ → C(E, ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F) :=
     fun r k => ⟨iteratedFDeriv ℝ r (Φ k),
       (contDiff_infty.mp (hΦ k) r).continuous_iteratedFDeriv'⟩
-
   have hcpt : ∀ r : ℕ, IsCompact (closure (Set.range (Fb r))) := by
     intro r
     haveI := cmm_finiteDimensional (E := E) (F := F) r
@@ -138,7 +131,6 @@ theorem exists_cInf_subseq
       (equicont_iteratedFDeriv Φ hΦ hbdd r) (fun x => ?_)
     obtain ⟨M, hM⟩ := hbdd r {x} isCompact_singleton
     exact ⟨M, fun k => hM k x rfl⟩
-
   haveI : ∀ r : ℕ, CompactSpace (closure (Set.range (Fb r))) :=
     fun r => isCompact_iff_compactSpace.mp (hcpt r)
   set xseq : ℕ → Π r : ℕ, closure (Set.range (Fb r)) :=
@@ -158,7 +150,6 @@ theorem exists_cInf_subseq
   have hGunif : ∀ r : ℕ, ∀ K : Set E, IsCompact K →
       TendstoUniformlyOn (fun k => ⇑(Fb r (φ k))) (⇑(G r)) atTop K :=
     fun r => ContinuousMap.tendsto_iff_forall_isCompact_tendstoUniformlyOn.mp (hGconv r)
-
   have hGderiv : ∀ (r : ℕ) (x₀ : E),
       HasFDerivAt (⇑(G r)) (((G (r + 1)) x₀).curryLeft) x₀ := by
     intro r x₀
@@ -178,7 +169,6 @@ theorem exists_cInf_subseq
       (hGunif r _ hball).tendsto_at (Metric.ball_subset_closedBall hy)
     exact hasFDerivAt_of_tendstoUniformlyOn Metric.isOpen_ball hf' hfd hfg
       (Metric.mem_ball_self one_pos)
-
   have htaylor : HasFTaylorSeriesUpTo ((⊤ : ℕ∞) : WithTop ℕ∞)
       (fun y => ((G 0) y).curry0) (fun y r => (G r) y) :=
     ⟨fun _ => rfl, fun m _ y => hGderiv m y, fun m _ => (G m).continuous⟩
@@ -205,10 +195,6 @@ theorem exists_cInf_subseq
 
 
 omit [FiniteDimensional ℝ F] in
-
-
-
-
 private theorem equicontOn_iteratedFDerivWithin
     {U : Set E} (hU : IsOpen U) (Φ : ℕ → E → F)
     (hΦ : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (Φ k) U)
@@ -285,14 +271,12 @@ theorem exists_cInf_subseq_on
         MapCInfConvOnCompacts U (fun k => Φ (φ k)) Φinf := by
   classical
   haveI : LocallyCompactSpace U := hU.locallyCompactSpace
-
   have hbddW : ∀ r : ℕ, ∀ K : Set E, IsCompact K → K ⊆ U →
       ∃ M : ℝ, ∀ k : ℕ, ∀ x ∈ K, ‖iteratedFDerivWithin ℝ r (Φ k) U x‖ ≤ M := by
     intro r K hK hKU
     obtain ⟨M, hM⟩ := hbdd r K hK hKU
     exact ⟨M, fun k x hx => by
       rw [iteratedFDerivWithin_of_isOpen r hU (hKU hx)]; exact hM k x hx⟩
-
   let Fb : (r : ℕ) → ℕ → C(U, ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F) :=
     fun r k => ⟨fun x => iteratedFDerivWithin ℝ r (Φ k) U (x : E),
       ((hΦ k).continuousOn_iteratedFDerivWithin (by exact_mod_cast le_top)
@@ -323,13 +307,11 @@ theorem exists_cInf_subseq_on
   have hGunif : ∀ r : ℕ, ∀ K : Set U, IsCompact K →
       TendstoUniformlyOn (fun k => ⇑(Fb r (φ k))) (⇑(G r)) atTop K :=
     fun r => ContinuousMap.tendsto_iff_forall_isCompact_tendstoUniformlyOn.mp (hGconv r)
-
   let Gext : (r : ℕ) → E → ContinuousMultilinearMap ℝ (fun _ : Fin r => E) F :=
     fun r x => if h : x ∈ U then (G r) ⟨x, h⟩ else 0
   have hGext : ∀ (r : ℕ) (x : E) (hx : x ∈ U), Gext r x = (G r) ⟨x, hx⟩ :=
     fun r x hx => dif_pos hx
   let Φinf : E → F := fun x => (Gext 0 x).curry0
-
   have hGunifE : ∀ r : ℕ, ∀ K : Set E, IsCompact K → K ⊆ U →
       TendstoUniformlyOn (fun k => iteratedFDerivWithin ℝ r (Φ (φ k)) U)
         (Gext r) atTop K := by
@@ -344,7 +326,6 @@ theorem exists_cInf_subseq_on
     have hxU : x ∈ U := hKU hx
     have hkx := hk ⟨x, hxU⟩ hx
     rwa [show (G r) ⟨x, hxU⟩ = Gext r x from (hGext r x hxU).symm] at hkx
-
   have hGderiv : ∀ (r : ℕ) (x₀ : E), x₀ ∈ U →
       HasFDerivAt (Gext r) ((Gext (r + 1) x₀).curryLeft) x₀ := by
     intro r x₀ hx₀
@@ -373,7 +354,6 @@ theorem exists_cInf_subseq_on
         (Set.singleton_subset_iff.mpr (hballU hy))).tendsto_at rfl
     exact hasFDerivAt_of_tendstoUniformlyOn Metric.isOpen_ball hf' hfd hfg
       (Metric.mem_ball_self (by positivity))
-
   have hcontGext : ∀ m : ℕ, ContinuousOn (Gext m) U := by
     intro m
     rw [continuousOn_iff_continuous_restrict]

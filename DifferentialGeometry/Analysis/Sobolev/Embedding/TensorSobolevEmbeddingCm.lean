@@ -35,7 +35,6 @@ private noncomputable local instance tensorSobolevEmbeddingRiemannianNormedAddCo
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [I.Boundaryless] in
 omit [BoundarylessManifold I M] in
 theorem tensorPouSobolevHilbert_embedding_Ck
@@ -106,7 +105,8 @@ theorem tensorChartComponentScalar_embedding_C0
     (I := I) (M := M) g hk hreg h_meas h_mem
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 theorem tensorFiberNorm_sq_le_chartCenterComponents
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (T : SmoothCcTensor g r s) (x : M) :
@@ -137,7 +137,7 @@ theorem tensorFiberNorm_sq_le_chartCenterComponents
     exact DifferentialGeometry.PDE.RicciFlow.HebeyBlock.triv_eq_toModel_at_chartCenter
       (I := I) r s x (T.toSection x)
   have h_alg :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorRSModel_norm_sq_le_sum_projection_sq
+    Analysis.Parabolic.TensorSpectral.tensorRSModel_norm_sq_le_sum_projection_sq
       (E := E) r s Tmod
   rw [h_norm_eq]
   refine h_alg.trans_eq ?_

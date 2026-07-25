@@ -59,7 +59,8 @@ private theorem clm0_ext {x : M}
   rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D,
     map_smul, map_smul, hunit]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem traceFib_diag
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
@@ -143,7 +144,8 @@ private theorem lapTrace_diag
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 private theorem trace_eq_lap
     (a : SmoothRiemannianMetric I M) (x : M)
     (D Hs : Tensor0SSpace 2 I x)

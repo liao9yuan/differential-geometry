@@ -43,7 +43,8 @@ theorem tensorL2Inner_covGrad_appCc_eq_add (g : SmoothRiemannianMetric I M) (r s
   set A2 : SmoothCcTensor g 0 (s + 1) :=
     operatorFieldApply (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
       (covGrad (I := I) (M := M) g 0 r W) with hA2
-  have hB : covGrad (I := I) (M := M) g 0 s (operatorFieldApply (I := I) (M := M) g r s Φ W) = A1 + A2 :=
+  have hB : covGrad (I := I) (M := M) g 0 s (operatorFieldApply (I := I) (M := M) g r s Φ W) = A1 +
+    A2 :=
     covGrad_operatorFieldApply_eq (I := I) (M := M) g r s Φ W
   have hstep := congrArg
     (fun Z : SmoothCcTensor g 0 (s + 1) =>

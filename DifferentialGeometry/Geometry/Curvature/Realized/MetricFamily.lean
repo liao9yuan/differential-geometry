@@ -15,7 +15,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 
@@ -48,7 +47,8 @@ structure RealizedMetricFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t) (metric t)
+    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+      (metric t)
 
 
 
@@ -67,7 +67,8 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t) (metric t))
+      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+        (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metric t = metric t := by
@@ -77,7 +78,8 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t) (metric t))
+      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+        (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).connection t =
@@ -88,7 +90,8 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t) (metric t))
+      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+        (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metricCompatible t = metricCompatible t := by
@@ -151,7 +154,8 @@ theorem metricCompatibleAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t) (G.metricAt t) := by
+    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
+      (G.metricAt t) := by
   exact G.metricCompatible t
 
 
@@ -172,7 +176,8 @@ def IsMetricCompatibleFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t) (G.metricAt t)
+    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
+      (G.metricAt t)
 
 
 theorem isMetricCompatibleFamilyOn

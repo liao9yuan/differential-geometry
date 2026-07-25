@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmFrozenSlotField
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

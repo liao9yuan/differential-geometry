@@ -46,7 +46,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 
 
 
@@ -115,7 +114,7 @@ theorem deturck_metric_pde_interior
           N_cont
             (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
-    (hsmall : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
+    (_hsmall : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
       metricCauchySchwarzBound (I := I) (M := M) g_bg
         (ccTensorBilinSymm (I := I) g_bg (T_s s)) δ')
     (hsmoothrepr : ∀ (s : ℝ)

@@ -152,7 +152,7 @@ theorem chartBilinear_master_nonsmooth_discharge
     rw [h_eq] at hx'
     exact hδ_in_chart hx'
   obtain ⟨χ, hχ_smooth, hχ_cs, hχ_range, hχ_one, hχ_tsupp⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.exists_cutoff
+    SmoothEllipticBilinearForm.exists_cutoff
       (d := Module.finrank ℝ E)
       (K := Metric.cthickening r (tsupport η))
       (Ω' := chartTargetEuclid (I := I) (M := M) α)
@@ -562,7 +562,6 @@ theorem chartBilinear_master_nonsmooth_discharge
           - cross_3_term_chartBilinear (I := I) (M := M) D K_0 η k h
           - f_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
     linarith
-
   have h_test_supp_in_cthick_h :
       Function.support
         (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction

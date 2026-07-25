@@ -31,7 +31,9 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiniteDimensional ℝ F]
 
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
+    [FiniteDimensional ℝ F] in
 theorem covApply_outer_swap_eq_riemannSec
     (cov : CovariantDerivative I F V)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, V b) (x : M) :
@@ -60,7 +62,8 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiniteDimensional ℝ F]
 
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 theorem covApply_contMDiff
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -73,7 +76,8 @@ theorem covApply_contMDiff
   rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
   exact hT
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 theorem covApply_covApply_contMDiff
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -112,7 +116,8 @@ theorem mlieBracket_contMDiff
     rw [h_eq]; infer_instance
   exact hX_inf.mlieBracket_vectorField (m := (⊤ : ℕ∞)) (n := (⊤ : ℕ∞)) hY_inf hn_le
 
-omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 theorem riemannSec_contMDiff
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -135,7 +140,9 @@ theorem riemannSec_contMDiff
   intro b
   rfl
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
+    [FiniteDimensional ℝ F] in
 theorem covApply_covApply_eq_section
     (cov : CovariantDerivative I F V)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, V b) :
@@ -147,7 +154,8 @@ theorem covApply_covApply_eq_section
   simp only [Pi.add_apply, covApply_apply]
   exact covApply_outer_swap_eq_riemannSec cov X Y T b
 
-omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 theorem secondCovDeriv_swap_outer
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

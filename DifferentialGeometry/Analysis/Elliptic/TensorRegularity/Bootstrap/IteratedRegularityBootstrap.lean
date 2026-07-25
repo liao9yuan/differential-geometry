@@ -223,7 +223,6 @@ private theorem wkpNorm_assembly_le
       exact h_main
 
 omit [NeZero d] in
-
 private theorem tsupport_finsetSum_subset_of_forall
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ) {B : Set EE}
     (hB_closed : IsClosed B) (hF : ∀ a ∈ S, tsupport (F a) ⊆ B) :
@@ -356,7 +355,8 @@ private theorem wkpNorm_iteratedPerturbedSource_zero_le
         iteratedWeakSobolevNorm (d := d) 0 2
             (iteratedPerturbedSource (d := d) B m u f idx) Ω ≤
           ENNReal.ofReal C *
-            (iteratedWeakSobolevNorm (d := d) m 2 f Ω + iteratedWeakSobolevNorm (d := d) (m + 1) 2 u Ω) := by
+            (iteratedWeakSobolevNorm (d := d) m 2 f Ω + iteratedWeakSobolevNorm (d := d) (m + 1) 2 u
+              Ω) := by
   classical
   induction m with
   | zero =>
@@ -431,7 +431,8 @@ private theorem wkpNorm_iteratedPerturbedSource_zero_le
       refine h_ih.trans ?_
       rw [ENNReal.ofReal_mul hC_nn, mul_assoc]
       refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
-      calc iteratedWeakSobolevNorm (d := d) m 2 f' Ω + iteratedWeakSobolevNorm (d := d) (m + 1) 2 u' Ω
+      calc iteratedWeakSobolevNorm (d := d) m 2 f' Ω + iteratedWeakSobolevNorm (d := d) (m + 1) 2 u'
+             Ω
           ≤ (ENNReal.ofReal Kmax *
               (iteratedWeakSobolevNorm (d := d) (m + 1) 2 f Ω +
                 iteratedWeakSobolevNorm (d := d) (m + 2) 2 u Ω)) +
@@ -506,13 +507,11 @@ private theorem wkpNorm_iterClassicalPartial_le
       omega
 
 omit [NeZero d] in
-
 private lemma rpow_half_add_le {a b : ℝ≥0∞} :
     (a + b) ^ ((1 : ℝ) / 2) ≤ a ^ ((1 : ℝ) / 2) + b ^ ((1 : ℝ) / 2) :=
   ENNReal.rpow_add_le_add_rpow a b (by norm_num) (by norm_num)
 
 omit [NeZero d] in
-
 private lemma rpow_half_sq_add_sq_le {a b : ℝ≥0∞} :
     (a ^ 2 + b ^ 2) ^ ((1 : ℝ) / 2) ≤ a + b := by
   have h_le : a ^ 2 + b ^ 2 ≤ (a + b) ^ 2 := by
@@ -526,7 +525,6 @@ private lemma rpow_half_sq_add_sq_le {a b : ℝ≥0∞} :
         norm_num
 
 omit [NeZero d] in
-
 private lemma eLpNorm_two_sq_eq_ofReal_integral_sq_univ
     {Ω : Set EE} {h : EE → ℝ}
     (hh_cd : ContDiff ℝ (⊤ : ℕ∞) h) (hh_cpt : HasCompactSupport h)
@@ -580,7 +578,8 @@ private theorem smooth_cc_wkp2_wkpNorm_le
       tsupport w ⊆ Ω'' → tsupport s ⊆ Ω'' →
       iteratedWeakSobolevNorm (d := d) 2 2 w Ω'' ≤
         ENNReal.ofReal C *
-          (iteratedWeakSobolevNorm (d := d) 1 2 w Ω'' + iteratedWeakSobolevNorm (d := d) 0 2 s Ω'') := by
+          (iteratedWeakSobolevNorm (d := d) 1 2 w Ω'' + iteratedWeakSobolevNorm (d := d) 0 2 s
+            Ω'') := by
   classical
   obtain ⟨C, hC_nn, hC⟩ :=
     smooth_cc_h2_loc_memWkp_two (d := d) B hΩ'' hΩ''_compact_closure
@@ -726,7 +725,8 @@ private theorem smooth_cc_wkp2_wkpNorm_le
         ((iteratedWeakSobolevNorm (d := d) 0 2 s Ω'') ^ 2) ^ ((1 : ℝ) / 2) := by
         refine add_le_add (ENNReal.rpow_le_rpow hw_W1_sq (by norm_num)) ?_
         rw [hs_wkp0_sq]
-    _ = iteratedWeakSobolevNorm (d := d) 1 2 w Ω'' + iteratedWeakSobolevNorm (d := d) 0 2 s Ω'' := by
+    _ = iteratedWeakSobolevNorm (d := d) 1 2 w Ω'' + iteratedWeakSobolevNorm (d := d) 0 2 s
+      Ω'' := by
         rw [← ENNReal.rpow_natCast (iteratedWeakSobolevNorm (d := d) 1 2 w Ω'') 2,
           ← ENNReal.rpow_mul,
           ← ENNReal.rpow_natCast (iteratedWeakSobolevNorm (d := d) 0 2 s Ω'') 2,
@@ -873,7 +873,8 @@ private theorem tensorComponent_aPriori_succ
     Finset.sum_le_sum (fun idx _ => h_partial_le idx)
   refine h_assembly.trans ?_
   set DR : ℝ≥0∞ :=
-    iteratedWeakSobolevNorm (d := dimE) m 2 RHS Ω'' + iteratedWeakSobolevNorm (d := dimE) (m + 1) 2 u Ω''
+    iteratedWeakSobolevNorm (d := dimE) m 2 RHS Ω'' + iteratedWeakSobolevNorm (d := dimE) (m + 1) 2
+      u Ω''
     with hDR_def
   have h_card_sum :
       ∑ _idx : Fin m → Fin dimE,

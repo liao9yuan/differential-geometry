@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.CurvatureAction
 import DifferentialGeometry.Geometry.Curvature.Contractions
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

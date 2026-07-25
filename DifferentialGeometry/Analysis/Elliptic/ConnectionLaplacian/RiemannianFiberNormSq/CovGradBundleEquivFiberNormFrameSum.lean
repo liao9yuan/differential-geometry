@@ -57,10 +57,10 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
   set bse : Module.Basis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ (TangentSpace I x) :=
     basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
   have hbse_eq : ∀ i, bse i = e i := by
-    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard)
+      i
   have hbse_orth : ∀ i j, g.inner x (bse i) (bse j) = if i = j then (1 : ℝ) else 0 := by
     intro i j; rw [hbse_eq i, hbse_eq j]; exact horth i j
-
   have hstep : riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
       ∑ ψ : Fin s → Fin (Module.finrank ℝ (TangentSpace I x)),
         Tensor0SSpace.toModel
@@ -117,11 +117,9 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
       have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
       rw [this]
   rw [hstep]
-
   rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
   · refine Finset.sum_congr rfl (fun J _ => ?_)
     rw [fiberNormSqSummand_eq_component_sq]
-
     have hweight : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e ((fun k : Fin 0 => k.elim0) k))) : Tensor0SSpace 0 I x) =
         unitZeroSec (I := I) (M := M) x := by
@@ -152,7 +150,6 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -172,12 +169,10 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
     riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS _ K₀]
   refine Finset.sum_congr rfl (fun J _ => ?_)
   congr 1
-
   unfold fiberNormSqComponent
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK
-
   have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           slot0Curry (I := I) (M := M) g x s e K₀
             (covGradBundleEquiv (I := I) (M := M) 0 s x Φ) a) ωK =
@@ -196,7 +191,6 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
       simp
     rw [hscalar, one_smul]
   rw [hslot]
-
   rw [show (tensor0S_curry (I := I) (M := M) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ωK) (e a)
@@ -209,14 +203,12 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ωK) (v0 := e a) (vs := fun k => e (J k))]
-
   rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 s x Φ ωK
     (Fin.cons (e a) (fun k => e (J k)))]
   rw [Fin.cons_zero]
   congr 1
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -241,7 +233,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
     hreprS a
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -252,7 +243,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
         (covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ≤
       (Module.finrank ℝ E : ℝ) * b := by
   classical
-
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x
@@ -288,7 +278,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
     intro S; rfl
   rw [riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame (I := I) (M := M) g s x Φ e K₀
     hreprS hreprSucc]
-
   have hper : ∀ a : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (Φ (e a)) ≤ b := by
     intro a
@@ -300,7 +289,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
   rw [hn_def, hfr]
 
 omit [CompactSpace M] [I.Boundaryless] in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -324,7 +312,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK
-
   have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           slot0Curry (I := I) (M := M) g x s e K₀ T a) ωK =
         tensor0S_curry (I := I) (M := M) s x
@@ -339,7 +326,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
         coframeS_apply (I := I) (M := M) g x 0 e K₀]
       simp
     rw [hscalar, one_smul]
-
   rw [show ((((covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (e a)) ωK)
         (fun k => e (J k)) : ℝ) =
       Tensor0SSpace.toModel
@@ -377,7 +363,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
   have horthC : ∀ a b : Fin (Module.finrank ℝ E),
       g.inner x (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
   set K₀ : Fin 0 → Fin (Module.finrank ℝ E) := fun k => k.elim0 with hK₀
-
   have hreprS : ∀ S : TensorRSSpace 0 s I x,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
         ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),

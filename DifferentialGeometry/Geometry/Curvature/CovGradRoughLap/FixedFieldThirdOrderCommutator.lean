@@ -87,7 +87,8 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_eq_of_toModel_eq {t : ℕ} {x : M} {T T' : Tensor0SSpace t I x}
     (h : ∀ v : Fin t → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
@@ -131,7 +132,8 @@ private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x)
   rw [ContinuousLinearMap.map_smul]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C - D) =
       tensor0SToTensorRS (I := I) (M := M) x C - tensor0SToTensorRS (I := I) (M := M) x D := by
@@ -155,7 +157,8 @@ private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
   exact h
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A - B) τ =
@@ -163,7 +166,8 @@ private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A + B) τ =
@@ -667,7 +671,6 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
   have hW := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hVs
   have hXV := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hXs
   have hVX := covApply_contMDiff (cov := LeviCivita (I := I) g) hXs hVs
-
   have hbrx : VectorField.mlieBracket I V X x =
       covApply (LeviCivita (I := I) g) V X x - covApply (LeviCivita (I := I) g) X V x :=
     (covApply_sub_eq_mlieBracket (LeviCivita (I := I) g)
@@ -688,7 +691,6 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
         ((hVs y).mdifferentiableAt (by simp)) ((hXs y).mdifferentiableAt (by simp))).symm
     rw [covApply_apply, hbry, map_sub]
     rfl
-
   · have hswap := secondCovDeriv_swap_outer (cov := tensorCov (I := I) g 0 s)
       (B := V) (W := X) (T := fun z : M => S.toSection z) (x := x) hVs hXs hSAt
     have hsw2 : (tensorCov (I := I) g 0 s).toFun
@@ -719,14 +721,12 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hXV)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hVX)]
       rfl
-
     have hanti1 := tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 s
       (X := covApply (LeviCivita (I := I) g) V X) (Y := V)
       (T := fun z : M => S.toSection z) (x := x) hXV hVs hSAt
     have hanti2 := tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 s
       (X := X) (Y := covApply (LeviCivita (I := I) g) V V)
       (T := fun z : M => S.toSection z) (x := x) hXs hW hSAt
-
     have ht5dir := riemannOp_self_eq_connection_covApply
       (I := I) (M := M) g hVs hXs x
     have hd31 := tensorSecondCovDeriv_def (I := I) g 0 s
@@ -759,12 +759,10 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
             (V x)) := by
       rw [tensorSecondCovDeriv_def]
       rfl
-
     rw [hswap]
     simp only [rs_add_apply']
     rw [hsw2, hsw4]
     simp only [rs_sub_apply']
-
     rw [show riemannOp (tensorCov (I := I) g 0 s) x
         ((LeviCivita (I := I) g).toFun X x (V x)) (V x) (S.toSection x) =
         riemannOp (tensorCov (I := I) g 0 s) x

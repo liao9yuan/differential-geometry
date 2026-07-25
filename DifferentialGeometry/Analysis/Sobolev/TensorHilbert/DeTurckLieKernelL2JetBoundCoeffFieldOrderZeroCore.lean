@@ -32,7 +32,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -50,7 +51,8 @@ theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M)
     mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   nlinarith [h1, h2, hnn]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem coframeS_one_eq_g0FlatCLM_local
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
@@ -66,7 +68,8 @@ private theorem coframeS_one_eq_g0FlatCLM_local
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 2 → Fin n)
     (p q : TangentSpace I x) :
@@ -77,7 +80,8 @@ theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
   rw [coframeS_apply (I := I) (M := M) g₀ x 2 e K ![p, q], Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 1 2 I x) (d a b : TangentSpace I x) :
@@ -240,7 +244,8 @@ private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
     rw [hKsum, hJsum]
   have hcompsq : (∑ p : (Fin 1 → Fin n) × (Fin 2 → Fin n), comp p ^ 2) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x W := by
-    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x W e bse hnE hbse horth]
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x W e bse hnE
+      hbse horth]
     rw [Fintype.sum_prod_type]
   have hnorm_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x W :=
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 2 x W
@@ -428,7 +433,8 @@ theorem exists_fixed_covDerivConnDiff_sqrt_bound
   have hbridge := covGrad_connDiffSection_flat_eval_eq_inner_local (I := I) (M := M)
     g₀ g_bg x v w u
   rw [← hA_def, ← hW_def] at hbridge
-  have hprim := abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u w
+  have hprim := abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u
+    w
   rw [hbridge] at hprim
   rw [abs_of_nonneg hAA_nn] at hprim
   have hAA_sq : g₀.inner x A A = NA ^ 2 := by rw [hNA_def, Real.sq_sqrt hAA_nn]

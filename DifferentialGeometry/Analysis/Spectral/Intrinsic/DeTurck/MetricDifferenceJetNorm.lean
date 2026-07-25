@@ -111,14 +111,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-
-
-
-
-
-
-
 set_option backward.isDefEq.respectTransparency false in
 def metricDiff2JetNorm (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) : ℝ :=
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
@@ -137,8 +129,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
@@ -162,7 +152,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
@@ -188,13 +177,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.mixed_instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-
-
-
-
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
@@ -224,15 +206,15 @@ theorem metricDiff2JetNorm_continuous
     rhsPointwiseTensorRSFiberBundle 0 4
   haveI hC2 : IsContinuousRiemannianBundle (TensorRSModel 0 2 ℝ E)
       (fun b : M => TensorRSSpace 0 2 I b) :=
-    DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
+    TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
       (I := I) (M := M) g₀ 0 2
   haveI hC3 : IsContinuousRiemannianBundle (TensorRSModel 0 3 ℝ E)
       (fun b : M => TensorRSSpace 0 3 I b) :=
-    DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
+    TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
       (I := I) (M := M) g₀ 0 3
   haveI hC4 : IsContinuousRiemannianBundle (TensorRSModel 0 4 ℝ E)
       (fun b : M => TensorRSSpace 0 4 I b) :=
-    DifferentialGeometry.Tensor.TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
+    TensorRSRiemannianBundleContinuous.tensorRS_isContinuousRiemannianBundle
       (I := I) (M := M) g₀ 0 4
   have h0 : Continuous (fun x : M => ‖metricDiff02MixedSection (I := I) g₁ g₂ x‖) :=
     continuous_riemannian_fiber_norm_of_continuous_section

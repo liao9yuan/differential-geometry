@@ -70,6 +70,7 @@ noncomputable local instance secondVariationTrilinearNormedSpace :
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
+open Geometry.Riemannian.CovariantDerivativeAlong
 
 def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
     (g : SmoothRiemannianMetric I M)
@@ -103,7 +104,6 @@ lemma indexForm_eq_intervalIntegral
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
@@ -385,7 +385,8 @@ theorem second_variation_of_arcLength_eq_indexForm
       with hγ'def
     have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) γ := by
       have hsmooth_central : ContMDiff (𝓘(ℝ, ℝ)) I (8 : ℕ) (fun v : ℝ => f 0 v) := by
-        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ) (fun v : ℝ => ((0 : ℝ), v)) :=
+        have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (8 : ℕ)
+          (fun v : ℝ => ((0 : ℝ), v)) :=
           contMDiff_const.prodMk contMDiff_id
         exact (hf : ContMDiff _ _ _ _).comp hincl
       exact hfγ ▸ hsmooth_central
@@ -425,7 +426,8 @@ theorem second_variation_of_arcLength_eq_indexForm
         refine (hasDerivWithinAt_const t (Set.Icc 0 L) (0 : ℝ)).congr_of_mem ?_ ht
         intro s hs
         rw [hVsec_eq s]; exact hVperp s hs
-      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
+      have hmc := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Vsec γ' t hγ_smooth
         (hVdiff t) (hγ'diff t)
       have hmcWithin : HasDerivWithinAt (fun s : ℝ => g.inner (γ s) (Vsec s) (γ' s))
           (g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t)
@@ -485,7 +487,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             hslicediff
           have : P (0, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (0, t) (1, 0) := rfl
           rw [this]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t
+            hslicediff).unique
             (hGslice.sqrt (by rw [hG0]; norm_num))
         rw [hPeq]; exact this
       have hP0 : P (0, t) = 0 := by
@@ -500,7 +503,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             simpa using this
           have hPis : P (0, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (0, t) (1, 0) := rfl
           rw [hPis]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) 0 t
+            hslicediff).unique
             (hGslice.sqrt (by rw [hG0]; norm_num))
         rw [this]
         have : fderiv ℝ G (0, t) (1, 0) = 0 := hgs
@@ -541,7 +545,8 @@ theorem second_variation_of_arcLength_eq_indexForm
             simpa using this
           have hPis : P (s, t) = fderiv ℝ (fun p : ℝ × ℝ => Real.sqrt (G p)) (s, t) (1, 0) := rfl
           rw [hPis]
-          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) s t hslicediff).unique
+          exact (Aux2.hasDerivAt_slice_fst (fun u v : ℝ => Real.sqrt (G (u, v))) s t
+            hslicediff).unique
             (hGslice.sqrt (ne_of_gt hGpos))
         rw [hPeq]
         have hsqrtne : Real.sqrt (G (s, t)) ≠ 0 := by
@@ -575,7 +580,8 @@ theorem second_variation_of_arcLength_eq_indexForm
         exact this
       have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) c Wsec 0) 0 :=
         slice_secondCovDeriv_chartRep_differentiableAt (I := I) g f hf t
-      have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g c Wsec velTsec 0
+      have hmc := metric_compat_hasDerivAt_inner (I := I)
+        (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g c Wsec velTsec 0
         hc_smooth hWdiff hvelTdiff
       have hcovW : covDerivAlong (I := I) g c Wsec 0 = W2 t := by
         rw [hW2def, hc, hWsec, hvelTsec]
@@ -777,7 +783,8 @@ theorem second_variation_of_arcLength_eq_indexForm
           HasDerivAt (fun s : ℝ => g.inner (γ s) (Asec s) (γ' s))
             (g.inner (γ t) (Bsec t) (γ' t)) t := by
         intro t ht
-        have hmc := metric_compat_hasDerivAt_inner (I := I) (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Asec γ' t hγ_smooth
+        have hmc := metric_compat_hasDerivAt_inner (I := I)
+          (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 8)) g γ Asec γ' t hγ_smooth
           (hAsecdiff t) (hγ'diff t)
         have hB2 : g.inner (γ t) (Asec t) (covDerivAlong (I := I) g γ γ' t) = 0 := by
           rw [hgeo0 t ht]; simp
@@ -912,7 +919,8 @@ theorem second_variation_of_arcLength_eq_indexForm
       have hsplit : (∫ t in (0 : ℝ)..L, g_ss t / 2)
           = (∫ t in (0 : ℝ)..L, indexFormIntegrand (I := I) g γ V V t)
             + (∫ t in (0 : ℝ)..L, g.inner (γ t) (Bsec t) (γ' t)) := by
-        rw [← intervalIntegral.integral_add hindexFormIntegrand_intervalIntegrable hBsec_intervalIntegrable]
+        rw [← intervalIntegral.integral_add hindexFormIntegrand_intervalIntegrable
+          hBsec_intervalIntegrable]
         refine intervalIntegral.integral_congr (fun t ht => ?_)
         rw [Set.uIcc_of_le (le_of_lt hL)] at ht
         exact hpt_id t ht
@@ -970,7 +978,7 @@ theorem indexFormIntegrand_intervalIntegrable
   have he_total : ContinuousOn
       (fun t : ℝ => (TotalSpace.mk' E (γ t) ((e i).toFun t) : TangentBundle I M))
       (Set.Icc 0 L) :=
-    DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
+    sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
       (I := I) γ (e i).toFun _hγ_C1 (fun t ht => _heDiff i t ht)
   have hA : ContinuousOn (fun t : ℝ => g.inner (γ t) ((e i).toFun t) ((e i).toFun t))
       (Set.Icc 0 L) :=

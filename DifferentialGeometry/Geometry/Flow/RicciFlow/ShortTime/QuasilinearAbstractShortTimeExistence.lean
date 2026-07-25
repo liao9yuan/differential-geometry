@@ -36,8 +36,10 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
     (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a:ℝ)+2) → tensorHs (I := I) (M := M) g₀ 0 2 (a:ℝ))
     (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
-        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ), SmoothCcTensor g₀ 0 2)
-    (_H0 : ∀ (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x), F g x v w = F g x w v)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ),
+          SmoothCcTensor g₀ 0 2)
+    (_H0 : ∀ (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x), F g x v w = F g x w
+      v)
     (_H1 : IsStrictlyParabolicMetricRHS (I := I) F g₀)
     {L : ℝ≥0} (hLipN : LipschitzWith L Nfun)
     (H2 : ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
@@ -51,8 +53,10 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖)
     (_H3 : IsSmoothQuasilinearMetricRHS (I := I) F)
     (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ) (x : M) (v w : TangentSpace I x),
-      ccTensorBilinSymm (I := I) g₀ (Nsec S hδ_lt hδ + rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+          (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g₀ (Nsec S hδ_lt hδ + rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v
+        w
         = F (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ) x v w)
     (hForce : ∀ {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
         (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose)
@@ -106,10 +110,13 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
                     (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
                       (Nsec (Ffam t) hδ_lt (hδ t))) i)) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
-      IsQuasilinearMetricParabolicSolution (I := I) F g₀ T g_DT ∧ JointChartGramSmooth (I := I) T g_DT := by
+      IsQuasilinearMetricParabolicSolution (I := I) F g₀ T g_DT ∧ JointChartGramSmooth (I := I) T
+        g_DT := by
   classical
-  obtain ⟨_, hT₀pos, hsol⟩ := (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose_spec
-  set T : ℝ := min (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose 1 with hT_def
+  obtain ⟨_, hT₀pos, hsol⟩ :=
+    (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose_spec
+  set T : ℝ := min (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose 1 with
+    hT_def
   have hT_pos : 0 < T := lt_min hT₀pos one_pos
   have hT_le₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose :=
     min_le_left _ _
@@ -157,16 +164,20 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
                     (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
                       (Nsec (Ffam t) hδ_lt (hδ t))) i) :=
     hForce hT_pos hT_le1 hT_le₀ u gforce hduh hforce hgforce htrace
-  obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, R₀, hR₀pos, hHorizon, hForceRepr_fam⟩ :=
+  obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, R₀, hR₀pos, hHorizon,
+    hForceRepr_fam⟩ :=
     hForce2
   obtain ⟨T₁, hT₁pos, hT₁le, F_fam, δ, hδ_lt, hδ, hF_zero, hF_pin, hF_flow, hF_joint⟩ :=
     maxreg_solution_jointly_smooth_representative_of_nemytskii g₀ a ha_super ha_eq Nfun F Nsec hRepr
-      hT_pos hT_le1 u htrace hd₂F_pos hd₂F_le f hf_smooth hf_mass hf_id hR₀pos hHorizon hForceRepr_fam
-  refine ⟨T₁, fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F_fam t) hδ_lt (hδ t), ⟨hT₁pos, ?_, ?_⟩, hF_joint⟩
+      hT_pos hT_le1 u htrace hd₂F_pos hd₂F_le f hf_smooth hf_mass hf_id hR₀pos hHorizon
+        hForceRepr_fam
+  refine ⟨T₁, fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F_fam t) hδ_lt (hδ t),
+    ⟨hT₁pos, ?_, ?_⟩, hF_joint⟩
   · refine smoothRiemannianMetric_ext_inner (fun x v w => ?_)
     rw [tensorSectionRealizeMetric_inner, hF_zero, ccTensorBilinSymm_zero_apply, add_zero]
   · intro t ht x v w
-    have hcongr : (fun s : ℝ => (tensorSectionRealizeMetric (I := I) g₀ (F_fam s) hδ_lt (hδ s)).inner x v w) =
+    have hcongr : (fun s : ℝ =>
+      (tensorSectionRealizeMetric (I := I) g₀ (F_fam s) hδ_lt (hδ s)).inner x v w) =
         fun s : ℝ => g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (F_fam s) x v w := by
       funext s; rw [tensorSectionRealizeMetric_inner]
     rw [hcongr]

@@ -291,7 +291,6 @@ theorem residual_package_of_algebraic_curvature_symmetries3
       h.anti_last 0 2 0 2, h.anti_first 2 1 2 1,
       h.anti_last 1 2 1 2]
 
-set_option linter.flexible false in
 private theorem residual_ordered_components_of_package
     {R : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real}
     (pkg : RiemannFromRicci3DResidualPackage R) :

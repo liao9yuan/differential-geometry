@@ -508,7 +508,7 @@ private lemma eLpNorm_chartPushedRaw_sqrtPou_le_uniform
   have hKα_compact : IsCompact Kα := (isClosed_tsupport _).isCompact
   have hKα_sub : Kα ⊆ (chartAt H α).source := chartAtlasPOU_isSubordinate I M α
   obtain ⟨C, hC_pos, hC_bound⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Chart.eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
+    eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
       (I := I) (M := M) g α hKα_compact hKα_sub (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       (by decide : (2 : ℝ≥0∞) ≠ ⊤)
   obtain ⟨D, hD_nn, hD_bound⟩ :=

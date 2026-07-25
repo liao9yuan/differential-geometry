@@ -33,7 +33,8 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (Z : SmoothCcTensor g 0 s) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
-            ((iteratedCovGrad g 0 s j (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
+            ((iteratedCovGrad g 0 s j
+              (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
               x) ≤
           (4 : ℝ) ^ j * gridWindowSum kappa 0 s j *
             ∑ q ∈ Finset.range (j + 1),

@@ -246,7 +246,6 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassical_anyOpen
       exact h_iter_congr.trans h_ih
 
 omit [NeZero d] in
-
 lemma hasCompactSupport_sq {h : EE → ℝ} (hh : HasCompactSupport h) :
     HasCompactSupport (fun x => h x ^ 2) := by
   have h_eq : (fun x => h x ^ 2) = h * h := by funext x; rw [Pi.mul_apply, sq]
@@ -271,7 +270,6 @@ lemma rpow_half_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
   norm_num
 
 omit [NeZero d] in
-
 private lemma eLpNorm_two_sq_eq_ofReal_integral_sq
     {Ω : Set EE} {h : EE → ℝ}
     (hh_l2 : MemLp h 2 (volume.restrict Ω)) :

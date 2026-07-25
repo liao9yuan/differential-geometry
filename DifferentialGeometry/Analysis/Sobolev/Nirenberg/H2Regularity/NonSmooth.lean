@@ -17,7 +17,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 private lemma memLp_two_of_continuous_compact_closure
     {f : E → ℝ} (hf : Continuous f)
     {S : Set E} (hS_open : IsOpen S) (hS_cc : IsCompact (closure S)) :

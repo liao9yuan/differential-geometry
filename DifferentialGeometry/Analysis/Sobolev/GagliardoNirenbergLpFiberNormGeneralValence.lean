@@ -89,14 +89,12 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
   have hkRpos : (0 : ℝ) < (k : ℝ) := by positivity
   set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
   have hVnn : 0 ≤ V := Real.sqrt_nonneg _
-
   refine ⟨max (max Kf 1) (Ks * (1 / V) + Ks), ?_, ?_⟩
   · exact le_trans (le_max_right _ _) (le_max_left _ _)
   intro u Λ₀ hΛ₀ hsup
   set K : ℝ := max (max Kf 1) (Ks * (1 / V) + Ks) with hKdef
   have hKf_le : Kf ≤ K := le_trans (le_max_left _ _) (le_max_left _ _)
   have hKsV_le : Ks * (1 / V) + Ks ≤ K := le_max_right _ _
-
   set J : ℕ → ℝ := fun i =>
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
@@ -105,7 +103,6 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
     intro i; rw [hJdef]
     exact Real.rpow_nonneg (integral_nonneg (fun x =>
       Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + i) x _) _)) _
-
   have hread : ∀ i, 1 ≤ i → lpFiberJetLadder_rs (I := I) (M := M) g r s k u Λ₀ i = J i := by
     intro i hi1
     rcases eq_or_ne i k with hik | hik
@@ -118,7 +115,8 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
       have hbridge : (∫ x, riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g)) = t ^ 2 := by
-        rw [ht, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r (s + i)
+        rw [ht, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r
+          (s + i)
           (PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u)]
       have hii : (i : ℝ) / i = 1 := by
         rw [div_self]; exact_mod_cast (show i ≠ 0 by omega)
@@ -138,7 +136,6 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
               norm_num
     · rw [hJdef]
       simp only [lpFiberJetLadder_rs, if_neg (show i ≠ 0 by omega), if_neg hik]
-
   rcases eq_or_lt_of_le hVnn with hV0 | hVpos
   · have hmuzero : (Integral.Measure.riemannianVolumeMeasure I M g) = 0 := by
       have hfin : (Integral.Measure.riemannianVolumeMeasure I M g) Set.univ ≠ ⊤ := by
@@ -176,16 +173,13 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
               = Λ₀ * Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal
             from by unfold lpFiberJetLadder_rs; rw [if_pos rfl], ← hV]
       rw [hc0eq]
-
       have hstep := hsupc s u Λ₀ hΛ₀ hsup
-
       have e1 : (1 : ℝ) = ((1 : ℕ) : ℝ) := by norm_num
       have e2 : (2 : ℝ) = ((2 : ℕ) : ℝ) := by norm_num
       rw [show ((k : ℝ) / 1) = ((k : ℝ) / ((1 : ℕ) : ℝ)) by norm_num,
           show ((1 : ℝ) / (2 * k)) = (((1 : ℕ) : ℝ) / (2 * k)) by norm_num,
           show ((k : ℝ) / 2) = ((k : ℝ) / ((2 : ℕ) : ℝ)) by norm_num,
           show ((2 : ℝ) / (2 * k)) = (((2 : ℕ) : ℝ) / (2 * k)) by norm_num] at hstep
-
       have hstep' : (J 1) ^ 2 ≤ Ks * Λ₀ * J 2 := hstep
       refine le_trans hstep' ?_
       have hJ2nn : 0 ≤ J 2 := hJnn 2
@@ -203,11 +197,9 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
       exact mul_le_mul_of_nonneg_right hreconc hJ2nn
     · rw [hread (i + 1) (by omega), hread i hipos, hread (i + 2) (by omega)]
       have hstep := hfin (s + i) (PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u) i hipos hik
-
       have e1 : ((i : ℝ) + 1) = ((i + 1 : ℕ) : ℝ) := by push_cast; ring
       have e2 : ((i : ℝ) + 2) = ((i + 2 : ℕ) : ℝ) := by push_cast; ring
       rw [e1, e2] at hstep
-
       refine le_trans hstep ?_
       have hJinn : 0 ≤ J i := hJnn i
       have hJi2nn : 0 ≤ J (i + 2) := hJnn (i + 2)
@@ -227,7 +219,8 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
               ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) ≤
             C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
               (Integral.L2.tensorL2Norm (I := I) g r (s + k)
-                  (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun) ^ (2 * (j : ℝ) / k) := by
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun) ^
+                    (2 * (j : ℝ) / k) := by
   classical
   obtain ⟨K, hK1, hlc⟩ := lpFiberJet_logConvex_iteratedCovGrad_rs (I := I) (M := M) g r s k _hk
   set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
@@ -235,7 +228,6 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
   have hmax1 : (1 : ℝ) ≤ max 1 V := le_max_left _ _
   have hmaxV : V ≤ max 1 V := le_max_right _ _
   have hmax_nn : 0 ≤ max 1 V := le_trans zero_le_one hmax1
-
   set C : ℝ := K ^ (2 * k ^ 2) * (max 1 V) ^ 2 with hC
   have hKnn : 0 ≤ K := le_trans zero_le_one hK1
   have hC_nn : 0 ≤ C := by rw [hC]; positivity
@@ -244,9 +236,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
   have hk0 : (k : ℕ) ≠ 0 := by omega
   have hkR : (k : ℝ) ≠ 0 := by exact_mod_cast hk0
   have hkRpos : (0 : ℝ) < (k : ℝ) := by positivity
-
   set c : ℕ → ℝ := fun i => lpFiberJetLadder_rs (I := I) (M := M) g r s k u Λ₀ i with hc_def
-
   have hc_nn : ∀ i, 0 ≤ c i := by
     intro i
     rw [hc_def]
@@ -256,13 +246,10 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     · exact Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + k) _
     · exact Real.rpow_nonneg (integral_nonneg (fun x =>
         Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + i) x _) _)) _
-
   have hc_lc : ∀ i, i + 1 < k → (c (i + 1)) ^ 2 ≤ K * c i * c (i + 2) := by
     intro i hik; rw [hc_def]; exact hlc u Λ₀ hΛ₀ hsup i hik
-
   have hpow : (c j) ^ k ≤ K ^ (k ^ 3) * (c 0) ^ (k - j) * (c k) ^ j :=
     discrete_log_convex_power_interpolation c hc_nn K hK1 j k hc_lc hj0 hjk
-
   have hc0_eq : c 0 = Λ₀ * V := by
     simp only [hc_def, lpFiberJetLadder_rs, if_pos rfl]
     rw [hV]
@@ -273,7 +260,8 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) := by
-    simp only [hc_def, lpFiberJetLadder_rs, if_neg (show j ≠ 0 by omega), if_neg (show j ≠ k by omega)]
+    simp only [hc_def, lpFiberJetLadder_rs, if_neg (show j ≠ 0 by omega), if_neg
+      (show j ≠ k by omega)]
     set Iint : ℝ := ∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
         ∂(Integral.Measure.riemannianVolumeMeasure I M g) with hIint
@@ -284,11 +272,9 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       rw [mul_comm, ← mul_div_assoc, mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)]
     rw [← Real.rpow_natCast (Iint ^ ((j : ℝ) / (2 * k))) 2,
         ← Real.rpow_mul hIint_nn, hexp]
-
   have hc0_nn : 0 ≤ c 0 := hc_nn 0
   have hck_nn : 0 ≤ c k := hc_nn k
   have hcj_nn : 0 ≤ c j := hc_nn j
-
   have hpow_sq : ((c j) ^ 2) ^ k ≤
       (K ^ (k ^ 3)) ^ 2 * ((c 0) ^ 2) ^ (k - j) * ((c k) ^ 2) ^ j := by
     have hrw : ((c j) ^ 2) ^ k = ((c j) ^ k) ^ 2 := by rw [← pow_mul, ← pow_mul, Nat.mul_comm]
@@ -299,13 +285,11 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       _ = (K ^ (k ^ 3)) ^ 2 * ((c 0) ^ 2) ^ (k - j) * ((c k) ^ 2) ^ j := by
           rw [mul_pow, mul_pow, ← pow_mul, ← pow_mul, ← pow_mul, ← pow_mul]
           ring_nf
-
   have hcj2_nn : 0 ≤ (c j) ^ 2 := by positivity
   have hmono : (((c j) ^ 2) ^ k) ^ ((k : ℝ)⁻¹) ≤
       ((K ^ (k ^ 3)) ^ 2 * ((c 0) ^ 2) ^ (k - j) * ((c k) ^ 2) ^ j) ^ ((k : ℝ)⁻¹) :=
     Real.rpow_le_rpow (by positivity) hpow_sq (by positivity)
   rw [Real.pow_rpow_inv_natCast hcj2_nn hk0] at hmono
-
   have hcast_sub : ((k - j : ℕ) : ℝ) = (k : ℝ) - (j : ℝ) := by rw [Nat.cast_sub (le_of_lt hjk)]
   have hrhs : ((K ^ (k ^ 3)) ^ 2 * ((c 0) ^ 2) ^ (k - j) * ((c k) ^ 2) ^ j) ^ ((k : ℝ)⁻¹) =
       (K ^ (2 * k ^ 2)) * ((c 0) ^ 2) ^ ((1 : ℝ) - (j : ℝ) / k) * ((c k) ^ 2) ^ ((j : ℝ) / k) := by
@@ -326,19 +310,15 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         rw [← Real.rpow_natCast ((c 0) ^ 2) (k - j), ← Real.rpow_mul (by positivity), hexp0]
     · rw [← Real.rpow_natCast ((c k) ^ 2) j, ← Real.rpow_mul (by positivity), div_eq_mul_inv]
   rw [hrhs] at hmono
-
   rw [hcj_sq] at hmono
   rw [hc0_eq, hck_eq] at hmono
-
   set ak : ℝ := Integral.L2.tensorL2Norm (I := I) g r (s + k)
     (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun with hak_def
   have hak_nn : 0 ≤ ak := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + k) _
-
   have hak_pow : (ak ^ 2) ^ ((j : ℝ) / k) = ak ^ (2 * (j : ℝ) / k) := by
     rw [← Real.rpow_natCast ak 2, ← Real.rpow_mul hak_nn]
     congr 1
     push_cast; ring
-
   have hweight_nn : 0 ≤ (1 : ℝ) - (j : ℝ) / k := by
     have : (j : ℝ) / k ≤ 1 := by
       rw [div_le_one hkRpos]; exact_mod_cast le_of_lt hjk
@@ -352,7 +332,6 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     congr 1
     rw [← Real.rpow_natCast Λ₀ 2, ← Real.rpow_mul hΛ₀]
     norm_num
-
   have hV2_le : (V ^ 2) ^ ((1 : ℝ) - (j : ℝ) / k) ≤ (max 1 V) ^ 2 := by
     have hV2_nn : 0 ≤ V ^ 2 := by positivity
     have h2max : (1 : ℝ) ≤ (max 1 V) ^ 2 := by
@@ -367,7 +346,6 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       rw [Real.rpow_one] at h1
       have hV2_le_max : V ^ 2 ≤ (max 1 V) ^ 2 := pow_le_pow_left₀ hVnn hmaxV 2
       linarith
-
   calc (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k)

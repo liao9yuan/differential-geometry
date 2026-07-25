@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
 

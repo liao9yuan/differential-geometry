@@ -48,10 +48,8 @@ private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
         (chartBasisVecFiber (I := I) α (Jdx 0) b)
         (chartBasisVecFiber (I := I) α (Jdx 1) b) := by
   classical
-
   rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (deTurckRHSSectionBg (I := I) g_bg g₁) α hb Idx Jdx]
-
   have hframe : chartFrameBasisModel (I := I) (M := M) α b 0 Idx =
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I b) (1 : ℝ)) := by
@@ -62,13 +60,10 @@ private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     exact h
   rw [hframe]
-
   have hmodel := deTurckRHSSection_toModel_apply (I := I) g_bg g₁ b
     (fun k : Fin 2 => chartBasisVecFiber (I := I) α (Jdx k) b)
-
   rw [show (deTurckRHSSectionBg (I := I) g_bg g₁).toSection b =
       (deTurckRHSSection (I := I) g_bg g₁).toSection b from rfl]
-
   have hdirect :
       ((deTurckRHSSection (I := I) g_bg g₁).toSection b
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -98,22 +93,18 @@ theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   set v₀ : TangentSpace I b := chartBasisVecFiber (I := I) α (Jdx 0) b with hv₀_def
   set v₁ : TangentSpace I b := chartBasisVecFiber (I := I) α (Jdx 1) b with hv₁_def
-
   rw [tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS (I := I) (M := M) g_bg g₁ α
       hb_src Idx Jdx]
   rw [show chartBasisVecFiber (I := I) α (Jdx 0) b = v₀ from rfl,
     show chartBasisVecFiber (I := I) α (Jdx 1) b = v₁ from rfl]
-
   rw [deTurckRicciRHS, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
-
   have hRic :
       ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g₁) b v₀ v₁ =
         chartRicciTensor (I := I) g₁ α (Jdx 0) (Jdx 1) (extChartAt I α b) := by
     have h := ricciTensor_chartBasisVec_alpha_eq (I := I) g₁ α (Jdx 0) (Jdx 1) hb
     rw [hv₀_def, hv₁_def]
     exact h
-
   have hLie :
       lieDerivMetricClm (I := I) g₁
         (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)

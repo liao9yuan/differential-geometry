@@ -125,7 +125,6 @@ theorem pou_weighted_euclid_pairing_eq_hessPairingChart_pointwise_of_discharge
   rw [add_zero]
 
 omit [NeZero (Module.finrank ℝ E)] in
-
 theorem hessPairingMChartContribution_smoothCase_eq_weighted_chartLocal
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (α : M) (x : M) :

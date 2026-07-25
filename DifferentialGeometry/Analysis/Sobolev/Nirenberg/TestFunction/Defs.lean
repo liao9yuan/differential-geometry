@@ -12,7 +12,6 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-
 theorem contDiff_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     ContDiff ℝ (⊤ : ℕ∞)
@@ -48,7 +47,6 @@ theorem contDiff_diffQuot_of_contDiff
   exact h_div
 
 omit [NeZero d] in
-
 theorem contDiff_nirenbergTestFunction_aux
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -70,7 +68,6 @@ theorem contDiff_nirenbergTestFunction_aux
   exact contDiff_diffQuot_of_contDiff (d := d) h_prod k hnh
 
 omit [NeZero d] in
-
 theorem hasCompactSupport_translate_of_hasCompactSupport
     {v : E → ℝ} (hv : HasCompactSupport v) (k : Fin d) (h : ℝ) :
     HasCompactSupport
@@ -84,7 +81,6 @@ theorem hasCompactSupport_translate_of_hasCompactSupport
   exact hv.comp_homeomorph φ
 
 omit [NeZero d] in
-
 theorem hasCompactSupport_diffQuot_of_hasCompactSupport
     {v : E → ℝ} (hv : HasCompactSupport v) (k : Fin d) (h : ℝ) :
     HasCompactSupport
@@ -121,7 +117,6 @@ noncomputable def nirenbergTestFunction
       DifferentialGeometry.Analysis.Sobolev.diffQuot k h u y)
 
 omit [NeZero d] in
-
 theorem contDiff_nirenbergTestFunction
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -130,7 +125,6 @@ theorem contDiff_nirenbergTestFunction
   exact contDiff_nirenbergTestFunction_aux (d := d) hη hu k hh
 
 omit [NeZero d] in
-
 theorem hasCompactSupport_nirenbergTestFunction
     {η u : E → ℝ} (hη_supp : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :
@@ -151,7 +145,6 @@ theorem hasCompactSupport_nirenbergTestFunction
     (d := d) h_prod_supp k (-h)
 
 omit [NeZero d] in
-
 private lemma support_eta_sq_subset
     (η : E → ℝ) :
     Function.support (fun y : E => η y ^ 2) ⊆ Function.support η := by
@@ -164,7 +157,6 @@ private lemma support_eta_sq_subset
   simp
 
 omit [NeZero d] in
-
 private lemma support_eta_sq_diffQuot_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     Function.support
@@ -184,7 +176,6 @@ private lemma support_eta_sq_diffQuot_subset
   simp
 
 omit [NeZero d] in
-
 private lemma tsupport_eta_sq_diffQuot_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     tsupport
@@ -194,7 +185,6 @@ private lemma tsupport_eta_sq_diffQuot_subset
   exact closure_mono (support_eta_sq_diffQuot_subset (d := d) η u k h)
 
 omit [NeZero d] in
-
 theorem tsupport_nirenbergTestFunction_subset
     (η u : E → ℝ) (k : Fin d) (h : ℝ) :
     tsupport (nirenbergTestFunction k h η u) ⊆
@@ -286,7 +276,6 @@ theorem tsupport_nirenbergTestFunction_subset
   exact (closure_minimal h_supp_subset h_thick_closed)
 
 omit [NeZero d] in
-
 private lemma hasFDerivAt_translate (k : Fin d) (h : ℝ) (x : E) :
     HasFDerivAt
       (fun y : E => y + h • EuclideanSpace.single k 1)
@@ -294,7 +283,6 @@ private lemma hasFDerivAt_translate (k : Fin d) (h : ℝ) (x : E) :
   exact (hasFDerivAt_id x).add_const _
 
 omit [NeZero d] in
-
 theorem fderiv_diffQuot_apply_eq_diffQuot_partial
     {g : E → ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -375,7 +363,6 @@ theorem fderiv_diffQuot_apply_eq_diffQuot_partial
   rw [div_eq_inv_mul, smul_eq_mul]
 
 omit [NeZero d] in
-
 theorem fderiv_eta_sq_times_diffQuot_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :
@@ -448,7 +435,6 @@ theorem fderiv_eta_sq_times_diffQuot_apply
   ring
 
 omit [NeZero d] in
-
 theorem fderiv_nirenbergTestFunction_apply
     {η u : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (k j : Fin d) {h : ℝ} (hh : h ≠ 0) (x : E) :

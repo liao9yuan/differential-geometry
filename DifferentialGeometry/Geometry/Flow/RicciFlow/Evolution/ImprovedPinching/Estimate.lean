@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -344,7 +343,8 @@ theorem pinchQuotient_parabolic_nonpos
         (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) (flowG (I := I) S) T
+      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+        (flowG (I := I) S) T
         (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
         (pinchQuotient (I := I) S epsilon) t x <= 0 := by
   intro t ht htpos x
@@ -385,7 +385,8 @@ theorem pinchQuotient_parabolic_nonpos
           S.scalar (1 : Real) (2 - epsilon) t x +
         pinchDriftTerm (I := I) (flowG (I := I) S)
           S.scalar (ricciNorm (I := I) S) epsilon t x := by
-    unfold DifferentialGeometry.Integral.Connection.heatOperatorWithDrift DifferentialGeometry.Integral.Connection.driftTerm
+    unfold DifferentialGeometry.Integral.Connection.heatOperatorWithDrift
+      DifferentialGeometry.Integral.Connection.driftTerm
       pinchQuotient quotLap
     rw [← pinchDriftTerm_eq_inner_drift (I := I) (M := M)
       (flowG (I := I) S) S.scalar (ricciNorm (I := I) S) epsilon t x]
@@ -495,7 +496,8 @@ private theorem ricciComp_coordCont
       have hlocal : ContinuousOn (fun y : M =>
           (⟨y, frame i y⟩ : TangentBundle I M)) u := by
         simpa [frame, u] using
-          ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I) x0).contMDiffOn i).continuousOn
+          ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I)
+            x0).contMDiffOn i).continuousOn
       exact hlocal.comp_continuous
         (continuous_snd.comp continuous_subtype_val) (fun q => q.2.2)
     have hframe_j : Continuous (fun q : P =>
@@ -503,11 +505,13 @@ private theorem ricciComp_coordCont
       have hlocal : ContinuousOn (fun y : M =>
           (⟨y, frame j y⟩ : TangentBundle I M)) u := by
         simpa [frame, u] using
-          ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I) x0).contMDiffOn j).continuousOn
+          ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I)
+            x0).contMDiffOn j).continuousOn
       exact hlocal.comp_continuous
         (continuous_snd.comp continuous_subtype_val) (fun q => q.2.2)
     have hA := hS.ricciRegular.ricciTensorFamilyContinuousOnSet
-    have heval := DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+    have heval :=
+      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
       (I := I) (M := M) (s := 2) (K := K)
       (A := fun t x => S.ricci t x) hA
       (P := P)
@@ -525,7 +529,8 @@ private theorem ricciComp_coordCont
         · simpa using hframe_j)
     simpa [ricciCompInFrame, frame, DifferentialGeometry.Integral.Connection.vec2] using heval
   simpa [K, u, P, frame] using
-    continuousOn_of_restrict (s := D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+    continuousOn_of_restrict
+      (s := D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
       (f := fun p : Real × M =>
         ricciCompInFrame (I := I) S
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p.1 p.2 i j)
@@ -585,7 +590,8 @@ private theorem ricciNorm_coordCont
       (basis := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis (I := I) x0 hp.2)
       (hinv := by
         simpa [gInv, coordInv] using
-          DifferentialGeometry.Tensor.Coordinates.gInvBasisAt (I := I) (S.family.metric p.1) x0 hp.2)
+          DifferentialGeometry.Tensor.Coordinates.gInvBasisAt (I := I) (S.family.metric p.1) x0
+            hp.2)
       hbasis
   simpa [ricciNorm, U] using hnorm.symm
 
@@ -607,7 +613,8 @@ private theorem ricciNorm_slabCont
   let u : Set (Real × M) :=
     Set.univ ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) p.2
   refine ⟨u, ?_, ?_, ?_⟩
-  · exact isOpen_univ.prod (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) p.2)
+  · exact isOpen_univ.prod
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) p.2)
   · exact ⟨trivial, DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) p.2⟩
   · have hlocal := ricciNorm_coordCont (I := I) S hS p.2
     refine hlocal.mono ?_
@@ -649,7 +656,8 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
           intro t ht
           rw [hD]
           exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩))
-  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T ->
+  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab
+    (M := M) T ->
       S.scalar p.1 p.2 ≠ 0 ∨ 0 ≤ -(2 - epsilon) := by
     intro p hp
     have hp' : p.1 ∈ Set.Icc 0 T ∧ p.2 ∈ (Set.univ : Set M) := by
@@ -701,7 +709,8 @@ theorem pinchQuotient_space_pos
   have hpow :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => S.scalar (t : Real) y ^ p) x :=
-    DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow (I := I) p hscalarDiff (hscalar t x)
+    DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow (I := I) p hscalarDiff
+      (hscalar t x)
   have hprod :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real) y *
@@ -830,7 +839,8 @@ theorem pinchQuot_slab_bound
   classical
   have hsub :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) (flowG (I := I) S) T
+        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+          (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x <= 0 :=
     pinchQuotient_parabolic_nonpos (I := I) (M := M) S hS h0ω hD
@@ -892,32 +902,39 @@ theorem pinchQuot_slab_bound
           (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ y
     have hgrad_plain :
         (fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y) =
         (fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+          - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            ((flowG (I := I) S).metric t)
             (pinchQuotient (I := I) S epsilon t) y) := by
       funext y
       calc
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y =
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            ((flowG (I := I) S).metric t)
               (fun _ : M => C) y -
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+            DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+              ((flowG (I := I) S).metric t)
               (pinchQuotient (I := I) S epsilon t) y := by
             exact DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I)
               ((flowG (I := I) S).metric t)
               mdifferentiableAt_const (hPdiff y)
-        _ = - DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+        _ = - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          ((flowG (I := I) S).metric t)
               (pinchQuotient (I := I) S epsilon t) y := by
             rw [DifferentialGeometry.Integral.Connection.gradientFun_const]
             simp
     have hgrad_eq :
         (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y) =
         (T% fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+          - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            ((flowG (I := I) S).metric t)
             (pinchQuotient (I := I) S epsilon t) y) := by
       funext y
       simpa using congrFun hgrad_plain y
@@ -925,10 +942,12 @@ theorem pinchQuot_slab_bound
     simpa [τ] using mdifferentiableAt_neg_section hPgrad
   have hoperator_neg : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       ∀ x : M,
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) (flowG (I := I) S) T
+        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+          (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (fun s y => C - pinchQuotient (I := I) S epsilon s y) t x =
-        - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) (flowG (I := I) S) T
+        - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+          (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x := by
     intro t ht htpos x
@@ -1047,7 +1066,8 @@ theorem pinchEstimate_sol
           ∀ T : Real, 0 ≤ T -> T < omega ->
             PinchPres (I := I) (M := M)
               (fun t : Real => S.base.metric t)
-              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+                S.ricci)
               S.scalar T delta)
     (hric :
       ∀ T : Real, 0 ≤ T -> T < omega ->
@@ -1085,7 +1105,8 @@ theorem pinchEstimate_sol
     (scalar := S.scalar) (epsilon := epsilon) (C := C)
     (U := D.carrier) hscalar
   intro t htD x
-  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+    h0ω).carrier := by
     simpa [hD] using htD
   have ht0 : 0 <= t := htD'.1
   have htω : t < omega := htD'.2
@@ -1138,7 +1159,8 @@ theorem pinchEstimate_display_sol
           ∀ T : Real, 0 ≤ T -> T < omega ->
             PinchPres (I := I) (M := M)
               (fun t : Real => S.base.metric t)
-              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+                S.ricci)
               S.scalar T delta)
     (hric :
       ∀ T : Real, 0 ≤ T -> T < omega ->

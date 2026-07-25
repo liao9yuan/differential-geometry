@@ -41,7 +41,6 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (hA : 0 ≤ A) (hB : 0 ≤ B)
     (hbound : ∀ᵐ t ∂(timeMeasure T), ‖h t‖ ≤ A * ‖p t‖ + B * ‖q t‖) :
     ‖h‖ ≤ A * ‖p‖ + B * ‖q‖ := by
-
   set Pf : ℝ → ℝ := fun t => ‖(p : ℝ → Y) t‖ with hPf
   set Qf : ℝ → ℝ := fun t => ‖(q : ℝ → Z) t‖ with hQf
   have hPm : AEStronglyMeasurable Pf (timeMeasure T) :=
@@ -50,7 +49,6 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (Lp.aestronglyMeasurable q).norm
   have hAPm : AEStronglyMeasurable (A • Pf) (timeMeasure T) := hPm.const_smul A
   have hBQm : AEStronglyMeasurable (B • Qf) (timeMeasure T) := hQm.const_smul B
-
   have hmono : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) := by
     refine eLpNorm_mono_ae ?_
@@ -61,7 +59,6 @@ theorem timeL2_norm_le_of_ae_mixed_bound
       rw [happ]; exact add_nonneg (mul_nonneg hA (norm_nonneg _)) (mul_nonneg hB (norm_nonneg _))
     rw [Real.norm_eq_abs, abs_of_nonneg hge, happ]
     exact ht
-
   have htri : eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf) 2 (timeMeasure T) + eLpNorm (B • Qf) 2 (timeMeasure T) :=
     eLpNorm_add_le hAPm hBQm (by norm_num)
@@ -71,7 +68,6 @@ theorem timeL2_norm_le_of_ae_mixed_bound
   have hscaleQ : eLpNorm (B • Qf) 2 (timeMeasure T) =
       ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
     rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hB]
-
   have hfinal : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) +
         ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
@@ -110,7 +106,6 @@ theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
   rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)]
-
   rw [maxRegDuhamelSolField, maxRegDuhamelSolFieldHa1,
     timeModeCoeff_add (I := I) (M := M), timeModeCoeff_add (I := I) (M := M),
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT.le u₀ i,
@@ -424,7 +419,8 @@ theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric I M) (a 
         refine add_le_add ?_ ?_
         · exact mul_le_mul_of_nonneg_left hfield_dist (mul_nonneg C₁.coe_nonneg hRnn)
         · exact mul_le_mul_of_nonneg_left hincl_dist C₂.coe_nonneg
-    _ = ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
+    _ = ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F -
+      F'‖ := by
         rw [hR]; ring
 
 omit [BoundarylessManifold I M] in
@@ -495,11 +491,9 @@ theorem nemytskii_sol_const
   have hM₀ : 0 ≤ M₀ := norm_nonneg _
   have hM₀D : M₀ ≤ D := by simpa only [hM₀def] using hzero
   have hD1pos : 0 < D + 1 := by linarith
-
   set ρ : ℝ := 1 / (16 * ((C₁ : ℝ) + 1)) with hρdef
   have hC₁p : (0 : ℝ) < 16 * ((C₁ : ℝ) + 1) := by positivity
   have hρpos : 0 < ρ := by rw [hρdef]; positivity
-
   set T₀ : ℝ := min 1 (min (1 / (64 * ((C₂ : ℝ) + 1) ^ 2))
     ((ρ / (2 * (D + 1))) ^ 2)) with hT₀def
   have hT₀pos : 0 < T₀ := by
@@ -510,18 +504,16 @@ theorem nemytskii_sol_const
   refine ⟨T₀, ?_, hT₀pos, ?_⟩
   · rw [hT₀def, hρdef]
   intro T hT hTT₀ hT1
-
   have hT_le1 : T ≤ 1 := hT1
   have hT_lo : T ≤ 1 / (64 * ((C₂ : ℝ) + 1) ^ 2) :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_left _ _))
   have hT_stay : T ≤ (ρ / (2 * (D + 1))) ^ 2 :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_right _ _))
-
-  set Λ : ℝ := (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with hΛdef
+  set Λ : ℝ := (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with
+    hΛdef
   have hΛnn : 0 ≤ Λ := by
     rw [hΛdef]; have : (0:ℝ) ≤ 1 + T := by linarith
     positivity
-
   have h1T : (1 : ℝ) + T ≤ 2 := by linarith
   have hsqrt1T_le : Real.sqrt (1 + T) ≤ 1 + T := by
     have h1le : (1 : ℝ) ≤ 1 + T := by linarith
@@ -541,7 +533,6 @@ theorem nemytskii_sol_const
     have hfrac : (C₁ : ℝ) / ((C₁ : ℝ) + 1) ≤ 1 := by
       rw [div_le_one (by positivity)]; linarith [C₁.coe_nonneg]
     nlinarith [hfrac, div_nonneg C₁.coe_nonneg (by positivity : (0:ℝ) ≤ (C₁:ℝ)+1)]
-
   have hsqrtT : Real.sqrt T ≤ 1 / (8 * ((C₂ : ℝ) + 1)) := by
     rw [show (1 : ℝ) / (8 * ((C₂ : ℝ) + 1)) =
         Real.sqrt ((1 / (8 * ((C₂ : ℝ) + 1))) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
@@ -563,14 +554,12 @@ theorem nemytskii_sol_const
           nlinarith [hfrac, div_nonneg hc2 (by positivity : (0:ℝ) ≤ (C₂:ℝ)+1)]
   have hΛ_le : Λ ≤ 1 / 2 := by rw [hΛdef]; linarith
   have hΛ_lt : Λ < 1 := by linarith
-
   set Ψ := nemytskiiMixedForcingMap (I := I) (M := M) g₀ a hLip hT hT1
     with hΨdef
   set z₀ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := 0 with hz₀
   set ρt := recenteredBallRetraction (z₀) ρ with hρtdef
   set Ψ' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := fun F => Ψ (ρt F) with hΨ'def
-
   have hΨ_ball : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖F‖ ≤ ρ → ‖F'‖ ≤ ρ → ‖Ψ F - Ψ F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F' hF hF'
@@ -578,7 +567,6 @@ theorem nemytskii_sol_const
       hT hT1 hρpos.le F F' hF hF'
     rw [hΛdef]
     exact h
-
   have hρt_mem : ∀ F, ρt F ∈ Metric.closedBall z₀ ρ := fun F =>
     recenteredBallRetraction_mapsTo (X := _) hρpos.le z₀ (Set.mem_univ F)
   have hρt_norm : ∀ F, ‖ρt F‖ ≤ ρ := by
@@ -587,7 +575,6 @@ theorem nemytskii_sol_const
     rw [Metric.mem_closedBall, hz₀, dist_zero_right] at this
     exact this
   have hρt_lip : LipschitzWith 1 ρt := recenteredBallRetraction_lipschitzWith hρpos.le z₀
-
   have hΨ'_lip : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖Ψ' F - Ψ' F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F'
@@ -598,7 +585,6 @@ theorem nemytskii_sol_const
       rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at this
       exact this
     exact mul_le_mul_of_nonneg_left hretr hΛnn
-
   have hcontr : ContractingWith Λ.toNNReal Ψ' := by
     refine ⟨?_, ?_⟩
     · rw [← NNReal.coe_lt_coe, Real.coe_toNNReal _ hΛnn]
@@ -606,10 +592,8 @@ theorem nemytskii_sol_const
     · refine LipschitzWith.of_dist_le_mul (fun F F' => ?_)
       rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hΛnn]
       exact hΨ'_lip F F'
-
   set Fstar := ContractingWith.fixedPoint Ψ' hcontr with hFstar_def
   have hFstar_fix : Ψ' Fstar = Fstar := ContractingWith.fixedPoint_isFixedPt hcontr
-
   have hΨ0 : ‖Ψ z₀‖ ≤ Real.sqrt T * M₀ := by
     rw [hΨdef, hz₀, hM₀def]
     exact norm_nemytskiiMixedForcingMap_zero_le (I := I) (M := M) g₀ a hLip hT hT1
@@ -626,7 +610,6 @@ theorem nemytskii_sol_const
           have hne : (D + 1) ≠ 0 := ne_of_gt hD1pos
           field_simp
   have hz₀norm : ‖z₀‖ = 0 := by rw [hz₀, norm_zero]
-
   have hΨ_stay : ∀ G, ‖G‖ ≤ ρ → ‖Ψ G‖ ≤ ρ := by
     intro G hG
     have hball := hΨ_ball G z₀ hG (by rw [hz₀norm]; exact hρpos.le)
@@ -640,24 +623,20 @@ theorem nemytskii_sol_const
           calc Λ * ‖G‖ ≤ Λ * ρ := mul_le_mul_of_nonneg_left hG hΛnn
             _ ≤ (1 / 2) * ρ := mul_le_mul_of_nonneg_right hΛ_le hρpos.le
       _ = ρ := by ring
-
   have hFstar_mem : ‖Fstar‖ ≤ ρ := by
     have heq : Fstar = Ψ (ρt Fstar) := hFstar_fix.symm
     rw [heq]
     exact hΨ_stay (ρt Fstar) (hρt_norm Fstar)
-
   have hρt_Fstar : ρt Fstar = Fstar :=
     recenteredBallRetraction_eq_self_of_mem (by
       rw [Metric.mem_closedBall, hz₀, dist_zero_right]; exact hFstar_mem)
   have hΨFstar : Ψ Fstar = Fstar := by
     have hstep : Ψ' Fstar = Ψ Fstar := by simp only [hΨ'def, hρt_Fstar]
     rw [← hstep]; exact hFstar_fix
-
   set field := maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar with hfielddef
   have hforce_eq : Fstar = nemytskii (I := I) (M := M) hLip field := by
     rw [← hΨFstar, hΨdef, nemytskiiMixedForcingMap_apply]
-
   refine ⟨maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, Fstar, rfl, ?_, ?_, ?_, ?_⟩
   · have hcoe := nemytskii_coeFn (I := I) (M := M) hLip field

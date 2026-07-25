@@ -285,44 +285,35 @@ theorem bochner_polarised_pointwise
     (I := I) g hφv_add x
   have hΔ_sub := bochner_pointwise_concrete_metric_unconditional
     (I := I) g hφv_sub x
-
   have hpolar_norm := normGradSqFun_polar (I := I) (M := M) g φ v x
-
   set N1 : M → ℝ := normGradSqFun (I := I) g (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y)
     with hN1_def
   set N2 : M → ℝ := normGradSqFun (I := I) g (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y)
     with hN2_def
-
   have hN1_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ N1 :=
     normGradSqFun_contMDiff (I := I) g hφv_add
   have hN2_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ N2 :=
     normGradSqFun_contMDiff (I := I) g hφv_sub
-
   have hN_sub_eq : ∀ y : M,
       (N1 y - N2 y) = 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y) :=
     fun y => normGradSqFun_polar (I := I) (M := M) g φ v y
-
   have hN_sub_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => N1 y - N2 y) :=
     hN1_smooth.sub hN2_smooth
-
   have h_4gphi_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun y : M => 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y)) := by
     have h_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (4 : ℝ)) := contMDiff_const
     exact h_const.mul h_gphi_gv_smooth
-
   have h_Δ_N_sub := Δ_g_sub (I := I) g hN1_smooth hN2_smooth hN_sub_smooth x
-
   have hN_eq_4ginner :
       (fun y : M => N1 y - N2 y) =
       (fun y : M => 4 * g.inner y
         (gradFun (I := I) g (φ : M → ℝ) y)
         (gradFun (I := I) g (v : M → ℝ) y)) := by
     funext y; exact hN_sub_eq y
-
   have h_Δ_N_sub_eq_Δ_4ginner :
       Δ_g (I := I) g hN_sub_smooth x =
       Δ_g (I := I) g h_4gphi_smooth x := by
@@ -341,9 +332,7 @@ theorem bochner_polarised_pointwise
           (gradFun (I := I) g (v : M → ℝ) z)) y
       rw [hN_eq_4ginner]
     rw [h_grad_eq]
-
   have h_const_smul_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (4 : ℝ)) := contMDiff_const
-
   have h_Δ_4ginner_eq :
       Δ_g (I := I) g h_4gphi_smooth x = 4 * Δ_g (I := I) g h_gphi_gv_smooth x := by
     have h_witness_eq :
@@ -373,17 +362,14 @@ theorem bochner_polarised_pointwise
       exact Δ_g_const (I := I) g (4 : ℝ) x
     rw [hΔ_const_4]
     simp only [ContinuousLinearMap.zero_apply, mul_zero, add_zero]
-
   have h_Δ_4ginner_eq_sub :
       4 * Δ_g (I := I) g h_gphi_gv_smooth x =
       Δ_g (I := I) g hN1_smooth x - Δ_g (I := I) g hN2_smooth x := by
     rw [← h_Δ_4ginner_eq]
     rw [← h_Δ_N_sub_eq_Δ_4ginner]
     exact h_Δ_N_sub
-
   have hN1_witness_eq : hN1_smooth = normGradSqFun_contMDiff (I := I) g hφv_add := rfl
   have hN2_witness_eq : hN2_smooth = normGradSqFun_contMDiff (I := I) g hφv_sub := rfl
-
   have hΔN1 :
       Δ_g (I := I) g hN1_smooth x =
         2 * chartHessFrobeniusSq (I := I) g
@@ -396,7 +382,6 @@ theorem bochner_polarised_pointwise
               (gradFun (I := I) g (Δ_g (I := I) g hφv_add) x) := by
     rw [hN1_witness_eq]
     exact hΔ_add
-
   have hΔN2 :
       Δ_g (I := I) g hN2_smooth x =
         2 * chartHessFrobeniusSq (I := I) g
@@ -409,7 +394,6 @@ theorem bochner_polarised_pointwise
               (gradFun (I := I) g (Δ_g (I := I) g hφv_sub) x) := by
     rw [hN2_witness_eq]
     exact hΔ_sub
-
   have h_hessPolar :
       chartHessFrobeniusSq (I := I) g
           (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y) x -
@@ -417,13 +401,10 @@ theorem bochner_polarised_pointwise
           (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y) x =
       4 * hessPairingChart (I := I) g φ v x :=
     chartHessFrobeniusSq_polar_eq_hessPairing (I := I) (M := M) g φ v x
-
   have h_ricciPolar :=
     ricciTensor_grad_polar (I := I) (M := M) g φ v x
-
   have h_gradLapPolar :=
     g_inner_grad_lap_polar (I := I) (M := M) g φ v x hφv_add hφv_sub
-
   have key :
       4 * Δ_g (I := I) g h_gphi_gv_smooth x =
         8 * hessPairingChart (I := I) g φ v x +
@@ -439,7 +420,6 @@ theorem bochner_polarised_pointwise
     rw [h_Δ_4ginner_eq_sub]
     rw [hΔN1, hΔN2]
     linarith [h_hessPolar, h_ricciPolar, h_gradLapPolar]
-
   linarith [key]
 
 omit [CompactSpace M] in

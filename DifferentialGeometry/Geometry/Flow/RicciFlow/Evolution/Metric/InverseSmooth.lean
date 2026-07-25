@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -104,7 +102,8 @@ noncomputable def matrixCLM
   classical
   simp [matrixCLM, Finset.sum_apply]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E]
+    [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_finset_sum
     {ι V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     {n : WithTop ℕ∞}
@@ -472,7 +471,8 @@ theorem coordInvCLM_eq
     (hx : x ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
     (s : Real) :
     ContinuousLinearMap.inverse
-        (frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
+        (frameGramCLM (I := I) S
+          (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
           (s, x)) =
       frameGInvCLM (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E)
         (coordInv (I := I) S x0) (s, x) := by
@@ -486,11 +486,13 @@ theorem coordInvCLM_eq
       (by
         intro a b
         simpa [coordInv, metricCompInFrame,
-          DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1)
+          DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+            (hbasis a b).1)
         (by
           intro a b
           simpa [coordInv, metricCompInFrame,
-            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+            DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using
+              (hbasis a b).2)
 
 omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_spacetimeSmooth
@@ -503,7 +505,8 @@ theorem coordFrameGramCLM_spacetimeSmooth
         (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ∞
       (fun p : Real × M =>
-        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p)
+        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I)
+          x0) p)
       (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   classical
   unfold frameGramCLM
@@ -566,7 +569,8 @@ theorem coordFrameGInvCLM_spacetimeSmooth
           ContinuousLinearMap.inverse
             (frameGramCLM (I := I) S
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) q))
-        (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) p := by
+        (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+          p := by
     simpa [Function.comp_def] using (hinvAt.of_le le_top).comp_contMDiffWithinAt hgram
   refine hcomp.congr_of_eventuallyEq_of_mem ?_ hp
   filter_upwards [self_mem_nhdsWithin] with q hq
@@ -604,11 +608,14 @@ theorem coordInvSmooth
         (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
     exact (contMDiffOn_const
       (I := 𝓘(Real, Real).prod I)
-      (I' := 𝓘(Real, (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real] Real))
-      (n := ∞) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+      (I' := 𝓘(Real, (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+        →L[Real] Real))
+      (n := ∞) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet
+        (I := I) x0)
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real)
-          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
+          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real)
+            i))).clm_apply happ
   refine hcoord.congr ?_
   intro p hp
   simpa using
@@ -625,7 +632,8 @@ theorem coordFrameGramCLM_contOn
     (x0 : M) :
     ContinuousOn
       (fun p : Real × M =>
-        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p)
+        frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I)
+          x0) p)
       (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   classical
   unfold frameGramCLM
@@ -686,7 +694,8 @@ theorem coordFrameGInvCLM_contOn
           ContinuousLinearMap.inverse
             (frameGramCLM (I := I) S
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) q))
-        (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) p := by
+        (D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+          p := by
     simpa [Function.comp_def] using hinvAt.comp_continuousWithinAt hgram
   refine hcomp.congr (fun q hq => ?_) ?_
   · exact (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
@@ -729,7 +738,8 @@ theorem coordInvContOn
     (continuousOn_const
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real)
-          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
+          (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real)
+            i))).clm_apply happ
   refine hcoord.congr ?_
   intro p hp
   simpa using

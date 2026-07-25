@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 import DifferentialGeometry.Geometry.Metric.Basic
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

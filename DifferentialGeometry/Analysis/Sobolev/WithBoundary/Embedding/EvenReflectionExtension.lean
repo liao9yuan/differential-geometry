@@ -772,7 +772,8 @@ lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
     have h_sfy_zero : f (signFlipFun n y) = 0 := by
       apply image_eq_zero_of_notMem_tsupport
       intro hin
-      have : signFlipFun n y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
+      have : signFlipFun n y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace :=
+        hf_supp hin
       have hopen : (0 : ℝ) < signFlipFun n y 0 := this
       rw [signFlipFun_apply_zero] at hopen
       have : (0 : ℝ) < -y 0 := hopen
@@ -788,7 +789,8 @@ lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
     rw [evenReflect_eq_self_of_upper f h_y_in_closed]
     have h_sfy_not_supp : signFlipFun n y ∉ tsupport f := by
       intro hin
-      have : signFlipFun n y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace := hf_supp hin
+      have : signFlipFun n y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace :=
+        hf_supp hin
       have hopen : (0 : ℝ) < signFlipFun n y 0 := this
       rw [signFlipFun_apply_zero] at hopen
       have : (0 : ℝ) < -y 0 := hopen
@@ -867,7 +869,8 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
   rw [ContinuousLinearMap.add_apply]
   set iso : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n) :=
     (signFlipLIE n).toContinuousLinearEquiv with hiso_def
-  have h_iso_apply : ∀ z, (iso : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n)) z = signFlipFun n z := by
+  have h_iso_apply : ∀ z, (iso : EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n)) z =
+    signFlipFun n z := by
     intro z; rfl
   have h_fderiv_comp_eq : (fun z : EuclideanSpace ℝ (Fin n) => f (signFlipFun n z))
       = f ∘ iso := by

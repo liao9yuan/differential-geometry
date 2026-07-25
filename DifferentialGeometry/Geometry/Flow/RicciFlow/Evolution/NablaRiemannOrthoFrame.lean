@@ -3,9 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -86,6 +83,8 @@ set_option linter.unusedDecidableInType false
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
@@ -309,7 +308,6 @@ theorem exists_orthoFrameAt
         (S.family.metric t).inner x₀ (frame i x₀) (frame j x₀) =
           if i = j then (1 : Real) else 0) := by
   classical
-
   set g := S.family.metric t with hg_def
   let cd : InnerProductSpace.Core Real (TangentSpace I x₀) := g.toRiemannianMetric.toCore x₀
   have hc : ContinuousAt (fun v : TangentSpace I x₀ => cd.inner v v) 0 :=
@@ -324,10 +322,8 @@ theorem exists_orthoFrameAt
   set n : ℕ := Module.finrank Real (TangentSpace I x₀) with hn_def
   set e : OrthonormalBasis (Fin n) Real (TangentSpace I x₀) :=
     stdOrthonormalBasis Real (TangentSpace I x₀) with he_def
-
   have hinner_eq : ∀ u v : TangentSpace I x₀, (inner Real u v : Real) = g.inner x₀ u v :=
     fun u v => rfl
-
   refine ⟨n, fun i _x => e i, ?_⟩
   intro i j
   have horth : Orthonormal Real (fun i : Fin n => e i) := e.orthonormal
@@ -366,7 +362,7 @@ omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-theorem deltaInvMetric_orthonormal {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+theorem deltaInvMetric_orthonormal {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (t : Real) (x : M) :
     InverseMetricOrthonormalAt (M := M) (Idx := Idx) (deltaInvMetric (M := M)) t x := by
   intro i j; rfl

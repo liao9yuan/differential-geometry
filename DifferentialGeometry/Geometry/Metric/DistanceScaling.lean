@@ -26,7 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 noncomputable def riemannianEDistOf
     (g : SmoothRiemannianMetric I M) (x y : M) : ℝ≥0∞ :=
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
@@ -53,8 +52,6 @@ private theorem edistOf_iInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
-
 theorem edistOf_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (x y : M) :

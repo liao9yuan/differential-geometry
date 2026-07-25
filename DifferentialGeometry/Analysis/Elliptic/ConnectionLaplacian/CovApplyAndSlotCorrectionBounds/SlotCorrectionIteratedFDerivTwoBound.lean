@@ -322,7 +322,6 @@ private lemma outputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
         (fun y : E => outputSlotChartKernel (I := I) g r s α B.toFun l
                         ((extChartAt I α).symm y)) (extChartAt I α b)‖) K_set :=
     hcont.comp hφ_cont hmaps
-
   obtain ⟨C, hC_mem⟩ := hK_compact.bddAbove_image hcont_M
   refine ⟨max C 0, le_max_right _ _, ?_⟩
   intro b hb

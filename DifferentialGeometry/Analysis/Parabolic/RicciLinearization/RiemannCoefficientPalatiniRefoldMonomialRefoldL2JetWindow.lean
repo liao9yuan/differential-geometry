@@ -52,8 +52,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w : TensorRSSpace r s I x) :
@@ -143,7 +143,8 @@ private lemma curvatureRefoldSlotPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 
     armPairTraceSlotPerm6 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (G : Tensor0SSpace 4 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -400,15 +401,18 @@ lemma bdSingle_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq
   rw [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
   rwa [zero_add] at h
 
-private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
+private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow
+    (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (σ : Equiv.Perm (Fin 4)) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P S : SmoothCcTensor g₀ 0 2)
         (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
-        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (_hboundS : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+          δ)
+        (_hboundS : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
+          δ)
         (_hPS : ∀ (l : ℕ) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
@@ -530,7 +534,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
         CS l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
       rcases Nat.eq_zero_or_pos l with hl0 | hl1
       · subst hl0
-        have hzero := riemannianFiberNormSq_symmS_le_of_gFibreOpBound (I := I) (M := M) g₀ S hδ0 hboundS x
+        have hzero := riemannianFiberNormSq_symmS_le_of_gFibreOpBound (I := I) (M := M) g₀ S hδ0
+          hboundS x
         have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith
         have hone : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (0 + 2) :=
           Combinatorics.one_le_antidiagonalTupleGridWindow b hb (by norm_num)
@@ -604,7 +609,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
     rw [curvatureRefoldMonomialCoeffField_eq_pairTrace (I := I) (M := M) g₀ g₁
       (ccTensor02Symm (I := I) (M := M) g₀ S) σ]
   rw [hlift]
-  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
+  refine le_trans
+    (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 4 6 2
     (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
@@ -701,7 +707,8 @@ private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : S
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
-private theorem iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ Kg : ℕ → ℝ, (∀ k, 0 ≤ Kg k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -816,7 +823,8 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
   classical
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
-  obtain ⟨C, hC_nn, hpt⟩ := curvatureRefoldMonomialCoeffField_pointwise_gridWindow (I := I) (M := M) g₀ hδ₁_lt σ
+  obtain ⟨C, hC_nn, hpt⟩ := curvatureRefoldMonomialCoeffField_pointwise_gridWindow (I := I) (M := M)
+    g₀ hδ₁_lt σ
   obtain ⟨Kg, hKg_nn, hKg⟩ :=
     iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (I := I) (M := M) g₀ a ha_super hR
   refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,

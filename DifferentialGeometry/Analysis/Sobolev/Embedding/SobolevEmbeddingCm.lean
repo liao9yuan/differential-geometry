@@ -77,7 +77,6 @@ noncomputable def iteratedCovGradSobolevNorm
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_Cm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
@@ -144,7 +143,6 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-
 omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad_toSobolev_embedding_C2
     (g : SmoothRiemannianMetric I M) (k : ℕ)

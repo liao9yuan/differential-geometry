@@ -73,9 +73,9 @@ def tensorChartComponentOnModel (g : SmoothRiemannianMetric I M) (S : SmoothCcTe
   fun y => tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx ((extChartAt I α).symm y)
 
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
@@ -105,7 +105,8 @@ def chartComponentJetSeminormSum (g : SmoothRiemannianMetric I M) (S : SmoothCcT
       ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
         (interior (extChartAt I α).target) y‖
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContentOnE_nonneg (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (α : M) (N : ℕ) (y : E) :
     0 ≤ chartComponentJetSeminormSum (I := I) (M := M) g S α N y :=
@@ -124,11 +125,11 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
         (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
         (tensorSectionRealizeMetric (I := I) g_bg T' hδ'_lt hδ') α
         (interior (extChartAt I α).target) y ≤
-      ((Module.finrank ℝ E) : ℝ) * chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α N y := by
+      ((Module.finrank ℝ E) : ℝ) * chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α N
+        y := by
   classical
   set s : Set E := interior (extChartAt I α).target with hs_def
   have hs_open : IsOpen s := isOpen_interior
-
   have hpair : ∀ a b : Fin (Module.finrank ℝ E),
       iteratedFDerivSeminorm N
         (fun z => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
@@ -137,16 +138,16 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
         s y ≤
       ∑ m ∈ Finset.range (N + 1),
         ((1 / 2 : ℝ) *
-          (‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
-            ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
+          (‖iteratedFDerivWithin ℝ m
+            (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
+            ‖iteratedFDerivWithin ℝ m
+              (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
     intro a b
     refine Finset.sum_le_sum (fun m _ => ?_)
-
     have hEq := chartGramOnE_realize_sub_eqOn_symm_rawComponent (I := I) (M := M)
       g_bg T T' hδ_lt hδ hδ'_lt hδ' α a b
     have hcongr := iteratedFDerivWithin_congr (𝕜 := ℝ) hEq hy m
     rw [hcongr]
-
     have hfun_eq : Set.EqOn
         (fun y : E => (1 / 2 : ℝ) *
           (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 (T - T') α ![] ![a, b]
@@ -158,15 +159,17 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y)) s := by
       intro z _; rfl
     rw [iteratedFDerivWithin_congr (𝕜 := ℝ) hfun_eq hy m]
-
-    have hcd_ab : ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
+    have hcd_ab : ContDiffOn ℝ ∞
+      (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![a, b]
-    have hcd_ba : ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
+    have hcd_ba : ContDiffOn ℝ ∞
+      (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![b, a]
     have hreshape : (fun y : E => (1 / 2 : ℝ) *
           (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] y +
             tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y)) =
-        (1 / 2 : ℝ) • (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] y +
+        (1 / 2 : ℝ) • (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α
+          ![a, b] y +
             tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y) := by
       funext z; rw [Pi.smul_apply, smul_eq_mul]
     rw [hreshape,
@@ -182,37 +185,39 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
           tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] +
             tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] := rfl
     rw [hadd_reshape,
-      iteratedFDerivWithin_add_apply (hcd_ab.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top))
+      iteratedFDerivWithin_add_apply
+        (hcd_ab.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top))
         (hcd_ba.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top)) hs_open.uniqueDiffOn hy]
     exact norm_add_le _ _
-
   unfold chartGramJetDiffSeminormSum
   refine (Finset.sum_le_sum (fun a _ => Finset.sum_le_sum (fun b _ => hpair a b))).trans ?_
-
   set col : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ := fun Jdx =>
     ∑ m ∈ Finset.range (N + 1),
-      ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α Jdx) s y‖
+      ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α Jdx)
+        s y‖
     with hcol_def
   have hcol_nn : ∀ Jdx, 0 ≤ col Jdx := fun Jdx =>
     Finset.sum_nonneg fun m _ => norm_nonneg _
-
   have hLHS_eq : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ m ∈ Finset.range (N + 1),
           ((1 / 2 : ℝ) *
-            (‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
-              ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖))) =
+            (‖iteratedFDerivWithin ℝ m
+              (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
+              ‖iteratedFDerivWithin ℝ m
+                (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖))) =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (1 / 2 : ℝ) * (col ![a, b] + col ![b, a]) := by
     refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
     have hcab : col ![a, b] = ∑ m ∈ Finset.range (N + 1),
-        ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ := rfl
+        ‖iteratedFDerivWithin ℝ m
+          (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ := rfl
     have hcba : col ![b, a] = ∑ m ∈ Finset.range (N + 1),
-        ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖ := rfl
+        ‖iteratedFDerivWithin ℝ m
+          (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖ := rfl
     rw [hcab, hcba, mul_add, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun m _ => ?_)
     ring
   rw [hLHS_eq]
-
   have hsum_pair : ∀ f : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ,
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), f ![a, b]) =
         ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), f Jdx := by
@@ -233,7 +238,6 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
       ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), col Jdx := by
-
     have hsplit : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
         (∑ a, ∑ b, (1 / 2 : ℝ) * col ![a, b]) +

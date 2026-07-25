@@ -128,7 +128,8 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] in
 theorem exists_smooth_chartBasisExtension (x : M) :
     ∃ X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
       (∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i))) ∧
@@ -193,7 +194,8 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_baseSet
     (x : M) (i : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :

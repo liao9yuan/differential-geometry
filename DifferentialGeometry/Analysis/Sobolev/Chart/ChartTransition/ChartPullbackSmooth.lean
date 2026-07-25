@@ -179,7 +179,6 @@ lemma chartTransitionEuclid_apply (γ α : M) (y : EuclN) :
         ((extChartAt I γ).symm ((toEuclidean (E := E)).symm y))) := rfl
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_eq_chartα_image
     (γ α : M) {x : M}
     (hx_γ : x ∈ (chartAt H γ).source) :
@@ -203,7 +202,6 @@ def chartTransitionExtended
   η y • chartTransitionEuclid (I := I) (M := M) γ α y + (1 - η y) • c
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionExtended_sub_const
     (γ α : M)
     (η : EuclN → ℝ)
@@ -214,7 +212,6 @@ lemma chartTransitionExtended_sub_const
   module
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionExtended_eq_const_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
@@ -226,7 +223,6 @@ lemma chartTransitionExtended_eq_const_off_tsupport
   simp
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionExtended_eq_chartTransition_on_eta_eq_one
     (γ α : M)
     {η : EuclN → ℝ}
@@ -241,7 +237,6 @@ def chartOverlapEuclid (γ α : M) : Set EuclN :=
   (toEuclidean (E := E)) '' (extChartAt I γ '' ((chartAt H γ).source ∩ (chartAt H α).source))
 
 omit [IsManifold I ∞ M] in
-
 lemma chartOverlapEuclid_subset_chartTarget
     [I.Boundaryless]
     (γ α : M) :
@@ -257,7 +252,6 @@ lemma chartOverlapEuclid_subset_chartTarget
   exact (extChartAt I γ).map_source hx_src
 
 omit [IsManifold I ∞ M] in
-
 lemma chartOverlapEuclid_isOpen
     [I.Boundaryless]
     (γ α : M) :
@@ -277,7 +271,8 @@ lemma chartOverlapEuclid_isOpen
     rw [Set.image_image]
     rfl
   rw [h_extChart_eq]
-  have h_I_image : IsOpen (I '' ((chartAt H γ) '' ((chartAt H γ).source ∩ (chartAt H α).source))) := by
+  have h_I_image : IsOpen (I ''
+    ((chartAt H γ) '' ((chartAt H γ).source ∩ (chartAt H α).source))) := by
     have hI_homeo : Continuous (I.toHomeomorph.symm : E → H) ∧
         Function.Surjective (I.toHomeomorph.symm) ∧ True := by
       refine ⟨I.toHomeomorph.symm.continuous, I.toHomeomorph.symm.surjective, trivial⟩
@@ -288,7 +283,6 @@ lemma chartOverlapEuclid_isOpen
   exact (toEuclidean (E := E)).toHomeomorph.isOpenMap _ h_I_image
 
 omit [IsManifold I ∞ M] in
-
 lemma kEuclid_subset_overlap
     [I.Boundaryless]
     (γ α : M) {K : Set M}
@@ -302,7 +296,6 @@ lemma kEuclid_subset_overlap
   exact ⟨x, ⟨hK_γ hx_in, hK_α hx_in⟩, rfl⟩
 
 omit [IsManifold I ∞ M] in
-
 lemma kEuclid_compact
     [I.Boundaryless]
     (γ : M) {K : Set M} (hK_compact : IsCompact K)
@@ -407,7 +400,6 @@ lemma chartTransitionExtensionSubC_zero_off_tsupport
   simp
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
@@ -491,7 +483,6 @@ lemma chartTransitionExtended_contDiff
     γ α hη_smooth hη_supp c)
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionExtended_hasCompactSupport_sub
     (γ α : M)
     {η : EuclN → ℝ}
@@ -537,11 +528,11 @@ lemma chartTransitionExtended_iter_deriv_bound
   have hT_diff_cpt : HasCompactSupport
       (fun y => chartTransitionExtended (I := I) (M := M) γ α η c y - c) :=
     chartTransitionExtended_hasCompactSupport_sub (I := I) (M := M) γ α hη_cpt c
-  exact DifferentialGeometry.Analysis.Sobolev.Euclidean.iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
+  exact
+    Analysis.Sobolev.Euclidean.iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
     (d := Module.finrank ℝ E) hT_smooth hT_diff_cpt kmax
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_mapsTo_overlap
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -558,7 +549,6 @@ lemma chartTransitionEuclid_mapsTo_overlap
   refine ⟨x, ⟨hx_in.2, hx_in.1⟩, rfl⟩
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_left_inv
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -580,7 +570,6 @@ lemma chartTransitionEuclid_left_inv
   rw [h_T2, hy_eq]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_injOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -592,7 +581,6 @@ lemma chartTransitionEuclid_injOn_overlap
   rw [← h1, ← h2, heq]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_surjOn_overlap
     [I.Boundaryless]
     (γ α : M) :
@@ -608,7 +596,6 @@ lemma chartTransitionEuclid_surjOn_overlap
     rw [← hwz, ← hxw]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartTransitionEuclid_bijOn_overlap
     [I.Boundaryless]
     (γ α : M) :

@@ -159,7 +159,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
-        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovGradRaw (I := I) (M := M) g₀ T)).toSection x) ≤
+        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovGradRaw (I := I) (M := M) g₀ T)).toSection x)
+          ≤
       10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) T).toSection x) := by
   classical
@@ -237,7 +238,8 @@ lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMe
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [BoundarylessManifold I M] in
-theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ Csob : ℝ, 0 ≤ Csob ∧
       ∀ (T : SmoothCcTensor g₀ 0 2) {R : ℝ} (_hR : 0 ≤ R),
@@ -428,7 +430,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
       sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T))))).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-          ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+          ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection
+            x) *
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
           ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -443,7 +446,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
     rw [appCcRS_toSection]
     exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 2 6 2 x _ _
   have hPTO : riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-      ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ CP 0 := by
+      ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤
+        CP 0 := by
     have h := hCP (realizedFam (I := I) g₀ T 0 hδ hδZ s)
       (convexPerturbation (I := I) g₀ T 0 s) htie0 hδ_le' hδ0 hδP 0 x
     rw [iteratedCovGrad_zero] at h
@@ -451,7 +455,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
     rw [Combinatorics.antidiagonalTupleGridWindow, Finset.sum_range_one,
       Combinatorics.antidiagonalTupleGrid_zero, mul_one]
   have hDT4cap : riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-      ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) ≤ C4 0 := by
+      ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        4).toSection x) ≤ C4 0 := by
     have h := hC4 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
       (convexPerturbation (I := I) g₀ T 0 s) htie0 hδ_le' hδ0 hδP 0 x
     rw [iteratedCovGrad_zero] at h
@@ -556,7 +561,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau1 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -589,7 +595,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau2 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -622,7 +629,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau3 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -655,7 +663,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T).toSection x) ≤
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
-            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) 4).toSection x) *
+            ((cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              4).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
         (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
@@ -891,7 +900,8 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T))))).toSection x) :=
         mul_le_mul_of_nonneg_right hsq1 hfnn
     _ ≤ 4 * (riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
-            ((armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+            ((armPairTraceOpCc (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
             ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1125,7 +1135,8 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
             ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T).toSection x) := by
-        have h := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+        have h := riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I)
+          (M := M)
           g₀ 0 6 σw
           (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -1166,7 +1177,8 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
           ((cometricDoubleTraceField (I := I) g₀ 4).toSection x) :=
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 6 4 x _
       calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
-            ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+            ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+              (cometricDoubleTraceField (I := I) g₀ 4)
               (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
                 (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 6
                   (slotExtendIter (I := I) (M := M) g₀ 0 4 2

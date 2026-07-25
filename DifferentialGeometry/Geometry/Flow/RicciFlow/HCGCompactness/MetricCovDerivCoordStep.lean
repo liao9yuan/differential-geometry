@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.CoordFrameStep
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

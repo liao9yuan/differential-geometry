@@ -30,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] in
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -44,7 +43,8 @@ theorem nablaRicci_contMDiff
       (fun b : M =>
         extDerivFun (I := I) (fun c => ricciTensor (I := I) g c (V c) (W c)) b (X b)
         - ricciTensor (I := I) g b ((LeviCivita (I := I) g).toFun (fun c => V c) b (X b)) (W b)
-        - ricciTensor (I := I) g b (V b) ((LeviCivita (I := I) g).toFun (fun c => W c) b (X b))) := by
+        - ricciTensor (I := I) g b (V b)
+          ((LeviCivita (I := I) g).toFun (fun c => W c) b (X b))) := by
     funext b; rw [nablaRicci_def]
   rw [hfun]
   have hricVW : ContMDiff I 𝓘(ℝ, ℝ) ∞
@@ -353,7 +353,8 @@ theorem leviCivita_covDeriv_ricEndoRaisedFib (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (LeviCivita (I := I) g).toFun (fun y : M => ricEndoRaisedFib (I := I) g y (Y y)) x (X x) =
       nablaRicciEndo (I := I) g X x (Y x) +
-        ricEndoRaisedFib (I := I) g x ((LeviCivita (I := I) g).toFun (fun y : M => Y y) x (X x)) := by
+        ricEndoRaisedFib (I := I) g x
+          ((LeviCivita (I := I) g).toFun (fun y : M => Y y) x (X x)) := by
   classical
   refine SmoothRiemannianMetric.eq_of_inner_eq g (fun ζ => ?_)
   set W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -480,7 +481,8 @@ private theorem ricSlotOp_core_curry_reading (g : SmoothRiemannianMetric I M) (s
   rw [hHL, map_sub, ContinuousLinearMap.sub_apply]
   rw [eq_sub_of_add_eq hCL_U.symm]
   rw [hfun]
-  rw [show (fun y : M => Z y) = (fun y : M => ricEndoRaisedFib (I := I) g y (Y y)) from rfl] at hCL_w
+  rw [show (fun y : M => Z y) = (fun y : M => ricEndoRaisedFib (I := I) g y (Y y)) from rfl]
+    at hCL_w
   rw [hCL_w]
   have hEndo := leviCivita_covDeriv_ricEndoRaisedFib (I := I) (M := M) g X Y x
   have hcurU : (Tensor0SNabla.curriedSection I M

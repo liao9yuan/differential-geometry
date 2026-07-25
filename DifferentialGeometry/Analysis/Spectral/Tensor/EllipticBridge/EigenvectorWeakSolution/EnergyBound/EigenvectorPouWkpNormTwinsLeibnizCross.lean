@@ -37,7 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenIdx_val_pos
@@ -51,6 +50,7 @@ private lemma eigenIdx_val_pos
     (I := I) (M := M) g r s hu_in hu_ne).1
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 omit [CompleteSpace E] in
 lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
@@ -96,12 +96,12 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
     chartAtlasPOU_isSubordinate I M β
   have hpou_pushed_smooth : ContDiff ℝ ∞
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M)
       (chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯).contMDiff hpou_supp
   have hpou_pushed_cs : HasCompactSupport
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) hpou_supp
   have hmult_smooth : ContDiff ℝ ∞
       (euclidPartial (E := E) k
@@ -344,12 +344,12 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     chartAtlasPOU_isSubordinate I M β
   have hpou_pushed_smooth : ContDiff ℝ ∞
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
       (I := I) (M := M)
       (chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯).contMDiff hpou_supp
   have hpou_pushed_cs : HasCompactSupport
       (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
-    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+    chartPushedRaw_smooth_hasCompactSupport_local
       (I := I) (M := M) hpou_supp
   have hmult_smooth : ContDiff ℝ ∞
       (euclidPartial (E := E) k

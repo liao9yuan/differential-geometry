@@ -36,7 +36,6 @@ noncomputable def innerCoordFun (w : E) : C^∞⟮𝓡 n, sphere (0 : E) 1; ℝ�
   ⟨fun p => ⟪w, (↑p : E)⟫, ((innerSL ℝ w).contMDiff).comp contMDiff_coe_sphere⟩
 
 omit [FiniteDimensional ℝ E] in
-
 theorem mfderiv_innerCoordFun (w : E) (p : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) p) :
     mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) w) p v = ⟪w, dIncl (n := n) p v⟫ := by
   haveI : InnerProductSpace ℝ (TangentSpace 𝓘(ℝ, E) (↑p : E)) :=
@@ -47,7 +46,8 @@ theorem mfderiv_innerCoordFun (w : E) (p : sphere (0 : E) 1) (v : TangentSpace (
     (hιC.mdifferentiableAt (by simp)).hasMFDerivAt
   have hL : HasMFDerivAt 𝓘(ℝ, E) 𝓘(ℝ, ℝ) (innerSL ℝ w) ((↑p : E)) (innerSL ℝ w) :=
     (innerSL ℝ w).hasFDerivAt.hasMFDerivAt
-  have hfun : (⇑(innerCoordFun (E := E) (n := n) w)) = (innerSL ℝ w) ∘ ((↑) : sphere (0 : E) 1 → E) := by
+  have hfun : (⇑(innerCoordFun (E := E) (n := n) w)) = (innerSL ℝ w) ∘
+    ((↑) : sphere (0 : E) 1 → E) := by
     funext q; simp [innerCoordFun]
   have hcomp : HasMFDerivAt (𝓡 n) 𝓘(ℝ, ℝ) ((innerSL ℝ w) ∘ ((↑) : sphere (0 : E) 1 → E)) p
       ((innerSL ℝ w).comp (dIncl (n := n) p)) := hL.comp p hι
@@ -55,8 +55,6 @@ theorem mfderiv_innerCoordFun (w : E) (p : sphere (0 : E) 1) (v : TangentSpace (
   rfl
 
 omit [FiniteDimensional ℝ E] in
-
-
 theorem mfderiv_inner_left (w : E) {F : sphere (0 : E) 1 → E} {x : sphere (0 : E) 1}
     (hF : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) F x) (v : TangentSpace (𝓡 n) x) :
     mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (fun p => ⟪w, F p⟫) x v
@@ -73,7 +71,6 @@ theorem mfderiv_inner_left (w : E) {F : sphere (0 : E) 1 → E} {x : sphere (0 :
   rfl
 
 omit [FiniteDimensional ℝ E] in
-
 theorem mfderiv_inner {F G : sphere (0 : E) 1 → E} {x : sphere (0 : E) 1}
     (hF : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) F x) (hG : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) G x)
     (v : TangentSpace (𝓡 n) x) :
@@ -103,10 +100,9 @@ theorem dIncl_mlieBracket
     dIncl (n := n) x (mlieBracket (𝓡 n) (⇑X) (⇑Y) x)
       = ambDeriv (n := n) (⇑Y) x (X x) - ambDeriv (n := n) (⇑X) x (Y x) := by
   refine ext_inner_left ℝ fun w => ?_
-
   have hbr := embedDeriv_mlieBracket (I := 𝓡 n) (M := sphere (0 : E) 1) X Y (innerCoordFun w)
-
-  have hact : ∀ (Z : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
+  have hact : ∀ (Z : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
+    (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
       (p : sphere (0 : E) 1),
       (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w) : sphere (0 : E) 1 → ℝ) p
         = ⟪w, dIncl (n := n) p (Z p)⟫ := by
@@ -116,9 +112,10 @@ theorem dIncl_mlieBracket
     rw [show extDerivFun (I := 𝓡 n) (innerCoordFun w) p (Z p)
           = mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) w) p (Z p) from rfl,
       mfderiv_innerCoordFun]
-
-  have hsecond : ∀ (Z W : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯),
-      (embedDeriv (𝓡 n) (sphere (0 : E) 1) W (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w))
+  have hsecond : ∀ (Z W : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
+    (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯),
+      (embedDeriv (𝓡 n) (sphere (0 : E) 1) W
+        (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w))
         : sphere (0 : E) 1 → ℝ) x = ⟪w, ambDeriv (n := n) (⇑Z) x (W x)⟫ := by
     intro Z W
     have hZC : ContMDiffAt (𝓡 n) (𝓡 n).tangent ∞
@@ -130,17 +127,19 @@ theorem dIncl_mlieBracket
     change vectorFieldAction (𝓡 n) (sphere (0 : E) 1) W
       (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w)) x = _
     simp only [vectorFieldAction]
-    rw [show extDerivFun (I := 𝓡 n) (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w)) x (W x)
+    rw [show extDerivFun (I := 𝓡 n) (embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w)) x
+      (W x)
           = mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
               (⇑(embedDeriv (𝓡 n) (sphere (0 : E) 1) Z (innerCoordFun w))) x (W x) from rfl,
       hg, mfderiv_inner_left w (dInclField_mdifferentiableAt (n := n) hZdiff) (W x), ambDeriv_apply]
-
   have hbrx : (embedDeriv (𝓡 n) (sphere (0 : E) 1)
-        (mlieBracketSection (𝓡 n) (sphere (0 : E) 1) X Y) (innerCoordFun w) : sphere (0 : E) 1 → ℝ) x
+        (mlieBracketSection (𝓡 n) (sphere (0 : E) 1) X Y) (innerCoordFun w) : sphere (0 : E) 1 → ℝ)
+          x
       = (embedDeriv (𝓡 n) (sphere (0 : E) 1) X
           (embedDeriv (𝓡 n) (sphere (0 : E) 1) Y (innerCoordFun w)) : sphere (0 : E) 1 → ℝ) x
         - (embedDeriv (𝓡 n) (sphere (0 : E) 1) Y
-            (embedDeriv (𝓡 n) (sphere (0 : E) 1) X (innerCoordFun w)) : sphere (0 : E) 1 → ℝ) x := by
+            (embedDeriv (𝓡 n) (sphere (0 : E) 1) X (innerCoordFun w)) : sphere (0 : E) 1 → ℝ)
+              x := by
     have h := DFunLike.congr_fun hbr x
     simpa using h
   rw [hact (mlieBracketSection (𝓡 n) (sphere (0 : E) 1) X Y) x, hsecond Y X, hsecond X Y] at hbrx
@@ -179,7 +178,6 @@ theorem projConn_torsion :
     ← Submodule.starProjection_apply, Submodule.starProjection_eq_self_iff.mpr hmem]
 
 omit [FiniteDimensional ℝ E] in
-
 theorem projConn_metricCompat :
     Integral.Connection.IsMetricCompatible (projConnCD (E := E) (n := n))
       (roundMetric (E := E) (n := n)) := by

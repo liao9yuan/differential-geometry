@@ -92,7 +92,8 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b' =
       e.continuousLinearMapAt ℝ b T₀ from hy_repr]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma chartTensor0SParallelExtend_zero_scalar_apply
     (α : M) {b b' : M} (T₀ : Tensor0SSpace 0 I b)
     (hb' : b' ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -129,7 +130,8 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hrepr]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -158,7 +160,8 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
       (I := I) α (b := b) (b' := b') T₀ hb'_U
   exact (mdifferentiableAt_const).congr_of_eventuallyEq hev
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) (v : TangentSpace I b) :
@@ -197,7 +200,8 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
   rw [hkey, hFderiv]
   rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -267,7 +271,8 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
   rw [hintr]
   rw [zero_sub]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+    [BoundarylessManifold I M] in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

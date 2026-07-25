@@ -81,7 +81,6 @@ noncomputable def scalarPotSec
     (finiteReprLin (I := I) (M := M) q 0 0 1)
 
 omit [BoundarylessManifold I M] in
-
 theorem scalarPotSec_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) (x : M) :
@@ -99,7 +98,6 @@ noncomputable def scalarPotCore
     (scalarPotSec (I := I) (M := M) q ζ)
 
 omit [BoundarylessManifold I M] in
-
 theorem scalarPotCore_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : ScalarH1Core (I := I) (M := M) q) :
@@ -252,7 +250,6 @@ noncomputable def scalarPotH0
     (scalarPotOp (I := I) (M := M) q ζ)
 
 omit [BoundarylessManifold I M] in
-
 @[simp] theorem scalarPotH0_apply
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
     (v : tensorHs (I := I) (M := M) q 0 0 1) :
@@ -336,7 +333,6 @@ theorem scalarPotH0_test
       tensorInnerPointwise_smul_right]
 
 omit [BoundarylessManifold I M] in
-
 theorem scalarPotH0_norm
     (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) :
     ‖scalarPotH0 (I := I) (M := M) q ζ‖ =

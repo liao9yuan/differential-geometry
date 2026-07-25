@@ -193,7 +193,6 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma sharp_memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
@@ -223,7 +222,6 @@ private lemma sharp_memWkp_finset_sum
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
 omit [CompleteSpace E] in
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
@@ -249,7 +247,6 @@ private lemma sharp_wkpNorm_sub_le
   rw [h_neg_eq]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)

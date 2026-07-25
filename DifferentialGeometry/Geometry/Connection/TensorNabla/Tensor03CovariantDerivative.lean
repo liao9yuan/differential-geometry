@@ -93,7 +93,8 @@ local instance covariantDerivativeTangentTrilinearModule (x : M) :
 local instance covariantDerivativeTangentTrilinearSMul (x : M) :
     SMul ℝ
       (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
-  (covariantDerivativeTangentTrilinearModule x).toDistribMulAction.toMulAction.toSemigroupAction.toSMul
+  (covariantDerivativeTangentTrilinearModule
+    x).toDistribMulAction.toMulAction.toSemigroupAction.toSMul
 
 local instance covariantDerivativeTangentTrilinearTopology (x : M) :
     TopologicalSpace

@@ -77,9 +77,6 @@ private theorem covariantDerivative_finset_sum
               simp [Finset.sum_insert, hit]
 
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-
-
-
 omit [IsManifold I n M] in
 lemma covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -365,7 +362,8 @@ theorem covariantDerivative_modelInChart_center_eq_sum
   have hterm_diff : ∀ i : Fin (Module.finrank 𝕜 E), MDiffAt (T% (term i)) x₀ := by
     intro i
     exact (hz i).smul_section (hconst_diff i)
-  have hsum_diff : MDiffAt (T% ((Finset.univ : Finset (Fin (Module.finrank 𝕜 E))).sum term)) x₀ := by
+  have hsum_diff : MDiffAt (T% ((Finset.univ : Finset (Fin (Module.finrank 𝕜 E))).sum term))
+    x₀ := by
     simpa using MDifferentiableAt.sum_section
       (s := (Finset.univ : Finset (Fin (Module.finrank 𝕜 E)))) (t := term) hterm_diff
   have hV_ev :

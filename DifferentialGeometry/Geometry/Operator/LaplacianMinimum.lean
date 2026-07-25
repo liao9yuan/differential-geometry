@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.DerivativeTest
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

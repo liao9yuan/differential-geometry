@@ -121,7 +121,8 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
       riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) ≤ B ^ 2) :
     ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤ B * ‖W‖ := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
-  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W B hB hΦ
+  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W
+    B hB hΦ
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
@@ -131,7 +132,8 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
       riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) ≤ B ^ 2) :
     ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤ ‖Φ‖ * B := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
-  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ W B hB hW
+  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ
+    W B hB hW
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -607,7 +609,8 @@ private theorem productGridTerm_integral_le_topOrderJetSq
     have hsum_int : MeasureTheory.Integrable
         (fun x => ∑ m ∈ Sset, ((e m : ℝ) / i) *
           (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ))) μ := by
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)))
+              μ := by
       apply MeasureTheory.integrable_finset_sum
       intro m _
       exact (hint_rpow (e m) ((i : ℝ) / (e m : ℝ)) (by positivity)).const_mul _
@@ -616,7 +619,8 @@ private theorem productGridTerm_integral_le_topOrderJetSq
             ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)) ∂μ) =
         ∑ m ∈ Sset, ((e m : ℝ) / i) *
           (∫ x, (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ)) ∂μ) := by
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ^ ((i : ℝ) / (e m : ℝ))
+              ∂μ) := by
       rw [MeasureTheory.integral_finset_sum]
       · apply Finset.sum_congr rfl
         intro m _; rw [MeasureTheory.integral_const_mul]
@@ -667,22 +671,24 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨Cgrid, hCgrid_nn, hgrid⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M) g₀ hδ₀
+    riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M)
+      g₀ hδ₀
   obtain ⟨Cemb, hCemb_nn, hCemb⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
+    deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
       (I := I) (M := M) g₀ a ha_super
   set Lam : ℝ := Cemb * Real.sqrt ((a + 1 + 1 : ℕ) : ℝ) * R₀ with hLam
   have hLam_nn : 0 ≤ Lam := by rw [hLam]; positivity
   set Cgn : ℕ → ℝ := fun k =>
     if h : 1 ≤ k then
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g₀ 0 2 k h).choose
     else 0 with hCgn
   have hCgn_nn : ∀ k, 0 ≤ Cgn k := by
     intro k
     simp only [hCgn]
     split_ifs with h
-    · exact (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    · exact
+        (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g₀ 0 2 k h).choose_spec.1
     · exact le_refl 0
   set vol : ℝ := ((riemannianVolumeMeasure (I := I) (M := M) g₀) Set.univ).toReal with hvol
@@ -741,7 +747,8 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
         have hgrid0 : (fun x => ∑ n ∈ Finset.range (0 + 1),
             ∑ e ∈ Finset.Nat.antidiagonalTuple n 0, ∏ m : Fin n,
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) = (fun _ : M => (1 : ℝ)) := by
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) =
+                  (fun _ : M => (1 : ℝ)) := by
           funext x
           simp only [Nat.zero_add, Finset.sum_range_one, Finset.Nat.antidiagonalTuple_zero_zero,
             Finset.sum_singleton, Finset.univ_eq_empty, Finset.prod_empty]
@@ -818,7 +825,8 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
                   mul_le_mul_of_nonneg_left hsum_le (by positivity)
               _ = Cemb ^ 2 * ((a + 1 + 1 : ℕ) : ℝ) * R₀ ^ 2 := by ring
           exact le_trans hsingle hchain
-        have hGNspec := (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+        have hGNspec :=
+          (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
           (I := I) (M := M) g₀ 0 2 i hi1).choose_spec.2
         have hGNP : ∀ j : ℕ, 0 < j → j < i →
             (∫ x, (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -828,7 +836,8 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
                 ‖iteratedCovGrad (I := I) g₀ 0 2 i P‖ ^ (2 * (j : ℝ) / (i : ℝ)) := by
           intro j hj0 hji
           have hb := hGNspec P Lam hLam_nn hΛsup j hj0 hji
-          have hchoose : (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+          have hchoose :
+            (Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
               (I := I) (M := M) g₀ 0 2 i hi1).choose = Cgn i := by
             rw [hCgn]; simp only [dif_pos hi1]
           rw [hchoose] at hb
@@ -927,7 +936,8 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
             (tupCard i * (max Lam (max (Cgn i) 1)) ^ (7 * i) + vol) * (1 + Rtop ^ 2) := by
           nlinarith [hMpow_nn, hvol_nn, sq_nonneg Rtop]
         rw [hKival,
-          mul_assoc (Cgrid i) (tupCard i * (max Lam (max (Cgn i) 1)) ^ (7 * i) + vol) (1 + Rtop ^ 2)]
+          mul_assoc (Cgrid i) (tupCard i * (max Lam (max (Cgn i) 1)) ^ (7 * i) + vol)
+            (1 + Rtop ^ 2)]
         exact mul_le_mul_of_nonneg_left hstep (hCgrid_nn i)
     · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
       have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ = 0 := by
@@ -965,7 +975,8 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
   have hCbr_bound : ∀ (j : ℕ) (S : SmoothCcTensor g₀ 0 2),
       ∑ k ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 k S‖ ≤
         Cbr j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (j : ℝ) S‖ :=
-    fun j S => (exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ j).choose_spec.2 S
+    fun j S => (exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀
+      j).choose_spec.2 S
   refine ⟨fun i => Real.sqrt (Cpo i * ∑ j ∈ Finset.range (i + 1), Kslot j * (1 + Cbr j ^ 2)),
     fun i => Real.sqrt_nonneg _, ?_⟩
   intro g₁ P δ hδ_le hδ htie hPball i

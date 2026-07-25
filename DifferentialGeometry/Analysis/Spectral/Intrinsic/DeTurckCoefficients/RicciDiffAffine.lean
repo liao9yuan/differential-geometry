@@ -1,8 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 noncomputable section
 
@@ -11,6 +9,8 @@ open Bundle Set Matrix
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
+
+attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
@@ -47,7 +47,7 @@ private lemma exists_bound_of_contDiffOn_int
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_uniform_bound_of_int_family
-    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {ι : Type*} [Finite ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
     (hf : ∀ i, ContDiffOn ℝ ∞ (f i) (interior (extChartAt I α).target))
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :

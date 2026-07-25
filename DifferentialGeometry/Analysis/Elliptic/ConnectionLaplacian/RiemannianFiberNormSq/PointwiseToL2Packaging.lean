@@ -201,7 +201,8 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
   classical
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
   rw [SmoothCcTensor.norm_def (I := I) (M := M) Curv]
-  conv_rhs => rw [show (fun i => ‖T i‖) = fun i => tensorL2Norm (I := I) (M := M) g 0 (v i) (T i).toFun from by
+  conv_rhs => rw [show (fun i => ‖T i‖) = fun i => tensorL2Norm (I := I) (M := M) g 0 (v i)
+    (T i).toFun from by
     funext i; exact SmoothCcTensor.norm_def (I := I) (M := M) (T i)]
   set nCurv : ℝ := tensorL2Norm (I := I) (M := M) g 0 c Curv.toFun with hnCurv_def
   set fi : ℕ → ℝ := fun i => tensorL2Norm (I := I) (M := M) g 0 (v i) (T i).toFun with hfi_def
@@ -249,7 +250,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
       _ = C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2 := by
             congr 1
             exact Finset.sum_congr rfl (fun i _ => (hbridge_i i).symm)
-
   have hsum_sq_le : ∑ i ∈ Finset.range N, fi i ^ 2 ≤ (∑ i ∈ Finset.range N, fi i) ^ 2 := by
     have hsq_sum : (∑ i ∈ Finset.range N, fi i) ^ 2 =
         ∑ i ∈ Finset.range N, fi i * (∑ j ∈ Finset.range N, fi j) := by

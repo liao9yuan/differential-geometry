@@ -29,7 +29,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (I) in
-
 def chartPullback (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) : M → ℝ := by
   classical
@@ -39,7 +38,6 @@ def chartPullback (α : M)
     else 0
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_apply_of_mem (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -49,7 +47,6 @@ lemma chartPullback_apply_of_mem (α : M)
   simp [hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_apply_of_notMem (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
@@ -59,7 +56,6 @@ lemma chartPullback_apply_of_notMem (α : M)
   simp [hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_add (α : M)
     (ψ₁ ψ₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     chartPullback I α (fun y => ψ₁ y + ψ₂ y) =
@@ -71,7 +67,6 @@ lemma chartPullback_add (α : M)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_const_smul (α : M) (c : ℝ)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     chartPullback I α (fun y => c * ψ y) =
@@ -83,7 +78,6 @@ lemma chartPullback_const_smul (α : M) (c : ℝ)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma chartPullback_zero_fun (α : M) :
     chartPullback I α (fun _ => (0 : ℝ)) = (fun _ : M => (0 : ℝ)) := by
   classical
@@ -93,7 +87,6 @@ lemma chartPullback_zero_fun (α : M) :
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α (fun _ => (0 : ℝ)) hx]
 
 omit [IsManifold I ∞ M] in
-
 lemma support_chartPullback_subset_chartAt_source (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (chartPullback I α ψ) ⊆ (chartAt H α).source := by
@@ -104,7 +97,6 @@ lemma support_chartPullback_subset_chartAt_source (α : M)
   exact chartPullback_apply_of_notMem (I := I) (M := M) α ψ hx_off
 
 omit [IsManifold I ∞ M] in
-
 omit [FiniteDimensional ℝ E] in
 lemma tsupport_pou_mul_subset_tsupport_pou
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :

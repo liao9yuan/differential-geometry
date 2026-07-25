@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairT
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSourceCover
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -2618,8 +2617,10 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : RiemannianBundle (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
         ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
       letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
-        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ =>
+          rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+        (M := (X.obj (L.φ n)).M)
       let ptsSeq := NetLimitData.decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
       forall a b : Nat, forall x : (X.obj (L.φ n)).M,
         x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
@@ -2686,7 +2687,8 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
     letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
       ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-    letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+      (M := (X.obj (L.φ n)).M)
     let ptsSeq := NetLimitData.decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
     forall eps : Real, eps > 0 -> exists N : Nat,
       forall a : Nat, a >= N -> forall b : Nat, b >= N ->
@@ -2774,8 +2776,10 @@ theorem stepCJoinDataFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : RiemannianBundle (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
         ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
       letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
-        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ =>
+          rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+        (M := (X.obj (L.φ n)).M)
       let ptsSeq := NetLimitData.decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
       forall a b : Nat, forall x : (X.obj (L.φ n)).M,
         x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
@@ -2841,7 +2845,8 @@ theorem stepCJoinDataFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
     letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
       ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-    letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+      (M := (X.obj (L.φ n)).M)
     let ptsSeq := NetLimitData.decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
     forall eps : Real, eps > 0 -> exists N : Nat,
       forall a : Nat, a >= N -> forall b : Nat, b >= N ->
@@ -3010,8 +3015,10 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : RiemannianBundle (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
         ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
       letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
-        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+        ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ =>
+          rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+        (M := (X.obj (L.φ n)).M)
       forall a b : Nat, forall xx : (X.obj (L.φ n)).M,
         xx ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
           forall gamma : Fin (pb.A r), rho gamma xx ≠ 0 ->
@@ -3062,7 +3069,8 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       forall gamma : Fin (pb.A r), forall v : E,
         v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (x gamma n)) ''
             NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        forall a : Nat, normalTransition (I := I) (X.obj (L.φ a)) (x gamma a) (y gamma a) v ∈ V' gamma) :
+        forall a : Nat, normalTransition (I := I) (X.obj (L.φ a)) (x gamma a) (y gamma a) v ∈ V'
+          gamma) :
     exists phi : Nat -> Nat, StrictMono phi /\
       (let hcomplete := NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
        letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -3078,12 +3086,16 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
        letI : RiemannianBundle (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
          ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
        letI : IsContinuousRiemannianBundle E (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
-         ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
-       letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+         ⟨(X.obj (L.φ n)).metric.inner, (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ =>
+           rfl⟩
+       letI : MetricSpace (X.obj (L.φ n)).M := HopfRinow.riemMetricSpace (I := I)
+         (M := (X.obj (L.φ n)).M)
        let ptsSeq := NetLimitData.decodedCompPts (I := I) (X.obj (L.φ n)).metric
          (fun gamma => x gamma n)
-         (fun gamma a => normalTransition (I := I) (X.obj (L.φ (phi a))) (x gamma (phi a)) (y gamma (phi a)))
-         (fun gamma b => normalTransition (I := I) (X.obj (L.φ (phi b))) (y gamma (phi b)) (x gamma (phi b)))
+         (fun gamma a => normalTransition (I := I) (X.obj (L.φ (phi a))) (x gamma (phi a))
+           (y gamma (phi a)))
+         (fun gamma b => normalTransition (I := I) (X.obj (L.φ (phi b))) (y gamma (phi b))
+           (x gamma (phi b)))
        forall eps : Real, eps > 0 -> exists N : Nat,
          forall a : Nat, a >= N -> forall b : Nat, b >= N ->
            forall xx : (X.obj (L.φ n)).M,
@@ -3102,7 +3114,8 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
                      (g := (X.obj (L.φ n)).metric)
                      (μ := fun yy : (X.obj (L.φ n)).M => fun gamma : Fin (pb.A r) => rho gamma yy)
                      (pts := ptsSeq a b) (join := join)
-                     (r := fun xx => radSeq (phi a) (phi b) xx) (qstar := fun yy : (X.obj (L.φ n)).M => yy)
+                     (r := fun xx => radSeq (phi a) (phi b) xx)
+                       (qstar := fun yy : (X.obj (L.φ n)).M => yy)
                      yy hcomplete (hrad (phi a) (phi b) yy hy) (hactive0 (phi a) (phi b) yy hy)
                      ((NetLimitData.hatPOUDataTwo (I := I) (X := X) (hd := hd)
                        (D := D) (P := P) (L := L) (pb := pb) (r := r) (n := n)
@@ -3148,9 +3161,11 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact stepCJoinFixed hd P L pb r n rho hrho join
     (fun a b => radSeq (phi a) (phi b))
     (fun gamma => x gamma n) U V
-    (fun gamma a => normalTransition (I := I) (X.obj (L.φ (phi a))) (x gamma (phi a)) (y gamma (phi a)))
+    (fun gamma a => normalTransition (I := I) (X.obj (L.φ (phi a))) (x gamma (phi a))
+      (y gamma (phi a)))
     Jinf
-    (fun gamma b => normalTransition (I := I) (X.obj (L.φ (phi b))) (y gamma (phi b)) (x gamma (phi b)))
+    (fun gamma b => normalTransition (I := I) (X.obj (L.φ (phi b))) (y gamma (phi b))
+      (x gamma (phi b)))
     Jbarinf
     hconn hX hcenter hgp
     (fun a b => hrad (phi a) (phi b))

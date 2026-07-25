@@ -42,7 +42,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] in
 private theorem appCc_time_deriv
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -95,7 +96,6 @@ private theorem affine_uIcc {S : Set ℝ} {a h : ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
 private theorem joint_affine
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}
@@ -121,8 +121,6 @@ private theorem joint_affine
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
 private theorem joint_const
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (S : Set ℝ) :
@@ -136,8 +134,6 @@ private theorem joint_const
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-
-
 private theorem joint_affine_sub
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ}

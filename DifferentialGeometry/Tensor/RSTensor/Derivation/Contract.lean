@@ -161,7 +161,6 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   rw [contMDiffAt_section] at hα
   have hX := X.contMDiff x₀
   rw [contMDiffAt_section] at hX
-
   have h_combine :
       ContMDiffAt I 𝓘(𝕜, Tensor0SModel s 𝕜 E) n
         (fun x => model_interior_bilinear 𝕜 E s
@@ -173,9 +172,7 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-
   ext v
-
   set symmL := (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x with hsymmL
   set gtilde : E := (trivializationAt E (TangentSpace I) x₀ ⟨x, X x⟩).2 with hgtilde
   change (α x) (@Fin.cons s (fun _ => E) (X x : E) (fun i => symmL (v i))) =
@@ -186,7 +183,8 @@ noncomputable def contract_Tensor0SField (s : ℕ)
   · change (X x : E) = symmL gtilde
     have h := (trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
       (R := 𝕜) hx (X x)
-    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (X x) = gtilde := by
+    have hcl : (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (X x) =
+      gtilde := by
       change (trivializationAt E (TangentSpace I) x₀).linearMapAt 𝕜 x (X x) = _
       rw [(trivializationAt E (TangentSpace I) x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
     rw [hcl] at h
@@ -850,7 +848,6 @@ noncomputable def contract_covariantField (r s : ℕ)
   rw [contMDiffAt_section] at hα
   have hX := X.contMDiff x₀
   rw [contMDiffAt_section] at hX
-
   set biop :
       E →L[𝕜] (TensorRSModel r (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
     (ContinuousLinearMap.compL 𝕜
@@ -874,7 +871,6 @@ noncomputable def contract_covariantField (r s : ℕ)
   set gtilde : Tensor0SSpace r I x :=
     (trivializationAt (Tensor0SModel r 𝕜 E) (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x γ
     with hgtilde
-
   have h_cLMAt_s : ∀ (T : Tensor0SSpace s I x) (v : Fin s → E),
       (trivializationAt (Tensor0SModel s 𝕜 E)
         (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x T v =
@@ -899,7 +895,6 @@ noncomputable def contract_covariantField (r s : ℕ)
           (fun x => Tensor0SSpace (s + 1) I x) x₀ ⟨x, y⟩).2 from
       (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
     rfl
-
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
       (model_interior_product s (X x : E)
@@ -909,7 +904,6 @@ noncomputable def contract_covariantField (r s : ℕ)
       ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde)
       (Fin.cons Xtilde w)
   rw [h_cLMAt_s, h_cLMAt_s1]
-
   change ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde :
         Tensor0SModel (s + 1) 𝕜 E)
       (@Fin.cons s (fun _ => E) (X x : E) (fun i => sL (w i))) =
@@ -954,7 +948,6 @@ noncomputable def contract_contravariantField (r s : ℕ)
   rw [contMDiffAt_section] at hα
   have hφ := φ.contMDiff x₀
   rw [contMDiffAt_section] at hφ
-
   set biop_ctr :
       Tensor0SModel 1 𝕜 E →L[𝕜] (TensorRSModel (r + 1) s 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
     (ContinuousLinearMap.compL 𝕜
@@ -974,14 +967,12 @@ noncomputable def contract_contravariantField (r s : ℕ)
   filter_upwards [hbase] with x hx
   refine ContinuousLinearMap.ext fun β => ?_
   refine ContinuousMultilinearMap.ext fun v => ?_
-
   set β_symm : Tensor0SSpace r I x :=
     (trivializationAt (Tensor0SModel r 𝕜 E) (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x β
     with hβ_symm
   set atilde_x : Tensor0SModel 1 𝕜 E :=
     (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x) x₀ ⟨x, φ x⟩).2
     with hatilde_x
-
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
       ((show Tensor0SSpace (r + 1) I x →L[𝕜] Tensor0SSpace s I x from α x)
@@ -994,10 +985,8 @@ noncomputable def contract_contravariantField (r s : ℕ)
           (model_tensorWithCovector r atilde_x β))) v
   rw [tensor0STrivialization_continuousLinearMapAt_apply (I := I) s x₀ x hx,
     tensor0STrivialization_continuousLinearMapAt_apply (I := I) s x₀ x hx]
-
   congr 1
   congr 1
-
   refine ContinuousMultilinearMap.ext fun w => ?_
   have hrhs :
       ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
@@ -1008,20 +997,19 @@ noncomputable def contract_contravariantField (r s : ℕ)
     exact tensor0STrivialization_symmL_apply (I := I) (r + 1) x₀ x hx
       ((model_tensorWithCovector r atilde_x) β) w
   refine Eq.trans ?_ hrhs.symm
-
   change (Bundle.continuousMultilinearMap.modelProduct r 1 β_symm
       (Tensor0SSpace.toModel (φ x))) w =
     Bundle.continuousMultilinearMap.modelProduct r 1 β atilde_x
       (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (w i))
   rw [Bundle.continuousMultilinearMap.modelProduct_apply,
     Bundle.continuousMultilinearMap.modelProduct_apply]
-
   congr 1
   · rw [hβ_symm]
     exact tensor0STrivialization_symmL_apply (I := I) r x₀ x hx β
       (w ∘ Fin.castAdd 1)
   · have h_atilde_eq :
-        (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x) x₀).continuousLinearMapAt
+        (trivializationAt (Tensor0SModel 1 𝕜 E) (fun x => Tensor0SSpace 1 I x)
+          x₀).continuousLinearMapAt
           𝕜 x (Tensor0SSpace.toModel (φ x)) = atilde_x := by
       ext u'
       rw [tensor0STrivialization_continuousLinearMapAt_apply (I := I) 1 x₀ x hx]

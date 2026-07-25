@@ -57,7 +57,6 @@ lemma iSup_iSup_normalized_le_opNorm
   exact normalized_bilinear_le_opNorm Δ a b
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_local_bound : ∀ y₀ : M, ∃ W : Set M, IsOpen W ∧ y₀ ∈ W ∧
@@ -130,7 +129,6 @@ theorem bddAbove_iSup_normalized_of_continuous_opNorm
   exact hW_sub hb
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem bddAbove_opNorm_range_of_locally_bounded
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_local_bound : ∀ y₀ : M, ∃ W : Set M, IsOpen W ∧ y₀ ∈ W ∧
@@ -164,7 +162,6 @@ theorem bddAbove_opNorm_range_of_locally_bounded
   exact (hΔ_bound y₀ y hy_W).trans (Finset.le_sup' Cₐ hy₀)
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-
 theorem bddAbove_opNorm_range_of_continuous_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_cont : Continuous (fun b : M => ‖Δ b‖)) :

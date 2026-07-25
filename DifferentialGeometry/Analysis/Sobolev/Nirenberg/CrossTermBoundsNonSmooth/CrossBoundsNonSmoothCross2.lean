@@ -236,7 +236,6 @@ private lemma integrable_cross_2_summand_nonsmooth
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₂_gi_l2 h_dq_g_l2
 
 omit [NeZero d] in
-
 private lemma integrable_const_eta_sq_indicator_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -326,7 +325,6 @@ private lemma integrable_const_eta_sq_indicator_g_sq
     refine mul_nonneg (mul_nonneg (abs_nonneg _) hM_nn) h_g_sq_nn
 
 omit [NeZero d] in
-
 private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -406,7 +404,6 @@ private lemma integrable_const_eta_sq_diffQuot_g_sq_cross2
   exact mul_le_mul_of_nonneg_right h_ic_eta_sq h_dq_sq_nn
 
 omit [NeZero d] in
-
 private lemma integrable_eta_sq_diffQuot_g_sq_cross2
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))

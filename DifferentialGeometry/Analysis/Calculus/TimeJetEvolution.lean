@@ -53,7 +53,6 @@ theorem curveJet_match
     iteratedDerivWithin b (fun t => jet2 (GL t) w) sL 0
       = iteratedDerivWithin b (fun t => jet2 (GR t) w) sR 0 := by
   have hbinf : (b : WithTop ℕ∞) ≤ ∞ := WithTop.coe_le_coe.mpr le_top
-
   have heqf : (fun u => iteratedDerivWithin b (fun s => GL s u) sL 0)
       =ᶠ[nhds w] (fun u => iteratedDerivWithin b (fun s => GR s u) sR 0) :=
     Filter.eventuallyEq_of_mem (hV.mem_nhds hw) (fun u hu => hval u hu)
@@ -61,7 +60,8 @@ theorem curveJet_match
   rw [iteratedDerivWithin_prodMk (hcurveL.of_le hbinf).fst (hcurveL.of_le hbinf).snd hsL h0L,
     iteratedDerivWithin_prodMk (hcurveR.of_le hbinf).fst (hcurveR.of_le hbinf).snd hsR h0R]
   refine Prod.ext (hval w hw) ?_
-  rw [iteratedDerivWithin_prodMk (hcurveL.of_le hbinf).snd.fst (hcurveL.of_le hbinf).snd.snd hsL h0L,
+  rw [iteratedDerivWithin_prodMk (hcurveL.of_le hbinf).snd.fst (hcurveL.of_le hbinf).snd.snd hsL
+    h0L,
     iteratedDerivWithin_prodMk (hcurveR.of_le hbinf).snd.fst (hcurveR.of_le hbinf).snd.snd hsR h0R]
   refine Prod.ext ?_ ?_
   · rw [← fderiv_iteratedDerivWithin_time_comm hsL haccL hV b h0L hw hGL,
@@ -103,7 +103,8 @@ theorem jetMatch_of_evolution
       derivWithin (fun s => GR s w) sR t = Φ (jet2 (GR t) w))
     (hbdry : Set.EqOn (GL 0) (GR 0) V) :
     ∀ (n : ℕ), ∀ w ∈ V,
-      iteratedDerivWithin n (fun s => GL s w) sL 0 = iteratedDerivWithin n (fun s => GR s w) sR 0 := by
+      iteratedDerivWithin n (fun s => GL s w) sL 0 = iteratedDerivWithin n (fun s => GR s w) sR
+        0 := by
   intro n
   induction n using Nat.strong_induction_on with
   | _ n ih =>

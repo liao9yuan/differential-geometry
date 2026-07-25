@@ -170,7 +170,7 @@ private lemma base_u_chart_ae_eq_chartPushed
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := by
   classical
   have h_coeFn :=
-    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
+    Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
   have h_meas : MeasurableSet
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -216,7 +216,7 @@ private lemma base_weak_partial_ae_eq_chartPushedChosenFirstPartial_aux
       (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)]
       chartPushedChosenFirstPartial (I := I) (M := M) g α u_h i :=
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3.chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
+  chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
     (I := I) (M := M) g α hu_h i
 
 def ofBase

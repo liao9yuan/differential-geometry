@@ -122,7 +122,7 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
   have hp_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
   obtain ⟨C_env, hC_env_nn, h_env⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
+    Analysis.Sobolev.EquivalenceReverse.eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
       (I := I) (M := M) g α (p := (2 : ℝ≥0∞)) hp_one hp_top
   obtain ⟨C_L2, hC_L2_nn, h_L2⟩ :=
     exists_eLpNorm_tensorChartComponentScalar_le_const_mul_h1Norm
@@ -168,7 +168,8 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
             eLpNorm (fun x : M => Real.sqrt
                 (g.inner x
                   (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x)
-                  (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) 2 μM) :=
+                  (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) 2
+                    μM) :=
     h_env hu_smooth k
   have h_L2_apply :
       eLpNorm u 2 μM ≤ ENNReal.ofReal C_L2 * NS := by
@@ -221,7 +222,8 @@ theorem exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar
               eLpNorm (fun x : M => Real.sqrt
                   (g.inner x
                     (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x)
-                    (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) 2 μM) :=
+                    (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u x))) 2
+                      μM) :=
           h_env_apply
       _ ≤ ENNReal.ofReal C_env *
             (ENNReal.ofReal C_L2 * NS + ENNReal.ofReal C_grad * NS) :=

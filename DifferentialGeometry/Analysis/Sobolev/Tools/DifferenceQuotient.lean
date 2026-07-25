@@ -77,7 +77,6 @@ omit [NeZero d] in
   simp [translate]
 
 omit [NeZero d] in
-
 @[simp] lemma diffQuot_add (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v + w) = diffQuot i h v + diffQuot i h w := by
   ext x
@@ -87,7 +86,6 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-
 @[simp] lemma diffQuot_smul (i : Fin d) (h c : ℝ) (v : E → ℝ) :
     diffQuot i h (c • v) = c • diffQuot i h v := by
   ext x
@@ -97,7 +95,6 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-
 @[simp] lemma diffQuot_sub (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v - w) = diffQuot i h v - diffQuot i h w := by
   ext x
@@ -124,7 +121,6 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-
 lemma measurable_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Measurable v) :
     Measurable (translate i h v) := by
@@ -133,7 +129,6 @@ lemma measurable_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
   exact hv.comp hadd
 
 omit [NeZero d] in
-
 lemma measurable_diffQuot (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Measurable v) :
     Measurable (diffQuot i h v) := by
@@ -152,7 +147,6 @@ lemma measurable_diffQuot (i : Fin d) (h : ℝ) {v : E → ℝ}
     rw [heq]; exact hd
 
 omit [NeZero d] in
-
 lemma continuous_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (translate i h v) := by
   have hadd : Continuous (fun x : E => x + h • EuclideanSpace.single i 1) :=
@@ -160,7 +154,6 @@ lemma continuous_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
   exact hv.comp hadd
 
 omit [NeZero d] in
-
 lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (diffQuot i h v) := by
   by_cases hh : h = 0
@@ -178,7 +171,6 @@ lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
     rw [heq]; exact hd
 
 omit [NeZero d] in
-
 lemma aestronglyMeasurable_diffQuot
     (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : AEStronglyMeasurable v volume) :
@@ -213,7 +205,6 @@ lemma aestronglyMeasurable_diffQuot
     rw [heq]; exact hd
 
 omit [NeZero d] in
-
 lemma tendsto_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) (x : E) :
     Tendsto (fun h : ℝ => diffQuot i h v x) (𝓝[≠] 0)
@@ -264,7 +255,6 @@ private lemma measurePreserving_translate (i : Fin d) (h : ℝ) :
   measurePreserving_add_right volume _
 
 omit [NeZero d] in
-
 lemma memLp_translate
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v p volume) :
@@ -281,7 +271,6 @@ lemma memLp_translate
   rw [h_eq]; exact hv.eLpNorm_lt_top
 
 omit [NeZero d] in
-
 lemma integrable_translate
     (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Integrable v volume) :
@@ -290,14 +279,12 @@ lemma integrable_translate
   exact hMP.integrable_comp_of_integrable hv
 
 omit [NeZero d] in
-
 private lemma holder_two_two : ENNReal.HolderTriple (2 : ℝ≥0∞) 2 1 := by
   constructor
   rw [show (1 : ℝ≥0∞)⁻¹ = 1 from inv_one]
   rw [ENNReal.inv_two_add_inv_two]
 
 omit [NeZero d] in
-
 lemma integrable_mul_of_memLp_two
     {f g : E → ℝ} (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
     Integrable (fun x => f x * g x) volume := by
@@ -307,7 +294,6 @@ lemma integrable_mul_of_memLp_two
   simpa using h
 
 omit [NeZero d] in
-
 theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
     (i : Fin d) {h : ℝ} (hh : h ≠ 0) {f g : E → ℝ}
     (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
@@ -408,7 +394,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
   rw [div_neg, neg_neg]
 
 omit [NeZero d] in
-
 lemma diffQuot_eq_integral_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -496,7 +481,6 @@ lemma diffQuot_eq_integral_partialDeriv
   rw [hrewrite_goal]
 
 omit [NeZero d] in
-
 lemma sq_diffQuot_le_integral_sq_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -546,7 +530,6 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
   exact hJensen
 
 omit [NeZero d] in
-
 lemma sq_diffQuot_le_integral_indicator
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     {Ω : Set E} (hΩ : MeasurableSet Ω)
@@ -593,7 +576,6 @@ lemma sq_diffQuot_le_integral_indicator
   exact hbase
 
 omit [NeZero d] in
-
 theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0) :
     ∫⁻ x : E, (‖diffQuot i h v x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure E) ≤
@@ -708,7 +690,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     _ = ∫⁻ y : E, H y ∂(volume : Measure E) := h_lintegral_const
 
 omit [NeZero d] in
-
 theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0) :
     eLpNorm (diffQuot i h v) 2 (volume : Measure E) ≤
@@ -750,7 +731,6 @@ theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
     (d := d) hv i hh
 
 omit [NeZero d] in
-
 private lemma diffQuot_bound_of_lipschitz
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (i : Fin d) :
@@ -785,7 +765,6 @@ private lemma diffQuot_bound_of_lipschitz
     exact hLip_apply
 
 omit [NeZero d] in
-
 theorem hasWeakPartialDeriv_of_diffQuot_tendsto_inner
     (i : Fin d) {v g : E → ℝ}
     (hv_memLp : MemLp v 2 (volume : Measure E))

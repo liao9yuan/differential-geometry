@@ -82,7 +82,8 @@ def metricDiff02 (g₁ g₂ : SmoothRiemannianMetric I M) :
     Π b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
   fun b => metricTensor02 (I := I) g₁ b - metricTensor02 (I := I) g₂ b
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem metricDiff02_apply
     (g₁ g₂ : SmoothRiemannianMetric I M) (b : M) (v w : TangentSpace I b) :
     metricDiff02 (I := I) g₁ g₂ b v w =

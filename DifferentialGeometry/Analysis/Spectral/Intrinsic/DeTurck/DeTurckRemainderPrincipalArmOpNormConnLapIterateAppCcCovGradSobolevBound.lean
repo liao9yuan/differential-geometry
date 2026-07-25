@@ -49,7 +49,8 @@ lemma iteratedCovGrad_le_sq_envelope_product (g₀ : SmoothRiemannianMetric I M)
       (Real.sqrt (Kc b) * (1 + ∑ j ∈ Finset.range (b + 2), CJ j) +
         εa * CJ (b + 2)) * (1 + f) := by
   refine le_trans
-    (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv b) ?_
+    (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv b)
+      ?_
   have hCJsum_nn : 0 ≤ ∑ j ∈ Finset.range (b + 2), CJ j :=
     Finset.sum_nonneg (fun j _ => hCJ_nn j)
   have hsum' : 1 + ∑ j ∈ Finset.range (b + 2),
@@ -86,7 +87,8 @@ lemma iteratedCovGrad_le_sq_envelope_product (g₀ : SmoothRiemannianMetric I M)
           εa * CJ (b + 2)) * (1 + f) := by ring
 
 
-lemma exists_connLapIterate_appCc_covGrad_sobolevHs_bound_odd (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+lemma exists_connLapIterate_appCc_covGrad_sobolevHs_bound_odd (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa) :
     ∃ KT : ℕ → ℝ, (∀ p, 0 ≤ KT p) ∧
@@ -107,10 +109,14 @@ lemma exists_connLapIterate_appCc_covGrad_sobolevHs_bound_odd (g₀ : SmoothRiem
             B * εa * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 3 : ℕ) : ℝ) T₀‖ +
               KT p * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 2 : ℕ) : ℝ) T₀‖ := by
   classical
-  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
-  obtain ⟨CCS, hCCS_nn, hCCS⟩ := riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs
+    (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CCS, hCCS_nn, hCCS⟩ :=
+    riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (I := I) (M := M)
+    g₀ Kc hKc_nn εa hεa_nn
   obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
-  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I) (M := M) g₀
+  obtain ⟨CDS0, hCDS0_nn, hCDS0⟩ := riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (I := I)
+    (M := M) g₀
   obtain ⟨c22, hc22_nn, hc22⟩ := bal_Ccore (I := I) (M := M) g₀ 2 2
   have hgapfam := fun k : ℕ =>
     exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower

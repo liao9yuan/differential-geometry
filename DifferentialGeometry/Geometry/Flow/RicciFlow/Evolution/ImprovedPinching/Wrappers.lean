@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -43,7 +42,8 @@ theorem pinchEvol_book
     {epsilon : Real}
     (_heps_pos : 0 < epsilon)
     (_heps_lt : epsilon < 1)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      x,
       0 < S.scalar (t : Real) x) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt

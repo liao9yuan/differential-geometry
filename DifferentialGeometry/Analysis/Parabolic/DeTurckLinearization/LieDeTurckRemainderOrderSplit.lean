@@ -536,7 +536,8 @@ theorem lieDerivFirstOrderRemainder_eq_order0_add_order1
             partialDeriv (E := E) i
               (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
       = (∑ k : Fin (Module.finrank ℝ E),
-          h k j y * partialDeriv (E := E) i (fun y' => chartDeTurckVFComp (I := I) g₀ g_bg α k y') y)
+          h k j y * partialDeriv (E := E) i (fun y' => chartDeTurckVFComp (I := I) g₀ g_bg α k y')
+            y)
         + (∑ k : Fin (Module.finrank ℝ E),
           chartGramOnE (I := I) g₀ α k j y *
             deTurckVFFirstOrderCorrDeriv0 (I := I) g₀ g_bg α h i k y)
@@ -554,7 +555,8 @@ theorem lieDerivFirstOrderRemainder_eq_order0_add_order1
             partialDeriv (E := E) j
               (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
       = (∑ k : Fin (Module.finrank ℝ E),
-          h i k y * partialDeriv (E := E) j (fun y' => chartDeTurckVFComp (I := I) g₀ g_bg α k y') y)
+          h i k y * partialDeriv (E := E) j (fun y' => chartDeTurckVFComp (I := I) g₀ g_bg α k y')
+            y)
         + (∑ k : Fin (Module.finrank ℝ E),
           chartGramOnE (I := I) g₀ α i k y *
             deTurckVFFirstOrderCorrDeriv0 (I := I) g₀ g_bg α h j k y)

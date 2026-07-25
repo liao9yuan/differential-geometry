@@ -652,7 +652,8 @@ theorem linearODESolution_continuousOn
   have hdt_β : dist t t₀ < β - t₀ :=
     lt_of_lt_of_le hdt (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))
   have hdt_α : dist t t₀ < t₀ - α :=
-    lt_of_lt_of_le hdt (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
+    lt_of_lt_of_le hdt (le_trans (min_le_right _ _)
+      (le_trans (min_le_right _ _) (min_le_right _ _)))
   have ht_Icc : t ∈ Icc α β := by
     rw [Real.dist_eq] at hdt_β hdt_α
     refine ⟨?_, ?_⟩

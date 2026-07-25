@@ -368,7 +368,8 @@ theorem perp_to_velocity_preserved_of_parallel
     have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
       have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
       ((hVdiff t₀ ht₀).hasDerivAt)
@@ -623,7 +624,8 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space (TangentBundle I M)] in
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
     (hX : IsParallelChart (I := I) g (γ t) γ
@@ -777,7 +779,6 @@ theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
         simpa [Function.support] using hnot_support
       simpa [hchi_zero] using hlam_pos.le
 
-set_option linter.unusedVariables false in
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_on
@@ -855,7 +856,8 @@ theorem perp_to_velocity_preserved_on
     have hmem_int : chartCurve (I := I) α γ t₀ ∈ interior (extChartAt I α).target := by
       have hxsrc : γ t₀ ∈ (extChartAt I α).source := by
         rw [extChartAt_source]; exact mem_chart_source H (γ t₀)
-      exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      exact
+        Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
         (I := I) α ((extChartAt I α).map_source hxsrc)
     have hVrep_hasDerivAt : HasDerivAt Vrep (deriv Vrep t₀) t₀ :=
       ((hVdiff t₀ ht₀).hasDerivAt)
@@ -990,7 +992,6 @@ theorem velocity_chartRepAt_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]

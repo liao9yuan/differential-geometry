@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
 
 
 
@@ -488,7 +486,8 @@ abbrev raisedRicciCompInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (i j : Idx) : Real :=
-  DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame (I := I) (M := M) (Time := Real)
+  DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame (I := I) (M := M)
+    (Time := Real)
     (ricciTwoTensorField (I := I) S) gInv frame t x i j
 
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -655,7 +654,8 @@ theorem ricciNormSq_basis
     (fun i j : Idx => gInv t x i j) hinv (S.ricci t x) (S.ricci t x)]
   simp only [ricciNormSqInFrame, DifferentialGeometry.Integral.Connection.ricciNormSqInFrame_apply,
     ricciTwoTensorField_apply, SolutionOn.ricciAt_eq,
-    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame_apply, SolutionOn.ricci_eq,
+    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame_apply,
+      SolutionOn.ricci_eq,
     SolutionFamily.ricci_apply, hbasis, Fin.isValue,
     Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -684,7 +684,8 @@ abbrev roughLapRicciInnerInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     Real -> M -> Real :=
-  DifferentialGeometry.Integral.Connection.roughLapRicciInnerInFrame (I := I) (M := M) (Time := Real)
+  DifferentialGeometry.Integral.Connection.roughLapRicciInnerInFrame (I := I) (M := M)
+    (Time := Real)
     roughLapRic (ricciTwoTensorField (I := I) S) gInv frame
 
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -722,7 +723,8 @@ omit [SigmaCompactSpace M] in
     nablaRicComp (I := I) S frame t x a i j =
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) := by
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) := by
   rfl
 
 
@@ -785,7 +787,8 @@ private theorem coordInner3_eq
       ∑ a : Idx, ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
         gInv a b * gInv i k * gInv j l *
           A (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis a) (basis i) (basis j)) *
-            B (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k) (basis l)) := by
+            B (DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k)
+              (basis l)) := by
   classical
   unfold coordInner0S tensor0SComponent
   rw [← Fintype.sum_prod_type']
@@ -821,12 +824,14 @@ private theorem coordInner3_eq
         (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) a i j q)) =
           DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis a) (basis i) (basis j) := by
       funext q
-      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3,
+        DifferentialGeometry.Integral.Connection.vec3]
     have hB :
         (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) b k l q)) =
           DifferentialGeometry.Integral.Connection.vec3 (I := I) (basis b) (basis k) (basis l) := by
       funext q
-      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3,
+        DifferentialGeometry.Integral.Connection.vec3]
     rw [hA, hB]
     simp [fin3Slots]
   · intro p
@@ -859,7 +864,8 @@ private theorem nablaRicciNorm_basis
     (hnabla : ∀ a i j : Idx,
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) =
         nablaRic t x a i j) :
     nablaRicciNormSqInFrame (M := M) nablaRic gInv t x =
       ricciGradSq (I := I) S t x := by
@@ -878,7 +884,8 @@ private theorem nablaRicciNorm_basis
   have hnabla' : ∀ a i j : Idx,
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.base.connection t) (S.base.ricci t) x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+            (frame j x)) =
         nablaRic t x a i j := by
     intro a i j
     simpa [SolutionOn.family, SolutionOn.ricci] using hnabla a i j
@@ -976,7 +983,8 @@ def InverseMetricEvolutionEquationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u -> ∀ (i j : Idx),
+  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    ∀ (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => gInv s x i j)
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
@@ -1097,7 +1105,8 @@ theorem ricciDerivSimpAt
         ∑ i : Idx, ∑ j : Idx, L i j * raise2By G A i j := by
     simp [G, A, L, roughLapRicciInnerInFrame, raise2By]
   let R4 : Idx -> Idx -> Idx -> Idx -> Real :=
-    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x i k j l
+    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                     frame x i k j l
   let AR : Idx -> Idx -> Real := fun i j => raise2By G A i j
   have hcurv :
       (∑ i : Idx, ∑ j : Idx, C i j * raise2By G A i j) =
@@ -1185,7 +1194,8 @@ theorem ricciNormDerivativeSimplifiesInFrame_canonical
         ∑ i : Idx, ∑ j : Idx, L i j * raise2By G A i j := by
     simp [G, A, L, roughLapRicciInnerInFrame, raise2By]
   let R4 : Idx -> Idx -> Idx -> Idx -> Real :=
-    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x i k j l
+    fun i k j l => DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real))
+                     frame x i k j l
   let AR : Idx -> Idx -> Real := fun i j => raise2By G A i j
   have hcurv :
       (∑ i : Idx, ∑ j : Idx, C i j * raise2By G A i j) =
@@ -1220,7 +1230,8 @@ def RicciEvolutionEquationInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (i j : Idx),
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
       (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
@@ -1256,7 +1267,8 @@ theorem inverseMetricEvolutionEquationInFrame_of_components
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
-    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x
+      ∈ u ->
       ∀ (i j : Idx),
       HasDerivWithinAt
         (fun s : Real => gInv s x i j)
@@ -1297,7 +1309,8 @@ theorem ricciEvolutionEquationInFrame_of_components
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    (h : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+      (i j : Idx),
       HasDerivWithinAt
         (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
         (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic

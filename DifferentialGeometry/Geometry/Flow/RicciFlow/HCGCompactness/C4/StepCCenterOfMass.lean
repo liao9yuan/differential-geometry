@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 
@@ -228,7 +227,8 @@ theorem dist_le {qstar : M} {ε : ℝ} (hε : 0 ≤ ε)
 
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem centerEnergy_diff {x : M}
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=

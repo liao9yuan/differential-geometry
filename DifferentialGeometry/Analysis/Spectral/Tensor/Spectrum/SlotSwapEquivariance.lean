@@ -61,7 +61,8 @@ private lemma cons_cons_comp_decomposeFin_double {α : Type*} {s : ℕ}
       simp only [Equiv.refl_apply, Fin.cons_succ]
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add (s : ℕ) (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S + S') x =
       unitModel (I := I) (M := M) g s S x + unitModel (I := I) (M := M) g s S' x := by
@@ -361,7 +362,6 @@ theorem orthonormal_toL2_swap_eigenSmooth :
   exact hstep
 
 open scoped Classical in
-
 omit [BoundarylessManifold I M] in
 private lemma tensorL2Coeff_sum_smul_eigenbasis
     (S : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -790,7 +790,8 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
       (fun l : Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)) =>
         (⟨μ, l⟩ :
           Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2)) hinj
-  have hstep1 : ∀ k : Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
+  have hstep1 : ∀ k : Fin (Module.finrank ℝ
+    (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
       tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
           ⟨μ, k⟩ =
@@ -818,7 +819,8 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
             (hCompact (I := I) (M := M) g)) j⟫_ℝ = 0 := by
       intro j hj
       have hjfst : ¬ (⟨μ, k⟩ :
-          Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2).1 = j.1 := by
+          Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2).1 =
+            j.1 := by
         intro heq
         obtain ⟨ν, w⟩ := j
         have heq' : μ = ν := heq
@@ -830,7 +832,8 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
           (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
             (eigenSmooth (I := I) (M := M) g ⟨μ, k⟩))) j]
-        exact tensorL2Coeff_toL2_swap_eigenSmooth_eq_zero_of_fst_ne (I := I) (M := M) g ⟨μ, k⟩ j hjfst
+        exact tensorL2Coeff_toL2_swap_eigenSmooth_eq_zero_of_fst_ne (I := I) (M := M) g ⟨μ, k⟩ j
+          hjfst
       rw [hbj, mul_zero]
     have hlhs : ⟪sk, SmoothCcTensor.toL2 X⟫_ℝ =
         ∑ j ∈ F, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
@@ -846,7 +849,8 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
       rw [hY, inner_sum]
       exact Finset.sum_congr rfl (fun j _ => real_inner_smul_right _ _ _)
     rw [hlhs, hrhs]
-  have hbessel : ∑ k : Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
+  have hbessel : ∑ k : Fin
+    (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
       ‖⟪SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
           (eigenSmooth (I := I) (M := M) g ⟨μ, k⟩)), Y⟫_ℝ‖ ^ 2 ≤ ‖Y‖ ^ 2 :=
     Orthonormal.sum_inner_products_le Y hsorth
@@ -895,13 +899,15 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
     (smoothCcToTensorHs (I := I) (M := M) g σ X).weighted_summable
   have hsummSwap : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-        (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i) ^ 2) :=
+        (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i) ^
+          2) :=
     (smoothCcToTensorHs (I := I) (M := M) g σ
       (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)).weighted_summable
   have hsummSymm : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
         (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2) :=
-    (smoothCcToTensorHs (I := I) (M := M) g σ (ccTensor02Symm (I := I) (M := M) g X)).weighted_summable
+    (smoothCcToTensorHs (I := I) (M := M) g σ
+      (ccTensor02Symm (I := I) (M := M) g X)).weighted_summable
   have hswapLe : ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
@@ -912,41 +918,50 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
     rw [hsummSwap.tsum_sigma, hsummX.tsum_sigma]
     refine Summable.tsum_le_tsum (fun μ => ?_) hsummSwap.sigma hsummX.sigma
     rw [tsum_eq_sum (s := (Finset.univ :
-          Finset (Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)))))
+          Finset (Fin (Module.finrank ℝ
+            (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)))))
         (fun c hc => absurd (Finset.mem_univ c) hc),
       tsum_eq_sum (s := (Finset.univ :
-          Finset (Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)))))
+          Finset (Fin (Module.finrank ℝ
+            (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)))))
         (fun c hc => absurd (Finset.mem_univ c) hc)]
     rcases isEmpty_or_nonempty
         (Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)))
       with hemp | hne
     · haveI := hemp; simp
     · obtain ⟨c₀⟩ := hne
-      have hwc : ∀ c : Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
+      have hwc : ∀ c : Fin (Module.finrank ℝ
+        (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
           tensorSobolevWeight (I := I) (M := M)
-            (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ =
+            (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2)
+              σ =
           tensorSobolevWeight (I := I) (M := M)
-            (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ :=
+            (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2)
+              σ :=
         fun c => tensorSobolevWeight_eq_of_fst_eq (I := I) (M := M) g rfl σ
       calc ∑ c, tensorSobolevWeight (I := I) (M := M)
-              (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ *
+              (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+                2) σ *
               (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
                 (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
                 ⟨μ, c⟩) ^ 2
           = tensorSobolevWeight (I := I) (M := M)
-              (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ *
+              (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+                2) σ *
               ∑ c, (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
                 (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
                 ⟨μ, c⟩) ^ 2 := by
             rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun c _ => by rw [hwc c])
         _ ≤ tensorSobolevWeight (I := I) (M := M)
-              (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ *
+              (⟨μ, c₀⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+                2) σ *
               ∑ c, (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
                 (SmoothCcTensor.toL2 X) ⟨μ, c⟩) ^ 2 :=
             mul_le_mul_of_nonneg_left (block_tensorL2Coeff_sq_swap_le (I := I) (M := M) g X μ)
               (tensorSobolevWeight_nonneg (I := I) (M := M) _ σ)
         _ = ∑ c, tensorSobolevWeight (I := I) (M := M)
-              (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) σ *
+              (⟨μ, c⟩ : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0
+                2) σ *
               (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
                 (SmoothCcTensor.toL2 X) ⟨μ, c⟩) ^ 2 := by
             rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun c _ => by rw [hwc c])
@@ -955,7 +970,8 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
       (1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 X) i +
         tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-          (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i) := by
+          (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
+            i) := by
     intro i
     rw [toL2_symmS_eq (I := I) (M := M) g X, tensorL2Coeff_smul, tensorL2Coeff_add]
   have hRHSsumm : Summable (fun i => (1 / 2 : ℝ) * (tensorSobolevWeight (I := I) (M := M) i σ *
@@ -963,7 +979,8 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
           (SmoothCcTensor.toL2 X) i) ^ 2) +
       (1 / 2 : ℝ) * (tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-          (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i) ^ 2)) :=
+          (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i) ^
+            2)) :=
     (hsummX.mul_left _).add (hsummSwap.mul_left _)
   calc ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
           (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)

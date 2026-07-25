@@ -196,7 +196,7 @@ private lemma chosenWeakPartial_chartPushed_u_h_ae_zero_off_K_α
         (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)) := by
   have h_w1p :=
-    DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree.chartPushed_memW1p_two_of_laplacianDomainPow_two
+    Analysis.Laplacian.ChartPushedMemWkpThree.chartPushed_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h
   exact chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -421,7 +421,7 @@ private lemma base_u_chart_ae_eq_chartPushed_on_vol
         (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := by
   have h_coeFn :=
-    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
+    Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
   have h_v_abs_w := vol_restrict_chart_target_absCont_weighted (I := I) (M := M)
     (α := α) g
@@ -492,7 +492,8 @@ private lemma base_f_chart_locally_memLp_helper
   base_f_chart_locally_memLp (I := I) (M := M) g α hu_h hK_compact
     hK_compact.isClosed.measurableSet hK_in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma memLp_top_of_continuousOn_on_compact_chart
     (_g : SmoothRiemannianMetric I M) (α : M)
     {h : EuclN → ℝ}

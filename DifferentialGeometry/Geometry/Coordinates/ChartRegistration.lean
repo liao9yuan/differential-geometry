@@ -2,7 +2,6 @@ import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 
 

@@ -32,7 +32,8 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 private lemma velocity_enorm_le_of_speedSq_le
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -393,7 +394,8 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 theorem chartPhase_eventually_of_geodesicOn
     (g : SmoothRiemannianMetric I M) (q : M) {γ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -447,10 +449,12 @@ theorem chartPhase_eventually_of_geodesicOn
       (extChartAt I q).map_source hp_ext_src
     have hws : w s = extChartAt I q (γ s) := by rw [hw_def, chartCurve_def]
     rw [hws]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+    exact
+      Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) q hp_target
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPhaseVF_orbit_uniqueness_at
@@ -504,7 +508,8 @@ theorem chartPhaseVF_orbit_uniqueness_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem chartPhase_continuousAt_of_geodesicOn
     (g : SmoothRiemannianMetric I M) (q : M) {γ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -518,7 +523,8 @@ private theorem chartPhase_continuousAt_of_geodesicOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem geodesic_eventuallyEq_of_chartPhase_eq
     (g : SmoothRiemannianMetric I M) (q : M) {γ₁ γ₂ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -561,7 +567,8 @@ private theorem geodesic_eventuallyEq_of_chartPhase_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem chartCurve_deriv_zero_eq
     (q : M) {γ : ℝ → M} {v : E}
     (hγ_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ 0)
@@ -805,7 +812,8 @@ theorem exists_maximalGeodesic_data_of_small
       rw [hF0]; exact mem_chart_source H q
     have hmfd := Geodesic.IsMIntegralCurveAt.mfderiv_proj_one (I := I) hF_at hF0_src
     have hEqnhds : (fun s => maximalGeodesic (I := I) g q v s)
-        =ᶠ[𝓝 (0 : ℝ)] (fun r => (Exponential.chartFlowOrbitLiftRescaled (I := I) Φ q t' vb r).proj) := by
+        =ᶠ[𝓝 (0 : ℝ)] (fun r => (Exponential.chartFlowOrbitLiftRescaled (I := I) Φ q t' vb
+          r).proj) := by
       refine Filter.eventually_of_mem (isOpen_Ioo.mem_nhds h0_mem) ?_
       intro r hr
       have h := Exponential.chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
@@ -837,7 +845,8 @@ theorem exists_maximalGeodesic_data_of_small
     rw [show (t' • vb : TangentSpace I q) = v from hvb_resc] at hEq
     rw [← hEq]; exact hsrc'
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private lemma gq_coercive (g : SmoothRiemannianMetric I M) (q : M) :
     ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner q x x := by
   classical
@@ -1213,7 +1222,8 @@ theorem exp_eq_intr_of_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem hasGeodesicEquationAt_comp_const_smul
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} (c t : ℝ)
     (hgeo : Geodesic.HasGeodesicEquationAt (I := I) g γ (c * t)) :
@@ -1282,7 +1292,8 @@ private theorem hasGeodesicEquationAt_comp_const_smul
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem geodesic_eventuallyEq_of_initial_local
     (g : SmoothRiemannianMetric I M) {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
     (hγ₁_cont : Continuous γ₁) (hγ₂_cont : Continuous γ₂)

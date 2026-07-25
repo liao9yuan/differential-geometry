@@ -178,7 +178,8 @@ private lemma lp_pos_propagate_up (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M :
       rw [hidx2] at hRr
       exact hRr
 
-theorem discrete_log_convex_power_interpolation (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M) (j k : ℕ)
+theorem discrete_log_convex_power_interpolation (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M)
+    (j k : ℕ)
     (hlc : ∀ i, i + 1 < k → (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2))
     (hj : 0 < j) (hjk : j < k) :
     (a j) ^ k ≤ M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by

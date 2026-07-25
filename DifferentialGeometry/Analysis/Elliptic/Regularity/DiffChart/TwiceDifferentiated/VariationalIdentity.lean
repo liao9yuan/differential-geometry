@@ -137,7 +137,8 @@ private lemma integral_add_thirteen {α : Type*} [MeasurableSpace α]
     (h11 : Integrable f11 μ)
     (h12 : Integrable f12 μ)
     (h13 : Integrable f13 μ) :
-    (∫ y, f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y + f12 y + f13 y ∂μ) =
+    (∫ y, f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y + f12 y + f13
+      y ∂μ) =
       (∫ y, f1 y ∂μ) +
       (∫ y, f2 y ∂μ) +
       (∫ y, f3 y ∂μ) +
@@ -157,11 +158,16 @@ private lemma integral_add_thirteen {α : Type*} [MeasurableSpace α]
   have hs5 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y) μ := hs4.add h5
   have hs6 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y) μ := hs5.add h6
   have hs7 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y) μ := hs6.add h7
-  have hs8 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y) μ := hs7.add h8
-  have hs9 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y) μ := hs8.add h9
-  have hs10 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y) μ := hs9.add h10
-  have hs11 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y) μ := hs10.add h11
-  have hs12 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y + f10 y + f11 y + f12 y) μ := hs11.add h12
+  have hs8 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y) μ :=
+    hs7.add h8
+  have hs9 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y) μ :=
+    hs8.add h9
+  have hs10 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y +
+    f10 y) μ := hs9.add h10
+  have hs11 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y +
+    f10 y + f11 y) μ := hs10.add h11
+  have hs12 : Integrable (fun y => f1 y + f2 y + f3 y + f4 y + f5 y + f6 y + f7 y + f8 y + f9 y +
+    f10 y + f11 y + f12 y) μ := hs11.add h12
   rw [MeasureTheory.integral_add hs12 h13,
     MeasureTheory.integral_add hs11 h12,
     MeasureTheory.integral_add hs10 h11,
@@ -194,11 +200,14 @@ private lemma numerator_secondOrder_decomp
     (hΩ_open : IsOpen Ω)
     (h_base_wp_int : ∀ i : Fin (Module.finrank ℝ E),
       IntegrableOn ((chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i) K (volume : Measure EuclN))
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i) K
+        (volume : Measure EuclN))
     (h_base_uc_int : IntegrableOn (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart K (volume : Measure EuclN))
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart K
+        (volume : Measure EuclN))
     (h_base_fc_int : IntegrableOn (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart K (volume : Measure EuclN))
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart K
+        (volume : Measure EuclN))
     (h_chosenFChartDeriv_int : ∀ l : Fin (Module.finrank ℝ E),
       IntegrableOn (chosenFChartDeriv (I := I) (M := M) g α hu_h l)
         K (volume : Measure EuclN))
@@ -214,7 +223,8 @@ private lemma numerator_secondOrder_decomp
       Integrable (fun y => (fderiv ℝ (weightedInvGramSecondDerivOnEuclid
             (I := I) g α i j l₁ l₂) y) (EuclideanSpace.single j 1) *
           (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i y * ψ y)
+      (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i y
+        * ψ y)
         ((volume : Measure EuclN).restrict Ω))
     (h_int_C2_pair : ∀ i j,
       Integrable (fun y => weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
@@ -257,7 +267,8 @@ private lemma numerator_secondOrder_decomp
          ∫ y in Ω,
             (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
             (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial l₁ y * ψ y ∂(volume : Measure EuclN)) +
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1
+                hu_h)).weak_partial l₁ y * ψ y ∂(volume : Measure EuclN)) +
      ∫ y in Ω,
      (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l₂ 1) *
      chosenFChartDeriv (I := I) (M := M) g α hu_h l₁ y * ψ y
@@ -270,7 +281,8 @@ private lemma numerator_secondOrder_decomp
               (fderiv ℝ (weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂) y)
                 (EuclideanSpace.single j 1) *
               (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial i y * ψ y
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1
+                hu_h)).weak_partial i y * ψ y
               ∂(volume : Measure EuclN)) +
       (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
             ∫ y in Ω, weightedInvGramSecondDerivOnEuclid (I := I) g α i j l₁ l₂ y *
@@ -290,15 +302,18 @@ private lemma numerator_secondOrder_decomp
          ∫ y in Ω,
             (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
             (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart y * ψ y ∂(volume : Measure EuclN)) +
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).u_chart y
+                * ψ y ∂(volume : Measure EuclN)) +
       (-
          ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
             (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).weak_partial l₂ y * ψ y ∂(volume : Measure EuclN)) +
+              (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1
+                hu_h)).weak_partial l₂ y * ψ y ∂(volume : Measure EuclN)) +
      ∫ y in Ω,
      (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y) (EuclideanSpace.single l₂ 1) *
      (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
-       (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart y * ψ y ∂(volume : Measure EuclN) +
+       (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)).f_chart y * ψ y
+         ∂(volume : Measure EuclN) +
      ∫ y in Ω, densityDerivOnEuclid (I := I) g α l₁ y *
      chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y
      ∂(volume : Measure EuclN) := by
@@ -523,7 +538,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_X1_named i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_X1_named i j)]
-
   have eq_intA2 : (∫ y in Ω, int_A2 y ∂(volume : Measure EuclN)) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), X2 i j := by
@@ -541,7 +555,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_X2_named i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_X2_named i j)]
-
   have eq_intA3 : (∫ y in Ω, int_A3 y ∂(volume : Measure EuclN)) = - N_A3 := by
     change (∫ y in Ω,
         - (densityDerivOnEuclid (I := I) g α l₂ y *
@@ -549,7 +562,6 @@ private lemma numerator_secondOrder_decomp
         ∂(volume : Measure EuclN)) = - N_A3
     rw [MeasureTheory.integral_neg]
     rfl
-
   have eq_intB1 : (∫ y in Ω, int_B1 y ∂(volume : Measure EuclN)) = N_B1 := rfl
   have eq_intB2 : (∫ y in Ω, int_B2 y ∂(volume : Measure EuclN)) = N_B2 := rfl
   have eq_intC1 : (∫ y in Ω, int_C1 y ∂(volume : Measure EuclN)) =
@@ -569,7 +581,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_C1_pair i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_C1_pair i j)]
-
   have eq_intC2 : (∫ y in Ω, int_C2 y ∂(volume : Measure EuclN)) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), C2 i j := by
@@ -586,7 +597,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_C2_pair i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_C2_pair i j)]
-
   have eq_intC3 : (∫ y in Ω, int_C3 y ∂(volume : Measure EuclN)) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), C3 i j := by
@@ -604,7 +614,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_C3_pair i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_C3_pair i j)]
-
   have eq_intC4 : (∫ y in Ω, int_C4 y ∂(volume : Measure EuclN)) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E), C4 i j := by
@@ -621,7 +630,6 @@ private lemma numerator_secondOrder_decomp
       (integrable_finset_sum _ (fun j _ => h_int_C4_pair i j)))]
     refine Finset.sum_congr rfl ?_; intro i _
     rw [integral_finset_sum _ (fun j _ => h_int_C4_pair i j)]
-
   have eq_intD1 : (∫ y in Ω, int_D1 y ∂(volume : Measure EuclN)) = - N_D1 := by
     change (∫ y in Ω,
         - (densitySecondDerivOnEuclid (I := I) g α l₁ l₂ y *
@@ -629,14 +637,12 @@ private lemma numerator_secondOrder_decomp
         ∂(volume : Measure EuclN)) = - N_D1
     rw [MeasureTheory.integral_neg]
     rfl
-
   have eq_intD2 : (∫ y in Ω, int_D2 y ∂(volume : Measure EuclN)) = - N_D2 := by
     change (∫ y in Ω,
         - (densityDerivOnEuclid (I := I) g α l₁ y *
           D_base.weak_partial l₂ y * ψ y)
         ∂(volume : Measure EuclN)) = - N_D2
     rw [MeasureTheory.integral_neg]
-
   have eq_intE1 : (∫ y in Ω, int_E1 y ∂(volume : Measure EuclN)) = N_E1 := rfl
   have eq_intE2 : (∫ y in Ω, int_E2 y ∂(volume : Measure EuclN)) = N_E2 := rfl
   rw [h_int_split, eq_intA1, eq_intA2, eq_intA3, eq_intB1, eq_intB2,

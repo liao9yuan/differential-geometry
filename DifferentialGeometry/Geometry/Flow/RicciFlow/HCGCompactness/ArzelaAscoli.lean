@@ -141,15 +141,6 @@ section VectorTarget
 variable {V : Type*} [NormedAddCommGroup V] [ProperSpace V]
 
 omit [SigmaCompactSpace X] [T2Space X] in
-
-
-
-
-
-
-
-
-
 theorem arzelaAscoli_isCompact_closure
     (f : Nat -> C(X, V))
     (hequi : Equicontinuous (fun k => (f k : X -> V)))
@@ -221,9 +212,6 @@ theorem arzelaAscoli_isCompact_closure
       (s := Set.range f) hEq hPoint
 
 omit [T2Space X] in
-
-
-
 theorem arzelaAscoli_subseq_vec
     (f : Nat -> C(X, V))
     (hequi : Equicontinuous (fun k => (f k : X -> V)))

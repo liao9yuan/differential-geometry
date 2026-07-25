@@ -1,9 +1,6 @@
 import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 
 
@@ -274,10 +271,6 @@ private theorem tensor0S_commutator_expansion_from_realizes
             (Fin.cons ((cov Yf x) (Xsec x)) slots) +
           nablaAlpha
             (Fin.cons ((cov Xf x) (Ysec x)) slots)) := by
-
-
-
-
     rw [metricTraceInput_eq_finCons (I := I) (Xsec x) (Ysec x)
       (fun q : Fin s => Vsec q x)]
     rw [metricTraceInput_eq_finCons (I := I) (Ysec x) (Xsec x)
@@ -860,7 +853,6 @@ private theorem tensor0S_commutator_expansion_from_realizes
     simp_rw [finCons_update_tail_eq_update_finCons_succ]
     repeat rw [Finset.sum_add_distrib]
     linarith [hDoubleCancel, hDiagCurv]
-
   calc
     nabla2Alpha
         (metricTraceInput (I := I) (Xsec x) (Ysec x)

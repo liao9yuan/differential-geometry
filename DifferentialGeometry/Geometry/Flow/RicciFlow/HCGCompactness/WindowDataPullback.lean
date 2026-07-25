@@ -331,8 +331,6 @@ theorem solSwapData_pullback
     SolSwapData (I := I) (Diffeomorph.pullbackMetric (I := I) gRef Φ) D
       (fun i => solutionOn_pullback (I := I) (S i) Φ) := by
   intro i n p' hp' V x0 t ht x hx Vdir
-
-
   have hfield : ∀ (A0M : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
       (A0N : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -349,7 +347,6 @@ theorem solSwapData_pullback
     congr 1
     funext a
     rw [pushFwdSection_apply_at_image]
-
   have hMDiff : ∀ (A0N : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
         (I := I) (M := N) (n := (∞ : WithTop ℕ∞)) 2),
       MDifferentiableAt I 𝓘(ℝ, ℝ)
@@ -358,7 +355,6 @@ theorem solSwapData_pullback
     intro A0N
     exact (covDerivOfField_eval_contMDiff (I := I) gRef A0N p'
       (fun a => pushFwdSection (I := I) Φ (V a))).contMDiffAt.mdifferentiableAt (by simp)
-
   have hconv : ∀ (A0M : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
       (A0N : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -377,7 +373,6 @@ theorem solSwapData_pullback
     exact extDerivFun_comp_diffeomorph
       (fun z : N => covDerivOfField (I := I) gRef A0N p' z
         (fun a => (pushFwdSection (I := I) Φ (V a)) z)) Φ x Vdir (hMDiff A0N)
-
   have hfun : (fun s : ℝ => extDerivFun (I := I)
         (fun y : M => covDerivOfField (I := I) (Diffeomorph.pullbackMetric (I := I) gRef Φ)
           (solnMetricField (I := I) (solutionOn_pullback (I := I) (S i) Φ) s) p' y
@@ -419,7 +414,6 @@ noncomputable def solWindowData_pullback
       (solCovData_pullback (I := I) beta psiT t0 gSeq gRef D S Hcov Φ)
       (solLipData_pullback (I := I) K beta psiT p gSeq gRef D S Hlip Φ)
       (solLowData_pullback (I := I) beta psiT gSeq gRef hlow Φ)
-
     have hset : (Φ : M → N) ⁻¹' K = (Φ.symm : N → M) '' K := by
       ext z
       simp only [Set.mem_preimage, Set.mem_image]

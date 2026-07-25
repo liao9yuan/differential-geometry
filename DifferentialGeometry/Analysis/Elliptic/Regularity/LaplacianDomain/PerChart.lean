@@ -272,7 +272,8 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
       (Measure.restrict_mono subset_closure le_rfl)
   have h_uChart_ae_f :
       D.u_chart =ᵐ[volume.restrict (chartTargetEuclid (I := I) (M := M) α)] f := by
-    have h_coeFn := DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
+    have h_coeFn :=
+      chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
     have h_v_abs_w :
         (volume : Measure EuclN).restrict

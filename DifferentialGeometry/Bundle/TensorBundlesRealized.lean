@@ -230,11 +230,9 @@ noncomputable def totalSpaceTopology :
     TopologicalSpace
       (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) := by
   classical
-
   letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
     Bundle.TensorProduct.tensorFiberTopology
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂) x
-
   exact
     (Bundle.TensorProduct.vectorPrebundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).totalSpaceTopology

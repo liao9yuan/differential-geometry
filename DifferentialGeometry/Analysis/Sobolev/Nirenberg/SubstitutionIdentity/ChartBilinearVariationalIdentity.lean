@@ -1632,19 +1632,23 @@ private lemma principal_post_ibp_integral_eq_symbolic
       hη_supp_in_K_0 h_T_zero
   have hT1_ij_int : ∀ i j, Integrable (T1 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    translatedCoeff_cutoffSq_diffQuotPartial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
+    translatedCoeff_cutoffSq_diffQuotPartial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D
+      hK_0_compact hη k hh hh_le
       h_thick i j
   have hT2_ij_int : ∀ i j, Integrable (T2 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    translatedCoeff_cutoffDeriv_diffQuotPartial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
+    translatedCoeff_cutoffDeriv_diffQuotPartial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D
+      hK_0_compact hη k hh hh_le
       h_thick i j
   have hT3_ij_int : ∀ i j, Integrable (T3 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    diffQuotCoeff_cutoffSq_partial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
+    diffQuotCoeff_cutoffSq_partial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D hK_0_compact
+      hK_0_in hη k hh hh_le
       h_thick i j
   have hT4_ij_int : ∀ i j, Integrable (T4 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    diffQuotCoeff_cutoffDeriv_partial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
+    diffQuotCoeff_cutoffDeriv_partial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D hK_0_compact
+      hK_0_in hη k hh hh_le
       h_thick i j
   have hT1_sum_int : Integrable (fun y => ∑ i, ∑ j, T1 i j y)
       ((volume : Measure EuclN).restrict K_0) := by

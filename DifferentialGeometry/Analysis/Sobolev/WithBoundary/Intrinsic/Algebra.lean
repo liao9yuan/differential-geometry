@@ -432,7 +432,6 @@ private lemma tsupport_chartSmoothExt_local
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
 omit [CompactSpace M] in
-
 private lemma chartSmoothExt_ae_eq_chartPushed_interior_local
     (α : M) (u : M → ℝ) :
     chartPullbackZeroExtend (n := n) (M := M) α

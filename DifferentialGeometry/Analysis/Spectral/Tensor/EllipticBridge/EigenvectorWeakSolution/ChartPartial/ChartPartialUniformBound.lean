@@ -23,6 +23,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open Analysis.Laplacian.SmoothFChartResidualBilinearBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -112,7 +113,8 @@ private lemma tensorChartComponent_contDiff
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) := by
   classical
   rw [tensorChartComponent_def]
-  refine DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+  refine
+    Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
     (I := I) (M := M) ?_ ?_
   · exact tensorChartComponentPou_contMDiff (I := I) (M := M) g r s S α Idx Jdx
   · exact tensorChartComponentPou_support_subset_chart_source
@@ -128,7 +130,8 @@ private lemma tensorChartComponent_hasCompactSupport'
     HasCompactSupport
       (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) := by
   rw [tensorChartComponent_def]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+  exact
+    chartPushedRaw_smooth_hasCompactSupport_local
     (I := I) (M := M)
     (tensorChartComponentPou_support_subset_chart_source
       (I := I) (M := M) g r s S α Idx Jdx)
@@ -143,7 +146,8 @@ private lemma tensorChartComponent_tsupport_subset
     tsupport (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   rw [tensorChartComponent_def]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
+  exact
+    tsupport_chartPushedRaw_subset_chartTargetEuclid
     (I := I) (M := M)
     (tensorChartComponentPou_support_subset_chart_source
       (I := I) (M := M) g r s S α Idx Jdx)
@@ -272,7 +276,8 @@ private lemma euclidPartial_tensorChartComponent_eq_leibniz
     euclidPartial_def, euclidPartial_def]
   ring
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma euclidPartial_rawPushed_eq_covDerivComponent_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -380,7 +385,8 @@ private lemma euclidPartial_chartPushedRaw_pou_continuousOn
   (euclidPartial_contDiff_of_contDiff (E := E)
     (chartPushedRaw_pou_contDiff (I := I) (M := M) α) k).continuous.continuousOn
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
 private lemma chartPushedRaw_rawComponent_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

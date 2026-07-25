@@ -87,7 +87,8 @@ theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_invGram (g : SmoothRiemannianMetric I M) (α : M) (y : E)
     (k l : Fin (Module.finrank ℝ E)) :
-    (Matrix.of (jet2 (chartGramPi (I := I) g α) y).1)⁻¹ k l = chartInvGramOnE (I := I) g α k l y := by
+    (Matrix.of (jet2 (chartGramPi (I := I) g α) y).1)⁻¹ k l = chartInvGramOnE (I := I) g α k l
+      y := by
   have hmat : Matrix.of (jet2 (chartGramPi (I := I) g α) y).1
       = chartGramMatrix (I := I) g α ((extChartAt I α).symm y) := by
     ext a b
