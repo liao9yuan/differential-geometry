@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovDerivConnDiffQuadraticBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv
 
 /-!
 # Order-1 connection-difference-derivative: the ungated fibre→vector reduction (B2 P1)
@@ -48,6 +50,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -195,6 +198,84 @@ theorem covDerivConnDiff_fibreNorm_le
     have hcancel := le_of_mul_le_mul_left hkey hNApos
     calc NA ≤ NW * Sv * Su * Sw := hcancel
       _ = NW * Sv * Sw * Su := by ring
+
+/-! ### B2 P2 — the a=1 Koszul fibre bound (currency + comparability + the dual-Koszul core)
+
+The remaining B2 frontier: bound the connection-difference-derivative output vector in the
+metric-jet currency `Λ, Λ', Λ''` and compose with P1.  The route is the eval/dual form of the
+differentiated Koszul identity `connDiff_koszul_deriv` (`ChristoffelDiffKoszulDeriv.lean`): pairing it
+against the output vector itself, bound each right-hand term by the multilinear Cauchy–Schwarz
+`abs_apply_le_sqrt_normSq0S` in the `∇₂²g₁`/`∇₂g₁` currency, re-expand the connection difference by the
+a=0 atom `connDiffVec_norm_le` + `lcDiff_norm_le`, then convert `g₁ ↔ g₂` by comparability. -/
+
+set_option linter.unusedSectionVars false in
+/-- Currency bridge: the bundled `∇₂g₁` field `totalNabla0S 2 (LC g₂) (metricTensorField g₁)` used by
+`connDiff_koszul_deriv` is the HCG metric covariant derivative `metricCovDeriv g₁ g₂ 1`. -/
+private theorem field_eq_mcd1
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (g₁ g₂ : SmoothRiemannianMetric I M) :
+    (Tensor0SBundle.totalNabla0S (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂)
+        (Tensor0SBundle.metricTensorField (I := I) g₁)
+        (DifferentialGeometry.Integral.Connection.metricField_totalReg (I := I) g₁ g₂))
+      = metricCovDeriv (I := I) g₁ g₂ 1 := by
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
+  apply DFunLike.ext
+  intro x
+  rw [Tensor0SBundle.totalNabla0S_apply,
+    show metricCovDeriv (I := I) g₁ g₂ 1
+        = metricCovDerivStep (I := I) g₂ 0 (metricCovDeriv (I := I) g₁ g₂ 0) from rfl,
+    metricCovDerivStep_apply]
+
+set_option linter.unusedSectionVars false in
+/-- Currency bridge (order 2): the directional derivative `nabla0SFun 3 (LC g₂) W (∇₂g₁-field)` of the
+bundled first metric covariant derivative equals the second metric covariant derivative
+`metricCovDeriv g₁ g₂ 2` with the derivative direction `W x` in the leading slot. -/
+private theorem nabla3_eq_mcd2
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (W : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (x : M) (slots : Fin 3 → TangentSpace I x) :
+    Tensor0SBundle.nabla0SFun (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 3
+        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
+        (Tensor0SBundle.totalNabla0S (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂)
+          (Tensor0SBundle.metricTensorField (I := I) g₁)
+          (DifferentialGeometry.Integral.Connection.metricField_totalReg (I := I) g₁ g₂)) x slots
+      = metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons (W x) slots) := by
+  rw [field_eq_mcd1 (I := I) g₁ g₂,
+    show metricCovDeriv (I := I) g₁ g₂ 2
+        = metricCovDerivStep (I := I) g₂ 1 (metricCovDeriv (I := I) g₁ g₂ 1) from rfl,
+    metricCovDerivStep_apply]
+  exact (Tensor0SBundle.totalNabla0SFun_apply_section (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    3 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
+    (metricCovDeriv (I := I) g₁ g₂ 1) x slots).symm
+
+set_option linter.unusedSectionVars false in
+/-- General-order `(0,s)` norm comparison under `MetricUniformEquivalentOn K g₂ g₁ Λ`:
+`√normSq0S(g₁, s, A) ≤ √(Λ^s) · √normSq0S(g₂, s, A)`.  General-`s` sibling of
+`sqrt_normSq0S_three_le_of_metricUniformEquivalentOn` (used at `s = 3` and `s = 4`). -/
+private theorem sqrt_normSq0S_comp
+    {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    {x : M} (hx : x ∈ K) (s : ℕ)
+    (A : Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) s x) :
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x s A) ≤
+      Real.sqrt (Λ ^ s) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x s A) := by
+  obtain ⟨μ, basis, hginv, hhinv, hμ_nonneg, hμ_le⟩ :=
+    exists_diagInv_of_metricUniformEquivalentOn (I := I) (K := K) (g := g₂) (h := g₁) (C := Λ) hEq hx
+  have hsq : Tensor0SBundle.normSq0S (I := I) g₁ x s A
+      ≤ Λ ^ s * Tensor0SBundle.normSq0S (I := I) g₂ x s A :=
+    Tensor0SBundle.normSq0S_diag_le (I := I) (g := g₂) (h := g₁) (x := x) (s := s)
+      basis μ Λ hginv hhinv hμ_nonneg hμ_le A
+  calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x s A)
+      ≤ Real.sqrt (Λ ^ s * Tensor0SBundle.normSq0S (I := I) g₂ x s A) := Real.sqrt_le_sqrt hsq
+    _ = Real.sqrt (Λ ^ s) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x s A) := by
+        rw [Real.sqrt_mul (pow_nonneg (le_trans zero_le_one hEq.1) s)]
 
 end Curvature
 end Geometry
