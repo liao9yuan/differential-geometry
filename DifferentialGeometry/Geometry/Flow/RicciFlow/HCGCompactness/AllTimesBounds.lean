@@ -255,6 +255,7 @@ theorem norm_componentVec3
 
 
 
+set_option linter.unusedFintypeInType false in
 theorem hasDerivAt_componentVec3
     (A A' : Real -> Idx -> Idx -> Idx -> Real) {t : Real}
     (hderiv :
@@ -290,6 +291,7 @@ theorem hasDerivAt_componentVec3
   simpa [componentVec3, L, PiLp.coe_symm_continuousLinearEquiv] using hL
 
 
+set_option linter.unusedFintypeInType false in
 theorem hasDerivWithinAt_componentVec3
     (A A' : Real -> Idx -> Idx -> Idx -> Real) {s : Set Real} {t : Real}
     (hderiv :
