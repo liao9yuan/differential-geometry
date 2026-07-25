@@ -211,6 +211,21 @@ form) is respected — P1/P2 are stated on the eval `covDerivConnDiff` and the e
 
 ## 7. Session log
 
+- 2026-07-25 (B2 session 6 — P2 ROUTE PIVOT + currency/comparability helpers LANDED; STAND-DOWN pause):
+  **Chose the dual/eval route (recon §4 alternative), NOT the component P2.b/c/d.**  The dual route pairs
+  the LOWERED identity `connDiff_koszul_deriv` against the output vector `B` itself (`Z x = B`), bounds
+  each RHS term by the EXISTING multilinear CS `abs_apply_le_sqrt_normSq0S` in the `metricCovDeriv 2/1`
+  currency, re-expands `|A|` via the a=0 atoms `connDiffVec_norm_le`+`lcDiff_norm_le`, divides by `|B|`,
+  then converts `g₁↔g₂` by comparability — **producing B3's `hA1` (eval form) DIRECTLY, bypassing the
+  fibre-norm P2.d and the compose-with-P1 step, and avoiding any new (1,3)-component→l² engine or
+  quadratic-l² lemma.**  P1 (`covDerivConnDiff_fibreNorm_le`) is thus an unused-but-kept alternative for
+  this consumer.  Pinned **`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`**.  LANDED green (whole-file `lake build`
+  EXIT=0, 9451 jobs) in `ConnDiffDerivBound.lean`: `field_eq_mcd1` + `nabla3_eq_mcd2` (currency bridges
+  `field = metricCovDeriv g₁ g₂ 1` and `nabla0SFun 3 W field = metricCovDeriv g₁ g₂ 2`) and
+  `sqrt_normSq0S_comp` (general-`s` comparability — subsumes order-3 AND order-4, so **no order-4 sibling
+  is needed in AllTimesBounds; that file is UNTOUCHED**).  REMAINING = the dual core + endpoint (two
+  lemmas, all ingredients present, no new frontier) — see `ConnDiffDerivBound.md` §"EXACT NEXT STEPS".
+  P2.b/c/d as originally scoped are SUPERSEDED by this route.
 - 2026-07-25 (B3 consumer LANDED, in `UnifCovSumCross.lean`): the T-B consumer of `hA1`,
   **`covStepDiff_norm_le` + `covStepDiff_jet_le`**, is PROVED sorry-free + axiom-clean (build EXIT=0),
   taking the §0 target as the **abstract hypothesis `hA1`** in the committed **ext-form**
