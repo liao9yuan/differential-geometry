@@ -499,6 +499,19 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (brick 2a ENVELOPE + Λ<2 single link, LANE C, Opus): **2a-0 COMPLETE** — the full
+  order-0 curvature sup from comparability + jets alone (Λ<2), sorry-free + axiom-clean
+  (`[propext, Classical.choice, Quot.sound]` on all 4 new public theorems; `lake build
+  +…UnifCurvatureJetBound` EXIT=0, 9653 jobs).  `normBridge` (session 8 gate) is now proved, so the
+  order-`≤2` jet envelope landed in `HCGCompactness/UnifCurvatureJetBound.lean`:
+  `metricDiff_order0_bound` (j=0 Parseval HS bound `≤ n·(Λ−1)`), `metricDiff_orderPos_bound`
+  (j≥1 `≤ Λ` via normBridge + the pre-existing self-zero `covNorm_self_succ`), `metricDiff_jetEnvelope`
+  (`∑_{j<3}‖…‖ ≤ n·(Λ−1)+2Λ` = **B(Λ)**, c₀(n)=n), and the endpoint **`unifCurvatureSup_singleLink`**
+  (tie + D1 + envelope → asset `hdiff` → session-4 composition core; **F = Λ²·(Cd+√Kbase)**).  Full
+  ledger + 5 Lean lessons + the 2a-tel (Λ≥2) remaining-work note in
+  `HCGCompactness/UnifCurvatureJetBound.md` §"Session 9".  **2a-tel remaining**: convexComb link
+  comparability/jet inheritance + ~2Λ(Λ+1)-link g-norm triangle composition (the per-link discharge
+  is now done).  2a-hi (higher orders ∇^a Riemann, a≤b) + 2a-pkg (H_R/H_dR currency) still open.
 - 2026-07-24 (S0 session 4, LANE C, Opus): **T (connection-change telescoping) recon + identity
   activation.**  Route r1 CONFIRMED and the identity layer is a **FALSE WALL** — `nabla0SFun_sub_cov`
   (generic `(0,s)` multi-slot connection difference, proved by the subtraction route) +

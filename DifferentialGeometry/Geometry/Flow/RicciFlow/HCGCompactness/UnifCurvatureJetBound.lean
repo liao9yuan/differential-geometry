@@ -592,7 +592,11 @@ theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : 
   -- card (Fin 2 → Fin n) = n²
   have hcard : (Fintype.card (Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) : ℝ) =
       (Module.finrank ℝ E : ℝ) ^ 2 := by
-    simp [Fintype.card_fun]
+    have hc : Fintype.card (Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) =
+        Module.finrank ℝ E ^ 2 := by
+      change Fintype.card (Fin 2 → Fin (Module.finrank ℝ E)) = Module.finrank ℝ E ^ 2
+      rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    rw [hc]; push_cast; ring
   rw [hcard] at hnormsq
   -- √ normSq0S ≤ √ (n² (Λ-1)²) = n (Λ-1)
   calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gBase x 2
@@ -662,14 +666,10 @@ theorem metricDiff_jetEnvelope (gBase g₀ : SmoothRiemannianMetric I M) {Λ : �
         ‖((iteratedCovGrad gBase 0 2 j
             (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
             TensorRSSpace 0 (2 + j) I x)‖)) ≤ (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ := by
-  have hbound : ∀ j ∈ Finset.range 3,
-      (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
-          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + j)
-        ‖((iteratedCovGrad gBase 0 2 j
-            (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
-            TensorRSSpace 0 (2 + j) I x)‖) ≤
-        (if j = 0 then (Module.finrank ℝ E : ℝ) * (Λ - 1) else Λ) := by
-    intro j hj
+  refine le_trans (Finset.sum_le_sum
+    (g := fun j => if j = 0 then (Module.finrank ℝ E : ℝ) * (Λ - 1) else Λ) ?_)
+    (le_of_eq ?_)
+  · intro j hj
     fin_cases hj
     · simpa only [iteratedCovGrad_zero] using
         metricDiff_order0_bound (I := I) (M := M) gBase g₀ hΛ hcomp x
@@ -677,17 +677,10 @@ theorem metricDiff_jetEnvelope (gBase g₀ : SmoothRiemannianMetric I M) {Λ : �
         metricDiff_orderPos_bound (I := I) (M := M) gBase g₀ 0 hjet1 x
     · simpa only [iteratedCovGrad_zero] using
         metricDiff_orderPos_bound (I := I) (M := M) gBase g₀ 1 hjet2 x
-  calc (∑ j ∈ Finset.range 3,
-          (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
-              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + j)
-            ‖((iteratedCovGrad gBase 0 2 j
-                (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
-                TensorRSSpace 0 (2 + j) I x)‖))
-      ≤ ∑ j ∈ Finset.range 3,
-          (if j = 0 then (Module.finrank ℝ E : ℝ) * (Λ - 1) else Λ) := Finset.sum_le_sum hbound
-    _ = (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ := by
-        simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
-        ring
+  · rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+      Finset.sum_range_zero, zero_add, if_pos (rfl : (0 : ℕ) = 0),
+      if_neg (by norm_num : ¬(1 : ℕ) = 0), if_neg (by norm_num : ¬(2 : ℕ) = 0)]
+    ring
 
 /-- **Order-0 curvature sup, single link (`Λ < 2` regime), from comparability and
 jets alone.**

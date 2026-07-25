@@ -191,8 +191,50 @@ Mission: build the order-`≤2` jet envelope + the assembled `unifCurvatureSup_s
 
 RISK: RiemannianBundle `letI` + `attribute [-instance] tensorRSSpace_normedAddCommGroup/
 normedSpace` juggling must mirror asset/normBridge exactly (norm-instance defeq).
-STATUS: recon done, awaiting 2 Explore agents (j=0 bridge public status; toSection-sub +
-self-zero support), then build.
+
+### LANDED (sorry-free, axiom-clean — `[propext, Classical.choice, Quot.sound]` on all 4 public)
+`lake build +…UnifCurvatureJetBound` EXIT=0 (9653 jobs). New declarations in the leaf:
+- **`metricDiff_order0_bound`** (public): `‖(metricDifferenceCcTensor gBase g₀).toSection x‖ ≤
+  n·(Λ−1)`, `n = finrank ℝ E`.  Route: `norm_toSection_eq_sqrt_riemannianFiberNormSq` →
+  reproduced `rfns_eq_normSq0S_unit'` → `normSq0S_le_card_of_component_bound` (card `n²` via
+  `Fintype.card_fun`) with component = `ccTensorBilin = g₀−gBase`, `|·|≤Λ−1` from
+  `metricDiff_gFibreOpBound` on the ON frame (`gBase(eᵢ,eᵢ)=1`).
+- **`metricDiff_orderPos_bound (a)`** (public): `‖(iteratedCovGrad gBase 0 2 (a+1) …).toSection x‖
+  ≤ Λ`.  `metricDiff_iterCovGrad_sub` split; the `metricCcTensor gBase gBase` half has norm 0 via
+  `normBridge gBase gBase (a+1) x` + **`covNorm_self_succ`** (ConvFieldInputs — the self-zero
+  ALREADY EXISTS, no reproof needed); `SmoothCcTensor.toSection_sub` + `norm_eq_zero`; the g₀ half
+  = `normBridge g₀ gBase (a+1) x` = `metricCovDerivNorm (a+1) g₀ gBase x ≤ Λ` from the jet hyp.
+- **`metricDiff_jetEnvelope`** (public): `∑_{j<3} ‖…‖ ≤ n·(Λ−1) + 2Λ` via `Finset.sum_le_sum`
+  with per-`j` bound `if j=0 then n(Λ−1) else Λ` (`fin_cases` + defeq-tolerant `simpa`/`exact`).
+  **B(Λ) = n·(Λ−1) + 2Λ, c₀(n)=n.**
+- **`unifCurvatureSup_singleLink`** (public, THE endpoint): `hΛ:1≤Λ, hΛ2:Λ<2, hcomp,
+  hjet1/hjet2 (MetricCovDerivOrderBoundOn univ 1/2 g₀ gBase Λ)` ⟹ `∃F≥0, ∀ x v w u,
+  g₀(R(g₀)vwu,·) ≤ F²·g₀-quad`.  Discharges the asset `hdiff` (P=metricDifferenceCcTensor,
+  htie=`metricDiff_tie`, hδ=`metricDiff_gFibreOpBound` δ=Λ−1<1, env=`metricDiff_jetEnvelope`),
+  feeds session-4 `unifCurvatureSup_singleLink_of_diff`.  **F = Λ²·(Cd + √Kbase)** where Cd =
+  the asset's difference constant at δ₀=Λ−1, B=n(Λ−1)+2Λ; Kbase = fixed gBase curvature.
+- Reproduced private helpers (MetricCovDerivBridge's are `private`, can't edit that file):
+  `lowerAllUpper_zero_eq_unit'`, `rfns_eq_normSq0S_unit'`, `component0S_unit_eq_ccBilin`.
+- Imports added: `MetricCovDerivBridge`, `ConvFieldInputs`, `Geometry.Curvature.RicciOperatorNormBound`;
+  `open DifferentialGeometry.HCGCompactness`.
+
+Lean lessons: (1) the RiemannianBundle→`Norm` synth needs `set_option synthInstance.maxHeartbeats
+1600000 in` (default 20000 times out) — mirror normBridge, scope per-decl.  (2) inline `letI` in a
+`have :` Prop misparses (`‖…‖` applied to the bundle) — infer the summand via `Finset.sum_le_sum
+(g:=…) ?_` instead of re-typing it.  (3) `reduceIte` does NOT fire in `simp only` here — reduce
+ites with explicit `if_pos/if_neg`.  (4) `finrank (TangentSpace I x) = finrank E` is rfl but `rw`'s
+auto-close uses reducible transparency; `change` to `finrank E` first.  (5) `0+1`/`2+0` vs `1`/`2`:
+use `exact`/`simpa` (defeq-tolerant), never `linarith` (syntactic atoms).
+
+### 2a-tel (Λ ≥ 2, full class) — what remains (NOT in this session)
+The single link is `Λ < 2` only (asset needs `δ₀ = Λ−1 < 1`).  For the full class: telescope
+`g_t = convexComb g₀ gBase (const t)`, `N ≈ Λ` links each op-step `<1`; per link need (a) convexComb
+comparability + jet inheritance (NEW lemmas on `SmoothRiemannianMetric.convexComb`, see session-4
+block), (b) apply `unifCurvatureSup_singleLink` per link, (c) compose ~2Λ(Λ+1) curvature
+differences by g-norm triangle.  The per-link discharge (tie/D1/envelope) is now DONE; 2a-tel is
+the convexComb-inheritance + composition layer only.
+
+STATUS: **ENVELOPE + Λ<2 single link COMPLETE, verified, axiom-clean.**
 
 ## Session 8 (2026-07-24, LANE C, Opus) — D2 `normBridge` GATED on a missing upstream agreement (corrects session 7)
 
