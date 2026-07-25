@@ -146,24 +146,21 @@ Quot.sound]` on each new public theorem (then stripped).
   `B=Λ•chartGram gBase` PosDef (`PosDef.smul`), `det_le_of_posSemidef_le` + `det_smul`/`Fintype.card_fin`
   ⟹ `det g₀ ≤ Λⁿ det gBase`; `√` via `Real.sqrt_mul (pow_nonneg …)` + `Real.sqrt_le_sqrt`.  Constant
   `√(Λ^n)` (`n=finrank`).  Use `change` not `show` to unfold `chartDensity` (linter).
-- **(4) `volumeMeasure_cross_le`** — **proof WRITTEN and complete, but BLOCKED, deliberately NOT in the
-  .lean.**  It needs `chart_lintegral_le` from `Analysis/Integration/Measure/CompactVolumeEquiv.lean`,
-  and **that file does NOT compile against the current pinned Mathlib**: `volume_uniform_equiv`
-  (`CompactVolumeEquiv.lean:366` and `:371`) fails "Type mismatch: After simplification" — its
-  `simpa only [lintegral_indicator_one hs, Measure.smul_apply, smul_eq_mul] using h` no longer fires
-  (`lintegral_indicator_one` / indicator-`1` Mathlib API drift).  Its `.olean` was simply MISSING
-  (bit-rotted, unnoticed because nothing on the built path imports CompactVolumeEquiv).  A file's olean
-  is all-or-nothing, so `chart_lintegral_le` (line 195, itself fine) is unimportable while 366/371 error.
-  **KNOWN FIX** (found while porting the identical pattern): replace the indicator with
-  `Set.indicator s (1 : M → ℝ≥0∞)` (exact `s.indicator 1` shape) and use explicit
-  `rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h` then `rwa [Measure.smul_apply,
-  smul_eq_mul]` — two-line fix at CompactVolumeEquiv:366 and :371.  CompactVolumeEquiv is OUTSIDE this
-  session's editable set, so step 4 stops here.  The FULL step-4 proof is preserved at the bottom of
-  this note for drop-in once CompactVolumeEquiv is fixed (or once `volumeMeasure_cross_le` is re-homed
-  inside CompactVolumeEquiv.lean — arguably its natural home, next to the private POU-sum layer it
-  re-derives).  All OTHER step-4 pieces are worked from PUBLIC atoms (`riemannianMeasure_lintegral_eq`,
-  `tsum_eq_sum`, `chartAtlasPOU_weight_zero_of_notMem`, `chartAtlasPOU_isSubordinate`,
-  `trivializationAt_baseSet_eq_chartAt_source`, `metricUniformEquivalentOn_symm`).
+- **(4) `volumeMeasure_cross_le`** — **DONE (public), sorry-free + verified** (planner-authorized the
+  scope-limited CompactVolumeEquiv repair, session 3b).  `dV_{g₀} ≤ √(Λ^n)·dV_{gBase}` and reverse,
+  both directions, via `chart_lintegral_le` + the POU lower-integral decomposition (`vsum`, re-derived
+  from PUBLIC `riemannianMeasure_lintegral_eq`+`tsum_eq_sum`+`chartAtlasPOU_weight_zero_of_notMem`),
+  `hbase` tsupport⊆baseSet (`chartAtlasPOU_isSubordinate`+`trivializationAt_baseSet_eq_chartAt_source`),
+  reverse via `metricUniformEquivalentOn_symm`, and `Measure.le_iff`+indicator to read off the measure
+  inequality.  The measure-conversion tail uses `Set.indicator s (1 : M → ℝ≥0∞)` (exact `s.indicator 1`
+  shape) + explicit `rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h` then
+  `rwa [Measure.smul_apply, smul_eq_mul]` — NOT `simpa`, which no longer fires against pinned Mathlib.
+  **Unblocked by** a latent-break repair of `CompactVolumeEquiv.lean` (`volume_uniform_equiv` tail was
+  bit-rotted the same way; its olean was silently missing) — the identical two-line fix at
+  `CompactVolumeEquiv.lean:366/:371`, statement-preserving, recorded in `CompactVolumeEquiv.md`.  Lift
+  section needs the compact-closed-manifold measure instances (`[T2Space] [SigmaCompactSpace]
+  [CompactSpace]` + local `borel E/M`), added in a dedicated `section VolumeMeasure`.  The verbatim proof
+  is also preserved at the bottom of this note.
 
 ### V — ORIGINAL fully-worked route (from session 2; realized by steps 1–3 above)
 1. **`det_le_of_posSemidef_le`** (general Loewner→det): `A.PosSemidef`, `B.PosDef`,
@@ -293,6 +290,14 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-24 (session 3b, V step 4): **`volumeMeasure_cross_le` LANDED sorry-free + verified**
+  (public, `HCGCompactness/UnifCovSumCross.lean` `section VolumeMeasure`).  Planner authorized the
+  scope-limited `CompactVolumeEquiv.lean:366/:371` latent-break repair (indicator `Set.indicator s 1`
+  + explicit `rw`, statement-preserving; recorded in `CompactVolumeEquiv.md`).  `lake build
+  +…CompactVolumeEquiv` EXIT=0 (2873 jobs); then step-4 drop-in `lake build +…UnifCovSumCross` EXIT=0
+  (3904 jobs); `#print axioms volumeMeasure_cross_le` = `[propext, Classical.choice, Quot.sound]`.
+  **ALL FOUR V steps now done** (fibre + steps 1–3 + step 4 measure lift).  T (connection-change
+  telescoping) not started — separate next dispatch.
 - 2026-07-24 (session 3, V steps 1–3): **LANDED sorry-free + verified** — `det_le_of_posSemidef_le`
   (general Loewner→det, private), `det_le_one_of_dotProduct` (plain-form bridge, private),
   `chartGram_quad_le_of_equiv` (public), `chartDensity_cross_le` (public).  `lake build

@@ -499,6 +499,16 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (S0 session 3b, LANE C, Opus): **VOLUME brick (V) COMPLETE** — step 4
+  `volumeMeasure_cross_le` LANDED sorry-free + verified (`dV_{g₀} ≤ √(Λ^n)·dV_{gBase}`, two-sided,
+  `HCGCompactness/UnifCovSumCross.lean` `section VolumeMeasure`).  Planner authorized the scope-limited
+  `CompactVolumeEquiv.lean:366/:371` latent-break repair (indicator `Set.indicator s 1` + explicit `rw`,
+  statement-preserving; `CompactVolumeEquiv.md` records it).  `lake build +…CompactVolumeEquiv` EXIT=0
+  (2873 jobs); `lake build +…UnifCovSumCross` EXIT=0 (3904 jobs); `#print axioms volumeMeasure_cross_le`
+  = `[propext, Classical.choice, Quot.sound]`.  All four V levels (fibre + steps 1–3 + step-4 measure
+  lift) done.  Remaining for the S0 `L²` endpoint `covsum_cross_unif`: **T** (iterated connection-change
+  telescoping — the main tensor-calculus frontier, separate dispatch) and the RS↔0S currency bridge
+  (sibling `MetricCovDerivBridge` lane).
 - 2026-07-24 (S0 session 3, LANE C, Opus): **VOLUME brick (V) steps 1–3 LANDED sorry-free +
   verified** (`lake build +…UnifCovSumCross` EXIT=0, 3903 jobs; axioms `[propext, Classical.choice,
   Quot.sound]`).  In `HCGCompactness/UnifCovSumCross.lean`: `det_le_of_posSemidef_le` (the general

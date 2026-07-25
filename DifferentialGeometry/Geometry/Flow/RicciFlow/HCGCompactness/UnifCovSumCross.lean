@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Analysis.Matrix.Order
 
@@ -302,6 +303,100 @@ theorem chartDensity_cross_le
       Real.sqrt ((chartGramMatrix (I := I) gBase x₀ x).det)
   rw [← Real.sqrt_mul (pow_nonneg hΛpos.le _)]
   exact Real.sqrt_le_sqrt hdet
+
+/-! ### Volume level — measure comparison (volume-brick step 4)
+
+Lifting the pointwise chart-density bound `chartDensity_cross_le` through the finite chart
+partition of unity gives the two Riemannian volume *measures* compared with the explicit
+constant `√(Λ^n)`.  The compact closed-manifold measure infrastructure enters only here. -/
+section VolumeMeasure
+
+open MeasureTheory
+open scoped ENNReal
+
+variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+/-- **Volume-measure cross-metric comparison** (volume-brick step 4).  The two Riemannian
+volume measures of `Λ`-comparable metrics are two-sidedly comparable with the explicit constant
+`√(Λ^n)` (`n = finrank ℝ E`): `dV_{g₀} ≤ Λ^{n/2}·dV_{gBase}` and symmetrically.  Proved by
+lifting `chartDensity_cross_le` through the finite chart partition of unity (`chart_lintegral_le`
++ the POU lower-integral decomposition) and reading off the measure inequality on measurable
+sets.  This is the `Λ`-uniform volume comparison the S0 `L²` assembly composes with the fibre
+and connection-change bricks. -/
+theorem volumeMeasure_cross_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ) :
+    riemannianVolumeMeasure (I := I) (M := M) g₀ ≤
+        ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) •
+          riemannianVolumeMeasure (I := I) (M := M) gBase ∧
+      riemannianVolumeMeasure (I := I) (M := M) gBase ≤
+        ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) •
+          riemannianVolumeMeasure (I := I) (M := M) g₀ := by
+  classical
+  -- POU decomposition of the volume lower-integral, re-derived from public primitives
+  have vsum : ∀ (g : SmoothRiemannianMetric I M) (F : M → ℝ≥0∞), Measurable F →
+      ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), ∫⁻ x,
+          ENNReal.ofReal ((chartAtlasPOU I M α : M → ℝ) x) * F x
+            ∂(chartLocalMeasure (I := I) g α) := by
+    intro g F hF
+    rw [riemannianVolumeMeasure_def,
+      riemannianMeasure_lintegral_eq (I := I) g (chartAtlasPOU I M) hF]
+    refine tsum_eq_sum (fun α hα => ?_)
+    have hz : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x = 0 :=
+      fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
+    simp only [hz, ENNReal.ofReal_zero, zero_mul, lintegral_zero]
+  -- each POU weight is supported inside the trivialization base set
+  have hbase : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    intro α x hx
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact (chartAtlasPOU_isSubordinate I M) α hx
+  -- lower-integral comparison from a directional pointwise chart-density bound
+  have lintComp : ∀ (q h : SmoothRiemannianMetric I M),
+      (∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+        chartDensity (I := I) h α x ≤
+          Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) q α x) →
+      ∀ (F : M → ℝ≥0∞), Measurable F →
+        ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) h) ≤
+          ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) *
+            ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) q) := by
+    intro q h hdens F hF
+    rw [vsum h F hF, vsum q F hF, Finset.mul_sum]
+    refine Finset.sum_le_sum (fun α _ => ?_)
+    exact chart_lintegral_le (I := I) (M := M) q h α
+      (Real.sqrt (Λ ^ Module.finrank ℝ E)) (Real.sqrt_nonneg _) (hdens α) hF
+  -- the two directional density bounds from `chartDensity_cross_le`
+  have hdens_fwd : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      chartDensity (I := I) g₀ α x ≤
+        Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) gBase α x :=
+    fun α _ hx => chartDensity_cross_le (I := I) gBase g₀ hEq α (hbase α _ hx)
+  have hdens_rev : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      chartDensity (I := I) gBase α x ≤
+        Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) g₀ α x :=
+    fun α _ hx =>
+      chartDensity_cross_le (I := I) g₀ gBase
+        (metricUniformEquivalentOn_symm (I := I) hEq) α (hbase α _ hx)
+  refine ⟨?_, ?_⟩
+  · rw [Measure.le_iff]
+    intro s hs
+    have h := lintComp gBase g₀ hdens_fwd (Set.indicator s (1 : M → ℝ≥0∞))
+      (measurable_const.indicator hs)
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
+  · rw [Measure.le_iff]
+    intro s hs
+    have h := lintComp g₀ gBase hdens_rev (Set.indicator s (1 : M → ℝ≥0∞))
+      (measurable_const.indicator hs)
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
+
+end VolumeMeasure
 
 end RicciFlow
 end PDE

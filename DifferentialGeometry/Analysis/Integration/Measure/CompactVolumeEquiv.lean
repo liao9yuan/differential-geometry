@@ -361,14 +361,16 @@ theorem volume_uniform_equiv
   constructor
   · rw [Measure.le_iff]
     intro s hs
-    have h := (hlin t ht (s.indicator fun _ : M => (1 : ℝ≥0∞))
+    have h := (hlin t ht (Set.indicator s (1 : M → ℝ≥0∞))
       (measurable_const.indicator hs)).1
-    simpa only [lintegral_indicator_one hs, Measure.smul_apply, smul_eq_mul] using h
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
   · rw [Measure.le_iff]
     intro s hs
-    have h := (hlin t ht (s.indicator fun _ : M => (1 : ℝ≥0∞))
+    have h := (hlin t ht (Set.indicator s (1 : M → ℝ≥0∞))
       (measurable_const.indicator hs)).2
-    simpa only [lintegral_indicator_one hs, Measure.smul_apply, smul_eq_mul] using h
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
 
 end Measure
 end Integral
