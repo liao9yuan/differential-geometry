@@ -777,6 +777,52 @@ C ratified), final (N) assembly last.
   one (`normBridge`), documented, expected to clear with the agreement
   bridge.
 
+## Planner consolidation №23 (2026-07-25) — USER PAUSE POINT (authoritative resume state)
+
+User ordered a full pause; new dispatches FROZEN; the two in-flight
+executors were stand-down-ordered (record state in their `.md`s, no new
+proof work).  This section is the authoritative resume point.
+
+STATE AT PAUSE (all committed & pushed through `509238f03`+):
+- Ruling items 1 ✓, 3 ✓, 4 ✓, 5 ✓ (focused layer; deepest cutoff rework
+  deferred post-item-2).
+- Item 2: constituents 6/7 closed (deTurckLie fully: DLa+DLb+combined).
+  lieCorr0: diamond FIXED (Pro-ruled dedup `55efbcbd7`; Split builds;
+  LowJet quarantined as abandoned deep-WIP); the leaf's top piece
+  committed; the Kc-assembly session was mid-flight at the pause (see its
+  `LieCorr0CoeffL2JetBound.md` stand-down note).  Ψ₀/threeArm assembly
+  and the smooth-core tame lemma (item 2 PROPER — the decisive route
+  test, and the main remaining mathematical risk): NOT started, 0%.
+- Item 6: S1-abstract COMPLETE (`covsum_hs_unif`/`hsCovsum_unif`,
+  hcurv/Fc interface).  Curvature-jet discharge (2a): Λ<2 single link
+  CLOSED (`unifCurvatureSup_singleLink`, F = Λ²(Cd+√Kbase)); telescoping
+  link lemmas (a) done; composition (b) + 2a-hi/pkg blocked on the
+  connection-difference-derivative bound B2.  B2 = P1 ✓ ∘ P2:
+  P2.a (differentiated Koszul `connDiff_koszul_deriv`) DONE `509238f03`;
+  P2.b/c/d session was mid-flight at the pause (see
+  `ConnDiffDerivBound.md`/`ChristoffelDiffKoszulDeriv.md` stand-down
+  notes).  T-B norm layer: identity (B1 `diffStep_leibniz_eval`) +
+  conditional bound (B3 `covStepDiff_norm_le`/`covStepDiff_jet_le`) done
+  — unconditional once B2 closes; then the D_N recursion.  S0: fiber +
+  volume + telescoping identity + eval gate + j=1 endpoint all done;
+  j≥2 waits on B2+D_N.  S2–S4/S1b: unstarted.
+- Machinery sorries in tree: ZERO (normBridge discharged `46a7133ba`).
+  Theorem-level sorries: exactly the two black boxes
+  (`ExtendViaUniqueness.lean` :92 (N) and :201 forward-uniqueness).
+- Forward uniqueness: chartered to a second Fable session
+  (`ShortTime/FORWARD_UNIQUE_CHARTER.md`), not started.
+- Honest numbers: (N) theorem 0%; its machinery ≈ 50%; est. 15–25
+  executor sessions to (N) discharge absent surprises in item-2 proper.
+
+RESUME ORDER (when the user unfreezes): (1) accept & commit the two
+stand-down notes; (2) B2 close (P2.b/c/d per the recipe) → hA1 discharge
+→ D_N; (3) lieCorr0 Kc close → constituent 7/7; (4) threeArm/Ψ₀
+assembly; (5) item-2 smooth-core lemma; (6) 2a-hi/pkg + S0 endpoint +
+S2–S4/S1b; (7) Stage-3 (N) assembly (statement raise to jets ≤ A(n)+2
+per the №21-era order-budget flag).  Maintenance queue: split the 6007-
+line `DeTurckLieKernelL2JetBound.lean`; hoist `rfns_eq_normSq0S_unit`
+and drop the local copies; decide LowJet deletion.
+
 ## Executor constraints (multi-agent; STRICT)
 
 - Work ONLY in this worktree/branch.  The tree is committed clean as of
