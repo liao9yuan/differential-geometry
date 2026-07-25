@@ -12,6 +12,70 @@ that lets `UnifCurvatureJetBound.lean`'s order-`≤2` jet envelope consume
 `MetricCovDerivOrderBoundOn` (which is stated in `normSq0S`/`metricCovDeriv`
 currency).
 
+## SESSION 9 (2026-07-24, executor e87b): SECOND GATE found, then dissolved; clean route
+
+Discharging the sorry surfaced a **second** gate the session-8 recipe missed, and a
+cleaner overall route that dissolves it.  Durable findings:
+
+### The norm half (b) is NOT the chain the session-8 note claimed.
+The RS-bundle norm `‖W.toSection x‖` (with the `tensorRS_riemannianBundle` instance)
+reduces, via `norm_toSection_eq_sqrt_riemannianFiberNormSq` →
+`riemannianFiberNormSq_eq_tensorInnerPointwise`, to `tensorInnerPointwise_0s` (the
+**chart-model** fibre inner, `gramMatrixAt⁻¹` on `chartModelBasis E`).  But
+`normBridge`'s RHS `normSq0S = inner0S` is the **intrinsic** recursive fibre inner
+(`tensor0SMetricData`).  These are TWO parallel `(0,s)`-inner APIs with **no
+identification lemma anywhere in the tree** (exhaustively grep-verified;
+`Tensor0SMetricContinuity.md:74` documents it as a deferred shim).  So the
+session-8 claim "half (b) UNBLOCKED via `tensorInnerPointwise_0s … = inner0S`" was
+wrong — that bridge does not exist.
+
+### The clean route (avoids a per-step cast; isolates ONE tractable new bridge).
+`metricCovDerivNorm N h gRef x` (`AllTimesBounds.lean:661`) is *by definition*
+`√normSq0S gRef x (N+2) (metricCovDeriv h gRef N x)` = `normBridge`'s RHS.  And
+`MetricCovDerivArityBridge.metricCovDerivNorm_eq_iterCov` already proves, at a
+`gRef`-orthonormal basis, `metricCovDerivNorm N h gRef x =
+√normSq0S gRef x (2+N) (iterCov gRef 2 (metricTensorField h) N x)`.  So the RHS is
+`√normSq0S gBase x (2+j) (iterCov gBase 2 (metricTensorField h) j x)` — arity `2+j`,
+matching the RS tower's `2+j`.  **No `2+j = j+2` cast is needed in the tower match**
+(the cast lives entirely inside `metricCovDerivNorm_eq_iterCov`, already discharged).
+
+Remaining obligations, both tractable:
+- **(A) tower match (no cast):** `(iteratedCovGrad gBase 0 2 j (metricCcTensor gBase h)).toSection x (unitZeroSec x) = iterCov gBase 2 (metricTensorField h) j x`, by induction on `j`.
+  - base `j=0`: `(metricCcTensor gBase h).toSection x unit = metricTensorField h x = iterCov … 0 x`.
+  - step: `iteratedCovGrad_succ` → `curry_covGrad_unit_eval_genVal` → `tensorCovDerivAt = tensorRSCovariantDerivative` → `covDeriv_unit_eval_eq_genVal` → field-IH rewrite → `nabla0SFun_eq_tensor0SCovariantDerivative` (the resolved agreement, reversed) → `totalNabla0SFun_apply_section` (= `covStep`/`iterCov_succ`).  Every tuple is `Fin.cons (v 0) (vecTail v)`, closed by `ContinuousMultilinearMap.ext`.
+- **(B) fibre-inner bridge (the real new content):** `riemannianFiberNormSq gBase 0 s x (W.toSection x) = normSq0S gBase x s (W.toSection x unit)` for `W : SmoothCcTensor gBase 0 s`.  Route: pick a `gBase(x)`-ON basis `frame` (`exists_gOrthonormalBasis`); expand LHS by `riemannianFiberNormSq_eq_tensorInnerPointwise` + `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame` (`RiemannianFiberNormSqTensorInnerBridge.lean:391`) and RHS by `normSq0S_identity_eq_sum_sq` (`Tensor0SMetric.lean`, used at `MetricCovDerivArityBridge.lean:179`) — both become `∑_φ (component in `frame`)²`; components match through the `toModel`/`lowerAllUpperIndices (r=0)` evaluation identity (`TangentSpace I x = E` defeq).  Kept as a private lemma in this file (correct layer would be `FiberMetric/`; planner may relocate).
+
+Status: **(A)+(B) IMPLEMENTED, sorry removed.**  `MetricCovDerivBridge.lean` now proves
+`normBridge` outright.  New private helpers in the file:
+- `iterCovGrad_unit_eq_iterCov` — the tower match (A), induction on `j`; succ step uses
+  `covGrad_apply_unit_eval_genVal` → `tensorCovDerivAt_def` → `covDeriv_unit_eval_eq_genVal`
+  → `ih` (field rewrite) → `nabla0SFun_eq_tensor0SCovariantDerivative` (the agreement) →
+  `iterCov_succ`/`covStep_apply`/`totalNabla0SFun_apply_section`, closed on
+  `LeviCivita = leviCivitaConnectionOfMetric` (rfl).  Base = `ccTensorMultilinear_apply`
+  + `metricCcTensorFib_apply` = `metricTensorField_apply`.
+- `lowerAllUpper_zero_eq_unit` — the `r=0` index-lowering crux (replica of the private upstream
+  `lowerAllUpperIndices_zero_apply_unitModel`), via `lowerAllUpperIndices_apply` +
+  `separableFormAt_zero` + `toModel_tensorRS_apply` + `rfl`.
+- `rfns_eq_normSq0S_unit` — the fibre-inner bridge (B): both sides expanded in one `gBase`-ON
+  frame (`exists_gOrthonormalBasis`), model side by `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`,
+  intrinsic side by `normSq0S_identity_eq_sum_sq`; matched by `Fintype.sum_equiv` over
+  `arrowCongr (finCongr (zero_add s).symm)` + the crux + `Fin.ext`.
+
+Verification: **COMPLETE.**  Authoritative `lake build`: "Build completed successfully (9582 jobs)".
+Axiom audit (verbatim): `'DifferentialGeometry.PDE.RicciFlow.normBridge' depends on axioms:
+[propext, Classical.choice, Quot.sound]` — sorryAx GONE, exact clean triple.  Final focused
+`lake env lean` after stripping the audit line + docstring refresh: exit 0, no error/sorry/warning.
+
+KEY LESSON (this session): the whole envelope stays in `normSq0S`/`iterCov` currency — the
+`2+j = j+2` cast never enters the tower match (already discharged inside
+`metricCovDerivArityBridge.metricCovDerivNorm_eq_iterCov`), so the tower match is at uniform
+arity `2+j`.  The genuinely new content was the fibre-inner bridge (B), NOT a false wall:
+`Tensor0SSpace.toModel` is `id` on the carrier (rfl) and `TangentSpace I x = E` defeq, so the
+existing orthoFrame diagonal-sum lemmas made both norms `∑_φ (component)²`.  Main Lean friction:
+`show …→L… from` elaborates to a `have`-wrapper that blocks `rw` (fix: `change` to plain FunLike,
+or keep the wrapper to match the target lemma); toModel-based `_apply_eval` lemmas are handled by
+routing through `Tensor0SSpace.toModel_injective` + `ContinuousMultilinearMap.ext`.
+
 ## GATE RESOLVED (2026-07-24): the upstream agreement is now PROVED
 
 The missing `nabla0SFun ↔ tensor0SCovariantDerivative` `(0, s)` agreement (the framework
