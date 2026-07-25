@@ -285,7 +285,9 @@ set_option linter.unusedSectionVars false
 
 -- The connection-difference tower `covStep`/`iterCov`/`diffStep`/`telescAccum` re-enters the
 -- manifold/compactness instances the weakest-hypothesis fibre block above deliberately dropped.
-variable [T2Space M] [SigmaCompactSpace M]
+-- Session-10 also gave `MetricCovDerivLinear`'s `covStep`/`diffStep`/`diffStep_eval` a
+-- `[NeZero (finrank)]` + `[BoundarylessManifold]` requirement, so the whole tower re-adds them here.
+variable [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 
 /-- `covStep` of the zero field vanishes (`R`-linearity, via `covStep_add`). -/
 private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -634,7 +636,7 @@ explicit constant `C(Λ,Λ') = (3/2)·√(Λ³)·Λ'` times the dimension/slot f
 `connDiffTensor_normSqRS_swap`, `lcDiff_norm_le` (Koszul/change-of-connection), the seminorm bridge
 `metricDeriv_eq_covDeriv_norm`, and the class jet bound. -/
 theorem diffStep_jet_one_le
-    [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)]
+    [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
@@ -678,6 +680,319 @@ theorem diffStep_jet_one_le
   refine le_trans (diffStep_norm_le (I := I) g₁ g₂ s S x) ?_
   refine mul_le_mul_of_nonneg_right ?_ (Real.sqrt_nonneg _)
   exact mul_le_mul_of_nonneg_left hconn (by positivity)
+
+/-! #### Base-Leibniz norm bound for the mixed connection-difference derivative (brick T-B)
+
+The `∇₂A` layer of the base-Leibniz norm recursion, with the order-1 connection-difference-derivative
+output-vector bound taken as the **abstract hypothesis `hA1`** (discharged later by B2's
+`covDerivConnDiff_fibreNorm_le ∘ P2`, `HCGCompactness/ConnDiffDerivBound.lean`).  The eval identity
+`diffStep_leibniz_eval` (`MetricCovDerivLinear.lean`) expands
+`covStep g₂ (diffStep g₁ g₂ s S)` — the outer base covariant derivative of the single-step connection
+difference — into `(∇₂A) ⋆ S + A ⋆ (∇₂S)`; each `(∇₂A)`-insertion is bounded by `hA1`, each
+`A`-insertion by the a=0 atom `connDiffVec_norm_le`, and the frame components are summed as in
+`diffStep_norm_le`.
+
+`covStepDiff_norm_le` is the atom (with the `A`-atom fibre norm `NA` explicit); `covStepDiff_jet_le`
+folds `NA ≤ (3/2)·√(Λ³)·Λ'` (Koszul, as in `diffStep_jet_one_le`) into the class currency, delivering
+the `D_N`-recursion shape `C(CA,Λ,Λ',s,n)·(‖S‖ + ‖∇₂S‖)`.  This is the base-Leibniz norm layer the
+`D_N` telescoping recursion consumes (applying `covStep g₂` to a `diffStep` factor is controlled by the
+lower-order `iterCov g₂` currency); the three T-B consumers (S0 `j ≥ 2`, 2a-tel comp (b), S1 `hcurv`)
+close once B2 discharges `hA1`. -/
+
+/-- **Base-Leibniz norm atom for the mixed connection-difference derivative** (brick T-B, the `∇₂A`
+layer, `A`-atom fibre norm `NA` explicit).  Under the abstract order-1 connection-difference-derivative
+bound `hA1` (the `covDerivConnDiff` output-vector estimate `√(g₂(∇₂_v A(w,u), ·)) ≤ CA·|v|·|w|·|u|`),
+the `g₂`-fibre norm of `covStep g₂ (diffStep g₁ g₂ s S)` — the eval-form `(∇₂A)⋆S + A⋆(∇₂S)` of the
+base-Leibniz split (`diffStep_leibniz_eval`) — is bounded by
+`s·n^{(s+2)/2}·(CA·‖S‖ + NA·‖∇₂S‖)` (`n = finrank ℝ E`, `NA =
+√normSqRS(g₂, connectionDifferenceTensorAt (LC g₁)(LC g₂) x)` the a=0 connection-difference atom). -/
+theorem covStepDiff_norm_le
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) {CA : ℝ} (hCA : 0 ≤ CA)
+    (hA1 : ∀ (v w u : TangentSpace I x),
+      Real.sqrt (g₂.inner x
+          (covDerivConnDiff (I := I) g₂ g₁
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)
+          (covDerivConnDiff (I := I) g₂ g₁
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)) ≤
+        CA * Real.sqrt (g₂.inner x v v) * Real.sqrt (g₂.inner x w w) *
+          Real.sqrt (g₂.inner x u u)) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+        (CA * Real.sqrt (normSq0S (I := I) g₂ x s (S x)) +
+          Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+            (connectionDifferenceTensorAt (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+            Real.sqrt (normSq0S (I := I) g₂ x (s + 1)
+              (covStep (I := I) g₂ s S x))) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  -- internal `g₂`-orthonormal frame at `x` (as in `diffStep_norm_le`)
+  let D := (tangentMetricData_gen (I := I) g₂ x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  let basis := ob.toBasis
+  have hON : ∀ i j, g₂.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    change g₂.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g₂ x) (ob.toBasis i) (ob.toBasis j)]
+    change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+    rw [← hinner]
+    exact ob.inner_eq_ite i j
+  have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  have hbnorm : ∀ i, Real.sqrt (g₂.inner x (basis i) (basis i)) = 1 := by
+    intro i; rw [hON i i]; simp
+  set NA := Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+    (connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) with hNA
+  set NS := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hNS
+  set NcovS := Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x)) with hNcovS
+  have hNSnn : 0 ≤ NS := Real.sqrt_nonneg _
+  have hNcovS_nn : 0 ≤ NcovS := Real.sqrt_nonneg _
+  set B : ℝ := (s : ℝ) * CA * NS + (s : ℝ) * NA * NcovS with hB
+  have hBnn : 0 ≤ B := by rw [hB]; positivity
+  have hcomp : ∀ φ : Fin (s + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+      |component0S (I := I) basis
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x) φ| ≤ B := by
+    intro φ
+    rw [component0S_apply]
+    let Wsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      ContMDiffSection.mk (smoothExtensionTangent (I := I) x (basis (φ 0)))
+        (smoothExtensionTangent_contMDiff (I := I) x (basis (φ 0)))
+    let Vsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      ContMDiffSection.mk (smoothExtensionTangent (I := I) x (basis (φ (Fin.succ 0))))
+        (smoothExtensionTangent_contMDiff (I := I) x (basis (φ (Fin.succ 0))))
+    let Zsec : Fin s → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      fun a => ContMDiffSection.mk (smoothExtensionTangent (I := I) x (basis (φ a.succ.succ)))
+        (smoothExtensionTangent_contMDiff (I := I) x (basis (φ a.succ.succ)))
+    have hWval : Wsec x = basis (φ 0) := smoothExtensionTangent_eq (I := I) x (basis (φ 0))
+    have hVval : Vsec x = basis (φ (Fin.succ 0)) :=
+      smoothExtensionTangent_eq (I := I) x (basis (φ (Fin.succ 0)))
+    have hZval : ∀ a : Fin s, Zsec a x = basis (φ a.succ.succ) :=
+      fun a => smoothExtensionTangent_eq (I := I) x (basis (φ a.succ.succ))
+    have htuple : (fun j : Fin (s + 2) => basis (φ j)) =
+        Fin.cons (Wsec x) (Fin.cons (Vsec x) (fun a : Fin s => Zsec a x)) := by
+      funext j
+      refine Fin.cases ?_ (fun i => ?_) j
+      · exact hWval.symm
+      · refine Fin.cases ?_ (fun k => ?_) i
+        · exact hVval.symm
+        · exact (hZval k).symm
+    rw [htuple, diffStep_leibniz_eval (I := I) g₁ g₂ s S Wsec Vsec Zsec x]
+    -- per-slot bound for the `(∇₂A) ⋆ S` insertion sum
+    have hX : ∀ a : Fin s,
+        |(S x) (Function.update (fun b : Fin s => Zsec b x) a
+            (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+              (fun y : M => Zsec a y) x))| ≤ NS * CA := by
+      intro a
+      have hcs := abs_apply_le_sqrt_normSq0S (I := I) g₂ x s basis hON (S x)
+        (Function.update (fun b : Fin s => Zsec b x) a
+          (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+            (fun y : M => Zsec a y) x))
+      have hprodX :
+          (∏ b : Fin s, Real.sqrt (g₂.inner x
+              ((Function.update (fun b' : Fin s => Zsec b' x) a
+                  (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+                    (fun y : M => Zsec a y) x)) b)
+              ((Function.update (fun b' : Fin s => Zsec b' x) a
+                  (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+                    (fun y : M => Zsec a y) x)) b)))
+            = Real.sqrt (g₂.inner x
+                (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+                  (fun y : M => Zsec a y) x)
+                (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
+                  (fun y : M => Zsec a y) x)) := by
+        rw [Finset.prod_eq_single a
+          (fun b _ hb => by rw [Function.update_of_ne hb, hZval b]; exact hbnorm (φ b.succ.succ))
+          (fun ha => absurd (Finset.mem_univ a) ha), Function.update_self]
+      rw [hprodX, ← hNS] at hcs
+      refine le_trans hcs (mul_le_mul_of_nonneg_left ?_ hNSnn)
+      have h := hA1 (basis (φ 0)) (basis (φ (Fin.succ 0))) (basis (φ a.succ.succ))
+      rw [hbnorm (φ 0), hbnorm (φ (Fin.succ 0)), hbnorm (φ a.succ.succ),
+        mul_one, mul_one, mul_one] at h
+      exact h
+    -- per-slot bound for the `A ⋆ (∇₂S)` insertion sum
+    have hY : ∀ a : Fin s,
+        |(covStep (I := I) g₂ s S x)
+            (Fin.cons (Wsec x) (Function.update (fun b : Fin s => Zsec b x) a
+              ((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x (Zsec a x)) (Vsec x))))|
+          ≤ NcovS * NA := by
+      intro a
+      set tup : Fin (s + 1) → TangentSpace I x :=
+        Fin.cons (Wsec x) (Function.update (fun b : Fin s => Zsec b x) a
+          ((CovariantDerivative.difference
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) x (Zsec a x)) (Vsec x))) with htup
+      have hcs := abs_apply_le_sqrt_normSq0S (I := I) g₂ x (s + 1) basis hON
+        (covStep (I := I) g₂ s S x) tup
+      have hprodY :
+          (∏ b : Fin (s + 1), Real.sqrt (g₂.inner x (tup b) (tup b)))
+            = Real.sqrt (g₂.inner x
+                ((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x (Zsec a x)) (Vsec x))
+                ((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x (Zsec a x)) (Vsec x))) := by
+        rw [htup, Fin.prod_univ_succ, Fin.cons_zero, hWval, hbnorm (φ 0), one_mul]
+        simp only [Fin.cons_succ]
+        rw [Finset.prod_eq_single a
+          (fun b _ hb => by rw [Function.update_of_ne hb, hZval b]; exact hbnorm (φ b.succ.succ))
+          (fun ha => absurd (Finset.mem_univ a) ha), Function.update_self]
+      rw [hprodY, ← hNcovS] at hcs
+      refine le_trans hcs (mul_le_mul_of_nonneg_left ?_ hNcovS_nn)
+      have h := connDiffVec_norm_le (I := I) g₂
+        (leviCivitaConnectionOfMetric (I := I) g₁)
+        (leviCivitaConnectionOfMetric (I := I) g₂)
+        (basis (φ (Fin.succ 0))) (basis (φ a.succ.succ))
+      rw [hbnorm (φ (Fin.succ 0)), hbnorm (φ a.succ.succ), mul_one, mul_one, ← hNA] at h
+      rw [hZval a, hVval]
+      exact h
+    -- assemble the two insertion sums
+    rw [sub_eq_add_neg]
+    refine le_trans (abs_add_le _ _) ?_
+    rw [abs_neg, abs_neg]
+    refine le_trans (add_le_add (Finset.abs_sum_le_sum_abs _ _)
+      (Finset.abs_sum_le_sum_abs _ _)) ?_
+    refine le_trans (add_le_add (Finset.sum_le_sum (fun a _ => hX a))
+      (Finset.sum_le_sum (fun a _ => hY a))) ?_
+    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+    rw [hB]; apply le_of_eq; ring
+  -- assemble via component → normSq0S bound
+  have hcard : normSq0S (I := I) g₂ x (s + 2)
+      (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x) ≤
+      (Fintype.card (Fin (s + 2) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ) * B ^ 2 :=
+    normSq0S_le_card_of_component_bound (I := I) g₂ x (s + 2) basis hinv
+      (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x) B hBnn hcomp
+  have hcard_eq :
+      (Fintype.card (Fin (s + 2) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ)
+        = (Module.finrank ℝ E : ℝ) ^ (s + 2) := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    rfl
+  calc Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+          (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x))
+        ≤ Real.sqrt
+            ((Fintype.card (Fin (s + 2) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ)
+              * B ^ 2) := Real.sqrt_le_sqrt hcard
+    _ = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) * B := by
+        rw [hcard_eq, Real.sqrt_mul (by positivity), Real.sqrt_sq hBnn]
+    _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) * (CA * NS + NA * NcovS) := by
+        rw [hB]; ring
+
+/-- **Base-Leibniz jet-composed norm bound for the mixed connection-difference derivative** (brick
+T-B, the `D_N`-recursion endpoint).  Folds the a=0 connection-difference atom `NA` of
+`covStepDiff_norm_le` into the class jet currency via `NA ≤ (3/2)·√(Λ³)·Λ'` (Koszul, as in
+`diffStep_jet_one_le`).  Under `Λ`-comparability of `g₁, g₂` and a first-order metric
+covariant-derivative bound `Λ'` on `K`, together with the abstract `∇₂A` output-vector bound `hA1`,
+`covStep g₂ (diffStep g₁ g₂ s S)` is bounded at `x ∈ K` by
+`s·n^{(s+2)/2}·(CA + (3/2)·√(Λ³)·Λ')·(‖S‖ + ‖∇₂S‖)`.  This is the base-Leibniz norm layer the `D_N`
+telescoping recursion consumes; the three T-B consumers close once B2 discharges `hA1`. -/
+theorem covStepDiff_jet_le
+    [I.Boundaryless] [CompactSpace M]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) {CA Λ Λ' : ℝ} (hCA : 0 ≤ CA)
+    (hA1 : ∀ (v w u : TangentSpace I x),
+      Real.sqrt (g₂.inner x
+          (covDerivConnDiff (I := I) g₂ g₁
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)
+          (covDerivConnDiff (I := I) g₂ g₁
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)) ≤
+        CA * Real.sqrt (g₂.inner x v v) * Real.sqrt (g₂.inner x w w) *
+          Real.sqrt (g₂.inner x u u))
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hx : x ∈ K) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+        (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) *
+        (Real.sqrt (normSq0S (I := I) g₂ x s (S x)) +
+          Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))) := by
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  -- Koszul connection-difference fibre bound by the jet constant (as in `diffStep_jet_one_le`)
+  have hconn :
+      Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+          (connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x)) ≤
+        (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') := by
+    rw [connDiffTensor_normSqRS_swap g₂ (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x]
+    calc
+      Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+            (connectionDifferenceTensorAt (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g₂)
+              (leviCivitaConnectionOfMetric (I := I) g₁) x))
+          ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * metricDerivNorm (I := I) 1 g₂ g₁ g₁ x) :=
+            lcDiff_norm_le (I := I) g₁ g₂ hEq hx
+      _ = (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * metricCovDerivNorm (I := I) 1 g₂ g₁ x) := by
+            rw [metricDeriv_eq_covDeriv_norm]
+      _ ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left (hjet x hx) (Real.sqrt_nonneg _)) (by norm_num)
+  have hmcnn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 1 g₂ g₁ x := Real.sqrt_nonneg _
+  have hΛ'nn : 0 ≤ Λ' := le_trans hmcnn (hjet x hx)
+  refine le_trans (covStepDiff_norm_le (I := I) g₁ g₂ s S x hCA hA1) ?_
+  set NS := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hNS
+  set NcovS := Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x)) with hNcovS
+  set NA := Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+    (connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) with hNAdef
+  have hNSnn : 0 ≤ NS := Real.sqrt_nonneg _
+  have hNcovS_nn : 0 ≤ NcovS := Real.sqrt_nonneg _
+  have hDnn : 0 ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') := by positivity
+  have hstep : CA * NS + NA * NcovS ≤
+      (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by
+    have h1 : NA * NcovS ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') * NcovS :=
+      mul_le_mul_of_nonneg_right hconn hNcovS_nn
+    nlinarith [h1, mul_nonneg hCA hNcovS_nn, mul_nonneg hDnn hNSnn]
+  calc (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) * (CA * NS + NA * NcovS)
+        ≤ (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+            ((CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS)) :=
+          mul_le_mul_of_nonneg_left hstep (by positivity)
+    _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+          (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by ring
 
 end DiffStepNorm
 

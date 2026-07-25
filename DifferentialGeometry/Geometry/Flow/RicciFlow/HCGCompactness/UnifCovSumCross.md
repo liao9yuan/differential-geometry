@@ -652,6 +652,53 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 11, B3 — LANDED, GREEN): **`covStepDiff_norm_le` + `covStepDiff_jet_le`
+  PROVED sorry-free** in `UnifCovSumCross.lean` `section DiffStepNorm`.  Authoritative
+  `lake build +…UnifCovSumCross` EXIT=0 (8648 jobs); `#print axioms` = `[propext, Classical.choice,
+  Quot.sound]` on BOTH (standard triple, then stripped).  **Statement chosen** = the
+  `covStep g₂ (diffStep g₁ g₂ s S)` form (the base-Leibniz output = Term1+Term2 together, i.e. the
+  form the `D_N` recursion applies: `covStep g₂` of a `diffStep` factor), NOT the literal mixed
+  commutator — the two are equivalent (`diffStep_leibniz`) and this form is directly provable from B1
+  with no `√normSq0S` triangle lemma.
+  - **`covStepDiff_norm_le`** (atom, `NA` explicit): under the abstract `hA1`
+    (`∀ v w u, √(g₂(covDerivConnDiff g₂ g₁ (ext v)(ext w)(ext u) x, ·)) ≤ CA·|v|·|w|·|u|`, the
+    **ext-form** = exactly `covDerivConnDiff_fibreNorm_le`'s consumable shape ∘ P2) + `hCA : 0 ≤ CA`,
+    `√normSq0S(g₂, s+2, covStep g₂ (diffStep g₁ g₂ s S) x) ≤ s·n^{(s+2)/2}·(CA·‖S x‖ + NA·‖∇₂S x‖)`,
+    `NA = √normSqRS(g₂, connectionDifferenceTensorAt (LC g₁)(LC g₂) x)`.
+  - **`covStepDiff_jet_le`** (folded `D_N` endpoint): + `hEq`/`hjet`/`hx` fold `NA ≤ (3/2)√(Λ³)Λ'`
+    (Koszul via `connDiffTensor_normSqRS_swap`+`lcDiff_norm_le`+`metricDeriv_eq_covDeriv_norm`, the
+    `diffStep_jet_one_le` `hconn` block) ⟹ **`C(CA,Λ,Λ',s,n) = s·n^{(s+2)/2}·(CA + (3/2)·√(Λ³)·Λ')`**,
+    `≤ C·(‖S x‖ + ‖∇₂S x‖)`.
+  - **Route** (mirrors `diffStep_norm_le` one level up): `diffStep_leibniz_eval` (B1) eval-expands the
+    component `component0S basis (covStep g₂ (diffStep …) x) φ` on the ON frame into
+    `(∇₂A)⋆S − A⋆(∇₂S)`; the `covDerivConnDiff` insertion (`(∇₂A)⋆S`) bounded by `hA1`, the
+    `difference`-insertion (`A⋆∇₂S`) by the a=0 atom `connDiffVec_norm_le`; `abs_apply_le_sqrt_normSq0S`
+    per tensor + `normSq0S_le_card_of_component_bound` sums the `n^{s+2}` frame components (crude
+    `s·n^{(s+2)/2}` constant, sharpness UNNEEDED).  **KEY design trick**: choose the B1 sections =
+    `mk(smoothExtensionTangent x (basis (φ ·)))`, so the eval-level `covDerivConnDiff (fun y => W y)…`
+    is DEFEQ the ext-form `hA1` consumes — **no `covDerivConnDiff` congruence/tensoriality lemma
+    needed in B3** (that burden, if any, is B2's; but P1∘P2 already delivers the ext-form, so B2 is
+    trivial too).
+  - **Pre-existing breakage fixed (Session-10 fallout)**: Session-10 gave `MetricCovDerivLinear`'s
+    `covStep`/`diffStep`/`diffStep_eval` a `[NeZero (finrank)]`+`[BoundarylessManifold]` requirement,
+    which silently broke this file's `covStep_zero'`/`iterCov_one_eq`/`diffStep_norm_le` (Session-6/7,
+    verified pre-Session-10; `UnifCovSumCross.olean` was missing).  Fix = add
+    `[NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]` to the `section DiffStepNorm` `variable`
+    (matches the section's "re-add dropped instances" design) and drop the now-redundant explicit
+    `[NeZero]` from `diffStep_jet_one_le` and the two new theorems.  Whole file now GREEN.
+  - **Lean lessons**: (1) `abs_add` is **renamed `abs_add_le`** in this mathlib (v4.29 toolchain) —
+    `|a+b| ≤ |a|+|b|`.  (2) A bare `Fin.cons (Wsec x)(update …)` inside `√(g₂.inner x (· b)(· b))`
+    leaves the `Fin.cons` **motive a metavar** (higher-order unif `?m b = TangentSpace` doesn't solve);
+    fix = `set tup : Fin (s+1) → TangentSpace I x := Fin.cons … with htup` (explicit codomain pins the
+    motive), then `rw [htup]` inside the product lemma.  (3) `set NA/NS/NcovS` before applying the atom
+    keeps the fold arithmetic (`nlinarith [mul_le_mul_of_nonneg_right hconn …, mul_nonneg …]`) readable.
+  - **REMAINING for the `D_N` recursion + the three T-B consumers** (S0 `j≥2`, 2a-tel comp (b), S1
+    `hcurv`): (i) **discharge `hA1`** = B2's `covDerivConnDiff_fibreNorm_le` (P1, committed) ∘ the
+    **ungated general-Λ `‖covGrad connDiffSection‖ ≤ CA(Λ,Λ',Λ'')` bound (P2)** — the 2a-tel
+    telescoping sub-frontier, still OPEN (see `UNIF_ITEM6_RECON.md` §4); (ii) run the all-`∇₂`
+    schematic `D_N` recursion (Session-8 §(2)) in the T-B files, feeding `covStepDiff_jet_le` at each
+    `covStep g₂`-of-`diffStep` step.  B3 + B1 are the base-Leibniz norm layer; the consumers stay
+    BLOCKED only on P2 (`hA1`).
 - 2026-07-25 (session 10, B1 — LANDED, GREEN): **`diffStep_leibniz_eval` PROVED sorry-free** in
   `MetricCovDerivLinear.lean` (HCG home, per §Session-9 recommendation).  `lake build
   +…MetricCovDerivLinear` EXIT=0; axioms `[propext, Classical.choice, Quot.sound]` (standard triple).
