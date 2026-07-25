@@ -499,6 +499,19 @@ or `Geometry/Curvature/`, exporting the curvature-jet sup so `UnifBochnerGap.lea
 ---
 
 ## Status
+- 2026-07-24 (S0 session 3, LANE C, Opus): **VOLUME brick (V) steps 1–3 LANDED sorry-free +
+  verified** (`lake build +…UnifCovSumCross` EXIT=0, 3903 jobs; axioms `[propext, Classical.choice,
+  Quot.sound]`).  In `HCGCompactness/UnifCovSumCross.lean`: `det_le_of_posSemidef_le` (the general
+  Loewner→determinant estimate Mathlib lacks, via the CFC matrix sqrt; the genuinely-missing brick),
+  its plain-form bridge `det_le_one_of_dotProduct`, `chartGram_quad_le_of_equiv` (chart-Gram Loewner
+  comparison), `chartDensity_cross_le` (`chartDensity g₀ ≤ √(Λ^n)·chartDensity gBase` on the base set).
+  **Step 4 `volumeMeasure_cross_le` (the measure lift) is written and complete but BLOCKED**: it needs
+  `chart_lintegral_le` from `Measure/CompactVolumeEquiv.lean`, and that file no longer compiles against
+  the pinned Mathlib (`volume_uniform_equiv` :366/:371 — `lintegral_indicator_one` `simpa` API drift;
+  its olean was silently missing).  Two-line fix is known (`Set.indicator s 1` + explicit `rw`) but
+  CompactVolumeEquiv is outside this session's editable set; the full step-4 proof is preserved in
+  `UnifCovSumCross.md` for drop-in.  T (connection-change telescoping) not started.  V fibre level
+  (session 1) + V steps 1–3 (this session) done; V step 4 pending the CompactVolumeEquiv repair.
 - 2026-07-24 (S0 session 2, LANE C, Opus): **VOLUME brick (V) core LANDED + verified**
   (`lake build` 3860 jobs EXIT=0; axioms standard triple).  Two reusable matrix lemmas in
   `HCGCompactness/UnifCovSumCross.lean` §MatrixDet: `eigenvalues_le_of_rayleigh` (upper companion

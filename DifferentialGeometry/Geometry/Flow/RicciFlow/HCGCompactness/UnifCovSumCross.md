@@ -126,7 +126,46 @@ The reusable Loewner→det core, in `UnifCovSumCross.lean` §MatrixDet (private;
 - `det_le_one_of_rayleigh` — `A.PosSemidef` + Rayleigh `≤ 1` (i.e. `A ≤ I`) ⟹ `det A ≤ 1`
   (eigenvalues `∈ [0,1]`, `det = ∏ ≤ 1` via `Finset.prod_le_one`).  This is the `B = I` core.
 
-### V — REMAINING (fully-worked route; next session is mechanical)
+### V — SESSION 3 (2026-07-24): steps 1–3 LANDED sorry-free + verified; step 4 BLOCKED
+`lake build +…UnifCovSumCross` EXIT=0 (3903 jobs); `#print axioms` = `[propext, Classical.choice,
+Quot.sound]` on each new public theorem (then stripped).
+- **(1) `det_le_of_posSemidef_le`** (general Loewner→det) — DONE, private in §MatrixDet, via the CFC
+  matrix sqrt per the worked route below.  Simplification vs the plan: `PosSemidef.det_sqrt` was NOT
+  needed — `IsUnit M.det` came directly from `M.det*M.det=B.det` being a unit; `A = M·C·M` via
+  `simp only [mul_assoc]` reassociation.  Helper split out: **`det_le_one_of_dotProduct`** (plain
+  `ι→ℝ` form of the committed `det_le_one_of_rayleigh`) isolates ALL `EuclideanSpace`/`star`/`RCLike.re`
+  coercion so the general lemma stays in `ι→ℝ` currency.  LESSONS: the `EuclideanSpace` inner↔dotProduct
+  bridge is `EuclideanSpace.inner_eq_star_dotProduct` (namespaced!) + `real_inner_self_eq_norm_sq`, and
+  must be composed via **`exact` (defeq), NOT `rw`** — `rw` on `inner ℝ v v` fails to match (`inner ?m
+  ?x ?y` pattern misses the instance).  `dotProduct_smul`/`smul_dotProduct` are ROOT namespace (NOT
+  `Matrix.`); `smul_mulVec`/`dotProduct_mulVec`/`mulVec_mulVec`/`mulVec_transpose` ARE `Matrix.`.
+- **(2) `chartGram_quad_le_of_equiv`** — DONE (public).  `chartGramMatrix_dotProduct_mulVec` already
+  gives the quad-form = fibre inner product of `V=∑ vᵢ•cbf i`; `← …_dotProduct_mulVec` + `star_trivial`
+  turns `v ⬝ᵥ Gram *ᵥ v` into `g.inner x V V`, then `(hEq.2 x (mem_univ x) V).2`.
+- **(3) `chartDensity_cross_le`** — DONE (public), on the trivialization base set.  `A=chartGram g₀` PSD,
+  `B=Λ•chartGram gBase` PosDef (`PosDef.smul`), `det_le_of_posSemidef_le` + `det_smul`/`Fintype.card_fin`
+  ⟹ `det g₀ ≤ Λⁿ det gBase`; `√` via `Real.sqrt_mul (pow_nonneg …)` + `Real.sqrt_le_sqrt`.  Constant
+  `√(Λ^n)` (`n=finrank`).  Use `change` not `show` to unfold `chartDensity` (linter).
+- **(4) `volumeMeasure_cross_le`** — **proof WRITTEN and complete, but BLOCKED, deliberately NOT in the
+  .lean.**  It needs `chart_lintegral_le` from `Analysis/Integration/Measure/CompactVolumeEquiv.lean`,
+  and **that file does NOT compile against the current pinned Mathlib**: `volume_uniform_equiv`
+  (`CompactVolumeEquiv.lean:366` and `:371`) fails "Type mismatch: After simplification" — its
+  `simpa only [lintegral_indicator_one hs, Measure.smul_apply, smul_eq_mul] using h` no longer fires
+  (`lintegral_indicator_one` / indicator-`1` Mathlib API drift).  Its `.olean` was simply MISSING
+  (bit-rotted, unnoticed because nothing on the built path imports CompactVolumeEquiv).  A file's olean
+  is all-or-nothing, so `chart_lintegral_le` (line 195, itself fine) is unimportable while 366/371 error.
+  **KNOWN FIX** (found while porting the identical pattern): replace the indicator with
+  `Set.indicator s (1 : M → ℝ≥0∞)` (exact `s.indicator 1` shape) and use explicit
+  `rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h` then `rwa [Measure.smul_apply,
+  smul_eq_mul]` — two-line fix at CompactVolumeEquiv:366 and :371.  CompactVolumeEquiv is OUTSIDE this
+  session's editable set, so step 4 stops here.  The FULL step-4 proof is preserved at the bottom of
+  this note for drop-in once CompactVolumeEquiv is fixed (or once `volumeMeasure_cross_le` is re-homed
+  inside CompactVolumeEquiv.lean — arguably its natural home, next to the private POU-sum layer it
+  re-derives).  All OTHER step-4 pieces are worked from PUBLIC atoms (`riemannianMeasure_lintegral_eq`,
+  `tsum_eq_sum`, `chartAtlasPOU_weight_zero_of_notMem`, `chartAtlasPOU_isSubordinate`,
+  `trivializationAt_baseSet_eq_chartAt_source`, `metricUniformEquivalentOn_symm`).
+
+### V — ORIGINAL fully-worked route (from session 2; realized by steps 1–3 above)
 1. **`det_le_of_posSemidef_le`** (general Loewner→det): `A.PosSemidef`, `B.PosDef`,
    `∀ v:ι→ℝ, v ⬝ᵥ A*ᵥv ≤ v ⬝ᵥ B*ᵥv` ⟹ `A.det ≤ B.det`.  Proof (worked): `M := CFC.sqrt B`
    (PosDef, symmetric `Mᴴ=M` via `IsSelfAdjoint.of_nonneg (CFC.sqrt_nonneg _)`, `M*M=B` via
@@ -169,7 +208,100 @@ the real j=1-for-`(0,2)` content (not yet a committed lemma; `MetricDiffCovGradK
 `A`-insertion (cost one jet) and one fibre-slot (cost `√Λ`).  Then integrate with the volume
 comparison (V) and sum over `j≤n` (Cauchy–Schwarz over the `(j+1)`-term inner sum) → `C(Λ,n)`.
 
+## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
+
+Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
+(after `chartDensity_cross_le`, before `end RicciFlow`) once CompactVolumeEquiv.lean compiles again
+(fix its `lintegral_indicator_one` `simpa` at :366/:371 with the `Set.indicator s 1` form + explicit
+`rw`).  Verified up to the CompactVolumeEquiv build wall; the tail was reformulated to the
+`Set.indicator s (1 : M → ℝ≥0∞)` shape precisely to dodge the same `lintegral_indicator_one` drift.
+
+```lean
+section VolumeMeasure
+open MeasureTheory
+open scoped ENNReal
+variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+theorem volumeMeasure_cross_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ) :
+    riemannianVolumeMeasure (I := I) (M := M) g₀ ≤
+        ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) •
+          riemannianVolumeMeasure (I := I) (M := M) gBase ∧
+      riemannianVolumeMeasure (I := I) (M := M) gBase ≤
+        ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) •
+          riemannianVolumeMeasure (I := I) (M := M) g₀ := by
+  classical
+  have vsum : ∀ (g : SmoothRiemannianMetric I M) (F : M → ℝ≥0∞), Measurable F →
+      ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), ∫⁻ x,
+          ENNReal.ofReal ((chartAtlasPOU I M α : M → ℝ) x) * F x
+            ∂(chartLocalMeasure (I := I) g α) := by
+    intro g F hF
+    rw [riemannianVolumeMeasure_def,
+      riemannianMeasure_lintegral_eq (I := I) g (chartAtlasPOU I M) hF]
+    refine tsum_eq_sum (fun α hα => ?_)
+    have hz : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x = 0 :=
+      fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
+    simp only [hz, ENNReal.ofReal_zero, zero_mul, lintegral_zero]
+  have hbase : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    intro α x hx
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact (chartAtlasPOU_isSubordinate I M) α hx
+  have lintComp : ∀ (q h : SmoothRiemannianMetric I M),
+      (∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+        chartDensity (I := I) h α x ≤
+          Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) q α x) →
+      ∀ (F : M → ℝ≥0∞), Measurable F →
+        ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) h) ≤
+          ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) *
+            ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) q) := by
+    intro q h hdens F hF
+    rw [vsum h F hF, vsum q F hF, Finset.mul_sum]
+    refine Finset.sum_le_sum (fun α _ => ?_)
+    exact chart_lintegral_le (I := I) (M := M) q h α
+      (Real.sqrt (Λ ^ Module.finrank ℝ E)) (Real.sqrt_nonneg _) (hdens α) hF
+  have hdens_fwd : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      chartDensity (I := I) g₀ α x ≤
+        Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) gBase α x :=
+    fun α _ hx => chartDensity_cross_le (I := I) gBase g₀ hEq α (hbase α _ hx)
+  have hdens_rev : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
+      chartDensity (I := I) gBase α x ≤
+        Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) g₀ α x :=
+    fun α _ hx =>
+      chartDensity_cross_le (I := I) g₀ gBase
+        (metricUniformEquivalentOn_symm (I := I) hEq) α (hbase α _ hx)
+  refine ⟨?_, ?_⟩
+  · rw [Measure.le_iff]
+    intro s hs
+    have h := lintComp gBase g₀ hdens_fwd (Set.indicator s (1 : M → ℝ≥0∞))
+      (measurable_const.indicator hs)
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
+  · rw [Measure.le_iff]
+    intro s hs
+    have h := lintComp g₀ gBase hdens_rev (Set.indicator s (1 : M → ℝ≥0∞))
+      (measurable_const.indicator hs)
+    rw [lintegral_indicator_one hs, lintegral_indicator_one hs] at h
+    rwa [Measure.smul_apply, smul_eq_mul]
+end VolumeMeasure
+```
+
 ## Status
+- 2026-07-24 (session 3, V steps 1–3): **LANDED sorry-free + verified** — `det_le_of_posSemidef_le`
+  (general Loewner→det, private), `det_le_one_of_dotProduct` (plain-form bridge, private),
+  `chartGram_quad_le_of_equiv` (public), `chartDensity_cross_le` (public).  `lake build
+  +…UnifCovSumCross` EXIT=0 (3903 jobs); axioms `[propext, Classical.choice, Quot.sound]` on all new
+  public/private theorems.  **Step 4 `volumeMeasure_cross_le` proof is complete but BLOCKED and NOT in
+  the .lean**: its dep `CompactVolumeEquiv.lean` does not compile against the current Mathlib
+  (`volume_uniform_equiv` :366/:371 — `lintegral_indicator_one` `simpa` drift), so `chart_lintegral_le`
+  is unimportable.  Fix is one two-line change in CompactVolumeEquiv (non-editable this session); proof
+  preserved above for drop-in.  T (connection-change) not started this session.
 - 2026-07-24 (session 2, V): LANDED the Loewner→det reusable CORE sorry-free + verified
   (`eigenvalues_le_of_rayleigh`, `det_le_one_of_rayleigh`; `lake` EXIT=0; axioms standard triple).
   MATERIAL FINDING: the full Loewner→det is a genuine ~50-line matrix brick (Mathlib lacks matrix

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+import DifferentialGeometry.Geometry.Metric.ChartGram
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Matrix.Order
 
 /-!
 # Covariant-sum cross-metric equivalence (item-6 statement S0) — fiber-level layer
@@ -39,8 +42,9 @@ set_option autoImplicit false
 noncomputable section
 
 open Bundle Manifold Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators Matrix MatrixOrder
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.Measure
 
 namespace DifferentialGeometry
 namespace PDE
@@ -83,6 +87,89 @@ private lemma det_le_one_of_rayleigh
   refine Finset.prod_le_one (fun i _ => ?_) (fun i _ => ?_)
   · exact_mod_cast hA.eigenvalues_nonneg i
   · exact_mod_cast eigenvalues_le_of_rayleigh hA.isHermitian hray i
+
+/-- Plain-vector form of `det_le_one_of_rayleigh`: if the (real) quadratic form of a
+positive-semidefinite matrix `A` is dominated by the Euclidean one (`x ⬝ᵥ A *ᵥ x ≤ x ⬝ᵥ x`,
+i.e. `A ≤ I`), then `det A ≤ 1`.  Isolates the `EuclideanSpace`/`star`/`RCLike.re`
+bookkeeping so the general Loewner→determinant lemma stays in `ι → ℝ` currency. -/
+private lemma det_le_one_of_dotProduct
+    {A : Matrix ι ι ℝ} (hA : A.PosSemidef)
+    (hray : ∀ x : ι → ℝ, x ⬝ᵥ (A *ᵥ x) ≤ x ⬝ᵥ x) :
+    A.det ≤ 1 := by
+  refine det_le_one_of_rayleigh hA (fun v hv => ?_)
+  have hnorm : (⇑v : ι → ℝ) ⬝ᵥ ⇑v = 1 := by
+    have h1 := EuclideanSpace.inner_eq_star_dotProduct (𝕜 := ℝ) v v
+    rw [star_trivial] at h1
+    have h2 : (⇑v : ι → ℝ) ⬝ᵥ ⇑v = ‖v‖ ^ 2 := by
+      rw [← h1]; exact real_inner_self_eq_norm_sq v
+    rw [h2, hv, one_pow]
+  simp only [star_trivial, RCLike.re_to_real]
+  exact (hray ⇑v).trans hnorm.le
+
+/-- **General Loewner→determinant monotonicity.**  A positive-semidefinite matrix `A` dominated
+(in the quadratic-form / Loewner sense) by a positive-definite matrix `B` has no larger
+determinant.  Proof: the congruence `C := B^{-1/2} A B^{-1/2}` satisfies `C ≤ I` (so
+`det C ≤ 1`) and `A = B^{1/2} C B^{1/2}`, whence `det A = det B · det C ≤ det B`.  Mathlib has
+no matrix Loewner→det lemma; this is built from the CFC matrix square root
+(`Analysis/Matrix/Order.lean`).  Reusable core of the volume brick (hoist candidate:
+`Geometry/Comparison/Volume/JacobianBounds.lean` `MatrixBounds`). -/
+private lemma det_le_of_posSemidef_le
+    {A B : Matrix ι ι ℝ} (hA : A.PosSemidef) (hB : B.PosDef)
+    (hAB : ∀ x : ι → ℝ, x ⬝ᵥ (A *ᵥ x) ≤ x ⬝ᵥ (B *ᵥ x)) :
+    A.det ≤ B.det := by
+  classical
+  -- self-adjointness of the quadratic pairing for a symmetric real matrix
+  have quad_symm : ∀ (S : Matrix ι ι ℝ), Sᵀ = S → ∀ x z : ι → ℝ,
+      x ⬝ᵥ (S *ᵥ z) = (S *ᵥ x) ⬝ᵥ z := by
+    intro S hS x z
+    rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, hS]
+  -- the positive square root `M = √B` and its basic algebra
+  set M := CFC.sqrt B with hM_def
+  have hM_nonneg : (0 : Matrix ι ι ℝ) ≤ M := by rw [hM_def]; exact CFC.sqrt_nonneg B
+  have hM_psd : M.PosSemidef := Matrix.nonneg_iff_posSemidef.mp hM_nonneg
+  have hM_herm : Mᴴ = M := hM_psd.isHermitian
+  have hMsymm : Mᵀ = M := by
+    ext i j
+    simpa [Matrix.transpose_apply, star_trivial] using hM_psd.isHermitian.apply i j
+  have hMM : M * M = B := by
+    rw [hM_def]; exact CFC.sqrt_mul_sqrt_self B (Matrix.nonneg_iff_posSemidef.mpr hB.posSemidef)
+  -- determinant bookkeeping for `M`
+  have hdetB_pos : 0 < B.det := hB.det_pos
+  have hdetMM : M.det * M.det = B.det := by rw [← Matrix.det_mul, hMM]
+  have hdetM_ne : M.det ≠ 0 := fun h0 => hdetB_pos.ne' (by rw [← hdetMM, h0, zero_mul])
+  have hdetM_unit : IsUnit M.det := isUnit_iff_ne_zero.mpr hdetM_ne
+  have hMinv_r : M * M⁻¹ = 1 := Matrix.mul_nonsing_inv M hdetM_unit
+  have hMinv_l : M⁻¹ * M = 1 := Matrix.nonsing_inv_mul M hdetM_unit
+  have hMinvsymm : (M⁻¹)ᵀ = M⁻¹ := by rw [Matrix.transpose_nonsing_inv, hMsymm]
+  -- the congruence `C = M⁻¹ A M⁻¹` is PSD with Rayleigh quotient `≤ 1`
+  have hC_psd : (M⁻¹ * A * M⁻¹).PosSemidef := by
+    have h := hA.conjTranspose_mul_mul_same M⁻¹
+    rwa [Matrix.conjTranspose_nonsing_inv, hM_herm] at h
+  have hC_ray : ∀ x : ι → ℝ, x ⬝ᵥ ((M⁻¹ * A * M⁻¹) *ᵥ x) ≤ x ⬝ᵥ x := by
+    intro x
+    have hMw : M *ᵥ (M⁻¹ *ᵥ x) = x := by
+      rw [Matrix.mulVec_mulVec, hMinv_r, Matrix.one_mulVec]
+    have e1 : x ⬝ᵥ ((M⁻¹ * A * M⁻¹) *ᵥ x) = (M⁻¹ *ᵥ x) ⬝ᵥ (A *ᵥ (M⁻¹ *ᵥ x)) := by
+      rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
+      exact quad_symm M⁻¹ hMinvsymm x (A *ᵥ (M⁻¹ *ᵥ x))
+    have e3 : (M⁻¹ *ᵥ x) ⬝ᵥ (B *ᵥ (M⁻¹ *ᵥ x)) = x ⬝ᵥ x := by
+      rw [← hMM, ← Matrix.mulVec_mulVec,
+        quad_symm M hMsymm (M⁻¹ *ᵥ x) (M *ᵥ (M⁻¹ *ᵥ x)), hMw]
+    calc x ⬝ᵥ ((M⁻¹ * A * M⁻¹) *ᵥ x)
+        = (M⁻¹ *ᵥ x) ⬝ᵥ (A *ᵥ (M⁻¹ *ᵥ x)) := e1
+      _ ≤ (M⁻¹ *ᵥ x) ⬝ᵥ (B *ᵥ (M⁻¹ *ᵥ x)) := hAB (M⁻¹ *ᵥ x)
+      _ = x ⬝ᵥ x := e3
+  have hdetC : (M⁻¹ * A * M⁻¹).det ≤ 1 := det_le_one_of_dotProduct hC_psd hC_ray
+  -- reassemble `A = M C M` and conclude `det A = det B · det C ≤ det B`
+  have hACM : M * (M⁻¹ * A * M⁻¹) * M = A := by
+    rw [show M * (M⁻¹ * A * M⁻¹) * M = (M * M⁻¹) * A * (M⁻¹ * M) by simp only [mul_assoc]]
+    rw [hMinv_r, hMinv_l, one_mul, mul_one]
+  have hdetA : A.det = B.det * (M⁻¹ * A * M⁻¹).det := by
+    have hcongr := congrArg Matrix.det hACM
+    rw [Matrix.det_mul, Matrix.det_mul] at hcongr
+    rw [← hcongr, ← hdetMM]; ring
+  rw [hdetA]
+  exact mul_le_of_le_one_right hdetB_pos.le hdetC
 
 end MatrixDet
 
@@ -151,6 +238,70 @@ theorem covsumCross_fibSum
     _ ≤ Real.sqrt (Λ ^ (s + n)) *
           Real.sqrt (normSq0S (I := I) gBase x (s + j) (A j)) :=
         mul_le_mul_of_nonneg_right hmono (Real.sqrt_nonneg _)
+
+/-! ### Volume level — chart-Gram / chart-density cross-metric comparison
+
+The volume brick `dV_{g₀} ≍_{Λ^{n/2}} dV_{gBase}`.  `chartDensity g x₀ x = √det(chartGramMatrix
+g x₀ x)`, so the comparison reduces to the Loewner→determinant estimate `det(chartGram g₀) ≤
+Λ^n·det(chartGram gBase)` (`det_le_of_posSemidef_le`) fed by the chart-Gram quadratic-form
+comparison below.  The measure-level lift (via `chart_lintegral_le` and the POU sum) is the
+remaining piece; see `UnifCovSumCross.md`. -/
+
+/-- **Chart-Gram quadratic-form comparison** (volume-brick step 2).  `Λ`-comparability of
+`g₀`, `gBase` transfers to a pointwise Loewner bound on their chart-Gram matrices: the
+`g₀`-Gram quadratic form is bounded by `Λ` times the `gBase`-Gram quadratic form, at every
+point and coefficient vector.  Proved by writing each quadratic form as the fibre inner
+product of the same linear combination of chart-basis vectors and applying comparability. -/
+theorem chartGram_quad_le_of_equiv
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
+    (x₀ x : M) (v : Fin (Module.finrank ℝ E) → ℝ) :
+    v ⬝ᵥ (chartGramMatrix (I := I) g₀ x₀ x) *ᵥ v ≤
+      Λ * (v ⬝ᵥ (chartGramMatrix (I := I) gBase x₀ x) *ᵥ v) := by
+  have hg₀ : v ⬝ᵥ (chartGramMatrix (I := I) g₀ x₀ x) *ᵥ v =
+      g₀.inner x (∑ i, v i • chartBasisVecFiber (I := I) x₀ i x)
+        (∑ j, v j • chartBasisVecFiber (I := I) x₀ j x) := by
+    rw [← chartGramMatrix_dotProduct_mulVec (I := I) g₀ x₀ x v, star_trivial]
+  have hgB : v ⬝ᵥ (chartGramMatrix (I := I) gBase x₀ x) *ᵥ v =
+      gBase.inner x (∑ i, v i • chartBasisVecFiber (I := I) x₀ i x)
+        (∑ j, v j • chartBasisVecFiber (I := I) x₀ j x) := by
+    rw [← chartGramMatrix_dotProduct_mulVec (I := I) gBase x₀ x v, star_trivial]
+  rw [hg₀, hgB]
+  exact (hEq.2 x (Set.mem_univ x)
+    (∑ i, v i • chartBasisVecFiber (I := I) x₀ i x)).2
+
+/-- **Chart-density cross-metric bound** (volume-brick step 3).  On the tangent trivialization
+base set — where both chart-Gram matrices are positive-definite — the `g₀` chart density is
+bounded by `√(Λ^n)` times the `gBase` chart density (`n = finrank ℝ E`), the pointwise
+`Λ^{n/2}` volume-density comparison.  Combines the chart-Gram quadratic comparison with the
+Loewner→determinant estimate and `√`-monotonicity. -/
+theorem chartDensity_cross_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
+    (x₀ : M) {x : M}
+    (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
+    chartDensity (I := I) g₀ x₀ x ≤
+      Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) gBase x₀ x := by
+  have hΛpos : 0 < Λ := lt_of_lt_of_le zero_lt_one hEq.1
+  have hA : (chartGramMatrix (I := I) g₀ x₀ x).PosSemidef :=
+    (chartGramMatrix_posDef (I := I) g₀ x₀ hx).posSemidef
+  have hB : (Λ • chartGramMatrix (I := I) gBase x₀ x).PosDef :=
+    (chartGramMatrix_posDef (I := I) gBase x₀ hx).smul hΛpos
+  have hAB : ∀ v : Fin (Module.finrank ℝ E) → ℝ,
+      v ⬝ᵥ (chartGramMatrix (I := I) g₀ x₀ x) *ᵥ v ≤
+        v ⬝ᵥ (Λ • chartGramMatrix (I := I) gBase x₀ x) *ᵥ v := by
+    intro v
+    rw [Matrix.smul_mulVec, dotProduct_smul, smul_eq_mul]
+    exact chartGram_quad_le_of_equiv (I := I) gBase g₀ hEq x₀ x v
+  have hdet : (chartGramMatrix (I := I) g₀ x₀ x).det ≤
+      Λ ^ Module.finrank ℝ E * (chartGramMatrix (I := I) gBase x₀ x).det := by
+    have h := det_le_of_posSemidef_le hA hB hAB
+    rwa [Matrix.det_smul, Fintype.card_fin] at h
+  change Real.sqrt ((chartGramMatrix (I := I) g₀ x₀ x).det) ≤
+    Real.sqrt (Λ ^ Module.finrank ℝ E) *
+      Real.sqrt ((chartGramMatrix (I := I) gBase x₀ x).det)
+  rw [← Real.sqrt_mul (pow_nonneg hΛpos.le _)]
+  exact Real.sqrt_le_sqrt hdet
 
 end RicciFlow
 end PDE
