@@ -17,7 +17,7 @@ noncomputable section
 namespace MetricKoszul
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [CompleteSpace E]
+  [CompleteSpace E] [FiniteDimensional Real E]
 
 noncomputable local instance sprayDualNormedGroup :
     NormedAddCommGroup (E →L[Real] Real) :=

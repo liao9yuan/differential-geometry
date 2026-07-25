@@ -234,6 +234,7 @@ end LoweredJet
 variable {E0 F0 : Type*}
   [NormedAddCommGroup E0] [InnerProductSpace Real E0]
   [NormedAddCommGroup F0] [InnerProductSpace Real F0]
+  [FiniteDimensional Real E0] [FiniteDimensional Real F0]
 
 /-- A lowered metric pairing recovers a vector norm with constant `4` under
 the H6 lower metric bound and the inverse first-derivative bound `2`. -/

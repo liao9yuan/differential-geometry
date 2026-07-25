@@ -19,7 +19,10 @@ open RealInnerProductSpace
 namespace IsCoercive
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [CompleteSpace E]
+  [CompleteSpace E] [FiniteDimensional Real E]
+
+instance : FiniteDimensional Real (StrongDual Real E) :=
+  inferInstanceAs (FiniteDimensional Real (E →L[Real] Real))
 
 /-- If `B v v` dominates `c * ||v||^2`, then the inverse Lax--Milgram map has
 pointwise norm at most `c^{-1}`. -/
@@ -109,7 +112,7 @@ vectors.  This is the finite-Galerkin mass-matrix inverse in invariant form. -/
 noncomputable def sharpCLM {B : E →L[Real] E →L[Real] Real}
     (hco : IsCoercive B) : (E →L[Real] Real) →L[Real] E :=
   hco.continuousLinearEquivOfBilin.symm.toContinuousLinearMap.comp
-    (InnerProductSpace.toDual Real E).symm.toContinuousLinearMap
+    (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap
 
 @[simp] theorem sharpCLM_apply {B : E →L[Real] E →L[Real] Real}
     (hco : IsCoercive B) (eta : E →L[Real] Real) :
@@ -126,6 +129,21 @@ theorem sharpCLM_norm_le {B : E →L[Real] E →L[Real] Real}
   rw [sharpCLM_apply]
   exact hco.sharp_norm_le hc hB eta
 
+/-- The canonical Gram construction, regarded as a bounded linear operation on
+bilinear forms. -/
+noncomputable def gramCLM :
+    (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) :=
+  ContinuousLinearMap.compL Real E (E →L[Real] Real) E
+    (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap
+
+@[simp] theorem gramCLM_apply (B : E →L[Real] E →L[Real] Real) :
+    gramCLM B = InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B := rfl
+
+theorem gramCLM_isUnit {B : E →L[Real] E →L[Real] Real} (hB : IsCoercive B) :
+    IsUnit (gramCLM B) := by
+  rw [gramCLM_apply]
+  exact ⟨hB.continuousLinearEquivOfBilin.toUnit, rfl⟩
+
 /-- A continuous family of coercive bilinear forms has a continuous family of
 packaged sharp maps.  This is the finite-dimensional moving-mass inverse
 continuity bridge used by nonautonomous Galerkin systems. -/
@@ -134,8 +152,7 @@ theorem sharpCLM_contOn
     (B : X → E →L[Real] E →L[Real] Real)
     (hB : ContinuousOn B S) (hco : ∀ x, IsCoercive (B x)) :
     ContinuousOn (fun x => (hco x).sharpCLM) S := by
-  let G : (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) :=
-    InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real)
+  let G : (E →L[Real] E →L[Real] Real) →L[Real] (E →L[Real] E) := gramCLM
   have hG : ContinuousOn (fun x => G (B x)) S :=
     G.continuous.comp_continuousOn hB
   have hinv : ContinuousOn (fun x => Ring.inverse (G (B x))) S := by
@@ -143,10 +160,10 @@ theorem sharpCLM_contOn
     obtain ⟨u, hu⟩ := gramCLM_isUnit (hco x)
     have hri : ContinuousAt (fun A : E →L[Real] E => Ring.inverse A) (G (B x)) := by
       rw [show G (B x) = (u : E →L[Real] E) from hu.symm]
-      exact (contDiffAt_ringInverse u).continuousAt
-    exact hri.comp_continuousWithinAt x (hG x hx)
+      exact (contDiffAt_ringInverse (n := 1) Real u).continuousAt
+    exact ContinuousAt.comp_continuousWithinAt (f := fun y => G (B y)) hri (hG x hx)
   let R : (E →L[Real] Real) →L[Real] E :=
-    (InnerProductSpace.toDual Real E).symm.toContinuousLinearMap
+    (InnerProductSpace.toDual Real E).symm.toContinuousLinearEquiv.toContinuousLinearMap
   have hcomp : ContinuousOn
       (fun x => (Ring.inverse (G (B x))).comp R) S := by
     have hleft : ContinuousOn

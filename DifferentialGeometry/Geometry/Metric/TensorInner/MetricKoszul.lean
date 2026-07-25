@@ -18,6 +18,7 @@ noncomputable section
 namespace MetricKoszul
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 
 /-- The covector in the coordinate Koszul formula associated to a trilinear
 metric derivative `D` and two model-space vectors. -/

@@ -40,7 +40,6 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -594,9 +593,9 @@ theorem diffStep_leibniz_eval
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
   haveI hcov₁ : CovariantDerivative.ContMDiffCovariantDerivative
-      (leviCivitaConnectionOfMetric (I := I) g₁) (∞ : WithTop ℕ∞) := LeviCivita_isContMDiff g₁
+      (leviCivitaConnectionOfMetric (I := I) g₁) (∞ : WithTop ℕ∞) := leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₁
   haveI hcov₂ : CovariantDerivative.ContMDiffCovariantDerivative
-      (leviCivitaConnectionOfMetric (I := I) g₂) (∞ : WithTop ℕ∞) := LeviCivita_isContMDiff g₂
+      (leviCivitaConnectionOfMetric (I := I) g₂) (∞ : WithTop ℕ∞) := leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₂
   set VV : Fin (s + 1) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) := Fin.cons V Vslots with hVVdef
   have hVVpt : ∀ y : M, (fun q : Fin (s + 1) => VV q y)
