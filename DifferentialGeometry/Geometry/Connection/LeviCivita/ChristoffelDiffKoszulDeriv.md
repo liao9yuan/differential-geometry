@@ -69,7 +69,59 @@ Both engines = one `nabla0SFun_eval_smooth_slots` + `abel`; RHS also uses the sl
 `V : Fin n → ContMDiffSection` PARAMETER — inlining `Fin.cons X (…)` in a statement fails constant-motive
 inference ("Function expected at Fin.cons … a").
 
-## REMAINING (the assembly) — EXECUTABLE RECIPE + tools confirmed (session 4 recon)
+## LANDED session 5 (the assembly — P2.a COMPLETE, verified, axioms [propext, Classical.choice, Quot.sound])
+
+- **`connDiff_koszul_deriv`** — the full differentiated Christoffel-difference Koszul identity:
+  ```
+  2·g₁(covDerivConnDiff g₂ g₁ W X Y x, Z x)
+    = nabla0SFun 3 (LC g₂) W field x ![X x,Y x,Z x]
+      + nabla0SFun 3 (LC g₂) W field x ![Y x,X x,Z x]
+      − nabla0SFun 3 (LC g₂) W field x ![Z x,X x,Y x]
+      − 2·nabla0SFun 2 (LC g₂) W (mtf g₁) x ![difference (LC g₁)(LC g₂) x (Y x)(X x), Z x]
+  ```
+  `field = totalNabla0S 2 (LC g₂)(mtf g₁)(metricField_totalReg …)` (= the bundled ∇₂g₁ (0,3)-field);
+  the three `nabla0SFun 3` terms are the ∇₂²g₁ combo, the last is `2·(∇₂_W g₁)(A(X,Y),Z)`.
+- **`koszul_field`** (private helper) — field-eval form of `connDiff_koszul_nabla`: pairing `A` against `g₁`
+  as `½·field(![Q,P,R]) + ½·field(![P,Q,R]) − ½·field(![R,Q,P])`.  Used 3× on the slot corrections.
+
+### How the assembly closed (the cancellation is EXACT — no α-symmetry needed)
+- The 9 slot-correction field-evals from the LHS (koszul on `∇₂_W`-slot args) match the 9 from the RHS
+  (`nablaMetric_combo_extDeriv` update terms) **term-for-term by pure rearrangement**.  Predecessor recon
+  feared an α slot-symmetry step; with the correct Koszul third-term slot order `−½α(w;q,p)` (NOT `−½α(w;p,q)`),
+  every term is syntactically identical after normalisation → `linarith` closes.
+- Route: `funext` identity from `connDiff_koszul_nabla` → `congrArg (extDerivFun · x (W x))` → LHS via
+  `metric_leibniz_extDeriv` (V=![Adiff,Z]) + RHS via `nablaMetric_combo_extDeriv` ×3 (V=![X,Y,Z]/![Y,X,Z]/![Z,X,Y])
+  + `extDerivFun_add`/local `extDerivFun_sub'`/`extDerivFun_const_mul` linearity split (3 combo `MDifferentiableAt`
+  via `tensor0SField_eval_smooth_slots_contMDiffAt`, NOT the raw `contMDiffAt_section_apply_gen` — that hits the
+  NormedSpace-on-Tensor0SModel wall) → normalise slot funcs / `Function.update` / index-2 to explicit `![·,·,·]`
+  → `covDerivConnDiff` expansion `hB` (proved by ONE `rfl`-defeq intermediate, then `abel`) → `koszul_field` ×3
+  → `g₁.inner` bilinearity (local `map_add`+`ContinuousLinearMap.add_apply` helper) → `linarith`.
+
+### Lessons (session 5)
+- `LeviCivita_isContMDiff` (needed by `diffSec_contMDiff`/`covApply_contMDiffOn`) requires the FULL instance set
+  incl. `[BoundarylessManifold I M]` (and InnerProductSpace/NeZero).  DO NOT `omit` them on lemmas that build
+  covariant-derivative sections — the a=0 base omits them only because it never packages such sections.
+- `covApply_contMDiff` is in `TensorThirdOrderWeitzenbock` (NOT imported here); use `covApply_contMDiffOn`
+  (`CurvatureOperator/Defs.lean`, imported) + `contMDiffOn_univ`.  `extDerivFun_sub'` lives in a downstream
+  RicciLinearization file — re-derive it locally from `extDerivFun_add` (the add/const_mul ARE in scope).
+- `extDerivFun_const_mul`'s FIRST explicit arg is `I` (then `c`, then `hf`): `extDerivFun_const_mul I (1/2) hMDcX`.
+- `set cX := (fun p => …)` folds the standalone lambda (in `hRX`/`hMDcX`) but NOT applied `cX p` occurrences
+  (inside the combined RHS lambda); fold those with `simp only [← hcX_app]` where `hcX_app p : cX p = … := rfl`.
+- `congrArg (fun f => extDerivFun f x (W x)) h` leaves a β-redex; `simp only [] at hmaster` β-reduces it before `rw`.
+- Coe-of-`ContMDiffSection.mk` is `rfl` (no `coe_mk` lemma exists — `ContMDiffSection` only has `coe_add`/`coe_smul`/…).
+  `↑cov` (CovariantDerivative FunLike coe) = `cov.toFun` definitionally; write `(LeviCivita g₂) σ x v` WITHOUT the
+  explicit `↑` (explicit `↑` errors "expected type not known").
+- Normalise `![a,b,c] 2` with a `fun _ _ _ => rfl` helper (`Matrix.cons_val_zero/one` only cover 0,1).
+
+## REMAINING (P2.b/c/d) — the a=1 component→norm engine and comparability conversion (NOT started)
+
+- **P2.b** — a=1 analogue of `diff_le_covOne_basis` (component→norm engine): from `connDiff_koszul_deriv`
+  in a g₁-ON basis, bound `√normSqRS(g₂,1,3)(∇₂A) ≤ C·(√normSq0S(∇₂²g₁) + √normSq0S(∇₂g₁)²)`.  The `∇₂²g₁` combo
+  is now available as the RHS `nabla0SFun 3 W field` terms; the quadratic `Λ'²` term is `2·(∇₂_W g₁)(A,Z)`.
+- **P2.c/P2.d** — order-4 comparability conversion sibling + assembly into the fibre bound (recon §4).
+- Then B2 = P1 ∘ P2 (P1 already landed in `ConnDiffDerivBound.lean`).
+
+## Superseded (session 4 recon) — EXECUTABLE RECIPE + tools (kept for provenance)
 
 Session-4 verdict (STOP-CLEANLY): the assembly is NOT pure algebra — it needs `extDerivFun` linearity over
 a **sum-form** RHS, which requires `MDifferentiableAt` of each of the 3 combo terms (real analysis), plus a
@@ -119,6 +171,11 @@ guidance).  All tools are located; a fresh successor should close it in one pass
 
 ## Status
 
+- 2026-07-25 (B2 session 5): **P2.a COMPLETE.**  `connDiff_koszul_deriv` (the full differentiated
+  Christoffel-difference Koszul identity) LANDED in `ChristoffelDiffKoszulDeriv.lean`, sorry-free, verified by
+  authoritative `lake build` (✔ 3666/3666), axioms `[propext, Classical.choice, Quot.sound]`.  Also landed the
+  `koszul_field` field-eval helper.  ~230 lines added (helper + main).  The cancellation is EXACT (9+9 slot
+  corrections match by rearrangement — no α-symmetry).  Next = P2.b (a=1 component→norm engine); NOT started.
 - 2026-07-25 (B2 session 4): assembly RECON complete; **clean stop at the green boundary (no new Lean)**.
   Verdict: the assembly needs `extDerivFun` linearity over a sum-form RHS ⟹ `MDifferentiableAt` of 3 combo
   terms (real analysis) + a delicate many-term cancellation — NOT pure algebra.  All tools located and the
