@@ -344,6 +344,72 @@ theorem tf_decay0_of_cgh
             (L.sourceToOrig i (L.cgh.spatial.maps.map k x)))
   exact hsmall 0 h0
 
+/-- The genuine time-zero smooth-CGH scalar and Ricci-norm convergence,
+Hamilton's improved pinching estimate, and the basepoint normalization make
+the retained limit slice a positive constant-curvature metric. -/
+theorem round0_of_cgh
+    {omega : Real} (h0omega : 0 < omega)
+    (hdim : Module.finrank Real E = 3)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hscalar :
+      forall t : Real, t ∈ P.D.carrier ->
+        forall x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    (hsource : Ham3SourceLink (I := I) (M := M) P Q hsel X)
+    (h0 : (0 : Real) ∈ X.D.carrier)
+    (L : PointedFlowData.{u, uE, uH} (I := I) X.D)
+    (subseq : Nat -> Nat) (hsubseq : StrictMono subseq)
+    (hconv : SmoothCGHConverges (I := I) X L subseq)
+    (hcomplete : forall t : Real, t ∈ X.D.carrier ->
+      MetricComplete (I := I) (L.atTime (I := I) t))
+    (hconnected :
+      letI : TopologicalSpace L.M := L.topology
+      ConnectedSpace L.M) :
+    let Lh := cghToHam3 (I := I) (M := M) X hsource.origIndex
+      hsource.strictMono hsource.toOrig L subseq hsubseq hconv hcomplete
+    LimitRoundAt (I := I) (M := M) Lh 0 := by
+  classical
+  let Lh := cghToHam3 (I := I) (M := M) X hsource.origIndex
+    hsource.strictMono hsource.toOrig L subseq hsubseq hconv hcomplete
+  have h0h : (0 : Real) ∈ Lh.D.carrier := by
+    simpa [Lh, cghToHam3] using h0
+  have hreal : Ham3SourceRealizes (I := I) (M := M) P Q hsel Lh := by
+    simpa [Lh] using
+      (Ham3SourceLink.realizes (I := I) (M := M) P Q hsel hsource
+        L subseq hsubseq hconv hcomplete)
+  have hdecay : LimitTfDecayAt (I := I) (M := M) Lh 0 :=
+    tf_decay0_of_cgh (I := I) (M := M) h0omega P hD Q hsel hscalar
+      hpinch Lh h0h hreal
+  have htf : LimitTfZeroAt (I := I) (M := M) Lh 0 :=
+    tf_zero_of_decay (I := I) (M := M) hdim hdecay
+  have heinstein : LimitEinsteinAt (I := I) (M := M) Lh 0 :=
+    limitEinstein_of_tf0 (I := I) (M := M) hdim htf
+  have hbaseConv : Ham3LimitBaseScalarConv (I := I) (M := M) P Q Lh := by
+    simpa [Lh] using
+      (baseScalarConv_of_smoothCGH (I := I) (M := M) P Q hsel hsource
+        h0 hsubseq hconv hcomplete)
+  have hbaseOne : LimitBaseScalarOne (I := I) (M := M) Lh :=
+    limit_base_scalar_one (I := I) (M := M) P Q hsel hbaseConv
+  have hbaseEq : Lh.S.scalar 0 Lh.basepoint = 1 := by
+    simpa [LimitBaseScalarOne] using hbaseOne
+  have hbasePos : 0 < Lh.S.scalar 0 Lh.basepoint := by
+    rw [hbaseEq]
+    exact one_pos
+  have hconn : Ham3LimitConnected (I := I) (M := M) Lh := by
+    simpa [Lh, cghToHam3, Ham3LimitConnected] using hconnected
+  have hbdry : Ham3LimitBoundaryless (I := I) (M := M) Lh := by
+    simpa [Lh, cghToHam3, Ham3LimitBoundaryless] using
+      (inferInstance : I.Boundaryless)
+  exact limit_round_base (I := I) (M := M) hdim hconn hbdry
+    hbasePos heinstein
+
 /-- A compactness conclusion from the new HCG interface supplies the old
 Hamilton Section 12 black-box conclusion. -/
 theorem toHam3Exists

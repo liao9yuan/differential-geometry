@@ -155,6 +155,34 @@ theorem gradientFun_mdiffAt
     MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x :=
   (gradientFun_smooth (I := I) g hf).contMDiffAt.mdifferentiableAt (by simp)
 
+/-- The gradient section of a scalar composition is differentiable at a point
+when the inner scalar is differentiable nearby. -/
+theorem grad_comp_mdiffAt
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (g : SmoothRiemannianMetric I M)
+    {φ : Real → Real} {f : M → Real} {x : M}
+    (hφ : Differentiable Real φ)
+    (hφ' : DifferentiableAt Real (deriv φ) (f x))
+    (hf : ∀ᶠ y in 𝓝 x,
+      MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g f y) x) :
+    MDiffAt
+      (T% fun y : M =>
+        gradientFun (I := I) g (fun z => φ (f z)) y) x := by
+  let c : M → Real := fun y => deriv φ (f y)
+  have hc : MDifferentiableAt I 𝓘(Real, Real) c x :=
+    hφ'.mdifferentiableAt.comp x hf.self_of_nhds
+  have hs :
+      MDiffAt
+        (T% fun y : M => c y • gradientFun (I := I) g f y) x :=
+    hc.smul_section hgrad
+  refine hs.congr_of_eventuallyEq ?_
+  filter_upwards [hf] with y hy
+  exact congrArg
+    (fun v => (⟨y, v⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+    (gradientFun_comp (I := I) g (hφ (f y)) hy)
+
 /-- If a scalar and its realized gradient are differentiable, then the
 scalar-multiple tangent field `f ∇f` is differentiable. -/
 theorem scalar_mul_grad_mdiffAt

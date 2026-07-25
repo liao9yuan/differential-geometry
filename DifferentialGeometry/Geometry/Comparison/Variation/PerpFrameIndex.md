@@ -22,18 +22,15 @@ Focused verification passes without warnings.  The module now supplies:
 - perpendicularity of a globally differentiable Jacobi field that vanishes at
   two distinct times.
 
-The remaining geometric frontier is not a frame calculation.  It is the final
-assembly: rescale a conjugate-vector variation to the original minimizing
-geodesic, use the nonzero initial coefficient derivative to obtain a
-nontrivial coefficient solution, feed that solution through the checked
-negative smooth index-form producer, lift it through the frame, and contradict
-the minimizing-geodesic index-form nonnegativity theorem.
+The module also exports `perpCoeff_smooth`, the smooth coefficient field used
+by the arbitrary-length minimizing-geodesic assembly.  That downstream source
+now exists in `MinimalGeodesicNoConjugate`; it still awaits the ordered
+artifact refresh and focused verification before its public theorem is
+counted as complete.
 
 ## Project accounting
 
-The N-d endpoint theorem remains unstated and therefore 0%.  This file is one
-dedicated geometric bridge inside N-d machinery; it does not by itself prove
-that a minimizing geodesic has no interior conjugate vector.  With the abstract
-negative and smoothing package already complete, dedicated N-d machinery is
-approximately 82--86%; Route B machinery is approximately 84--88%; the full
-V1--V3 volume-comparison/CGT producer program remains approximately 48--52%.
+`perpCoeff_smooth` and the fixed-frame bridge are focused-green (100% theorem
+and dedicated machinery).  The downstream arbitrary-length no-conjugacy
+theorem remains 0% until its own verification passes; this module alone does
+not prove it.  The final Calabi support theorem is a separate 0% endpoint.

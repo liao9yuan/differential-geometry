@@ -146,3 +146,56 @@ focused green; their dedicated fixed-metric machinery is about 75%.  The
 evolving-distance support and solution-generated cutoff remain separate 0%
 theorems, Route B-prime producer machinery is about 50%, whole HCG supporting
 machinery remains about 60%, and unconditional `compactnessSol` remains 0%.
+
+## 2026-07-24 fixed-metric Calabi support closed
+
+`exists_calabiTail` and `calabiDist_support` are now focused- and exact-green.
+The deterministic quarter split, endpoint and whole-tail nonconjugacy,
+fixed-first inverse branch, intrinsic Bishop comparison, upper-support
+inequality, unit-gradient calculation, and branch Laplacian readout all check
+without an additional radius, cut-time, minimizing, or connectedness
+assumption.
+
+Direct axiom replay for `tail_not_conj_of_min`, `tail_no_conj`, and
+`calabiDist_support` reports only `propext`, `Classical.choice`, and
+`Quot.sound`; none depends on `sorryAx`.
+
+Theorem accounting: `exists_calabiTail` and `calabiDist_support` are each
+**100%**; their dedicated fixed-metric machinery is **100%**.  The next
+theorem-level frontier is the evolving Ricci-flow support
+`scaledDist_calabiUpperSupport_of_sol`, still **0%**.  Selected Route B-prime
+complete-Shi producer machinery is about **55%**, dedicated P4
+consumer/assembly machinery about **98%**, whole HCG supporting machinery about
+**60%**, and unconditional `compactnessSol` remains theorem-level **0%**.
+
+## 2026-07-24 evolving-support provenance refactor
+
+The fixed-metric proof now has a provenance-preserving public producer,
+`exists_calabiData`.  It returns the selected `CalabiTailData` and keeps the
+support definition explicit as
+`tail.left + branchRadius g tail.branch`.  Its checked output includes smoothness
+at the selected point, equality with the distance there, the local upper-support
+inequality, neighborhood spatial differentiability, differentiability of the
+gradient section, exact unit gradient norm, and the final Laplacian bound.
+`calabiDist_support` is now only the compatibility projection that forgets the
+tail and the two regularity fields not present in its original statement.
+
+`CalabiTailData` also records `left_pos`; the existing `left_nonneg` field is
+retained.  The deterministic quarter-split constructor proves both.  This
+positive early length is the fact needed to select a regular first fixed path
+for the evolving Ricci-flow support.
+
+The refactored source is focused-green with zero diagnostics and contains no
+new `sorry`; no exact refresh was run in this shared write window.  The theorem
+accounting is unchanged: `exists_calabiData`, `exists_calabiTail`, and
+`calabiDist_support` are theorem-level **100%**, while
+`scaledDist_calabiUpperSupport_of_sol` remains theorem-level **0%**.  Its
+dedicated Route B-prime producer machinery remains about **55%**; whole HCG
+supporting machinery remains about **60%**, and unconditional
+`compactnessSol` remains theorem-level **0%**.
+
+The provenance refactor is now exact-current as well as focused-green.  The
+refresh also rebuilt the fixed-first conjugacy and inverse-branch dependency
+chain successfully.  This changes verification provenance only: the
+fixed-metric Calabi theorem and machinery remain 100%, while the evolving
+support is still accounted independently until its own module verifies.

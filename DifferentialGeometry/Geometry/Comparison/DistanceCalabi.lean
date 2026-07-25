@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
-import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConjugate
+import DifferentialGeometry.Geometry.Comparison.Variation.MinimizingNoConj
 import DifferentialGeometry.Geometry.Comparison.RadialLaplacian
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopIntrinsic
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
@@ -60,6 +60,7 @@ structure CalabiTailData
   ell : Real
   branch : ExpInvBranch (I := I) g hEnorm p
   b : Real
+  left_pos : 0 < left
   left_nonneg : 0 ≤ left
   ell_pos : 0 < ell
   split : left + ell = r
@@ -109,73 +110,6 @@ theorem CalabiTailData.target_mem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every initial segment of a minimizing intrinsic radial geodesic has the
-expected fraction of the total endpoint distance. -/
-private theorem minSeg_edist
-    [RiemannianBundle (fun y : M => TangentSpace I y)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
-    {O x : M} {r : Real} (v : TangentSpace I O)
-    (hexp : expMapIntrinsic (I := I) g hEnorm O v = x)
-    (hlen : Real.sqrt (g.inner O v v) = r)
-    (hr_def : r = (riemannianEDist I O x).toReal)
-    (hfin : riemannianEDist I O x ≠ (⊤ : ENNReal))
-    {s : Real} (hs : s ∈ Set.Icc (0 : Real) 1) :
-    riemannianEDist I O
-        (intrinsicGeodesic (I := I) g hEnorm O v s) =
-      ENNReal.ofReal (s * r) := by
-  let γ : Real → M := intrinsicGeodesic (I := I) g hEnorm O v
-  have hr_nonneg : 0 ≤ r := by
-    rw [hr_def]
-    exact ENNReal.toReal_nonneg
-  have hsr_nonneg : 0 ≤ s * r := mul_nonneg hs.1 hr_nonneg
-  have htail_nonneg : 0 ≤ (1 - s) * r :=
-    mul_nonneg (sub_nonneg.mpr hs.2) hr_nonneg
-  have hleft :
-      riemannianEDist I O (γ s) ≤ ENNReal.ofReal (s * r) := by
-    have h :=
-      intrinsicGeodesic_riemannianEDist_le
-        (I := I) g hEnorm O v (s := 0) (t := s) hs.1
-    rw [intrinsicGeodesic_zero (I := I) g hEnorm O v, hlen] at h
-    simpa only [γ, sub_zero, mul_comm] using h
-  have hγ_one : γ 1 = x := by
-    simpa only [γ, expMapIntrinsic_def] using hexp
-  have hright :
-      riemannianEDist I (γ s) x ≤
-        ENNReal.ofReal ((1 - s) * r) := by
-    have h :=
-      intrinsicGeodesic_riemannianEDist_le
-        (I := I) g hEnorm O v (s := s) (t := 1) hs.2
-    change riemannianEDist I (γ s) (γ 1) ≤ _ at h
-    rw [hγ_one, hlen] at h
-    simpa only [mul_comm] using h
-  have hfull :
-      riemannianEDist I O x = ENNReal.ofReal r := by
-    rw [hr_def, ENNReal.ofReal_toReal hfin]
-  have hsplit :
-      ENNReal.ofReal r =
-        ENNReal.ofReal (s * r) + ENNReal.ofReal ((1 - s) * r) := by
-    rw [← ENNReal.ofReal_add hsr_nonneg htail_nonneg]
-    congr 1
-    ring
-  have hsum :
-      ENNReal.ofReal (s * r) + ENNReal.ofReal ((1 - s) * r) ≤
-        riemannianEDist I O (γ s) +
-          ENNReal.ofReal ((1 - s) * r) := by
-    rw [← hsplit, ← hfull]
-    have htri :
-        riemannianEDist I O x ≤
-          riemannianEDist I O (γ s) + riemannianEDist I (γ s) x :=
-      Manifold.riemannianEDist_triangle
-    exact htri.trans (add_le_add_right hright _)
-  exact le_antisymm hleft
-    ((ENNReal.add_le_add_iff_right ENNReal.ofReal_ne_top).mp hsum)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
 /-- A finite-distance minimizing geodesic supplies the deterministic
 quarter-split Calabi tail, together with a fixed-first inverse branch and a
 nonconjugate radial interval extending past its endpoint. -/
@@ -206,7 +140,7 @@ theorem exists_calabiTail
     ⟨hs₀.1.le, hs₀.2.le⟩
   have hfin : riemannianEDist I O x ≠ (⊤ : ENNReal) := by
     intro htop
-    rw [htop, ENNReal.top_toReal] at hr_def
+    rw [htop, ENNReal.toReal_top] at hr_def
     linarith
   have hlen_dist :
       Real.sqrt (g.inner O v v) =
@@ -230,7 +164,8 @@ theorem exists_calabiTail
         intrinsicGeodesic (I := I) g hEnorm O v 1 = x := by
       simpa only [expMapIntrinsic_def] using hexp
     change intrinsicGeodesic (I := I) g hEnorm z.proj u 1 = x
-    rw [u, intrinsicGeodesic_smul (I := I) g hEnorm]
+    dsimp only [u]
+    rw [intrinsicGeodesic_smul (I := I) g hEnorm]
     rw [show z.proj =
         intrinsicGeodesic (I := I) g hEnorm O v s₀ by
           exact velocityLift_proj (I := I) g hEnorm O v s₀]
@@ -272,7 +207,9 @@ theorem exists_calabiTail
     rw [Metric.mem_ball, Real.dist_eq,
       abs_of_nonneg (sub_nonneg.mpr ht.1)]
     dsimp [b] at ht
-    linarith
+    calc
+      t - 1 ≤ ε / 2 := by linarith [ht.2]
+      _ < ε := by linarith [hε]
   have htail_no :
       ∀ t ∈ Set.Ioc (0 : Real) 1,
         ¬ IsConjVec (I := I) g hEnorm z.proj
@@ -295,12 +232,17 @@ theorem exists_calabiTail
       intrinsicGeodesic_speedSq_eq (I := I) g hEnorm O v s₀
   have hu_norm :
       Real.sqrt (g.inner z.proj u u) = ell := by
-    rw [u, sqrt_gInner_smul_self (I := I) g z.proj
+    dsimp only [u]
+    rw [sqrt_gInner_smul_self (I := I) g z.proj
       (sub_nonneg.mpr hs₀.2.le) z.snd, hspeed, hlen]
   have hleft :
       riemannianEDist I O z.proj = ENNReal.ofReal left := by
     simpa only [z, velocityLift_proj, left] using
-      minSeg_edist (I := I) g hEnorm v hexp hlen hr_def hfin hs₀_closed
+      Geometry.Riemannian.Variation.minSeg_edist
+        (I := I) g hEnorm v hexp hlen hr_def hfin hs₀_closed
+  have hleftPos : 0 < left := by
+    dsimp [left, s₀]
+    positivity
   refine ⟨{
     p := z.proj
     u := u
@@ -308,9 +250,8 @@ theorem exists_calabiTail
     ell := ell
     branch := B
     b := b
-    left_nonneg := by
-      dsimp [left, s₀]
-      positivity
+    left_pos := hleftPos
+    left_nonneg := hleftPos.le
     ell_pos := by
       dsimp [ell, s₀]
       linarith
@@ -330,9 +271,10 @@ theorem exists_calabiTail
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The distance from `O` admits a smooth Calabi upper support at every finite
-nonbase point, with the standard Ricci-lower-bound Laplacian estimate. -/
-theorem calabiDist_support
+/-- A finite nonbase point has selected Calabi-tail data whose explicit
+fixed-first branch radius is a smooth upper support with the standard
+Ricci-lower-bound Laplacian estimate. -/
+theorem exists_calabiData
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -340,19 +282,25 @@ theorem calabiDist_support
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
     (q : Real) (hq : 0 ≤ q)
-    (hRic : RicciBoundedBelow (I := I) g
+    (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
       (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
     {O x : M} (hOx : O ≠ x)
     (hfin : riemannianEDist I O x ≠ (⊤ : ENNReal)) :
     let r := (riemannianEDist I O x).toReal
-    ∃ rho : M → Real,
+    ∃ tail : CalabiTailData (I := I) g hEnorm O x r,
+      let rho : M → Real := fun y =>
+        tail.left + branchRadius (I := I) g tail.branch y
       ContMDiffAt I 𝓘(Real, Real) ∞ rho x ∧
       rho x = r ∧
       (∀ᶠ y in 𝓝 x,
         (riemannianEDist I O y).toReal ≤ rho y) ∧
+      (∀ᶠ y in 𝓝 x,
+        MDifferentiableAt I 𝓘(Real, Real) rho y) ∧
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M => gradientFun (I := I) g rho y) x ∧
       g.inner x
           (gradientFun (I := I) g rho x)
-          (gradientFun (I := I) g rho x) ≤ 1 ∧
+          (gradientFun (I := I) g rho x) = 1 ∧
       laplacian (I := I)
           (LeviCivita (I := I) g) g rho x ≤
         2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
@@ -369,11 +317,16 @@ theorem calabiDist_support
     minExp_of_ne_top (I := I) g hEnorm O x hfin
   obtain ⟨tail⟩ :=
     exists_calabiTail (I := I) g hEnorm v hexp hlen hr rfl
+  have hsqrt_pos :
+      0 < Real.sqrt (g.inner tail.p tail.u tail.u) := by
+    rw [tail.u_norm]
+    exact tail.ell_pos
   have hu_pos : 0 < g.inner tail.p tail.u tail.u :=
-    Real.sqrt_pos.mp (tail.u_norm ▸ tail.ell_pos)
+    Real.sqrt_pos.mp hsqrt_pos
   obtain ⟨w, hwLI, hwperp, hmean⟩ :=
-    exists_intrMean (I := I) g hEnorm tail.p tail.u q tail.b
-      hq tail.one_lt hu_pos tail.no_conj hRic
+    Geometry.Riemannian.VolumeComparison.exists_intrMean
+      (I := I) g hEnorm tail.p tail.u q tail.b
+        hq tail.one_lt hu_pos tail.no_conj hRic
   let rho : M → Real := fun y =>
     tail.left + branchRadius (I := I) g tail.branch y
   have hbr_inf :
@@ -387,9 +340,14 @@ theorem calabiDist_support
     exact contMDiffAt_const.add hbr_inf
   have hrad_x :
       branchRadius (I := I) g tail.branch x = tail.ell := by
-    rw [← tail.exp_eq,
-      branchRadius_exp (I := I) tail.branch tail.source_mem,
-      tail.u_norm]
+    calc
+      branchRadius (I := I) g tail.branch x =
+          branchRadius (I := I) g tail.branch
+            (expMapIntrinsic (I := I) g hEnorm tail.p tail.u) :=
+        congrArg (branchRadius (I := I) g tail.branch) tail.exp_eq.symm
+      _ = Real.sqrt (g.inner tail.p tail.u tail.u) :=
+        branchRadius_exp (I := I) tail.branch tail.source_mem
+      _ = tail.ell := tail.u_norm
   have hrho_x : rho x = r := by
     dsimp only [rho]
     rw [hrad_x, tail.split]
@@ -460,9 +418,11 @@ theorem calabiDist_support
           (intrinsicVelocityLift
             (I := I) g hEnorm tail.p tail.u 1).snd =
         g.inner tail.p tail.u tail.u := by
-    simpa only [tail.exp_eq, intrinsicVelocityLift] using
+    have h :=
       intrinsicGeodesic_speedSq_eq
         (I := I) g hEnorm tail.p tail.u 1
+    rw [← expMapIntrinsic_def, tail.exp_eq] at h
+    simpa only [intrinsicVelocityLift] using h
   have hu_sq :
       g.inner tail.p tail.u tail.u = tail.ell ^ 2 := by
     have hsq :=
@@ -470,18 +430,46 @@ theorem calabiDist_support
         (gInner_self_nonneg (I := I) g tail.p tail.u)
     rw [tail.u_norm] at hsq
     exact hsq.symm
+  let Vx : TangentSpace I x :=
+    show TangentSpace I x from
+      ((intrinsicVelocityLift
+        (I := I) g hEnorm tail.p tail.u 1).snd : E)
+  have hgrad_br' :
+      gradientFun (I := I) g
+          (branchRadius (I := I) g tail.branch) x =
+        (Real.sqrt (g.inner tail.p tail.u tail.u))⁻¹ • Vx := by
+    simpa only [Vx] using hgrad_br
+  have hspeed' :
+      g.inner x Vx Vx = g.inner tail.p tail.u tail.u := by
+    simpa only [Vx] using hspeed
   have hgrad_norm :
       g.inner x
           (gradientFun (I := I) g rho x)
           (gradientFun (I := I) g rho x) = 1 := by
-    rw [hgrad_rho, hgrad_br,
-      gInner_smul_self (I := I) g x, hspeed, hu_sq,
-      tail.u_norm]
+    rw [hgrad_rho, hgrad_br',
+      gInner_smul_self (I := I) g x, hspeed', tail.u_norm,
+      hu_sq]
     field_simp [tail.ell_pos.ne']
   obtain ⟨U, hUopen, hxU, hbrU⟩ :=
     branchRadius_open
       (I := I) tail.branch tail.source_mem hu_pos
   rw [tail.exp_eq] at hxU
+  have hrhoU :
+      ContMDiffOn I 𝓘(Real, Real) ∞ rho U := by
+    simpa only [rho] using
+      (contMDiffOn_const.add hbrU)
+  have hrho_ev :
+      ∀ᶠ y in 𝓝 x,
+        MDifferentiableAt I 𝓘(Real, Real) rho y := by
+    filter_upwards [hUopen.mem_nhds hxU] with y hy
+    exact
+      ((hrhoU y hy).contMDiffAt
+        (hUopen.mem_nhds hy)).mdifferentiableAt (by simp)
+  have hrho_grad :
+      MDiffAt
+        (T% fun y : M =>
+          gradientFun (I := I) g rho y) x :=
+    gradientFun_mdiffOn (I := I) g hUopen hrhoU hxU
   have hbr_ev :
       ∀ᶠ y in 𝓝 x,
         MDifferentiableAt I 𝓘(Real, Real)
@@ -506,8 +494,10 @@ theorem calabiDist_support
     branchLap_eq_mean
       (I := I) g hEnorm tail.branch tail.u w
         tail.source_mem hu_pos hwLI hwperp (by simp)
+  dsimp only at hlap_br
   rw [← expMapIntrinsic_def, tail.exp_eq, tail.u_norm] at hlap_br
   dsimp only at hmean
+  rw [tail.u_norm] at hmean
   have hlap_bound :
       laplacian (I := I) (LeviCivita (I := I) g) g rho x ≤
         ((Module.finrank Real E - 1 : Nat) : Real) / tail.ell +
@@ -529,8 +519,46 @@ theorem calabiDist_support
     have hrell : r ≤ 2 * tail.ell := by
       linarith [tail.half_le]
     nlinarith [mul_nonneg hn (sub_nonneg.mpr hrell)]
-  refine ⟨rho, hrho_inf, hrho_x, hupper, hgrad_norm.le, ?_⟩
+  refine ⟨tail, hrho_inf, hrho_x, hupper, hrho_ev, hrho_grad,
+    hgrad_norm, ?_⟩
   linarith
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The distance from `O` admits a smooth Calabi upper support at every finite
+nonbase point, with the standard Ricci-lower-bound Laplacian estimate. -/
+theorem calabiDist_support
+    [RiemannianBundle (fun y : M => TangentSpace I y)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (q : Real) (hq : 0 ≤ q)
+    (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
+    {O x : M} (hOx : O ≠ x)
+    (hfin : riemannianEDist I O x ≠ (⊤ : ENNReal)) :
+    let r := (riemannianEDist I O x).toReal
+    ∃ rho : M → Real,
+      ContMDiffAt I 𝓘(Real, Real) ∞ rho x ∧
+      rho x = r ∧
+      (∀ᶠ y in 𝓝 x,
+        (riemannianEDist I O y).toReal ≤ rho y) ∧
+      g.inner x
+          (gradientFun (I := I) g rho x)
+          (gradientFun (I := I) g rho x) ≤ 1 ∧
+      laplacian (I := I)
+          (LeviCivita (I := I) g) g rho x ≤
+        2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
+          ((Module.finrank Real E - 1 : Nat) : Real) * q := by
+  dsimp only
+  obtain ⟨tail, hrho_inf, hrho_x, hupper, _hrho_ev, _hrho_grad,
+      hgrad_norm, hlap⟩ :=
+    exists_calabiData (I := I) g hEnorm q hq hRic hOx hfin
+  exact
+    ⟨fun y => tail.left + branchRadius (I := I) g tail.branch y,
+      hrho_inf, hrho_x, hupper, hgrad_norm.le, hlap⟩
 
 private theorem continuousAt_fiber_smul
     {X B F : Type*} [TopologicalSpace X] [TopologicalSpace B]

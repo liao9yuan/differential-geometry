@@ -83,28 +83,34 @@ solution-generated barrier-cutoff family.
   and dedicated IFT machinery **100%**, focused/exact green.
 - `DiagInvBranch.fixed`: theorem **100%**, focused/exact green.
 - `minExp_of_ne_top`: theorem and finite-pair Hopf--Rinow machinery **100%**,
-  focused green with no `ConnectedSpace M`; the former long theorem is now a
-  compatibility wrapper.
+  focused/exact green with no `ConnectedSpace M`; the former long theorem is
+  now a compatibility wrapper.
 - Fixed-first calculus migration: `BranchRadius`,
   `ExpInvBranch.edist_le_radius`, `EndpointShape`, `RadialLaplacian`,
   `DiagInvFixed`, and `CartanLocal` are focused green. The first three
-  proof-owning modules are exact-current; the final compatibility refreshes
-  remain to be coordinated. The underlying radial Hessian/Laplacian
-  mathematics remains **100%**.
+  proof-owning modules are exact-current through the lint-clean
+  `BishopIntrinsic` refresh; the final compatibility refreshes remain to be
+  coordinated. The underlying radial Hessian/Laplacian mathematics remains
+  **100%**.
 - `conjVec_reverse`: theorem and dedicated reversal machinery **100%**,
-  focused/exact green.  The shifted-tail theorems remain theorem-level **0%**
-  while the canonical negative-index-form producer is generalized from
-  `[0,1]` to `[0,L]`; that lower repair is mechanical and source-active.
+  focused/exact green.
+- `not_conj_of_min_len`, `minSeg_edist`, `tail_not_conj_of_min`, and
+  `tail_no_conj`: theorem and dedicated minimizing-tail machinery **100%**,
+  focused/exact green with no `ConnectedSpace M` or added endpoint hypothesis.
 - `exists_intrMean`: theorem and dedicated whole-tail intrinsic comparison
-  machinery **100%**, focused green, including the explicit empty `Fin 0`
-  branch.  Its lint-clean exact refresh is in the current narrow build window.
-- `CalabiTailData`: statement **100%**, focused green.
-- `exists_calabiTail` and `calabiDist_support`: statements and proof drafts are
-  now present, but theorem-level **0%** until their first focused check is
-  green.  The exact minimizing-subsegment helper and the neighborhood-local
-  Laplacian/gradient APIs are focused green; dedicated fixed-metric support
-  machinery is about **75%**.
-- Selected Route B-prime complete-Shi producer machinery: about **50%**.
+  machinery **100%**, focused/exact green, including the explicit empty
+  `Fin 0` branch.  Direct axiom replay reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- `CalabiTailData`, `exists_calabiTail`, and `calabiDist_support`: theorem and
+  dedicated fixed-metric support machinery **100%**, focused/exact green.
+  Direct axiom replay for both minimizing-tail capstones and the final support
+  theorem contains only `propext`, `Classical.choice`, and `Quot.sound`.
+- The next named theorem is
+  `scaledDist_calabiUpperSupport_of_sol` in `Evolution/DistanceBarrier.lean`;
+  theorem-level **0%**.  Its remaining seam is to retain the two fixed paths
+  from the Calabi construction for the Ricci-flow time derivative, plus the
+  separate one-dimensional curvature specialization.
+- Selected Route B-prime complete-Shi producer machinery: about **55%**.
 - Dedicated P4 consumer/assembly machinery: about **98%**.
 - Whole HCG supporting machinery: about **60%**.
 - Unconditional `compactnessSol`: theorem-level **0%**.

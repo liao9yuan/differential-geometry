@@ -17,3 +17,14 @@ dedicated regularity machinery are complete (100%).  This closes only the local
 gradient-regularity input needed by `laplacian_add_const`;
 `calabiDist_support` remains separately at theorem level 0%.  No targeted
 module refresh was run in this lane.
+
+## 2026-07-24: composition germ
+
+Added `grad_comp_mdiffAt`, which transfers differentiability of the realized
+gradient through a smooth scalar outer function using only neighborhood
+differentiability of the inner scalar and pointwise regularity of its gradient.
+It is the route-neutral chain-rule input used by the barrier cutoff.
+
+Focused and exact verification are current with no diagnostics.  This theorem
+and its dedicated regularity machinery are 100%; it does not by itself
+complete the geometric cutoff producer.

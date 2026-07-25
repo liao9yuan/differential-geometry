@@ -22,12 +22,14 @@ The checked implementation consists of:
   Ricci lower bound, with no long-tail raw radius;
 - an explicit transverse-dimension-zero branch using the empty `Fin 0` family.
 
-Focused verification is green with no diagnostics, and the module contains no
-`sorry`, `admit`, or new axiom.  Theorem-level `exists_intrMean` and its
-dedicated whole-tail machinery are both 100%.  This closes the intrinsic Bishop
-brick, roughly 20% of the fixed-metric Calabi-support producer.  The separate
-`calabiDist_support`, the evolving-distance barrier theorem, and the
-unconditional HCG endpoint remain theorem-level 0%.
+Focused and exact verification are green with no local diagnostics, and the
+module contains no `sorry`, `admit`, or new axiom.  A direct axiom replay for
+`exists_intrMean` reports only `propext`, `Classical.choice`, and `Quot.sound`.
+Theorem-level `exists_intrMean` and its dedicated whole-tail machinery are both
+100%.  This closes the intrinsic Bishop brick, roughly 20% of the fixed-metric
+Calabi-support producer.  The separate `calabiDist_support`, the evolving-
+distance barrier theorem, and the unconditional HCG endpoint remain theorem-
+level 0%.
 
 The exact-build linter cleanup weakens the private orthogonality helper to an
 arbitrary index type and removes unused finite/decidable index instances from

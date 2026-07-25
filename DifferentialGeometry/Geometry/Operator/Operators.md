@@ -131,3 +131,15 @@ complete (theorem 100%, dedicated machinery 100%).  It closes only the local
 constant-add API seam for the Calabi support assembly; `calabiDist_support`
 remains a separate theorem-level frontier and is not advanced by this
 accounting alone.  No targeted module refresh was run in this lane.
+
+## 2026-07-24: local scalar multiplication
+
+Added `laplacian_smul_at`, the neighborhood-local scalar-multiplication rule
+for the realized Laplacian.  It consumes the same honest first- and
+second-order germ data as `laplacian_add_const` and avoids requiring a global
+smooth extension.
+
+Focused and exact verification are current with no local diagnostics.  This
+operator theorem and its dedicated machinery are 100%; the evolving Calabi
+support and complete-Shi producers remain separately accounted until their own
+files verify.

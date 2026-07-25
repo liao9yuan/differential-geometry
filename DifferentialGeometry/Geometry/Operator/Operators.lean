@@ -879,6 +879,61 @@ theorem laplacian_const_smul
       rw [divergence_const_smul (I := I) cov a hgrad]
       rfl
 
+/-- The scalar Laplacian scales at a point under multiplication by a spatial
+constant, assuming scalar differentiability only near the evaluation point. -/
+theorem laplacian_smul_at
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (g : SmoothRiemannianMetric I M)
+    (a : Real) {f : M → Real} {x : M}
+    (hf : ∀ᶠ y in nhds x,
+      MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g f y) x) :
+    laplacian (I := I) cov g (a • f) x =
+      a * laplacian (I := I) cov g f x := by
+  have hgrad_eq :
+      (fun y : M => gradientFun (I := I) g (a • f) y) =ᶠ[nhds x]
+        (fun y : M => a • gradientFun (I := I) g f y) := by
+    filter_upwards [hf] with y hy
+    exact gradientFun_const_smul (I := I) g a hy
+  have hscaled :
+      MDiffAt
+        (T% fun y : M => a • gradientFun (I := I) g f y) x := by
+    simpa only [Pi.smul_apply] using
+      hgrad.smul_const_section (a := a)
+  have hgrad_total :
+      (T% fun y : M => gradientFun (I := I) g (a • f) y) =ᶠ[nhds x]
+        (T% fun y : M => a • gradientFun (I := I) g f y) := by
+    filter_upwards [hgrad_eq] with y hy
+    change TotalSpace.mk' E y
+        (gradientFun (I := I) g (a • f) y) =
+      TotalSpace.mk' E y
+        (a • gradientFun (I := I) g f y)
+    rw [hy]
+  have hgrad_smul :
+      MDiffAt
+        (T% fun y : M => gradientFun (I := I) g (a • f) y) x :=
+    hscaled.congr_of_eventuallyEq hgrad_total
+  have hcov :
+      cov.toFun
+          (fun y : M => gradientFun (I := I) g (a • f) y) x =
+        cov.toFun
+          (fun y : M => a • gradientFun (I := I) g f y) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hgrad_smul hscaled Filter.univ_mem hgrad_eq
+  calc
+    laplacian (I := I) cov g (a • f) x =
+        divergence (I := I) cov
+          (fun y : M => a • gradientFun (I := I) g f y) x := by
+      unfold laplacian divergence
+      rw [hcov]
+    _ = divergence (I := I) cov
+          (a • fun y : M => gradientFun (I := I) g f y) x := by
+      rfl
+    _ = a * laplacian (I := I) cov g f x := by
+      simpa only [laplacian] using
+        (divergence_const_smul (I := I) cov a hgrad)
+
 /-- Divergence of `u ∇u`: the middle identity in the scalar square
 Laplacian formula. -/
 theorem divergence_smul_gradientFun

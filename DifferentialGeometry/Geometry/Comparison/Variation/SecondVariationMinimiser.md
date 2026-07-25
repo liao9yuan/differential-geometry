@@ -64,3 +64,22 @@ What this closes:
 Verification status: passed. Focused check, targeted module build, and axiom
 print for `exists_sqDeriv_field` succeeded; the axiom set is
 `[propext, Classical.choice, Quot.sound]`.
+
+## 2026-07-24 — component-local minimizing producer
+
+The fixed-end variation chain used by
+`indexForm_nonneg_of_minimising_geodesic` no longer inherits
+`ConnectedSpace M`.  The cleanup is scoped to the actual producer path:
+
+- scalar multiplication of a bundle-smooth launch field;
+- differentiability of the intrinsic exponential at zero;
+- the general intrinsic exponential variation;
+- the endpoint-fixed compatibility wrapper; and
+- the final index-form nonnegativity theorem.
+
+The geometric hypotheses and public conclusions are unchanged.  The only
+upstream change is the component-local global smoothness producer in
+`ExpVariationSmooth`.  Focused verification passes without diagnostics.
+This minimizing second-variation producer and its dedicated machinery are
+100% at source level; the arbitrary-length no-conjugacy theorem remains a
+separate 0% theorem until checked.

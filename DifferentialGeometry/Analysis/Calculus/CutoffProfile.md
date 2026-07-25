@@ -39,3 +39,15 @@ Current accounting:
 - unconditional Theorem 3.10: 0%;
 - whole HCG compactness machinery: about 60%, with unconditional endpoints
   still 0%.
+
+## 2026-07-24: extended-real and plateau API
+
+Added the canonical extended-real evaluation `evalue`, its agreement with
+`value` at finite inputs, continuity and range lemmas, antitonicity, and exact
+inner/outer plateau formulas.  The first and second derivatives are now proved
+to vanish on both constant regions.  These are the lower scalar facts needed
+by the barrier cutoff; they do not encode any geometric cutoff assumption.
+
+Focused and exact verification are current.  The cutoff-profile theorem layer
+and dedicated machinery are 100%.  The solution-generated barrier cutoff is
+accounted separately until its own focused and exact checks pass.

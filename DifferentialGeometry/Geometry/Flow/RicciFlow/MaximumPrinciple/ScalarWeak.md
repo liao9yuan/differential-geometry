@@ -112,3 +112,14 @@ solution-generated barrier cutoff and the complete Shi theorem are still
 unstated/unproved (0%).  Dedicated Route B-prime machinery is about 10--15%,
 the unconditional HCG endpoint remains theorem-level 0%, and whole-project HCG
 supporting machinery remains about 60%.
+
+## 2026-07-24: neighborhood parabolic composition
+
+Added `parabolic_comp_nhds`, the local chain rule for the parabolic operator at
+one spacetime point.  Its spatial hypotheses are neighborhood-local and its
+time hypothesis is relative to the closed slab, matching the selected Calabi
+support rather than assuming a globally smooth exhaustion.
+
+Focused and exact verification are current with no local diagnostics.  This
+composition theorem and its dedicated machinery are 100%.  The concrete
+barrier cutoff and complete-Shi assembly remain separate producer endpoints.

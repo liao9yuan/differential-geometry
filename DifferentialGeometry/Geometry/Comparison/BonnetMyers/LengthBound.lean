@@ -304,6 +304,42 @@ theorem ricci_eq_sum_perp
     _ = a ^ 2 * ricciTensor (I := I) g x X₀ X₀ := by rw [htrace]
     _ = ricciTensor (I := I) g x X X := hric.symm
 
+/-- In model dimension one, every smooth Riemannian metric has Ricci curvature
+bounded below by zero. -/
+theorem ricciLower_dim1
+    (g : SmoothRiemannianMetric I M)
+    (h1 : Module.finrank ℝ E = 1) :
+    RicciBoundedBelow (I := I) g 0 := by
+  classical
+  intro x X
+  simp only [zero_mul]
+  by_cases hX : X = 0
+  · subst X
+    simp
+  · have hPos : 0 < g.inner x X X := g.pos x X hX
+    have hd0 : Module.finrank ℝ E - 1 = 0 := by omega
+    let e : Fin (Module.finrank ℝ E - 1) → E :=
+      fun i => Fin.elim0 (hd0 ▸ i)
+    have hON :
+        ∀ i j, g.inner x (e i) (e j) = if i = j then 1 else 0 := by
+      intro i
+      exact Fin.elim0 (hd0 ▸ i)
+    have hPerp : ∀ i, g.inner x (e i) X = 0 := by
+      intro i
+      exact Fin.elim0 (hd0 ▸ i)
+    have hsum :=
+      ricci_eq_sum_perp (I := I) g x X hPos e hON hPerp
+    have hempty :
+        (∑ i : Fin (Module.finrank ℝ E - 1),
+          g.inner x
+            (riemannOp (LeviCivita (I := I) g) x (e i) X X)
+            (e i)) = 0 := by
+      apply Finset.sum_eq_zero
+      intro i _
+      exact Fin.elim0 (hd0 ▸ i)
+    rw [hempty] at hsum
+    exact hsum.le
+
 /-- Pointwise integrand identity used by `sum_index_form_frame_evaluation`.
 At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
 `V_i := sin(πt/L) • e_i` equals the trig–Ricci expression. Derivation:

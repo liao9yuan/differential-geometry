@@ -65,7 +65,7 @@ has no interior conjugate vector.
 
 ## 2026-07-24 conjugate-vector reversal
 
-The fixed-time intrinsic reversal brick is complete and focused-green:
+The fixed-time intrinsic reversal brick is complete and exact-current:
 
 - `intrinsicGeodesic_reverse` identifies the reversed intrinsic geodesic with
   the intrinsic geodesic launched from the endpoint with negative terminal
@@ -77,6 +77,7 @@ The fixed-time intrinsic reversal brick is complete and focused-green:
   finite-dimensional injective/surjective duality to prove conjugacy is
   invariant under geodesic reversal.
 
-The source is placeholder-free and focused verification passes.  The
+The source is placeholder-free; focused verification and the targeted module
+refresh pass.  The
 `conjVec_reverse` theorem and its dedicated reversal machinery are both 100%;
 the minimizing-tail theorems remain unstated here and therefore remain 0%.

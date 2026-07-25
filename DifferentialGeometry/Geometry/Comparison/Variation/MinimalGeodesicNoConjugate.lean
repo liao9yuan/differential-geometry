@@ -74,6 +74,11 @@ theorem not_conj_of_min_len
     intrinsicGeodesic (I := I) g hEnorm p
       (show TangentSpace I p from u + s • z) t
   let γ : ℝ → M := fun t => f 0 t
+  have hγ :
+      γ = intrinsicGeodesic (I := I) g hEnorm p
+        (show TangentSpace I p from u) := by
+    funext t
+    simp only [γ, f, zero_smul, add_zero]
   let J : ∀ t : ℝ, TangentSpace I (γ t) := fun t =>
     mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => f s t) 0 (1 : ℝ)
   let DJ : ∀ t : ℝ, TangentSpace I (γ t) :=
@@ -83,7 +88,7 @@ theorem not_conj_of_min_len
     have hincl : ContMDiff 𝓘(ℝ, ℝ)
         (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => ((0 : ℝ), t)) :=
       contMDiff_const.prodMk contMDiff_id
-    simpa only [γ, f, Function.comp_apply, smul_zero, add_zero] using
+    simpa only [γ, f, Function.comp_apply, zero_smul, smul_zero, add_zero] using
       hvar.comp hincl
   have hgeo : IsGeodesic (I := I) g γ := by
     simpa only [γ, f, zero_smul, add_zero] using
@@ -112,7 +117,8 @@ theorem not_conj_of_min_len
       variationField_covDeriv_chartRep_differentiableAt
         (I := I) g f hf_smooth t
   have hJac : IsJacobiAlong (I := I) g γ J := by
-    simpa only [γ, f, J, zero_smul, add_zero] using
+    rw [hγ]
+    simpa only [J, f] using
       intrinsic_jacobi (I := I) g hEnorm p u z
   have hJ0 : J 0 = 0 := by
     simpa only [γ, f, J, zero_smul, add_zero] using
@@ -127,20 +133,21 @@ theorem not_conj_of_min_len
       g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
         (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1 := by
     have hγ0 : γ 0 = p := by
-      simpa only [γ, f, zero_smul, add_zero] using
+      rw [hγ]
+      simpa only using
         intrinsicGeodesic_zero (I := I) g hEnorm p
           (show TangentSpace I p from u)
     have hvel0 : (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) = u := by
-      simpa only [γ, f, zero_smul, add_zero] using
+      rw [hγ]
+      simpa only using
         intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p
           (show TangentSpace I p from u)
-    calc
-      g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
-          (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) =
-        g.inner p (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
-          (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) := by rw [hγ0]
-      _ = g.inner p u u := congrArg₂ (g.inner p) hvel0 hvel0
-      _ = 1 := hunit
+    rw [hγ0]
+    change g.inner p
+      (show E from mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
+      (show E from mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1
+    rw [hvel0]
+    exact hunit
   obtain ⟨F, hFdiff, hFpar, hON, hFperp, hFbundle⟩ :=
     exists_parallel_perp_frame (I := I) g γ hγ_smooth
       (L := L) hL (hgeo.isGeodesicOn (Icc 0 L)) hunit0
@@ -163,7 +170,8 @@ theorem not_conj_of_min_len
     have hsq' :
         g.inner (γ t) (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t) = 1 := by
-      simpa only [γ, f, zero_smul, add_zero] using hsq.trans hunit
+      rw [hγ]
+      simpa only [curveVelocity] using hsq.trans hunit
     rw [hsq']
     exact zero_lt_one
   have hode (t : ℝ) (ht : t ∈ Icc (0 : ℝ) L) :
@@ -204,8 +212,38 @@ theorem not_conj_of_min_len
       ∀ t ∈ Icc (0 : ℝ) L, deriv y t = v t :=
     fun t ht => (hode t ht).1.deriv
   have hDJ0 : (DJ 0 : E) = z := by
-    simpa only [DJ, J, γ, f, zero_smul, add_zero] using
-      intrinsic_jacobi_d0 (I := I) g hEnorm p u z
+    change (covDerivAlong (I := I) g γ J 0 : E) = z
+    have hcurve_ev :
+        γ =ᶠ[𝓝 (0 : ℝ)]
+          intrinsicGeodesic (I := I) g hEnorm p
+            (show TangentSpace I p from u) :=
+      Filter.Eventually.of_forall fun t => congrFun hγ t
+    have hfield_ev : ∀ᶠ t in 𝓝 (0 : ℝ),
+        (J t : E) =
+          (show TangentSpace I
+              (intrinsicGeodesic (I := I) g hEnorm p
+                (show TangentSpace I p from u) t) from
+            mfderiv 𝓘(ℝ, ℝ) I
+              (fun s : ℝ =>
+                intrinsicGeodesic (I := I) g hEnorm p
+                  (show TangentSpace I p from u + s • z) t)
+              0 (1 : ℝ) : E) := by
+      filter_upwards with t
+      rfl
+    have htransport :=
+      covDerivAlong_congr_curve (I := I) g J
+        (fun t : ℝ =>
+          show TangentSpace I
+              (intrinsicGeodesic (I := I) g hEnorm p
+                (show TangentSpace I p from u) t) from
+            mfderiv 𝓘(ℝ, ℝ) I
+              (fun s : ℝ =>
+                intrinsicGeodesic (I := I) g hEnorm p
+                  (show TangentSpace I p from u + s • z) t)
+              0 (1 : ℝ))
+        hcurve_ev hfield_ev
+    exact htransport.trans
+      (intrinsic_jacobi_d0 (I := I) g hEnorm p u z)
   have hveldiff :
       DifferentiableAt ℝ
         (chartRepAt (I := I) γ (curveVelocity (I := I) γ) 0) 0 := by
@@ -318,7 +356,8 @@ theorem not_conj_of_min_len
     have hsq :=
       intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p
         (show TangentSpace I p from u) t
-    simpa only [γ, f, zero_smul, add_zero, hunit] using hsq
+    rw [hγ]
+    simpa only [hunit] using hsq
   have hminγ :
       ∀ η : ℝ → M,
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Icc 0 L) →
@@ -326,17 +365,19 @@ theorem not_conj_of_min_len
         arcLength (I := I) g γ 0 L ≤
           arcLength (I := I) g η 0 L := by
     intro η hη hη0 hηL
-    apply hmin η hη
-    · exact hη0.trans (by
-        simpa only [γ, f, zero_smul, add_zero] using
-          intrinsicGeodesic_zero (I := I) g hEnorm p
-            (show TangentSpace I p from u))
-    · simpa only [γ, f, zero_smul, add_zero] using hηL
+    have hη0' : η 0 = p := hη0.trans (by
+      rw [hγ]
+      exact intrinsicGeodesic_zero (I := I) g hEnorm p
+        (show TangentSpace I p from u))
+    have hηL' :
+        η L = intrinsicGeodesic (I := I) g hEnorm p
+          (show TangentSpace I p from u) L := hηL.trans (by rw [hγ])
+    simpa only [hγ] using hmin η hη hη0' hηL'
   have hnonneg :
       0 ≤ indexForm (I := I) g γ 0 L V V :=
     indexForm_nonneg_of_minimising_geodesic
       (I := I) g hEnorm γ L V hL
-      hγ_smooth hV_bundle hgeo.isGeodesicOn hminγ
+      hγ_smooth hV_bundle (hgeo.isGeodesicOn (Icc 0 L)) hminγ
       hUnit hVperp hV0 hVL
   exact (not_lt_of_ge hnonneg) hgeom_neg
 

@@ -1,5 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Analysis.Calculus.LocalExtr.Basic
+import Mathlib.Topology.Instances.ENNReal.Lemmas
 
 set_option autoImplicit false
 
@@ -61,6 +63,74 @@ theorem zero_of_two_le {s : ℝ} (hs : 2 ≤ s) : value s = 0 := by
     Real.smoothTransition.one_of_one_le (by linarith)
   simp [value, stem, hone]
 
+/-- The cutoff profile is antitone. -/
+theorem antitone_value : Antitone value := by
+  have hstem_nonneg : ∀ y : ℝ, 0 ≤ stem y := by
+    intro y
+    unfold stem
+    linarith [Real.smoothTransition.le_one (y - 1)]
+  have hstem_antitone : Antitone stem := by
+    intro a b hab
+    have hmono :=
+      Real.smoothTransition.monotone (sub_le_sub_right hab 1)
+    unfold stem
+    linarith
+  intro a b hab
+  rw [value, value]
+  nlinarith [hstem_antitone hab, hstem_nonneg a, hstem_nonneg b]
+
+/-- The cutoff profile extended continuously to `ℝ≥0∞`, with the infinite
+endpoint sent to zero. -/
+noncomputable def evalue (s : ENNReal) : Real :=
+  value (ENNReal.truncateToReal (2 : ENNReal) s)
+
+/-- The extended profile vanishes at and beyond its outer cutoff. -/
+theorem evalue_zero_of_ge {s : ENNReal} (hs : 2 ≤ s) :
+    evalue s = 0 := by
+  simp only [evalue, ENNReal.truncateToReal, min_eq_left hs,
+    ENNReal.toReal_ofNat]
+  exact zero_of_two_le le_rfl
+
+/-- The extended profile vanishes at infinity. -/
+@[simp] theorem evalue_top : evalue ⊤ = 0 :=
+  evalue_zero_of_ge le_top
+
+/-- Away from infinity, the extended profile agrees with the real profile
+applied to `ENNReal.toReal`. -/
+theorem evalue_eq_value {s : ENNReal} (hs : s ≠ ⊤) :
+    evalue s = value s.toReal := by
+  by_cases hle : s ≤ 2
+  · rw [evalue,
+      ENNReal.truncateToReal_eq_toReal (by norm_num) hle]
+  · have htwo : (2 : ENNReal) ≤ s := (not_le.mp hle).le
+    rw [evalue_zero_of_ge htwo, zero_of_two_le]
+    simpa using ENNReal.toReal_mono hs htwo
+
+/-- The extended cutoff profile is continuous on `ℝ≥0∞`. -/
+theorem continuous_evalue : Continuous evalue :=
+  contDiff.continuous.comp
+    (ENNReal.continuous_truncateToReal (by norm_num))
+
+/-- The extended cutoff profile takes values in `[0,1]`. -/
+theorem evalue_mem_Icc (s : ENNReal) :
+    evalue s ∈ Set.Icc (0 : Real) 1 :=
+  mem_Icc _
+
+/-- The extended cutoff equals one on its inner zone. -/
+theorem evalue_one_of_le {s : ENNReal} (hs : s ≤ 1) :
+    evalue s = 1 := by
+  rw [evalue,
+    ENNReal.truncateToReal_eq_toReal (by norm_num)
+      (hs.trans (by norm_num))]
+  apply one_of_le_one
+  simpa using ENNReal.toReal_mono (by norm_num : (1 : ENNReal) ≠ ⊤) hs
+
+/-- The extended cutoff profile is antitone. -/
+theorem antitone_evalue : Antitone evalue := by
+  intro a b hab
+  exact antitone_value
+    ((ENNReal.monotone_truncateToReal (by norm_num)) hab)
+
 /-- The first derivative of the unsquared transition is globally bounded. -/
 private theorem exists_stem_bound :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ, |deriv stem s| ≤ C := by
@@ -115,21 +185,39 @@ theorem deriv_eq (s : ℝ) :
 
 /-- The cutoff profile is decreasing. -/
 theorem deriv_nonpos (s : ℝ) : deriv value s ≤ 0 := by
-  have hstem_nonneg : ∀ y : ℝ, 0 ≤ stem y := by
-    intro y
-    unfold stem
-    linarith [Real.smoothTransition.le_one (y - 1)]
-  have hstem_antitone : Antitone stem := by
-    intro a b hab
-    have hmono :=
-      Real.smoothTransition.monotone (sub_le_sub_right hab 1)
-    unfold stem
-    linarith
-  have hvalue_antitone : Antitone value := by
-    intro a b hab
-    rw [value, value]
-    nlinarith [hstem_antitone hab, hstem_nonneg a, hstem_nonneg b]
-  exact hvalue_antitone.deriv_nonpos
+  exact antitone_value.deriv_nonpos
+
+/-- The first derivative vanishes throughout the inner constant zone. -/
+theorem deriv_zero_of_le {s : Real} (hs : s ≤ 1) :
+    deriv value s = 0 := by
+  apply IsLocalMax.deriv_eq_zero
+  filter_upwards with y
+  rw [one_of_le_one hs]
+  exact (mem_Icc y).2
+
+/-- The first derivative vanishes throughout the outer constant zone. -/
+theorem deriv_zero_of_ge {s : Real} (hs : 2 ≤ s) :
+    deriv value s = 0 := by
+  apply IsLocalMin.deriv_eq_zero
+  filter_upwards with y
+  rw [zero_of_two_le hs]
+  exact (mem_Icc y).1
+
+/-- The second derivative vanishes throughout the inner constant zone. -/
+theorem deriv2_zero_of_le {s : Real} (hs : s ≤ 1) :
+    deriv (deriv value) s = 0 := by
+  apply IsLocalMax.deriv_eq_zero
+  filter_upwards with y
+  rw [deriv_zero_of_le hs]
+  exact deriv_nonpos y
+
+/-- The second derivative vanishes throughout the outer constant zone. -/
+theorem deriv2_zero_of_ge {s : Real} (hs : 2 ≤ s) :
+    deriv (deriv value) s = 0 := by
+  apply IsLocalMax.deriv_eq_zero
+  filter_upwards with y
+  rw [deriv_zero_of_ge hs]
+  exact deriv_nonpos y
 
 /-- The squared first derivative is bounded by a constant times the profile. -/
 theorem exists_deriv_sq :

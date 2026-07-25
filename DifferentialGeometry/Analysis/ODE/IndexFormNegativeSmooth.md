@@ -1,5 +1,28 @@
 # IndexFormNegativeSmooth
 
+## 2026-07-24 arbitrary terminal time
+
+The source now has the canonical arbitrary-terminal-time facade
+`IsJacobiSolOn.exists_smooth_neg_on`. It consumes the endpoint-aware split
+producer on `[0, L]`; the previous `exists_smooth_neg` theorem is retained as
+the literal `L = 1` compatibility wrapper.
+
+The quantitative smoothing argument is not duplicated. A private positive
+time-dilation identity transports the split index form to the already checked
+unit-interval smoothing capstone, and the resulting smooth field is pulled
+back to `[0, L]`. Positivity of the dilation preserves strict negativity.
+
+The new dilation and smoothing helpers and the final
+`IsJacobiSolOn.exists_smooth_neg_on` assembly pass focused verification without
+diagnostics after refreshing the direct `IndexFormNegative` dependency.  The
+arbitrary-length theorem and its dedicated smoothing machinery are both 100%;
+only the module artifact refresh remains before downstream consumers can use
+the export.
+
+Project accounting: the minimizing-geodesic no-conjugacy endpoint remains 0%
+until its own focused verification, and the Calabi support theorem remains a
+separate 0% downstream theorem.
+
 ## 2026-07-23
 
 Architecture ruling: use an explicit quantitative `H¹`-type smoothing in the

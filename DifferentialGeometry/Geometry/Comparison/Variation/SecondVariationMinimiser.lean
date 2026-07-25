@@ -153,6 +153,7 @@ variable [T2Space (TangentBundle I M)] [ConnectedSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Scalar cut-off of a bundle-smooth field of launch directions is bundle-smooth.
@@ -189,6 +190,7 @@ theorem contMDiff_smul_bundleField
         (γ t) ht]
   exact map_smul _ _ _
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The intrinsic exponential map at `p` is `MDifferentiableAt 𝓘(ℝ, E) I` at the
@@ -236,6 +238,7 @@ theorem mdifferentiableAt_expMapIntrinsic_zero
   refine (MDifferentiableAt.congr_of_eventuallyEq ?_ hEvEq)
   exact (expMap_contMDiffAt_zero (I := I) g p).mdifferentiableAt (by norm_num)
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Exponential-map construction of a smooth variation realising a field.**
@@ -487,6 +490,7 @@ theorem exists_sqDeriv_field
     exact hfield 0 h0mem
   rwa [hfield0] at hraw
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Exponential-map construction of a smooth endpoint-fixed variation.**
@@ -515,6 +519,7 @@ theorem exists_variation_realising_field_via_exp
     exists_expVar_field (I := I) g hEnorm γ V L hγ hVbundle
   exact ⟨f, hf, hcentral, hderiv, hfix0 hV0, hfixL hVL⟩
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- For a unit-speed geodesic `γ` on `[0, L]` that minimises arc length among `C¹`

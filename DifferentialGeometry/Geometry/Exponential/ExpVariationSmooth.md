@@ -128,3 +128,18 @@ obtainable from the same chart factorisation by differentiating
 `dΦ` at the phase-ball centre (Jacobi-field content). Recommended as a dedicated
 follow-up; with both target 1 (done) and target 2, the Banach IFT gives the
 moving-base inverse section `q ↦ exp_q⁻¹(pt)`.
+
+## 2026-07-24 — component-local variation smoothness
+
+`expMapIntrinsic_variation_contMDiffAt_of_smallField` no longer inherits an
+API-only `ConnectedSpace M` hypothesis.  Its proof now composes the checked
+global `intrinsicExp_smooth` theorem with the bundle-smooth launch map
+`(s,t) ↦ ⟨(V₀ t).proj, s • (V₀ t).snd⟩`.  The only nontrivial local step is
+fiberwise linearity of a tangent-bundle trivialization; no new radius,
+regularity, or connectivity assumption is introduced.
+
+The public signature is preserved, including its finite-order and positive
+order arguments, for downstream compatibility.  Focused verification passes
+without diagnostics.  This producer and its dedicated smoothness machinery
+are 100%; the minimizing no-conjugacy theorem that consumes it remains a
+separate 0% theorem until its own check passes.
