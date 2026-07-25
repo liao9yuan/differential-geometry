@@ -51,8 +51,40 @@ leading and X/Y/Z as slots; the three combo terms differentiate separately (lead
 Then LHS metric-compat Leibniz + step-4 `covDerivDiff` unfold + step-5 `connDiff_koszul_nabla`-cancellation
 of slot corrections.  Est. 200–400 lines, genuine multi-session.
 
+## Landed session 3 (both differentiation engines, verified, axioms [propext, Classical.choice, Quot.sound])
+
+- `metricField_totalReg` — regularity of `∇₂g₁ = totalNabla0SFun 2 (LC g₂)(metricTensorField g₁)` as a
+  `(0,3)`-field (from `totalNabla0S_reg` + `leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally`),
+  so it bundles via `totalNabla0S` and differentiates a second time.
+- `nablaMetric_combo_extDeriv` — **RHS engine**: `extDerivFun` along `W` of a `∇₂g₁` combo term
+  (direction `V 0`, slots `V 1, V 2`) `= nabla0SFun 3 (LC g₂) W (∇₂g₁-field)` (= `∇₂²g₁`) `+ Leibniz
+  corrections`.  **V-parameterized ⟹ covers all THREE combo terms** of `connDiff_koszul_nabla`
+  (`V = ![X,Y,Z]`, `![Y,X,Z]`, `![Z,X,Y]`).
+- `metric_leibniz_extDeriv` — **LHS engine**: `extDerivFun` along `W` of `p ↦ metricTensorField g₁ p (V·p)`
+  `= nabla0SFun 2 (LC g₂) W (metricTensorField g₁)` (= `(∇₂g₁)(a,b)`) `+ g₁(∇₂_W ·,·)` corrections.
+
+Both engines = one `nabla0SFun_eval_smooth_slots` + `abel`; RHS also uses the slot-0 bridge
+`totalNabla0SFun_apply_section` + `Fin.cons_self_tail`.  `extDerivFun` resolves UNQUALIFIED (it is
+`DifferentialGeometry.extDerivFun`, not `Tensor0SBundle.extDerivFun`).  Pass section families as a
+`V : Fin n → ContMDiffSection` PARAMETER — inlining `Fin.cons X (…)` in a statement fails constant-motive
+inference ("Function expected at Fin.cons … a").
+
+## REMAINING (the assembly — next session), all algebra now both engines exist
+
+1. **Differentiate the identity:** `connDiff_koszul_nabla` holds ∀p, so `funext` ⟹ `extDerivFun LHS =
+   extDerivFun RHS`; LHS by `metric_leibniz_extDeriv` (slots `[diffSec-section, Z]`), RHS by
+   `nablaMetric_combo_extDeriv` ×3.  NEEDS: package `diffSec (LC g₂)(LC g₁) X Y` as a `ContMDiffSection`
+   (grep `diffSec_contMDiff` first).
+2. **Identify `covDerivConnDiff`:** `∇₂_W(diffSec …) = covDerivConnDiff g₂ g₁ W X Y x + A-slot corr` via
+   `covDerivConnDiff_eq` + `covDerivDiff` def (`ConnectionDifferenceCurvature.lean:274`).
+3. **Cancel** slot corrections via `connDiff_koszul_nabla` on `∇₂_W`-slot args ⟹
+   `2·g₁(covDerivConnDiff g₂ g₁ W X Y x, Z) = [∇₂²g₁ combo] − 2·(∇₂_W g₁)(A(X,Y),Z)`.  Est. ~100–200 lines.
+
 ## Status
 
+- 2026-07-25 (B2 session 3): BOTH differentiation engines LANDED (`metric_leibniz_extDeriv` +
+  `nablaMetric_combo_extDeriv`) + `metricField_totalReg`, verified/axiom-clean.  Milestone (slot-0 bridge
+  + one combo) EXCEEDED (general combo covers all 3 terms; LHS engine also done).  Remaining = the
+  assembly (steps 1–3).  Verified-boundary stop.
 - 2026-07-25 (B2 session 2): a=0 base `connDiff_koszul_nabla` LANDED (verified, axiom-clean); home + LC
-  currency + instances confirmed in real Lean.  Full differentiated identity = the multi-session
-  continuation (recon §4b plan banked).  Verified-boundary stop.
+  currency + instances confirmed in real Lean.
