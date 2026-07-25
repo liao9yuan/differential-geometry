@@ -405,6 +405,105 @@ are `Function.update_self` / `Function.update_of_ne`.
    `MetricUniformEquivalentOn K g₁ g₂ Λ` + `MetricCovDerivOrderBoundOn K 1 g₂ g₁ Λ'`.
 2. **T-B base-Leibniz** (`j ≥ 2`) — the genuine multi-session frontier.
 
+## Session 8 (2026-07-25) — T-B base-Leibniz: committed-currency split LANDED; ∇A frontier isolated
+
+Planner dispatch (T-B, the base-Leibniz family, THE convergence brick blocking S0 j≥2 / 2a-tel
+comp (b) / S1 hcurv).  Deliver bottom-up: (1) base-Leibniz identity green; (2) all-∇₂ schematic /
+norm recursion with explicit `D_N` (state-before-prove); (3) `∇₂^a A` bounds.
+
+### Infra map verdict (worktree-verified)
+GENERIC covariant-Leibniz engines that DO exist and are reusable:
+`homBundleCovariantDerivativeFun_apply_eq` (`Connection/Realization/HomNabla.lean:270`, the master
+Hom-bundle product rule `∇(τ·Y)=(∇τ)·Y+τ·(∇Y)`); `tensorRSCovariantDerivative_apply`
+(`Connection/TensorNabla/TensorRSNabla.lean:89`, the `(r,s)` product rule `(∇^{(r,s)}_vτ)(w) =
+∇^{(0,s)}_v(τ·w) − τ(∇^{(0,r)}_v w)`); `nabla0SFun_sub_cov` (the first-order connection difference =
+`(Γ₁−Γ₂)⋆` action).  **GENUINELY MISSING** (the frontier): `∇` of `connectionDifferenceTensorAt` /
+`connDiff` *as a tensor field* (nothing feeds it through `tensorRSCovariantDerivative`/`covGrad`), and
+any "∇ commutes with the `A⋆S` slot-insertion contraction".  So the *literal eval-level* `(∇₂A)⋆S`
+form of the base-Leibniz is unbuilt = the multi-session frontier.  (An `E:\`-stale-tree Explore run
+falsely reported `contract_covariant_leibniz`/`tensor0S_curry_covApply_slot0_leibniz_fib` "NOT FOUND";
+both DO exist in the worktree but are specialized — slot-0 currying / divergence — not the multi-slot
+`A⋆S` insertion.)
+
+### (1) LANDED — the base-Leibniz split in COMMITTED currency (green, axiom target standard triple)
+In `MetricCovDerivLinear.lean` (identity layer):
+- `covStep_smul`, `covStep_sub` — complete the `covStep` linearity API (add/smul/sub/zero').
+- **`diffStep_leibniz`** (headline; item (1) realized without materialising `∇₂A`):
+  ```
+  covStep g₂ (s+1) (diffStep g₁ g₂ s S)
+    = diffStep g₁ g₂ (s+1) (covStep g₂ s S)                              -- Term1 = A ⋆ (∇₂S)
+      + (covStep g₂ (s+1) (covStep g₁ s S) − covStep g₁ (s+1) (covStep g₂ s S))  -- Term2 = (∇₂A) ⋆ S
+  ```
+  Term1 is committed currency (a `diffStep` of `∇₂S`).  Term2 is the **mixed second-derivative
+  commutator** `∇₂∇₁S − ∇₁∇₂S`, whose `∂∂S` symbols cancel, leaving a first-order-in-`S`,
+  one-more-jet-of-`A` object — this IS `(∇₂A)⋆S` (minus the derivative-slot insertion, which is
+  absorbed into Term1).  Proof = `simp only [diffStep]; rw [covStep_sub]; abel` (pure operator
+  algebra).  **This is why `∇₂A` need not be materialised for the identity.**
+- **`iterCov_succ_diffStep`**: `iterCov g₁ (N+1) = covStep g₂ (iterCov g₁ N) + diffStep g₁ g₂
+  (iterCov g₁ N)` — `∇₁ = ∇₂ + (∇₁−∇₂)`, the base-connection recursion driver.
+- **Term1 norm bound is COMMITTED, no new lemma**: `diffStep_jet_one_le` at `s := s+1`,
+  `S := covStep g₂ s S` gives `√normSq0S(g₂, Term1 x) ≤ (s+1)·n^{(s+2)/2}·((3/2)√(Λ³)Λ')·
+  √normSq0S(g₂, covStep g₂ s S x)`; and `covStep g₂ (r+k) (iterCov g₂ r T k) = iterCov g₂ r T (k+1)`,
+  so it lands directly on the RHS currency of the norm recursion.
+
+### (2) DESIGN — the all-∇₂ norm recursion + explicit `D_N` (state-before-prove)
+Target (`Diff_N := iterCov g₁ r T N − iterCov g₂ r T N = telescAccum N`):
+```
+√normSq0S(g₂, Diff_N x) ≤ D_N · ∑_{k≤N} √normSq0S(g₂, iterCov g₂ r T k x).
+```
+Schematic: `iterCov g₁ r T N = ∑_{trees} (∇₂^{a₁}A)⋆…⋆(∇₂^{aₘ}A)⋆(iterCov g₂ r T k)`, with
+`a₁+…+aₘ+k ≤ N`, `k ≤ N` (the `m=0,k=N` tree = `iterCov g₂ N`); so `Diff_N = ∑_{m≥1 trees}`.  The
+base-Leibniz keeps the schematic CLOSED under `iterCov_succ_diffStep` + `diffStep_leibniz`: applying
+`covStep g₂` to a tree distributes `∇₂` over each factor (one `aᵢ→aᵢ+1`, or `k→k+1`), and the
+`diffStep` term prepends a fresh `∇₂^0 A ⋆`.  So each of the `N` levels either (a) increments an
+`A`-jet, (b) increments `k` (free), or (c) spawns a new `A`-factor.
+Constants: per-insertion slot/dimension factor `σ_N := (r+N)·n^{(r+N+1)/2}` (from
+`diffStep_norm_le` at rank `r+N`, `n=finrank ℝ E`); per-jet bound `B_a := |∇₂^a A|_{g₂}` (item 3).
+Crude closed over-bound (sharpness UNNEEDED — the S0 endpoint only needs `D_N ≤ F(Λ,n)` polynomial,
+fixed `N=a+2`):
+```
+D_N ≤ (1 + σ_N · max_{a≤N} B_a)^N − 1        (D_0 = 0).
+```
+NB: the recursion lives at the **schematic/jet-tracked** level, NOT on `|Diff_N|` — `|covStep g₂
+Diff_N|` is a derivative and is NOT `≤ C·|Diff_N|`; that is precisely why the schematic (and hence
+the base-Leibniz with a MATERIALISED `∇₂A` factor) is required, not just the committed split.
+
+### (3) `∇₂^a A` bounds
+`A = connectionDifferenceTensorAt (LC g₁)(LC g₂)`:
+- `a=0`: `|A|_{g₂} = √normSqRS(g₂,1,2,A) ≤ (3/2)√(Λ³)·Λ'` — COMMITTED (`lcDiff_norm_le` +
+  `connDiffTensor_normSqRS_swap` + `MetricCovDerivOrderBoundOn` order 1; = the `diffStep_jet_one_le`
+  constant, session 7).
+- `a≥1`: Koszul gives `A ~ ∇₂g₁` (metric compat `∇₂g₂=0`), so `∇₂^a A ~ ∇₂^{a+1}g₁ ~
+  MetricCovDerivOrderBoundOn` order `a+1`.  But the Lean object `∇₂A` is UNBUILT — the "ungated
+  ∇connDiff" gap 2a-tel flagged.
+
+### THE FRONTIER (single, isolated) — the `∇₂A` mixed-commutator norm bound
+`mixedComm_norm_le` (target, the ONLY remaining piece of the base-Leibniz norm layer):
+```
+√normSq0S(g₂, (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S)) x)
+  ≤ C(Λ,Λ'') · (√normSq0S(g₂, S x) + √normSq0S(g₂, covStep g₂ s S x))
+```
+(`Λ''` = order-2 metric-jet bound).  Smallest missing lemma to PROVE it (two equivalent routes):
+- **(F1, preferred — realization layer):** materialise `∇₂A`.  Build the smooth `(1,2)` field
+  `y ↦ connectionDifferenceTensorAt (LC g₁)(LC g₂) y` (smoothness = `connDiff_contMDiff`,
+  Levi-Civita case, `Geometry/Flow/ConnectionDifference.lean:141`); define `∇₂A :=
+  tensorRSCovariantDerivative 1 2 (LC g₂) A_field`; prove the eval-level base-Leibniz
+  `covStep g₂ (A⋆S) = (∇₂A)⋆S + A⋆(∇₂S)` (the "∇ commutes with slot-insertion" lemma, threading
+  `homBundleCovariantDerivativeFun_apply_eq` / `tensorRSCovariantDerivative_apply`); then bound
+  `|∇₂A|` by Koszul + order-2 jets.  This is the form the SCHEMATIC needs (materialised `∇₂A` factor).
+- **(F2, eval-only):** differentiate `diffStep_eval` directly (the `∂` of the `difference(...)` map)
+  — same `∇₂A` content in a frame, no materialised tensor.
+Classification: **MISSING API** (covariant derivative of the connection-difference bundle map / ungated
+∇connDiff).  Est. 200–400 lines; genuine multi-session.  NOT sorry-wrapped (tree kept green /
+axiom-clean, matching every prior session).
+
+### Consumer status (honest)
+The committed split + Term1 discharge the `A⋆∇₂S` half and isolate the frontier to `mixedComm_norm_le`
+(= `∇₂A`).  The three T-B consumers (S0 `j≥2`, 2a-tel comp (b), S1 `hcurv`) all still require the
+`∇₂A` bound to close — they remain **BLOCKED on the single frontier above**.  The identity (1) is the
+mission's "(1) alone green = valid" deliverable; (2)/(3) are stated-before-proving; the norm layer
+awaits (F1)/(F2).
+
 ## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
 
 Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
@@ -490,6 +589,20 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 8, T-B base-Leibniz): **committed-currency base-Leibniz split LANDED** in
+  `MetricCovDerivLinear.lean`: `covStep_smul`, `covStep_sub` (linearity API), **`diffStep_leibniz`**
+  (`covStep g₂ (diffStep g₁ g₂ s S) = diffStep g₁ g₂ (covStep g₂ s S) + (covStep g₂ (covStep g₁ S) −
+  covStep g₁ (covStep g₂ S))` — Term1 = `A⋆∇₂S` committed, Term2 = mixed commutator `∇₂∇₁S−∇₁∇₂S =
+  (∇₂A)⋆S`), and `iterCov_succ_diffStep` (the `∇₁=∇₂+(∇₁−∇₂)` recursion driver).  All pure operator
+  algebra (`covStep_sub` + `abel`).  This realizes the mission's item (1) WITHOUT materialising `∇₂A`.
+  Norm recursion + explicit `D_N ≤ (1+σ_N·max B_a)^N−1` + `∇₂^a A` bounds STATED (state-before-prove,
+  §Session 8).  **Single isolated frontier = `mixedComm_norm_le` (the `∇₂A` bound)**: infra map
+  confirms `∇` of `connectionDifferenceTensorAt` and "∇ commutes with slot-insertion" are GENUINELY
+  UNBUILT (generic engines `homBundleCovariantDerivativeFun_apply_eq` /
+  `tensorRSCovariantDerivative_apply` exist to build it); route (F1) = materialise `∇₂A` via
+  `tensorRSCovariantDerivative 1 2` + `connDiff_contMDiff` smoothness, ~200–400 lines, multi-session.
+  Three T-B consumers still BLOCKED on this one frontier.  Verification: PENDING authoritative build
+  (diamond lane held the machine; edits written, `lake build` not yet run — see report).
 - 2026-07-25 (session 7, jet composition): **two micro-bridges + jet-composed j=1 endpoint LANDED
   sorry-free + verified** in `UnifCovSumCross.lean` `section DiffStepNorm`.  Authoritative
   `lake build +…UnifCovSumCross` EXIT=0 (8645 jobs, 33s); `#print axioms` = `[propext,

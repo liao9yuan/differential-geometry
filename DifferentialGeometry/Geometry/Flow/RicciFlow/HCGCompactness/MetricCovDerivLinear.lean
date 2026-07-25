@@ -263,6 +263,29 @@ theorem covStep_add
   rw [covStep_apply, ContMDiffSection.coe_add, Pi.add_apply,
     covStep_apply, covStep_apply, Tensor0SBundle.totalNabla0SFun_add]
 
+/-- `covStep` is scalar-homogeneous in the tensor field. -/
+theorem covStep_smul
+    (gRef : SmoothRiemannianMetric I M) (c : Real) (s : Nat)
+    (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) :
+    covStep (I := I) gRef s (c • A)
+      = c • covStep (I := I) gRef s A := by
+  refine DFunLike.ext _ _ (fun x => ?_)
+  rw [covStep_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
+    covStep_apply, Tensor0SBundle.totalNabla0SFun_smul]
+
+/-- `covStep` preserves differences in the tensor field (additivity plus
+`(-1)`-homogeneity).  This is the linearity fact behind the connection-difference
+splitting `covStep g₂ (∇^{g₁}S − ∇^{g₂}S)`. -/
+theorem covStep_sub
+    (gRef : SmoothRiemannianMetric I M) (s : Nat)
+    (A B : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) :
+    covStep (I := I) gRef s (A - B)
+      = covStep (I := I) gRef s A - covStep (I := I) gRef s B := by
+  rw [sub_eq_add_neg, covStep_add, ← neg_one_smul Real B,
+    covStep_smul, neg_one_smul, ← sub_eq_add_neg]
+
 /-- The `a`-fold background covariant derivative (Levi-Civita of `gRef`) of an
 arbitrary-rank covariant tensor field `A0`.  This is the book's `∇^a` on tensors
 of any valence; `covDerivOfField gRef A0 a = iterCov gRef 2 A0 a` for `(0,2)`
@@ -431,6 +454,57 @@ theorem iterCov_telescoping
       rw [iterCov_succ, ih, covStep_add, iterCov_succ (gRef := g₂)]
       simp only [telescAccum, diffStep]
       abel
+
+/-- **The base-connection Leibniz split of the connection-difference step**
+(brick T-B, committed-currency form).  Differentiating the single-step connection
+difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` once more with the *base*
+connection `∇^{g₂}` splits, by the tensor-derivation (product) rule
+`∇^{g₂}(A ⋆ S) = (∇^{g₂}A) ⋆ S + A ⋆ (∇^{g₂}S)` where
+`A = Γ₁ − Γ₂ = connectionDifferenceTensorAt (LC g₁)(LC g₂)`, into
+
+* the **`A ⋆ (∇^{g₂}S)` term**, realized in committed currency as the connection
+  difference of the base derivative `diffStep g₁ g₂ (s+1) (covStep g₂ s S)`, and
+* the **`(∇^{g₂}A) ⋆ S` term**, realized as the *mixed second-derivative
+  commutator* `∇^{g₂}∇^{g₁}S − ∇^{g₁}∇^{g₂}S = covStep g₂ (covStep g₁ S)
+  − covStep g₁ (covStep g₂ S)` (whose second-order-in-`S` symbols cancel, leaving
+  a first-order-in-`S`, one-more-jet-of-`A` object).
+
+The identity itself is pure operator algebra (`covStep` additivity and the
+`diffStep` definition); it does not require materialising `∇^{g₂}A` as a mixed
+`(1,3)` tensor.  It is the algebraic backbone of the all-`∇^{g₂}` telescoping
+schematic: the first term feeds directly into the base-derivative norm recursion
+(bounded by `diffStep_jet_one_le` applied to `covStep g₂ s S`), and the mixed
+commutator isolates the single remaining jet-of-`A` frontier. -/
+theorem diffStep_leibniz
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) :
+    covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)
+      = diffStep (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S)
+        + (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+            - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) := by
+  simp only [diffStep]
+  rw [covStep_sub]
+  abel
+
+/-- **Base-connection splitting of one `iterCov` step.**  One further `∇^{g₁}`
+derivative of the `g₁`-iterated tower is the *base* `∇^{g₂}` derivative plus the
+single-step connection difference, both applied to `iterCov g₁ r T N`:
+`∇^{g₁} W = ∇^{g₂} W + (∇^{g₁} − ∇^{g₂}) W`.  This is the recursion driver for the
+all-`∇^{g₂}` telescoping norm bound: it rewrites the outer `g₁`-derivative of
+`iterCov_succ` into a base derivative (to be pushed inward by `diffStep_leibniz`)
+plus a connection-difference term (bounded pointwise by `diffStep_jet_one_le`). -/
+theorem iterCov_succ_diffStep
+    (g₁ g₂ : SmoothRiemannianMetric I M) (r : Nat)
+    (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r)
+    (N : Nat) :
+    iterCov (I := I) g₁ r T (N + 1)
+      = covStep (I := I) g₂ (r + N) (iterCov (I := I) g₁ r T N)
+        + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) := by
+  rw [iterCov_succ]
+  simp only [diffStep]
+  abel
 
 end HCGCompactness
 

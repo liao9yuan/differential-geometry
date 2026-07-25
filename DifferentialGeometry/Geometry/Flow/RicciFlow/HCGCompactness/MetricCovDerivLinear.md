@@ -63,3 +63,24 @@ which are `variable`-declared upstream, not auto-synth from `IsManifold`).
 component Cauchy–Schwarz bounding `|(Γ₁−Γ₂)(u)(w)|_{gBase}` by
 `√normSqRS(connectionDifferenceTensorAt)·|u|·|w|` (the sharp-constant-`s` route, ~100 lines
 Finset). Then T-B base-Leibniz remains the multi-session frontier.
+
+## 2026-07-25 — brick T-B: base-connection Leibniz split (committed currency, LANDED)
+
+Added the identity-layer core of the base-Leibniz.  All pure operator algebra (no bundle-derivative
+work, no `∇₂A` materialisation), so they are cheap and green; full design + frontier in
+`UnifCovSumCross.md` §Session 8.
+
+- `covStep_smul` / `covStep_sub` — complete the `covStep` linearity API next to `covStep_add`
+  (`covStep_sub` via `sub_eq_add_neg` + `covStep_add` + `neg_one_smul` + `covStep_smul`, mirroring
+  `covDerivOfField_sub`; `covStep_smul` via `covStep_apply` + `totalNabla0SFun_smul`).
+- **`diffStep_leibniz`** — `covStep g₂ (s+1) (diffStep g₁ g₂ s S) = diffStep g₁ g₂ (s+1) (covStep g₂
+  s S) + (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))`.  Term1 = the `A⋆(∇₂S)` half
+  (committed `diffStep`); Term2 = the mixed second-derivative commutator `∇₂∇₁S − ∇₁∇₂S = (∇₂A)⋆S`
+  (the `∂∂S` symbols cancel).  Proof: `simp only [diffStep]; rw [covStep_sub]; abel`.
+- **`iterCov_succ_diffStep`** — `iterCov g₁ (N+1) = covStep g₂ (iterCov g₁ N) + diffStep g₁ g₂
+  (iterCov g₁ N)` (`∇₁ = ∇₂ + (∇₁−∇₂)`), the base-connection recursion driver.  Proof:
+  `rw [iterCov_succ]; simp only [diffStep]; abel`.
+
+The single remaining frontier is `mixedComm_norm_le` (the `∇₂A` bound on Term2), which needs the
+genuinely-unbuilt covariant derivative of `connectionDifferenceTensorAt` — see `UnifCovSumCross.md`
+§Session 8 route (F1).
