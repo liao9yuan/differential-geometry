@@ -90,6 +90,15 @@ These source proofs have been statically reviewed and contain no
 this lane because the workspace had the single coordinated named build still
 active; verification therefore remains pending.
 
+**2026-07-25 VERIFIED (B-lane planner).** First authoritative
+`lake build +…RicciEdgeBounds`: two mechanical direction errors repaired
+(`:221` needed `.symm` on `metricRicciAt_apply_eq_ricciTensor`; `:266` needed
+`heq.symm` in `Tendsto.congr'`), then GREEN (9416 jobs).  `#print axioms` via
+direct lean: all four public theorems (`ricciEdgeMetric`, `ricciEdgeChartPDE`,
+`ricciEdgeIntegral`, `ricciEdgeImproper`) depend on exactly
+`[propext, Classical.choice, Quot.sound]`.  This file is now settled verified
+API for the forward-uniqueness lane.
+
 ## Updated obstruction audit
 
 The new bridges sharpen rather than remove the analytic obstruction.  Three

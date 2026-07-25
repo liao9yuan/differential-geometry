@@ -18,3 +18,7 @@ lemma removes a long duplicated algebraic block from the intended
 dimension-three Ricci--DeTurck dense extension.  Focused verification is
 pending until the shared long-path `.olean` rebuild finishes; no analytic
 endpoint is claimed here.
+
+**2026-07-25 REAL BUILD VERDICT: GREEN.** Authoritative
+`lake build +…RadialMixedBound` passed (olean produced); `norm_map_ball_le`
+and `radial_mixed` are verified and consumable.

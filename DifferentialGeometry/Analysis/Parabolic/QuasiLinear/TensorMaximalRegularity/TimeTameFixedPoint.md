@@ -56,3 +56,22 @@ placeholders.  No focused Lean elaboration was run in this lane.
 
 No `sorry`, `admit`, axiom, opaque replacement, foundational instance, or new
 notation is introduced.
+
+## 2026-07-25 REAL BUILD VERDICT: FAILED (B-lane planner verification)
+
+First authoritative `lake build` of this module: elaboration FAILS. The
+(r,s)-generalization claim above ("the underlying maximal-regularity and
+Duhamel estimates are generic in tensor variance") is FALSE for at least two
+consumed upstream lemmas, which are hard-coded to `(0,2)`:
+
+- `:428` — `timeL2Inclusion_maxRegDuhamelSolField` (at
+  `Analysis/Spectral/Intrinsic/DeTurck/DeTurckQuasilinearExistence.lean:155`)
+  expects `timeL2 (tensorHs g₀ 0 2 a) T`; applied here at generic `r s`.
+- `:644` — `maxRegDuhamelSolField_zero_zero` (same file `:237`), same mismatch.
+
+Repair options (planner ruling: PARKED pending the forward-uniqueness route
+decision, since this engine is only on the Route-G/HMF critical path):
+(a) generalize the two (plus any further) upstream lemmas to (r,s) in place —
+touches the (N)-lane engine file, coordinate first; (b) state (r,s)-generic
+variants in a new TensorMaximalRegularity file (same proofs, no upstream edit).
+Verified-progress accounting: `time_partial_tame` remains 0%; do not consume.

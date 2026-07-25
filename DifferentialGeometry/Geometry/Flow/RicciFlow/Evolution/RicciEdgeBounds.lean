@@ -218,7 +218,7 @@ theorem ricciEdgeIntegral
   have hRic : ContinuousOn
       (fun r : ℝ => ricciTensor (I := I) (g r) x v w) (Set.Ioo a b) := by
     refine hRicEval.congr (fun r _ => ?_)
-    exact metricRicciAt_apply_eq_ricciTensor (I := I) (g r) x v w
+    exact (metricRicciAt_apply_eq_ricciTensor (I := I) (g r) x v w).symm
   have hseg : Set.Icc s t ⊆ Set.Ioo a b := by
     intro r hr
     exact ⟨lt_of_lt_of_le hs hr.1, lt_of_le_of_lt hr.2 ht⟩
@@ -263,6 +263,6 @@ theorem ricciEdgeImproper
     filter_upwards [self_mem_nhdsWithin,
       mem_nhdsWithin_of_mem_nhds (Iio_mem_nhds ht.1)] with s hsa hst
     exact ricciEdgeIntegral (I := I) g hsmooth hpde hsa hst.le ht.2 x v w
-  exact Filter.Tendsto.congr' heq hdiff
+  exact Filter.Tendsto.congr' heq.symm hdiff
 
 end DifferentialGeometry.PDE.RicciFlow

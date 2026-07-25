@@ -1,6 +1,19 @@
 # MovingMass
 
-## Current status
+## 2026-07-25 REAL BUILD VERDICT: STRUCTURALLY BROKEN (B-lane planner)
+
+First authoritative elaboration fails at the IDENTIFIER level from `:55`
+onward: `Unknown identifier tensorHs` (namespace never opened), `Function
+expected at MaxRegSolutionSpace ↑r ↑s` (arity mismatch with the real API),
+and free variables `Ha`, `ET` used with `autoImplicit false`.  This draft was
+written against an API shape that does not exist in the repository — it is a
+sketch, not near-green code.  PARKED by planner ruling: it is off the
+forward-uniqueness critical path under every live route (its own §Exact
+limitation already records that it does not solve the low-regularity gauge).
+Any revival must start by restating it against the actual
+`tensorHs`/`MaxRegSolutionSpace` API, not by local repair.
+
+## Prior status (2026-07-19, superseded)
 
 Source-written and not yet focused-checked because a shared named Lean build is
 still active.

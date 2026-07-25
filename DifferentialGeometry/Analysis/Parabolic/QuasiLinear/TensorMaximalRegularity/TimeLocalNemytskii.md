@@ -36,5 +36,10 @@ Lean check in this lane.  Verified theorem completion is 0% until that check
 passes; source implementation of this isolated measure-theoretic layer is
 complete pending elaboration.
 
+**2026-07-25 REAL BUILD VERDICT: GREEN.** Authoritative
+`lake build +…TimeLocalNemytskii` passed (olean produced); the public API
+(`TimeNemyMeas`, `timeNemy_of_cont`, `memLp_time_tame`, `timeNemyTame`,
+`timeNemyTame_ae`) is now verified and consumable.
+
 No `sorry`, `admit`, axiom, opaque replacement, foundational instance, or new
 notation is introduced.
