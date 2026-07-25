@@ -235,6 +235,27 @@ Decision inputs pending: (i) real-build verdicts on the six source-only files;
 
 ## Status log
 
+- 2026-07-25 (Stage 0 wave 3, MovingEdgeEnergy verification attempt): the build
+  BANKED a large newly-verified layer directly useful to both routes —
+  `Evolution/Ricci.{GammaAlgebra,GammaCoord,Trace,Bianchi,Commutator,
+  CoordinateRegularity,CoordinateIdentities,Lichnerowicz}` (the ∂ₜΓ/Ricci
+  evolution family), the full Shi tower (`BernsteinShi(Higher)`,
+  `NablaRiemann{Heat,HeatFull,TimeDeriv,Commutator(Bound),T1Bound,T2Bound,
+  ReactionBound,OrthoFrame,HeatFrameInvariant}`, `IteratedRmTower{HeatEq,
+  Producer}`, `Uhlenbeck`, `RmRealizationBridge(AllK)`), plus
+  `EdgeDifferenceEnergy`, `DeTurckPrincipalArmEnergyPairing`,
+  `Tensor0SMetric{Deriv,…}`, `DeTurckChartRegularityFromJoint` — all ✔ green.
+  BUT `MovingEdgeEnergy` itself NEVER ELABORATED: blocked by the SAME three
+  broken committed modules as `DeTurckUniqueWindow` (`SmoothEmbedInj` — own
+  funext proof bug; `SmoothPathHs` — `NormedSpace ℝ (TensorRSModel …)`
+  synthesis failures, the in-flight-dedup signature; `MetricDiffJoint` — missing
+  identifiers + parse error, written against a not-yet-existing API, possibly
+  the API the dedup is about to introduce). **LANE BOTTLENECK: these three
+  modules block BOTH RDT-uniqueness assets.** Per charter §4 the instance-
+  flavored breakage is (N)-dedup coordination territory — planner rules:
+  DO NOT PATCH; flag to user + (N) session. If the (N) dedup does not repair
+  them, negotiating ownership transfer of the three files to this lane is the
+  next option.
 - 2026-07-25 (Stage 0 wave 2): **`RicciEdgeBounds.lean` GREEN + AXIOM-CLEAN**
   (two mechanical `.symm` repairs by planner; all four public theorems on
   exactly `[propext, Classical.choice, Quot.sound]`) — the edge-bridge family
