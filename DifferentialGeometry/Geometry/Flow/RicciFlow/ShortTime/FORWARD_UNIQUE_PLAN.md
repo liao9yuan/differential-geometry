@@ -89,7 +89,41 @@ supposed to prove — circular. So the real choice is (N)-strengthening (+ smoot
 (B)) vs Route BG (no statement change, far larger new parabolic foundation on the
 (B) side). Both sessions + user must weigh; Pro consult asked to rule.
 
-## Route decision (OPEN — Pro consult prescribed by charter §3 before heavy building)
+## Route decision — RESOLVED 2026-07-25 (GPT Pro ruling, user-relayed)
+
+**Ruling** (full archive + verbatim + K1 kickoff prompt =
+`FORWARD_UNIQUE_PRO_RULING.md`): statement surgery APPROVED (exact minimal
+signature changes; KEEP the redundant C⁰ fields); Burkhardt-Guim rough-C⁰
+route REJECTED; proof route = **(K) Kotschwar energy with MOVING g₁(t)
+carrier** (fixed-ḡ ruled sound-but-wrong-formulation), dimension-generic;
+brick board K1 (∂ₜΓ-difference, pure subtraction) → K2
+(divergence-form Rm-difference evolution with flux U — the dominant brick) →
+K3 (triple-energy exact differentiation) → rate estimate → edge-Gronwall →
+integral-zero-to-equality. (N)-lane corner bootstrap ruled standard/medium
+(a-posteriori bootstrap on the fixed horizon; NEVER shrinking per-order
+horizons; fallback = finite edge-order contract for K, never rough-C⁰).
+Stop gates: (N)-gate (shrinking horizons) and K2-gates (global representation
+change / Shi-architecture modification / IBP cannot pair div₁U against S
+invariantly) — details in the ruling file.
+
+**EXECUTION FREEZE (user directive 2026-07-25): e87b will be MERGED BACK into
+ste-align (`codex/short-time-existence-align`). Do not implement the ruling on
+e87b. First post-merge action = dispatch the K1 kickoff prompt from the ruling
+file (path-adjust if the merge moves files).**
+
+**ste-align overlap verification (2026-07-25, planner)**: file-level overlap of
+this lane's work with ste-align ≈ ZERO — the four TMR drafts, RicciEdgeBounds,
+DeTurckUniqueWindow, MovingEdgeEnergy, StrongSolutionUniqueness, HarmonicTension,
+DeTurckNaturality, and the three broken modules do not exist there (declaration
+grep zero hits); the two (0,2) Duhamel lemmas are identically hard-coded in
+both trees. The one real precursor: ste-align's `SHORTTIME_MERGE_PLAN.md` §3
+U-track ((B) via gauge, "keep the statement as cited") + its 07-14 audit
+(gauge = real analytic frontier) — both now SUPERSEDED by this ruling
+(surgery + Route K). The U-track's "statement stays as-is" decision is
+explicitly overturned by the ruling; note this during the merge so the merge
+plan's §3 is updated rather than resurrected.
+
+## Route options considered (historical record; superseded by the ruling above)
 
 Candidate proofs of smooth-class (B), ranked by expected formalization cost here:
 
@@ -194,7 +228,19 @@ Decision inputs pending: (i) real-build verdicts on the six source-only files;
   edge difficulty concentrates in `hbound`'s uniform `K`. Hence G′'s only real
   frontier = HMF existence + diffeo persistence; K's = Rm-difference evolution.
 
-## Stages (draft; ratified after consult)
+## Stages (RATIFIED by the 2026-07-25 ruling; FROZEN until the ste-align merge)
+
+Post-merge order: Stage 1 (surgery, exact edits per ruling §1) → K1
+(`ForwardUniqueConnectionDiff.lean`, kickoff prompt in the ruling file) →
+K1-corollary (pointwise |∂ₜA₀₃|² bound) → K2 (`rmDiffLowered_evolution_div_bound`,
+the dominant brick, watch the K2 stop gates) → K3 (`forwardUniqueEnergy(_hasDerivAt)`
+/`forwardUniqueRate`) → `forwardUniqueRate_le` → edge-Gronwall →
+integral-zero-to-equality → K6 endgame (discharge `:201`, shared-file protocol).
+(N)-side corner bootstrap proceeds in the sibling lane per ruling §"(N) cost";
+their co-sign condition: trace/linear-regularity APIs bootstrap on a fixed
+horizon. The draft stage list below is the pre-ruling record.
+
+## Stages (pre-ruling draft; superseded)
 
 - **Stage 0 — verification triage (RUNNING).** Real `lake build` of
   `TimeLocalNemytskii`, `TimeTameFixedPoint`, `MovingMass`, `RadialMixedBound`;
@@ -235,6 +281,18 @@ Decision inputs pending: (i) real-build verdicts on the six source-only files;
 
 ## Status log
 
+- 2026-07-25 (RULING + FREEZE): GPT Pro ruling received via user and archived
+  (`FORWARD_UNIQUE_PRO_RULING.md`): surgery approved, BG rejected, Route K with
+  moving g₁-carrier, K1/K2/K3 brick board, stop gates. USER DIRECTIVE: e87b
+  merges back into ste-align — do NOT implement; K1 kickoff prompt banked for
+  post-merge dispatch. ste-align overlap verification done (≈zero file overlap;
+  U-track precursor superseded — see §Route decision). Lane state at freeze:
+  verified green = `RicciEdgeBounds` (axiom-clean) + `TimeLocalNemytskii` +
+  `RadialMixedBound` + the banked Shi/∂ₜΓ/pairing layers; broken-parked =
+  `TimeTameFixedPoint`, `MovingMass`; blocked-upstream = `DeTurckUniqueWindow`,
+  `MovingEdgeEnergy` (behind `SmoothEmbedInj`/`SmoothPathHs`/`MetricDiffJoint`
+  — now only "design evidence" for K3 per the ruling, so the bottleneck is no
+  longer route-critical; it matters only if the merge wants those files green).
 - 2026-07-25 (Stage 0 wave 3, MovingEdgeEnergy verification attempt): the build
   BANKED a large newly-verified layer directly useful to both routes —
   `Evolution/Ricci.{GammaAlgebra,GammaCoord,Trace,Bianchi,Commutator,

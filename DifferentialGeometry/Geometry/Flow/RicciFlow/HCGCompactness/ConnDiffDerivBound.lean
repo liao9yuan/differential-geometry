@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv
 
 /-!
@@ -225,10 +226,9 @@ private theorem field_eq_mcd1
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
   apply DFunLike.ext
   intro x
-  rw [Tensor0SBundle.totalNabla0S_apply,
-    show metricCovDeriv (I := I) g₁ g₂ 1
-        = metricCovDerivStep (I := I) g₂ 0 (metricCovDeriv (I := I) g₁ g₂ 0) from rfl,
-    metricCovDerivStep_apply]
+  rw [Tensor0SBundle.totalNabla0S_apply]
+  exact (metricCovDerivStep_apply (I := I) g₂ 0
+    (Tensor0SBundle.metricTensorField (I := I) g₁) x).symm
 
 set_option linter.unusedSectionVars false in
 /-- Currency bridge (order 2): the directional derivative `nabla0SFun 3 (LC g₂) W (∇₂g₁-field)` of the

@@ -113,7 +113,18 @@ inference ("Function expected at Fin.cons … a").
   explicit `↑` (explicit `↑` errors "expected type not known").
 - Normalise `![a,b,c] 2` with a `fun _ _ _ => rfl` helper (`Matrix.cons_val_zero/one` only cover 0,1).
 
-## REMAINING (P2.b/c/d) — the a=1 component→norm engine and comparability conversion (NOT started)
+## DOWNSTREAM UPDATE (2026-07-25, session 6): P2 route pivoted to the dual/eval form of THIS identity
+
+The consumer B2 P2 no longer uses a (1,3)-component engine.  `connDiff_koszul_deriv` (this file, unchanged)
+is now consumed in its **lowered-eval form** by the dual route in
+`HCGCompactness/ConnDiffDerivBound.lean`: pair it against the output vector `B` (`Z x = B`), Cauchy–Schwarz
+each RHS term (`abs_apply_le_sqrt_normSq0S`) in the `metricCovDeriv 2/1` currency (currency bridges
+`field_eq_mcd1`/`nabla3_eq_mcd2` = green there), re-expand `|A|` by `connDiffVec_norm_le`+`lcDiff_norm_le`,
+divide by `|B|`, convert `g₁↔g₂`.  Yields B3's `hA1` directly with `CA = (3/2)Λ⁴(Λ''+ΛΛ'²)`.  The P2.b/c/d
+below are SUPERSEDED; see `ConnDiffDerivBound.md` §"ROUTE DECISION" + §"EXACT NEXT STEPS".  This file's
+`.lean` is UNCHANGED this session (still green, `connDiff_koszul_deriv` sorry-free).
+
+## REMAINING (P2.b/c/d) — the a=1 component→norm engine and comparability conversion (SUPERSEDED — see above)
 
 - **P2.b** — a=1 analogue of `diff_le_covOne_basis` (component→norm engine): from `connDiff_koszul_deriv`
   in a g₁-ON basis, bound `√normSqRS(g₂,1,3)(∇₂A) ≤ C·(√normSq0S(∇₂²g₁) + √normSq0S(∇₂g₁)²)`.  The `∇₂²g₁` combo
