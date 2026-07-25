@@ -362,6 +362,49 @@ Then assemble: `√normSq0S(diffStep x) ≤ s·√normSqRS(connectionDifferenceT
 compose with `lcDiff_norm_le` (jet side) + `MetricCovDerivOrderBoundOn`.  T-B base-Leibniz
 (`covStep g₂ (diffStep …)` re-expansion into all-`∇₂` schematic) remains the multi-session frontier.
 
+## Session 6 (2026-07-24) — T-A assembly `diffStep_norm_le` LANDED (fibre form)
+
+Planner dispatch: assemble the j=1 fibre-norm atom (`diffStep_eval` + `connDiffVec_norm_le` +
+`abs_apply_le_sqrt_normSq0S` over an internal g-ON frame), explicit constant.
+
+**LANDED sorry-free + verified** in `UnifCovSumCross.lean` `section DiffStepNorm` (`lake build
++…UnifCovSumCross` EXIT=0, 3909 jobs; `#print axioms diffStep_norm_le` = `[propext,
+Classical.choice, Quot.sound]`, stripped; added `import …FiberMetric.ConnectionDifferenceNorm`):
+
+- **`diffStep_norm_le`** (public):
+  `√normSq0S(g₂, s+1, diffStep g₁ g₂ s S x) ≤ (s)·√((finrank ℝ E)^{s+1})·√normSqRS(g₂, 1, 2, connectionDifferenceTensorAt (LC g₁)(LC g₂) x)·√normSq0S(g₂, s, S x)`.
+  **Constant `s·n^{(s+1)/2}`** (`n = finrank ℝ E`), NOT sharp `s`:
+  `normSq0S_le_card_of_component_bound` bounds each of the `n^{s+1}` frame components uniformly by
+  `B = s·√normSqRS·√normSq0S(S x)` ⟹ `normSq0S ≤ n^{s+1}·B²` ⟹ the `√(n^{s+1})` card factor; sharp
+  `s` would need per-component Parseval.
+
+Proof (~150 lines, passed on the FIRST authoritative build): internal `g₂`-ON frame; per-component
+`hcomp` via `component0S_apply` → `Fin.cons` rewrite (`Fin.cases`) → `diffStep_eval` → `abs_neg` +
+`Finset.abs_sum_le_sum_abs`; per-slot `hterm` via `abs_apply_le_sqrt_normSq0S` on `S x`, slot
+product collapsed to `‖insertion‖` (`Finset.prod_eq_single` + `update_self`/`update_of_ne` + ON
+`hbnorm = 1`), `connDiffVec_norm_le` bounding `‖insertion‖ ≤ √normSqRS`; sum over `s`;
+`normSq0S_le_card_of_component_bound`; `√` + card (`Fintype.card_fun`/`card_fin`, `finrank
+(TangentSpace I x) = finrank E` by rfl, `Real.sqrt_mul`/`sqrt_sq`).
+
+USEFUL FACTS: `finrank ℝ (TangentSpace I x) = finrank ℝ E` is `rfl`; `SmoothRiemannianMetric =
+SmoothMetric = SmoothMetric_gen`; `Fintype.card_fun : card (α→β) = card β ^ card α`; update lemmas
+are `Function.update_self` / `Function.update_of_ne`.
+
+### REMAINING for the L² S0 endpoint
+1. **Jet composition** of `diffStep_norm_le` into `MetricCovDerivOrderBoundOn` currency — two
+   bridges, BOTH not-yet-available (grep-checked):
+   - **antisymmetry** `normSqRS(connectionDifferenceTensorAt (LC g₁)(LC g₂)) =
+     normSqRS(connectionDifferenceTensorAt (LC g₂)(LC g₁))` (`diffStep_eval` gives order `(LC g₁)(LC
+     g₂)`; `lcDiff_norm_le` is `(LC h)(LC g) = (LC g₂)(LC g₁)`).  `difference cov cov' = −difference
+     cov' cov` ⟹ `normSqRS` equal; needs a `difference`-antisymmetry + `normSqRS_neg` lemma (neither
+     found; `difference_symm_at` in `KoszulDifference.lean` is the SLOT symmetry, not this).
+   - **`metricDerivNorm` ↔ `metricCovDerivNorm`**: `lcDiff_norm_le` outputs `metricDerivNorm 1 g₂ g₁
+     g₁ x`; `MetricCovDerivOrderBoundOn K 1 g₂ g₁ C` bounds `metricCovDerivNorm 1 g₂ g₁ x ≤ C`.
+     Distinct signatures, no found equality.  Needs a `metricDerivNorm ≤ metricCovDerivNorm` lemma.
+   Endpoint: `√normSq0S(diffStep) ≤ s·n^{(s+1)/2}·(3/2)·√(Λ³)·Λ'·√normSq0S(S x)` under
+   `MetricUniformEquivalentOn K g₁ g₂ Λ` + `MetricCovDerivOrderBoundOn K 1 g₂ g₁ Λ'`.
+2. **T-B base-Leibniz** (`j ≥ 2`) — the genuine multi-session frontier.
+
 ## Step-4 proof, preserved for drop-in (BLOCKED on CompactVolumeEquiv — see V-session-3)
 
 Add `import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv` and this section
@@ -447,6 +490,14 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-24 (session 6, T-A assembly): **`diffStep_norm_le` LANDED (fibre form)** sorry-free +
+  verified in `UnifCovSumCross.lean` (`lake build +…UnifCovSumCross` EXIT=0, 3909 jobs; axioms
+  standard triple; added `import …FiberMetric.ConnectionDifferenceNorm`).  Constant `s·n^{(s+1)/2}`
+  (`n = finrank ℝ E`), via `diffStep_eval` + `connDiffVec_norm_le` + `abs_apply_le_sqrt_normSq0S`
+  over an internal g₂-ON frame, summed over `s` slots (`normSq0S_le_card_of_component_bound`).
+  Passed on the FIRST authoritative build.  REMAINING (see §"Session 6"): (i) jet composition into
+  `MetricCovDerivOrderBoundOn` currency — blocked on a `connectionDifferenceTensorAt` argument-order
+  antisymmetry lemma + a `metricDerivNorm`↔`metricCovDerivNorm` bridge; (ii) T-B base-Leibniz.
 - 2026-07-24 (session 5, T eval gate): **eval gate CROSSED** — `diffStep_apply` (section) +
   `diffStep_eval` (pointwise, arbitrary vectors) LANDED sorry-free + verified in
   `MetricCovDerivLinear.lean` (`lake build +…MetricCovDerivLinear` EXIT=0, 3633 jobs; axioms

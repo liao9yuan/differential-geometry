@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
@@ -259,11 +260,19 @@ elaborates fine at variable rank once `set_option backward.isDefEq.respectTransp
 in scope (this file lacks it; `MetricCovDerivLinear.lean` has it, so the eval was proved there).
 
 The *fibre norm* atom `diffStep_norm_le` — brick T's reusable atom, the `(0,s)` generalization of
-`connOut_norm_le` — is the remaining frontier and is NOT landed here.  With `diffStep_eval` the
-two sub-frontiers are: (a) a `gBase`-orthonormal frame at `x` for `normSq0S_identity_eq_sum_sq` /
-`abs_apply_le_sqrt_normSq0S`; (b) the raw connection-difference component Cauchy–Schwarz bounding
-`|(Γ₁−Γ₂)(u)(w)|_{gBase}` by `√normSqRS(connectionDifferenceTensorAt)·|u|·|w|`.  See
-`UnifCovSumCross.md` §"Session 5" for the recipe and the downstream base-Leibniz induction (T-B).
+`connOut_norm_le` — is now LANDED here:
+`√normSq0S(g₂, diffStep g₁ g₂ s S x) ≤ s·n^{(s+1)/2}·√normSqRS(connectionDifferenceTensorAt (LC g₁)(LC g₂) x)·√normSq0S(g₂, S x)`
+(`n = finrank ℝ E`).  Its two sub-frontiers are both discharged: (a) the `g₂`-orthonormal frame at
+`x` is built internally (`stdOrthonormalBasis` on `(tangentMetricData_gen g₂ x).metric.toCore`);
+(b) the raw connection-difference component bound is the public `connDiffVec_norm_le`
+(`Tensor/RSTensor/FiberMetric/ConnectionDifferenceNorm.lean`).  Proof = `diffStep_eval` +
+`abs_apply_le_sqrt_normSq0S` on `S x` + `connDiffVec_norm_le` on the inserted slot, summed over the
+`s` slots (`normSq0S_le_card_of_component_bound`).  REMAINING for the L² S0 assembly: (i) the JET
+composition of `diffStep_norm_le` (fold `√normSqRS(connectionDifferenceTensorAt)` into
+`metricCovDeriv`/`MetricCovDerivOrderBoundOn` currency via `lcDiff_norm_le`, needing a
+`connectionDifferenceTensorAt` argument-order antisymmetry lemma + a `metricDerivNorm` ↔
+`metricCovDerivNorm` bridge — see `UnifCovSumCross.md` §"Session 6"); (ii) the T-B base-Leibniz
+induction for `j ≥ 2`.
 
 Hoist candidate: `covStep_zero'`, `iterCov_one_eq` → `MetricCovDerivLinear.lean`.  Kept private
 here pending planner hoist. -/
@@ -300,6 +309,185 @@ private theorem iterCov_one_eq
   simp only [telescAccum]
   rw [covStep_zero', zero_add]
   rfl
+
+/-- **Fibre norm of the single-step connection difference** (brick T-A, the `(0,s)` analogue of
+`connOut_norm_le`).  The `gBase = g₂`-fibre norm of `diffStep g₁ g₂ s S x = ∇^{g₁}S − ∇^{g₂}S` is
+bounded by `s · n^{(s+1)/2} · ‖Γ₁−Γ₂‖_{g₂} · ‖S x‖_{g₂}` (`n = finrank ℝ E`), where
+`‖Γ₁−Γ₂‖_{g₂} = √normSqRS(connectionDifferenceTensorAt (LC g₁)(LC g₂) x)`.
+
+The dimension factor `n^{(s+1)/2}` comes from bounding each of the `n^{s+1}` frame components of
+`diffStep g₁ g₂ s S x` uniformly by `s·‖Γ₁−Γ₂‖_{g₂}·‖S x‖_{g₂}` — via `diffStep_eval`, the slot
+Cauchy–Schwarz `abs_apply_le_sqrt_normSq0S` on `S x`, and the atomic per-slot bound
+`connDiffVec_norm_le` on the inserted vector — and summing squares
+(`normSq0S_le_card_of_component_bound`) over a `g₂`-orthonormal frame; the sharp constant `s`
+would instead need a per-component Parseval identity. -/
+theorem diffStep_norm_le
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (diffStep (I := I) g₁ g₂ s S x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) *
+        Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+          (connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+        Real.sqrt (normSq0S (I := I) g₂ x s (S x)) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  -- internal `g₂`-orthonormal frame at `x`
+  let D := (tangentMetricData_gen (I := I) g₂ x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  let basis := ob.toBasis
+  have hON : ∀ i j, g₂.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    change g₂.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g₂ x) (ob.toBasis i) (ob.toBasis j)]
+    change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+    rw [← hinner]
+    exact ob.inner_eq_ite i j
+  have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
+      (identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  have hbnorm : ∀ i, Real.sqrt (g₂.inner x (basis i) (basis i)) = 1 := by
+    intro i; rw [hON i i]; simp
+  set NA := Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
+    (connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) with hNA
+  set NS := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hNS
+  have hNSnn : 0 ≤ NS := Real.sqrt_nonneg _
+  set B : ℝ := (s : ℝ) * NA * NS with hB
+  have hBnn : 0 ≤ B := by rw [hB]; positivity
+  -- each frame component of `diffStep g₁ g₂ s S x` is bounded by `B`
+  have hcomp : ∀ φ : Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x)),
+      |component0S (I := I) basis (diffStep (I := I) g₁ g₂ s S x) φ| ≤ B := by
+    intro φ
+    rw [component0S_apply]
+    have hcons : (fun a : Fin (s + 1) => basis (φ a)) =
+        Fin.cons (basis (φ 0)) (fun a : Fin s => basis (φ a.succ)) := by
+      funext a
+      refine Fin.cases ?_ ?_ a
+      · rfl
+      · intro i; rfl
+    rw [hcons, diffStep_eval, abs_neg]
+    refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    have hterm : ∀ a : Fin s,
+        |(S x) (Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x)
+              (basis (φ a.succ))) (basis (φ 0))))| ≤ NA * NS := by
+      intro a
+      have hins_le :
+          Real.sqrt (g₂.inner x
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x)
+              (basis (φ a.succ))) (basis (φ 0)))
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x)
+              (basis (φ a.succ))) (basis (φ 0)))) ≤ NA := by
+        have h := connDiffVec_norm_le (I := I) g₂
+          (leviCivitaConnectionOfMetric (I := I) g₁)
+          (leviCivitaConnectionOfMetric (I := I) g₂)
+          (basis (φ 0)) (basis (φ a.succ))
+        rw [hbnorm (φ 0), hbnorm (φ a.succ), mul_one, mul_one, ← hNA] at h
+        exact h
+      have hcs := abs_apply_le_sqrt_normSq0S (I := I) g₂ x s basis hON (S x)
+        (Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+          (((CovariantDerivative.difference
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) x)
+            (basis (φ a.succ))) (basis (φ 0))))
+      have hprod :
+          (∏ b : Fin s, Real.sqrt (g₂.inner x
+              ((Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+                (((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                  (basis (φ a.succ))) (basis (φ 0)))) b)
+              ((Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+                (((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                  (basis (φ a.succ))) (basis (φ 0)))) b)))
+            = Real.sqrt (g₂.inner x
+              (((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                (basis (φ a.succ))) (basis (φ 0)))
+              (((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                (basis (φ a.succ))) (basis (φ 0)))) := by
+        rw [Finset.prod_eq_single a
+          (fun b _ hb => by rw [Function.update_of_ne hb]; exact hbnorm (φ b.succ))
+          (fun ha => absurd (Finset.mem_univ a) ha), Function.update_self]
+      rw [hprod, ← hNS] at hcs
+      calc
+        |(S x) (Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+            (((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x)
+              (basis (φ a.succ))) (basis (φ 0))))|
+            ≤ NS * Real.sqrt (g₂.inner x
+              (((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                (basis (φ a.succ))) (basis (φ 0)))
+              (((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                (basis (φ a.succ))) (basis (φ 0)))) := hcs
+        _ ≤ NS * NA := mul_le_mul_of_nonneg_left hins_le hNSnn
+        _ = NA * NS := by ring
+    calc (∑ a : Fin s,
+            |(S x) (Function.update (fun a' : Fin s => basis (φ a'.succ)) a
+                (((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x)
+                  (basis (φ a.succ))) (basis (φ 0))))|)
+          ≤ ∑ _a : Fin s, NA * NS := Finset.sum_le_sum (fun a _ => hterm a)
+      _ = B := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, hB]
+          simp [nsmul_eq_mul]; ring
+  -- assemble via the component → normSq0S bound and the card computation
+  have hcard : normSq0S (I := I) g₂ x (s + 1) (diffStep (I := I) g₁ g₂ s S x) ≤
+      (Fintype.card (Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ) * B ^ 2 :=
+    normSq0S_le_card_of_component_bound (I := I) g₂ x (s + 1) basis hinv
+      (diffStep (I := I) g₁ g₂ s S x) B hBnn hcomp
+  have hcard_eq :
+      (Fintype.card (Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ)
+        = (Module.finrank ℝ E : ℝ) ^ (s + 1) := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    rfl
+  calc Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (diffStep (I := I) g₁ g₂ s S x))
+        ≤ Real.sqrt
+            ((Fintype.card (Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ)
+              * B ^ 2) := Real.sqrt_le_sqrt hcard
+    _ = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) * B := by
+        rw [hcard_eq, Real.sqrt_mul (by positivity), Real.sqrt_sq hBnn]
+    _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) * NA * NS := by
+        rw [hB]; ring
 
 end DiffStepNorm
 
