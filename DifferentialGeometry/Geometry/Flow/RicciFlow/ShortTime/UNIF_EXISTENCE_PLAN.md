@@ -1939,3 +1939,57 @@ assembly (Fork-A, ~3-5 sessions) → smooth-core layers 2-3 (~4-8) [item 2];
 2a-hi/pkg → S0 j≥2 → S2-S4/S1b [item 6 tail]; then Stage-3 (N) assembly with
 the jet-order raise.  MAINTENANCE: split ConnDiffDeriv2Bound (3052 > 3000).
 (N) theorem: 0% (unstated), unchanged discipline.
+
+## Planner wrap-up №36 (2026-07-26) — SESSION CLOSED; HANDOFF TO CODEX
+
+User order: this planner session wraps up; Codex takes over.  Everything below
+is committed & pushed through `2bd13aaa1`.  The in-flight part-B session was
+stopped BEFORE editing (clean tree); its full dispatch spec is reproduced in
+the NEXT-BRICK entry below.
+
+### State at handoff (honest, theorem vs machinery separated)
+- **(N) `ricci_flow_unif_existence`: 0% — unstated.**  Everything below is its
+  machinery.  Overall machinery ≈ 72%.
+- **item 6**: D_N telescoping proved through N=3 UNCONDITIONAL
+  (`iterCovG1_three`, UnifCovSumN3.lean); general N conditional on the single
+  consumer-exact `hAcc_of_jets` (that file's only sorry; strong-induction
+  route in its docstring).  The whole a=2 atom chain is sorry-free
+  (`ConnDiffDeriv2Bound.lean`: koszul2 identity+clean form, dual core, both
+  gJet atoms, opLeibniz, eval core, the bridge, exists_const — all
+  [propext, Classical.choice, Quot.sound]).  Tail unstarted: 2a-hi/pkg,
+  S0 j≥2, S2-S4/S1b.
+- **item 2** (Pro-ruled repair, THREEARM_RECON.md is the authority): gate +
+  arm0 + deTurckLie DONE (R-free, axiom-clean); lieCorr0 ≈ 80% — the ONLY
+  sorry in `LieCorr0CoeffDiffRadiusFree.lean` is `lc0AMix_perOrder_rf`
+  (:1911).  After it: the threeArm/Ψ₀ topSeparated assembly (Fork-A, ~3-5
+  sessions), then smooth-core layers 2-3 (~4-8).  The lieCorr0 ballUniform
+  leaf is zero-sorry (vbPass discharged).
+- **Working sorries tree-wide (my lanes)**: exactly TWO — `lc0AMix_perOrder_rf`
+  and `hAcc_of_jets`.  Plus the two theorem-level black boxes
+  (ExtendViaUniqueness :92/:201, the FU session owns :201's lane).
+
+### NEXT BRICK (ready to dispatch, spec complete)
+`lc0AMix_perOrder_rf` (`LieCorr0CoeffDiffRadiusFree.lean:1911`): the 5-factor
+traceStep-chain fibre identity via the `lc0RiemLive`
+`reindexCoeffGen(slotExtendᵏ(cometricCastG0))` transport pattern (the stopped
+session's last finding: `lc0RiemLive_toSec` is exactly the transport at
+p=3/p=4 — clone its proof), + two mcd chains via the g_bg-generic
+`b4_mcd_atgw` at BOTH g_bg and g₀, + the banked `b4_trace_succ` + committed
+atgw producers.  Definition at `LieCorr0Core.lean:162` — statement-first.
+On success brick 4 is DONE and Ψ₀'s three constituents are all green.
+
+### Standing rules for Codex (do not relearn these)
+- Model-space NormedSpace only; never compensate a new instance demand
+  downstream — fix the producer or `omit` (lessons.md 2026-07-25).
+- `set_option backward.isDefEq.respectTransparency false` cures Tensor0SModel
+  synth walls incl. section-apply in IPS files; `set … with h` + `clear_value`
+  for heavy fibre values; corner-peel-split for heartbeat walls.
+- lake via scripts/lake-locked.ps1; shell defaults to the STALE
+  E:\testdifferential-geometry — cd to ste-align first; lake env lean SUCCESS
+  is untrustworthy (targeted builds are the verdict); axiom audits on every
+  endpoint ([propext, Classical.choice, Quot.sound] exactly).
+- The FU session works in Evolution/* in THIS checkout — commit only own-lane
+  files; never run two full builds concurrently.
+- Honest partials with ONE flagged sorry; verbatim escalation on real term
+  mismatches (two statement bugs were caught exactly this way: №29-30's
+  currency fork, №33's order-2 bridge).
