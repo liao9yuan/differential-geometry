@@ -44,13 +44,16 @@ tail-interval statement to the reference one by `rfl`.
 * `fuSdec` — the bundle's `sdec`, from `sdec_of_uhlenbeck` at the same tail;
 * `fuSfield_apply` — the bundle's `car`, by construction of `fuSfield`;
 * the density-regularity members `dens`, `densCont`, `densInt`, `lapInt`, `divInt`, `nabInt`,
-  `disInt`, inside `fuInputs_of_gram`, from `ForwardUniqueDensReg.lean`.
+  `disInt`, inside `fuInputs_of_gram`, from `ForwardUniqueDensReg.lean`;
+* `pairInt`, `restInt`, `remInt` — the three slots pairing a *bare pointwise* speed family —
+  from `fuPairInt`, `fuRestInt`, `fuRemInt`;
+* `energyCont` at every interior time, from `fuEnergyDeriv`.
 
 ## What is NOT discharged here
 
-`bounds` (the six slab-uniform pointwise estimates), `energyCont`, and the three integrability
-members `pairInt`, `restInt`, `remInt` that pair a bare pointwise family.  They are named,
-with their frontier, in `fuInputs_of_gram`'s hypothesis list and in `ForwardUniqueWiring.md`.
+`bounds` (the six slab-uniform pointwise estimates), and `energyCont` at the **single** closed
+initial time `a`.  They are named, with their frontier, in `fuInputs_of_gram`'s hypothesis list
+and in `ForwardUniqueWiring.md`.
 -/
 
 noncomputable section
@@ -465,27 +468,665 @@ theorem fuSdec (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {h
     (fun _ _ y i j k l => fuLapRm_real (I := I) g₂ _ y i j k l)
     t ⟨ht0, ht.2⟩ x
 
+/-! ## The three bare-pointwise integrability slots
+
+`pairInt`, `restInt` and `remInt` pair a **bare pointwise** family (`rmSpeed … fuSvec`,
+`connSpeed … fuAvec`, `fuRem`), so `ForwardUniqueDensReg.lean`'s smooth-by-type argument does not
+reach them.  They are nevertheless continuous in `x`, and the route never touches the
+per-point-centred frame construction inside the carriers:
+
+* an invariant speed enters a rate integrand only through the combination
+  `movingReact0S + 2⟨Ṫ, T⟩`, which `normSq0S_moving_deriv` identifies as the time derivative of
+  one of the three energy thirds — a **scalar** already known to be jointly `C∞`
+  (`metricDiffSq_jointContMDiffOn`, `connDiffSq_jointContMDiffOn`, `rmDiffSq_jointContMDiffOn`);
+* the one leftover reaction `movingReact0S (g₁ t) x 4 Ric₁ S₀₄` is the same derivative with the
+  carrier **frozen** at time `t`, hence again the time partial of a jointly `C∞` scalar
+  (`fuFrozenJoint`);
+* `tderivCont` turns "jointly `C∞` on `J ×ˢ univ`" into "the time partial is continuous in `x`".
+
+Compactness of `M` then closes each slot through `integrable_of_continuous`. -/
+
+section SpeedContinuity
+
+/-- The chart-Gram package of black box (B), restricted to the open window. -/
+private theorem fuGramIoo (g : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ i j =>
+  (hjoint x₀ i j).mono (Set.prod_mono_left Ioo_subset_Ico_self)
+
+/-- **The time partial of a jointly `C∞` scalar is continuous in space.**
+
+For `J ⊆ ℝ` open, `t ∈ J` and `F` jointly `C∞` on `J ×ˢ univ`, the map
+`x ↦ ∂ᵣF(r, x)|_{r=t}` is continuous.  Read through the chart at `x₀`, `F` becomes a `C∞`
+function on an open subset of `ℝ × E` whose `fderiv` is continuous
+(`ContDiffOn.continuousOn_fderiv_of_isOpen`); the time partial is that differential applied to
+`(1, 0)`. -/
+private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈ J)
+    (F : Real → M → Real)
+    (hF : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun p : Real × M => F p.1 p.2) (J ×ˢ (univ : Set M))) :
+    Continuous (fun x : M => deriv (fun r : Real => F r x) t) := by
+  refine continuous_iff_continuousAt.mpr fun x₀ => ?_
+  set U : Set E := interior (extChartAt I x₀).target with hUdef
+  have hUopen : IsOpen U := isOpen_interior
+  have hy₀ : (extChartAt I x₀) x₀ ∈ U :=
+    mem_interior_iff_mem_nhds.2 (extChartAt_target_mem_nhds (I := I) x₀)
+  have hprod : IsOpen (J ×ˢ U) := hJ.prod hUopen
+  -- transport the joint smoothness to the model space
+  have hsymm : ContMDiffOn 𝓘(Real, E) I ∞ (extChartAt I x₀).symm (extChartAt I x₀).target :=
+    contMDiffOn_extChartAt_symm (I := I) x₀
+  have hfst : ContMDiffOn 𝓘(Real, Real × E) 𝓘(Real, Real) ∞
+      (fun p : Real × E => p.1) (J ×ˢ U) :=
+    (contMDiff_iff_contDiff.mpr contDiff_fst).contMDiffOn
+  have hsnd : ContMDiffOn 𝓘(Real, Real × E) 𝓘(Real, E) ∞
+      (fun p : Real × E => p.2) (J ×ˢ U) :=
+    (contMDiff_iff_contDiff.mpr contDiff_snd).contMDiffOn
+  have hmaps : Set.MapsTo (fun p : Real × E => p.2) (J ×ˢ U) (extChartAt I x₀).target :=
+    fun p hp => interior_subset hp.2
+  have hσ : ContMDiffOn 𝓘(Real, Real × E) (𝓘(Real, Real).prod I) ∞
+      (fun p : Real × E => (p.1, (extChartAt I x₀).symm p.2)) (J ×ˢ U) :=
+    hfst.prodMk (hsymm.comp hsnd hmaps)
+  have hGm : ContMDiffOn 𝓘(Real, Real × E) 𝓘(Real, Real) ∞
+      (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (J ×ˢ U) := by
+    refine (hF.comp hσ fun p hp => ⟨hp.1, mem_univ _⟩).congr ?_
+    intro p _
+    rfl
+  have hGd : ContDiffOn Real ∞ (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2))
+      (J ×ˢ U) := hGm.contDiffOn
+  have hone : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by simp
+  have hne : (∞ : WithTop ℕ∞) ≠ 0 := by simp
+  have hfdCont : ContinuousOn
+      (fderiv Real fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (J ×ˢ U) :=
+    hGd.continuousOn_fderiv_of_isOpen hprod hone
+  -- the time partial of the transported function is that differential at `(1, 0)`
+  have hslice : ∀ y ∈ U, HasDerivAt
+      (fun r : Real => F r ((extChartAt I x₀).symm y))
+      ((fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (t, y))
+        ((1 : Real), (0 : E))) t := by
+    intro y hy
+    have hdiff : HasFDerivAt (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2))
+        (fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (t, y)) (t, y) :=
+      ((hGd.differentiableOn hne).differentiableAt
+        (hprod.mem_nhds ⟨ht, hy⟩)).hasFDerivAt
+    have hline : HasDerivAt (fun r : Real => ((r, y) : Real × E)) ((1 : Real), (0 : E)) t :=
+      (hasDerivAt_id t).prodMk (hasDerivAt_const t y)
+    simpa [Function.comp_def] using hdiff.comp_hasDerivAt t hline
+  -- near `x₀` the two readings agree
+  have heq : (fun x : M => deriv (fun r : Real => F r x) t) =ᶠ[nhds x₀]
+      fun x : M =>
+        (fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2))
+          (t, (extChartAt I x₀) x)) ((1 : Real), (0 : E)) := by
+    have hcontφ : ContinuousAt (extChartAt I x₀) x₀ := continuousAt_extChartAt (I := I) x₀
+    filter_upwards [extChartAt_source_mem_nhds (I := I) x₀,
+      hcontφ.preimage_mem_nhds (hUopen.mem_nhds hy₀)] with x hx1 hx2
+    have hinv : (extChartAt I x₀).symm ((extChartAt I x₀) x) = x := (extChartAt I x₀).left_inv hx1
+    have hrw : (fun r : Real => F r x) =
+        fun r : Real => F r ((extChartAt I x₀).symm ((extChartAt I x₀) x)) := by
+      rw [hinv]
+    rw [hrw]
+    exact (hslice _ hx2).deriv
+  refine ContinuousAt.congr ?_ heq.symm
+  have hmap : ContinuousAt (fun x : M => ((t, (extChartAt I x₀) x) : Real × E)) x₀ :=
+    continuousAt_const.prodMk (continuousAt_extChartAt (I := I) x₀)
+  exact ((hfdCont.continuousAt (hprod.mem_nhds ⟨ht, hy₀⟩)).comp hmap).clm_apply continuousAt_const
+
+/-- **`movingReact0S` is a genuine time derivative: the moving fibre norm of a frozen carrier.**
+Taking the tensor family constant in `normSq0S_moving_deriv` kills the pairing term, so the
+reaction is the derivative of `r ↦ |W|²_{g r}` — a basis-free characterisation that makes its
+spatial continuity a corollary of joint smoothness. -/
+private theorem fuReactDeriv {s : ℕ} {x : M} {t : Real}
+    (g : Real → SmoothRiemannianMetric I M)
+    (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (hg : ∀ X Y : TangentSpace I x,
+      HasDerivAt (fun r : Real => (g r).inner x X Y)
+        ((-2 : Real) * Q (fun a : Fin 2 => if a = 0 then X else Y)) t) :
+    HasDerivAt (fun r : Real => normSq0S (I := I) (g r) x s W)
+      (movingReact0S (I := I) (g t) x s Q W) t := by
+  have hT : ∀ v : Fin s → TangentSpace I x,
+      HasDerivAt (fun _ : Real => W v)
+        ((0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) v) t := by
+    intro v
+    rw [Tensor0SSpace.zero_apply (I := I) s x v]
+    exact hasDerivAt_const t (W v)
+  have h := normSq0S_moving_deriv (I := I) g Q (fun _ => W) 0 hg hT
+  have hz : inner0S (I := I) (g t) x s 0 W = 0 := by
+    simpa using inner0S_smul_left (I := I) (g t) x s (0 : Real) W W
+  rw [hz, mul_zero, add_zero] at h
+  exact h
+
+/-- **The frozen-carrier moving norm is jointly `C∞`.**  The brick `normSq0S_jointContMDiffOn`
+with the tensor family constant in time: its chart-component input is `rmChartJoint` at the two
+*constant* metric families, exactly the trick that makes `dens_continuous` unconditional. -/
+private theorem fuFrozenJoint (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (t₀ : Real)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun p : Real × M => normSq0S (I := I) (g₁ p.1) p.2 4
+        (rmDiffLowAt (I := I) (g₁ t₀) (g₂ t₀) p.2))
+      (Ioo a b ×ˢ (univ : Set M)) := by
+  refine normSq0S_jointContMDiffOn (I := I) g₁ isOpen_Ioo
+    (fun _ x => rmDiffLowAt (I := I) (g₁ t₀) (g₂ t₀) x) hgram₁ ?_
+  intro x₀ K t _
+  have hconst : ∀ (g : SmoothRiemannianMetric I M) (y₀ : M)
+      (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) g y₀ p.2 i j)
+        (Ioo (t - 1) (t + 1) ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) := by
+    intro g y₀ i j
+    have hsnd : ContMDiffOn (𝓘(Real, Real).prod I) I ∞ (fun p : Real × M => p.2)
+        (Ioo (t - 1) (t + 1) ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) :=
+      contMDiffOn_snd
+    exact (chartGramMatrix_entry_contMDiffOn (I := I) g y₀ i j).comp hsnd fun p hp => hp.2
+  exact rmChartJoint (I := I) (fun _ => g₁ t₀) (fun _ => g₂ t₀) isOpen_Ioo x₀
+    (fun i j => hconst (g₁ t₀) x₀ i j) (fun i j => hconst (g₂ t₀) x₀ i j) K
+    (⟨by linarith, by linarith⟩ : t ∈ Ioo (t - 1) (t + 1))
+
+/-- **The leftover reaction of the curvature third is continuous in space.** -/
+private theorem fuReactCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) :
+    Continuous (fun x : M => movingReact0S (I := I) (g₁ t) x 4
+      (metricRicciAt (I := I) (g₁ t) x) (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)) := by
+  have hcont := tderivCont (I := I) (J := Ioo a b) isOpen_Ioo ht
+    (fun r x => normSq0S (I := I) (g₁ r) x 4 (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x))
+    (fuFrozenJoint (I := I) g₁ g₂ t hgram₁)
+  refine hcont.congr fun x => ?_
+  exact (fuReactDeriv (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+    (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)).deriv
+
+/-- The metric third's time derivative, in the moving-norm form. -/
+private theorem fuMetricSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) (x : M) :
+    deriv (fun r : Real => metricDiffSq (I := I) (g₁ r) (g₂ r) x) t =
+      movingReact0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)
+          (metricDiffAt (I := I) (g₁ t) (g₂ t) x) +
+        2 * inner0S (I := I) (g₁ t) x 2 (metricDiffDot (I := I) g₁ g₂ t x)
+          (metricDiffAt (I := I) (g₁ t) (g₂ t) x) := by
+  have hbase := normSq0S_moving_deriv (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+    (fun r => metricDiffAt (I := I) (g₁ r) (g₂ r) x) (metricDiffDot (I := I) g₁ g₂ t x)
+    (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+    (metricDiff_hasDerivAt (I := I) g₁ g₂ (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+      (pde_hasDerivAt (I := I) g₂ hpde₂ ht x))
+  simpa only [metricDiffSq_def] using hbase.deriv
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- The connection third's time derivative, in the moving-norm form, at the `Avec` carrier. -/
+private theorem fuConnSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) (x : M) :
+    deriv (fun r : Real => connDiffSq (I := I) (g₁ r) (g₂ r) x) t =
+      movingReact0S (I := I) (g₁ t) x 3 (metricRicciAt (I := I) (g₁ t) x)
+          (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) +
+        2 * inner0S (I := I) (g₁ t) x 3
+          (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x)
+          (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) := by
+  have hbase := normSq0S_moving_deriv (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+    (fun r => connDiffLowAt (I := I) (g₁ r) (g₂ r) x)
+    (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x)
+    (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+    (connSpeed_hasDerivAt (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)
+      (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+      (fuGamma (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂ t ht x))
+  simpa only [connDiffSq_def] using hbase.deriv
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- The curvature third's time derivative, in the moving-norm form, at the `Svec` carrier.
+The pairing term is exactly the bundle's `pairInt` integrand. -/
+private theorem fuRmSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
+    (hS₁ : IsSolutionOn (I := I)
+      (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g₁))
+    (hS₂ : IsSolutionOn (I := I)
+      (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g₂))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) (x : M) :
+    deriv (fun r : Real => rmDiffSq (I := I) (g₁ r) (g₂ r) x) t =
+      movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+          (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) +
+        2 * inner0S (I := I) (g₁ t) x 4
+          (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
+          (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) := by
+  have hbase := normSq0S_moving_deriv (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+    (fun r => rmDiffLowAt (I := I) (g₁ r) (g₂ r) x)
+    (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
+    (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+    (rmSpeed_hasDerivAt (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂)
+      (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+      (fuRm (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ t ht x))
+  simpa only [rmDiffSq_def] using hbase.deriv
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **The bundle's `pairInt` member, from (B)'s own fields.**
+
+`2⟨Ṡ, S₀₄⟩ = ∂ₜ|S₀₄|² − movingReact0S`, and both terms on the right are time partials of jointly
+`C∞` scalars, hence continuous in `x`; on a compact manifold a continuous scalar is integrable
+against the moving Riemannian volume. -/
+theorem fuPairInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t) :
+    ∀ t ∈ Ioo a b, Integrable
+      (fun x => 2 * inner0S (I := I) (g₁ t) x 4
+        (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
+        (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x))
+      (riemannianMeasureFamily (I := I) (M := M) g₁ t) := by
+  intro t ht
+  have hgram₁ := fuGramIoo (I := I) g₁ hjoint₁
+  have hS₁ := fuIsSol (I := I) g₁ hab hjoint₁ hpde₁
+  have hS₂ := fuIsSol (I := I) g₂ hab hjoint₂ hpde₂
+  refine integrable_of_continuous (I := I) g₁ t ?_
+  have hfun : (fun x : M => 2 * inner0S (I := I) (g₁ t) x 4
+        (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
+        (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)) =
+      fun x : M => deriv (fun r : Real => rmDiffSq (I := I) (g₁ r) (g₂ r) x) t -
+        movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+          (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) := by
+    funext x
+    rw [fuRmSqD (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ ht x]
+    ring
+  rw [hfun]
+  exact (tderivCont (I := I) (J := Ioo a b) isOpen_Ioo ht
+      (fun r x => rmDiffSq (I := I) (g₁ r) (g₂ r) x)
+      (rmDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ (fuGramIoo (I := I) g₂ hjoint₂))).sub
+    (fuReactCont (I := I) g₁ g₂ hgram₁ hpde₁ ht)
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **The bundle's `remInt` member, from (B)'s own fields.**
+
+The `S`-equation `fuSdec` turns the remainder pairing into the `pairInt` integrand minus the two
+smooth-by-type pairings, so it inherits their continuity. -/
+theorem fuRemInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t) :
+    ∀ t ∈ Ioo a b, Integrable
+      (fun x => inner0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x)
+        (fuSfield (I := I) g₁ g₂ t x))
+      (riemannianMeasureFamily (I := I) (M := M) g₁ t) := by
+  intro t ht
+  have hgram₁ := fuGramIoo (I := I) g₁ hjoint₁
+  have hS₁ := fuIsSol (I := I) g₁ hab hjoint₁ hpde₁
+  have hS₂ := fuIsSol (I := I) g₂ hab hjoint₂ hpde₂
+  refine integrable_of_continuous (I := I) g₁ t ?_
+  have hfun : (fun x : M => inner0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x)
+        (fuSfield (I := I) g₁ g₂ t x)) =
+      fun x : M =>
+        (1 / 2 : Real) * (deriv (fun r : Real => rmDiffSq (I := I) (g₁ r) (g₂ r) x) t -
+            movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+              (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)) -
+          inner0S (I := I) (g₁ t) x 4
+            (roughLap0SField (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x)
+            (fuSfield (I := I) g₁ g₂ t x) -
+          inner0S (I := I) (g₁ t) x 4
+            (covDiv0SField (I := I) (g₁ t) (fuUflux (I := I) g₁ g₂ t) x)
+            (fuSfield (I := I) g₁ g₂ t x) := by
+    funext x
+    have hcar : fuSfield (I := I) g₁ g₂ t x = rmDiffLowAt (I := I) (g₁ t) (g₂ t) x :=
+      fuSfield_apply (I := I) g₁ g₂ t x
+    have hsplit : inner0S (I := I) (g₁ t) x 4
+          (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
+          (fuSfield (I := I) g₁ g₂ t x) =
+        inner0S (I := I) (g₁ t) x 4
+            (roughLap0SField (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x)
+            (fuSfield (I := I) g₁ g₂ t x) +
+          inner0S (I := I) (g₁ t) x 4
+            (covDiv0SField (I := I) (g₁ t) (fuUflux (I := I) g₁ g₂ t) x)
+            (fuSfield (I := I) g₁ g₂ t x) +
+          inner0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x)
+            (fuSfield (I := I) g₁ g₂ t x) := by
+      rw [fuSdec (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ t ht x, inner0S_add_left, inner0S_add_left]
+    have hpair := fuRmSqD (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ ht x
+    rw [hcar] at hsplit
+    rw [hcar]
+    rw [hpair]
+    linarith [hsplit]
+  rw [hfun]
+  refine (((tderivCont (I := I) (J := Ioo a b) isOpen_Ioo ht
+      (fun r x => rmDiffSq (I := I) (g₁ r) (g₂ r) x)
+      (rmDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ (fuGramIoo (I := I) g₂ hjoint₂))).sub
+        (fuReactCont (I := I) g₁ g₂ hgram₁ hpde₁ ht)).const_mul _ |>.sub ?_).sub ?_
+  · exact inner0S_continuous (I := I) (g₁ t)
+      (roughLap0SField (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t))
+      (fuSfield (I := I) g₁ g₂ t)
+  · exact inner0S_continuous (I := I) (g₁ t)
+      (covDiv0SField (I := I) (g₁ t) (fuUflux (I := I) g₁ g₂ t))
+      (fuSfield (I := I) g₁ g₂ t)
+
+/-- **The moving-volume trace is the intrinsic metric trace of the flow speed.**  Under
+`∂ₜg = −2Q` the chart-defined `traceTimeDerivMetric` equals `−2 tr_{g t} Q`, a basis-free
+quantity.
+
+This duplicates `IntrinsicSpectral.traceTime_rd`
+(`Analysis/Spectral/Intrinsic/DeTurck/MovingEdgeEnergy.lean`), which sits in a *higher* layer than
+`Evolution/`, so importing it here would invert the layering.  **Relocation TODO**: both copies
+belong next to `traceTimeDerivMetric` in `Analysis/Integration/Measure/Family.lean`. -/
+private theorem fuTraceRd {x : M} {t : Real}
+    (g : Real → SmoothRiemannianMetric I M)
+    (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hg : ∀ X Y : TangentSpace I x,
+      HasDerivAt (fun r : Real => (g r).inner x X Y)
+        ((-2 : Real) * Q (fun a : Fin 2 => if a = 0 then X else Y)) t) :
+    traceTimeDerivMetric (I := I) g t x =
+      (-2 : Real) * metricTracePair0SAt (I := I) (g t) Q := by
+  classical
+  have htrace : traceTimeDerivMetric (I := I) g t x =
+      Matrix.trace ((chartGramMatrix (I := I) (g t) x x)⁻¹ *
+        (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+          deriv (fun r : Real => chartGramMatrix (I := I) (g r) x x i j) t)) :=
+    traceTimeDerivMetric_eq (I := I) g t x
+  have hdG : (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+        deriv (fun r : Real => chartGramMatrix (I := I) (g r) x x i j) t) =
+      Matrix.of fun i j : Fin (Module.finrank Real E) =>
+        (-2 : Real) * Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+          else chartBasisVecFiber (I := I) x j x) := by
+    ext i j
+    simpa only [Matrix.of_apply, chartGramMatrix_apply] using
+      (hg (chartBasisVecFiber (I := I) x i x) (chartBasisVecFiber (I := I) x j x)).deriv
+  have hInvSymm : ∀ i j : Fin (Module.finrank Real E),
+      ((chartGramMatrix (I := I) (g t) x x)⁻¹) j i =
+        ((chartGramMatrix (I := I) (g t) x x)⁻¹) i j := by
+    intro i j
+    have hHerm := (chartGramMatrix_isHermitian (I := I) (g t) x x).inv
+    simpa only [star_trivial] using hHerm.apply i j
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hscalar : metricTracePair0SAt (I := I) (g t) Q =
+      ∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),
+        ((chartGramMatrix (I := I) (g t) x x)⁻¹) i j *
+          Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+            else chartBasisVecFiber (I := I) x j x) := by
+    rw [metricTracePair0SAt_eq_sum_basis (I := I) (g t) (chartBasisFamily (I := I) x hx) _
+      (chartInvGram_inverse (I := I) (g t) x hx) Q]
+    simp only [chartBasisFamily_apply,
+      DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix]
+    rfl
+  rw [htrace, hdG]
+  calc
+    Matrix.trace ((chartGramMatrix (I := I) (g t) x x)⁻¹ *
+        (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+          (-2 : Real) * Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+            else chartBasisVecFiber (I := I) x j x))) =
+        Matrix.trace ((Matrix.of fun i j : Fin (Module.finrank Real E) =>
+            (-2 : Real) * Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+              else chartBasisVecFiber (I := I) x j x)) *
+          (chartGramMatrix (I := I) (g t) x x)⁻¹) := by
+      rw [Matrix.trace_mul_comm]
+    _ = ∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),
+          ((-2 : Real) * Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+            else chartBasisVecFiber (I := I) x j x)) *
+            ((chartGramMatrix (I := I) (g t) x x)⁻¹) j i := by
+      simp [Matrix.trace, Matrix.mul_apply]
+    _ = (-2 : Real) * (∑ i : Fin (Module.finrank Real E),
+          ∑ j : Fin (Module.finrank Real E),
+            ((chartGramMatrix (I := I) (g t) x x)⁻¹) i j *
+              Q (fun a : Fin 2 => if a = 0 then chartBasisVecFiber (I := I) x i x
+                else chartBasisVecFiber (I := I) x j x)) := by
+      simp_rw [hInvSymm]
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      ring
+    _ = (-2 : Real) * metricTracePair0SAt (I := I) (g t) Q := by rw [hscalar]
+
+/-- **The moving-volume trace is continuous in space.**  Along the flow it is `−2` times the
+fibre pairing of two smooth `(0,2)` fields (the metric and the Ricci section), so
+`inner0S_continuous` applies. -/
+private theorem fuTraceCont (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) :
+    Continuous (fun x : M => traceTimeDerivMetric (I := I) g₁ t x) := by
+  have hgt : ∀ y : M,
+      metricTensor0S (I := I) (g₁ t) y = metricTensorField (I := I) (g₁ t) y := fun y =>
+    ContinuousMultilinearMap.ext fun v =>
+      (metricTensor0S_apply (I := I) (g₁ t) y v).trans
+        (metricTensorField_apply (I := I) (g₁ t) y v).symm
+  have hric : ∀ y : M, metricRicciAt (I := I) (g₁ t) y =
+      CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
+        (metricCov_smooth (I := I) (g₁ t)) y := fun y =>
+    (CovariantDerivative.ricciSection_apply (I := I) (metricCov (I := I) (g₁ t))
+      (metricCov_smooth (I := I) (g₁ t)) y).symm
+  have hfun : (fun x : M => traceTimeDerivMetric (I := I) g₁ t x) =
+      fun x : M => (-2 : Real) * inner0S (I := I) (g₁ t) x 2
+        (metricTensorField (I := I) (g₁ t) x)
+        (CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
+          (metricCov_smooth (I := I) (g₁ t)) x) := by
+    funext x
+    rw [fuTraceRd (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+      (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)]
+    have hval : metricTracePair0SAt (I := I) (g₁ t) (metricRicciAt (I := I) (g₁ t) x) =
+        inner0S (I := I) (g₁ t) x 2 (metricTensorField (I := I) (g₁ t) x)
+          (CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
+            (metricCov_smooth (I := I) (g₁ t)) x) := by
+      rw [← hgt x, ← hric x]
+      rfl
+    rw [hval]
+  rw [hfun]
+  exact continuous_const.mul (inner0S_continuous (I := I) (g₁ t)
+    (metricTensorField (I := I) (g₁ t))
+    (CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
+      (metricCov_smooth (I := I) (g₁ t))))
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **The bundle's `restInt` member, from (B)'s own fields.**
+
+`rateRest` groups the metric and connection thirds as `movingReact0S + 2⟨Ṫ, T⟩`, i.e. as the time
+derivatives of `|h₀₂|²` and `|A₀₃|²`; what is left is the frozen-carrier reaction of the curvature
+third and the moving-volume term.  All four summands are continuous in `x`. -/
+theorem fuRestInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t) :
+    ∀ t ∈ Ioo a b, Integrable
+      (fun x => rateRest (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)) t x)
+      (riemannianMeasureFamily (I := I) (M := M) g₁ t) := by
+  intro t ht
+  have hgram₁ := fuGramIoo (I := I) g₁ hjoint₁
+  have hgram₂ := fuGramIoo (I := I) g₂ hjoint₂
+  refine integrable_of_continuous (I := I) g₁ t ?_
+  have hfun : (fun x : M => rateRest (I := I) g₁ g₂
+        (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)) t x) =
+      fun x : M => deriv (fun r : Real => metricDiffSq (I := I) (g₁ r) (g₂ r) x) t +
+          deriv (fun r : Real => connDiffSq (I := I) (g₁ r) (g₂ r) x) t +
+          movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+            (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) +
+        (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x *
+          forwardUniqueDensity (I := I) g₁ g₂ t x := by
+    funext x
+    rw [fuMetricSqD (I := I) g₁ g₂ hpde₁ hpde₂ ht x,
+      fuConnSqD (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂ ht x]
+    simp only [rateRest]
+  rw [hfun]
+  refine (((tderivCont (I := I) (J := Ioo a b) isOpen_Ioo ht
+      (fun r x => metricDiffSq (I := I) (g₁ r) (g₂ r) x)
+      (metricDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂)).add
+    (tderivCont (I := I) (J := Ioo a b) isOpen_Ioo ht
+      (fun r x => connDiffSq (I := I) (g₁ r) (g₂ r) x)
+      (connDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂))).add
+    (fuReactCont (I := I) g₁ g₂ hgram₁ hpde₁ ht)).add ?_
+  exact (continuous_const.mul (fuTraceCont (I := I) g₁ hpde₁ ht)).mul
+    (dens_continuous (I := I) g₁ g₂ t)
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **The Kotschwar energy is differentiable at every interior time, from (B)'s own fields.**
+
+`forwardUniqueEnergy_hasDerivAt` (K3) is stated with purely window-local hypotheses — an open
+`U`, the chart-Gram package and the joint density smoothness on `U`, and the two flow equations
+and two carrier speeds at the single time `t` — every one of which the wiring already supplies at
+the constructed carriers. -/
+theorem fuEnergyDeriv (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    {t : Real} (ht : t ∈ Ioo a b) :
+    HasDerivAt (forwardUniqueEnergy (I := I) (M := M) g₁ g₂)
+      (forwardUniqueRate (I := I) (M := M) g₁ g₂
+        (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
+        (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂)) t) t := by
+  have hS₁ := fuIsSol (I := I) g₁ hab hjoint₁ hpde₁
+  have hS₂ := fuIsSol (I := I) g₂ hab hjoint₂ hpde₂
+  exact forwardUniqueEnergy_hasDerivAt (I := I) g₁ g₂
+    (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
+    (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂)) isOpen_Ioo ht
+    (fuGramIoo (I := I) g₁ hjoint₁)
+    (dens_jointContMDiffOn (I := I) g₁ g₂ (fuGramIoo (I := I) g₁ hjoint₁)
+      (fuGramIoo (I := I) g₂ hjoint₂))
+    (fun x => pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+    (fun x => pde_hasDerivAt (I := I) g₂ hpde₂ ht x)
+    (fun x => connSpeed_hasDerivAt (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)
+      (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+      (fuGamma (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂ t ht x))
+    (fun x => rmSpeed_hasDerivAt (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂)
+      (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
+      (fuRm (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ t ht x))
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **The bundle's `energyCont` member, reduced to the single closed initial edge.**
+
+The energy is differentiable — hence continuous — at every *interior* time (`fuEnergyDeriv`), so
+the only content left in `energyCont` is the one-point statement at `t = a`.  That edge is a
+genuine analytic gap: `dens_jointContMDiffOn` lives on the open window because the joint
+Christoffel/Riemann tower (`gen_joint_christoffel`, `gen_joint_riemann`) is stated with
+`ContDiffAt`, so nothing controls the density at `t = a`. -/
+theorem fuEnergyCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hjoint₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hpde₂ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    (hedge : ContinuousWithinAt (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b) a) :
+    ContinuousOn (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b) := by
+  intro t ht
+  rcases eq_or_lt_of_le ht.1 with hEq | hlt
+  · rw [← hEq]
+    exact hedge
+  · exact (fuEnergyDeriv (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
+      (⟨hlt, ht.2⟩ : t ∈ Ioo a b)).continuousAt.continuousWithinAt
+
+end SpeedContinuity
+
 /-! ## The residual bundle, assembled
 
 `fuInputs_of_gram` builds `ForwardUniqueInputs` at the constructed carriers from black box
-(B)'s own fields plus **five** named residual hypotheses in three families.  Everything else —
-the three evolution members, the realization member, and the seven density-regularity members
-— is discharged here. -/
+(B)'s own fields plus **two** named residual hypotheses.  Everything else — the three evolution
+members, the realization member, the seven density-regularity members, and the three
+bare-pointwise integrability members — is discharged here. -/
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
 /-- **The standing bundle of the (B) endgame, at the constructed carriers.**
 
-From (B)'s own fields (`hjointᵢ`, `hpdeᵢ`) together with four residual inputs:
+From (B)'s own fields (`hjointᵢ`, `hpdeᵢ`) together with two residual inputs:
 
 * `hbounds` — K4's six slab-uniform pointwise estimates, per compact subslab;
-* `henergy` — continuity of the Kotschwar energy up to the closed initial edge;
-* `hpair`, `hrest`, `hrem` — the three integrability slots whose integrand pairs a bare
-  pointwise speed family.
+* `hedge` — continuity of the Kotschwar energy at the *single* closed initial time `a`.
 
 Nothing else remains: `gamma`/`rm`/`sdec` come from the tail Uhlenbeck and Christoffel
-producers, `car` is by construction, and the density-regularity members come from
-`ForwardUniqueDensReg.lean`. -/
+producers, `car` is by construction, the density-regularity members come from
+`ForwardUniqueDensReg.lean`, the three bare-pointwise integrability members come from
+`fuPairInt`/`fuRestInt`/`fuRemInt`, and the interior half of `energyCont` comes from
+`fuEnergyDeriv`. -/
 theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -505,59 +1146,39 @@ theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b 
       ForwardUniqueSlab (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
         (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂)
         a c C_A C_R C_Ric C_V C_U C_rem)
-    (henergy : ContinuousOn (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b))
-    (hpair : ∀ t ∈ Ioo a b, Integrable
-      (fun x => 2 * inner0S (I := I) (g₁ t) x 4
-        (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
-        (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x))
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-    (hrest : ∀ t ∈ Ioo a b, Integrable
-      (fun x => rateRest (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)) t x)
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-    (hrem : ∀ t ∈ Ioo a b, Integrable
-      (fun x => inner0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x)
-        (fuSfield (I := I) g₁ g₂ t x))
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t)) :
+    (hedge : ContinuousWithinAt (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b) a) :
     ForwardUniqueInputs (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) (fuSvec (I := I) g₁ g₂)
       (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂) a b := by
   have hS₁ := fuIsSol (I := I) g₁ hab hjoint₁ hpde₁
   have hS₂ := fuIsSol (I := I) g₂ hab hjoint₂ hpde₂
-  have hgramIoo₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
-        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ i j =>
-    (hjoint₁ x₀ i j).mono (Set.prod_mono_left Ioo_subset_Ico_self)
-  have hgramIoo₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
-        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ i j =>
-    (hjoint₂ x₀ i j).mono (Set.prod_mono_left Ioo_subset_Ico_self)
   exact
     { gamma := fuGamma (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
       rm := fuRm (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂
       car := fun _ _ x => fuSfield_apply (I := I) g₁ g₂ _ x
       sdec := fuSdec (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂
       bounds := hbounds
-      dens := dens_jointContMDiffOn (I := I) g₁ g₂ hgramIoo₁ hgramIoo₂
-      energyCont := henergy
+      dens := dens_jointContMDiffOn (I := I) g₁ g₂ (fuGramIoo (I := I) g₁ hjoint₁)
+        (fuGramIoo (I := I) g₂ hjoint₂)
+      energyCont := fuEnergyCont (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂ hedge
       densInt := fun t _ => (dcont_idens (I := I) g₁ g₂ t).2
       densCont := fun t _ => (dcont_idens (I := I) g₁ g₂ t).1
-      restInt := hrest
-      pairInt := hpair
+      restInt := fuRestInt (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
+      pairInt := fuPairInt (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
       lapInt := fun t _ => ilap_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t)
       divInt := fun t _ =>
         idiv_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t) (fuUflux (I := I) g₁ g₂ t)
-      remInt := hrem
+      remInt := fuRemInt (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
       nabInt := fun t _ =>
         inab_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t) (fuUflux (I := I) g₁ g₂ t)
       disInt := fun t _ => idis_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t) }
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **Forward uniqueness from black box (B)'s own fields, modulo six named residual inputs.**
+/-- **Forward uniqueness from black box (B)'s own fields, modulo two named residual inputs.**
 
 This is `ricci_flow_forward_unique`'s statement with exactly the residual list of
-`fuInputs_of_gram` added; instantiating it is the whole content of the endpoint. -/
+`fuInputs_of_gram` added: the slab-uniform pointwise bounds, and continuity of the Kotschwar
+energy at the single initial time.  Instantiating it is the whole content of the endpoint. -/
 theorem forward_unique_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -587,25 +1208,12 @@ theorem forward_unique_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M)
       ForwardUniqueSlab (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
         (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂)
         a c C_A C_R C_Ric C_V C_U C_rem)
-    (henergy : ContinuousOn (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b))
-    (hpair : ∀ t ∈ Ioo a b, Integrable
-      (fun x => 2 * inner0S (I := I) (g₁ t) x 4
-        (rmSpeed (I := I) g₁ g₂ (fuSvec (I := I) g₁ g₂) t x)
-        (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x))
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-    (hrest : ∀ t ∈ Ioo a b, Integrable
-      (fun x => rateRest (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂)) t x)
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-    (hrem : ∀ t ∈ Ioo a b, Integrable
-      (fun x => inner0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x)
-        (fuSfield (I := I) g₁ g₂ t x))
-      (riemannianMeasureFamily (I := I) (M := M) g₁ t)) :
+    (hedge : ContinuousWithinAt (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b) a) :
     ∀ t ∈ Ico a b, g₁ t = g₂ t :=
   forward_unique_of_inputs (I := I) g₁ g₂ hab (fuAvec (I := I) g₁ g₂) (fuSvec (I := I) g₁ g₂)
     (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂)
     h1smooth h1cont h2smooth h2cont h1pde h2pde h0
-    (fuInputs_of_gram (I := I) g₁ g₂ hab h1smooth h2smooth h1pde h2pde
-      hbounds henergy hpair hrest hrem)
+    (fuInputs_of_gram (I := I) g₁ g₂ hab h1smooth h2smooth h1pde h2pde hbounds hedge)
 
 end DifferentialGeometry.PDE.RicciFlow
 

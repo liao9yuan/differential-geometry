@@ -6,29 +6,38 @@ provenance ledger), `ForwardUniqueLifts.md`, `ForwardUniqueSdec.md`, `ForwardUni
 
 ## Status
 
-**Outcome (B).**  612 lines, 0 `sorry`, warning-free.  Focused check GREEN; targeted module
-build GREEN (9534 jobs); the consumer chain
-(`ExtendViaUniqueness` + `MaximalTime`) rebuilt GREEN (9975 jobs) with the endpoint's two
-`sorry`s unchanged.  Every public endpoint is 3-axiom clean
-(`[propext, Classical.choice, Quot.sound]`).
+**Second pass (2026-07-26): the three integrability slots and the interior half of `energyCont`
+are CLOSED.**  1220 lines, 0 `sorry`, warning-free.  Focused check GREEN; targeted module build
+GREEN (9534 jobs).  Every public endpoint is 3-axiom clean
+(`[propext, Classical.choice, Quot.sound]`), including the five new ones (`fuPairInt`,
+`fuRestInt`, `fuRemInt`, `fuEnergyDeriv`, `fuEnergyCont`).
+
+`forward_unique_of_gram`'s residual list went from **five** hypotheses to **two**:
+
+```
+forward_unique_of_gram : (B)'s hypotheses + hbounds + hedge → ∀ t ∈ Ico a b, g₁ t = g₂ t
+```
+
+where `hedge : ContinuousWithinAt (forwardUniqueEnergy g₁ g₂) (Ico a b) a` is a **one-point**
+statement (previously the whole-interval `henergy`).
 
 The endpoint `Evolution/ExtendViaUniqueness.lean:189` (`ricci_flow_forward_unique`; its
-`sorry` token sits at `:215`) is **untouched** — three residual gap families remain (below), so replacing the `sorry` would
-have meant smuggling them in as new hypotheses of the public black-box interface, which the
-statement is not allowed to carry.
+`sorry` token sits at `:215`) is still **untouched** — two residual gaps remain (below), so
+replacing the `sorry` would still mean smuggling them in as new hypotheses of the public
+black-box interface, which the statement is not allowed to carry.
 
 ## What this file does
 
 `forward_unique_of_inputs` (K6a, `ForwardUniqueAssembly.lean`) is (B)'s statement plus five
 data carriers and a 16-field `Prop` bundle.  This file **constructs the five carriers from
-(B)'s own fields** and discharges **12 of the 16** bundle members, leaving
+(B)'s own fields** and discharges **15 of the 16** bundle members outright; the sixteenth
+(`energyCont`) is reduced to its single closed-edge point.  What is left is
 
 ```
-forward_unique_of_gram : (B)'s hypotheses + hbounds + henergy + hpair + hrest + hrem
-                       → ∀ t ∈ Ico a b, g₁ t = g₂ t
+forward_unique_of_gram : (B)'s hypotheses + hbounds + hedge → ∀ t ∈ Ico a b, g₁ t = g₂ t
 ```
 
-so the endpoint is one `exact` away from whoever produces those five.
+so the endpoint is one `exact` away from whoever produces those two.
 
 ### Carriers (all built from the two metric families alone)
 
@@ -40,15 +49,18 @@ so the endpoint is one `exact` away from whoever produces those five.
 | `fuUflux` | `sdecUflux` at `fuTf g₁`, `fuTf g₂`, `fuSfield` |
 | `fuRem` | `sdecRemFam` at the same data |
 
-### Discharged bundle members (12 of 16)
+### Discharged bundle members (15 of 16, plus the interior of the 16th)
 
-`gamma` (`gamma_of_gram`), `rm` (`rm_of_uhlenbeck` + `rm04EvolFamTail`), `sdec`
+First pass: `gamma` (`gamma_of_gram`), `rm` (`rm_of_uhlenbeck` + `rm04EvolFamTail`), `sdec`
 (`sdec_of_uhlenbeck`), `car` (by construction), `dens` (`dens_jointContMDiffOn`), `densCont`
 and `densInt` (`dcont_idens`, unconditional), `lapInt`, `divInt`, `nabInt`, `disInt`
 (the four hypothesis-free `Integrable` slots of `ForwardUniqueDensReg.lean`) — plus
 `fuRmContAt`, which is not a bundle field but was the last standing input of `rm`/`sdec`.
 
-### Residual (3 families, 5 hypotheses)
+Second pass: `pairInt` (`fuPairInt`), `restInt` (`fuRestInt`), `remInt` (`fuRemInt`), and
+`energyCont` at every *interior* time (`fuEnergyDeriv`, assembled by `fuEnergyCont`).
+
+### Residual (2 hypotheses)
 
 1. **`hbounds`** — `∀ c ∈ Ioo a b, ∃ C…, ForwardUniqueSlab … a c …`, i.e. K4's six
    slab-uniform pointwise estimates (`fluxLe`, `remLe`, `reactLe`, `ricciLe`, `adotLe`,
@@ -62,17 +74,22 @@ and `densInt` (`dcont_idens`, unconditional), `lapInt`, `divInt`, `nabInt`, `dis
    `connDiffDot_normSq_le`, and compactness of `Icc a c` for `volLe`) but every one of them
    consumes *slab-uniform background norms* as named arguments, so a genuine
    compactness-of-`Icc a c × M` sup-bound layer is still missing.  **This is the dominant
-   remaining brick of the lane.**
-2. **`henergy`** — `ContinuousOn (forwardUniqueEnergy g₁ g₂) (Ico a b)`, i.e. continuity of
-   `t ↦ ∫ density dμ_{g₁ t}` **up to the closed initial edge**.  `dens_jointContMDiffOn`
-   lives on the *open* window and `dens_continuous` is fixed-time only, so this needs a
-   dominated-convergence argument on the compact subslab plus a closed-edge input.  Medium.
-3. **`hpair` / `hrest` / `hrem`** — the three `Integrable` slots whose integrand pairs a
-   **bare pointwise family** (`rmSpeed … fuSvec`, `connSpeed … fuAvec`, `fuRem`).  The four
-   sibling slots are free because their carriers are `Tensor0SField`s (smooth by type).
-   These three need *spatial* continuity of a per-point-centred frame construction: the
-   objects are frame-independent tensors, but that tensoriality is not yet a Lean fact.
-   `ForwardUniqueDensReg.md` already classified them as "not density-regularity questions".
+   remaining brick of the lane.**  (`Evolution/ForwardUniqueSup.lean` is the sibling lane
+   attacking exactly this.)
+2. **`hedge`** — `ContinuousWithinAt (forwardUniqueEnergy g₁ g₂) (Ico a b) a`, i.e. continuity
+   of the energy at the **single** initial time.  Precise obstruction: the whole joint
+   `(t, x)`-regularity tower bottoms out at `gen_joint_christoffel` / `gen_joint_riemann`
+   (`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValue.lean`), which conclude
+   `ContDiffAt` on an **open** time window; hence `dens_jointContMDiffOn` lives on `Ioo a b`
+   and nothing controls the density as `t ↓ a`.  Black box (B) *does* supply
+   `ContMDiffOn … ∞ (chartGram) (Ico a b ×ˢ baseSet)` — one-sided `C∞` at the edge — so the
+   fix is a `ContDiffWithinAt`-on-`Ici a` variant of that generic tower, which lives in a
+   foreign file.  Note also that `E(a) = 0` under (B)'s `h0`, so the edge statement is really
+   "`E(t) → 0` as `t ↓ a`", which needs quantitative control and is *not* free from continuity
+   alone.
+
+Both residuals sit in files this lane does not own, so they are correctly left as named
+hypotheses rather than smuggled into the endpoint.
 
 ## The one piece of new mathematics: `fuRmContAt`
 
@@ -92,6 +109,53 @@ standing hypothesis.  **It is not one.**  On a positive-time tail:
   nonzero determinant closes it.
 
 So `rm` and `sdec` are now discharged from (B)'s own fields with **no auxiliary input at all**.
+
+## Second pass: how the three bare-pointwise slots fell (the key idea)
+
+`pairInt`, `restInt`, `remInt` were recorded as needing "*spatial* continuity of a per-point-centred
+frame construction".  **That framing was wrong** — the frame-pinned carriers `fuSvec` / `fuAvec` /
+`fuRem` never have to be touched.  Observe:
+
+* `normSq0S_moving_deriv` (`ForwardUniqueEnergy.lean`) states
+  `∂ₜ|T|²_{g₁} = movingReact0S (g₁ t) x s Ric₁ (T t) + 2⟨Ṫ, T⟩`, and **every** occurrence of an
+  invariant speed inside `rateRest` / the pair integrand is in exactly that combination.  So each
+  such group *is* the time partial of one of the three energy thirds — scalars whose joint
+  `C∞`-ness `ForwardUniqueDensReg.lean` already proves.
+* Specialising the same lemma to a **constant** tensor family (`Tdot := 0`) shows
+  `movingReact0S (g₁ t) x s Q W = ∂ᵣ|W|²_{g₁ r}|_{r=t}` — a basis-free characterisation of the
+  frame-pinned `movingReact0S`.  Its joint smoothness comes from the brick
+  `normSq0S_jointContMDiffOn` with the *moving* metric `g₁` and the *frozen* carrier, whose chart
+  components are supplied by `rmChartJoint` at two constant metric families (the `dens_continuous`
+  trick).  This is `fuFrozenJoint`.
+
+The only genuinely new analysis is `tderivCont`:
+
+> `F` jointly `C∞` on `J ×ˢ univ` (`J` open), `t ∈ J` ⟹ `x ↦ ∂ᵣF(r,x)|_{r=t}` is continuous.
+
+proved by transporting `F` through `extChartAt x₀` to `ℝ × E` (the `hσ` construction copied from
+`genGram_of_joint`), applying `ContDiffOn.continuousOn_fderiv_of_isOpen`, and reading the time
+partial as `fderiv … (1, 0)`.
+
+The ledger then is purely algebraic:
+
+| slot | identity used |
+|---|---|
+| `pairInt` | `2⟨Ṡ, S₀₄⟩ = ∂ₜ|S₀₄|² − movingReact₄` (`fuRmSqD`, `fuReactCont`) |
+| `remInt` | `fuSdec` + `inner0S_add_left` twice: `⟨rem, S⟩ = ⟨Ṡ, S⟩ − ⟨Δ S, S⟩ − ⟨div U, S⟩`, the last two smooth by type |
+| `restInt` | `rateRest = ∂ₜ|h₀₂|² + ∂ₜ|A₀₃|² + movingReact₄ + ½·tr_g(ġ)·ρ` |
+
+For the volume term `restInt` needs spatial continuity of `traceTimeDerivMetric g₁ t ·`, which is
+frame-pinned in the same way (the chart at `x` evaluated at `x`).  It is dissolved by the same
+kind of invariance statement: under `∂ₜg = −2Q`, `traceTimeDerivMetric g t x = −2 tr_{g t} Q`, and
+`metricTracePair0SAt g B = inner0S g x 2 (metricTensor0S g x) B` is a pairing of two smooth
+`(0,2)` fields (`metricTensorField` and `CovariantDerivative.ricciSection`), so
+`inner0S_continuous` finishes.
+
+`energyCont`'s interior half turned out to be **free**: `forwardUniqueEnergy_hasDerivAt`
+(`ForwardUniqueEnergy.lean:368`) is already stated with purely window-local hypotheses (open `U`,
+chart-Gram and joint density on `U`, the two flow equations and two carrier speeds at the single
+time `t`) — all of which the wiring supplies.  Differentiability ⟹ continuity at every interior
+time, leaving only `t = a`.
 
 ## Design decisions worth keeping
 
@@ -135,16 +199,48 @@ So `rm` and `sdec` are now discharged from (B)'s own fields with **no auxiliary 
   `IsManifold I (∞+1) M` from `FiniteDimensional ℝ E` / `IsManifold I ∞ M` — verified by
   probe, so wiring the endpoint needs no `haveI` scaffolding.
 
+## Lean lessons (second pass)
+
+* **`simpa only [foo_def] using h.deriv` beats `have h : HasDerivAt … _ t`.**  Writing the
+  derivative slot as `_` in a `have` makes Lean try to *synthesize* `f'` from nothing and fail
+  with "don't know how to synthesize placeholder for argument `f'`".  Convert the `HasDerivAt`
+  to the `deriv = …` equation first, then `simpa only` on the equation.
+* **Do not `set` a local abbreviation that a Mathlib lemma has to unify against.**  `set U :=
+  interior (extChartAt I x₀).target` made `interior_subset hp.2` elaborate against the wrong
+  `interior _`; stating the `Set.MapsTo` as its own type-ascribed `have` (exactly the
+  `genGram_of_joint` shape in `ForwardUniqueDensReg.lean`) fixes it.
+* `ContDiffOn.differentiableOn` in this Mathlib takes `n ≠ 0`, not `1 ≤ n`;
+  `ContDiffOn.continuousOn_fderiv_of_isOpen` takes `1 ≤ n`.  Keep both `have`s around.
+* The stack-wide rule "never `rw` on `Tensor0SSpace` FunLike coercions" bit again:
+  `ContinuousMultilinearMap.ext fun v => by rw [metricTensor0S_apply, …]` fails; the term form
+  `(metricTensor0S_apply … v).trans (metricTensorField_apply … v).symm` works.
+* `simp only [vec2]` is reported *unused* even when `vec2 X Y` is visibly in the goal; the two
+  sides are definitionally equal, so a bare trailing `rfl` is the fix.
+* `ContinuousAt.clm_apply` exists and is the clean finisher for `x ↦ (fderiv … (φ x)) v`.
+
 ## Relocation TODOs
 
 * `cwaSum` → a topology-algebra layer (duplicate of `cwa_finset_sum`).
 * `fuRmContAt`'s raising-continuity core is generic (any metric family with a differentiable
   Gram and a continuous lowered-component family); it belongs next to `raiseAt_lower` in
   `ForwardUniqueRmBridge.lean` once that file is next touched.
+* **`tderivCont`** is completely generic (any jointly-`C∞` scalar on `J ×ˢ univ`); canonical home
+  is an analysis/manifold layer such as `Analysis/Integration/Measure/` or a
+  `Geometry/Coordinates/` joint-regularity file.  Kept `private` here for now.
+* **`fuTraceRd` duplicates `IntrinsicSpectral.traceTime_rd`**
+  (`Analysis/Spectral/Intrinsic/DeTurck/MovingEdgeEnergy.lean:760`).  That file sits *above*
+  `Evolution/` in the import order, so importing it here would invert the layering; the copy is
+  `private` and carries the TODO in its docstring.  Both copies belong next to
+  `traceTimeDerivMetric` in `Analysis/Integration/Measure/Family.lean` — that is the real fix.
+* `fuReactDeriv` (`movingReact0S` as a frozen-carrier time derivative) is a rank-uniform fact
+  about `normSq0S_moving_deriv` with nothing forward-uniqueness-specific; it belongs beside
+  `movingReact0S` (which itself is queued for `Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv`).
 
 ## Next targets, in order of leverage
 
 1. `hbounds` — the slab-uniform background-norm layer (compactness of `Icc a c`, then the six
-   named producers).  Dominant; includes the deferred `movingReact_le` decision.
-2. `hpair`/`hrest`/`hrem` — spatial continuity of the constructed speed families.
-3. `henergy` — closed-edge continuity of the energy.
+   named producers).  Dominant; includes the deferred `movingReact_le` decision.  Lane file:
+   `Evolution/ForwardUniqueSup.lean`.
+2. `hedge` — continuity of the energy at `t = a`.  Requires the `ContDiffWithinAt`-on-`Ici a`
+   variant of `gen_joint_christoffel` / `gen_joint_riemann`, plus a decay estimate for
+   `E(t) → E(a) = 0`; i.e. it is really a sub-problem of (1).

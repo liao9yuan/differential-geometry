@@ -292,6 +292,35 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №47 (2026-07-26, CONT ACCEPTED+COMMITTED — **hpair/hrest/hrem PROVED
+  OUTRIGHT (the "frame-continuity problem" was a phantom); henergy shrunk
+  to the single edge point; residuals now TWO**): the wiring file grew
+  612→1220 lines, 0 sorry; planner re-audit clean (7 endpoints 3-axiom).
+  THE TURN: the constructed speed families never need spatial continuity
+  — the rate integrands see them only through `movingReact0S + 2⟨Ṫ,T⟩`,
+  which `normSq0S_moving_deriv` identifies as ∂ₜ of an energy third —
+  scalars whose joint (t,x)-C∞ DensReg already proves.  Freezing the
+  carrier in the same lemma yields a BASIS-FREE reading of the
+  frame-pinned `movingReact0S` (likely dissolves reactLe's №25
+  `movingReact_le` gap — CHECK in the SLAB-2 pass).  New analysis piece:
+  `tderivCont` (jointly-C∞ scalar ⟹ continuous time-partial in x, via
+  extChartAt transport + `ContDiffOn.continuousOn_fderiv_of_isOpen`).
+  `traceTimeDerivMetric = −2 tr_g Ric` under the flow dissolves the
+  volume term.  Interior energy continuity FREE
+  (`forwardUniqueEnergy_hasDerivAt` is window-local).
+  `forward_unique_of_gram` now = (B) fields + `hbounds` + `hedge`
+  (`ContinuousWithinAt (energy) (Ico a b) a`; E(a)=0 under h0, so really
+  "E(t)→0" — quantitative, a SUB-PROBLEM of hbounds, same Within-tower
+  gate).  15/16 bundle members + interior of the 16th.  LAYERING DEBT:
+  `fuTraceRd` = private duplicate of `IntrinsicSpectral.traceTime_rd`
+  (importing would invert layering); both belong next to
+  `traceTimeDerivMetric` in `Analysis/Integration/Measure/Family.lean` —
+  relocation TODO.  COORDINATION FLAG: the user's separate relocation
+  chip (todo-move-movingreact0s) targets `normSq0S_moving_deriv`/
+  `movingReact0S` — the relocation MUST keep the names reachable (alias)
+  or update the wiring consumer; note added here so neither session is
+  surprised.  WITHIN (the tower gate) still in flight; after it lands →
+  SLAB-2 (remaining hbounds fields + hedge).
 - №46 (2026-07-26, SLAB PARTIAL ACCEPTED+COMMITTED — **2.5/6 fields + the
   compactness engine + ONE genuinely new estimate; the rest gated on the
   CLOSED-EDGE joint tower; RULING R12**): `Evolution/ForwardUniqueSup.lean`
