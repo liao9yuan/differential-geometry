@@ -211,6 +211,19 @@ form) is respected — P1/P2 are stated on the eval `covDerivConnDiff` and the e
 
 ## 7. Session log
 
+- 2026-07-25 (**a ≥ 2 recon — the `hAcc` (m ≥ 2) frontier, dispatch (a) of plan §26**): full route +
+  state-before-prove landed in the NEW sibling `ConnDiffDeriv2Bound.lean` / `.md`.  **Route (i)
+  (iterate the differentiated Koszul) RULED IN**; (ii) [bundle A via `covGrad connDiffSection` — the
+  P2.d B2 bypassed] and (iii) [recurse on the accumulator] RULED OUT.  Central check answered: the
+  differentiated-Koszul RHS **stays in `metricCovDeriv` currency at order a+1**, giving the clean
+  recursion `|∇₂^a A| ≲ |∇₂^{a+1}g₁| + Σ_{j<a}|∇₂^{a−j}g₁|·|∇₂^j A|`.  Reduction pinned: `hAcc m`'s only
+  new atom (at m=2) is `∇₂²(A ⋆ S)` = `covStep g₂ (covStep g₂ (diffStep g₁ g₂ s S))`; the other m=2
+  pieces are committed a=1 (`covStepDiff_of_jets`).  STATED `covStepDiff2_exists_const` (existential
+  constant, order-3 metric jets, role asymmetry, `[NormedSpace ℝ E]`-only), elaborates GREEN with the
+  single `sorry`.  **a=2 NOT a direct extension** — needs the new identity `connDiff_koszul_deriv2`
+  (grep-confirmed absent), so machinery not built.  No false wall: infra-map's "missing bundled
+  ∇connDiff" confirmed missing AND route (ii)'s object; the real missing piece is smaller (a per-order
+  Koszul-differentiation identity reusing committed a=1 engines).  See `ConnDiffDeriv2Bound.md`.
 - 2026-07-25 (**B2 session 7 — B2 CLOSED**): the two remaining lemmas landed sorry-free in
   `ConnDiffDerivBound.lean`, whole-module `lake build` green, zero warnings.
   **`covDerivConnDiff_gJet_le` (public) is the §0 target**, proved with exactly the pinned constant
