@@ -1894,3 +1894,21 @@ the D_N jet budget).  Dispatched: the statement amendment + the strengthened
 assembly (keep the ∇₂²S-insertions, route them through the a=0 atom in the CS).
 The session-7 note's cancellation claim is superseded; sessions 8-11 machinery
 (peel/split/branches/OCsplit) remains valid PieceA route.
+
+## Planner acceptance №34 (2026-07-26 morning) — BRICK 3 DONE; brick 4 dispatched ON FABLE
+
+Brick 3 discharged (`9a7555886`): `deTurckLieCoeffField_{perOrder,summed}_l2_radiusFree`
+both unconditional, axiom-clean.  The full R-free stack (VF tower → DLa/DLb
+arm engines → frontier) is green; three minimal exposures in the home files;
+dLaGridWin turned out defeq to the leaf's atgw.
+
+RULING: the lieCorr0 freeze is LIFTED for brick 4 ONLY (the new currency is
+defined; the old ballUniform lc0* atom work stays read-only).  Brick 4 = the
+mechanical clone per brick 3's reuse spec; if a lieCorr0 piece lacks a
+pointwise top-separated engine (possible for the frozen-atom pieces), the
+executor stops at one flagged sorry naming the missing piece.
+
+USER DIRECTIVE (morning): remaining Fable quota to be used — executor
+dispatches now run on FABLE (brick 4 is the first).  Plans live at
+UNIF_EXISTENCE_PLAN.md (this file), THREEARM_RECON.md (item-2), PROJECT_MAP.md
+(HCG), REUNION_MERGE_PLAN.md (handed off).
