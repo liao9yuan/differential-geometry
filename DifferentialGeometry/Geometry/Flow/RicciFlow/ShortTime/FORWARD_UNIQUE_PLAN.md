@@ -7,7 +7,7 @@ Coordination contract with the (N) session: charter §4 (binding).
 
 ## Target
 
-`DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean:201`
+`DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean:189`
 (`ricci_flow_forward_unique`): two flows `g₁ g₂ : ℝ → SmoothRiemannianMetric I M` on
 `Ico a b`, closed `M` (CompactSpace, boundaryless, finite-dim, dimension-GENERIC),
 chart-Gram jointly C∞ on `Ioo a b ×ˢ baseSet`, chart-Gram C⁰ on `Ico a b ×ˢ baseSet`,
@@ -292,6 +292,42 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №45 (2026-07-26, Agent-WIRE — **K7 OUTCOME (B): THE WIRING PASS LANDED;
+  12 OF 16 BUNDLE MEMBERS DISCHARGED; endpoint `:189` DELIBERATELY UNTOUCHED**):
+  new file `Evolution/ForwardUniqueWiring.lean` (612 lines, 0 sorry,
+  warning-free; focused check + targeted module build GREEN, 9534 jobs; all 9
+  public decls 3-axiom clean).  The five `ForwardUniqueInputs` carriers are now
+  CONSTRUCTED from (B)'s own fields (`fuAvec`/`fuSvec`/`fuSfield`/`fuUflux`/
+  `fuRem`).  Discharged: `gamma` (`gamma_of_gram`), `rm` (`rm_of_uhlenbeck` +
+  `rm04EvolFamTail` at the midpoint tail), `sdec` (`sdec_of_uhlenbeck`), `car`
+  (by construction), and all seven density-regularity members.  **Two recorded
+  walls fell.**  (i) `ForwardUniqueSdec.md`'s "a smooth (0,4) field realizing
+  `metricRm04At` is not available as a producer" is WRONG — `metricRm04 =
+  rm04Section g (metricCov g)` (`Curvature/Riemann/Basic/Sections.lean:528`)
+  is exactly it, and `rm04Section g₁ (metricCov g₂)` builds the second term of
+  S₀₄, so `car`/`hT₁`/`hT₂` are `rfl` (6th false wall).  (ii) the `hcont`
+  input of `rm_of_uhlenbeck`/`sdec_of_uhlenbeck` (time-continuity of the raised
+  curvature), treated as standing everywhere, is PROVED unconditionally on the
+  tail (`fuRmContAt`): `raiseAt_lower` + `metricRm04At_inner` make the raised
+  curvature the inverse Gram applied to `fuRm04`; `fuEvolTail` gives the
+  components' differentiability, `hpde` gives the Gram's, and Mathlib's
+  `continuousAt_matrix_inv` + `basisInvMetric_real` close it.  Design note: the
+  `RealTimeInterval` index of `rm04Fam`/`rm04LapFam`/`rm04BFam`/`ricUpFam`/
+  `solOfMetric` is a PHANTOM (`rfl`-transport, `fuRm04_eq` … `fuRicUp_eq`),
+  which is what lets ONE fixed `Svec` serve every interior time while the
+  producers only exist on tails.  **Endpoint status**: `forward_unique_of_gram`
+  = (B)'s statement + exactly five named hypotheses in three families —
+  (1) `hbounds` (the six `ForwardUniqueSlab` estimates; NO producer of that
+  structure exists in the tree, and the five named sub-producers all consume
+  slab-uniform background norms nothing supplies; `reactLe`'s `movingReact_le`
+  still deferred per №25) — DOMINANT; (2) `hpair`/`hrest`/`hrem` (spatial
+  continuity of the constructed speed families — tensoriality of a
+  per-point-centred frame construction, not a density question); (3) `henergy`
+  (closed-edge continuity of the energy).  Three families > the two-gap
+  threshold, so `:189` was left intact rather than half-replaced.  Full record:
+  `Evolution/ForwardUniqueWiring.md`; discharge record appended to
+  `Evolution/ExtendViaUniqueness.md`.  Module NOT wired into the root aggregate
+  (planner's step).
 - №44 (2026-07-26, α5 ACCEPTED+COMMITTED — **R11 SURGERY LANDED TREE-GREEN;
   K2-B MACHINERY COMPLETE**): the field weakening executed exactly per
   ruling (`InvMetricDerivLocal` added, global predicate KEPT for BlackBox,

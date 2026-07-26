@@ -641,3 +641,41 @@ machinery campaign are DONE through the assembly layer.  The endpoint sorry at
 Discharging `:189` = commissioning K2-B + the two small producers above, then
 one wiring pass instantiating `forward_unique_of_inputs`.  Do NOT restate the
 endpoint; the assembly already matches its interface.
+
+## (B) discharge record — the wiring pass (2026-07-26, Agent-WIRE)
+
+The wiring pass announced above ran; its product is
+`Evolution/ForwardUniqueWiring.lean` (612 lines, 0 `sorry`, all endpoints
+3-axiom clean; targeted module build GREEN).  **`ricci_flow_forward_unique`
+(decl `:189`, `sorry` token `:215`) is UNTOUCHED and the statement is unchanged** — three
+residual gap families survive, so replacing it would have meant importing them
+into the audited black-box interface.
+
+What the wiring establishes:
+
+- the five `ForwardUniqueInputs` data carriers are now **constructed** from
+  (B)'s own fields (`fuAvec`, `fuSvec`, `fuSfield`, `fuUflux`, `fuRem`).  In
+  particular `fuSfield` is a genuine smooth `(0,4)` field
+  (`rm04Section g₁ (metricCov g₁) − rm04Section g₁ (metricCov g₂)`), so the
+  bundle's `car` and Sdec's `hT₁`/`hT₂` are `rfl`;
+- **12 of the 16 bundle members are discharged**: `gamma`, `rm`, `sdec`, `car`
+  and the seven density-regularity members;
+- the α-frontier "(K2-B) the two own-lowered Uhlenbeck interfaces" is
+  **closed** at the endpoint's level: `rm04EvolFamTail` supplies them
+  unconditionally on the midpoint tail, and the last standing auxiliary of
+  `rm_of_uhlenbeck`/`sdec_of_uhlenbeck` (time-continuity of the raised
+  curvature) is now proved, not assumed (`fuRmContAt`);
+- the endpoint is one `exact` away from `forward_unique_of_gram`, which is
+  (B)'s statement plus exactly five named hypotheses.
+
+Residual, in leverage order (full analysis: `ForwardUniqueWiring.md`):
+
+1. **`hbounds`** — the six slab-uniform pointwise estimates
+   (`ForwardUniqueSlab`).  No producer exists anywhere in the tree; the five
+   named producers all consume slab-uniform background norms that nothing
+   supplies, and `reactLe`'s micro-bound `movingReact_le` was deliberately
+   deferred (plan №25).  Dominant remaining brick.
+2. **`hpair` / `hrest` / `hrem`** — spatial continuity (hence integrability on
+   the compact `M`) of the three constructed pointwise speed families.
+3. **`henergy`** — continuity of the Kotschwar energy up to the closed initial
+   edge.
