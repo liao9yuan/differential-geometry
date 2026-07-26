@@ -292,6 +292,29 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №18 (2026-07-25, ACCEPTED — **K2.7 OUTCOME (A)** + **PLANNER RULING R5**):
+  **Agent-K27 delivered `Evolution/ForwardUniqueIBP.lean`** (389 lines, 9
+  public decls, 0 sorry; planner re-audit clean, probe up-to-date). The lane's
+  field-level `∇`/`div` identified with the bundled `covGrad`/`covDivergence`
+  along `ccLift0S` (unit-scalar lift, ZERO extra hypotheses — Tensor0SField ∞
+  IS the Cₛ^∞ type; compact support from CompactSpace). K4 entry points:
+  `l2Inner_nabla_eq_neg_div` (⟨∇T,V⟩ = −⟨T,divV⟩ in lane currency) and
+  `l2Inner_nabla_self_eq_neg_lap` (free via `roughLap0SField = covDiv ∘ ∇`
+  definitionally). **RULING R5**: the file's forced `[InnerProductSpace ℝ E]`
+  (+Boundaryless etc.) is RATIFIED for K4/K5/K6 — the ENDPOINT's own variable
+  block (`ExtendViaUniqueness.lean:53`) already carries it, so
+  endpoint-altitude assembly files may inherit it; the lower-layer
+  NormedSpace-cleanliness discipline stands; the Green/IBP producer de-IPS
+  restatement (model-space orthonormal frames — likely MORE than an `omit`)
+  joins the campaign-end list as its 5th occurrence. New debug lesson:
+  Tensor0SSpace has its OWN FunLike instance — use `DFunLike.ext`, and
+  ascribe CLM sums with `show … →L[ℝ] …` to fire `sum_apply`.
+- №17 (2026-07-25, IN FLIGHT): **Agent-K26C** — `Evolution/ForwardUniqueReLower.lean`:
+  the K2.6c slot-bookkeeping brick (reLower as g₂-trace of g₁⊗T with two
+  permutations, first-order Leibniz defect via `nabla2_metric1`, instantiate
+  `lapComm_eq_div_flux`). Executors now instructed to RE-RUN the targeted
+  build after the final edit (fresh-olean audit lesson from №16).
+  K27 (IBP) still in flight.
 - №16 (2026-07-25, ACCEPTED — **K2.6b OUTCOME (B); R4 ROUTE REALIZED; NO
   ESCALATION**): **Agent-K2B6 delivered `Evolution/ForwardUniqueRmBridge.lean`**
   (656 lines, 17 public decls, 0 sorry; planner audit: initial `--no-build`
