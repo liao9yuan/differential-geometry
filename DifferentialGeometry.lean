@@ -1570,6 +1570,7 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SInnerSectionContinuity
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricIneq
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSMetric
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
 import DifferentialGeometry.Tensor.RSTensor.Field
