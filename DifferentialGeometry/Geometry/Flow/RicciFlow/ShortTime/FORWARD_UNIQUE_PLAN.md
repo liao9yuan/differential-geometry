@@ -292,6 +292,78 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №35 (2026-07-26, **α RECON ACCEPTED → K2-B-1 DISPATCHED**): recon findings
+  (planner-verified where load-bearing): (1) the target predicate's sign
+  `−2(B…)` with minus-FREE `B` is the project's own 2026-06-09 verified
+  reconciliation (`UhlenbeckBaseProducer.md:166-215`) — the old consult's
+  `2|Ric|²` mystery is RESOLVED, not open; (2) citation pinned: **Chow–Knopf
+  MSM110 Lemma 6.15 p.179** (chapter6.tex:518; Morgan–Tian flowbasics.tex:368
+  attributes it; GSM77 = Lemma 2.51) — the plan's "Lemma 6.1" was a
+  project-internal label colliding with MSM135's entropy Lemma 6.1: STOP
+  using it, say "MSM110 6.15"; (3) NO producer of the predicate exists —
+  every occurrence is hypothesis-side; (4) dim-3 pointwise evolution is
+  DONE+discharged (`rm04Base_of_sol`, `rm04HrmProducer`) but (B) is
+  dim-GENERIC (variable block re-checked: no finrank hypothesis) so K2-B
+  must be general; dim-3 serves as sign/algebra reference only; (5) the
+  time side is banked dim-generically (`rm04Var_of_sol`, ∇²Ric-expanded
+  `rm04VarRHS`), so K2-B's real content = the STATIC MSM110-6.14-style
+  reduction (differentiated-traced second Bianchi + rank-4 Ricci identity
+  + first-Bianchi B-algebra); (6) consumer mismatch "centre-only producers
+  vs every-y predicate" DISSOLVES by per-point centred coordinate frames
+  (the component family takes the point as argument; instantiate x₀ := y);
+  (7) regularity black boxes (hmetricFrame/hmix/hswap) all discharge on
+  the coordinate route (`coordRicciEvol` precedent carries ZERO regularity
+  hypotheses) and consumers only use t ∈ Ioo ⊆ D.regular.  **K2-B-1
+  dispatched** (new file `Evolution/Rm04Reduction.lean`, hypothesis-taking
+  static identity `rm04VarRHS = roughLap − 2(B-comb) − drift` mirroring
+  `ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators`; outcome (B)
+  = B-algebra+swap green with ΔRm core as ONE named sorry is a legitimate
+  landing).  K2-B-2 (coord* discharge + per-point packaging + hreal/hL
+  realizations) queued after α1 lands.
+- №34 (2026-07-26, **β OUTCOME (C) — FRONTIER STATEMENT FALSE; RULING R8**):
+  Agent-CONNBOUND DISPROVED `connSpeedLow_normSq_le` as stated: the RHS is
+  difference-only, so at `g₁ t = g₂ t` it forces `Adot = 0`, but `hA` +
+  single-time pointwise `hRF₁/hRF₂` cannot exclude a Schwarz failure
+  (`w(r,y) = r³y/(r²+y²)` family: `∂ᵣw(0,·) ≡ 0` yet `∂ᵣ∂_y w(0,0) = 1`);
+  the RHS-collapse half is machine-checked (`connSpeedRHS_self`, green,
+  axiom-clean).  Planner verified the argument + zero external consumers.
+  Durable lesson: audit every pointwise-estimate frontier by collapsing all
+  difference carriers FIRST; `ℝ → SmoothRiemannianMetric` carries NO joint
+  (t,y) regularity — any ∂ₜ(spatial-derivative object) statement must take
+  joint regularity/∂ₜΓ as input.  Defect 2 (weaker, derivation-level): RHS
+  needs zeroth-order background norms `B₃ ≥ |Ric₂|²`, `B₄ ≥ |Rm₂|²`.
+  **RULING R8**: repair per the executor's .md §"The repair" — keep the
+  conclusion shape; ADD `hΓ` (Hamilton ∂ₜΓ-difference in the
+  `ChristoffelEvolutionEquationInFrameOn` frame currency, = K1's output,
+  dischargeable via `christoffelEvolution_of_solution`/`tailChristoffel` +
+  midpoint trick exactly like K6b's gamma); keep `hA` as realization link
+  (`HasDerivAt.unique` pins components); ADD `B₃`/`B₄`; constants free;
+  reuse K4P's `ricci_eq_trace_rm04`/`ricciDiff_eq_trace`
+  (`ForwardUniqueRatePro.lean`) for the (1,3)→(0,4) trace bridge BEFORE
+  building any new Curvature-layer API; restate the in-file capstone
+  `connDiffDot_normSq_le` accordingly; downstream `adotLe` absorbs the new
+  norms into slab constants at wiring time (no downstream edits now).
+  Re-dispatched to the same executor (context intact).
+- №33 (2026-07-26, IN FLIGHT — **α/β/γ wave, user go received**): three
+  parallel dispatches on disjoint files.  **Agent-CONNBOUND (β)**: fill
+  `ForwardUniqueConnBound.lean:496` (`connSpeedLow_normSq_le`) — route =
+  (i) identify `Adot` components against the PROVEN frame producer
+  `christoffelEvolution_of_solution` via `HasDerivAt.unique` (no invariant
+  Koszul re-derivation), (ii) trace bridge `∇¹(Ric₁−Ric₂) = tr_{g₁}(∇¹S₀₄)
+  + l.o.·bg` via `nabla_metricTraceFirstTwo0S` + `traceNablaShuffle`
+  (Bianchi NOT on path); constants may grow (downstream is ∃-shaped).
+  **Agent-DENS (γ)**: execute DensReg .md §3 steps 1–4 (GenJointGram
+  repackage → christoffel transport → good-set chart evaluation of A₀₃ →
+  S₀₄ chain + THE one new mixed-object chart lemma
+  `riemannCurvature04At g₁ (metricCov g₂)`); R6 import pre-authorized;
+  Icc-edge gap deliver-or-report; ≤150-line escape hatch = one documented
+  frontier sorry. **K2-B RECON (α stage 1, read-only Explore)**: A-half
+  inventory (`realizedRmBase_timeDeriv` exact shape + olean), 3D-KN residue
+  reuse, static-identity assets (curvSecondBianchi shape, ∇∇-commutator
+  API, ∂ₜRm04 lowering, coordRicciEvol architecture), consumer instance
+  shapes (Lifts/Sdec/Assembly), book citation pin (the "Lemma 6.1" number
+  vs actual LaTeX), regularity side-conditions (hmetricFrame/hmix/hswap
+  status for Ico-smooth flows). Main α dispatch AFTER recon lands.
 - №32 (2026-07-26, **WINDOW WRAP — FULL LOCKED BUILD GREEN**): final
   `lake-locked build` of the autonomous window completed successfully
   (10649 jobs, 0 errors).  Whole-tree sorry set audited from the full log =
