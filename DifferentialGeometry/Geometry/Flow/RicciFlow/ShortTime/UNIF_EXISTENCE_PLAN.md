@@ -1642,3 +1642,32 @@ CAUTION kept visible: lc0VB/lc0AMix get NO cancellation (single deTurckVF) —
 the contraction-Leibniz question is live for them; re-assess at their dispatch.
 
 lieCorr0 lane rests here pending the next dispatch; D_N lane still in flight.
+
+## Planner acceptance №26 (2026-07-25) — D_N SCHEME PROVED (conditional) + N=2 unconditional; day closes
+
+D_N brick accepted (`1a6c191ad`); both public theorems planner-probed
+axiom-clean.  The T-B telescoping is now a PROVED conditional theorem
+(`iterCovG1_le`, single named frontier `hAcc`) with its explicit constant
+(`Dtower`) and a verified unconditional base (`iterCovG1_two`, N=2), not a plan.
+Metric-role asymmetry threaded through (hjet ∇g₂/g₁ + hJet1/hJet2 ∇g₁/g₂).
+Durable Lean lesson: `set … with h` + `clear_value` to make heavy fibre values
+opaque (bare `set` keeps a whnf-unfoldable let-body); 1.6M-heartbeat walls
+dissolve.
+
+STATE OF THE DAY (all committed; lanes at clean stops):
+- item 6: B2 closed (`covDerivConnDiff_gJet_le`) → consumed
+  (`covStepDiff_of_jets`) → D_N scheme + N=2.  Remaining math = `hAcc` for
+  m ≥ 2 (the ∇₂^a A, a ≥ 2 schematic — THE item-6 frontier), then 2a-hi/pkg,
+  S0 j≥2, S2–S4/S1b.
+- item 2 (lieCorr0): top piece + lc0Riem green; atom 2 stated w/ one honest
+  sorry; wOmegaDiff cancellation makes it lc0Riem-shaped (~1–2 sessions);
+  lc0VB/lc0AMix keep the contraction-Leibniz question OPEN; then endpoints;
+  then threeArm/Ψ₀ + smooth-core (item 2 PROPER — still the main risk,
+  still unstarted).
+- (N) theorem: 0% (unstated).  Machinery ≈ 60%.
+
+NEXT DISPATCH QUEUE (in order): (a) hAcc m≥2 schematic (needs a
+state-before-prove recon of ∇₂^a A — the connDiff-as-tensor-field covariant
+derivative family); (b) lieCorr0 atom-2 finish per the recorded layer plan;
+(c) 2a-hi/pkg once (a) lands.  Do not open (a) and the atom-2 finish in the
+same file set — disjoint, can run parallel.
