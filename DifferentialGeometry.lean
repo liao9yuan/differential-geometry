@@ -1351,6 +1351,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciEdgeBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Reduction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Assembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic

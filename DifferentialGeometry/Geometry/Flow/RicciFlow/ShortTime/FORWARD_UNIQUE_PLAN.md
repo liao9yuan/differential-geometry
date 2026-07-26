@@ -292,6 +292,81 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №38 (2026-07-26, ACCEPTED+WIRED — **α1 OUTCOME (A): THE STATIC REDUCTION
+  IS PROVED, MSM110 6.14 CORE INCLUDED, 0 sorry**): Agent-K2B1 delivered
+  `Evolution/Rm04Reduction.lean` (801 lines; endpoint `rm04Var_eq_uhl` =
+  rm04VarRHS → ΔRm − 2(B−B+B−B) − drift at the frame centre, bridges to
+  `rm04VarRHS`/`uhlenbeckBTensorInFrame`/`riemann04RicciDriftInFrame` all
+  rfl).  Planner re-audit: hygiene clean, 4 endpoints 3-axiom clean by
+  direct lean, zero tactic sorries (three STALE docstring "carries a
+  sorry" mentions from the mid-flight state fixed by planner, focused
+  check re-run green).  Chain `rmVar_eq_hess → comm_eq_drift →
+  rmHess_eq_lap (6.14) → rmQuad_eq_b (6.15)`; enabling technique =
+  `quadSum` normal form (every quadratic block is Σ g⁻¹g⁻¹X with metric
+  pairs pre-aligned; book index gymnastics collapse to 3 reindexings +
+  symmetry rw); `linarith` with double-sums-as-atoms.  Sign ledger now
+  DERIVED dim-generically (bComp = −B_MSM ⟹ book +2 = project −2),
+  upgrading the dim-3 spot-check.  Non-vacuity guard: hypothesis packages
+  constructible (zero-curvature witness).  Hypothesis inventory: 10, each
+  with a named stage-2 discharger in the .md; the ONLY producer gaps =
+  `Rm04LapIn.bianchi2` (once-differentiated second Bianchi) and
+  `n2RicTrace`; suggested build order = `Nabla20SRealizesAt` at s=4
+  first, everything else flows.  Relocation TODO: the manifold-free
+  `section Algebra` → beside `Uhlenbeck.lean`; on relocation REDEFINE
+  `uhlenbeckBTensorInFrame := bComp` (bridge rfl) rather than keep two.
+  Wired into the root aggregate (`DifferentialGeometry.lean:1354`).
+  **K2-B-2 dispatched** (same executor): discharge the 10 inputs at the
+  coordinate frame (coord*/canBianchiAt families + the two new
+  producers), then per-point packaging into the predicate + the
+  consumers' hreal/hL realization shapes.
+- №37 (2026-07-26, β PASS 2 ACCEPTED+COMMITTED `119c86055` — **statement
+  repaired per R8; Layer A proved; 1 sorry on a strictly reduced goal**):
+  restated `connSpeedLow_normSq_le` + capstone carry hΓ (verbatim
+  `ChristoffelEvolutionEquationInFrameOn` currency), hA as realization
+  link, B₃/B₄, supplied `Ric₁`+`hRic₁` (needed for `Ric₁−Ric₂` to be a
+  differentiable object — flagged addition, approved), constant 100n⁶
+  provisional.  GREEN axiom-clean (planner re-audited): `coeff_adot_eq`
+  (HasDerivAt.unique pins Adot's frame coefficients — the structural
+  discharge of the falsity), `lower_raise_cancel`, `connSpeedLow_eq`
+  (splitting needs NO inverse metric), `connSpeedRHS_self`.  RatePro
+  trace bridge fit exactly — `ricciDiff_eq_trace` has NO residual h₀₂
+  term, so B₄/B₂ turned out UNUSED on this route (executor's own defect-2
+  prediction partly wrong, recorded).  Remaining sorry = two reductions:
+  (1) contracted trace — plumbing (nabla_metricTraceFirstTwo0S needs
+  `[I.Boundaryless]`, not yet in the file's variable block); (2) Φ-defect
+  — ONE new slot-precomposition norm bound; one-sided hΛ suffices at Λ².
+  Durable lesson: `lake build` runs linters the focused `check` does not
+  — warning-cleanliness must be certified by the targeted build.
+  **RULINGS R9** for pass 3: (a) adding `[I.Boundaryless]` to the file /
+  endpoint theorems AUTHORIZED (ExtendViaUniqueness's variable block
+  already carries it — honest at wiring); (b) the new norm lemma goes
+  IN-LANE (this file or ReLower) with a relocation TODO pointing at
+  `Tensor0SRiemannian/Comparison.lean` — do NOT edit the shared canonical
+  file mid-campaign; (c) after the proof closes, DROP whichever of
+  B₂/B₃/B₄ the final proof does not consume (weakest-assumptions rule);
+  keep the flagged `Ric₁` field.  Pass 3 dispatched (same executor).
+- №36 (2026-07-26, ACCEPTED+COMMITTED `002d5766c` — **γ OUTCOME (A): hdens
+  TOWER COMPLETE**): Agent-DENS closed all four steps + the flagged
+  closed-edge delta, 0 sorry, warning-free; planner re-audit clean
+  (hygiene grep: only the №29-precedented borel block; direct-lean axiom
+  audit on 6 endpoints = 3-axiom clean).  Key moves: (1) the brick's
+  component hypothesis WEAKENED to pointwise `ContMDiffAt` — dissolves the
+  good-set-vs-baseSet mismatch with no re-localization; (2) the mixed-object
+  chart lemma `rm04ChartComp` proved in 11 lines — the recon had missed the
+  OFF-CENTRE Riemann basis identity (`RiemannBasisIdentityOffCentre.lean:426`);
+  mini-instance of the grep-the-producer lesson; `g₂ := g₁` covers the
+  diagonal, so S₀₄ needed no separate treatment; (3) `dens_continuous`/
+  `dcont_idens` UNCONDITIONAL at every t (constant-family trick: fixed-time
+  density is static, chart-Gram hypothesis degenerates to spatial) — the
+  Ioo-vs-Icc "second gap" is CLOSED, `dcont_idens_of_joint` removed as
+  subsumed; (4) the R6 import was already in the transitive closure —
+  module graph unchanged.  7 of 11 hdens-tower `ForwardUniqueInputs`
+  fields now producible from the file (dens/densCont/densInt/lapInt/
+  divInt/nabInt/disInt); the 4 left (energyCont/pairInt/restInt/remInt)
+  pair bare pointwise speed families — not density-regularity questions.
+  Interface fit verified BY CONSTRUCTION in a scratch probe.  Relocation
+  TODOs in the .md (6 decls in wrong layer, deferred to campaign end).
+  γ of the №31 bundle: DONE.
 - №35 (2026-07-26, **α RECON ACCEPTED → K2-B-1 DISPATCHED**): recon findings
   (planner-verified where load-bearing): (1) the target predicate's sign
   `−2(B…)` with minus-FREE `B` is the project's own 2026-06-09 verified
