@@ -233,11 +233,28 @@ structure FlowDerivBounds
   nonneg : forall k : Nat, 0 <= C k
   bound : forall i k : Nat, HasSpacetimeCurvDerivBound (I := I) (X.term i) k (C k)
 
+namespace FlowDerivBounds
+
+/-- Restrict uniform spacetime curvature-derivative bounds to one carrier
+time-slice. -/
+def at_time
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    (h : FlowDerivBounds (I := I) X) {t : Real} (ht : t ∈ X.D.carrier) :
+    SeqBoundedGeometry (I := I) (X.atTime (I := I) t) where
+  C := h.C
+  nonneg := h.nonneg
+  bound := by
+    intro i k
+    simpa [HasSpacetimeCurvDerivBound, HasCurvDerivBound,
+      PointedFlowSeq.atTime, PointedFlowData.atTime] using h.bound i k t ht
+
+end FlowDerivBounds
+
 /-- Honest derivative input for solution compactness.
 
 The time-zero bounded-geometry field is explicit because the primitive
-spacetime derivative predicates are not yet connected to the metric
-curvature-derivative predicates by a proved restriction theorem. -/
+spacetime derivative predicates must also be retained for the flow-upgrade
+producer. -/
 structure FlowDerivativeInput
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   spacetime : FlowDerivBounds (I := I) X

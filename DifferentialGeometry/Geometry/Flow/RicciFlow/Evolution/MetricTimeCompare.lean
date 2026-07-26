@@ -382,4 +382,36 @@ theorem complete_of_ricBound
     intro x v
     simpa only [Real.exp_neg] using hequiv x v
 
+/-- A solution with a uniform lowered-curvature norm bound remains complete
+on every slice of a closed time slab when its left endpoint is complete. -/
+theorem complete_of_rmBound
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    {a b C : Real}
+    (hslab : Set.Icc a b ⊆ D.carrier)
+    (hreg : Set.Ioc a b ⊆ D.regular)
+    (hcurv : ∀ t ∈ Set.Icc a b, ∀ x : M,
+      Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4
+        (S.base.rm04 t x) ≤ C)
+    (ha : RiemannianMetricComplete (I := I) (S.base.metric a))
+    {s : Real} (hs : s ∈ Set.Icc a b) :
+    RiemannianMetricComplete (I := I) (S.base.metric s) := by
+  let K : Real :=
+    (Module.finrank Real E : Real) ^ 2 * Real.sqrt C
+  have hK : 0 ≤ K := by
+    dsimp only [K]
+    exact mul_nonneg (sq_nonneg _) (Real.sqrt_nonneg C)
+  have hric : ∀ t ∈ Set.Icc a b, ∀ x : M,
+      ∀ v : TangentSpace I x,
+        |ricciTensor (I := I) (S.base.metric t) x v v| ≤
+          K * (S.base.metric t).inner x v v := by
+    intro t ht x v
+    simpa only [K] using
+      (ricci_quad_sol (I := I) S x v (hcurv t ht x))
+  exact
+    complete_of_ricBound
+      (I := I) (D := D) (a := a) (b := b) (K := K) (s := s)
+      S hS hslab hreg hK hric ha hs
+
 end DifferentialGeometry.PDE.RicciFlow

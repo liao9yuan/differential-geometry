@@ -28,7 +28,8 @@ fully evaluated scalar combination
 `|Ric|² - scalar² / 3` then passes to the limit without a tensor-valued
 transport.  A scalar strong maximum principle and the older all-time
 `Ham3PinchTransfer` package are not needed for this time-zero route.  The
-adapter's exact artifact refresh is still running at this snapshot.
+latest adapter source is focused-green; its exact artifact refresh is pending
+until the active shared target writers stop.
 
 Consequently `ham3_cgh_limit` remains theorem-level **0%**, while whole-project
 HCG infrastructure remains conservatively about **60%**.
@@ -52,11 +53,14 @@ The focused source verification passes.  Both new theorems and their dedicated
 consumer machinery are **100%**.  They add no analytic assumption and show that
 the static Hamilton endgame does not require a strong maximum principle.
 
-The missing endpoint-time CGH transfer is now proved by
-`HamiltonPositiveRicciAdapter.tf_decay0_of_cgh`.  Composing it with these
-reducers and the already retained base-scalar convergence is the next narrow
-assembly step.  `ham3_cgh_limit` itself remains theorem-level **0%**, and
-whole-project HCG infrastructure remains conservatively about **60%**.
+The endpoint-time CGH transfer is proved by
+`HamiltonPositiveRicciAdapter.tf_decay0_of_cgh`.  The focused-green theorem
+`round0_of_cgh` now composes it with these reducers and retained base-scalar
+convergence to prove `LimitRoundAt Lh 0`; `const0_of_cgh` then applies
+`limit_to_orig` and produces `AdmitsConstPosSec M`.  Thus the static time-zero
+endgame from a genuine raw CGH witness is 100%, while construction of that
+witness in `ham3_cgh_limit` remains theorem-level **0%**.  Whole-project HCG
+infrastructure remains conservatively about **60%**.
 
 ## `ham3_space_box` endpoint integration — 2026-07-24
 

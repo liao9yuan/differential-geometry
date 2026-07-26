@@ -1330,16 +1330,6 @@ private theorem endoArmField_realizedFam_threeArmHjoint
   rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
 set_option linter.unusedSectionVars false in
-
-private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
-    (c : ℝ) (w : SmoothCcTensor g r s) :
-    iteratedCovGrad (I := I) g r s j (c • w) =
-      c • iteratedCovGrad (I := I) g r s j w := by
-  induction j with
-  | zero => simp only [iteratedCovGrad_zero]
-  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
-
-set_option linter.unusedSectionVars false in
 private theorem bdExists_fixedField_rfns_jet (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (F : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ j, 0 ≤ c j) ∧ ∀ (j : ℕ) (x : M),
@@ -5954,7 +5944,7 @@ private theorem bdLow0_gridWindow (g₀ g_bg : SmoothRiemannianMetric I M)
     fun Z => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x _
   have hA' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
       ((iteratedCovGrad (I := I) g₀ 0 4 l A).toSection x) ≤ cF l * W := by
-    rw [hA_def, iteratedCovGrad_smul_real]
+    rw [hA_def, iteratedCovGrad_smul]
     rw [show (((-1 : ℝ) • iteratedCovGrad (I := I) g₀ 0 4 l
         (bdFixLoweredCc (I := I) (M := M) g₀ g_bg g₀)).toSection x) =
         (-1 : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 4 l
@@ -6267,7 +6257,7 @@ private theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRieman
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
                 (bdXd (I := I) (M := M) g₀ g₁ g_bg))))).toSection x) := by
     rw [bdCovDerivArmDiff_eq_pairTrace (I := I) (M := M) g₀ g_bg g₁]
-    rw [iteratedCovGrad_smul_real]
+    rw [iteratedCovGrad_smul]
     rw [show (((-1 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
@@ -6484,7 +6474,7 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
   have hPball : ∀ j : ℕ, j ≤ a + 2 →
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T 0 s)‖ ≤ R := by
     intro j hj
-    rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+    rw [hcP, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
     calc |s| * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤
         1 * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
           mul_le_mul_of_nonneg_right habs (norm_nonneg _)
@@ -6495,7 +6485,7 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
   refine mul_le_mul_of_nonneg_left ?_ (hK_nn i)
   refine add_le_add le_rfl ?_
   refine Finset.sum_le_sum (fun j _ => ?_)
-  rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+  rw [hcP, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, mul_pow]
   have h1 : |s| ^ 2 ≤ 1 := by nlinarith [abs_nonneg s]
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
@@ -8929,7 +8919,7 @@ private theorem lrExists_rfnsT_zero_jet_cap (g₀ : SmoothRiemannianMetric I M) 
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
     intro j hj
     rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • T from (zero_smul ℝ T).symm,
-      iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
+      iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
     exact hR
   have hsum := hCsob T 0 hR hball hball0 1 ⟨by norm_num, le_refl 1⟩ x
   have hterms : ∀ k ∈ Finset.range 3, 0 ≤
@@ -8979,7 +8969,7 @@ private theorem lrExists_rfnsT_one_jet_cap (g₀ : SmoothRiemannianMetric I M) (
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
     intro j hj
     rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • T from (zero_smul ℝ T).symm,
-      iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
+      iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
     exact hR
   have hsum := hCsob T 0 hR hball hball0 1 ⟨by norm_num, le_refl 1⟩ x
   have hterms : ∀ k ∈ Finset.range 3, 0 ≤
@@ -9596,7 +9586,7 @@ private theorem lrR4_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 
       ((iteratedCovGrad (I := I) g₀ 0 2 l'
         (convexPerturbation (I := I) g₀ T 0 s)).toSection x) ≤ b l' := by
     intro l'
-    rw [hcP, iteratedCovGrad_smul_real]
+    rw [hcP, iteratedCovGrad_smul]
     rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) =
         s • ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) from by
       rw [SmoothCcTensor.toSection_smul]
@@ -9619,7 +9609,7 @@ private theorem lrR4_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 
       ((iteratedCovGrad (I := I) g₀ 0 4 w
         ((-(s / 2) : ℝ) • lrCurvF (I := I) (M := M) g₀ T)).toSection x) ≤
       CF w * W := by
-    rw [iteratedCovGrad_smul_real]
+    rw [iteratedCovGrad_smul]
     rw [show (((-(s / 2) : ℝ) • iteratedCovGrad (I := I) g₀ 0 4 w
         (lrCurvF (I := I) (M := M) g₀ T)).toSection x) =
         (-(s / 2) : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 4 w
@@ -9732,7 +9722,7 @@ private theorem lrPointwise_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ)
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') y
         ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection y) := by
     intro l' y
-    rw [hcP, iteratedCovGrad_smul_real]
+    rw [hcP, iteratedCovGrad_smul]
     rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection y) =
         s • ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection y) from by
       rw [SmoothCcTensor.toSection_smul]
@@ -9759,7 +9749,7 @@ private theorem lrPointwise_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ)
                 (lrR4 (I := I) (M := M) g₀ T hδ hδZ s))))).toSection x) := by
     rw [lrArm_sub_family_eq_pairTrace (I := I) (M := M) g₀ T hδ_lt hδ hδZ hTsymm
       ⟨hs0, hs1⟩]
-    rw [iteratedCovGrad_smul_real]
+    rw [iteratedCovGrad_smul]
     rw [show (((-1 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 6 2
           (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
@@ -11577,7 +11567,7 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) := by
       intro l x
-      rw [hcP, iteratedCovGrad_smul_real]
+      rw [hcP, iteratedCovGrad_smul]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) =
           s • ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) from by
         rw [SmoothCcTensor.toSection_smul]
@@ -14883,7 +14873,7 @@ private lemma bdRfns_iCG_koszulCovecCc_le (g₀ : SmoothRiemannianMetric I M)
       (1 / 2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 3 i DA).toSection x +
         (iteratedCovGrad (I := I) g₀ 0 3 i DB).toSection x -
         (iteratedCovGrad (I := I) g₀ 0 3 i DC).toSection x) := by
-    rw [hkos, iteratedCovGrad_smul_real, hsub]
+    rw [hkos, iteratedCovGrad_smul, hsub]
     rw [show (((1 / 2 : ℝ) • (iteratedCovGrad (I := I) g₀ 0 3 i DA +
           iteratedCovGrad (I := I) g₀ 0 3 i DB -
           iteratedCovGrad (I := I) g₀ 0 3 i DC)).toSection x) =
@@ -14965,7 +14955,7 @@ private lemma bdRfns_iCG_bdKRaw_le (g₀ : SmoothRiemannianMetric I M)
       (1 / 2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 3 i DA).toSection x +
         (iteratedCovGrad (I := I) g₀ 0 3 i DB).toSection x -
         (iteratedCovGrad (I := I) g₀ 0 3 i DC).toSection x) := by
-    rw [hkos, iteratedCovGrad_smul_real, hsub]
+    rw [hkos, iteratedCovGrad_smul, hsub]
     rw [show (((1 / 2 : ℝ) • (iteratedCovGrad (I := I) g₀ 0 3 i DA +
           iteratedCovGrad (I := I) g₀ 0 3 i DB -
           iteratedCovGrad (I := I) g₀ 0 3 i DC)).toSection x) =
@@ -15031,7 +15021,7 @@ private theorem bdExists_rfnsT_one_jet_cap (g₀ : SmoothRiemannianMetric I M) (
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
     intro j hj
     rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • T from (zero_smul ℝ T).symm,
-      iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
+      iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
     exact hR
   have hsum := hCsob T 0 hR hball hball0 1 ⟨by norm_num, le_refl 1⟩ x
   have hterms : ∀ k ∈ Finset.range 3, 0 ≤
@@ -15718,7 +15708,7 @@ private theorem bdExists_rfnsT_zero_jet_cap (g₀ : SmoothRiemannianMetric I M) 
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
     intro j hj
     rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • T from (zero_smul ℝ T).symm,
-      iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
+      iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
     exact hR
   have hsum := hCsob T 0 hR hball hball0 1 ⟨by norm_num, le_refl 1⟩ x
   have hterms : ∀ k ∈ Finset.range 3, 0 ≤
@@ -16230,7 +16220,7 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
   have hb1 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
       ((iteratedCovGrad (I := I) g₀ 0 2 1
         (convexPerturbation (I := I) g₀ T 0 s)).toSection x) ≤ (Csob * R) ^ 2 := by
-    rw [hcP, iteratedCovGrad_smul_real]
+    rw [hcP, iteratedCovGrad_smul]
     rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) =
         s • ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) from by
       rw [SmoothCcTensor.toSection_smul]
@@ -16323,7 +16313,7 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
       refine Finset.prod_le_prod
         (fun m _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + e m) x _)
         (fun m _ => ?_)
-      rw [hcP, iteratedCovGrad_smul_real]
+      rw [hcP, iteratedCovGrad_smul]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) =
           s • ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) from by
         rw [SmoothCcTensor.toSection_smul]
@@ -16429,7 +16419,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) := by
       intro l x
-      rw [hcP, iteratedCovGrad_smul_real]
+      rw [hcP, iteratedCovGrad_smul]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) =
           s • ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) from by
         rw [SmoothCcTensor.toSection_smul]
@@ -17121,7 +17111,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
           bdSGKMvWeight (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s) bdSGKTau4 T T))))]
       rw [smul_smul]
-    rw [hfield, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+    rw [hfield, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, mul_pow]
     have hss : 0 ≤ s * s := mul_nonneg hs0 hs0
     have hs2 : s * s ≤ 1 := by nlinarith
     have habs2 : |(2 : ℝ) * (s * s)| ^ 2 ≤ 4 := by
@@ -17151,7 +17141,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
       intro x
       refine hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s) (convexPerturbation (I := I) g₀ T 0 s) T htie0 hδ_le' hδ0 hδP i x
         (fun l' => ?_)
-      rw [hcP, iteratedCovGrad_smul_real]
+      rw [hcP, iteratedCovGrad_smul]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) =
           s • ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) from by
         rw [SmoothCcTensor.toSection_smul]
@@ -17745,7 +17735,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) := by
       intro l x
-      rw [hcP, iteratedCovGrad_smul_real]
+      rw [hcP, iteratedCovGrad_smul]
       rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) =
           s • ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) from by
         rw [SmoothCcTensor.toSection_smul]
@@ -17773,7 +17763,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
             (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
               bdRicciFoldWeightB (I := I) (M := M) g₀ T)))]
       rw [smul_smul]
-    rw [hfield, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+    rw [hfield, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, mul_pow]
     have habs2 : |(-(1 / 2) : ℝ) * s| ^ 2 ≤ 1 := by
       rw [abs_mul]
       have h1 : |(-(1 / 2) : ℝ)| = 1 / 2 := by norm_num
@@ -18058,7 +18048,7 @@ theorem exists_riemannPalatini_refold_identity_data
               - appCc (I := I) (M := M) g₀ 2 2
                   (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T)) := by
         rw [smul_smul, show (2 : ℝ) * (1 / 2) = 1 by norm_num, one_smul]
-      rw [hfold, iteratedCovGrad_smul_real, appCc_smul_right, smul_add, smul_smul] at h2
+      rw [hfold, iteratedCovGrad_smul, appCc_smul_right, smul_add, smul_smul] at h2
       rw [sub_eq_iff_eq_add] at h2
       rw [h2]
       abel
@@ -18196,8 +18186,8 @@ theorem exists_riemannPalatini_refold_identity_data
     have hS := hwinS T hδ_le hδ hδZ hball i s hs
     have hF := hwinF T hδ_le hδ hδZ hball i s hs
     beta_reduce
-    rw [iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_add,
-      iteratedCovGrad_sub, iteratedCovGrad_add, iteratedCovGrad_smul_real]
+    rw [iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_add,
+      iteratedCovGrad_sub, iteratedCovGrad_add, iteratedCovGrad_smul]
     set jc := iteratedCovGrad (I := I) g₀ 2 2 i
       (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) with hjc_def
     set jq := iteratedCovGrad (I := I) g₀ 2 2 i
@@ -18434,8 +18424,8 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
   obtain ⟨hs0, hs1⟩ := hs
   rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ
     qA qB hq s]
-  rw [curvatureRefoldKernelCoeffField, iteratedCovGrad_smul_real,
-    iteratedCovGrad_smul_real, iteratedCovGrad_smul_real,
+  rw [curvatureRefoldKernelCoeffField, iteratedCovGrad_smul,
+    iteratedCovGrad_smul, iteratedCovGrad_smul,
     iteratedCovGrad_sub, iteratedCovGrad_sub, iteratedCovGrad_add]
   set G0 := iteratedCovGrad (I := I) g₀ 4 2 i
     (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
@@ -18724,10 +18714,10 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
       sq_nonneg (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2))]
   · intro i s hs
     rw [deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (I := I) (M := M) g₀ T hδ hδZ q ε s,
-      iteratedCovGrad_smul_real]
+      iteratedCovGrad_smul]
     simp only [Fin.sum_univ_three]
-    rw [iteratedCovGrad_add, iteratedCovGrad_add, iteratedCovGrad_smul_real,
-      iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+    rw [iteratedCovGrad_add, iteratedCovGrad_add, iteratedCovGrad_smul,
+      iteratedCovGrad_smul, iteratedCovGrad_smul]
     have hG0 := hK0 T hδ_le hδ hδZ hball i s hs
     have hG1 := hK1 T hδ_le hδ hδZ hball i s hs
     have hG2 := hK2 T hδ_le hδ hδZ hball i s hs
@@ -18972,7 +18962,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
   have hPball : ∀ j : ℕ, j ≤ a + 2 →
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T 0 s)‖ ≤ R := by
     intro j hj
-    rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+    rw [hcP, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
     calc |s| * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤
         1 * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
           mul_le_mul_of_nonneg_right habs (norm_nonneg _)
@@ -18983,7 +18973,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
   refine mul_le_mul_of_nonneg_left ?_ (hK_nn i)
   refine add_le_add le_rfl ?_
   refine Finset.sum_le_sum (fun j _ => ?_)
-  rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+  rw [hcP, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, mul_pow]
   have h1 : |s| ^ 2 ≤ 1 := by nlinarith [abs_nonneg s]
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]

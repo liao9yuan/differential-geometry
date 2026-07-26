@@ -36,14 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
-    (w : SmoothCcTensor g r s) :
-    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
-  induction j with
-  | zero => simp only [iteratedCovGrad_zero]
-  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
-
 set_option linter.unusedVariables false in
 
 theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
@@ -255,7 +247,7 @@ theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     rw [heq]
     calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
             + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
@@ -278,7 +270,7 @@ theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     have hy_nn : 0 ≤ (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
         + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
       add_nonneg (mul_nonneg h1ms (norm_nonneg _)) (mul_nonneg hs0 (norm_nonneg _))
@@ -652,7 +644,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffFieldInputSymm_bo
             + appCcRS (I := I) (M := M) g₀ 2 2 2
               (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁)
               (ccSlotSwapField (I := I) (M := M) g₀))).toSection x) := by
-      rw [iteratedCovGrad_smul_real (I := I) g₀ 2 2 i (1 / 2 : ℝ) _,
+      rw [iteratedCovGrad_smul (I := I) g₀ 2 2 i (1 / 2 : ℝ) _,
         SmoothCcTensor.toSection_smul]
       rfl
     rw [hsm, riemannianFiberNormSq_smul_value (I := I) (M := M) g₀ 2 (2 + i) x (1 / 2 : ℝ) _,
@@ -1146,7 +1138,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
         ((1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)).toSection x =
         (1 / 2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 2 2 n
           (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)).toSection x) := by
-      rw [iteratedCovGrad_smul_real (I := I) g₀ 2 2 n (1 / 2 : ℝ)
+      rw [iteratedCovGrad_smul (I := I) g₀ 2 2 n (1 / 2 : ℝ)
         (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁), SmoothCcTensor.toSection_smul]
       rfl
     have hsecG : (iteratedCovGrad (I := I) g₀ 2 2 n
@@ -1267,7 +1259,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
             (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
               + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
             (ccSlotSwapField (I := I) (M := M) g₀))).toSection x) := by
-    rw [iteratedCovGrad_smul_real (I := I) g₀ 2 2 i (1 / 2 : ℝ) _,
+    rw [iteratedCovGrad_smul (I := I) g₀ 2 2 i (1 / 2 : ℝ) _,
       SmoothCcTensor.toSection_smul]
     rfl
   rw [hmain, riemannianFiberNormSq_smul_value (I := I) (M := M) g₀ 2 (2 + i) x (1 / 2 : ℝ) _,
@@ -1601,7 +1593,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     rw [heq]
     calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
             + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
@@ -1624,7 +1616,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     have hy_nn : 0 ≤ (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
         + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
       add_nonneg (mul_nonneg h1ms (norm_nonneg _)) (mul_nonneg hs0 (norm_nonneg _))

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ProductMFoldNorm
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 import DifferentialGeometry.Geometry.Metric.ChartGram
@@ -1030,6 +1031,74 @@ theorem covStepDiff_of_jets
     (fun v w u => DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_gJet_le
       (I := I) hEq hJet1 hJet2 hx v w u)
     (metricUniformEquivalentOn_symm (I := I) hEq) hJet1' hx
+
+/-! #### The `∇₁ᴺ`-jet telescoping bound `D_N` (brick T-B, the recursion endpoint)
+
+The full norm telescoping `|iterCov g₁ r T N|_{g₂} ≤ D_N·∑_{k≤N}|iterCov g₂ r T k|_{g₂}`.  Direct
+induction on `N` via `iterCov_succ` and the split `covStep g₁ = covStep g₂ + diffStep`: the step
+produces `G_{N+1} ≤ P_{N+1} + R_N + cstep(r+N)·G_N` (`P_k` the `∇₂`-jets, `cstep` the single-step
+`diffStep_jet_one_le` constant), whose single obstruction is the base-covariant derivative
+`R_N = |covStep g₂ (telescAccum N)|_{g₂}` of the telescoping accumulator.  `R_0 = 0` and
+`R_1 = |covStep g₂ (diffStep g₁ g₂ r T)|_{g₂}` is exactly `covStepDiff_of_jets` (the a=1 piece), so
+`N ≤ 2` is unconditional; `R_m` for `m ≥ 2` needs `∇₂^a A` (`a ≥ 2`), the schematic frontier, factored
+as the single hypothesis `hAcc`. -/
+
+/-- Internal `g`-orthonormal basis at `x` with identity inverse-metric matrix, packaged for the
+telescoping fibre-norm triangle inequalities. -/
+private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ basis : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real (TangentSpace I x),
+      (∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0) ∧
+        MetricInverseInBasis_gen (I := I) g x basis
+          (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+  classical
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  refine ⟨ob.toBasis, ?_, ?_⟩
+  · intro i j
+    have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    change g.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g x) (ob.toBasis i) (ob.toBasis j)]
+    change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+    rw [← hinner]; exact ob.inner_eq_ite i j
+  · intro i j
+    have hON : ∀ i j, g.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0 := by
+      intro i j
+      have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+        MetricFiberData.toCore_inner D (ob i) (ob j)
+      change g.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+      rw [← TangentMetricData_gen.inner_eq_gen
+        (tangentMetricData_gen (I := I) g x) (ob.toBasis i) (ob.toBasis j)]
+      change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+      rw [← hinner]; exact ob.inner_eq_ite i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+
+/-- The fibre norm of the zero tensor vanishes. -/
+private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
+    Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
+  classical
+  obtain ⟨basis, _, hinv⟩ := exists_g_onbasis (I := I) g x
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
+  rw [show (∑ slots : Fin s → Fin (Module.finrank Real (TangentSpace I x)),
+      (component0S (I := I) basis (0 : Tensor0SBundle.Tensor0SSpace s I x) slots) ^ 2) = 0 from ?_]
+  · exact Real.sqrt_zero
+  · refine Finset.sum_eq_zero (fun slots _ => ?_)
+    rw [component0S_apply]; simp
+
+/-- **The explicit `D_N` constant tower** for the `∇₁ᴺ`-jet telescoping bound.  `Dtower n q r Racc N`
+realizes the recursion `D₀ = 1`, `D_{N+1} = 1 + Racc N + ((r+N)·√(n^{r+N+1})·q)·D_N`, with
+`q = (3/2)·√(Λ³)·Λ'` the folded single-step jet constant and `Racc N` the accumulator base-derivative
+bound at level `N` (`n = finrank ℝ E`). -/
+noncomputable def Dtower (n : ℕ) (q : ℝ) (r : ℕ) (Racc : ℕ → ℝ) : ℕ → ℝ
+  | 0 => 1
+  | (N + 1) => 1 + Racc N +
+      ((r + N : ℝ) * Real.sqrt ((n : ℝ) ^ (r + N + 1)) * q) * Dtower n q r Racc N
 
 end DiffStepNorm
 

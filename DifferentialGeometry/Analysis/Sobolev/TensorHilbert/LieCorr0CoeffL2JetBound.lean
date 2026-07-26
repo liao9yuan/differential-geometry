@@ -243,14 +243,6 @@ private theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [SmoothCcTensor.toSection_neg, ContMDiffSection.coe_neg, Pi.neg_apply, appCcRS_toSection]
   exact lc0RiemFib_eq (I := I) (M := M) g₀ g₁ x
 
-private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
-    (w : SmoothCcTensor g r s) :
-    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
-  induction j with
-  | zero => simp only [iteratedCovGrad_zero]
-  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
-
 /-- Pointwise: the live arm's jets are dominated by the jets of the committed
 rank-`1` cometric cast, at the cost of one factor of the dimension. -/
 private theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
@@ -362,7 +354,7 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     rw [heq]
     calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
             + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖

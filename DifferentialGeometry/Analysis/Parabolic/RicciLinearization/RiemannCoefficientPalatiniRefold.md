@@ -16,3 +16,10 @@ the metric jet through order three in dimension three.
 
 Focused verification is pending the shared sequential artifact refresh.  The
 underlying producer proofs pre-existed; only their public aliases are new.
+
+## 2026-07-25 — dedup: private `iteratedCovGrad_smul_real` removed
+
+The file-local private copy was deleted; all 32 call sites now use the public
+`iteratedCovGrad_smul` from
+`Analysis/Spectral/Tensor/CovGrad/IteratedCovGradLinear.lean` (in scope via
+`open DifferentialGeometry.PDE.RicciFlow`).  Focused check green.

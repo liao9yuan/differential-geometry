@@ -232,8 +232,8 @@ The DIRECT route above is accurate; two refinements for the next (Lie / traceHes
   (∇^i sec − Hd)` split is `riemannianFiberNormSq_add_le` + `simp only [SmoothCcTensor.toSection_sub,
   ContMDiffSection.coe_sub, Pi.sub_apply]; abel` (the `toSection_add/sub` lemmas are section-level
   `rfl`, so `rw [← toSection_add]` on a pointwise `…x + …x` FAILS).
-- `iteratedCovGrad_smul_real` is `private` to `RemainderCoeffL2JetMoser`; copy it (Lie reuses the
-  connDiff producer directly, so may not even need it).
+- `iteratedCovGrad_smul_real` — do NOT copy it: since 2026-07-25 use the public
+  `iteratedCovGrad_smul` (`Analysis/Spectral/Tensor/CovGrad/IteratedCovGradLinear.lean`).
 
 Lie next: `linearizedRicciConnDiffOrder1KernelField = neg 5-permuted-copy combination of
 connDiffContrInsertionField` (`kernelField_eq_neg_arm_combination`), each copy same `rfns∘∇^i`;

@@ -93,3 +93,39 @@ Honest accounting: `scaledDist_calabiUpperSupport_of_sol` remains theorem-level
 is about 90--95%.  The solution-generated barrier cutoff and trusted
 complete-Shi producer remain theorem-level 0%; whole HCG supporting machinery
 remains about 60%, and unconditional `compactnessSol` remains 0%.
+
+## 2026-07-25 — precompiled core boundary
+
+The source has been split at the smallest stable analytic boundary:
+`DistanceBarrierCore.lean` now owns the already checked path-length,
+fixed-time Calabi, Ricci-coefficient, and rescaling machinery, while this file
+retains only the curvature/completeness assembly and the public endpoint.
+The public theorem name and import path are unchanged.
+
+The core is focused-green and exact-green (`3994/3994`) at the default
+heartbeat budget with no diagnostics, and contains no `sorry`, `admit`, new
+axiom, or local heartbeat override.  Its narrow exported boundary is
+`DistanceBarrierCore.ricci_quad_of_curv`,
+`DistanceBarrierCore.scaled_of_quad`, and the internal-namespace support record
+plus its `toResult` projection.  `MetricTimeCompare.complete_of_rmBound` is the
+canonical exact-current lower-layer completeness producer.
+
+The artifact split alone did not close the endpoint.  Both variants of
+`scaled_of_quad`—first returning the explicit nested existential proposition,
+then returning `Nonempty DistanceBarrierCore.ScaledDistSupport`—left the thin
+wrapper timing out at `whnf`.  A final `CurvPrep : Prop` experiment isolated
+the failure further: its three fields are only the nonnegative coefficient,
+the quadratic Ricci bound, and selected-slice completeness, yet the private
+`curv_prep` constructor still times out at the default 200000 heartbeats and
+also under a temporary option scoped to 500000.  The live source is restored
+to the default setting.
+
+This is now a precise declaration-elaboration performance wall, not a
+mathematical, stale-artifact, or missing-API blocker.  The second-round
+repository-specific question is recorded in
+`HCGCompactness/DISTANCE_BARRIER_PERF_CONSULT.md`.
+
+Honest accounting remains: `scaledDist_calabiUpperSupport_of_sol` is
+theorem-level 0%, its dedicated machinery is about 95%, the solution-generated
+cutoff and trusted complete-Shi theorems are 0%, whole HCG supporting machinery
+is about 60%, and unconditional `compactnessSol` is 0%.

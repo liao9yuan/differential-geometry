@@ -1,5 +1,94 @@
 # HamiltonPositiveRicciAdapter
 
+## 2026-07-25 buffered Shi derivative input
+
+The canonical source index now retains both the requested
+`[-ham3_r0^2, 0]` window and the strict earlier Shi buffer
+`[-2 * ham3_r0^2, 0]`.  The carrier and regular-time inclusions into each
+untruncated rescaled solution are focused-verified.
+
+`source_deriv` is a data constructor, not a theorem wrapper.  It applies the
+constants-first compact estimate `movingRmOn` to each genuine untruncated
+rescaling, restricts the result to the closed source interval, and packages the
+uniform spacetime bounds together with the time-zero projection
+`FlowDerivBounds.at_time`.  The time-restriction equality is proved directly
+from the unchanged `SolutionOn.base`, avoiding a transported tensor equality.
+The complete Adapter passes focused verification.
+
+This checked assembly still depends on the explicit frontier theorem
+`curvNormSq_eq` in `CurvTowerBridge.lean`.  That theorem is not proved: three
+routes to normalize `k + 4` against `4 + k` hit either the whole-tensor
+elaboration wall or dependent-elimination failure.  Consequently:
+
+- constants-first compact Riemann-tower producer: 100%;
+- strict Hamilton buffer and source restriction: 100%;
+- `source_deriv` assembly: 100% checked as a consumer;
+- axiom-clean `FlowDerivativeInput` production: 0% until `curvNormSq_eq`;
+- closed-endpoint compactness upgrade theorem: 0%;
+- `ham3_cgh_limit`: theorem-level 0%;
+- whole-HCG dedicated machinery: about 60%.
+
+## 2026-07-25 canonical closed-window source sequence
+
+Added the actual tail-reindexed Hamilton source rather than an existential
+placeholder:
+
+- `ham3SourceSeq` chooses the eventual window index from `Ham3Window`, uses
+  `origIndex i = N + i`, restricts each genuine `ham3RescaledSol` to the common
+  interval `[-ham3_r0^2, 0]`, and transports `IsSolutionOn` with the proved
+  carrier and regular-set inclusions.
+- `sourceSeq_carrier` and `sourceSeq_regular` expose the exact `Icc`/`Ioo`
+  domains.
+- `ham3SourceLink` supplies the identity diffeomorphisms, original indexing,
+  basepoints, metrics, and scalar identities required by the existing
+  `Ham3SourceLink` interface.
+
+Focused verification passes. The identity-metric proof was deliberately
+reduced to the scalar normal form `inner x v w`; replacing the whole
+cross-model pullback metric by the same-model pullback made the focused check
+roughly four times slower. No new consumer assumption, compactness witness, or
+transfer predicate was added. The exact artifact refresh remains pending.
+
+The closed interval is the mathematically correct domain: time zero is in its
+carrier but not its regular set. It can feed the carrier-generic
+`compactnessSol_cond`, but not the legacy `compactnessSol` or
+`open_upgrade_canon`, which require time zero to be interior to an open
+interval. The next honest producer is a Hamilton endpoint Shi/tower estimate
+for the untruncated rescalings on a larger backward slab, transported to the
+closed source; it must supply the endpoint bounds required by
+`FlowDerivativeInput`. Limit connectedness remains a separate topology
+projection after compactness.
+
+Accounting: the canonical common-window source and its source-link data are
+100% implemented and focused-verified. A Hamilton closed-endpoint
+derivative/upgrade theorem is not yet stated or proved (0%), although it can
+reuse the largely checked generic P4 machinery. `ham3_cgh_limit` therefore
+remains theorem-level 0%, and whole-HCG supporting machinery remains about
+60%.
+
+## 2026-07-25 time-zero round limit and original-metric transfer
+
+Added two honest final-assembly theorems over the raw common-window source and
+the actual smooth-CGH witness:
+
+- `round0_of_cgh` combines `tf_decay0_of_cgh`, `tf_zero_of_decay`,
+  `limitEinstein_of_tf0`, retained base-scalar convergence, Schur constancy, and
+  the ambient boundaryless/connected limit data to prove `LimitRoundAt Lh 0`.
+- `const0_of_cgh` applies `limit_to_orig` to that exact time-zero slice and
+  produces the canonical conclusion `AdmitsConstPosSec M`.
+
+Both theorems pass focused verification. They do not consume
+`Ham3PinchTransfer`, `LimitScalarPos`, `Ham3RicNonnegTransfer`, a scalar strong
+maximum principle, or any newly introduced transfer predicate. The static
+time-zero endgame is therefore 100% once the raw source sequence and genuine
+smooth-CGH limit witness are supplied. The latest adapter source still needs
+an exact artifact refresh after the active shared writers stop.
+
+This is infrastructure/conditional assembly, not construction of the
+compactness witness: `ham3_cgh_limit` remains theorem-level 0%, its genuine
+remaining frontier is the common-window source plus unconditional smooth-CGH
+producer, and whole-HCG supporting machinery remains about 60%.
+
 ## 2026-07-24 fixed-time trace-free decay producer
 
 Added `tf_decay0_of_cgh`, the direct time-zero transfer theorem for

@@ -1,5 +1,21 @@
 # MovingShiProducer
 
+## 2026-07-25 constants-first compact slab producer
+
+`movingRmOn` is the axiom-clean, constants-first Riemann-tower estimate needed
+by the Hamilton closed-window source.  Given a common buffered slab
+`[alpha, psi]`, it bounds every order `k <= order` on `[beta, psi]` by the
+explicit `rmSlabConst`; the constant is independent of the particular
+solution.  The proof uses the already checked compact
+`BernsteinTower.estimate_of_heat`, not the legacy sorry-backed complete
+maximum-principle route in `MovingShiOpen`.
+
+Focused verification passed.  This producer and its dedicated machinery are
+100% complete; its Hamilton `FlowDerivativeInput` consumer remains blocked
+only by the static/PDE curvature-tower normalization bridge.  The
+`ham3_cgh_limit` endpoint remains unstated here and theorem-level 0%; whole
+HCG supporting machinery remains about 60%.
+
 ## Result
 
 `movingShiBoundSol` turns a uniform squared-norm bound on `Rm` for a

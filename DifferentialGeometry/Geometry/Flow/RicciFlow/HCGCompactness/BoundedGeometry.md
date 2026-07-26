@@ -1,5 +1,17 @@
 # BoundedGeometry
 
+## 2026-07-25 time-slice projection
+
+`FlowDerivBounds.at_time` now restricts the existing spacetime
+curvature-derivative bounds to `SeqBoundedGeometry` at any carrier time.  This
+is a direct projection, not a new analytic assumption.  Focused verification
+passed.
+
+The projection is 100% complete.  It removes the separate time-zero packaging
+gap once a genuine `FlowDerivBounds` producer is available; it does not itself
+prove the Hamilton source bounds.  `ham3_cgh_limit` remains theorem-level 0%,
+and whole HCG supporting machinery remains about 60%.
+
 Source used: MSM135 Definition 3.8 and the bounded-curvature assumptions in Theorems 3.9 and 3.10.
 
 Introduced definitions: `curvCovDerivStep`, `curvCovDeriv`, `curvDerivNormSq`, `curvDerivNorm`, `HasCurvDerivBound`, `BoundedGeometry`, `SeqBoundedGeometry`, `HasSpacetimeCurvBound`, `HasSpacetimeCurvDerivBound`, `SpacetimeCurvBound`, `FlowDerivBounds`, and `FlowDerivativeInput`.

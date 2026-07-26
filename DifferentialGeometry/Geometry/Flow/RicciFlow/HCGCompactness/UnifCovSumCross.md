@@ -652,6 +652,25 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 13, D_N TELESCOPING — IN PROGRESS): plan settled, implementing.
+  **D_N recursion (validated on paper):** direct induction on `G_N := √normSq0S(g₂, iterCov g₁ r T N x)`
+  via `iterCov_succ` + `covStep g₁ = covStep g₂ + diffStep`.  The step gives
+  `G_{N+1} ≤ P_{N+1} + R_N + cstep(r+N)·G_N`, where `P_k := √normSq0S(g₂, iterCov g₂ r T k x)`,
+  `cstep s := s·√(n^{s+1})·(3/2)√(Λ³)Λ'` (from `diffStep_jet_one_le`), and the SINGLE obstruction is
+  `R_N := √normSq0S(g₂, covStep g₂ (r+N) (telescAccum g₁ g₂ r T N) x)` — the base-covariant derivative
+  of the accumulator.  Closes to `G_N ≤ Dtower N · ∑_{k≤N} P_k` with
+  **`Dtower 0 = 1`, `Dtower (N+1) = 1 + Racc N + cstep(r+N)·Dtower N`**, where `Racc N` bounds `R_N`
+  (`R_N ≤ Racc N · ∑_{k≤N+1} P_k`).
+  - `R_0 = 0` (`telescAccum 0 = 0`, `covStep_zero'`, `normSq0S 0 = 0`) ⟹ `Racc 0 = 0`, unconditional.
+  - `R_1 = √normSq0S(covStep g₂ (r+1) (diffStep g₁ g₂ r T))` (since `telescAccum 1 = diffStep g₁ g₂ r T`)
+    = EXACTLY `covStepDiff_of_jets` at `s=r, S=T` ⟹ `Racc 1 = (r)·√(n^{r+2})·(3/2·Λ⁴(Λ''+ΛΛ'²)+(3/2)√(Λ³)Λ')`,
+    unconditional (this is the a=1 piece; N=2 needs only a≤1).
+  - `R_m, m≥2` needs `∇₂^a A`, `a≥2` (the schematic) — FRONTIER, factored as the single hypothesis
+    `hAcc : ∀ m < N, R_m ≤ Racc m · ∑_{k≤m+1} P_k`.
+  **Deliverables:** `Dtower` def; `iterCovG1_le` (general, conditional on `hAcc`, sorry-free);
+  `iterCovG1_two` (N=2, unconditional — discharges `hAcc` for m<2).  Jet-order budget: order-N needs
+  metric jets up to order N (`∇₂^a A ~ ∇₂^{a+1}g₀`, a≤N-1); the N=2 theorem carries `hjet` (K 1 g₂ g₁),
+  `hJet1` (K 1 g₁ g₂), `hJet2` (K 2 g₁ g₂) — the metric-role asymmetry from session 12.
 - 2026-07-25 (session 12, `hA1` DISCHARGE WIRED — LANDED, GREEN): **`covStepDiff_of_jets` PROVED
   sorry-free** in `section DiffStepNorm`, the fully-discharged `D_N`-facing jet step.  Authoritative
   `lake build +…UnifCovSumCross` EXIT=0 (9482 jobs); `#print axioms covStepDiff_of_jets` =

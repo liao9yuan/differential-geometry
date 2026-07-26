@@ -36,14 +36,6 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet realizedSmallSet)
 
-private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
-    (w : SmoothCcTensor g r s) :
-    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
-  induction j with
-  | zero => simp only [iteratedCovGrad_zero]
-  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
-
 set_option linter.unusedVariables false in
 private theorem diagonalProductTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
@@ -745,7 +737,7 @@ theorem gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform
         = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
           + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
       rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
-        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
     rw [heq]
     calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
             + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
@@ -1362,7 +1354,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
     rw [norm_neg]
     exact add_le_add (norm_add_le _ _) le_rfl
   rw [hDAeq, hDBeq, hDCeq] at htri
-  rw [hkos, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs,
+  rw [hkos, iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
   linarith [htri, hWbound]
 

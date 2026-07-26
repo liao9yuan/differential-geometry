@@ -184,9 +184,12 @@ layer's own `set_option linter.unusedVariables false in` idiom.
   `lieCorr0*` needs `open LieCorr0Core`; `tensor0S_curry_apply_eval` is
   `TensorMultilinear`.  Widen the restricted lists rather than doing a bare full
   `open` (the restriction is deliberate).
-- `iteratedCovGrad_smul_real` has **no public home** — it exists as a copy-pasted
-  `private theorem` in at least four files.  A fifth copy was added here; the real fix
-  is one public lemma in the `iteratedCovGrad` module (flagged as a separate task).
+- `iteratedCovGrad_smul_real` — RESOLVED 2026-07-25: the copy here was deleted; use the public
+  `iteratedCovGrad_smul` from `Analysis/Spectral/Tensor/CovGrad/IteratedCovGradLinear.lean`
+  (next to `iteratedCovGrad_add`; in scope via `open DifferentialGeometry.PDE.RicciFlow`).
+  Same cleanup applied to the four other listed copies; six same-named copies remain elsewhere
+  (LowRegRicciOne, LowRegCoeffJets, RicciArmResidualFieldGridWindow, RemainderCoeffL2JetMoser,
+  DLaTopSeparated, DeTurckVectorFieldL2JetBound) plus ~10 alias-named ones — separate task.
 - Two different instantiations of the same `@[simp]` lemma in one goal: `rw` picks one
   instantiation and the second `rw` then fails.  Use `simp only [lemma]` instead.
 - `(-1 : ℝ) • A` is NOT `rfl`-equal to `-A` for CLMs — `neg_one_smul` first.  But

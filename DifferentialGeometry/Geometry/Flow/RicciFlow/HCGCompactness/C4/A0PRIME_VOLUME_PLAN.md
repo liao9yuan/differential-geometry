@@ -1,5 +1,16 @@
 # A0′ `VolumeComparisonInput` producer — lane plan + dispatch prompts
 
+> **PARKED (2026-07-26, user decision) — do NOT dispatch from this file.**
+> Post-hoc audit found this lane's scope duplicates Stage V2 / Route B of
+> the pre-existing, active `Geometry/Comparison/VOLUME_COMPARISON_PLAN.md`
+> (Poincaré P1a), which again solely owns the Bishop–Gromov / packing /
+> Step-A discharge endpoint.  This lane's driving route (non-injective
+> segment-domain covering discharge) is abandoned; its verified assets and
+> the route-neutral discharge interface (`SegmentPolar`'s two `sorry`
+> statements → `SegmentCount` → `VolumeOverlap`/`volInput_of_bg`) are
+> registered in that plan's **2026-07-26 status-log entry** — read it
+> there.  §8 below is the frozen historical record.
+
 Created 2026-07-24 (planning session).  Lane protocol: a Fable orchestrator
 session owns this plan and the acceptance loop; individual bricks are
 dispatched to Opus executor sessions/subagents with the preamble in §6.
@@ -1125,3 +1136,27 @@ lessons paragraph.  Escalation: use the CLAUDE.md GPT-Pro consult template
   the registry's many OTHER stale claims (dead Codex-lane pids,
   2026-07-15..18) left untouched — not this lane's to clean.  Endpoint:
   **0%**.
+
+- **LANE PARKED (2026-07-26, user decision) — final entry.**  B5d3 was
+  killed mid-work on user instruction (its partial `SegmentPole.lean` is
+  in-tree, NOT verified; claim released).  A post-hoc duplication audit
+  found this lane's scope ≈ Stage V2 + V1e/P of the pre-existing ACTIVE
+  `Geometry/Comparison/VOLUME_COMPARISON_PLAN.md` (status log through
+  2026-07-23, Route B machinery ~81–85%, frontier N-d), including the
+  frenzymath/Poincare-Conjecture reference that likely resolves both that
+  lane's N-d and this lane's sharp-`N=1` blocker.  Orchestrator failure
+  acknowledged: the connection was flagged in the session memory index
+  from the start and never consulted.  Code-level duplication was small
+  (audit in the V-plan's 2026-07-26 entry: one false-wall wrapper, a few
+  redos of private/Mathlib-adjacent lemmas, one intra-session duplicate
+  `hypSn_ge_self`≡`hypSn_ge_id`); plan-level duplication was near-total.
+  All verified assets handed to the V-plan (its 2026-07-26 status-log
+  entry is the registration of record).  Lessons for future lane
+  planning: (1) before opening a lane, grep for existing `*_PLAN.md`
+  covering the same mathematics AND check the memory index; (2) sorry'd
+  frontier statements need model-case truth checks (σ-mass, ⊤-sum, both
+  caught here); (3) regularity walls need producer-surface greps (the
+  `intrinsicFiber_smooth` false wall was missed twice).  Endpoint at
+  parking: `volInput_of_bg` **0%** — exists, transitively `sorry` via
+  exactly `segBall_vol_le`/`segBall_vol_rel`; discharging those two (by
+  the V-lane) closes it with no further edits.

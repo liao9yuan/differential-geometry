@@ -1,78 +1,155 @@
-# Distance-barrier elaboration consultation
+# Distance-barrier elaboration consultation, round 2
 
 I need a repository-specific Lean 4 elaboration/performance diagnosis, not a
 new mathematical route.
 
-Repository: https://github.com/liao9yuan/differential-geometry  
-Branch: `codex/short-time-existence-align`  
-Remote-visible commit: `00de305b01554dbe63df5d5ea2edc78836dea6c5`  
+Repository: `https://github.com/liao9yuan/differential-geometry`
+
+Branch: `codex/short-time-existence-align`
+
+Remote-visible commit: `80a504a87997b4984cbecb9d7a7ef8522b02f7fa`
+
+Current local HEAD: `828e01877e66d69fc6b94957b8ab46a1dd0fd7d6`
+
 Lean: `v4.29.0`
 
-Important visibility caveat: the remote branch currently points to that commit,
-but the relevant changes in
+The files and declarations discussed below are uncommitted local changes and
+are not yet visible at the remote commit. The excerpts and verification results
+below are authoritative.
 
-`DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/DistanceBarrier.lean`
+The cleanup branch
+`https://github.com/qinz1yang/differential-geometry/tree/reunion` was also
+audited read-only. It confirms the canonical
+`EMetricSpace.ofRiemannianMetric` completeness-instance pattern, but it does not
+contain the newer `DistanceBarrier`, `MetricTimeCompare`, or an analogous
+heartbeat fix.
 
-are uncommitted local changes and are therefore not visible on GitHub. Treat
-the architecture and code excerpts below as authoritative; the remote file is
-only background.
+## Goal and invariant constraints
 
-## Goal
-
-Keep the public theorem `scaledDist_calabiUpperSupport_of_sol` unchanged. It
-states that, under a Ricci-flow solution, initial completeness, a closed-slab
-curvature bound, positive time, finite nonzero distance, and no additional
-geometric assumptions, the rescaled distance
+Keep the public theorem
+`scaledDist_calabiUpperSupport_of_sol` unchanged. It produces the seven-field
+smooth Calabi upper-support conclusion for
 
 ```text
 exp (Lambda * t) * d_{g(t)}(O, ·)
 ```
 
-has a smooth local Calabi upper support with the required value, neighborhood
-upper-support inequality, time differentiability, spatial smoothness, gradient
-bound, and parabolic lower bound.
+from a Ricci-flow solution, completeness at time zero, a closed-slab
+order-zero curvature bound, positive time, and finite nonzero distance.
 
-Its proof is mathematically assembled and contains no `sorry`, `admit`, or new
-axiom. The only blocker is elaboration/kernel-normalization performance in one
-private orchestration theorem.
+Do not add:
 
-## Current helper architecture
+- completeness at the selected time as an input;
+- connectedness, injectivity radius, a cut-time hypothesis, or a new HCG field;
+- a second metric/completeness hierarchy;
+- an unlimited or file-wide heartbeat setting.
 
-The implementation deliberately separates the mathematics into private
-declarations:
+All mathematics below is already assembled without `sorry`, `admit`, or a new
+axiom. The only blocker is deterministic `whnf` normalization.
 
-- `ScaledDistSupport`: bundles the support function `rho` and exactly the seven
-  conclusions later projected by the public theorem: `eq_at`, `upper_nhds`,
-  `time_diff`, `space_diff_nhds`, `grad_diff`, `grad_sq`, and `par_lower`.
-- `exists_calabi_coeff`: chooses the dimension-normalized Bishop comparison
-  coefficient.
-- `ricci_quad_of_curv`: turns the scalar curvature-norm bound into a uniform
-  quadratic Ricci bound and proves `0 <= Lambda`.
-- `CalabiFlowCore`: bundles the unscaled fixed-time Calabi support, broken-path
-  time variation, spatial regularity, unit gradient, and Laplacian estimate.
-- `calabi_core_of_sol`: constructs `Nonempty CalabiFlowCore` after installing
-  the fixed-time Riemannian metric and completeness instances.
-- `CalabiFlowCore.scale`: multiplies the unscaled core by `exp (Lambda * t)` and
-  returns `Nonempty ScaledDistSupport`.
-- `scaled_of_quad`: given the quadratic Ricci bound and completeness of the
-  selected time slice, installs the local metric instances, calls the
-  fixed-time Calabi producer, and scales the result.
+## Current two-module boundary
 
-All these declarations elaborate without diagnostics in the current focused
-proof loop.
+The source was split at the smallest stable boundary:
 
-The remaining private orchestration theorem is:
+```text
+Evolution/DistanceBarrierCore.lean
+Evolution/DistanceBarrier.lean
+```
+
+`DistanceBarrierCore.lean` is focused-green and exact-green
+(`3994/3994`) at the default heartbeat budget. It exports:
+
+```lean
+namespace DistanceBarrierCore
+
+structure ScaledDistSupport
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (O : M) (T t : Real) (x : M) (d Λ r : Real) : Prop where
+  rho : Real → M → Real
+  eq_at : ...
+  upper_nhds : ...
+  time_diff : ...
+  space_diff_nhds : ...
+  grad_diff : ...
+  grad_sq : ...
+  par_lower : ...
+
+theorem ScaledDistSupport.toResult
+    (h : ScaledDistSupport (I := I) S O T t x d Λ r) :
+    ∃ rho : Real → M → Real, ... := ...
+
+theorem ricci_quad_of_curv ... :
+    0 ≤ (Module.finrank Real E : Real) ^ 2 * Real.sqrt K ∧
+    (∀ s ∈ Set.Icc 0 T, ∀ y v,
+      |ricciTensor ... v v| ≤
+        ((Module.finrank Real E : Real) ^ 2 * Real.sqrt K) *
+          (S.base.metric s).inner y v v)
+
+theorem scaled_of_quad
+    ...
+    (hLambda : 0 ≤ Lambda)
+    (hricQuad : ∀ s ∈ Set.Icc 0 T, ∀ y v, ...)
+    (hcomplete_t :
+      RiemannianMetricComplete (I := I) (S.base.metric t))
+    ... :
+    Nonempty
+      (ScaledDistSupport (I := I) S O T t x
+        (Module.finrank Real E : Real) Lambda
+        (riemannianEDistOf
+          (I := I) (S.base.metric t) O x).toReal)
+```
+
+The lower module
+`Evolution/MetricTimeCompare.lean` is also focused- and exact-green and exports:
+
+```lean
+theorem complete_of_rmBound
+    ...
+    (hcurv : ∀ t ∈ Set.Icc a b, ∀ x : M,
+      Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4
+        (S.base.rm04 t x) ≤ C)
+    (ha : RiemannianMetricComplete (I := I) (S.base.metric a))
+    {s : Real} (hs : s ∈ Set.Icc a b) :
+    RiemannianMetricComplete (I := I) (S.base.metric s)
+```
+
+`RiemannianMetricComplete g` is the existing `Prop` structure whose only field
+is a `CompleteSpace M` value under the canonical local instances for
+`IsManifold I 1 M`, metrizability, `T3Space`, `RiemannianBundle`,
+`IsContinuousRiemannianBundle`, and
+`EMetricSpace.ofRiemannianMetric I M`.
+
+## Current smallest failing declaration
+
+The endpoint wrapper defines:
+
+```lean
+private structure CurvPrep
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (T K t : Real) : Prop where
+  lambda_nonneg :
+    0 ≤ (Module.finrank Real E : Real) ^ 2 * Real.sqrt K
+  ricci_quad :
+    ∀ s ∈ Set.Icc 0 T, ∀ y : M, ∀ v : TangentSpace I y,
+      |ricciTensor (I := I) (S.base.metric s) y v v| ≤
+        ((Module.finrank Real E : Real) ^ 2 * Real.sqrt K) *
+          (S.base.metric s).inner y v v
+  complete_t :
+    RiemannianMetricComplete (I := I) (S.base.metric t)
+```
+
+and then:
 
 ```lean
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem scaledDist_support
+private theorem curv_prep
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (O : M)
     {T K t : Real}
-    (hT : 0 < T)
     (hslab : Set.Icc 0 T ⊆ D.carrier)
     (hreg : Set.Ioc 0 T ⊆ D.regular)
     (hcomplete :
@@ -80,120 +157,105 @@ private theorem scaledDist_support
     (hK : 0 ≤ K)
     (hcurv : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
       nablaKRm04NormSqIntrinsic (I := I) S 0 s y ≤ K)
-    (ht : t ∈ Set.Icc 0 T)
-    (htpos : 0 < t)
-    (x : M)
-    (hfinite :
-      riemannianEDistOf (I := I) (S.base.metric t) O x ≠ ⊤)
-    (hOx : O ≠ x) :
-    let d : Real := Module.finrank Real E
-    let Λ : Real := d ^ 2 * Real.sqrt K
-    let r : Real :=
-      (riemannianEDistOf (I := I) (S.base.metric t) O x).toReal
-    Nonempty (ScaledDistSupport (I := I) S O T t x d Λ r) := by
-  classical
-  dsimp only
-  obtain ⟨hΛ, hricQuad⟩ :=
-    ricci_quad_of_curv (I := I) S hK hcurv
-  have hcomplete_t :
-      RiemannianMetricComplete (I := I) (S.base.metric t) :=
-    complete_of_ricBound
-      (I := I) (D := D) (a := 0) (b := T)
-        (K := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
-        (s := t) S hS hslab hreg hΛ hricQuad hcomplete ht
-  exact scaled_of_quad
-    (I := I) (D := D) (T := T) (t := t)
-      (Λ := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
-      S hS O hT hreg hΛ hricQuad hcomplete_t ht htpos x hfinite hOx
+    (ht : t ∈ Set.Icc 0 T) :
+    CurvPrep (I := I) S T K t := by
+  have hquad :=
+    DistanceBarrierCore.ricci_quad_of_curv (I := I) S hK hcurv
+  have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
+      Tensor0SBundle.normSq0S (I := I) (S.base.metric s) y 4
+        (S.base.rm04 s y) ≤ K := by
+    intro s hs y
+    simpa only [nablaKRm04NormSqIntrinsic, nablaKRm04Field_zero,
+      Nat.add_zero] using hcurv s hs y
+  exact {
+    lambda_nonneg := hquad.1
+    ricci_quad := hquad.2
+    complete_t :=
+      complete_of_rmBound
+        (I := I) (D := D) (a := 0) (b := T) (C := K) (s := t)
+        S hS hslab hreg hcurv0 hcomplete ht
+  }
 ```
 
-The public theorem merely calls this private theorem, destructures the bundled
-witness, and projects its fields:
+This declaration deterministically times out at `whnf`:
+
+```text
+DistanceBarrier.lean:52:0:
+error: timeout at whnf, maximum heartbeats 200000
+```
+
+A temporary option scoped only to `curv_prep` also failed at `500000`
+heartbeats. The live source has been restored to the default setting.
+
+The later private `scaled_of_curv` now only does:
 
 ```lean
-  obtain ⟨h⟩ :=
-    scaledDist_support
-      (I := I) S hS O hT hslab hreg hcomplete hK hcurv
-        ht htpos x hfinite hOx
-  exact
-    ⟨h.rho, h.eq_at, h.upper_nhds, h.time_diff, h.space_diff_nhds,
-      h.grad_diff, h.grad_sq, h.par_lower⟩
+have hp := curv_prep ...
+exact DistanceBarrierCore.scaled_of_quad
+  ... hp.lambda_nonneg hp.ricci_quad hp.complete_t ...
 ```
 
-## Verified failure
+It cannot be checked because `curv_prep` is not created.
 
-`scaledDist_support` deterministically exceeds the heartbeat limit during
-`whnf`.
+## Routes already ruled out
 
-- It fails with the default `200000` heartbeats.
-- A separate narrowly scoped test at `500000` heartbeats also fails. The live
-  source has been restored to the default setting.
-- There is no ordinary theorem-body goal, type mismatch, missing declaration,
-  or stale-import diagnostic before the timeout.
-- Because this private declaration is never created, the public wrapper
-  subsequently cannot use it; that is only a downstream consequence.
-- The constituent mathematical helpers listed above elaborate successfully.
+1. One monolithic proof returning the public nested existential proposition.
+2. Separate fixed-time `CalabiFlowCore`, scaling, and completeness helpers in
+   the same module.
+3. An opaque lower `completeInst` for installing the canonical
+   `CompleteSpace M`.
+4. A compiled top-level `complete_of_rmBound` theorem in
+   `MetricTimeCompare.lean`.
+5. A compiled `DistanceBarrierCore.olean` boundary while
+   `scaled_of_quad` returned the full public existential proposition.
+6. The same compiled boundary with `scaled_of_quad` returning
+   `Nonempty ScaledDistSupport`.
+7. The current `CurvPrep : Prop` packaging of `lambda_nonneg`,
+   `ricci_quad`, and `complete_t`.
+8. Fully explicit implicit arguments and direct `exact`/`obtain` layouts.
+9. Scoped 400000 and 500000 heartbeat experiments.
 
-The likely expensive term is the interaction among:
-
-- `complete_of_ricBound`;
-- its proof-valued `RiemannianMetricComplete` result;
-- the induced `CompleteSpace M` instance installed inside `scaled_of_quad`;
-- the fixed-time metric-generated `RiemannianBundle`, `PseudoEMetricSpace`, and
-  related dependent instances;
-- normalization of the large `Nonempty (ScaledDistSupport ...)` expected type.
-
-## Three proof layouts already tried
-
-1. One monolithic proof directly inside the public theorem.
-2. A bundled `ScaledDistSupport` wrapper, with separate fixed-time
-   `CalabiFlowCore`, `calabi_core_of_sol`, and `CalabiFlowCore.scale`.
-3. A further setup split:
-   `ricci_quad_of_curv -> complete_of_ricBound -> scaled_of_quad`, leaving
-   `scaledDist_support` as only the three-line orchestrator shown above.
-
-The third layout is the current source. Making all important arguments to
-`complete_of_ricBound` and `scaled_of_quad` explicit did not remove the `whnf`
-timeout.
-
-## Constraints
-
-Please preserve:
-
-- the exact public statement of `scaledDist_calabiUpperSupport_of_sol`;
-- all current mathematical hypotheses: do not add completeness at time `t`, an
-  injectivity-radius assumption, connectedness, or a new HCG input;
-- the single canonical metric/completeness APIs already used;
-- the existing fixed-metric Calabi and metric-time-comparison producers.
-
-Private implementation helpers may be refactored, but do not introduce a
-parallel public API or move the mathematical frontier into a new assumption.
-
-Please avoid recommending a giant or unlimited heartbeat setting unless you
-can explain why no Lean-native elaboration boundary is available. A small,
-narrowly scoped increase is acceptable only as a justified last resort.
+The compiled core, its named support result, `ricci_quad_of_curv`,
+`complete_of_rmBound`, and `scaled_of_quad` all verify individually. No stale
+artifact or theorem-body type error is reported.
 
 ## Questions
 
-1. What is the most likely source of `whnf` blow-up in this exact proof shape?
-2. What is the smallest Lean-native refactor that prevents reduction of the
-   large metric-instance/completeness proof term?
-3. In Lean 4.29, would one of the following genuinely create the needed
-   elaboration boundary, and exactly where should it be placed?
-   - an `opaque` private definition/theorem;
-   - a small private structure packaging `hΛ`, `hricQuad`, and `hcomplete_t`;
-   - an `abstract` block around the completeness proof;
-   - an explicitly typed intermediate `have` whose result is consumed by
-     `refine`/`apply`;
-   - moving the `CompleteSpace` installation outside or inside a different
-     helper;
-   - changing only the final `exact scaled_of_quad ...` tactic shape.
-4. Please provide the smallest concrete Lean patch or proof skeleton you expect
-   to compile, including any needed `show`, `change`, `refine`, `apply`, `let`,
-   or `have` boundaries.
-5. If an opaque boundary cannot help because the timeout happens before
-   declaration compilation, explain precisely why and give the next-smallest
-   tactic or declaration-level split.
+1. Why does constructing this three-field `CurvPrep` force enough reduction to
+   exceed 500000 heartbeats even though both producer constants are imported
+   from fresh `.olean` files?
+2. Is the expensive reduction caused by the `RiemannianMetricComplete` field
+   and its dependent canonical-instance tower, by the record constructor, by
+   elaboration of the `ricci_quad` dependent function field, or by interaction
+   with the scoped removal of tangent-space instances?
+3. What is the smallest Lean-native declaration or tactic shape that prevents
+   this reduction while preserving all current statements and assumptions?
+   Please give concrete code.
+4. In particular, would any of these genuinely change elaboration here:
+   - a narrowly scoped
+     `set_option backward.isDefEq.respectTransparency false` at one exact
+     declaration;
+   - replacing the record literal with three separately typed opaque producer
+     theorems and `refine ⟨?_, ?_, ?_⟩`;
+   - making `CurvPrep` a data structure rather than a `Prop` structure;
+   - making `complete_t` a thunk or a separately named field theorem;
+   - moving `curv_prep` into `MetricTimeCompare.lean`;
+   - passing `complete_of_rmBound ...` directly to `scaled_of_quad`;
+   - installing the canonical metric instances once in the wrapper and passing
+     a raw `CompleteSpace M` value instead of
+     `RiemannianMetricComplete`;
+   - using `apply`/`refine`/`show`/`change` so Lean does not synthesize the
+     record's expected type by `whnf`;
+   - a narrowly scoped `synthInstance.maxHeartbeats` rather than
+     `maxHeartbeats`.
+5. If the existing `RiemannianMetricComplete` representation itself is the
+   performance problem, propose the smallest compatibility-preserving adapter.
+   Do not redesign the public completeness API or add a new assumption.
+6. If the source cannot be decided statically, give the smallest trace or
+   diagnostic setting that distinguishes expected-type normalization,
+   typeclass synthesis, the curvature-bound coercion, and normalization of
+   `RiemannianMetricComplete`.
 
-The desired answer is a surgical elaboration fix, not a redesign of the Calabi
-argument.
+The desired answer is a surgical Lean elaboration fix. If no such boundary can
+work before declaration compilation, please explain precisely which term is
+being normalized and recommend the smallest justified next experiment.

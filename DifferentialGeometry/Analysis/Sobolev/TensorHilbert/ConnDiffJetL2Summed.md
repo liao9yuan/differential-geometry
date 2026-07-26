@@ -60,8 +60,9 @@ Then realizedFam wrapper (clone of the arm0 tameEnvelope wrapper's `convexPertur
 - `jetL2_sum_lowShift` — new generalization of `ArmBaseCoeffJetL2Summed`'s
   `jetL2_sum_of_perOrder` with **independent** top offset `p` and low-window offset `q` (connDiff
   needs `p=1`, `q=2`; the arm single-offset version does not apply).
-- `iteratedCovGrad_smul_real` — copied (it is `private` to `RemainderCoeffL2JetMoser`, so not
-  importable); needed for the `convexPerturbation` jet expansion.
+- `iteratedCovGrad_smul_real` — WAS copied here (private in `RemainderCoeffL2JetMoser`); the copy
+  was removed 2026-07-25 in favor of the public `iteratedCovGrad_smul`
+  (`Analysis/Spectral/Tensor/CovGrad/IteratedCovGradLinear.lean`, already a transitive import).
 
 ### Lessons / traps hit
 

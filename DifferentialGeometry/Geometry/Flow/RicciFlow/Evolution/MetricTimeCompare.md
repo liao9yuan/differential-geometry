@@ -19,10 +19,18 @@ dependency.
   endpoint vary.
 - `complete_of_ricBound`: completeness of every slice from completeness of the
   left endpoint and a uniform quadratic Ricci bound.
+- `complete_of_rmBound`: the canonical lowered-curvature-norm wrapper around
+  `ricci_quad_sol` and `complete_of_ricBound`.
 
 The completeness theorem treats the degenerate case `s = a` directly. Hence it
 does not add a global strict inequality `a < b`; strictness is needed only on
 the actual subslab when `a < s`.
+
+`complete_of_rmBound` consumes the natural fixed-rank bound
+`normSq0S g 4 Rm04 ≤ C`; its coefficient is chosen before invoking
+`complete_of_ricBound`.  This provides an opaque lower-module boundary for
+consumers such as `DistanceBarrier`, without adding completeness at the
+selected time or importing the higher curvature-tower API here.
 
 The joint-continuity theorem first obtains a two-time exponential metric
 sandwich by restricting `metricPDE_Icc` and `metricEquiv_Icc` to the interval
@@ -40,8 +48,9 @@ active.
 
 ## Project accounting
 
-`complete_of_ricBound` and `edistCont_Icc` are supporting producers for the
-evolving Calabi distance barrier and its cutoff layer. Both producer theorems
+`complete_of_ricBound`, `complete_of_rmBound`, and `edistCont_Icc` are
+supporting producers for the
+evolving Calabi distance barrier and its cutoff layer. These producer theorems
 and their dedicated closed-slab metric comparison machinery are 100% at the
 source/focused level.  Their exact artifact verification is now current. The evolving
 barrier theorem remains separately accounted until its own verification. The
