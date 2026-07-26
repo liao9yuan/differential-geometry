@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSdec
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSup
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04ProducerTail
 
 set_option autoImplicit false
@@ -614,22 +615,21 @@ private theorem fuFrozenJoint (g₁ g₂ : Real → SmoothRiemannianMetric I M) 
       (fun p : Real × M => normSq0S (I := I) (g₁ p.1) p.2 4
         (rmDiffLowAt (I := I) (g₁ t₀) (g₂ t₀) p.2))
       (Ioo a b ×ˢ (univ : Set M)) := by
-  refine normSq0S_jointContMDiffOn (I := I) g₁ isOpen_Ioo
+  refine normSq0S_jointContMDiffOn (I := I) g₁
     (fun _ x => rmDiffLowAt (I := I) (g₁ t₀) (g₂ t₀) x) hgram₁ ?_
-  intro x₀ K t _
+  intro x₀ K t ht
   have hconst : ∀ (g : SmoothRiemannianMetric I M) (y₀ : M)
       (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => chartGramMatrix (I := I) g y₀ p.2 i j)
-        (Ioo (t - 1) (t + 1) ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) := by
+        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) := by
     intro g y₀ i j
     have hsnd : ContMDiffOn (𝓘(Real, Real).prod I) I ∞ (fun p : Real × M => p.2)
-        (Ioo (t - 1) (t + 1) ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) :=
+        (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) y₀).baseSet) :=
       contMDiffOn_snd
     exact (chartGramMatrix_entry_contMDiffOn (I := I) g y₀ i j).comp hsnd fun p hp => hp.2
-  exact rmChartJoint (I := I) (fun _ => g₁ t₀) (fun _ => g₂ t₀) isOpen_Ioo x₀
-    (fun i j => hconst (g₁ t₀) x₀ i j) (fun i j => hconst (g₂ t₀) x₀ i j) K
-    (⟨by linarith, by linarith⟩ : t ∈ Ioo (t - 1) (t + 1))
+  exact rmChartJoint (I := I) (fun _ => g₁ t₀) (fun _ => g₂ t₀) x₀
+    (fun i j => hconst (g₁ t₀) x₀ i j) (fun i j => hconst (g₂ t₀) x₀ i j) K ht
 
 /-- **The leftover reaction of the curvature third is continuous in space.** -/
 private theorem fuReactCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
@@ -1105,6 +1105,76 @@ theorem fuEnergyCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Re
       (⟨hlt, ht.2⟩ : t ∈ Ioo a b)).continuousAt.continuousWithinAt
 
 end SpeedContinuity
+
+section SlabFields
+
+/-! ## Slab-uniform fields at the constructed carriers
+
+`Evolution/ForwardUniqueSup.lean` proves the six `ForwardUniqueSlab` estimates in *carrier*
+form; the two that are unconditional there — `ricciLe` and, once its three background sups are
+supplied, `fluxLe` — are instantiated here at the carriers this file builds.  The background
+sups themselves come from the closed-edge compactness layer (`rm04SlabSup`, `metricSlabSup`),
+which black box (B)'s own half-open chart-Gram fields feed after restriction to `Icc a c`. -/
+
+/-- The `P` slot of the constructed flux is the **cross-lowered** background curvature.
+
+`fuTf g₁ t − fuSfield g₁ g₂ t = Rm(∇²) lowered by g₁`: the flow-1 curvature minus the
+curvature difference is, term by term, the `g₁`-lowering of the *second* connection's Riemann
+tensor.  This is what turns `sdecFluxSq_le`'s abstract `B_P` into a curvature sup. -/
+theorem fuP_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
+    (fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t) x =
+      CovariantDerivative.riemannCurvature04At (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
+        (metricCov_smooth (I := I) (g₂ t)) x := by
+  have hpt : (fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t) x =
+      fuTf (I := I) g₁ t x - fuSfield (I := I) g₁ g₂ t x := rfl
+  rw [hpt, fuTf_apply, fuSfield_apply]
+  exact sub_sub_cancel _ _
+
+/-- **The `fluxLe` field of `ForwardUniqueSlab` at the constructed carrier, unconditional.**
+
+From black box (B)'s two chart-Gram fields alone: on every closed subslab the three background
+norms of `sdecFluxSq_le` — `|Rm₂|²_{g₁}`, `|P|²_{g₁}` and `|g₂|²_{g₁}` — are bounded by the
+extreme value theorem, and `fluxSlabLe` absorbs them into the energy density.  No estimate
+hypothesis and no PDE enter. -/
+theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {c : Real} (hc : c ∈ Ioo a b) :
+    ∃ C_U : Real, ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 5 (fuUflux (I := I) g₁ g₂ t x) ≤
+        C_U * forwardUniqueDensity (I := I) g₁ g₂ t x := by
+  have hsub : Icc a c ⊆ Ico a b := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hc.2⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h1smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  have hres₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h2smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  obtain ⟨B₂, hB₂0, hB₂⟩ := rm04SlabSup (I := I) g₁ g₂ g₂ hres₁ hres₂ hres₂
+  obtain ⟨BP, hBP0, hBP⟩ := rm04SlabSup (I := I) g₁ g₁ g₂ hres₁ hres₁ hres₂
+  obtain ⟨Bg, hBg0, hBg⟩ := metricSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  refine ⟨32 * (Module.finrank Real E : Real) ^ 5 * B₂ +
+    8 * (Module.finrank Real E : Real) ^ 10 * (BP * Bg), fun t ht x => ?_⟩
+  have hIcc : t ∈ Icc a c := Ioo_subset_Icc_self ht
+  have hBPx : normSq0S (I := I) (g₁ t) x 4
+      ((fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t) x) ≤ BP := by
+    rw [fuP_eq (I := I) g₁ g₂ t x]
+    exact hBP t hIcc x
+  exact fluxSlabLe (I := I) g₁ g₂ (fuTf (I := I) g₂)
+    (fun r => fuTf (I := I) g₁ r - fuSfield (I := I) g₁ g₂ r) t x hB₂0 hBP0 hBg0
+    (hB₂ t hIcc x) hBPx (hBg t hIcc x)
+
+end SlabFields
 
 /-! ## The residual bundle, assembled
 

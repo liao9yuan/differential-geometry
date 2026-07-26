@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueClosu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueWithin
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -193,36 +193,56 @@ end JointInvGram
 
 section JointNormSq
 
+/-- An open spatial set through the base point cuts the product slab down to a
+neighbourhood **within** the slab over `univ`, for an *arbitrary* time set `J`.  This is the
+one place where the closed initial edge of `J` would otherwise force `IsOpen J`. -/
+private theorem prodOpen_nhdsWithin {S : Set M} (hS : IsOpen S) {x₀ : M} (hx₀ : x₀ ∈ S)
+    (J : Set ℝ) (t : ℝ) :
+    J ×ˢ S ∈ 𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) := by
+  have hset : (J ×ˢ (Set.univ : Set M)) ∩ ((fun p : ℝ × M => p.2) ⁻¹' S) = J ×ˢ S := by
+    ext p
+    simp [Set.mem_prod]
+  have hopen : ((fun p : ℝ × M => p.2) ⁻¹' S) ∈ nhds ((t, x₀) : ℝ × M) :=
+    (hS.preimage continuous_snd).mem_nhds hx₀
+  have h := inter_mem_nhdsWithin (J ×ˢ (Set.univ : Set M)) (a := ((t, x₀) : ℝ × M)) hopen
+  rwa [hset] at h
+
 variable (g : ℝ → SmoothRiemannianMetric I M)
 
 /-- **Joint `(t, x)`-smoothness of an intrinsic moving fibre squared norm.**
 
 For a metric family `g` with jointly `C∞` chart-Gram entries and a `(0,s)`-tensor family `A`
-whose chart-frame components are jointly `C∞`, the scalar `(t, x) ↦ |A t x|²_{g t}` is jointly
-`C∞` on `J ×ˢ univ` (`J` open).
+whose chart-frame components are jointly `C∞`-within, the scalar `(t, x) ↦ |A t x|²_{g t}` is
+jointly `C∞` on `J ×ˢ univ`, for an **arbitrary** time set `J` — in particular for a closed or
+half-open one, which is what a slab-uniform sup up to the initial edge needs.
 
 The proof is local: around any `(t, x₀)` the intrinsic norm agrees with the coordinate
 contraction of `normSq0S_eq_coord` against the chart basis at `x₀`, whose inverse-metric
 coefficients are the chart inverse-Gram entries (`chartInvGram_inverse`).  Both factors of
-that finite sum are jointly `C∞` by hypothesis, so the sum is, and the eventual equality
+that finite sum are jointly `C∞`-within by hypothesis, so the sum is, and the eventual equality
 transports smoothness back to the intrinsic norm.  This is the joint-in-time analogue of the
 spatial `normSq0S_smooth`.
+
+Openness of `J` is never used: the base set of the trivialization at `x₀` is a *spatial*
+neighbourhood of the chart centre, so `J ×ˢ baseSet` is already a neighbourhood of `(t, x₀)`
+**within** `J ×ˢ univ` (`prodOpen_nhdsWithin`), whatever `J` is.
 
 The component hypothesis `hA` is only ever used *at the diagonal point* `(t, x₀)` with the
 chart centred at `x₀`, so it is stated in that (weakest) pointwise form: producers whose chart
 identity is valid only on a neighbourhood of the chart centre — such as the connection- and
 curvature-difference carriers, valid on `chartLeviCivitaGoodSet x₀` rather than on the whole
 trivialization base set — feed it without any restriction juggling. -/
-theorem normSq0S_jointContMDiffOn {J : Set ℝ} (hJ : IsOpen J) {s : ℕ}
+theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
     (A : ℝ → (x : M) → Tensor0SSpace s I x)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hA : ∀ (x₀ : M) (K : Fin s → Fin (Module.finrank ℝ E)) {t : ℝ}, t ∈ J →
-      ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M =>
-          A p.1 p.2 (fun a : Fin s => chartBasisVecFiber (I := I) x₀ (K a) p.2)) (t, x₀)) :
+          A p.1 p.2 (fun a : Fin s => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+        (J ×ˢ (Set.univ : Set M)) (t, x₀)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => normSq0S (I := I) (g p.1) p.2 s (A p.1 p.2))
       (J ×ˢ (Set.univ : Set M)) := by
@@ -232,33 +252,34 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} (hJ : IsOpen J) {s : ℕ}
   have hqbase : x₀ ∈ e.baseSet := by
     rw [he]
     exact FiberBundle.mem_baseSet_trivializationAt' x₀
-  have hopen : IsOpen (J ×ˢ e.baseSet) := hJ.prod e.open_baseSet
-  have hnhd : J ×ˢ e.baseSet ∈ nhds ((t, x₀) : ℝ × M) := hopen.mem_nhds ⟨htJ, hqbase⟩
-  -- the coordinate contraction is jointly smooth at `(t, x₀)`
-  have hsum : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+  have hnhd : J ×ˢ e.baseSet ∈ 𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+    prodOpen_nhdsWithin e.open_baseSet hqbase J t
+  -- the coordinate contraction is jointly smooth-within at `(t, x₀)`
+  have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M =>
         ∑ K : Fin s → Fin (Module.finrank ℝ E),
           ∑ L : Fin s → Fin (Module.finrank ℝ E),
             (∏ a : Fin s, chartInvGramMatrix (I := I) (g p.1) x₀ p.2 (K a) (L a)) *
               A p.1 p.2 (fun a : Fin s => chartBasisVecFiber (I := I) x₀ (K a) p.2) *
               A p.1 p.2 (fun a : Fin s => chartBasisVecFiber (I := I) x₀ (L a) p.2))
-      ((t, x₀) : ℝ × M) := by
-    refine ContMDiffAt.sum fun K _ => ContMDiffAt.sum fun L _ => ?_
+      (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) := by
+    refine ContMDiffWithinAt.sum fun K _ => ContMDiffWithinAt.sum fun L _ => ?_
     have hinvAt : ∀ k l : Fin (Module.finrank ℝ E),
-        ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
           (fun p : ℝ × M => chartInvGramMatrix (I := I) (g p.1) x₀ p.2 k l)
-          ((t, x₀) : ℝ × M) :=
-      fun k l => (chartInvGram_jointContMDiffOn (I := I) g x₀ (hgram x₀) k l).contMDiffAt hnhd
+          (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) :=
+      fun k l => (chartInvGram_jointContMDiffOn (I := I) g x₀ (hgram x₀) k l
+        ((t, x₀) : ℝ × M) ⟨htJ, hqbase⟩).mono_of_mem_nhdsWithin hnhd
     have hAAt : ∀ N : Fin s → Fin (Module.finrank ℝ E),
-        ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
           (fun p : ℝ × M =>
             A p.1 p.2 (fun a : Fin s => chartBasisVecFiber (I := I) x₀ (N a) p.2))
-          ((t, x₀) : ℝ × M) :=
+          (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) :=
       fun N => hA x₀ N htJ
-    exact ((ContMDiffAt.prod fun a _ => hinvAt (K a) (L a)).mul (hAAt K)).mul (hAAt L)
-  -- and it agrees with the intrinsic norm near `(t, x₀)`
+    exact ((ContMDiffWithinAt.prod fun a _ => hinvAt (K a) (L a)).mul (hAAt K)).mul (hAAt L)
+  -- and it agrees with the intrinsic norm near `(t, x₀)` within the slab
   have heq : (fun p : ℝ × M => normSq0S (I := I) (g p.1) p.2 s (A p.1 p.2))
-      =ᶠ[nhds ((t, x₀) : ℝ × M)]
+      =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
       fun p : ℝ × M =>
         ∑ K : Fin s → Fin (Module.finrank ℝ E),
           ∑ L : Fin s → Fin (Module.finrank ℝ E),
@@ -280,7 +301,7 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} (hJ : IsOpen J) {s : ℕ}
       funext a
       exact chartBasisFamily_apply (I := I) x₀ hpb (N a)
     rw [hbas K, hbas L]
-  exact (hsum.congr_of_eventuallyEq heq).contMDiffWithinAt
+  exact hsum.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨htJ, Set.mem_univ x₀⟩)
 
 end JointNormSq
 
@@ -294,51 +315,39 @@ section MetricDiff
 
 variable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
 
-/-- Chart-frame components of a metric family are jointly `C∞`: the chart basis vectors
-`chartBasisVecFiber x₀` form a `C∞` local frame on the trivialization base set, so this is
-`metricFrameComp_jointContMDiffOn_of_chartGram` read through
-`Trivialization.localFrame_apply_of_mem_baseSet`. -/
-theorem metricChartComp_jointContMDiffOn (g : ℝ → SmoothRiemannianMetric I M) {a b : ℝ}
+/-- Chart-frame components of a metric family are jointly `C∞` on **any** time set: the
+chart-frame component *is* the chart-Gram entry (`chartGramMatrix_apply` is `rfl`), so this is
+the chart-Gram package itself. -/
+theorem metricChartComp_jointContMDiffOn (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (x₀ : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => (g p.1).inner p.2
         (chartBasisVecFiber (I := I) x₀ i p.2) (chartBasisVecFiber (I := I) x₀ j p.2))
-      (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
-  set e := trivializationAt E (TangentSpace I) x₀ with he
-  have hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞)
-      (e.localFrame (chartModelBasis E)) e.baseSet :=
-    e.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (chartModelBasis E)
-  have hbridge : ∀ {x : M}, x ∈ e.baseSet → ∀ k : Fin (Module.finrank ℝ E),
-      e.localFrame (chartModelBasis E) k x = chartBasisVecFiber (I := I) x₀ k x := by
-    intro x hx k
-    rw [e.localFrame_apply_of_mem_baseSet (chartModelBasis E) hx]
-    rfl
-  refine (metricFrameComp_jointContMDiffOn_of_chartGram (I := I) g a b hgram
-    (e.localFrame (chartModelBasis E)) hframe i j).congr ?_
-  intro p hp
-  rw [hbridge hp.2 i, hbridge hp.2 j]
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+  hgram x₀ i j
 
 /-- **The metric third of `hdens`.**  `(t, x) ↦ |h₀₂|²_{g₁(t)}` is jointly `C∞` on
-`Ioo a b ×ˢ univ` under the chart-Gram packages of the two flows.  Unconditional: the brick's
-component hypothesis is discharged by `metricChartComp_jointContMDiffOn` on both metrics. -/
-theorem metricDiffSq_jointContMDiffOn {a b : ℝ}
+`J ×ˢ univ` under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`.
+Unconditional: the brick's component hypothesis is discharged by
+`metricChartComp_jointContMDiffOn` on both metrics. -/
+theorem metricDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => metricDiffSq (I := I) (g₁ p.1) (g₂ p.1) p.2)
-      (Set.Ioo a b ×ˢ (Set.univ : Set M)) := by
+      (J ×ˢ (Set.univ : Set M)) := by
   simp only [metricDiffSq_def]
-  refine normSq0S_jointContMDiffOn (I := I) g₁ isOpen_Ioo
+  refine normSq0S_jointContMDiffOn (I := I) g₁
     (fun t x => metricDiffAt (I := I) (g₁ t) (g₂ t) x) hgram₁ ?_
   intro x₀ K t ht
   have hsub : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -347,14 +356,15 @@ theorem metricDiffSq_jointContMDiffOn {a b : ℝ}
             (chartBasisVecFiber (I := I) x₀ (K 1) p.2) -
           (g₂ p.1).inner p.2 (chartBasisVecFiber (I := I) x₀ (K 0) p.2)
             (chartBasisVecFiber (I := I) x₀ (K 1) p.2))
-      (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
     (metricChartComp_jointContMDiffOn (I := I) g₁ hgram₁ x₀ (K 0) (K 1)).sub
       (metricChartComp_jointContMDiffOn (I := I) g₂ hgram₂ x₀ (K 0) (K 1))
-  have hnhd : Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
-      nhds ((t, x₀) : ℝ × M) :=
-    (isOpen_Ioo.prod (trivializationAt E (TangentSpace I) x₀).open_baseSet).mem_nhds
-      ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩
-  refine ContMDiffOn.contMDiffAt (hsub.congr ?_) hnhd
+  have hnhd : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
+      𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+    prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) J t
+  refine ContMDiffWithinAt.mono_of_mem_nhdsWithin ((hsub.congr ?_) ((t, x₀) : ℝ × M)
+    ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩) hnhd
   intro p _
   exact (metricDiffAt_apply (I := I) (g₁ p.1) (g₂ p.1) p.2
     (fun a : Fin 2 => chartBasisVecFiber (I := I) x₀ (K a) p.2)).symm
@@ -472,6 +482,28 @@ theorem rm04ChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     riemannOp_chartBasisVec_alpha_eq (I := I) g₂ α i j k hx, inner_sum_right]
   exact Finset.sum_congr rfl fun l _ => by rw [chartGramMatrix_apply]
 
+/-- **Chart-frame components of the mixed lowered curvature, in slot-map form.**  The same
+identity as `rm04ChartComp`, with the four slots supplied by an index map `K : Fin 4 → …`
+instead of `vec4` — the shape the joint-regularity brick `normSq0S_jointContMDiffOn` consumes.
+Taking `g₂ := g₁` reads the diagonal curvature `metricRm04At g₁`. -/
+theorem rm04ChartMap (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
+    (K : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
+        (metricCov_smooth (I := I) g₂) x
+        (fun a : Fin 4 => chartBasisVecFiber (I := I) α (K a) x) =
+      ∑ l : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) g₂ α (K 2) (K 0) (K 1) l (extChartAt I α x) *
+          chartGramMatrix (I := I) g₁ α x (K 3) l := by
+  have hvec : (fun a : Fin 4 => chartBasisVecFiber (I := I) α (K a) x) =
+      vec4 (I := I) (chartBasisVecFiber (I := I) α (K 0) x)
+        (chartBasisVecFiber (I := I) α (K 1) x) (chartBasisVecFiber (I := I) α (K 2) x)
+        (chartBasisVecFiber (I := I) α (K 3) x) := by
+    funext a
+    fin_cases a <;> rfl
+  rw [hvec]
+  exact rm04ChartComp (I := I) g₁ g₂ α (K 2) (K 0) (K 1) (K 3) hx
+
 /-- **Chart-frame components of `S₀₄`.**  Both terms of the curvature difference are read by
 `rm04ChartComp`, the first with `g₂ := g₁`. -/
 theorem rmChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
@@ -511,109 +543,21 @@ back to `ℝ × M` along `extChartAt`. -/
 
 section JointChart
 
-/-- The chart-Gram package of a metric family, repackaged as the `GenJointGram` hypothesis
-bundle of the generic joint Christoffel/Riemann tower.  Only the transport `ℝ × M → ℝ × E` is
-performed here; the Gram determinant positivity is unconditional. -/
-private theorem genGram_of_joint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
-    (hJ : IsOpen J) (α : M)
-    (hgram : ∀ i j : Fin (Module.finrank ℝ E),
-      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) α p.2 i j)
-        (J ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)) :
-    GenJointGram (I := I) g α J := by
-  classical
-  refine ⟨?_, ?_⟩
-  · intro i j s₀ y₀ hs hy
-    set e := trivializationAt E (TangentSpace I) α with he
-    have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm (extChartAt I α).target :=
-      contMDiffOn_extChartAt_symm (I := I) α
-    have hsubset : (extChartAt I α).target ⊆ (extChartAt I α).symm ⁻¹' e.baseSet := by
-      intro y hy'
-      have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
-        (extChartAt I α).map_target hy'
-      rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
-      rw [he, trivializationAt_baseSet_eq_chartAt_source]
-      exact hsource
-    have hσ1 : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × E => p.1) (J ×ˢ interior (extChartAt I α).target) :=
-      (contMDiff_iff_contDiff.mpr contDiff_fst).contMDiffOn
-    have hsnd : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞
-        (fun p : ℝ × E => p.2) (J ×ˢ interior (extChartAt I α).target) :=
-      (contMDiff_iff_contDiff.mpr contDiff_snd).contMDiffOn
-    have hmaps2 : Set.MapsTo (fun p : ℝ × E => p.2)
-        (J ×ˢ interior (extChartAt I α).target) (extChartAt I α).target :=
-      fun p hp => interior_subset hp.2
-    have hσ2 : ContMDiffOn 𝓘(ℝ, ℝ × E) I ∞
-        (fun p : ℝ × E => (extChartAt I α).symm p.2)
-        (J ×ˢ interior (extChartAt I α).target) :=
-      hsymm.comp hsnd hmaps2
-    have hσ : ContMDiffOn 𝓘(ℝ, ℝ × E) (𝓘(ℝ, ℝ).prod I) ∞
-        (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2))
-        (J ×ˢ interior (extChartAt I α).target) :=
-      hσ1.prodMk hσ2
-    have hcomp : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × E => chartGramOnE (I := I) (g p.1) α i j p.2)
-        (J ×ˢ interior (extChartAt I α).target) := by
-      refine ((hgram i j).comp hσ (fun p hp => ⟨hp.1, hsubset (interior_subset hp.2)⟩)).congr ?_
-      intro p _
-      rfl
-    exact hcomp.contDiffOn.contDiffAt
-      (prod_mem_nhds (hJ.mem_nhds hs) (isOpen_interior.mem_nhds hy))
-  · intro s₀ _ x hx
-    exact chartGramMatrix_det_pos (I := I) (g s₀) α hx
-
-/-- Transport of a joint `ℝ × E` chart-scalar smoothness statement back to the manifold source
-`ℝ × M`, along `(t, x) ↦ (t, ϕ_α x)`. -/
-private theorem jointOnM (α : M) (F : ℝ → E → ℝ) {t : ℝ} {x : M}
-    (hF : ContDiffAt ℝ ∞ (fun r : ℝ × E => F r.1 r.2) (t, extChartAt I α x))
-    (hx : x ∈ (chartAt H α).source) :
-    ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => F p.1 (extChartAt I α p.2)) (t, x) := by
-  have hchart : ContMDiffAt I 𝓘(ℝ, E) ∞ (fun y : M => extChartAt I α y) x :=
-    (contMDiffOn_extChartAt (I := I) (x := α) (n := ∞)).contMDiffAt
-      ((chartAt H α).open_source.mem_nhds hx)
-  have hmove : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ × E) ∞
-      (fun p : ℝ × M => (p.1, extChartAt I α p.2)) (t, x) := by
-    have hfst : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => p.1) ((t, x) : ℝ × M) := contMDiffAt_fst
-    have h := hfst.prodMk (hchart.comp ((t, x) : ℝ × M) contMDiffAt_snd)
-    rwa [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at h
-  simpa using hF.contMDiffAt.comp ((t, x) : ℝ × M) hmove
-
-/-- Joint `(t, x)`-`C∞` of a chart Christoffel symbol of a metric family, on `ℝ × M`. -/
-private theorem christJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
-    (α : M) (hG : GenJointGram (I := I) g α J)
-    (i j k : Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) {x : M}
-    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
-    ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => chartChristoffel (I := I) (g p.1) α i j k (extChartAt I α p.2))
-      (t, x) :=
-  jointOnM (I := I) α (fun s y => chartChristoffel (I := I) (g s) α i j k y)
-    (gen_joint_christoffel (I := I) g α hG i j k ht
-      (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx))
-    (by
-      have h := (mem_chartLeviCivitaGoodSet_iff.mp hx).1
-      rwa [extChartAt_source] at h)
-
-/-- Joint `(t, x)`-`C∞` of a chart Riemann coefficient of a metric family, on `ℝ × M`. -/
-private theorem riemJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
-    (α : M) (hG : GenJointGram (I := I) g α J)
-    (i j k l : Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) {x : M}
-    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
-    ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => chartRiemannTensor (I := I) (g p.1) α i j k l (extChartAt I α p.2))
-      (t, x) :=
-  jointOnM (I := I) α (fun s y => chartRiemannTensor (I := I) (g s) α i j k l y)
-    (gen_joint_riemann (I := I) g α hG i j k l ht
-      (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx))
-    (by
-      have h := (mem_chartLeviCivitaGoodSet_iff.mp hx).1
-      rwa [extChartAt_source] at h)
+/-- The chart-`α` good set is a spatial neighbourhood of the chart centre, so the product slab
+over it is a neighbourhood of `(t, x₀)` within the slab over `univ`, for an arbitrary `J`. -/
+private theorem good_nhdsWithin (x₀ : M) (J : Set ℝ) (t : ℝ) :
+    J ×ˢ chartLeviCivitaGoodSet (I := I) x₀ ∈
+      𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+  prodOpen_nhdsWithin (chartLeviCivitaGoodSet_isOpen (I := I) x₀)
+    (self_mem_chartLeviCivitaGoodSet (I := I) x₀) J t
 
 /-- **The `A₀₃` component input of the brick**, discharged: the chart-frame components of the
-connection-difference carrier are jointly `C∞` at `(t, x₀)`, from the two chart-Gram packages
-at `x₀`. -/
-theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (hJ : IsOpen J)
+connection-difference carrier are jointly `C∞`-within `J ×ˢ univ` at `(t, x₀)`, from the two
+chart-Gram packages at `x₀`.  The time set `J` is **arbitrary** — in particular it may be
+half-open or closed at the initial edge, which is what the slab-uniform sups need.  The joint
+Christoffel input is the `ContDiffWithinAt` tower `christWithinM`
+(`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`). -/
+theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -624,38 +568,50 @@ theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
         (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (K : Fin 3 → Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) :
-    ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => connDiffLowAt (I := I) (g₁ p.1) (g₂ p.1) p.2
-        (fun a : Fin 3 => chartBasisVecFiber (I := I) x₀ (K a) p.2)) (t, x₀) := by
+        (fun a : Fin 3 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      (J ×ˢ (Set.univ : Set M)) (t, x₀) := by
   classical
-  have hG₁ := genGram_of_joint (I := I) g₁ hJ x₀ hgram₁
-  have hG₂ := genGram_of_joint (I := I) g₂ hJ x₀ hgram₂
-  have hgood : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
-    self_mem_chartLeviCivitaGoodSet (I := I) x₀
-  have hnhdB : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈ nhds ((t, x₀) : ℝ × M) :=
-    (hJ.prod (trivializationAt E (TangentSpace I) x₀).open_baseSet).mem_nhds
-      ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩
-  have hΦ : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+  have hG₁ := genGramOn_of_field (I := I) g₁ x₀ hgram₁
+  have hG₂ := genGramOn_of_field (I := I) g₂ x₀ hgram₂
+  have hxs : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+  have hnhdS := prodOpen_nhdsWithin (chartAt H x₀).open_source
+    (mem_chart_source H x₀) J t
+  have hnhdB : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
+      𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+    prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) J t
+  have hΦ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => ∑ m : Fin (Module.finrank ℝ E),
         (chartChristoffel (I := I) (g₁ p.1) x₀ (K 0) (K 1) m (extChartAt I x₀ p.2) -
             chartChristoffel (I := I) (g₂ p.1) x₀ (K 0) (K 1) m (extChartAt I x₀ p.2)) *
-          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 m (K 2)) ((t, x₀) : ℝ × M) := by
-    refine ContMDiffAt.sum fun m _ => ?_
-    exact ((christJoint (I := I) g₁ x₀ hG₁ (K 0) (K 1) m ht hgood).sub
-      (christJoint (I := I) g₂ x₀ hG₂ (K 0) (K 1) m ht hgood)).mul
-      ((hgram₁ m (K 2)).contMDiffAt hnhdB)
-  refine hΦ.congr_of_eventuallyEq ?_
-  have hnhdG : (Set.univ : Set ℝ) ×ˢ chartLeviCivitaGoodSet (I := I) x₀ ∈
-      nhds ((t, x₀) : ℝ × M) :=
-    (isOpen_univ.prod (chartLeviCivitaGoodSet_isOpen (I := I) x₀)).mem_nhds
-      ⟨Set.mem_univ t, hgood⟩
-  filter_upwards [hnhdG] with p hp
-  exact connChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 m (K 2))
+      (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) := by
+    refine ContMDiffWithinAt.sum fun m _ => ?_
+    exact
+      (((christWithinM (I := I) g₁ x₀ hG₁ (K 0) (K 1) m ht hxs).mono_of_mem_nhdsWithin
+          hnhdS).sub
+        ((christWithinM (I := I) g₂ x₀ hG₂ (K 0) (K 1) m ht hxs).mono_of_mem_nhdsWithin
+          hnhdS)).mul
+      ((hgram₁ m (K 2) ((t, x₀) : ℝ × M)
+        ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩).mono_of_mem_nhdsWithin hnhdB)
+  have heq : (fun p : ℝ × M => connDiffLowAt (I := I) (g₁ p.1) (g₂ p.1) p.2
+        (fun a : Fin 3 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
+      fun p : ℝ × M => ∑ m : Fin (Module.finrank ℝ E),
+        (chartChristoffel (I := I) (g₁ p.1) x₀ (K 0) (K 1) m (extChartAt I x₀ p.2) -
+            chartChristoffel (I := I) (g₂ p.1) x₀ (K 0) (K 1) m (extChartAt I x₀ p.2)) *
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 m (K 2) := by
+    filter_upwards [good_nhdsWithin (I := I) x₀ J t] with p hp
+    exact connChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
+  exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
 /-- **The `S₀₄` component input of the brick**, discharged: the chart-frame components of the
-curvature-difference carrier are jointly `C∞` at `(t, x₀)`, from the two chart-Gram packages
-at `x₀`. -/
-theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (hJ : IsOpen J)
+curvature-difference carrier are jointly `C∞`-within `J ×ˢ univ` at `(t, x₀)`, from the two
+chart-Gram packages at `x₀`, for an **arbitrary** time set `J`.  The joint Riemann input is the
+`ContDiffWithinAt` tower `riemWithinM`. -/
+theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -666,34 +622,127 @@ theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set �
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
         (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (K : Fin 4 → Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) :
-    ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => rmDiffLowAt (I := I) (g₁ p.1) (g₂ p.1) p.2
-        (fun a : Fin 4 => chartBasisVecFiber (I := I) x₀ (K a) p.2)) (t, x₀) := by
+        (fun a : Fin 4 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      (J ×ˢ (Set.univ : Set M)) (t, x₀) := by
   classical
-  have hG₁ := genGram_of_joint (I := I) g₁ hJ x₀ hgram₁
-  have hG₂ := genGram_of_joint (I := I) g₂ hJ x₀ hgram₂
-  have hgood : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
-    self_mem_chartLeviCivitaGoodSet (I := I) x₀
-  have hnhdB : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈ nhds ((t, x₀) : ℝ × M) :=
-    (hJ.prod (trivializationAt E (TangentSpace I) x₀).open_baseSet).mem_nhds
-      ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩
-  have hΦ : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+  have hG₁ := genGramOn_of_field (I := I) g₁ x₀ hgram₁
+  have hG₂ := genGramOn_of_field (I := I) g₂ x₀ hgram₂
+  have hxs : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+  have hnhdS := prodOpen_nhdsWithin (chartAt H x₀).open_source
+    (mem_chart_source H x₀) J t
+  have hnhdB : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
+      𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+    prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) J t
+  have hΦ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => ∑ l : Fin (Module.finrank ℝ E),
         (chartRiemannTensor (I := I) (g₁ p.1) x₀ (K 2) (K 0) (K 1) l (extChartAt I x₀ p.2) -
             chartRiemannTensor (I := I) (g₂ p.1) x₀ (K 2) (K 0) (K 1) l
               (extChartAt I x₀ p.2)) *
-          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 (K 3) l) ((t, x₀) : ℝ × M) := by
-    refine ContMDiffAt.sum fun l _ => ?_
-    exact ((riemJoint (I := I) g₁ x₀ hG₁ (K 2) (K 0) (K 1) l ht hgood).sub
-      (riemJoint (I := I) g₂ x₀ hG₂ (K 2) (K 0) (K 1) l ht hgood)).mul
-      ((hgram₁ (K 3) l).contMDiffAt hnhdB)
-  refine hΦ.congr_of_eventuallyEq ?_
-  have hnhdG : (Set.univ : Set ℝ) ×ˢ chartLeviCivitaGoodSet (I := I) x₀ ∈
-      nhds ((t, x₀) : ℝ × M) :=
-    (isOpen_univ.prod (chartLeviCivitaGoodSet_isOpen (I := I) x₀)).mem_nhds
-      ⟨Set.mem_univ t, hgood⟩
-  filter_upwards [hnhdG] with p hp
-  exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 (K 3) l)
+      (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) := by
+    refine ContMDiffWithinAt.sum fun l _ => ?_
+    exact
+      (((riemWithinM (I := I) g₁ x₀ hG₁ (K 2) (K 0) (K 1) l ht hxs).mono_of_mem_nhdsWithin
+          hnhdS).sub
+        ((riemWithinM (I := I) g₂ x₀ hG₂ (K 2) (K 0) (K 1) l ht hxs).mono_of_mem_nhdsWithin
+          hnhdS)).mul
+      ((hgram₁ (K 3) l ((t, x₀) : ℝ × M)
+        ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩).mono_of_mem_nhdsWithin hnhdB)
+  have heq : (fun p : ℝ × M => rmDiffLowAt (I := I) (g₁ p.1) (g₂ p.1) p.2
+        (fun a : Fin 4 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
+      fun p : ℝ × M => ∑ l : Fin (Module.finrank ℝ E),
+        (chartRiemannTensor (I := I) (g₁ p.1) x₀ (K 2) (K 0) (K 1) l (extChartAt I x₀ p.2) -
+            chartRiemannTensor (I := I) (g₂ p.1) x₀ (K 2) (K 0) (K 1) l
+              (extChartAt I x₀ p.2)) *
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 (K 3) l := by
+    filter_upwards [good_nhdsWithin (I := I) x₀ J t] with p hp
+    exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
+  exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
+
+/-- **The chart-frame components of a moving metric, jointly.**  For the `(0,2)` carrier
+`metricTensorField (g t)` the chart-frame component *is* the chart-Gram entry, so the joint
+regularity is the chart-Gram package read through `metricTensorField_apply`.  This is the
+`|g₂|²_{g₁}` input of the flux constant. -/
+theorem metricChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (x₀ : M)
+    (hgram : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (K : Fin 2 → Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => metricTensorField (I := I) (g p.1) p.2
+        (fun a : Fin 2 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      (J ×ˢ (Set.univ : Set M)) (t, x₀) := by
+  have hfun : (fun p : ℝ × M => metricTensorField (I := I) (g p.1) p.2
+        (fun a : Fin 2 => chartBasisVecFiber (I := I) x₀ (K a) p.2)) =
+      fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 (K 0) (K 1) := by
+    funext p
+    rw [metricTensorField_apply, chartGramMatrix_apply]
+  rw [hfun]
+  exact (hgram (K 0) (K 1) ((t, x₀) : ℝ × M)
+    ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩).mono_of_mem_nhdsWithin
+    (prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) J t)
+
+/-- **The background-curvature component input of the brick.**  The chart-frame components of
+the mixed lowered curvature `riemannCurvature04At g₁ (metricCov g₂)` are jointly `C∞`-within
+`J ×ˢ univ` at `(t, x₀)`, from the chart-Gram package of the *lowering* metric `g₁` and the
+chart-Gram package of the *connection* metric `g₂`, for an arbitrary time set `J`.
+
+Two instances carry all the background curvature norms of the (B) endgame: `g₂ := g₁` gives
+`Rm₁` lowered by `g₁`, and the pair `(g₂, g₂)` gives `Rm₂` lowered by `g₂`, whose `g₁`-norms are
+the constants `B₂` and `B_P` of `sdecFluxSq_le`. -/
+theorem rm04ChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
+    (x₀ : M)
+    (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (K : Fin 4 → Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        CovariantDerivative.riemannCurvature04At (I := I) (g₁ p.1) (metricCov (I := I) (g₂ p.1))
+          (metricCov_smooth (I := I) (g₂ p.1)) p.2
+          (fun a : Fin 4 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      (J ×ˢ (Set.univ : Set M)) (t, x₀) := by
+  classical
+  have hG₂ := genGramOn_of_field (I := I) g₂ x₀ hgram₂
+  have hxs : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+  have hnhdS := prodOpen_nhdsWithin (chartAt H x₀).open_source
+    (mem_chart_source H x₀) J t
+  have hnhdB : J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
+      𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
+    prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) J t
+  have hΦ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => ∑ l : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) (g₂ p.1) x₀ (K 2) (K 0) (K 1) l (extChartAt I x₀ p.2) *
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 (K 3) l)
+      (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) := by
+    refine ContMDiffWithinAt.sum fun l _ => ?_
+    exact ((riemWithinM (I := I) g₂ x₀ hG₂ (K 2) (K 0) (K 1) l ht hxs).mono_of_mem_nhdsWithin
+        hnhdS).mul
+      ((hgram₁ (K 3) l ((t, x₀) : ℝ × M)
+        ⟨ht, FiberBundle.mem_baseSet_trivializationAt' x₀⟩).mono_of_mem_nhdsWithin hnhdB)
+  have heq : (fun p : ℝ × M =>
+        CovariantDerivative.riemannCurvature04At (I := I) (g₁ p.1) (metricCov (I := I) (g₂ p.1))
+          (metricCov_smooth (I := I) (g₂ p.1)) p.2
+          (fun a : Fin 4 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
+      fun p : ℝ × M => ∑ l : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) (g₂ p.1) x₀ (K 2) (K 0) (K 1) l (extChartAt I x₀ p.2) *
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 (K 3) l := by
+    filter_upwards [good_nhdsWithin (I := I) x₀ J t] with p hp
+    exact rm04ChartMap (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
+  exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
 end JointChart
 
@@ -705,60 +754,62 @@ section Density
 
 variable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
 
-/-- **The connection third of `hdens`.**  Joint `C∞` of `|A₀₃|²_{g₁(t)}` on `Ioo a b ×ˢ univ`
-under the chart-Gram packages of the two flows. -/
-theorem connDiffSq_jointContMDiffOn {a b : ℝ}
+/-- **The connection third of `hdens`.**  Joint `C∞` of `|A₀₃|²_{g₁(t)}` on `J ×ˢ univ`
+under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`. -/
+theorem connDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => connDiffSq (I := I) (g₁ p.1) (g₂ p.1) p.2)
-      (Set.Ioo a b ×ˢ (Set.univ : Set M)) := by
+      (J ×ˢ (Set.univ : Set M)) := by
   simp only [connDiffSq_def]
-  refine normSq0S_jointContMDiffOn (I := I) g₁ isOpen_Ioo
+  refine normSq0S_jointContMDiffOn (I := I) g₁
     (fun t x => connDiffLowAt (I := I) (g₁ t) (g₂ t) x) hgram₁ ?_
   intro x₀ K t ht
-  exact connChartJoint (I := I) g₁ g₂ isOpen_Ioo x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
+  exact connChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-/-- **The curvature third of `hdens`.**  Joint `C∞` of `|S₀₄|²_{g₁(t)}` on `Ioo a b ×ˢ univ`
-under the chart-Gram packages of the two flows. -/
-theorem rmDiffSq_jointContMDiffOn {a b : ℝ}
+/-- **The curvature third of `hdens`.**  Joint `C∞` of `|S₀₄|²_{g₁(t)}` on `J ×ˢ univ`
+under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`. -/
+theorem rmDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => rmDiffSq (I := I) (g₁ p.1) (g₂ p.1) p.2)
-      (Set.Ioo a b ×ˢ (Set.univ : Set M)) := by
+      (J ×ˢ (Set.univ : Set M)) := by
   simp only [rmDiffSq_def]
-  refine normSq0S_jointContMDiffOn (I := I) g₁ isOpen_Ioo
+  refine normSq0S_jointContMDiffOn (I := I) g₁
     (fun t x => rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) hgram₁ ?_
   intro x₀ K t ht
-  exact rmChartJoint (I := I) g₁ g₂ isOpen_Ioo x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
+  exact rmChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-/-- **K5's `hdens`.**  Joint `C∞` of the Kotschwar energy density on `Ioo a b ×ˢ univ`, from
-the chart-Gram packages of the two flows and nothing else. -/
-theorem dens_jointContMDiffOn {a b : ℝ}
+/-- **K5's `hdens`.**  Joint `C∞` of the Kotschwar energy density on `J ×ˢ univ`, from
+the chart-Gram packages of the two flows and nothing else.  The time set `J` is **arbitrary**:
+taking `J := Icc a c` gives the density up to the closed initial edge, which is what the
+slab-uniform extreme-value bounds and the edge continuity of the energy consume. -/
+theorem dens_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => forwardUniqueDensity (I := I) g₁ g₂ p.1 p.2)
-      (Set.Ioo a b ×ˢ (Set.univ : Set M)) := by
+      (J ×ˢ (Set.univ : Set M)) := by
   have h := ((metricDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂).add
     (connDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂)).add
     (rmDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂)

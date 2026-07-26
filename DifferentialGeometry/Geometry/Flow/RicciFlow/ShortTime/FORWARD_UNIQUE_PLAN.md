@@ -292,6 +292,32 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №49 (2026-07-26, SLAB-2 ACCEPTED+COMMITTED — **hedge DISCHARGED
+  (handoff one-linerized, machine-checked); residual = hbounds ALONE,
+  2/6 fields closed at the REAL carriers; four smallest-bricks named**):
+  three files (DensReg/Sup/Wiring), 0 sorry, planner re-audit clean
+  (7 endpoints 3-axiom).  DensReg closed-edge upgrade: `IsOpen J`
+  DROPPED from `normSq0S_jointContMDiffOn` (𝓝[J ×ˢ univ] via
+  `prodOpen_nhdsWithin`), whole deliverable chain generalized to
+  arbitrary J, four privates DELETED in favour of public Within
+  replacements; cascade contained (one wiring adaptation).  Sup layer:
+  `normSqSlabSup`/`metricSlabSup`/`rm04SlabSup` (three metric roles)/
+  `ricciSq_le_rm04`/`ricciSlabSup`.  `fuFluxSlab` = fluxLe AT fuUflux
+  unconditional; `energyEdgeCont` = hedge from the two chart-Gram fields
+  alone (`integral_family_cont` was the moving-measure DCT — no new
+  integration theory; `first_var_joint` unusable, IsOpen-gated).  FOUR
+  OPEN FIELDS with smallest bricks: volLe (port
+  `traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv` from
+  Volume.lean currency — cheapest); adotLe (hΓ/hA STALE-claim corrected:
+  both available via fuGamma; genuinely missing = B₁ (needs `partRiem`
+  in the Within file) + Λ pointwise metric comparison (sphere-bundle
+  compactness or PDE Grönwall)); reactLe (№47 basis-free reading gives
+  the HasDerivAt.unique transport route but `movingReact_le` cite is
+  **FALSE-GREEN — MovingEdgeEnergy.lean has NO olean** (planner
+  re-verified); must port/reprove, + a Cauchy–Schwarz step);
+  remLe (sdecRemFam's `lowOfComp g₁ b (rmDotRem …)` + `gapDot g₁ g₂
+  (uhlRm2Vec …)` summands carry no norm bound — PLANNER DESIGN DECISION
+  pending).  FINAL-FIELDS wave next.
 - №48 (2026-07-26, WITHIN ACCEPTED+WIRED+COMMITTED — **R12 DELIVERED IN
   FULL: the closed-edge joint tower exists; the hbounds/hedge gate is
   OPEN**): `Analysis/Parabolic/RicciLinearization/

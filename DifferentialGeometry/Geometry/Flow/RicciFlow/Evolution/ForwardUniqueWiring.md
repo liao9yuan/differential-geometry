@@ -6,6 +6,36 @@ provenance ledger), `ForwardUniqueLifts.md`, `ForwardUniqueSdec.md`, `ForwardUni
 
 ## Status
 
+### Third pass (2026-07-26, SLAB-2): `hedge` DISCHARGED — the residual list is now **ONE**
+
+```
+forward_unique_of_gram : (B)'s hypotheses + h0 + hbounds → ∀ t ∈ Ico a b, g₁ t = g₂ t
+```
+
+`hedge` is supplied by `energyEdgeCont` (`Evolution/ForwardUniqueSup.lean`) from (B)'s two
+chart-Gram fields alone; a scratch `example` machine-checks
+`forward_unique_of_gram … hbounds (energyEdgeCont g₁ g₂ hab h1smooth h2smooth)`.
+
+Two additions in this file, plus one import (`Evolution.ForwardUniqueSup`):
+
+* `fuP_eq` — the `P` slot of the constructed flux is the **cross-lowered** background
+  curvature: `fuTf g₁ t − fuSfield g₁ g₂ t = riemannCurvature04At (g₁ t) (metricCov (g₂ t))`.
+  Proof is `sub_sub_cancel` after `fuTf_apply`/`fuSfield_apply`, because `rmDiffLowAt` is
+  *defined* as that very difference.
+* `fuFluxSlab` — the **`fluxLe` field of `ForwardUniqueSlab` at `fuUflux`, unconditional**:
+  restrict (B)'s fields to `Icc a c`, take the three background sups (`rm04SlabSup` at
+  `(g₁,g₂,g₂)` and `(g₁,g₁,g₂)`, `metricSlabSup`), and apply `fluxSlabLe`.
+
+One adaptation: `fuFrozenJoint` lost its `isOpen_Ioo` arguments (the DensReg brick and
+`rmChartJoint` no longer take `IsOpen J`), and the `Ioo (t−1) (t+1)` dance it used to satisfy
+`t ∈ J` for an open `J` is gone — `J := Ioo a b` with the supplied `ht` now works directly.
+
+`hbounds` is still short four of six fields (`volLe`, `remLe`, `reactLe`, `adotLe`); the
+field-by-field state, with the smallest missing brick for each, is in `ForwardUniqueSup.md`
+§"What is still missing".
+
+### Second pass
+
 **Second pass (2026-07-26): the three integrability slots and the interior half of `energyCont`
 are CLOSED.**  1220 lines, 0 `sorry`, warning-free.  Focused check GREEN; targeted module build
 GREEN (9534 jobs).  Every public endpoint is 3-axiom clean

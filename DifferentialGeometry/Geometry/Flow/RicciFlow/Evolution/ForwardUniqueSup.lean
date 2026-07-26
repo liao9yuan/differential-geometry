@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueAssembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRatePro
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSdec
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
+import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -53,6 +55,7 @@ open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E]
@@ -385,6 +388,201 @@ theorem fluxSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     _ ≤ _ := mul_le_mul_of_nonneg_left (connDiffSq_le_dens (I := I) g₁ g₂ t x) hbr
 
 end FluxField
+
+section BackgroundSups
+
+/-! ## The background-norm sups on the closed subslab
+
+`slabBound` needs joint continuity **up to the closed initial edge** `t = a`, which black box
+(B)'s one-sided `Ico a b` chart-Gram field could not feed before the `ContDiffWithinAt` tower
+(`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`) and the
+arbitrary-time-set upgrade of `Evolution/ForwardUniqueDensReg.lean`'s brick.  With those, every
+background quantity whose chart-frame components are readable from the two chart-Gram packages
+produces its constant.  The three below are the ones the remaining fields consume:
+the moving metric itself, the background curvature (in any lowering), and the Ricci tensors. -/
+
+variable {a c : Real}
+
+/-- **The background-norm slab sup.**  Composition of the closed-edge joint brick
+`normSq0S_jointContMDiffOn` with the extreme value theorem `normSqSlabBound`.  Both hypotheses
+are stated on the *closed* subslab, which is what the initial edge costs. -/
+theorem normSqSlabSup {s : Nat} (g : Real → SmoothRiemannianMetric I M)
+    (A : Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hA : ∀ (x₀ : M) (K : Fin s → Fin (Module.finrank Real E)) {t : Real}, t ∈ Icc a c →
+      ContMDiffWithinAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M =>
+          A p.1 p.2 (fun i : Fin s => chartBasisVecFiber (I := I) x₀ (K i) p.2))
+        (Icc a c ×ˢ (univ : Set M)) (t, x₀)) :
+    ∃ B : Real, 0 ≤ B ∧
+      ∀ t ∈ Icc a c, ∀ x : M, normSq0S (I := I) (g t) x s (A t x) ≤ B :=
+  normSqSlabBound (I := I) g A
+    ((normSq0S_jointContMDiffOn (I := I) g A hgram hA).continuousOn)
+
+/-- **The sup of `|g₂|²_{g₁}` on the closed subslab** — the `B_g` constant of `sdecFluxSq_le`.
+The chart-frame components of the `(0,2)` carrier `metricTensorField (g₂ t)` *are* the chart-Gram
+entries of `g₂`, so no curvature tower is involved. -/
+theorem metricSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 2 (metricTensorField (I := I) (g₂ t) x) ≤ B :=
+  normSqSlabSup (I := I) g₁ (fun t x => metricTensorField (I := I) (g₂ t) x) hgram₁
+    (fun x₀ K _ ht => metricChartJoint (I := I) g₂ x₀ (hgram₂ x₀) K ht)
+
+/-- **The sup of a background curvature on the closed subslab.**
+
+`|Rm(∇^{gC}) lowered by gL|²_{gN} ≤ B` on `Icc a c ×ˢ univ`, with the three roles — the metric
+taking the norm, the metric lowering the last slot, and the metric supplying the connection —
+independent.  Two instances carry all the curvature constants of the endgame:
+
+* `(gN, gL, gC) = (g₁, g₂, g₂)` is `B₂ ≥ |Rm₂|²_{g₁}`;
+* `(gN, gL, gC) = (g₁, g₁, g₂)` is `B_P ≥ |P|²_{g₁}`, `P` being the cross-lowered curvature
+  `Rm₂` that `sdecFlux`'s re-lowering defect carries. -/
+theorem rm04SlabSup (gN gL gC : Real → SmoothRiemannianMetric I M)
+    (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gN p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramL : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gL p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramC : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gC p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (gN t) x 4
+        (CovariantDerivative.riemannCurvature04At (I := I) (gL t) (metricCov (I := I) (gC t))
+          (metricCov_smooth (I := I) (gC t)) x) ≤ B :=
+  normSqSlabSup (I := I) gN
+    (fun t x => CovariantDerivative.riemannCurvature04At (I := I) (gL t)
+      (metricCov (I := I) (gC t)) (metricCov_smooth (I := I) (gC t)) x) hgramN
+    (fun x₀ K _ ht => rm04ChartJoint (I := I) gL gC x₀ (hgramL x₀) (hgramC x₀) K ht)
+
+/-- **The Ricci tensor is `n⁴`-controlled by the curvature it traces.**
+
+`|Ric₂|²_{g₁} ≤ n⁴ · |Rm(∇²) lowered by g₁|²_{g₁}`.
+
+`metricRicci_eq_trace_cross` writes `Ric₂` as the `g₁`-trace of a slot permutation of the
+cross-lowered curvature, `normSq0S_domDomCongr` says the permutation is a fibre isometry, and
+`traceNormSq_le` pays the dimension factor.  Taking `g₂ := g₁` gives `|Ric₁|²_{g₁} ≤
+n⁴·|Rm₁|²_{g₁}`, which is `adotLe`'s `Λric` and `reactLe`'s only background norm. -/
+theorem ricciSq_le_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
+    normSq0S (I := I) g₁ x 2 (metricRicciAt (I := I) g₂ x) ≤
+      (Module.finrank Real E : Real) ^ 4 *
+        normSq0S (I := I) g₁ x 4
+          (CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
+            (metricCov_smooth (I := I) g₂) x) := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_onFrame (I := I) g₁ x
+  have hinv := onFrame_inv (I := I) g₁ basis hON
+  have htr := traceNormSq_le (I := I) (s := 2) g₁ x
+    (ContinuousMultilinearMap.domDomCongr rm04TraceSlots
+      (CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
+        (metricCov_smooth (I := I) g₂) x))
+  rw [normSq0S_domDomCongr (I := I) g₁ x basis hinv rm04TraceSlots _] at htr
+  rw [metricRicci_eq_trace_cross (I := I) g₁ g₂ x]
+  exact htr
+
+/-- **The sup of `|Ric₂|²_{g₁}` on the closed subslab.**  `ricciSq_le_rm04` on top of
+`rm04SlabSup` at `(gN, gL, gC) = (g₁, g₁, g₂)`.  With `g₂ := g₁` this is `Λric`; as stated it is
+`adotLe`'s `B₃`. -/
+theorem ricciSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₂ t) x) ≤ B := by
+  obtain ⟨B, hB0, hB⟩ := rm04SlabSup (I := I) g₁ g₁ g₂ hgram₁ hgram₁ hgram₂
+  have hpow : (0 : Real) ≤ (Module.finrank Real E : Real) ^ 4 := by positivity
+  refine ⟨(Module.finrank Real E : Real) ^ 4 * B, mul_nonneg hpow hB0, fun t ht x => ?_⟩
+  exact (ricciSq_le_rm04 (I := I) (g₁ t) (g₂ t) x).trans
+    (mul_le_mul_of_nonneg_left (hB t ht x) hpow)
+
+end BackgroundSups
+
+section EdgeContinuity
+
+/-! ## The closed initial edge of the energy
+
+`ForwardUniqueWiring.lean` leaves, next to `hbounds`, one further residual hypothesis:
+`hedge : ContinuousWithinAt (forwardUniqueEnergy g₁ g₂) (Ico a b) a` — continuity of the
+Kotschwar energy at the *single* closed initial time.  `fuEnergyCont` supplies the interior of
+`Ico a b` from the exact first variation, which needs an open time window and therefore cannot
+see `t = a`.
+
+The edge is a **moving-measure** statement: both the density and the volume measure move with
+`t`.  `integral_family_cont` (`Analysis/Integration/Measure/FamilyContinuity.lean`) is exactly
+the required dominated-convergence layer — on a compact time set, entrywise joint continuity of
+the metric family plus joint continuity of the integrand give continuity of
+`t ↦ ∫ f t dμ_{g t}` — and its hypotheses are purely `C⁰` on an *arbitrary compact* time set,
+so the closed edge is admissible.  The integrand input is `dens_jointContMDiffOn` at
+`J := Icc a c`, which is available since the closed-edge upgrade of
+`Evolution/ForwardUniqueDensReg.lean`. -/
+
+/-- **The `hedge` residual of `forward_unique_of_gram`, discharged.**
+
+`ContinuousWithinAt (forwardUniqueEnergy g₁ g₂) (Ico a b) a` from black box (B)'s own
+chart-Gram fields alone.  No estimate, no PDE and no initial condition enter: the energy is
+continuous up to the closed initial edge purely by joint regularity of the density and of the
+moving volume on the compact subslab `Icc a (a+b)/2`. -/
+theorem energyEdgeCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContinuousWithinAt (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Ico a b) a := by
+  set c : Real := (a + b) / 2 with hcdef
+  have hac : a < c := by rw [hcdef]; linarith
+  have hcb : c < b := by rw [hcdef]; linarith
+  have hsub : Icc a c ⊆ Ico a b := fun x hx => ⟨hx.1, lt_of_le_of_lt hx.2 hcb⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hgram₁ x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  have hres₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hgram₂ x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  have hdens : ContinuousOn
+      (fun p : Real × M => forwardUniqueDensity (I := I) g₁ g₂ p.1 p.2)
+      (Icc a c ×ˢ (univ : Set M)) :=
+    (dens_jointContMDiffOn (I := I) g₁ g₂ hres₁ hres₂).continuousOn
+  have hE : ContinuousOn
+      (fun t : Real => ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x
+        ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)) (Icc a c) :=
+    integral_family_cont (I := I) isCompact_Icc
+      (fun x₀ i j => (hres₁ x₀ i j).continuousOn) hdens
+  have hmem : Icc a c ∈ 𝓝[Ico a b] a := by
+    refine Filter.mem_of_superset
+      (inter_mem_nhdsWithin (Ico a b) (isOpen_Iio.mem_nhds hac)) ?_
+    rintro p ⟨hp1, hp2⟩
+    exact ⟨hp1.1, le_of_lt hp2⟩
+  exact (hE a ⟨le_refl a, hac.le⟩).mono_of_mem_nhdsWithin hmem
+
+end EdgeContinuity
 
 end DifferentialGeometry.PDE.RicciFlow
 

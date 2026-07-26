@@ -11,6 +11,70 @@ no new instances, axioms or notation.  Axioms of every endpoint:
 
 ---
 
+## 2026-07-26 (third pass, SLAB-2): the closed-edge upgrade
+
+**What changed.**  The brick `normSq0S_jointContMDiffOn` and its two chart-component
+producers no longer require `IsOpen J`; every joint statement in the file now holds for an
+**arbitrary** time set `J`, so `J := Icc a c` (the closed initial edge) is admissible.  This is
+the step `RicciDifferenceMeanValueWithin.md` §"The remaining step to a background sup" names,
+and it is what turns black box (B)'s one-sided `Ico a b` chart-Gram field into slab-uniform
+sups and into edge continuity of the Kotschwar energy.
+
+Signature changes (hypothesis WEAKENING; downstream call sites drop an argument):
+
+| declaration | before | after |
+| --- | --- | --- |
+| `normSq0S_jointContMDiffOn` | `(hJ : IsOpen J)`, `hA` a `ContMDiffAt` | no `hJ`, `hA` a `ContMDiffWithinAt … (J ×ˢ univ)` |
+| `connChartJoint` / `rmChartJoint` | `(hJ : IsOpen J)`, conclusion `ContMDiffAt` | no `hJ`, conclusion `ContMDiffWithinAt … (J ×ˢ univ)` |
+| `metricChartComp_jointContMDiffOn` | `Ioo a b` | arbitrary `J` (and the proof collapsed to `hgram x₀ i j` — the chart-frame component *is* the chart-Gram entry) |
+| `metricDiffSq_/connDiffSq_/rmDiffSq_/dens_jointContMDiffOn` | `{a b}` on `Ioo a b` | `{J}` on arbitrary `J` |
+
+**Why openness was never needed.**  `hJ` was used in exactly two places, both to produce
+`J ×ˢ baseSet ∈ 𝓝 (t, x₀)`.  The base set of the trivialization at `x₀` is a *spatial*
+neighbourhood of the chart centre, so `J ×ˢ baseSet` is a neighbourhood of `(t, x₀)`
+**within** `J ×ˢ univ` for any `J` whatsoever.  That one-line observation is the new private
+`prodOpen_nhdsWithin`; `ContMDiffWithinAt.mono_of_mem_nhdsWithin` then replaces every
+`.contMDiffAt hnhd`, and `filter_upwards [hnhd]` becomes an eventual equality along
+`𝓝[J ×ˢ univ]` closed by `ContMDiffWithinAt.congr_of_eventuallyEq` (which additionally wants
+the value at the point — `EventuallyEq.self_of_nhdsWithin`).
+
+**What was deleted.**  The four `private` helpers `genGram_of_joint`, `jointOnM`, `christJoint`,
+`riemJoint` are gone: their `ContDiffWithinAt` replacements `genGramOn_of_field`,
+`jointOnMWithin`, `christWithinM`, `riemWithinM` are public in
+`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`, which this file
+now imports in place of `RicciDifferenceMeanValue.lean`.  No duplication remains.
+
+**What was added.**
+
+* `rm04ChartMap` — `rm04ChartComp` with the four slots given by an index map `K : Fin 4 → …`
+  instead of `vec4`; the shape the brick consumes.
+* `rm04ChartJoint` — the background-curvature component input, with the three metric roles
+  independent: the *lowering* metric supplies the Gram factor, the *connection* metric supplies
+  the chart Riemann coefficients (`riemWithinM`).  `(gL, gC) = (g₂, g₂)` is `Rm₂`;
+  `(g₁, g₂)` is the cross-lowered `P` of `sdecFlux`'s re-lowering defect.
+* `metricChartJoint` — the `(0,2)` carrier `metricTensorField (g t)`, whose chart-frame
+  components are literally the chart-Gram entries.
+
+**Lean lessons (this pass).**
+
+* A `private` helper whose *statement* mentions neither `I` nor anything needing an
+  `I`-dependent instance does **not** get `I` as a parameter, even though the proof body uses
+  it.  The tell is `error: Invalid argument name 'I' for function …` at the call site with a
+  hint listing the parameters.  `prodOpen_nhdsWithin` is such a helper — call it **without**
+  `(I := I)`; `good_nhdsWithin` mentions `chartLeviCivitaGoodSet (I := I)` and therefore does
+  take `I`.  (Same family as the `slabBound (M := M)` lesson in `ForwardUniqueSup.md`.)
+* `ContMDiffWithinAt.prod` / `.sum` / `.mul` / `.mono_of_mem_nhdsWithin` /
+  `.congr_of_eventuallyEq` all exist with the same shapes as their `ContMDiffAt` counterparts;
+  the only extra argument anywhere is `congr_of_eventuallyEq`'s point-value side condition.
+* `chartGramMatrix_apply` and `metricTensorField_apply` are both `rfl`, but `rw`'s closing
+  `rfl` does not fire through the `Fin 2` slot map — write
+  `rw [metricTensorField_apply, chartGramMatrix_apply]` explicitly.
+
+**Verification.**  Focused check GREEN and warning-free; targeted module build GREEN; 0 `sorry`.
+All endpoints (including the three new ones) 3-axiom clean.
+
+---
+
 ## 1. Recon result — the "chart-Gram → Γ → Rm joint tower does NOT exist" debt is WRONG
 
 Dispatch №6 recorded the `hdens` debt as: *"the chart-Gram → Γ → Rm joint tower does NOT
