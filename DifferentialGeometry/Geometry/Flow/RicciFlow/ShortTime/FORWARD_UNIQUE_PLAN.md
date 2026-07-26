@@ -292,6 +292,63 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №41 (2026-07-26, α3 ACCEPTED+COMMITTED — **bianchi2 CLOSED without new
+  Tensor API; static side complete bar hcomm; K2-B ≈55%**): fresh executor
+  extended `Rm04Producer.lean` 110→805 lines, 0 sorry; planner re-audit
+  clean (4 endpoints 3-axiom).  `rm2Bianchi` (once-differentiated second
+  Bianchi, ~145 lines): restating `SecondBianchiAt` in slot-function form
+  over two `Equiv.Perm (Fin 5)` 3-cycles lets `nabla0SFun_eval_smooth_slots`'s
+  correction sum be reindexed by the differentiated field
+  (`Function.update_comp_equiv` + `Equiv.sum_comp`) — the two predicted
+  missing lemmas were NOT needed.  `rm04LapInOfSol` = the full 7-field
+  package from S/hS (`n2RicSym` derived — redundant field).
+  `rm04StaticOfSol` = the static identity with every `rm04Var_eq_uhl`
+  input discharged EXCEPT `hcomm`.  Cheap-`ricciId` find:
+  `curvatureAction0SAt_eq_rm04` (`Curvature/CurvatureActionLower.lean:49`)
+  is the component form directly.  TWO PRECISE BLOCKERS (both
+  grep-verified by executor): (1) recon §6 partially WRONG — 
+  `coordMetricDeriv`/`coordMetricMix` produce a DIFFERENT predicate
+  (`MetricCovDerivDerivativeComponentsInFrameOnLocal` ≠
+  `MetricFrameSpacetimeRegularityInFrameOnLocal`); `coordRicciEvol` never
+  builds hmetricReg (routes through `ricciEvolCore` on
+  `ChristoffelEvolutionEquationInFrameOn`); the ONLY solution-producers
+  are `tailFrameSpaceReg` (`Metric/TailFrameRegularity.lean:74`) /
+  `tailChristoffelReg`, tail-restricted with `localFrameInv` — **the tail
+  is structurally forced** (carrier-vs-regular joint smoothness) and will
+  propagate into items 2-3; needs the routine `localFrameInv → coordInv`
+  bridge (Gram-inverse uniqueness); (2) `hcomm` needs the s=2
+  `Tensor0SRicciIdentityAt` producer for Ric (~120 lines mirroring
+  `rmRicciId`) — Evolution/Ricci has only the TRACED commutator.
+  Relocation TODOs: `nabPerm`/`nabCyc` →
+  `Tensor/RSTensor/NablaOnTensors/Regularity/Tensor0S.lean`; `secondCyc`
+  → `Curvature/Bianchi.lean`.  **α4 dispatched (same executor)**: hcomm
+  producer → time half on the PAID tail (bridge lemma + tailFrameSpaceReg)
+  → `rm04Evol_at` → item-3 packaging.
+- №40 (2026-07-26, β PASS 3 ACCEPTED+COMMITTED `a0474e367` — **Φ-defect +
+  Hamilton half CLOSED; ONE sorry left = htrace, fully scoped**):
+  `lowerBilin_metric_le` (the R9(b) new API): one-sided hΛ ⟹ Λ²
+  slot-precomposition bound via Parseval + Cauchy–Schwarz in a
+  g₁-orthonormal frame, division avoided by an N=0/N>0 split — in-lane
+  with relocation TODO, `Comparison.lean` untouched.  Hamilton half
+  end-to-end (`lowerHamRHS_comp`/`lowerHam_eq_perm`/`hamSum_sub`/
+  `hamSum_normSq_le`, slot isometry costs 10).  Planner re-audit: hygiene
+  clean, 5 public endpoints 3-axiom clean (6th is private), single
+  tactic sorry `:1244`.  Remaining = `htrace`
+  `|∇¹(Ric₁−Ric₂)|² ≤ n⁵|∇¹S₀₄|²`: route fixed (`ricciDiff_eq_trace` →
+  DFunLike.ext → `nablaRealizes_metricTraceFirstTwo` + `traceNablaShuffle`
+  → realizer-uniqueness → `traceNormSq_le` s=3 + `normSq0S_domDomCongr`);
+  ONE small missing lemma = realizer uniqueness for `TotalNabla0SRealizes`.
+  R9(a) `[I.Boundaryless]` deliberately deferred to the closing pass
+  (unused hypothesis would be noise).  FINAL prune list (R9(c), safe —
+  htrace mentions none): DROP `B₂`,`B₄`,`hRF₁`,`hRF₂`,`hRm₂` (content
+  arrives via hΓ); constant now `200(n⁶+1)` (the +1 kills the finrank=0
+  split).  Lean lessons recorded (typed-wrapper defs for Tensor0SSpace
+  sums — ascription does NOT force elaboration; keep nlinarith away from
+  tensor atoms — isDefEq/whnf timeout, factor into pure-real lemmas;
+  explicit mul_le_mul chains beat 17-variable nlinarith).  β executor
+  retired at ~500k tokens; **β4 (closing pass) dispatched to a FRESH
+  executor**: add Boundaryless, build realizer-uniqueness, close htrace,
+  prune, restate capstone, 0-sorry target.
 - №39 (2026-07-26, ACCEPTED+WIRED — **α2 PARTIAL (B) + SCOPE-CORRECTING
   FINDING: 5 of the "missing" K2-B inputs have EXISTING producers**):
   Agent-K2B1's second pass delivered `Evolution/Rm04Producer.lean`
