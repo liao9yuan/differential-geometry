@@ -95,7 +95,7 @@ theorem exists_live_metric
         (X'.obj k).t2TangentBundle
       Metric.ball (0 : E) (inp.normalRadius.phaseRadius R) ⊆
         Metric.ball 0
-        (Geometry.Riemannian.expMapC2Radius
+        (Geometry.Riemannian.expRadiusGp
             (I := I) (X'.obj k).metric (c alpha k)) := by
     intro k alpha
     letI : TopologicalSpace (X'.obj k).M := (X'.obj k).topology
@@ -105,11 +105,11 @@ theorem exists_live_metric
       (X'.obj k).t2TangentBundle
     have hquarter := inp.normalRadius.phaseRadius_exp (hcenter k alpha)
     have hquarter' : Metric.ball (0 : E) (inp.normalRadius.phaseRadius R) ⊆
-        Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
+        Metric.ball 0 (Geometry.Riemannian.expRadiusGp
           (I := I) (X'.obj k).metric (c alpha k) / 4) := by
       simpa only [X', PointedRiemannianSeq.subseq] using hquarter
     exact hquarter'.trans (Metric.ball_subset_ball (by
-      nlinarith [Geometry.Riemannian.expMapC2Radius_pos
+      nlinarith [Geometry.Riemannian.expRadiusGp_pos
         (I := I) (X'.obj k).metric (c alpha k)]))
   obtain ⟨phi, gInf, hphi, hgInf, hconv, hequiv⟩ :=
     exists_metric_lim_pi (I := I) input' c Metric.isOpen_ball hdom hsub
@@ -204,7 +204,7 @@ theorem exists_slot_metric
         letI : T2Space (TangentBundle I (X'.obj n).M) :=
           (X'.obj n).t2TangentBundle
         U alpha ⊆ Metric.ball (0 : E)
-          (Geometry.Riemannian.expMapC2Radius
+          (Geometry.Riemannian.expRadiusGp
             (I := I) (X'.obj n).metric (c n)) := by
       intro n
       letI : TopologicalSpace (X'.obj n).M := (X'.obj n).topology
@@ -214,11 +214,11 @@ theorem exists_slot_metric
         (X'.obj n).t2TangentBundle
       have hquarter := inp.normalRadius.phaseRadius_exp (hcenter n)
       have hquarter' : U alpha ⊆ Metric.ball (0 : E)
-          (Geometry.Riemannian.expMapC2Radius
+          (Geometry.Riemannian.expRadiusGp
             (I := I) (X'.obj n).metric (c n) / 4) := by
         simpa only [U, X', index, c, PointedRiemannianSeq.subseq] using hquarter
       exact hquarter'.trans (Metric.ball_subset_ball (by
-        nlinarith [Geometry.Riemannian.expMapC2Radius_pos
+        nlinarith [Geometry.Riemannian.expRadiusGp_pos
           (I := I) (X'.obj n).metric (c n)]))
     obtain ⟨σ, g, hσ, hg, hconv, hequiv⟩ :=
       exists_metricLimit_normalCoord (I := I) input' c Metric.isOpen_ball hdom hsub

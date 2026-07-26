@@ -221,10 +221,15 @@ theorem expMap_contMDiffAt_infty_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {w : E}
     (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
     ContMDiffAt 𝓘(ℝ, E) I ∞
-      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
-  (Classical.choose_spec
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact min_le_left _ _
+  exact (Classical.choose_spec
     (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p)).2 w
-    (lt_of_lt_of_le hw (min_le_left _ _))
+      (lt_of_lt_of_le hw hle)
 
 lemma expMap_contMDiffAt2_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {w : E}
@@ -238,19 +243,28 @@ lemma radial_hasGeodesicEquationAt_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Ioo (-1 : ℝ) 2) :
     Geodesic.HasGeodesicEquationAt (I := I) g
-      (fun s : ℝ => maximalGeodesic (I := I) g p v s) t :=
-  (Classical.choose_spec
+      (fun s : ℝ => maximalGeodesic (I := I) g p v s) t := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact (min_le_right _ _).trans (min_le_left _ _)
+  exact (Classical.choose_spec
     (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).2
-    (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_left _ _))) t ht
+      (lt_of_lt_of_le hv hle) t ht
 
 lemma maximalGeodesic_rescale_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
-    maximalGeodesic (I := I) g p (t • v) 1 = maximalGeodesic (I := I) g p v t :=
-  (Classical.choose_spec
+    maximalGeodesic (I := I) g p (t • v) 1 = maximalGeodesic (I := I) g p v t := by
+  have hle : expMapC2Radius (I := I) g p ≤
+      Classical.choose
+        (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p) := by
+    rw [expMapC2Radius]
+    exact (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_left _ _))
+  exact (Classical.choose_spec
     (Exponential.maximalGeodesic_rescale_at_one_of_small (I := I) g p)).2
-    (lt_of_lt_of_le hv
-      (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))) t ht
+      (lt_of_lt_of_le hv hle) t ht
 
 lemma ball_subset_normalChartAt_target
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
@@ -260,8 +274,9 @@ lemma ball_subset_normalChartAt_target
   refine (Classical.choose_spec
     (exists_metric_ball_subset_expMapDiffeo_source (I := I) g p)).2 ?_
   rw [Metric.mem_ball, dist_zero_right]
-  exact lt_of_lt_of_le hx
-    (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
+  apply lt_of_lt_of_le hx
+  rw [expMapC2Radius]
+  exact (min_le_right _ _).trans ((min_le_right _ _).trans (min_le_right _ _))
 
 lemma mem_expMapDiffeo_source_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
@@ -425,6 +440,36 @@ lemma norm_lt_expMapC2Radius_of_sqrt_inner_lt
   have hRpos : 0 < expMapC2Radius (I := I) g p := expMapC2Radius_pos (I := I) g p
   nlinarith [norm_nonneg x, hsq_lt, hRpos]
 
+/-- The coercivity conversion is compatible with division by the same positive
+scale on the Riemannian and model radii. -/
+lemma norm_lt_exp_div
+    (g : SmoothRiemannianMetric I M) (p : M) {x : E} {n : ℝ}
+    (hn : 0 < n)
+    (hx : Real.sqrt (g.inner p x x) < expRadiusGp (I := I) g p / n) :
+    ‖x‖ < expMapC2Radius (I := I) g p / n := by
+  have hc_pos : 0 < gpCoerciveConst (I := I) g p :=
+    gpCoerciveConst_pos (I := I) g p
+  have hsq :
+      g.inner p x x < (expRadiusGp (I := I) g p / n) ^ 2 :=
+    Real.lt_sq_of_sqrt_lt hx
+  have hR : (expRadiusGp (I := I) g p / n) ^ 2 =
+      gpCoerciveConst (I := I) g p *
+        (expMapC2Radius (I := I) g p / n) ^ 2 := by
+    rw [expRadiusGp, div_pow, mul_pow, Real.sq_sqrt hc_pos.le, div_pow]
+    ring
+  rw [hR] at hsq
+  have hcoerc : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤
+      g.inner p x x := gpCoerciveConst_le (I := I) g p x
+  have hlt : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 <
+      gpCoerciveConst (I := I) g p *
+        (expMapC2Radius (I := I) g p / n) ^ 2 :=
+    lt_of_le_of_lt hcoerc hsq
+  have hsq_lt : ‖x‖ ^ 2 < (expMapC2Radius (I := I) g p / n) ^ 2 :=
+    lt_of_mul_lt_mul_left hlt hc_pos.le
+  have hRpos : 0 < expMapC2Radius (I := I) g p / n :=
+    div_pos (expMapC2Radius_pos (I := I) g p) hn
+  nlinarith [norm_nonneg x, hsq_lt, hRpos]
+
 
 section GaussVariation
 
@@ -457,29 +502,8 @@ private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     (γ : ℝ → M) (t₀ : ℝ) (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀) :
     DifferentiableAt ℝ
       (chartRepAt (I := I) γ (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) t₀) t₀ := by
-  set α : M := γ t₀ with hα
-  have hchart_c2 : ContDiffAt ℝ 2 (fun u : ℝ => extChartAt I α (γ u)) t₀ :=
-    contMDiffAt_iff_contDiffAt.mp ((contMDiffAt_extChartAt (I := I) (x := α)).comp t₀ hγC2)
-  set sec : ℝ → E := fun u : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (γ w)) u (1 : ℝ)
-    with hsec
-  have hsec_c1 : ContDiffAt ℝ 1 sec t₀ :=
-    (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀
-      (hchart_c2.fderiv_right (by norm_num))
-  have hev_c2 : ∀ᶠ u in nhds t₀, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ u :=
-    (contMDiffAt_iff_contMDiffAt_nhds (n := 2) (by decide)).mp hγC2
-  have hsrcmem : {u : ℝ | γ u ∈ (chartAt H α).source} ∈ nhds t₀ :=
-    hγC2.continuousAt.preimage_mem_nhds
-      ((chartAt H α).open_source.mem_nhds (mem_chart_source H (γ t₀)))
-  have heq : (chartRepAt (I := I) γ (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) t₀)
-      =ᶠ[nhds t₀] sec := by
-    filter_upwards [hsrcmem, hev_c2] with u hu hu_c2
-    have hbridge := chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := γ) (hu_c2.mdifferentiableAt (by decide)) α (t := u) hu
-    change (trivializationAt E (TangentSpace I) (γ t₀)).continuousLinearMapAt ℝ (γ u)
-        (mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) = sec u
-    rw [hsec, show (γ t₀) = α from rfl]
-    exact hbridge
-  exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
+  simpa only [chartRepAt] using
+    MFDerivAlongCurve.velocity_coord_diff (I := I) γ t₀ hγC2
 
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma speedSq_hasDerivAt_zero_of_geodesic
@@ -517,6 +541,11 @@ lemma radialCurve_contMDiffAt2
   exact hexp.comp t₀ hbase
 
 private lemma radialCurve_hasGeodesicEquationAt
+/-- The central radial curve `t ↦ expMap g p (t • a)` satisfies the
+moving-foot geodesic equation at every `t₀ ∈ (-1, 2)` provided
+`‖a‖ < expMapC2Radius g p`.  Transferred from the maximal geodesic via the
+`[0, 1]` rescaling identity and `congr_of_eventuallyEq_at`. -/
+lemma radial_geo_at
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
     HasGeodesicEquationAt (I := I) g
@@ -587,7 +616,7 @@ private lemma radialSpeedSq_hasDerivAt_zero
   exact speedSq_hasDerivAt_zero_of_geodesic (I := I) g
     (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t₀
     (radialCurve_contMDiffAt2 (I := I) g p a t₀ hnorm)
-    (radialCurve_hasGeodesicEquationAt (I := I) g p a ha t₀ ht₀)
+    (radial_geo_at (I := I) g p a ha t₀ ht₀)
 
 lemma radialSpeedSq_eq_inner
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
@@ -934,7 +963,7 @@ private lemma gauss_phi_hasDerivAt
   have hγgeo : HasGeodesicEquationAt (I := I) g γ t₀ := by
     rw [show γ = (fun t : ℝ => (expMap (I := I) g p
       (show TangentSpace I p from (t • v)) : M)) from hcentral_eq]
-    exact radialCurve_hasGeodesicEquationAt (I := I) g p v hv_ball t₀ ht₀
+    exact radial_geo_at (I := I) g p v hv_ball t₀ ht₀
   have hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀ :=
     velocityChartRep_differentiableAt_of_contMDiffAt2 (I := I) γ t₀ hγC2
   have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀ := by

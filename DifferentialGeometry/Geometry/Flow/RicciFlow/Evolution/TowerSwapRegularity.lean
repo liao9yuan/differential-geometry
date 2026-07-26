@@ -27,11 +27,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem frameTowerSwap [CompactSpace M]
+/-- Given the level-zero curvature and Christoffel time derivatives, every
+local-frame curvature-tower component satisfies the fixed-base time/spatial
+derivative swap on regular times. -/
+theorem frameTowerSwap
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
@@ -149,11 +148,10 @@ theorem frameTowerSwap [CompactSpace M]
   intro k m
   exact (hboth k).2 m
 
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem tailTowerData [CompactSpace M]
+/-- On a strictly positive-time tail, a Ricci-flow solution supplies the
+level-zero time derivatives and every fixed-base curvature-tower swap needed
+by the local-frame heat recursion. -/
+theorem tailTowerData
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
@@ -302,5 +300,111 @@ theorem tailTowerData [CompactSpace M]
     simpa only [chrDt, nablaRic, S', D'] using
       christoffelRHS_id (M := M) gInv nablaRic hinvId i j p
   · simpa only [S', D'] using hswap
+
+/-- At any regular time of an arbitrary Ricci-flow interval, a smooth local
+frame carries the level-zero curvature derivative, the Christoffel derivative
+and its orthonormal-frame value, and every fixed-base curvature-tower swap.
+
+The proof restricts to a compact regular time window around `t`, applies the
+positive-tail producer there, and transports the resulting germs back to the
+original solution and time carrier. -/
+theorem towerDataAt
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D)
+    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    (frame : Idx → (y : M) → TangentSpace I y) {u : Set M}
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
+    (hu : IsOpen u)
+    (horthU : ∀ y : M, y ∈ u → ∀ i j : Idx,
+      (S.base.metric (t : Real)).inner y (frame i y) (frame j y) =
+        if i = j then (1 : Real) else 0) :
+    ∃ hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u,
+      ∃ baseDt : Real → M → (Fin 4 → Idx) → Real,
+        ∃ chrDt : Real → M → Idx → Idx → Idx → Real,
+          (∀ (y : M), y ∈ u → ∀ m : Fin 4 → Idx,
+            HasDerivWithinAt
+              (fun s : Real => frameComp0S (I := I) (S.base.rm04 s) frame y m)
+              (baseDt (t : Real) y m) D.carrier (t : Real)) ∧
+          (∀ (y : M), y ∈ u → ∀ i a p : Idx,
+            HasDerivWithinAt
+              (fun s : Real => christoffelSymbolInFrame
+                (S.family.connection s) frame hframe1 y i a p)
+              (chrDt (t : Real) y i a p) D.carrier (t : Real)) ∧
+          (∀ (y : M), y ∈ u → ∀ i j p : Idx,
+            chrDt (t : Real) y i j p =
+              -ricciCovDerivCompInFrame (I := I) S frame (t : Real) y i j p
+              -ricciCovDerivCompInFrame (I := I) S frame (t : Real) y j i p
+              +ricciCovDerivCompInFrame (I := I) S frame (t : Real) y p i j) ∧
+          ∀ (y : M), y ∈ u → ∀ (k : Nat) (d : Idx) (m : Fin (4 + k) → Idx),
+            HasDerivWithinAt
+              (fun s : Real =>
+                extDerivFun (I := I)
+                  (fun z : M =>
+                    iteratedRmComp (I := I) frame
+                      (fun r x => christoffelSymbolInFrame
+                        (S.family.connection r) frame hframe1 x)
+                      (fun r => frameComp0S (I := I) (S.base.rm04 r) frame)
+                      k s z m)
+                  y (frame d y))
+              (extDerivFun (I := I)
+                (fun z : M =>
+                  iteratedRmCompDt (I := I) frame
+                    (fun r x => christoffelSymbolInFrame
+                      (S.family.connection r) frame hframe1 x)
+                    chrDt
+                    (fun r => frameComp0S (I := I) (S.base.rm04 r) frame)
+                    baseDt k (t : Real) z m)
+                y (frame d y))
+              D.carrier (t : Real) := by
+  classical
+  obtain ⟨a, b, htab, hwin⟩ := D.exists_Icc_regular t.2
+  have hab : a < b := htab.1.trans htab.2
+  let Dab := RealTimeInterval.closedOpen a b hab
+  let Sab : SolutionOn (I := I) (M := M) Dab := S.timeRestrict Dab
+  have hSab : IsSolutionOn (I := I) Sab := by
+    apply isSoln_timeRestrict (I := I) hS
+    · intro s hs
+      exact D.regular_subset (hwin ⟨hs.1, hs.2.le⟩)
+    · intro s hs
+      exact hwin ⟨hs.1.le, hs.2.le⟩
+  let t0 : Real := (a + (t : Real)) / 2
+  have hat0 : a < t0 := by
+    dsimp only [t0]
+    linarith [htab.1]
+  have ht0t : t0 < (t : Real) := by
+    dsimp only [t0]
+    linarith [htab.1]
+  have ht0b : t0 < b := ht0t.trans htab.2
+  let Dt := RealTimeInterval.closedOpen t0 b ht0b
+  obtain ⟨hframe1, baseDt, chrDt, hrm, hchr, hchrId, hswap⟩ :=
+    tailTowerData (I := I) hSab hat0 ht0b frame hframe hu
+  have htDt : (t : Real) ∈ Dt.regular := ⟨ht0t, htab.2⟩
+  let tt : RealTimeInterval.RegularTime Dt := ⟨(t : Real), htDt⟩
+  have hDt : Dt.carrier ∈ nhds (t : Real) := Dt.regular_mem_nhds htDt
+  refine ⟨hframe1, baseDt, chrDt, ?_, ?_, ?_, ?_⟩
+  · intro y hy m
+    have h := (hrm tt y hy m).hasDerivAt hDt
+    simpa only [Sab, Dab, Dt, SolutionOn.timeRestrict_base] using h.hasDerivWithinAt
+  · intro y hy i a' p
+    have h := (hchr tt y hy i a' p).hasDerivAt hDt
+    simpa only [Sab, Dab, Dt, SolutionOn.timeRestrict,
+      SolutionOn.family] using h.hasDerivWithinAt
+  · intro y hy i j p
+    have horth : ∀ a' b' : Idx,
+        ((Sab.timeRestrict Dt).base.metric (tt : Real)).inner y
+            (frame a' y) (frame b' y) =
+          if a' = b' then (1 : Real) else 0 := by
+      intro a' b'
+      simpa only [Sab, Dab, Dt, SolutionOn.timeRestrict_base] using
+        horthU y hy a' b'
+    simpa only [Sab, Dab, Dt, SolutionOn.timeRestrict,
+      SolutionOn.family, tt] using hchrId tt y hy horth i j p
+  · intro y hy k d m
+    have h := hswap k m (t : Real) htDt y hy (frame d y)
+    have h' := h.hasDerivAt hDt
+    simpa only [Sab, Dab, Dt, SolutionOn.timeRestrict,
+      SolutionOn.family, tt] using h'.hasDerivWithinAt
 
 end DifferentialGeometry.PDE.RicciFlow

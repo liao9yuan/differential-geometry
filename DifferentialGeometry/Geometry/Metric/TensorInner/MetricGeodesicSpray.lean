@@ -16,8 +16,8 @@ noncomputable section
 
 namespace MetricKoszul
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [ContinuousDualEquiv E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+  [CompleteSpace E] [FiniteDimensional Real E]
 
 noncomputable local instance sprayDualNormedGroup :
     NormedAddCommGroup (E →L[Real] Real) :=
@@ -274,7 +274,9 @@ private theorem koszulRiesz_conv
     (hgInf_cd.fderiv_of_isOpen hU
       (by rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from rfl]))
 
-private theorem raisedOp_smooth
+/-- A smooth coercive metric-coefficient field has a smooth proof-independent
+raised Koszul bilinear operator. -/
+theorem raisedOp_smooth
     [FiniteDimensional Real E]
     {U : Set E} (hU : IsOpen U)
     {g : E → E →L[Real] E →L[Real] Real}

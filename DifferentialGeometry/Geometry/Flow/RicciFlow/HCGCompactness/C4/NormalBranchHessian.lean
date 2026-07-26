@@ -76,9 +76,9 @@ noncomputable def normalReadCLM
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (trivializationAt E (TangentSpace I) x).continuousLinearMapAt Real
-    (expMapDiffeo (I := I) Y.metric x u) |>.comp
+    (framedExpDiffeo (I := I) Y.metric x u) |>.comp
       (mfderiv 𝓘(Real, E) I
-        (fun v : E ↦ expMapDiffeo (I := I) Y.metric x v) u)
+        (fun v : E ↦ framedExpDiffeo (I := I) Y.metric x v) u)
 
 
 
@@ -91,7 +91,7 @@ theorem normalPhaseRead_eq
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    expMapDiffeo (I := I) Y.metric x u ∈
+    framedExpDiffeo (I := I) Y.metric x u ∈
       (trivializationAt E (TangentSpace I) x).baseSet →
     normalPhaseRead (I := I) Y x (u, v) = normalReadCLM (I := I) Y x u v := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -105,13 +105,13 @@ theorem normalPhaseRead_eq
   unfold normalReadCLM normalTangent
   rw [ContinuousLinearMap.comp_apply]
   change (trivializationAt E (TangentSpace I) x
-      ⟨expMapDiffeo (I := I) Y.metric x u,
+      ⟨framedExpDiffeo (I := I) Y.metric x u,
         mfderiv 𝓘(Real, E) I
-          (fun w : E ↦ expMapDiffeo (I := I) Y.metric x w) u v⟩).2 = _
+          (fun w : E ↦ framedExpDiffeo (I := I) Y.metric x w) u v⟩).2 = _
   rw [show ⇑((trivializationAt E (TangentSpace I) x).continuousLinearMapAt Real
-      (expMapDiffeo (I := I) Y.metric x u)) =
+      (framedExpDiffeo (I := I) Y.metric x u)) =
         ⇑((trivializationAt E (TangentSpace I) x).linearMapAt Real
-          (expMapDiffeo (I := I) Y.metric x u)) from rfl,
+          (framedExpDiffeo (I := I) Y.metric x u)) from rfl,
     (trivializationAt E (TangentSpace I) x).coe_linearMapAt_of_mem hbase]
   rfl
 
@@ -126,7 +126,7 @@ noncomputable def normalReadCLE
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    expMapDiffeo (I := I) Y.metric x u ∈
+    framedExpDiffeo (I := I) Y.metric x u ∈
       (trivializationAt E (TangentSpace I) x).baseSet →
     E ≃L[Real] E := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -142,7 +142,7 @@ noncomputable def normalReadCLE
         simpa only [normalExpPD_source] using hu)).mfderivToContinuousLinearEquiv
         (by simp)).trans
     ((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt
-      Real (expMapDiffeo (I := I) Y.metric x u) hbase)
+      Real (framedExpDiffeo (I := I) Y.metric x u) hbase)
 
 
 
@@ -155,7 +155,7 @@ theorem normalReadCLE_coe
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    ∀ hbase : expMapDiffeo (I := I) Y.metric x u ∈
+    ∀ hbase : framedExpDiffeo (I := I) Y.metric x u ∈
         (trivializationAt E (TangentSpace I) x).baseSet,
     (normalReadCLE (I := I) Y x hu hbase : E →L[Real] E) =
       normalReadCLM (I := I) Y x u := by
@@ -176,17 +176,17 @@ theorem normalReadCLE_coe
   ext v
   change
     ((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt
-        Real (expMapDiffeo (I := I) Y.metric x u) hbase
+        Real (framedExpDiffeo (I := I) Y.metric x u) hbase
       ((hloc.mfderivToContinuousLinearEquiv (by simp)) v)) =
       (trivializationAt E (TangentSpace I) x).continuousLinearMapAt Real
-        (expMapDiffeo (I := I) Y.metric x u)
+        (framedExpDiffeo (I := I) Y.metric x u)
           (mfderiv 𝓘(Real, E) I
-            (fun w : E ↦ expMapDiffeo (I := I) Y.metric x w) u v)
+            (fun w : E ↦ framedExpDiffeo (I := I) Y.metric x w) u v)
   rw [Bundle.Trivialization.coe_continuousLinearEquivAt_eq _ hbase]
   apply congrArg ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt
-    Real (expMapDiffeo (I := I) Y.metric x u))
+    Real (framedExpDiffeo (I := I) Y.metric x u))
   exact congrArg (fun A : E →L[Real] TangentSpace I
-      (expMapDiffeo (I := I) Y.metric x u) => A v)
+      (framedExpDiffeo (I := I) Y.metric x u) => A v)
     (hloc.mfderivToContinuousLinearEquiv_coe (by simp))
 
 
@@ -200,7 +200,7 @@ theorem normalPhaseRead_cd
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    expMapDiffeo (I := I) Y.metric x u ∈
+    framedExpDiffeo (I := I) Y.metric x u ∈
       (trivializationAt E (TangentSpace I) x).baseSet →
     ContDiffAt Real ∞ (normalPhaseRead (I := I) Y x) (u, v) := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -237,7 +237,7 @@ theorem normalReadCLM_cd
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    expMapDiffeo (I := I) Y.metric x u ∈
+    framedExpDiffeo (I := I) Y.metric x u ∈
       (trivializationAt E (TangentSpace I) x).baseSet →
     ContDiffAt Real ∞ (normalReadCLM (I := I) Y x) u := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -260,13 +260,13 @@ theorem normalReadCLM_cd
   have huSource : u ∈ (normalExpPD (I := I) Y x).source := by
     simpa only [normalExpPD_source] using hu
   have hExp : ContinuousAt
-      (fun a : E => expMapDiffeo (I := I) Y.metric x a) u := by
+      (fun a : E => framedExpDiffeo (I := I) Y.metric x a) u := by
     exact (((normalExpPD (I := I) Y x).contMDiffOn_toFun u huSource).contMDiffAt
       ((normalExpPD (I := I) Y x).open_source.mem_nhds huSource)).continuousAt
   have hnormal : (↑(normalBall (I := I) Y x) : Set E) ∈ nhds u :=
     (normalBall (I := I) Y x).isOpen.mem_nhds hu
   have hbaseNhd :
-      (fun a : E => expMapDiffeo (I := I) Y.metric x a) ⁻¹'
+      (fun a : E => framedExpDiffeo (I := I) Y.metric x a) ⁻¹'
           (trivializationAt E (TangentSpace I) x).baseSet ∈ nhds u :=
     hExp.preimage_mem_nhds
       ((trivializationAt E (TangentSpace I) x).open_baseSet.mem_nhds hbase)
@@ -384,7 +384,7 @@ theorem normalComp_inv {ι : Type*} [Fintype ι]
     letI : IsManifold I 1 Y.M := IsManifold.of_le
       (I := I) (M := Y.M) (n := ∞) (by decide)
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    expMapDiffeo (I := I) Y.metric x z ∈
+    framedExpDiffeo (I := I) Y.metric x z ∈
       (trivializationAt E (TangentSpace I) x).baseSet →
     ∃ L : E ≃L[Real] E,
       HasFDerivAt
@@ -495,19 +495,22 @@ theorem readout_factor
   have hzNormal : (e.symm w).1 ∈ normalBall (I := I) Y x :=
     (hfence (e.symm w) (Metric.ball_subset_closedBall hzBall)).1
   have hzNormLt : ‖(e.symm w).1‖ <
-      expMapC2Radius (I := I) Y.metric x := by
+      expRadiusGp (I := I) Y.metric x := by
     have hzNormal' := hzNormal
     change (e.symm w).1 ∈
-      Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) at hzNormal'
+      Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) at hzNormal'
     rwa [Metric.mem_ball, dist_zero_right] at hzNormal'
   have hzExpSource : (e.symm w).1 ∈
-      (expMapDiffeo (I := I) Y.metric x).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzNormLt
-  have hbase : expMapDiffeo (I := I) Y.metric x (e.symm w).1 ∈
+      (framedExpDiffeo (I := I) Y.metric x).source := by
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt] using hzNormLt
+  have hbase : framedExpDiffeo (I := I) Y.metric x (e.symm w).1 ∈
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
-      ((expMapDiffeo (I := I) Y.metric x).map_source hzExpSource)
+      ((framedExpDiffeo (I := I) Y.metric x).map_source hzExpSource)
   have htransport := full_transport (I := I) Y hcomplete hconn x hq he hf
   unfold DiagInvBranch.diagReadout
   rw [htransport.2.2 w hw,
@@ -551,16 +554,16 @@ theorem inv_cov_coord
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
     let B := toBranch (I := I) Y hcomplete hconn x hq he
     mfderiv 𝓘(Real, E) I
-        (fun u : E => expMapDiffeo (I := I) Y.metric x u) z
+        (fun u : E => framedExpDiffeo (I := I) Y.metric x u) z
         (((Integral.Connection.metricCov (I := 𝓘(Real, E)) (M := E)
           (normalTotal (I := I) Y x)).toFun
           (fun u : E => (e.symm (u, xi)).2) z) v) =
       ((Integral.Connection.metricCov (I := I) (M := Y.M) Y.metric).toFun
         (fun y : Y.M => (B.inv
-          (y, expMapDiffeo (I := I) Y.metric x xi)).snd)
-        (expMapDiffeo (I := I) Y.metric x z))
+          (y, framedExpDiffeo (I := I) Y.metric x xi)).snd)
+        (framedExpDiffeo (I := I) Y.metric x z))
         (mfderiv 𝓘(Real, E) I
-          (fun u : E => expMapDiffeo (I := I) Y.metric x u) z v) := by
+          (fun u : E => framedExpDiffeo (I := I) Y.metric x u) z v) := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -584,8 +587,8 @@ theorem inv_cov_coord
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   dsimp only
   let B := toBranch (I := I) Y hcomplete hconn x hq he
-  let pt : Y.M := expMapDiffeo (I := I) Y.metric x xi
-  let y0 : Y.M := expMapDiffeo (I := I) Y.metric x z
+  let pt : Y.M := framedExpDiffeo (I := I) Y.metric x xi
+  let y0 : Y.M := framedExpDiffeo (I := I) Y.metric x z
   let Vloc : E → E := fun u => (e.symm (u, xi)).2
   let VTan : (u : E) → TangentSpace 𝓘(Real, E) u := fun u => Vloc u
   let Zloc : (y : Y.M) → TangentSpace I y := fun y =>
@@ -697,7 +700,7 @@ theorem inv_cov_coord
       mfderiv 𝓘(Real, E) I (Phi : UQ → WQ) u (Vloc (u : E))
     rw [hInv']
     change mfderiv 𝓘(Real, E) I
-        (fun a : E => expMapDiffeo (I := I) Y.metric x a) (u : E)
+        (fun a : E => framedExpDiffeo (I := I) Y.metric x a) (u : E)
         (Vloc (u : E)) = _
     exact (quarterDiffeo_mfd (I := I) Y x u (Vloc (u : E))).symm
   have hmap := normal_cov_map (I := I) Y x Vext Zext zQ v hEq
@@ -766,21 +769,21 @@ theorem hess_inv_coord
     letI : MetricSpace (X.obj k).M :=
       HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
     let dExp := mfderiv 𝓘(Real, E) I
-      (fun u : E => expMapDiffeo (I := I) (X.obj k).metric x u) z
+      (fun u : E => framedExpDiffeo (I := I) (X.obj k).metric x u) z
     0 < ρ →
     2 * ρ < (q : Real) →
     ρ ≤ hb.radius k x →
     ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
     max
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x z))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z))
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x xi)) <
+        (framedExpDiffeo (I := I) (X.obj k).metric x xi)) <
         ENNReal.ofReal (ρ / 2) →
     hessFun (I := I) (X.obj k).metric
         (CenterOfMass.halfSqDist
-          (expMapDiffeo (I := I) (X.obj k).metric x xi))
-        (expMapDiffeo (I := I) (X.obj k).metric x z)
+          (framedExpDiffeo (I := I) (X.obj k).metric x xi))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z)
         (dExp v) (dExp w) =
       -normalCoordMetric (I := I) (X.obj k) x z
         (((Integral.Connection.metricCov (I := 𝓘(Real, E)) (M := E)
@@ -817,11 +820,11 @@ theorem hess_inv_coord
   intro hρ hρq hρmetric hρexp hpairs
   let B := toBranch (I := I) (X.obj k) hcomplete hconn x hq he
   let pt : (X.obj k).M :=
-    expMapDiffeo (I := I) (X.obj k).metric x xi
+    framedExpDiffeo (I := I) (X.obj k).metric x xi
   let y0 : (X.obj k).M :=
-    expMapDiffeo (I := I) (X.obj k).metric x z
+    framedExpDiffeo (I := I) (X.obj k).metric x z
   let dExp := mfderiv 𝓘(Real, E) I
-    (fun u : E => expMapDiffeo (I := I) (X.obj k).metric x u) z
+    (fun u : E => framedExpDiffeo (I := I) (X.obj k).metric x u) z
   let Z : (y : (X.obj k).M) → TangentSpace I y := fun y =>
     show TangentSpace I y from (B.inv (y, pt)).snd
   let S : Set (X.obj k).M :=
@@ -958,7 +961,7 @@ theorem inv_cov_expand
     (contMDiffAt_vectorSpace_iff_contDiffAt.mpr
       (by simpa only [VTan] using hVcd)).mdifferentiableAt (by simp)
   have hzQuarter : z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric x / 4) := by
+      (expRadiusGp (I := I) (X.obj k).metric x / 4) := by
     exact hzQ
   have hcov := normal_cov_eq_fderiv (I := I) (X.obj k) x z hzQuarter
     ((hb.metric_equiv k x).coercive hzMetric) V hVmd v
@@ -1011,24 +1014,24 @@ theorem hess_inv_lower
     letI : MetricSpace (X.obj k).M :=
       HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
     let dExp := mfderiv 𝓘(Real, E) I
-      (fun u : E ↦ expMapDiffeo (I := I) (X.obj k).metric x u) z
+      (fun u : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x u) z
     0 < ρ →
     2 * ρ < (q : Real) →
     ρ ≤ hb.radius k x →
     ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
     max
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x z))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z))
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x xi)) <
+        (framedExpDiffeo (I := I) (X.obj k).metric x xi)) <
         ENNReal.ofReal (ρ / 2) →
     (1 - 4 * (eta : Real) -
         12 * hb.metricC 1 * (q : Real)) *
         normalCoordMetric (I := I) (X.obj k) x z v v ≤
       hessFun (I := I) (X.obj k).metric
         (CenterOfMass.halfSqDist
-          (expMapDiffeo (I := I) (X.obj k).metric x xi))
-        (expMapDiffeo (I := I) (X.obj k).metric x z)
+          (framedExpDiffeo (I := I) (X.obj k).metric x xi))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z)
         (dExp v) (dExp v) := by
   classical
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -1163,12 +1166,12 @@ theorem hess_inv_lower
   have hhess' :
       hessFun (I := I) (X.obj k).metric
           (CenterOfMass.halfSqDist
-            (expMapDiffeo (I := I) (X.obj k).metric x xi))
-          (expMapDiffeo (I := I) (X.obj k).metric x z)
+            (framedExpDiffeo (I := I) (X.obj k).metric x xi))
+          (framedExpDiffeo (I := I) (X.obj k).metric x z)
           (mfderiv 𝓘(Real, E) I
-            (fun u : E ↦ expMapDiffeo (I := I) (X.obj k).metric x u) z v)
+            (fun u : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x u) z v)
           (mfderiv 𝓘(Real, E) I
-            (fun u : E ↦ expMapDiffeo (I := I) (X.obj k).metric x u) z v) =
+            (fun u : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x u) z v) =
         -g (A v + K) v := by
     rw [hhess, hcov]
   rw [hhess', hdecomp]
@@ -1228,23 +1231,23 @@ theorem hess_inv_sixth
     letI : MetricSpace (X.obj k).M :=
       HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
     let dExp := mfderiv 𝓘(Real, E) I
-      (fun u : E ↦ expMapDiffeo (I := I) (X.obj k).metric x u) z
+      (fun u : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x u) z
     0 < ρ →
     2 * ρ < (q : Real) →
     ρ ≤ hb.radius k x →
     ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
     max
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x z))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z))
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x xi)) <
+        (framedExpDiffeo (I := I) (X.obj k).metric x xi)) <
         ENNReal.ofReal (ρ / 2) →
     (1 / 6 : Real) *
         normalCoordMetric (I := I) (X.obj k) x z v v ≤
       hessFun (I := I) (X.obj k).metric
         (CenterOfMass.halfSqDist
-          (expMapDiffeo (I := I) (X.obj k).metric x xi))
-        (expMapDiffeo (I := I) (X.obj k).metric x z)
+          (framedExpDiffeo (I := I) (X.obj k).metric x xi))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z)
         (dExp v) (dExp v) := by
   classical
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -1413,18 +1416,21 @@ theorem chartCm_zero_iff
     (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
   letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-  have hzNormLt : ‖z‖ < expMapC2Radius (I := I) Y.metric x := by
+  have hzNormLt : ‖z‖ < expRadiusGp (I := I) Y.metric x := by
     have hz' := hz
     change z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x) at hz'
+      (expRadiusGp (I := I) Y.metric x) at hz'
     rwa [Metric.mem_ball, dist_zero_right] at hz'
-  have hzSource : z ∈ (expMapDiffeo (I := I) Y.metric x).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzNormLt
-  have hbase : expMapDiffeo (I := I) Y.metric x z ∈
+  have hzSource : z ∈ (framedExpDiffeo (I := I) Y.metric x).source := by
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt] using hzNormLt
+  have hbase : framedExpDiffeo (I := I) Y.metric x z ∈
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
-      ((expMapDiffeo (I := I) Y.metric x).map_source hzSource)
+      ((framedExpDiffeo (I := I) Y.metric x).map_source hzSource)
   rw [chartCmEqnB_factor (I := I) Y hcomplete hconn x hq he hf z mu xi htgt,
     ← normalReadCLE_coe (I := I) Y x hz hbase]
   exact (normalReadCLE (I := I) Y x hz hbase).map_eq_zero_iff
@@ -1528,18 +1534,21 @@ theorem cm_deriv_inv
     have hz := (hfence (e.symm (z, xi i0))
       (Metric.ball_subset_closedBall hzBall)).2.1
     simpa only [e.right_inv (htgt i0)] using hz
-  have hzNormLt : ‖z‖ < expMapC2Radius (I := I) Y.metric x := by
+  have hzNormLt : ‖z‖ < expRadiusGp (I := I) Y.metric x := by
     have hzNormal' := hzNormal
     change z ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x) at hzNormal'
+      (expRadiusGp (I := I) Y.metric x) at hzNormal'
     rwa [Metric.mem_ball, dist_zero_right] at hzNormal'
-  have hzExpSource : z ∈ (expMapDiffeo (I := I) Y.metric x).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzNormLt
-  have hbase : expMapDiffeo (I := I) Y.metric x z ∈
+  have hzExpSource : z ∈ (framedExpDiffeo (I := I) Y.metric x).source := by
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt] using hzNormLt
+  have hbase : framedExpDiffeo (I := I) Y.metric x z ∈
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet]
     exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
-      ((expMapDiffeo (I := I) Y.metric x).map_source hzExpSource)
+      ((framedExpDiffeo (I := I) Y.metric x).map_source hzExpSource)
   have hfactor := chartCmEqnB_factor (I := I) Y hcomplete hconn x
     hq he hf z mu xi htgt
   have hreadZero : normalReadCLM (I := I) Y x z (invVelSum e mu xi z) = 0 := by
@@ -1698,11 +1707,13 @@ theorem cm_sol_strict
       (Metric.ball_subset_closedBall hpre)).2
     simpa only [e.right_inv (htgt i)] using hout
   have hcoordTarget {v : E} (hv : v ∈ normalBall (I := I) Y x) :
-      v ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).target := by
-    change v ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) at hv
-    rw [NormalCoordinates.normalChartAt_target_eq]
-    exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
-      (by rwa [Metric.mem_ball, dist_zero_right] at hv)
+      v ∈ (NormalCoordinates.framedChartAt (I := I) Y.metric x).target := by
+    change v ∈ Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) at hv
+    change v ∈ (framedExpDiffeo (I := I) Y.metric x).source
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt, Metric.mem_ball, dist_zero_right] using hv
   have huniv : (Finset.univ : Finset ι).Nonempty := by
     by_contra hne
     have hempty : (Finset.univ : Finset ι) = ∅ :=
@@ -1712,43 +1723,43 @@ theorem cm_sol_strict
   obtain ⟨i0, _hi0⟩ := huniv
   have hchz : ContMDiffAt 𝓘(Real, E) I 1
       (fun u : E =>
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm u) z := by
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm u) z := by
     have hzTarget := hcoordTarget (hnormal i0).1
-    exact (NormalCoordinates.normalChartAt_symm_contMDiffOn
-      (I := I) Y.metric x z hzTarget).contMDiffAt
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).open_target.mem_nhds
-          hzTarget)
+    change ContMDiffAt 𝓘(Real, E) I 1
+      (fun u : E => framedExpDiffeo (I := I) Y.metric x u) z
+    exact ((framedExp_smoothOn (I := I) Y x).contMDiffAt
+      (Metric.isOpen_ball.mem_nhds (hnormal i0).1)).of_le (by simp)
   have hchxi (i : ι) : ContMDiffAt 𝓘(Real, E) I 1
       (fun u : E =>
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm u) (xi i) := by
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm u) (xi i) := by
     have hiTarget := hcoordTarget (hnormal i).2
-    exact (NormalCoordinates.normalChartAt_symm_contMDiffOn
-      (I := I) Y.metric x (xi i) hiTarget).contMDiffAt
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).open_target.mem_nhds
-          hiTarget)
+    change ContMDiffAt 𝓘(Real, E) I 1
+      (fun u : E => framedExpDiffeo (I := I) Y.metric x u) (xi i)
+    exact ((framedExp_smoothOn (I := I) Y x).contMDiffAt
+      (Metric.isOpen_ball.mem_nhds (hnormal i).2)).of_le (by simp)
   have htransport := full_transport (I := I) Y hcomplete hconn x hq he hf
   have hread (i : ι) :
       ContMDiffAt (I.prod I) 𝓘(Real, E) 1
         (fun yq : Y.M × Y.M => B.diagReadout yq)
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) := by
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) := by
     have hdom :
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) ∈ B.dom := by
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) ∈ B.dom := by
       rw [← htransport.2.1]
       refine ⟨(z, xi i), htgt i, ?_⟩
       rfl
     have hzTarget := hcoordTarget (hnormal i).1
     have hbase :
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z ∈
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z ∈
           (trivializationAt E (TangentSpace I) x).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]
       exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
-        ((expMapDiffeo (I := I) Y.metric x).map_source (by
-          simpa only [NormalCoordinates.normalChartAt_target_eq] using hzTarget))
+        ((framedExpDiffeo (I := I) Y.metric x).map_source (by
+          simpa only [NormalCoordinates.framedChartAt] using hzTarget))
     have hmem :
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) ∈
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) ∈
             B.readDom := ⟨hdom, hbase⟩
     have hdata := B.readoutDomInf
     exact ((hdata.2.2.1 _ hmem).contMDiffAt (hdata.1.mem_nhds hmem)).of_le
@@ -1876,11 +1887,13 @@ theorem cm_sol_cd
       (Metric.ball_subset_closedBall hpre)).2
     simpa only [e.right_inv (htgt i)] using hout
   have hcoordTarget {v : E} (hv : v ∈ normalBall (I := I) Y x) :
-      v ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).target := by
-    change v ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) at hv
-    rw [NormalCoordinates.normalChartAt_target_eq]
-    exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
-      (by rwa [Metric.mem_ball, dist_zero_right] at hv)
+      v ∈ (NormalCoordinates.framedChartAt (I := I) Y.metric x).target := by
+    change v ∈ Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x) at hv
+    change v ∈ (framedExpDiffeo (I := I) Y.metric x).source
+    rw [framedExp_source]
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt, Metric.mem_ball, dist_zero_right] using hv
   have huniv : (Finset.univ : Finset ι).Nonempty := by
     by_contra hne
     have hempty : (Finset.univ : Finset ι) = ∅ :=
@@ -1890,42 +1903,42 @@ theorem cm_sol_cd
   obtain ⟨i0, _hi0⟩ := huniv
   have hchz : ContMDiffAt 𝓘(Real, E) I (n : ℕ∞)
       (fun u : E =>
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm u) z := by
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm u) z := by
     change ContMDiffAt 𝓘(Real, E) I (n : ℕ∞)
-      (fun u : E => expMapDiffeo (I := I) Y.metric x u) z
-    exact ((expMapDiffeo_contMDiffOn_expBall (I := I) Y x).contMDiffAt
+      (fun u : E => framedExpDiffeo (I := I) Y.metric x u) z
+    exact ((framedExp_smoothOn (I := I) Y x).contMDiffAt
       (Metric.isOpen_ball.mem_nhds (hnormal i0).1)).of_le
         (WithTop.coe_le_coe.mpr le_top)
   have hchxi (i : ι) : ContMDiffAt 𝓘(Real, E) I (n : ℕ∞)
       (fun u : E =>
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm u) (xi i) := by
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm u) (xi i) := by
     change ContMDiffAt 𝓘(Real, E) I (n : ℕ∞)
-      (fun u : E => expMapDiffeo (I := I) Y.metric x u) (xi i)
-    exact ((expMapDiffeo_contMDiffOn_expBall (I := I) Y x).contMDiffAt
+      (fun u : E => framedExpDiffeo (I := I) Y.metric x u) (xi i)
+    exact ((framedExp_smoothOn (I := I) Y x).contMDiffAt
       (Metric.isOpen_ball.mem_nhds (hnormal i).2)).of_le
         (WithTop.coe_le_coe.mpr le_top)
   have htransport := full_transport (I := I) Y hcomplete hconn x hq he hf
   have hread (i : ι) :
       ContMDiffAt (I.prod I) 𝓘(Real, E) (n : ℕ∞)
         (fun yq : Y.M × Y.M => B.diagReadout yq)
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) := by
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) := by
     have hdom :
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) ∈ B.dom := by
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) ∈ B.dom := by
       rw [← htransport.2.1]
       refine ⟨(z, xi i), htgt i, ?_⟩
       rfl
     have hbase :
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z ∈
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z ∈
           (trivializationAt E (TangentSpace I) x).baseSet := by
       rw [TangentBundle.trivializationAt_baseSet]
       exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
-        ((expMapDiffeo (I := I) Y.metric x).map_source
+        ((framedExpDiffeo (I := I) Y.metric x).map_source
           (hcoordTarget (hnormal i).1))
     have hmem :
-        ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z,
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm (xi i)) ∈
+        ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm z,
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm (xi i)) ∈
             B.readDom := ⟨hdom, hbase⟩
     have hdata := B.readoutDomInf
     exact ((hdata.2.2.1 _ hmem).contMDiffAt (hdata.1.mem_nhds hmem)).of_le
@@ -2034,9 +2047,9 @@ theorem hess_pos
     ⟨hyFin, hyReal.trans_le hρexp⟩
   have hptControl := hb.chart_mem_norm_le k x pt
     ⟨hptFin, hptReal.trans_le hρexp⟩
-  let z : E := NormalCoordinates.normalChartAt
+  let z : E := NormalCoordinates.framedChartAt
     (I := I) (X.obj k).metric x y
-  let xi : E := NormalCoordinates.normalChartAt
+  let xi : E := NormalCoordinates.framedChartAt
     (I := I) (X.obj k).metric x pt
   have hzρ : ‖z‖ < ρ := by
     calc
@@ -2056,19 +2069,19 @@ theorem hess_pos
       IsNormalDiag.target_of_chart_dom (I := I) (X.obj k) hcomplete hconn x
         hq he hf hyControl.1 hptControl.1 hdom
   have hzSrc : z ∈
-      (expMapDiffeo (I := I) (X.obj k).metric x).source := by
-    change z ∈ (NormalCoordinates.normalChartAt
+      (framedExpDiffeo (I := I) (X.obj k).metric x).source := by
+    change z ∈ (NormalCoordinates.framedChartAt
       (I := I) (X.obj k).metric x).target
     simpa only [z] using
-      (NormalCoordinates.normalChartAt
+      (NormalCoordinates.framedChartAt
         (I := I) (X.obj k).metric x).map_source hyControl.1
   let hloc : IsLocalDiffeomorphAt 𝓘(Real, E) I 1
-      (expMapDiffeo (I := I) (X.obj k).metric x) z :=
+      (framedExpDiffeo (I := I) (X.obj k).metric x) z :=
     PartialDiffeomorph.isLocalDiffeomorphAt
       (I := 𝓘(Real, E)) (J := I) (n := 1)
-      (expMapDiffeo (I := I) (X.obj k).metric x) hzSrc
+      (framedExpDiffeo (I := I) (X.obj k).metric x) hzSrc
   let dExpEquiv : E ≃L[Real] TangentSpace I
-      (expMapDiffeo (I := I) (X.obj k).metric x z) :=
+      (framedExpDiffeo (I := I) (X.obj k).metric x z) :=
     hloc.mfderivToContinuousLinearEquiv (by norm_num)
   let u : E := dExpEquiv.symm v
   have hu : u ≠ 0 := by
@@ -2080,38 +2093,40 @@ theorem hess_pos
         (dExpEquiv.apply_symm_apply v).symm
       _ = 0 := by rw [hu0]; exact map_zero dExpEquiv
   have hdExp : mfderiv 𝓘(Real, E) I
-      (fun w : E ↦ expMapDiffeo (I := I) (X.obj k).metric x w) z u = v := by
+      (fun w : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x w) z u = v := by
     have hcoe := hloc.mfderivToContinuousLinearEquiv_coe (by norm_num)
     change (mfderiv 𝓘(Real, E) I
-      (expMapDiffeo (I := I) (X.obj k).metric x) z) u = v
+      (framedExpDiffeo (I := I) (X.obj k).metric x) z) u = v
     rw [← hcoe, ContinuousLinearEquiv.coe_coe]
     change dExpEquiv (dExpEquiv.symm v) = v
     exact dExpEquiv.apply_symm_apply v
-  have hyDecode : expMapDiffeo (I := I) (X.obj k).metric x z = y := by
-    change (NormalCoordinates.normalChartAt
+  have hyDecode : framedExpDiffeo (I := I) (X.obj k).metric x z = y := by
+    change (NormalCoordinates.framedChartAt
       (I := I) (X.obj k).metric x).symm z = y
-    simpa only [z] using NormalCoordinates.normalChartAt_left_inv
-      (I := I) (X.obj k).metric x hyControl.1
-  have hptDecode : expMapDiffeo (I := I) (X.obj k).metric x xi = pt := by
-    change (NormalCoordinates.normalChartAt
+    simpa only [z] using
+      (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).left_inv hyControl.1
+  have hptDecode : framedExpDiffeo (I := I) (X.obj k).metric x xi = pt := by
+    change (NormalCoordinates.framedChartAt
       (I := I) (X.obj k).metric x).symm xi = pt
-    simpa only [xi] using NormalCoordinates.normalChartAt_left_inv
-      (I := I) (X.obj k).metric x hptControl.1
+    simpa only [xi] using
+      (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).left_inv hptControl.1
   have hmetric := hb.metric_equiv k x z hzMetric u
   have hnorm : 0 < ‖u‖ ^ 2 := sq_pos_of_pos (norm_pos_iff.mpr hu)
   have hgpos : 0 < normalCoordMetric (I := I) (X.obj k) x z u u := by
     nlinarith [hmetric.1]
   have hpairs' : max
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x z))
+        (framedExpDiffeo (I := I) (X.obj k).metric x z))
       (riemannianEDist I x
-        (expMapDiffeo (I := I) (X.obj k).metric x xi)) <
+        (framedExpDiffeo (I := I) (X.obj k).metric x xi)) <
         ENNReal.ofReal (ρ / 2) := by
     simpa only [hyDecode, hptDecode] using hpairs
   have hhess := IsNormalDiag.hess_inv_sixth (I := I) hb k hcomplete hconn x
     hq he hf happrox heta hqAcc hw hzQ hzMetric u hρ hρq hρmetric hρexp hpairs'
   have hdExp' : mfderiv 𝓘(Real, E) I
-      (fun w : E ↦ expMapDiffeo (I := I) (X.obj k).metric x w) z u = v :=
+      (fun w : E ↦ framedExpDiffeo (I := I) (X.obj k).metric x w) z u = v :=
     hdExp
   rw [hdExp'] at hhess
   rw [hyDecode] at hhess

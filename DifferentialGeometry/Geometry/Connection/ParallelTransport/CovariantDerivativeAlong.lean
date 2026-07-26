@@ -190,7 +190,32 @@ theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_smul_right]
   rw [smul_add]
 
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Covariant differentiation along a multiplicatively reparametrized curve
+scales by the parameter factor. -/
+theorem covDeriv_comp_mul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ∀ t, TangentSpace I (γ t)) (c t : ℝ) :
+    covDerivAlong (I := I) g (fun s => γ (c * s)) (fun s => V (c * s)) t =
+      c • covDerivAlong (I := I) g γ V (c * t) := by
+  rw [covDerivAlong_def, covDerivAlong_def]
+  rw [← map_smul]
+  congr 1
+  have hrep :
+      chartRepAt (I := I) (fun s => γ (c * s)) (fun s => V (c * s)) t =
+        fun s => chartRepAt (I := I) γ V (c * t) (c * s) := rfl
+  have hcurve :
+      chartCurve (I := I) (γ (c * t)) (fun s => γ (c * s)) =
+        fun s => chartCurve (I := I) (γ (c * t)) γ (c * s) := rfl
+  rw [hrep, chartCovDerivAlong_def, chartCovDerivAlong_def, hcurve,
+    deriv_comp_mul_left, deriv_comp_mul_left,
+    ChartChristoffel.contraction_smul_left, smul_add]
+
+/-- **Leibniz rule for a scalar-function multiple.** If the chart-`(γ t)`-
+coordinate representation of `V` and the scalar function `f` are both
+differentiable at `t`, then
+`covDerivAlong g γ (f • V) t = f' t • V t + f t • covDerivAlong g γ V t`.
+The first summand uses the *derivative of `f` at `t`* times the value
+`V t` (recovered by the round-trip `symmL`), the second the value `f t`
+times the covariant derivative of `V`. -/
 theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hf : DifferentiableAt ℝ f t)

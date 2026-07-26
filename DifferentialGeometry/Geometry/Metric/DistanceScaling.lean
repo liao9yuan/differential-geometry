@@ -52,6 +52,24 @@ private theorem edistOf_iInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Pointwise domination of Riemannian metrics implies domination of their
+extended distances. -/
+theorem edistOf_mono
+    (g h : SmoothRiemannianMetric I M)
+    (hgh : ∀ x v, g.inner x v v ≤ h.inner x v v)
+    (x y : M) :
+    riemannianEDistOf (I := I) g x y ≤
+      riemannianEDistOf (I := I) h x y := by
+  rw [edistOf_iInf, edistOf_iInf]
+  refine iInf_mono fun γ => ?_
+  refine iInf_mono fun hγ => ?_
+  refine lintegral_mono fun t => ?_
+  exact ENNReal.ofReal_le_ofReal (Real.sqrt_le_sqrt (hgh (γ t) _))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Positive constant metric scaling multiplies Riemannian extended distance
+by the square root of the scaling constant. -/
 theorem edistOf_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (x y : M) :
@@ -80,8 +98,47 @@ theorem edistOf_scale
   rw [Real.sqrt_mul hc.le]
   rw [ENNReal.ofReal_mul (Real.sqrt_nonneg c)]
 
+/-- A pointwise quadratic upper bound gives the corresponding square-root
+upper bound on Riemannian extended distance. -/
+theorem edistOf_le_of_quad
+    (g h : SmoothRiemannianMetric I M) {c : Real} (hc : 0 < c)
+    (hu : ∀ x v, h.inner x v v ≤ c * g.inner x v v)
+    (x y : M) :
+    riemannianEDistOf (I := I) h x y ≤
+      ENNReal.ofReal (Real.sqrt c) * riemannianEDistOf (I := I) g x y := by
+  calc
+    riemannianEDistOf (I := I) h x y ≤
+        riemannianEDistOf (I := I) (scaleMetric (I := I) c hc g) x y :=
+      edistOf_mono h (scaleMetric (I := I) c hc g)
+        (by
+          intro z v
+          simpa only [scaleMetric_inner] using hu z v)
+        x y
+    _ = ENNReal.ofReal (Real.sqrt c) *
+        riemannianEDistOf (I := I) g x y :=
+      edistOf_scale c hc g x y
 
+/-- A pointwise quadratic lower bound gives the corresponding square-root
+lower bound on Riemannian extended distance. -/
+theorem le_edistOf_of_quad
+    (g h : SmoothRiemannianMetric I M) {c : Real} (hc : 0 < c)
+    (hl : ∀ x v, c * g.inner x v v ≤ h.inner x v v)
+    (x y : M) :
+    ENNReal.ofReal (Real.sqrt c) * riemannianEDistOf (I := I) g x y ≤
+      riemannianEDistOf (I := I) h x y := by
+  calc
+    ENNReal.ofReal (Real.sqrt c) * riemannianEDistOf (I := I) g x y =
+        riemannianEDistOf (I := I) (scaleMetric (I := I) c hc g) x y :=
+      (edistOf_scale c hc g x y).symm
+    _ ≤ riemannianEDistOf (I := I) h x y :=
+      edistOf_mono (scaleMetric (I := I) c hc g) h
+        (by
+          intro z v
+          simpa only [scaleMetric_inner] using hl z v)
+        x y
 
+/-- Scaling the metric by `c` and the radius by `√c` preserves the carrier
+of an extended-distance ball. -/
 theorem edistBall_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     (x : M) (r : Real) :

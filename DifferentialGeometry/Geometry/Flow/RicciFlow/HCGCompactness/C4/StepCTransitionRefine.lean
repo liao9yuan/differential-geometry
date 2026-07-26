@@ -62,7 +62,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (x k)))
+        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (x k)))
     (hVexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -70,7 +70,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       V ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (y k)))
+        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (y k)))
     (hUaexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -78,7 +78,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       Ua ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (x k)))
+        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (x k)))
     (hVaexp : ∀ k,
       letI : TopologicalSpace (X.obj (phi0 k)).M := (X.obj (phi0 k)).topology
       letI : ChartedSpace H (X.obj (phi0 k)).M := (X.obj (phi0 k)).charted
@@ -86,7 +86,7 @@ theorem existsTransRefH6
       letI : T2Space (TangentBundle I (X.obj (phi0 k)).M) :=
         (X.obj (phi0 k)).t2TangentBundle
       Va ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (phi0 k)).metric (y k)))
+        (expRadiusGp (I := I) (X.obj (phi0 k)).metric (y k)))
     (hJ : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj (phi0 k)) (x k) (y k)) U)
     (hJbar : ∀ k, ContDiffOn Real (⊤ : ℕ∞)
@@ -160,28 +160,28 @@ theorem existsTransFinite
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       U i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
     (hVexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       V i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
     (hUaexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Ua i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
     (hVaexp : forall i, i ∈ s -> forall k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Va i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
     (hJ : forall i, i ∈ s -> forall k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i))
     (hJbar : forall i, i ∈ s -> forall k, ContDiffOn Real (⊤ : ℕ∞)
@@ -317,28 +317,28 @@ theorem existsTransUniv
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       U i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
     (hVexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       V i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
     (hUaexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Ua i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (x i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (x i k)))
     (hVaexp : forall i k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Va i ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric (y i k)))
+        (expRadiusGp (I := I) (X.obj k).metric (y i k)))
     (hJ : forall i k, ContDiffOn Real (⊤ : ℕ∞)
       (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i))
     (hJbar : forall i k, ContDiffOn Real (⊤ : ℕ∞)
@@ -456,28 +456,28 @@ structure NormalTransAt
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     U i ⊆ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric (x i k))
+      (expRadiusGp (I := I) (X.obj k).metric (x i k))
   Vexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     V i ⊆ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric (y i k))
+      (expRadiusGp (I := I) (X.obj k).metric (y i k))
   Uaexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     Ua i ⊆ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric (x i k))
+      (expRadiusGp (I := I) (X.obj k).metric (x i k))
   Vaexp :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     Va i ⊆ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric (y i k))
+      (expRadiusGp (I := I) (X.obj k).metric (y i k))
   J : ContDiffOn Real (⊤ : ℕ∞)
     (normalTransition (I := I) (X.obj k) (x i k) (y i k)) (U i)
   Jbar : ContDiffOn Real (⊤ : ℕ∞)

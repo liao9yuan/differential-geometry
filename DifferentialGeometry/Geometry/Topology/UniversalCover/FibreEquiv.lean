@@ -1,17 +1,6 @@
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Riemannian
-import DifferentialGeometry.Geometry.Topology.UniversalCover.ChartPullback
-import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
-import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
-import Mathlib.Topology.Covering.Basic
-import Mathlib.Topology.Homotopy.Lifting
+import DifferentialGeometry.Geometry.Topology.UniversalCover.CoveringMap
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
-import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
-import Mathlib.Topology.UniformSpace.Cauchy
-import Mathlib.Topology.EMetricSpace.Lipschitz
-import Mathlib.LinearAlgebra.Trace
+import Mathlib.Topology.Compactness.Compact
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
 
@@ -25,12 +14,8 @@ import Mathlib.Data.Finite.Defs
 
 
 
-open Set Function Filter Bundle
-open scoped Topology ContDiff
-open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric chartModelBasis)
-open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor)
-open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
+open Set Function
+open scoped Topology
 
 noncomputable section
 
@@ -40,23 +25,12 @@ namespace Riemannian
 namespace Topology
 namespace UniversalCover
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [NeZero (Module.finrank ℝ E)]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-  [I.Boundaryless]
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
-  [LocPathConnectedSpace M]
-  [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
-  [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
-
-
-
-
-
-
-
+/-- **The fibre of a covering map over a compact total space is finite.**
+For any covering map `p : E → X` with `E` compact and `X` a `T1Space`, the
+fibre `p⁻¹{x}` is closed in `E` (preimage of a point under a continuous map
+into a `T1Space`), hence compact (`IsClosed.isCompact` in the compact space
+`E`), and discrete (`IsCoveringMap` implies discrete fibres). A compact and
+discrete topological space is finite. -/
 theorem isCoveringMap_fibre_finite_of_compact
     {X E : Type*} [TopologicalSpace X] [T1Space X]
     [TopologicalSpace E] [CompactSpace E]
@@ -194,6 +168,24 @@ noncomputable def fibreEquivFundamentalGroup
       invFun := FundamentalGroup.toPath
       left_inv := fun _ => rfl
       right_inv := fun _ => rfl }
+
+/-- Compactness of the path-space universal cover makes the fundamental group
+at the chosen base point finite. -/
+theorem finite_pi1_of_uc
+    {X : Type*} [TopologicalSpace X] [T1Space X] [Inhabited X]
+    [ConnectedSpace X] [LocPathConnectedSpace X]
+    [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
+    [CompactSpace (UniversalCover X)] :
+    Finite (FundamentalGroup X (default : X)) := by
+  letI : Finite
+      ((proj : UniversalCover X → X) ⁻¹' {(default : X)}) :=
+    isCoveringMap_fibre_finite_of_compact
+      (UniversalCover.proj_isCoveringMap (X := X)) default
+  let e : (proj : UniversalCover X → X) ⁻¹' {(default : X)} :=
+    ⟨basePoint (X := X), rfl⟩
+  exact Finite.of_equiv _
+    (fibreEquivFundamentalGroup
+      (UniversalCover.proj_isCoveringMap (X := X)) default e)
 
 end UniversalCover
 end Topology

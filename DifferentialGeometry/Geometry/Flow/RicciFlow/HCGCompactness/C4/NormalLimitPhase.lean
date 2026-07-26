@@ -66,7 +66,7 @@ theorem limit_accel_bounds
       (X.obj n).t2TangentBundle
     apply (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj n) (c n)).mono
     exact (h.phaseRadius_exp (hc n)).trans (Metric.ball_subset_ball (by
-      nlinarith [Geometry.Riemannian.expMapC2Radius_pos
+      nlinarith [Geometry.Riemannian.expRadiusGp_pos
         (I := I) (X.obj n).metric (c n)]))
   have hg_co : ∀ n z, z ∈ U → IsCoercive (g n z) := by
     intro n z hz

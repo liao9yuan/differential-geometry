@@ -1381,19 +1381,15 @@ structure MetricCompactnessConclusion
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+**Endpoint ruling (2026-07-05):** this unconditional form is NOT the Chapter 4
+working target.  Its `sorry` decomposes as
+`C4.MetricCompactnessInputs.metricCompactness` (the now-checked conditional
+Theorem 3.9) **plus** native producers for the book-external theorems bundled
+there (Cheeger–Gromov–Taylor `lbl384`, Bishop–Gromov, and the localized [H6]
+normal-coordinate inputs) and per-member connectedness.  It stays `sorry`
+until those citations are proved natively; the Steps A→D assembly is no longer
+part of this frontier.  See `C4/MetricCompactnessEndpoint.lean` and
+`HCGCompactness/PROJECT_MAP.md`. -/
 def metricCompactness
     [I.Boundaryless]
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
@@ -1401,10 +1397,9 @@ def metricCompactness
     (_hgeom : SeqBoundedGeometry (I := I) X)
     (_hinj : BaseInjBound (I := I) X) :
     MetricCompactnessConclusion (I := I) X := by
-
-
-
-
+  -- The conditional direct-limit assembly is checked.  The remaining
+  -- frontier is to produce its external comparison inputs (and the required
+  -- connectedness) from these unconditional hypotheses.
   sorry
 
 end HCGCompactness

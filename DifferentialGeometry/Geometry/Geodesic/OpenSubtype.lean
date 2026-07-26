@@ -56,7 +56,9 @@ private theorem chartBasisVec_open
 
 omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
     in
-private theorem chartGram_open
+/-- Restricting a metric to an open subtype leaves its chart-Gram entries unchanged
+where the corresponding ambient chart is defined. -/
+theorem chartGram_open
     (g : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U] (a x : U)
     (hx : (x : M) ∈ (chartAt H (a : M)).source)

@@ -713,9 +713,107 @@ theorem exists_appHsDeriv
         inv_smul_smul₀ hh0 _
   exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
+/-- The full time-derivative package behind `exists_appHsDeriv`: the same
+jointly smooth tensor derivative is simultaneously the pointwise derivative
+of every fully evaluated fibre component and the strong derivative of every
+completed integer-order Sobolev action. -/
+theorem exists_appHsFull
+    (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel b c ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel b c ℝ E)
+        (E := fun x : M => TensorRSSpace b c I x) p.1
+        ((Φ p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ S)) :
+    ∃ dΦ : ℝ → SmoothCcTensor g b c,
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+        (I.prod 𝓘(ℝ, TensorRSModel b c ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel b c ℝ E)
+          (E := fun x : M => TensorRSSpace b c I x) p.1
+          ((dΦ p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ S) ∧
+      (∀ t ∈ S, ∀ x : M, ∀ A : Tensor0SSpace b I x,
+        ∀ slots : Fin c → E,
+          HasDerivAt
+            (fun τ => Tensor0SSpace.toModel (((Φ τ).toSection x) A) slots)
+            (Tensor0SSpace.toModel (((dΦ t).toSection x) A) slots) t) ∧
+      ∀ n : ℕ, ∀ t ∈ S,
+        ∀ U : tensorHs (I := I) (M := M) g 0 b (n : ℝ),
+        HasDerivAt
+          (fun τ => appHs g b c n (Φ τ) U)
+          (appHs g b c n (dΦ t) U) t := by
+  classical
+  obtain ⟨dΦ, hdjoint, hderiv⟩ :=
+    exists_timeDerivCc (I := I) (M := M) g b c Φ hS hjoint
+  refine ⟨dΦ, hdjoint, hderiv, ?_⟩
+  intro n t ht U
+  rw [hasDerivAt_iff_tendsto_slope_zero]
+  have hrem := coeffRem0_apply (I := I) (M := M)
+    g b c n dΦ hS hdjoint ht U
+  have hrem' : Tendsto
+      (fun h => appHs g b c n
+        (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U)
+      (𝓝[≠] (0 : ℝ))
+      (𝓝 (0 : tensorHs (I := I) (M := M) g 0 c (n : ℝ))) :=
+    hrem.mono_left inf_le_left
+  have htarget : Tendsto
+      (fun h => appHs g b c n (dΦ t) U +
+        appHs g b c n
+          (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U)
+      (𝓝[≠] (0 : ℝ))
+      (𝓝 (appHs g b c n (dΦ t) U)) := by
+    simpa only [add_zero] using tendsto_const_nhds.add hrem'
+  have hseg : ∀ᶠ h in 𝓝[≠] (0 : ℝ), Set.uIcc t (t + h) ⊆ S :=
+    (segment_eventually (hS.mem_nhds ht)).filter_mono inf_le_left
+  have hslope : ∀ᶠ h in 𝓝[≠] (0 : ℝ),
+      h⁻¹ • (appHs g b c n (Φ (t + h)) U - appHs g b c n (Φ t) U) =
+        appHs g b c n (dΦ t) U +
+          appHs g b c n
+            (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U := by
+    filter_upwards [hseg, self_mem_nhdsWithin] with h hseg hh
+    have hh0 : h ≠ 0 := by
+      simpa only [Set.mem_compl_iff, Set.mem_singleton_iff] using hh
+    have hrem_eq :
+        coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h =
+          coeffRem (I := I) (M := M) g b c dΦ S hS hdjoint t h hseg := by
+      simp only [coeffRem0, dif_pos hseg]
+    have hsec := coeff_secant (I := I) (M := M)
+      g b c Φ dΦ hS hdjoint hderiv t h hseg
+    have hact := congrArg
+      (fun Q : SmoothCcTensor g b c => appHs g b c n Q U) hsec
+    simp only [appHs_sub, appHs_smul] at hact
+    rw [← hrem_eq] at hact
+    have hdiff :
+        appHs g b c n (Φ (t + h)) U - appHs g b c n (Φ t) U =
+          h • (appHs g b c n (dΦ t) U +
+            appHs g b c n
+              (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U) := by
+      calc
+        appHs g b c n (Φ (t + h)) U - appHs g b c n (Φ t) U =
+            h • appHs g b c n
+                (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U +
+              h • appHs g b c n (dΦ t) U :=
+          sub_eq_iff_eq_add.mp hact
+        _ = h • (appHs g b c n (dΦ t) U +
+            appHs g b c n
+              (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U) := by
+          module
+    calc
+      h⁻¹ • (appHs g b c n (Φ (t + h)) U - appHs g b c n (Φ t) U) =
+          h⁻¹ • (h • (appHs g b c n (dΦ t) U +
+            appHs g b c n
+              (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U)) := by
+        rw [hdiff]
+      _ = appHs g b c n (dΦ t) U +
+          appHs g b c n
+            (coeffRem0 (I := I) (M := M) g b c dΦ S hS hdjoint t h) U :=
+        inv_smul_smul₀ hh0 _
+  exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
-
-
+/-- A jointly smooth tensor coefficient has one jointly smooth time derivative
+which gives the product rule after application to every differentiable
+completed Sobolev path. -/
 theorem exists_appHsDyn
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)

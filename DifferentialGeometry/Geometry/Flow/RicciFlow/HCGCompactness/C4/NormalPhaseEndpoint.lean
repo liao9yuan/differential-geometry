@@ -145,9 +145,9 @@ noncomputable def normalTangent
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact ⟨expMapDiffeo (I := I) Y.metric x z.1,
+  exact ⟨framedExpDiffeo (I := I) Y.metric x z.1,
     mfderiv 𝓘(Real, E) I
-      (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) z.1 z.2⟩
+      (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) z.1 z.2⟩
 
 
 
@@ -163,8 +163,8 @@ noncomputable def normalPair
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact (expMapDiffeo (I := I) Y.metric x z.1,
-    expMapDiffeo (I := I) Y.metric x z.2)
+  exact (framedExpDiffeo (I := I) Y.metric x z.1,
+    framedExpDiffeo (I := I) Y.metric x z.2)
 
 
 
@@ -259,15 +259,15 @@ theorem normal_launch_mfd
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       (Z 0).1 ∈ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) Y.metric x)) :
+        (expRadiusGp (I := I) Y.metric x)) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     mfderiv 𝓘(Real, Real) I
-        (fun t : Real ↦ expMapDiffeo (I := I) Y.metric x (Z t).1) 0 1 =
+        (fun t : Real ↦ framedExpDiffeo (I := I) Y.metric x (Z t).1) 0 1 =
       mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (Z 0).1 (Z 0).2 := by
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (Z 0).1 (Z 0).2 := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -282,8 +282,8 @@ theorem normal_launch_mfd
     rw [mdifferentiableAt_iff_differentiableAt]
     exact hgammaDeriv.differentiableAt
   have hExpMd : MDifferentiableAt 𝓘(Real, E) I
-      (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (Z 0).1 :=
-    (((expMapDiffeo_contMDiffOn_expBall (I := I) Y x) (Z 0).1 hpos).contMDiffAt
+      (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (Z 0).1 :=
+    (((framedExp_smoothOn (I := I) Y x) (Z 0).1 hpos).contMDiffAt
       (Metric.isOpen_ball.mem_nhds hpos)).mdifferentiableAt (by simp)
   have hgammaMfd : mfderiv 𝓘(Real, Real) 𝓘(Real, E) gamma 0 1 = (Z 0).2 := by
     rw [mfderiv_eq_fderiv]
@@ -291,17 +291,17 @@ theorem normal_launch_mfd
       hgammaDeriv.deriv
   have hcomp := mfderiv_comp_apply
     (I := 𝓘(Real, Real)) (I' := 𝓘(Real, E)) (I'' := I)
-    (g := fun u : E ↦ expMapDiffeo (I := I) Y.metric x u)
+    (g := fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u)
     (f := gamma) (x := (0 : Real)) hExpMd hgammaMd (1 : Real)
   calc
     mfderiv 𝓘(Real, Real) I
-        (fun t : Real ↦ expMapDiffeo (I := I) Y.metric x (Z t).1) 0 1 =
+        (fun t : Real ↦ framedExpDiffeo (I := I) Y.metric x (Z t).1) 0 1 =
       mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (gamma 0)
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (gamma 0)
           (mfderiv 𝓘(Real, Real) 𝓘(Real, E) gamma 0 1) := by
       simpa only [gamma, Function.comp_apply] using hcomp
     _ = mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (Z 0).1 (Z 0).2 := by
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (Z 0).1 (Z 0).2 := by
       rw [hgammaMfd]
 
 
@@ -318,7 +318,7 @@ theorem normal_end_eq_intr
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) Y.metric x / 4))
+        (expRadiusGp (I := I) Y.metric x / 4))
     (hZcont : ContinuousOn Z (Icc (-1) 1))
     (hZwithin : ∀ t ∈ Icc (-1) 1, HasDerivWithinAt Z
       (PhaseFlow.phaseField (normalAccel (I := I) Y x) (Z t))
@@ -344,11 +344,11 @@ theorem normal_end_eq_intr
         (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
     letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-    expMapDiffeo (I := I) Y.metric x (Z 1).1 =
+    framedExpDiffeo (I := I) Y.metric x (Z 1).1 =
       expMapIntrinsic (I := I) Y.metric (normal_enorm (I := I) Y)
-        (expMapDiffeo (I := I) Y.metric x (Z 0).1)
+        (framedExpDiffeo (I := I) Y.metric x (Z 0).1)
         (mfderiv 𝓘(Real, Real) I
-          (fun t : Real ↦ expMapDiffeo (I := I) Y.metric x (Z t).1) 0 1) := by
+          (fun t : Real ↦ framedExpDiffeo (I := I) Y.metric x (Z t).1) 0 1) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -370,7 +370,7 @@ theorem normal_end_eq_intr
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   let gamma : Real → E := fun t ↦ (Z t).1
   let Gamma : Real → Y.M :=
-    fun t ↦ expMapDiffeo (I := I) Y.metric x (gamma t)
+    fun t ↦ framedExpDiffeo (I := I) Y.metric x (gamma t)
   have hright : ∀ t ∈ Ico (-1) 1, HasDerivWithinAt Z
       (PhaseFlow.phaseField (normalAccel (I := I) Y x) (Z t)) (Ici t) t := by
     intro t ht
@@ -400,12 +400,12 @@ theorem normal_end_eq_intr
         hmem hgamma hgeo
   have hGammaCont : ContinuousOn Gamma (Icc (-1) 1) := by
     have hExp :=
-      (expMapDiffeo_contMDiffOn_expBall (I := I) Y x).continuousOn
+      (framedExp_smoothOn (I := I) Y x).continuousOn
     apply hExp.comp hZcont.fst
     intro t ht
     have hquarter := hrQuarter (hZmem t ht).1
     exact (Metric.ball_subset_ball (by
-      nlinarith [expMapC2Radius_pos (I := I) Y.metric x])) hquarter
+      nlinarith [expRadiusGp_pos (I := I) Y.metric x])) hquarter
   simpa only [Gamma, gamma] using
     (geo_end_eq_intr (I := I) Y.metric (normal_enorm (I := I) Y)
       (Gamma 0)
@@ -425,7 +425,7 @@ theorem normal_end_eq_diag
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) Y.metric x / 4))
+        (expRadiusGp (I := I) Y.metric x / 4))
     (hZcont : ContinuousOn Z (Icc (-1) 1))
     (hZwithin : ∀ t ∈ Icc (-1) 1, HasDerivWithinAt Z
       (PhaseFlow.phaseField (normalAccel (I := I) Y x) (Z t))
@@ -478,10 +478,10 @@ theorem normal_end_eq_diag
       (PhaseFlow.phaseField (normalAccel (I := I) Y x) (Z 0)) 0 :=
     (hZwithin 0 h0).hasDerivAt (Icc_mem_nhds (by norm_num) (by norm_num))
   have hpos : (Z 0).1 ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x) := by
+      (expRadiusGp (I := I) Y.metric x) := by
     have hquarter := hrQuarter (hZmem 0 h0).1
     exact (Metric.ball_subset_ball (by
-      nlinarith [expMapC2Radius_pos (I := I) Y.metric x])) hquarter
+      nlinarith [expRadiusGp_pos (I := I) Y.metric x])) hquarter
   have hlaunch := normal_launch_mfd (I := I) Y x hZat hpos
   have hend := normal_end_eq_intr (I := I) Y hcomplete hconn x
     hrQuarter hZcont hZwithin hZmem
@@ -511,7 +511,7 @@ theorem exists_normal_diag
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4)) :
+        (expRadiusGp (I := I) (X.obj k).metric x / 4)) :
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -798,13 +798,13 @@ theorem exists_flow_at
     have htime : (1 : Real) ∈ Set.Icc (-1) 1 := by norm_num
     have hzEnd : (Φ z 1).1 ∈ Metric.ball (0 : E) (h.phaseRadius R) :=
       (hΦbox z hz 1 htime).1
-    have hExpPos := expMapC2Radius_pos (I := I) (X.obj k).metric x
+    have hExpPos := expRadiusGp_pos (I := I) (X.obj k).metric x
     have hrNormal : Metric.ball (0 : E) (h.phaseRadius R) ⊆
         normalBall (I := I) (X.obj k) x := by
       intro v hv
       have hvQuarter := hrQuarter hv
       change v ∈ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x)
+        (expRadiusGp (I := I) (X.obj k).metric x)
       exact Metric.ball_subset_ball (by nlinarith) hvQuarter
     have hzFirst' := hrNormal hzFirst
     have hzEnd' := hrNormal hzEnd

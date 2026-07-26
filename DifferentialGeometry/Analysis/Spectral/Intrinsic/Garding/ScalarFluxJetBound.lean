@@ -139,9 +139,9 @@ private theorem metricDiff_eval
     rfl
   · rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
-    [SigmaCompactSpace M] in
-private theorem metricDiff_joint
+/-- The fixed-background metric-difference tensor of a smooth realized metric
+family is jointly smooth in space and regular time. -/
+theorem metricDiff_joint
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)

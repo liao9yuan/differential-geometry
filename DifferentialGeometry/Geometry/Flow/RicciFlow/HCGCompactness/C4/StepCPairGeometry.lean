@@ -27,11 +27,9 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
-
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
+/-- A stable intersection of the book's `B`-balls sends the physical
+`16 * lamInf` source ball into half of the item-3 target ball.  The spare factor
+of two is reserved for the framed target-coordinate ball. -/
 theorem NetLimitData.sigmaBall_nesting
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -126,22 +124,6 @@ theorem NetLimitData.pair_exp_maps
     (hy : seqCenter hd D P (L.φ k) (β : Nat) = some y)
     (hrad : Item3RadiusAt (I := I) hd D P L pb r
       (item3RadiusFactor hd D) k)
-    (hmetric :
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
-        (X.obj (L.φ k)).t2TangentBundle
-      ∀ z : E, (X.obj (L.φ k)).metric.inner x z z ≤ 2 * ‖z‖ ^ 2)
-    (hhalf :
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
-        (X.obj (L.φ k)).t2TangentBundle
-      (1 / 2 : Real) ≤
-        Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj (L.φ k)).metric y)
     (hgp :
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -159,11 +141,11 @@ theorem NetLimitData.pair_exp_maps
       (X.obj (L.φ k)).t2TangentBundle
     letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
     Set.MapsTo
-      (fun z : E => Geometry.Riemannian.NormalCoordinates.expMapDiffeo
-        (I := I) (X.obj (L.φ k)).metric x z)
+      (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+        (I := I) (X.obj (L.φ k)).metric x)
       (Metric.ball 0 (8 * L.lamInf (α : Nat)))
-      ((fun v : E => Geometry.Riemannian.Exponential.expMap
-        (I := I) (X.obj (L.φ k)).metric y (show TangentSpace I y from v)) ''
+      (Geometry.Riemannian.NormalCoordinates.framedExpMap
+        (I := I) (X.obj (L.φ k)).metric y ''
           Metric.ball 0 (item3RadiusFactor hd D * L.lamInf (β : Nat))) := by
   letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
   letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -181,70 +163,45 @@ theorem NetLimitData.pair_exp_maps
   have hfactor : (8 : Real) ≤ item3RadiusFactor hd D := by
     rw [item3RadiusFactor]
     nlinarith
-  have hsourceC2 :
+  have hsourceGp :
       8 * L.lamInf (α : Nat) ≤
-        Geometry.Riemannian.expMapC2Radius
+        Geometry.Riemannian.expRadiusGp
           (I := I) (X.obj (L.φ k)).metric x := by
     calc
       8 * L.lamInf (α : Nat) ≤
           item3RadiusFactor hd D * L.lamInf (α : Nat) :=
         mul_le_mul_of_nonneg_right hfactor
           (hd.lambda_pos hD (L.rInf (α : Nat))).le
-      _ ≤ Geometry.Riemannian.expMapC2Radius
+      _ ≤ Geometry.Riemannian.expRadiusGp
             (I := I) (X.obj (L.φ k)).metric x := (hrad α x hx).2
   have hsource := exp_sigma_maps (I := I) (X.obj (L.φ k))
-    (P (L.φ k)).ms (P (L.φ k)).realizes x hmetric hsourceC2
+    (P (L.φ k)).ms (P (L.φ k)).realizes x hsourceGp
   have hnest := L.sigmaBall_nesting hd hD P hfreq k hk hx hy
   have hApos : 0 < item3RadiusFactor hd D * L.lamInf (β : Nat) :=
     mul_pos (item3Factor_pos hd D) (hd.lambda_pos hD (L.rInf (β : Nat)))
-  have hcoercPos :
-      0 < Geometry.Riemannian.gpCoerciveConst
-        (I := I) (X.obj (L.φ k)).metric y :=
-    Geometry.Riemannian.gpCoerciveConst_pos
-      (I := I) (X.obj (L.φ k)).metric y
-  have hsqrtPos :
-      0 < Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-        (I := I) (X.obj (L.φ k)).metric y) := Real.sqrt_pos.mpr hcoercPos
-  have hsqrtHalf :
-      Real.sqrt (1 / 2 : Real) ≤
-        Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj (L.φ k)).metric y) := Real.sqrt_le_sqrt hhalf
-  have hhalfLt : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
-    have hsqrtSq := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
-    have hsqrtNonneg := Real.sqrt_nonneg (1 / 2 : Real)
-    nlinarith
-  have hhalfSqrt :
-      (1 / 2 : Real) < Real.sqrt
-        (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj (L.φ k)).metric y) := hhalfLt.trans_le hsqrtHalf
   have hcoord :
-      ((item3RadiusFactor hd D / 2) * L.lamInf (β : Nat)) /
-          Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-            (I := I) (X.obj (L.φ k)).metric y) <
+      (item3RadiusFactor hd D / 2) * L.lamInf (β : Nat) <
         item3RadiusFactor hd D * L.lamInf (β : Nat) := by
-    rw [div_lt_iff₀ hsqrtPos]
-    calc
-      (item3RadiusFactor hd D / 2) * L.lamInf (β : Nat) =
-          (item3RadiusFactor hd D * L.lamInf (β : Nat)) * (1 / 2 : Real) := by ring
-      _ < (item3RadiusFactor hd D * L.lamInf (β : Nat)) *
-          Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-            (I := I) (X.obj (L.φ k)).metric y) :=
-        mul_lt_mul_of_pos_left hhalfSqrt hApos
+    nlinarith
   have htarget := properBall_to_exp (I := I) (X.obj (L.φ k))
     (P (L.φ k)).ms (P (L.φ k)).realizes
     (c := y) (R := (item3RadiusFactor hd D / 2) * L.lamInf (β : Nat))
     (σ := item3RadiusFactor hd D * L.lamInf (β : Nat)) hgp hcoord
   intro z hz
-  have hzC2 : ‖z‖ < Geometry.Riemannian.expMapC2Radius
+  have hzGp : ‖z‖ < Geometry.Riemannian.expRadiusGp
       (I := I) (X.obj (L.φ k)).metric x := by
     have hz8 : ‖z‖ < 8 * L.lamInf (α : Nat) := by
       simpa only [Metric.mem_ball, dist_zero_right] using hz
-    exact hz8.trans_le hsourceC2
-  have hzSrc := Geometry.Riemannian.mem_expMapDiffeo_source_of_norm_lt_radius
-    (I := I) (X.obj (L.φ k)).metric x hzC2
-  change Geometry.Riemannian.NormalCoordinates.expMapDiffeo
-    (I := I) (X.obj (L.φ k)).metric x z ∈ _
-  rw [Geometry.Riemannian.NormalCoordinates.expMapDiffeo_apply_eq
+    exact hz8.trans_le hsourceGp
+  have hzSrc : z ∈ (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+      (I := I) (X.obj (L.φ k)).metric x).source := by
+    rw [Geometry.Riemannian.NormalCoordinates.framedExp_source]
+    apply Geometry.Riemannian.mem_expMapDiffeo_source_of_norm_lt_radius
+      (I := I) (X.obj (L.φ k)).metric x
+    apply Geometry.Riemannian.norm_lt_expMapC2Radius_of_sqrt_inner_lt
+      (I := I) (X.obj (L.φ k)).metric x
+    simpa only [Geometry.Riemannian.NormalCoordinates.normalFrame_sqrt] using hzGp
+  rw [Geometry.Riemannian.NormalCoordinates.framedExp_eq_expMap
     (I := I) (X.obj (L.φ k)).metric x hzSrc]
   exact htarget (Metric.ball_subset_closedBall (hnest (hsource hz)))
 

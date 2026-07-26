@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
+import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
@@ -83,15 +84,16 @@ private local instance : NormedSpace Real (E →L[Real] E →L[Real] E →L[Real
 
 
 
+/-- The model-coordinate transition map between the orthonormally framed normal
+charts at `x` and `y`. Outside the meaningful domain the partial diffeomorphisms
+return junk values; derivative bounds are therefore stated only on the chart overlap. -/
 noncomputable def normalTransition
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : X.M) : E → E :=
   letI : TopologicalSpace X.M := X.topology
   letI : ChartedSpace H X.M := X.charted
   letI : IsManifold I ∞ X.M := X.smooth
   letI : T2Space (TangentBundle I X.M) := X.t2TangentBundle
-  fun z =>
-    normalChartAt (I := I) X.metric y
-      (expMapDiffeo (I := I) X.metric x z)
+  framedTransition (I := I) X.metric x y
 
 
 
@@ -103,6 +105,10 @@ noncomputable def normalTransition
 
 
 
+/-- The metric pulled back through the orthonormally framed normal exponential
+at `x`. Its model vectors are genuine `g_x`-normal coordinates, so the value at
+the center is the fixed model inner product. Outside the selected chart source
+the partial-diffeomorphism derivative is junk; bounds are therefore local. -/
 noncomputable def normalCoordMetric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     E -> (E →L[Real] E →L[Real] Real) :=
@@ -110,11 +116,7 @@ noncomputable def normalCoordMetric
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  fun z =>
-    let D : E →L[Real] TangentSpace I (expMapDiffeo (I := I) Y.metric x z) :=
-      mfderiv 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) z
-    (ContinuousLinearMap.precomp Real D).comp
-      ((Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)).comp D)
+  NormalCoordinates.framedMetric (I := I) Y.metric x
 
 
 
@@ -153,6 +155,7 @@ theorem expMapDiffeo_contMDiffOn_ball
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+/-- Scalar evaluation of the framed normal-coordinate metric. -/
 theorem normalCoordMetric_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (z v w : E) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -160,34 +163,35 @@ theorem normalCoordMetric_apply
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     normalCoordMetric (I := I) Y x z v w =
-      Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
-        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w) := by
+      Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
+        (mfderiv 𝓘(Real, E) I
+          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
+        (mfderiv 𝓘(Real, E) I
+          (fun u => framedExpDiffeo (I := I) Y.metric x u) z w) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  simp only [normalCoordMetric, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.precomp_apply]
-  rfl
+  exact NormalCoordinates.framedMetric_apply (I := I) Y.metric x z v w
 
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+/-- At the origin of a framed normal chart, the pulled-back metric is the fixed
+model inner product. -/
 theorem normalMetric_zero
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (c : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    normalCoordMetric (I := I) Y c 0 = Y.metric.inner c := by
+    normalCoordMetric (I := I) Y c 0 =
+      (innerSL Real : E →L[Real] E →L[Real] Real) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  ext v w
-  rw [normalCoordMetric_apply (I := I), expMapDiffeo_zero (I := I)]
-  exact normalChartAt_metric_pullback_at_origin (I := I) Y.metric c v w
+  exact NormalCoordinates.framedMetric_zero (I := I) Y.metric c
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -200,10 +204,12 @@ theorem radialEnorm_normal
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
       ⟨Y.metric.toRiemannianMetric⟩
-    ∀ (t : Real), ‖t • v‖ < expMapC2Radius (I := I) Y.metric x →
+    ∀ (t : Real), ‖t • v‖ < expRadiusGp (I := I) Y.metric x →
     ‖mfderiv 𝓘(Real, Real) I
         (fun s : Real => (expMap (I := I) Y.metric x
-          (show TangentSpace I x from (s • v)) : Y.M)) t (1 : Real)‖ₑ =
+          (show TangentSpace I x from
+            s • (show E from normalFrame (I := I) Y.metric x v)) : Y.M))
+        t (1 : Real)‖ₑ =
       ENNReal.ofReal (Real.sqrt (normalCoordMetric (I := I) Y x (t • v) v v)) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -212,39 +218,78 @@ theorem radialEnorm_normal
   letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
     ⟨Y.metric.toRiemannianMetric⟩
   intro t ht
-  have hsrc : t • v ∈ (expMapDiffeo (I := I) Y.metric x).source :=
-    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x ht
-  have hev : expMapDiffeo (I := I) Y.metric x =ᶠ[nhds (t • v)]
+  let a : E := show E from normalFrame (I := I) Y.metric x v
+  have hraw : ‖t • a‖ <
+      expMapC2Radius (I := I) Y.metric x := by
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt
+      (I := I) Y.metric x (x := t • a)
+    have ha : t • a =
+        (show E from normalFrame (I := I) Y.metric x (t • v)) := by
+      change t • (normalFrame (I := I) Y.metric x v) =
+        normalFrame (I := I) Y.metric x (t • v)
+      exact (map_smul (normalFrame (I := I) Y.metric x) t v).symm
+    rw [ha, normalFrame_sqrt]
+    exact ht
+  have hsrcRaw : t • a ∈ (expMapDiffeo (I := I) Y.metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hraw
+  have hsrc : t • v ∈ (framedExpDiffeo (I := I) Y.metric x).source := by
+    rw [framedExp_source]
+    change normalFrame (I := I) Y.metric x (t • v) ∈
+      (expMapDiffeo (I := I) Y.metric x).source
+    simpa only [a, map_smul] using hsrcRaw
+  have hev : expMapDiffeo (I := I) Y.metric x =ᶠ[nhds (t • a)]
       (fun z : E => (expMap (I := I) Y.metric x
         (show TangentSpace I x from z) : Y.M)) := by
     refine Filter.eventuallyEq_of_mem
-      ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hsrc) ?_
+      ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hsrcRaw) ?_
     intro z hz
     exact expMapDiffeo_apply_eq (I := I) Y.metric x hz
-  rw [mfderiv_exp_radial (I := I) Y.metric x v t ht]
+  simp only [a] at hev
+  rw [mfderiv_exp_radial (I := I) Y.metric x
+    a t hraw]
   rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
   have hinner :
       (inner Real
         (mfderiv 𝓘(Real, E) I
           (fun z : E => (expMap (I := I) Y.metric x
-            (show TangentSpace I x from z) : Y.M)) (t • v)
-          (show TangentSpace I x from v))
+            (show TangentSpace I x from z) : Y.M))
+          (t • a) a)
         (mfderiv 𝓘(Real, E) I
           (fun z : E => (expMap (I := I) Y.metric x
-            (show TangentSpace I x from z) : Y.M)) (t • v)
-          (show TangentSpace I x from v)) : Real) =
+            (show TangentSpace I x from z) : Y.M))
+          (t • a) a) : Real) =
         Y.metric.inner
-          (expMap (I := I) Y.metric x (show TangentSpace I x from (t • v)))
+          (expMap (I := I) Y.metric x
+            (show TangentSpace I x from t • a))
           (mfderiv 𝓘(Real, E) I
             (fun z : E => (expMap (I := I) Y.metric x
-              (show TangentSpace I x from z) : Y.M)) (t • v)
-            (show TangentSpace I x from v))
+              (show TangentSpace I x from z) : Y.M))
+            (t • a) a)
           (mfderiv 𝓘(Real, E) I
             (fun z : E => (expMap (I := I) Y.metric x
-              (show TangentSpace I x from z) : Y.M)) (t • v)
-            (show TangentSpace I x from v)) := rfl
-  rw [hinner, normalCoordMetric_apply (I := I),
-    expMapDiffeo_apply_eq (I := I) Y.metric x hsrc, hev.mfderiv_eq]
+              (show TangentSpace I x from z) : Y.M))
+            (t • a) a) := rfl
+  rw [hinner, normalCoordMetric_apply (I := I)]
+  simp only [a] at hsrcRaw ⊢
+  rw [mfderiv_framedExp (I := I) Y.metric x hsrc]
+  rw [framedExp_apply]
+  rw [map_smul (normalFrame (I := I) Y.metric x) t v]
+  let dRaw := mfderiv 𝓘(Real, E) I
+    (fun u : E => expMapDiffeo (I := I) Y.metric x u)
+    (t • (show E from normalFrame (I := I) Y.metric x v))
+  change _ = ENNReal.ofReal (Real.sqrt
+    (Y.metric.inner
+      (expMapDiffeo (I := I) Y.metric x
+        (t • (show E from normalFrame (I := I) Y.metric x v)))
+      ((dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v)
+      ((dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v)))
+  have hcomp :
+      (dRaw.comp (normalFrame (I := I) Y.metric x).toContinuousLinearMap) v =
+        dRaw (show E from normalFrame (I := I) Y.metric x v) := rfl
+  rw [hcomp]
+  rw [expMapDiffeo_apply_eq (I := I) Y.metric x hsrcRaw]
+  dsimp only [dRaw]
+  rw [hev.mfderiv_eq]
 
 
 
@@ -254,13 +299,59 @@ theorem radialEnorm_normal
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem expMapDiffeo_pushforward_section_contMDiffOn
+/-- The framed exponential-side parametrization is smooth on its intrinsic
+source-radius ball. -/
+theorem framedExp_smoothOn
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContMDiffOn 𝓘(Real, E) I ∞
+      (fun z => framedExpDiffeo (I := I) Y.metric x z)
+      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  have hmap : ContMDiffOn 𝓘(Real, E) I ∞
+      (framedExpMap (I := I) Y.metric x)
+      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
+    intro z hz
+    rw [Metric.mem_ball, dist_zero_right] at hz
+    have hzRaw : ‖(show E from normalFrame (I := I) Y.metric x z)‖ <
+        expMapC2Radius (I := I) Y.metric x := by
+      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+      simpa only [normalFrame_sqrt] using hz
+    have hexp := expMap_contMDiffAt_infty_of_norm_lt_radius
+      (I := I) Y.metric x hzRaw
+    have hframe : ContMDiffAt 𝓘(Real, E) 𝓘(Real, E) ∞
+        (fun w : E => (show E from normalFrame (I := I) Y.metric x w)) z :=
+      (normalFrame (I := I) Y.metric x).toContinuousLinearMap.contMDiff.contMDiffAt
+    simpa only [framedExpMap_apply, Function.comp_apply] using
+      (hexp.comp z hframe).contMDiffWithinAt
+  refine hmap.congr (fun z hz => ?_)
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  have hzRaw : ‖(show E from normalFrame (I := I) Y.metric x z)‖ <
+      expMapC2Radius (I := I) Y.metric x := by
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt] using hz
+  exact framedExp_eq_expMap (I := I) Y.metric x
+    (by
+      rw [framedExp_source]
+      exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzRaw)
+
+/-- Pushforward-section smoothness for a framed exponential parametrization
+that is `C∞` on an open set. -/
+private theorem framedPush_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {U : Set E}
     (hU : IsOpen U)
     (hf : letI : TopologicalSpace Y.M := Y.topology
           letI : ChartedSpace H Y.M := Y.charted
           letI : IsManifold I ∞ Y.M := Y.smooth
           letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-          ContMDiffOn 𝓘(Real, E) I ∞ (fun w => expMapDiffeo (I := I) Y.metric x w) U)
+          ContMDiffOn 𝓘(Real, E) I ∞
+            (fun w => framedExpDiffeo (I := I) Y.metric x w) U)
     (v : E) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
@@ -268,8 +359,9 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E)) ∞
       (fun z => TotalSpace.mk' E (E := fun b : Y.M => TangentSpace I b)
-        (expMapDiffeo (I := I) Y.metric x z)
-        (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)) U := by
+        (framedExpDiffeo (I := I) Y.metric x z)
+        (mfderiv 𝓘(Real, E) I
+          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)) U := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -279,23 +371,35 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
       (fun z : E => (TotalSpace.mk' E z v : TangentBundle 𝓘(Real, E) E)) :=
     (contMDiff_vectorSpace_iff_contDiff (V := fun _ : E => v)).mpr contDiff_const
   have hcomp : ContMDiffOn 𝓘(Real, E) I.tangent ∞
-      (fun z => tangentMapWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U
+      (fun z => tangentMapWithin 𝓘(Real, E) I
+        (fun w => framedExpDiffeo (I := I) Y.metric x w) U
         (TotalSpace.mk' E z v)) U :=
     htm.comp (hσ.contMDiffOn (s := U)) (fun z hz => hz)
   refine hcomp.congr ?_
   intro z hz
-  have hmf : mfderivWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U z
-      = mfderiv 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) z :=
+  have hmf : mfderivWithin 𝓘(Real, E) I
+      (fun w => framedExpDiffeo (I := I) Y.metric x w) U z =
+      mfderiv 𝓘(Real, E) I
+        (fun w => framedExpDiffeo (I := I) Y.metric x w) z :=
     mfderivWithin_of_isOpen hU hz
   change TotalSpace.mk' E (E := fun b : Y.M => TangentSpace I b)
-      (expMapDiffeo (I := I) Y.metric x z)
-      (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-      = tangentMapWithin 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) U
+      (framedExpDiffeo (I := I) Y.metric x z)
+      (mfderiv 𝓘(Real, E) I
+        (fun u => framedExpDiffeo (I := I) Y.metric x u) z v) =
+      tangentMapWithin 𝓘(Real, E) I
+        (fun w => framedExpDiffeo (I := I) Y.metric x w) U
           (TotalSpace.mk' E z v)
   dsimp only [tangentMapWithin]
   rw [hmf]
 
 omit [NeZero (Module.finrank ℝ E)] in
+set_option synthInstance.maxHeartbeats 800000 in
+/-- **Generic-domain B-metric smoothness** (the reusable core): on any open set `S ⊆ E`
+on which the framed parametrization is `C∞`, the pulled-back
+normal-coordinate metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤`.  The opaque-radius and
+named-radius producers below specialize `S`.  Built from the pushforward sections +
+`ContMDiffOn.clm_bundle_apply₂` (the bilinear bundle apply) + the finite-dimensional
+`contDiffOn_clm_apply` reduction. -/
 theorem normalCoordMetric_contDiffOn_of_smooth
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {S : Set E}
     (hU : IsOpen S)
@@ -303,7 +407,8 @@ theorem normalCoordMetric_contDiffOn_of_smooth
           letI : ChartedSpace H Y.M := Y.charted
           letI : IsManifold I ∞ Y.M := Y.smooth
           letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-          ContMDiffOn 𝓘(Real, E) I ∞ (fun w => expMapDiffeo (I := I) Y.metric x w) S) :
+          ContMDiffOn 𝓘(Real, E) I ∞
+            (fun w => framedExpDiffeo (I := I) Y.metric x w) S) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -314,34 +419,40 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   have hscalar : ∀ v w : E, ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) ∞
-      (fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
-          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w))
+      (fun z => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
+          (mfderiv 𝓘(Real, E) I
+            (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
+          (mfderiv 𝓘(Real, E) I
+            (fun u => framedExpDiffeo (I := I) Y.metric x u) z w))
       S := by
     intro v w
     have hg : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
         (fun z => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
           (E := fun b : Y.M => TangentSpace I b →L[Real] TangentSpace I b →L[Real] Real)
-          (expMapDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)))
+          (framedExpDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)))
         S :=
       Y.metric.contMDiff.comp_contMDiffOn hf
-    have hv := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf v
-    have hw := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf w
+    have hv := framedPush_smooth (I := I) Y x hU hf v
+    have hw := framedPush_smooth (I := I) Y x hU hf w
     have htotal : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, Real)) ∞
         (fun z => TotalSpace.mk' Real (E := Bundle.Trivial Y.M Real)
-          (expMapDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
-            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)))
+          (framedExpDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z)
+            (mfderiv 𝓘(Real, E) I
+              (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
+            (mfderiv 𝓘(Real, E) I
+              (fun u => framedExpDiffeo (I := I) Y.metric x u) z w)))
         S :=
       ContMDiffOn.clm_bundle_apply₂
         (E₁ := fun b : Y.M => TangentSpace I b) (E₂ := fun b : Y.M => TangentSpace I b)
         (E₃ := fun _ : Y.M => Real)
-        (b := fun z => expMapDiffeo (I := I) Y.metric x z)
-        (ψ := fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z))
-        (v := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-        (w := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)
+        (b := fun z => framedExpDiffeo (I := I) Y.metric x z)
+        (ψ := fun z => Y.metric.inner (framedExpDiffeo (I := I) Y.metric x z))
+        (v := fun z => mfderiv 𝓘(Real, E) I
+          (fun u => framedExpDiffeo (I := I) Y.metric x u) z v)
+        (w := fun z => mfderiv 𝓘(Real, E) I
+          (fun u => framedExpDiffeo (I := I) Y.metric x u) z w)
         hg hv hw
     intro z hz
     have h_at := htotal z hz
@@ -363,14 +474,16 @@ theorem normalCoordMetric_contDiffOn
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∃ δ : ℝ, 0 < δ ∧
       ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x)
-        (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) := by
+        (Metric.ball (0 : E) δ ∩
+          (framedExpDiffeo (I := I) Y.metric x).source) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  obtain ⟨δ, hδ, hf⟩ := expMapDiffeo_contMDiffOn_ball (I := I) Y x
-  exact ⟨δ, hδ, normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
-    (Metric.isOpen_ball.inter (expMapDiffeo (I := I) Y.metric x).open_source) hf⟩
+  refine ⟨expRadiusGp (I := I) Y.metric x,
+    expRadiusGp_pos (I := I) Y.metric x, ?_⟩
+  exact (normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
+    Metric.isOpen_ball (framedExp_smoothOn (I := I) Y x)).mono Set.inter_subset_left
 
 
 
@@ -394,8 +507,8 @@ theorem normalCoordMetric_contDiffOn_ball
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   obtain ⟨δ, hδ, hsm⟩ := normalCoordMetric_contDiffOn (I := I) Y x
   obtain ⟨r₀, hr₀, hsub⟩ :=
-    Metric.isOpen_iff.mp (expMapDiffeo (I := I) Y.metric x).open_source 0
-      (zero_mem_expMapDiffeo_source (I := I) Y.metric x)
+    Metric.isOpen_iff.mp (framedExpDiffeo (I := I) Y.metric x).open_source 0
+      (zero_mem_framedExp_source (I := I) Y.metric x)
   refine ⟨min δ r₀, lt_min hδ hr₀, hsm.mono fun z hz => ?_⟩
   rw [Metric.mem_ball, dist_zero_right] at hz
   refine ⟨Metric.mem_ball.mpr ?_, hsub (Metric.mem_ball.mpr ?_)⟩
@@ -438,6 +551,8 @@ theorem expMapDiffeo_contMDiffOn_expBall
 
 
 
+/-- The framed normal-coordinate metric is smooth on the intrinsic source-radius
+ball. -/
 theorem normalCoordMetric_contDiffOn_expBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -445,13 +560,13 @@ theorem normalCoordMetric_contDiffOn_expBall
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x)
-      (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)) := by
+      (Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact normalCoordMetric_contDiffOn_of_smooth (I := I) Y x Metric.isOpen_ball
-    (expMapDiffeo_contMDiffOn_expBall (I := I) Y x)
+    (framedExp_smoothOn (I := I) Y x)
 
 
 
@@ -459,6 +574,12 @@ theorem normalCoordMetric_contDiffOn_expBall
 
 
 
+/-- **`hsmooth` reduction for the fixed-`U` wrapper.**  Given a fixed open `U` contained in
+every term's intrinsic framed source-radius ball, the
+pulled-back metrics are uniformly `ContDiffOn ℝ ⊤` on `U` — exactly the `hsmooth` hypothesis
+of `exists_metricLimit_normalCoord`.  This reduces `hsmooth` to the single geometric
+containment `hsub`, i.e. to a uniform lower bound on `expMapC2Radius` across the sequence (the
+remaining Step-A wiring frontier). -/
 theorem contDiffOn_normalCoordMetric_of_subset_expBall
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} (c : ∀ k : ℕ, (X.obj k).M) {U : Set E}
     (hsub : ∀ k,
@@ -466,7 +587,7 @@ theorem contDiffOn_normalCoordMetric_of_subset_expBall
       letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (c k))) :
+      U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I) (X.obj k).metric (c k))) :
     ∀ k, ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) (X.obj k) (c k)) U :=
   fun k => (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj k) (c k)).mono (hsub k)
 
@@ -523,9 +644,9 @@ theorem abs_apply_le
   letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
     ⟨Y.metric.toRiemannianMetric⟩
   let dExp : E →L[Real]
-      TangentSpace I (expMapDiffeo (I := I) Y.metric x z) :=
+      TangentSpace I (framedExpDiffeo (I := I) Y.metric x z) :=
     mfderiv 𝓘(Real, E) I
-      (fun u ↦ expMapDiffeo (I := I) Y.metric x u) z
+      (fun u ↦ framedExpDiffeo (I := I) Y.metric x u) z
   have hcs :
       |normalCoordMetric (I := I) Y x z v w| ≤
         ‖dExp v‖ * ‖dExp w‖ := by
@@ -625,6 +746,11 @@ theorem half_le_gpConst
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+-- Evaluation of the order-one metric jet in the nested bilinear-form space
+-- needs the project-standard extended, terminating synthesis budget.
+set_option synthInstance.maxHeartbeats 800000 in
+/-- The order-one metric-jet bound controls every trilinear evaluation of the
+Fréchet derivative of the normal-coordinate metric. -/
 theorem fderiv_apply_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -763,7 +889,7 @@ theorem koszulVec_lip_on
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆
         Metric.ball (0 : E)
-          (expMapC2Radius (I := I) (X.obj k).metric x))
+          (expRadiusGp (I := I) (X.obj k).metric x))
     {z y : E}
     (hz : z ∈ Metric.ball (0 : E) r)
     (hy : y ∈ Metric.ball (0 : E) r)
@@ -876,7 +1002,7 @@ theorem koszulVec_lip_le
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) (h.radius k x) ⊆
         Metric.ball (0 : E)
-          (expMapC2Radius (I := I) (X.obj k).metric x))
+          (expRadiusGp (I := I) (X.obj k).metric x))
     {z y : E}
     (hz : z ∈ Metric.ball (0 : E) (h.radius k x))
     (hy : y ∈ Metric.ball (0 : E) (h.radius k x))
@@ -906,7 +1032,7 @@ theorem koszulAccel_lip_on
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆
         Metric.ball (0 : E)
-          (expMapC2Radius (I := I) (X.obj k).metric x))
+          (expRadiusGp (I := I) (X.obj k).metric x))
     {z y : E × E} {R : Real} (hR : 0 ≤ R)
     (hz : z.1 ∈ Metric.ball (0 : E) r)
     (hy : y.1 ∈ Metric.ball (0 : E) r)
@@ -989,7 +1115,7 @@ theorem koszulAccel_lip_le
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) (h.radius k x) ⊆
         Metric.ball (0 : E)
-          (expMapC2Radius (I := I) (X.obj k).metric x))
+          (expRadiusGp (I := I) (X.obj k).metric x))
     {z y : E × E} {R : Real} (hR : 0 ≤ R)
     (hz : z.1 ∈ Metric.ball (0 : E) (h.radius k x))
     (hy : y.1 ∈ Metric.ball (0 : E) (h.radius k x))
@@ -1062,6 +1188,13 @@ theorem normalChartAt_contMDiffAt_infty
     rw [Metric.mem_ball, dist_zero_right]; exact hv₀
   have hf_diffeo : IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1 fexp v₀ :=
     exp_isLocalDiffeomorphOn_ball (I := I) g p (le_refl _) ⟨v₀, hmem_ball⟩
+  -- forward map is a `C¹` local diffeomorphism at `v₀`
+  have hsrc : v₀ ∈ (expMapDiffeo (I := I) g p).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p hv₀
+  have hf_diffeo : IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1 fexp v₀ :=
+    ⟨expMapDiffeo (I := I) g p, hsrc,
+      fun y hy => (expMapDiffeo_apply_eq (I := I) g p hy).symm⟩
+  -- the two factor differentials are invertible, hence so is the composite
   have hD1_inv : (mfderiv 𝓘(ℝ, E) I fexp v₀).IsInvertible :=
     ⟨hf_diffeo.mfderivToContinuousLinearEquiv one_ne_zero,
       hf_diffeo.mfderivToContinuousLinearEquiv_coe one_ne_zero⟩
@@ -1146,6 +1279,36 @@ theorem normalChartAt_contMDiffOn_infty
   exact (normalChartAt_contMDiffAt_infty (I := I) g p hv₀ball).contMDiffWithinAt
 
 end NormalChartInftySmooth
+
+/-- The framed normal chart is smooth on the image of its intrinsic framed
+source-radius ball. -/
+theorem framedChart_smooth
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContMDiffOn I 𝓘(Real, E) ∞ (framedChartAt (I := I) Y.metric x)
+      (framedExpMap (I := I) Y.metric x ''
+        Metric.ball (0 : E) (expRadiusGp (I := I) Y.metric x)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rintro _ ⟨v, hv, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right] at hv
+  have hvRaw : ‖(show E from normalFrame (I := I) Y.metric x v)‖ <
+      expMapC2Radius (I := I) Y.metric x := by
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
+    simpa only [normalFrame_sqrt] using hv
+  have hchart := normalChartAt_contMDiffAt_infty (I := I) Y.metric x hvRaw
+  have hframe : ContMDiffAt 𝓘(Real, E) 𝓘(Real, E) ∞
+      (fun w : E => (normalFrame (I := I) Y.metric x).symm w)
+      (normalChartAt (I := I) Y.metric x
+        (framedExpMap (I := I) Y.metric x v)) :=
+    (normalFrame (I := I) Y.metric x).symm.toContinuousLinearMap.contMDiff.contMDiffAt
+  simpa only [framedChart_apply, framedExpMap_apply, Function.comp_apply] using
+    (hframe.comp (framedExpMap (I := I) Y.metric x v) hchart).contMDiffWithinAt
 
 end HCGCompactness
 end DifferentialGeometry

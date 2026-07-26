@@ -180,6 +180,16 @@ def regularToFlow {D : RealTimeInterval} (t : D.RegularTime) : D.FlowTime :=
     (D.regularToFlow t : Real) = (t : Real) := by
   rfl
 
+/-- Every regular time lies in the interior of a compact time window that is
+still contained in the regular set. -/
+theorem exists_Icc_regular (D : RealTimeInterval) {t : Real}
+    (ht : t ∈ D.regular) :
+    ∃ a b : Real, t ∈ Set.Ioo a b ∧ Set.Icc a b ⊆ D.regular := by
+  obtain ⟨a, b, _htIcc, hIcc, hsub⟩ :=
+    exists_Icc_mem_subset_of_mem_nhds (D.regular_isOpen.mem_nhds ht)
+  exact ⟨a, b, Icc_mem_nhds_iff.mp hIcc, hsub⟩
+
+/-- Time translation of an interval.
 
 
 
@@ -333,7 +343,170 @@ def openInterval (a b t₀ : Real) (ht₀ : t₀ ∈ Set.Ioo a b) : RealTimeInte
     intro t ht
     exact Ioo_mem_nhds ht.1 ht.2
 
+/-- Left endpoint of the `n`th compact window exhausting `(a,b)` while
+retaining the distinguished time `t₀`. -/
+noncomputable def openWindowLeft (a t₀ : Real) (n : Nat) : Real :=
+  a + (t₀ - a) / ((n : Real) + 2)
 
+/-- Right endpoint of the `n`th compact window exhausting `(a,b)` while
+retaining the distinguished time `t₀`. -/
+noncomputable def openWindowRight (b t₀ : Real) (n : Nat) : Real :=
+  b - (b - t₀) / ((n : Real) + 2)
+
+/-- The canonical nested compact windows exhausting an open time interval. -/
+def openWindow (a b t₀ : Real) (n : Nat) : Set Real :=
+  Set.Icc (openWindowLeft a t₀ n) (openWindowRight b t₀ n)
+
+/-- Every canonical compact window lies strictly inside the ambient open
+interval. -/
+theorem openWindow_subset {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b) (n : Nat) :
+    openWindow a b t₀ n ⊆ Set.Ioo a b := by
+  intro t ht
+  have hden : (0 : Real) < (n : Real) + 2 := by positivity
+  have hleft : a < openWindowLeft a t₀ n := by
+    have hfrac : 0 < (t₀ - a) / ((n : Real) + 2) :=
+      div_pos (sub_pos.mpr ht₀.1) hden
+    simp only [openWindowLeft]
+    linarith
+  have hright : openWindowRight b t₀ n < b := by
+    have hfrac : 0 < (b - t₀) / ((n : Real) + 2) :=
+      div_pos (sub_pos.mpr ht₀.2) hden
+    simp only [openWindowRight]
+    linarith
+  exact ⟨hleft.trans_le ht.1, ht.2.trans_lt hright⟩
+
+/-- The distinguished time belongs to every canonical compact window. -/
+theorem initial_mem_window {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b) (n : Nat) :
+    t₀ ∈ openWindow a b t₀ n := by
+  have hden : (0 : Real) < (n : Real) + 2 := by positivity
+  have hden_ge : (1 : Real) ≤ (n : Real) + 2 := by
+    have hn : (0 : Real) ≤ (n : Real) := Nat.cast_nonneg n
+    linarith
+  have hleft : openWindowLeft a t₀ n ≤ t₀ := by
+    have hfrac : (t₀ - a) / ((n : Real) + 2) ≤ t₀ - a := by
+      rw [div_le_iff₀ hden]
+      calc
+        t₀ - a = (t₀ - a) * 1 := (mul_one _).symm
+        _ ≤ (t₀ - a) * ((n : Real) + 2) :=
+          mul_le_mul_of_nonneg_left hden_ge (sub_nonneg.mpr ht₀.1.le)
+    simp only [openWindowLeft]
+    linarith
+  have hright : t₀ ≤ openWindowRight b t₀ n := by
+    have hfrac : (b - t₀) / ((n : Real) + 2) ≤ b - t₀ := by
+      rw [div_le_iff₀ hden]
+      calc
+        b - t₀ = (b - t₀) * 1 := (mul_one _).symm
+        _ ≤ (b - t₀) * ((n : Real) + 2) :=
+          mul_le_mul_of_nonneg_left hden_ge (sub_nonneg.mpr ht₀.2.le)
+    simp only [openWindowRight]
+    linarith
+  exact ⟨hleft, hright⟩
+
+/-- The canonical compact windows are increasing with their index. -/
+theorem openWindow_mono {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b)
+    {n m : Nat} (hnm : n ≤ m) :
+    openWindow a b t₀ n ⊆ openWindow a b t₀ m := by
+  intro t ht
+  have hnpos : (0 : Real) < (n : Real) + 2 := by positivity
+  have hden : (n : Real) + 2 ≤ (m : Real) + 2 := by
+    have hcast : (n : Real) ≤ (m : Real) := Nat.cast_le.mpr hnm
+    linarith
+  have hleft : openWindowLeft a t₀ m ≤ openWindowLeft a t₀ n := by
+    have hfrac : (t₀ - a) / ((m : Real) + 2) ≤
+        (t₀ - a) / ((n : Real) + 2) :=
+      div_le_div_of_nonneg_left (sub_nonneg.mpr ht₀.1.le) hnpos hden
+    simp only [openWindowLeft]
+    linarith
+  have hright : openWindowRight b t₀ n ≤ openWindowRight b t₀ m := by
+    have hfrac : (b - t₀) / ((m : Real) + 2) ≤
+        (b - t₀) / ((n : Real) + 2) :=
+      div_le_div_of_nonneg_left (sub_nonneg.mpr ht₀.2.le) hnpos hden
+    simp only [openWindowRight]
+    linarith
+  exact ⟨hleft.trans ht.1, ht.2.trans hright⟩
+
+/-- Every point of `(a,b)` lies in one canonical compact window. -/
+theorem mem_openWindow {a b t₀ t : Real} (ht : t ∈ Set.Ioo a b) :
+    ∃ n : Nat, t ∈ openWindow a b t₀ n := by
+  have hta : 0 < t - a := sub_pos.mpr ht.1
+  have htb : 0 < b - t := sub_pos.mpr ht.2
+  obtain ⟨n, hn⟩ :=
+    exists_nat_gt (max ((t₀ - a) / (t - a)) ((b - t₀) / (b - t)))
+  have hnleft : (t₀ - a) / (t - a) < (n : Real) :=
+    (le_max_left _ _).trans_lt hn
+  have hnright : (b - t₀) / (b - t) < (n : Real) :=
+    (le_max_right _ _).trans_lt hn
+  refine ⟨n, ?_, ?_⟩
+  · have hden : (0 : Real) < (n : Real) + 2 := by positivity
+    have hkey : (t₀ - a) / ((n : Real) + 2) < t - a := by
+      rw [div_lt_iff₀ hden]
+      have heq : t₀ - a = (t₀ - a) / (t - a) * (t - a) := by
+        field_simp
+      rw [heq, mul_comm (t - a) ((n : Real) + 2)]
+      calc
+        (t₀ - a) / (t - a) * (t - a) < (n : Real) * (t - a) :=
+          mul_lt_mul_of_pos_right hnleft hta
+        _ ≤ ((n : Real) + 2) * (t - a) :=
+          mul_le_mul_of_nonneg_right (by linarith) hta.le
+    simp only [openWindowLeft]
+    linarith
+  · have hden : (0 : Real) < (n : Real) + 2 := by positivity
+    have hkey : (b - t₀) / ((n : Real) + 2) < b - t := by
+      rw [div_lt_iff₀ hden]
+      have heq : b - t₀ = (b - t₀) / (b - t) * (b - t) := by
+        field_simp
+      rw [heq, mul_comm (b - t) ((n : Real) + 2)]
+      calc
+        (b - t₀) / (b - t) * (b - t) < (n : Real) * (b - t) :=
+          mul_lt_mul_of_pos_right hnright htb
+        _ ≤ ((n : Real) + 2) * (b - t) :=
+          mul_le_mul_of_nonneg_right (by linarith) htb.le
+    simp only [openWindowRight]
+    linarith
+
+/-- The canonical compact windows exhaust the open interval. -/
+theorem iUnion_openWindow {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b) :
+    (⋃ n : Nat, openWindow a b t₀ n) = Set.Ioo a b := by
+  apply Set.Subset.antisymm
+  · intro t ht
+    obtain ⟨n, hn⟩ := Set.mem_iUnion.mp ht
+    exact openWindow_subset ht₀ n hn
+  · intro t ht
+    obtain ⟨n, hn⟩ := mem_openWindow ht
+    exact Set.mem_iUnion.mpr ⟨n, hn⟩
+
+/-- Every compact interval contained in `(a,b)` is contained in one canonical
+compact window. -/
+theorem exists_window_superset {a b t₀ c d : Real}
+    (ht₀ : t₀ ∈ Set.Ioo a b) (hcd : Set.Icc c d ⊆ Set.Ioo a b) :
+    ∃ n : Nat, Set.Icc c d ⊆ openWindow a b t₀ n := by
+  by_cases hle : c ≤ d
+  · have hc : c ∈ Set.Ioo a b := hcd ⟨le_rfl, hle⟩
+    have hd : d ∈ Set.Ioo a b := hcd ⟨hle, le_rfl⟩
+    obtain ⟨nc, hnc⟩ := mem_openWindow (t₀ := t₀) hc
+    obtain ⟨nd, hnd⟩ := mem_openWindow (t₀ := t₀) hd
+    refine ⟨max nc nd, ?_⟩
+    have hnc' : c ∈ openWindow a b t₀ (max nc nd) :=
+      openWindow_mono ht₀ (Nat.le_max_left nc nd) hnc
+    have hnd' : d ∈ openWindow a b t₀ (max nc nd) :=
+      openWindow_mono ht₀ (Nat.le_max_right nc nd) hnd
+    intro t ht
+    exact ⟨hnc'.1.trans ht.1, ht.2.trans hnd'.2⟩
+  · refine ⟨0, ?_⟩
+    intro t ht
+    exact (hle (ht.1.trans ht.2)).elim
+
+/-- Every point of the ambient open interval has one canonical compact window
+as a neighborhood, not merely as a containing set. -/
+theorem exists_window_nhds {a b t₀ t : Real}
+    (ht₀ : t₀ ∈ Set.Ioo a b) (ht : t ∈ Set.Ioo a b) :
+    ∃ n : Nat, openWindow a b t₀ n ∈ 𝓝 t := by
+  obtain ⟨c, d, _htIcc, hmem, hsub⟩ :=
+    exists_Icc_mem_subset_of_mem_nhds (Ioo_mem_nhds ht.1 ht.2)
+  obtain ⟨n, hn⟩ := exists_window_superset ht₀ hsub
+  exact ⟨n, Filter.mem_of_superset hmem hn⟩
+
+/-- Open-closed interval `(a,b]`, with a chosen initial time inside it. -/
 def openClosed (a b t₀ : Real) (ht₀ : t₀ ∈ Set.Ioc a b) : RealTimeInterval where
   carrier := Set.Ioc a b
   regular := Set.Ioo a b

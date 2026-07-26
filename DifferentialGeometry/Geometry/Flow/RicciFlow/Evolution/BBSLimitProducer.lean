@@ -95,15 +95,16 @@ def cinftyLimitData_of_allMBounds
               (S.base.metric s).inner x v v ≤
                 Lambda * (S.base.metric alpha).inner x v v) :
     CinftyLimitData (I := I) S.base.metric alpha omega hαω := by
-  let hEnd := exists_endMetric (I := I) S hdim hS hbound hEquiv
-  let gInf := Classical.choose hEnd
-  have hleft := Classical.choose_spec hEnd
+  classical
+  -- `exists_endMetric` is `Prop`-valued while the goal is data, so the endpoint
+  -- metric is extracted with `Exists.choose` rather than destructured.
+  have hex := exists_endMetric (I := I) S hdim hS hbound hEquiv
   refine
-    { limitMetric := gInf
-      tendsto_left := hleft
+    { limitMetric := hex.choose
+      tendsto_left := hex.choose_spec
       ricci_match := ?_ }
   intro x v w
-  exact ricci_tendsto_left (I := I) S hdim hS hbound hEquiv gInf hleft x v w
+  exact ricci_tendsto_left (I := I) S hdim hS hbound hEquiv hex.choose hex.choose_spec x v w
 
 
 
@@ -135,13 +136,13 @@ def cinftyLimitData_of_solution
       hRm (⟨t, ht⟩ : RealTimeInterval.FlowTime
         (RealTimeInterval.closedOpen alpha omega hαω))
   have hCan := rm04_bound_can (I := I) Rm04 hRmRaw hbound
-  let K := Classical.choose hbound
-  have hK := Classical.choose_spec hbound
+  have hK := hbound.choose_spec
   have hRic := ric_quad_le_of_soln (I := I) hRmRaw hK
   have hRicConst :
-      0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K := by
+      0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt hbound.choose := by
     positivity
   have hEquiv := hell_of_soln (I := I) hS hRicConst hRic
   exact cinftyLimitData_of_allMBounds (I := I) S hS hdim hCan hEquiv
+    (bbsAllMBounds (I := I) S hS hdim Rm04 hRm hbound)
 
 end DifferentialGeometry.PDE.RicciFlow

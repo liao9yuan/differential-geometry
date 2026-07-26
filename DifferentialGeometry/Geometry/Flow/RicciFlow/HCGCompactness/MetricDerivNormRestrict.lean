@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivTower
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
@@ -25,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 section FixedManifold
 
@@ -336,3 +337,58 @@ end FixedManifold
 
 end HCGCompactness
 end DifferentialGeometry
+
+namespace DifferentialGeometry.PDE.RicciFlow
+
+open DifferentialGeometry.Integral.Connection
+open scoped Manifold ContDiff Topology
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
+variable {Idx : Type*} [Fintype Idx]
+
+/-- A constant-frame component tower commutes with restriction to an open
+subtype of its model space.  The differentiability premise is exactly what is
+needed to restrict the scalar directional derivative at each recursive level. -/
+theorem iterCovComp_restrict {r : Nat} (U : TopologicalSpace.Opens E)
+    [SigmaCompactSpace U] [T2Space U]
+    (e : Idx → E) (chr : E → Idx → Idx → Idx → Real)
+    (base : E → (Fin r → Idx) → Real)
+    (hdiff : ∀ (a : Nat) (x : U) (n : Fin (r + a) → Idx),
+      MDifferentiableAt 𝓘(Real, E) 𝓘(Real, Real)
+        (fun y : E ↦ iterCovComp (I := 𝓘(Real, E))
+          (fun i _ ↦ e i) chr base a y n) (x : E)) :
+    ∀ (a : Nat) (x : U) (n : Fin (r + a) → Idx),
+      iterCovComp (I := 𝓘(Real, E)) (M := U)
+          (fun i _ ↦ e i) (fun z ↦ chr (z : E))
+          (fun z ↦ base (z : E)) a x n =
+        iterCovComp (I := 𝓘(Real, E))
+          (fun i _ ↦ e i) chr base a (x : E) n := by
+  classical
+  intro a
+  induction a with
+  | zero =>
+      intro x n
+      rfl
+  | succ a ih =>
+      intro x n
+      rw [iterCovComp_succ, iterCovComp_succ]
+      unfold covDerivStepComp frameExtData
+      have hscalar :
+          (fun y : U ↦
+            iterCovComp (I := 𝓘(Real, E)) (M := U)
+              (fun i _ ↦ e i) (fun z ↦ chr (z : E))
+              (fun z ↦ base (z : E)) a y (Fin.tail n)) =
+            fun y : U ↦
+              iterCovComp (I := 𝓘(Real, E))
+                (fun i _ ↦ e i) chr base a (y : E) (Fin.tail n) := by
+        funext y
+        exact ih y (Fin.tail n)
+      rw [hscalar]
+      rw [extDerivFun_restrictOpen U
+        (fun y : E ↦ iterCovComp (I := 𝓘(Real, E))
+          (fun i _ ↦ e i) chr base a y (Fin.tail n))
+        x (e (n 0)) (hdiff a x (Fin.tail n))]
+      simp_rw [ih]
+
+end DifferentialGeometry.PDE.RicciFlow

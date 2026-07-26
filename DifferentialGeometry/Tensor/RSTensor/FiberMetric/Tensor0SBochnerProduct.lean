@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerSplit
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SInnerLeibniz
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
@@ -510,12 +511,83 @@ theorem du_norm0S {s : ℕ}
           (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x (nablaT x) W) (T x) := by
           rw [hAderiv, hWsec]
 
+/-- Kato bound for the differential of the squared norm of a covariant tensor. -/
+theorem normSq0S_du_le {s : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
+    (hmc : IsMetricCompatible_gen (I := I) cov g)
+    (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (nablaT : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 1))
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s cov T nablaT)
+    (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (hdu : DuFieldRealizes (I := I)
+      (fun y : M => normSq0S (I := I) g y s (T y)) du)
+    (x : M) :
+    normSq0S (I := I) g x 1 (du x) <=
+      4 * normSq0S (I := I) g x s (T x) *
+        normSq0S (I := I) g x (s + 1) (nablaT x) := by
+  classical
+  obtain ⟨_mu, basis, hinv, _hinv', _hmu0, _hmu1⟩ :=
+    exists_diagInv_of_equiv (I := I) g g x (C := 1) (by norm_num)
+      (by intro v; simp)
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x 1 basis hinv]
+  rw [sum_fin_one_fun]
+  calc
+    (∑ i,
+        (component0S (I := I) basis (du x) (fun _ : Fin 1 => i)) ^ 2) =
+        ∑ i,
+          (2 * inner0S (I := I) g x s
+            (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+              (nablaT x) (basis i)) (T x)) ^ 2 := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [component0S_apply,
+            du_norm0S (I := I) cov g hmc T nablaT hA du hdu (basis i)]
+    _ <= ∑ i,
+          4 *
+            (normSq0S (I := I) g x s
+              (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+                (nablaT x) (basis i)) *
+              normSq0S (I := I) g x s (T x)) := by
+          apply Finset.sum_le_sum
+          intro i _
+          calc
+            (2 * inner0S (I := I) g x s
+                (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+                  (nablaT x) (basis i)) (T x)) ^ 2 =
+                4 * (inner0S (I := I) g x s
+                  (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+                    (nablaT x) (basis i)) (T x)) ^ 2 := by ring
+            _ <= 4 *
+                (normSq0S (I := I) g x s
+                    (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+                      (nablaT x) (basis i)) *
+                  normSq0S (I := I) g x s (T x)) :=
+              mul_le_mul_of_nonneg_left
+                (inner0S_sq_le_mul (I := I) g x s
+                  (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+                    (nablaT x) (basis i)) (T x)) (by norm_num)
+    _ = 4 * normSq0S (I := I) g x s (T x) *
+          ∑ i, normSq0S (I := I) g x s
+            (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x
+              (nablaT x) (basis i)) := by
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro i _
+          ring
+    _ = 4 * normSq0S (I := I) g x s (T x) *
+          normSq0S (I := I) g x (s + 1) (nablaT x) := by
+          rw [normSq0S_curry_sum (I := I) g x s basis hinv]
 
-
-
-
-
-omit [CompleteSpace E] [SigmaCompactSpace M] in
+/-- **The pointwise Hessian product rule of a covariant-tensor norm**, in basis
+component form — the genuine geometric input of the general Bochner Laplacian
+split, here **derived** (not assumed) from metric compatibility.  This is the
+rank-`s` generalisation of `BochnerTensor.hess_norm02`, and it discharges the
+`TensorNormHessianProductInBasis` hypothesis of `tensorNormBochnerSplit`. -/
 theorem hess_norm0S {s : ℕ}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

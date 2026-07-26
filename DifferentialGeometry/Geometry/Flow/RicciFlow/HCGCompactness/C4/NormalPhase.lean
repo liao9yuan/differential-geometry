@@ -110,7 +110,7 @@ theorem normalAccel_eq
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E × E), z.1 ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4) →
+      (expRadiusGp (I := I) Y.metric x / 4) →
     ∀ hco : IsCoercive (normalCoordMetric (I := I) Y x z.1),
       normalAccel (I := I) Y x z =
         -MetricKoszul.koszulVec hco
@@ -138,7 +138,7 @@ theorem normalPhase_eq_spray
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ (z : E × E),
       z.1 ∈ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) Y.metric x / 4) →
+        (expRadiusGp (I := I) Y.metric x / 4) →
       ∀ _hco : IsCoercive (normalCoordMetric (I := I) Y x z.1),
         PhaseFlow.phaseField (normalAccel (I := I) Y x) z =
           MetricKoszul.metricSpray (normalCoordMetric (I := I) Y x) z := by
@@ -166,7 +166,7 @@ theorem normalAccel_norm
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (R : ℝ≥0) (z : E × E) (hz : z ∈ normalPhaseBox r R) :
     ‖normalAccel (I := I) (X.obj k) x z‖ ≤
       3 * h.metricC 1 * (R : Real) ^ 2 := by
@@ -205,7 +205,7 @@ theorem normalAccel_lip
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (R : ℝ≥0) :
     LipschitzOnWith (normalPhaseK h R)
       (normalAccel (I := I) (X.obj k) x) (normalPhaseBox r R) := by
@@ -216,11 +216,11 @@ theorem normalAccel_lip
   letI : T2Space (X.obj k).M := (X.obj k).t2
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
   have hquarter : Metric.ball (0 : E)
-      (expMapC2Radius (I := I) (X.obj k).metric x / 4) ⊆
-      Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric x) := by
+      (expRadiusGp (I := I) (X.obj k).metric x / 4) ⊆
+      Metric.ball (0 : E) (expRadiusGp (I := I) (X.obj k).metric x) := by
     simpa only [normalBall] using normalInner_sub (I := I) (X.obj k) x
   have hrExp : Metric.ball (0 : E) r ⊆
-      Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric x) :=
+      Metric.ball (0 : E) (expRadiusGp (I := I) (X.obj k).metric x) :=
     hrQuarter.trans hquarter
   apply LipschitzOnWith.of_dist_le_mul
   intro z hz y hy
@@ -249,7 +249,7 @@ theorem normalDiag_approx
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (R : ℝ≥0) {u : Set (E × E)} {Φ : (E × E) → Real → E × E}
     (hinit : ∀ z ∈ u, Φ z 0 = z)
     (hcont : ∀ z ∈ u, ContinuousOn (Φ z) (Icc 0 1))
@@ -279,7 +279,7 @@ theorem exists_normalFlow
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
+        (expRadiusGp (I := I) (X.obj k).metric x / 4))
     (q : NNReal) (hq : 0 < q)
     (hqPos : 4 * (q : Real) < r)
     (hqAcc : 3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤ (q : Real)) :

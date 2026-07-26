@@ -834,8 +834,8 @@ theorem averagedTargets₂ {ι : Type*} [Fintype ι] {F' : Type*} [NormedAddComm
 
 end CloseIdEngine
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [Module.Finite Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -1779,10 +1779,12 @@ theorem normLowerOfSepExp
     letI : T2Space (TangentBundle J' Y.M) := Y.t2TangentBundle
     letI : RiemannianBundle (fun y : Y.M => TangentSpace J' y) :=
       ⟨Y.metric.toRiemannianMetric⟩
-    U ⊆ Metric.ball (0 : F) (expMapC2Radius (I := J') Y.metric x) →
+    U ⊆ Metric.ball (0 : F) (expRadiusGp (I := J') Y.metric x) →
     ∀ {lam : ℝ},
       ENNReal.ofReal lam ≤ Manifold.riemannianEDist J' x
-        (expMap (I := J') Y.metric x (show TangentSpace J' x from v)) →
+        (expMap (I := J') Y.metric x
+          (show TangentSpace J' x from
+            NormalCoordinates.normalFrame (I := J') Y.metric x v)) →
       lam / Real.sqrt 2 ≤ ‖v‖ := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace G Y.M := Y.charted
@@ -1792,23 +1794,47 @@ theorem normLowerOfSepExp
     ⟨Y.metric.toRiemannianMetric⟩
   intro hsub lam hlam
   have hsmall : ∀ t ∈ Set.Icc (0 : ℝ) 1,
-      ‖t • v‖ < expMapC2Radius (I := J') Y.metric x := by
+      ‖t • v‖ < expRadiusGp (I := J') Y.metric x := by
     intro t ht
     simpa only [Metric.mem_ball, dist_zero_right] using hsub (hseg t ht)
+  have hraw : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖t • (show F from
+        NormalCoordinates.normalFrame (I := J') Y.metric x v)‖ <
+          expMapC2Radius (I := J') Y.metric x := by
+    intro t ht
+    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := J') Y.metric x
+    have hframe : t • (show F from
+        NormalCoordinates.normalFrame (I := J') Y.metric x v) =
+        (show F from
+          NormalCoordinates.normalFrame (I := J') Y.metric x (t • v)) := by
+      exact (map_smul
+        (NormalCoordinates.normalFrame (I := J') Y.metric x) t v).symm
+    rw [hframe, NormalCoordinates.normalFrame_sqrt]
+    exact hsmall t ht
   have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) J' 1
       (fun t : ℝ => (expMap (I := J') Y.metric x
-        (show TangentSpace J' x from (t • v)) : Y.M)) (Set.Icc (0 : ℝ) 1) := by
+        (show TangentSpace J' x from
+          t • (show F from
+            NormalCoordinates.normalFrame (I := J') Y.metric x v)) : Y.M))
+        (Set.Icc (0 : ℝ) 1) := by
     intro t ht
-    exact (radialCurve_contMDiffAt2 (I := J') Y.metric x v t (hsmall t ht)).contMDiffWithinAt.of_le
+    exact (radialCurve_contMDiffAt2 (I := J') Y.metric x
+      (show F from NormalCoordinates.normalFrame (I := J') Y.metric x v)
+      t (hraw t ht)).contMDiffWithinAt.of_le
       (by norm_num)
   have hend :
-      (expMap (I := J') Y.metric x (show TangentSpace J' x from ((0 : ℝ) • v)) : Y.M) = x := by
+      (expMap (I := J') Y.metric x
+        (show TangentSpace J' x from
+          (0 : ℝ) • (show F from
+            NormalCoordinates.normalFrame (I := J') Y.metric x v)) : Y.M) = x := by
     rw [zero_smul]
     exact expMap_zero (I := J') Y.metric x
   have hderiv : ∀ t ∈ Set.Icc (0 : ℝ) 1,
       ‖mfderiv 𝓘(ℝ, ℝ) J'
         (fun s : ℝ => (expMap (I := J') Y.metric x
-          (show TangentSpace J' x from (s • v)) : Y.M)) t 1‖ₑ =
+          (show TangentSpace J' x from
+            s • (show F from
+              NormalCoordinates.normalFrame (I := J') Y.metric x v)) : Y.M)) t 1‖ₑ =
         ENNReal.ofReal (Real.sqrt (normalCoordMetric (I := J') Y x (t • v) v v)) := by
     intro t ht
     exact radialEnorm_normal (I := J') Y x v t (hsmall t ht)
@@ -1830,13 +1856,13 @@ theorem seqChartNorm_ge
     letI : RiemannianBundle (fun y : (Z.obj k).M => TangentSpace J' y) :=
       ⟨(Z.obj k).metric.toRiemannianMetric⟩
     (Z.obj k).basepoint ∈
-        (NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c).source →
+        (NormalCoordinates.framedChartAt (I := J') (Z.obj k).metric c).source →
     (∀ t : Real, t ∈ Set.Icc (0 : Real) 1 →
-      t • NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+      t • NormalCoordinates.framedChartAt (I := J') (Z.obj k).metric c
         (Z.obj k).basepoint ∈ U) →
-    U ⊆ Metric.ball (0 : F) (expMapC2Radius (I := J') (Z.obj k).metric c) →
+    U ⊆ Metric.ball (0 : F) (expRadiusGp (I := J') (Z.obj k).metric c) →
     hd.lambda D 0 / Real.sqrt 2 ≤
-      ‖NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+      ‖NormalCoordinates.framedChartAt (I := J') (Z.obj k).metric c
         (Z.obj k).basepoint‖ := by
   letI : TopologicalSpace (Z.obj k).M := (Z.obj k).topology
   letI : ChartedSpace G (Z.obj k).M := (Z.obj k).charted
@@ -1846,19 +1872,24 @@ theorem seqChartNorm_ge
     ⟨(Z.obj k).metric.toRiemannianMetric⟩
   intro hbase hseg hsub
   have hvsrc :
-      NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+      NormalCoordinates.framedChartAt (I := J') (Z.obj k).metric c
           (Z.obj k).basepoint ∈
-        (NormalCoordinates.expMapDiffeo (I := J') (Z.obj k).metric c).source :=
-    (NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c).map_source hbase
+        (NormalCoordinates.framedExpDiffeo (I := J')
+          (Z.obj k).metric c).source :=
+    (NormalCoordinates.framedChartAt (I := J')
+      (Z.obj k).metric c).map_source hbase
   have hexp :
       (expMap (I := J') (Z.obj k).metric c
         (show TangentSpace J' c from
-          NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
-            (Z.obj k).basepoint) : (Z.obj k).M) = (Z.obj k).basepoint := by
-    rw [← NormalCoordinates.expMapDiffeo_apply_eq
+          NormalCoordinates.normalFrame (I := J') (Z.obj k).metric c
+            (NormalCoordinates.framedChartAt (I := J')
+              (Z.obj k).metric c (Z.obj k).basepoint)) : (Z.obj k).M) =
+          (Z.obj k).basepoint := by
+    rw [← NormalCoordinates.framedExpMap_apply]
+    rw [← NormalCoordinates.framedExp_eq_expMap
       (I := J') (Z.obj k).metric c hvsrc]
-    exact NormalCoordinates.normalChartAt_left_inv
-      (I := J') (Z.obj k).metric c hbase
+    exact (NormalCoordinates.framedExpDiffeo (I := J')
+      (Z.obj k).metric c).right_inv hbase
   have hsep : ENNReal.ofReal (hd.lambda D 0) ≤
       Manifold.riemannianEDist J' c (Z.obj k).basepoint := by
     have h := seqCenter_edist_ge hd hD P k hα hc
@@ -1893,64 +1924,64 @@ theorem chartCm_contDiffOn
     (p : M') {ι : Type} [Fintype ι] (join : M' → M' → ℝ → M') (r : ℝ)
     (H : ∀ params : (ι → ℝ) × (ι → E),
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r)
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r)
     {V : Set ((ι → ℝ) × (ι → E))}
     (hchz : ∀ params₀ ∈ V, ∀ n : ℕ, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z)
-      (NormalCoordinates.normalChartAt (I := I) g p
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z)
+      (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params₀.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
           join p r (H params₀))))
     (hchξ : ∀ params₀ ∈ V, ∀ n : ℕ, ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ params₀ ∈ V, ∀ n : ℕ, ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M' × M' => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm
-        (NormalCoordinates.normalChartAt (I := I) g p
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params₀.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
             join p r (H params₀))),
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∀ params₀ ∈ V, ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E)
-        (NormalCoordinates.normalChartAt (I := I) g p
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params₀.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
             join p r (H params₀))))
     (hz₀' : ∀ params₀ ∈ V,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params₀.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
             join p r (H params₀))) params₀ = 0)
     (hc_solves : ∀ params₀ ∈ V, ∀ᶠ params in nhds params₀,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
             join p r (H params))) params = 0)
     (hc_cont : ∀ params₀ ∈ V, Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
           join p r (H params)) : E))
       (nhds params₀)
-      (nhds (NormalCoordinates.normalChartAt (I := I) g p
+      (nhds (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params₀.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
           join p r (H params₀))))) :
     ContDiffOn ℝ (∞ : WithTop ℕ∞)
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
           join p r (H params)) : E)) V := by
   rw [contDiffOn_infty]
   intro n params₀ hp
   have hcd := centerOfMass_contDiffAt (I := I) g hEnorm p
-    (NormalCoordinates.normalChartAt (I := I) g p
+    (NormalCoordinates.framedChartAt (I := I) g p
       (centerOfMass (I := I) g params₀.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))
         join p r (H params₀)))
     params₀ (max 1 n) (le_max_left 1 n) join r H
     (hchz params₀ hp (max 1 n)) (hchξ params₀ hp (max 1 n)) (hsm params₀ hp (max 1 n))

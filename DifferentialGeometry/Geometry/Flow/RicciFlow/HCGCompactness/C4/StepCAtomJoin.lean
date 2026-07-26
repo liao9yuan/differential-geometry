@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomConv
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransition
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransitionOverlap
 
 set_option autoImplicit false
 
@@ -60,7 +60,7 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k)))
+        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k)))
     (hmapsJ : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -68,12 +68,10 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U
-        ((fun v : E => (expMap (I := I) (X.obj (L.φ k)).metric
-            (seqCenterD hd P L k (gamma.1 : Nat))
-            (show TangentSpace I (seqCenterD hd P L k (gamma.1 : Nat)) from v) :
-              (X.obj (L.φ k)).M)) '' Metric.ball (0 : E) rho))
+        (framedExpMap (I := I) (X.obj (L.φ k)).metric
+          (seqCenterD hd P L k (gamma.1 : Nat)) '' Metric.ball (0 : E) rho))
     (hVmetric : ∀ gamma : LiveSlot L pb r, ∀ᶠ k in Filter.atTop,
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
         (metricInput.radius (L.φ k)
@@ -85,7 +83,7 @@ theorem existsLiveJointH6
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric
+        (expRadiusGp (I := I) (X.obj (L.φ k)).metric
           (seqCenterD hd P L k (gamma.1 : Nat)))) :
     ∃ (psi : Nat → Nat)
         (gInf : E → (LiveSlot L pb r → (E →L[Real] E →L[Real] Real)))
@@ -124,7 +122,7 @@ theorem existsLiveJointH6
             (X.obj (L.φ (psi1 k))).smooth
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
-         U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I)
+         U ⊆ Metric.ball (0 : E) (expRadiusGp (I := I)
             (X.obj (L.φ (psi1 k))).metric (beta (psi1 k)))) ∧
         (letI : TopologicalSpace (X.obj (L.φ (psi1 k))).M :=
             (X.obj (L.φ (psi1 k))).topology
@@ -135,13 +133,11 @@ theorem existsLiveJointH6
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
          Set.MapsTo
-            (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi1 k))).metric
+            (fun z => framedExpDiffeo (I := I) (X.obj (L.φ (psi1 k))).metric
               (beta (psi1 k)) z) U
-            ((fun v : E => (expMap (I := I) (X.obj (L.φ (psi1 k))).metric
-                (seqCenterD hd P L (psi1 k) (gamma.1 : Nat))
-                (show TangentSpace I
-                  (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) from v) :
-                    (X.obj (L.φ (psi1 k))).M)) '' Metric.ball (0 : E) rho)) ∧
+            (framedExpMap (I := I) (X.obj (L.φ (psi1 k))).metric
+              (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) ''
+                Metric.ball (0 : E) rho)) ∧
         Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
           (metricInput.radius (L.φ (psi1 k))
             (seqCenterD hd P L (psi1 k) (gamma.1 : Nat))) ∧
@@ -154,7 +150,7 @@ theorem existsLiveJointH6
          letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 k))).M) :=
             (X.obj (L.φ (psi1 k))).t2TangentBundle
          Metric.ball (0 : E) rho ⊆ Metric.ball (0 : E)
-          (expMapC2Radius (I := I) (X.obj (L.φ (psi1 k))).metric
+          (expRadiusGp (I := I) (X.obj (L.φ (psi1 k))).metric
             (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)))) ∧
         seqCenter hd D P (L.φ (psi1 k)) (gamma.1 : Nat) =
           some (seqCenterD hd P L (psi1 k) (gamma.1 : Nat)) := by
@@ -205,44 +201,10 @@ theorem existsLiveJointH6
         (beta (psi1 (tau k)))
         (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat)))
       U (Metric.ball (0 : E) rho) := by
-    letI : TopologicalSpace (X.obj (L.φ (psi1 (tau k)))).M :=
-      (X.obj (L.φ (psi1 (tau k)))).topology
-    letI : ChartedSpace H (X.obj (L.φ (psi1 (tau k)))).M :=
-      (X.obj (L.φ (psi1 (tau k)))).charted
-    letI : IsManifold I ∞ (X.obj (L.φ (psi1 (tau k)))).M :=
-      (X.obj (L.φ (psi1 (tau k)))).smooth
-    letI : T2Space (TangentBundle I (X.obj (L.φ (psi1 (tau k)))).M) :=
-      (X.obj (L.φ (psi1 (tau k)))).t2TangentBundle
-    intro z hz
-    obtain ⟨v, hv, hvEq⟩ := hMaps k gamma hz
-    have hvEq' :
-        (expMap (I := I) (X.obj (L.φ (psi1 (tau k)))).metric
-          (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat))
-          (show TangentSpace I
-            (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat)) from v) :
-            (X.obj (L.φ (psi1 (tau k)))).M) =
-          expMapDiffeo (I := I) (X.obj (L.φ (psi1 (tau k)))).metric
-            (beta (psi1 (tau k))) z := by
-      simpa only using hvEq
-    have hvTarget : v ∈ (normalChartAt (I := I)
-        (X.obj (L.φ (psi1 (tau k)))).metric
-        (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat))).target :=
-      ball_subset_normalChartAt_target (I := I)
-        (X.obj (L.φ (psi1 (tau k)))).metric
-        (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat))
-        (mem_ball_zero_iff.mp (hVExp k gamma hv))
-    change normalChartAt (I := I) (X.obj (L.φ (psi1 (tau k)))).metric
-        (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat))
-        (expMapDiffeo (I := I) (X.obj (L.φ (psi1 (tau k)))).metric
-          (beta (psi1 (tau k))) z) ∈ Metric.ball (0 : E) rho
-    rw [← hvEq',
-      ← normalChartAt_symm_apply (I := I)
-        (X.obj (L.φ (psi1 (tau k)))).metric
-        (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat)) hvTarget,
-      normalChartAt_right_inv (I := I)
-        (X.obj (L.φ (psi1 (tau k)))).metric
-        (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat)) hvTarget]
-    exact hv
+    exact normalTrans_mapsTo (I := I) (X.obj (L.φ (psi1 (tau k))))
+      (beta (psi1 (tau k)))
+      (seqCenterD hd P L (psi1 (tau k)) (gamma.1 : Nat))
+      (hVExp k gamma) (hMaps k gamma)
   have hbddComp (gamma : LiveSlot L pb r) : IsometryDerivBoundsOn U
       (fun k z => normalTransition (I := I) (X.obj (L.φ (psi1 (tau k))))
         (beta (psi1 (tau k)))

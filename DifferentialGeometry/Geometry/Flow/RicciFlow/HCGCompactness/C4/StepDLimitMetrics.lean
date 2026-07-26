@@ -202,8 +202,10 @@ def ballStep
   PartialDiffeomorph.opensMap (I := I) (M := M j) (N := M (j + 1))
     (Ψ j) (hsrc j) (hmap j)
 
+variable [I.Boundaryless]
 
-
+/-- Adjacent partial diffeomorphisms that preserve an increasing family of positive-radius open
+balls assemble into a smooth sequential direct system. -/
 def ballSystem
     (b : ∀ j, M j) (r : ℕ → ℝ) (hr : ∀ j, 0 < r j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -433,7 +435,7 @@ theorem chainPullback_zero
 
 omit [CompleteSpace E] in
 theorem chainPullback_step
-    [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
     {j : ℕ} (U : Opens (M j)) (V : Opens (M (j + 1)))
@@ -593,7 +595,7 @@ section ApproxData
 
 open Bundle
 
-variable [I.Boundaryless]
+variable [∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (M j)]
 variable [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
 variable [∀ j, IsRiemannianManifold I (M j)]
 variable [NeZero (Module.finrank ℝ E)]
@@ -797,7 +799,7 @@ theorem chainPrefix_cov_le
     (chainCompAssoc_eq (I := I) (Mf := M) Ψ j a b)]
   exact prefixTail_cov_le Φ Θ U hpre hnext hUK gMid g D hq1 hqp x
 
-omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_lower {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -2332,7 +2334,8 @@ theorem exists_limits_close
     have hleft' := Filter.Tendsto.congr' hevent hleft
     exact tendsto_nhds_unique hleft' hright
 
-omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+set_option linter.unusedSectionVars false in
+omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 theorem half_ambient_le_tail
     (b : ∀ j, M j) (j₀ : ℕ)

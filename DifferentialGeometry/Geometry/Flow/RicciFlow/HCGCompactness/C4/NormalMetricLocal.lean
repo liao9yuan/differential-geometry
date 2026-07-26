@@ -46,7 +46,7 @@ def normalQuarter
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact ⟨Metric.ball (0 : E)
-    (expMapC2Radius (I := I) Y.metric x / 4), Metric.isOpen_ball⟩
+    (expRadiusGp (I := I) Y.metric x / 4), Metric.isOpen_ball⟩
 
 
 
@@ -150,7 +150,7 @@ theorem quarterDiffeo_apply
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ((normalQuarterDiffeo (I := I) Y x z :
       normalQuarterImage (I := I) Y x) : Y.M) =
-      expMapDiffeo (I := I) Y.metric x (z : E) := by
+      framedExpDiffeo (I := I) Y.metric x (z : E) := by
   rfl
 
 
@@ -166,7 +166,7 @@ theorem quarterDiffeo_mfd
         (normalQuarterDiffeo (I := I) Y x :
           normalQuarter (I := I) Y x → normalQuarterImage (I := I) Y x) z v =
       mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v := by
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -260,15 +260,15 @@ theorem normal_cov_map
           (Integral.Connection.restrictOpenTangentSection
             (I := 𝓘(Real, E)) (normalQuarter (I := I) Y x) V) y) →
     mfderiv 𝓘(Real, E) I
-        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E)
+        (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E)
         (((Integral.Connection.metricCov (I := 𝓘(Real, E))
           (M := E) (normalTotal (I := I) Y x)).toFun
           (fun u : E => V u) (z : E)) v) =
       ((Integral.Connection.metricCov (I := I) (M := Y.M) Y.metric).toFun
         (fun y : Y.M => Z y)
-        (expMapDiffeo (I := I) Y.metric x (z : E)))
+        (framedExpDiffeo (I := I) Y.metric x (z : E)))
         (mfderiv 𝓘(Real, E) I
-          (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v) := by
+          (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v) := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -348,7 +348,7 @@ theorem normalGeo_map
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     Geometry.Riemannian.Geodesic.IsGeodesicOn (I := I) Y.metric
-      (fun t ↦ expMapDiffeo (I := I) Y.metric x (gamma t)) s := by
+      (fun t ↦ framedExpDiffeo (I := I) Y.metric x (gamma t)) s := by
   classical
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -362,9 +362,9 @@ theorem normalGeo_map
     normalQuarterImageSigma (I := I) Y x
   let z0 : normalQuarter (I := I) Y x := ⟨0, by
     change (0 : E) ∈ Metric.ball (0 : E)
-      (expMapC2Radius (I := I) Y.metric x / 4)
+      (expRadiusGp (I := I) Y.metric x / 4)
     rw [Metric.mem_ball, dist_self]
-    exact div_pos (expMapC2Radius_pos (I := I) Y.metric x) (by norm_num)⟩
+    exact div_pos (expRadiusGp_pos (I := I) Y.metric x) (by norm_num)⟩
   let gammaQ : Real → normalQuarter (I := I) Y x := fun t ↦
     if ht : t ∈ s then ⟨gamma t, hmem t ht⟩ else z0
   have hval : ∀ t ∈ s, (gammaQ t : E) = gamma t := by
@@ -407,7 +407,7 @@ theorem normalGeo_map
       (normalQuarterImage (I := I) Y x)
       (fun t ↦ normalQuarterDiffeo (I := I) Y x (gammaQ t)) s).1 hmapRestr
   intro t ht
-  have hev : (fun r ↦ expMapDiffeo (I := I) Y.metric x (gamma r)) =ᶠ[nhds t]
+  have hev : (fun r ↦ framedExpDiffeo (I := I) Y.metric x (gamma r)) =ᶠ[nhds t]
       (fun r ↦ ((normalQuarterDiffeo (I := I) Y x (gammaQ r) :
         normalQuarterImage (I := I) Y x) : Y.M)) := by
     filter_upwards [hs.mem_nhds ht] with r hr

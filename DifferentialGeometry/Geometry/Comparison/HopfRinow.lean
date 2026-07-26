@@ -44,7 +44,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section GeodesicCompleteness
@@ -637,7 +637,7 @@ section ExpMapSurjectivity
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 theorem exists_continuous_path_realizing_riemannianEDist
-    (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
         pathELength I γ 0 1 = riemannianEDist I p q := by
@@ -772,7 +772,7 @@ theorem unit_speed_rescale
     sorry
 
 theorem exists_unit_speed_minimizing_geodesic_between_points
-    (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
       0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L) ∧

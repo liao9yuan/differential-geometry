@@ -95,5 +95,27 @@ def tangentHome (Φ : PartialDiffeomorph I J M N n) (hn : 1 ≤ n) :
     Φ.contMDiffOn_invFun.continuousOn_tangentMapWithin hn
       Φ.open_target.uniqueMDiffOn
 
+/-- Applying the differential of a partial diffeomorphism to a continuous
+tangent-bundle input is continuous when its base stays in the source. -/
+theorem mfderiv_cont
+    (Φ : PartialDiffeomorph I J M N n) (hn : 1 ≤ n)
+    {P : Type*} [TopologicalSpace P]
+    (q : P → TangentBundle I M) (hq : Continuous q)
+    (hsource : ∀ p, (q p).proj ∈ Φ.source) :
+    Continuous (fun p : P =>
+      Bundle.TotalSpace.mk' E' (E := fun x : N => TangentSpace J x) (Φ (q p).proj)
+        (mfderiv I J Φ (q p).proj (q p).2)) := by
+  have hcont :=
+    (tangentHome Φ hn).continuousOn_toFun.comp_continuous hq
+      (fun p => hsource p)
+  refine hcont.congr (fun p => ?_)
+  change
+    tangentMapWithin I J Φ Φ.source (q p) =
+      Bundle.TotalSpace.mk' E' (E := fun x : N => TangentSpace J x) (Φ (q p).proj)
+        (mfderiv I J Φ (q p).proj (q p).2)
+  simp only [tangentMapWithin]
+  rw [mfderivWithin_of_isOpen (I := I) (I' := J)
+    (f := (Φ : M → N)) Φ.open_source (hsource p)]
+
 end PartialDiffeomorph
 end DifferentialGeometry

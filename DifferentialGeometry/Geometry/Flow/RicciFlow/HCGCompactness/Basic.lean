@@ -141,9 +141,21 @@ structure CompleteInput {I : ModelWithCorners Real E H}
     forall i : Nat, forall t : Real, t ∈ X.D.carrier ->
       MetricComplete (I := I) ((X.term i).atTime (I := I) t)
 
+namespace CompleteInput
 
+/-- Completeness of a pointed flow sequence restricts to completeness of every
+chosen time-slice sequence. -/
+def at_time {I : ModelWithCorners Real E H}
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    (h : CompleteInput (I := I) X) {t : Real} (ht : t ∈ X.D.carrier) :
+    SeqMetricComplete (I := I) (X.atTime (I := I) t) where
+  complete := fun i => h.complete_on i t ht
 
+end CompleteInput
 
+/-- Uniform curvature bound on every compact time window inside the common
+time interval.  The bound is stated for the squared norm of the canonical
+lowered Riemann tensor. -/
 structure CurvBoundInput {I : ModelWithCorners Real E H}
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop where
   bound_on_window :

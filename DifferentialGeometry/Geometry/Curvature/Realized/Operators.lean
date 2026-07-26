@@ -120,8 +120,21 @@ theorem driftTerm_const_smul
   rw [gradientFun_const_smul (I := I) (G.metric t) a hf]
   simp
 
+/-- The drift term is additive in the scalar field. -/
+theorem driftTerm_add
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f h : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hh : MDifferentiableAt I 𝓘(Real, Real) h x) :
+    driftTerm (I := I) G t X (fun y : M => f y + h y) x =
+      driftTerm (I := I) G t X f x +
+        driftTerm (I := I) G t X h x := by
+  unfold driftTerm gradientAt
+  rw [gradientFun_add (I := I) (G.metric t) hf hh]
+  simp only [map_add]
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
+/-- The heat operator with drift is unchanged by subtracting a spatial constant. -/
 theorem heatOperatorWithDrift_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
@@ -179,8 +192,30 @@ theorem laplacianAt_smul
   exact laplacian_const_smul (I := I) (G.connection t) (G.metric t)
     a hf hgrad
 
+/-- Family-facing addition rule for the scalar Laplacian. -/
+theorem laplacianAt_add
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) {f h : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
+    (hgradf : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x)
+    (hgradh : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) h y) x) :
+    laplacianAt (I := I) G t (fun y : M => f y + h y) x =
+      laplacianAt (I := I) G t f x +
+        laplacianAt (I := I) G t h x := by
+  unfold laplacianAt laplacian
+  have hgradient :
+      gradientFun (I := I) (G.metric t) (fun z : M => f z + h z) =
+        gradientFun (I := I) (G.metric t) f +
+          gradientFun (I := I) (G.metric t) h := by
+    funext y
+    exact gradientFun_add (I := I) (G.metric t) (hf y) (hh y)
+  rw [hgradient]
+  exact divergence_add (I := I) (G.connection t) hgradf hgradh
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
+/-- Family-facing product rule for the realized gradient. -/
 theorem gradientAt_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -192,8 +227,21 @@ theorem gradientAt_mul
   unfold gradientAt
   exact gradientFun_mul (I := I) (G.metric t) hf hh
 
+/-- The drift term satisfies the scalar product rule. -/
+theorem driftTerm_mul
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f h : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hh : MDifferentiableAt I 𝓘(Real, Real) h x) :
+    driftTerm (I := I) G t X (fun y : M => f y * h y) x =
+      f x * driftTerm (I := I) G t X h x +
+        h x * driftTerm (I := I) G t X f x := by
+  unfold driftTerm
+  rw [gradientAt_mul (I := I) G t hf hh]
+  simp only [map_add, map_smul, smul_eq_mul]
 
-omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
+/-- Family-facing chain rule for the realized gradient of a real power. -/
 theorem gradientAt_rpow
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M} (p : Real)
@@ -250,7 +298,72 @@ theorem laplacianAt_mul_of_scalarRegular
     ((hf x).smul_section (hgradh x))
     ((hh x).smul_section (hgradf x))
 
+/-- The drifted heat operator satisfies the scalar chain rule. -/
+theorem heatDrift_comp
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {φ : Real -> Real} {f : M -> Real} {x : M}
+    (hφ : Differentiable Real φ)
+    (hφ' : DifferentiableAt Real (deriv φ) (f x))
+    (hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x) :
+    heatOperatorWithDrift (I := I) G t X
+        (fun y : M => φ (f y)) x =
+      deriv φ (f x) * heatOperatorWithDrift (I := I) G t X f x +
+        deriv (deriv φ) (f x) *
+          (G.metric t).inner x
+            (gradientAt (I := I) G t f x)
+            (gradientAt (I := I) G t f x) := by
+  unfold heatOperatorWithDrift laplacianAt driftTerm gradientAt
+  rw [laplacian_comp (I := I) (G.connection t) (G.metric t)
+    hφ hφ' hf hgrad]
+  rw [gradientFun_comp (I := I) (G.metric t) (hφ (f x)) (hf x)]
+  simp only [map_smul, smul_eq_mul]
+  ring
 
+/-- The drifted heat operator satisfies the scalar product rule. -/
+theorem heatDrift_mul
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f h : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
+    (hgradf : forall y : M, MDiffAt (T% fun z : M =>
+      gradientFun (I := I) (G.metric t) f z) y)
+    (hgradh : forall y : M, MDiffAt (T% fun z : M =>
+      gradientFun (I := I) (G.metric t) h z) y) :
+    heatOperatorWithDrift (I := I) G t X (fun y : M => f y * h y) x =
+      f x * heatOperatorWithDrift (I := I) G t X h x +
+        h x * heatOperatorWithDrift (I := I) G t X f x +
+          2 * (G.metric t).inner x
+            (gradientAt (I := I) G t f x)
+            (gradientAt (I := I) G t h x) := by
+  unfold heatOperatorWithDrift
+  rw [laplacianAt_mul_of_scalarRegular (I := I) G t hf hh hgradf hgradh]
+  rw [driftTerm_mul (I := I) G t X (hf x) (hh x)]
+  ring
+
+/-- The drifted heat operator is additive in the scalar field. -/
+theorem heatDrift_add
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f h : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
+    (hgradf : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x)
+    (hgradh : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) h y) x) :
+    heatOperatorWithDrift (I := I) G t X (fun y : M => f y + h y) x =
+      heatOperatorWithDrift (I := I) G t X f x +
+        heatOperatorWithDrift (I := I) G t X h x := by
+  unfold heatOperatorWithDrift
+  rw [laplacianAt_add (I := I) G t hf hh hgradf hgradh]
+  rw [driftTerm_add (I := I) G t X (hf x) (hh x)]
+  ring
+
+/-- Family-facing scalar real-power rule for the realized Laplacian. -/
 theorem laplacianAt_rpow
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M} (p : Real)

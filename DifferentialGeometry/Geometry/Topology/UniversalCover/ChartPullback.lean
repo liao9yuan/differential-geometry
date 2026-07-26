@@ -191,31 +191,7 @@ theorem chartGramMatrix_lifted
       chartBasisVecFiber_lifted (I := I) (M := M) g α' j x' hx']
   rfl
 
-
-
-
-
-
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M]
-    [SigmaCompactSpace M] [ConnectedSpace M] in
-lemma extChartAt_proj_eq
-    (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
-    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
-    extChartAt I α' x' = extChartAt I (proj (X := M) α') (proj (X := M) x') := by
-  have hConj := (uc_coverChartAt_extend_conjugacy (I := I) α').1
-  have := congrArg (fun f => f x') hConj
-  simp only [Function.comp_apply] at this
-  have hLS : (localSection α') x' = proj x' := by
-    have := congrArg (fun f => f x') (proj_eq_localSection α')
-    simpa using this.symm
-  change ((coverChartAt α').extend I) x' = _ at this
-  rw [hLS] at this
-  exact this
-
+/-- **`chartChristoffel` is natural under universal-cover projection.**
 
 
 

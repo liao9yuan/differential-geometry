@@ -126,11 +126,11 @@ def HasHatCmEqn
         let c := centerOfMass (I := I) (X.obj (L.φ n)).metric
           mu pts join x rad hcm
         let xi : Fin (pb.A r) → E := fun i =>
-          NormalCoordinates.normalChartAt
+          NormalCoordinates.framedChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
         chartCmEqnB (I := I) (X.obj (L.φ n)).metric
           (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
-          (NormalCoordinates.normalChartAt
+          (NormalCoordinates.framedChartAt
             (I := I) (X.obj (L.φ n)).metric x0 c)
           (mu, xi) = 0
 
@@ -224,12 +224,12 @@ def HasHatCmStrictAt
           (hcomplete.complete (L.φ n)) (hconn (L.φ n)) x0 hq he
         let c := centerOfMass (I := I) (X.obj (L.φ n)).metric
           mu pts join x rad hcm
-        let z := NormalCoordinates.normalChartAt
+        let z := NormalCoordinates.framedChartAt
           (I := I) (X.obj (L.φ n)).metric x0 c
         let xi : Fin (pb.A r) → E := fun i =>
-          NormalCoordinates.normalChartAt
+          NormalCoordinates.framedChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
-        c ∈ (NormalCoordinates.normalChartAt
+        c ∈ (NormalCoordinates.framedChartAt
             (I := I) (X.obj (L.φ n)).metric x0).source ∧
           (∀ i, (z, xi i) ∈ e.target) ∧
             z ∈ normalBall (I := I) (X.obj (L.φ n)) x0 ∧

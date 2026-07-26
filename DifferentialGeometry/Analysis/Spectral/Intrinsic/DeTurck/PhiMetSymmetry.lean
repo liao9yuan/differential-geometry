@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (unitModel unitTensor smoothCcTensor_ext_of_unitModel traceHessianCoeff
-    ricciArmPrincipalCoeff)
+    ricciArmPrincipalCoeff gradSlot_sub_eq_curv)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]

@@ -330,11 +330,11 @@ theorem normalPair_inv_inf
 
 namespace NormalCoordMetricBoundInput
 
-
-
+/-- Below the radial normal radius, the framed normal coordinate is bounded by
+twice the Riemannian distance. -/
 theorem chart_mem_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (h : NormalCoordMetricBoundInput (I := I) X)
+    (_h : NormalCoordMetricBoundInput (I := I) X)
     (k : Nat) (c y : (X.obj k).M)
     (hdist :
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -366,8 +366,8 @@ theorem chart_mem_norm_le
         (fun z : (X.obj k).M ↦ TangentSpace I z) :=
       (X.obj k).riemBundle_cont (I := I)
     letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
-    y ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c).source ∧
-      ‖NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c y‖ ≤
+    y ∈ (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric c).source ∧
+      ‖NormalCoordinates.framedChartAt (I := I) (X.obj k).metric c y‖ ≤
         2 * (riemannianEDist I c y).toReal := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -384,11 +384,15 @@ theorem chart_mem_norm_le
   obtain ⟨v, hvTarget, _hvDomain, hvLength, hyExp⟩ :=
     metricBall_subset_normalBall (I := I) (X.obj k).metric c
       (normal_enorm (I := I) (X.obj k)) hdist.1 hdist.2
-  have hySource :
+  have hyRawSource :
       y ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c).source :=
     memNChartSrcOfDist (I := I) (X.obj k).metric c
       (normal_enorm (I := I) (X.obj k)) hdist.1 hdist.2
-  have hchart :
+  have hySource :
+      y ∈ (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric c).source := by
+    simpa only [NormalCoordinates.framedChartAt,
+      NormalCoordinates.framedExp_target] using hyRawSource
+  have hchartRaw :
       NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c y = v := by
     have hsymm :
         (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c).symm v = y := by
@@ -396,35 +400,28 @@ theorem chart_mem_norm_le
       exact hyExp.symm
     rw [← hsymm]
     exact (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric c).right_inv hvTarget
-  have hzero : (0 : E) ∈ Metric.ball 0 (h.radius k c) := by
-    rw [Metric.mem_ball, dist_self]
-    exact h.radius_pos k c
-  have hcoercive := (h.metric_equiv k c 0 hzero v).1
-  have hmetricZero :
-      normalCoordMetric (I := I) (X.obj k) c 0 v v =
-        (X.obj k).metric.inner c v v := by
-    rw [normalCoordMetric_apply (I := I),
-      NormalCoordinates.expMapDiffeo_zero (I := I)]
-    exact NormalCoordinates.normalChartAt_metric_pullback_at_origin
-      (I := I) (X.obj k).metric c v v
-  rw [hmetricZero] at hcoercive
-  have hinnerNonneg : 0 ≤ (X.obj k).metric.inner c v v := by
-    exact (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hcoercive
-  have hinnerEq :
-      (X.obj k).metric.inner c v v = (riemannianEDist I c y).toReal ^ 2 := by
+  let z : E := (NormalCoordinates.normalFrame (I := I) (X.obj k).metric c).symm
+    (show TangentSpace I c from v)
+  have hzFrame : NormalCoordinates.normalFrame (I := I) (X.obj k).metric c z =
+      (show TangentSpace I c from v) := by
+    dsimp only [z]
+    exact (NormalCoordinates.normalFrame (I := I) (X.obj k).metric c).apply_symm_apply _
+  have hchart :
+      NormalCoordinates.framedChartAt (I := I) (X.obj k).metric c y = z := by
+    rw [NormalCoordinates.framedChart_apply, hchartRaw]
+  have hnorm : ‖z‖ = Real.sqrt ((X.obj k).metric.inner c
+      (show TangentSpace I c from v) (show TangentSpace I c from v)) := by
     calc
-      (X.obj k).metric.inner c v v =
-          Real.sqrt ((X.obj k).metric.inner c v v) ^ 2 :=
-        (Real.sq_sqrt hinnerNonneg).symm
-      _ = (riemannianEDist I c y).toReal ^ 2 := congrArg (fun t : Real => t ^ 2) hvLength
-  rw [hinnerEq] at hcoercive
-  rw [hchart]
+      ‖z‖ = Real.sqrt ((X.obj k).metric.inner c
+          (NormalCoordinates.normalFrame (I := I) (X.obj k).metric c z)
+          (NormalCoordinates.normalFrame (I := I) (X.obj k).metric c z)) :=
+        (NormalCoordinates.normalFrame_sqrt (I := I) (X.obj k).metric c z).symm
+      _ = Real.sqrt ((X.obj k).metric.inner c
+          (show TangentSpace I c from v) (show TangentSpace I c from v)) := by
+        rw [hzFrame]
   refine ⟨hySource, ?_⟩
+  rw [hchart, hnorm, hvLength]
   have hdistNonneg : 0 ≤ (riemannianEDist I c y).toReal := ENNReal.toReal_nonneg
-  by_contra hle
-  have hlt : 2 * (riemannianEDist I c y).toReal < ‖v‖ := lt_of_not_ge hle
-  have hsq : (2 * (riemannianEDist I c y).toReal) ^ 2 < ‖v‖ ^ 2 :=
-    (sq_lt_sq₀ (mul_nonneg (by norm_num) hdistNonneg) (norm_nonneg v)).2 hlt
   nlinarith
 
 end NormalCoordMetricBoundInput
@@ -576,8 +573,8 @@ noncomputable def toBranch
   let D := normalDiagHome (I := I) Y x e
   let u0 : TangentBundle I Y.M := ⟨x, (0 : TangentSpace I x)⟩
   have hzNormal : (0 : E) ∈ normalBall (I := I) Y x := by
-    change dist (0 : E) 0 < expMapC2Radius (I := I) Y.metric x
-    simpa only [dist_self] using expMapC2Radius_pos (I := I) Y.metric x
+    change dist (0 : E) 0 < expRadiusGp (I := I) Y.metric x
+    simpa only [dist_self] using expRadiusGp_pos (I := I) Y.metric x
   have hA0src : (0 : E × E) ∈ A.source := by
     change (0 : E × E) ∈ (normalTanHome (I := I) Y x).source
     rw [normalTanHome_source]
@@ -586,10 +583,10 @@ noncomputable def toBranch
     change normalTanHome (I := I) Y x 0 = u0
     rw [normalTanHome_apply (I := I) Y x 0 hzNormal]
     simp only [normalTangent, u0, Prod.fst_zero, Prod.snd_zero]
-    rw [NormalCoordinates.expMapDiffeo_zero]
+    rw [NormalCoordinates.framedExp_zero]
     apply TotalSpace.mk_inj.mpr
     change (mfderiv 𝓘(Real, E) I
-      (fun v : E => NormalCoordinates.expMapDiffeo (I := I) Y.metric x v) 0) 0 =
+      (fun v : E => NormalCoordinates.framedExpDiffeo (I := I) Y.metric x v) 0) 0 =
         (0 : E)
     exact ContinuousLinearMap.map_zero _
   have hP0src : (0 : E × E) ∈ P.source := by
@@ -979,8 +976,8 @@ theorem symm_fst_eq
   have hfst := congrArg Prod.fst
     (hdiag (e.symm w) (Metric.ball_subset_closedBall hzBall))
   have hexp :
-      NormalCoordinates.expMapDiffeo (I := I) Y.metric x w.1 =
-        NormalCoordinates.expMapDiffeo (I := I) Y.metric x (e.symm w).1 := by
+      NormalCoordinates.framedExpDiffeo (I := I) Y.metric x w.1 =
+        NormalCoordinates.framedExpDiffeo (I := I) Y.metric x (e.symm w).1 := by
     simpa only [normalPair, normalTangent, diagExp_fst, e.right_inv hw] using hfst
   apply (normalExpPD (I := I) Y x).toPartialEquiv.injOn
   · simpa only [normalExpPD_source] using hzNormal
@@ -1139,11 +1136,11 @@ theorem target_of_chart_dom
       (fun z : Y.M ↦ TangentSpace I z) := Y.riemBundle_cont (I := I)
     letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-    y ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).source →
-      p ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).source →
+    y ∈ (NormalCoordinates.framedChartAt (I := I) Y.metric x).source →
+      p ∈ (NormalCoordinates.framedChartAt (I := I) Y.metric x).source →
       (y, p) ∈ (toBranch (I := I) Y hcomplete hconn x hq h).dom →
-      (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
-        NormalCoordinates.normalChartAt (I := I) Y.metric x p) ∈ e.target := by
+      (NormalCoordinates.framedChartAt (I := I) Y.metric x y,
+        NormalCoordinates.framedChartAt (I := I) Y.metric x p) ∈ e.target := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -1200,25 +1197,28 @@ theorem target_of_chart_dom
     exact hwNormal
   have hleft := P.left_inv hwP
   change
-    (NormalCoordinates.normalChartAt (I := I) Y.metric x (P w).1,
-      NormalCoordinates.normalChartAt (I := I) Y.metric x (P w).2) = w at hleft
+    (NormalCoordinates.framedChartAt (I := I) Y.metric x (P w).1,
+      NormalCoordinates.framedChartAt (I := I) Y.metric x (P w).2) = w at hleft
   rw [hwEq] at hleft
   have hcoordSource :
-      (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
-        NormalCoordinates.normalChartAt (I := I) Y.metric x p) ∈ P.source := by
+      (NormalCoordinates.framedChartAt (I := I) Y.metric x y,
+        NormalCoordinates.framedChartAt (I := I) Y.metric x p) ∈ P.source := by
     rw [hleft]
     exact hwP
   have hpairEq :
       normalPair (I := I) Y x
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
-          NormalCoordinates.normalChartAt (I := I) Y.metric x p) = (y, p) := by
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x y,
+          NormalCoordinates.framedChartAt (I := I) Y.metric x p) = (y, p) := by
     change
-      ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x y),
-        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm
-          (NormalCoordinates.normalChartAt (I := I) Y.metric x p)) = (y, p)
-    rw [NormalCoordinates.normalChartAt_left_inv (I := I) Y.metric x hy,
-      NormalCoordinates.normalChartAt_left_inv (I := I) Y.metric x hp]
+      ((NormalCoordinates.framedChartAt (I := I) Y.metric x).symm
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x y),
+        (NormalCoordinates.framedChartAt (I := I) Y.metric x).symm
+          (NormalCoordinates.framedChartAt (I := I) Y.metric x p)) = (y, p)
+    apply Prod.ext
+    · exact (NormalCoordinates.framedChartAt
+        (I := I) Y.metric x).toPartialEquiv.left_inv hy
+    · exact (NormalCoordinates.framedChartAt
+        (I := I) Y.metric x).toPartialEquiv.left_inv hp
   apply target_of_pair_mem (I := I) Y hcomplete hconn x hq h hcoordSource
   rwa [hpairEq]
 
@@ -1253,9 +1253,9 @@ theorem pair_mem_of_closed
       (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
     letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-    (q : Real) < expMapC2Radius (I := I) Y.metric x →
+    (q : Real) < expRadiusGp (I := I) Y.metric x →
     ρ ≤ δ →
-    ρ < expMapC2Radius (I := I) Y.metric x →
+    ρ < expRadiusGp (I := I) Y.metric x →
       normalPair (I := I) Y x w ∈
         (toBranch (I := I) Y hcomplete hconn x hq h).dom := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -1297,10 +1297,10 @@ theorem pair_mem_of_closed
     change w ∈ (normalPairHome (I := I) Y x).source
     rw [normalPair_source]
     constructor
-    · change dist w.1 0 < expMapC2Radius (I := I) Y.metric x
+    · change dist w.1 0 < expRadiusGp (I := I) Y.metric x
       rw [dist_zero_right]
       exact (norm_fst_le w).trans_lt (hwnorm.trans_lt hρExp)
-    · change dist w.2 0 < expMapC2Radius (I := I) Y.metric x
+    · change dist w.2 0 < expRadiusGp (I := I) Y.metric x
       rw [dist_zero_right]
       exact (norm_snd_le w).trans_lt (hwnorm.trans_lt hρExp)
   have hwe : w ∈ e.target :=
@@ -1314,7 +1314,7 @@ theorem pair_mem_of_closed
   have hwA : e.symm w ∈ A.source := by
     change e.symm w ∈ (normalTanHome (I := I) Y x).source
     rw [normalTanHome_source]
-    change dist (e.symm w).1 0 < expMapC2Radius (I := I) Y.metric x
+    change dist (e.symm w).1 0 < expRadiusGp (I := I) Y.metric x
     rw [dist_zero_right]
     exact (norm_fst_le (e.symm w)).trans_lt (hwinvNorm.trans hqExp)
   unfold DiagInvBranch.dom
@@ -1449,8 +1449,8 @@ theorem exists_pair_branch
     (ENNReal.lt_ofReal_iff_toReal_lt hbFin).mp hbLt
   have haControl := hb.chart_mem_norm_le k x (a i) ⟨haFin, haReal.trans hρExp⟩
   have hbControl := hb.chart_mem_norm_le k x (b i) ⟨hbFin, hbReal.trans hρExp⟩
-  let wa := NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (a i)
-  let wb := NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (b i)
+  let wa := NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (a i)
+  let wb := NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (b i)
   have hwa : ‖wa‖ < ρ := by
     calc
       ‖wa‖ ≤ 2 * (riemannianEDist I x (a i)).toReal := haControl.2
@@ -1464,39 +1464,21 @@ theorem exists_pair_branch
   have hwClosed : (wa, wb) ∈ Metric.closedBall (0 : E × E) ρ := by
     rw [Metric.mem_closedBall, dist_zero_right, Prod.norm_def]
     exact max_le hwa.le hwb.le
-  have haTarget : wa ∈
-      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).target :=
-    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).map_source haControl.1
-  have hbTarget : wb ∈
-      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).target :=
-    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).map_source hbControl.1
-  have haDecode : NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wa = a i := by
-    calc
-      NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wa =
-          expMap (I := I) (X.obj k).metric x wa :=
-        NormalCoordinates.expMapDiffeo_apply_eq
-          (I := I) (X.obj k).metric x haTarget
-      _ =
-          (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm wa :=
-        (NormalCoordinates.normalChartAt_symm_apply
-          (I := I) (X.obj k).metric x haTarget).symm
-      _ = a i :=
-        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).left_inv haControl.1
-  have hbDecode : NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wb = b i := by
-    calc
-      NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wb =
-          expMap (I := I) (X.obj k).metric x wb :=
-        NormalCoordinates.expMapDiffeo_apply_eq
-          (I := I) (X.obj k).metric x hbTarget
-      _ =
-          (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm wb :=
-        (NormalCoordinates.normalChartAt_symm_apply
-          (I := I) (X.obj k).metric x hbTarget).symm
-      _ = b i :=
-        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).left_inv hbControl.1
+  have haDecode : NormalCoordinates.framedExpDiffeo
+      (I := I) (X.obj k).metric x wa = a i := by
+    change (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).symm wa = a i
+    exact (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).left_inv haControl.1
+  have hbDecode : NormalCoordinates.framedExpDiffeo
+      (I := I) (X.obj k).metric x wb = b i := by
+    change (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).symm wb = b i
+    exact (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).left_inv hbControl.1
   have hnormalPair : normalPair (I := I) (X.obj k) x (wa, wb) = (a i, b i) := by
-    change (NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wa,
-      NormalCoordinates.expMapDiffeo (I := I) (X.obj k).metric x wb) = (a i, b i)
+    change (NormalCoordinates.framedExpDiffeo (I := I) (X.obj k).metric x wa,
+      NormalCoordinates.framedExpDiffeo (I := I) (X.obj k).metric x wb) = (a i, b i)
     rw [haDecode, hbDecode]
   rw [← hnormalPair]
   exact hclosed (wa, wb) hwClosed
@@ -1580,7 +1562,8 @@ theorem exists_pair_readout
     (hb.chart_mem_norm_le k x (a i) ⟨haFin, haReal.trans hρExp⟩).1
   rw [TangentBundle.trivializationAt_baseSet]
   apply NormalCoordinates.exp_target_sub_chart (I := I) (X.obj k).metric x
-  rwa [← NormalCoordinates.normalChartAt_source_eq]
+  simpa only [NormalCoordinates.framedChartAt,
+    NormalCoordinates.framedExp_target] using haSource
 
 end HasNormalBranchDom
 
@@ -1651,9 +1634,9 @@ theorem exists_common_dom
   letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
   letI : CompleteSpace (X.obj k).M :=
     MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
-  have hqExp : (q : Real) < expMapC2Radius (I := I) (X.obj k).metric x :=
+  have hqExp : (q : Real) < expRadiusGp (I := I) (X.obj k).metric x :=
     hqFloor.trans_le (h.floor_le_exp hx)
-  have hρExp : ρ < expMapC2Radius (I := I) (X.obj k).metric x :=
+  have hρExp : ρ < expRadiusGp (I := I) (X.obj k).metric x :=
     hρq.trans hqExp
   obtain ⟨e, he⟩ := hall k x hx
   change ∃ hq' : 0 < q,

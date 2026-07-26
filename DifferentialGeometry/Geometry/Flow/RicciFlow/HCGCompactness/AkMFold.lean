@@ -1397,64 +1397,81 @@ theorem compL2_le_contrTail_inv {P : ℕ}
     _ ≤ compL2 (contrTail T G) * compL2 Ginv := compL2_contrTail_le _ _
 
 
+/-- The data-independent constant in the abstract Claim 1 induction. -/
+noncomputable def claim1Const (C0 KR K : Real) (m : ℕ) : Real :=
+  Nat.strongRecOn' m fun n C =>
+    max C0 0 * (max KR 0 +
+      ∑ c : Fin n, (n.choose c : Real) *
+        (C c c.isLt * (1 + max K 0)) * max K 0)
 
+/-- Unfolding equation for `claim1Const`. -/
+theorem claim1Const_eq (C0 KR K : Real) (m : ℕ) :
+    claim1Const C0 KR K m =
+      max C0 0 * (max KR 0 +
+        ∑ c ∈ Finset.range m, (m.choose c : Real) *
+          (claim1Const C0 KR K c * (1 + max K 0)) * max K 0) := by
+  rw [claim1Const, Nat.strongRecOn'_beta, ← Fin.sum_univ_eq_sum_range]
+  rfl
 
+/-- The abstract Claim 1 constant is nonnegative. -/
+theorem claim1Const_nonneg (C0 KR K : Real) (m : ℕ) :
+    0 ≤ claim1Const C0 KR K m := by
+  induction m using Nat.strong_induction_on with
+  | _ m ih =>
+      rw [claim1Const_eq]
+      refine mul_nonneg (le_max_right C0 0) (add_nonneg (le_max_right KR 0) ?_)
+      exact Finset.sum_nonneg fun c hc =>
+        mul_nonneg
+          (mul_nonneg (Nat.cast_nonneg _)
+            (mul_nonneg (ih c (Finset.mem_range.mp hc)) (by linarith [le_max_right K 0])))
+          (le_max_right K 0)
 
-
-
-
-
-
-
-
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
-theorem claim1_abstract {u : Set M} (hu : IsOpen u)
+/-- **Abstract Claim 1**: on the smooth frame domain, if the contraction field `A∗g`
+norm-realizes the metric derivative up to a constant (`hrelB`, the Koszul/eq-3.7 input:
+`|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` — geometrically `Ǎ = A∗g` is a constant slot-permutation
+combination of `∇g`), `Ginv` is the pointwise inverse array of `g` (`hinv`), and the window
+bounds `|Ginv| ≤ C0`, `|∇^j g| ≤ K (1 ≤ j ≤ m)` hold, then
+`|∇_U^m A| ≤ C·(1 + |∇^{m+1} g|)` for a constant `C = C(m, C0, KR, K)`.  Strong induction:
+invert (`compL2_le_contrTail_inv`) + isolated-top (`compL2_contrTail_topU_le`) + `hrelB`
+turn `|∇_U^m A|` into `C0·(KR·|∇^{m+1}g| + Σ_{c<m} binom·|∇_U^c A|·|∇^{m-c}g|)`; the IH
+bounds each `|∇_U^c A|`. -/
+theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
     (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
     {p : ℕ} (C0 KR K : Real) (m : ℕ) :
-    ∃ C, 0 ≤ C ∧
-      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
-        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
-      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
-        (A : M → (Fin (p + 1) → Idx) → Real),
-        (∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
-        (∀ x ∈ u, ∀ c e : Idx,
-          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
-            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
-        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
-          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
-        (∀ x ∈ u, ∀ m', m' ≤ m →
-          compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
-            KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
-        ∀ x ∈ u,
-          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
-            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+    ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+      (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+    ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+      (A : M → (Fin (p + 1) → Idx) → Real),
+      (∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+      (∀ x ∈ u, ∀ c e : Idx,
+        (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+          Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+      (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+      (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+        compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+      (∀ x ∈ u, ∀ m', m' ≤ m →
+        compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
+          KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
+      ∀ x ∈ u,
+        compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+          claim1Const C0 KR K m *
+            (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
     classical
     have hK'0 : (0 : Real) ≤ max K 0 := le_max_right K 0
     have hKR0 : (0 : Real) ≤ max KR 0 := le_max_right KR 0
-    have hCc := fun c (hc : c < m) => ih c hc
-    choose! Cc hCc0 hCcB using hCc
-    refine ⟨max C0 0 * (max KR 0 + ∑ c ∈ Finset.range m,
-        (m.choose c : Real) * (Cc c * (1 + max K 0)) * max K 0), ?_, ?_⟩
-    · refine mul_nonneg (le_max_right C0 0) ?_
-      have : (0 : Real) ≤ ∑ c ∈ Finset.range m,
-          (m.choose c : Real) * (Cc c * (1 + max K 0)) * max K 0 :=
-        Finset.sum_nonneg fun c hc =>
-          mul_nonneg (mul_nonneg (Nat.cast_nonneg _)
-            (mul_nonneg (hCc0 c (Finset.mem_range.mp hc)) (by linarith))) hK'0
-      linarith
     intro g hg Ginv A hA hinv hGinv hK hrelB x hx
     set S := ∑ c ∈ Finset.range m,
-      (m.choose c : Real) * (Cc c * (1 + max K 0)) * max K 0 with hSdef
+      (m.choose c : Real) * (claim1Const C0 KR K c * (1 + max K 0)) *
+        max K 0 with hSdef
     have hS0 : 0 ≤ S := Finset.sum_nonneg fun c hc =>
       mul_nonneg (mul_nonneg (Nat.cast_nonneg _)
-        (mul_nonneg (hCc0 c (Finset.mem_range.mp hc)) (by linarith))) hK'0
+        (mul_nonneg (claim1Const_nonneg C0 KR K c) (by linarith))) hK'0
     have hgm1 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m + 1) x) :=
       compL2_nonneg _
     have hrel3 : compL2 (iterCovComp (I := I) frame chr
@@ -1496,23 +1513,26 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
       have hc' := Finset.mem_range.mp hc
       have hgc1 : compL2 (iterCovComp (I := I) frame chr g (c + 1) x) ≤ max K 0 :=
         le_trans (hK x hx (c + 1) (by omega) (by omega)) (le_max_left K 0)
-      have hAc : compL2 (iterCovCompU (I := I) frame chr A c x) ≤ Cc c * (1 + max K 0) := by
-        refine le_trans (hCcB c hc' g hg Ginv A hA hinv hGinv
+      have hAc : compL2 (iterCovCompU (I := I) frame chr A c x) ≤
+          claim1Const C0 KR K c * (1 + max K 0) := by
+        refine le_trans (ih c hc' g hg Ginv A hA hinv hGinv
           (fun x' hx' j h1 h2 => hK x' hx' j h1 (by omega))
           (fun x' hx' m' h' => hrelB x' hx' m' (by omega)) x hx) ?_
-        exact mul_le_mul_of_nonneg_left (by linarith) (hCc0 c hc')
+        exact mul_le_mul_of_nonneg_left (by linarith) (claim1Const_nonneg C0 KR K c)
       have hgmc : compL2 (iterCovComp (I := I) frame chr g (m - c) x) ≤ max K 0 :=
         le_trans (hK x hx (m - c) (by omega) (by omega)) (le_max_left K 0)
       calc (m.choose c : Real) * compL2 (iterCovCompU (I := I) frame chr A c x) *
             compL2 (iterCovComp (I := I) frame chr g (m - c) x)
-          ≤ (m.choose c : Real) * (Cc c * (1 + max K 0)) *
+          ≤ (m.choose c : Real) * (claim1Const C0 KR K c * (1 + max K 0)) *
               compL2 (iterCovComp (I := I) frame chr g (m - c) x) :=
             mul_le_mul_of_nonneg_right
               (mul_le_mul_of_nonneg_left hAc (Nat.cast_nonneg _)) (compL2_nonneg _)
-        _ ≤ (m.choose c : Real) * (Cc c * (1 + max K 0)) * max K 0 :=
+        _ ≤ (m.choose c : Real) * (claim1Const C0 KR K c * (1 + max K 0)) *
+              max K 0 :=
             mul_le_mul_of_nonneg_left hgmc
               (mul_nonneg (Nat.cast_nonneg _)
-                (mul_nonneg (hCc0 c hc') (by linarith)))
+                (mul_nonneg (claim1Const_nonneg C0 KR K c) (by linarith)))
+    -- assemble
     have hbr : max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
           (∑ c ∈ Finset.range m, (m.choose c : Real) *
             compL2 (iterCovCompU (I := I) frame chr A c x) *
@@ -1536,19 +1556,49 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
       _ ≤ max C0 0 * ((max KR 0 + S) *
             (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x))) :=
           mul_le_mul hGx hbr hbr0 (le_max_right C0 0)
-      _ = max C0 0 * (max KR 0 + S) *
-            (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by ring
+      _ = claim1Const C0 KR K m *
+            (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+          rw [claim1Const_eq, hSdef]
+          ring
 
+/-- Existential compatibility form of `claim1_abstract_bound`. -/
+theorem claim1_abstract {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    {p : ℕ} (C0 KR K : Real) (m : ℕ) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+        (A : M → (Fin (p + 1) → Idx) → Real),
+        (∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+        (∀ x ∈ u, ∀ c e : Idx,
+          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+        (∀ x ∈ u, ∀ m', m' ≤ m →
+          compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
+            KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
+        ∀ x ∈ u,
+          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+  exact ⟨claim1Const C0 KR K m, claim1Const_nonneg C0 KR K m,
+    claim1_abstract_bound hu frame chr hframe hchr C0 KR K m⟩
 
-
-
-
-
-
-
-
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
-theorem claim1 {u : Set M} (hu : IsOpen u)
+/-- **Claim 1** (component form, with the lowered-Koszul relation explicit).  The connection
+difference `A` lowered by `g` (`contrTail A g`) is, on `u`, a fixed three-term slot
+combination of `∇g` (`hkoszul` — the eq-3.7 / `connDiffCompEq` content in this frame, with
+coefficients `½,½,−½` and the Koszul slot permutations).  Together with the pointwise
+inverse property of `g`/`Ginv` (`hinv`) and the window bounds, this gives the textbook
+estimate `|∇^m A| ≤ C·(1 + |∇^{m+1}g|)`.  Proof: discharge `claim1_abstract`'s `hrelB`
+(`|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|`, `KR = |c₁|+|c₂|+|c₃| = 3/2`) from `hkoszul` via tower
+linearity (`iterCovComp_smul`/`_add`), the reindex norm-invariance, and the bottom shift. -/
+theorem claim1_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -1556,31 +1606,29 @@ theorem claim1 {u : Set M} (hu : IsOpen u)
     (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
     (c₁ c₂ c₃ : Real) (P₁ P₂ P₃ : Fin 3 ≃ Fin 3)
     (C0 K : Real) (m : ℕ) :
-    ∃ C, 0 ≤ C ∧
-      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
-        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
-      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
-        (A : M → (Fin (2 + 1) → Idx) → Real),
-        (∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
-        (∀ x ∈ u, ∀ c e : Idx,
-          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
-            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
-        (∀ y ∈ u, contrTail (A y) (g y) =
-          fun idx : Fin 3 → Idx =>
-            c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
-            (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
-              c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j)))) →
-        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
-          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
-        ∀ x ∈ u,
-          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
-            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
-  obtain ⟨C, hC0, hCb⟩ := claim1_abstract (p := 2) hu frame chr hframe hchr C0
-    (|c₁| + |c₂| + |c₃|) K m
-  refine ⟨C, hC0, ?_⟩
+    ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+      (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+    ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+      (A : M → (Fin (2 + 1) → Idx) → Real),
+      (∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+      (∀ x ∈ u, ∀ c e : Idx,
+        (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+          Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+      (∀ y ∈ u, contrTail (A y) (g y) =
+        fun idx : Fin 3 → Idx =>
+          c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
+          (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
+            c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j)))) →
+      (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+      (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+        compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+      ∀ x ∈ u,
+        compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+          claim1Const C0 (|c₁| + |c₂| + |c₃|) K m *
+            (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
   intro g hg Ginv A hA hinv hkoszul hGinv hK
-  refine hCb g hg Ginv A hA hinv hGinv hK ?_
+  refine claim1_abstract_bound (p := 2) hu frame chr hframe hchr C0
+    (|c₁| + |c₂| + |c₃|) K m g hg Ginv A hA hinv hGinv hK ?_
   intro x hx m' _
   have hterm : ∀ (ci : Real) (Pi : Fin 3 ≃ Fin 3),
       compL2 (iterCovComp (I := I) frame chr
@@ -1645,5 +1693,38 @@ theorem claim1 {u : Set M} (hu : IsOpen u)
   rw [hterm c₂ P₂, hterm c₃ P₃] at h23
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
+
+/-- Existential compatibility form of `claim1_bound`. -/
+theorem claim1 {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (c₁ c₂ c₃ : Real) (P₁ P₂ P₃ : Fin 3 ≃ Fin 3)
+    (C0 K : Real) (m : ℕ) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+        (A : M → (Fin (2 + 1) → Idx) → Real),
+        (∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+        (∀ x ∈ u, ∀ c e : Idx,
+          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+        (∀ y ∈ u, contrTail (A y) (g y) =
+          fun idx : Fin 3 → Idx =>
+            c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
+            (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
+              c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j)))) →
+        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+        ∀ x ∈ u,
+          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+  exact ⟨claim1Const C0 (|c₁| + |c₂| + |c₃|) K m,
+    claim1Const_nonneg C0 (|c₁| + |c₂| + |c₃|) K m,
+    claim1_bound hu frame chr hframe hchr c₁ c₂ c₃ P₁ P₂ P₃ C0 K m⟩
 
 end DifferentialGeometry.PDE.RicciFlow

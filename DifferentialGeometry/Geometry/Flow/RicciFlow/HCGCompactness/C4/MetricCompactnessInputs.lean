@@ -6,10 +6,41 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeComp
 
 set_option autoImplicit false
 
+/-!
+# MSM135 Theorem 3.9 — inputs for the conditional endpoint
 
 
+This module owns only the input and producer-side interfaces.  The final
+conditional endpoint is assembled in `C4/MetricCompactnessEndpoint.lean`, above
+the concrete B1 producer and the checked Step-D consumer, so that this
+foundational layer does not participate in an import cycle.
+
+## The bundle, field by field (mathematical audit 2026-07-05)
 
 
+* `decay` — Cheeger–Gromov–Taylor injectivity-radius decay (`lbl384`):
+  `inj(x) ≥ a·min{ρ,1}^n·e^{−C·d(x,O)}`, constants `a(n,C₀), C(n,C₀)`.  The Lean
+  field matches the book form exactly.
+* `packAll` / `pack` — Bishop–Gromov total packing count `A(r)` (`lbl387`):
+  available after every positive divisor is chosen, together with the instance
+  selected at the final `D`.  Retaining the family lets the endpoint recover
+  the `D`-independent producer bundle without changing fixed-`D` consumers.
+* `volume` — Bishop-Gromov intersection multiplicity, capped at containing
+  scale `m * r ≤ r0` (the joint cap is mathematically necessary; see the
+  structure docstring), with `stepA_cap_le` recording the producer's choice
+  that `r0` dominates the largest Step A ratio times `λ[0]`.
+* `realizes` — the supplied distance realizes the Riemannian emetric
+  (plumbing; discharged at instantiation from the Hopf–Rinow realization).
+* `normalBounds` — normal-coordinate metric `C^p` bounds (`lbl395`, [H6]
+  Cor 4.12): per-center radius, `k`- and center-uniform constants (uniformity is
+  genuine: the Jacobi-field ODE analysis depends only on the curvature bounds).
+* `normalRadius` — compatibility of the preceding radius with the CGT profile:
+  one fixed positive fraction of `mu (dist x O)` lies in every controlled
+  normal-coordinate ball and in the intrinsic framed exponential radius.
+  Its compatibility projection `gpRatio` is the same coefficient.  This is the
+  noncompact uniformity actually used by the construction; an absolute radius
+  floor over all base points would be false.
+## Deliberately NOT in the bundle (derived at assembly, or bundle-v2)
 
 
 
@@ -99,7 +130,7 @@ structure NormalRadiusProfile
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x
 
 namespace NormalRadiusProfile
 
@@ -125,17 +156,16 @@ def subseq
     letI : T2Space (TangentBundle I (X.obj (f k)).M) :=
       (X.obj (f k)).t2TangentBundle
     change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj (f k)).metric x
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj (f k)).metric x
     exact h.le_exp_radius (f k) x
 
-
-
+/-- Compatibility name for the relative intrinsic framed-radius coefficient. -/
 def gpRatio
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : Real :=
-  Real.sqrt (1 / 2 : Real) * h.ratio
+  h.ratio
 
 
 theorem gpRatio_pos
@@ -143,8 +173,7 @@ theorem gpRatio_pos
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : 0 < h.gpRatio := by
-  rw [gpRatio]
-  exact mul_pos (Real.sqrt_pos.mpr (by norm_num)) h.ratio_pos
+  exact h.ratio_pos
 
 
 
@@ -153,11 +182,7 @@ theorem gpRatio_le_ratio
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : h.gpRatio ≤ h.ratio := by
-  rw [gpRatio]
-  have hsqrt : Real.sqrt (1 / 2 : Real) ≤ 1 :=
-    Real.sqrt_le_one.mpr (by norm_num)
-  simpa only [one_mul] using
-    mul_le_mul_of_nonneg_right hsqrt h.ratio_pos.le
+  exact le_rfl
 
 
 
@@ -184,8 +209,8 @@ theorem floor_le_radius
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
     _ ≤ hb.radius k x := h.le_radius k x
 
-
-
+/-- On a fixed basepoint-distance sublevel, the profile floor also lies in the
+intrinsic framed exponential-chart ball. -/
 theorem floor_le_exp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -197,7 +222,7 @@ theorem floor_le_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     h.ratio * hd.mu R ≤
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -206,7 +231,7 @@ theorem floor_le_exp
     h.ratio * hd.mu R ≤
         h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
-    _ ≤ Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
+    _ ≤ Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
       h.le_exp_radius k x
 
 
@@ -227,18 +252,7 @@ theorem floor_le_expGp
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  rw [gpRatio, Geometry.Riemannian.expRadiusGp]
-  calc
-    Real.sqrt (1 / 2 : Real) * h.ratio * hd.mu R =
-        Real.sqrt (1 / 2 : Real) * (h.ratio * hd.mu R) := by ring
-    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj k).metric x) * (h.ratio * hd.mu R) :=
-      mul_le_mul_of_nonneg_right
-        (Real.sqrt_le_sqrt (hb.half_le_gpConst k x)) (h.floor_pos R).le
-    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
-          (I := I) (X.obj k).metric x) *
-          Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
-      mul_le_mul_of_nonneg_left (h.floor_le_exp hx) (Real.sqrt_nonneg _)
+  simpa only [gpRatio] using h.floor_le_exp hx
 
 
 
@@ -268,8 +282,8 @@ theorem mul_lambda_lt_radius
     c * hd.lambda D R < hb.radius k x :=
   (h.mul_lambda_lt_floor hD hc).trans_le (h.floor_le_radius hx)
 
-
-
+/-- On a fixed basepoint-distance sublevel, the same divisor choice places the
+scaled covering radius inside the intrinsic framed exponential-chart ball. -/
 theorem mul_lambda_lt_exp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -283,7 +297,7 @@ theorem mul_lambda_lt_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     c * hd.lambda D R <
-      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -363,10 +377,8 @@ theorem gpScaleTail
       h.mul_lambda_lt_expGp (D := D) (c := 8)
         (R := seqRadius hd D P (L.φ n) (γ : Nat)) hD h8 hx
 
-
-
-
-
+/-- The same lower half of `lambda_window` places half of any item-3 radius
+inside the intrinsic framed exponential ball. -/
 theorem halfGpScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -387,17 +399,9 @@ theorem halfGpScaleTail
         (a / 2) * L.lamInf (γ : Nat) <
           Geometry.Riemannian.expRadiusGp
             (I := I) (X.obj (L.φ n)).metric c := by
-  have hsqrt : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
-    have hsqrtSq := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
-    have hsqrtNonneg := Real.sqrt_nonneg (1 / 2 : Real)
-    nlinarith
-  have hratioD : 0 < h.ratio * D := mul_pos h.ratio_pos hD
   have haGp : a < h.gpRatio * D := by
-    calc
-      a < (1 / 2 : Real) * (h.ratio * D) := by nlinarith
-      _ < Real.sqrt (1 / 2 : Real) * (h.ratio * D) :=
-        mul_lt_mul_of_pos_right hsqrt hratioD
-      _ = h.gpRatio * D := by rw [gpRatio]; ring
+    rw [gpRatio]
+    nlinarith [ha]
   have hwin : ∀ᶠ n in atTop, ∀ γ ∈ Finset.range (pb.A r),
       L.lamInf γ / 2 ≤ hd.lambda D (seqRadius hd D P (L.φ n) γ) :=
     (Filter.eventually_all_finset _).mpr fun γ _ =>
@@ -735,8 +739,10 @@ structure MetricCompactnessInputs
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
 
   decay : InjRadiusDecayInput (I := I) X
-
-
+  /-- `lbl387`, uniformly available after every positive divisor is chosen. -/
+  packAll : ∀ D : Real, 0 < D → decay.PackingBound D
+  /-- The good-covering scale divisor (`λ = μ/D`); the assembly chooses it
+  large against the relative normal-coordinate radius profile. -/
   D : Real
   hD : 0 < D
 
@@ -760,8 +766,22 @@ structure MetricCompactnessInputs
 
 namespace MetricCompactnessInputs
 
+/-- Recover the divisor-independent geometric producer bundle from a
+conditional compactness input. -/
+def toBase
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactnessInputs (I := I) X) :
+    MetricCompactBase (I := I) X where
+  decay := inp.decay
+  pack := inp.packAll
+  volume := inp.volume
+  dist_eq := inp.dist_eq
+  realizes := inp.realizes
+  normalBounds := inp.normalBounds
+  normalRadius := inp.normalRadius
 
-
+/-- Instantiate the fixed-divisor consumer bundle from the `D`-independent
+producer data once the scalar cap has been verified. -/
 def ofBase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X) (D : Real) (hD : 0 < D)
@@ -770,6 +790,7 @@ def ofBase
         b.decay.lambda D 0 ≤ b.volume.r0) :
     MetricCompactnessInputs (I := I) X where
   decay := b.decay
+  packAll := b.pack
   D := D
   hD := hD
   pack := b.pack D hD
@@ -863,8 +884,8 @@ theorem item3ScaleTails
 def ofUniformVolume
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (decay : InjRadiusDecayInput (I := I) X)
+    (packAll : ∀ D : Real, 0 < D → decay.PackingBound D)
     (D : Real) (hD : 0 < D)
-    (pack : decay.PackingBound D)
     (vol : UniformBallPack (I := I) X)
     (dist_eq : vol.dist = decay.dist)
     (stepA_cap_le :
@@ -875,9 +896,10 @@ def ofUniformVolume
     (normalRadius : NormalRadiusProfile decay normalBounds) :
     MetricCompactnessInputs (I := I) X where
   decay := decay
+  packAll := packAll
   D := D
   hD := hD
-  pack := pack
+  pack := packAll D hD
   volume := vol.toVCInput
   dist_eq := by
     change vol.dist = decay.dist
@@ -896,6 +918,7 @@ def subseq
     (inp : MetricCompactnessInputs (I := I) X) (f : Nat -> Nat) :
     MetricCompactnessInputs (I := I) (X.subseq f) where
   decay := inp.decay.subseq f
+  packAll := fun D hD => (inp.packAll D hD).subseq f
   D := inp.D
   hD := inp.hD
   pack := inp.pack.subseq f
@@ -1123,28 +1146,10 @@ theorem stepA_net_subseq
     (fun k => by
       simpa [PointedRiemannianSeq.subseq] using hconn (f k))
 
-
-
-
-
-
-
-
-
-
-
-
-def metricCompactness
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (_inp : MetricCompactnessInputs (I := I) X)
-    (_hcomplete : SeqMetricComplete (I := I) X)
-    (_hgeom : SeqBoundedGeometry (I := I) X)
-    (_hinj : BaseInjBound (I := I) X)
-    (_hconn : forall k : Nat,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M) :
-    MetricCompactnessConclusion (I := I) X := by
-  sorry
+/- The conditional Theorem 3.9 endpoint is assembled in
+`C4/MetricCompactnessEndpoint.lean`. Keeping the endpoint above this input
+layer would create an import cycle through the concrete B1 and Step-D
+producers. -/
 
 end MetricCompactnessInputs
 

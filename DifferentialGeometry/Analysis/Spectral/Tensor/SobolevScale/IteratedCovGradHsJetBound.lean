@@ -213,7 +213,7 @@ private theorem rawIter_coeff
         ih, pow_succ]
       ring
 
-private theorem rawIter_tsum
+theorem rawIter_tsum
     (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s i S)‖ ^ 2 =
       ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -234,7 +234,7 @@ private theorem rawIter_tsum
     (I := I) (M := M) m
   rw [mul_pow, ← pow_mul, mul_comm i 2, (even_two_mul i).neg_pow L]
 
-private theorem covIter_tsum
+theorem covIter_tsum
     (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖covGrad (I := I) (M := M) g₀ 0 s
         (rawTensorConnLapIter (I := I) g₀ 0 s i S)‖ ^ 2 =
@@ -301,7 +301,7 @@ private theorem covIter_tsum
   rw [hpow, (odd_two_mul_add_one i).neg_pow L]
   ring
 
-private theorem covIter_odd
+theorem covIter_odd
     (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖covGrad (I := I) (M := M) g₀ 0 s
         (rawTensorConnLapIter (I := I) g₀ 0 s i S)‖ ≤
@@ -372,7 +372,7 @@ private theorem covIter_odd
         ((2 * i + 1 : ℕ) : ℝ) S).weighted_summable
   exact le_of_sq_le_sq hsq hnn
 
-private theorem rawIter_even
+theorem rawIter_even
     (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s i S)‖ ≤
       ‖ccTensorToHs (I := I) (M := M) g₀ s ((2 * i : ℕ) : ℝ) S‖ := by

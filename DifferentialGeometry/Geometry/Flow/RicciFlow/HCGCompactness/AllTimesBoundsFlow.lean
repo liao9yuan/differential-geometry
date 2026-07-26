@@ -375,22 +375,20 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
     _ <= δ * gInf.inner x v v :=
         mul_le_mul_of_nonneg_right (hsmall x hx) hgnn
 
-
-
-
-
-
-omit [CompleteSpace E] in
-theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
+/-- Two smooth Riemannian metrics are uniformly equivalent on a compact set. -/
+theorem equivOn_compact
+    {K : Set M} (hK : IsCompact K)
     (gRef h : SmoothRiemannianMetric I M) :
-    ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
-  obtain ⟨c, hc, hlow⟩ := DifferentialGeometry.metric_lower_bound_of_compact h gRef
-  obtain ⟨c', hc', hup⟩ := DifferentialGeometry.metric_lower_bound_of_compact gRef h
+    ∃ C : Real, MetricUniformEquivalentOn (I := I) K gRef h C := by
+  obtain ⟨c, hc, hlow⟩ :=
+    DifferentialGeometry.metric_lower_on (I := I) hK h gRef
+  obtain ⟨c', hc', hup⟩ :=
+    DifferentialGeometry.metric_lower_on (I := I) hK gRef h
   set C : Real := max (max c⁻¹ c'⁻¹) 1 with hCdef
   have hc_inv_le_C : c⁻¹ <= C := le_trans (le_max_left _ _) (le_max_left _ _)
   have hc'_inv_le_C : c'⁻¹ <= C := le_trans (le_max_right _ _) (le_max_left _ _)
   refine ⟨C, le_max_right _ _, ?_⟩
-  intro x _ v
+  intro x hx v
   have hgnn : 0 <= gRef.inner x v v := by
     by_cases hv : v = 0
     · subst hv; simp
@@ -406,16 +404,22 @@ theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
       exact le_of_mul_le_mul_right h3 hC_pos
     calc C⁻¹ * gRef.inner x v v <= c * gRef.inner x v v :=
           mul_le_mul_of_nonneg_right hCinv_le_c hgnn
-      _ <= h.inner x v v := hlow x v
+      _ <= h.inner x v v := hlow x hx v
   · have hub : h.inner x v v <= c'⁻¹ * gRef.inner x v v := by
       rw [inv_mul_eq_div, le_div_iff₀ hc']
-      linarith [hup x v]
+      linarith [hup x hx v]
     calc h.inner x v v <= c'⁻¹ * gRef.inner x v v := hub
       _ <= C * gRef.inner x v v := mul_le_mul_of_nonneg_right hc'_inv_le_C hgnn
 
+/-- **(A): two metrics on a closed manifold are uniformly equivalent.** -/
+theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
+    (gRef h : SmoothRiemannianMetric I M) :
+    ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
+  simpa using equivOn_compact (I := I) isCompact_univ gRef h
 
-
-
+/-- **`hle`.** Each per-point metric-difference norm is bounded by the window
+supremum (the `BddAbove` content for the `②`-bookkeeping, via the per-point
+bound `metricDerivNorm_le_of_equiv` plus closed-manifold compactness). -/
 theorem metricDerivNorm_le_metricDerivNormSupOn [CompactSpace M]
     (gk gInf : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) 0 gk gInf gInf x

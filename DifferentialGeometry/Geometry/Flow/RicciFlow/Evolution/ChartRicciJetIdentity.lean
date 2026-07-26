@@ -67,7 +67,7 @@ theorem jet2_chartGram_d1 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
     (m i l j : Fin (Module.finrank ℝ E)) :
     (jet2 (chartGramPi (I := I) g α) y).2.2 (chartModelBasis E m) (chartModelBasis E i) l j
@@ -75,11 +75,11 @@ theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
   simp only [jet2]
   rw [fderiv2_matEntry hG2 (chartModelBasis E m) (chartModelBasis E i) l j]
   have hinner : (fun w => (fderiv ℝ (chartGramPi (I := I) g α) w) (chartModelBasis E i) l j)
-      = partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) := by
-    funext w
-    rw [fderiv_matEntry (hG1 w) (chartModelBasis E i) l j]
+      =ᶠ[nhds y] partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) := by
+    filter_upwards [hG1] with w hw
+    rw [fderiv_matEntry hw (chartModelBasis E i) l j]
     rfl
-  rw [hinner]
+  rw [hinner.fderiv_eq]
   rfl
 
 
@@ -118,7 +118,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelDeriv_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y)
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
     (m i j k : Fin (Module.finrank ℝ E)) :
     partialDeriv (E := E) m (chartChristoffel (I := I) g α i j k) y
@@ -138,7 +138,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemann_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y)
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
     (i j k l : Fin (Module.finrank ℝ E)) :
     chartRiemannTensor (I := I) g α i j k l y
@@ -159,7 +159,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicci_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y)
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
     (i k : Fin (Module.finrank ℝ E)) :
     chartRicciTensor (I := I) g α i k y
@@ -176,7 +176,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem jetRicciFlow_chartGram (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y)
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
     (i k : Fin (Module.finrank ℝ E)) :
     jetRicciFlow (chartModelBasis E) (jet2 (chartGramPi (I := I) g α) y) i k
@@ -226,7 +226,7 @@ theorem chartGramEvolution_of_pde (g : ℝ → SmoothRiemannianMetric I M) (α :
     {t : ℝ} (hsL : UniqueDiffWithinAt ℝ sL t)
     (hy : y ∈ interior (extChartAt I α).target)
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) (g t) α) y)
-    (hG1 : ∀ w, DifferentiableAt ℝ (chartGramPi (I := I) (g t) α) w)
+    (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) (g t) α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) (g t) α) w) y)
     (hpde : ∀ i k : Fin (Module.finrank ℝ E),
       HasDerivWithinAt (fun s => chartGramOnE (I := I) (g s) α i k y)

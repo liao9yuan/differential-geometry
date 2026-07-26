@@ -516,24 +516,39 @@ private theorem curvRoute
 def commStarCost (n k : ℕ) : Real :=
   (n : Real) ^ 2 * (13 + 3 * k)
 
+/-- The canonical field representing the spatial commutator
+`[Δ,∇]∇ᵏRm`. Its definition is independent of a solution proof, a component
+index type, a point, and a choice of basis. -/
+def commStarField
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : RealTimeInterval.RegularTime D) (k : ℕ) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + (k + 1)) :=
+  let TA :=
+    (∑ q : Fin (4 + k),
+      starBaseField (I := I) S (t : Real) (k + 1) 1 k 0 (sigmaDiffA k q))
+  let TB :=
+    (∑ q : Fin (4 + k),
+      starBaseField (I := I) S (t : Real) (k + 1) 0 (k + 1) 0 (sigmaDiffB k q))
+  let TC :=
+    (∑ q : Fin (4 + (k + 1)),
+      if hq : q.val = 0 then
+        starBaseField (I := I) S (t : Real) (k + 1) (k + 1) 0 0 (sigmaCurv0 k)
+      else
+        starBaseField (I := I) S (t : Real) (k + 1) (k + 1) 0 0
+          (sigmaCurvPos k q hq))
+  (-1 : Real) • (TA + TB + TC)
+
 set_option backward.isDefEq.respectTransparency false in
-
-
-omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
-theorem spatialCommStarSum
-    [Module.Finite ℝ E]
+/-- The cost and component specifications of the canonical spatial-commutator
+field, bundled so their shared assembly proof is checked once. -/
+private theorem commStarField_data
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
-    ∃ T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (n := (∞ : WithTop ℕ∞)) (4 + (k + 1)),
-      StarSum2Cost (I := I) Idx S (t : Real) (k + 1) T
-          (commStarCost (Fintype.card Idx) k) ∧
+    StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
+        (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) ∧
       ∀ (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
-        (gInv : Idx → Idx → Real)
-        (_hinv : MetricInverseInBasis_gen (I := I) (M := M)
-          (S.base.metric (t : Real)) x basis gInv)
         (_horth : ∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j)
             = if i = j then (1 : Real) else 0)
         (I0 : Fin (4 + (k + 1)) → Idx),
@@ -543,7 +558,8 @@ theorem spatialCommStarSum
                 (4 + k) (S.family.connection (t : Real))
                 (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
                   (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
-          = tensor0SComponent (I := I) (T x) (fun i => basis i) I0 := by
+          = tensor0SComponent (I := I) (commStarField (I := I) S t k x)
+              (fun i => basis i) I0 := by
   classical
   let TA :=
     (∑ q : Fin (4 + k),
@@ -559,7 +575,20 @@ theorem spatialCommStarSum
         starBaseField (I := I) S (t : Real) (k + 1) (k + 1) 0 0
           (sigmaCurvPos k q hq))
   let T := (-1 : Real) • (TA + TB + TC)
-  refine ⟨T, ?_, ?_⟩
+  change StarSum2Cost (I := I) Idx S (t : Real) (k + 1) T
+      (commStarCost (Fintype.card Idx) k) ∧
+    ∀ (x : M) (basis : Module.Basis Idx Real (TangentSpace I x)),
+      (∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j) =
+        if i = j then (1 : Real) else 0) →
+      ∀ I0 : Fin (4 + (k + 1)) → Idx,
+        metricTraceFirstTwo0STensor (I := I) (S.base.metric (t : Real))
+              (nablaKRm04Field (I := I) S (t : Real) (k + 3) x) (fun p => basis (I0 p))
+            - totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                (4 + k) (S.family.connection (t : Real))
+                (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
+                  (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
+          = tensor0SComponent (I := I) (T x) (fun i => basis i) I0
+  refine ⟨?_, ?_⟩
   · have hTA : StarSum2Cost (I := I) Idx S (t : Real) (k + 1) TA
         (∑ _q : Fin (4 + k), (Fintype.card Idx : Real) ^ 2) := by
       dsimp [TA]
@@ -612,7 +641,7 @@ theorem spatialCommStarSum
       Fintype.card_fin, nsmul_eq_mul, commStarCost]
     push_cast
     ring
-  · intro x basis _gInv _hinv horth I0
+  · intro x basis horth I0
     let tail : Fin (4 + k) → TangentSpace I x := fun p => basis (I0 p.succ)
     have hinvId : MetricInverseInBasis_gen (I := I) (M := M)
         (S.base.metric (t : Real)) x basis (identityInvMetric (Idx := Idx)) :=
@@ -733,5 +762,64 @@ theorem spatialCommStarSum
     rw [curvRoute (I := I) S (t : Real) k basis horth I0]
     simp [T, tensor0SComponent_apply, hTAp, hTBp, hTCp, Finset.sum_add_distrib]
     ring_nf
+
+/-- The canonical spatial-commutator field has the exact constructor-tree
+cost `commStarCost`. -/
+theorem commStarField_cost
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D) (k : ℕ)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
+      (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) :=
+  (commStarField_data (I := I) S hS t k).1
+
+/-- Components of the canonical spatial-commutator field agree with the
+intrinsic commutator expression in every orthonormal basis. -/
+theorem commStarField_spec
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D) (k : ℕ)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
+    (horth : ∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j)
+      = if i = j then (1 : Real) else 0)
+    (I0 : Fin (4 + (k + 1)) → Idx) :
+    metricTraceFirstTwo0STensor (I := I) (S.base.metric (t : Real))
+          (nablaKRm04Field (I := I) S (t : Real) (k + 3) x) (fun p => basis (I0 p))
+        - totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (4 + k) (S.family.connection (t : Real))
+            (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
+              (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
+      = tensor0SComponent (I := I) (commStarField (I := I) S t k x)
+          (fun i => basis i) I0 :=
+  (commStarField_data (I := I) S hS t k).2 x basis horth I0
+
+/-- **Brick 4, P2 (compatibility form): the spatial commutator
+`[Δ,∇]∇ᵏRm` is a star sum.** -/
+theorem spatialCommStarSum
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D) (k : ℕ)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    ∃ T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (4 + (k + 1)),
+      StarSum2Cost (I := I) Idx S (t : Real) (k + 1) T
+          (commStarCost (Fintype.card Idx) k) ∧
+      ∀ (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
+        (gInv : Idx → Idx → Real)
+        (_hinv : MetricInverseInBasis_gen (I := I) (M := M)
+          (S.base.metric (t : Real)) x basis gInv)
+        (_horth : ∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j)
+            = if i = j then (1 : Real) else 0)
+        (I0 : Fin (4 + (k + 1)) → Idx),
+        metricTraceFirstTwo0STensor (I := I) (S.base.metric (t : Real))
+              (nablaKRm04Field (I := I) S (t : Real) (k + 3) x) (fun p => basis (I0 p))
+            - totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                (4 + k) (S.family.connection (t : Real))
+                (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
+                  (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
+          = tensor0SComponent (I := I) (T x) (fun i => basis i) I0 := by
+  refine ⟨commStarField (I := I) S t k,
+    commStarField_cost (I := I) S hS t k, ?_⟩
+  intro x basis _gInv _hinv horth I0
+  exact commStarField_spec (I := I) S hS t k x basis horth I0
 
 end DifferentialGeometry.PDE.RicciFlow

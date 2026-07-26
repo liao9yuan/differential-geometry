@@ -10,42 +10,20 @@ set_option autoImplicit false
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Main statements:
+* `hasDerivWithinAt_lim` — generic 1-D uniform-limit derivative passage on a
+  convex set.
+* `metricInner_tendsto` — pointwise metric-coefficient convergence from order-0
+  `metricDerivNorm` smallness (via `metricInnerApply_diff_le`).
+* `metricLimit_pde'` — plain-sequence consumer for an eventual per-index Ricci-flow
+  equation, pointwise metric convergence, and uniform Ricci convergence.
+* `metricLimit_pde` — the core bridge: solutions on windows + pointwise inner
+  convergence + uniform Ricci convergence ⟹ the limit family satisfies
+  `∂ₜ g_∞ = -2 Ric(g_∞)` on the whole closed window (`HasDerivWithinAt` on
+  `Icc β ψ`, endpoints included).
+* `metricLimit_pdeOn` — endpoint consuming the `windowGInfAll`-style pointwise
+  seminorm convergence on a compact `K ∋ x`.
+-/
 
 noncomputable section
 
@@ -138,7 +116,31 @@ theorem hasDerivWithinAt_lim
       ≤ 2 * (c / 4) * |u - t| + c / 4 * |u - t| + |u - t| * (c / 4) := by linarith
     _ = c * |u - t| := by ring
 
+/-- **Tail form of uniform-limit derivative passage.**  The same conclusion as
+`hasDerivWithinAt_lim` holds when the derivative identities are available only
+after a fixed index. -/
+theorem hasDeriv_lim_tail
+    {s : Set Real} (hs : Convex Real s) {t : Real} (ht : t ∈ s)
+    (f f' : Nat → Real → Real) (g h : Real → Real)
+    (hderiv : ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
+      ∀ u ∈ s, HasDerivWithinAt (f k) (f' k u) s u)
+    (hfg : ∀ u ∈ s, Filter.Tendsto (fun k => f k u) Filter.atTop (nhds (g u)))
+    (hunif : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
+      ∀ u ∈ s, |f' k u - h u| < ε) :
+    HasDerivWithinAt g (h t) s t := by
+  obtain ⟨k0, hk0⟩ := hderiv
+  refine hasDerivWithinAt_lim hs ht
+    (fun k => f (k + k0)) (fun k => f' (k + k0)) g h ?_ ?_ ?_
+  · intro k u hu
+    exact hk0 (k + k0) (by omega) u hu
+  · intro u hu
+    exact (hfg u hu).comp (tendsto_add_atTop_nat k0)
+  · intro ε hε
+    obtain ⟨k1, hk1⟩ := hunif ε hε
+    refine ⟨k1, fun k hk u hu => hk1 (k + k0) ?_ u hu⟩
+    omega
 
+/-! ## Manifold layer -/
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
@@ -200,6 +202,49 @@ theorem metricInner_tendsto
   rw [tendsto_iff_dist_tendsto_zero]
   exact squeeze_zero (fun k => dist_nonneg) hbound hb
 
+/-- **Plain-sequence tail consumer for the limit Ricci-flow equation.**  If the
+metric sequence satisfies the coefficientwise Ricci-flow equation after a fixed
+index, its coefficients converge pointwise, and its Ricci coefficients converge
+uniformly on the closed window, then the limit coefficient satisfies the
+Ricci-flow equation within that window. -/
+theorem metricLimit_pde'
+    [NeZero (Module.finrank Real E)]
+    (gSeq : Nat → Real → SmoothRiemannianMetric I M)
+    (β ψ : Real)
+    (gInf : Real → SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x)
+    (hderiv : ∃ kd : Nat, ∀ k : Nat, kd ≤ k → ∀ u ∈ Set.Icc β ψ,
+      HasDerivWithinAt (fun s : Real => (gSeq k s).inner x v w)
+        (-2 * ricciTensor (I := I) (gSeq k u) x v w) (Set.Icc β ψ) u)
+    (hinner : ∀ u ∈ Set.Icc β ψ,
+      Filter.Tendsto (fun k => (gSeq k u).inner x v w)
+        Filter.atTop (nhds ((gInf u).inner x v w)))
+    (hRicConv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
+      ∀ u ∈ Set.Icc β ψ,
+        |ricciTensor (I := I) (gSeq k u) x v w
+          - ricciTensor (I := I) (gInf u) x v w| < ε)
+    {t : Real} (ht : t ∈ Set.Icc β ψ) :
+    HasDerivWithinAt (fun s : Real => (gInf s).inner x v w)
+      (-2 * ricciTensor (I := I) (gInf t) x v w) (Set.Icc β ψ) t := by
+  refine hasDeriv_lim_tail (convex_Icc β ψ) ht
+    (fun k s => (gSeq k s).inner x v w)
+    (fun k u => -2 * ricciTensor (I := I) (gSeq k u) x v w)
+    (fun s => (gInf s).inner x v w)
+    (fun u => -2 * ricciTensor (I := I) (gInf u) x v w)
+    hderiv hinner ?_
+  intro ε hε
+  obtain ⟨k0, hk0⟩ := hRicConv (ε / 2) (by positivity)
+  refine ⟨k0, fun k hk u hu => ?_⟩
+  have h1 := hk0 k hk u hu
+  have hfactor : -2 * ricciTensor (I := I) (gSeq k u) x v w
+      - -2 * ricciTensor (I := I) (gInf u) x v w
+      = -2 * (ricciTensor (I := I) (gSeq k u) x v w
+          - ricciTensor (I := I) (gInf u) x v w) := by ring
+  rw [hfactor, abs_mul, show |(-2 : Real)| = 2 by norm_num]
+  linarith
+
+/-- **The window limit of Ricci-flow solutions satisfies the Ricci-flow
+equation** (core bridge, fixed manifold `M`, fixed `x, v, w`).
 
 
 
@@ -248,22 +293,9 @@ theorem metricLimit_pde
       metricRicciAt_apply_eq_ricciTensor (I := I) ((S k).family.metric u) x v w
     rw [hval] at h0'
     exact h0'.mono (fun r hr => (D k).regular_subset (hreg k hr))
-  refine hasDerivWithinAt_lim (convex_Icc β ψ) ht
-    (fun k s => ((S k).family.metric s).inner x v w)
-    (fun k u => -2 * ricciTensor (I := I) ((S k).family.metric u) x v w)
-    (fun s => (gInf s).inner x v w)
-    (fun u => -2 * ricciTensor (I := I) (gInf u) x v w)
-    hkder hinner ?_
-  intro ε hε
-  obtain ⟨k0, hk0⟩ := hRicConv (ε / 2) (by positivity)
-  refine ⟨k0, fun k hk u hu => ?_⟩
-  have h1 := hk0 k hk u hu
-  have hfactor : -2 * ricciTensor (I := I) ((S k).family.metric u) x v w
-      - -2 * ricciTensor (I := I) (gInf u) x v w
-      = -2 * (ricciTensor (I := I) ((S k).family.metric u) x v w
-          - ricciTensor (I := I) (gInf u) x v w) := by ring
-  rw [hfactor, abs_mul, show |(-2 : Real)| = 2 by norm_num]
-  linarith
+  refine metricLimit_pde' (fun k s => (S k).family.metric s) β ψ gInf x v w
+    ?_ hinner hRicConv ht
+  exact ⟨0, fun k _ => hkder k⟩
 
 
 

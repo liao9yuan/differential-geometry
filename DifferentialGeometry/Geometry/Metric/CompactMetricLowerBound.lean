@@ -26,14 +26,16 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
-variable [IsManifold I ∞ M] [SigmaCompactSpace M] [CompactSpace M]
+variable [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-
-
-theorem metric_lower_bound_of_compact
+/-- One smooth Riemannian metric has a positive lower bound relative to another
+on any compact base set. -/
+theorem metric_lower_on
+    {K : Set M} (hK : IsCompact K)
     (h gRef : SmoothRiemannianMetric I M) :
     ∃ c : Real, 0 < c ∧
-      ∀ (x : M) (v : TangentSpace I x), c * gRef.inner x v v ≤ h.inner x v v := by
+      ∀ (x : M), x ∈ K → ∀ v : TangentSpace I x,
+        c * gRef.inner x v v ≤ h.inner x v v := by
   classical
   set f : MetricUnitTangent (I := I) (M := M) gRef → Real :=
     fun p => quad02 (I := I) (M := M)
@@ -41,8 +43,9 @@ theorem metric_lower_bound_of_compact
       (MetricUnitTangent.vec (I := I) (M := M) p) with hf_def
   have hf_cont : Continuous f :=
     metricUnit_quadCont (I := I) (M := M) gRef (Tensor0SBundle.metricTensorField (I := I) h)
-  have hcompact : IsCompact (Set.univ : Set (MetricUnitTangent (I := I) (M := M) gRef)) :=
-    metricUnit_compact (I := I) (M := M) gRef
+  have hcompact : IsCompact {p : MetricUnitTangent (I := I) (M := M) gRef |
+      MetricUnitTangent.base (I := I) (M := M) p ∈ K} :=
+    metricUnitOn_compact (I := I) (M := M) gRef hK
   haveI : IsManifold I 1 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
@@ -53,7 +56,8 @@ theorem metric_lower_bound_of_compact
         (MetricUnitTangent.vec (I := I) (M := M) p) := by
     intro p
     simp [hf_def, quad02, Tensor0SBundle.metricTensorField_apply]
-  by_cases hne : (Set.univ : Set (MetricUnitTangent (I := I) (M := M) gRef)).Nonempty
+  by_cases hne : {p : MetricUnitTangent (I := I) (M := M) gRef |
+      MetricUnitTangent.base (I := I) (M := M) p ∈ K}.Nonempty
   · obtain ⟨p0, _hp0, hmin⟩ := hcompact.exists_isMinOn hne hf_cont.continuousOn
     set c : Real := f p0 with hc_def
     have hc : 0 < c := by
@@ -64,7 +68,7 @@ theorem metric_lower_bound_of_compact
       rw [hz] at hu
       simp at hu
     refine ⟨c, hc, ?_⟩
-    intro x v
+    intro x hx v
     by_cases hv : v = 0
     · subst hv
       have h00 : h.inner x (0 : TangentSpace I x) 0 = 0 := by
@@ -85,7 +89,9 @@ theorem metric_lower_bound_of_compact
         linarith [hss]
       let p : MetricUnitTangent (I := I) (M := M) gRef :=
         ⟨(⟨x, u⟩ : TangentBundle I M), hunit⟩
-      have hfp : c ≤ f p := (isMinOn_iff.mp hmin) p (Set.mem_univ p)
+      have hpK : MetricUnitTangent.base (I := I) (M := M) p ∈ K := by
+        simpa [p, MetricUnitTangent.base] using hx
+      have hfp : c ≤ f p := (isMinOn_iff.mp hmin) p hpK
       have hfp_eq : f p = s⁻¹ * s⁻¹ * h.inner x v v := by
         rw [hquad_eq p]
         change h.inner x u u = _
@@ -98,7 +104,7 @@ theorem metric_lower_bound_of_compact
       rw [hss] at hkey
       exact hkey
   · refine ⟨1, one_pos, ?_⟩
-    intro x v
+    intro x hx v
     by_cases hv : v = 0
     · subst hv
       have h00 : h.inner x (0 : TangentSpace I x) 0 = 0 := by
@@ -115,6 +121,17 @@ theorem metric_lower_bound_of_compact
         have hss : s * s = gRef.inner x v v := by simpa [sq] using Real.sq_sqrt hrpos.le
         field_simp [ne_of_gt hspos]
         linarith [hss]
-      exact hne ⟨⟨(⟨x, s⁻¹ • v⟩ : TangentBundle I M), hunit⟩, Set.mem_univ _⟩
+      exact hne ⟨⟨(⟨x, s⁻¹ • v⟩ : TangentBundle I M), hunit⟩, by
+        simpa [MetricUnitTangent.base] using hx⟩
+
+/-- **Metric lower bound on a compact manifold.** For two smooth Riemannian
+metrics `h`, `gRef`, there is `c > 0` with `c·gRef(v,v) ≤ h(v,v)` for all `v`. -/
+theorem metric_lower_bound_of_compact [CompactSpace M]
+    (h gRef : SmoothRiemannianMetric I M) :
+    ∃ c : Real, 0 < c ∧
+      ∀ (x : M) (v : TangentSpace I x), c * gRef.inner x v v ≤ h.inner x v v := by
+  obtain ⟨c, hc, hbound⟩ :=
+    metric_lower_on (I := I) (M := M) isCompact_univ h gRef
+  exact ⟨c, hc, fun x v => hbound x (Set.mem_univ x) v⟩
 
 end DifferentialGeometry

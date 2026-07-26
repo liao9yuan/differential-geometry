@@ -42,6 +42,44 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+/-!
+# Brick 7a of the P4 conv engine — producers for the carried cited inputs
+
+Bricks 4–5 (`ConvFieldAssembly.lean`, `ConvFieldMain.lean`) carry five cited inputs at
+`gSeqExt`/source-flow granularity: `hbound` (uniform source lower bound), `hcovTail`
+(uniform tail covariant bound), `hlipTail`/`hlipSrc` (time-Lipschitz at the two
+granularities), and `hconv0` (pointwise time-0 convergence).  This file produces each of
+them, verbatim, from honest THEOREM-LEVEL inputs stated against the comparison maps `Φ`
+(ruling 5b: instantiate `Φ := pointedCGHMaps_of_atZero X L subseq rmaps` at Brick 7b):
+
+* the eq-(3.3)-side window metric equivalence of the sequence flows against per-`k`
+  references on the target side (`hequivT`, uniform majorant `B`/`Bmax`), plus the
+  uniform relation of the transported reference to the restricted limit reference
+  (`hrel`, constant `Crel`) — producers `hbound_of_equiv` and the shared transport
+  `srcEquivOn`;
+* the moving-Shi bounds for the sequence flows on the target side (`hShiT`) —
+  transported by `srcShi` and consumed by `lipSrc_of_soln`;
+* uniform source-side covariant bounds on the bump agreement diagonal (`hcovSrc`) —
+  transferred locally, with no bump-collar derivative input, by
+  `covTail_of_bounds`;
+* the uniform source-granularity window Lipschitz bound on the bump agreement diagonal
+  (`hlipG`) — producer `lipTail_of_src`;
+* the time-0 seminorm convergence in `MetricSourceCPConvOn` shape (`hcp`, discharged
+  from `mc.convergence` at 7b) — producer `conv0_of_cp`.
+
+`lipSrc_of_soln` is fully produced (no Lipschitz citation): it runs the solution-driven
+producers `hgLip0Sol`/`hgLipFinSol` on the Brick-2 flow `sourceFlow Φ k`, with their
+`SolLipData` packs assembled per `k` from the transported equivalence and Shi bounds,
+`covOrderBound_of_soln`, and compact initial bounds (`metricCovDerivNorm_bddOn`).
+
+The general prelims include the metric-compatibility endpoint `covNorm_self_succ`
+(`|∇_g^{a+1} g|_g = 0`, from `Tensor0SBundle.nabla_metric_zero`), the reverse triangle
+`covNorm_le_add`, the explicit-constant order-0 bound `covNorm0_le`, and the
+difference-slot congruence `derivNorm_congr_diff`.
+
+See `ConvFieldInputs.md` for the route, the honesty discussion of each cited input, and
+the recorded gaps.
+-/
 
 noncomputable section
 
@@ -69,6 +107,24 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M] in
+/-- The pointwise covariant metric norm is local with respect to restriction to
+an open subtype. -/
+theorem covNorm_restrictOpen
+    (h gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
+    [SigmaCompactSpace U] [T2Space U] (a : Nat) (x : U) :
+    metricCovDerivNorm (I := I) a (h.restrictOpen (I := I) U)
+        (gRef.restrictOpen (I := I) U) x =
+      metricCovDerivNorm (I := I) a h gRef (x : M) := by
+  have hcov :
+      metricCovDeriv (I := I) (h.restrictOpen (I := I) U)
+          (gRef.restrictOpen (I := I) U) a x =
+        metricCovDeriv (I := I) h gRef a (x : M) := by
+    ext slots
+    exact metricCovDeriv_restrictOpen_apply (I := I) h gRef U a x slots
+  unfold metricCovDerivNorm
+  rw [normSq0S_restrictOpen_apply, hcov]
+
+/-- Uniform metric equivalence is transitive, with multiplied constants. -/
 theorem equivOn_trans {K : Set M} {g h f : SmoothRiemannianMetric I M} {C₁ C₂ : Real}
     (h₁ : MetricUniformEquivalentOn (I := I) K g h C₁)
     (h₂ : MetricUniformEquivalentOn (I := I) K h f C₂) :
@@ -794,6 +850,10 @@ theorem lipTail_of_src
           (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
         - (srcMetric (I := I) Φ hsrc htgt k t).inner
           (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
+        = (srcMetric (I := I) Φ hsrc htgt k s).inner
+            (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
+          - (srcMetric (I := I) Φ hsrc htgt k t).inner
+            (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k s
         (((w : SourceDomain (I := I) Φ k)) : P.M) hwsrc (vs 0) (vs 1),
       gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
@@ -958,86 +1018,45 @@ private theorem extEquivOn
 
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+/-- **Producer for the `hcovTail` input of `hbdd_gSeqExt`/`convOut`.**
+A uniform source-flow covariant bound on the agreement region `bf.grow k`
+transfers to the bump extension with the same constant.  The bump is identically
+one on an open neighborhood of `bf.grow k`, so restriction locality identifies
+the two covariant metric towers pointwise. -/
 theorem covTail_of_bounds
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
     (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : Real)
-    (gRefT : forall k : Nat,
-      letI : TopologicalSpace (X.term (subseq k)).M := (X.term (subseq k)).topology
-      letI : ChartedSpace H (X.term (subseq k)).M := (X.term (subseq k)).charted
-      letI : IsManifold I ∞ (X.term (subseq k)).M := (X.term (subseq k)).smooth
-      SmoothRiemannianMetric I ((X.term (subseq k)).M))
-    (B : Real -> Real) (Crel Bmax : Real)
-    (hBmax : forall t : Real, t ∈ Set.Icc β ψ -> B t <= Bmax)
-    (hCrel1 : 1 <= Crel)
-    (hequivT : forall k : Nat,
-      letI : TopologicalSpace (X.term (subseq k)).M := (X.term (subseq k)).topology
-      letI : ChartedSpace H (X.term (subseq k)).M := (X.term (subseq k)).charted
-      letI : T2Space (X.term (subseq k)).M := (X.term (subseq k)).t2
-      letI : IsManifold I ∞ (X.term (subseq k)).M := (X.term (subseq k)).smooth
-      letI : SigmaCompactSpace (X.term (subseq k)).M := (X.term (subseq k)).sigmaCompact
-      MetricUniformEquivalentOnWindow (I := I) (Φ.target k) β ψ (gRefT k)
-        (fun _ t => (X.term (subseq k)).S.family.metric t) B)
-    (hrel : forall k : Nat,
-      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
-      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
-      letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
-      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
-      MetricUniformEquivalentOn (I := I)
-        (Set.univ : Set (SourceDomain (I := I) Φ k))
-        (refRes (I := I) Φ R hsrc k)
-        (tgtRefSrc (I := I) Φ gRefT hsrc htgt k) Crel)
     (hcovSrc : letI : TopologicalSpace P.M := P.topology;
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
-      forall j : Nat, exists Cs : Real, 0 <= Cs /\
+      forall q : Nat, exists C : Real, 0 <= C /\
         forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ tsupport (bf.chi k) ->
+          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ bf.grow k ->
             letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
             letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
             letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
             letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
             letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
               sourceDomSigmaOf (I := I) Φ k (hsrc k)
-            metricCovDerivNorm (I := I) j (srcMetric (I := I) Φ hsrc htgt k t)
-              (refRes (I := I) Φ R hsrc k) y <= Cs)
-    (hchi : letI : TopologicalSpace P.M := P.topology;
-        letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
-        letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
-      forall c : Nat, exists Cc : Real, 0 <= Cc /\
-        forall (k : Nat) (y : SourceDomain (I := I) Φ k),
-          letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
-          letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
-          letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
-          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
-          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
-            sourceDomSigmaOf (I := I) Φ k (hsrc k)
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I)
-            (refRes (I := I) Φ R hsrc k) y (0 + c)
-            (iterCov (I := I) (refRes (I := I) Φ R hsrc k) 0
-              (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I)
-                (M := SourceDomain (I := I) Φ k) (∞ : WithTop ℕ∞)
-                (chiRes (I := I) Φ bf k) (chiRes_smooth (I := I) Φ bf k)) c y)) <= Cc) :
+            metricCovDerivNorm (I := I) q (srcMetric (I := I) Φ hsrc htgt k t)
+              (refRes (I := I) Φ R hsrc k) y <= C) :
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
     letI : IsManifold I ∞ P.M := P.smooth
     letI : SigmaCompactSpace P.M := P.sigmaCompact
     forall q : Nat, exists C : Real, forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-      forall z : P.M, z ∈ Φ.source k ->
-        metricCovDerivNorm (I := I) q (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C := by
-  classical
+      forall z : P.M, z ∈ bf.grow k ->
+        metricCovDerivNorm (I := I) q
+          (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C := by
   letI : TopologicalSpace P.M := P.topology
   letI : ChartedSpace H P.M := P.charted
   letI : T2Space P.M := P.t2
   letI : IsManifold I ∞ P.M := P.smooth
   letI : SigmaCompactSpace P.M := P.sigmaCompact
-  choose Cs hCs0 hCs using hcovSrc
-  choose Cχ hCχ0 hCχ using hchi
-  set nE : Real := Real.sqrt (Module.finrank Real E : Real) with hnE
-  have hnE0 : 0 <= nE := Real.sqrt_nonneg _
   intro q
   match q with
   | 0 =>
@@ -1328,6 +1347,84 @@ theorem covTail_of_bounds
 
 
 omit [NeZero (Module.finrank ℝ E)] in
+  obtain ⟨C, _hC0, hC⟩ := hcovSrc q
+  refine ⟨C, fun k t ht z hzgrow => ?_⟩
+  have hzsrc : z ∈ Φ.source k := bf.grow_subset k hzgrow
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI : T2Space ↥(sourceOpen (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  set y : SourceDomain (I := I) Φ k := ⟨z, hzsrc⟩ with hydef
+  obtain ⟨W, hWopen, hgrowW, hW1⟩ := bf.chi_one k
+  set O : TopologicalSpace.Opens (SourceDomain (I := I) Φ k) :=
+    ⟨Subtype.val ⁻¹' W, hWopen.preimage continuous_subtype_val⟩ with hOdef
+  letI : ChartedSpace H ↥O :=
+    TopologicalSpace.Opens.instChartedSpace (H := H) (M := SourceDomain (I := I) Φ k) (s := O)
+  letI : IsManifold I ∞ ↥O := { O.instHasGroupoid (contDiffGroupoid ∞ I) with }
+  letI : SigmaCompactSpace ↥O := isSigmaCompact_iff_sigmaCompactSpace.mp
+    (Geometry.isSigmaCompact_of_isOpen I O.isOpen)
+  letI : T2Space ↥O := inferInstance
+  have hyO : y ∈ O := hgrowW hzgrow
+  have hfieldO : Tensor0SBundle.metricTensorField (I := I)
+        (((gSeqExt (I := I) Φ R bf hsrc htgt k t).restrictOpen (I := I)
+          (sourceOpen (I := I) Φ k)).restrictOpen (I := I) O) =
+      Tensor0SBundle.metricTensorField (I := I)
+        ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O) := by
+    refine DFunLike.ext _ _ (fun w => ?_)
+    refine ContinuousMultilinearMap.ext (fun vs => ?_)
+    have hwW : (((w : SourceDomain (I := I) Φ k)) : P.M) ∈ W := w.2
+    have hwsrc : (((w : SourceDomain (I := I) Φ k)) : P.M) ∈ Φ.source k :=
+      (w : SourceDomain (I := I) Φ k).2
+    change
+      (gSeqExt (I := I) Φ R bf hsrc htgt k t).inner
+          (((w : SourceDomain (I := I) Φ k)) : P.M) (vs 0) (vs 1) =
+        (srcMetric (I := I) Φ hsrc htgt k t).inner
+          (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
+    rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
+      (((w : SourceDomain (I := I) Φ k)) : P.M) hwsrc (vs 0) (vs 1), hW1 _ hwW]
+    simp
+  calc
+    metricCovDerivNorm (I := I) q
+        (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z =
+      metricCovDerivNorm (I := I) q
+        ((gSeqExt (I := I) Φ R bf hsrc htgt k t).restrictOpen (I := I)
+          (sourceOpen (I := I) Φ k))
+        (refRes (I := I) Φ R hsrc k) y :=
+      (covNorm_restrictOpen (I := I) _ _ (sourceOpen (I := I) Φ k) q y).symm
+    _ = metricCovDerivNorm (I := I) q
+        (((gSeqExt (I := I) Φ R bf hsrc htgt k t).restrictOpen (I := I)
+          (sourceOpen (I := I) Φ k)).restrictOpen (I := I) O)
+        ((refRes (I := I) Φ R hsrc k).restrictOpen (I := I) O)
+        (⟨y, hyO⟩ : ↥O) :=
+      (covNorm_restrictOpen (I := I) _ _ O q (⟨y, hyO⟩ : ↥O)).symm
+    _ = metricCovDerivNorm (I := I) q
+        ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O)
+        ((refRes (I := I) Φ R hsrc k).restrictOpen (I := I) O)
+        (⟨y, hyO⟩ : ↥O) := by
+      unfold metricCovDerivNorm
+      rw [metricCovDeriv_eq_covDerivOfField, metricCovDeriv_eq_covDerivOfField, hfieldO]
+    _ = metricCovDerivNorm (I := I) q
+        (srcMetric (I := I) Φ hsrc htgt k t)
+        (refRes (I := I) Φ R hsrc k) y :=
+      covNorm_restrictOpen (I := I) _ _ O q (⟨y, hyO⟩ : ↥O)
+    _ <= C := hC k t ht y hzgrow
+/-! ### Producer 4: `hlipSrc` (the per-`k` source-granularity time-Lipschitz bound) -/
+
+set_option maxHeartbeats 1600000 in
+/-- **Producer for the `hlipSrc` carried input of `hgLip_gSeqExt`/`convOut`.**  This one
+is fully produced (no Lipschitz citation): per `k`, the solution-driven producers
+`hgLip0Sol` and `hgLipFinSol` run on the Brick-2 pulled-back flow `sourceFlow Φ k`, whose
+flow equation they consume.  Their analytic inputs are assembled from: the transported
+window equivalence (`srcEquivOn`), the transported moving-Shi bounds (`srcShi`, per
+order budget from `hShiT`), the mixed-derivative swap from the flow's own regularity
+(`solnTowerSwap_reg`), and the `SolLipData` covariant packs from `covOrderBound_of_soln`
+with per-`k` compact initial bounds (`metricCovDerivNorm_bddOn` on a compact-closure
+neighborhood).  The conclusion is verbatim the `hlipSrc` hypothesis. -/
 theorem lipSrc_of_soln
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;

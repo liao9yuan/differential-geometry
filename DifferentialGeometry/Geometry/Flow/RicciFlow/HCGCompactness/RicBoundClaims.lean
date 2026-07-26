@@ -61,16 +61,92 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
+/-- **Geometric Claim 1** (ric_bound Step 3, MSM135 Lemma 3.11).  On a local-frame
+domain `u`, let `chrG`/`chrH` be the frame Christoffels of the Levi-Civita
+connections of the moving metric `g` and the fixed reference `gRef`.  If the
+`g`-component inverse is bounded (`hGinv`) and the `chrH`-derivatives of the
+`g`-components are bounded up to order `m` (`hK`), then
+`|∇_{H,U}^m (Γ_G − Γ_H)| ≤ C·(1 + |∇_H^{m+1} g|)` on `u`.
+`AkMFold.claim1` with `hkoszul` discharged by `hkoszul_of_leviCivita`. -/
+theorem claim1_LC_bound {u : Set M} (hu : IsOpen u)
+    (gRef : SmoothRiemannianMetric I M)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u)
+    (hframeS : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe y d i j) u)
+    (C0 K : Real) (m : ℕ) :
+    ∀ (g : SmoothRiemannianMetric I M),
+      (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun y => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+          frame hframe y d i j) u) →
+      (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun y => frameComp0S (I := I) (metricTensorField (I := I) g) frame y k) u) →
+    ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real),
+      (∀ x ∈ u, ∀ c e : Idx,
+        (∑ l : Idx, frameComp0S (I := I) (metricTensorField (I := I) g) frame x
+            (Fin.snoc (fun _ : Fin 1 => l) c) *
+          Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+      (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+      (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+        compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe z)
+          (frameComp0S (I := I) (metricTensorField (I := I) g) frame) j x) ≤ K) →
+      ∀ x ∈ u,
+      compL2 (iterCovCompU (I := I) frame
+        (fun z => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe z)
+        (chrDiffField
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+            frame hframe z)
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe z)) m x) ≤
+        claim1Const C0 (3 / 2) K m * (1 + compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe z)
+          (frameComp0S (I := I) (metricTensorField (I := I) g) frame) (m + 1) x)) := by
+  classical
+  intro g hchrG hgsm Ginv hinv hGinv hK
+  have hDsm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => chrDiffField
+        (fun z => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+          frame hframe z)
+        (fun z => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe z) y k) u :=
+    fun k => (hchrG _ _ _).sub (hchrH _ _ _)
+  have hmain := claim1_bound hu frame
+    (fun z => christoffelSymbolInFrame
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+      frame hframe z) hframeS hchrH
+    (1 / 2) (1 / 2) (-(1 / 2))
+    (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
+    C0 K m (frameComp0S (I := I) (metricTensorField (I := I) g) frame) hgsm Ginv
+    (chrDiffField
+      (fun z => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        frame hframe z)
+      (fun z => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe z)) hDsm hinv
+    (fun y hy => hkoszul_of_leviCivita hu g gRef frame hframe y hy)
+    hGinv hK
+  have hKR : |(1 / 2 : Real)| + |(1 / 2 : Real)| + |(-(1 / 2 : Real))| = 3 / 2 := by
+    norm_num
+  simpa only [hKR] using hmain
 
-
-
-
-
-
-
-
-omit [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
+/-- Existential compatibility form of `claim1_LC_bound`. -/
 theorem claim1_LC {u : Set M} (hu : IsOpen u)
     (gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -119,35 +195,8 @@ theorem claim1_LC {u : Set M} (hu : IsOpen u)
             (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
             frame hframe z)
           (frameComp0S (I := I) (metricTensorField (I := I) g) frame) (m + 1) x)) := by
-  classical
-  obtain ⟨C, hC0, hCb⟩ := claim1 hu frame
-    (fun z => christoffelSymbolInFrame
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
-      frame hframe z) hframeS hchrH
-    (1 / 2) (1 / 2) (-(1 / 2))
-    (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
-    C0 K m
-  refine ⟨C, hC0, ?_⟩
-  intro g hchrG hgsm Ginv hinv hGinv hK
-  have hDsm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun y => chrDiffField
-        (fun z => christoffelSymbolInFrame
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-          frame hframe z)
-        (fun z => christoffelSymbolInFrame
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
-          frame hframe z) y k) u :=
-    fun k => (hchrG _ _ _).sub (hchrH _ _ _)
-  exact hCb (frameComp0S (I := I) (metricTensorField (I := I) g) frame) hgsm Ginv
-    (chrDiffField
-      (fun z => christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-        frame hframe z)
-      (fun z => christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
-        frame hframe z)) hDsm hinv
-    (fun y hy => hkoszul_of_leviCivita hu g gRef frame hframe y hy)
-    hGinv hK
+  exact ⟨claim1Const C0 (3 / 2) K m, claim1Const_nonneg C0 (3 / 2) K m,
+    claim1_LC_bound hu gRef frame hframe hframeS hchrH C0 K m⟩
 
 
 
@@ -639,19 +688,54 @@ theorem claim2Double (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
       (Finset.mem_range.mpr (by omega))
   linarith
 
+/-- A proof-independent numeric witness selected from the pure Claim-2 theorem
+after normalizing the coefficient family and base bound to be nonnegative. -/
+noncomputable def claim2Const (L : ℕ) (A : ℕ → Real) (K : Real) : Real :=
+  Classical.choose <|
+    claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
+      (max K 0) (le_max_right K 0)
 
+/-- The normalized Claim-2 witness is nonnegative. -/
+theorem claim2Const_nonneg (L : ℕ) (A : ℕ → Real) (K : Real) :
+    0 ≤ claim2Const L A K :=
+  (Classical.choose_spec <|
+    claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
+      (max K 0) (le_max_right K 0)).1
 
+/-- The fixed-witness form of the pure Claim-2 induction. -/
+theorem claim2Const_spec (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
+    (K : Real) (hK0 : 0 ≤ K)
+    (W : ℕ → ℕ → Real) (hW0 : ∀ i k, 0 ≤ W i k)
+    (hBase : ∀ i, i ≤ L → W i 0 ≤ K)
+    (hOne : ∀ i k, i + k + 1 ≤ L →
+      W i (k + 1) ≤ W (i + 1) k + A k * ∑ j ∈ Finset.range (k + 1), W i j) :
+    ∀ i k, i + k ≤ L → W i k ≤ claim2Const L A K := by
+  have hAmax : ∀ n, max (A n) 0 = A n := fun n => max_eq_left (hA n)
+  have hKmax : max K 0 = K := max_eq_left hK0
+  have hBase' : ∀ i, i ≤ L → W i 0 ≤ max K 0 := by
+    intro i hi
+    simpa only [hKmax] using hBase i hi
+  have hOne' : ∀ i k, i + k + 1 ≤ L →
+      W i (k + 1) ≤
+        W (i + 1) k + max (A k) 0 * ∑ j ∈ Finset.range (k + 1), W i j := by
+    intro i k hik
+    simpa only [hAmax] using hOne i k hik
+  simpa only [claim2Const] using
+    (Classical.choose_spec <|
+      claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
+        (max K 0) (le_max_right K 0)).2 W hW0 hBase' hOne'
 
+/-! ## R2: geometric Claim 2 -/
 
-
-
-
-
-
-
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
-    [DecidableEq Idx] in
-theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+/-- **Geometric Claim 2** (mixed derivatives, ric_bound Step 3).  If the
+`chrH`-towers of the difference-Christoffel array are bounded below order `L`
+(`hDbound`, Claim 1's output) and the pure `chrG`-towers of `T` are bounded up to
+order `L` (`hShi`, the Shi input), then every mixed tower
+`|∇_H^a (∇_G^b T)|` with `a + b ≤ L` is uniformly bounded on `u`.
+Strong induction on the `chrH`-count via `claim2Double`, with the one-step
+recursion supplied by `mixed_oneStep_rev` at `ε = 1` and the rank factor
+absorbed by the monotonicity of `oneStepConst` in the rank. -/
+theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -659,22 +743,19 @@ theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrH y d i j) u)
     (B : ℕ → Real) (hB : ∀ n : ℕ, 0 ≤ B n)
     (L : ℕ) (K : Real) (hK0 : 0 ≤ K) :
-    ∃ C, 0 ≤ C ∧
-      ∀ (chrG : M → Idx → Idx → Idx → Real),
-        (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
-      ∀ (T : M → (Fin r₀ → Idx) → Real),
-        (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
-        (∀ c : ℕ, c < L → ∀ z ∈ u,
-          compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
-        (∀ z ∈ u, ∀ s : ℕ, s ≤ L →
-          compL2 (iterCovComp (I := I) frame chrG T s z) ≤ K) →
-        ∀ x ∈ u, ∀ b a : ℕ, a + b ≤ L →
-          compL2 (iterCovComp (I := I) frame chrH
-            (iterCovComp (I := I) frame chrG T b) a x) ≤ C := by
+    ∀ (chrG : M → Idx → Idx → Idx → Real),
+      (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
+    ∀ (T : M → (Fin r₀ → Idx) → Real),
+      (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
+      (∀ c : ℕ, c < L → ∀ z ∈ u,
+        compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
+      (∀ z ∈ u, ∀ s : ℕ, s ≤ L →
+        compL2 (iterCovComp (I := I) frame chrG T s z) ≤ K) →
+      ∀ x ∈ u, ∀ b a : ℕ, a + b ≤ L →
+        compL2 (iterCovComp (I := I) frame chrH
+          (iterCovComp (I := I) frame chrG T b) a x) ≤
+            claim2Const L (fun k => oneStepConst B k (r₀ + L)) K := by
   classical
-  obtain ⟨C, hC0, hCb⟩ := claim2Double L (fun k => oneStepConst B k (r₀ + L))
-    (fun k => oneStepConst_nonneg hB k (r₀ + L)) K hK0
-  refine ⟨C, hC0, ?_⟩
   intro chrG hchrG T hT hDbound hShi x hx b a hab
   have hX_sm : ∀ i : ℕ, ∀ kk : Fin (r₀ + i) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => iterCovComp (I := I) frame chrG T i y kk) u :=
@@ -731,11 +812,38 @@ theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       rw [one_mul]
       exact mul_le_mul_of_nonneg_right hmono hSig0
     linarith
-  exact hCb
+  exact claim2Const_spec L (fun k => oneStepConst B k (r₀ + L))
+    (fun k => oneStepConst_nonneg hB k (r₀ + L)) K hK0
     (fun i k => compL2 (iterCovComp (I := I) frame chrH
       (iterCovComp (I := I) frame chrG T i) k x))
     (fun i k => compL2_nonneg _) hbase hone b a (by omega)
 
+/-- Existential compatibility form of `claim2_component_bound`. -/
+theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chrH : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrH y d i j) u)
+    (B : ℕ → Real) (hB : ∀ n : ℕ, 0 ≤ B n)
+    (L : ℕ) (K : Real) (hK0 : 0 ≤ K) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (chrG : M → Idx → Idx → Idx → Real),
+        (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
+      ∀ (T : M → (Fin r₀ → Idx) → Real),
+        (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
+        (∀ c : ℕ, c < L → ∀ z ∈ u,
+          compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
+        (∀ z ∈ u, ∀ s : ℕ, s ≤ L →
+          compL2 (iterCovComp (I := I) frame chrG T s z) ≤ K) →
+        ∀ x ∈ u, ∀ b a : ℕ, a + b ≤ L →
+          compL2 (iterCovComp (I := I) frame chrH
+            (iterCovComp (I := I) frame chrG T b) a x) ≤ C := by
+  exact ⟨claim2Const L (fun k => oneStepConst B k (r₀ + L)) K,
+    claim2Const_nonneg L (fun k => oneStepConst B k (r₀ + L)) K,
+    claim2_component_bound hu frame chrH hframe hchrH B hB L K hK0⟩
+
+/-! ## R3b: the (A_N) descent -/
 
 
 
@@ -751,20 +859,38 @@ private theorem chain_le (V Q : ℕ → Real) (N : ℕ)
     rw [Finset.sum_range_succ]
     linarith
 
+/-- The explicit numeric witness in the mixed-descent estimate. -/
+def mixedDescentConst (r₀ N : ℕ) (B : ℕ → Real) (C₂ K : Real) : Real :=
+  K + (N : Real) *
+    ((((r₀ + N : ℕ) : Real) * (1 + ∑ c ∈ Finset.range N, B c) * C₂) +
+      (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂))
 
+/-- The mixed-descent witness is nonnegative under the natural input bounds. -/
+theorem mixedDescentConst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {C₂ K : Real}
+    (hB : ∀ n, 0 ≤ B n) (hC₂ : 0 ≤ C₂) (hK : 0 ≤ K) :
+    0 ≤ mixedDescentConst r₀ N B C₂ K := by
+  have hBsum : (0 : Real) ≤ ∑ c ∈ Finset.range N, B c :=
+    Finset.sum_nonneg fun c _ => hB c
+  have hOS : (0 : Real) ≤ ∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N) :=
+    Finset.sum_nonneg fun k _ => oneStepConst_nonneg hB k _
+  rw [mixedDescentConst]
+  exact add_nonneg hK (mul_nonneg (Nat.cast_nonneg N)
+    (add_nonneg
+      (mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (by linarith)) hC₂)
+      (mul_nonneg hOS (mul_nonneg (Nat.cast_nonneg N) hC₂))))
 
-
-
-
-
-
-
-
-
-
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
-    [DecidableEq Idx] in
-theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+/-- **The mixed descent** — the analytic core of ric_bound Step 4's `(A_N)`:
+`|∇_H^N T| ≤ C·(1 + |∇_{H,U}^{N-1} D|)` pointwise on `u`, from uniform
+difference-tower bounds BELOW the top order (`hDlow`), mixed-tower bounds up to
+total order `N − 1` (`hmix`, Claim 2's output), and the order-`N` pure
+`chrG`-tower bound (`hShiN`, the Shi input).  Descend
+`V i := |∇_H^{N-i}(∇_G^i T)|` from `V 0 = |∇_H^N T|` to `V N = |∇_G^N T|` by
+`mixed_oneStep_top` at every step (its isolated top factor needs no hypothesis);
+the top D-factor is bounded by `|∇_{H,U}^{N-1} D| + Σ B` in both the `i = 0` and
+`i ≥ 1` cases, so the per-step cost `Q` is uniform in `i` and the chain sum
+collapses.  Composing with Claim 1's pointwise bound on `|∇_{H,U}^{N-1} D|`
+yields the book's `(A_N)`. -/
+theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -774,32 +900,26 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (N : ℕ) (hN : 1 ≤ N)
     (C₂ : Real) (hC₂0 : 0 ≤ C₂)
     (K : Real) (hK0 : 0 ≤ K) :
-    ∃ C, 0 ≤ C ∧
-      ∀ (chrG : M → Idx → Idx → Idx → Real),
-        (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
-      ∀ (T : M → (Fin r₀ → Idx) → Real),
-        (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
-        (∀ c : ℕ, c + 1 < N → ∀ z ∈ u,
-          compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
-        (∀ z ∈ u, ∀ b a : ℕ, a + b ≤ N - 1 →
-          compL2 (iterCovComp (I := I) frame chrH
-            (iterCovComp (I := I) frame chrG T b) a z) ≤ C₂) →
-        (∀ z ∈ u, compL2 (iterCovComp (I := I) frame chrG T N z) ≤ K) →
-        ∀ x ∈ u,
-          compL2 (iterCovComp (I := I) frame chrH T N x) ≤
-            C * (1 + compL2 (iterCovCompU (I := I) frame chrH
+    ∀ (chrG : M → Idx → Idx → Idx → Real),
+      (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
+    ∀ (T : M → (Fin r₀ → Idx) → Real),
+      (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
+      (∀ c : ℕ, c + 1 < N → ∀ z ∈ u,
+        compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
+      (∀ z ∈ u, ∀ b a : ℕ, a + b ≤ N - 1 →
+        compL2 (iterCovComp (I := I) frame chrH
+          (iterCovComp (I := I) frame chrG T b) a z) ≤ C₂) →
+      (∀ z ∈ u, compL2 (iterCovComp (I := I) frame chrG T N z) ≤ K) →
+      ∀ x ∈ u,
+        compL2 (iterCovComp (I := I) frame chrH T N x) ≤
+          mixedDescentConst r₀ N B C₂ K *
+            (1 + compL2 (iterCovCompU (I := I) frame chrH
               (chrDiffField chrG chrH) (N - 1) x)) := by
   classical
   have hBmax0 : (0 : Real) ≤ ∑ c ∈ Finset.range N, B c :=
     Finset.sum_nonneg fun c _ => hB c
   have hOS0 : (0 : Real) ≤ ∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N) :=
     Finset.sum_nonneg fun k _ => oneStepConst_nonneg hB k _
-  have h1B : (0 : Real) ≤ 1 + ∑ c ∈ Finset.range N, B c := by linarith
-  refine ⟨K + (N : Real) * (((r₀ + N : ℕ) : Real) * (1 + ∑ c ∈ Finset.range N, B c) * C₂ +
-      (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂)),
-    add_nonneg hK0 (mul_nonneg (Nat.cast_nonneg N)
-      (add_nonneg (mul_nonneg (mul_nonneg (Nat.cast_nonneg _) h1B) hC₂0)
-        (mul_nonneg hOS0 (mul_nonneg (Nat.cast_nonneg N) hC₂0)))), ?_⟩
   intro chrG hchrG T hT hDlow hmix hShiN x hx
   have hX_sm : ∀ i : ℕ, ∀ kk : Fin (r₀ + i) → Idx,
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => iterCovComp (I := I) frame chrG T i y kk) u :=
@@ -935,6 +1055,7 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
           (compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) (N - 1) x) +
             ∑ c ∈ Finset.range N, B c) * C₂ +
         (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂)) := hchain
+  rw [mixedDescentConst]
   nlinarith [hhead, hVN, hd0, hK0, hC₂0, hBmax0, hOS0,
     mul_nonneg (mul_nonneg (Nat.cast_nonneg N) (Nat.cast_nonneg (r₀ + N))) hC₂0,
     mul_nonneg hK0 hd0,
@@ -943,25 +1064,133 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (Nat.cast_nonneg N)
       (Nat.cast_nonneg N)) hOS0) hC₂0) hd0]
 
+/-- Existential compatibility form of `mixed_descent_bound`. -/
+theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chrH : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrH y d i j) u)
+    (B : ℕ → Real) (hB : ∀ n : ℕ, 0 ≤ B n)
+    (N : ℕ) (hN : 1 ≤ N)
+    (C₂ : Real) (hC₂0 : 0 ≤ C₂)
+    (K : Real) (hK0 : 0 ≤ K) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (chrG : M → Idx → Idx → Idx → Real),
+        (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
+      ∀ (T : M → (Fin r₀ → Idx) → Real),
+        (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
+        (∀ c : ℕ, c + 1 < N → ∀ z ∈ u,
+          compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
+        (∀ z ∈ u, ∀ b a : ℕ, a + b ≤ N - 1 →
+          compL2 (iterCovComp (I := I) frame chrH
+            (iterCovComp (I := I) frame chrG T b) a z) ≤ C₂) →
+        (∀ z ∈ u, compL2 (iterCovComp (I := I) frame chrG T N z) ≤ K) →
+        ∀ x ∈ u,
+          compL2 (iterCovComp (I := I) frame chrH T N x) ≤
+            C * (1 + compL2 (iterCovCompU (I := I) frame chrH
+              (chrDiffField chrG chrH) (N - 1) x)) := by
+  exact ⟨mixedDescentConst r₀ N B C₂ K,
+    mixedDescentConst_nonneg hB hC₂0 hK0,
+    mixed_descent_bound hu frame chrH hframe hchrH B hB N hN C₂ hC₂0 K hK0⟩
+
+/-! ## R4a: the per-frame component `(A_N)` bound
 
 
+/-- The explicit slope and offset in the per-frame component `(A_N)` bound. -/
+noncomputable def aNConst (r₀ N : ℕ) (B : ℕ → Real) (Ctop KShi : Real) :
+    Real × Real :=
+  let C₂ := claim2Const (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi
+  let Cdesc := mixedDescentConst r₀ N B C₂ KShi
+  (Cdesc * Ctop, Cdesc * (1 + Ctop))
 
+/-- The slope in `aNConst` is nonnegative under the natural input bounds. -/
+theorem aNConst_fst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
+    (hB : ∀ n, 0 ≤ B n) (hCtop : 0 ≤ Ctop) (hKShi : 0 ≤ KShi) :
+    0 ≤ (aNConst r₀ N B Ctop KShi).1 := by
+  rw [aNConst]
+  exact mul_nonneg
+    (mixedDescentConst_nonneg hB
+      (claim2Const_nonneg (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi)
+      hKShi)
+    hCtop
 
+/-- The offset in `aNConst` is nonnegative under the natural input bounds. -/
+theorem aNConst_snd_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
+    (hB : ∀ n, 0 ≤ B n) (hCtop : 0 ≤ Ctop) (hKShi : 0 ≤ KShi) :
+    0 ≤ (aNConst r₀ N B Ctop KShi).2 := by
+  rw [aNConst]
+  exact mul_nonneg
+    (mixedDescentConst_nonneg hB
+      (claim2Const_nonneg (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi)
+      hKShi)
+    (by linarith)
 
+/-- **Per-frame component `(A_N)`** (ric_bound Step 4, component form).  On a
+smooth frame domain `u`, for two connections whose difference-Christoffel tower
+satisfies the Claim-1 bounds — lower orders bounded by constants (`hDlow`, the
+input `claim2_component`/`mixed_descent` share) and the top order `N − 1` bounded
+linearly by the metric `N`-tower (`hDtop`, `claim1_LC` at `m = N − 1`) — and a
+field `T` with pure-`chrG` (Shi) bounds up to order `N` (`hShi`), the
+`chrH`-tower of `T` at order `N` is bounded linearly by the metric `N`-tower:
+`|∇_H^N T| ≤ Cpp·|∇_H^N g| + Cppp` on `u`. -/
+theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chrH : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrH y d i j) u)
+    (N : ℕ) (hN : 1 ≤ N)
+    (B : ℕ → Real) (hB0 : ∀ n : ℕ, 0 ≤ B n)
+    (Ctop : Real)
+    (KShi : Real) (hKShi0 : 0 ≤ KShi) :
+    ∀ (chrG : M → Idx → Idx → Idx → Real),
+      (∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrG y d i j) u) →
+    ∀ (T : M → (Fin r₀ → Idx) → Real),
+      (∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u) →
+      (∀ c : ℕ, c < N - 1 → ∀ z ∈ u,
+        compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c) →
+    ∀ (gComp : M → (Fin rg → Idx) → Real),
+      (∀ x ∈ u,
+        compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) (N - 1) x) ≤
+          Ctop * (1 + compL2 (iterCovComp (I := I) frame chrH gComp N x))) →
+      (∀ z ∈ u, ∀ s : ℕ, s ≤ N →
+        compL2 (iterCovComp (I := I) frame chrG T s z) ≤ KShi) →
+      ∀ x ∈ u,
+        compL2 (iterCovComp (I := I) frame chrH T N x) ≤
+          (aNConst r₀ N B Ctop KShi).1 *
+              compL2 (iterCovComp (I := I) frame chrH gComp N x) +
+            (aNConst r₀ N B Ctop KShi).2 := by
+  classical
+  let C₂ := claim2Const (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi
+  have hC₂0 : 0 ≤ C₂ :=
+    claim2Const_nonneg (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi
+  let Cdesc := mixedDescentConst r₀ N B C₂ KShi
+  have hCdesc0 : 0 ≤ Cdesc := mixedDescentConst_nonneg hB0 hC₂0 hKShi0
+  intro chrG hchrG T hT hDlow gComp hDtop hShi x hx
+  -- the mixed bounds (Claim 2) at `L = N - 1`
+  have hmixU := claim2_component_bound (r₀ := r₀) hu frame chrH hframe hchrH
+    B hB0 (N - 1) KShi hKShi0
+  -- the `(A_N)` descent: `|∇_H^N T| ≤ Cdesc·(1 + |∇_{H,U}^{N-1} D|)`
+  have hdescU := mixed_descent_bound (r₀ := r₀) hu frame chrH hframe hchrH
+    B hB0 N hN C₂ hC₂0 KShi hKShi0
+  have hmix := hmixU chrG hchrG T hT (fun c hc z hz => hDlow c hc z hz)
+    (fun z hz s hs => hShi z hz s (by omega))
+  have hdesc := hdescU chrG hchrG T hT (fun c hc z hz => hDlow c (by omega) z hz)
+    (fun z hz b a hab => hmix z hz b a hab)
+    (fun z hz => hShi z hz N le_rfl)
+  have hd := hdesc x hx
+  have ht := hDtop x hx
+  have hkey : Cdesc *
+      compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) (N - 1) x) ≤
+      Cdesc * (Ctop * (1 + compL2 (iterCovComp (I := I) frame chrH gComp N x))) :=
+    mul_le_mul_of_nonneg_left ht hCdesc0
+  change compL2 (iterCovComp (I := I) frame chrH T N x) ≤
+    Cdesc * Ctop * compL2 (iterCovComp (I := I) frame chrH gComp N x) +
+      Cdesc * (1 + Ctop)
+  nlinarith [hd, hkey]
 
-
-
-
-
-
-
-
-
-
-
-
-omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
-    [DecidableEq Idx] in
+/-- Existential compatibility form of `aN_component_bound`. -/
 theorem aN_component {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -988,25 +1217,9 @@ theorem aN_component {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
         ∀ x ∈ u,
           compL2 (iterCovComp (I := I) frame chrH T N x) ≤
             Cpp * compL2 (iterCovComp (I := I) frame chrH gComp N x) + Cppp := by
-  classical
-  obtain ⟨C₂, hC₂0, hmixU⟩ := claim2_component (r₀ := r₀) hu frame chrH hframe hchrH
-    B hB0 (N - 1) KShi hKShi0
-  obtain ⟨Cdesc, hCdesc0, hdescU⟩ := mixed_descent (r₀ := r₀) hu frame chrH hframe hchrH
-    B hB0 N hN C₂ hC₂0 KShi hKShi0
-  refine ⟨Cdesc * Ctop, Cdesc * (1 + Ctop), mul_nonneg hCdesc0 hCtop0,
-    mul_nonneg hCdesc0 (by linarith), ?_⟩
-  intro chrG hchrG T hT hDlow gComp hDtop hShi x hx
-  have hmix := hmixU chrG hchrG T hT (fun c hc z hz => hDlow c hc z hz)
-    (fun z hz s hs => hShi z hz s (by omega))
-  have hdesc := hdescU chrG hchrG T hT (fun c hc z hz => hDlow c (by omega) z hz)
-    (fun z hz b a hab => hmix z hz b a hab)
-    (fun z hz => hShi z hz N le_rfl)
-  have hd := hdesc x hx
-  have ht := hDtop x hx
-  have hkey : Cdesc *
-      compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) (N - 1) x) ≤
-      Cdesc * (Ctop * (1 + compL2 (iterCovComp (I := I) frame chrH gComp N x))) :=
-    mul_le_mul_of_nonneg_left ht hCdesc0
-  nlinarith [hd, hkey]
+  exact ⟨(aNConst r₀ N B Ctop KShi).1, (aNConst r₀ N B Ctop KShi).2,
+    aNConst_fst_nonneg hB0 hCtop0 hKShi0,
+    aNConst_snd_nonneg hB0 hCtop0 hKShi0,
+    aN_component_bound hu frame chrH hframe hchrH N hN B hB0 Ctop KShi hKShi0⟩
 
 end DifferentialGeometry.PDE.RicciFlow

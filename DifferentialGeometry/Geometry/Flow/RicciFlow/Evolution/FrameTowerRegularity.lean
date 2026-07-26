@@ -24,10 +24,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem frameTowerSmooth [CompactSpace M]
+/-- Components of the intrinsic curvature-derivative tower in any smooth local
+frame are jointly `C∞` in spacetime at regular chart-good points. -/
+theorem frameTowerSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}

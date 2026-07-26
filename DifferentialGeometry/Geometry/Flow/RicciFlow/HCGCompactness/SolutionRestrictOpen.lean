@@ -38,7 +38,7 @@ namespace HCGCompactness
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
   [IsManifold I 1 M] [IsManifold I 2 M]

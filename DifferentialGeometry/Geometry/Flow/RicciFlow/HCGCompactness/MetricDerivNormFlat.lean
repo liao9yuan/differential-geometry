@@ -41,7 +41,9 @@ private theorem codRestr_mdiffAt
     (by simpa [Function.comp_def] using hcont), ?_⟩
   convert hdiff using 2
 
-private def nestedOpen {U V : Opens M} (_hVU : V ≤ U) : Opens U :=
+/-- A smaller ambient open `V ≤ U`, regarded as an ordinary open subset of
+the open subtype `U`. -/
+def nestedOpen {U V : Opens M} (_hVU : V ≤ U) : Opens U :=
   ⟨Subtype.val ⁻¹' (V : Set M), V.isOpen.preimage continuous_subtype_val⟩
 
 private def flatNestedEquiv {U V : Opens M} (hVU : V ≤ U) :
@@ -54,7 +56,9 @@ private def flatNestedEquiv {U V : Opens M} (hVU : V ≤ U) :
     apply Subtype.ext
     rfl
 
-private noncomputable def flatNestedDiffeo {U V : Opens M} (hVU : V ≤ U) :
+/-- The identity diffeomorphism from a flat ambient open subtype to the same
+set regarded as an open subset of the larger carrier. -/
+noncomputable def flatNestedDiffeo {U V : Opens M} (hVU : V ≤ U) :
     V ≃ₘ⟮I, I⟯ nestedOpen hVU where
   toEquiv := flatNestedEquiv hVU
   contMDiff_toFun := by
@@ -102,6 +106,9 @@ private theorem metric_ext
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private theorem flatMetric_eq
+/-- Flat restriction to a smaller ambient open carrier is the pullback of the
+ordinary restriction to the corresponding nested open subtype. -/
+theorem restrictSubset_pull
     {U V : Opens M} (hVU : V ≤ U)
     [SigmaCompactSpace U] [T2Space U]
     [SigmaCompactSpace V] [T2Space V]
@@ -192,9 +199,9 @@ theorem metricDerivNorm_flat
         (gk.restrictOpen (I := I) W)
         (gInf.restrictOpen (I := I) W)
         (gRef.restrictOpen (I := I) W) F
-        (flatMetric_eq (I := I) hVU gk)
-        (flatMetric_eq (I := I) hVU gInf)
-        (flatMetric_eq (I := I) hVU gRef) a x
+        (restrictSubset_pull (I := I) hVU gk)
+        (restrictSubset_pull (I := I) hVU gInf)
+        (restrictSubset_pull (I := I) hVU gRef) a x
     _ = metricDerivNorm (I := I) a gk gInf gRef ((F x : W) : U) :=
       metricDerivNorm_restrictOpen (I := I) gk gInf gRef W a (F x)
     _ = metricDerivNorm (I := I) a gk gInf gRef (Opens.inclusion hVU x) := by

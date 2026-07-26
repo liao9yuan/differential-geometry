@@ -458,8 +458,8 @@ open scoped Topology Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -845,8 +845,8 @@ noncomputable def chartCmEqnB
     {ι : Type} [Fintype ι] (z : E) (params : (ι → ℝ) × (ι → E)) : E :=
   ∑ i : ι, params.1 i •
     B.diagReadout
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -859,8 +859,8 @@ noncomputable def chartCmEqn'
   ∑ i : ι, params.1 i •
     (trivializationAt E (TangentSpace I) p
       (diagExpInv (I := I) g hEnorm p
-        ((NormalCoordinates.normalChartAt (I := I) g p).symm z,
-          (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)))).2
+        ((NormalCoordinates.framedChartAt (I := I) g p).symm z,
+          (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)))).2
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -890,13 +890,13 @@ theorem chartCmEqnB_cdAt
     {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (n : ℕ∞)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I n
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I n
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) n
       (fun yq : M × M => B.diagReadout yq)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))) :
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))) :
     ContDiffAt ℝ n
       (fun w : E × ((ι → ℝ) × (ι → E)) =>
         chartCmEqnB (I := I) g hEnorm p B w.1 w.2) (z₀, params₀) := by
@@ -917,23 +917,23 @@ theorem chartCmEqnB_cdAt
     have hinner : ContMDiffAt
         𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) (I.prod I) n
         (fun w : E × ((ι → ℝ) × (ι → E)) =>
-          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
-            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
+          ((NormalCoordinates.framedChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.framedChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
       ContMDiffAt.prodMk (ContMDiffAt.comp (z₀, params₀) hchz hfst)
         (ContMDiffAt.comp (z₀, params₀) (hchξ i) hproj)
     have hcomp : ContMDiffAt
         𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) 𝓘(ℝ, E) n
         (fun w : E × ((ι → ℝ) × (ι → E)) =>
           B.diagReadout
-            ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
-              (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i)))
+            ((NormalCoordinates.framedChartAt (I := I) g p).symm w.1,
+              (NormalCoordinates.framedChartAt (I := I) g p).symm (w.2.2 i)))
         (z₀, params₀) :=
       ContMDiffAt.comp
         (I := 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))))
         (I' := I.prod I) (I'' := 𝓘(ℝ, E))
         (f := fun w : E × ((ι → ℝ) × (ι → E)) =>
-          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
-            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i)))
+          ((NormalCoordinates.framedChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.framedChartAt (I := I) g p).symm (w.2.2 i)))
         (g := fun yq : M × M => B.diagReadout yq)
         (z₀, params₀) (hsm i) hinner
     exact hcomp
@@ -1002,13 +1002,13 @@ theorem readoutSolB_strict
     (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
     {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => B.diagReadout yq)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
         (L : E →L[ℝ] E) z₀)
@@ -1045,13 +1045,13 @@ theorem readoutSolB_cdAt
     {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (n : ℕ) (hn : 1 ≤ n)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => B.diagReadout yq)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
         (L : E →L[ℝ] E) z₀)
@@ -1133,14 +1133,14 @@ theorem chartCmEqn'_contDiffAt
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))) :
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))) :
     ContDiffAt ℝ 1
       (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
         (z₀, params₀) := by
@@ -1158,8 +1158,8 @@ theorem chartCmEqn'_contDiffAt
       rw [contMDiffAt_iff_contDiffAt]; fun_prop
     have hinner : ContMDiffAt 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) (I.prod I) 1
         (fun w : E × ((ι → ℝ) × (ι → E)) =>
-          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
-            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
+          ((NormalCoordinates.framedChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.framedChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
       ContMDiffAt.prodMk (ContMDiffAt.comp (z₀, params₀) hchz hfst)
         (ContMDiffAt.comp (z₀, params₀) (hchξ i) hproj)
     have hcomp := (hsm i).comp (z₀, params₀) hinner
@@ -1176,14 +1176,14 @@ theorem chartCmEqn'_contDiffAt_order
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) (n : ℕ)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))) :
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i))) :
     ContDiffAt ℝ (n : ℕ∞)
       (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
       (z₀, params₀) := by
@@ -1201,8 +1201,8 @@ theorem chartCmEqn'_contDiffAt_order
       rw [contMDiffAt_iff_contDiffAt]; fun_prop
     have hinner : ContMDiffAt 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) (I.prod I) (n : ℕ∞)
         (fun w : E × ((ι → ℝ) × (ι → E)) =>
-          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
-            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
+          ((NormalCoordinates.framedChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.framedChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
       ContMDiffAt.prodMk (ContMDiffAt.comp (z₀, params₀) hchz hfst)
         (ContMDiffAt.comp (z₀, params₀) (hchξ i) hproj)
     have hcomp := (hsm i).comp (z₀, params₀) hinner
@@ -1219,14 +1219,14 @@ theorem readoutSol_hasStrictFDerivAt
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0) :
@@ -1255,14 +1255,14 @@ theorem readoutSol_contDiffAt
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) (n : ℕ) (hn : 1 ≤ n)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0) :
@@ -1289,13 +1289,13 @@ theorem centerB_hasStrict
     (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
     {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => B.diagReadout yq)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
         (L : E →L[ℝ] E) z₀)
@@ -1303,19 +1303,18 @@ theorem centerB_hasStrict
     (c : ((ι → ℝ) × (ι → E)) → M)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqnB (I := I) g hEnorm p B
-        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+        (NormalCoordinates.framedChartAt (I := I) g p (c params)) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       (nhds params₀) (nhds z₀)) :
     ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
       HasStrictFDerivAt
-        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df
-          params₀ := by
+        (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E)) Df params₀ := by
   obtain ⟨f, Df, hf0, hfderiv, hsolves, huniq⟩ :=
     readoutSolB_strict (I := I) g hEnorm p B z₀ params₀ hchz hchξ hsm hinv hzero
   refine ⟨Df, ?_⟩
   have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
-  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+  have hid : (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       =ᶠ[nhds params₀] f := by
     filter_upwards [huniq', hc_solves] with params hu hs
     exact hu hs
@@ -1334,13 +1333,13 @@ theorem centerB_contDiff
     {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (n : ℕ) (hn : 1 ≤ n)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => B.diagReadout yq)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
         (L : E →L[ℝ] E) z₀)
@@ -1348,16 +1347,16 @@ theorem centerB_contDiff
     (c : ((ι → ℝ) × (ι → E)) → M)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqnB (I := I) g hEnorm p B
-        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+        (NormalCoordinates.framedChartAt (I := I) g p (c params)) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       (nhds params₀) (nhds z₀)) :
     ContDiffAt ℝ (n : ℕ∞)
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀ := by
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E)) params₀ := by
   obtain ⟨f, hf0, hfcd, hsolves, huniq⟩ :=
     readoutSolB_cdAt (I := I) g hEnorm p B z₀ params₀ n hn hchz hchξ hsm hinv hzero
   have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
-  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+  have hid : (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       =ᶠ[nhds params₀] f := by
     filter_upwards [huniq', hc_solves] with params hu hs
     exact hu hs
@@ -1374,33 +1373,32 @@ theorem center_hasStrictFDerivAt
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0)
     (c : ((ι → ℝ) × (ι → E)) → M)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+        (NormalCoordinates.framedChartAt (I := I) g p (c params)) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       (nhds params₀) (nhds z₀)) :
     ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
       HasStrictFDerivAt
-        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df
-          params₀ := by
+        (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E)) Df params₀ := by
   obtain ⟨f, Df, hf0, hfderiv, hsolves, huniq⟩ :=
     readoutSol_hasStrictFDerivAt (I := I) g hEnorm p z₀ params₀ hchz hchξ hsm hinv' hz₀'
   refine ⟨Df, ?_⟩
   have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
-  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+  have hid : (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       =ᶠ[nhds params₀] f := by
     filter_upwards [huniq', hc_solves] with params hu hs
     exact hu hs
@@ -1417,30 +1415,30 @@ theorem center_contDiffAt
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) (n : ℕ) (hn : 1 ≤ n)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0)
     (c : ((ι → ℝ) × (ι → E)) → M)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+        (NormalCoordinates.framedChartAt (I := I) g p (c params)) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       (nhds params₀) (nhds z₀)) :
     ContDiffAt ℝ (n : ℕ∞)
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀ := by
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E)) params₀ := by
   obtain ⟨f, hf0, hfcd, hsolves, huniq⟩ :=
     readoutSol_contDiffAt (I := I) g hEnorm p z₀ params₀ n hn hchz hchξ hsm hinv' hz₀'
   have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
-  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+  have hid : (fun params => (NormalCoordinates.framedChartAt (I := I) g p (c params) : E))
       =ᶠ[nhds params₀] f := by
     filter_upwards [huniq', hc_solves] with params hu hs
     exact hu hs
@@ -1457,41 +1455,40 @@ theorem centerOfMass_hasStrictFDerivAt
     (join : M → M → ℝ → M) (r : ℝ)
     (H : ∀ params : (ι → ℝ) × (ι → E),
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r)
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
             join p r (H params))) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
           join p r (H params)) : E))
       (nhds params₀) (nhds z₀)) :
     ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
       HasStrictFDerivAt
-        (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+        (fun params => (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
             join p r (H params)) : E)) Df params₀ :=
   center_hasStrictFDerivAt (I := I) g hEnorm p z₀ params₀ hchz hchξ hsm hinv' hz₀'
     (fun params => centerOfMass (I := I) g params.1
-      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r
-        (H params))
+      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r (H params))
     hc_solves hc_cont
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1505,40 +1502,39 @@ theorem centerOfMass_contDiffAt
     (join : M → M → ℝ → M) (r : ℝ)
     (H : ∀ params : (ι → ℝ) × (ι → E),
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r)
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r)
     (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+      (fun z : E => (NormalCoordinates.framedChartAt (I := I) g p).symm z) z₀)
     (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
-      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+      (fun ξ : E => (NormalCoordinates.framedChartAt (I := I) g p).symm ξ) (params₀.2 i))
     (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
       (fun yq : M × M => (trivializationAt E (TangentSpace I) p
         (diagExpInv (I := I) g hEnorm p yq)).2)
-      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
-        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+      ((NormalCoordinates.framedChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)))
     (hinv' : ∃ L : E ≃L[ℝ] E,
       HasFDerivAt (fun z : E => chartCmEqn' (I := I) g hEnorm p z params₀) (L : E →L[ℝ] E) z₀)
     (hz₀' : chartCmEqn' (I := I) g hEnorm p z₀ params₀ = 0)
     (hc_solves : ∀ᶠ params in nhds params₀,
       chartCmEqn' (I := I) g hEnorm p
-        (NormalCoordinates.normalChartAt (I := I) g p
+        (NormalCoordinates.framedChartAt (I := I) g p
           (centerOfMass (I := I) g params.1
-            (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+            (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
             join p r (H params))) params = 0)
     (hc_cont : Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
           join p r (H params)) : E))
       (nhds params₀) (nhds z₀)) :
     ContDiffAt ℝ (n : ℕ∞)
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
           join p r (H params)) : E)) params₀ :=
   center_contDiffAt (I := I) g hEnorm p z₀ params₀ n hn hchz hchξ hsm hinv' hz₀'
     (fun params => centerOfMass (I := I) g params.1
-      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r
-        (H params))
+      (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r (H params))
     hc_solves hc_cont
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1551,31 +1547,31 @@ theorem centerOfMassChart_cont
     (join : M → M → ℝ → M) (r : ℝ)
     (H : ∀ params : (ι → ℝ) × (ι → E),
       CenterInput (I := I) g params.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r)
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r)
     (hpts : Continuous (fun params : (ι → ℝ) × (ι → E) =>
-      fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)))
+      fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)))
     (hsrc : centerOfMass (I := I) g params₀.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)) join p r
-        (H params₀) ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)) join p r
+        (H params₀) ∈ (NormalCoordinates.framedChartAt (I := I) g p).source) :
     Filter.Tendsto
-      (fun params => (NormalCoordinates.normalChartAt (I := I) g p
+      (fun params => (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i)) join p r
           (H params)) : E))
       (nhds params₀)
-      (nhds (NormalCoordinates.normalChartAt (I := I) g p
+      (nhds (NormalCoordinates.framedChartAt (I := I) g p
         (centerOfMass (I := I) g params₀.1
-          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)) join p r
+          (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)) join p r
           (H params₀)))) := by
   have hcm := centerOfMass_cont (I := I) g (fun params : (ι → ℝ) × (ι → E) => params.1)
-    (fun params => fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+    (fun params => fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params.2 i))
     join p r params₀ H continuous_fst hpts
-  have hchart : ContinuousAt (fun q : M => (NormalCoordinates.normalChartAt (I := I) g p q : E))
+  have hchart : ContinuousAt (fun q : M => (NormalCoordinates.framedChartAt (I := I) g p q : E))
       (centerOfMass (I := I) g params₀.1
-        (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)) join p r
+        (fun i => (NormalCoordinates.framedChartAt (I := I) g p).symm (params₀.2 i)) join p r
         (H params₀)) :=
-    (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn.continuousAt
-      ((NormalCoordinates.normalChartAt (I := I) g p).open_source.mem_nhds hsrc)
+    (NormalCoordinates.framedChartAt (I := I) g p).contMDiffOn_toFun.continuousOn.continuousAt
+      ((NormalCoordinates.framedChartAt (I := I) g p).open_source.mem_nhds hsrc)
   exact hchart.tendsto.comp hcm
 
 end DiagExpIdentification

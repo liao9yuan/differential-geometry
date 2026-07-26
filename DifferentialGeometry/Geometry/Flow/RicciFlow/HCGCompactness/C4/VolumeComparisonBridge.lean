@@ -1,4 +1,5 @@
-import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
+import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
@@ -208,6 +209,32 @@ theorem exists_pairR_of_seqBoundedGeometry
   intro s hs hsd
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
+/-- Uniform bounded geometry gives the common lower Ricci bound used by the
+Bishop--Gromov stage of the volume-comparison route. -/
+theorem ricciLower_of_seq
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hgeom : SeqBoundedGeometry (I := I) X) (k : Nat) :
+    let Y := X.obj k
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
+      (I := I) Y.metric
+      (-((Module.finrank Real E : Real) ^ 2 * hgeom.C 0)) := by
+  let Y := X.obj k
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  refine Geometry.Riemannian.BonnetMyers.ricciLower_of_rm
+    (I := I) Y.metric ?_
+  simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
+    (rm04Bound_of_seq (I := I) hgeom k)
+
+/-- Uniform local-volume packing input for the Step A volume-comparison field.
 
 
 

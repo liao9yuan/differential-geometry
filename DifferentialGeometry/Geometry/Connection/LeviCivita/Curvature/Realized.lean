@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
+import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 
 set_option autoImplicit false
 
@@ -325,9 +326,14 @@ private theorem slots4_eq_vec4 {x : M}
   funext q
   fin_cases q <;> rfl
 
+private theorem slots5_eq_vec5 {x : M}
+    (slots : Fin 5 -> TangentSpace I x) :
+    slots = vec5 (I := I) (slots 0) (slots 1) (slots 2) (slots 3) (slots 4) := by
+  funext q
+  fin_cases q <;> rfl
 
-
-omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
+/-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
+is last-pair-skew in its curvature slots. -/
 theorem nabla4OutSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -1092,6 +1098,304 @@ theorem canRicTrace
   simpa [cov, hcov, Rm04, Ric, nablaRm04, nablaRic, hRicField,
     finCons_vec4_eq_vec5] using htrace
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Canonical Levi-Civita `∇²Ric` is the first metric trace of canonical
+`∇²Rm04`. -/
+theorem canNabla2RicTrace
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv)
+    (A B C D : TangentSpace I x) :
+    let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
+    let hcov :=
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) g
+    let Rm04 : Tensor04Section (I := I) (M := M) :=
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
+    let Ric : Tensor02Section (I := I) (M := M) :=
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    let nablaRm04 :=
+      totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          4 cov hcov Rm04)
+    let nabla2Rm04 :=
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        5 cov nablaRm04 x
+    let nablaRic :=
+      totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov Ric (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          2 cov hcov Ric)
+    let nabla2Ric :=
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaRic x
+    nabla2Ric (vec4 (I := I) A B C D) =
+      ∑ i : Idx, ∑ j : Idx,
+        gInv i j * nabla2Rm04
+          (Fin.cons A (vec5 (I := I) B (basis i) C D (basis j))) := by
+  classical
+  let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
+  let hcov :=
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g
+  let hcov1 :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (I := I) (E := E) (M := M) cov (1 : WithTop ℕ∞) := by
+    simpa [cov] using
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+        (I := I) (M := M) g)
+  let Rm04 : Tensor04Section (I := I) (M := M) :=
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
+  let Ric : Tensor02Section (I := I) (M := M) :=
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+  let nablaRm04 :=
+    totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+        4 cov hcov Rm04)
+  let nabla2Rm04 :=
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov nablaRm04 x
+  let nablaRic :=
+    totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 cov Ric (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+        2 cov hcov Ric)
+  let nabla2Ric :=
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 cov nablaRic x
+  let rmPerm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4 :=
+    MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (∞ : WithTop ℕ∞) trace04Perm Rm04
+  let nablaRmPerm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 5 :=
+    MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv trace04Perm) nablaRm04
+  let traceNablaRm : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3 :=
+    metricTraceFirstTwoField (I := I) (M := M) g
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (traceNablaShuffle 2) nablaRmPerm)
+  have hRm : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 4 cov Rm04 nablaRm04 := by
+    exact totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) 4 cov Rm04 _
+  have hRmPerm : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 4 cov rmPerm nablaRmPerm := by
+    exact totalNabla0SRealizes_domDomCongr (I := I) cov trace04Perm
+      Rm04 nablaRm04 hRm
+  have hTrace : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov
+        (metricTraceFirstTwoField (I := I) (M := M) g rmPerm) traceNablaRm := by
+    exact nablaRealizes_metricTraceFirstTwo (I := I) (M := M) cov hcov1 g
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
+      rmPerm nablaRmPerm hRmPerm
+  have hTraceField :
+      metricTraceFirstTwoField (I := I) (M := M) g rmPerm =
+        trace04Field (I := I) (M := M) g Rm04 := by
+    apply ContMDiffSection.ext
+    intro y
+    rfl
+  have hRicField : Ric = trace04Field (I := I) (M := M) g Rm04 := by
+    simpa [cov, hcov, Rm04, Ric] using
+      (canRicField (I := I) (M := M) g)
+  have hTraceRic : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov Ric traceNablaRm := by
+    rw [hRicField, ← hTraceField]
+    exact hTrace
+  have hCanRic : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov Ric nablaRic := by
+    exact totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) 2 cov Ric _
+  have hnablaRic : nablaRic = traceNablaRm :=
+    totalNabla0SRealizes_unique (I := I) hCanRic hTraceRic
+  have hmain :
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          3 cov nablaRic x (Fin.cons A (vec3 (I := I) B C D)) =
+        ∑ i : Idx, ∑ j : Idx,
+          gInv i j * nabla2Rm04
+            (Fin.cons A (vec5 (I := I) B (basis i) C D (basis j))) := by
+    rw [hnablaRic]
+    rw [nabla_metricTraceFirstTwo0S (I := I) (M := M) cov hcov1 g
+      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) g)
+      _ basis gInv hinv A (vec3 (I := I) B C D)]
+    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+    apply congrArg (fun z : Real => gInv i j * z)
+    dsimp [traceNablaRm]
+    rw [totalNabla0SFun_domDomCongr (I := I)]
+    rw [Tensor0SSpace.domDomCongr_apply]
+    dsimp [nablaRmPerm]
+    rw [totalNabla0SFun_domDomCongr (I := I)]
+    rw [Tensor0SSpace.domDomCongr_apply]
+    let e : Equiv.Perm (Fin 6) :=
+      (frontExtendEquiv (frontExtendEquiv trace04Perm)).trans
+        (frontExtendEquiv (traceNablaShuffle 2))
+    change nabla2Rm04
+        ((Fin.cons A (metricTraceInput (I := I) (basis i) (basis j)
+          (vec3 (I := I) B C D))) ∘ e) = _
+    apply congrArg nabla2Rm04
+    funext q
+    fin_cases q
+    · simp only [Function.comp_apply]
+      change A = A
+      rfl
+    · simp only [Function.comp_apply]
+      change B = B
+      rfl
+    · simp only [Function.comp_apply]
+      change basis i = basis i
+      rfl
+    · simp only [Function.comp_apply]
+      change C = C
+      rfl
+    · simp only [Function.comp_apply]
+      change D = D
+      rfl
+    · simp only [Function.comp_apply]
+      change basis j = basis j
+      rfl
+  simpa [cov, hcov, Rm04, Ric, nablaRm04, nabla2Rm04, nablaRic, nabla2Ric,
+    metricTrace_finCons_vec3_eq_vec4] using hmain
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Canonical Levi-Civita `∇²Rm04` inherits the three algebraic Riemann
+symmetries in its four curvature slots. -/
+theorem canRm2Symm
+    (g : SmoothRiemannianMetric I M)
+    {x : M} :
+    let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
+    let hcov :=
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) g
+    let Rm04 : Tensor04Section (I := I) (M := M) :=
+      DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
+    let nablaRm04 :=
+      totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          4 cov hcov Rm04)
+    let nabla2Rm04 :=
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        5 cov nablaRm04 x
+    (∀ A B X Y Z W : TangentSpace I x,
+        nabla2Rm04 (Fin.cons A (vec5 (I := I) B X Y Z W)) =
+          -nabla2Rm04 (Fin.cons A (vec5 (I := I) B X Y W Z))) ∧
+      (∀ A B X Y Z W : TangentSpace I x,
+        nabla2Rm04 (Fin.cons A (vec5 (I := I) B Y X Z W)) =
+          -nabla2Rm04 (Fin.cons A (vec5 (I := I) B X Y Z W))) ∧
+        ∀ A B X Y Z W : TangentSpace I x,
+          nabla2Rm04 (Fin.cons A (vec5 (I := I) B X Y Z W)) =
+            nabla2Rm04 (Fin.cons A (vec5 (I := I) B Z W X Y)) := by
+  classical
+  let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
+  let hcov :=
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g
+  let Rm04 : Tensor04Section (I := I) (M := M) :=
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section (I := I) g cov hcov
+  let nablaRm04 :=
+    totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+        4 cov hcov Rm04)
+  let nabla2Rm04 :=
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov nablaRm04 x
+  dsimp
+  constructor
+  · intro A B X Y Z W
+    let σ : Equiv.Perm (Fin 5) :=
+      Equiv.ofBijective ![0, 1, 2, 4, 3] (by decide)
+    have hperm : ∀ y : M, ∀ slots : Fin 5 -> TangentSpace I y,
+        nablaRm04 y slots =
+          (-1 : Real) * nablaRm04 y (fun q : Fin 5 => slots (σ q)) := by
+      intro y slots
+      rw [slots5_eq_vec5 (I := I) (fun q : Fin 5 => slots (σ q))]
+      rw [slots5_eq_vec5 (I := I) slots]
+      have h := (canRmSymm (I := I) (M := M) g (x := y)).1
+        (slots 0) (slots 1) (slots 2) (slots 3) (slots 4)
+      simpa [σ, vec5, Equiv.ofBijective] using h
+    obtain ⟨Asec, hAsec⟩ :=
+      ContMDiffSection.exists_eq_at_gen
+        (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) x A
+    have h := nabla0SFun_perm (I := I)
+      cov Asec nablaRm04 x σ (-1 : Real) hperm
+        (vec5 (I := I) B X Y Z W)
+    rw [slots5_eq_vec5 (I := I)
+      (fun q : Fin 5 => vec5 (I := I) B X Y Z W (σ q))] at h
+    have hleft := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B X Y Z W)
+    have hright := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B X Y W Z)
+    rw [← hAsec]
+    rw [hleft, hright]
+    simpa [σ, vec5, Equiv.ofBijective] using h
+  constructor
+  · intro A B X Y Z W
+    let σ : Equiv.Perm (Fin 5) :=
+      Equiv.ofBijective ![0, 2, 1, 3, 4] (by decide)
+    have hperm : ∀ y : M, ∀ slots : Fin 5 -> TangentSpace I y,
+        nablaRm04 y slots =
+          (-1 : Real) * nablaRm04 y (fun q : Fin 5 => slots (σ q)) := by
+      intro y slots
+      rw [slots5_eq_vec5 (I := I) (fun q : Fin 5 => slots (σ q))]
+      rw [slots5_eq_vec5 (I := I) slots]
+      have h := (canRmSymm (I := I) (M := M) g (x := y)).2.1
+        (slots 0) (slots 2) (slots 1) (slots 3) (slots 4)
+      simpa [σ, vec5, Equiv.ofBijective] using h
+    obtain ⟨Asec, hAsec⟩ :=
+      ContMDiffSection.exists_eq_at_gen
+        (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) x A
+    have h := nabla0SFun_perm (I := I)
+      cov Asec nablaRm04 x σ (-1 : Real) hperm
+        (vec5 (I := I) B Y X Z W)
+    rw [slots5_eq_vec5 (I := I)
+      (fun q : Fin 5 => vec5 (I := I) B Y X Z W (σ q))] at h
+    have hleft := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B Y X Z W)
+    have hright := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B X Y Z W)
+    rw [← hAsec]
+    rw [hleft, hright]
+    simpa [σ, vec5, Equiv.ofBijective] using h
+  · intro A B X Y Z W
+    let σ : Equiv.Perm (Fin 5) :=
+      Equiv.ofBijective ![0, 3, 4, 1, 2] (by decide)
+    have hperm : ∀ y : M, ∀ slots : Fin 5 -> TangentSpace I y,
+        nablaRm04 y slots =
+          (1 : Real) * nablaRm04 y (fun q : Fin 5 => slots (σ q)) := by
+      intro y slots
+      rw [slots5_eq_vec5 (I := I) (fun q : Fin 5 => slots (σ q))]
+      rw [slots5_eq_vec5 (I := I) slots]
+      have h := (canRmSymm (I := I) (M := M) g (x := y)).2.2
+        (slots 0) (slots 1) (slots 2) (slots 3) (slots 4)
+      simpa [σ, vec5, Equiv.ofBijective] using h
+    obtain ⟨Asec, hAsec⟩ :=
+      ContMDiffSection.exists_eq_at_gen
+        (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) x A
+    have h := nabla0SFun_perm (I := I)
+      cov Asec nablaRm04 x σ (1 : Real) hperm
+        (vec5 (I := I) B X Y Z W)
+    rw [slots5_eq_vec5 (I := I)
+      (fun q : Fin 5 => vec5 (I := I) B X Y Z W (σ q))] at h
+    have hleft := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B X Y Z W)
+    have hright := totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      5 cov Asec nablaRm04 x (vec5 (I := I) B Z W X Y)
+    rw [← hAsec]
+    rw [hleft, hright]
+    simpa [σ, vec5, Equiv.ofBijective] using h
+
+/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric.
 
 
 

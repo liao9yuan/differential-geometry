@@ -55,9 +55,9 @@ noncomputable def stageTarget
   letI : IsManifold I ∞ Yl.M := Yl.smooth
   letI : T2Space Yl.M := Yl.t2
   letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-  (NormalCoordinates.normalChartAt (I := I) Yl.metric
+  (NormalCoordinates.framedChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P L l (gamma : Nat))).symm
-    (NormalCoordinates.normalChartAt (I := I) Yk.metric
+    (NormalCoordinates.framedChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P L k (gamma : Nat)) x)
 
 
@@ -81,15 +81,15 @@ noncomputable def stageTarget
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    NormalCoordinates.normalChartAt (I := I) Yl.metric
+    NormalCoordinates.framedChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P L l (alpha : Nat))
         (stageTarget inp P L s k l
-          ((NormalCoordinates.normalChartAt (I := I) Yk.metric
+          ((NormalCoordinates.framedChartAt (I := I) Yk.metric
             (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma) =
-      normalTransition (I := I) Yl
+      NormalCoordinates.framedTransition (I := I) Yl.metric
         (seqCenterD inp.decay P L l (gamma : Nat))
         (seqCenterD inp.decay P L l (alpha : Nat))
-        (normalTransition (I := I) Yk
+        (NormalCoordinates.framedTransition (I := I) Yk.metric
           (seqCenterD inp.decay P L k (alpha : Nat))
           (seqCenterD inp.decay P L k (gamma : Nat)) z) := by
   rfl
@@ -115,9 +115,9 @@ theorem stageTarget_local
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
       stageTarget inp P L s k l
-          ((NormalCoordinates.normalChartAt (I := I) Yk.metric
+          ((NormalCoordinates.framedChartAt (I := I) Yk.metric
             (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma ∈
-        (NormalCoordinates.normalChartAt (I := I) Yl.metric
+        (NormalCoordinates.framedChartAt (I := I) Yl.metric
           (seqCenterD inp.decay P L l (alpha : Nat))).source) :
     let Yk := X.obj (L.φ k)
     let Yl := X.obj (L.φ l)
@@ -131,16 +131,16 @@ theorem stageTarget_local
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    (NormalCoordinates.normalChartAt (I := I) Yl.metric
+    (NormalCoordinates.framedChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P L l (alpha : Nat))).symm
-      (normalTransition (I := I) Yl
+      (NormalCoordinates.framedTransition (I := I) Yl.metric
         (seqCenterD inp.decay P L l (gamma : Nat))
         (seqCenterD inp.decay P L l (alpha : Nat))
-        (normalTransition (I := I) Yk
+        (NormalCoordinates.framedTransition (I := I) Yk.metric
           (seqCenterD inp.decay P L k (alpha : Nat))
           (seqCenterD inp.decay P L k (gamma : Nat)) z)) =
       stageTarget inp P L s k l
-        ((NormalCoordinates.normalChartAt (I := I) Yk.metric
+        ((NormalCoordinates.framedChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma := by
   letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
   letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -156,9 +156,9 @@ theorem stageTarget_local
     (X.obj (L.φ l)).t2TangentBundle
   dsimp only
   rw [← stageTarget_chart (I := I) inp P L s k l alpha gamma z]
-  exact NormalCoordinates.normalChartAt_left_inv (I := I)
+  exact (NormalCoordinates.framedChartAt (I := I)
     (X.obj (L.φ l)).metric
-    (seqCenterD inp.decay P L l (alpha : Nat)) hsrc
+    (seqCenterD inp.decay P L l (alpha : Nat))).left_inv hsrc
 
 
 
@@ -400,14 +400,15 @@ theorem stageCompare_base
     have htarget :
         stageTarget inp P L s k l Yk.basepoint i0 = Yl.basepoint := by
       change
-        (NormalCoordinates.normalChartAt (I := I) Yl.metric
+        (NormalCoordinates.framedChartAt (I := I) Yl.metric
             (seqCenterD inp.decay P L l (i0 : Nat))).symm
-          (NormalCoordinates.normalChartAt (I := I) Yk.metric
+          (NormalCoordinates.framedChartAt (I := I) Yk.metric
             (seqCenterD inp.decay P L k (i0 : Nat)) Yk.basepoint) =
           Yl.basepoint
-      rw [hcenterK, hcenterL,
-        NormalCoordinates.normalChartAt_centre,
-        NormalCoordinates.normalChartAt_symm_zero]
+      rw [hcenterK, hcenterL, NormalCoordinates.framedChart_centre]
+      change NormalCoordinates.framedExpDiffeo (I := I) Yl.metric
+        Yl.basepoint (0 : E) = Yl.basepoint
+      exact NormalCoordinates.framedExp_zero (I := I) Yl.metric Yl.basepoint
     have hzero :
         CenterOfMass.centerEnergy (I := I) Yl.metric mu
             (stageTarget inp P L s k l Yk.basepoint) Yl.basepoint = 0 := by

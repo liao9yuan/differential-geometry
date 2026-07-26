@@ -95,11 +95,150 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         = 0
     linear_combination (norm := module) h
 
+/-- Read the second covariant derivative directly from the pointwise Jacobi
+equation. -/
+theorem jacobi_d2_eq
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J : ∀ t : ℝ, TangentSpace I (γ t)) {t : ℝ}
+    (hJ : IsJacobiAt (I := I) g γ J t) :
+    covDerivAlong (I := I) g γ
+        (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
+      = - (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t) := by
+  change covDerivAlong (I := I) g γ
+        (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
+      + (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
+      = 0 at hJ
+  linear_combination (norm := module) hJ
 
+/-- Wronskian pairing of two vector fields along the same curve.  For Jacobi
+fields this quantity is constant. -/
+def jacobiWronskian
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J K : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
+  g.inner (γ t) (covDerivAlong (I := I) g γ J t) (K t) -
+    g.inner (γ t) (J t) (covDerivAlong (I := I) g γ K t)
 
-omit [InnerProductSpace ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+/-- The Wronskian of two pointwise Jacobi fields has zero derivative under
+pointwise curve regularity. -/
+theorem wronskian_deriv_at
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J K : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
+    (hJdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ J t) t)
+    (hKdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ K t) t)
+    (hDJdiff : DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ J s) t) t)
+    (hDKdiff : DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ K s) t) t)
+    (hJ : IsJacobiAt (I := I) g γ J t)
+    (hK : IsJacobiAt (I := I) g γ K t) :
+    HasDerivAt (jacobiWronskian (I := I) g γ J K) 0 t := by
+  have hleft := inner_deriv_at (I := I) hn g γ
+    (fun s => covDerivAlong (I := I) g γ J s) K t hγ hDJdiff hKdiff
+  have hright := inner_deriv_at (I := I) hn g γ J
+    (fun s => covDerivAlong (I := I) g γ K s) t hγ hJdiff hDKdiff
+  have hsub := hleft.sub hright
+  have hJ2 := jacobi_d2_eq (I := I) g γ J hJ
+  have hK2 := jacobi_d2_eq (I := I) g γ K hK
+  have hcurv := DifferentialGeometry.Integral.Connection.riemannOp_diag_symm
+    (I := I) g (γ t) (curveVelocity (I := I) γ t) (J t) (K t)
+  refine (hsub.congr_deriv ?_)
+  rw [hJ2, hK2]
+  simp only [map_neg, ContinuousLinearMap.neg_apply]
+  linarith
+
+/-- Smooth-curve wrapper for `wronskian_deriv_at`. -/
+theorem hasDerivAt_wronsk
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J K : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hJdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ J t) t)
+    (hKdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ K t) t)
+    (hDJdiff : DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ J s) t) t)
+    (hDKdiff : DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ K s) t) t)
+    (hJ : IsJacobiAt (I := I) g γ J t)
+    (hK : IsJacobiAt (I := I) g γ K t) :
+    HasDerivAt (jacobiWronskian (I := I) g γ J K) 0 t :=
+  wronskian_deriv_at (I := I) hn g γ J K t hγ.contMDiffAt
+    hJdiff hKdiff hDJdiff hDKdiff hJ hK
+
+/-- Two Jacobi fields that vanish initially have zero Wronskian on an interval
+when the curve is smooth at each point of that interval. -/
+theorem wronskian_zero_on
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J K : ∀ t : ℝ, TangentSpace I (γ t)) {b : ℝ}
+    (hγ : ∀ t ∈ Icc (0 : ℝ) b, ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
+    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ J t) t)
+    (hKdiff : ∀ t ∈ Icc (0 : ℝ) b,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ K t) t)
+    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ J s) t) t)
+    (hDKdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ K s) t) t)
+    (hJacJ : ∀ t ∈ Icc (0 : ℝ) b, IsJacobiAt (I := I) g γ J t)
+    (hJacK : ∀ t ∈ Icc (0 : ℝ) b, IsJacobiAt (I := I) g γ K t)
+    (hJ0 : J 0 = 0) (hK0 : K 0 = 0) :
+    ∀ t ∈ Icc (0 : ℝ) b, jacobiWronskian (I := I) g γ J K t = 0 := by
+  have hderiv : ∀ t ∈ Icc (0 : ℝ) b,
+      HasDerivAt (jacobiWronskian (I := I) g γ J K) 0 t := by
+    intro t ht
+    exact wronskian_deriv_at (I := I) hn g γ J K t (hγ t ht)
+      (hJdiff t ht) (hKdiff t ht) (hDJdiff t ht) (hDKdiff t ht)
+      (hJacJ t ht) (hJacK t ht)
+  have hcont : ContinuousOn (jacobiWronskian (I := I) g γ J K)
+      (Icc (0 : ℝ) b) := by
+    intro t ht
+    exact (hderiv t ht).continuousAt.continuousWithinAt
+  have hconst := constant_of_has_deriv_right_zero hcont (fun t ht =>
+    (hderiv t ⟨ht.1, ht.2.le⟩).hasDerivWithinAt)
+  have hzero : jacobiWronskian (I := I) g γ J K 0 = 0 := by
+    simp only [jacobiWronskian, hJ0, hK0, map_zero,
+      ContinuousLinearMap.zero_apply, sub_self]
+  intro t ht
+  rw [hconst t ht, hzero]
+
+/-- Two Jacobi fields that vanish at the initial endpoint have zero Wronskian
+throughout the interval. -/
+theorem wronskian_eq_zero
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J K : ∀ t : ℝ, TangentSpace I (γ t)) {b : ℝ}
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hJdiff : ∀ t ∈ Icc (0 : ℝ) b,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ J t) t)
+    (hKdiff : ∀ t ∈ Icc (0 : ℝ) b,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ K t) t)
+    (hDJdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ J s) t) t)
+    (hDKdiff : ∀ t ∈ Icc (0 : ℝ) b, DifferentiableAt ℝ
+      (chartRepAt (I := I) γ
+        (fun s => covDerivAlong (I := I) g γ K s) t) t)
+    (hJacJ : ∀ t ∈ Icc (0 : ℝ) b, IsJacobiAt (I := I) g γ J t)
+    (hJacK : ∀ t ∈ Icc (0 : ℝ) b, IsJacobiAt (I := I) g γ K t)
+    (hJ0 : J 0 = 0) (hK0 : K 0 = 0) :
+    ∀ t ∈ Icc (0 : ℝ) b, jacobiWronskian (I := I) g γ J K t = 0 :=
+  wronskian_zero_on (I := I) hn g γ J K (fun _ _ => hγ.contMDiffAt)
+    hJdiff hKdiff hDJdiff hDKdiff hJacJ hJacK hJ0 hK0
+
+/-- A pointwise Jacobi equation plus a curvature-term norm bound gives the
+second-covariant-derivative norm bound used by Gronwall estimates. -/
 theorem ode_bound_of_isJacobiAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {K t : ℝ}
