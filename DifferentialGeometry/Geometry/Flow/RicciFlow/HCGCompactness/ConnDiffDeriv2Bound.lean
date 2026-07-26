@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumCross
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv2
 
 set_option autoImplicit false
@@ -789,6 +790,39 @@ theorem covDConnDiff2_g1_le
     have hdiv := le_of_mul_le_mul_left hmul hSBpos
     nlinarith [hdiv]
 
+/-- **FRONTIER (`sorry`) — the a=2 mixed-commutator fibre-realization bridge (the SINGLE genuinely new
+a=2 frontier).**  The `g₂`-fibre norm of the base derivative of the a=1 mixed commutator
+`∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` — the `Term C`
+of `covStepDiff2_opLeibniz`, which realizes `(∇₂²A) ⋆ S + (∇₂A) ⋆ ∇₂S` (the `∇₂³S` symbols having
+cancelled) — bounded by the order-≤1 jets of `S`.
+
+**Route (not a recombination — a new Tensor-layer lemma).**  The proof needs the *evaluated* a=2
+mixed-commutator Leibniz: the a=2 analogue of `diffStep_leibniz_eval` (`MetricCovDerivLinear.lean`),
+expanding `∇₂(mixedComm S)(tuple)` into a `covDerivConnDiff2`-insertion sum (materialising `∇₂²A` at
+the eval level) plus a `covDerivConnDiff`-insertion sum (`∇₂A`), then per-slot Cauchy–Schwarz against
+the proved dual core `covDConnDiff2_g1_le` (for the `∇₂²A` insertion) and `covDerivConnDiff_gJet_le`
+(for the `∇₂A` insertion), assembled component-wise exactly as `covStepDiff_norm_le` does one order
+down (`normSq0S_le_card_of_component_bound`).  Flagged for the next planner decision; see
+`ConnDiffDeriv2Bound.md §3.2`. -/
+theorem covStepDiff2_mixedComm_le
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    {Λ Λ' Λ'' Λ''' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''')
+    (hJet1' : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ') :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
+        Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
+            (covStep (I := I) g₂ (s + 2)
+              (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+                - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x)) ≤
+          C * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))) := by
+  sorry
+
 /-- **FRONTIER (`sorry`) — the a=2 base-Leibniz jet of a single connection-difference step.**
 
 Under `Λ`-comparability of `g₁, g₂` on `K` and metric covariant-derivative bounds through **order 3**
@@ -807,23 +841,16 @@ which is the honest state-before-prove interface: the a≥2 campaign has not yet
 polynomial, only its structure (order-3 metric jets, order-2 `S`-jets, role asymmetry).  A downstream
 `hAcc`-facing consumer reads `Racc 2 := C₂`.
 
-**What discharges the `sorry` (two ingredients, one genuinely new):**
-
-1. THE FRONTIER — the a=2 differentiated Christoffel-difference Koszul identity `connDiff_koszul_deriv2`
-   (not yet in the tree): differentiate the committed a=1 identity `connDiff_koszul_deriv`
-   (`Geometry/Connection/LeviCivita/ChristoffelDiffKoszulDeriv.lean`) once more along a base direction
-   with the metric-compatibility Leibniz.  Its RHS stays in `metricCovDeriv` currency at order 3
-   (`∇₂³g₁` combos) plus `∇₂²g₁·A` and `∇₂g₁·∇₂A` correction terms.  This is a new
-   differential-geometric identity of the same character and size as `connDiff_koszul_deriv`
-   (~150–300 lines), plus its a=2 dual core (analogue of `ConnDiffDerivBound`'s `covDerivConnDiff_g1_le`)
-   giving `|∇₂²A|`.  Comparability at orders 4/5 is already covered by the general-`s`
-   `sqrt_normSq0S_comp` (`ConnDiffDerivBound.lean`).
-
-2. MECHANICAL — the a=2 base-Leibniz operator identity `∇₂²(A ⋆ S) = (∇₂²A) ⋆ S + 2 (∇₂A) ⋆ (∇₂S)
-   + A ⋆ (∇₂²S)` (the a=2 analogue of `diffStep_leibniz` in `MetricCovDerivLinear.lean`, pure `covStep`
-   / `diffStep` operator algebra), then the fibre Cauchy–Schwarz product bound composing the a=0 atom
-   `|A| ≲ √(Λ³)Λ'` (`lcDiff_norm_le`), the a=1 atom `|∇₂A| ≲ Λ⁴(Λ''+ΛΛ'²)`
-   (`covDerivConnDiff_gJet_le`), and the a=2 atom `|∇₂²A|` from (1). -/
+**PROVED conditional on the single a=2 bridge `covStepDiff2_mixedComm_le`.**  The full a=2 fibre
+assembly is discharged here from committed pieces plus that one flagged bridge:
+`covStep g₂ (covStep g₂ (diffStep g₁ g₂ s S))` splits, by `diffStep_leibniz` (applied to `S`) and
+`covStep_add`, into
+`covStep g₂ (diffStep g₁ g₂ (s+1) (covStep g₂ s S))` (the a=1 base-Leibniz jet of `∇₂S`, bounded by the
+committed `covStepDiff_of_jets` at level `s+1`) plus `∇₂(mixedComm S)` (the a=2 mixed commutator,
+bounded by `covStepDiff2_mixedComm_le`).  The two fibre norms combine by the triangle inequality
+`sqrt_normSq0S_add_le`; the constant is `max 0 (K₁ + C_bridge)`, uniform in `S, x`.  The ONLY remaining
+`sorry` in the a=2 file lives in `covStepDiff2_mixedComm_le` (the evaluated a=2 mixed-commutator Leibniz
+realization). -/
 theorem covStepDiff2_exists_const
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -842,7 +869,72 @@ theorem covStepDiff2_exists_const
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
                 (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
-  sorry
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  obtain ⟨Cbr, hCbr_nn, hCbr⟩ :=
+    covStepDiff2_mixedComm_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3 hJet1'
+  -- The committed-atom constant of `covStepDiff_of_jets` at level `s+1`.
+  set K1 : ℝ := ((s + 1 : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
+    (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + 3 / 2 * (Real.sqrt (Λ ^ 3) * Λ')) with hK1def
+  refine ⟨max 0 (K1 + Cbr), le_max_left _ _, ?_⟩
+  intro S x hx
+  -- Λ-nonnegativity at `x ∈ K` and nonnegativity of `K1`.
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hJet1 x hx)
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans (Real.sqrt_nonneg _) (hJet2 x hx)
+  have hK1nn : 0 ≤ K1 := by
+    have hP : 0 ≤ 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + 3 / 2 * (Real.sqrt (Λ ^ 3) * Λ') := by
+      have h1 : 0 ≤ Λ ^ 4 := by positivity
+      nlinarith [hL''nn, hL'nn, hLnn, h1, mul_nonneg hLnn (sq_nonneg Λ'),
+        mul_nonneg (Real.sqrt_nonneg (Λ ^ 3)) hL'nn]
+    rw [hK1def]
+    exact mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (Real.sqrt_nonneg _)) hP
+  -- Operator split: `∇₂²(A⋆S) = piece1 + piece2` (a=1 jet of `∇₂S` plus the mixed commutator).
+  have hop : covStep (I := I) g₂ (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S))
+      = covStep (I := I) g₂ (s + 2)
+          (diffStep (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S))
+        + covStep (I := I) g₂ (s + 2)
+          (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+            - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) := by
+    rw [diffStep_leibniz (I := I) g₁ g₂ s S, covStep_add]
+  have hFx : (covStep (I := I) g₂ (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S))) x
+      = (covStep (I := I) g₂ (s + 2)
+          (diffStep (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S))) x
+        + (covStep (I := I) g₂ (s + 2)
+          (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+            - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S))) x := by
+    rw [hop]; rfl
+  -- `g₂`-orthonormal basis at `x` for the fibre triangle inequality.
+  obtain ⟨basis, hON⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g₂ x
+  have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j; constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  -- Committed a=1 jet bound on `piece1` (`covStepDiff_of_jets` at level `s+1`, `S := ∇₂S`).
+  have hp1 := DifferentialGeometry.PDE.RicciFlow.covStepDiff_of_jets (I := I) g₁ g₂ (s + 1)
+    (covStep (I := I) g₂ s S) x hEq hJet1 hJet2 hJet1' hx
+  simp only [show s + 1 + 2 = s + 3 from rfl, ← hK1def] at hp1
+  -- Bridge bound on `piece2`.
+  have hp2 := hCbr S x hx
+  -- Assemble by the triangle inequality.
+  set a : ℝ := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hadef
+  set b : ℝ := Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x)) with hbdef
+  set c : ℝ := Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+    (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x)) with hcdef
+  have ha : 0 ≤ a := Real.sqrt_nonneg _
+  have hb : 0 ≤ b := Real.sqrt_nonneg _
+  have hc : 0 ≤ c := Real.sqrt_nonneg _
+  rw [hFx]
+  refine le_trans (sqrt_normSq0S_add_le (I := I) g₂ _ _ basis hinv) ?_
+  refine le_trans (add_le_add hp1 hp2) ?_
+  nlinarith [mul_nonneg hK1nn ha, mul_nonneg hCbr_nn hc,
+    mul_nonneg (sub_nonneg.mpr (le_max_right 0 (K1 + Cbr)))
+      (add_nonneg (add_nonneg ha hb) hc), ha, hb, hc, hK1nn, hCbr_nn]
 
 end HCGCompactness
 end DifferentialGeometry

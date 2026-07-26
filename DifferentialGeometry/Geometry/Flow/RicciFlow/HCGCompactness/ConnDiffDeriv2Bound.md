@@ -7,6 +7,43 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 6, 2026-07-26): `covStepDiff2_exists_const` is PROVED conditional on a
+  SINGLE minimal bridge; the a=2 fibre assembly is COMPLETE modulo one flagged realization lemma.**
+  - **Reduction (the honest, minimal frontier).**  Applying `covStep g₂` to `diffStep_leibniz`
+    (`MetricCovDerivLinear.lean`) + `covStep_add` splits
+    `∇₂²(A⋆S) = covStep g₂ (covStep g₂ (diffStep g₁ g₂ s S))` into
+    `covStep g₂ (diffStep g₁ g₂ (s+1)(covStep g₂ s S))` (**piece 1** — the a=1 base-Leibniz jet of `∇₂S`,
+    bounded by the COMMITTED `covStepDiff_of_jets` at level `s+1`, `S := ∇₂S`) PLUS
+    `∇₂(mixedComm S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` (**piece 2** —
+    the a=2 mixed commutator, realizing `(∇₂²A)⋆S + (∇₂A)⋆∇₂S`).  The two fibre norms combine by
+    `sqrt_normSq0S_add_le` (triangle); constant `max 0 (K₁ + C_bridge)`, uniform in `S, x`.
+  - **The ONE flagged bridge = `covStepDiff2_mixedComm_le`** (new theorem in this file, `sorry`): bounds
+    `√normSq0S(g₂, s+3, ∇₂(mixedComm S) x) ≤ C·(|S| + |∇₂S|)` under the exists_const hypotheses.  This is
+    a genuinely NEW Tensor-layer realization lemma, NOT a recombination: its proof needs the **evaluated
+    a=2 mixed-commutator Leibniz** (a=2 analogue of `diffStep_leibniz_eval`, materialising
+    `∇₂²A = covDerivConnDiff2` and `∇₂A = covDerivConnDiff` at the eval level, where `∇₂³S` has cancelled)
+    then per-slot Cauchy–Schwarz against the proved dual core `covDConnDiff2_g1_le` (for `∇₂²A`) and
+    `covDerivConnDiff_gJet_le` (for `∇₂A`), assembled component-wise via
+    `normSq0S_le_card_of_component_bound` exactly as `covStepDiff_norm_le` does one order down.
+    **Flagged for the next planner decision.**
+  - **Import.**  This file now imports `UnifCovSumCross` (no cycle — `UnifCovSumCross` does not import this
+    file; its `hAcc` is an abstract `Racc` hypothesis discharged only in the final assembly downstream),
+    to reuse the committed a=1 operator jet
+    `DifferentialGeometry.PDE.RicciFlow.covStepDiff_of_jets`.
+  - Verified: targeted module build GREEN (9519 jobs).  `#print axioms`:
+    `covStepDiff2_exists_const` = `[propext, Classical.choice, Quot.sound, sorryAx]` (the `sorryAx` is
+    inherited SOLELY from `covStepDiff2_mixedComm_le`); `covStepDiff2_mixedComm_le` = same with `sorryAx`;
+    `koszul2_clean` and `covDConnDiff2_g1_le` remain axiom-clean `[propext, Classical.choice, Quot.sound]`.
+  - Lean lessons: `ContMDiffSection.coe_add` as a bare `rw` lemma fails instance synth
+    (`NormedSpace ℝ (Tensor0SModel ?n)`, metavar valence) in this IPS file — but the field-sum eval
+    `(f + g) x = f x + g x` is DEFINITIONAL, so `rw [hop]; rfl` closes it without the lemma.  Fold
+    `covStepDiff_of_jets`'s constant into the exists_const witness with
+    `simp only [show s+1+2 = s+3 from rfl, ← hK1def]`.
+  - **a=2 ledger — what remains before the `hAcc m=2` glue (`UnifCovSumCross.lean`, out of scope):**
+    ONLY `covStepDiff2_mixedComm_le` (the evaluated a=2 mixed-commutator Leibniz realization).  Once it is
+    proved, `covStepDiff2_exists_const` becomes axiom-clean automatically, and `Racc 2 := C₂`,
+    `hRnn 2 := ·.1` feed `iterCovG1_le` at `m = 2` directly.
+
 - **UPDATE (a=2 campaign session 5, 2026-07-26): `koszul2_clean` is PROVED sorry-free; the a=2
   differential-geometric content is COMPLETE.**  The ~200-line term-by-term absorption landed exactly
   as the §2.1.a derivation predicted — no statement change was needed (the corrected term-5 survivor
