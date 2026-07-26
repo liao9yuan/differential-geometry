@@ -483,3 +483,33 @@ SYMMETRIC part, so the gate must be consumed at `P := symmS g₀ T` (the geometr
 perturbation), not raw `T`; committed raw-`T` grids (`bdOmRecover_gridWindow`) switch to
 `symmS T`.  The gate is on a general `P` and does not force this — it is the consumer's choice.
 Per-file lessons + exact statements in `CurvatureCoefficientDifferenceJetTower.md`.
+
+## 11c. STATUS (2026-07-26): THE CONSUMER SIBLING IS EXACT-GREEN (brick 2)
+
+Landed in the NEW small leaf
+`Analysis/Spectral/Tensor/CovGrad/CurvatureCoeffDiffRadiusFree.lean` (imports the monolith;
+a new file because the L²-route uses only public API — the 15.4k-line monolith would
+re-elaborate on every focused check, and the alternate pointwise-`hpt` clone route needed the
+monolith-private `tsRfns_sub_le` / `exists_backgroundJet_rfns_bound`):
+
+- `ricciArmOrder0BaseCoeff_summed_l2_radiusFree` — THE DELIVERABLE.  R-free sibling of
+  `ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic` (the `:14447`/now-`:14808`
+  generic whose `Kc` routed through the ball-uniform converter):
+  `∑_{i≤a}‖∇ⁱ(RiemannCoeff g₀ g₁ − CurvCoeff g₀ g₁)‖² ≤ Ktop·∑_{j≤a+2}‖∇ʲ(symmS g₀ T)‖²
+  + Klow·(1 + ∑_{j≤a+1}‖∇ʲ(symmS g₀ T)‖²)`, `Ktop/Klow` depend only on `g₀,a,dim E,δ₀`; NO R,
+  NO ball hyp.  Hyps: `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ`, `δ ≤ δ₀`, `htie`.
+- `ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree` — per-order engine (abstract Λ₀ + `hsup`,
+  mirroring the gate's design decision 1).
+
+Both `#print axioms` = `[propext, Classical.choice, Quot.sound]`; targeted module build GREEN
+(`9388 jobs`, module built clean).  The two binding design constraints are honoured: capped
+antidiagonal top terms land in the explicit `Ktop` L² envelope via the gate's top leak (NOT the
+pointwise-head API — the existing top-head theorems are untouched), and the grids/RHS jets run
+over `symmS g₀ T` (background-difference lemmas instantiated at `T := symmS g₀ T`; `htie`/`hbound`
+transfer via local copies of `ccTensorBilinSymm_symmS_app` / `gFibreOpBound_ccTensorBilinSymm_symmS`).
+No unreceivable term arose — every leaked top cell is absorbed by the gate's `Ktop·‖∇^{i+2}‖²`.
+
+Scope note for brick 3 (DeTurckLie wire-in): this deliverable is the arm0 constituent
+(`RiemannCoeff − CurvCoeff`) of Ψ₀ and the reusable EXEMPLAR.  The deTurckLie / lieCorr0 fields
+are DIFFERENT coefficients, so they need their own R-free siblings built by the SAME pattern
+(gate + symmS bridge + L² 5-term triangle); they cannot consume this arm0 theorem verbatim.
