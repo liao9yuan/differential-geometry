@@ -1853,3 +1853,34 @@ Reopened queue, in Pro's order:
 
 Parallel item-6 lane: koszul2_clean PROVED (`621964cca`, planner-probed
 axiom-clean with the dual core); exists_const assembly in flight.
+
+## Planner night ledger №32 (2026-07-26 ~07:00) — the 10-hour window's outcome
+
+All lanes verified, committed, pushed through `505534bc6`.  Chronological
+acceptances: №25 (B2 closed + consumed; lc0Riem) → №26 (D_N conditional + N=2)
+→ №27 (koszul-deriv2 1-session; Kc 2/4) → №28 charter → №29 (threeArm recon:
+currency fork found) → №30 (Pro ruling: FALSE dichotomy; the gate defined) →
+№31 (THE GATE GREEN) → this ledger.
+
+**item 6 (the a=2 hAcc chain):** identity chain COMPLETE (`connDiff_koszul_deriv2`
++ corrected `koszul2_clean` + dual core `covDConnDiff2_g1_le`, all axiom-clean);
+`covStepDiff2_exists_const` proved conditional on the ONE remaining sorry
+(`covStepDiff2_mixedComm_le`); its `covStep2_diffStep_eval` core ~70% built
+(peel, both branches, linearity split, OC split — all green; clean-mixedComm
+shortcut DISPROVEN in Lean and route re-scoped honestly).  ~2 sessions left
+(assembly + norm CS), then the hAcc m=2 glue.
+**item 2 (the Pro-ruled repair):** bricks 1-2 GREEN (the radius-free gate
+integrator + the arm0 R-free sibling; §6 stop-signal never fired, three
+times); brick 3 stated with its summed reduction proved (one frontier sorry);
+brick 3b-prep DONE (the 4596-line VF monolith split; the 27 promotions =
+exactly the planned exposure); brick 3b session 1 (the R-free tower) IN FLIGHT.
+lieCorr0 stays frozen per №30 (its 2/4 green atoms + structural lc0VB stand).
+**Durable lessons banked:** respectTransparency cures IPS section-apply walls
+(supersedes the placement-refactor diagnosis); the mixedComm disproof residual;
+the split promotions list.
+
+Honest numbers, unchanged discipline: **(N) `ricci_flow_unif_existence` = 0%
+(unstated)**; item-6 machinery ≈ 85% (one sorry + glue); item-2 ≈ 3 of ~10-18
+bricks (gate + arm0 + the 3b scaffold); threeArm assembly + smooth-core layers
+2-3 untouched.  Machinery overall ≈ 70%.  Est. to (N) discharge: ~12-20
+executor sessions absent surprises.
