@@ -1,6 +1,97 @@
 # ForwardUniqueConnBound — brick K1C-b (the pointwise bound on `|∂ₜA₀₃|²`)
 
-## Outcome (current: after pass 3)
+## Outcome (current: after pass 4 — the closing pass)
+
+**(A) — 0 `sorry`.  The file is complete.**
+
+Pass 4 executed the planner's four tasks: `[I.Boundaryless]` added (R9(a)), the `htrace`
+frontier closed, the hypothesis list pruned (R9(c)), and the docstrings brought to the final
+state.  Focused check green; targeted module build **Built** (fresh, 20 s) and **warning-clean**
+(no warning in the build log is attributed to this file).  `#print axioms` on
+`connSpeedLow_normSq_le`, `connDiffDot_normSq_le`, `nablaRicDiff_trace_le` and
+`connSpeedRHS_self` all report `[propext, Classical.choice, Quot.sound]`.  1469 lines.
+
+### The `htrace` route, as executed
+
+The planner's route was correct except in one respect: **the realizer-uniqueness lemma already
+existed** and did not have to be written.  It is `totalNabla0SRealizes_unique`
+(`Tensor/RSTensor/NablaDomDomCongr.lean:184`, namespace `Tensor0SBundle`), with exactly the
+`ContMDiffSection.exists_eq_at_gen` proof the planner predicted; there is a second copy in
+`HCGCompactness/ProductMFoldNorm.lean:82`.  This is the *fourth* time in this lane that an API
+declared missing was already in the tree — grep the concept across the whole tree, not the
+directory where it ought to live.
+
+Three declarations were added, in a new `section TraceCommute` between `NablaRicci` and
+`Hamilton`:
+
+* `nabla_trace_field` (private, ~25 lines) — `∇(tr_g A) = tr_g (∇A ∘ traceNablaShuffle)` for the
+  Levi-Civita connection of `g`.  This is `nablaRealizes_metricTraceFirstTwo`
+  (`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`) transported onto the canonical
+  `metricNabla0S` by `totalNabla0SRealizes_unique`, both realizers being produced by
+  `totalNabla0S_realizes`.  **This is where `[I.Boundaryless]` enters**, and it is the only
+  place in the file that needs it.
+* `traceShuffle_normSq_le` (private) — `traceNormSq_le` at rank `s+1` with the shuffle absorbed
+  by `normSq0S_domDomCongr` against the in-file `exists_onFrame`/`onFrame_inv` pair.
+* `nablaTracePerm_normSq_le` (private) — `|∇ tr_g(A∘e)|² ≤ n^{s+3}·|∇A|²` for any slot
+  permutation `e`; `∇` past the reindexing is `totalNabla0SFun_domDomCongr` (fibre level — **no**
+  realizer-uniqueness needed for this half, contrary to the plan's sketch).
+* `nablaRicDiff_trace_le` (public) — the frontier itself,
+  `|∇¹(Ric₁ − Ric₂)|²_{g₁} ≤ n⁵·|∇¹S₀₄|²_{g₁}`.  Body: `ricciDiff_eq_trace` pointwise, upgraded
+  to a field equality by `DFunLike.ext` (`(Ric₁ − Ric₂) y = Ric₁ y − Ric₂ y` is `rfl`), then a
+  single `exact nablaTracePerm_normSq_le (s := 2) g₁ rm04TraceSlots S x`.
+
+Inside `connSpeedLow_normSq_le` the `sorry` block collapsed to one line:
+`have htrace := nablaRicDiff_trace_le (g₁ t) (g₂ t) S hS Ric₁ Ric₂ hRic₁ hRic₂ x`.
+
+**Post-proof simplification.**  The two new norm lemmas would have made the
+`exists_onFrame` + `onFrame_inv` + `normSq0S_domDomCongr` incantation appear a third time, so it
+was factored into one private rank-uniform lemma `normSq0S_reindex` (end of `section Frame`);
+`normSq0S_perm3` now reduces to a one-line application of it.  Net effect: three copies of the
+pattern became one, and callers never mention a basis.
+
+**Relocation TODO (new).**  `nabla_trace_field` belongs in
+`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`, immediately after
+`nablaRealizes_metricTraceFirstTwo`, as the `metricCov`-specialised field identity; it is here
+only because that shared file must not be edited mid-campaign.  `traceShuffle_normSq_le` and
+`nablaTracePerm_normSq_le` are rank-uniform norm facts with no Ricci-flow content and belong
+next to `traceNormSq_le` in `Evolution/ForwardUniqueRmBounds.lean`.  Also:
+`totalNabla0SRealizes_unique` has a duplicate in `HCGCompactness/ProductMFoldNorm.lean` that
+should redirect to the Tensor-layer copy (that file's own note already says so).
+
+### The prune (R9(c)), verified by the linter
+
+Proof inspection plus the `linter.unusedVariables` warnings (which fired on exactly `hRm₂`,
+`hRF₁`, `hRF₂` once `htrace` closed) confirm the pass-3 prediction: the route consumes `B₁`,
+`B₃`, `hΓ`, `hA`, `hΛ`, `hΛ0`, `hgInv₁/₂`, `hNR₁/₂`, `hRic₁/₂`, `hS`, and the frame package
+`frame/hframe/hu/hx`.  **Dropped** from both `connSpeedLow_normSq_le` and
+`connDiffDot_normSq_le`: `Rm₂`, `hRm₂`, `hRF₁`, `hRF₂`, `B₂`, `hB₂`, `B₄`, `hB₄`.  The RHS
+group `(B₁ + B₂ + B₃ + B₄)` became `(B₁ + B₃)`, and `connSpeed_arith` lost its `B₂`/`B₄`
+variables and their nonnegativity hypotheses.  After the prune the focused check emits **no**
+unused-variable warnings, so every remaining binder is genuinely consumed.
+
+**Constant unchanged at `200(n⁶ + 1)`,** and it is honest: shrinking the `B`-sum makes the RHS
+smaller but `hprod1`/`hprod2` only ever needed `B₁ + B₃ ≥ B₁` and `≥ B₃`, so no coefficient
+moved.  The chain contributes `200` on the `P` side (`hs1`) and `160 + 40 = 200` on the
+carrier side (`hs2` + `hs3`); the `+1` still removes the `finrank = 0` split for free.
+
+`connSpeedRHS_self` was restated with `(Λ, B₁, B₃)` and the constant `200(n⁶+1)` so that it
+still literally is "the right-hand side of `connSpeedLow_normSq_le` collapses"; its proof
+(ending in `ring`) was unaffected.
+
+### Verification and hygiene (pass 4)
+
+Focused check green after every edit; final targeted module build *Built* and warning-clean.
+Hygiene grep for `instance`/`axiom`/`notation`/`macro`/`opaque`/`syntax`/`elab`/fixity in every
+modifier-prefixed form: clean.  No new imports (all of `nablaRealizes_metricTraceFirstTwo`,
+`totalNabla0SRealizes_unique`, `totalNabla0SFun_domDomCongr`, `normSq0S_domDomCongr` were
+already in the 303-module import closure).  Grep over `DifferentialGeometry/` for
+`connSpeedLow_normSq_le`, `connDiffDot_normSq_le`, `connSpeedRHS_self`, `nablaRmDiffSq`,
+`IsRmDiffField`, `nablaRmDiff`: **zero hits outside this file**, so the signature changes broke
+nothing (third independent verification).  No file outside this one and its `.md` was edited.
+
+---
+
+## Outcome (historical: after pass 3)
 
 **(B) — repaired statement, proof complete except the contracted trace; ONE `sorry`, at
 `htrace` inside `connSpeedLow_normSq_le`.**
@@ -55,12 +146,15 @@ edited mid-campaign.  Likewise `perm3`/`normSq0S_perm3` are a thin typed wrapper
 `Tensor/RSTensor/NormSqProduct.lean`.
 
 **Unused inputs, for the R9(c) prune once `htrace` lands** (deferred, per R9(c)'s
-prove-then-prune ordering): the route consumes `B₁`, `B₃`, `hΓ`, `hA`, `hΛ`, `hgInv₁/₂`,
-`hNR₁/₂`, `hRic₁/₂`, `hS`.  It does **not** consume `B₂`, `B₄` (hence not `Rm₂`/`hRm₂` either),
-nor `hRF₁`/`hRF₂` — whose mathematical content arrives through `hΓ`.  `htrace`'s statement
-mentions none of them, so closing it cannot change this list.
+prove-then-prune ordering) — **prediction CONFIRMED and executed in pass 4**: the route consumes
+`B₁`, `B₃`, `hΓ`, `hA`, `hΛ`, `hgInv₁/₂`, `hNR₁/₂`, `hRic₁/₂`, `hS`.  It does **not** consume
+`B₂`, `B₄` (hence not `Rm₂`/`hRm₂` either), nor `hRF₁`/`hRF₂` — whose mathematical content
+arrives through `hΓ`.  `htrace`'s statement mentions none of them, so closing it cannot change
+this list.
 
-**Remaining frontier, fully scoped.**  `ricciDiff_eq_trace` gives
+**Remaining frontier, fully scoped** — **CLOSED in pass 4** (see the pass-4 section; the only
+correction is that the realizer-uniqueness lemma already existed as
+`totalNabla0SRealizes_unique`).  `ricciDiff_eq_trace` gives
 `Ric₁ − Ric₂ = tr_{g₁}(S₀₄ ∘ rm04TraceSlots)` pointwise with **no residual `h₀₂` term**, hence as
 bundled fields by `DFunLike.ext`; `nablaRealizes_metricTraceFirstTwo`
 (`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`) commutes `∇` past the trace up to
@@ -408,6 +502,46 @@ breakage, and the planner authorized it as ruling R8 in the following pass.
 
 ## Lean lessons (durable)
 
+* **`n + k` vs a literal: put the literal in an explicitly-typed `have`, never in a `rw`.**  The
+  whole friction of the trace step is that `traceNormSq_le` is stated at `s + 2` and produces
+  `(s+1)+2` / `3+2` where the goal reads `s+3` / `5`.  These are defeq (`Nat` literal/offset
+  arithmetic), so `exact`, `refine … ?_` and an annotated `have` all accept them silently —
+  but `rw` and `simp only` need *syntactic* agreement and will fail or hit a
+  "motive is not type correct" when the index sits in a dependent position such as
+  `normSq0S g x s T`.  The working discipline: state each intermediate step as a `have` with the
+  index written the way the *goal* writes it, prove it by a bare application of the general
+  lemma, and let `exact` do the arithmetic.  Choosing `s + 2 + 1` (rather than `s + 3`) as the
+  house form of the derivative rank made every application match syntactically, because
+  `metricNabla0S g A : (0, (s+2)+1)` already prints that way.
+* **Grep the *concept* before writing a "missing" lemma — fourth time in this lane.**  The
+  realizer-uniqueness step was scoped as "this small lemma does not yet exist and is the first
+  thing to write".  It exists twice: `totalNabla0SRealizes_unique`
+  (`Tensor/RSTensor/NablaDomDomCongr.lean`) and a copy in `HCGCompactness/ProductMFoldNorm.lean`.
+  A one-line `grep -rn "Realizes.*unique\|_realizes_eq"` over `Tensor/` + `Geometry/` found both
+  in seconds.  Likewise the `∇`-past-reindexing half needed no realizer argument at all:
+  `totalNabla0SFun_domDomCongr` states it at the fibre level, and `metricNabla0S g T x` is `rfl`
+  for `totalNabla0SFun s (metricCov g) T x`, so it applies directly.
+* **`Realized.lean`'s `canRicNabla`-style block is the template for any `∇`-through-a-trace
+  argument.**  `Geometry/Connection/LeviCivita/Curvature/Realized.lean:1100–1180` runs exactly
+  this chain (`totalNabla0S_realizes` → `totalNabla0SRealizes_domDomCongr` →
+  `nablaRealizes_metricTraceFirstTwo` → `totalNabla0SRealizes_unique`) for `∇Ric = tr(∇Rm)`.
+  Reading it first turned a scoped-as-hard step into ~25 lines that compiled on the first check.
+* **`metricCov`'s regularity/compatibility producers are reachable by defeq, so skip the
+  wrapper.**  `have hcov1 := leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+  (I := I) (M := M) g` (no type ascription) passes straight into a slot expecting
+  `ContMDiffCovariantDerivativeLocally (metricCov g) 1`: `metricCov` is a `def` for
+  `leviCivitaConnectionOfMetric`, and `exact` unfolds `def`s.  `ForwardUniqueReLower.lean`'s
+  `private metricCov_one` (a `simpa [metricCov]` wrapper) is not needed, and writing an
+  annotated `have` would have forced naming `CovariantDerivative.ContMDiffCovariantDerivativeLocally`
+  in a file that does not `open DifferentialGeometry.Integral.Connection`.
+* **This file deliberately does *not* `open DifferentialGeometry.Integral.Connection`,** unlike
+  every sibling (`RatePro`, `RmDiff`, `ReLower`, `RmBounds`).  Adding the `open` would make
+  `metricCov` ambiguous with the local `PDE.RicciFlow.metricCov` abbrev across 1400 lines; the
+  cheap, zero-blast-radius alternative is to fully qualify the five or six names actually needed
+  (`metricTraceFirstTwoField`, `traceNablaShuffle`, `nablaRealizes_metricTraceFirstTwo`,
+  `leviCivitaConnectionOfMetric_*`).  `frontExtendEquiv`, `totalNabla0S_realizes`,
+  `totalNabla0SRealizes_unique`, `totalNabla0SFun_domDomCongr` need no prefix — they live in
+  `Tensor0SBundle`, which the file already opens.
 * **`Tensor0SSpace` arithmetic needs the expected type at elaboration time; a type ascription is
   not enough.**  Writing `(-1:ℝ) • N + (T.domDomCongr e : Tensor0SSpace … 3 x)` fails with
   `failed to synthesize HAdd (Tensor0SSpace 3 I x) (ContinuousMultilinearMap …)` — the ascription
@@ -541,15 +675,26 @@ or copied):
 ## Hygiene
 
 No `instance`, `axiom`, `notation`, `macro`, `opaque`, `syntax` or `elab` declarations (in any
-modifier-prefixed form).  Four `set_option`s, all file-local and all matching the lane's
-existing files.  **No file outside this one was edited** in either 2026-07-26 pass.
+modifier-prefixed form), and no fixity declarations.  Four `set_option`s, all file-local and all
+matching the lane's existing files.  **No file outside this one and its `.md` was edited** in any
+of the four 2026-07-26 passes.
 
 Imports: the repair pass replaced `Evolution.ForwardUniqueRmBounds` by
 `Evolution.ForwardUniqueRatePro` (which re-exports it) and added
-`Evolution.Connection.Components` — net `+1`.  Neither imports this file, so no cycle.
+`Evolution.Connection.Components` — net `+1`.  Neither imports this file, so no cycle.  **Pass 4
+added no import**: every lemma the trace step needs was already in the 303-module closure.
 
-Declarations added by the two 2026-07-26 passes: `connSpeedRHS_self`, `coeff_adot_eq`,
-`lower_raise_cancel`, `connSpeedLow_eq` (public), and `lowerBilin_basis`, `repr_bilinOfComp`,
-`normSq0S_sub_le` (private).  All axiom-clean (`[propext, Classical.choice, Quot.sound]`).
-No new typeclass hypothesis was introduced; note that closing reduction 1 will likely need
-`[I.Boundaryless]` on `connSpeedLow_normSq_le` (flagged, not added).
+Declarations added across the 2026-07-26 passes: `connSpeedRHS_self`, `coeff_adot_eq`,
+`lower_raise_cancel`, `connSpeedLow_eq`, `lowerBilin_metric_le`, `lowerHamRHS_comp`, `perm3`,
+`perm3_apply`, `normSq0S_perm3`, `perm3_sub`, `hamSum`, `hamSum_sub`, `hamSum_normSq_le`,
+`lowerHam_eq_perm`, `nablaRicDiff_trace_le` (public), and `lowerBilin_basis`,
+`repr_bilinOfComp`, `normSq0S_sub_le`, `inner_le_sum_sq`, `hamPerm`, `connSpeed_arith`,
+`normSq0S_reindex`, `nabla_trace_field`, `traceShuffle_normSq_le`, `nablaTracePerm_normSq_le`
+(private).  All axiom-clean (`[propext, Classical.choice, Quot.sound]`).
+
+**One typeclass hypothesis was introduced, as authorized by R9(a):** `[I.Boundaryless]`, placed
+per-theorem on `connSpeedLow_normSq_le`, `connDiffDot_normSq_le`, `nablaRicDiff_trace_le`,
+`nabla_trace_field` and `nablaTracePerm_normSq_le` — deliberately **not** in the file-level
+`variable` block, so that the other 20-odd public declarations keep their signatures.  It is
+inherited from `nabla_metricTraceFirstTwo0S`, and the endpoint consumer
+`ExtendViaUniqueness.lean` already carries it.

@@ -30,9 +30,10 @@ difference carriers plus `|∇¹S₀₄|²`.  This file supplies
 * the **lowering-contraction bound** `lowerBilin_normSq_le`, which measures the lowering of a
   bilinear vector-valued map against an *arbitrary* `(0,2)` tensor by the lowering against the
   metric itself, with sharp constant `1`;
-* the **reaction half of the ruling's estimate** (`connDiffDot_le_speed`), fully proved, and
-  the capstone `connDiffDot_normSq_le` in the ruling's shape, which consumes the one remaining
-  frontier `connSpeedLow_normSq_le`.
+* the **reaction half of the ruling's estimate** (`connDiffDot_le_speed`) and the capstone
+  `connDiffDot_normSq_le` in the ruling's shape, proved from `connSpeedLow_normSq_le`.
+
+Everything in this file is proved; there is no `sorry`.
 
 ## The lowering-contraction bound
 
@@ -47,27 +48,30 @@ so neither a mixed-variance fibre norm nor `RSLoweringNorm.lowerAllSpace` (whose
 carries the model-space `[InnerProductSpace ℝ E]` taint) ever enters.  At `q = Ric₁` and
 `A = ∇¹ − ∇²` the right-hand factor *is* `connDiffSq`, by `connDiffLow_eq_lower`.
 
-## Hamilton's `∂ₜΓ` and the remaining frontier
+## Hamilton's `∂ₜΓ`
 
-`connSpeedLow_normSq_le` — the bound on the second summand `|g₁(Adot ·, ·)|²` — carries the
-file's single `sorry`.  Its content is Hamilton's `∂ₜΓ = −g^{-1}(∇Ric + ∇Ric − ∇Ric)` formula
-for each flow followed by the contracted-trace rewriting `∇Ric = tr_g(∇Rm)`.
+`connSpeedLow_normSq_le` — the bound on the second summand `|g₁(Adot ·, ·)|²` — is Hamilton's
+`∂ₜΓ = −g^{-1}(∇Ric + ∇Ric − ∇Ric)` formula for each flow followed by the contracted-trace
+rewriting `∇Ric = tr_g(∇Rm)`.
 
 An earlier version of the statement was **false** (it took only `hA` and the two Ricci-flow
 equations, which do not determine `Adot`: recovering `∂ₜΓ` from `∂ₜg` needs joint `(t, y)`
 regularity).  Ruling R8 repaired it by adding the honest K1 input `hΓ` in
-`ChristoffelEvolutionEquationInFrameOn` currency plus two zeroth-order background norms; the
+`ChristoffelEvolutionEquationInFrameOn` currency plus a zeroth-order background norm; the
 counterexample is the permanent record in `ForwardUniqueConnBound.md`, and
 `connSpeedRHS_self` is its machine-checked half.
 
-The repaired statement's **Layer A is proved**: `coeff_adot_eq` pins the frame coefficients of
+The proof runs in three layers.  **Layer A**: `coeff_adot_eq` pins the frame coefficients of
 `Adot` from `hΓ` by uniqueness of derivatives, `lower_raise_cancel` strips the inverse metric
 from each flow's Hamilton term, and `connSpeedLow_eq` splits the lowering into
-`g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·) − h₀₂(Γ̇₂·,·)`.  What is left inside the `sorry`, after
-`normSq0S_sub_le`, is two norm reductions — the contracted trace and the `Φ`-defect — both
-detailed in the `connSpeedLow_normSq_le` docstring.  Nothing outside this file consumes the
-frontier or its capstone.  The displayed dimensional constant is provisional: the *shape* of
-the right-hand side, not the constant, is the interface.
+`g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·) − h₀₂(Γ̇₂·,·)`.  **The Hamilton half**: `lowerHam_eq_perm` /
+`hamSum_normSq_le` reduce each flow's term to a slot combination of its own `∇Ric`, and
+`nablaRicDiff_trace_le` converts the surviving `∇¹(Ric₁ − Ric₂)` into `|∇¹S₀₄|²` by commuting
+`∇` past the metric trace (which is why the two endpoints carry `[I.Boundaryless]`).  **The
+`Φ`-defect half**: `lowerBilin_normSq_le` and `lowerBilin_metric_le`, the latter from the
+*one-sided* `hΛ`.  Nothing outside this file consumes either endpoint.  The displayed
+dimensional constant `200(n⁶+1)` is what the route as written yields; the *shape* of the
+right-hand side, not the constant, is the interface.
 -/
 
 noncomputable section
@@ -143,6 +147,17 @@ private theorem repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     rw [metricTensorField_apply]
     simpa using hON l k
   simp only [hbb, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+
+/-- **Slot reindexing is a fibre isometry.**  Rank-uniform form of `normSq0S_domDomCongr`,
+obtained by feeding it a `g`-orthonormal frame (whose inverse metric is the identity), so that
+callers never have to produce a basis themselves. -/
+private theorem normSq0S_reindex (g : SmoothRiemannianMetric I M) {x : M} {s s' : ℕ}
+    (e : Fin s ≃ Fin s')
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
+    normSq0S (I := I) g x s' (N.domDomCongr e) = normSq0S (I := I) g x s N := by
+  classical
+  obtain ⟨b, hON⟩ := exists_onFrame (I := I) g x
+  exact normSq0S_domDomCongr (I := I) g x b (onFrame_inv (I := I) g b hON) e N
 
 end Frame
 
@@ -372,8 +387,8 @@ theorem nablaRicDiff_split (g₁ g₂ : SmoothRiemannianMetric I M)
 
 /-- **The background half of the `∇Ric`-difference bound.**  The flux summand of
 `nablaRicDiff_split` is `O(|A₀₃|²·|Ric₂|²)` — zeroth order in the background's derivatives —
-by the existing `fluxNormSq_le`.  Only the `∇¹(Ric₁ − Ric₂)` summand is left for the
-contracted-trace step, which is what `connSpeedLow_normSq_le` still owes. -/
+by the existing `fluxNormSq_le`.  The remaining `∇¹(Ric₁ − Ric₂)` summand is handled by the
+contracted-trace step `nablaRicDiff_trace_le`. -/
 theorem nablaRicDiff_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Ric₁ Ric₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2) (x : M) :
@@ -395,6 +410,152 @@ theorem nablaRicDiff_le (g₁ g₂ : SmoothRiemannianMetric I M)
   linarith
 
 end NablaRicci
+
+section TraceCommute
+
+/-- **`∇` passes through the first-two metric trace**, for the Levi-Civita connection of `g`:
+
+`∇(tr_g A) = tr_g (∇A ∘ traceNablaShuffle)`.
+
+This is the field-level `nablaRealizes_metricTraceFirstTwo` transported onto the canonical
+`metricNabla0S` by realizer uniqueness; the slot shuffle carries the new derivative slot past
+the traced pair.  It holds because `∇g = 0`, and is *not* second Bianchi.
+
+Relocation TODO: the canonical home is `Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`, next
+to `nablaRealizes_metricTraceFirstTwo`; it lives here only because that shared file must not be
+edited mid-campaign. -/
+private theorem nabla_trace_field [I.Boundaryless] {s : ℕ}
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2)) :
+    metricNabla0S (I := I) g
+        (DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField
+          (I := I) (M := M) g A) =
+      DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (DifferentialGeometry.Integral.Connection.traceNablaShuffle s)
+          (metricNabla0S (I := I) g A)) := by
+  have hcov1 :=
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (I := I) (M := M) g
+  have hmc :=
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (I := I) g
+  exact totalNabla0SRealizes_unique
+    (totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
+      (metricCov (I := I) g)
+      (DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField
+        (I := I) (M := M) g A) _)
+    (DifferentialGeometry.Integral.Connection.nablaRealizes_metricTraceFirstTwo
+      (I := I) (M := M) (metricCov (I := I) g) hcov1 g hmc A (metricNabla0S (I := I) g A)
+      (totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2)
+        (metricCov (I := I) g) A _))
+
+/-- The dimensional cost of tracing a shuffled `(0,s+3)` field: `traceNormSq_le` at rank
+`s+1`, with the shuffle absorbed by the fibre isometry `normSq0S_domDomCongr`. -/
+private theorem traceShuffle_normSq_le {s : ℕ}
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2 + 1)) :
+    normSq0S (I := I) g x (s + 1)
+        (DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField (I := I) (M := M) g
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (DifferentialGeometry.Integral.Connection.traceNablaShuffle s) N) x) ≤
+      (Module.finrank Real E : Real) ^ (s + 2 + 1) *
+        normSq0S (I := I) g x (s + 2 + 1) (N x) := by
+  have hle : normSq0S (I := I) g x (s + 1)
+        (DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField (I := I) (M := M) g
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (DifferentialGeometry.Integral.Connection.traceNablaShuffle s) N) x) ≤
+      (Module.finrank Real E : Real) ^ (s + 2 + 1) *
+        normSq0S (I := I) g x (s + 2 + 1)
+          ((MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (DifferentialGeometry.Integral.Connection.traceNablaShuffle s) N) x) :=
+    traceNormSq_le (I := I) (s := s + 1) g x
+      ((MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞)
+        (DifferentialGeometry.Integral.Connection.traceNablaShuffle s) N) x)
+  have hiso : normSq0S (I := I) g x (s + 2 + 1)
+        ((MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (DifferentialGeometry.Integral.Connection.traceNablaShuffle s) N) x) =
+      normSq0S (I := I) g x (s + 2 + 1) (N x) :=
+    normSq0S_reindex (I := I) g _ (N x)
+  rwa [hiso] at hle
+
+/-- **`|∇ tr_g (A∘e)|²_g ≤ n^{s+3}·|∇A|²_g`** for any slot permutation `e`: `∇` commutes with
+the trace (`nabla_trace_field`), reindexings are fibre isometries, and the trace itself costs
+`traceNormSq_le`. -/
+private theorem nablaTracePerm_normSq_le [I.Boundaryless] {s : ℕ}
+    (g : SmoothRiemannianMetric I M) (e : Equiv.Perm (Fin (s + 2)))
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2)) (x : M) :
+    normSq0S (I := I) g x (s + 1)
+        (metricNabla0S (I := I) g
+          (DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField (I := I) (M := M) g
+            (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞) e A)) x) ≤
+      (Module.finrank Real E : Real) ^ (s + 2 + 1) *
+        normSq0S (I := I) g x (s + 2 + 1) (metricNabla0S (I := I) g A x) := by
+  have hna : metricNabla0S (I := I) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e A) x =
+      ContinuousMultilinearMap.domDomCongr (frontExtendEquiv e)
+        (metricNabla0S (I := I) g A x) :=
+    totalNabla0SFun_domDomCongr (I := I) (metricCov (I := I) g) e A x
+  have hiso : normSq0S (I := I) g x (s + 2 + 1)
+        (metricNabla0S (I := I) g
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞) e A) x) =
+      normSq0S (I := I) g x (s + 2 + 1) (metricNabla0S (I := I) g A x) := by
+    rw [hna]
+    exact normSq0S_reindex (I := I) g _ (metricNabla0S (I := I) g A x)
+  rw [nabla_trace_field (I := I) g
+    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (∞ : WithTop ℕ∞) e A)]
+  refine le_trans (traceShuffle_normSq_le (I := I) g x
+    (metricNabla0S (I := I) g
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) e A))) ?_
+  exact le_of_eq (by rw [hiso])
+
+/-- **The contracted trace: `|∇¹(Ric₁ − Ric₂)|²_{g₁} ≤ n⁵·|∇¹S₀₄|²_{g₁}`.**
+
+`ricciDiff_eq_trace` (`Evolution/ForwardUniqueRatePro.lean`) identifies the Ricci difference
+with the `g₁`-trace of the reindexed Kotschwar carrier — both flows lowered *and* traced with
+`g₁`, so there is no residual `h₀₂` term — and that identity upgrades from points to bundled
+fields by `DFunLike.ext`.  Differentiating it commutes `∇¹` past the trace, which costs only
+the dimensional factor `n⁵ = n^{3+2}` of `traceNormSq_le`.  This is the analytic content that
+`connSpeedLow_normSq_le` consumes; it needs `[I.Boundaryless]`, inherited from
+`nabla_metricTraceFirstTwo0S`. -/
+theorem nablaRicDiff_trace_le [I.Boundaryless]
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4)
+    (hS : IsRmDiffField (I := I) g₁ g₂ S)
+    (Ric₁ Ric₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (hRic₁ : ∀ y : M, Ric₁ y = metricRicciAt (I := I) g₁ y)
+    (hRic₂ : ∀ y : M, Ric₂ y = metricRicciAt (I := I) g₂ y)
+    (x : M) :
+    normSq0S (I := I) g₁ x 3 (metricNabla0S (I := I) g₁ (Ric₁ - Ric₂) x) ≤
+      (Module.finrank Real E : Real) ^ 5 * nablaRmDiffSq (I := I) g₁ S x := by
+  have hfield : Ric₁ - Ric₂ =
+      DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField (I := I) (M := M) g₁
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) rm04TraceSlots S) := by
+    refine DFunLike.ext _ _ fun y => ?_
+    have hsub : (Ric₁ - Ric₂) y = Ric₁ y - Ric₂ y := rfl
+    rw [hsub, hRic₁ y, hRic₂ y, ricciDiff_eq_trace (I := I) g₁ g₂ y, ← hS y]
+    rfl
+  rw [hfield]
+  exact nablaTracePerm_normSq_le (I := I) (s := 2) g₁ rm04TraceSlots S x
+
+end TraceCommute
 
 section Hamilton
 
@@ -685,10 +846,8 @@ def perm3 (e : Equiv.Perm (Fin 3))
 
 theorem normSq0S_perm3 (g : SmoothRiemannianMetric I M) (e : Equiv.Perm (Fin 3))
     (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
-    normSq0S (I := I) g x 3 (perm3 (I := I) e N) = normSq0S (I := I) g x 3 N := by
-  classical
-  obtain ⟨b, hON⟩ := exists_onFrame (I := I) g x
-  exact normSq0S_domDomCongr (I := I) g x b (onFrame_inv (I := I) g b hON) e N
+    normSq0S (I := I) g x 3 (perm3 (I := I) e N) = normSq0S (I := I) g x 3 N :=
+  normSq0S_reindex (I := I) g e N
 
 def hamSum (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
@@ -918,46 +1077,46 @@ expressions keeps `nlinarith` away from the (very large) geometric atoms — inl
 checks on those atoms time out.  `E1`/`E2` are the two halves of the split, `X`/`D`/`R2` the
 `∇Ric` chain and `L1`/`L2` the `Φ`-defect chain. -/
 private theorem connSpeed_arith
-    {n P Hm Ac Λ B₁ B₂ B₃ B₄ E1 E2 X D R2 L1 L2 : Real}
+    {n P Hm Ac Λ B₁ B₃ E1 E2 X D R2 L1 L2 : Real}
     (hn : 0 ≤ n) (hP : 0 ≤ P) (hHm : 0 ≤ Hm) (hAc : 0 ≤ Ac)
-    (hB₁ : 0 ≤ B₁) (hB₂ : 0 ≤ B₂) (hB₃ : 0 ≤ B₃) (hB₄ : 0 ≤ B₄) (hΛ0 : 0 ≤ Λ)
+    (hB₁ : 0 ≤ B₁) (hB₃ : 0 ≤ B₃) (hΛ0 : 0 ≤ Λ)
     (hE1 : E1 ≤ 10 * X) (hX : X ≤ 2 * D + 8 * n ^ 3 * Ac * R2)
     (hD : D ≤ n ^ 5 * P) (hR2B : R2 ≤ B₃)
     (hE2 : E2 ≤ Hm * L1) (hL1 : L1 ≤ Λ ^ 2 * L2) (hL2B : L2 ≤ 10 * B₁)
     (hp5 : n ^ 5 ≤ n ^ 6 + 1) (hp3 : n ^ 3 ≤ n ^ 6 + 1) :
     2 * E1 + 2 * E2 ≤
       200 * (n ^ 6 + 1) *
-        (P + (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) := by
+        (P + (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac)) := by
   have hKnn : (0 : Real) ≤ n ^ 6 + 1 := by positivity
   have hK1 : (1 : Real) ≤ n ^ 6 + 1 := by have := pow_nonneg hn 6; linarith
-  have hSBnn : (0 : Real) ≤ B₁ + B₂ + B₃ + B₄ := by linarith
+  have hSBnn : (0 : Real) ≤ B₁ + B₃ := by linarith
   have hWnn : (0 : Real) ≤ Hm + Ac := by linarith
   have hQ1 : (1 : Real) ≤ (1 + Λ) ^ 2 := by nlinarith [sq_nonneg Λ]
   have hQnn : (0 : Real) ≤ (1 + Λ) ^ 2 := sq_nonneg _
   -- the common right-hand factor
-  have hQ'nn : (0 : Real) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) :=
+  have hQ'nn : (0 : Real) ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) :=
     mul_nonneg (mul_nonneg hQnn hSBnn) hWnn
   -- the two carrier-monotonicity products
-  have hprod1 : Ac * B₃ ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by
-    have h1 : Ac * B₃ ≤ (Hm + Ac) * (B₁ + B₂ + B₃ + B₄) :=
+  have hprod1 : Ac * B₃ ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by
+    have h1 : Ac * B₃ ≤ (Hm + Ac) * (B₁ + B₃) :=
       mul_le_mul (by linarith) (by linarith) hB₃ hWnn
-    have h2 : (Hm + Ac) * (B₁ + B₂ + B₃ + B₄) ≤
-        (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₂ + B₃ + B₄)) :=
+    have h2 : (Hm + Ac) * (B₁ + B₃) ≤
+        (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₃)) :=
       le_mul_of_one_le_left (mul_nonneg hWnn hSBnn) hQ1
-    have h3 : (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₂ + B₃ + B₄)) =
-        (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by ring
+    have h3 : (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₃)) =
+        (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by ring
     linarith [h3 ▸ h2]
-  have hprod2 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by
+  have hprod2 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by
     have hΛ2 : Λ ^ 2 ≤ (1 + Λ) ^ 2 := by nlinarith
-    have h1 : B₁ * Hm ≤ (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) :=
+    have h1 : B₁ * Hm ≤ (B₁ + B₃) * (Hm + Ac) :=
       mul_le_mul (by linarith) (by linarith) hHm hSBnn
-    have h2 : Λ ^ 2 * (B₁ * Hm) ≤ Λ ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+    have h2 : Λ ^ 2 * (B₁ * Hm) ≤ Λ ^ 2 * ((B₁ + B₃) * (Hm + Ac)) :=
       mul_le_mul_of_nonneg_left h1 (sq_nonneg Λ)
-    have h3 : Λ ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) ≤
-        (1 + Λ) ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+    have h3 : Λ ^ 2 * ((B₁ + B₃) * (Hm + Ac)) ≤
+        (1 + Λ) ^ 2 * ((B₁ + B₃) * (Hm + Ac)) :=
       mul_le_mul_of_nonneg_right hΛ2 (mul_nonneg hSBnn hWnn)
-    have h4 : (1 + Λ) ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) =
-        (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by ring
+    have h4 : (1 + Λ) ^ 2 * ((B₁ + B₃) * (Hm + Ac)) =
+        (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by ring
     linarith [h4 ▸ h3]
   -- half one
   have hfl : 8 * n ^ 3 * Ac * R2 ≤ 8 * n ^ 3 * Ac * B₃ :=
@@ -976,26 +1135,26 @@ private theorem connSpeed_arith
     have h2 : (0 : Real) ≤ (n ^ 6 + 1) * P := mul_nonneg hKnn hP
     linarith
   have hs2 : 160 * (n ^ 3 * (Ac * B₃)) ≤
-      160 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by
+      160 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac))) := by
     have h1 : n ^ 3 * (Ac * B₃) ≤ (n ^ 6 + 1) * (Ac * B₃) :=
       mul_le_mul_of_nonneg_right hp3 hac
     have h2 : (n ^ 6 + 1) * (Ac * B₃) ≤
-        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac)) :=
       mul_le_mul_of_nonneg_left hprod1 hKnn
     linarith
   have hs3 : 20 * (Λ ^ 2 * (B₁ * Hm)) ≤
-      40 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by
-    have h1 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := hprod2
-    have h2 : (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) ≤
-        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      40 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac))) := by
+    have h1 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := hprod2
+    have h2 : (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) ≤
+        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac)) :=
       le_mul_of_one_le_left hQ'nn hK1
-    have h3 : (0 : Real) ≤ (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+    have h3 : (0 : Real) ≤ (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac)) :=
       mul_nonneg hKnn hQ'nn
     linarith
   have hexp : 200 * (n ^ 6 + 1) *
-        (P + (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) =
+        (P + (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac)) =
       200 * ((n ^ 6 + 1) * P) +
-        200 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by ring
+        200 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac))) := by ring
   rw [hexp]
   linarith
 
@@ -1055,17 +1214,17 @@ theorem connDiffDot_le_speed
 
 /-- **Degenerate-case collapse of the K1C-b right-hand side.**  When the two metrics agree at
 time `t`, every carrier on the right of `connSpeedLow_normSq_le` vanishes, so that right-hand
-side is `0` — for *every* value of the background bounds `Λ`, `B₁`, `B₂`.  Companion of
+side is `0` — for *every* value of the background bounds `Λ`, `B₁`, `B₃`.  Companion of
 `nablaRmDiffSq_self`, and the formal half of the counterexample recorded in the
 `connSpeedLow_normSq_le` docstring. -/
 theorem connSpeedRHS_self (g₁ g₂ : Real → SmoothRiemannianMetric I M) {t : Real} (x : M)
     (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
     (hS : IsRmDiffField (I := I) (g₁ t) (g₂ t) S)
-    (hg : g₁ t = g₂ t) (Λ B₁ B₂ : Real) :
-    9 * (Module.finrank Real E : Real) ^ 6 *
+    (hg : g₁ t = g₂ t) (Λ B₁ B₃ : Real) :
+    200 * ((Module.finrank Real E : Real) ^ 6 + 1) *
         (nablaRmDiffSq (I := I) (g₁ t) S x +
-          (1 + Λ) ^ 2 * (B₁ + B₂) *
+          (1 + Λ) ^ 2 * (B₁ + B₃) *
             (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
               connDiffSq (I := I) (g₁ t) (g₂ t) x)) = 0 := by
   have hzero : ∀ s : Nat,
@@ -1079,19 +1238,18 @@ theorem connSpeedRHS_self (g₁ g₂ : Real → SmoothRiemannianMetric I M) {t :
 
 /-- **K1C-b: the bound on the lowered invariant speed of the connection difference.**
 
-`|g₁(∂ₜ(∇¹−∇²)·, ·)|²_{g₁} ≤ C(n)·(|∇¹S₀₄|² + (1+Λ)²(B₁+B₂+B₃+B₄)(|h₀₂|² + |A₀₃|²))`.
+`|g₁(∂ₜ(∇¹−∇²)·, ·)|²_{g₁} ≤ 200(n⁶+1)·(|∇¹S₀₄|² + (1+Λ)²(B₁+B₃)(|h₀₂|² + |A₀₃|²))`.
 
-**Repaired interface (ruling R8).**  An earlier version of this statement took only `hA`,
-`hRF₁`, `hRF₂` and was *false*: those do not determine `Adot`, because recovering `∂ₜΓ` from
-`∂ₜg` interchanges `∂ₜ` with a spatial derivative and so needs joint `(t, y)` regularity.  The
-counterexample and the full analysis are the permanent record in `ForwardUniqueConnBound.md`;
-`connSpeedRHS_self` above is its machine-checked half.  The repair adds the honest K1 input
-`hΓ` — the conclusion of `ChristoffelEvolutionEquationInFrameOn`, discharged from a solution
-pair by `christoffelEvolution_of_solution` — with `hA` kept as the realisation link, plus the
-two zeroth-order background norms `B₃ ≥ |Ric₂|²` and `B₄ ≥ |Rm₂|²`.
+**Repaired interface (ruling R8).**  An earlier version of this statement took only `hA` and
+the two Ricci-flow equations and was *false*: those do not determine `Adot`, because recovering
+`∂ₜΓ` from `∂ₜg` interchanges `∂ₜ` with a spatial derivative and so needs joint `(t, y)`
+regularity.  The counterexample and the full analysis are the permanent record in
+`ForwardUniqueConnBound.md`; `connSpeedRHS_self` above is its machine-checked half.  The repair
+adds the honest K1 input `hΓ` — the conclusion of `ChristoffelEvolutionEquationInFrameOn`,
+discharged from a solution pair by `christoffelEvolution_of_solution` — with `hA` kept as the
+realisation link, plus the zeroth-order background norm `B₃ ≥ |Ric₂|²`.
 
-**Status: everything proved except the contracted trace.**  The proof runs end to end; its one
-`sorry` is the local `htrace` step and nothing else.  What is green:
+**Proved, in three layers.**
 
 * **Layer A** — `coeff_adot_eq` pins the frame coefficients of `Adot` by uniqueness of
   derivatives against `hΓ`, and `connSpeedLow_eq` splits the lowering into
@@ -1100,30 +1258,21 @@ two zeroth-order background norms `B₃ ≥ |Ric₂|²` and `B₄ ≥ |Rm₂|²`
   term, `lowerHam_eq_perm` identifies it with `hamSum (∇Ric)`, `hamSum_sub` subtracts the two
   flows before the slot combination and `hamSum_normSq_le` costs a factor `10`
   (`normSq0S_perm3` makes each slot summand isometric).  `nablaRicDiff_le` then splits off
-  `8n³·|A₀₃|²·|Ric₂|²` — this is what `B₃` is for.
+  `8n³·|A₀₃|²·|Ric₂|²` — this is what `B₃` is for — and `nablaRicDiff_trace_le` converts the
+  surviving `∇¹(Ric₁ − Ric₂)` into `n⁵·|∇¹S₀₄|²`.  That last step is where `[I.Boundaryless]`
+  enters: it commutes `∇` past the metric trace, which is pure metric compatibility and *not*
+  second Bianchi.
 * **the `Φ`-defect half** — `lowerBilin_normSq_le` gives `|h₀₂(Γ̇₂·,·)|² ≤ |h₀₂|²·|g₁(Γ̇₂·,·)|²`
   and `lowerBilin_metric_le` gives `|g₁(Γ̇₂·,·)|²_{g₁} ≤ Λ²·|g₂(Γ̇₂·,·)|²_{g₁}` from the
   *one-sided* `hΛ`.
-* **the constants** — `connSpeed_arith`, kept as pure real arithmetic so that `nlinarith` never
-  meets the (very large) tensor atoms.
 
-**The one frontier: `∇¹(Ric₁ − Ric₂) = tr_{g₁}(∇¹S₀₄)`.**  Route, fully scoped: `ricciDiff_eq_trace`
-(`Evolution/ForwardUniqueRatePro.lean`) gives `Ric₁ − Ric₂ = tr_{g₁}(S₀₄∘rm04TraceSlots)`
-pointwise with **no residual `h₀₂` term** — both flows are lowered *and* traced with `g₁` —
-hence as bundled fields by `DFunLike.ext`; `nablaRealizes_metricTraceFirstTwo`
-(`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`) commutes `∇` past the trace up to
-`traceNablaShuffle`; a realizer-uniqueness step (`TotalNabla0SRealizes` is pointwise on
-`Fin.cons (X x) slots`, so two realizers agree via `ContMDiffSection.exists_eq_at`) identifies
-it with `metricNabla0S`; then `traceNormSq_le` at `s = 3` gives the `n⁵` and
-`normSq0S_domDomCongr` absorbs both reindexings.  This is pure `∇`-past-trace commutation,
-*not* second Bianchi.  It needs `[I.Boundaryless]` (authorized, ruling R9(a)) and the
-field-level `MultilinearSection.domDomCongr` plumbing that `ForwardUniqueReLower.nabla_reLower_eval`
-already exercises.
-
-**Unused inputs, pending the R9(c) prune once `htrace` lands:** this route consumes `B₁` and
-`B₃` but *not* `B₂`, `B₄` (hence not `Rm₂`/`hRm₂` either), and consumes `hΓ`/`hA` rather than
-`hRF₁`/`hRF₂`.  The constant `200(n⁶+1)` is honest for the route as written. -/
-theorem connSpeedLow_normSq_le
+`connSpeed_arith` does the constant bookkeeping as pure real arithmetic, so that `nlinarith`
+never meets the (very large) tensor atoms.  The input list is exactly what the proof consumes
+(ruling R9(c)): the two Ricci-flow equations, `Rm₂` and the background norms `B₂ ≥ |∇²Rm₂|²`,
+`B₄ ≥ |Rm₂|²` were dropped, since Hamilton's formula reaches `Adot` through `hΓ` alone and the
+trace step produces no `Rm₂` term.  The constant `200(n⁶+1)` is what the route yields; the
+`+1` removes the `finrank = 0` case split at no mathematical cost. -/
+theorem connSpeedLow_normSq_le [I.Boundaryless]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (y : M) →
@@ -1138,11 +1287,6 @@ theorem connSpeedLow_normSq_le
       (n := (∞ : WithTop ℕ∞)) 2)
     (hRic₁ : ∀ y : M, Ric₁ y = metricRicciAt (I := I) (g₁ t) y)
     (hRic₂ : ∀ y : M, Ric₂ y = metricRicciAt (I := I) (g₂ t) y)
-    (Rm₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 4)
-    (hRm₂ : ∀ y : M, Rm₂ y =
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
-        (I := I) (g₁ t) (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) y)
     (gInv₁ gInv₂ : Real ->
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (hgInv₁ : MetricInverseInBasis_gen (I := I) (g₁ t) x (hframe.toBasisAt hx)
@@ -1173,25 +1317,15 @@ theorem connSpeedLow_normSq_le
           CovariantDerivative.difference (metricCov (I := I) (g₁ r))
             (metricCov (I := I) (g₂ r)) x Y X)
         ((Adot x Y) X) t)
-    (hRF₁ : ∀ (y : M) (X Y : TangentSpace I y),
-      HasDerivAt (fun r : Real => (g₁ r).inner y X Y)
-        ((-2 : Real) * metricRicciAt (I := I) (g₁ t) y
-          (fun a : Fin 2 => if a = 0 then X else Y)) t)
-    (hRF₂ : ∀ (y : M) (X Y : TangentSpace I y),
-      HasDerivAt (fun r : Real => (g₂ r).inner y X Y)
-        ((-2 : Real) * metricRicciAt (I := I) (g₂ t) y
-          (fun a : Fin 2 => if a = 0 then X else Y)) t)
-    {Λ B₁ B₂ B₃ B₄ : Real} (hΛ0 : 0 ≤ Λ)
+    {Λ B₁ B₃ : Real} (hΛ0 : 0 ≤ Λ)
     (hΛ : ∀ v : TangentSpace I x, (g₁ t).inner x v v ≤ Λ * (g₂ t).inner x v v)
     (hB₁ : normSq0S (I := I) (g₁ t) x 3 (metricNabla0S (I := I) (g₂ t) Ric₂ x) ≤ B₁)
-    (hB₂ : normSq0S (I := I) (g₁ t) x 5 (metricNabla0S (I := I) (g₂ t) Rm₂ x) ≤ B₂)
-    (hB₃ : normSq0S (I := I) (g₁ t) x 2 (Ric₂ x) ≤ B₃)
-    (hB₄ : normSq0S (I := I) (g₁ t) x 4 (Rm₂ x) ≤ B₄) :
+    (hB₃ : normSq0S (I := I) (g₁ t) x 2 (Ric₂ x) ≤ B₃) :
     normSq0S (I := I) (g₁ t) x 3
         (lowerBilin (I := I) (metricTensorField (I := I) (g₁ t) x) (Adot x)) ≤
       200 * ((Module.finrank Real E : Real) ^ 6 + 1) *
         (nablaRmDiffSq (I := I) (g₁ t) S x +
-          (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) *
+          (1 + Λ) ^ 2 * (B₁ + B₃) *
             (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
               connDiffSq (I := I) (g₁ t) (g₂ t) x)) := by
   classical
@@ -1237,11 +1371,8 @@ theorem connSpeedLow_normSq_le
     rw [hT₂]
     exact le_trans (hamSum_normSq_le (I := I) (g₁ t) _) (by linarith)
   rw [← metricDiffSq_def (I := I) (g₁ t) (g₂ t) x] at hd1
-  -- ## the contracted trace — THE ONE REMAINING FRONTIER (see the docstring for the route)
-  have htrace : normSq0S (I := I) (g₁ t) x 3
-      (metricNabla0S (I := I) (g₁ t) (Ric₁ - Ric₂) x) ≤
-      (Module.finrank Real E : Real) ^ 5 * nablaRmDiffSq (I := I) (g₁ t) S x := by
-    sorry
+  -- ## the contracted trace
+  have htrace := nablaRicDiff_trace_le (I := I) (g₁ t) (g₂ t) S hS Ric₁ Ric₂ hRic₁ hRic₂ x
   -- ## nonnegativity bookkeeping
   have hnnn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
   have hpow : ∀ a : ℕ, a ≤ 6 →
@@ -1259,20 +1390,18 @@ theorem connSpeedLow_normSq_le
   exact connSpeed_arith hnnn (nablaRmDiffSq_nonneg (I := I) (g₁ t) S x)
     (normSq0S_nonneg (I := I) (g₁ t) x 2 _) (normSq0S_nonneg (I := I) (g₁ t) x 3 _)
     (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 3 _) hB₁)
-    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 5 _) hB₂)
-    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 2 _) hB₃)
-    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 4 _) hB₄) hΛ0
+    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 2 _) hB₃) hΛ0
     hham hsplit htrace hB₃ hd1 hd2 hd3 (hpow 5 (by norm_num)) (hpow 3 (by norm_num))
 
 /-- **K1C-b, the ruling's bound on `|∂ₜA₀₃|²`.**  The speed of the connection-difference
 carrier is controlled pointwise by the three difference carriers and the `∇¹S₀₄` integrand,
-with all background norms (`Λric`, `Λ`, `B₁`, `B₂`) as named hypothesis arguments.  This is the
-statement `forwardUniqueRate_le` is meant to consume; it is proved from `connDiffDot_le_speed`
-(green) and `connSpeedLow_normSq_le`, and carries the same repaired (ruling R8) input list —
-the K1 Hamilton input `hΓ` and the four named background norms.  It therefore inherits the one
-`sorry` of `connSpeedLow_normSq_le`; downstream wiring (`adotLe`) absorbs `B₃`/`B₄` into the
-slab constants. -/
-theorem connDiffDot_normSq_le
+with the background norms (`Λric ≥ |Ric₁|²`, `Λ` for `g₁ ≤ Λg₂`, `B₁ ≥ |∇²Ric₂|²`,
+`B₃ ≥ |Ric₂|²`) as named hypothesis arguments.  This is the statement `forwardUniqueRate_le` is
+meant to consume; it is proved from `connDiffDot_le_speed` and `connSpeedLow_normSq_le` and
+carries the latter's input list — the K1 Hamilton input `hΓ` and the two background norms —
+together with its `[I.Boundaryless]`.  Downstream wiring (`adotLe`) absorbs `B₃` into the slab
+constants. -/
+theorem connDiffDot_normSq_le [I.Boundaryless]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (y : M) →
@@ -1287,11 +1416,6 @@ theorem connDiffDot_normSq_le
       (n := (∞ : WithTop ℕ∞)) 2)
     (hRic₁ : ∀ y : M, Ric₁ y = metricRicciAt (I := I) (g₁ t) y)
     (hRic₂ : ∀ y : M, Ric₂ y = metricRicciAt (I := I) (g₂ t) y)
-    (Rm₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 4)
-    (hRm₂ : ∀ y : M, Rm₂ y =
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
-        (I := I) (g₁ t) (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) y)
     (gInv₁ gInv₂ : Real ->
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (hgInv₁ : MetricInverseInBasis_gen (I := I) (g₁ t) x (hframe.toBasisAt hx)
@@ -1322,33 +1446,23 @@ theorem connDiffDot_normSq_le
           CovariantDerivative.difference (metricCov (I := I) (g₁ r))
             (metricCov (I := I) (g₂ r)) x Y X)
         ((Adot x Y) X) t)
-    (hRF₁ : ∀ (y : M) (X Y : TangentSpace I y),
-      HasDerivAt (fun r : Real => (g₁ r).inner y X Y)
-        ((-2 : Real) * metricRicciAt (I := I) (g₁ t) y
-          (fun a : Fin 2 => if a = 0 then X else Y)) t)
-    (hRF₂ : ∀ (y : M) (X Y : TangentSpace I y),
-      HasDerivAt (fun r : Real => (g₂ r).inner y X Y)
-        ((-2 : Real) * metricRicciAt (I := I) (g₂ t) y
-          (fun a : Fin 2 => if a = 0 then X else Y)) t)
-    {Λric Λ B₁ B₂ B₃ B₄ : Real}
+    {Λric Λ B₁ B₃ : Real}
     (hΛric : normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x) ≤ Λric)
     (hΛ0 : 0 ≤ Λ)
     (hΛ : ∀ v : TangentSpace I x, (g₁ t).inner x v v ≤ Λ * (g₂ t).inner x v v)
     (hB₁ : normSq0S (I := I) (g₁ t) x 3 (metricNabla0S (I := I) (g₂ t) Ric₂ x) ≤ B₁)
-    (hB₂ : normSq0S (I := I) (g₁ t) x 5 (metricNabla0S (I := I) (g₂ t) Rm₂ x) ≤ B₂)
-    (hB₃ : normSq0S (I := I) (g₁ t) x 2 (Ric₂ x) ≤ B₃)
-    (hB₄ : normSq0S (I := I) (g₁ t) x 4 (Rm₂ x) ≤ B₄) :
+    (hB₃ : normSq0S (I := I) (g₁ t) x 2 (Ric₂ x) ≤ B₃) :
     normSq0S (I := I) (g₁ t) x 3 (connDiffDot (I := I) g₁ g₂ Adot t x) ≤
       8 * Λric * connDiffSq (I := I) (g₁ t) (g₂ t) x +
         2 * (200 * ((Module.finrank Real E : Real) ^ 6 + 1) *
           (nablaRmDiffSq (I := I) (g₁ t) S x +
-            (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) *
+            (1 + Λ) ^ 2 * (B₁ + B₃) *
               (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
                 connDiffSq (I := I) (g₁ t) (g₂ t) x))) := by
   refine le_trans (connDiffDot_le_speed (I := I) g₁ g₂ Adot t x hΛric) ?_
   have h := connSpeedLow_normSq_le (I := I) g₁ g₂ Adot frame hframe hu hx S hS
-    Ric₁ Ric₂ hRic₁ hRic₂ Rm₂ hRm₂ gInv₁ gInv₂ hgInv₁ hgInv₂ nablaRic₁ nablaRic₂
-    hNR₁ hNR₂ hΓ hA hRF₁ hRF₂ hΛ0 hΛ hB₁ hB₂ hB₃ hB₄
+    Ric₁ Ric₂ hRic₁ hRic₂ gInv₁ gInv₂ hgInv₁ hgInv₂ nablaRic₁ nablaRic₂
+    hNR₁ hNR₂ hΓ hA hΛ0 hΛ hB₁ hB₃
   linarith
 
 end MainBound

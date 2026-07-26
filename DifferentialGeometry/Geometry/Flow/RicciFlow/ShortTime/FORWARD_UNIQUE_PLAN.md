@@ -292,6 +292,29 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №42 (2026-07-26, β4 ACCEPTED+COMMITTED — **CONNBOUND 0-SORRY: the
+  Kotschwar |∂ₜA₀₃|² bound is PROVED on the repaired honest interface;
+  K1C-b 100%**): fresh executor closed `htrace` — realizer uniqueness
+  ALREADY EXISTED (`totalNabla0SRealizes_unique`,
+  `Tensor/RSTensor/NablaDomDomCongr.lean:184`; duplicate in
+  `HCGCompactness/ProductMFoldNorm.lean:82` — relocation TODO to
+  deduplicate), and the ∇-past-reindexing half needed no realizer at all
+  (`totalNabla0SFun_domDomCongr` fibre-level + `metricNabla0S` rfl).
+  Planner re-audit: hygiene clean, ZERO tactic sorries, both endpoints +
+  `nablaRicDiff_trace_le`/`connSpeedRHS_self` 3-axiom by direct lean.
+  Final interface: `[I.Boundaryless]` per-theorem (5 sites; availability
+  at the consumer verified by planner — ExtendViaUniqueness.lean:58);
+  PRUNED `Rm₂/hRm₂/hRF₁/hRF₂/B₂/B₄` (verified by proof inspection AND
+  the unusedVariables linter); RHS group `(B₁+B₃)`; constant `200(n⁶+1)`
+  honest.  1472 lines.  Durable lesson: `n+k` vs literal is defeq for
+  `exact` but NOT for `rw`/`simp only` (dependent index positions fail
+  outright) — fix the house form of the derivative rank (`s+2+1`) and
+  let `exact` do arithmetic.  **β of the №31 bundle: DONE.**  Explicitly
+  NOT done (final-wiring-pass items, not this brick): the lemma
+  discharging `forwardUniqueRate_le`'s `hAdot` from
+  `connDiffDot_normSq_le` (0%), and the solution-level discharge of hΓ
+  (`christoffelEvolution_of_solution` + regularity triple — same tail
+  machinery α4 is building).
 - №41 (2026-07-26, α3 ACCEPTED+COMMITTED — **bianchi2 CLOSED without new
   Tensor API; static side complete bar hcomm; K2-B ≈55%**): fresh executor
   extended `Rm04Producer.lean` 110→805 lines, 0 sorry; planner re-audit
