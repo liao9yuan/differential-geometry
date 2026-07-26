@@ -1688,3 +1688,32 @@ DISPATCHED next (fresh executor): **koszul-deriv2 session 1** — state and prov
 `connDiff_koszul_deriv`), the gate to a=2.  Honest-partial allowed; expected
 2–4 sessions to a=2 overall.  Parallel: atom-2 finisher still in flight
 (Sobolev/TensorHilbert files, disjoint).
+
+## Planner acceptance №27 (2026-07-25) — koszul-deriv2 PROVED (1 session); Kc atom 2 GREEN (2/4)
+
+Both lanes accepted and committed (`2b0f4af3a`, `a98ece56c`); koszul2
+planner-probed axiom-clean independently; leaf 0 sorryAx on targeted build.
+
+- **`connDiff_koszul_deriv2` closed sorry-free in ONE session** (recon estimate
+  was 1–2 of 2–4): master differentiated form via `congrArg (∂_V)` of the a=1
+  statement — the pattern that makes a ≥ 3 cheap (rank-generic Tensor engines,
+  quadratic reuses the a=1 combo engine unchanged).  Honest deviation on
+  record: the identity mirrors its a=1 sibling's IPS environment (confined;
+  engines NormedSpace-only; no new consumer demand).
+- **lieCorr0 atoms 2/4**: `lc0InsertDiff` green via a SIMPLER route than
+  spec'd (crude wAlphaB triangle; cancellation kept as sharp-bound seed);
+  producer gained the public HOIST + the (1,1) ballUniform producer.  Atom-3
+  honest read: HOIST does NOT route lc0VB/lc0AMix; their template is the
+  committed same-shape `deTurckLieArm1Coeff…ballUniform` (:4812) — i.e. the
+  contraction-Leibniz "engine question" may again be a recombination in
+  disguise; the atom-3 session decides.
+
+DISPATCHED (fresh executors, disjoint):
+- **a=2 session 2**: the dual core (`covDerivConnDiff2_g1_le`, mirror of B2's)
+  + the operator Leibniz `∇₂²(A⋆S) = (∇₂²A)⋆S + 2(∇₂A)⋆∇₂S + A⋆∇₂²S`; then
+  (if budget) the `covStepDiff2_exists_const` assembly.
+- **lieCorr0 atom 3 (`lc0VB`)** per the Arm1 template anchor.
+
+Honest numbers: (N) theorem 0%; machinery ≈ 65% (item-6: gate identity done,
+dual core + Leibniz + assembly + m=2 glue left; item-2: Kc 2/4 + endpoints +
+threeArm/smooth-core (main risk, unstarted)).
