@@ -513,3 +513,35 @@ Scope note for brick 3 (DeTurckLie wire-in): this deliverable is the arm0 consti
 (`RiemannCoeff − CurvCoeff`) of Ψ₀ and the reusable EXEMPLAR.  The deTurckLie / lieCorr0 fields
 are DIFFERENT coefficients, so they need their own R-free siblings built by the SAME pattern
 (gate + symmS bridge + L² 5-term triangle); they cannot consume this arm0 theorem verbatim.
+
+## 11d. STATUS (2026-07-26): BRICK 3 (DeTurckLie) — STATEMENT LANDED, FORK CLOSED, 1 FRONTIER
+
+New leaf `Analysis/Sobolev/TensorHilbert/DeTurckLieCoeffDiffRadiusFree.lean` (per-file note
+`DeTurckLieCoeffDiffRadiusFree.md`).  Focused check GREEN; `#print axioms` on both public theorems
+= `[propext, sorryAx, Classical.choice, Quot.sound]` (honest partial — one flagged `sorry`).
+
+- `deTurckLieCoeffField_summed_l2_radiusFree` — **the deliverable, STATEMENT LANDED**, single-tensor
+  (`g₁`+`htie`), RHS over `symmS g₀ T`, top window `a+2` / low `a+1` (brick-2 shape), hyps
+  `ha_super`+`gFibreOpBound`+`δ≤δ₀`+`htie`, NO `R`, NO ball.  Summed→per-order reduction PROVED
+  (verbatim clone of brick 2's summed proof).
+- `deTurckLieCoeffField_perOrder_l2_radiusFree` — **the SINGLE frontier (1 `sorry`).**
+
+**The §6 fork is CLOSED (confirmed no wall / no unreceivable term).**  The DeTurckLie field routes
+through the private DeTurck-VF tower (`wAlpha`/`wOmega`/`wXi`/`wCA`) into exactly TWO ball-uniform
+integrators: `diagonalProductGrid_rfns_integral_ballUniform_succ` (VF :996) and
+`antidiagonalTupleGrid_integral_ballUniform_tameWindow` (monolith :8556).  BOTH have the
+**byte-identical integrand** to the radius-free workhorse `antidiagonalTupleGrid_integral_radiusFree`
+(:14455); R lives ONLY in their constant (`Λ = C_emb·R` before the `^{7k}` grid).  The fixed-`Λ₀` +
+`hsup` workhorse is a drop-in for BOTH (the tameWindow's per-index top jets sum into the top/low
+envelope).  Index bookkeeping gives EXACTLY `Atop·‖∇^{i+2}P‖² + Alow·(1+∑_{j≤i+1}‖∇ʲP‖²)`, no
+cross-contamination.  The frontier's proof is therefore mechanical, NOT a wall — it is a large but
+routine bottom→top re-derivation of the private tower with the integrator swap.
+
+**Why not fully closed:** the tower needs the PRIVATE `wAlpha`/`wOmega`/`wXi` defs; it must live in
+(or expose from) `DeTurckVectorFieldL2JetBound.lean` (already 4596 lines > limit ⟹ split first).
+That is brick 3b (~3-5 sessions, ~1200-1500 lines).  Full producer table + placement plan in the
+per-file `.md`.
+
+**Brick 4 (lieCorr0) is mechanizable** from this pattern: same two integrators, same g₁⁻¹/connDiff
+machinery, same engine+summed shapes — a clone once brick 3b's shared R-free tower exists.  No new
+integrator, no new frontier expected.
