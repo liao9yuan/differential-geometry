@@ -263,21 +263,33 @@ namespace `DifferentialGeometry.HCGCompactness`).  B3 target `hA1`: `UnifCovSumC
 
 ## Status / next
 
+- 2026-07-25 (session 8 — the `hA1` discharge is WIRED): `covStepDiff_of_jets` landed in
+  `UnifCovSumCross.lean` (public, axioms `[propext, Classical.choice, Quot.sound]`, whole-module
+  build green, zero warnings on the file).  It is the fully-discharged, `D_N`-facing jet variant of
+  `covStepDiff_jet_le`: it drops `hCA`/`hA1` and takes the metric-jet inputs, discharging `hA1` via
+  `covDerivConnDiff_gJet_le` with `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.  `UnifCovSumCross.lean` now
+  `import`s this file (verified acyclic).  **This closes the "consumer side has to add that import"
+  item** for the T-B chain.  Design ruling (from the coordinator): there were no live call sites —
+  the "three T-B consumers" are the not-yet-written `D_N` recursion — so the metric-jet hypotheses
+  went into the NEW variant's SIGNATURE (honest-input-bundle style), not threaded through existing
+  signatures.  KEY subtlety recorded there: `covStepDiff_jet_le`'s own NA-fold measures
+  `∇g₂ w.r.t. g₁` while this endpoint discharges `hA1` via `∇g₁ w.r.t. g₂`, so the comparability is
+  shared through `metricUniformEquivalentOn_symm` (one `hEq`, same `Λ`) but the two first-order jets
+  are genuinely distinct facts — `covStepDiff_of_jets` carries BOTH `hJet1` (∇g₁/g₂) and `hJet1'`
+  (∇g₂/g₁), sharing the constant `Λ'`.  The **norm** variant (of `covStepDiff_norm_le`, NA explicit)
+  was NOT added: its statement alone exceeds the coordinator's ≤10-line budget and the jet variant is
+  the `D_N` API; norm stays abstract and can be added trivially (same one-line composition) if wanted.
 - 2026-07-25 (session 7): **B2 CLOSED inside this file.**  `covDerivConnDiff_gJet_le` proved
   sorry-free with the predicted constant `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`; axiom-clean; whole-module
   build green with zero warnings.  `hA1` of `covStepDiff_norm_le` verified dischargeable by an
   actual (throwaway) build, not by inspection.  Nothing in this file is a frontier any more —
   every declaration is proved.
-  **Next is wiring, not mathematics**, and it is OUTSIDE this file:
-  1. `UnifCovSumCross.lean` must `import …HCGCompactness.ConnDiffDerivBound` and replace the `hA1`
-     binder of `covStepDiff_norm_le` (and of anything above it that still threads `hA1`/`CA`
-     abstractly) with the concrete endpoint, instantiating `CA := 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)`.
-     Check whether the metric-jet hypotheses (`hEq`, `hJet1`, `hJet2`, `hx`) are already in scope at
-     those call sites or have to be added to their signatures — that is the only real design
-     question left.
-  2. Same for the 2a-tel composition-(b) consumer.
-  3. Once both consumers are on the concrete bound, discharge the home debt: promote
-     `covDerivConnDiff_fibreNorm_le` (and possibly the dual core) to
+  **Remaining wiring (OUTSIDE this file):**
+  1. DONE (session 8, above): `UnifCovSumCross.lean` imports this file and exposes
+     `covStepDiff_of_jets`, the discharged T-B jet step.
+  2. The 2a-tel composition-(b) consumer (same `covDerivConnDiff` sub-frontier) can now discharge
+     `hA1` the same way once that consumer is written.
+  3. Home debt (unchanged): promote `covDerivConnDiff_fibreNorm_le` (and possibly the dual core) to
      `Geometry/Curvature/CovDerivConnDiffFibreExtraction.lean`, and de-privatise the parent's
      `covGrad_connDiffSection_flat_eval_eq_inner` so this file's private copy can be dropped.
   Note `covDerivConnDiff_fibreNorm_le` (P1) is now confirmed UNUSED by the dual route.  Keep it: it

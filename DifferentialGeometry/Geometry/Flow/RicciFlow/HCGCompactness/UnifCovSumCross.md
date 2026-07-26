@@ -652,6 +652,35 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-25 (session 12, `hA1` DISCHARGE WIRED — LANDED, GREEN): **`covStepDiff_of_jets` PROVED
+  sorry-free** in `section DiffStepNorm`, the fully-discharged `D_N`-facing jet step.  Authoritative
+  `lake build +…UnifCovSumCross` EXIT=0 (9482 jobs); `#print axioms covStepDiff_of_jets` =
+  `[propext, Classical.choice, Quot.sound]` (stripped after audit); zero warnings on the file.
+  Added `import …HCGCompactness.ConnDiffDerivBound` (verified acyclic; nothing imports this file, and
+  `ConnDiffDerivBound` does not).  This RESOLVES the Session-11 "REMAINING (i) discharge `hA1`" item:
+  B2's frontier P2 was NOT an open sub-frontier after all — B2 closed via the **dual/eval route**
+  (`covDerivConnDiff_gJet_le`, `ConnDiffDerivBound.lean`, `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`), which
+  produces the ext-form `hA1` directly (no `covGrad connDiffSection` fibre-norm P2 needed).
+  - **`covStepDiff_of_jets`** = `covStepDiff_jet_le` with `hCA`/`hA1` dropped and replaced by the
+    metric-jet input bundle: `hEq : MetricUniformEquivalentOn K g₂ g₁ Λ`,
+    `hJet1/hJet2 : MetricCovDerivOrderBoundOn K 1/2 g₁ g₂ Λ'/Λ''`, and `hJet1' :
+    MetricCovDerivOrderBoundOn K 1 g₂ g₁ Λ'`.  Conclusion = `covStepDiff_jet_le`'s shape with
+    `CA := (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`, i.e. constant
+    `s·n^{(s+2)/2}·((3/2)·Λ⁴·(Λ'' + Λ·Λ'²) + (3/2)·√(Λ³)·Λ')`.
+  - **Metric-role subtlety (the reason there are TWO first-order jets)**: `covStepDiff_jet_le`'s own
+    NA-fold uses `∇g₂ w.r.t. g₁` (`hjet`), while discharging `hA1` needs `∇g₁ w.r.t. g₂`
+    (`hJet1/hJet2`).  The two comparabilities are the same fact up to `metricUniformEquivalentOn_symm`
+    (same `Λ`) so ONE `hEq` is shared, but `∇g₂/g₁` and `∇g₁/g₂` are genuinely distinct quantities —
+    hence both `hJet1` and `hJet1'`, sharing only the constant `Λ'`.  This is honest-input-bundle
+    minimal; there was no shorter signature.
+  - **Design ruling (coordinator)**: no live call sites exist yet (the three T-B consumers are the
+    unwritten `D_N` recursion), so the inputs went into `covStepDiff_of_jets`'s SIGNATURE rather than
+    being threaded through existing ones.  The **norm** variant (of `covStepDiff_norm_le`, NA
+    explicit) was deliberately NOT added — its statement exceeds a ~10-line budget and the jet variant
+    is the `D_N` API; the same one-line composition discharges it if ever wanted.
+  - **REMAINING for the `D_N` recursion**: only (ii) — run the all-`∇₂` schematic recursion in the
+    T-B files, feeding `covStepDiff_of_jets` at each `covStep g₂`-of-`diffStep` step.  `hA1` is no
+    longer a frontier for any T-B consumer.
 - 2026-07-25 (session 11, B3 — LANDED, GREEN): **`covStepDiff_norm_le` + `covStepDiff_jet_le`
   PROVED sorry-free** in `UnifCovSumCross.lean` `section DiffStepNorm`.  Authoritative
   `lake build +…UnifCovSumCross` EXIT=0 (8648 jobs); `#print axioms` = `[propext, Classical.choice,

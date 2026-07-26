@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
@@ -993,6 +994,42 @@ theorem covStepDiff_jet_le
           mul_le_mul_of_nonneg_left hstep (by positivity)
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
           (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by ring
+
+/-- **Fully-discharged base-Leibniz jet step bound** (brick T-B, the `D_N`-recursion endpoint with
+`hA1` supplied by B2).  Same conclusion shape as `covStepDiff_jet_le`, but the abstract order-1
+connection-difference-derivative bound `hA1` is discharged by `covDerivConnDiff_gJet_le`, instantiating
+`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.  Inputs: `Λ`-comparability of `g₂, g₁` on `K` (`hEq`), the first- and
+second-order metric covariant-derivative bounds `Λ', Λ''` of `g₁` measured against `g₂`
+(`hJet1`, `hJet2`, the `∇₂A` discharge), and a matching first-order bound of `g₂` against `g₁`
+(`hJet1'`, the a=0 `A`-atom `NA` fold that `covStepDiff_jet_le` performs internally). -/
+theorem covStepDiff_of_jets
+    [I.Boundaryless] [CompactSpace M]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) {Λ Λ' Λ'' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet1' : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hx : x ∈ K) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+        (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+          (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) *
+        (Real.sqrt (normSq0S (I := I) g₂ x s (S x)) +
+          Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))) := by
+  have hJ2nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 2 g₁ g₂ x := Real.sqrt_nonneg _
+  have hJ1nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 1 g₁ g₂ x := Real.sqrt_nonneg _
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans hJ2nn (hJet2 x hx)
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans hJ1nn (hJet1 x hx)
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
+  have hCA : (0 : ℝ) ≤ 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) := by positivity
+  exact covStepDiff_jet_le (I := I) g₁ g₂ s S x hCA
+    (fun v w u => DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_gJet_le
+      (I := I) hEq hJet1 hJet2 hx v w u)
+    (metricUniformEquivalentOn_symm (I := I) hEq) hJet1' hx
 
 end DiffStepNorm
 
