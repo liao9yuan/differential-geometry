@@ -652,6 +652,21 @@ end VolumeMeasure
 ```
 
 ## Status
+- 2026-07-26 (session 14, N=3 GLUE — LANDED, GREEN, in the NEW leaf `UnifCovSumN3.lean`):
+  **`hAcc` discharged at m=2; the unconditional N=3 endpoint is proved.**  `covStepAcc2_le`
+  (the m=2 accumulator bound, `∃ C ≥ 0` uniform in `T,x`: `R₂ ≤ C·(P₀+P₁+P₂)` — sharp at
+  range(m+1)) + `iterCovG1_three` (`√normSq0S(g₂, iterCov g₁ r T 3 x) ≤ C·∑_{k<4} P_k`,
+  `∃ C ≥ 0` uniform in `T,x`) PROVED sorry-free; targeted module build green; `#print axioms` =
+  `[propext, Classical.choice, Quot.sound]` (literal) on both.  The glue lives in the new leaf
+  because `ConnDiffDeriv2Bound` imports THIS file (cycle) and is itself at the 3000-line cap.
+  Reconciliation: `∇₂(telescAccum 2) = ∇₂²(A⋆T) [the a=2 atom `covStepDiff2_exists_const`, s=r]
+  + ∇₂(A⋆(A⋆T)) + ∇₂(A⋆∇₂T) [both `covStepDiff_of_jets` at s=r+1, inner jets folded by
+  `diffStep_jet_one_le`/`covStepDiff_of_jets` at s=r]; `Racc 2 = C₂ + CA(r+1)·(cstep(r)+CA(r)+1)`.
+  The general-m frontier is now STATED as `hAcc_of_jets` (flagged `sorry`, jets through order m+1
+  as a `Λs`-family, consumer-exact range(m+2) sum) — the single remaining input for general N.
+  Session-13 lesson (1) re-confirmed the hard way: the fibre triangle MUST run on
+  `set`+`clear_value` opaque values; `respectTransparency false` does NOT substitute for it.
+  See `UnifCovSumN3.md` for the full ledger.
 - 2026-07-25 (session 13, D_N TELESCOPING — LANDED, GREEN): `Dtower` (def), `iterCovG1_le`
   (general, conditional on `hAcc`), and `iterCovG1_two` (unconditional `N=2`) PROVED sorry-free in
   `section DiffStepNorm`.  Authoritative `lake build +…UnifCovSumCross` EXIT=0 (9517 jobs, 55s);

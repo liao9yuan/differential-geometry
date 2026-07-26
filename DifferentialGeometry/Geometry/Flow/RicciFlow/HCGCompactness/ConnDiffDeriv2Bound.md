@@ -15,6 +15,12 @@ is the route + a stated frontier lemma, not a proof.**
   `covStepDiff2_exists_const`).  The `hAcc m = 2` consumer can now read `Racc 2 := C₂`,
   `hRnn 2 := ·.1` from `covStepDiff2_exists_const` directly (the glue in `UnifCovSumCross.lean` is
   the NEXT brick, out of scope here).**
+  - **GLUE DONE (2026-07-26): the consumer landed in the new leaf `UnifCovSumN3.lean`**
+    (`covStepAcc2_le` + the unconditional N=3 endpoint `iterCovG1_three`, both sorry-free,
+    axioms = the standard triple; the atom is consumed exactly as predicted, via the
+    `diffStep_leibniz`-style split of `∇₂(telescAccum 2)` into the atom + two
+    `covStepDiff_of_jets` pieces).  The leaf imports this file — remember it when splitting this
+    file per the HOME-DEBT plan.  See `UnifCovSumN3.md`.
   - **The norm CS (task 4, DONE):**
     - `covDConnDiff2_gJet_le` — the `g₂`-currency a=2 atom for `x ∈ K`:
       `√(g₂(∇₂²A(ext v',ext v,ext w,ext u)x)) ≤ CA₂·|v'||v||w||u|` with

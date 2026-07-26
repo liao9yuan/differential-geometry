@@ -1925,8 +1925,14 @@ slot-correction cancellation refinement, and value-honest statements
 throughout.
 
 IN FLIGHT: brick-4 part A (atgw assembly, sorry → lc0AMix-only) — written,
-iterating on its focused check; the hAcc m=2 glue (N=3 unconditional; new
-leaf likely, import direction reversed).
+iterating on its focused check; ~~the hAcc m=2 glue (N=3 unconditional; new
+leaf likely, import direction reversed)~~ **hAcc m=2 glue LANDED (2026-07-26,
+Fable executor): new leaf `HCGCompactness/UnifCovSumN3.lean` (import direction
+indeed reversed + ConnDiffDeriv2Bound at the line cap) — `covStepAcc2_le` (m=2
+accumulator bound, sharp at range(m+1)) + `iterCovG1_three` (N=3 unconditional)
+both sorry-free, axioms = the standard triple; general-m frontier STATED as
+`hAcc_of_jets` (flagged sorry, jets through order m+1).  Ledger:
+`UnifCovSumN3.md`.**
 
 QUEUE after these: lc0AMix (brick 4 final) → threeArm/Ψ₀ topSeparated
 assembly (Fork-A, ~3-5 sessions) → smooth-core layers 2-3 (~4-8) [item 2];
