@@ -292,6 +292,27 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №9 (2026-07-25, ACCEPTED — **K1C OUTCOME (B), the honest kind**):
+  **Agent-K1C delivered `Evolution/ForwardUniqueConnDot.lean`** (628 lines,
+  20 decls, 0 sorry; planner re-audit clean). K1C-a COMPLETE: the moving-
+  carrier two-term speed `∂ₜA₀₃ = −2Ric₁((∇¹−∇²)·,·) + g₁(∂ₜ(∇¹−∇²)·,·)` as
+  `connDiffDot` (genuine Tensor0SSpace 3); `connDiffLow_hasDerivAt_frame`
+  produces K3's `hA` VERBATIM (R3 debt discharged); `connDiffVec_hasDerivAt`
+  lifts K1's scalar components bilinearly, one chart frame per point, no atlas.
+  BONUS FINDING: `hPDE₂` NOT needed (only g₁ lowers) — endpoint input bundle
+  slimmed. `bilinOfComp`+`coeff_bilinOfComp`+`christoffelInFrame_sol` complete
+  the K1→K3 wiring modulo the caller's `HasDerivWithinAt→HasDerivAt`.
+  K1C-b DELIBERATELY NOT STATED (would hide four gaps behind a wrapper —
+  correct per house rules): missing (1) Tensor0SSpace fiber triangle/CS API
+  (smallest unblocker: `normSq0S_add_le` in `Tensor0SMetric.lean`),
+  (2) lowering-isometry (blocked on the №3 `lowerAllSpace` omit),
+  (3) generic (0,2)-lowering contraction bound, (4) the ∇Ric-difference →
+  trace(∇¹S₀₄) Bianchi expansion — NOTE: `contracted_bianchi_of_second` is a
+  hypothesis-shaped combinator, NOT a proved identity (check `second_bianchi`'s
+  true status during K4 planning; affects K2-B scope). Statement blocker:
+  no named `∇¹S₀₄` carrier yet. Durable lesson in the .md: Tensor0SSpace vs
+  bare CMM is an INSTANCE DIAMOND — cross it with `exact` (defeq), never
+  simp/rw; let `uncurryLeft` infer types.
 - №8 (2026-07-25, ACCEPTED — **K2.4+K2.5 OUTCOME (A)**): **Agent-K2E delivered
   `Evolution/ForwardUniqueRmBounds.lean`** (898 lines, 8 public + 11 private,
   0 sorry; planner re-audit clean). `fluxNormSq_le` (|U|² ≤ s²n^{s+1}|A₀₃|²|T|²,
