@@ -164,6 +164,10 @@ publics/producer; targeted build 9433 jobs OK).  Leaf 2282 lines (< 2500, no spl
 session 5 (the frontier discharge) consumes: `wAlpha_L2_topsep_rf` — top `Ktop·‖∇^{i+2}P‖²` + low
 `Flow i·(1+∑_{j<i+3}‖∇ʲP‖²)` — lifted through `norm_iCG_wEndoInsert_eq_wAlpha` (private in Producers,
 `‖∇ⁱwEndoInsert‖=‖∇ⁱwAlpha‖`) + the DLa/DLb split into the brick-3 frontier
-`deTurckLieCoeffField_perOrder_l2_radiusFree` (`DeTurckLieCoeffDiffRadiusFree.lean:89`, ONE sorry;
-its window is range `i+2`, so session 5 splits the top index `i+2` out of my range `i+3`).  Frontier
-still 0% in-code (its `sorry` untouched per task).  See THREEARM_RECON §11d.4.
+`deTurckLieCoeffField_perOrder_l2_radiusFree`.  **UPDATE — session 5 DONE (2026-07-26): BRICK 3
+COMPLETE.**  The frontier is PROVED (`sorry` deleted) and the brick-3 target
+`deTurckLieCoeffField_summed_l2_radiusFree` is unconditional; both axiom-clean
+(`[propext, Classical.choice, Quot.sound]`).  `wAlpha_L2_topsep_rf` fed the DLb arm via
+`norm_iCG_wEndoInsert_eq_wAlpha` (which was PUBLIC, not private); the DLa arm used the exposed
+`rfns_iCG_dLaField_topsep` + the workhorse; single-tensor `symmS` bridge + `Finset.sum_range_succ`
+range split.  Details in `DeTurckLieCoeffDiffRadiusFree.md` and THREEARM_RECON §11d.5.

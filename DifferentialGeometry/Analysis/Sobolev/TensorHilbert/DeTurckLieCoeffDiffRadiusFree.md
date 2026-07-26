@@ -19,15 +19,40 @@ R-free sibling of `deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated`
 (`2·dim E+10 ≤ a`, genuinely needed by the DeTurck-VF supercritical machinery),
 `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ`, `δ ≤ δ₀`, `htie`.
 
-## Status: HONEST PARTIAL (2026-07-26)
+## Status: COMPLETE — frontier DISCHARGED (2026-07-26, session 5)
 
-- `deTurckLieCoeffField_summed_l2_radiusFree` — **the deliverable, statement landed**, summed→per-order
-  reduction PROVED (verbatim clone of brick 2's summed proof: `Λ₀ := max 0 (dim E·δ₀)` + fibre-small
-  bridge `rfns_symmS_zero_le_fibreSmall`, Nonempty/empty-M split, top weight → `a+2`, low → `a+1`).
-- `deTurckLieCoeffField_perOrder_l2_radiusFree` — **the single frontier, ONE flagged `sorry`.**
-- Focused check GREEN (`lake env lean succeeded`, 22.8s, only the one `sorry` warning).
-- `#print axioms` on BOTH public theorems = `[propext, sorryAx, Classical.choice, Quot.sound]`
-  (honest sorryAx via the one frontier).
+- `deTurckLieCoeffField_perOrder_l2_radiusFree` — **PROVED, `sorry` deleted.**
+- `deTurckLieCoeffField_summed_l2_radiusFree` — **the brick-3 target, now unconditional** (its summed
+  reduction was already proved; it just consumes the now-sorry-free per-order engine).
+- Targeted build GREEN (9480 jobs).  `#print axioms` on BOTH public theorems = **exactly**
+  `[propext, Classical.choice, Quot.sound]` — ZERO `sorryAx`.
+
+### How the frontier was discharged (session 5)
+
+`deTurckLieCoeffField = DLa + DLb`; `‖∇ⁱfield‖² ≤ 2‖∇ⁱDLa‖² + 2‖∇ⁱDLb‖²` (re-derived in-leaf from the
+public `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` + `iteratedCovGrad_add`).  Two per-order
+R-free arm engines (private helpers `dLaField_perOrder_rf` / `dLbField_perOrder_rf` in this leaf):
+- **DLa** — integrates the R-free pointwise `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`
+  + `dLaGridWin (i+3)` remainder) through the workhorse `antidiagonalTupleGrid_integral_radiusFree`
+  (in place of the ball-uniform tame-window integrator).  `dLaGridWin b m = ∑_{k<m} grid k` — defeq to
+  the leaf's `antidiagonalTupleGridWindow`, so the exposed engine feeds the workhorse directly.
+- **DLb** — `‖∇ⁱDLb‖² ≤ 4·finrank·‖∇ⁱwEndoInsert‖²` (`normSq_iCG_dlbField_le`); the insert jet equals the
+  `wAlpha` jet (`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the session-4 `wAlpha_L2_topsep_rf`.
+
+Single-tensor bridge: `P := symmS g₀ T`, with `htie`/`hδ` transported via the PUBLIC
+`ccTensorBilinSymm_symmS_apply` / `gFibreOpBound_symmS` (namespace
+`…PDE.RicciFlow.IntrinsicSpectral`, qualified at the call).  Range bookkeeping: the arm engines land at
+window `i+3`; one `Finset.sum_range_succ` peels the top cell `‖∇^{i+2}P‖²` out of `∑_{j<i+3}` into `Atop`
+(the frontier needs only `0 ≤ Atop`), giving the target shape `Atop·‖∇^{i+2}P‖² + Alow·(1+∑_{j<i+2})`.
+
+### Exposures (minimal, `private` removed; both home files rebuilt GREEN)
+
+- `rfns_iCG_dLaField_topsep`, `dLaGridWin`(+`_nonneg`) in `DeTurckLieKernelL2JetBound.lean` (the DLa
+  pointwise engine is ~250 lines with a deep private dep chain — infeasible to re-derive in-leaf).
+- `normSq_iCG_dlbField_le` in `DeTurckLieCoeffL2JetBound.lean` (its slotInsert/reindex deps are private).
+
+New import edge: this leaf now imports `DeTurckVFJetRadiusFree` (for `wAlpha_L2_topsep_rf`) and
+`SobolevNonlinearityExistence` (for the symmS bridges).
 
 ## The fork is CLOSED (no wall, no unreceivable term)
 
@@ -122,11 +147,13 @@ reduction (verbatim from here). No new integrator, no new frontier expected.
 ## Honest progress (denominator: (N) `ricci_flow_unif_existence` = 0%, unstated)
 
 - Item-2 proper (the main math risk of a 15-25-session (N) discharge): bricks 1-2 (gate + arm0)
-  green; brick 3 = **statement landed + fork CLOSED + route fully specified**, but the frontier
-  (per-order engine) is ~0% proved in-code (its dedicated tower machinery: R-dependent version exists,
-  R-free re-derivation ~0% built). Brick 3 theorem: conditional-landed (1 sorry). Brick 3 machinery: 0%.
-- Remaining item-2 after brick 3b+4: the threeArm/Ψ₀ topSeparated assembly (Fork-A, ~3-5 sessions) +
-  smooth-core tame lemma (layers 2-3, ~4-8 sessions). Brick 3b ~3-5 sessions; brick 4 ~1-2 (mechanical).
+  green; **brick 3 (DeTurckLie) is now DONE — theorem PROVED, axiom-clean, no `sorry`.**  The full
+  brick-3b R-free DeTurck-VF tower (sessions 1-4, `DeTurckVFJetRadiusFree.lean`) + this leaf's DLa/DLb
+  arm engines + the exposed pointwise engines discharge it end-to-end.
+- Remaining item-2 after brick 3: brick 4 (lieCorr0's sibling — mechanical clone of this pattern, ~1-2
+  sessions, pending the coordinator's re-assessment of the lieCorr0 freeze), the threeArm/Ψ₀
+  topSeparated assembly (Fork-A, ~3-5 sessions), and the smooth-core tame lemma (layers 2-3, ~4-8
+  sessions).  Brick 3 no longer on the critical path.
 
 ## Lessons
 

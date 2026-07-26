@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 
 /-!
 # Radius-free jet-L² bound for the DeTurck-Lie coefficient field
@@ -30,13 +32,13 @@ with `Ktop`, `Klow` depending only on `g₀`, `g_bg`, `a`, `dim E`, `δ₀` — 
 `H^{a+2}` ball hypothesis; the only smallness input is the fibre operator-norm bound
 `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ` with `δ ≤ δ₀`.
 
-**Status (honest partial).** The summed deliverable and its `symmS` fibre-small wiring are
-proved here from the *per-order* radius-free engine `deTurckLieCoeffField_perOrder_l2_radiusFree`.
-That engine is the single remaining frontier: it is the R-free sibling of the private
-`wAlpha_L2_topsep` lifted through the `deTurckLieWEndoInsert` isometry and the `DLa + DLb` split,
-and its proof is the mechanical (no-unreceivable-term) re-derivation of the private DeTurck-VF
-tower with the two ball-uniform integrators swapped for `antidiagonalTupleGrid_integral_radiusFree`.
-It carries ONE flagged `sorry`; the route is analysed in `DeTurckLieCoeffDiffRadiusFree.md`.
+**Status (COMPLETE — 2026-07-26, session 5).** Both public theorems are proved and axiom-clean
+(`[propext, Classical.choice, Quot.sound]`, no `sorryAx`).  The summed deliverable and its `symmS`
+fibre-small wiring reduce to the *per-order* radius-free engine
+`deTurckLieCoeffField_perOrder_l2_radiusFree`, which is discharged via the `DLa + DLb` split: the DLb
+arm through `deTurckLieWEndoInsert`/`wAlpha_L2_topsep_rf`, the DLa arm by integrating the R-free
+pointwise `rfns_iCG_dLaField_topsep` through `antidiagonalTupleGrid_integral_radiusFree` (in place of
+the two ball-uniform integrators).  The full route is analysed in `DeTurckLieCoeffDiffRadiusFree.md`.
 -/
 
 noncomputable section
@@ -66,6 +68,190 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+/-! ### Per-order DLa / DLb radius-free engines feeding the frontier. -/
+
+set_option linter.unusedVariables false in
+/-- Radius-free per-order jet-L² bound for the `deTurckLieDLaCoeffField` arm.  Integrates the public
+R-free pointwise top-separated engine `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`,
+`dLaGridWin (i+3)` remainder) through the radius-free workhorse
+`antidiagonalTupleGrid_integral_radiusFree`, in place of the ball-uniform tame-window integrator. -/
+private lemma dLaField_perOrder_rf
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧ ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
+        (i : ℕ),
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 ≤
+          Ktop i * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+          Flow i * (1 + ∑ j ∈ Finset.range (i + 3),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨Ktop_a, hKtop_a_nn, Kc_a, hKc_a_nn, hfield⟩ :=
+    rfns_iCG_dLaField_topsep (I := I) (M := M) g₀ g_bg hδ₀
+  obtain ⟨K_rf, hK_rf_nn, hK_rf⟩ :=
+    antidiagonalTupleGrid_integral_radiusFree (I := I) (M := M) g₀ hΛ₀0
+  refine ⟨fun i => Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i,
+    fun i => mul_nonneg (mul_nonneg hKtop_a_nn (appCcGdiag_nonneg (E := E) i))
+      (appCcGdiag_nonneg (E := E) i),
+    fun i => Kc_a i * ∑ k ∈ Finset.range (i + 3), K_rf k,
+    fun i => mul_nonneg (hKc_a_nn i) (Finset.sum_nonneg fun k _ => hK_rf_nn k), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hsup i
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
+  set S' : ℝ := ∑ j ∈ Finset.range (i + 3),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
+  have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)).toSection x) ≤
+        (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x) +
+          Kc_a i * dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3) :=
+    fun x => hfield g₁ P htie hδ_le hδ0 hδ i x
+  have hAG : ∀ k : ℕ,
+      MeasureTheory.Integrable
+          (fun x => Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+        (∫ x, Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+          K_rf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2) := by
+    intro k
+    have hExpand : (fun x => Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+        = (fun x => ∑ nn ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple nn k,
+            ∏ m : Fin nn, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
+      funext x; rw [Combinatorics.antidiagonalTupleGrid]
+    rw [hExpand]; exact hK_rf P hsup k
+  have hwin_int : MeasureTheory.Integrable
+      (fun x => dLaGridWin
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    simp only [dLaGridWin]
+    exact MeasureTheory.integrable_finset_sum _ (fun k _ => (hAG k).1)
+  have htop_int : MeasureTheory.Integrable (fun x =>
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + (i + 2))
+      (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)
+  have hbridge := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg))
+    (fun x => (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+      + Kc_a i * dLaGridWin
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3))
+    ((htop_int.const_mul (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i)).add
+      (hwin_int.const_mul (Kc_a i))) hpt
+  rw [MeasureTheory.integral_add
+      (htop_int.const_mul (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i))
+      (hwin_int.const_mul (Kc_a i)),
+    MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul] at hbridge
+  have hnormsq : ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    rw [SmoothCcTensor.norm_def, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+  have hwin_bd : (∫ x, dLaGridWin
+      (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      (∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by
+    simp only [dLaGridWin]
+    rw [MeasureTheory.integral_finset_sum _ (fun k _ => (hAG k).1), Finset.sum_mul]
+    refine Finset.sum_le_sum (fun k hk => ?_)
+    refine le_trans (hAG k).2 ?_
+    have hkS' : ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2 ≤ S' :=
+      Finset.single_le_sum (f := fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)
+        (fun j _ => sq_nonneg _) (Finset.mem_range.mpr (by rw [Finset.mem_range] at hk; omega))
+    refine mul_le_mul_of_nonneg_left ?_ (hK_rf_nn k)
+    linarith
+  calc ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2
+      ≤ (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i) *
+          (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+        + Kc_a i * (∫ x, dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) := hbridge
+    _ = (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i) *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2
+        + Kc_a i * (∫ x, dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) := by rw [hnormsq]
+    _ ≤ (Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i) *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2
+        + Kc_a i * ((∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S')) := by
+        have hmul := mul_le_mul_of_nonneg_left hwin_bd (hKc_a_nn i)
+        linarith [hmul]
+    _ = Ktop_a * appCcGdiag (E := E) i * appCcGdiag (E := E) i *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2
+        + (Kc_a i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
+
+set_option linter.unusedVariables false in
+/-- Radius-free per-order jet-L² bound for the `deTurckLieDLbCoeffField` arm.  `‖∇ⁱDLb‖² ≤
+4·finrank·‖∇ⁱwEndoInsert‖²` (`normSq_iCG_dlbField_le`); the insert jet equals the `wAlpha` jet
+(`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the radius-free `wAlpha_L2_topsep_rf`. -/
+private lemma dLbField_perOrder_rf
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
+        (i : ℕ), i ≤ a →
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 ≤
+          Ktop * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+          Flow i * (1 + ∑ j ∈ Finset.range (i + 3),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨Kb_top, hKb_top_nn, Kb_flow, hKb_flow_nn, hwalpha⟩ :=
+    wAlpha_L2_topsep_rf (I := I) (M := M) g₀ g_bg a ha_super hδ₀ hΛ₀0
+  have h4fr_nn : (0 : ℝ) ≤ 4 * (Module.finrank ℝ E : ℝ) := by positivity
+  refine ⟨4 * (Module.finrank ℝ E : ℝ) * Kb_top, mul_nonneg h4fr_nn hKb_top_nn,
+    fun i => 4 * (Module.finrank ℝ E : ℝ) * Kb_flow i,
+    fun i => mul_nonneg h4fr_nn (hKb_flow_nn i), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
+  have hdlb := normSq_iCG_dlbField_le (I := I) (M := M) g₀ g₁ g_bg i
+  rw [norm_iCG_wEndoInsert_eq_wAlpha (I := I) (M := M) g₀ g₁ g_bg i] at hdlb
+  have hwa := hwalpha g₁ P htie hδ_le hδ0 hδ hsup i hi
+  calc ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2
+      ≤ 4 * (Module.finrank ℝ E : ℝ) *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlpha (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 := hdlb
+    _ ≤ 4 * (Module.finrank ℝ E : ℝ) *
+          (Kb_top * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+            Kb_flow i * (1 + ∑ j ∈ Finset.range (i + 3),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
+        mul_le_mul_of_nonneg_left hwa h4fr_nn
+    _ = 4 * (Module.finrank ℝ E : ℝ) * Kb_top *
+            ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+          4 * (Module.finrank ℝ E : ℝ) * Kb_flow i * (1 + ∑ j ∈ Finset.range (i + 3),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
+
 /-! ### Radius-free per-order engine (the frontier). -/
 
 set_option linter.unusedVariables false in
@@ -78,14 +264,13 @@ smallness, not a Sobolev ball radius), the order-`i` jet-L² norm splits into a 
 with the radius-free workhorse `antidiagonalTupleGrid_integral_radiusFree` in place of the two
 ball-uniform integrators.
 
-FRONTIER (one flagged `sorry`): the proof is the mechanical re-derivation of the private
-DeTurck-vector-field tower — `deTurckLieCoeffField = DLa + DLb`, `‖∇ⁱDL·‖ = ‖∇ⁱ wAlpha‖` via the
-`deTurckLieWEndoInsert` endo-insert isometry, `wAlpha` residual through R-free
-`wOmega_lowOrder`/`connDiffSection_lowOrder` and R-free `wOmega_L2_topsep` — with the two
-ball-uniform integrators (`diagonalProductGrid_rfns_integral_ballUniform_succ`,
-`antidiagonalTupleGrid_integral_ballUniform_tameWindow`) each replaced by
-`antidiagonalTupleGrid_integral_radiusFree` (same integrand, fixed `Λ₀`; the per-index top jets
-sum into the top/low envelope).  No unreceivable term arises.  See the `.md` note. -/
+PROVED (session 5): `deTurckLieCoeffField = DLa + DLb` (`‖∇ⁱfield‖² ≤ 2‖∇ⁱDLa‖² + 2‖∇ⁱDLb‖²`).
+`DLb` = `4·finrank·‖∇ⁱwEndoInsert‖²` = `4·finrank·‖∇ⁱwAlpha‖²` (the `deTurckLieWEndoInsert` isometry
+`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the R-free `wAlpha_L2_topsep_rf` (`dLbField_perOrder_rf`).
+`DLa` integrates the R-free pointwise `rfns_iCG_dLaField_topsep` through
+`antidiagonalTupleGrid_integral_radiusFree` in place of the ball-uniform tame-window integrator
+(`dLaField_perOrder_rf`).  Perturbation `P := symmS g₀ T`; one `Finset.sum_range_succ` peels the top
+cell out of the `i+3` window into `Atop`.  See the `.md` note. -/
 theorem deTurckLieCoeffField_perOrder_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -105,7 +290,78 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
               (symmS (I := I) (M := M) g₀ T)‖ ^ 2 +
           Alow i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2) := by
-  sorry
+  classical
+  obtain ⟨Ka_top, hKa_top_nn, Ka_low, hKa_low_nn, hDLa⟩ :=
+    dLaField_perOrder_rf (I := I) (M := M) g₀ g_bg a ha_super hδ₀ hΛ₀0
+  obtain ⟨Kb_top, hKb_top_nn, Kb_low, hKb_low_nn, hDLb⟩ :=
+    dLbField_perOrder_rf (I := I) (M := M) g₀ g_bg a ha_super hδ₀ hΛ₀0
+  refine ⟨fun i => 2 * Ka_top i + 2 * Kb_top + (2 * Ka_low i + 2 * Kb_low i),
+    fun i => by
+      have := hKa_top_nn i; have := hKb_top_nn; have := hKa_low_nn i; have := hKb_low_nn i
+      linarith,
+    fun i => 2 * Ka_low i + 2 * Kb_low i,
+    fun i => by have := hKa_low_nn i; have := hKb_low_nn i; linarith, ?_⟩
+  intro g₁ T δ hδ_le hδ0 hδ htie hsup i hi
+  set P : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ T with hP_def
+  have htie' : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w := by
+    intro y v w
+    rw [hP_def,
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.ccTensorBilinSymm_symmS_apply
+        (I := I) (M := M) g₀ T y v w]
+    exact htie y v w
+  have hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ := by
+    rw [hP_def]
+    exact DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.gFibreOpBound_symmS
+      (I := I) (M := M) g₀ T hδ
+  have ha := hDLa g₁ P htie' hδ_le hδ0 hδ' hsup i
+  have hb := hDLb g₁ P htie' hδ_le hδ0 hδ' hsup i hi
+  -- combined triangle `‖∇ⁱ field‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²`.
+  have hcomb : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
+      2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 +
+        2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 := by
+    have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i
+          (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)
+        = iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)
+          + iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg) := by
+      rw [← deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg,
+        iteratedCovGrad_add]
+    rw [hgrad]
+    nlinarith [norm_add_le
+        (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg))
+        (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)
+          + iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)),
+      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ -
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖)]
+  -- range split: peel `‖∇^{i+2}P‖²` (index `i+2`) out of the `i+3` low window into the top.
+  have hsplit : (∑ j ∈ Finset.range (i + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) =
+      (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
+    rw [show i + 3 = (i + 2) + 1 from rfl, Finset.sum_range_succ]
+  rw [hsplit] at ha hb
+  calc ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2
+      ≤ 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 +
+          2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 :=
+        hcomb
+    _ ≤ 2 * (Ka_top i * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+            Ka_low i * (1 +
+              ((∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2))) +
+          2 * (Kb_top * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+            Kb_low i * (1 +
+              ((∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2))) := by
+        have h1 := mul_le_mul_of_nonneg_left ha (by norm_num : (0 : ℝ) ≤ 2)
+        have h2 := mul_le_mul_of_nonneg_left hb (by norm_num : (0 : ℝ) ≤ 2)
+        linarith [h1, h2]
+    _ = (2 * Ka_top i + 2 * Kb_top + (2 * Ka_low i + 2 * Kb_low i)) *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 +
+        (2 * Ka_low i + 2 * Kb_low i) * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
 /-! ### Radius-free summed sibling (the consumer-gate deliverable). -/
 

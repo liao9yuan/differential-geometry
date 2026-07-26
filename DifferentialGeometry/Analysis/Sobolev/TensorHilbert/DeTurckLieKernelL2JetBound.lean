@@ -2093,10 +2093,10 @@ private lemma dLaLoweredPerturbCc_unitModel_apply (g₀ : SmoothRiemannianMetric
   exact ccTensorBilinSymm_symm (I := I) g₀ T x (m 0)
     (dLaCovKernel (I := I) g₁ g_bg x (m 1) (m 2) (m 3))
 
-private def dLaGridWin (b : ℕ → ℝ) (m : ℕ) : ℝ :=
+def dLaGridWin (b : ℕ → ℝ) (m : ℕ) : ℝ :=
   ∑ k ∈ Finset.range m, Combinatorics.antidiagonalTupleGrid b k
 
-private lemma dLaGridWin_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
+lemma dLaGridWin_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
     0 ≤ dLaGridWin b m :=
   Finset.sum_nonneg fun k _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k
 
@@ -5428,7 +5428,7 @@ set_option maxHeartbeats 3200000 in
 /-- **Field pointwise top-separated bound** for `deTurckLieDLaCoeffField`.  Exported base top
 coefficient `Ktop` is `R`-free; the `appCcGdiag i` powers are explicit (the field carries TWO
 nested appCcRS extractions, so `(appCcGdiag i)²`). -/
-private theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
+theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)

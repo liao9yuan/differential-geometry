@@ -661,3 +661,34 @@ low `Flow i·(1+∑_{j<i+3})` — lifted through `norm_iCG_wEndoInsert_eq_wAlpha
 UNTOUCHED per task).  The frontier's low window is range `i+2` (top `i+2` excluded); my `wAlpha` low
 window is range `i+3` (includes `i+2`), so session 5's remaining bookkeeping is a `Finset.sum_range_succ`
 splitting `Flow i·‖∇^{i+2}P‖²` into `Atop`.  Tower COMPLETE; frontier still 0% in-code.
+
+### 11d.5 — brick 3b SESSION 5 (2026-07-26): the discharge — BRICK 3 DONE
+
+The brick-3 frontier `deTurckLieCoeffField_perOrder_l2_radiusFree`
+(`DeTurckLieCoeffDiffRadiusFree.lean`) is **PROVED — `sorry` deleted**; the brick-3 target
+`deTurckLieCoeffField_summed_l2_radiusFree` is **now unconditional**.  Targeted build GREEN (9480 jobs);
+`#print axioms` on BOTH publics = **exactly `[propext, Classical.choice, Quot.sound]`, ZERO `sorryAx`.**
+
+**Route (as planned in the per-file `.md`).**  `deTurckLieCoeffField = DLa + DLb`,
+`‖∇ⁱfield‖² ≤ 2‖∇ⁱDLa‖² + 2‖∇ⁱDLb‖²` (re-derived in-leaf from the public
+`deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`).  Two per-order R-free arm engines in the leaf:
+- **DLb** = `4·finrank·‖∇ⁱwEndoInsert‖²` (`normSq_iCG_dlbField_le`) = `4·finrank·‖∇ⁱwAlpha‖²`
+  (`norm_iCG_wEndoInsert_eq_wAlpha`, PUBLIC) → session-4 `wAlpha_L2_topsep_rf`.
+- **DLa** = integrate the R-free pointwise `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`
+  + `dLaGridWin (i+3)`) through the workhorse `antidiagonalTupleGrid_integral_radiusFree` (swapping the
+  ball-uniform tame-window integrator).  `dLaGridWin b m = ∑_{k<m} grid k` is defeq to the leaf's
+  `antidiagonalTupleGridWindow` — the exposed engine feeds the workhorse directly.
+
+Single-tensor bridge `P := symmS g₀ T` via PUBLIC `ccTensorBilinSymm_symmS_apply` / `gFibreOpBound_symmS`
+(namespace `PDE.RicciFlow.IntrinsicSpectral`).  Range bookkeeping: one `Finset.sum_range_succ` peels the
+top cell out of the `i+3` window into `Atop` → target shape (top `i+2`, low `∑_{j<i+2}`).
+
+**Exposures (minimal `private`-removals, both home files rebuilt GREEN; NOT the VF split parts):**
+`rfns_iCG_dLaField_topsep` + `dLaGridWin`(+`_nonneg`) in `DeTurckLieKernelL2JetBound.lean` (the DLa
+pointwise engine is ~250 lines over a deep private dep chain — re-derivation infeasible);
+`normSq_iCG_dlbField_le` in `DeTurckLieCoeffL2JetBound.lean`.  The frontier leaf now imports
+`DeTurckVFJetRadiusFree` (for `wAlpha`) + `SobolevNonlinearityExistence` (symmS bridges).
+
+**Brick 4 (lieCorr0 sibling)** is now a mechanical clone: same DLa/DLb split, same two arm engines,
+same summed reduction — pending the coordinator's lieCorr0-freeze re-assessment.  Brick 3 off the
+item-2 critical path.
