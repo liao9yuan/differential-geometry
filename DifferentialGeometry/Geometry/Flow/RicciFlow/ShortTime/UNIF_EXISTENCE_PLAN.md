@@ -1803,3 +1803,26 @@ route-dead)?  Answer to be recorded here as №30.
 Prompt (THREEARM_RECON §8, links corrected to codex/short-time-existence-align)
 submitted via Chrome at ~00:15; chat id 6a65adf2-9cec-83e8-8548-2a2f4508fad7.
 Answer expected in 5–10 min; to be recorded as №30 with the Fork A/B ruling.
+
+## Planner ruling №30 (2026-07-26) — Pro answer received; the GATE brick defined
+
+Full distillation in THREEARM_RECON.md §11.  Operative consequences:
+
+1. The §29 fork DISSOLVES: orientation routing was never broken (recon §4/§6
+   error); arm0's R-independence claim was ALSO wrong (docstring > impl).
+   The single real defect is the ball-uniform grid converter creating
+   R^{7k}-type constants by setting Λ ∝ R.
+2. **THE GATE (item-2's new single frontier): the radius-free top-separated
+   `boundedFactorGridWindow` integrator** in
+   CurvatureCoefficientDifferenceJetTower.lean (sibling of :14417-14444,
+   opposite constant choice; fixed Λ₀(dim,δ₀); layers ≤ i+1 low, layer i+2 the
+   explicit top leak) + the fibre-small zero-order bridge.  Everything else
+   waits: NO DeTurckLie edits, NO lieCorr0 finishing (lane FROZEN at its clean
+   green state, one vbPass_jetL2 sorry), NO assembly, until it is exact-green.
+3. R1τ viability: CONFIRMED pending the gate (failure signal = superlinear-in-H
+   coefficient growth AFTER the fix; concrete high-frequency diagnostic given).
+4. The a=2 lane (item 6) is unaffected and continues in parallel.
+
+DISPATCHED: (a) the gate brick (fresh executor; CurvatureCoefficientDifference-
+JetTower.lean, 14k+ lines — surgical addition only); (b) a=2 session 4 (the
+drafted dual-core CS finish).
