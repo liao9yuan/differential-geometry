@@ -1797,3 +1797,9 @@ corrected to codex/short-time-existence-align).  Question: is the R-dependent
 Kc absorbable into orientation 2 by the covariant tame lift (Fork A, ~10–18
 sessions) or is an R-free-Kc re-derivation forced (Fork B, ~18–30+, possibly
 route-dead)?  Answer to be recorded here as №30.
+
+### №29 log — consult SUBMITTED (fresh chat in "Lean Pro Consult Handoff")
+
+Prompt (THREEARM_RECON §8, links corrected to codex/short-time-existence-align)
+submitted via Chrome at ~00:15; chat id 6a65adf2-9cec-83e8-8548-2a2f4508fad7.
+Answer expected in 5–10 min; to be recorded as №30 with the Fork A/B ruling.
