@@ -1753,3 +1753,17 @@ QUEUE for the window (accept → commit → dispatch, two lanes saturated):
 Standing rules restated for all night dispatches: model-space NormedSpace only;
 honest partials; ≤1 visible frontier per stop; targeted builds only; commit
 own-lane files only; plan + memory updated at each acceptance.
+
+### №28 log — a=2 session 2 ACCEPTED (`f1e1ce272`); session 3 (absorption) dispatched
+
+Session 2 delivered the mechanical layer sorry-free (operator Leibniz
+`covStepDiff2_opLeibniz` via double `diffStep_leibniz`; order-1/2/3 currency
+bridges incl. `nabla4_eq_mcd3`; the clean (1,4) object `covDerivConnDiff2`).
+The dual-core bound is deliberately NOT stated: the clean-form derivation is
+recorded term-by-term in `ConnDiffDeriv2Bound.md` §2.1 at ~85% hand-confidence
+and the wrong-statement rule keeps it prose until proved.  Sub-frontiers for
+session 3: de-privatize `sqrt_normSq0S_comp`; section-smoothness of the
+covDerivConnDiff section (reuse-check ordered before any build).  Session 3
+dispatched: absorption proof (§2.1 → Lean; trust Lean over hand where they
+disagree — a REAL term mismatch is planner-level), then the dual-core bound,
+then (budget) the exists_const discharge.  a=2 ≈ 45% machinery / 0% theorems.
