@@ -604,3 +604,28 @@ order-0 sup `ΛX 0` which is `R`-DEPENDENT.  R-free fix: fold the lower `∑rfns
 cometricCastG0 grid bound (`rfns_iteratedCovGrad_cometricCastG0_gridWindow_le`, PRIVATE in
 `CurvatureArm1KoszulTopSeparation.lean:35` → re-derive) + a pointwise wXi grid bound.  Full session;
 `g₀/g_bg/δ₀`-only.  3b tower base 4/≈8-10 producers; frontier 0%.
+
+### 11d.3 — brick 3b SESSION 3 (2026-07-26): wOmega LANDED; low-order tier COMPLETE
+
+Four more declarations landed in the leaf, targeted-build GREEN, axioms EXACTLY `[propext,
+Classical.choice, Quot.sound]` (no `sorryAx`): three pointwise `antidiagonalTupleGridWindow`-currency
+grid bounds (`rfns_iCG_cometricCastG0_atgw_rf` — re-derives the private cometricCastG0 grid bound R-free;
+`rfns_iCG_connDiffSection_atgw_rf` — head engine + `single_factor`; `rfns_iCG_wXi_atgw_rf`) + the
+producer `wOmega_lowOrder_jetL2_radiusFree`.  The **entire `_lowOrder` tier is now R-free**
+(cometricCastG0/sharpFlatEndoCc/connDiffSection/wXi/wOmega).
+
+**wOmega done as planned (two-arm grid-mul).**  `rfns(∇ⁿwOmega) ≤ appCcGdiag n·∑_{i'}rfns(∇^{i'}cg)·
+∑_l rfns(∇ˡwXi)` (public two-arm Leibniz `appCc_iteratedCovGrad_diagonalProductGrid_le`); per term
+`atgw(i'+1)·atgw(l+2) ≤ Const·atgw(i'+l+2) ≤ Const·atgw(n+2)` via `antidiagonalTupleGridWindow_mul_le`
++ `_mono` (valid since `i'+l ≤ n`), folding into a single `atgw(n+2)`; the workhorse integrates it →
+low window at order `n+1`.  No `R`, no `ΛX 0` sup.  **De-risk vs the §11d.2 plan:** `connLow_rfns`
+(`connDiffLoweredCc ↔ connDiffSection` fibre-norm identity) is PUBLIC (`Analysis.Parabolic.TensorSpectral`,
+reachable via Tower), so the wXi grid bound needed NO private valence-bridge re-derivation.
+
+**Next (session 4): the `_L2_topsep` layer → `wAlpha` → frontier.**  `connDiff_L2_topsep` /
+`wXi_L2_topsep` / `wOmega_L2_topsep` R-free (the head engine + `exists_rfns_connDiff_topsep` shape are
+already R-free; swap the ball-uniform integrator for the workhorse, keep the top `‖∇^{i+2}P‖²`
+separate).  Then `wAlpha_L2_topsep` (= `‖∇^{i+1}wOmega‖²` top arm + `wAlphaB` two-arm via the same
+grid-mul) → lift through `norm_iCG_wEndoInsert_eq_wAlpha` + the DLa/DLb split → discharge the brick-3
+frontier `deTurckLieCoeffField_perOrder_l2_radiusFree`.  Low-order tier COMPLETE (~5/≈8-10 producers);
+frontier still 0% in-code (its `sorry` untouched).

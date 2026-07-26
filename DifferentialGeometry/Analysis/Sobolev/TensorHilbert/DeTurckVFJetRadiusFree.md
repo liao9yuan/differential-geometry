@@ -26,9 +26,26 @@ the producer's `F i` a LOW WINDOW `Flow i · (1 + ∑_{j≤W} ‖∇ʲP‖²)` w
 | `raisedKoszul_order0sup` R-free | NOT NEEDED | — | head engine subsumes it (see finding) |
 | `connDiffSection_lowOrder_jetL2_radiusFree` | LANDED (session 2) | clean | via R-free head engine + single_factor + workhorse |
 | `wXi_lowOrder_jetL2_radiusFree` | LANDED (session 2) | clean | connDiffSection triangle + `g_bg` const |
-| `wOmega_lowOrder` R-free | NEXT (session 3) | — | two-arm; needs cometricCastG0 pointwise grid bound + grid-mul |
+| `rfns_iCG_cometricCastG0_atgw_rf` (pointwise) | LANDED (session 3) | clean | re-derives private cometricCastG0 grid bound, atgw currency |
+| `rfns_iCG_connDiffSection_atgw_rf` (pointwise) | LANDED (session 3) | clean | head engine + single_factor, atgw currency |
+| `rfns_iCG_wXi_atgw_rf` (pointwise) | LANDED (session 3) | clean | via PUBLIC `connLow_rfns` valence bridge + `g_bg` |
+| `wOmega_lowOrder_jetL2_radiusFree` | LANDED (session 3) | clean | two-arm grid-mul via `antidiagonalTupleGridWindow_mul_le` + workhorse |
 
 `clean` axioms = exactly `[propext, Classical.choice, Quot.sound]` (targeted build, 2026-07-26).
+
+### SESSION-3 RESULT — wOmega landed; the whole low-order tier is R-free
+
+All FOUR `_lowOrder` producers (`cometricCastG0`/`sharpFlatEndoCc`/`connDiffSection`/`wXi`/`wOmega`)
+are now R-free.  `wOmega = appCc(cometricCastG0, wXi)` — the genuine two-arm composer — was folded per
+term into a single `antidiagonalTupleGridWindow(n+2)`: `atgw(i'+1)·atgw(l+2) ≤ Const·atgw(i'+l+2) ≤
+Const·atgw(n+2)` (via `antidiagonalTupleGridWindow_mul_le` + `_mono`, valid because `i'+l ≤ n`), then
+integrated by the workhorse → low window.  No `R`, no `ΛX 0` sup — the R-dependent sup obstruction is
+fully avoided.  KEY de-risk: `connLow_rfns` (`connDiffLoweredCc ↔ connDiffSection` fibre-norm identity)
+is PUBLIC (`Analysis.Parabolic.TensorSpectral`, reachable via Tower), so the wXi grid bound needed NO
+private valence-bridge re-derivation.  Two Lean lessons: (i) after the `l`-range extend the window
+`_mono` needs `i'+l ≤ n`, so bound per-`l` on `range(n+1-i')` FIRST then extend the nonneg constants;
+(ii) `set Komega := fun n => …` β/ζ-reduces under `rw [mul_assoc]` — use a `calc … := by ring` step
+(ring treats `Komega q` as an atom) to keep the fold.
 
 ### SESSION-2 FINDING — the head engine subsumes raisedKoszul + sharpFlatEndoCc
 
@@ -97,14 +114,14 @@ All constants are `g₀ / g_bg / a / dim E / δ₀`-only: `C_base` (fibre decomp
 `K_rf` (workhorse, fixed Λ₀), `SΦ` (T-independent Φ sup, R-free), `fr = finrank`, `appCcGdiag`.
 NO `R`.  Confirmed by inspection — no §6 unreceivable term at the cometricCastG0/sharpFlatEndoCc level.
 
-## Status line (2026-07-26, session 2)
+## Status line (2026-07-26, session 3)
 
-FOUR producers LANDED green + axiom-clean (targeted build, exactly `[propext, Classical.choice,
-Quot.sound]`): session 1 `cometricCastG0`/`sharpFlatEndoCc`; session 2 `connDiffSection_lowOrder`/
-`wXi_lowOrder`.  Leaf ~815 lines.  Session-2 pivot: `connDiffSection` R-free came in cleanly via the
-PUBLIC R-free head engine (subsuming raisedKoszul/sharpFlat — task item 1 `raisedKoszul` turned out
-UNNEEDED, see finding).  Next (session 3): `wOmega_lowOrder` R-free — the genuine two-arm grid-mul
-(cometricCastG0 pointwise grid bound re-derive + `antidiagonalTupleGrid_mul_le` fold + workhorse; NO
-`ΛX 0` sup).  Then the `_L2_topsep` layer (`connDiff`/`wXi`/`wOmega` top-sep, mostly done R-free-ready
-by the same engines) → `wAlpha` assembly → frontier discharge (final 3b session).  Base = 4 of ≈8-10
-producers; frontier still 0% in-code.  See THREEARM_RECON §11d.1.
+The ENTIRE `_lowOrder` tier is R-free: seven declarations LANDED green + axiom-clean (targeted build,
+exactly `[propext, Classical.choice, Quot.sound]`): session 1 `cometricCastG0`/`sharpFlatEndoCc`;
+session 2 `connDiffSection_lowOrder`/`wXi_lowOrder`; session 3 three pointwise atgw grid bounds
+(`cometricCastG0`/`connDiffSection`/`wXi`) + `wOmega_lowOrder`.  Leaf ~1320 lines.  wOmega (the genuine
+two-arm grid-mul) landed cleanly — `connLow_rfns` being PUBLIC removed the feared private valence
+bridge.  Next (session 4): the `_L2_topsep` layer (`connDiff`/`wXi`/`wOmega` top-separated L² — the
+head engine + workhorse make these R-free-ready) → `wAlpha_L2_topsep` assembly → the brick-3 frontier
+discharge (`deTurckLieCoeffField_perOrder_l2_radiusFree`, lift through `norm_iCG_wEndoInsert_eq_wAlpha`
++ the DLa/DLb split).  Low-order tier COMPLETE; frontier still 0% in-code.  See THREEARM_RECON §11d.3.
