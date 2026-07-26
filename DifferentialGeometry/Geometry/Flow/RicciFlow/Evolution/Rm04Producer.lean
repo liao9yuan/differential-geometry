@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Reduction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmDiff
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -754,11 +755,209 @@ theorem rmRaise
           (I := I) (S.family.connection (t : Real)) x₀ a b c d := by
         simp
 
+/-! ### The `(0,2)` Ricci identity for `Ric` -/
+
+/-- The canonical second covariant derivative of Ricci as a bundled field. -/
+private def solNab2RicF
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4 :=
+  totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    3 (S.family.connection t) (solNabRic (I := I) S t)
+    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+      3 (S.family.connection t) (connSmoothInf (I := I) S t) (solNabRic (I := I) S t))
+
+private theorem solNabRicReal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (S.ricci t) (solNabRic (I := I) S t) :=
+  totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    2 (S.family.connection t) (S.ricci t)
+    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
+
+private theorem solNab2RicReal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 (S.family.connection t) (solNabRic (I := I) S t) (solNab2RicF (I := I) S t) :=
+  totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    3 (S.family.connection t) (solNabRic (I := I) S t)
+    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+      3 (S.family.connection t) (connSmoothInf (I := I) S t) (solNabRic (I := I) S t))
+
+/-- **The `(0,2)` Ricci identity for the solution's Ricci tensor.**  The `s = 2` analogue
+of `rm04_ricciIdentityAt`: the commutator of the canonical `∇²Ric` is the slotwise
+curvature action on `Ric`, at every regular time and point. -/
+theorem ricRicciIdAt
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (x : M) :
+    DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I)
+      (S.base.rm13 (t : Real)) (S.ricci (t : Real) x)
+      (solNab2Ric (I := I) S (t : Real) x) := by
+  have hcov :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection (t : Real)) (1 : WithTop ℕ∞) :=
+    connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
+  have htor : (S.family.connection (t : Real)).torsion x = 0 := by
+    have htf :=
+      DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+        (I := I) (lcAt_regular (I := I) S hS t)
+    simpa [DifferentialGeometry.Integral.Connection.IsTorsionFreeAt] using htf x
+  have h20 :
+      DifferentialGeometry.Integral.Connection.Nabla20SRealizesAt (I := I) 2
+        (S.family.connection (t : Real)) (S.ricci (t : Real))
+        (solNabRic (I := I) S (t : Real)) x
+        (solNab2Ric (I := I) S (t : Real) x) := by
+    refine ⟨?_, ?_⟩
+    · intro y X slots
+      exact solNabRicReal (I := I) S (t : Real) X y slots
+    · intro X slots
+      exact solNab2RicReal (I := I) S (t : Real) X x slots
+  exact DifferentialGeometry.Integral.Connection.tensor0S_ricciIdentity_of_torsionFree
+    (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))
+    (S.ricci (t : Real)) (solNabRic (I := I) S (t : Real))
+    (S.ricci (t : Real) x) (solNabRic (I := I) S (t : Real) x)
+    (solNab2Ric (I := I) S (t : Real) x)
+    (rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)) rfl rfl h20 htor
+
+/-- **`RicCommAt` discharged from the solution.**  The `(0,2)` Ricci identity in
+coordinate-frame components at the frame centre; the `hcomm` input of `rm04Var_eq_uhl`. -/
+theorem ricCommOfSol
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) :
+    RicCommAt
+      (DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+        (I := I) (S.family.connection (t : Real)) x₀)
+      (ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀)
+      (coordNab2Ric (I := I) S x₀ (t : Real) x₀) := by
+  classical
+  intro i j k l
+  have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ := coordinateFrameAt_mem (I := I) x₀
+  have hframe := coordinateFrameAt_isLocalFrame_one (I := I) x₀
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis_gen
+        (I := I) (M := M) (S.family.metric (t : Real)) x₀
+        (hframe.toBasisAt hx₀)
+        (fun p r : CoordinateIdx (𝕜 := Real) E =>
+          coordInv (I := I) S x₀ (t : Real) x₀ p r) :=
+    metricInverseInBasis_of_local
+      (I := I) S (coordInv (I := I) S x₀)
+      (coordinateFrameAt (I := I) x₀) hframe
+      (coordInvLocal (I := I) S x₀) (t : Real) hx₀
+  have hb : ∀ a : CoordinateIdx (𝕜 := Real) E,
+      ((hframe.toBasisAt hx₀) a : TangentSpace I x₀)
+        = coordinateFrameAt (I := I) x₀ a x₀ := by
+    intro a
+    simp [IsLocalFrameOn.toBasisAt_coe]
+  have hri := ricRicciIdAt (I := I) S hS t x₀
+    (coordinateFrameAt (I := I) x₀ i x₀) (coordinateFrameAt (I := I) x₀ j x₀)
+    (DifferentialGeometry.Integral.Connection.vec2 (I := I)
+      (coordinateFrameAt (I := I) x₀ k x₀) (coordinateFrameAt (I := I) x₀ l x₀))
+  rw [DifferentialGeometry.Integral.Connection.curvatureAction0SAt_eq_rm04
+      (I := I) (S.family.metric (t : Real)) (hframe.toBasisAt hx₀)
+      (fun p r : CoordinateIdx (𝕜 := Real) E => coordInv (I := I) S x₀ (t : Real) x₀ p r)
+      hinvAt (S.base.rm13 (t : Real)) (S.base.rm04 (t : Real) x₀)
+      (solution_rm04LowersRm13At (I := I) S (t : Real) x₀)] at hri
+  have hin : ∀ X Y : TangentSpace I x₀,
+      DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) X Y
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I)
+            (coordinateFrameAt (I := I) x₀ k x₀) (coordinateFrameAt (I := I) x₀ l x₀))
+        = DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y
+            (coordinateFrameAt (I := I) x₀ k x₀) (coordinateFrameAt (I := I) x₀ l x₀) := by
+    intro X Y
+    funext m
+    fin_cases m <;> rfl
+  have hu : ∀ Z : TangentSpace I x₀,
+      Function.update (DifferentialGeometry.Integral.Connection.vec2 (I := I)
+            (coordinateFrameAt (I := I) x₀ k x₀)
+            (coordinateFrameAt (I := I) x₀ l x₀)) 0 Z
+          = DifferentialGeometry.Integral.Connection.vec2 (I := I) Z
+              (coordinateFrameAt (I := I) x₀ l x₀) ∧
+        Function.update (DifferentialGeometry.Integral.Connection.vec2 (I := I)
+            (coordinateFrameAt (I := I) x₀ k x₀)
+            (coordinateFrameAt (I := I) x₀ l x₀)) 1 Z
+          = DifferentialGeometry.Integral.Connection.vec2 (I := I)
+              (coordinateFrameAt (I := I) x₀ k x₀) Z := by
+    intro Z
+    constructor <;>
+      · funext m
+        fin_cases m <;> simp [DifferentialGeometry.Integral.Connection.vec2]
+  have hRicC : ∀ a b : CoordinateIdx (𝕜 := Real) E,
+      S.ricci (t : Real) x₀
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I)
+            (coordinateFrameAt (I := I) x₀ a x₀) (coordinateFrameAt (I := I) x₀ b x₀))
+        = ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀ a b := by
+    intro a b
+    simp [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt]
+  have hRmC : ∀ a b c d : CoordinateIdx (𝕜 := Real) E,
+      S.base.rm04 (t : Real) x₀
+          (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+            (coordinateFrameAt (I := I) x₀ a x₀) (coordinateFrameAt (I := I) x₀ b x₀)
+            (coordinateFrameAt (I := I) x₀ c x₀) (coordinateFrameAt (I := I) x₀ d x₀))
+        = rmComp (I := I) S x₀ (t : Real) x₀ a b c d := fun _ _ _ _ => rfl
+  rw [hin, hin, ← coordNab2Eq (I := I) S x₀ (t : Real) i j k l,
+    ← coordNab2Eq (I := I) S x₀ (t : Real) j i k l, Fin.sum_univ_two] at hri
+  simp only [(hu _).1, (hu _).2, hb, hRicC, hRmC,
+    show DifferentialGeometry.Integral.Connection.vec2 (I := I)
+        (coordinateFrameAt (I := I) x₀ k x₀) (coordinateFrameAt (I := I) x₀ l x₀) 0
+      = coordinateFrameAt (I := I) x₀ k x₀ from rfl,
+    show DifferentialGeometry.Integral.Connection.vec2 (I := I)
+        (coordinateFrameAt (I := I) x₀ k x₀) (coordinateFrameAt (I := I) x₀ l x₀) 1
+      = coordinateFrameAt (I := I) x₀ l x₀ from rfl] at hri
+  have hterm : ∀ (c : CoordinateIdx (𝕜 := Real) E)
+      (Rf : CoordinateIdx (𝕜 := Real) E → Real),
+      (∑ p : CoordinateIdx (𝕜 := Real) E,
+          DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              (I := I) (S.family.connection (t : Real)) x₀ i j c p * Rf p)
+        = ∑ p : CoordinateIdx (𝕜 := Real) E,
+            (∑ r : CoordinateIdx (𝕜 := Real) E,
+              coordInv (I := I) S x₀ (t : Real) x₀ p r * Rf r) *
+              rmComp (I := I) S x₀ (t : Real) x₀ i j c p := by
+    intro c Rf
+    calc (∑ p : CoordinateIdx (𝕜 := Real) E,
+          DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              (I := I) (S.family.connection (t : Real)) x₀ i j c p * Rf p)
+        = ∑ p : CoordinateIdx (𝕜 := Real) E,
+            (∑ r : CoordinateIdx (𝕜 := Real) E,
+              coordInv (I := I) S x₀ (t : Real) x₀ p r *
+                rmComp (I := I) S x₀ (t : Real) x₀ i j c r) * Rf p := by
+          refine Finset.sum_congr rfl fun p _ => ?_
+          rw [rmRaise (I := I) S hS x₀ t i j c p]
+      _ = ∑ p : CoordinateIdx (𝕜 := Real) E, ∑ r : CoordinateIdx (𝕜 := Real) E,
+            coordInv (I := I) S x₀ (t : Real) x₀ p r *
+              (rmComp (I := I) S x₀ (t : Real) x₀ i j c r * Rf p) :=
+          sumMulPair _ _ _
+      _ = ∑ p : CoordinateIdx (𝕜 := Real) E, ∑ r : CoordinateIdx (𝕜 := Real) E,
+            coordInv (I := I) S x₀ (t : Real) x₀ r p *
+              (rmComp (I := I) S x₀ (t : Real) x₀ i j c p * Rf r) :=
+          sumSwap _
+      _ = ∑ p : CoordinateIdx (𝕜 := Real) E, ∑ r : CoordinateIdx (𝕜 := Real) E,
+            coordInv (I := I) S x₀ (t : Real) x₀ p r *
+              (Rf r * rmComp (I := I) S x₀ (t : Real) x₀ i j c p) := by
+          refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun r _ => ?_
+          rw [coordInvSymmOn (I := I) S x₀ (t : Real) hx₀ r p]
+          ring
+      _ = _ := (sumMulPair _ _ _).symm
+  rw [hterm k (fun p => ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
+        (t : Real) x₀ p l),
+    hterm l (fun p => ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
+        (t : Real) x₀ k p)]
+  linarith [hri]
+
 /-- **The static Uhlenbeck reduction discharged from the solution.**  At the centre of the
 coordinate frame and at a regular time, the `∇²Ric`-expanded lowered-Riemann variation
-`rm04VarRHS` equals `ΔRm − 2(B − B + B − B) − drift` built from the canonical coordinate
-arrays.  Every input of `rm04Var_eq_uhl` is discharged from `S`/`hS` except the component
-`(0,2)` Ricci identity `hcomm`, which is the one remaining static frontier. -/
+`rm04VarRHS` equals `ΔRm − 2(B − B + B − B) − drift` built entirely from the canonical
+coordinate arrays.  Every input of `rm04Var_eq_uhl` is discharged from `S`/`hS`. -/
 theorem rm04StaticOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -766,11 +965,6 @@ theorem rm04StaticOfSol
     (hS : IsSolutionOn (I := I) S)
     (x₀ : M)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-    (hcomm : RicCommAt
-      (DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
-        (I := I) (S.family.connection (t : Real)) x₀)
-      (ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) (t : Real) x₀)
-      (coordNab2Ric (I := I) S x₀ (t : Real) x₀))
     (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
     rm04VarRHS (I := I) S x₀ (coordNab2Ric (I := I) S x₀) (t : Real) m
       = rmLap (coordInv (I := I) S x₀ (t : Real) x₀)
@@ -799,7 +993,203 @@ theorem rm04StaticOfSol
     (fun p q => (coordInvLocal (I := I) S x₀ (t : Real) x₀ hx₀ p q).2)
     (fun p q r s => rmRaise (I := I) S hS x₀ t p q r s)
     (fun p q => rfl)
-    hcomm
+    (ricCommOfSol (I := I) S hS x₀ t)
     (rm04LapInOfSol (I := I) S hS x₀ t) m
+
+/-- **The Uhlenbeck curvature evolution at the frame centre.**  Along a Ricci-flow
+solution, the canonical coordinate component of lowered Riemann satisfies
+
+`∂ₜ Rm_{ijkl} = Δ Rm_{ijkl} − 2(B_{ijkl} − B_{ijlk} + B_{ikjl} − B_{iljk}) − drift_{ijkl}`
+
+at the centre of the coordinate frame and at every regular time.
+
+`gInvDt` and `hmetricReg` are the only inputs beyond `S`/`hS`: they record the
+spacetime regularity of the coordinate-frame metric components together with a time
+derivative for the coordinate inverse metric.  Every other input of `rm04Var_of_sol`
+and of `rm04Var_eq_uhl` is discharged here. -/
+theorem rm04Evol_at
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (gInvDt :
+      Real → M → CoordinateIdx (𝕜 := Real) E → CoordinateIdx (𝕜 := Real) E → Real)
+    (hmetricReg :
+      MetricFrameSpacetimeRegularityInFrameOnLocal
+        (I := I) S (coordInv (I := I) S x₀) gInvDt
+        (coordinateFrameAt (I := I) x₀) (coordinateFrameSet (I := I) x₀))
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
+    HasDerivWithinAt
+      (fun s : Real ↦ realizedRmBase (I := I) S x₀ s x₀ m)
+      (rmLap (coordInv (I := I) S x₀ (t : Real) x₀)
+            (nab2RmComp (I := I) S x₀ (t : Real) x₀) (m 0) (m 1) (m 2) (m 3)
+        - 2 * (uhlenbeckBTensorInFrame (coordInv (I := I) S x₀) (rmComp (I := I) S x₀)
+                (t : Real) x₀ (m 0) (m 1) (m 2) (m 3)
+            - uhlenbeckBTensorInFrame (coordInv (I := I) S x₀) (rmComp (I := I) S x₀)
+                (t : Real) x₀ (m 0) (m 1) (m 3) (m 2)
+            + uhlenbeckBTensorInFrame (coordInv (I := I) S x₀) (rmComp (I := I) S x₀)
+                (t : Real) x₀ (m 0) (m 2) (m 1) (m 3)
+            - uhlenbeckBTensorInFrame (coordInv (I := I) S x₀) (rmComp (I := I) S x₀)
+                (t : Real) x₀ (m 0) (m 3) (m 1) (m 2))
+        - riemann04RicciDriftInFrame
+            (ricciOneUpCompInFrame (I := I) S (coordInv (I := I) S x₀)
+              (coordinateFrameAt (I := I) x₀))
+            (rmComp (I := I) S x₀) (t : Real) x₀ (m 0) (m 1) (m 2) (m 3))
+      D.carrier (t : Real) := by
+  have hmix :=
+    coordGammaMix (I := I) S hS x₀
+      (coordGammaEvol (I := I) S hS x₀
+        (coordMetricMix (I := I) S hS x₀ (coordMetricDeriv (I := I) S hS x₀)))
+  have hbase :=
+    rm04Var_of_sol (I := I) S hS x₀ gInvDt (coordNab2Ric (I := I) S x₀)
+      hmetricReg (coordNab2Reg (I := I) S x₀) hmix
+      (fun s hs => rm13OfSol (I := I) S s hs)
+      (fun s hs => connCurvOfSol (I := I) S hS x₀ s hs) t m
+  exact hbase.congr_deriv (rm04StaticOfSol (I := I) S hS x₀ t m)
+
+/-! ## Per-point-centred global families
+
+The centre-only limitation of the theorems above dissolves by letting every point be its
+own frame centre.  These are the families the forward-uniqueness lane consumes. -/
+
+/-- The coordinate frame at `y`, read at its own centre as a basis of `T_y M`.  This is
+the `basisAt` argument of the forward-uniqueness lane. -/
+def coordBasisAt (y : M) :
+    Module.Basis (CoordinateIdx (𝕜 := Real) E) Real (TangentSpace I y) :=
+  (coordinateFrameAt_isLocalFrame_one (I := I) y).toBasisAt
+    (coordinateFrameAt_mem (I := I) y)
+
+@[simp] theorem coordBasisAt_coe (y : M) (i : CoordinateIdx (𝕜 := Real) E) :
+    (coordBasisAt (I := I) y i : TangentSpace I y) = coordinateFrameAt (I := I) y i y := by
+  simp [coordBasisAt, IsLocalFrameOn.toBasisAt_coe]
+
+/-- The per-point-centred lowered-curvature component family: at each point the coordinate
+frame centred at that same point is used. -/
+def rm04Fam
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    FourComp M (CoordinateIdx (𝕜 := Real) E) :=
+  fun r y i j k l => rmComp (I := I) S y r y i j k l
+
+/-- **`hreal` for the forward-uniqueness lane.**  The per-point-centred family is the
+metric's own lowered curvature evaluated on the per-point coordinate basis. -/
+theorem rm04Fam_real
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
+    rm04Fam (I := I) S r y i j k l
+      = metricRm04At (I := I) (S.family.metric r) y
+          (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+            (coordBasisAt (I := I) y i) (coordBasisAt (I := I) y j)
+            (coordBasisAt (I := I) y k) (coordBasisAt (I := I) y l)) := by
+  simp [rm04Fam, rmComp, SolutionFamily.rm04, SolutionOn.family]
+
+/-- The per-point-centred rough-Laplacian component family. -/
+def rm04LapFam
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    FourComp M (CoordinateIdx (𝕜 := Real) E) :=
+  fun r y i j k l =>
+    rmLap (coordInv (I := I) S y r y) (nab2RmComp (I := I) S y r y) i j k l
+
+/-- The per-point-centred Uhlenbeck `B` component family. -/
+def rm04BFam
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    FourComp M (CoordinateIdx (𝕜 := Real) E) :=
+  fun r y i j k l =>
+    uhlenbeckBTensorInFrame (coordInv (I := I) S y) (rmComp (I := I) S y) r y i j k l
+
+/-- The per-point-centred once-raised Ricci component family. -/
+def ricUpFam
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    MatrixComp M (CoordinateIdx (𝕜 := Real) E) :=
+  fun r y i k =>
+    ricciOneUpCompInFrame (I := I) S (coordInv (I := I) S y)
+      (coordinateFrameAt (I := I) y) r y i k
+
+/-- **`hev` for the forward-uniqueness lane.**  The per-point-centred families satisfy the
+Uhlenbeck reaction–diffusion evolution with the Ricci drift, at every regular time and
+every point.  The only input beyond `S`/`hS` is the per-centre coordinate-frame metric
+spacetime regularity package. -/
+theorem rm04EvolFam
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInvDt :
+      M → Real → M → CoordinateIdx (𝕜 := Real) E → CoordinateIdx (𝕜 := Real) E → Real)
+    (hmetricReg : ∀ y : M,
+      MetricFrameSpacetimeRegularityInFrameOnLocal
+        (I := I) S (coordInv (I := I) S y) (gInvDt y)
+        (coordinateFrameAt (I := I) y) (coordinateFrameSet (I := I) y)) :
+    Riemann04BTensorWithRicciDriftEvolutionInFrameOn (D := D)
+      (rm04Fam (I := I) S) (rm04LapFam (I := I) S) (rm04BFam (I := I) S)
+      (ricUpFam (I := I) S) := by
+  intro t x i j k l
+  have h := rm04Evol_at (I := I) S hS x (gInvDt x) (hmetricReg x) t
+    (fun q : Fin 4 => if q = 0 then i else if q = 1 then j else if q = 2 then k else l)
+  simpa only [rm04Fam, rm04LapFam, rm04BFam, ricUpFam, riemann04RicciDriftInFrame,
+    rmCompBase (I := I) S x, if_pos, if_neg,
+    show ((fun q : Fin 4 =>
+        if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 0) = i from rfl,
+    show ((fun q : Fin 4 =>
+        if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 1) = j from rfl,
+    show ((fun q : Fin 4 =>
+        if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 2) = k from rfl,
+    show ((fun q : Fin 4 =>
+        if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 3) = l from rfl]
+    using h
+
+/-- **`hL` for the forward-uniqueness lane.**  The per-point-centred rough-Laplacian
+component family realizes the metric rough Laplacian `Δ_g = div_g ∘ ∇^g` of the metric's
+own lowered curvature field, read on the per-point coordinate basis.
+
+The slot map is `frameVec4 (fun m z ↦ coordBasisAt z m) y i j k l` on the nose — that
+definition unfolds to the `vec4` written here. -/
+theorem rm04LapFam_real
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
+    rm04LapFam (I := I) S r y i j k l
+      = roughLap0SField (I := I) (S.family.metric r) (S.base.rm04 r) y
+          (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+            (coordBasisAt (I := I) y i) (coordBasisAt (I := I) y j)
+            (coordBasisAt (I := I) y k) (coordBasisAt (I := I) y l)) := by
+  classical
+  have hy : y ∈ coordinateFrameSet (I := I) y := coordinateFrameAt_mem (I := I) y
+  have hframe := coordinateFrameAt_isLocalFrame_one (I := I) y
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis_gen
+        (I := I) (M := M) (S.family.metric r) y (coordBasisAt (I := I) y)
+        (fun p q : CoordinateIdx (𝕜 := Real) E => coordInv (I := I) S y r y p q) :=
+    metricInverseInBasis_of_local
+      (I := I) S (coordInv (I := I) S y)
+      (coordinateFrameAt (I := I) y) hframe (coordInvLocal (I := I) S y) r hy
+  have hnab : ∀ v : Fin 6 → TangentSpace I y,
+      metricNabla0S (I := I) (S.family.metric r)
+          (metricNabla0S (I := I) (S.family.metric r) (S.base.rm04 r)) y v
+        = nabla2Rm04Field (I := I) S r y v := fun _ => rfl
+  rw [roughLap0SField, covDiv0SField,
+    DifferentialGeometry.Integral.Connection.metricTraceFirstTwoField_apply,
+    DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0STensor_apply,
+    DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0SAt_eq_sum_basis
+      (I := I) (S.family.metric r)
+      (coordBasisAt (I := I) y)
+      (fun p q : CoordinateIdx (𝕜 := Real) E => coordInv (I := I) S y r y p q) hinvAt]
+  simp only [rm04LapFam, rmLap,
+    DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis]
+  refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
+  congr 1
+  rw [hnab]
+  unfold nab2RmComp
+  simp only [coordBasisAt_coe]
+  congr 1
+  funext a
+  fin_cases a <;> rfl
 
 end DifferentialGeometry.PDE.RicciFlow

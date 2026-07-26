@@ -292,6 +292,40 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №43 (2026-07-26, α4 ACCEPTED+COMMITTED — **hcomm CLOSED (static side
+  unconditional on S/hS); all three lane-interface items delivered;
+  hmetricReg root-caused to an over-quantified structure field; RULING
+  R11**): `Rm04Producer.lean` 805→1195 lines, 0 sorry, warning-clean;
+  planner re-audit: 6 endpoints 3-axiom.  Delivered: `ricRicciIdAt`/
+  `ricCommOfSol` (s=2 Ricci identity via the plain `totalNabla0S` tower —
+  `coordCommAt`'s s=2 instance is an unusable local `let`);
+  `rm04Evol_at` (∂ₜRm = ΔRm − 2(B-comb) − drift at the centre, from
+  S/hS + gInvDt/hmetricReg ONLY; tail NOT paid — statements D-generic);
+  `rm04EvolFam` = hev (conditional on per-centre hmetricReg),
+  `rm04Fam_real` = hreal (UNCONDITIONAL), `rm04LapFam_real` = hL
+  (UNCONDITIONAL; `metricNabla0S∘metricNabla0S = nabla2Rm04Field` by rfl);
+  `coordBasisAt` via `IsLocalFrameOn.toBasisAt` — no chart plumbing.
+  BLOCKER root cause: `MetricFrameTimeRegularityInFrameOnLocal.
+  inverseMetricDerivative` (= `InverseMetricDerivativeComponentsOn`)
+  quantifies ALL x : M — the one non-u-local field; `localFrameInv`'s
+  off-u cutoff satisfies it vacuously, `coordInv` (no cutoff) cannot; the
+  localFrameInv→coordInv bridge CANNOT exist as an equality.  Planner
+  consumer audit (4 code sites): Covariant:186, Evolution:53/108,
+  Producers:129 all use it at x ∈ u only; BlackBox uses u=univ (trivial
+  adaptation).  **RULING R11 (option A approved)**: weaken the TWO
+  structure fields (base + spacetime) to u-local (∀ x ∈ u), KEEP the
+  standalone global predicate for BlackBox, adapt the ~5 consumer/
+  constructor sites (mechanical; constructors get strictly easier), then
+  discharge hmetricReg for coordInv on the tail via `coordInvSmooth` —
+  making hev per-tail unconditional.  Layering note (campaign-end):
+  `roughLap0SField`/`covDiv0SField`/`metricNabla0S` belong in
+  `Geometry/Operator/RoughLaplacian.lean` (producer→lane inversion via
+  the ForwardUniqueRmDiff import, acyclic).  `Rm04LapIn.n2RicSym`
+  redundant (derived) — prune the structure field at relocation time.
+  Durable lesson: never close a producer-family-vs-centre-expansion
+  match with `exact` on large defeq terms (360s KERNEL timeout);
+  `simpa only [small defs + rfl-lemmas] using h` (16s).  **α5 dispatched
+  (fresh executor): the R11 surgery + tail discharge.**
 - №42 (2026-07-26, β4 ACCEPTED+COMMITTED — **CONNBOUND 0-SORRY: the
   Kotschwar |∂ₜA₀₃|² bound is PROVED on the repaired honest interface;
   K1C-b 100%**): fresh executor closed `htrace` — realizer uniqueness

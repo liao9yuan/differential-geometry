@@ -1,180 +1,203 @@
 # Rm04Producer — discharging the `Rm04Reduction` inputs
 
-**Status: outcome B.**  Work item 1 (`bianchi2`) **CLOSED**.  Work item 2 **static half
-closed**, time half not started.  Work item 3 (global packaging) **not started**.
+**Status: steps 1 and 3 CLOSED; step 2 closed up to ONE named honest input.**
 
-0 `sorry`, 805 lines.  Targeted build `+…Evolution.Rm04Producer` GREEN (3780 jobs),
+0 `sorry`, 1195 lines.  Targeted build `+…Evolution.Rm04Producer` GREEN (3783 jobs),
 warning-clean.  `#print axioms` on every public endpoint: `propext`, `Classical.choice`,
 `Quot.sound` only.
 
-## Public API (what a consumer gets from `S`/`hS` alone)
+## Public API
 
 | Declaration | Content |
 |---|---|
-| `rmComp S x₀` | canonical lowered-curvature `FourComp` array, `vec4`-written |
-| `nab2RmComp S x₀` | canonical `∇²Rm` component array, `n2Rm a b c d e f = (∇_a∇_b Rm)_{cdef}` |
-| `rm04SymmOfSol` | `Rm04Symm (rmComp …)` — the four algebraic curvature symmetries |
-| `rmSecondAt` | `SecondBianchiAt (nablaRm04Field S t x)` at **every** `t`, `x` |
+| `rmComp S x₀` / `nab2RmComp S x₀` | canonical lowered-`Rm` and `∇²Rm` component arrays at the frame centred at `x₀` |
+| `rm04SymmOfSol` | `Rm04Symm` — the four algebraic curvature symmetries |
+| `rmSecondAt` | `SecondBianchiAt (nablaRm04Field S t x)` at every `t`, `x` |
 | **`rm2Bianchi`** | **the once-differentiated second Bianchi identity** (tensor level) |
 | `rm2SymmAt` | the three algebraic symmetries inherited by `nabla2Rm04Field` |
-| `n2RicTr` | `∇²Ric` is the first metric trace of `∇²Rm`, at the centre |
-| `ricTr` | `Ric` is the first metric trace of `Rm`, at the centre |
+| `n2RicTr` / `ricTr` | `∇²Ric` (resp. `Ric`) is the first metric trace of `∇²Rm` (resp. `Rm`) |
 | `rmRicciId` | the `(0,4)` Ricci identity in coordinate components at the centre |
 | `rmRaise` | `christoffelCurvCoeffAt = Σ_q g^{dq} Rm04_{abcq}` at the centre |
-| **`rm04LapInOfSol`** | **the whole `Rm04LapIn` package (7/7 fields)** |
-| **`rm04StaticOfSol`** | **`rm04VarRHS = ΔRm − 2(B−B+B−B) − drift`, conditional on `hcomm` only** |
+| **`rm04LapInOfSol`** | the whole `Rm04LapIn` package (7/7 fields) |
+| **`ricRicciIdAt`** | the `s = 2` Ricci identity for `Ric` (the analogue of `rm04_ricciIdentityAt`) |
+| **`ricCommOfSol`** | `RicCommAt` in components — the last static input |
+| **`rm04StaticOfSol`** | `rm04VarRHS = ΔRm − 2(B−B+B−B) − drift`, **unconditional** on `S`/`hS` |
+| **`rm04Evol_at`** | **`∂ₜRm = ΔRm − 2(B−B+B−B) − drift` at the centre**, conditional on `gInvDt`/`hmetricReg` only |
+| `coordBasisAt`, `rm04Fam`, `rm04LapFam`, `rm04BFam`, `ricUpFam` | the per-point-centred lane families |
+| **`rm04EvolFam`** | **`hev`** — `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`, conditional on the per-centre `hmetricReg` family |
+| **`rm04Fam_real`** | **`hreal`** — unconditional |
+| **`rm04LapFam_real`** | **`hL`** — unconditional |
 
-## Work item 1 — `bianchi2`, the only genuinely missing input.  DONE
+## Step 1 — `bianchi2` and `hcomm`.  DONE
 
-The route the task brief sketched (linearity of `totalNabla0S` in the differentiated field
-+ `domDomCongr` naturality) was **not** needed.  A cheaper route exists and is what landed:
+### `bianchi2` (the only genuinely missing mathematics)
+
+The route the original brief sketched (linearity of `totalNabla0S` in the differentiated
+field + `domDomCongr` naturality) was **not** needed:
 
 1. `canRmSecond` (`Geometry/Connection/LeviCivita/Curvature/Realized.lean:542`) gives
    `SecondBianchiAt` for the canonical Levi-Civita `∇Rm` **non-existentially at every
-   point**.  The bridge to the solution's `nablaRm04Field` is the same
-   `simpa [SolutionOn.family, SolutionFamily.connection, SolutionFamily.rm04, metricCov,
-   metricRm04]` unfolding that `canBianchiAt` uses (`rmSecondAt`, 8 lines).
-2. Restate `SecondBianchiAt` in **slot-function form**: `α u + α (u ∘ rotA) + α (u ∘ rotB)
-   = 0` for the two 3-cycles `rotA, rotB : Equiv.Perm (Fin 5)` fixing slots 3,4
-   (`secondCyc`).  This is the key move — it turns a 5-argument identity into a statement
-   about one slot map and makes the correction sums reindexable.
-3. `nabPerm`: apply `nabla0SFun_eval_smooth_slots`
-   (`Tensor/RSTensor/NablaOnTensors/Regularity/Tensor0S.lean:651`) to the permuted section
-   family `V ∘ σ` and **reindex the connection-correction sum** so that the *differentiated
-   field*, not its slot position, is the summation variable:
-   `Σ_a α(update (f∘σ) a (D V_{σa})) = Σ_c α((update f c (D V_c)) ∘ σ)`, via
-   `Function.update_comp_equiv` + `Equiv.sum_comp`.
-4. `nabCyc`: sum `nabPerm` over `σ ∈ {1, rotA, rotB}`.  The leading `extDerivFun` terms sum
-   to `extDerivFun 0 = 0` (`extDerivFun_add` twice, `extDerivFun_zero`).  After the
-   reindexing of step 3 the corrections regroup as `Σ_c (cyclic sum at U_c) = Σ_c 0 = 0`.
-5. `rm2Bianchi`: pick smooth sections through the given tangent vectors
-   (`ContMDiffSection.exists_eq_at_gen`), convert `nabla2Rm04Field` to `nabla0SFun` by
-   `totalNabla0SFun_apply_section`, and apply `nabCyc`.
+   point**; the bridge to `nablaRm04Field` is the `canBianchiAt` `simpa` unfolding
+   (`rmSecondAt`, 8 lines).
+2. Restate it in **slot-function form**: `α u + α (u ∘ rotA) + α (u ∘ rotB) = 0` for the two
+   3-cycles `rotA, rotB : Equiv.Perm (Fin 5)` fixing slots 3,4 (`secondCyc`).  This is the
+   key move — it makes the correction sums reindexable.
+3. `nabPerm`: apply `nabla0SFun_eval_smooth_slots` to `V ∘ σ` and **reindex the connection
+   corrections so that the differentiated field, not its slot position, is the summation
+   variable** (`Function.update_comp_equiv` + `Equiv.sum_comp`).
+4. `nabCyc`: sum over `σ ∈ {1, rotA, rotB}`.  Leading terms sum to `extDerivFun 0 = 0`;
+   after step 3 the corrections regroup as `Σ_c (cyclic sum at U_c) = 0`.
+5. `rm2Bianchi`: smooth sections through the given vectors, `totalNabla0SFun_apply_section`,
+   then `nabCyc`.
 
-Total ≈ 145 lines including the permutation scaffolding.  **No new Tensor-layer API was
-needed** — `nabla0SFun_add` / `domDomCongr` naturality were never used.
+≈145 lines.  **No new Tensor-layer API.**
 
-### Relocation TODO (planner ruling R10)
+### `hcomm` (`ricCommOfSol`)
 
-`rotA`/`rotB`/`vec5_rotA`/`vec5_rotB`/`vec5_self`/`secondCyc`/`nabPerm`/`nabCyc` are
-manifold-generic `(0,5)` covariant-derivative facts with no Ricci-flow content.  `nabPerm`
-(the permuted-slot evaluation with the reindexed correction sum) and `nabCyc` (cyclic
-vanishing propagates through `∇`) belong next to `nabla0SFun_eval_smooth_slots` in
-`Tensor/RSTensor/NablaOnTensors/Regularity/Tensor0S.lean`, generalized from `Fin 5` to
-`Fin s` and from a 3-cycle to an arbitrary finite family of permutations.  `secondCyc`
-and the `vec5_*` conversions belong in `Geometry/Curvature/Bianchi.lean` next to
-`SecondBianchiAt`.  Left here so the brick stays one reviewable file.
+Built as the planner predicted.  `ricRicciIdAt` is `rm04_ricciIdentityAt` at `s = 2`: the
+`Nabla20SRealizesAt` witness is *not* the one buried in `coordCommAt` (that one is a local
+`let` inside a 200-line theorem and unusable) — instead `solNabRic`/`solNab2RicF` are the
+plain `totalNabla0S` tower for `S.ricci t`, whose realizations come free from
+`totalNabla0S_realizes`, mirroring `nablaRm04Field_realizes`.  Then `ricCommOfSol` is
+`rmRicciId` at `s = 2`: `curvatureAction0SAt_eq_rm04`, `Fin.sum_univ_two`, two
+`Function.update → vec2` conversions, `rmRaise` to reintroduce `christoffelCurvCoeffAt`,
+`sumSwap` + `gInv` symmetry.
 
-## Work item 2 — full discharge at the centre.  STATIC HALF DONE, TIME HALF NOT STARTED
+With this, `rm04StaticOfSol` lost its `hcomm` hypothesis: **the static identity is now
+unconditional on `S`/`hS`.**
 
-`rm04StaticOfSol` discharges **all** of `rm04Var_eq_uhl`'s inputs from `S`/`hS` except one:
+## Step 2 — the time half.  BLOCKED on one honest input; everything else discharged
 
-| input | discharged by |
-|---|---|
-| `hsym` | `rm04SymmOfSol` |
-| `hgi` | `coordInvSymmOn` (pre-existing) |
-| `hricsym` | `coordRicSymmOn` (pre-existing) |
-| `hcon` | `coordInvLocal … .2` (pre-existing `InvMetricLocal`, second conjunct) |
-| `hraise` | **`rmRaise`** (new) |
-| `hRup` | `rfl` at `ricciOneUpCompInFrame S (coordInv S x₀) (coordinateFrameAt x₀)` |
-| `hin` | **`rm04LapInOfSol`** (new) |
-| `hcomm : RicCommAt` | **NOT DISCHARGED — the remaining static frontier** |
+`rm04Evol_at` delivers the full evolution at the centre from `S`/`hS` **plus** `gInvDt` and
+`hmetricReg`.  The other four packages of `rm04Var_of_sol` discharge for free:
+`coordNab2Reg` (hypothesis-free), `coordGammaMix ∘ coordGammaEvol ∘ coordMetricMix ∘
+coordMetricDeriv` (a single nested term, no `simpa` needed), `rm13OfSol`, `connCurvOfSol`.
 
-### `Rm04LapIn` field by field (all proved)
+### The blocker (NEW finding — supersedes the tail plan)
 
-- `bianchi2` ← `rm2Bianchi` at frame vectors.
-- `ricciId` ← `rm04_ricciIdentityAt` (`Evolution/RmRealizationBridge.lean:539`) rewritten by
-  **`curvatureAction0SAt_eq_rm04`** (`Geometry/Curvature/CurvatureActionLower.lean:49`),
-  which is the *component* form of the curvature action and was the find that made this
-  field cheap — no `cotangentSharp`/`oneFormAtSlot0S` basis expansion is needed.  Then
-  `Fin.sum_univ_four`, four `Function.update → vec4` conversions, `sumMulPair`, and a
-  single `Finset.sum_comm` + `gInv` symmetry.
-- `ricTrace` ← `ricciFirstTraceAt_of_rm13_section` (`Geometry/Curvature/Components/RicciTrace.lean:232`)
-  at `hframe.toBasisAt hx₀`, fed by `ricciTraceOfSol` + `solution_rm04LowersRm13At` +
-  `coordInvSymmOn`.
-- `n2RicTrace` ← `canNabla2RicTrace` (`Realized.lean:1068`) chained with
-  `coordNab2Ric_eq_nabla2RicField`.  The latter mentions the **private** `nabla2RicField`,
-  so this file re-declares `solNabRic`/`solNab2Ric` verbatim and bridges with
-  `simpa only [solNab2Ric, solNabRic]` — the same trick `HamiltonBaseProducer.lean:116-146`
-  uses.
-- `n2RmSwap12`, `n2RmPair` ← `canRm2Symm` conjuncts 2 and 3, via `rm2SymmAt`.
-- `n2RicSym` ← **derived**, not an independent producer: it follows from `n2RicTrace`,
-  `n2RmPair`, `n2RmSwap12` and `gInv` symmetry (swap the two trace indices, use pair
-  symmetry then swap12 then the derived swap34).  So `Rm04LapIn.n2RicSym` is redundant given
-  the other fields; worth removing from the structure if the planner wants a tighter package.
+`MetricFrameSpacetimeRegularityInFrameOnLocal S gInv gInvDt frame u` has a field that is
+**not `u`-local**:
 
-### What blocks the rest of work item 2
+```
+inverseMetricDerivative : InverseMetricDerivativeComponentsOn gInv gInvDt
+  ≡  ∀ t (x : M) i j, HasDerivWithinAt (fun s ↦ gInv s x i j) (gInvDt t x i j) D.carrier t
+```
 
-**(a) `hcomm : RicCommAt`** — the `(0,2)` Ricci identity in components:
-`n2Ric j i k l − n2Ric i j k l = Σ_p Rm13_{ijkp} Ric_{pl} + Σ_p Rm13_{ijlp} Ric_{kp}`
-with `Rm13 = christoffelCurvCoeffAt` and `n2Ric = coordNab2Ric S x₀ t x₀`.
-The route is the *exact analogue* of `rmRicciId` at `s = 2` with `alpha = S.ricci t`:
-apply `curvatureAction0SAt_eq_rm04` at `s = 2`, then convert `Σ_p Σ_q g^{pq} Rm04_{ijkq}
-Ric_{pl}` back to `Σ_p Rm13_{ijkp} Ric_{pl}` using `rmRaise`.  **The one missing ingredient
-is a `Tensor0SRicciIdentityAt (S.base.rm13 t) (S.ricci t x₀) (solNab2Ric S t x₀)`
-producer** — the `s = 2` analogue of `rm04_ricciIdentityAt`.  `Evolution/Ricci/` has only
-the *traced* commutator (`coordCommAt` → `RicciContractedCommutatorsInFrameOnLocal`), not
-the raw one.  Estimated ≈ 60 lines of Ricci identity plumbing + ≈ 60 lines mirroring
-`rmRicciId`.  Classification: **missing groundwork/API**, routine.
+— quantified over **all** `x : M`, not over `x ∈ u`.  `localFrameInv` is *designed* around
+this: its definition carries an `if hx : x ∈ u then … else 0` cut-off, so off `u` the
+function is constant and `localFrameInv_time` (`Metric/LocalFrameInverse.lean:97`) proves
+`ContDiffOn ℝ ∞ (fun t ↦ localFrameInv … t x i j) K` **for every `x`** while only assuming
+metric smoothness on `u`.  `coordInv` (`Basic/RicciNorm.lean:157`) has **no cut-off**: it is
+`inverseMetricFlatModelInChart_component (S.family.metric t) x₀ i j (extChartAt I x₀ x)`, and
+off the coordinate-frame domain `extChartAt I x₀ x` leaves the chart target, so nothing is
+known about it — `coordInvSmooth` only covers `D.regular ×ˢ coordinateFrameSet x₀`.
 
-**(b) `hmetricReg : MetricFrameSpacetimeRegularityInFrameOnLocal` for `coordInv S x₀`** —
-the time half (`rm04Var_of_sol`).  **The `coordMetricDeriv`/`coordMetricMix` route
-recommended in the brief does NOT compose**: those produce
-`MetricCovDerivDerivativeComponentsInFrameOnLocal`, a different predicate, and
-`coordRicciEvol` (the "architectural gold standard") never builds `hmetricReg` at all — it
-routes through `ricciEvolCore`, which takes `hGamma : ChristoffelEvolutionEquationInFrameOn`
-instead.  Grep-verified: the **only** producers of
-`MetricFrameSpacetimeRegularityInFrameOnLocal` from a solution are `tailFrameSpaceReg`
-(`Evolution/Metric/TailFrameRegularity.lean:74`) and `tailChristoffelReg`
-(`Evolution/Connection/TailChristoffel.lean:144`), both on a strictly positive-time tail and
-both with `localFrameInv` as the inverse family.  The tail is *structurally* required: the
-`frameMetricSpacetimeSmooth` field asks for joint `(t,x)` smoothness on `D.carrier ×ˢ u`,
-while `hS.smoothMetric.frameCompSmooth` only gives it on `D.regular` — restricting to
-`[t₀, ω)` is exactly what makes the old `regular` cover the new `carrier`.  So **the tail
-must be paid**, and the remaining bridge is `localFrameInv = coordInv` (both are two-sided
-inverses of the same Gram matrix on the same open set, so uniqueness of the inverse gives
-it; `InvMetricLocal` + `coordInvLocal` are the two sides).  Classification: **route-choice
-+ missing bridge lemma**, routine but the tail restriction propagates into the statement of
-work items 2 and 3.
+Grep-verified: there is **no** producer anywhere of `MetricFrameTimeRegularityInFrameOnLocal`
+or `MetricFrameSpacetimeRegularityInFrameOnLocal` with `coordInv`, and **no** lemma anywhere
+about time-regularity of `coordInv` (`fun t ↦ coordInv …`).
 
-The other four packages of `rm04Var_of_sol` are free: `hnablaReg` = `coordNab2Reg`
-(zero hypotheses), `hmix` = `coordGammaMix S hS x₀ (coordGammaEvol S hS x₀ hmetric)` with
-`hmetric` from `coordMetricMix ∘ coordMetricDeriv` (copy `coordRicciEvol:895-950`),
-`hRm` = `rm13OfSol`, `hcurv` = `connCurvOfSol`.
+**Consequence: the planned `localFrameInv → coordInv` bridge cannot exist as an equality.**
+The two arrays genuinely differ off `u` (0 versus chart junk), and the field that needs
+transporting is precisely the one quantified off `u`.  Restricting to a positive-time tail
+fixes the *other* mismatch (`frameMetricSpacetimeSmooth` on `D.carrier ×ˢ u` versus
+`hS.smoothMetric.frameCompSmooth` on `D.regular ×ˢ u`) but does nothing for this one.
 
-## Work item 3 — global packaging.  NOT STARTED
+**Two design options, both touching files outside this one — planner's call:**
 
-Blocked behind work item 2 in the sense that `hev` is literally "work item 2 at `x₀ := y`
-for every `y`".  Nothing was attempted; `basisAt` chart plumbing was not scoped.  Note that
-if (b) above is settled by the tail route, `hev` will be stated for
-`S.timeRestrict (closedOpen t₀ ω)`, not for `S` on the original `D`.
+- **(A) Make the field `u`-local.**  Weaken `InverseMetricDerivativeComponentsOn` (or add a
+  `…On u` variant used by `MetricFrameTimeRegularityInFrameOnLocal`) to `∀ x ∈ u`.  This is
+  the mathematically honest shape — every other field of the structure is already `u`-local —
+  and then `coordInvSmooth` discharges it directly on the tail.  Cost: `Metric/Basic.lean`
+  plus the `localFrameInv`/tail producers that currently prove the stronger form (they would
+  still prove the weaker one).
+- **(B) Build global time-regularity for `coordInv`.**  Provable *in principle*: the only
+  `t`-dependence is through `(S.family.metric t).inner q` at the fixed point
+  `q = (extChartAt I x₀).symm y`, and `ContinuousLinearMap.inverse` is smooth at invertible
+  maps.  But it needs the trivialization at `x₀` to be a fibrewise linear iso *off* its base
+  set, for which there is no API.  Substantially more work than (A) and of no other use.
+
+Recommendation: (A).  Note that under (A) the tail restriction is still needed for
+`frameMetricSpacetimeSmooth`, so `rm04Evol_at`/`rm04EvolFam` would be instantiated at
+`S.timeRestrict (closedOpen t₀ ω)`; their statements are already `D`-generic, so no change
+here is required — only the discharge of `hmetricReg`.
+
+## Step 3 — lane packaging.  ALL THREE DELIVERED
+
+- `coordBasisAt y` = the coordinate frame at `y` read at its own centre as a `Module.Basis`;
+  `coordBasisAt_coe` is the `@[simp]` evaluation.  **No chart plumbing was needed** —
+  `IsLocalFrameOn.toBasisAt` already does it, ~6 lines total.
+- `rm04Fam` / `rm04LapFam` / `rm04BFam` / `ricUpFam`: the per-point-centred families.
+- **`hreal` = `rm04Fam_real`** (unconditional): one `simp`.
+- **`hL` = `rm04LapFam_real`** (unconditional): `roughLap0SField → covDiv0SField →
+  metricTraceFirstTwoField_apply → metricTraceFirstTwo0STensor_apply →
+  metricTraceFirstTwo0SAt_eq_sum_basis`, then the identification
+  `metricNabla0S g (metricNabla0S g (S.base.rm04 r)) y v = nabla2Rm04Field S r y v`, which is
+  **`rfl`** (both are the same `totalNabla0S` tower once `SolutionFamily.connection` and
+  `metricCov` unfold).  Stated with `vec4 (coordBasisAt y i) …`; the lane's
+  `frameVec4 (fun m z ↦ coordBasisAt z m) y i j k l` unfolds to exactly that.
+- **`hev` = `rm04EvolFam`**: conditional on the per-centre family
+  `∀ y, MetricFrameSpacetimeRegularityInFrameOnLocal S (coordInv S y) (gInvDt y) …` — i.e. on
+  the *same* single honest input as `rm04Evol_at`, applied at every centre.
+
+`hcont`/`hPDE` are lane-side and were not attempted, as instructed.
 
 ## New imports
 
-One added: `DifferentialGeometry.Geometry.Curvature.CurvatureActionLower`, for
-`curvatureAction0SAt_eq_rm04`.  No cycle (it sits under `Geometry/Curvature/`).
+Two: `Geometry.Curvature.CurvatureActionLower` (for `curvatureAction0SAt_eq_rm04`) and
+`Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmDiff` (for `roughLap0SField`,
+`covDiv0SField`, `metricNabla0S`).  Both acyclic; the build went 3780 → 3783 jobs.
+
+**Layering note for the planner:** `roughLap0SField`, `covDiv0SField` and `metricNabla0S` are
+pure metric operators with zero forward-uniqueness content, currently misfiled in
+`Evolution/ForwardUniqueRmDiff.lean`.  Their canonical home is
+`Geometry/Operator/RoughLaplacian.lean`, next to `metricTraceFirstTwo0SAt` and
+`metricTrace0S2InBasis`, which they already consume.  Moving them would remove the second
+import above and undo the producer→lane layering inversion.
+
+## Relocation TODOs
+
+1. `rotA`/`rotB`/`vec5_rotA`/`vec5_rotB`/`vec5_self`/`secondCyc`/`nabPerm`/`nabCyc` are
+   manifold-generic `(0,5)` covariant-derivative facts.  `nabPerm`/`nabCyc` belong next to
+   `nabla0SFun_eval_smooth_slots` in
+   `Tensor/RSTensor/NablaOnTensors/Regularity/Tensor0S.lean`, generalized from `Fin 5` to
+   `Fin s` and from a 3-cycle to an arbitrary finite family of permutations; `secondCyc` and
+   the `vec5_*` conversions belong in `Geometry/Curvature/Bianchi.lean`.
+2. `Rm04LapIn.n2RicSym` is **redundant**: it is derived here from `n2RicTrace`, `n2RmPair`,
+   `n2RmSwap12` and `gInv` symmetry.  Consider dropping the field from the structure.
+3. `sumSwap`/`sumMulPair` are generic finite-sum reindexing helpers used by both `rmRicciId`
+   and `ricCommOfSol`; they belong wherever the `Rm04Reduction` algebra layer lands.
+4. At 1195 lines the file is still under the 3000-line limit but has three distinct layers
+   (differentiated Bianchi / component packages / lane families).  A split at the
+   `### The (0,2) Ricci identity` and `## Per-point-centred global families` headings is the
+   natural boundary when it next grows.
 
 ## Lessons
 
-- **Grep `Geometry/Curvature/CurvatureActionLower.lean` before expanding a curvature action
-  by hand.**  `curvatureAction0SAt_eq_rm04` already gives the fully component-level form with
-  an arbitrary basis and `gInv`; the `cotangentSharp_gen`/`oneFormAtSlot0S` version
-  (`RmRaisingBridge.lean:172`) is the *invariant* one and is much more painful to use in
-  components.  This turned `ricciId` from the expected hard field into a ~110-line
-  bookkeeping proof.
-- `u ∘ (σ * σ)` for `σ : Equiv.Perm` elaborates **inconsistently**: in one declaration Lean
-  read `⇑(σ * σ)` (group multiplication), in the next it read `⇑σ * ⇑σ` (pointwise `Pi.mul`),
-  and the `rw` then failed with a confusing "pattern not found".  Fix: give the square its
-  own named `Equiv.Perm` definition rather than writing a product inside a `∘`.
+- **Grep `Geometry/Curvature/CurvatureActionLower.lean` before expanding a curvature action by
+  hand.**  `curvatureAction0SAt_eq_rm04` gives the fully component-level form with an
+  arbitrary basis and `gInv`; the invariant `cotangentSharp_gen`/`oneFormAtSlot0S` version
+  (`RmRaisingBridge.lean:172`) is much more painful in components.  This one lemma carried
+  both `rmRicciId` and `ricCommOfSol`.
+- **`exact` between two large defeq terms is a kernel wall.**  `rm04EvolFam`'s first proof
+  ended in `exact h` where `h` and the goal differed only by unfolding `rm04LapFam`/`rm04Fam`
+  and reducing `m 0` — it hit a *kernel* `deterministic timeout` after 360 s.  Replacing it
+  with `simpa only [<the small defs>, <four `m q = …` rfl-lemmas>] using h` made the same
+  declaration check in 16 s.  When a producer family and its centre-specific expansion are
+  defeq but not syntactically equal, drive the match with `simp only` on the small defs, never
+  with `exact`.
+- `u ∘ (σ * σ)` for `σ : Equiv.Perm` elaborates **inconsistently** — `⇑(σ * σ)` in one
+  declaration, `⇑σ * ⇑σ` (`Pi.mul`!) in the next, with a confusing "pattern not found".  Give
+  the square its own named `Equiv.Perm` definition.
 - The `simpa [SolutionOn.family, SolutionFamily.connection, SolutionFamily.rm04, metricCov,
   metricRm04, …]` incantation from `canBianchiAt` transports **any** `can*` lemma from
-  `Realized.lean` to the solution's `S.family.connection` / `S.base.rm04` /
-  `nablaRm04Field` / `nabla2Rm04Field`.  It also handles the differing
-  `totalNabla0S_reg`-vs-`connSmoothInf` regularity witnesses (proof irrelevance).  Three
-  separate bridges (`rmSecondAt`, `rm2SymmAt`, `n2RicTr`) were one-shot green with it.
-- A private `def` in another module can still be *used* through a public theorem that
-  mentions it: re-declare the definition verbatim locally and bridge with
-  `simpa only [myCopy₁, myCopy₂] using theOtherTheorem`.  `HamiltonBaseProducer.lean` does
-  this for `nabla2RicField`; `coordNab2Eq` here repeats it.
-- Whole-file check ≈ 18 s.  Nothing needed a performance workaround; no `fin_cases` blowup
-  (the only enumerations are over `Fin 4`/`Fin 5` slot maps, never over `CoordinateIdx`).
+  `Realized.lean` to the solution's objects, and absorbs differing regularity witnesses by
+  proof irrelevance.  Four bridges (`rmSecondAt`, `rm2SymmAt`, `n2RicTr`, and the `hnab` of
+  `rm04LapFam_real` — the last one is plain `rfl`) were one-shot green with it.
+- A private `def` in another module can still be *used*: re-declare it verbatim locally and
+  bridge with `simpa only [myCopy] using theOtherTheorem` (`solNabRic`/`solNab2Ric` versus
+  `IntrinsicDerivation.nablaRicField`; `HamiltonBaseProducer.lean:116` does the same).
+- Lemmas from `Geometry/Operator/RoughLaplacian.lean` and `Tensor/RSTensor/MetricTrace/` need
+  the `DifferentialGeometry.Integral.Connection.` prefix here even though sibling lane files
+  use them bare — those files `open` the namespace, this one does not.
+- Whole-file check ≈ 17 s.  No `fin_cases` blowup (all enumerations are over `Fin 2/4/5/6`
+  slot maps, never over `CoordinateIdx`).
