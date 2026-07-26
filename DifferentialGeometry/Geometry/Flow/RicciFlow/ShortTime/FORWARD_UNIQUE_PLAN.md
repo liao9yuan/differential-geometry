@@ -106,10 +106,21 @@ Stop gates: (N)-gate (shrinking horizons) and K2-gates (global representation
 change / Shi-architecture modification / IBP cannot pair div₁U against S
 invariantly) — details in the ruling file.
 
-**EXECUTION FREEZE (user directive 2026-07-25): e87b will be MERGED BACK into
-ste-align (`codex/short-time-existence-align`). Do not implement the ruling on
-e87b. First post-merge action = dispatch the K1 kickoff prompt from the ruling
-file (path-adjust if the merge moves files).**
+**MERGE COMPLETE — FREEZE LIFTED (2026-07-25).** e87b was fully merged into
+ste-align at `8a3ce03e8` (whole-branch merge; parent chain includes the lane
+tip `d52850842`). Merge fidelity verified by the (B)-lane planner: zero e87b
+commits missing, all nine lane files byte-identical, the merge-adaptation
+commit (`acdac880a`) touched no lane file. The lane's PRIMARY TREE is now
+`E:\testdifferential-geometry-ste-align`; this copy of the plan is canonical
+(the e87b copy is an archive). Root-aggregate wiring done here: the three
+GREEN leaves (`RicciEdgeBounds`, `TimeLocalNemytskii`, `RadialMixedBound`)
+imported into `DifferentialGeometry.lean`; the broken (`TimeTameFixedPoint`,
+`MovingMass`) and blocked-upstream (`DeTurckUniqueWindow`, `MovingEdgeEnergy`)
+leaves deliberately NOT in the aggregate. Next action = Stage-1 surgery, then
+dispatch the K1 kickoff prompt from the ruling file.
+
+*(Historical freeze note, superseded: implementation was frozen on e87b
+pending this merge.)*
 
 **ste-align overlap verification (2026-07-25, planner)**: file-level overlap of
 this lane's work with ste-align ≈ ZERO — the four TMR drafts, RicciEdgeBounds,
