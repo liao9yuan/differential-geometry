@@ -106,7 +106,7 @@ pieces.  NO salvage-port from LowJet is required.
 | `lc0VB` | `2·traceStep(g₁,VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) ∘ interior_product(deTurckVF g₁ g₀)` (:144) | twoArm engine (Φ = metricConnDiffLowered→connDiff, W = deTurckVF interior-product); closest to `deTurckLieArm1Coeff` (same atoms, different contraction — NOT a reindex) | MEDIUM |
 | `lc0AMix` | `2·(AMixHalf + swap·AMixHalf)`, `AMixHalf` = chain of traceSteps over prodKappa(metricConnDiffLoweredFib g₁ g₁ g_bg) and prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) (:162) | twoArm engine, both factors connection-difference (via Atom-3 push) | MEDIUM |
 | `lc0Riem` | `−traceStep(g₁,RiemPerm2) ∘ traceStep(g₀,RiemPerm1) ∘ prodKappa(lieCorr0RiemLoweredFib g₀)` (:237); passenger = FIXED g₀-curvature `g₀.inner∘riemannOp(LC g₀)` | **DONE — see "lc0Riem: the route that worked" below.**  Neither of the two guessed routes was used: the winner was twoArm with the live arm *reduced to the committed rank-1 cometric envelope via `slotExtend` + a source 3-cycle reindex* | landed |
-| `lc0Insert g_bg − lc0Insert g₀` | `slotInsert(NEndo g_bg − NEndo g₀)`; by `nEndo_diff` (`LieCorr0Split.lean:103`) = `slotInsert(connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg))` | twoArm engine: connDiff (Atom 3, controlled) × deTurckVF-difference (controlled via DLb `wOmega`/`wXi`); slotInsert is a fibrewise isometry | MEDIUM |
+| `lc0Insert g_bg − lc0Insert g₀` | `slotInsert(NEndo g_bg − NEndo g₀)`; by `nEndo_diff` (`LieCorr0Split.lean:103`) = `slotInsert(connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg))` | **STATED, ONE `sorry` — see "lc0Insert-diff: the missing engine" below.**  The recon guess ("twoArm engine, deTurckVF-diff via DLb wOmega/wXi") was WRONG in a fatal way: the product is an *interior-product contraction*, not the operator *composition* the appCcRS grid covers, and the deTurckVF machinery it needs is all `private` | **blocked (missing engine)** |
 
 All four go to `Kc` (R allowed).  Only the top piece needs the R-free `Ktop`,
 already delivered via DLb.
@@ -150,7 +150,7 @@ order `k`, since it is stated per-`k`), then the `realizedFam` threading copied 
 `gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform`, then `Ktop = 0` and
 `Kc i ≤ Kc i · (1 + low)` by `nlinarith`.
 
-## SESSION STATE + RESUMPTION POINT (2026-07-25, after the first build session)
+## SESSION STATE (2026-07-25, first build session — superseded by the insert-diff session below for the resumption point)
 
 ### What is verified-green now (vs the previous session, which banked NOTHING)
 The previous session ran no build at all and left the leaf importing broken
@@ -197,32 +197,83 @@ layer's own `set_option linter.unusedVariables false in` idiom.
   build report exit 255 (broken pipe) even when it succeeded — redirect to a file, then
   filter.
 
-### Exact resumption point for a successor
-1. **Next atom: `lc0Insert g_bg − lc0Insert g₀`.**  By `nEndo_diff` (`LieCorr0Split.lean:103`)
-   it is `slotInsert(connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg))`.  Mirror the
-   `lc0Riem` skeleton exactly: factor as `appCcRS` of a controlled arm against a
-   controlled arm, reuse the same pointwise-grid → `normSq_le_integral…` → twoArm
-   integrator → `realizedFam`-threading → `Ktop = 0` pipeline.  Difference from `lc0Riem`:
-   BOTH arms are live here, so both need order-`0` sups and jet-`L²` sums (connDiff from
-   `ConnectionDifferenceJetTower`, deTurckVF-difference from the DLb `wOmega`/`wXi` low
-   atoms) — the passenger-is-fixed shortcut does not apply.
-2. Then `lc0VB`, then `lc0AMix` (see the routing table).
-3. Assemble the two endpoints ONLY once all four Kc atoms are green (they need all four
-   via `sq_le_five_add`).  `Ktop = 5·Ktop_DLb` (R-free), single summed `Kc`.
-4. Keep the leaf axiom-clean at every step; it is still outside the root import graph,
-   so nothing downstream protects it — verify the leaf itself with a targeted module
-   build, not only a focused check.
+## lc0Insert-diff: the missing engine (2026-07-25 second build session)
+
+**Status: STATED with the correct full signature, ONE isolated `sorry`.**  The atom
+`lc0InsertDiff_realizedFam_perOrder_topSep` (top-separated, `Ktop = 0`, signature verbatim
+= `lc0Riem`/top-piece) is proved from a single `ballUniform` frontier lemma
+`lc0InsertDiff_ballUniform` (the `sorry`) by the trivial reshape `K i ≤ K i·(1+low)`
+(`nlinarith`).  The `sorry` is the ONLY gap; `#print axioms` confirms the atom carries
+`sorryAx` and nothing else new, while the four banked theorems + `lc0Riem` stay exactly
+`[propext, Classical.choice, Quot.sound]`.
+
+### Why the recon route (and the "mirror lc0Riem" plan) FAILED — read before retrying
+The endomorphism is `Endo = connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg)`
+(`nEndo_diff`): the moving connection difference `connDiff g₁ g₀` **contracted** with the
+deTurckVF-difference `Vdiff`.  Three things make this NOT a recombination of the committed
+`lc0Riem` machinery:
+
+1. **The product is an interior-product contraction, not an operator composition.**  The
+   committed product grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
+   (and `appCc_iteratedCovGrad_diagonalProductGrid_le`) are for `appCcRS`/`appCc` =
+   composition of `(0,·)`-operators.  `connDiff·Vdiff` contracts a lower slot with a
+   vector.  Grepped the whole tree: there is **no `clm_apply`/`endoApply`/interior-product
+   Leibniz jet product grid**.  (`lc0Riem` worked precisely because its live factor was a
+   cometric *double trace* = an `appCcRS` after `slotExtend`+reindex; no analogue here.)
+2. **The `deTurckLieWEndo`-difference route is provably circular.**  `wEndo_eq_covDeriv_add_connDiff`
+   gives `WEndo g₁ g_ref = ∇^{g₀}(dVF) + connDiff·dVF`, so
+   `Endo = (WEndo g₁ g₀ − WEndo g₁ g_bg) − ∇^{g₀}(Vdiff)`.  But `∇^{g₀}(Vdiff) = (WEndo diff) − Endo`,
+   so the identity collapses to `Endo = Endo`.  `WEndo`-difference producers
+   (`deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform`) do NOT isolate `Endo`.
+3. **The natural committed home is `private`.**  Inside `deTurckLieWEndoInsert_eq_cometricRaise`
+   (`DeTurckVectorFieldL2JetBound.lean`) the connDiff·dVF part of `WEndo` is exactly
+   `cometricRaise(wAlphaB)`, with `wAlphaB = appCc(wCA, wOmega)` — and `Endo` (the g₀↔g_bg
+   difference) is `cometricRaise(appCc(wCA, wOmega(·,g₀) − wOmega(·,g_bg)))`, an `appCc`
+   product that the committed `appCc` grid + `wOmega_L2_topsep` *could* control.  But
+   `wAlphaB`, `wCA`, `wOmega`, `wXi` are **all `private`** in that file, and the identity
+   `slotInsert(connDiff·dVF) = cometricRaise(wAlphaB)` is buried, not exposed.
+
+### The precise missing engine (what the next agent must build first)
+A public jet-`L²` `ballUniform` producer for the `(1,1)` endomorphism
+`connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg)` (equivalently the `(2,2)` insert-diff
+after the DLb-style slotInsert-sum decomposition + `slotInsertEndoCc_le_endo` reduction —
+that plumbing IS committed and cheap, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`
+/ `rfns_iteratedCovGrad_dlbSlotZero_le`).  Cleanest realization: in
+`DeTurckVectorFieldL2JetBound.lean`, **expose** `wCA`, `wOmega`, and the identity
+`slotInsertEndoCc g₀ 0 (connDiff g₁ g₀ (dVF g₁ g_ref)) = cometricRaiseSlot0Field(wAlphaB g₀ g₁ g_ref)`
+as public lemmas, then the insert-diff endomorphism = `cometricRaise(appCc(wCA, wOmega-diff))`
+is controlled by `appCc_iteratedCovGrad_diagonalProductGrid_le` + `wOmega`'s committed
+top-separated producer + the cometricRaise jet bound.  (Alternative: a general
+interior-product Leibniz jet grid at the tensor layer — larger, more reusable.)
+NB: touching `DeTurckVectorFieldL2JetBound.lean` is a *different file* — coordinate the claim.
+
+### Resumption order for a successor
+1. **Unblock the missing engine** (above) — expose the private `wCA`/`wOmega`/`wAlphaB`
+   layer, or add the interior-product grid — then discharge `lc0InsertDiff_ballUniform`.
+2. `lc0VB`, then `lc0AMix` (routing table).  Both are ALSO connDiff×deTurckVF interior
+   products (`interior_product(deTurckVF)`), so the SAME missing engine unblocks all three
+   remaining atoms — build it once, reuse three times.  `lc0Riem` was the only atom whose
+   live factor was a pure cometric trace (hence the only clean-recombination atom).
+3. Assemble the two endpoints ONLY once all four Kc atoms are green (`sq_le_five_add`).
+   `Ktop = 5·Ktop_DLb` (R-free), single summed `Kc`.
+4. The leaf is outside the root import graph — verify with a targeted module build, and
+   build its imports first (a bare focused check dies on a missing `.olean`).
 
 ## Honest accounting
 `(N) ricci_flow_unif_existence` still **0%**.  The constituent is NOT closed: the two
-endpoints are **0% (still unstated)**.  Their dedicated machinery is the top piece
-(done) + four Kc atoms (**1 of 4 landed**) + the 5-way assembly (helper
-`sq_le_five_add` done, wiring pending).  Weighting top piece ~1/6, each Kc atom ~1/6,
-assembly ~1/6: dedicated machinery is now **~33%** (top + `lc0Riem`), up from ~17%.
-Still genuinely multi-session (three medium fresh derivations + the endpoints), but the
-`lc0Riem` skeleton is now a working template the remaining three can be cut from.
+endpoints are **0% (still unstated)**.  Dedicated machinery = top piece (done) + four Kc
+atoms (**1 of 4 GREEN: `lc0Riem`; 1 of 4 STATED-with-`sorry`: `lc0Insert`-diff; 2 unstarted:
+`lc0VB`, `lc0AMix`**) + the 5-way assembly (helper `sq_le_five_add` done, wiring pending).
+Counting only sorry-free content (top + `lc0Riem`) against a top+4-atoms+assembly
+denominator: **~33%** — UNCHANGED from the previous session, because this session's atom is
+not sorry-free.  What DID advance: the insert-diff is now correctly *stated* (was unstated),
+and — the real deliverable — the frontier is *pinned*: a single missing engine
+(interior-product/`wAlphaB` jet control) blocks THREE of the four Kc atoms, so building it
+once is the highest-leverage next move.
 
 ## Verification
-Focused check green, and — the trustworthy check — a targeted module build of the leaf
-completed successfully.  Leaf is sorry-free and emits no warnings of its own.  All five
-theorems axiom-audited clean.  No commit made.
+Focused check + trustworthy targeted module build both succeed with **exactly one `sorry`**
+(`lc0InsertDiff_ballUniform`, line 504).  `#print axioms`: the four banked + `lc0Riem` are
+`[propext, Classical.choice, Quot.sound]`; `lc0InsertDiff_realizedFam_perOrder_topSep` is
+`[propext, sorryAx, Classical.choice, Quot.sound]` (honest — the atom is stated, not proved).
+No commit made.

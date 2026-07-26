@@ -471,11 +471,100 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
           (mul_nonneg (mul_nonneg hfr_nn (sq_nonneg Λ)) (hNPass_nn i))))
   nlinarith [le_trans hnorm hmid, hsum_nn, hKc_nn]
 
+/-! ## The `lc0Insert`-difference `Kc` atom (`lc0Insert g_bg − lc0Insert g₀`)
+
+By `nEndo_diff` (`LieCorr0Split.lean:103`) the difference of insertion pieces is the
+slot insertion of the endomorphism
+`Endo = connDiff g₁ g₀ (deTurckVF g₁ g₀) − connDiff g₁ g₀ (deTurckVF g₁ g_bg)`,
+i.e. the moving connection difference `connDiff g₁ g₀` contracted with the
+deTurckVF-difference `Vdiff = deTurckVF g₁ g₀ − deTurckVF g₁ g_bg`.
+
+Unlike `lc0Riem` (one live cometric factor on a fixed passenger), this piece has
+**two live factors** whose product is an *interior-product contraction* — not the
+operator *composition* that `appCcRS` and its product grid
+(`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`) cover.  The tree
+has no `clm_apply`/interior-product Leibniz jet grid, and the natural
+committed home of the object,
+`cometricRaise (wAlphaB) = slotInsert (connDiff·deTurckVF)` extracted from
+`deTurckLieWEndoInsert_eq_cometricRaise`, lives entirely in the `private`
+`wAlphaB`/`wOmega`/`wCA` machinery of `DeTurckVectorFieldL2JetBound.lean`.  The
+`deTurckLieWEndo`-difference route is provably circular (it reduces `Endo` to
+`Endo`).  So the per-order jet-`L²` `ballUniform` bound for this piece is a
+genuine **missing engine** (see the same-name `.md`); it is isolated below in the
+single `sorry` of `lc0InsertDiff_ballUniform`, and the top-separated atom is
+proved from it with `Ktop = 0`. -/
+
+set_option linter.unusedVariables false in
+/-- **MISSING ENGINE (single `sorry`).**  Per-order `ballUniform` jet-`L²` bound for
+the `lc0Insert`-difference piece.  Requires a jet-`L²` producer for the endomorphism
+`connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg)`, whose committed home is the
+`private` `wAlphaB`/`wOmega`/`wCA` layer of `DeTurckVectorFieldL2JetBound.lean`
+(exposed via a public `appCc(wCA, wOmega-difference)` producer, or a new
+interior-product Leibniz jet grid).  This is the only gap in the atom below. -/
+private theorem lc0InsertDiff_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+                - lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)‖ ^ 2
+            ≤ K i := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **`lc0Insert`-difference `Kc` atom.**  Per-order top-separated jet-`L²` bound for
+`lc0Insert g_bg − lc0Insert g₀` with vanishing top constant (`∇²T`-free: all of it
+lands in the `R`-carrying `Kc`).  Proved from the `ballUniform` bound
+`lc0InsertDiff_ballUniform` by the trivial `Ktop = 0` reshape (`K i ≤ K i·(1+low)`);
+the `ballUniform` bound is the atom's single frontier `sorry`. -/
+private theorem lc0InsertDiff_realizedFam_perOrder_topSep
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+                - lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)‖ ^ 2 ≤
+            Ktop * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) +
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 3),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  obtain ⟨K, hK_nn, hK⟩ := lc0InsertDiff_ballUniform (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨0, le_refl 0, K, hK_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs i hi
+  have hb := hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+  have hlow_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 3),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+    Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
+  nlinarith [hb, hK_nn i, hlow_nn, mul_nonneg (hK_nn i) hlow_nn]
+
 #print axioms endoArm_eq_dlb
 #print axioms lc0Insert_base_eq_neg_dlb
 #print axioms lc0InsertBase_realizedFam_perOrder_topSeparated
 #print axioms sq_le_five_add
 #print axioms lc0Riem_realizedFam_perOrder_topSep
+-- honest: the insert-diff atom depends on `sorryAx` via `lc0InsertDiff_ballUniform`
+#print axioms lc0InsertDiff_realizedFam_perOrder_topSep
 
 end DifferentialGeometry.Integral.Connection
 
