@@ -292,6 +292,43 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №5 (2026-07-25, ACCEPTED — **K2.3 PROBE OUTCOME (A): GO**):
+  **Agent-K2P delivered `Evolution/ForwardUniqueRmDiff.lean`** (369 lines,
+  21 public decls, 0 sorry; planner re-audit: `--no-build` up-to-date + axiom
+  re-check of `lapDiff_eq_div_flux`/`rmLapDiff_div_flux`/`lapDiffFlux_self`
+  clean). **Neither Route-K gate fired.** APPROVED DESIGN SUBSTITUTION: flux
+  representative `U₀₅ := (∇¹−∇²)T` (algebraic in A₀₃, `|U| ≤ C|A₀₃|`) instead
+  of the ruling's literal `(g₁⁻¹−g₂⁻¹)∇²Rm₂ + g₁⁻¹(∇¹−∇²)Rm₂` — the literal
+  form is what would have forced a raised (1,4) intermediate + cross-variance
+  module (the Gate-1 shape was an artifact of the representative); the
+  difference term moves into the remainder. Divergence-form point PRESERVED
+  (no ∇S₀₄ anywhere in U or R). RECORDED COST for K2.4/K2.5: the remainder
+  bound now needs the background `|∇²∇²T|` (one extra covariant derivative of
+  curvature) — free in the smooth class but must be an explicit slab
+  hypothesis. Key identity: `Δ_{g₁}T − Δ_{g₂}T = div_{g₁}U + R` with
+  `Δ_g = div_g ∘ ∇^g` and both R summands manifestly differences
+  (conn-difference term + inverse-metric-difference term); `rm2Low_eq_sub`
+  ties T to the FIELDS carriers (`metricRm04At g₁ − rmDiffLowAt g₁ g₂`).
+  DEFERRED (planner-logged): (i) the generic (0,s) operator layer
+  (`metricNabla0S`, `covDiv0SField`, `roughLap0SField`, `_sub`/`_zero`
+  companions) has canonical homes in `NablaOnTensors/`, `RoughLaplacian.lean`,
+  `MetricTrace/NablaTraceGen.lean`, `TotalNabla0SLinear.lean` — relocate when
+  a second consumer appears or at campaign end (protocol forbade editing
+  existing files); (ii) K2.7 still owes `covDiv0SField` ↔ bundled
+  `covDivergence` identification for the IBP hookup (conventions pre-checked
+  to agree). NEXT: K2.4+K2.5 estimates dispatched (№6).
+- №4 (2026-07-25, IN FLIGHT → K2P accepted above; K3 still running): second wave, two Opus builders in parallel.
+  **Agent-K2P** — `Evolution/ForwardUniqueRmDiff.lean`: K2.0 flux `U₀₅` (div
+  index slot 0) + the K2.3 go/no-go probe `lapDiff_eq_div_flux` (pointwise,
+  two fixed metrics, no time), timeboxed, outcomes A/B/C with Gate-1 shape in
+  (C); hazards pre-briefed ((1,3)/(1,2)-variance lowering bridges, three-way
+  representation reconciliation). **Agent-K3** — `Evolution/ForwardUniqueEnergy.lean`:
+  `forwardUniqueEnergy`/`forwardUniqueRate`/`forwardUniqueEnergy_hasDerivAt`
+  (exact differentiation only) consuming the FIELDS Sq-functions; A₀₃/S₀₄
+  time-derivatives taken as plain ∀-shaped hypotheses (no new predicates);
+  MovingEdgeEnergy as design evidence only (no import — closure broken);
+  STOP-fork discipline on hypothesis packaging. Both: LEAN_NUM_THREADS=3,
+  wait-poll, no commits, planner acceptance loop.
 - №3 (2026-07-25, ACCEPTED): **Agent-F "FIELDS" delivered and accepted** —
   `Evolution/ForwardUniqueFields.lean` + `.md`, 16 public decls, 0 sorry,
   planner-independent re-verification: `--no-build` up-to-date + axiom re-audit
