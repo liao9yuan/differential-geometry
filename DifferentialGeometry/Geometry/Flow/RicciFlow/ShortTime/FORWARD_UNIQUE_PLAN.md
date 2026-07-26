@@ -292,6 +292,61 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №16 (2026-07-25, ACCEPTED — **K2.6b OUTCOME (B); R4 ROUTE REALIZED; NO
+  ESCALATION**): **Agent-K2B6 delivered `Evolution/ForwardUniqueRmBridge.lean`**
+  (656 lines, 17 public decls, 0 sorry; planner audit: initial `--no-build`
+  probe showed a stale trace → authoritative rebuild 14s GREEN → axiom
+  re-audit on the FRESH olean clean — trace-staleness noted as an audit
+  lesson: always rebuild before auditing if the probe is not up-to-date).
+  Deliverable 1 COMPLETE: `vecCurve_deriv` (frozen-metric reconstruction —
+  the inverse metric is NEVER differentiated; continuity-only input via the
+  vanishing-factor product rule), `metricRm04At_inner`, `rmVecComp_deriv`
+  (consumes the own-lowered Uhlenbeck interface verbatim), `rmDiffVec_deriv`
+  landing EXACTLY on `rmDiffLow_hasDerivAt`'s `hRm` — **the `hreal`
+  mixed-lowering fallback is RETIRED on this path**; stated for arbitrary
+  `s` (Ici/carrier/univ all instantiate). Deliverable 2 partial (~40%):
+  `metricNabla0S_self`, **`nabla2_metric1` (∇²g₁ = −lapDiffFlux g₁ g₂ g₁ —
+  bound comes free from `fluxNormSq_le`)**, `sharpFlat`/`mixLow_eq_rm04`
+  (the R4 gap = last-slot precomposition by Φ = g₂♯∘g₁♭, id at equal
+  metrics), and `lapComm_eq_div_flux` — the STRUCTURAL div-form regrouping
+  with both defect carriers manifestly FIRST-order ⟹ **the R4 escalation
+  gate does NOT fire; no consult needed**. REMAINING sub-brick K2.6c
+  (slot bookkeeping, not mathematics): the re-lowering operator's Leibniz
+  defect via g₂-trace of g₁⊗T with two slot permutations; all three
+  ingredients located (`totalNabla0SFun_domDomCongr` NablaDomDomCongr:110,
+  `nabla_metricTraceFirstTwo0S`+`traceNablaShuffle` NablaTraceGen:504/876/997,
+  `nabla0SFun_product_eval` ContractionLeibniz:122); `mixLow_eq_rm04` pins
+  the semantics. Hygiene: NO instances under hardened sweep.
+- №15 (2026-07-25, AUTONOMOUS WINDOW OPENED): user authorized ~10 hours of
+  autonomous operation; **Pro consults PRE-AUTHORIZED via the Chrome plugin**
+  ("直接用chrome打开就好"). Chrome path DRY-RUN VERIFIED end-to-end short of
+  submission: launch recipe = `Start-Process chrome.exe`, extension handshake
+  takes ~30–40 s (an empty `list_connected_browsers` right after launch is
+  normal — wait and re-probe); ChatGPT logged in (Yuan Liao Pro); the
+  "Lean Pro Consult Handoff" project reachable with history intact; the
+  project-scoped new-chat composer located. Consult protocol otherwise per
+  CLAUDE.md (fresh chat per consultation), with two USER AMENDMENTS
+  (2026-07-25): (a) expect ~20–30 MINUTES per Pro answer (not 5–10) — poll
+  patiently before concluding failure; (b) Pro CANNOT read local files — the
+  GitHub branch must be PUSHED up to the evidence commits before citing it
+  (push of `codex/short-time-existence-align` is PRE-AUTHORIZED for consult
+  evidence), or else ATTACH the needed files directly in the composer
+  (添加文件 button). Prefer push+blob-links for multi-file evidence, attach
+  for single-file questions. Autonomous-window queue: audit/accept K2.6b + K2.7 → dispatch
+  K4 (`forwardUniqueRate_le` assembly) and the K5 closure kit (edge-Gronwall +
+  integral-zero-to-equality + continuation) → K1C-b restatement once its
+  remaining gaps allow → commission K2-B (second-Bianchi) as a dedicated
+  long brick → hdens tower → K6 endgame wiring. Escalate to a consult on any
+  R4-escalation signal or K2-B decomposition doubt.
+- №14 (2026-07-25, IN FLIGHT): fifth wave, two Opus builders.
+  **Agent-K2B6** — `Evolution/ForwardUniqueRmBridge.lean`: the R4 bridge —
+  (1) per-flow own-metric (1,3)↔(0,4) evolution conversion (algebraic, ∇g = 0
+  commutation), (2) the [g₁♭, Δ₂] commutator in divergence form (∇²g₁ = −A·g₁
+  first; escalation per R4 if ∇A won't div-organize), optional (3) compose to
+  retire the `hreal` fallback. **Agent-K27** — `Evolution/ForwardUniqueIBP.lean`:
+  the SmoothCcTensor lift + `covDiv0SField` ↔ `covDivergence` identification +
+  the lane-currency IBP corollaries (K4's entry point). Both: hardened hygiene
+  (NO instances even private — report instead), standard protocol.
 - №13 (2026-07-25, ACCEPTED — **K2A OUTCOME (A)** + **PLANNER RULING R4**):
   **Agent-K2A delivered `Evolution/ForwardUniqueRmDot.lean`** (691 lines, 16
   public + 9 private, 0 sorry; planner re-audit clean). Part 1: `rmDiffVec :=
