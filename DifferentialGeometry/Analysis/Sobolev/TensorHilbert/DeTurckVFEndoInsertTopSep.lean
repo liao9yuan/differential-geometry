@@ -56,7 +56,7 @@ def connDiffDVFSection (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
       (PDE.DeTurck.deTurckVF (I := I) g₁ g_ref).contMDiff
 
 /-- Slot insertion is subtractive in the inserted endomorphism section. -/
-private lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ Λ' : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     slotInsertEndoCc (I := I) (M := M) g₀ s (Λ - Λ') =
@@ -126,7 +126,7 @@ theorem connDiffDVFInsert_eq_cometricRaise (g₀ g₁ g_ref : SmoothRiemannianMe
   rfl
 
 /-- The slot-`0` cometric raise is a jet isometry (generic `(0, s + 2)` field). -/
-private lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 (s + 1) i
         (cometricRaiseSlot0Field (I := I) (M := M) g₀ s W)‖ =

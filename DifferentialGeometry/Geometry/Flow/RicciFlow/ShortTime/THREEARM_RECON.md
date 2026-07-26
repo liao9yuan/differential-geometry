@@ -692,3 +692,45 @@ pointwise engine is ~250 lines over a deep private dep chain — re-derivation i
 **Brick 4 (lieCorr0 sibling)** is now a mechanical clone: same DLa/DLb split, same two arm engines,
 same summed reduction — pending the coordinator's lieCorr0-freeze re-assessment.  Brick 3 off the
 item-2 critical path.
+
+### 11d.6 — BRICK 4 (lieCorr0) SESSION 1 (2026-07-26): STATEMENT + 3/4 ARMS LANDED, 1 FRONTIER
+
+New leaf `Analysis/Sobolev/TensorHilbert/LieCorr0CoeffDiffRadiusFree.lean` (per-file note
+`LieCorr0CoeffDiffRadiusFree.md`).  Targeted build GREEN (9498 jobs, first pass, no proof repair);
+`#print axioms` on both publics = `[propext, sorryAx, Classical.choice, Quot.sound]` — honest
+partial, ONE flagged `sorry`.
+
+- `lieCorr0Field_summed_l2_radiusFree` — **the brick-4 deliverable, STATEMENT LANDED**, brick-2/3
+  shape verbatim: `∑_{i≤a}‖∇ⁱ(lieCorr0Field g₀ g₁ g_bg)‖² ≤ Ktop·∑_{j≤a+2}‖∇ʲ(symmS g₀ T)‖² +
+  Klow·(1+∑_{j≤a+1})`, constants `g₀/g_bg/a/dim E/δ₀`-only, hyps `ha_super`+`gFibreOpBound`+`δ≤δ₀`
+  +`htie`, NO `R`, NO ball.  Summed→per-order reduction PROVED (brick-3 summed clone).
+- `lieCorr0Field_perOrder_l2_radiusFree` — per-order engine PROVED via the five-way split
+  (`lc0_decomp`+`insert_base`, local `sq_le_five_add`, one `sum_range_succ` top peel).  Per-arm:
+  - `lc0Base_perOrder_rf` (top piece, `lc0Insert g₀ = −DLb(g_bg:=g₀)`) — **PROVED axiom-clean**
+    via `normSq_iCG_dlbField_le` + `norm_iCG_wEndoInsert_eq_wAlpha` + `wAlpha_L2_topsep_rf`.
+  - `lc0Diff_perOrder_rf` (insert difference, top-free) — **PROVED axiom-clean** via
+    `normSq_iCG_lc0InsertDiff_le` + `slotInsertEndoCc_sub` + HOIST ×2 + cometric-raise jet
+    isometry + R-free `wAlphaB_L2_perOrder_rf` ×2.
+  - `lc0Riem_perOrder_rf` (top-free) — **PROVED axiom-clean**: the frozen atom's two-arm route
+    with ONE swap — the ball-uniform cometric envelope → the R-free
+    `cometricCastG0_order0sup_jetL2_radiusFree`; the two-arm integrator constant was already
+    `g₀`-only, the fixed passenger `T`-free.  R lived ONLY in the cometric envelope.
+  - `lc0VBAMix_perOrder_rf` — **THE frontier (1 `sorry`)**: `lc0VB`+`lc0AMix` pointwise engines
+    exist in NO currency (`lc0VB`'s own ballUniform atom is sorried at `vbPass_jetL2` — missing
+    `interior_product`-with-vector Leibniz jet lemma + deTurckVF↔`wOmega` lowering; `lc0AMix`
+    unstarted).  Per the brick-4 ruling the atom machinery was NOT rebuilt; the sorried shape is
+    the pure low window (both pieces `∇²T`-free).  Est. ~2-4 sessions, missing-groundwork class.
+
+**Exposures** (minimal `private`-removals, content unchanged, homes rebuilt green):
+`wAlphaB_L2_perOrder_rf` (`DeTurckVFJetRadiusFree.lean`); `slotInsertEndoCc_sub` +
+`norm_iCG_cometricRaiseSlot0Field_eq` (`DeTurckVFEndoInsertTopSep.lean`); `endoArm_eq_dlb`,
+`lc0Insert_base_eq_neg_dlb`, `lc0RiemLive`, `lc0RiemPass`, `lc0Riem_eq_app`,
+`lc0RiemLive_rfns_le`, `lc0RiemLive_l2_le`, `endoDiffSection`, `normSq_iCG_lc0InsertDiff_le`
+(`LieCorr0CoeffL2JetBound.lean` — exposures ONLY, the old ballUniform atoms untouched, their
+in-file audits unchanged).
+
+**Item-2 picture after brick 4:** Ψ₀'s three genuinely-missing constituents in the new (R-free,
+symmS-jets) currency: arm0Base GREEN (brick 2), deTurckLie GREEN (brick 3), lieCorr0 = summed
+theorem stated + 3/4 arms green + ONE named engine gap (this section).  Next on item-2 proper:
+either discharge `lc0VBAMix_perOrder_rf` (the two missing atoms' engines) or start the
+threeArm/Ψ₀ topSeparated assembly (Fork-A) against the three delivered summed siblings.

@@ -2119,8 +2119,9 @@ set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
 /-- Radius-free per-order L² bound for the top-free `wAlphaB = appCc wCA wOmega` arm.  The two-arm
 Leibniz product is folded into a single `antidiagonalTupleGridWindow (i+3)` (`wCA_wOmega_twoArm_fold_rf`)
-and integrated through the workhorse into the low window `FlowB i · (1 + ∑_{j < i+3} ‖∇ʲP‖²)`. -/
-private lemma wAlphaB_L2_perOrder_rf
+and integrated through the workhorse into the low window `FlowB i · (1 + ∑_{j < i+3} ‖∇ʲP‖²)`.
+Public: consumed by the brick-4 `lc0Insert`-difference arm (`LieCorr0CoeffDiffRadiusFree.lean`). -/
+lemma wAlphaB_L2_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :

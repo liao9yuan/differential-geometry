@@ -61,7 +61,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-- The reanchoring endomorphism arm field and the DLb coefficient field are the
 same object (both are `ofCLM (deTurckLieDLbFib g₁ g_bg)`). -/
-private theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg =
       deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
   apply SmoothCcTensor.ext
@@ -72,7 +72,7 @@ private theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
 /-- The base insertion piece is the negative of the DLb coefficient field.
 Combines `insert_base` (at `g_bg := g₀`) with `endoArm_eq_dlb`; this routes
 `lieCorr0Field`'s top window through the committed DLb producer. -/
-private theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       -deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀ := by
   have h := insert_base (I := I) (M := M) g₀ g₁ g₀
@@ -141,7 +141,7 @@ private def lc0RiemSrc : Equiv.Perm (Fin 4) :=
 /-- **Live arm.**  The moving cometric double trace at rank `2`, presented as a
 `g₀`-based `(4, 2)` operator field built from the committed rank-`1` cast
 `cometricCastG0`. -/
-private noncomputable def lc0RiemLive (g₀ g₁ : SmoothRiemannianMetric I M) :
+noncomputable def lc0RiemLive (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   reindexCoeffGen (I := I) (M := M) g₀ 4 2
     (slotExtend (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)) lc0RiemSrc
@@ -213,7 +213,7 @@ private theorem lc0RiemPassFib_contMDiff (g₀ : SmoothRiemannianMetric I M) :
 
 /-- **Fixed passenger.**  The `g₀`-only `(2, 4)` operator field carrying the
 curvature insertion and the background trace step of `lc0Riem`. -/
-private noncomputable def lc0RiemPass (g₀ : SmoothRiemannianMetric I M) :
+noncomputable def lc0RiemPass (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
     { toFun := fun x : M =>
@@ -234,7 +234,7 @@ private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
 
 /-- **The `lc0Riem` two-arm factorization.**  The fixed-curvature piece is the
 operator-field action of the live rank-`2` cometric arm on the fixed passenger. -/
-private theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Riem (I := I) (M := M) g₀ g₁ =
       -appCcRS (I := I) (M := M) g₀ 2 4 2
         (lc0RiemLive (I := I) (M := M) g₀ g₁) (lc0RiemPass (I := I) g₀) := by
@@ -246,7 +246,7 @@ private theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
 
 /-- Pointwise: the live arm's jets are dominated by the jets of the committed
 rank-`1` cometric cast, at the cost of one factor of the dimension. -/
-private theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
+theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + m) x
         ((iteratedCovGrad (I := I) g₀ 4 2 m
           (lc0RiemLive (I := I) (M := M) g₀ g₁)).toSection x) ≤
@@ -258,7 +258,7 @@ private theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m 
     (cometricCastG0 (I := I) g₀ g₁) m x
 
 /-- `L²` form of `lc0RiemLive_rfns_le`. -/
-private theorem lc0RiemLive_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
+theorem lc0RiemLive_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 m (lc0RiemLive (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g₀ 3 1 m (cometricCastG0 (I := I) g₀ g₁)‖ ^ 2 := by
@@ -520,7 +520,7 @@ private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
 /-- The `(1, 1)` endomorphism-difference section carried by the `lc0Insert`-difference:
 `connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg`; equals `lieCorr0NEndo g_bg − g₀`
 pointwise (`nEndo_diff`). -/
-private def endoDiffSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+def endoDiffSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
   connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
     connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg
@@ -677,7 +677,7 @@ private theorem lc0InsertDiff_eq_slotInsert_sum (g₀ g₁ g_bg : SmoothRiemanni
 set_option linter.unusedSectionVars false in
 /-- **`(2, 2) → (1, 1)` reduction.**  The `lc0Insert`-difference jet is bounded by
 `4·finrank` times the slot-`0` insert of `endoDiffSection` (mirrors `normSq_iCG_dlbField_le`). -/
-private theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
+theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
           lc0Insert (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 ≤
