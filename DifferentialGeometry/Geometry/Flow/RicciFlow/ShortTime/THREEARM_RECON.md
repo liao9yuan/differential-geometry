@@ -439,3 +439,15 @@ project; the operative content:
 **Pro's explicit next-step gate:** implement ONLY the radius-free integrator;
 do NOT modify DeTurckLieCoeffL2JetBound.lean, do NOT finish lieCorr0, do NOT
 start the threeArm assembly until that generic lemma is exact-green.
+
+### §11 addendum — the §4 pointwise-head caveat (for the CONSUMER brick)
+
+The full ruling adds a design constraint the distillation above under-stated:
+the R-free coefficient theorem must NOT be forced through the current
+pointwise-head API (`∇ⁱC = H_d + low residual` with `|H_d(x)|² ≲ |∇^{i+2}P(x)|²`).
+Differentiating `g⁻¹∇P` produces `g⁻¹(∇P)g⁻¹(∇P)g⁻¹`-type terms that are NOT
+pointwise-bounded by `|∇²P|` and are not naturally H¹-only residuals; what is
+true is the radius-free Gagliardo–Nirenberg `‖(∇P)²‖₂ ≤ C(‖P‖∞)·‖∇²P‖₂ + lower`.
+Such capped antidiagonal terms belong in the TOP L² ENVELOPE.  Consequence: the
+consumer sibling is a NEW small theorem beside the existing public top-head
+APIs (which stay untouched), not a strengthening of them.
