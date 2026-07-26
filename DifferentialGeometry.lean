@@ -1308,6 +1308,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueClosu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnDot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnectionDiff
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueEnergy
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueFields
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueIBP
