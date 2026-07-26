@@ -1,5 +1,14 @@
 # SobolevNonlinearityExistence.lean — notes
 
+> **UPDATE (2026-07-25, item-2 recon):** the route-test verdict (a) below verified
+> R-independence only for arm0Base's `Kc`.  The DeTurck-Lie-flavoured C₀
+> constituents (deTurckLie, lieCorr0) that the full assembly (`:34758`) also
+> consumes carry an R-DEPENDENT `Kc` on the `a+2` window — not the R-free/low-window
+> currency the verdict assumed.  Whether the covariant-tame lift absorbs this or the
+> constituents need reworking is the open fork.  See
+> `Geometry/Flow/RicciFlow/ShortTime/THREEARM_RECON.md` §5/§6 (+ drafted GPT Pro
+> consult) before implementing layer 1.
+
 ## 2026-07-22 — R1τ route test (UNIF_N ruling item 2): second-order TAME difference estimate
 
 Task: prove a smooth-core SECOND-ORDER TAME difference estimate for the symmetric

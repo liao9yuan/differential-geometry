@@ -1,5 +1,13 @@
 # ThreeArmTopSeparated.lean — construction note (NOT built; blocked at Step 0's assembly premise)
 
+> **UPDATE (2026-07-25, item-2 recon):** superseded in part by
+> `Geometry/Flow/RicciFlow/ShortTime/THREEARM_RECON.md`.  Two claims below are
+> CORRECTED there: (1) `deTurckLieArm1Coeff`/`arm1Corr`/`arm0Corr` do NOT need
+> top-separated producers — they are Ktop=0 absorbable (frozen `…_tameEnvelope`);
+> (2) the real blocker is not "missing producers" but the R-DEPENDENT `Kc` currency
+> of the landed deTurckLie/lieCorr0 producers vs the R-free arm0Base shape.  Read
+> `THREEARM_RECON.md` §0/§4/§6 before acting on the "smallest next step" below.
+
 ## 2026-07-22/23 — data-weighted threeArm coefficient assembly: STEP 0 done, assembly BLOCKED
 
 Dispatched as "the convergence point of the five constituent producers" (arm0Base, arm1Base,
