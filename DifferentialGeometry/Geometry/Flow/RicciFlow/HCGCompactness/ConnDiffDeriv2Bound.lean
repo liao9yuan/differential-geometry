@@ -1588,6 +1588,29 @@ theorem covStep2_diffStep_OCsplit
   simp only [hRRptx, hRR0, hRR1, hRRss, Fin.update_cons_zero, ← Fin.cons_update]
   ring
 
+open DifferentialGeometry.Integral.Connection in
+/-- **Rank-`0` vanishing of the single connection-difference step** (session-12 witness).  For a
+scalar (rank-`0`) field `S`, the connection-difference step `A ⋆ S = diffStep g₁ g₂ 0 S` is identically
+zero: `diffStep_eval` inserts the derivative direction into the *empty* tuple of covariant slots, an
+empty sum.  This is the base case exposing that `∇₂(mixedComm S)` is genuinely order-`2` in `S`: at
+`s = 0`, `∇₂²(A⋆S) = 0`, so the committed operator split `∇₂²(A⋆S) = ∇₂(A⋆∇₂S) + ∇₂(mixedComm S)`
+(`covStepDiff2_exists_const.hop`) forces `∇₂(mixedComm S) = −∇₂(A⋆∇₂S)`, whose fibre norm is the
+committed a=1 atom `covStepDiff_of_jets` applied at level `1` to `∇₂S` — bounded by `|∇₂S| + |∇₂²S|`,
+*genuinely involving* the second jet `|∇₂²S|`.  Hence any bound on `∇₂(mixedComm S)` that omits
+`|∇₂²S|` from its right-hand side (as `covStepDiff2_mixedComm_le` currently does) is false; the `∇₂²S`
+terms of `∇₂(mixedComm S)` do **not** cancel. -/
+theorem diffStep_rank0_eq_zero
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 0) :
+    diffStep (I := I) g₁ g₂ 0 S = 0 := by
+  refine DFunLike.ext _ _ (fun x => ?_)
+  refine tensor0SSpace_ext 1 x (fun v => ?_)
+  have hev := diffStep_eval (I := I) g₁ g₂ 0 S x (v 0) (Fin.tail v)
+  rw [Fin.cons_self_tail] at hev
+  rw [hev]
+  simp
+
 /-- **FRONTIER (`sorry`) — the a=2 mixed-commutator fibre-realization bridge (the SINGLE genuinely new
 a=2 frontier).**  The `g₂`-fibre norm of the base derivative of the a=1 mixed commutator
 `∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` — the `Term C`

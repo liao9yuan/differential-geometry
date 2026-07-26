@@ -7,6 +7,52 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 12 = the PieceA−PieceB assembly, 2026-07-26): PLANNER-LEVEL BLOCKER —
+  the `∇₂²S` terms of `∇₂(mixedComm S)` do NOT cancel; `covStepDiff2_mixedComm_le` is FALSE as stated
+  (missing `|∇₂²S|` on its RHS), and the session-5 target ("a clean eval identity for `∇₂(mixedComm S)`
+  with NO `∇₂²S`") is mathematically UNREACHABLE.  No assembly was attempted; the blocker was found and
+  Lean-witnessed first.**
+  - **The error is session-7's claim `mixedComm S = (∇₂A)⋆S` (order-0 in `S`) — it is WRONG, and
+    session-7's OWN note (§0 s.7, "mixedComm ... carries genuine ∇₂S-insertion terms; it is NOT
+    `(∇₂A)⋆S`") already contradicts it.**  The tensor Leibniz `∇₂(A⋆S) = (∇₂A)⋆S + A⋆₀∇₂S` contracts `A`
+    over the **original `s` slots** of `∇₂S` (`A⋆₀`, `= diffStep_leibniz_eval`'s `T2`), whereas
+    `diffStep_leibniz`'s `mixedComm := ∇₂(A⋆S) − diffStep(∇₂S)` subtracts `diffStep(∇₂S)` = `A` over
+    **all `s+1` slots**.  So `mixedComm = (∇₂A)⋆S − (A into ∇₂S's derivative slot)`, an **order-1** object
+    (genuine `∇₂S`).  Hence `∇₂(mixedComm S)` is **order-2** (`∇₂²S`).  opLeibniz is NOT contradicted: it
+    only decomposes `PieceA`; it never asserted `TermC = ∇₂(mixedComm)` is order-≤1.
+  - **Decisive `s = 0` witness (Lean, sorry-free): `diffStep_rank0_eq_zero`** (new theorem, this file):
+    `diffStep g₁ g₂ 0 S = 0` (`A⋆S` on a scalar = empty-sum in `diffStep_eval`).  Consequences, all from
+    committed/proved pieces:  `PieceA(s=0) = ∇₂²(A⋆S) = ∇₂²(0) = 0`; the split `hop`
+    (`covStepDiff2_exists_const`, proved) `∇₂²(A⋆S) = PieceB + ∇₂(mixedComm S)` gives
+    `∇₂(mixedComm S) = −PieceB` at `s=0`; and `PieceB = covStep g₂ 2 (diffStep g₁ g₂ 1 (covStep g₂ 0 S))`
+    is EXACTLY the committed **sorry-free** `covStepDiff_of_jets` atom at level `1` on `∇₂S`, whose
+    RHS is `C·(|∇₂S| + |∇₂²S|)` — genuinely carrying `|∇₂²S|`.  So `∇₂(mixedComm S)` at `s=0` genuinely
+    needs `|∇₂²S|`, but `covStepDiff2_mixedComm_le`'s RHS is only `Cbr·(|S| + |∇₂S|)`.  Contradiction ⟹
+    the sorry statement is false.
+  - **Where it shows up structurally:** `covStepDiff2_exists_const` (line ~1670) consumes the mixedComm
+    bound as `hp2 = hCbr S x hx` = `Cbr·(a+b)` (`a=|S|`, `b=|∇₂S|`, NO `c=|∇₂²S|`), while its OWN RHS
+    already has the `c` term (supplied by `hp1`/`covStepDiff_of_jets` bounding `PieceB`).  So exists_const
+    "type-checks" only because the mixedComm bound is a `sorry`; the eval-level `∇₂²S` residual is the
+    live symptom.
+  - **RECOMMENDED FIX (planner call — a statement change to a frontier interface, NOT done unilaterally):**
+    add the `|∇₂²S|` term to `covStepDiff2_mixedComm_le`'s RHS, i.e.
+    `≤ C·(|S| + |∇₂S| + |∇₂²S|)` (`+ √normSq0S g₂ x (s+2)(covStep g₂ (s+1)(covStep g₂ s S) x)`).  Then in
+    `covStepDiff2_exists_const`, `hp2` becomes `Cbr·(a+b+c)` and the final `nlinarith` still closes
+    (`max 0 (K1+Cbr)·(a+b+c) ≥ K1·(b+c) + Cbr·(a+b+c)`, already has `mul_nonneg hCbr_nn hc`).  The
+    STRENGTHENED bound IS provable: the correct eval identity for `∇₂(mixedComm S)` has
+    `covDerivConnDiff2`-insertions (⟵ dual core `covDConnDiff2_g1_le`), `covDerivConnDiff`-insertions
+    (⟵ `covDerivConnDiff_gJet_le`), slot-corrections, AND `∇₂²S`-insertions of the form `(A ⋆ ∇₂²S)`
+    (bounded by the a=0 connection-difference atom `lcDiff_norm_le` × `|∇₂²S|`).  So session-5's chain
+    (`peel ▸ split ▸ branch1/branch2 ▸ OCsplit`) is still the right PieceA route — but the assembly's
+    RHS KEEPS the `∇₂²S`-insertion terms rather than cancelling them; only the norm CS (session-6) then
+    routes them through `lcDiff_norm_le·|∇₂²S|`.
+  - **Sessions 8–11 machinery is NOT wasted:** `covStep2_diffStep_peel/split/branch1/branch2/OCsplit`
+    remain the correct PieceA expansion for the (strengthened) identity; only the "cancel `∇₂²S`" step
+    and the sorry statement change.  Task-1 (OC per-term `diffStep_leibniz_eval` expansion) was NOT
+    written pending the planner's decision on the fix.
+  - Verified: focused check GREEN; `diffStep_rank0_eq_zero` sorry-free; file's only `sorry` still
+    `covStepDiff2_mixedComm_le`.
+
 - **UPDATE (a=2 campaign session 11 = `covStep2_diffStep_eval` core, session 4, 2026-07-26): the OC
   SUM SPLIT landed green + axiom-clean — the structural core of (ii) the H-correction eval.**
   `covStep2_diffStep_OCsplit` (`#print axioms` = `[propext, Classical.choice, Quot.sound]`; targeted
