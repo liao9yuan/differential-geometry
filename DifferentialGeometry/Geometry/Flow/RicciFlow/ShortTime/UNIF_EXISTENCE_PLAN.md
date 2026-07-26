@@ -1728,3 +1728,28 @@ both remaining atoms converge on ONE missing producer, the per-order jet-L²
 bound for `metricConnDiffLowered g₁ g₁ g₀`.  That linchpin is dispatched (same
 executor); the lc0VB fibre identity (~200-400 lines) is the brick after.
 Parallel: a=2 session 2 (dual core + operator Leibniz) still in flight.
+
+## Planner night charter №28 (2026-07-25 evening) — 10-hour autonomous window
+
+User mandate: run autonomously ~10 hours; GPT Pro consults authorized via the
+Chrome plugin path (CLAUDE.md protocol) if a lane hits a genuine wall.  The
+user is separately running the iteratedCovGrad_smul dedup task in another
+session — do NOT touch cross-file smul dedup; FU session still owns Evolution/*.
+
+QUEUE for the window (accept → commit → dispatch, two lanes saturated):
+1. [in flight] a=2 session 2 (dual core + operator Leibniz) → then session 3:
+   `covStepDiff2_exists_const` assembly + the hAcc m=2 glue in UnifCovSumCross
+   (glue may need a careful claim — coordinate with nothing; the file is free
+   between bricks).
+2. [in flight] linchpin producer (metricConnDiffLowered per-order) → then the
+   lc0VB fibre identity (~200-400 lines) → lc0AMix (traceStep-chain recipe) →
+   the 5-way Kc assembly → STATE the two lieCorr0 endpoints.
+3. [new tonight] item-2 PROPER recon: threeArm/Ψ₀ assembly + the smooth-core
+   tame lemma — state-before-prove, route options weighed, consult trigger
+   defined.  This is the campaign's main risk; a recon tonight buys the option
+   of a Pro consult before the user returns.
+4. [stretch] 2a-hi/pkg once hAcc m=2 lands; S0 j≥2 wiring after that.
+
+Standing rules restated for all night dispatches: model-space NormedSpace only;
+honest partials; ≤1 visible frontier per stop; targeted builds only; commit
+own-lane files only; plan + memory updated at each acceptance.
