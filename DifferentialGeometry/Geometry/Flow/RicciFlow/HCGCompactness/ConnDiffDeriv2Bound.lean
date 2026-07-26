@@ -203,6 +203,21 @@ theorem nabla4_eq_mcd3
     4 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) V
     (metricCovDeriv (I := I) g₁ g₂ 2) x slots).symm
 
+/-- Currency bridge (order 0, directional): `nabla0SFun 2 (LC g₂) W (mtf g₁)` is `metricCovDeriv g₁ g₂ 1`
+with the derivative direction `W x` in the leading slot.  Order-1 analogue of `nabla3_eq_mcd2`; the
+`∇₂g₁·A`/`∇₂g₁·∇₂A` quadratic slots of the differentiated Koszul identities land here. -/
+theorem nabla2_eq_mcd1
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (W : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (x : M) (slots : Fin 2 → TangentSpace I x) :
+    Tensor0SBundle.nabla0SFun (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
+        (Tensor0SBundle.metricTensorField (I := I) g₁) x slots
+      = metricCovDeriv (I := I) g₁ g₂ 1 x (Fin.cons (W x) slots) :=
+  (metricCovDeriv_one_apply_section (I := I) g₁ g₂ W x slots).symm
+
 /-! ### The clean a=2 connection-difference jet `∇₂²A` (the dual-core target object)
 
 `covDerivConnDiff2` is the a=2 analogue of `covDerivConnDiff` (`= ∇₂A`, the a=1 clean object): the
@@ -320,6 +335,7 @@ theorem covDerivConnDiff_contMDiff
 
 /-! ### The clean a=2 Koszul identity + the dual core -/
 
+open DifferentialGeometry.Integral.Connection in
 /-- **The clean a=2 Christoffel-difference Koszul identity** (`Z` evaluated only, `metricCovDeriv`
 currency).  Pairing the a=2 connection-difference jet `covDerivConnDiff2 = ∇₂²A` against `Z`:
 ```
@@ -333,8 +349,9 @@ Obtained from the master `connDiff_koszul_deriv2` by the metric-compat Leibniz o
 absorbing every slot correction (`∇₂_V W/X/Y/Z`) via the a=1 `connDiff_koszul_deriv` — all correction
 terms cancel exactly, leaving these six survivors.  The two `∇₂g₁·∇₂A` terms carry the **clean** a=1
 jet `covDerivConnDiff` (the raw `∇₂_V` of the connection-difference section reduces to it once the
-`A(Y,∇₂_V X)` pieces cancel against the input-slot absorption).  FRONTIER (`sorry`): the ~200-line
-absorption proof; the route is de-risked in `ConnDiffDeriv2Bound.md §2.1`. -/
+`A(Y,∇₂_V X)` pieces cancel against the input-slot absorption).  Proved by the metric-compat Leibniz
+on the LHS pairing, the master `connDiff_koszul_deriv2`, and the a=1 `connDiff_koszul_deriv` applied to
+each of the four `∇₂_V`-slot corrections; every correction cancels, leaving the six survivors. -/
 theorem koszul2_clean
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -362,7 +379,182 @@ theorem koszul2_clean
               DifferentialGeometry.Integral.Connection.covDerivConnDiff (I := I) g₂ g₁
                 (fun b => W b) (fun b => X b) (fun b => Y b) x,
               Z x] := by
-  sorry
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
+  haveI hcov2 : CovariantDerivative.ContMDiffCovariantDerivative
+      (LeviCivita (I := I) g₂) (∞ : WithTop ℕ∞) :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₂
+  -- Sections are `C^(∞+1)` since `∞ + 1 = ∞`.
+  have hZcast : ∀ (S : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (fun b => S b)) := by
+    intro S
+    rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+    exact S.contMDiff
+  -- Smoothness of the base covariant derivatives `∇₂_V S`.
+  have hsmW : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => W b))) :=
+    contMDiffOn_univ.mp (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) V.contMDiff (hZcast W))
+  have hsmX : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => X b))) :=
+    contMDiffOn_univ.mp (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) V.contMDiff (hZcast X))
+  have hsmY : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => Y b))) :=
+    contMDiffOn_univ.mp (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) V.contMDiff (hZcast Y))
+  have hsmZ : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => Z b))) :=
+    contMDiffOn_univ.mp (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) V.contMDiff (hZcast Z))
+  set DVW : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => W b)) hsmW
+    with hDVWdef
+  set DVX : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => X b)) hsmX
+    with hDVXdef
+  set DVY : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => Y b)) hsmY
+    with hDVYdef
+  set DVZ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => Z b)) hsmZ
+    with hDVZdef
+  set Qsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk
+      (fun p => covDerivConnDiff (I := I) g₂ g₁ (fun b => W b) (fun b => X b) (fun b => Y b) p)
+      (covDerivConnDiff_contMDiff (I := I) g₂ g₁ W X Y) with hQdef
+  -- Value bridges (definitional): the packaged base derivatives are the master's `∇₂_V ·` forms.
+  have hDVWval : DVW x = ((LeviCivita (I := I) g₂) (fun p => W p) x) (V x) := rfl
+  have hDVXval : DVX x = ((LeviCivita (I := I) g₂) (fun p => X p) x) (V x) := rfl
+  have hDVYval : DVY x = ((LeviCivita (I := I) g₂) (fun p => Y p) x) (V x) := rfl
+  have hDVZval : DVZ x = ((LeviCivita (I := I) g₂) (fun p => Z p) x) (V x) := rfl
+  have hQxval : Qsec x = covDerivConnDiff (I := I) g₂ g₁ W X Y x := rfl
+  -- The A-section base derivative decomposes into the clean a=1 jet plus two `A(·,∇₂_V ·)` corrections.
+  have hAvec : ((LeviCivita (I := I) g₂)
+        (fun p => CovariantDerivative.difference (LeviCivita (I := I) g₁)
+          (LeviCivita (I := I) g₂) p (Y p) (X p)) x) (V x)
+      = covDerivConnDiff (I := I) g₂ g₁ V X Y x
+        + CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x (Y x)
+            (((LeviCivita (I := I) g₂) (fun p => X p) x) (V x))
+        + CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x
+            (((LeviCivita (I := I) g₂) (fun p => Y p) x) (V x)) (X x) := by
+    have hcd : covDerivConnDiff (I := I) g₂ g₁ V X Y x
+        = ((LeviCivita (I := I) g₂)
+            (fun p => CovariantDerivative.difference (LeviCivita (I := I) g₁)
+              (LeviCivita (I := I) g₂) p (Y p) (X p)) x) (V x)
+          - CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x (Y x)
+              (((LeviCivita (I := I) g₂) (fun p => X p) x) (V x))
+          - CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x
+              (((LeviCivita (I := I) g₂) (fun p => Y p) x) (V x)) (X x) := rfl
+    rw [hcd]; abel
+  -- Slot-1 additivity of the first metric jet (three summands).
+  have hmcd1_add3 : ∀ (a b c d e : TangentSpace I x),
+      metricCovDeriv (I := I) g₁ g₂ 1 x ![a, b + c + d, e]
+        = metricCovDeriv (I := I) g₁ g₂ 1 x ![a, b, e]
+          + metricCovDeriv (I := I) g₁ g₂ 1 x ![a, c, e]
+          + metricCovDeriv (I := I) g₁ g₂ 1 x ![a, d, e] := by
+    intro a b c d e
+    have e1 : ∀ v : TangentSpace I x,
+        (![a, v, e] : Fin 3 → TangentSpace I x) = Function.update ![a, b, e] 1 v := by
+      intro v; funext i; fin_cases i <;> simp
+    rw [e1 (b + c + d),
+      Tensor0SBundle.Tensor0SSpace.map_update_add (metricCovDeriv (I := I) g₁ g₂ 1 x) ![a, b, e] 1
+        (b + c) d,
+      Tensor0SBundle.Tensor0SSpace.map_update_add (metricCovDeriv (I := I) g₁ g₂ 1 x) ![a, b, e] 1
+        b c, ← e1 b, ← e1 c, ← e1 d]
+  -- Metric bilinearity (subtraction in the first slot).
+  have g_sub : ∀ (a b : TangentSpace I x),
+      g₁.inner x (a - b) (Z x) = g₁.inner x a (Z x) - g₁.inner x b (Z x) := by
+    intro a b; rw [map_sub (g₁.inner x), ContinuousLinearMap.sub_apply]
+  -- `Fin.cons`/`![·]` normalisers.
+  have hcons3 : ∀ (a b c : TangentSpace I x),
+      Fin.cons a (![b, c] : Fin 2 → TangentSpace I x) = (![a, b, c] : Fin 3 → TangentSpace I x) := by
+    intro a b c; funext i; fin_cases i <;> rfl
+  have hcons4 : ∀ (a b c d : TangentSpace I x),
+      Fin.cons a (![b, c, d] : Fin 3 → TangentSpace I x)
+        = (![a, b, c, d] : Fin 4 → TangentSpace I x) := by
+    intro a b c d; funext i; fin_cases i <;> rfl
+  have hcons5 : ∀ (a b c d e : TangentSpace I x),
+      Fin.cons a (![b, c, d, e] : Fin 4 → TangentSpace I x)
+        = (![a, b, c, d, e] : Fin 5 → TangentSpace I x) := by
+    intro a b c d e; funext i; fin_cases i <;> rfl
+  -- `Function.update` normalisers on explicit tuples.
+  have hup4_0 : ∀ (v a b c d : TangentSpace I x),
+      Function.update (![a, b, c, d] : Fin 4 → TangentSpace I x) 0 v = ![v, b, c, d] := by
+    intro v a b c d; funext i; fin_cases i <;> simp
+  have hup4_1 : ∀ (v a b c d : TangentSpace I x),
+      Function.update (![a, b, c, d] : Fin 4 → TangentSpace I x) 1 v = ![a, v, c, d] := by
+    intro v a b c d; funext i; fin_cases i <;> simp
+  have hup4_2 : ∀ (v a b c d : TangentSpace I x),
+      Function.update (![a, b, c, d] : Fin 4 → TangentSpace I x) 2 v = ![a, b, v, d] := by
+    intro v a b c d; funext i; fin_cases i <;> simp
+  have hup4_3 : ∀ (v a b c d : TangentSpace I x),
+      Function.update (![a, b, c, d] : Fin 4 → TangentSpace I x) 3 v = ![a, b, c, v] := by
+    intro v a b c d; funext i; fin_cases i <;> simp
+  have hup2_0 : ∀ (v a b : TangentSpace I x),
+      Function.update (![a, b] : Fin 2 → TangentSpace I x) 0 v = ![v, b] := by
+    intro v a b; funext i; fin_cases i <;> simp
+  have hup2_1 : ∀ (v a b : TangentSpace I x),
+      Function.update (![a, b] : Fin 2 → TangentSpace I x) 1 v = ![a, v] := by
+    intro v a b; funext i; fin_cases i <;> simp
+  -- Section-tuple evaluations at `x`.
+  have e4x : ∀ (a b c d : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      (fun i : Fin 4 => ((![a, b, c, d] : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)) i) x) = ![a x, b x, c x, d x] := by
+    intro a b c d; funext i; fin_cases i <;> rfl
+  have e2x : ∀ (a b : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      (fun i : Fin 2 => ((![a, b] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)) i) x) = ![a x, b x] := by
+    intro a b; funext i; fin_cases i <;> rfl
+  -- The master differentiated identity, the four a=1 Koszul identities, and the LHS Leibniz.
+  have hmaster := connDiff_koszul_deriv2 (I := I) g₁ g₂ V W X Y Z x
+  have hkW := connDiff_koszul_deriv (I := I) g₁ g₂ DVW X Y Z x
+  have hkX := connDiff_koszul_deriv (I := I) g₁ g₂ W DVX Y Z x
+  have hkY := connDiff_koszul_deriv (I := I) g₁ g₂ W X DVY Z x
+  have hkZ := connDiff_koszul_deriv (I := I) g₁ g₂ W X Y DVZ x
+  -- Expand the master LHS by metric-compatibility Leibniz (factor 2 pulled out).
+  have hLHSfun : (fun p => g₁.inner p (Qsec p) (Z p))
+      = (fun p => Tensor0SBundle.metricTensorField (I := I) g₁ p
+          (fun c : Fin 2 => (![Qsec, Z] c) p)) := by
+    funext p
+    rw [Tensor0SBundle.metricTensorField_apply]
+    simp [Matrix.cons_val_zero, Matrix.cons_val_one]
+  have hQZdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun p => g₁.inner p (Qsec p) (Z p)) x := by
+    rw [hLHSfun]
+    exact (Tensor0SBundle.tensor0SField_eval_smooth_slots_contMDiffAt (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (Tensor0SBundle.metricTensorField (I := I) g₁) ![Qsec, Z] x).mdifferentiableAt
+      (by simp)
+  have hLeib := metric_leibniz_extDeriv (I := I) g₁ g₂ ![Qsec, Z] V x
+  rw [← hLHSfun] at hLeib
+  rw [show (fun p : M => 2 * g₁.inner p
+        (covDerivConnDiff (I := I) g₂ g₁ (fun b => W b) (fun b => X b) (fun b => Y b) p) (Z p))
+      = (fun p : M => 2 * g₁.inner p (Qsec p) (Z p)) from rfl,
+    extDerivFun_const_mul I (2 : ℝ) hQZdiff] at hmaster
+  simp only [ContinuousLinearMap.smul_apply, smul_eq_mul] at hmaster
+  rw [hLeib] at hmaster
+  -- Currency normalisation: everything to `metricCovDeriv` currency.
+  simp only [nabla4_eq_mcd3, nabla3_eq_mcd2, nabla2_eq_mcd1] at hmaster hkW hkX hkY hkZ
+  simp only [field2_eq_mcd2] at hmaster
+  simp only [field1_eq_mcd1] at hmaster
+  -- Expand sums / updates / matrix evaluations; normalise `∇₂_V ·` and `Fin.cons`.
+  simp only [Fin.sum_univ_four, Fin.sum_univ_two, e4x, e2x, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three, hup4_0, hup4_1,
+    hup4_2, hup4_3, hup2_0, hup2_1, hcons3, hcons4, hcons5, Tensor0SBundle.metricTensorField_apply,
+    hDVWval, hDVXval, hDVYval, hDVZval, hQxval] at hmaster hkW hkX hkY hkZ
+  -- Split the master's `∇₂_V(A-section)` correction into the clean jet + the two `A(·,∇₂_V·)` pieces.
+  rw [hAvec, hmcd1_add3] at hmaster
+  -- Unfold the a=2 jet; split the pairing by bilinearity.
+  have hcdc2 : covDerivConnDiff2 (I := I) g₂ g₁
+        (fun b => V b) (fun b => W b) (fun b => X b) (fun b => Y b) x
+      = ((LeviCivita (I := I) g₂) (fun p => Qsec p) x) (V x)
+        - covDerivConnDiff (I := I) g₂ g₁ DVW X Y x
+        - covDerivConnDiff (I := I) g₂ g₁ W DVX Y x
+        - covDerivConnDiff (I := I) g₂ g₁ W X DVY x := by
+    rw [covDerivConnDiff2_eq]; rfl
+  rw [hcdc2, g_sub, g_sub, g_sub,
+    show covDerivConnDiff (I := I) g₂ g₁ (fun b => V b) (fun b => X b) (fun b => Y b) x
+      = covDerivConnDiff (I := I) g₂ g₁ V X Y x from rfl,
+    show covDerivConnDiff (I := I) g₂ g₁ (fun b => W b) (fun b => X b) (fun b => Y b) x
+      = covDerivConnDiff (I := I) g₂ g₁ W X Y x from rfl]
+  linarith [hmaster, hkW, hkX, hkY, hkZ]
 
 open DifferentialGeometry.Integral.Connection
   (smoothExtensionTangent smoothExtensionTangent_eq smoothExtensionTangent_contMDiff

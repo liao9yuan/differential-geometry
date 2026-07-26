@@ -7,6 +7,34 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 5, 2026-07-26): `koszul2_clean` is PROVED sorry-free; the a=2
+  differential-geometric content is COMPLETE.**  The ~200-line term-by-term absorption landed exactly
+  as the §2.1.a derivation predicted — no statement change was needed (the corrected term-5 survivor
+  shape held up in Lean).  Verified: targeted module build GREEN (9482 jobs); `#print axioms
+  koszul2_clean` = `[propext, Classical.choice, Quot.sound]` AND `#print axioms covDConnDiff2_g1_le` =
+  `[propext, Classical.choice, Quot.sound]` (the dual core's inherited `sorryAx` is discharged — both
+  are now axiom-clean).  Proof route (all as planned): (i) package `∇₂_V` of `W,X,Y,Z` as sections
+  `DVW/DVX/DVY/DVZ` (`covApply_contMDiffOn`) and `Q = ∇₂A(W;X,Y)` as `Qsec`
+  (`covDerivConnDiff_contMDiff`); (ii) `hmaster := connDiff_koszul_deriv2`; the four
+  `hkW/hkX/hkY/hkZ := connDiff_koszul_deriv` on the slot corrections; expand the master LHS by
+  `metric_leibniz_extDeriv` + `extDerivFun_const_mul`; (iii) normalise EVERYTHING to `metricCovDeriv`
+  currency in staged simps: `[nabla4_eq_mcd3, nabla3_eq_mcd2, nabla2_eq_mcd1]` first, THEN
+  `field2_eq_mcd2` (before `field1_eq_mcd1` — else `field₁` inside `field₂` breaks the match), THEN
+  `field1_eq_mcd1`, THEN `Fin.sum_univ_*` + `hup*`/`e4x`/`e2x`/`hcons*` + `hDVWval…`; (iv) split the
+  master `∇₂_V(A-sec)` correction by `hAvec` (covDerivConnDiff-def rearrange + `abel`) and
+  `hmcd1_add3` (slot-1 additivity via `Tensor0SSpace.map_update_add`); (v) unfold the a=2 jet with a
+  defeq `hcdc2` (`covDerivConnDiff2_eq` + `rfl`), split by `g_sub`, `linarith`.  New reusable helper:
+  `nabla2_eq_mcd1` (order-1 sibling of `nabla3_eq_mcd2`, from `metricCovDeriv_one_apply_section`).
+  KEY Lean lessons: (a) the coe-vs-eta trap — `covDerivConnDiff g₂ g₁ (fun b=>W b)… x` (from
+  `covDerivConnDiff2`/statement) vs `covDerivConnDiff g₂ g₁ ⇑W … x` (from `connDiff_koszul_deriv`) are
+  defeq but `linarith` sees DIFFERENT atoms; unify to `⇑` by stating `hAvec`/`hQxval` in section-coe
+  form and `rw [show (fun b=>W b)… = W … from rfl]` on the goal survivors.  (b) `e2x` (Fin-2
+  section-tuple evaluator) is required, not just `e4x`, or the LHS-Leibniz `∑ c:Fin 2` and the `NV`
+  term stay unnormalised.  (c) `hcdc2` needs an explicit `rfl` AFTER `rw [covDerivConnDiff2_eq]` (the
+  reducible auto-rfl won't cross `covApply`↔coe / `Qsec`↔`cdc` / `DVW`↔`covApply`).  (d) `open … in`
+  goes BEFORE the docstring, not between docstring and `theorem`.
+  - **Remaining in this file:** only `covStepDiff2_exists_const` (the deliverable-3 fibre assembly).
+
 - **UPDATE (a=2 campaign session 4, 2026-07-26): the dual core `covDConnDiff2_g1_le` is PROVED.**
   The drafted CS+division proof was finished with the three diagnosed fixes plus one more:
   - `clear_value B2 D5 D6 Avec` right after the `set`s (tames the 1.6M-heartbeat unfolding of the
