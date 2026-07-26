@@ -7,6 +7,62 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 8 = `covStep2_diffStep_eval` core, session 1, 2026-07-26): the outer
+  PEEL and the fully-materialised T1 BRANCH landed sorry-free + axiom-clean.**  Both new theorems in
+  `ConnDiffDeriv2Bound.lean`, targeted module build GREEN (9519 jobs), `#print axioms` =
+  `[propext, Classical.choice, Quot.sound]` (no `sorryAx`); the file's ONLY `sorry` stays at
+  `covStepDiff2_mixedComm_le` (unchanged).
+  - **`covStep2_diffStep_peel`** (correct-by-construction, no differentiability hypothesis).  The eval
+    `PieceA = covStep g₂ (s+2)(covStep g₂ (s+1)(diffStep g₁ g₂ s S)) x [cons U (cons W (cons V Vslots))]`
+    equals, verbatim as landed:
+    ```
+    extDerivFun (fun y => (−∑ₐ (S y)(update (Vslots·y) a (covDerivConnDiff g₂ g₁ W V (Vslots a) y)))
+                          − ∑ₐ covStep g₂ s S y (cons (W y)(update (Vslots·y) a (A_y(Vslots a, V))))) x (U x)
+      − ∑_{q:Fin(s+2)} (covStep g₂ (s+1)(diffStep g₁ g₂ s S)) x
+          (update (fun b => RR b x) q ((leviCiv g₂ (fun y => RR q y) x)(U x)))
+    ```
+    where `RR = Fin.cons W (Fin.cons V Vslots)`, `A_y(P,Q)=difference (LC g₁)(LC g₂) y P Q`.  Proof =
+    outer `covStep_eval_smooth_slots` peel + pointwise `diffStep_leibniz_eval` on the inner scalar field
+    (`hInner`, funext + rw hRRpt + `exact diffStep_leibniz_eval …`).  The inner `−T1 − T2` is kept as ONE
+    `extDerivFun` (the linearity split is deferred to the branch layer); the `H`-correction sum is left
+    unevaluated (session-2 target).
+  - **`covStep2_diffStep_branch1`** (per slot `a`; materialises `covDerivConnDiff2`).  Differentiates the
+    T1 summand `y ↦ (S y)(update (Vslots·y) a (∇₂A(W;V,Vslots a) y))` via `covStep_eval_smooth_slots`
+    (field `S`, deriv `U`) into three branches: leading `∇₂S`-into-`∇₂A`, **diagonal**
+    `(S x)(update (Vslots·x) a (covDerivConnDiff2 g₂ g₁ U W V (Vslots a) x + 3 covDerivConnDiff
+    corrections))`, and the off-diagonal `∑_{b≠a} … (∇₂_U(Vslots b)) …`.  `covDerivConnDiff2` is
+    materialised on the diagonal by `covDerivConnDiff2_eq` (its DEF is `covApply(∇₂) U (∇₂A-sec) − 3`
+    slot corrections; `covDerivConnDiff_contMDiff` supplies the section smoothness).
+  - **Session-2 frontier for `covStep2_diffStep_eval` (the full clean identity) + the bridge:**
+    (i) the **T2 branch** — differentiate `∑ₐ covStep g₂ s S y (cons W (update (Vslots·y) a (A_y(Vslots a,V))))`
+    by `covStep_eval_smooth_slots` (field `covStep g₂ s S = ∇₂S`, rank `s+1`, deriv `U`) → the `∇₂²S`
+    leading terms + a `covDerivConnDiff` branch (via the `∇₂_U(A(Vslots a,V))` product rule, the a=1
+    `hFact1` one variable over); (ii) the **`H`-correction (OC) eval** — apply `diffStep_leibniz_eval`
+    ONE level down to `covStep g₂ (s+1)(diffStep S)` on each of the `s+2` `∇₂_U`-updated tuples (an
+    `hFib`-scale reindex, three `Fin.cases`-style cases q=0/1/succ·succ); (iii) the peel's single
+    `extDerivFun (−T1−T2)` linearity split (needs `MDifferentiableAt` of T1/T2 at `x`, mirroring a=1
+    `hdiff`); (iv) the `∇₂²S`-cancellation of this `PieceA` against `PieceB = diffStep_leibniz_eval` at
+    rank `s+1` (field `∇₂S`) inside `∇₂(mixedComm S) = PieceA − PieceB`, then the per-slot CS norm
+    assembly (`covDConnDiff2_g1_le` + `covDerivConnDiff_gJet_le`, `normSq0S_le_card_of_component_bound`)
+    to discharge `covStepDiff2_mixedComm_le`.
+  - **Honest size:** the `covStep2_diffStep_eval` reusable core is ~40% done (peel + 1 of 2 branches, both
+    fully materialised; T2 branch + OC eval + linearity split + assembly remain).  `covStepDiff2_mixedComm_le`
+    (the norm bound consuming the eval) is a further, separate step.  Revised estimate to
+    `covStepDiff2_mixedComm_le` GREEN: **~2–3 more focused sessions** (T2+OC ≈ 1, eval assembly ≈ 1,
+    norm CS ≈ 1), down from the session-7 "300–450 lines, 2-session core" for the eval identity alone.
+  - **Lean lessons (this session):** (a) a **section-valued `Fin.cons` tuple** `Fin.cons W (Fin.cons V Vslots)`
+    written inline in a statement/`have` leaves the `Fin.cons` motive a metavar (`Function expected at
+    Fin.cons ?m b`); fix = a **typed `set RR : Fin (s+2) → ContMDiffSection … := …`** (mirrors a=1's `VV`),
+    whose annotation both elaborates and lets `set` fold the statement's OC into `RR`-form so the final
+    `rw [hInner]` closes.  (b) **`covDerivConnDiff2` materialisation** = `rw [covDerivConnDiff2_eq]` then
+    `simp only [covApply, LeviCivita_eq_leviCivitaConnectionOfMetric]; abel`: `simp` beta-reduces
+    `(fun z=>U z) x → U x` and bridges the `LeviCivita g₂ = leviCivitaConnectionOfMetric g₂` **defeq**
+    (which `abel` alone treats as distinct atoms), and `abel` cancels the `−cᵢ + cᵢ` corrections.  (c)
+    diagonal collapse uses `Function.update_idem` (double update at `a`); off-diagonal `σ b → Vslots b`
+    (`b≠a`) via `Finset.sum_congr` + `Function.update_of_ne (Finset.ne_of_mem_erase hb)`.  (d)
+    `ContMDiffSection.mk`-coe is `rfl`-reducible after unfolding the `set` (a=1 `hDval` pattern), so
+    `rw [hCDCdef]; rfl` closes the section-coe `have`.
+
 - **UPDATE (a=2 campaign session 7, 2026-07-26): the `covStepDiff2_mixedComm_le` eval-identity route
   was AUDITED empirically; the plan's implied "clean one-order-up of `diffStep_leibniz_eval`" is
   DISPROVEN — the frontier is larger than the ~100-line estimate.  KEY FINDING (verified in Lean via a
