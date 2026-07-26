@@ -1826,3 +1826,30 @@ Full distillation in THREEARM_RECON.md §11.  Operative consequences:
 DISPATCHED: (a) the gate brick (fresh executor; CurvatureCoefficientDifference-
 JetTower.lean, 14k+ lines — surgical addition only); (b) a=2 session 4 (the
 drafted dual-core CS finish).
+
+## Planner acceptance №31 (2026-07-26 ~03:00) — THE GATE IS GREEN (`73b847a4d`)
+
+The radius-free top-separated integrator + fibre-small bridge landed exact-
+green, axiom-clean, zero deletions.  Empirical confirmation of №30: the
+top-layer subgrid argument has NO resisting term; R^{7k} was the wrapper's
+Λ ∝ R substitution and nothing else.  **R1τ survives its main risk test.**
+
+Pro's freeze condition ("until that generic lemma is exact-green") is MET.
+Reopened queue, in Pro's order:
+1. [dispatch next] **The consumer sibling** — the R-free DeTurck-Lie coefficient
+   theorem (∑‖∇ⁱC_DL‖² ≤ Ktop·(a+2 data window) + Klow·(1 + a+1 data window),
+   no R binder), instantiating the gate at Λ₀=(dim E)·δ₀ via the fibre bridge.
+   TWO design constraints on record: the §11-addendum pointwise-head caveat
+   (top terms go to the L² envelope, not a pointwise head; NEW sibling, do not
+   strengthen public top-head APIs) and the symmS point (run symmS-T grids —
+   fibre smallness controls the symmetric part; raw-T grids are the committed
+   R-dependent ones).  Wire-in point: wAlpha_L2_topsep
+   (DeTurckVectorFieldL2JetBound :4233-4256) — but per Pro, DeTurckLie edits
+   come AFTER this sibling exists.
+2. lieCorr0 stays FROZEN until the sibling defines the new currency (finishing
+   atoms in ballUniform currency risks rework).
+3. Then: DeTurckLie/lieCorr0 re-currency → assembly layer 1 → smooth-core
+   layers 2-3.
+
+Parallel item-6 lane: koszul2_clean PROVED (`621964cca`, planner-probed
+axiom-clean with the dual core); exists_const assembly in flight.
