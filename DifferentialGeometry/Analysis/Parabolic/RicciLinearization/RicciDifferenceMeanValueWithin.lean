@@ -338,6 +338,33 @@ theorem ricciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   rw [heq]
   exact ContDiffWithinAt.sum (fun j _ => riemannWithin (I := I) gfam α hG i j k j hs hy)
 
+/-- One more spatial derivative of the chart Riemann coefficients.  The `∂(chart Riemann)`
+layer, obtained from `riemannWithin` exactly as `partChristWithin` is obtained from
+`christoffelWithin`. -/
+theorem partRiemWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
+    (m i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffWithinAt ℝ ∞
+      (fun r : ℝ × E =>
+        partialDeriv (E := E) m
+          (fun y => chartRiemannTensor (I := I) (gfam r.1) α i j k l y) r.2)
+      (S ×ˢ interior (extChartAt I α).target) (s₀, y₀) :=
+  partialDerivWithin (fun s y => chartRiemannTensor (I := I) (gfam s) α i j k l y) m
+    isOpen_interior hs hy (riemannWithin (I := I) gfam α hG i j k l hs hy)
+
+/-- One more spatial derivative of the chart Ricci coefficients.  The `∂(chart Ricci)` layer:
+the coordinate ingredient of a `∇Ric` chart-frame component reading, the other ingredient
+being `christoffelWithin`. -/
+theorem partRicciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
+    (m i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffWithinAt ℝ ∞
+      (fun r : ℝ × E =>
+        partialDeriv (E := E) m (fun y => chartRicciTensor (I := I) (gfam r.1) α i k y) r.2)
+      (S ×ˢ interior (extChartAt I α).target) (s₀, y₀) :=
+  partialDerivWithin (fun s y => chartRicciTensor (I := I) (gfam s) α i k y) m
+    isOpen_interior hs hy (ricciWithin (I := I) gfam α hG i k hs hy)
+
 /-! ### Compatibility guard
 
 For an **open** time set the `Within` conclusions specialize back to the original `ContDiffAt`
@@ -469,19 +496,24 @@ theorem jointOnMWithin (α : M) (F : ℝ → E → ℝ) {J : Set ℝ} {t : ℝ} 
   simpa only [Function.comp_def] using
     hF.contMDiffWithinAt.comp ((t, x) : ℝ × M) hΦ hmapsΦ
 
+omit [NeZero (Module.finrank ℝ E)] in
+/-- A chart-source point lands in the interior of the extended chart target. -/
+private theorem chart_mem_interior (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
+    extChartAt I α x ∈ interior (extChartAt I α).target := by
+  have hsrc : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]; exact hx
+  exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
+    ((extChartAt I α).map_source hsrc)
+
 /-- **The chart Christoffel symbols on the manifold source, within a half-open time slab.** -/
 theorem christWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i j k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
     ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => chartChristoffel (I := I) (g p.1) α i j k (extChartAt I α p.2))
-      (J ×ˢ (chartAt H α).source) (t, x) := by
-  refine jointOnMWithin (I := I) α (fun s y => chartChristoffel (I := I) (g s) α i j k y)
-    (christoffelWithin (I := I) g α hG i j k ht ?_) hx
-  have hsrc : x ∈ (extChartAt I α).source := by
-    rw [extChartAt_source (I := I)]; exact hx
-  exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
-    ((extChartAt I α).map_source hsrc)
+      (J ×ˢ (chartAt H α).source) (t, x) :=
+  jointOnMWithin (I := I) α (fun s y => chartChristoffel (I := I) (g s) α i j k y)
+    (christoffelWithin (I := I) g α hG i j k ht (chart_mem_interior (I := I) α hx)) hx
 
 /-- **The chart Riemann coefficients on the manifold source, within a half-open time slab.** -/
 theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
@@ -489,13 +521,49 @@ theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α :
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
     ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => chartRiemannTensor (I := I) (g p.1) α i j k l (extChartAt I α p.2))
-      (J ×ˢ (chartAt H α).source) (t, x) := by
-  refine jointOnMWithin (I := I) α (fun s y => chartRiemannTensor (I := I) (g s) α i j k l y)
-    (riemannWithin (I := I) g α hG i j k l ht ?_) hx
-  have hsrc : x ∈ (extChartAt I α).source := by
-    rw [extChartAt_source (I := I)]; exact hx
-  exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
-    ((extChartAt I α).map_source hsrc)
+      (J ×ˢ (chartAt H α).source) (t, x) :=
+  jointOnMWithin (I := I) α (fun s y => chartRiemannTensor (I := I) (g s) α i j k l y)
+    (riemannWithin (I := I) g α hG i j k l ht (chart_mem_interior (I := I) α hx)) hx
+
+/-- **The chart Ricci coefficients on the manifold source, within a half-open time slab.** -/
+theorem ricciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
+    (hG : GenJointGramOn (I := I) g α J) (i k : Fin (Module.finrank ℝ E))
+    {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => chartRicciTensor (I := I) (g p.1) α i k (extChartAt I α p.2))
+      (J ×ˢ (chartAt H α).source) (t, x) :=
+  jointOnMWithin (I := I) α (fun s y => chartRicciTensor (I := I) (g s) α i k y)
+    (ricciWithin (I := I) g α hG i k ht (chart_mem_interior (I := I) α hx)) hx
+
+/-- **The spatial derivative of the chart Riemann coefficients, on the manifold source.**  The
+`∇Rm` chart-component input of the forward-uniqueness slab sups. -/
+theorem partRiemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
+    (hG : GenJointGramOn (I := I) g α J) (m i j k l : Fin (Module.finrank ℝ E))
+    {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        partialDeriv (E := E) m
+          (fun y => chartRiemannTensor (I := I) (g p.1) α i j k l y) (extChartAt I α p.2))
+      (J ×ˢ (chartAt H α).source) (t, x) :=
+  jointOnMWithin (I := I) α
+    (fun s y =>
+      partialDeriv (E := E) m (fun z => chartRiemannTensor (I := I) (g s) α i j k l z) y)
+    (partRiemWithin (I := I) g α hG m i j k l ht (chart_mem_interior (I := I) α hx)) hx
+
+/-- **The spatial derivative of the chart Ricci coefficients, on the manifold source.**  With
+`christWithinM` this is the pair of coordinate ingredients of a `∇Ric` chart-frame component
+reading. -/
+theorem partRicciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
+    (hG : GenJointGramOn (I := I) g α J) (m i k : Fin (Module.finrank ℝ E))
+    {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        partialDeriv (E := E) m
+          (fun y => chartRicciTensor (I := I) (g p.1) α i k y) (extChartAt I α p.2))
+      (J ×ˢ (chartAt H α).source) (t, x) :=
+  jointOnMWithin (I := I) α
+    (fun s y => partialDeriv (E := E) m (fun z => chartRicciTensor (I := I) (g s) α i k z) y)
+    (partRicciWithin (I := I) g α hG m i k ht (chart_mem_interior (I := I) α hx)) hx
 
 /-! ### The closed-subslab continuity corollary
 

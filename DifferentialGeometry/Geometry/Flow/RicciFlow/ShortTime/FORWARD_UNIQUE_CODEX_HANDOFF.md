@@ -17,26 +17,44 @@ from scratch.  Do not re-audit settled stages.
 Kotschwar evolution side, the density tower, hedge, 4 of 6 slab fields — is
 done, 0-sorry, 3-axiom clean.
 
-## Remaining work (one shared brick + two fields + the discharge)
+## Remaining work (two shared bricks + two fields + the discharge)
 
-0. **First: absorb or discard the in-flight executor output.**  An Opus agent
-   (Agent-LAST) was still running at handoff time on exactly this brick, in
-   `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`,
-   `Evolution/ForwardUniqueSup.lean`, `Evolution/ForwardUniqueWiring.lean`.
-   `git status --short` these three: if dirty, audit the diff (0 sorry, hygiene
-   grep below, direct-lean 3-axiom on new endpoints, targeted builds) and keep
-   only what passes; otherwise `git checkout --` them.  Its report file (if any
-   value) is not available to you — judge the code on its own.
-1. **Within-tower derivative layer** (`RicciDifferenceMeanValueWithin.lean`,
-   additive): `partRiemWithin` mirroring the existing `partChristWithin`, a
-   ∇Ric-components corollary, consumer `…SlabContAt` forms on
-   `Icc a c ×ˢ univ`.  Check FIRST whether the roughLap(Rm₂) sup can be reached
-   via `normSq0S_jointContMDiffOn` + DensReg chart machinery on the
-   by-type-smooth field instead of a second derivative layer.
-2. **hadot**: `connDiffDot_normSq_le` (`ForwardUniqueConnBound.lean`, 0-sorry)
-   instantiation — only `B₁ ≥ sup |∇Ric₂|²` is missing (step 1 +
-   `normSqSlabSup`); Λric/Λ/B₃/hΓ/hA routes are recorded in
-   `ForwardUniqueSup.md` §adotLe.
+*(Was "one shared brick".  Brick 1 is done; the audit found a **second** shared brick —
+the covariant-derivative chart-frame component identity.  See step 2.)*
+
+0. **The in-flight executor output landed; steps 1–2 below are superseded.**  Agent-LAST
+   finished after this doc was written.  Its working-tree diff is
+   `RicciDifferenceMeanValueWithin.lean` (+ its `.md`), `ForwardUniqueSup.md`,
+   `FORWARD_UNIQUE_PLAN.md` (entry **№52**) and this file.
+   `ForwardUniqueSup.lean` and `ForwardUniqueWiring.lean` were claimed but **not
+   edited** — there was nothing yet to wire.  Audit as planned; all the checks were run
+   and were green (focused check warning-clean, targeted build 9231 jobs, 0 sorry, seven
+   endpoints `[propext, Classical.choice, Quot.sound]`).
+1. ~~**Within-tower derivative layer**~~ **DONE** (№52).  `partRiemWithin`,
+   `partRicciWithin`, `ricciWithinM`, `partRiemWithinM`, `partRicciWithinM`, plus a
+   `private chart_mem_interior` de-duplicating `christWithinM`/`riemWithinM`.  The
+   `…SlabContAt` consumer forms were deliberately **not** added: the actual consumer
+   pattern (`rmChartJoint`, DensReg) uses the `…WithinM` forms, and unused publics are
+   bloat.  The check this step asked for was made — the answer is **no**, a
+   `roughLap(Rm₂)` sup cannot be reached through `normSq0S_jointContMDiffOn` on the
+   by-type-smooth field, for the reason in step 2.
+2. **hadot — the estimate "only `B₁` is missing (step 1 + `normSqSlabSup`)" was WRONG.**
+   Step 1's output is *chart coefficients* (`Γ^k_{ij}`, `R^l_{ijk}`, `∂Ric_{ab}` as
+   functions of `ϕ_α x`); `normSqSlabSup`'s `hA` consumes *chart-frame components of the
+   tensor at nearby points*.  Converting one into the other needs the off-centre identity
+   `(∇T)(e^α_d, e^α_a, e^α_b) = ∂_d T_{ab} − Γ·T − Γ·T`, which **exists nowhere in the
+   tree** — a second, independent gate, blocking `B₁` and `remLe`'s `roughLap(Rm₂)` sup
+   alike.  Two further code-verified corrections: `connDiffDot_normSq_le`'s `hB₁` is
+   `|∇Ric₂|²` at **rank 3** (one derivative, not `|∇²Ric₂|²`), and its `hNR₁`/`hNR₂` are a
+   **second unproduced input**, not plumbing.  GOOD NEWS: every ingredient for the missing
+   identity is already proved and public, the same bridge pays for `B₁` *and* `hNR`, and a
+   scratch probe confirms they all co-elaborate in the lane's `InnerProductSpace ℝ E`
+   section with the target statement.  **Read `Evolution/ForwardUniqueSup.md` §"The second
+   gate" / §"The route" / §"Honest size of the residue" before starting** — it names each
+   lemma with file:line, records the `ModelDerivEqCoordDeriv0SAt` trap (a producerless
+   frontier: do NOT route through `nabla0SFun_eval_coordFrame`), and gives the four-step
+   plan (`nablaRicChartComp` → `nablaRicChartJoint` → `nablaRicSlabSup` → `fuAdotSlab`,
+   ≈525–625 lines).
 3. **hrem (ruling R13, plan №49)**: evaluation identities at the real families
    via `lowOfComp_eval` (`ForwardUniqueSdec.lean:257`) rewriting
    `lowOfComp g₁ b (rmDotRem @real)` and `gapDot g₁ g₂ (uhlRm2Vec @real)` as

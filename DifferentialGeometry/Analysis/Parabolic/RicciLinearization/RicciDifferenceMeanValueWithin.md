@@ -1,5 +1,35 @@
 # `RicciDifferenceMeanValueWithin.lean` — ruling R12, the half-open-slab tower
 
+## 2026-07-26, second pass: the derivative layer (`∂Rm`, `∂Ric`) added
+
+Five new public declarations, all one-liners over the existing chain, plus one `private` helper:
+
+| new endpoint | what it is |
+| --- | --- |
+| `partRiemWithin` | `partialDerivWithin` on `riemannWithin` — the `∂(chart Riemann)` layer, exactly mirroring `partChristWithin` over `christoffelWithin` |
+| `partRicciWithin` | `partialDerivWithin` on `ricciWithin` — the `∂(chart Ricci)` layer |
+| `ricciWithinM` | `ricciWithin` transported to the manifold source (the `christWithinM`/`riemWithinM` row that was missing) |
+| `partRiemWithinM` | `partRiemWithin` transported to the manifold source |
+| `partRicciWithinM` | `partRicciWithin` transported to the manifold source |
+
+`private chart_mem_interior` factors the three-line "chart source ⟹ interior of the extended
+chart target" step that `christWithinM`/`riemWithinM` each repeated; both were rewritten to use
+it and became term-mode.  Nothing else in the file changed.
+
+**This is genuinely free.**  `partialDerivWithin` is rank- and object-agnostic: it only needs
+the *undifferentiated* family to be `ContDiffWithinAt` on `S ×ˢ U` with `U` open.  So every
+further spatial derivative of any tower member is one more application, at no mathematical
+cost.  Nothing in the tower bounds how many derivatives are available.
+
+**What this layer does NOT provide** (recorded here because the previous pass's
+`ForwardUniqueSup.md` §"Next targets" item 4 claimed this brick was the *only* thing between
+`fuSlab_of_gram` and an unconditional `hbounds` — that claim is wrong): these are *chart
+coefficient* statements.  Turning them into a bound on an intrinsic fibre norm such as
+`|∇^{g₂}Ric₂|²_{g₁}` additionally requires a **chart-frame component formula for a covariant
+derivative** — `(∇T)(e_d, e_a, e_b) = ∂_d T_{ab} − Γ·T − Γ·T` read on the chart-`α` frame at a
+general nearby point.  That formula does not exist in the tree; see
+`Evolution/ForwardUniqueSup.md` §"The second gate" for the route that was scouted for it.
+
 ## 2026-07-26: delivered, 0 sorry, 3-axiom clean
 
 New **additive** file.  `RicciDifferenceMeanValue.lean` was not touched, and neither were the

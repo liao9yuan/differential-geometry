@@ -6,6 +6,167 @@ residual hypotheses), `ForwardUniqueDensReg.md` (the joint-regularity tower),
 `ForwardUniqueRmBounds.md` / `ForwardUniqueRateLe.md` / `ForwardUniqueConnBound.md` (the
 pointwise estimate producers).
 
+## Outcome — 2026-07-26, fifth pass (DERIVATIVE-LAYER + audit of the residue)
+
+**The named brick is delivered; the audit of what it buys says it is NOT sufficient, and the
+previous pass's "nothing else stands between `fuSlab_of_gram` and an unconditional `hbounds`"
+is wrong.**  `remLe` and `adotLe` are unchanged (still the two arguments of `fuSlab_of_gram`),
+and nothing in this file or in `ForwardUniqueWiring.lean` was edited.
+
+Delivered: `partRiemWithin` / `partRicciWithin` (+ `ricciWithinM`, `partRiemWithinM`,
+`partRicciWithinM`) in `Analysis/Parabolic/RicciLinearization/
+RicciDifferenceMeanValueWithin.lean`, 0 sorry, warning-clean, targeted build green.  See that
+file's `.md`: the layer is free — `partialDerivWithin` is rank-agnostic, so arbitrarily many
+spatial derivatives of any tower member cost one line each.
+
+### The second gate (the reason neither field falls yet)
+
+`normSqSlabSup` consumes `hA`: the components of the tensor family **on the chart frame of
+`x₀`, at nearby points `p.2`**,
+
+```
+(t, x) ↦ A t x (fun i => chartBasisVecFiber x₀ (K i) x)   jointly C∞-within  (J ×ˢ univ) at (t, x₀)
+```
+
+For `A t x = metricRicciAt (g₂ t) x` that reading exists (`rm04ChartMap` / `rmChartComp`
+pattern, `Evolution/ForwardUniqueDensReg.lean`).  For `A t x = metricNabla0S (g₂ t) Ric₂ x`
+— `adotLe`'s `B₁` — it does **not**: there is no lemma anywhere in the tree writing a covariant
+derivative's chart-frame components as `∂(chart component) − Γ·T − Γ·T` at an off-centre point.
+The tower's `∂Ric` layer supplies the first summand and `christWithinM` the Christoffel factor;
+the missing piece is the *identity that assembles them*.
+
+Exactly the same gate blocks `remLe`: `sdecRemFam`'s `roughLap(Rm₂)` slab sup is
+`normSq0S`-of-`covDiv0SField(metricNabla0S …)`, one derivative further along the same road.
+
+### The route, with every ingredient located and checked (do not re-scout)
+
+Target lemma, off-centre on `chartLeviCivitaGoodSet α`:
+
+```
+metricNabla0S g Ric x (fun a : Fin 3 => chartBasisVecFiber α (K a) x)
+  = partialDeriv (K 0) (fun y => chartRicciTensor g α (K 1) (K 2) y) (extChartAt I α x)
+    − ∑ m, chartChristoffel g α (K 0) (K 1) m (extChartAt I α x)
+             * chartRicciTensor g α m (K 2) (extChartAt I α x)
+    − ∑ m, chartChristoffel g α (K 0) (K 2) m (extChartAt I α x)
+             * chartRicciTensor g α (K 1) m (extChartAt I α x)
+```
+
+* **The Leibniz formula is already proved**: `nabla0SFun_eval_coordFrame_moving_raw`
+  (`Geometry/Coordinates/NablaComponents/Tensor0S.lean:361`) gives, for an arbitrary *moving*
+  slot family `V : Fin s → (x : M) → TangentSpace I x`,
+
+  ```
+  nabla0SFun s cov X α x₀ (fun a => V a x₀)
+    = extDerivFun (fun p => α p (fun a => V a p)) x₀ (X x₀)
+      − ∑ a, α x₀ (Function.update (fun b => V b x₀) a ((cov (V a) x₀) (X x₀)))
+  ```
+
+  with four purely local hypotheses.  Its own consumer `nabla0SFun_eval_coordFrame`
+  (`…/CoordFrameStep.lean:51`) is the **discharge template**: `hV` from the frame's
+  `MDifferentiableAt`, and `hVmodel`/`hcoord` from the two *public*
+  `tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt` /
+  `…_coord_mdiffAt_center_of_contMDiffAt`
+  (`Tensor/RSTensor/NablaOnTensors/Regularity/Tensor0S.lean:100,110`), which need only
+  `ContMDiffAt` of the slot section — true for `chartBasisVecFiber α ·` at every `x` in `α`'s
+  base set (`chartBasisVec_alpha_mdifferentiableAt`, `ChartBridge/Hessian.lean:1155`).
+  Only `hpair` needs its own argument at a non-centre base point.
+* **Do NOT go through** `nabla0SFun_eval_coordFrame` / `nabla0SFun_two_eval_coordFrame`'s
+  *conclusions*.  They are conditional on `ModelDerivEqCoordDeriv0SAt`, whose own docstring
+  calls it "the remaining analytic/chart-identification bridge"; grep confirms **no producer
+  exists** in the tree, so that whole family is frontier-shaped.  The `_moving_raw` form is
+  unconditional — use it directly.
+* `totalNabla0SFun_apply_section` (`Tensor/RSTensor/NablaOnTensors/HigherOrder.lean:231`)
+  descends `metricNabla0S g T x (Fin.cons (X x) slots)` to `nabla0SFun`.  The global smooth
+  section `X` through `e^α_{K0}` at `x` is
+  `exists_globalSmooth_chartBasisVec_ext_alpha`
+  (`Geometry/Connection/ChartBridge/RiemannBasisIdentityOffCentre.lean:141`) — a bump-cut
+  `χ • chartBasisVecFiber α j`, already used by the off-centre Riemann identity.
+* The two `Γ`-terms: `LeviCivita_chartBasisVec_alpha_basis_apply`
+  (`ChartBridge/Hessian.lean:1293`, public) is exactly
+  `∇_{e^α_i} e^α_j (x) = ∑_k Γ^k_{ij}(α, ϕ_α x) • e^α_k(x)` **off-centre**; multilinearity of
+  `Ric x` then turns each into `∑_m Γ · chartRicci`.
+* The `extDerivFun` term → the tower's `partialDeriv`: the worked pattern is
+  `extDerivFun_pairing_chartBasisVec_alpha_apply` /
+  `extDerivFun_chartBasisVec_alpha_apply_of_mem` (`private`, `ChartBridge/Hessian.lean:1058`,
+  `:1020`); `mfderiv_chartBasisVecFiber`
+  (`Analysis/Integration/DivergenceTheorem/TangentAction.lean:191`) is the boundaryless form.
+* The scalar being differentiated is identified by `ricciTensor_chartBasisVec_alpha_eq`
+  (`ChartBridge/RiemannBasisIdentityOffCentre.lean:524`, public):
+  `ricciTensor g x (e^α_p x) (e^α_q x) = chartRicciTensor g α p q (ϕ_α x)` for
+  `x ∈ chartLeviCivitaGoodSet α`.  **This was the piece the previous notes assumed missing; it
+  exists.**
+
+**Scratch-probe result (fifth pass, so the next session does not have to re-check it).**  A
+throwaway file in the lane's own namespace `DifferentialGeometry.PDE.RicciFlow`, with the lane's
+`open`s and its `[InnerProductSpace Real E]` variable block, importing `ForwardUniqueSup` +
+`Geometry/Coordinates/NablaComponents/Tensor0S` + the two `ChartBridge` files: all six
+ingredients `#check` and the **displayed target statement elaborates**, with `sorry` as the only
+warning.  So there is *no* section-variable / instance-diamond obstruction — the
+`NormedSpace`-vs-`InnerProductSpace` trap recorded elsewhere in this lane does not bite here
+(`nabla0SFun_eval_coordFrame_moving_raw` is stated over `NormedSpace 𝕜 E`, which the lane's
+`InnerProductSpace Real E` supplies), and the `ChartBridge` lemmas already *require*
+`InnerProductSpace ℝ E`, i.e. they are stated in the lane's own section.  The three `ChartBridge`
+conclusions land in `Integral.DivergenceTheorem.chartRicciTensor` / `chartChristoffel` — the
+**same** chart objects the `Within` tower produces, so no third bridge is needed between them.
+Namespace note: `ricciTensor_chartBasisVec_alpha_eq`, `LeviCivita_chartBasisVec_alpha_basis_apply`
+and `exists_globalSmooth_chartBasisVec_ext_alpha` live in
+`DifferentialGeometry.Integral.Connection`; `totalNabla0SFun_apply_section` and the two
+`tangentFieldModelInChart_…` producers live in `Tensor0SBundle`.
+
+**The same bridge discharges `adotLe`'s `hNR₁`/`hNR₂`**, which are the *other* unproduced
+hypothesis of `connDiffDot_normSq_le`: `chartNablaRic` is `ricciCovDerivCompInFrame`
+(`Evolution/Connection/Components.lean:461`), which is *definitionally* the right-hand side of
+`nabla0SFun_eval_coordFrame_moving_raw` at `V := (frame a, frame b)` — the `extDerivFun` term
+and the two connection terms match term by term, with no chart conversion needed at all.  So
+one bridge lemma pays for both `B₁` and `hNR`.
+
+### `adotLe`'s remaining input list, audited against the code (not against notes)
+
+`connDiffDot_normSq_le` (`ForwardUniqueConnBound.lean:1404`) — note its `hB₁` is
+`normSq0S (g₁ t) x 3 (metricNabla0S (g₂ t) Ric₂ x) ≤ B₁`, i.e. **`|∇Ric₂|²`, one derivative,
+rank 3** — the "`|∇²Ric₂|²`" of the previous notes is a misreading.
+
+| input | status |
+| --- | --- |
+| `Ric₁ Ric₂ : Tensor0SField … 2` + `hRicᵢ` | **available** — `ricciSection` (`Geometry/Curvature/Riemann/Basic/Sections.lean:583`) at `metricCov gᵢ`, `metricCov_smooth`; `ricciSection_apply` → `ricciCurvatureAt` → `metricRicciAt` |
+| `S`, `hS : IsRmDiffField` | **available** — `fuSfield`, `fuSfield_apply` is `rfl` |
+| `frame`/`hframe`/`hu`/`hx` | **available** — `chartFrame I x`, `chartFrame_isFrame` (`C¹`, which is what is asked), base set of the trivialization |
+| `gInv₁ gInv₂` + `hgInvᵢ` | **available** — `chartFrameInv`, `localFrameInv_of_mem` + `basisInvMetric_real` |
+| `hΓ` | **available** — `fuGamma`/`gamma_of_gram` + `coeff_bilinOfComp` |
+| `hA` | **available** — `connDiffVec_hasDerivAt` fed by the same `hΓ` |
+| `Λric`, `B₃` | **available** — `ricciSlabSup` |
+| `Λ`, `hΛ0` | **available** — `metricCompSlab` |
+| `nablaRicᵢ` + `hNRᵢ` | **MISSING — the bridge above** |
+| `B₁` | **MISSING — the bridge above + `partRicciWithinM` + a new `nablaRicChartJoint`** |
+
+The RHS arithmetic is clean: `nablaRmDiffSq (g₁ t) S x` is *definitionally*
+`normSq0S (g₁ t) x 5 (metricNabla0S (g₁ t) S x)`, which is `hadot`'s own second term, and
+`metricDiffSq + connDiffSq ≤ dens`.  So once the bridge exists, `adotLe` is
+`connDiffDot_normSq_le` plus a `max`-of-two-constants `linarith`.
+
+### Honest size of the residue
+
+The bridge is **not** a ≤150-line local lemma, but every ingredient above is already proved, so
+it is assembly, not new mathematics.  Estimated shape of the next session:
+
+1. `nablaRicChartComp` (the displayed identity) — new file
+   `Evolution/ForwardUniqueNablaChart.lean`, ≈200–300 lines.  Only genuinely new sub-goal:
+   `hpair`, i.e. `ContMDiffAt (fun p => Ric p (e^α_{K1} p, e^α_{K2} p)) x` at a **non-centre**
+   base point; `ricciTensor_chartBasisVec_alpha_eq` reduces it to smoothness of
+   `chartRicciTensor g α · · ∘ extChartAt I α`, which the settled tower already gives.
+2. `nablaRicChartJoint` — in `ForwardUniqueDensReg.lean`, the `rmChartJoint` template verbatim,
+   with `partRicciWithinM` for the derivative summand and `christWithinM` for the two
+   `Γ`-summands.  ≈100 lines.
+3. `nablaRicSlabSup` (here) = `normSqSlabSup` at that family.  ≈25 lines.
+4. `fuAdotSlab` (Wiring) = `connDiffDot_normSq_le` at `chartFrame`/`chartFrameInv`/`ricciSection`
+   /`fuSfield`, plus the `max`-of-two-constants arithmetic.  ≈200 lines; `hNR` comes from
+   step 1 read in `ricciCovDerivCompInFrame` form.
+
+`remLe` needs steps 1–3 one derivative further (`roughLap Rm₂`, i.e. `covDiv0SField` of
+`metricNabla0S` of the `(0,4)` curvature — `partRiemWithinM` is the tower half of it) **plus**
+the R13 evaluation identities for `sdecRemFam`'s four summands, which are a separate and
+larger problem (see §"`remLe`: blocked beyond sups").
+
 ## Outcome — 2026-07-26, fourth pass (FINAL-FIELDS)
 
 **`volLe` and `reactLe` are CLOSED unconditionally at the constructed carriers; `Λ` is closed
@@ -392,12 +553,13 @@ collapsed to a single brick.)*
    `reactLe` with it (`fuReactSlab`).
 3. ~~`Λ`, the pointwise metric comparison.~~  **DONE** (`metricCompSlab`); it was a `normSq0S`
    sup, not a sphere-bundle problem.
-4. **THE ONE REMAINING BRICK — `partRiemWithin` / `partRicciWithin`** in
-   `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`, mirroring the
-   file's existing `partChristWithin`, plus the `normSq0S_jointContMDiffOn` feed that turns the
-   resulting `∇Ric` / `ΔRm` chart components into slab sups.  It delivers `adotLe`'s last
-   constant `B₁ ≥ |∇²Ric₂|²` **and** `remLe`'s `roughLap(Rm₂)` sup.  Nothing else stands
-   between `fuSlab_of_gram` and an unconditional `hbounds`.
-5. After that brick: `adotLe`'s instantiation plumbing for `connDiffDot_normSq_le` (local
-   frame, `gInv`/`nablaRic` component families, the `connSpeed`/`connDiffDot` identification),
-   and `remLe`'s ruling-R13 evaluation identities for `sdecRemFam`'s four summands.
+4. ~~`partRiemWithin` / `partRicciWithin`~~ **DONE** (fifth pass, plus `ricciWithinM`,
+   `partRiemWithinM`, `partRicciWithinM`).  The claim attached to it here — "nothing else
+   stands between `fuSlab_of_gram` and an unconditional `hbounds`" — was **wrong**: those are
+   chart *coefficient* statements, and a chart-*frame component* formula for a covariant
+   derivative is a second, independent gate.  See §"The second gate" at the top.
+5. **THE REMAINING BRICK — `nablaRicChartComp`**, the off-centre chart-frame component identity
+   for `metricNabla0S g Ric`.  Route and every ingredient are located in §"The route"; sizing
+   and the four-step plan on top of it are in §"Honest size of the residue".  It delivers
+   `adotLe`'s `B₁` **and** its `hNR₁`/`hNR₂` at once; `remLe` needs the same one derivative
+   further, plus the R13 identities.

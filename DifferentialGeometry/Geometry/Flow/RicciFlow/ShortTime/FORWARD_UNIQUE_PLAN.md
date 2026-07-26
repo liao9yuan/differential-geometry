@@ -310,7 +310,9 @@ horizon. The draft stage list below is the pre-ruling record.
   background at handoff; verify its tail before starting.  Fable planner
   session ends here; per-brick history = №33–№51 + eleven commits
   `002d5766c`…`8a0df5480`.
-- №51 (2026-07-26, DERIVATIVE-LAYER — **the named brick is delivered and green, and the
+- №52 (2026-07-26, DERIVATIVE-LAYER, executor Agent-LAST — the entry above (also
+  labelled №51, planner wrap) was committed while this working-tree edit was live, so
+  this one is renumbered.  **The named brick is delivered and green, and the
   audit says it is NOT sufficient: №50's "nothing else stands between `fuSlab_of_gram`
   and an unconditional `hbounds`" is FALSE.  Neither field closed; both still exactly
   the two arguments of `fuSlab_of_gram`**).  Delivered in
