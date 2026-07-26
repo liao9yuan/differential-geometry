@@ -7,6 +7,30 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-25)
 
+- **UPDATE (a=2 campaign session 2, 2026-07-25): infrastructure + object landed sorry-free; dual-core
+  route fully de-risked.**  In `ConnDiffDeriv2Bound.lean`, all axiom-clean
+  `[propext, Classical.choice, Quot.sound]`, targeted module build GREEN (9482 jobs):
+  - `covStepDiff2_opLeibniz` — **deliverable 2 (operator form)**: `∇₂²(A⋆S)` expanded via
+    `diffStep_leibniz` (twice) into `A⋆∇₂²S` (`= diffStep g₁ g₂ (s+2)(covStep g₂ (s+1)(covStep g₂ s S))`)
+    plus the mixed commutator on `∇₂S` and the base derivative of the mixed commutator on `S`.  This
+    reduces the `covStepDiff2_exists_const` frontier to the fibre norm of `∇₂(mixedComm(S))` (whose
+    `(∇₂²A)⋆S` part is the a=2 atom).  `[NormedSpace]`-only (pure `covStep`/`diffStep` algebra).
+  - `field1_eq_mcd1`, `field2_eq_mcd2`, `nabla3_eq_mcd2`, **`nabla4_eq_mcd3`** — the order-1/2/3
+    metric-jet currency bridges; `nabla4_eq_mcd3` is the requested new order-3 sibling
+    (`nabla0SFun 4 (LC g₂) V field₂ = metricCovDeriv g₁ g₂ 3` with `V x` leading).  `[NormedSpace]`-only.
+  - `covDerivConnDiff2` (+ `covDerivConnDiff2_eq`) — the **clean a=2 object** `∇₂²A`
+    (`= ∇₂_V[(∇₂A)(W;X,Y)] − (∇₂A)(∇₂_V W;X,Y) − (∇₂A)(W;∇₂_V X,Y) − (∇₂A)(W;X,∇₂_V Y)`), the dual-core
+    target output vector.  Definable via `covApply`/`covDerivConnDiff`; typechecks, `_eq` is `rfl`.
+    HOME DEBT: canonical home is next to `covDerivConnDiff` in `RicciConnDiffPalatini.lean`.
+  - **The a=2 dual core `covDConnDiff2_g1_le` is NOT yet stated in Lean** (deliverable 1's bound): its
+    proof needs the clean Koszul-2 identity `2 g₁(covDerivConnDiff2, Z) = RHS_clean` (§2.1 below),
+    which is a genuine ~200-line absorption proof (the a=1 `connDiff_koszul_deriv` proof one order up).
+    The route + the exact `RHS_clean` are now fully worked and de-risked below; the term-by-term
+    correction cancellation is verified by hand.  Deliverable 3 (`covStepDiff2_exists_const`) stays
+    `sorry` (gated on the dual core).  IPS note: the dual core will inherit `[InnerProductSpace ℝ E]`
+    from `connDiff_koszul_deriv2` (forced, confined to that theorem); `UnifCovSumCross.lean` is an IPS
+    file so it consumes it fine.
+
 - **UPDATE (a=2 campaign session 1, 2026-07-25): the FRONTIER identity `connDiff_koszul_deriv2` is
   PROVED sorry-free** in `Geometry/Connection/LeviCivita/ChristoffelDiffKoszulDeriv2.lean` (with its two
   reusable engines `metricField_totalReg2` + `nablaMetric_combo_extDeriv2`, all axiom-clean
@@ -105,6 +129,82 @@ shows, `∇₂(telescAccum(m+1))` needs `∇₂²(telescAccum m)` (the full deri
 `∇₂^j(A ⋆ S)` term spawns `∇₂^a A` via the Leibniz expansion.  Route (iii) therefore needs the SAME
 `∇₂^a A` content as route (i) **plus** a two-index induction on `(j, m)`.  Strictly more work; it
 reorganises the frontier without dissolving it.
+
+## 2.1 THE DUAL-CORE ROUTE — clean Koszul-2 identity + CS (session 2, de-risked)
+
+The a=2 dual core `covDConnDiff2_g1_le` mirrors the a=1 `covDerivConnDiff_g1_le`
+(`ConnDiffDerivBound.lean:306`) one order up.  Two steps:
+
+### 2.1.a The clean Koszul-2 identity `koszul_deriv2_clean` (the genuine frontier, ~200 lines)
+
+**Statement (target).**  For sections `V W X Y Z` and `x`, with `A(a,b) = difference (LC g₁)(LC g₂) x a b`,
+`Q = covDerivConnDiff g₂ g₁ W X Y` (the a=1 field), `mcd_k = metricCovDeriv g₁ g₂ k`:
+```
+2 g₁(covDerivConnDiff2 g₂ g₁ V W X Y x, Z x)
+  =  mcd3 x ![V,W,X,Y,Z] + mcd3 x ![V,W,Y,X,Z] − mcd3 x ![V,W,Z,X,Y]      -- ∇₂³g₁ combos (leading)
+   − 2 · mcd2 x ![V,W, A(Y,X), Z]                                          -- ∇₂²g₁·A
+   − 2 · mcd1 x ![W, ((LC g₂)(A(Y,X)-sec))x (V x), Z]                      -- ∇₂g₁·∇₂A  (raw ∇₂_V A-section slot)
+   − 2 · mcd1 x ![V, Q x, Z]                                               -- ∇₂g₁·∇₂A  (Q = ∇₂A vector slot)
+```
+Here the `mcd3/mcd2` slots use the `nabla4_eq_mcd3`/`nabla3_eq_mcd2` bridges, and `mcd1 ![·,vec,·]`
+uses `field1_eq_mcd1` (`(∇₂_V g₁)(a,b) = mcd1 ![V,a,b]`).  Note `Z` appears **only evaluated** — the
+`∇₂_V Z` terms cancel (verified below).
+
+**Proof route (all cancellations verified by hand — the `linarith` closes them, as in a=1):**
+1. Start from the master `connDiff_koszul_deriv2 g₁ g₂ V W X Y Z x`
+   (`ChristoffelDiffKoszulDeriv2.lean:141`): `∂_V[2 g₁(Q, Z)] = RHS2` (RHS2 = 3 `nabla0SFun4 V field₂`
+   combos + their 3 `∑_{a:Fin 4}` slot-correction sums − 2·[quad: `nabla0SFun3 V field₁ ![W,A,Z]` +
+   W-slot corr `field₁![∇₂_V W,A,Z]` + A-slot corr `field₁![W,∇₂_V A,Z]` + Z-slot corr `field₁![W,A,∇₂_V Z]`]).
+2. Expand the LHS by the metric-compat Leibniz (`metric_leibniz_extDeriv` on `![Q_sec, Z]`, needs `Q`
+   as a smooth section — a smoothness lemma for `p ↦ covDerivConnDiff g₂ g₁ W X Y p` is a small
+   sub-frontier):
+   `∂_V[2 g₁(Q,Z)] = 2(∇₂_V g₁)(Q,Z) + 2 g₁(∇₂_V Q, Z) + 2 g₁(Q, ∇₂_V Z)`.
+3. `covDerivConnDiff2 = ∇₂_V Q − [(∇₂A)(∇₂_V W;X,Y) + (∇₂A)(W;∇₂_V X,Y) + (∇₂A)(W;X,∇₂_V Y)]`, so
+   `2 g₁(covDerivConnDiff2, Z) = 2 g₁(∇₂_V Q, Z) − 2 g₁([3 corr], Z)`.
+4. Combine 1–3: `2 g₁(covDerivConnDiff2, Z) = RHS2 − 2(∇₂_V g₁)(Q,Z) − 2 g₁(Q, ∇₂_V Z) − 2 g₁([3 corr], Z)`.
+5. **Cancellations (each verified term-by-term):**
+   - **`∇₂_V Z` (ζ) terms cancel.**  `−2 g₁(Q, ζ)` via a=1 `connDiff_koszul_deriv W X Y (ext ζ)` gives
+     `−mcd2![W,X,Y,ζ] − mcd2![W,Y,X,ζ] + mcd2![W,ζ,X,Y] + 2·field₁![W,A(Y,X),ζ]` (note
+     `nabla0SFun3 W field₁ ![a,b,ζ] = field₂ x ![W,a,b,ζ]`, an **order-2** `field₂` eval — same object
+     as RHS2's Z-slot corrections).  The three `field₂![W,·,·,ζ]` cancel RHS2's Z-slot corrections of
+     the 3 combos (coeffs +,+,−); the `+2 field₁![W,A,ζ]` cancels RHS2's quadratic Z-slot corr
+     `−2 field₁![W,A,ζ]`.  Net ζ = 0.
+   - **`∇₂_V W/X/Y` (input-slot) corrections cancel.**  `−2 g₁((∇₂A)(∇₂_V W;X,Y), Z)` via a=1 Koszul
+     (deriv-dir `∇₂_V W`) gives 3 `mcd2(∇₂_V W;·,·,Z)` combos + `2 field₁![∇₂_V W, A(Y,X), Z]`.  The 3
+     `mcd2` combos cancel RHS2's W-slot corrections of the 3 combos; the `2 field₁![∇₂_V W,A,Z]` cancels
+     RHS2's quadratic W-slot corr `−2 field₁![∇₂_V W,A,Z]`.  Same for X, Y.  Net = 0.
+6. **Survivors** = RHS_clean (the 6 terms above): 3 `mcd3` combos (RHS2's leading `nabla0SFun4`, via
+   `nabla4_eq_mcd3`), `−2 mcd2![V,W,A,Z]` (RHS2's quadratic leading, via `nabla3_eq_mcd2`),
+   `−2 mcd1![W, ∇₂_V A-sec, Z]` (RHS2's quadratic A-slot corr, via `field1_eq_mcd1`), and
+   `−2 mcd1![V, Q, Z]` (the LHS `−2(∇₂_V g₁)(Q,Z)`, via `field1_eq_mcd1`).
+
+### 2.1.b The dual-core CS + division (mechanical, ~150 lines, mirrors a=1)
+
+Instantiate `koszul_deriv2_clean` at `Z = smoothExtensionTangent x (covDerivConnDiff2 …)`, so LHS
+`= 2 g₁(B₂, B₂) = 2|B₂|²_{g₁}` (`B₂ = covDerivConnDiff2 g₂ g₁ (ext v')(ext v)(ext w)(ext u) x`).
+Cauchy–Schwarz each RHS_clean term with `abs_apply_le_sqrt_normSq0S g₁` (ranks 5/4/3 for mcd3/mcd2/mcd1)
+at an internal `g₁`-ON basis; re-expand `|A(Y,X)|` by `connDiffVec_norm_le` and the two `∇₂A`-vector
+factors (`Q` and the raw `∇₂_V A-sec`) by the a=1 dual core `covDerivConnDiff_g1_le` (or its fibre form
+`covDerivConnDiff_fibreNorm_le`); collect the common `|v'||v||w||u||B₂|_{g₁}`, divide by `|B₂|_{g₁}`
+(rcases `eq_or_lt` of `Real.sqrt_nonneg`, then `le_of_mul_le_mul_left`, exactly as
+`covDerivConnDiff_g1_le` step 7).  Result — the a=2 dual core bound in `metricCovDeriv 3/2/1` currency
+(fibre norms `M₃ = √normSq0S(g₁,5,mcd3)`, `M₂ = √normSq0S(g₁,4,mcd2)`, `M₁ = √normSq0S(g₁,3,mcd1)`,
+`NA`, and the a=1 vector bound `Nq`):
+```
+√(g₁ B₂ B₂) ≤ (3/2·M₃ + M₂·NA + [M₁·Nq-form terms]) · √(g₁ v'v')·√(g₁ vv)·√(g₁ ww)·√(g₁ uu).
+```
+The endpoint then converts `g₁→g₂` by `sqrt_normSq0S_comp` (private in `ConnDiffDerivBound`; re-derive
+or promote) and folds `M_k ≤ √(Λ^{k+2})·Λ^{(k)}`, giving the a=2 `Λ`-polynomial that feeds
+`covStepDiff2_exists_const` (existential `C₂`).
+
+### 2.1.c Sub-frontiers exposed (for the next session)
+- **Smoothness of `p ↦ covDerivConnDiff g₂ g₁ W X Y p` as a section** (for step 2's
+  `metric_leibniz_extDeriv`).  Small; `covDerivDiff` is built from `cov.toFun (diffSec …)` + `covApply`,
+  all with existing `contMDiff` producers (`diffSec_contMDiff`, `covApply_contMDiffOn`).
+- `sqrt_normSq0S_comp` is `private` in `ConnDiffDerivBound.lean`; either re-derive (short:
+  `exists_diagInv_of_metricUniformEquivalentOn` + `normSq0S_diag_le` + `Real.sqrt_mul`) or de-privatise.
+- The a=1 vector bounds `covDerivConnDiff_g1_le` (private) / `covDerivConnDiff_fibreNorm_le` (public):
+  use the public fibre form to bound the two `∇₂A`-vector slots in RHS_clean terms 5–6.
 
 ## 3. THE STATED LEMMA (the interface)
 
