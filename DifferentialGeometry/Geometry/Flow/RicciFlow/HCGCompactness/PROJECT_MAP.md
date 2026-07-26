@@ -54,6 +54,12 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 ## 3. Live lanes and their entry documents
 
+> **Tree-wide (not HCG-specific):** the outstanding merge of the upstream mainline
+> `qinz/reunion` is planned in `DifferentialGeometry/REUNION_MERGE_PLAN.md`.  It also
+> records the standing ruling that `InnerProductSpace ℝ E` on the *model* space is the
+> wrong assumption — stay on `[NormedSpace ℝ E]`, and never compensate a newly-demanded
+> instance downstream; fix the producer or `omit` the unused variable instead.
+
 | Lane | Entry plan | State |
 |---|---|---|
 | Ch4 Step B/C (selected B1 producer route) | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCStageComparison.md` + `C4/StepCStageDiagonal.md` + `C4/StepCStageInjectivity.md` + `C4/StepCStageMaster.md` + `C4/StepB1MetricLocal.md` + `C4/StepB1MetricIntrinsic.md` + `C4/StepB1MetricCarrier.md` + `C4/StepB1RawProducer.md` | **100% checked for the selected canonical framed producer route.**  The support capstone, full stage-master DAG, forward intrinsic tail, exact-`Function.invFunOn` reverse tail, two-carrier capstone, and `MetricCompactBase.exists_b1_raw` are focused/exact-green; the unchanged `StepB1RawInput` closes 5/5 fields for one global finite-stage map.  The separately named textbook B1 theorem remains unstated at 0%, and the historical full Step-C arbitrary recurrence remains separate/incomplete. |
