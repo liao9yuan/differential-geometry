@@ -545,3 +545,34 @@ per-file `.md`.
 **Brick 4 (lieCorr0) is mechanizable** from this pattern: same two integrators, same g₁⁻¹/connDiff
 machinery, same engine+summed shapes — a clone once brick 3b's shared R-free tower exists.  No new
 integrator, no new frontier expected.
+
+### 11d.1 — brick 3b SESSION 1 (2026-07-26): tower BASE landed
+
+New leaf `Analysis/Sobolev/TensorHilbert/DeTurckVFJetRadiusFree.lean` (per-file note
+`DeTurckVFJetRadiusFree.md`), imports `DeTurckVFEndoInsertProducers` + `CurvatureCoefficientDifferenceJetTower`;
+the three split parts stay read-only.  Two BOTTOM producers landed, targeted-build GREEN, axioms
+EXACTLY `[propext, Classical.choice, Quot.sound]` (no `sorryAx`):
+
+- `cometricCastG0_order0sup_jetL2_radiusFree` — flagship; all-public decomps
+  (`cometricCastG0_eq_doubleTrace_add_appCcRS` + `rfns_iteratedCovGrad_slotInsertEndoCc_le_endo` +
+  the gInvDiff grid + `appCcRS_diagonalProductGrid_rankLeft`).  Order-0 sup `Λ` R-free (fibre bound,
+  grid₀=1); L² jets via the workhorse → low window `Flow i·(1+∑_{j≤i}‖∇ʲP‖²)`.
+- `sharpFlatEndoCc_lowOrder_jetL2_radiusFree` — the `DiffIns+IdIns` split re-derived in-leaf (4
+  helpers; originals private in Producers).  DiffIns L² via workhorse; IdIns `T`-free constant.
+
+**Route reality (correction to "single-integrator swap" framing).**  Only cometricCastG0 and
+sharpFlatEndoCc DIRECTLY call the ball-uniform integrator; they are clean workhorse swaps because
+their appCcRS/product `S`-factor is `T`-INDEPENDENT (Φ / IdIns), so no `R`-dependent sup is needed.
+The COMPOSERS `connDiffSection_lowOrder` / `wOmega_lowOrder` are NOT single-swap: they route
+`∫ ∑rfns(∇ⁿS)·∑rfns(∇ˡT)` through the (R-free) two-arm integrator fed the ORDER-0 sups of S/T, and
+for connDiffSection `S = raisedKoszul ~ ∇P` whose order-0 sup `ΛK = C·Csob·R` is genuinely
+`R`-dependent (needs C² Sobolev of the `a+2` ball).  ⟹ the R-free composers must fold the two-factor
+product into a SINGLE antidiagonal grid (`antidiagonalTupleGrid_mul_le` + `single_factor_mul_…`,
+present in `AntidiagonalTupleProductGrid.lean`, already used by JetTower/Kernel) then hit the
+workhorse.  Viable (infra exists — NOT a wall), but materially more than a clone; SESSION 2+ scope.
+NO §6 unreceivable term or `R`-dependent constant at the cometricCastG0/sharpFlatEndoCc level.
+
+**Next (session 2):** `raisedKoszul` R-free `F` (pointwise, keep `‖∇^{n+1}P‖²` explicit; its sup is
+the R-dep term, dropped) → then `connDiffSection_lowOrder` R-free via the grid-mul route → `wXi` →
+`wOmega`, then the `_L2_topsep` layer and the frontier assembly (final 3b session).  3b tower base
+~2/≈8 producers; frontier 0% (unstated in-code beyond its `sorry`).
