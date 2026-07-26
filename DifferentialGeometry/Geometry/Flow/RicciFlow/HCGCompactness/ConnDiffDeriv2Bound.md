@@ -7,6 +7,44 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 13 = statement fix + assembly backbone, 2026-07-26; coordinator ruling
+  №33, committed `348b43d31`/`8709d079e`): the session-12 blocker is RESOLVED by AMENDING the bridge
+  statement.  This SUPERSEDES the session-7 "∇₂²S cancels / `mixedComm = (∇₂A)⋆S`" claim, which is
+  FALSE — `∇₂(mixedComm S)` genuinely carries an `A ⋆ ∇₂²S` (order-2 in `S`) term that does NOT cancel.**
+  - **Task 1 (DONE, GREEN):** `covStepDiff2_mixedComm_le`'s RHS now carries the `|∇₂²S|` term
+    (`+ √normSq0S(g₂, s+2, covStep g₂ (s+1)(covStep g₂ s S) x)`).  `covStepDiff2_exists_const` closes
+    UNCHANGED — its existing `nlinarith` hints (`mul_nonneg hCbr_nn hc` + `(max0 − (K1+Cbr))·(a+b+c) ≥ 0`
+    + `K1·a ≥ 0`) already cover the strengthened `hp2 = Cbr·(a+b+c)`
+    (`max0(K1+Cbr)·(a+b+c) ≥ K1(b+c) + Cbr(a+b+c)`).
+  - **Assembly backbone (DONE, GREEN):**
+    - `covStep2_mixedComm_split` — the FIELD identity `∇₂(mixedComm S) = PieceA − PieceB`
+      (`PieceA = covStep g₂ (s+2)(covStep g₂ (s+1)(diffStep g₁ g₂ s S))`,
+       `PieceB = covStep g₂ (s+2)(diffStep g₁ g₂ (s+1)(covStep g₂ s S))`), from `diffStep_leibniz` +
+      `covStep_sub`: `rw [← covStep_sub]; congr 1; rw [diffStep_leibniz]; abel`.
+    - `covStep2_mixedComm_eval_sub` — the eval-level split `∇₂(mixedComm S) x [U,W,V,Vslots] = PieceA x [·]
+      − PieceB x [·]` (`rw [covStep2_mixedComm_split, ContMDiffSection.coe_sub, Pi.sub_apply,
+      Tensor0SSpace.sub_apply]`).  **NEEDS `set_option backward.isDefEq.respectTransparency false`** — the
+      `Tensor0SSpace.sub_apply` rewrite triggers the `NormedSpace ℝ (Tensor0SModel (s+3))` IPS wall (same
+      cure as `covStep2_branch1/2_mdiff`).  **LESSON:** fibre `sub_apply`/`add_apply` on `Tensor0SSpace`
+      in this IPS file hits the `Tensor0SModel`-`NormedSpace` synth; guard with the transparency option.
+    - `diffStep_rank0_eq_zero` (session-12 witness) retained.
+  - **Remaining (Task 2 full expansion + Task 3 CS — HANDOFF):** expand `PieceA x [·]` by
+    `covStep2_diffStep_peel ▸ split ▸ simp[branch1,branch2] ▸ OCsplit`, with the OC per-term expanded via
+    `diffStep_leibniz_eval` on the `covApply (LeviCivita g₂) (fun z=>U z) (fun z=>·z)` sections
+    (packaged `contMDiffOn_univ.mp (covApply_contMDiffOn U.contMDiff (hcast ·))`, the
+    `covDerivConnDiff_contMDiff` idiom).  The interior `∑ a₀` uses proof-local
+    `Function.update Vslots a₀ (covApply … Vslots a₀ section)` + the coe-update lemma
+    `(fun a => (update Vslots a₀ Z) a x) = update (fun b => Vslots b x) a₀ (Z x)` (funext + `Fin`-cases),
+    then a diagonal/off-diagonal split.  Expand `PieceB x [·]` by
+    `diffStep_leibniz_eval g₁ g₂ (s+1)(covStep g₂ s S) U W (Fin.cons V Vslots) x` — KEEP its `A⋆∇₂²S`
+    sum `T2_B` (bridge `(fun i => (Fin.cons V Vslots) i x) = Fin.cons (V x)(fun j=>Vslots j x)`).  Norm
+    CS: dual core `covDConnDiff2_g1_le` (∇₂²A insertion), `covDerivConnDiff_gJet_le` (∇₂A insertions into
+    `S`/`∇₂S`), `lcDiff_norm_le · |∇₂²S|` (the `A⋆∇₂²S` insertions), assembled by
+    `normSq0S_le_card_of_component_bound`.
+  - **VERIFY LESSON:** `lake-locked check`'s wrapper exit code FALSE-GREENS on `lake env lean` errors —
+    read the `lake env lean succeeded/failed` STATUS LINE and the error lines, not the wrapper exit code
+    (a `Tensor0SSpace.sub_apply` NormedSpace error at L1664 exited the wrapper `0`).
+
 - **UPDATE (a=2 campaign session 12 = the PieceA−PieceB assembly, 2026-07-26): PLANNER-LEVEL BLOCKER —
   the `∇₂²S` terms of `∇₂(mixedComm S)` do NOT cancel; `covStepDiff2_mixedComm_le` is FALSE as stated
   (missing `|∇₂²S|` on its RHS), and the session-5 target ("a clean eval identity for `∇₂(mixedComm S)`

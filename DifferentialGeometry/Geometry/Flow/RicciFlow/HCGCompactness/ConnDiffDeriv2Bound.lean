@@ -1611,20 +1611,79 @@ theorem diffStep_rank0_eq_zero
   rw [hev]
   simp
 
+/-- **The operator split of `∇₂(mixedComm S)` into `PieceA − PieceB`** (session-13 backbone).  The base
+derivative of the a=1 mixed commutator equals the second base-Leibniz jet `PieceA = ∇₂²(A⋆S)` minus the
+base-Leibniz jet of `∇₂S`, `PieceB = ∇₂(A⋆∇₂S)`:
+`∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (diffStep g₁ g₂ S)) − covStep g₂ (diffStep g₁ g₂ (∇₂S))`.
+Pure `covStep`/`diffStep` operator algebra (`diffStep_leibniz` + `covStep_sub`).  This is the field-level
+backbone the eval-level `∇₂(mixedComm S)` assembly rewrites through: `PieceB` is the committed a=1 atom
+(`covStepDiff_of_jets` at level `s+1`, which carries `|∇₂²S|`), and `PieceA` is expanded by the
+session-8–11 chain (`covStep2_diffStep_peel/split/branch1/branch2/OCsplit`). -/
+theorem covStep2_mixedComm_split
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) :
+    covStep (I := I) g₂ (s + 2)
+        (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+          - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S))
+      = covStep (I := I) g₂ (s + 2)
+          (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S))
+        - covStep (I := I) g₂ (s + 2)
+          (diffStep (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S)) := by
+  rw [← covStep_sub]
+  congr 1
+  rw [diffStep_leibniz (I := I) g₁ g₂ s S]
+  abel
+
+set_option backward.isDefEq.respectTransparency false in
+open DifferentialGeometry.Integral.Connection in
+/-- **Eval-level split of `∇₂(mixedComm S)`** (session-13, the assembly's Step 1).  Evaluating
+`covStep2_mixedComm_split` on `Fin.cons (U x) (Fin.cons (W x) (Fin.cons (V x) (Vslots · x)))` gives the
+pointwise `∇₂(mixedComm S) x [·] = PieceA x [·] − PieceB x [·]` (via the definitional fibre-subtraction
+eval).  The norm Cauchy–Schwarz then expands `PieceA = ∇₂²(A⋆S)` by the
+`covStep2_diffStep_peel ▸ split ▸ branch1/branch2 ▸ OCsplit` chain and `PieceB = ∇₂(A⋆∇₂S)` by
+`diffStep_leibniz_eval` at rank `s+1` — the latter's `A ⋆ ∇₂²S` sum KEPT (no cancellation), bounded by
+the committed a=0 atom scaled by `|∇₂²S|`. -/
+theorem covStep2_mixedComm_eval_sub
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (U W V : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Vslots : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    covStep (I := I) g₂ (s + 2)
+        (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+          - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x
+        (Fin.cons (U x) (Fin.cons (W x) (Fin.cons (V x) (fun a : Fin s => Vslots a x))))
+      = covStep (I := I) g₂ (s + 2)
+            (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x
+            (Fin.cons (U x) (Fin.cons (W x) (Fin.cons (V x) (fun a : Fin s => Vslots a x))))
+        - covStep (I := I) g₂ (s + 2)
+            (diffStep (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S)) x
+            (Fin.cons (U x) (Fin.cons (W x) (Fin.cons (V x) (fun a : Fin s => Vslots a x)))) := by
+  rw [covStep2_mixedComm_split (I := I) g₁ g₂ s S, ContMDiffSection.coe_sub, Pi.sub_apply,
+    Tensor0SSpace.sub_apply]
+
 /-- **FRONTIER (`sorry`) — the a=2 mixed-commutator fibre-realization bridge (the SINGLE genuinely new
 a=2 frontier).**  The `g₂`-fibre norm of the base derivative of the a=1 mixed commutator
 `∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` — the `Term C`
-of `covStepDiff2_opLeibniz`, which realizes `(∇₂²A) ⋆ S + (∇₂A) ⋆ ∇₂S` (the `∇₂³S` symbols having
-cancelled) — bounded by the order-≤1 jets of `S`.
+of `covStepDiff2_opLeibniz` — bounded by the order-≤2 jets of `S`.
 
-**Route (not a recombination — a new Tensor-layer lemma).**  The proof needs the *evaluated* a=2
-mixed-commutator Leibniz: the a=2 analogue of `diffStep_leibniz_eval` (`MetricCovDerivLinear.lean`),
-expanding `∇₂(mixedComm S)(tuple)` into a `covDerivConnDiff2`-insertion sum (materialising `∇₂²A` at
-the eval level) plus a `covDerivConnDiff`-insertion sum (`∇₂A`), then per-slot Cauchy–Schwarz against
-the proved dual core `covDConnDiff2_g1_le` (for the `∇₂²A` insertion) and `covDerivConnDiff_gJet_le`
-(for the `∇₂A` insertion), assembled component-wise exactly as `covStepDiff_norm_le` does one order
-down (`normSq0S_le_card_of_component_bound`).  Flagged for the next planner decision; see
-`ConnDiffDeriv2Bound.md §3.2`. -/
+**Statement correction (session-12/13, coordinator ruling №33).**  `mixedComm S` is order-`1` in `S`
+(NOT `(∇₂A)⋆S`; the Leibniz `A⋆∇₂S` contracts over the original `s` slots, while `diffStep_leibniz`'s
+`mixedComm := ∇₂(A⋆S) − diffStep(∇₂S)` subtracts `A` over all `s+1` slots — see `diffStep_rank0_eq_zero`
+and `ConnDiffDeriv2Bound.md §0 s.12`).  Hence `∇₂(mixedComm S)` genuinely carries a `∇₂²S` term
+(`A ⋆ ∇₂²S`), and the right-hand side MUST include `|∇₂²S|` — the earlier "cancelled `∇₂²S` / order-≤1"
+form was false.  `covStepDiff2_exists_const` (the sole consumer) already has room for this: its own
+right-hand side carries the `|∇₂²S|` term, and its `nlinarith` closes with the strengthened bound.
+
+**Route.**  The *evaluated* a=2 mixed-commutator Leibniz — the a=2 analogue of `diffStep_leibniz_eval`
+(`MetricCovDerivLinear.lean`) — expands `∇₂(mixedComm S)(tuple)` into a `covDerivConnDiff2`-insertion
+sum (`∇₂²A`), a `covDerivConnDiff`-insertion sum (`∇₂A`, into both `S` and `∇₂S`), slot-corrections, and
+`A ⋆ ∇₂²S`-insertions (NO cancellation).  Then per-slot Cauchy–Schwarz against the proved dual core
+`covDConnDiff2_g1_le` (`∇₂²A`), `covDerivConnDiff_gJet_le` (`∇₂A`), and the a=0 atom `lcDiff_norm_le`
+scaled by `|∇₂²S|` (`A ⋆ ∇₂²S`), assembled via `normSq0S_le_card_of_component_bound`. -/
 theorem covStepDiff2_mixedComm_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -1641,7 +1700,9 @@ theorem covStepDiff2_mixedComm_le
               (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
                 - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x)) ≤
           C * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
-            + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))) := by
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+                (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
   sorry
 
 /-- **FRONTIER (`sorry`) — the a=2 base-Leibniz jet of a single connection-difference step.**
