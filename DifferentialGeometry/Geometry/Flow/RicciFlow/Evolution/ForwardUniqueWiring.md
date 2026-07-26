@@ -6,6 +6,33 @@ provenance ledger), `ForwardUniqueLifts.md`, `ForwardUniqueSdec.md`, `ForwardUni
 
 ## Status
 
+### Fourth pass (2026-07-26, FINAL-FIELDS): `hbounds` ASSEMBLED modulo **two** `ForwardUniqueSlab` fields
+
+Three new endpoints here, all unconditional given (B)'s own fields:
+
+* `fuVolSlab` — the **`volLe`** field.  `fuTraceRd` (this file's own private bridge, second
+  pass) reads the chart-defined volume drift as `−2·tr_{g₁}Ric₁`, and `volSlabSup`
+  (`Evolution/ForwardUniqueSup.lean`) converts the `ricciSlabSup` constant into `C_V = √(n·B)`.
+  The "port `traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv` from the
+  `RealizedMetricFamily` currency" plan was unnecessary — the bridge was already in this file.
+* `fuReactSlab` — the **`reactLe`** field, from `reactSlabLe` + `ricciSlabSup g₁ g₁` + (B)'s PDE
+  field.  The plan-№25 micro-bound `movingReactAbs_le` is proved in-lane at every rank;
+  `movingReact_le` (false-green, no olean) is **not** imported.
+* `fuSlab_of_gram` — **`hbounds` itself**, taking exactly two arguments: `hrem` (the `remLe`
+  field at `fuRem`) and `hadot` (the `adotLe` field at `connSpeed … fuAvec`).  The other four
+  fields are supplied internally (`ricciSlabLe`, `fuFluxSlab`, `fuVolSlab`, `fuReactSlab`).
+
+A scratch `example` (not in the repo) machine-checks
+`forward_unique_of_gram … (fuSlab_of_gram … hrem hadot) (energyEdgeCont …)` against
+`ricci_flow_forward_unique`'s **verbatim** hypothesis list.  So the endpoint at
+`Evolution/ExtendViaUniqueness.lean:189` is one `exact` away from whoever produces `hrem` and
+`hadot` — and both of those bottom out on the **same** missing `∂(chart Riemann)` derivative
+layer (see `ForwardUniqueSup.md` §"What is left").
+
+`ForwardUniqueSup.lean`'s `volSlabLe` was deleted in this pass (unused; its `hdrift`
+regularity hypothesis is superseded by the unconditional `volSlabSup`).  Nothing in this file
+referenced it.
+
 ### Third pass (2026-07-26, SLAB-2): `hedge` DISCHARGED — the residual list is now **ONE**
 
 ```

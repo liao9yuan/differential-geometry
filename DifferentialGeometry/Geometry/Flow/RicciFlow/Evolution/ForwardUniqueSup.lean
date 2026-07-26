@@ -32,8 +32,15 @@ and nothing in the tree supplies one.  This file is the layer that does.
   `C_Ric = n⁴`.  No background norm and no compactness enter: `ricciDiff_eq_trace` exhibits the
   Ricci difference as a `g₁`-trace of a slot permutation of `S₀₄`, `normSq_ricciTraceRep` says
   the permutation is a fibre isometry, so `ricciDiffSq_le` applies with `B = 0`.
-* `volSlabLe` — the **`volLe` field**, from continuity of the volume drift on the closed
-  subslab.
+* `tracePairSq_le` — `(tr_g Q)² ≤ n·|Q|²_g`; with it, `volSlabSup` gives the **`volLe` field**
+  from the flow identity `tr_{g₁}(∂ₜg₁) = −2·tr_{g₁}Ric₁` and the Ricci sup alone, so no joint
+  continuity of the volume drift is needed.
+* `metricComp_le` / `metricCompSlab` — the **pointwise metric comparison** `g₁ ≤ Λ·g₂`, the `Λ`
+  input of `connDiffDot_normSq_le`, with `Λ = √(sup |g₁|²_{g₂})`.  No unit-sphere-bundle
+  compactness enters: it is the ON-frame component estimate with both slots equal.
+* `movingReactAbs_le` — the **rank-uniform moving-metric reaction bound** owed since plan №25:
+  `|movingReact0S (g t) x s Q W| ≤ 2·s·n^{2s+2}·√(|Q|²)·|W|²`, whence `reactSlabLe`, the
+  **`reactLe` field**.
 * `reLowerPairSq_le` — the missing norm bound for the re-lowering defect carrier
   `reLowerPair`: `|tr_g(σ(T ⊗ K))|²_g ≤ n^{s+4}·|T|²_g·|K|²_g`.
 * `sdecFluxSq_le` — the **`fluxLe` estimate at the carrier the wiring actually builds**
@@ -43,8 +50,11 @@ and nothing in the tree supplies one.  This file is the layer that does.
 
 ## What is *not* here
 
-`remLe`, `reactLe` and `adotLe` are not produced; see `ForwardUniqueSup.md` for the
-field-by-field ledger and the exact obstruction of each.
+`remLe` and `adotLe` are not produced; see `ForwardUniqueSup.md` for the field-by-field ledger
+and the exact obstruction of each.  Both now bottom out on the *same* missing layer — a
+`∂(chart Riemann)` derivative tower in
+`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean` — which is what
+`adotLe`'s `B₁ ≥ |∇²Ric₂|²` and `remLe`'s `roughLap(Rm₂)` sup both need.
 -/
 
 noncomputable section
@@ -151,36 +161,6 @@ theorem ricciSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real)
   nlinarith [hdens, hpow]
 
 end RicciField
-
-section VolumeField
-
-/-! ## `volLe` from compactness
-
-The volume drift `½ tr_{g₁}(∂ₜg₁)` is a background quantity: it does not involve the second
-flow at all.  Under the Ricci-flow equation it equals `−scal_{g₁}`, so it is continuous
-wherever the flow is, and the field is the extreme value theorem. -/
-
-variable {a c : Real}
-
-/-- **The `volLe` field of `ForwardUniqueSlab` from continuity of the volume drift.**
-
-This is the route recorded in `ForwardUniqueAssembly.md`'s ledger ("`volLe` ← compactness of
-`Icc a c` applied to `traceTimeDerivMetric`").  The hypothesis is a *regularity* statement —
-joint continuity of the drift up to the closed initial edge — not a disguised copy of the
-conclusion. -/
-theorem volSlabLe (g₁ : Real → SmoothRiemannianMetric I M)
-    (hdrift : ContinuousOn
-      (fun p : Real × M => traceTimeDerivMetric (I := I) g₁ p.1 p.2)
-      (Icc a c ×ˢ (univ : Set M))) :
-    ∃ C_V : Real, 0 ≤ C_V ∧ ∀ t ∈ Ioo a c, ∀ x : M,
-      (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x ≤ C_V := by
-  obtain ⟨C, hC0, hC⟩ :=
-    slabBound (M := M) (fun t x => traceTimeDerivMetric (I := I) g₁ t x) hdrift
-  refine ⟨C, hC0, fun t ht x => ?_⟩
-  have h := (le_abs_self _).trans (hC t (Ioo_subset_Icc_self ht) x)
-  linarith
-
-end VolumeField
 
 section FluxField
 
@@ -515,7 +495,453 @@ theorem ricciSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   exact (ricciSq_le_rm04 (I := I) (g₁ t) (g₂ t) x).trans
     (mul_le_mul_of_nonneg_left (hB t ht x) hpow)
 
+/-- **The pointwise metric comparison `g₁ ≤ Λ·g₂`, from a fibre-norm bound.**
+
+`g₁(v,v) ≤ √(|g₁|²_{g₂}) · g₂(v,v)` for **every** tangent vector — no eigenvalue, no positivity
+argument and no unit-sphere-bundle compactness.  The whole content is the ON-frame component
+estimate `abs_apply_le_sqrt_normSq0S` at rank `2` with both slots equal to `v`: the two
+`√(g₂(v,v))` factors it produces multiply back to `g₂(v,v)`.
+
+This is the `Λ` input of `connDiffDot_normSq_le` (`Evolution/ForwardUniqueConnBound.lean`), and
+`metricSlabSup g₂ g₁` supplies the sup of its coefficient on a closed subslab — so `Λ` is a
+`normSq0S` sup after all, contrary to the previous note's reading. -/
+theorem metricComp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    g₁.inner x v v ≤
+      Real.sqrt (normSq0S (I := I) g₂ x 2 (metricTensorField (I := I) g₁ x)) *
+        g₂.inner x v v := by
+  classical
+  have hvv : (0 : Real) ≤ g₂.inner x v v := by
+    rcases eq_or_ne v 0 with hv0 | hv0
+    · rw [hv0]; simp
+    · exact (g₂.pos x v hv0).le
+  obtain ⟨basis, hON⟩ := exists_onFrame (I := I) g₂ x
+  have h := abs_apply_le_sqrt_normSq0S (I := I) g₂ x 2 basis hON
+    (metricTensorField (I := I) g₁ x) (fun _ : Fin 2 => v)
+  have hval : metricTensorField (I := I) g₁ x (fun _ : Fin 2 => v) = g₁.inner x v v :=
+    metricTensorField_apply (I := I) g₁ x (fun _ : Fin 2 => v)
+  have hprod : (∏ _d : Fin 2, Real.sqrt (g₂.inner x v v)) = g₂.inner x v v := by
+    rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+    rw [sq]
+    exact Real.mul_self_sqrt hvv
+  rw [hval, hprod] at h
+  exact (le_abs_self _).trans h
+
+/-- **The `Λ` of `connDiffDot_normSq_le`, uniform on the closed subslab.**  `metricComp_le`
+on top of `metricSlabSup` with the two metric roles exchanged. -/
+theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ Λ : Real, 0 ≤ Λ ∧ ∀ t ∈ Icc a c, ∀ (x : M) (v : TangentSpace I x),
+      (g₁ t).inner x v v ≤ Λ * (g₂ t).inner x v v := by
+  obtain ⟨B, hB0, hB⟩ := metricSlabSup (I := I) g₂ g₁ hgram₂ hgram₁
+  refine ⟨Real.sqrt B, Real.sqrt_nonneg _, fun t ht x v => ?_⟩
+  have hvv : (0 : Real) ≤ (g₂ t).inner x v v := by
+    rcases eq_or_ne v 0 with hv0 | hv0
+    · rw [hv0]; simp
+    · exact ((g₂ t).pos x v hv0).le
+  refine (metricComp_le (I := I) (g₁ t) (g₂ t) x v).trans ?_
+  exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (hB t ht x)) hvv
+
+/-- **The metric trace of a `(0,2)` tensor costs exactly one dimension factor.**
+
+`(tr_g Q)² ≤ n · |Q|²_g`,  `n = finrank ℝ E`.
+
+`metricTracePair0SAt_sq_le_card_mul_normSq0S` is Cauchy–Schwarz against the metric tensor,
+whose own fibre norm is the dimension; evaluating it at a `g`-orthonormal frame replaces the
+abstract index cardinality by `n`. -/
+theorem tracePairSq_le (g : SmoothRiemannianMetric I M) (x : M)
+    (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    (metricTracePair0SAt (I := I) g Q) ^ 2 ≤
+      (Module.finrank Real E : Real) * normSq0S (I := I) g x 2 Q := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_onFrame (I := I) g x
+  simpa using metricTracePair0SAt_sq_le_card_mul_normSq0S (I := I) g basis
+    (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x))))
+    (onFrame_inv (I := I) g basis hON) Q
+
+/-- **The `volLe` field from the Ricci sup, under the flow identity `∂ₜg = −2Ric`.**
+
+`½·tr_{g₁}(∂ₜg₁) = −tr_{g₁}Ric₁`, and `tracePairSq_le` turns a sup on `|Ric₁|²_{g₁}` into a
+two-sided bound on that scalar.  The identity input `htr` is the Ricci-flow equation read
+through `traceTimeDerivMetric`; the wiring supplies it from black box (B)'s own PDE field. -/
+theorem volSlabSup (g₁ : Real → SmoothRiemannianMetric I M) {B : Real}
+    (htr : ∀ t ∈ Ioo a c, ∀ x : M, traceTimeDerivMetric (I := I) g₁ t x =
+      (-2 : Real) * metricTracePair0SAt (I := I) (g₁ t) (metricRicciAt (I := I) (g₁ t) x))
+    (hric : ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x) ≤ B) :
+    ∃ C_V : Real, 0 ≤ C_V ∧ ∀ t ∈ Ioo a c, ∀ x : M,
+      (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x ≤ C_V := by
+  refine ⟨Real.sqrt ((Module.finrank Real E : Real) * B), Real.sqrt_nonneg _,
+    fun t ht x => ?_⟩
+  set S : Real := metricTracePair0SAt (I := I) (g₁ t) (metricRicciAt (I := I) (g₁ t) x) with hS
+  have hsq : S ^ 2 ≤ (Module.finrank Real E : Real) * B := by
+    refine (tracePairSq_le (I := I) (g₁ t) x (metricRicciAt (I := I) (g₁ t) x)).trans ?_
+    exact mul_le_mul_of_nonneg_left (hric t ht x) (by positivity)
+  have habs : |S| ≤ Real.sqrt ((Module.finrank Real E : Real) * B) := by
+    rw [← Real.sqrt_sq_eq_abs]
+    exact Real.sqrt_le_sqrt hsq
+  have hneg : -S ≤ Real.sqrt ((Module.finrank Real E : Real) * B) :=
+    (neg_le_abs S).trans habs
+  rw [htr t ht x]
+  linarith
+
 end BackgroundSups
+
+section ReactField
+
+/-! ## `reactLe`: the moving-metric reaction at every rank
+
+`movingReact0S g x s Q W` is *defined* through the canonical basis `Module.finBasis`, so it
+carries no norm bound directly.  `normSq0S_moving_deriv` identifies it as the honest derivative
+`∂ᵣ|W|²_{g r}` of a **frozen** carrier, which is basis-free; running
+`hasDerivWithinAt_normSq0S_ricciFlow` again in a `g t`-*orthonormal* frame and matching the two
+derivatives by `HasDerivAt.unique` therefore rewrites it as a component contraction against the
+identity inverse metric, where every factor is bounded by an ON-frame component estimate.  This
+is the route recorded as owed since plan №25; nothing here imports the rank-2
+`movingMetricReact` bound. -/
+
+variable {a c : Real}
+
+/-- **The moving reaction, read in a `g t`-orthonormal frame.**
+
+The frozen-carrier moving norm has two readings of one and the same derivative: the definitional
+`movingReact0S` (canonical basis) and `ricReactionContract` in the supplied frame.  Under
+`∂ₜg = −2Q` the frame's inverse metric at time `t` is the identity, so the second reading is a
+plain component contraction of `Q` against `W ⊗ W`. -/
+private theorem reactOrtho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {s : Nat} {x : M} {t : Real}
+    (g : Real → SmoothRiemannianMetric I M)
+    (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hON : ∀ i j, (g t).inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
+    (hg : ∀ X Y : TangentSpace I x,
+      HasDerivAt (fun r : Real => (g r).inner x X Y)
+        ((-2 : Real) * Q (fun d : Fin 2 => if d = 0 then X else Y)) t) :
+    movingReact0S (I := I) (g t) x s Q W =
+      ricReactionContract (identityInvMetric (Idx := Idx))
+        (fun i j => Q (fun d : Fin 2 => if d = 0 then basis i else basis j))
+        (fun I0 => tensor0SComponent (I := I) W (fun i => basis i) I0)
+        (fun J0 => tensor0SComponent (I := I) W (fun i => basis i) J0) := by
+  classical
+  have hz : inner0S (I := I) (g t) x s
+      (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) W = 0 := by
+    simpa using inner0S_smul_left (I := I) (g t) x s (0 : Real) W W
+  -- the basis-free reading of the left-hand side
+  have hL : HasDerivAt (fun r : Real => normSq0S (I := I) (g r) x s W)
+      (movingReact0S (I := I) (g t) x s Q W) t := by
+    have hT : ∀ v : Fin s → TangentSpace I x,
+        HasDerivAt (fun _ : Real => W v)
+          ((0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) v) t := by
+      intro v
+      rw [Tensor0SSpace.zero_apply (I := I) s x v]
+      exact hasDerivAt_const t (W v)
+    have h := normSq0S_moving_deriv (I := I) g Q (fun _ => W) 0 hg hT
+    rw [hz, mul_zero, add_zero] at h
+    exact h
+  -- the same derivative, computed in the supplied frame
+  set ric : Idx → Idx → Real := fun i j =>
+    Q (fun d : Fin 2 => if d = 0 then basis i else basis j) with hricdef
+  set gI : Real → Idx → Idx → Real := fun r => basisInvMetric (I := I) (g r) x basis with hgIdef
+  set gIDt : Idx → Idx → Real := fun i j =>
+    -(∑ p : Idx, ∑ q : Idx, gI t i p * ((-2 : Real) * ric p q) * gI t q j) with hgIDtdef
+  have hinvAll : ∀ r : Real, MetricInverseInBasis (I := I) (g r) x basis (gI r) := by
+    intro r
+    simpa [gI] using basisInvMetric_real (I := I) (g r) x basis
+  have hgI : ∀ i j : Idx,
+      HasDerivWithinAt (fun r : Real => gI r i j) (gIDt i j) Set.univ t := by
+    intro i j
+    simpa [gI, gIDt, ric] using
+      (basisInv_time (I := I) g (fun p q => (-2 : Real) * ric p q) basis
+        (fun p q => by simpa [ric] using hg (basis p) (basis q)) i j)
+  have hflow : ∀ i j : Idx,
+      gIDt i j = 2 * (∑ p : Idx, ∑ q : Idx, gI t i p * gI t j q * ric p q) := by
+    intro i j
+    have hterm : (∑ p : Idx, ∑ q : Idx, gI t i p * ((-2 : Real) * ric p q) * gI t q j) =
+        ∑ p : Idx, ∑ q : Idx, (-2 : Real) * (gI t i p * gI t j q * ric p q) := by
+      refine Finset.sum_congr rfl fun p _ => ?_
+      refine Finset.sum_congr rfl fun q _ => ?_
+      simp only [gI]
+      rw [basisInvMetric_symm (I := I) (g t) x basis q j]
+      ring
+    have hfactor : (∑ p : Idx, ∑ q : Idx, (-2 : Real) * (gI t i p * gI t j q * ric p q)) =
+        (-2 : Real) * (∑ p : Idx, ∑ q : Idx, gI t i p * gI t j q * ric p q) := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun p _ => ?_
+      rw [Finset.mul_sum]
+    simp only [gIDt]
+    rw [hterm, hfactor]
+    ring
+  have hTcomp : ∀ I0 : Fin s → Idx,
+      HasDerivWithinAt
+        (fun r : Real => tensor0SComponent (I := I) ((fun _ : Real => W) r)
+          (fun i => basis i) I0) ((fun _ : Fin s → Idx => (0 : Real)) I0) Set.univ t :=
+    fun I0 => hasDerivWithinAt_const _ _ _
+  have hTdot : ∀ I0 : Fin s → Idx,
+      tensor0SComponent (I := I)
+          (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+          (fun i => basis i) I0 = (0 : Real) :=
+    fun I0 => Tensor0SSpace.zero_apply (I := I) s x _
+  have hR := hasDerivWithinAt_normSq0S_ricciFlow (I := I) (s := s) (u := Set.univ) (t := t)
+    g gI gIDt ric (fun _ : Real => W) (fun _ : Fin s → Idx => (0 : Real)) 0 basis
+    hinvAll hgI hTcomp hTdot hflow
+  rw [hz, mul_zero, add_zero] at hR
+  -- at `t` the frame's inverse metric is the identity
+  have hid : gI t = identityInvMetric (Idx := Idx) := by
+    funext i j
+    have h := (hinvAll t i j).1
+    simp only [hON, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
+      Finset.mem_univ, if_true] at h
+    simpa [identityInvMetric, diagonalInvMetric] using h
+  rw [hid] at hR
+  exact hL.unique (hR.hasDerivAt (by simp))
+
+/-- **The array bound for the Ricci reaction at the identity inverse metric.**
+
+Every factor of `ricReactionContract` is bounded on the nose in an orthonormal frame: the
+Kronecker entries by `1`, the reaction components by `Bq`, and the carrier components by `N`.
+The constant is deliberately crude — the field it feeds only needs *a* slab constant. -/
+private theorem ricReactAbs_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {s : Nat}
+    (ric : Idx → Idx → Real) (cc : (Fin s → Idx) → Real) {Bq N : Real}
+    (hBq0 : 0 ≤ Bq) (hN0 : 0 ≤ N)
+    (hBq : ∀ i j, |ric i j| ≤ Bq) (hc : ∀ I0, |cc I0| ≤ N) :
+    |ricReactionContract (identityInvMetric (Idx := Idx)) ric cc cc| ≤
+      2 * ((Fintype.card (Fin s → Idx) : Real) ^ 2 *
+        ((s : Real) * (Fintype.card Idx : Real) ^ 2 * Bq * N ^ 2)) := by
+  classical
+  have hδ : ∀ i j : Idx, |identityInvMetric (Idx := Idx) i j| ≤ 1 := by
+    intro i j
+    by_cases h : i = j
+    · subst h; simp [identityInvMetric]
+    · simp [identityInvMetric, diagonalInvMetric, h]
+  have hδ0 : ∀ i j : Idx, (0 : Real) ≤ |identityInvMetric (Idx := Idx) i j| := fun i j =>
+    abs_nonneg _
+  -- the doubly-contracted reaction entry
+  have hinner : ∀ i j : Idx,
+      |∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) i p *
+        identityInvMetric (Idx := Idx) j q * ric p q| ≤
+        (Fintype.card Idx : Real) ^ 2 * Bq := by
+    intro i j
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    have hrow : ∀ p : Idx, |∑ q : Idx, identityInvMetric (Idx := Idx) i p *
+        identityInvMetric (Idx := Idx) j q * ric p q| ≤ (Fintype.card Idx : Real) * Bq := by
+      intro p
+      refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+      have hterm : ∀ q : Idx, |identityInvMetric (Idx := Idx) i p *
+          identityInvMetric (Idx := Idx) j q * ric p q| ≤ Bq := by
+        intro q
+        rw [abs_mul, abs_mul]
+        calc |identityInvMetric (Idx := Idx) i p| * |identityInvMetric (Idx := Idx) j q| *
+              |ric p q|
+            ≤ 1 * 1 * Bq := by
+              refine mul_le_mul (mul_le_mul (hδ i p) (hδ j q) (hδ0 j q) zero_le_one)
+                (hBq p q) (abs_nonneg _) (by norm_num)
+          _ = Bq := by ring
+      refine (Finset.sum_le_sum fun q _ => hterm q).trans ?_
+      rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    refine (Finset.sum_le_sum fun p _ => hrow p).trans ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    rw [sq]
+    ring_nf
+    exact le_refl _
+  -- the slot sum
+  have hslot : ∀ I0 J0 : Fin s → Idx,
+      |∑ b : Fin s, (∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+          identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
+        (∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+          identityInvMetric (Idx := Idx) (J0 b) q * ric p q)| ≤
+        (s : Real) * ((Fintype.card Idx : Real) ^ 2 * Bq) := by
+    intro I0 J0
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    have hterm : ∀ b : Fin s,
+        |(∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+            identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
+          (∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+            identityInvMetric (Idx := Idx) (J0 b) q * ric p q)| ≤
+          (Fintype.card Idx : Real) ^ 2 * Bq := by
+      intro b
+      rw [abs_mul]
+      have hprod : |∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+          identityInvMetric (Idx := Idx) (I0 α) (J0 α)| ≤ 1 := by
+        rw [Finset.abs_prod]
+        exact Finset.prod_le_one (fun α _ => hδ0 _ _) (fun α _ => hδ _ _)
+      calc |∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+              identityInvMetric (Idx := Idx) (I0 α) (J0 α)| *
+            |∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+              identityInvMetric (Idx := Idx) (J0 b) q * ric p q|
+          ≤ 1 * ((Fintype.card Idx : Real) ^ 2 * Bq) := by
+            refine mul_le_mul hprod (hinner _ _) (abs_nonneg _) zero_le_one
+        _ = (Fintype.card Idx : Real) ^ 2 * Bq := by ring
+    refine (Finset.sum_le_sum fun b _ => hterm b).trans ?_
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  -- assemble
+  unfold ricReactionContract
+  rw [abs_mul, abs_two]
+  refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
+  refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+  have houter : ∀ I0 : Fin s → Idx,
+      |∑ J0 : Fin s → Idx,
+        (∑ b : Fin s, (∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+            identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
+          (∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+            identityInvMetric (Idx := Idx) (J0 b) q * ric p q)) * cc I0 * cc J0| ≤
+        (Fintype.card (Fin s → Idx) : Real) *
+          ((s : Real) * (Fintype.card Idx : Real) ^ 2 * Bq * N ^ 2) := by
+    intro I0
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    have hterm : ∀ J0 : Fin s → Idx,
+        |(∑ b : Fin s, (∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+            identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
+          (∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+            identityInvMetric (Idx := Idx) (J0 b) q * ric p q)) * cc I0 * cc J0| ≤
+          (s : Real) * (Fintype.card Idx : Real) ^ 2 * Bq * N ^ 2 := by
+      intro J0
+      rw [abs_mul, abs_mul]
+      calc |∑ b : Fin s, (∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
+              identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
+            (∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) (I0 b) p *
+              identityInvMetric (Idx := Idx) (J0 b) q * ric p q)| * |cc I0| * |cc J0|
+          ≤ ((s : Real) * ((Fintype.card Idx : Real) ^ 2 * Bq)) * N * N := by
+            refine mul_le_mul (mul_le_mul (hslot I0 J0) (hc I0) (abs_nonneg _) ?_)
+              (hc J0) (abs_nonneg _) ?_
+            · positivity
+            · positivity
+        _ = (s : Real) * (Fintype.card Idx : Real) ^ 2 * Bq * N ^ 2 := by ring
+    refine (Finset.sum_le_sum fun J0 _ => hterm J0).trans ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+  refine (Finset.sum_le_sum fun I0 _ => houter I0).trans ?_
+  rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+  rw [sq]
+  ring_nf
+  exact le_refl _
+
+/-- **The rank-uniform bound on the moving-metric reaction** — the `reactLe` micro-estimate
+owed since plan №25.
+
+`|movingReact0S (g t) x s Q W| ≤ 2·s·n^{2s+2}·√(|Q|²_{g t})·|W|²_{g t}`,  `n = finrank ℝ E`.
+
+The only hypothesis is the metric variation `∂ₜg = −2Q` at `t`, which is what makes the
+frame-pinned definition readable in a `g t`-orthonormal frame.  No operator bound on `Q` is
+required: the ON-frame components of `Q` are already controlled by its fibre norm. -/
+theorem movingReactAbs_le {s : Nat} {x : M} {t : Real}
+    (g : Real → SmoothRiemannianMetric I M)
+    (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (hg : ∀ X Y : TangentSpace I x,
+      HasDerivAt (fun r : Real => (g r).inner x X Y)
+        ((-2 : Real) * Q (fun d : Fin 2 => if d = 0 then X else Y)) t) :
+    |movingReact0S (I := I) (g t) x s Q W| ≤
+      2 * (s : Real) * (Module.finrank Real E : Real) ^ (2 * s + 2) *
+        Real.sqrt (normSq0S (I := I) (g t) x 2 Q) * normSq0S (I := I) (g t) x s W := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_onFrame (I := I) (g t) x
+  have hinv := onFrame_inv (I := I) (g t) basis hON
+  set NQ : Real := Real.sqrt (normSq0S (I := I) (g t) x 2 Q) with hNQ
+  set NW : Real := Real.sqrt (normSq0S (I := I) (g t) x s W) with hNW
+  have hNQ0 : 0 ≤ NQ := Real.sqrt_nonneg _
+  have hNW0 : 0 ≤ NW := Real.sqrt_nonneg _
+  have hQc : ∀ i j : Fin (Module.finrank Real (TangentSpace I x)),
+      |Q (fun d : Fin 2 => if d = 0 then basis i else basis j)| ≤ NQ := by
+    intro i j
+    have h := abs_apply_le_sqrt_normSq0S (I := I) (g t) x 2 basis hON Q
+      (fun d : Fin 2 => if d = 0 then basis i else basis j)
+    have hprod : (∏ d : Fin 2, Real.sqrt ((g t).inner x
+        (if d = 0 then basis i else basis j) (if d = 0 then basis i else basis j))) = 1 := by
+      refine Finset.prod_eq_one fun d _ => ?_
+      by_cases hd : d = 0
+      · simp [hd, hON i i]
+      · simp [hd, hON j j]
+    rw [hprod, mul_one] at h
+    exact h
+  have hWc : ∀ I0 : Fin s → Fin (Module.finrank Real (TangentSpace I x)),
+      |tensor0SComponent (I := I) W (fun i => basis i) I0| ≤ NW := by
+    intro I0
+    have h := abs_apply_le_sqrt_normSq0S (I := I) (g t) x s basis hON W
+      (fun d : Fin s => basis (I0 d))
+    have hprod : (∏ d : Fin s, Real.sqrt ((g t).inner x (basis (I0 d)) (basis (I0 d)))) = 1 := by
+      refine Finset.prod_eq_one fun d _ => ?_
+      simp [hON (I0 d) (I0 d)]
+    rw [hprod, mul_one] at h
+    simpa [tensor0SComponent] using h
+  rw [reactOrtho (I := I) g Q W basis hON hg]
+  refine (ricReactAbs_le (Idx := Fin (Module.finrank Real (TangentSpace I x)))
+    (s := s) _ _ hNQ0 hNW0 hQc hWc).trans (le_of_eq ?_)
+  have hcard : (Fintype.card (Fin s → Fin (Module.finrank Real (TangentSpace I x))) : Real)
+      = (Module.finrank Real E : Real) ^ s := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    rfl
+  have hcard1 : (Fintype.card (Fin (Module.finrank Real (TangentSpace I x))) : Real)
+      = (Module.finrank Real E : Real) := by
+    rw [Fintype.card_fin]
+    rfl
+  have hNW2 : NW ^ 2 = normSq0S (I := I) (g t) x s W :=
+    Real.sq_sqrt (normSq0S_nonneg (I := I) (g t) x s W)
+  rw [hcard, hcard1, hNW2, show 2 * s + 2 = s * 2 + 2 from by ring, pow_add, pow_mul]
+  ring
+
+/-- **The `reactLe` field of `ForwardUniqueSlab` from the Ricci sup.**
+
+The three moving-metric reactions of the energy's three carriers are each controlled by
+`movingReactAbs_le` at ranks `2`, `3`, `4`; each carrier's fibre norm is a third of the density,
+so the whole reaction is `C_R · density` with
+
+`C_R = (4n⁶ + 6n⁸ + 8n¹⁰)·√Λric`,  `Λric ≥ |Ric₁|²_{g₁}` on the subslab. -/
+theorem reactSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M) {Λric : Real}
+    (hpde : ∀ t ∈ Ioo a c, ∀ (x : M) (X Y : TangentSpace I x),
+      HasDerivAt (fun r : Real => (g₁ r).inner x X Y)
+        ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
+          (fun d : Fin 2 => if d = 0 then X else Y)) t)
+    (hric : ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x) ≤ Λric) :
+    ∃ C_R : Real, 0 ≤ C_R ∧ ∀ t ∈ Ioo a c, ∀ x : M,
+      movingReact0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)
+          (metricDiffAt (I := I) (g₁ t) (g₂ t) x) +
+        movingReact0S (I := I) (g₁ t) x 3 (metricRicciAt (I := I) (g₁ t) x)
+          (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) +
+        movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+          (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) ≤
+      C_R * forwardUniqueDensity (I := I) g₁ g₂ t x := by
+  refine ⟨(4 * (Module.finrank Real E : Real) ^ 6 + 6 * (Module.finrank Real E : Real) ^ 8 +
+      8 * (Module.finrank Real E : Real) ^ 10) * Real.sqrt Λric, by positivity,
+    fun t ht x => ?_⟩
+  have hSΛ0 : (0 : Real) ≤ Real.sqrt Λric := Real.sqrt_nonneg _
+  have hS : Real.sqrt (normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)) ≤
+      Real.sqrt Λric := Real.sqrt_le_sqrt (hric t ht x)
+  -- one rank at a time
+  have hstep : ∀ (s : Nat)
+      (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x),
+      normSq0S (I := I) (g₁ t) x s W ≤ forwardUniqueDensity (I := I) g₁ g₂ t x →
+      movingReact0S (I := I) (g₁ t) x s (metricRicciAt (I := I) (g₁ t) x) W ≤
+        2 * (s : Real) * (Module.finrank Real E : Real) ^ (2 * s + 2) * Real.sqrt Λric *
+          forwardUniqueDensity (I := I) g₁ g₂ t x := by
+    intro s W hW
+    have hcoef : (0 : Real) ≤
+        2 * (s : Real) * (Module.finrank Real E : Real) ^ (2 * s + 2) := by positivity
+    have hprod : Real.sqrt (normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)) *
+        normSq0S (I := I) (g₁ t) x s W ≤
+        Real.sqrt Λric * forwardUniqueDensity (I := I) g₁ g₂ t x :=
+      mul_le_mul hS hW (normSq0S_nonneg (I := I) (g₁ t) x s W) hSΛ0
+    refine le_trans (le_abs_self _)
+      ((movingReactAbs_le (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x) W (hpde t ht x)).trans ?_)
+    exact le_trans (le_of_eq (by ring))
+      (le_trans (mul_le_mul_of_nonneg_left hprod hcoef) (le_of_eq (by ring)))
+  have h2 := hstep 2 (metricDiffAt (I := I) (g₁ t) (g₂ t) x)
+    (by simpa [metricDiffSq_def] using metricDiffSq_le_dens (I := I) g₁ g₂ t x)
+  have h3 := hstep 3 (connDiffLowAt (I := I) (g₁ t) (g₂ t) x)
+    (by simpa [connDiffSq_def] using connDiffSq_le_dens (I := I) g₁ g₂ t x)
+  have h4 := hstep 4 (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)
+    (by simpa [rmDiffSq_def] using rmDiffSq_le_dens (I := I) g₁ g₂ t x)
+  norm_num at h2 h3 h4
+  linarith
+
+end ReactField
 
 section EdgeContinuity
 

@@ -6,6 +6,83 @@ residual hypotheses), `ForwardUniqueDensReg.md` (the joint-regularity tower),
 `ForwardUniqueRmBounds.md` / `ForwardUniqueRateLe.md` / `ForwardUniqueConnBound.md` (the
 pointwise estimate producers).
 
+## Outcome — 2026-07-26, fourth pass (FINAL-FIELDS)
+
+**`volLe` and `reactLe` are CLOSED unconditionally at the constructed carriers; `Λ` is closed
+too; `hbounds` is short exactly TWO fields (`remLe`, `adotLe`), and `fuSlab_of_gram`
+(`ForwardUniqueWiring.lean`) assembles the other four modulo those two.**
+
+A scratch `example` machine-checks that
+`forward_unique_of_gram … (fuSlab_of_gram … hrem hadot) (energyEdgeCont …)` closes
+`ricci_flow_forward_unique`'s **verbatim** statement, so the endpoint discharge is a one-liner
+once `hrem`/`hadot` have producers.  0 `sorry`, warning-clean, ten endpoints 3-axiom.
+
+### The three corrections this pass forced
+
+1. **`volLe` never needed the drift's joint continuity.**  The previous note's "route unchanged:
+   port `traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv` into the lane's currency" was
+   the long way round.  `fuTraceRd` (already `private` in the wiring, from the second pass)
+   *is* the bridge in the lane's currency, and it makes the drift `−2·tr_{g₁}Ric₁` — a scalar
+   the **Ricci sup already controls**.  `tracePairSq_le` (new, here) pays the one dimension
+   factor and `volSlabSup` returns `C_V = √(n·B)`.  Nothing is integrated, nothing is
+   differentiated, no `RealizedMetricFamily` currency appears.  **`volSlabLe` (the old
+   compactness wrapper with the `hdrift` regularity hypothesis) is DELETED** — it was unused
+   and its assumption is now superseded; `slabBound`, its only real content, stays.
+2. **`Λ` is NOT a sphere-bundle compactness problem.**  The previous note claimed the pointwise
+   comparison `g₁ ≤ Λ·g₂` "needs a separate compactness argument on `Icc a c × unit sphere
+   bundle`, or a Grönwall-type comparison".  It needs neither: `abs_apply_le_sqrt_normSq0S`
+   with **both slots equal to `v`** returns `|g₁(v,v)| ≤ √(|g₁|²_{g₂})·√(g₂(v,v))·√(g₂(v,v))`,
+   and the two square roots multiply back to `g₂(v,v)`.  So `Λ = √(sup |g₁|²_{g₂})` and
+   `metricSlabSup g₂ g₁` (roles exchanged) is the sup.  `metricComp_le` / `metricCompSlab`,
+   ~15 lines each.  **`Λ` was a `normSq0S` sup all along.**
+3. **`movingReact_le` was never needed.**  The rank-2 cite in
+   `Analysis/Spectral/Intrinsic/DeTurck/MovingEdgeEnergy.lean:643` is false-green (that file has
+   no olean) and was **not** imported.  The bound is reproved in-lane at every rank in ~150
+   lines, and the operator-bound→`normSq0S` Cauchy–Schwarz step the note said was "still owed"
+   turned out to be unnecessary: taking the ON frame *first* makes the components of `Q`
+   directly bounded by `√(|Q|²_g)`, so no operator bound ever appears.
+
+### `reactLe`: the route that worked
+
+`movingReact0S` is frame-pinned to `Module.finBasis`, so it carries no bound by itself.  Three
+steps:
+
+* `reactOrtho` (private) — run `normSq0S_moving_deriv` (canonical basis, giving `movingReact0S`)
+  and `hasDerivWithinAt_normSq0S_ricciFlow` (an **arbitrary** basis, giving
+  `ricReactionContract`) on the *same* function `r ↦ |W|²_{g r}` with the carrier frozen, and
+  match them with `HasDerivAt.unique`.  The frame's inverse metric at `t` is the identity: from
+  `MetricInverseInBasis`'s own first equation, `∑_k gInv i k · G k j = δ` collapses under
+  `hON` to `gInv i j = δ i j` — no external uniqueness lemma is needed.
+* `ricReactAbs_le` (private) — a crude but hypothesis-free array bound at the identity inverse
+  metric: `|δ| ≤ 1`, `|ric| ≤ Bq`, `|c| ≤ N`, triangle inequality throughout.  No re-indexing
+  bijection, no `Function.update`, no cancellation: the constant `2·card²·s·n²·Bq·N²` is
+  wasteful and that is fine, the field only needs *a* slab constant.
+* `movingReactAbs_le` (public) — the two glued, with `abs_apply_le_sqrt_normSq0S` supplying both
+  component bounds: `|movingReact0S (g t) x s Q W| ≤ 2·s·n^{2s+2}·√(|Q|²_{g t})·|W|²_{g t}`.
+
+`reactSlabLe` then sums ranks 2/3/4 against `metricDiffSq_le_dens`/`connDiffSq_le_dens`/
+`rmDiffSq_le_dens`, giving `C_R = (4n⁶ + 6n⁸ + 8n¹⁰)·√Λric`, and `fuReactSlab` (wiring) fires it
+at `ricciSlabSup g₁ g₁` and (B)'s own PDE field.
+
+### What is left, and why both remaining fields are one brick
+
+`remLe` and `adotLe` are **not** two independent problems any more:
+
+* `adotLe`'s producer `connDiffDot_normSq_le` now has three of its four background constants —
+  `Λric` and `B₃` from `ricciSlabSup`, `Λ` from `metricCompSlab`.  The fourth,
+  `B₁ ≥ |∇²Ric₂|²_{g₁}`, needs chart components of `metricNabla0S (g₂ t) Ric₂`, i.e. a
+  `∂(chart Riemann)` layer.  (Its `hΓ`/`hA` inputs are available via `fuGamma`; what remains
+  besides `B₁` is instantiation plumbing — the local frame, the `gInv`/`nablaRic` component
+  families, and the `connSpeed`/`connDiffDot` identification.)
+* `remLe` at `sdecRemFam` needs the four summands identified tensorially (per ruling R13) and
+  the identification consumes a `roughLap(Rm₂)` slab sup.
+
+**Both bottom out on the same missing layer**: `partRiemWithin` / `partRicciWithin` in
+`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean` (mirroring the
+existing `partChristWithin`), plus the `normSq0S_jointContMDiffOn` feed for the resulting
+`∇Ric` / `ΔRm` chart components.  That single derivative brick unblocks both fields; nothing
+else does.
+
 ## Outcome — 2026-07-26, third pass (SLAB-2)
 
 **`hedge` is DISCHARGED; `fluxLe` is now produced at the constructed carrier; `hbounds` is
@@ -117,12 +194,14 @@ and all six fields of `ForwardUniqueSlab` (`ForwardUniqueAssembly.lean:229`) qua
 
 | field | needed at | producer | sup consumed | status |
 | --- | --- | --- | --- | --- |
+*(fourth pass: `volLe` and `reactLe` moved to DONE; see §"Outcome — fourth pass".)*
+
 | `ricciLe` | — | `ricciSlabLe` (here) ← `ricciDiff_eq_trace` + `normSq_ricciTraceRep` + `ricciDiffSq_le` + `rmDiffSq_le_dens` | **none** | **DONE, unconditional, `C_Ric = n⁴`** |
-| `volLe` | `traceTimeDerivMetric g₁` | `volSlabLe` (here) ← `slabBound` | drift itself | **DONE modulo one regularity input** (joint continuity of the drift on `Icc a c ×ˢ univ`) |
+| `volLe` | `traceTimeDerivMetric g₁` | `fuVolSlab` (Wiring) ← `volSlabSup` + `tracePairSq_le` (here) ← `fuTraceRd` | `ricciSlabSup` | **DONE, unconditional given (B)**, `C_V = √(n·B)` |
 | `fluxLe` | `sdecFlux g₁ g₂ Rm₂ P` | `fuFluxSlab` (Wiring) ← `fluxSlabLe` (here) ← `sdecFluxSq_le` (here) ← `fluxNormSq_le` + `reLowerPairSq_le` (here) + `connDiffSq_le_dens` | `rm04SlabSup` ×2, `metricSlabSup` | **DONE at the constructed carrier, unconditional given (B)** |
-| `remLe` | `sdecRemFam` | **none** | — | **blocked, and not only on sups** (see §"`remLe`") |
-| `reactLe` | `movingReact0S` | **none** (`movingReact_le`, plan №25, deliberately deferred) | `sup |Ric₁|²` | **blocked** |
-| `adotLe` | `connSpeed … fuAvec` | `connDiffDot_normSq_le` (`ForwardUniqueConnBound.lean:1404`; **planner correction: that file is 0-sorry since β4, commit `24dc9ac50` — the ":496 live sorry" claim was read from the .md's historical disproof section, not the code**) | `Λric`, `Λ` (metric comparison), `B₁ = |∇²Ric₂|²`, `B₃ = |Ric₂|²` | **blocked** on those sups **and** on `hΓ`/`hA` (the K1 Christoffel-evolution and speed-derivative inputs, available only through `gamma_of_gram` / `connSpeed_hasDerivAt`) |
+| `remLe` | `sdecRemFam` | **none** | needs a `roughLap(Rm₂)` sup | **OPEN** — R13 identities + the `∂(chart Riemann)` layer |
+| `reactLe` | `movingReact0S` | `fuReactSlab` (Wiring) ← `reactSlabLe` ← `movingReactAbs_le` (here) ← `reactOrtho` + `ricReactAbs_le` | `ricciSlabSup` | **DONE, unconditional given (B)**, `C_R = (4n⁶+6n⁸+8n¹⁰)√Λric` |
+| `adotLe` | `connSpeed … fuAvec` | `connDiffDot_normSq_le` (`ForwardUniqueConnBound.lean:1404`; **planner correction: that file is 0-sorry since β4, commit `24dc9ac50` — the ":496 live sorry" claim was read from the .md's historical disproof section, not the code**) | `Λric` ✓, `Λ` ✓ (`metricCompSlab`), `B₃` ✓ (`ricciSlabSup`), `B₁ = |∇²Ric₂|²` ✗ | **OPEN on `B₁` alone** (plus instantiation plumbing); `hΓ`/`hA` available via `fuGamma`, `Λ` closed in the fourth pass |
 
 ## What is in the file
 
@@ -303,19 +382,22 @@ imports it (for `fuFluxSlab`), and the aggregate imports the wiring.  No edit to
 
 ## Next targets, in order of leverage
 
-*(Re-ordered 2026-07-26 after the closed-edge upgrade; see §"What is still missing".)*
+*(Rewritten 2026-07-26 after the fourth pass.  Items 0/2 below are now DONE; the list has
+collapsed to a single brick.)*
 
-0. **`volLe`** — cheapest of the four remaining fields: port the
-   `traceTimeDerivMetric = −2·scal` bridge into the lane's currency, then `ricciSlabSup`.
+0. ~~`volLe`~~ **DONE** (`fuVolSlab`); the `Volume.lean` port was never needed.
 1. ~~The `ContDiffWithinAt` joint Christoffel/Riemann tower (closed edge).~~  **DONE** (R12 +
-   the DensReg third pass).  It unblocked `fluxLe`'s three constants and `reactLe`/`adotLe`'s
-   `sup |Ric|²`; `volLe`'s regularity input is *not* among them (it is not a chart-Gram
-   quantity).
-2. `movingReact_le` (plan №25) — the `reactLe` micro-bound.  `movingReact0S` is frame-pinned to
-   `Module.finBasis`; the bound needs the change of basis to a `g`-orthonormal frame, which is
-   why it was deferred.  Nothing else about `reactLe` is missing.
-3. The planner decision on `sdecRemFam`'s two non-tensorial summands (§"`remLe`").
-4. ~~`ForwardUniqueConnBound.lean:496` — the live `sorry` under `adotLe`.~~
-   PLANNER CORRECTION: stale — ConnBound is 0-sorry since β4 (`24dc9ac50`,
-   machine-verified in two full builds); `adotLe`'s real remaining inputs
-   are the sups plus the hΓ/hA wiring only.
+   the DensReg third pass).
+2. ~~`movingReact_le` (plan №25)~~ **DONE** in-lane at every rank (`movingReactAbs_le`), and
+   `reactLe` with it (`fuReactSlab`).
+3. ~~`Λ`, the pointwise metric comparison.~~  **DONE** (`metricCompSlab`); it was a `normSq0S`
+   sup, not a sphere-bundle problem.
+4. **THE ONE REMAINING BRICK — `partRiemWithin` / `partRicciWithin`** in
+   `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`, mirroring the
+   file's existing `partChristWithin`, plus the `normSq0S_jointContMDiffOn` feed that turns the
+   resulting `∇Ric` / `ΔRm` chart components into slab sups.  It delivers `adotLe`'s last
+   constant `B₁ ≥ |∇²Ric₂|²` **and** `remLe`'s `roughLap(Rm₂)` sup.  Nothing else stands
+   between `fuSlab_of_gram` and an unconditional `hbounds`.
+5. After that brick: `adotLe`'s instantiation plumbing for `connDiffDot_normSq_le` (local
+   frame, `gInv`/`nablaRic` component families, the `connSpeed`/`connDiffDot` identification),
+   and `remLe`'s ruling-R13 evaluation identities for `sdecRemFam`'s four summands.

@@ -1174,6 +1174,128 @@ theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
     (fun r => fuTf (I := I) g₁ r - fuSfield (I := I) g₁ g₂ r) t x hB₂0 hBP0 hBg0
     (hB₂ t hIcc x) hBPx (hBg t hIcc x)
 
+/-- **The `volLe` field of `ForwardUniqueSlab`, unconditional.**
+
+The volume drift is a background quantity of the *first* flow alone.  `fuTraceRd` reads the
+chart-defined `traceTimeDerivMetric` as `−2·tr_{g₁}Ric₁` under (B)'s own Ricci-flow field, and
+`volSlabSup` converts the closed-subslab Ricci sup into the constant `C_V = √(n·B)`.  No
+joint continuity of the drift itself is needed — the identity replaces it. -/
+theorem fuVolSlab (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h1pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    {c : Real} (hc : c ∈ Ioo a b) :
+    ∃ C_V : Real, 0 ≤ C_V ∧ ∀ t ∈ Ioo a c, ∀ x : M,
+      (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x ≤ C_V := by
+  have hsub : Icc a c ⊆ Ico a b := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hc.2⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h1smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  obtain ⟨B, _, hB⟩ := ricciSlabSup (I := I) g₁ g₁ hres₁ hres₁
+  refine volSlabSup (I := I) g₁ (fun t ht x => ?_) (fun t ht x => hB t (Ioo_subset_Icc_self ht) x)
+  exact fuTraceRd (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
+    (pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x)
+
+/-- **The `reactLe` field of `ForwardUniqueSlab`, unconditional.**
+
+The three moving-metric reactions of the energy carriers need one background norm only,
+`sup |Ric₁|²_{g₁}`, which `ricciSlabSup` produces at `(g₁, g₁)` from (B)'s first chart-Gram
+field; `reactSlabLe` then pays the rank-uniform reaction bound `movingReactAbs_le`.  The
+metric-variation input of that bound is (B)'s own PDE field at interior times. -/
+theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h1pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    {c : Real} (hc : c ∈ Ioo a b) :
+    ∃ C_R : Real, 0 ≤ C_R ∧ ∀ t ∈ Ioo a c, ∀ x : M,
+      movingReact0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)
+          (metricDiffAt (I := I) (g₁ t) (g₂ t) x) +
+        movingReact0S (I := I) (g₁ t) x 3 (metricRicciAt (I := I) (g₁ t) x)
+          (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) +
+        movingReact0S (I := I) (g₁ t) x 4 (metricRicciAt (I := I) (g₁ t) x)
+          (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) ≤
+      C_R * forwardUniqueDensity (I := I) g₁ g₂ t x := by
+  have hsub : Icc a c ⊆ Ico a b := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hc.2⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h1smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  obtain ⟨Λric, _, hΛ⟩ := ricciSlabSup (I := I) g₁ g₁ hres₁ hres₁
+  exact reactSlabLe (I := I) g₁ g₂
+    (fun t ht x X Y => pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x X Y)
+    (fun t ht x => hΛ t (Ioo_subset_Icc_self ht) x)
+
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 1000000 in
+/-- **`hbounds` at the constructed carriers, modulo the two residual fields.**
+
+Four of the six `ForwardUniqueSlab` fields are supplied here from black box (B)'s own data:
+`ricciLe` (`ricciSlabLe`, `C_Ric = n⁴`, hypothesis-free), `fluxLe` (`fuFluxSlab`), `volLe`
+(`fuVolSlab`) and `reactLe` (`fuReactSlab`).  The remaining two are taken as named arguments
+because their producers are still missing:
+
+* `hrem` — the `remLe` field at `fuRem = sdecRemFam`.  Two of the four `sdecRem` summands
+  (`lowOfComp g₁ b (rmDotRem …)`, `gapDot g₁ g₂ (uhlRm2Vec …)`) still have to be identified
+  with tensorial combinations of the background curvature before any norm bound applies, and
+  the identification consumes a `roughLap(Rm₂)` slab sup that no derivative layer produces yet.
+* `hadot` — the `adotLe` field at `connSpeed g₁ g₂ (fuAvec g₁ g₂)`.  `connDiffDot_normSq_le`
+  (`Evolution/ForwardUniqueConnBound.lean`) is the producer and its `hΓ`/`hA` inputs are
+  available from `fuGamma`, but two of its four background constants are not: `B₁ ≥ |∇²Ric₂|²`
+  needs a `∂(chart Riemann)` layer in
+  `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`, and `Λ` is a
+  pointwise metric comparison `g₁ ≤ Λ·g₂`, not a fibre-norm sup.
+
+Substituting a producer for either argument turns this into that much of an unconditional
+`hbounds`; substituting both discharges `forward_unique_of_gram`'s last hypothesis outright. -/
+theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h1pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (hrem : ∀ c ∈ Ioo a b, ∃ C_rem : Real, ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x) ≤
+        C_rem * forwardUniqueDensity (I := I) g₁ g₂ t x)
+    (hadot : ∀ c ∈ Ioo a b, ∃ C_A : Real, ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 3 (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x) ≤
+        C_A * (forwardUniqueDensity (I := I) g₁ g₂ t x +
+          normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x))) :
+    ∀ c ∈ Ioo a b, ∃ C_A C_R C_Ric C_V C_U C_rem : Real,
+      ForwardUniqueSlab (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
+        (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂)
+        a c C_A C_R C_Ric C_V C_U C_rem := by
+  intro c hc
+  obtain ⟨C_U, hU⟩ := fuFluxSlab (I := I) g₁ g₂ h1smooth h2smooth hc
+  obtain ⟨C_V, _, hV⟩ := fuVolSlab (I := I) g₁ h1smooth h1pde hc
+  obtain ⟨C_R, _, hR⟩ := fuReactSlab (I := I) g₁ g₂ h1smooth h1pde hc
+  obtain ⟨C_rem, hrem'⟩ := hrem c hc
+  obtain ⟨C_A, hadot'⟩ := hadot c hc
+  exact ⟨C_A, C_R, (Module.finrank Real E : Real) ^ 4, C_V, C_U, C_rem,
+    { fluxLe := hU
+      remLe := hrem'
+      reactLe := hR
+      ricciLe := fun t _ x => ricciSlabLe (I := I) g₁ g₂ t x
+      adotLe := hadot'
+      volLe := hV }⟩
+
 end SlabFields
 
 /-! ## The residual bundle, assembled

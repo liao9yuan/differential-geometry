@@ -292,6 +292,40 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №50 (2026-07-26, FINAL-FIELDS — **volLe + reactLe CLOSED; Λ CLOSED;
+  `hbounds` ASSEMBLED as `fuSlab_of_gram` modulo TWO fields; handoff
+  example machine-checked against (B)'s verbatim statement**): two files
+  (Sup +~330 lines, Wiring +~110), 0 sorry, warning-clean, ten endpoints
+  3-axiom; both modules targeted-build green.  THREE PLANNER-LEVEL
+  CORRECTIONS, all of which shrank the work: (i) **volLe never needed the
+  drift's joint continuity** and never needed the `Volume.lean` port —
+  `fuTraceRd` (already private in the Wiring since №47) is the bridge in
+  the lane's currency, making the drift `−2·tr_{g₁}Ric₁`, which
+  `ricciSlabSup` + the new `tracePairSq_le` ((tr_g Q)² ≤ n|Q|²) bound
+  outright; `volSlabLe` (the old `hdrift` wrapper) DELETED as unused and
+  superseded.  (ii) **Λ was never a sphere-bundle compactness problem** —
+  `abs_apply_le_sqrt_normSq0S` with BOTH slots equal to `v` gives
+  `g₁(v,v) ≤ √(|g₁|²_{g₂})·g₂(v,v)` in ~15 lines, so `Λ = √(sup |g₁|²_{g₂})`
+  and `metricSlabSup g₂ g₁` (roles exchanged) is the sup
+  (`metricComp_le`/`metricCompSlab`).  (iii) **`movingReact_le` was never
+  needed** — reproved in-lane at ALL ranks (`reactOrtho` +
+  `ricReactAbs_le` → `movingReactAbs_le`), and the "owed Cauchy–Schwarz
+  step from operator bound to normSq0S" evaporates because taking the ON
+  frame FIRST bounds `Q`'s components by `√(|Q|²)` directly — no operator
+  bound ever appears.  KEY LEAN MOVE for (iii): `movingReact0S` is
+  frame-pinned to `Module.finBasis`, so run `normSq0S_moving_deriv`
+  (canonical basis) and `hasDerivWithinAt_normSq0S_ricciFlow` (arbitrary
+  ON basis) on the SAME frozen-carrier function and match by
+  `HasDerivAt.unique`; the ON frame's `gInv t = identityInvMetric` falls
+  straight out of `MetricInverseInBasis`'s own first equation (no external
+  uniqueness lemma).  RESIDUAL = `hrem` + `hadot`, and they are ONE brick,
+  not two: `adotLe` now lacks only `B₁ ≥ |∇²Ric₂|²` (Λric/Λ/B₃ all
+  supplied; hΓ/hA via `fuGamma`), and `remLe`'s R13 identities consume a
+  `roughLap(Rm₂)` sup — **both need `partRiemWithin`/`partRicciWithin` in
+  `RicciDifferenceMeanValueWithin.lean` plus the `normSq0S_jointContMDiffOn`
+  feed for the resulting ∇Ric/ΔRm chart components, and nothing else.**
+  NEXT: that derivative brick (mirror `partChristWithin`), then both
+  fields fall.  `ExtendViaUniqueness.lean` deliberately untouched.
 - №49 (2026-07-26, SLAB-2 ACCEPTED+COMMITTED — **hedge DISCHARGED
   (handoff one-linerized, machine-checked); residual = hbounds ALONE,
   2/6 fields closed at the REAL carriers; four smallest-bricks named**):
