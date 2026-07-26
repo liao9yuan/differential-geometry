@@ -63,8 +63,13 @@ restart). For a fixed background metric `gBase` the box chooses a finite chart-c
 (internally: a covering good-set atlas); then for every bound `Λ ≥ 1` there is a uniform existence
 time `τ₀ = τ₀(gBase, Λ, S) > 0` such that EVERY smooth metric `g₀` that is `Λ`-comparable to
 `gBase` and whose chart-Gram spatial jets of order `≤ 3` are bounded by `Λ` on the `S`-charts flows
-for time at least `τ₀`, with the standard short-time regularity fields (interior C∞ chart-Gram, C⁰
-up to `0`, the Ricci-flow PDE on `[0, τ₀)`).
+for time at least `τ₀`, with the standard short-time regularity fields (chart-Gram jointly C∞ up to
+the initial corner — `Ico`-slab, per the 2026-07-25 ruling in `ShortTime/FORWARD_UNIQUE_PRO_RULING.md`;
+the now-redundant C⁰ field is kept to minimize API churn; the Ricci-flow PDE on `[0, τ₀)`).
+For smooth initial data this up-to-corner smoothness is the standard quasilinear parabolic statement
+on a closed manifold (no compatibility obstruction); in the maximal-regularity discharge it is an
+a-posteriori endpoint bootstrap of the one low-regularity solution on its fixed horizon — never a
+per-order re-run with shrinking horizons (ruling §"(N) cost").
 
 TRUE and standard: the DeTurck fixed-point existence time depends only on the ellipticity constant
 and coefficient/data bounds, uniformly on such sets (GSM77 Ch. 7 vocabulary); the proof contains NO
@@ -81,7 +86,7 @@ theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
           (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
             ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
               (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
-              (Set.Ioo (0 : ℝ) τ₀ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+              (Set.Ico (0 : ℝ) τ₀ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
           (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
             ContinuousOn
               (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
@@ -98,22 +103,23 @@ background `g_fam α` (from `|Ric| ≤ cK` metric equivalence, Gronwall); `hC3` 
 centre family, uniform chart-Gram C³ bounds on a tail (from Shi-type `|∇ᵏRm| ≤ Cₖ, k ≤ 3` plus the
 chart bootstrap, Chow–Knopf pp. 223–224). Proof route (Brick V): obtain `S` from the box at
 `gBase := g_fam α`; `Λ := max` of the two producers' constants; `τ₀` from the box; pick
-`t_star := max t₁ t₂ (ω − τ₀/2)`-style with `t_star ∈ [α, ω)` and `ω < t_star + τ₀`; apply the box
-at `g₀ := g_fam t_star`; `TT := τ₀`. -/
+`t_star := max t₁ t₂ (ω − τ₀/2) ((α+ω)/2)`-style with `t_star ∈ (α, ω)` STRICTLY interior (so the
+ambient flow is jointly smooth up to `t_star` for the smooth-class (B) consumer, per the 2026-07-25
+ruling) and `ω < t_star + τ₀`; apply the box at `g₀ := g_fam t_star`; `TT := τ₀`. -/
 theorem ricci_flow_interior_restart
-    (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
+    (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     (hell : ∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₁ omega,
       ∀ x : M, ∀ v : TangentSpace I x,
         Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam s).inner x v v ∧
           (g_fam s).inner x v v ≤ Λ * (g_fam α).inner x v v)
     (hcov : ∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₂ omega,
       ∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a (g_fam s) (g_fam α) C) :
-    ∃ t_star : ℝ, t_star ∈ Set.Ico α omega ∧ ∃ TT : ℝ, omega < t_star + TT ∧
+    ∃ t_star : ℝ, t_star ∈ Set.Ioo α omega ∧ ∃ TT : ℝ, omega < t_star + TT ∧
       ∃ rr : ℝ → SmoothRiemannianMetric I M, rr 0 = g_fam t_star ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
             (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
-            (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+            (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContinuousOn
             (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (rr p.1) x₀ p.2 i j)
@@ -132,16 +138,23 @@ theorem ricci_flow_interior_restart
   have hΛ : 1 ≤ Λ := le_trans hΛ₁ hΛ₁le
   have hΛ₁pos : 0 < Λ₁ := lt_of_lt_of_le zero_lt_one hΛ₁
   obtain ⟨τ₀, hτ₀, hexist⟩ := hbox Λ hΛ
-  -- interior restart time: past both producers' thresholds and within `τ₀/2` of `ω`.
-  set t_star : ℝ := max (max t₁ t₂) (omega - τ₀ / 2) with hts_def
+  -- interior restart time: past both producers' thresholds, within `τ₀/2` of `ω`, and STRICTLY
+  -- past `α` (the midpoint arm; the strict interiority feeds the smooth-class (B) consumer).
+  set t_star : ℝ := max (max t₁ t₂) (max (omega - τ₀ / 2) ((α + omega) / 2)) with hts_def
   have ht1_le : t₁ ≤ t_star := le_trans (le_max_left t₁ t₂) (le_max_left _ _)
   have ht2_le : t₂ ≤ t_star := le_trans (le_max_right t₁ t₂) (le_max_left _ _)
-  have hstar_lt : t_star < omega := max_lt (max_lt ht₁.2 ht₂.2) (by linarith)
-  have hstar_mem_αω : t_star ∈ Set.Ico α omega := ⟨le_trans ht₁.1 ht1_le, hstar_lt⟩
+  have hstar_lt : t_star < omega :=
+    max_lt (max_lt ht₁.2 ht₂.2) (max_lt (by linarith) (by linarith))
+  have hα_lt : α < t_star := by
+    have hle : (α + omega) / 2 ≤ t_star := by
+      rw [hts_def]; exact le_trans (le_max_right _ _) (le_max_right _ _)
+    linarith
+  have hstar_mem_αω : t_star ∈ Set.Ioo α omega := ⟨hα_lt, hstar_lt⟩
   have hstar_mem_1 : t_star ∈ Set.Ico t₁ omega := ⟨ht1_le, hstar_lt⟩
   have hstar_mem_2 : t_star ∈ Set.Ico t₂ omega := ⟨ht2_le, hstar_lt⟩
   have hreach : omega < t_star + τ₀ := by
-    have hge : omega - τ₀ / 2 ≤ t_star := by rw [hts_def]; exact le_max_right _ _
+    have hge : omega - τ₀ / 2 ≤ t_star := by
+      rw [hts_def]; exact le_trans (le_max_left _ _) (le_max_right _ _)
     linarith
   -- weaken the producers' bounds from `Λ₁`/`Λ₂` to `Λ`, matching the box's ellipticity/C³ inputs.
   have hell_star : ∀ x : M, ∀ v : TangentSpace I x,
@@ -163,21 +176,22 @@ theorem ricci_flow_interior_restart
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
 /-- **Black box (B): forward uniqueness of the Ricci flow on a closed manifold, in the smooth
-class.** Two solutions on `[a, b)` with equal initial metric at `a`, each jointly smooth in the
-project's standard sense (chart-Gram jointly C∞ on the open slab, C⁰ up to `a`) and solving
+class.** Two solutions on `[a, b)` with equal initial metric at `a`, each chart-Gram jointly C∞
+UP TO the initial time (`Ico`-slab; the C⁰ fields are retained but now redundant) and solving
 `∂ₜg = −2 Ric` up to `a`, agree on `[a, b)`.
 
-TRUE and standard for closed `M`: GSM77 Ch. 7 §5.2 (uniqueness of the Ricci–DeTurck flow, energy
-argument) + the harmonic-map-flow conversion; invoked as standard throughout GSM77 (Ch. 4, Ch. 6).
-The joint-regularity hypotheses are ESSENTIAL for faithfulness — the textbook theorem is for smooth
-solutions; with only the pointwise-in-`t` PDE the literature asserts nothing. Faithful cited PDE
-input (verified, `ExtendViaUniqueness.md` §VERIFIED). -/
+TRUE and standard for closed `M`: GSM77 Ch. 7 §5.2 (uniqueness of the Ricci–DeTurck flow) + the
+harmonic-map-flow conversion; invoked as standard throughout GSM77 (Ch. 4, Ch. 6). The smooth-class
+(`Ico`) hypotheses are the faithful textbook class — statement surgery per the 2026-07-25 GPT Pro
+ruling (`ShortTime/FORWARD_UNIQUE_PRO_RULING.md`; the earlier C⁰-at-edge class was NOT covered by
+the citation and would have required Burkhardt-Guim-scale rough-parabolic machinery). Proof route
+(ratified, ruling §2–§5): Kotschwar-style moving-`g₁(t)`-carrier triple energy — bricks K1–K3. -/
 theorem ricci_flow_forward_unique
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
@@ -185,7 +199,7 @@ theorem ricci_flow_forward_unique
     (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)

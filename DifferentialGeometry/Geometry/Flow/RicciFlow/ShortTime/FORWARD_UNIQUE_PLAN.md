@@ -292,6 +292,30 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Status log
 
+- 2026-07-25 (STAGE 1 DONE + K1 DONE, on ste-align): **Statement surgery landed
+  per ruling §1** — (N) C∞ field `Ioo 0 τ₀ → Ico 0 τ₀` (C⁰ field kept; docstring
+  records the bootstrap contract + anti-pattern); (A) `t_star ∈ Ioo α omega` +
+  `Ico 0 TT` field threaded (Brick-V proof repaired: `t_star` gains the midpoint
+  arm `(α+ω)/2`, `hαω` now used); (B) `h1smooth`/`h2smooth` on `Ico a b`
+  (docstring rewritten: smooth class faithful, ruling pointer). `MaximalTime`
+  rewired (ht0 strict bound, `Ico` shift maps, Brick-U `.mono` back to `Ioo`).
+  Verification: focused checks green; stale-olean false-fail on MaximalTime
+  resolved by the prescribed targeted upstream refresh; authoritative targeted
+  builds GREEN (`ExtendViaUniqueness` 136s — only the two black-box sorries;
+  `MaximalTime` 140s; downstream `ExtendShiInputs` + `BBSLimitProducer` rebuilt
+  green — no other consumer broke). **K1 `ForwardUniqueConnectionDiff.lean`
+  VERIFIED**: `christoffelEvolutionDiffInFrameOn` (pure `.sub`) +
+  `christoffelDiff_coeff` (coeff `map_sub` identification); first-attempt green,
+  linter-clean after `omit` hygiene, axiom audit = exactly
+  `[propext, Classical.choice, Quot.sound]` both; wired into the root aggregate;
+  neither ruling STOP signal fired (common frame instantiates as-is; no
+  global-frame need). Details in `Evolution/ForwardUniqueConnectionDiff.md`.
+  NEXT: K1-corollary (pointwise `|∂ₜA₀₃|²` bound), then K2
+  (`rmDiffLowered_evolution_div_bound` — the dominant brick, watch its STOP
+  gates), then K3. (N)-lane co-sign of the bootstrap contract still expected
+  (ruling §"(N) cost"; the strengthened statement is now live in the shared
+  file).
+
 - 2026-07-25 (RULING + FREEZE): GPT Pro ruling received via user and archived
   (`FORWARD_UNIQUE_PRO_RULING.md`): surgery approved, BG rejected, Route K with
   moving g₁-carrier, K1/K2/K3 brick board, stop gates. USER DIRECTIVE: e87b

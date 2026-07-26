@@ -192,7 +192,8 @@ theorem extends_of_rmBounded
   -- (A): interior restart + short-time flow `rr` on `[0, TT)` with `t* + TT > ω`.
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
     ricci_flow_interior_restart (I := I) g_fam hαω hell hcov
-  have ht1 : alpha ≤ t_star := ht_star.1
+  have ht0 : alpha < t_star := ht_star.1
+  have ht1 : alpha ≤ t_star := ht_star.1.le
   have ht2 : t_star < omega := ht_star.2
   -- Left-family chart-Gram regularity, from the solution.
   have hsmooth_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
@@ -207,11 +208,11 @@ theorem extends_of_rmBounded
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (rr (p.1 - t_star)) x₀ p.2 i j)
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
     intro x₀ i j
     have hmaps : Set.MapsTo (fun q : ℝ × M => ((q.1 - t_star, q.2) : ℝ × M))
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
-        (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+        (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
       fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
     exact (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
   have h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -247,9 +248,9 @@ theorem extends_of_rmBounded
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
     fun x₀ i j => (hsmooth_left x₀ i j).mono
-      (Set.prod_mono (Set.Ioo_subset_Ioo ht1 le_rfl) (le_refl _))
+      (Set.prod_mono (fun s hs => ⟨lt_of_lt_of_le ht0 hs.1, hs.2⟩) (le_refl _))
   have h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M =>
@@ -266,7 +267,10 @@ theorem extends_of_rmBounded
   -- Brick U: assemble the extension tuple from the interior restart + overlap agreement.
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
     extend_construction_of_restart (I := I) g_fam hαω hleft hsmooth_left hcont_left
-      ht1 ht2 hreach rr hrr_smooth hrr_cont hrr_pde hagree_overlap
+      ht1 ht2 hreach rr
+      (fun x₀ i j => (hrr_smooth x₀ i j).mono
+        (Set.prod_mono Set.Ioo_subset_Ico_self (le_refl _)))
+      hrr_cont hrr_pde hagree_overlap
   -- Leaf 5: wrap the raw metric data into ExtendsPastEndpoint
   have hwide : alpha < omega + ε := by linarith
   let Shat : SolutionOn (I := I) (M := M)
