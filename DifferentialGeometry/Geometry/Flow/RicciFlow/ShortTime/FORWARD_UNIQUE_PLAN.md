@@ -290,6 +290,73 @@ horizon. The draft stage list below is the pre-ruling record.
   endgame-style, git-status-checked (shared with (N) session — their sorry `:92`).
 - `MaximalTime.lean`: Stage-1 rewiring only (coordinate — check (N) in-flight state).
 
+## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
+
+- №3 (2026-07-25, ACCEPTED): **Agent-F "FIELDS" delivered and accepted** —
+  `Evolution/ForwardUniqueFields.lean` + `.md`, 16 public decls, 0 sorry,
+  planner-independent re-verification: `--no-build` up-to-date + axiom re-audit
+  of the three `_self` lemmas = exactly the standard set. Design NOTE (approved
+  deviation): carriers are METRIC-indexed (`g₁ g₂ x`), not solution-indexed —
+  weakest honest form (SolutionFamily's only field is `metric`; connection/rm
+  are defs of it) and matches the ruling's K3 signature. `S₀₄` needed NO new
+  lowering machinery (canonical `riemannCurvature04At g₁ ∇ⁱ` difference —
+  representation stop-signal did not fire); only `A₀₃` lowers via
+  `lowerAllUpperIndices`. Deferred dedup items (planner-logged, not acted):
+  (i) `RSLoweringNorm.lowerAllSpace` needs an `omit [InnerProductSpace ℝ E]`
+  at the producer, after which `connDiffOutAt` collapses to it (no consumers
+  today, cheap); (ii) private `covDiff_self` is more general than
+  `DeTurck.connDiff_self` and belongs in the connection layer. Durable lesson
+  (in the .md): `rw` fails on `Tensor0SSpace` fiber algebra via the FunLike
+  coercion of a non-reducible def — use term-form
+  `have h := Tensor0SSpace.sub_apply … v` instead.
+- №2 (2026-07-25, ACCEPTED): **Agent-R "K2-RECON" report accepted** (planner
+  spot-grep-verified the two decisive claims verbatim; both files 0-sorry).
+  Findings that AMEND the ruling's §6 consume-list: `TensorConnLapLoweredIBP`
+  is DIRECTIONAL (fixed vector field) — the correct, hypothesis-free pairing
+  theorems are `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence`
+  (`Analysis/Elliptic/ConnectionLaplacian/GreenIdentityAndIBP/TensorCovDivergence.lean:1095`,
+  exactly `⟨∇T,V⟩_{L²} = −⟨T, div V⟩_{L²}` at (0,s)/(0,s+1), no integrability/
+  frame hypotheses, one metric for connection+inner+measure) and
+  `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs`
+  (`…/TensorDirichletCurrentGreenIdentityRS.lean:709`, the −2D principal term).
+  **K2 Gate 2 (IBP invariant pairing): CONFIRMED-SAFE.** Divergence convention:
+  slot 0 (`contract_covariant`), so U₀₅ carries its divergence index in slot 0.
+  Single-flow tensor Rm₀₄ evolution: dim-generic PROVEN version does NOT exist
+  (dim-3 only via Kulkarni–Nomizu, banned; `rm04Var_of_sol` is ∇²Ric-form);
+  the dim-generic INTERFACE exists: `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`
+  (`Evolution/Uhlenbeck.lean:727`) — the repo's own named 06-08 frontier
+  (`BBSAllKBundledRoute.md:869`), with the proven dim-generic Ricci analogue
+  `coordRicciEvol` (`Evolution/Ricci/CoordinateIdentities.lean:864`) as precedent.
+  **PLANNER RULING R1**: K2 proceeds HYPOTHESIS-TAKING — K2.1 takes the
+  Uhlenbeck interface (one per flow) as hypotheses, mirroring K1's pattern;
+  the endpoint discharge therefore carries the single-flow Rm₀₄ evolution as a
+  standing named input until brick **K2-B** (the ~900-line second-Bianchi
+  conversion "Lemma 6.1", local to Evolution/Ricci/* + Curvature/Bianchi.lean)
+  is separately commissioned. This is an EXPLICIT recorded decision (same
+  standing-input status as the BBS pillar), not a silent wrapper. K2-B is
+  mathematically unavoidable for the (B) endpoint under Route K — sequence it
+  after the K2 difference calculus banks.
+  **PLANNER RULING R2**: K2.3 `laplacianDiff_eq_div_flux` goes FIRST, timeboxed,
+  as the go/no-go probe (Gate-1 risk lives there: three-way representation
+  reconciliation, (1,3)-vs-(0,4/5) lowering bridges). If it demands a new
+  cross-variance connection-difference module spanning Geometry/Curvature +
+  Analysis/Elliptic, Gate 1 fires → stop and re-consult.
+  Full K2.0–K2.7 decomposition (target file `Evolution/ForwardUniqueRmDiff.lean`)
+  archived in the recon report; K2.7 bridge = `unitScalarRSLiftCₛ` +
+  `HasCompactSupport.of_compactSpace`.
+
+- №1 (2026-07-25, IN FLIGHT): **Agent-F "FIELDS"** (build) — new file
+  `Evolution/ForwardUniqueFields.lean`: the three g₁-lowered carriers
+  `h₀₂/A₀₃/S₀₄` per ruling §"Recommended tensor variances" + vanishing-at-equal-
+  metrics lemmas + normSq evaluation names. Pointwise carriers acceptable;
+  hard stops = new curvature representation, new mixed-tensor machinery,
+  bundle-dedup instance failures. **Agent-R "K2-RECON"** (read-only) — inventory
+  the single-flow tensor Rm evolution identity (tensor-level, not norm-heat),
+  roughLap/div operators at (0,4)/(0,5), TensorConnLapLoweredIBP pairing
+  readiness, verdicts on the two K2 STOP gates, K2 lemma decomposition proposal.
+  Acceptance loop: planner spot-checks (grep sorry/axioms, diff scope,
+  protocol discipline), wires the aggregate, commits.
+
 ## Status log
 
 - 2026-07-25 (STAGE 1 DONE + K1 DONE, on ste-align): **Statement surgery landed
