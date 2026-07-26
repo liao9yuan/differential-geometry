@@ -292,6 +292,60 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №51 (2026-07-26, **WRAP + CODEX HANDOFF**): FINAL wave accepted+committed
+  `8a0df5480` (volLe/reactLe/Λ closed — three more phantoms: volLe's port
+  already existed as fuTraceRd (7th in-tree find), Λ's "sphere-bundle
+  compactness" = 15-line √-trick, reactLe's "owed Cauchy–Schwarz" dissolved
+  by ON-frame-first — №25's micro-bound proved at ALL ranks in-lane,
+  false-green `movingReact_le` never imported; planner re-audit: 0 sorry
+  ×2 files, 6 endpoints 3-axiom).  `fuSlab_of_gram` ASSEMBLED taking only
+  `hrem`/`hadot`; endpoint handoff machine-checked again.  REMAINING =
+  ONE shared brick (partRiemWithin derivative layer) + hadot's B₁ feed +
+  hrem's R13 identities + the argument-free fuSlab + the `:215`
+  one-liner + final full build.  **Lane handed to Codex**: entry doc =
+  `ShortTime/FORWARD_UNIQUE_CODEX_HANDOFF.md` (state, step list incl.
+  absorbing/discarding the still-in-flight Agent-LAST output in three
+  named files, planner-grade verification standards, trap digest, honest
+  denominators).  A final full locked build was launched in the
+  background at handoff; verify its tail before starting.  Fable planner
+  session ends here; per-brick history = №33–№51 + eleven commits
+  `002d5766c`…`8a0df5480`.
+- №51 (2026-07-26, DERIVATIVE-LAYER — **the named brick is delivered and green, and the
+  audit says it is NOT sufficient: №50's "nothing else stands between `fuSlab_of_gram`
+  and an unconditional `hbounds`" is FALSE.  Neither field closed; both still exactly
+  the two arguments of `fuSlab_of_gram`**).  Delivered in
+  `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean` (+~75
+  lines, additive): `partRiemWithin`, `partRicciWithin` (the `∂Rm` / `∂Ric` layers, one
+  line each over `partialDerivWithin`), plus the manifold-source transports
+  `ricciWithinM`, `partRiemWithinM`, `partRicciWithinM`, plus a `private
+  chart_mem_interior` that de-duplicates the three-line chart-interior step
+  `christWithinM`/`riemWithinM` each repeated (both rewritten to term mode).  0 sorry,
+  warning-clean, focused check + targeted module build green (9231 jobs), all seven
+  touched endpoints 3-axiom.  `ForwardUniqueSup.lean` / `ForwardUniqueWiring.lean` were
+  claimed but **not edited** — there was nothing yet to wire.  THE FINDING: the tower's
+  output is *chart coefficients* (`Γ^k_{ij}`, `R^l_{ijk}`, `∂Ric_{ab}` as functions of
+  `ϕ_α x`), whereas `normSqSlabSup`'s `hA` consumes *chart-frame components of the
+  tensor at nearby points*.  Converting one into the other needs
+  `(∇T)(e^α_d, e^α_a, e^α_b) = ∂_d T_{ab} − Γ·T − Γ·T` **off-centre**, and no such lemma
+  exists anywhere in the tree for a covariant derivative.  That is a second, independent
+  gate, and it blocks `B₁` and `remLe`'s `roughLap(Rm₂)` sup alike.  GOOD NEWS, all
+  verified by reading the code: every ingredient for it is already proved and public —
+  `nabla0SFun_eval_coordFrame_moving_raw` (the unconditional moving-slot Leibniz
+  formula), `totalNabla0SFun_apply_section`, `exists_globalSmooth_chartBasisVec_ext_alpha`,
+  `LeviCivita_chartBasisVec_alpha_basis_apply` (off-centre `∇e^α_j = ∑Γ e^α_k`),
+  `ricciTensor_chartBasisVec_alpha_eq` (off-centre chart-α Ricci reading), and the two
+  `tangentFieldModelInChart_…_center_of_contMDiffAt` regularity producers.  TRAP
+  RECORDED: do **not** route through `nabla0SFun_eval_coordFrame` /
+  `nabla0SFun_two_eval_coordFrame` — they are conditional on
+  `ModelDerivEqCoordDeriv0SAt`, which has **no producer** in the tree (its own docstring
+  calls it "the remaining analytic/chart-identification bridge").  Also corrected from
+  the code: `connDiffDot_normSq_le`'s `hB₁` is `|∇Ric₂|²` at **rank 3** (one derivative),
+  not `|∇²Ric₂|²`; and `hNR₁`/`hNR₂` are a *second* unproduced input of that theorem, not
+  the plumbing №50 assumed — the same bridge pays for both.  Full four-step continuation
+  plan, with sizes, in `Evolution/ForwardUniqueSup.md` §"The second gate" / §"The route" /
+  §"Honest size of the residue".  NEXT: `nablaRicChartComp` in a new
+  `Evolution/ForwardUniqueNablaChart.lean`, then `nablaRicChartJoint` (DensReg,
+  `rmChartJoint` template), then `nablaRicSlabSup`, then `fuAdotSlab`.
 - №50 (2026-07-26, FINAL-FIELDS — **volLe + reactLe CLOSED; Λ CLOSED;
   `hbounds` ASSEMBLED as `fuSlab_of_gram` modulo TWO fields; handoff
   example machine-checked against (B)'s verbatim statement**): two files
