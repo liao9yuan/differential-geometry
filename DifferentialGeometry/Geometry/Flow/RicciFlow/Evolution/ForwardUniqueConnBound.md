@@ -1,6 +1,80 @@
 # ForwardUniqueConnBound — brick K1C-b (the pointwise bound on `|∂ₜA₀₃|²`)
 
-## Outcome
+## Outcome (current: after pass 3)
+
+**(B) — repaired statement, proof complete except the contracted trace; ONE `sorry`, at
+`htrace` inside `connSpeedLow_normSq_le`.**
+
+Pass 3 (planner ruling **R9**) closed the `Φ`-defect — the piece the pass-2 report flagged as
+needing new API — and the whole Hamilton half.  The proof of `connSpeedLow_normSq_le` now runs
+end to end; the single `sorry` is the local `htrace` step
+`|∇¹(Ric₁ − Ric₂)|² ≤ n⁵·|∇¹S₀₄|²` and nothing else.
+
+**Green in pass 3** (all axiom-clean, `[propext, Classical.choice, Quot.sound]`):
+
+* `inner_le_sum_sq` (private) — `Σₖ g₁(v,eₖ)² ≤ Λ²·Σₖ g₂(v,eₖ)²` in a `g₁`-orthonormal frame,
+  from the **one-sided** `hΛ` only.  Mechanism: Parseval, Cauchy–Schwarz on the `g₁`-coordinates,
+  and `|v|²_{g₁} ≤ Λ g₂(v,v)`; the division by `|v|²_{g₁}` is avoided by a `0 = N` / `0 < N` split.
+* `lowerBilin_metric_le` — `|g₁(A·,·)|²_{g₁} ≤ Λ²·|g₂(A·,·)|²_{g₁}`: **the `Φ`-defect bound**.
+* `lowerHamRHS_comp` — frame components of `g(Γ̇·,·)` are the *lowered* Hamilton RHS; no inverse
+  metric survives.
+* `perm3`, `perm3_apply`, `normSq0S_perm3`, `perm3_sub` — typed slot-reindexing wrapper with its
+  isometry and additivity.
+* `hamSum`, `hamSum_sub`, `hamSum_normSq_le` — Hamilton's three-term slot combination; additive,
+  and `|hamSum N|² ≤ 10|N|²`.
+* `lowerHam_eq_perm` — `g(Γ̇·,·) = hamSum (∇Ric)`.
+* `connSpeed_arith` (private) — the constant bookkeeping as **pure real arithmetic**.
+
+**Route as executed** (body of `connSpeedLow_normSq_le`):
+
+1. `connSpeedLow_eq` splits `g₁(Adot·,·) = g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·) − h₀₂(Γ̇₂·,·)`; then
+   `normSq0S_sub_le`.
+2. `lowerHam_eq_perm` (twice) turns each Hamilton term into `hamSum` of that flow's `∇Ric`;
+   `hamSum_sub` subtracts *before* the slot combination; `hamSum_normSq_le` costs `10`.
+3. `nablaRicDiff_le` (already green) splits off `8n³·|A₀₃|²·|Ric₂|²` — this is what `B₃` is for.
+4. `htrace` (**the `sorry`**) supplies `|∇¹(Ric₁−Ric₂)|² ≤ n⁵·|∇¹S₀₄|²`.
+5. `lowerBilin_normSq_le`, then `lowerBilin_metric_le`, then `hamSum_normSq_le` bound the defect
+   by `10Λ²B₁·|h₀₂|²`.
+6. `connSpeed_arith` does the constants.
+
+**Constant:** `9n⁶ → 100n⁶ → 200(n⁶ + 1)`.  The `+1` is deliberate — it removes the
+`finrank = 0` case split (where `n⁵ ≤ n⁶` is the only obstruction) at zero mathematical cost.
+
+**Size / verification:** 1358 lines (limit 3000); 26 public declarations (5 `def`, 21
+`theorem`), 14 `private` helpers; **exactly one tactic `sorry`**.  Focused check green after
+every edit; final targeted module build reports *Built* (fresh) and is **warning-clean** apart
+from the expected `uses sorry`.  Hygiene grep clean (no `instance`/`axiom`/`notation`/`macro`/
+`syntax`/`elab`), no leftover `#print` probes, no file outside this one edited.
+
+**Relocation TODO (R9(b)).**  `lowerBilin_metric_le` and its helper `inner_le_sum_sq` are
+general fibre-metric comparisons with nothing Ricci-flow-specific about them.  Canonical home:
+`Tensor/RSTensor/Tensor0SRiemannian/Comparison.lean`, next to `normSq0S_upper_le_of_equiv` and
+`normSq0S_le_of_metric_equiv`.  They live in this file only because that shared file must not be
+edited mid-campaign.  Likewise `perm3`/`normSq0S_perm3` are a thin typed wrapper over
+`Tensor0SSpace.domDomCongr` + `normSq0S_domDomCongr` and belong next to the latter in
+`Tensor/RSTensor/NormSqProduct.lean`.
+
+**Unused inputs, for the R9(c) prune once `htrace` lands** (deferred, per R9(c)'s
+prove-then-prune ordering): the route consumes `B₁`, `B₃`, `hΓ`, `hA`, `hΛ`, `hgInv₁/₂`,
+`hNR₁/₂`, `hRic₁/₂`, `hS`.  It does **not** consume `B₂`, `B₄` (hence not `Rm₂`/`hRm₂` either),
+nor `hRF₁`/`hRF₂` — whose mathematical content arrives through `hΓ`.  `htrace`'s statement
+mentions none of them, so closing it cannot change this list.
+
+**Remaining frontier, fully scoped.**  `ricciDiff_eq_trace` gives
+`Ric₁ − Ric₂ = tr_{g₁}(S₀₄ ∘ rm04TraceSlots)` pointwise with **no residual `h₀₂` term**, hence as
+bundled fields by `DFunLike.ext`; `nablaRealizes_metricTraceFirstTwo`
+(`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`) commutes `∇` past the trace up to
+`traceNablaShuffle`; a realizer-uniqueness step identifies the result with `metricNabla0S`
+(`TotalNabla0SRealizes` is pointwise on `Fin.cons (X x) slots`, so two realizers agree via
+`ContMDiffSection.exists_eq_at` — this small lemma does not yet exist and is the first thing to
+write); then `traceNormSq_le` at `s = 3` gives the `n⁵` and `normSq0S_domDomCongr` absorbs both
+reindexings.  Needs `[I.Boundaryless]` (authorized, R9(a); **not yet added**, since nothing in
+the file requires it until this step) and the field-level `MultilinearSection.domDomCongr`
+plumbing that `ForwardUniqueReLower.nabla_reLower_eval` already exercises.
+
+---
+
+## Outcome (historical: after pass 2)
 
 **(B) — repaired statement, Layer A proved, ONE `sorry` on a strictly reduced goal.**
 
@@ -334,6 +408,31 @@ breakage, and the planner authorized it as ruling R8 in the following pass.
 
 ## Lean lessons (durable)
 
+* **`Tensor0SSpace` arithmetic needs the expected type at elaboration time; a type ascription is
+  not enough.**  Writing `(-1:ℝ) • N + (T.domDomCongr e : Tensor0SSpace … 3 x)` fails with
+  `failed to synthesize HAdd (Tensor0SSpace 3 I x) (ContinuousMultilinearMap …)` — the ascription
+  does not stop `domDomCongr` from elaborating as a bare `ContinuousMultilinearMap`, and the `+`
+  then has mismatched operands.  The fix is a **thin typed wrapper `def`** whose declared return
+  type forces the elaboration (`perm3 e N : Tensor0SSpace … 3 x := N.domDomCongr e`); then all
+  the module arithmetic resolves.  This is why `hamSum` exists as a named object at all.
+* **Keep `nlinarith` away from tensor atoms.**  Inlining the final constant bookkeeping — where
+  the atoms are `normSq0S … (lowerBilin … (bilinOfComp …))` terms — timed out at `isDefEq`/`whnf`
+  (200 000 heartbeats), *not* in the polynomial search.  Factoring the arithmetic into a
+  standalone lemma over plain reals (`connSpeed_arith`) made it instant.  Corollary: when a
+  geometric proof ends in a messy inequality, extract the inequality as a real-number lemma
+  first.  The file-level `set_option backward.isDefEq.respectTransparency false` makes this
+  failure mode more likely, not less.
+* **`nlinarith` on a many-variable polynomial goal is a last resort even for pure reals.**  The
+  first version of `connSpeed_arith` still timed out with 17 real variables; rewriting every step
+  as an explicit `mul_le_mul_of_nonneg_*` / `le_mul_of_one_le_left` chain followed by a single
+  `ring`-rewrite and `linarith` made it cheap.  `nlinarith` survives only for the three genuinely
+  quadratic facts (`1 ≤ (1+Λ)²` etc.).
+* **`↑(0 : ℕ) ^ a` is not `(0 : ℝ) ^ a` to `rw [zero_pow]`.**  After `rw [h0]` with
+  `h0 : Module.finrank ℝ E = 0`, the goal carries `(↑(0:ℕ) : ℝ)`; insert `simp only [Nat.cast_zero]`
+  before `zero_pow`.  Cost one round trip.
+* **`Equiv.swap` on `Fin 3` does not reduce under bare `simp`.**  `Equiv.swap (0:Fin 3) 1 2 = 2`
+  needs `simp [Equiv.swap_apply_def]`; `Equiv.swap_apply_of_ne_of_ne` is reported as an unused
+  simp argument because it never fires without the `≠` side conditions in scope.
 * **To prove a `(0,s)` fibre-tensor identity, go through basis components, not `ext`.**  The
   working pattern (lifted from `ForwardUniqueRatePro.ricci_eq_trace_rm04` and reused verbatim
   for `connSpeedLow_eq` at `s = 3`): `refine tensor0SSpace_ext (𝕜 := Real) s x fun w => ?_`,

@@ -623,9 +623,381 @@ theorem connSpeedLow_eq
   simp only []
   ring
 
+/-- **The own-metric lowering of K1's raised Hamilton right-hand side is the lowered one.**
+Combining `lower_raise_cancel` with `bilinOfComp_basis`: the frame components of `g(Γ̇ ·, ·)`,
+where `Γ̇` carries K1's components `∑ₗ gInv^{ml}·L_{ijl}`, are exactly `L_{ijk}` — no inverse
+metric survives. -/
+theorem lowerHamRHS_comp [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (b : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis_gen (I := I) g x b gInv)
+    (L : Idx -> Idx -> Idx -> Real) (i j k : Idx) :
+    component0S (I := I) b
+        (lowerBilin (I := I) (metricTensorField (I := I) g x)
+          (bilinOfComp (I := I) b (fun i' j' m => ∑ l : Idx, gInv m l * L i' j' l)))
+        (fun s : Fin 3 => if s = 0 then i else if s = 1 then j else k) =
+      L i j k := by
+  classical
+  rw [comp_lowerBilin (I := I) b _ (bilinOfComp (I := I) b
+      (fun i' j' m => ∑ l : Idx, gInv m l * L i' j' l)) i j k,
+    tensor02_expand (I := I) (metricTensorField (I := I) g x) b _ (b k)]
+  have hterm : ∀ m : Idx,
+      b.repr ((bilinOfComp (I := I) b
+          (fun i' j' m' => ∑ l : Idx, gInv m' l * L i' j' l) (b j)) (b i)) m *
+        metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then b m else b k) =
+      (∑ l : Idx, gInv m l * L i j l) * g.inner x (b m) (b k) := by
+    intro m
+    have hg : metricTensorField (I := I) g x
+        (fun a : Fin 2 => if a = 0 then b m else b k) = g.inner x (b m) (b k) := by
+      rw [metricTensorField_apply]; simp
+    rw [repr_bilinOfComp (I := I) b
+      (fun i' j' m' => ∑ l : Idx, gInv m' l * L i' j' l) i j m, hg]
+  rw [Finset.sum_congr rfl fun m _ => hterm m]
+  exact lower_raise_cancel (I := I) g b gInv hinv (fun l => L i j l) k
+
+/-- Slot permutation `(i, j, k) ↦ (k, i, j)` of `Fin 3`: the third summand of Hamilton's
+lowered right-hand side reads `∇_k Ric_{ij}`. -/
+private def hamPerm : Equiv.Perm (Fin 3) where
+  toFun := ![2, 0, 1]
+  invFun := ![1, 2, 0]
+  left_inv := by decide
+  right_inv := by decide
+
+/-- **Hamilton's three-term slot combination** of a `(0,3)` tensor `N` (thought of as `∇Ric`
+with the derivative slot first):
+
+`hamSum N = −N − N∘(0 1) + N∘(i,j,k ↦ k,i,j)`.
+
+Naming the combination is what keeps the `Tensor0SSpace` module instances in play: written
+inline, the `domDomCongr` summands elaborate as bare `ContinuousMultilinearMap`s and the `+`
+fails to resolve. -/
+def perm3 (e : Equiv.Perm (Fin 3))
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
+  N.domDomCongr e
+
+@[simp] theorem perm3_apply (e : Equiv.Perm (Fin 3))
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (v : Fin 3 -> TangentSpace I x) :
+    perm3 (I := I) e N v = N (fun a : Fin 3 => v (e a)) :=
+  Tensor0SSpace.domDomCongr_apply (I := I) e N v
+
+theorem normSq0S_perm3 (g : SmoothRiemannianMetric I M) (e : Equiv.Perm (Fin 3))
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    normSq0S (I := I) g x 3 (perm3 (I := I) e N) = normSq0S (I := I) g x 3 N := by
+  classical
+  obtain ⟨b, hON⟩ := exists_onFrame (I := I) g x
+  exact normSq0S_domDomCongr (I := I) g x b (onFrame_inv (I := I) g b hON) e N
+
+def hamSum (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
+  (-1 : Real) • N + (-1 : Real) • perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N +
+    perm3 (I := I) hamPerm N
+
+/-- **Hamilton's lowered right-hand side is the slot combination `hamSum` of `∇Ric`.**  With
+`N` the `(0,3)` tensor of `∇Ric` (derivative slot first), `g(Γ̇ ·, ·) = hamSum N`, so the whole
+flow-`a` half of K1C-b is a three-term slot combination of a *single* tensor — which is what
+makes its fibre norm computable by `normSq0S_domDomCongr`. -/
+theorem lowerHam_eq_perm [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (b : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis_gen (I := I) g x b gInv)
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (nr : Idx -> Idx -> Idx -> Real)
+    (hnr : ∀ d a c : Idx, nr d a c =
+      component0S (I := I) b N
+        (fun s : Fin 3 => if s = 0 then d else if s = 1 then a else c)) :
+    lowerBilin (I := I) (metricTensorField (I := I) g x)
+        (bilinOfComp (I := I) b (fun i j m =>
+          ∑ l : Idx, gInv m l * (-nr i j l - nr j i l + nr l i j))) =
+      hamSum (I := I) N := by
+  classical
+  refine tensor0SSpace_ext (𝕜 := Real) 3 x fun w => ?_
+  set LHS : ContinuousMultilinearMap Real (fun _ : Fin 3 => TangentSpace I x) Real :=
+    lowerBilin (I := I) (metricTensorField (I := I) g x)
+      (bilinOfComp (I := I) b (fun i j m =>
+        ∑ l : Idx, gInv m l * (-nr i j l - nr j i l + nr l i j))) with hLdef
+  set RHS : ContinuousMultilinearMap Real (fun _ : Fin 3 => TangentSpace I x) Real :=
+    hamSum (I := I) N with hRdef
+  suffices h : LHS.toMultilinearMap = RHS.toMultilinearMap by
+    exact congrArg
+      (fun T : MultilinearMap Real (fun _ : Fin 3 => TangentSpace I x) Real => T w) h
+  refine Module.Basis.ext_multilinear (e := fun _ : Fin 3 => b) ?_
+  intro v
+  change LHS (fun a : Fin 3 => b (v a)) = RHS (fun a : Fin 3 => b (v a))
+  have hLval : LHS (fun a : Fin 3 => b (v a)) =
+      -nr (v 0) (v 1) (v 2) - nr (v 1) (v 0) (v 2) + nr (v 2) (v 0) (v 1) := by
+    rw [hLdef]
+    have h := lowerHamRHS_comp (I := I) g b gInv hinv
+      (fun i j l => -nr i j l - nr j i l + nr l i j) (v 0) (v 1) (v 2)
+    rw [component0S_apply] at h
+    have hslots : (fun a : Fin 3 =>
+        b ((fun s : Fin 3 => if s = 0 then v 0 else if s = 1 then v 1 else v 2) a)) =
+        fun a : Fin 3 => b (v a) := by
+      funext a; fin_cases a <;> simp
+    rw [hslots] at h
+    exact h
+  have hRval : RHS (fun a : Fin 3 => b (v a)) =
+      -(N (fun a : Fin 3 => b (v a))) -
+        N (fun a : Fin 3 => b (v (Equiv.swap (0 : Fin 3) 1 a))) +
+        N (fun a : Fin 3 => b (v (hamPerm a))) := by
+    rw [hRdef, hamSum,
+      Tensor0SSpace.add_apply (I := I) 3 x _ _ (fun a : Fin 3 => b (v a)),
+      Tensor0SSpace.add_apply (I := I) 3 x _ _ (fun a : Fin 3 => b (v a)),
+      Tensor0SSpace.smul_apply (I := I) 3 x (-1 : Real) N (fun a : Fin 3 => b (v a)),
+      Tensor0SSpace.smul_apply (I := I) 3 x (-1 : Real) _ (fun a : Fin 3 => b (v a))]
+    simp only [perm3_apply, smul_eq_mul]
+    ring
+  rw [hLval, hRval]
+  have hcomp : ∀ d a c : Idx, nr d a c =
+      N (fun s : Fin 3 => b ((fun s' : Fin 3 =>
+        if s' = 0 then d else if s' = 1 then a else c) s)) := by
+    intro d a c
+    rw [hnr d a c, component0S_apply]
+  have h0 : N (fun a : Fin 3 => b (v a)) = nr (v 0) (v 1) (v 2) := by
+    rw [hcomp (v 0) (v 1) (v 2)]
+    congr 1
+    funext a; fin_cases a <;> simp
+  have h1 : N (fun a : Fin 3 => b (v (Equiv.swap (0 : Fin 3) 1 a))) =
+      nr (v 1) (v 0) (v 2) := by
+    rw [hcomp (v 1) (v 0) (v 2)]
+    congr 1
+    funext a; fin_cases a <;> simp [Equiv.swap_apply_def]
+  have h2 : N (fun a : Fin 3 => b (v (hamPerm a))) = nr (v 2) (v 0) (v 1) := by
+    rw [hcomp (v 2) (v 0) (v 1)]
+    congr 1
+    funext a; fin_cases a <;> simp [hamPerm]
+  rw [h0, h1, h2]
+
+/-- Slot reindexing is additive, hence so is `hamSum`. -/
+theorem perm3_sub (e : Equiv.Perm (Fin 3))
+    (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    perm3 (I := I) e (A - B) = perm3 (I := I) e A - perm3 (I := I) e B :=
+  domDomCongr_sub (I := I) e A B
+
+/-- `hamSum` is additive: the two flows' Hamilton terms subtract before the slot combination. -/
+theorem hamSum_sub (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    hamSum (I := I) A - hamSum (I := I) B = hamSum (I := I) (A - B) := by
+  rw [hamSum, hamSum, hamSum, perm3_sub, perm3_sub]
+  module
+
+/-- **The fibre norm of Hamilton's slot combination.**  Three slot-isometric summands, so
+`|hamSum N|² ≤ 10·|N|²` by two applications of the `‖a+b‖² ≤ 2‖a‖²+2‖b‖²` kit. -/
+theorem hamSum_normSq_le (g : SmoothRiemannianMetric I M)
+    (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    normSq0S (I := I) g x 3 (hamSum (I := I) N) ≤ 10 * normSq0S (I := I) g x 3 N := by
+  have hp1 : normSq0S (I := I) g x 3 (perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N) =
+      normSq0S (I := I) g x 3 N := normSq0S_perm3 (I := I) g _ N
+  have hp2 : normSq0S (I := I) g x 3 (perm3 (I := I) hamPerm N) =
+      normSq0S (I := I) g x 3 N := normSq0S_perm3 (I := I) g _ N
+  have hs1 : normSq0S (I := I) g x 3 ((-1 : Real) • N) = normSq0S (I := I) g x 3 N := by
+    rw [normSq0S_smul]; norm_num
+  have hs2 : normSq0S (I := I) g x 3
+      ((-1 : Real) • perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N) =
+      normSq0S (I := I) g x 3 N := by
+    rw [normSq0S_smul, hp1]; norm_num
+  have hinner := normSq0S_add_le (I := I) g x 3 ((-1 : Real) • N)
+    ((-1 : Real) • perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N)
+  have houter := normSq0S_add_le (I := I) g x 3
+    ((-1 : Real) • N + (-1 : Real) • perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N)
+    (perm3 (I := I) hamPerm N)
+  rw [hamSum]
+  rw [hs1, hs2] at hinner
+  linarith [houter, hinner, hp2]
+
 end Hamilton
 
+section MetricCompare
+
+/-- **One-sided metric comparison for a `g₂`-pairing measured in `g₁`.**  If `g₁ ≤ Λ·g₂` then,
+in a `g₁`-orthonormal frame, the `g₁`-coordinate energy of a vector is controlled by its
+`g₂`-pairings at cost `Λ²`:
+
+`Σₖ g₁(v, eₖ)² ≤ Λ² Σₖ g₂(v, eₖ)²`.
+
+Mechanism: `Σₖ g₁(v, eₖ)² = |v|²_{g₁}` (Parseval), `g₂(v,v)² ≤ |v|²_{g₁}·Σₖ g₂(v, eₖ)²`
+(Cauchy–Schwarz on the `g₁`-coordinates) and `|v|²_{g₁} ≤ Λ·g₂(v,v)` (the hypothesis).  Only
+the *one-sided* comparison is used. -/
+private theorem inner_le_sum_sq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
+    (b : Module.Basis Idx Real (TangentSpace I x))
+    (hON : ∀ i j, g₁.inner x (b i) (b j) = if i = j then (1 : Real) else 0)
+    {Λ : Real} (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
+    (v : TangentSpace I x) :
+    ∑ k : Idx, (g₁.inner x v (b k)) ^ 2 ≤ Λ ^ 2 * ∑ k : Idx, (g₂.inner x v (b k)) ^ 2 := by
+  classical
+  have hrepr : ∀ k : Idx, b.repr v k = g₁.inner x v (b k) :=
+    fun k => repr_inner (I := I) g₁ b hON v k
+  -- expansion of any `g`-pairing along the `g₁`-orthonormal coordinates of `v`
+  have hpar : ∀ g : SmoothRiemannianMetric I M,
+      g.inner x v v = ∑ k : Idx, g₁.inner x v (b k) * g.inner x v (b k) := by
+    intro g
+    have hv : g.inner x v v =
+        metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then v else v) := by
+      rw [metricTensorField_apply]; simp
+    rw [hv, tensor02_expand (I := I) (metricTensorField (I := I) g x) b v v]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hval : metricTensorField (I := I) g x
+        (fun a : Fin 2 => if a = 0 then b k else v) = g.inner x (b k) v := by
+      rw [metricTensorField_apply]; simp
+    rw [hval, g.symm x (b k) v, hrepr k]
+  set N : Real := ∑ k : Idx, (g₁.inner x v (b k)) ^ 2 with hNdef
+  set Q : Real := ∑ k : Idx, (g₂.inner x v (b k)) ^ 2 with hQdef
+  have hN : g₁.inner x v v = N := by
+    rw [hpar g₁, hNdef]
+    exact Finset.sum_congr rfl fun k _ => by ring
+  have hNnn : 0 ≤ N := by rw [hNdef]; positivity
+  have hQnn : 0 ≤ Q := by rw [hQdef]; positivity
+  have hCS : (g₂.inner x v v) ^ 2 ≤ N * Q := by
+    rw [hpar g₂]
+    exact Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
+      (fun k => g₁.inner x v (b k)) (fun k => g₂.inner x v (b k))
+  have hsq : N ^ 2 ≤ Λ ^ 2 * (g₂.inner x v v) ^ 2 := by
+    have h := hΛ v
+    rw [hN] at h
+    nlinarith [mul_self_le_mul_self hNnn h]
+  rcases eq_or_lt_of_le hNnn with hN0 | hNpos
+  · rw [← hN0]; positivity
+  · nlinarith [hsq, hCS, hNpos, sq_nonneg Λ, hQnn]
+
+/-- **The `Φ`-defect bound: raising with `g₂` but measuring in `g₁` costs `Λ²`.**
+For any bilinear vector-valued map `A`,
+
+`|g₁(A ·, ·)|²_{g₁} ≤ Λ² · |g₂(A ·, ·)|²_{g₁}`,
+
+under the *one-sided* comparison `g₁ ≤ Λ·g₂`.  This is what makes K1C-b's flow-2 half usable:
+`Γ̇₂` is raised with `g₂`'s inverse but has to be measured in `g₁`, and the operator carrying it
+across is `Φ = g₂^♯ ∘ g₁^♭`.
+
+**Relocation TODO** — nothing here is Ricci-flow-specific; this is a general fibre-metric
+comparison.  Its canonical home is `Tensor/RSTensor/Tensor0SRiemannian/Comparison.lean`, next to
+`normSq0S_upper_le_of_equiv`.  It lives here only to avoid editing that shared file mid-campaign
+(planner ruling R9(b)). -/
+theorem lowerBilin_metric_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
+    {Λ : Real} (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
+    (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
+    normSq0S (I := I) g₁ x 3 (lowerBilin (I := I) (metricTensorField (I := I) g₁ x) A) ≤
+      Λ ^ 2 * normSq0S (I := I) g₁ x 3
+        (lowerBilin (I := I) (metricTensorField (I := I) g₂ x) A) := by
+  classical
+  obtain ⟨b, hON⟩ := exists_onFrame (I := I) g₁ x
+  have hinv := onFrame_inv (I := I) g₁ b hON
+  have hexp : ∀ q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x,
+      normSq0S (I := I) g₁ x 3 (lowerBilin (I := I) q A) =
+        ∑ i : Fin (Module.finrank Real (TangentSpace I x)),
+          ∑ j : Fin (Module.finrank Real (TangentSpace I x)),
+            ∑ k : Fin (Module.finrank Real (TangentSpace I x)),
+              (q (fun a : Fin 2 => if a = 0 then (A (b j)) (b i) else b k)) ^ 2 := by
+    intro q
+    rw [normSq0S_identity_eq_sum_sq (I := I) g₁ x 3 b hinv, sumSlots3]
+    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ =>
+      Finset.sum_congr rfl fun k _ => ?_
+    congr 1
+    rw [comp_lowerBilin (I := I) b q A i j k]
+  have hcomp : ∀ (g : SmoothRiemannianMetric I M) (w : TangentSpace I x)
+      (k : Fin (Module.finrank Real (TangentSpace I x))),
+      metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then w else b k) =
+        g.inner x w (b k) := by
+    intro g w k
+    rw [metricTensorField_apply]; simp
+  rw [hexp, hexp, Finset.mul_sum]
+  refine Finset.sum_le_sum fun i _ => ?_
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum fun j _ => ?_
+  simp only [hcomp]
+  exact inner_le_sum_sq (I := I) g₁ g₂ b hON hΛ ((A (b j)) (b i))
+
+end MetricCompare
+
 section MainBound
+
+/-- **The K1C-b constant bookkeeping, as pure real arithmetic.**  Isolating it from the tensor
+expressions keeps `nlinarith` away from the (very large) geometric atoms — inlined, the defeq
+checks on those atoms time out.  `E1`/`E2` are the two halves of the split, `X`/`D`/`R2` the
+`∇Ric` chain and `L1`/`L2` the `Φ`-defect chain. -/
+private theorem connSpeed_arith
+    {n P Hm Ac Λ B₁ B₂ B₃ B₄ E1 E2 X D R2 L1 L2 : Real}
+    (hn : 0 ≤ n) (hP : 0 ≤ P) (hHm : 0 ≤ Hm) (hAc : 0 ≤ Ac)
+    (hB₁ : 0 ≤ B₁) (hB₂ : 0 ≤ B₂) (hB₃ : 0 ≤ B₃) (hB₄ : 0 ≤ B₄) (hΛ0 : 0 ≤ Λ)
+    (hE1 : E1 ≤ 10 * X) (hX : X ≤ 2 * D + 8 * n ^ 3 * Ac * R2)
+    (hD : D ≤ n ^ 5 * P) (hR2B : R2 ≤ B₃)
+    (hE2 : E2 ≤ Hm * L1) (hL1 : L1 ≤ Λ ^ 2 * L2) (hL2B : L2 ≤ 10 * B₁)
+    (hp5 : n ^ 5 ≤ n ^ 6 + 1) (hp3 : n ^ 3 ≤ n ^ 6 + 1) :
+    2 * E1 + 2 * E2 ≤
+      200 * (n ^ 6 + 1) *
+        (P + (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) := by
+  have hKnn : (0 : Real) ≤ n ^ 6 + 1 := by positivity
+  have hK1 : (1 : Real) ≤ n ^ 6 + 1 := by have := pow_nonneg hn 6; linarith
+  have hSBnn : (0 : Real) ≤ B₁ + B₂ + B₃ + B₄ := by linarith
+  have hWnn : (0 : Real) ≤ Hm + Ac := by linarith
+  have hQ1 : (1 : Real) ≤ (1 + Λ) ^ 2 := by nlinarith [sq_nonneg Λ]
+  have hQnn : (0 : Real) ≤ (1 + Λ) ^ 2 := sq_nonneg _
+  -- the common right-hand factor
+  have hQ'nn : (0 : Real) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) :=
+    mul_nonneg (mul_nonneg hQnn hSBnn) hWnn
+  -- the two carrier-monotonicity products
+  have hprod1 : Ac * B₃ ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by
+    have h1 : Ac * B₃ ≤ (Hm + Ac) * (B₁ + B₂ + B₃ + B₄) :=
+      mul_le_mul (by linarith) (by linarith) hB₃ hWnn
+    have h2 : (Hm + Ac) * (B₁ + B₂ + B₃ + B₄) ≤
+        (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₂ + B₃ + B₄)) :=
+      le_mul_of_one_le_left (mul_nonneg hWnn hSBnn) hQ1
+    have h3 : (1 + Λ) ^ 2 * ((Hm + Ac) * (B₁ + B₂ + B₃ + B₄)) =
+        (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by ring
+    linarith [h3 ▸ h2]
+  have hprod2 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by
+    have hΛ2 : Λ ^ 2 ≤ (1 + Λ) ^ 2 := by nlinarith
+    have h1 : B₁ * Hm ≤ (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) :=
+      mul_le_mul (by linarith) (by linarith) hHm hSBnn
+    have h2 : Λ ^ 2 * (B₁ * Hm) ≤ Λ ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      mul_le_mul_of_nonneg_left h1 (sq_nonneg Λ)
+    have h3 : Λ ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) ≤
+        (1 + Λ) ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      mul_le_mul_of_nonneg_right hΛ2 (mul_nonneg hSBnn hWnn)
+    have h4 : (1 + Λ) ^ 2 * ((B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) =
+        (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := by ring
+    linarith [h4 ▸ h3]
+  -- half one
+  have hfl : 8 * n ^ 3 * Ac * R2 ≤ 8 * n ^ 3 * Ac * B₃ :=
+    mul_le_mul_of_nonneg_left hR2B (by positivity)
+  have hb1 : E1 ≤ 20 * (n ^ 5 * P) + 80 * (n ^ 3 * (Ac * B₃)) := by linarith
+  -- half two
+  have hb2 : E2 ≤ 10 * (Λ ^ 2 * (B₁ * Hm)) := by
+    have hc1 : Λ ^ 2 * L2 ≤ Λ ^ 2 * (10 * B₁) := mul_le_mul_of_nonneg_left hL2B (sq_nonneg Λ)
+    have hc2 : Hm * L1 ≤ Hm * (Λ ^ 2 * (10 * B₁)) :=
+      mul_le_mul_of_nonneg_left (le_trans hL1 hc1) hHm
+    linarith
+  -- the three dimensional comparisons
+  have hac : (0 : Real) ≤ Ac * B₃ := mul_nonneg hAc hB₃
+  have hs1 : 40 * (n ^ 5 * P) ≤ 200 * ((n ^ 6 + 1) * P) := by
+    have h1 : n ^ 5 * P ≤ (n ^ 6 + 1) * P := mul_le_mul_of_nonneg_right hp5 hP
+    have h2 : (0 : Real) ≤ (n ^ 6 + 1) * P := mul_nonneg hKnn hP
+    linarith
+  have hs2 : 160 * (n ^ 3 * (Ac * B₃)) ≤
+      160 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by
+    have h1 : n ^ 3 * (Ac * B₃) ≤ (n ^ 6 + 1) * (Ac * B₃) :=
+      mul_le_mul_of_nonneg_right hp3 hac
+    have h2 : (n ^ 6 + 1) * (Ac * B₃) ≤
+        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      mul_le_mul_of_nonneg_left hprod1 hKnn
+    linarith
+  have hs3 : 20 * (Λ ^ 2 * (B₁ * Hm)) ≤
+      40 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by
+    have h1 : Λ ^ 2 * (B₁ * Hm) ≤ (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) := hprod2
+    have h2 : (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac) ≤
+        (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      le_mul_of_one_le_left hQ'nn hK1
+    have h3 : (0 : Real) ≤ (n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) :=
+      mul_nonneg hKnn hQ'nn
+    linarith
+  have hexp : 200 * (n ^ 6 + 1) *
+        (P + (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac)) =
+      200 * ((n ^ 6 + 1) * P) +
+        200 * ((n ^ 6 + 1) * ((1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) * (Hm + Ac))) := by ring
+  rw [hexp]
+  linarith
 
 /-- Two-term expansion for a difference of `(0,s)` fibre tensors. -/
 private theorem normSq0S_sub_le (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
@@ -718,29 +1090,39 @@ counterexample and the full analysis are the permanent record in `ForwardUniqueC
 pair by `christoffelEvolution_of_solution` — with `hA` kept as the realisation link, plus the
 two zeroth-order background norms `B₃ ≥ |Ric₂|²` and `B₄ ≥ |Rm₂|²`.
 
-**Status: one `sorry`, on a strictly reduced goal.**  Layer A is *proved* and is on the proof
-path: `coeff_adot_eq` pins the frame coefficients of `Adot` by uniqueness of derivatives, and
-`connSpeedLow_eq` splits the lowering into `g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·) − h₀₂(Γ̇₂·,·)`, each Hamilton
-term lowered by *its own* metric.  After `normSq0S_sub_le` two norm reductions remain:
+**Status: everything proved except the contracted trace.**  The proof runs end to end; its one
+`sorry` is the local `htrace` step and nothing else.  What is green:
 
-* **the contracted trace.**  `lower_raise_cancel` strips the inverse metric from each Hamilton
-  term, so `g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·)` is the permutation sum `−T − T∘(0 1) + T∘(0↦2,1↦0,2↦1)` of
-  `T = ∇¹Ric₁ − ∇²Ric₂`; `normSq0S_domDomCongr` makes each summand isometric, `nablaRicDiff_le`
-  (green above) splits off `8n³·|A₀₃|²·|Ric₂|²` (this is what `B₃` is for), and
-  `∇¹(Ric₁ − Ric₂) = tr_{g₁}(∇¹S₀₄)` follows from `ricciDiff_eq_trace`
-  (`Evolution/ForwardUniqueRatePro.lean`) plus `nabla_metricTraceFirstTwo0S` /
-  `traceNablaShuffle` — pure `∇`-past-trace commutation, *not* second Bianchi — and
-  `traceNormSq_le`.  Note `ricciDiff_eq_trace` has **no residual `h₀₂` term** (both flows are
-  lowered *and* traced with `g₁`), so `B₄` is not consumed on this route.
-* **the `Φ`-defect.**  `lowerBilin_normSq_le` (green above) gives
-  `|h₀₂(Γ̇₂·,·)|² ≤ |h₀₂|²·|g₁(Γ̇₂·,·)|²`, and `|g₁(Γ̇₂·,·)|²_{g₁} ≤ Λ²·|g₂(Γ̇₂·,·)|²_{g₁}`: in a
-  `g₁`-orthonormal frame this is `|g₂^♯ω|²_{g₁} ≤ Λ|g₂^♯ω|²_{g₂} = Λ|ω|²_{g₂^{-1}} ≤ Λ²|ω|²_{g₁^{-1}}`,
-  so the *one-sided* `hΛ` suffices, at cost `Λ²`.  The missing API is a slot-precomposition
-  norm bound; `Tensor0SRiemannian/Comparison.lean` (`normSq0S_upper_le_of_equiv`,
-  `normSq0S_le_of_metric_equiv`) is the layer it belongs in.
+* **Layer A** — `coeff_adot_eq` pins the frame coefficients of `Adot` by uniqueness of
+  derivatives against `hΓ`, and `connSpeedLow_eq` splits the lowering into
+  `g₁(Γ̇₁·,·) − g₂(Γ̇₂·,·) − h₀₂(Γ̇₂·,·)`, each Hamilton term lowered by *its own* metric.
+* **the Hamilton half** — `lower_raise_cancel` strips the inverse metric from each Hamilton
+  term, `lowerHam_eq_perm` identifies it with `hamSum (∇Ric)`, `hamSum_sub` subtracts the two
+  flows before the slot combination and `hamSum_normSq_le` costs a factor `10`
+  (`normSq0S_perm3` makes each slot summand isometric).  `nablaRicDiff_le` then splits off
+  `8n³·|A₀₃|²·|Ric₂|²` — this is what `B₃` is for.
+* **the `Φ`-defect half** — `lowerBilin_normSq_le` gives `|h₀₂(Γ̇₂·,·)|² ≤ |h₀₂|²·|g₁(Γ̇₂·,·)|²`
+  and `lowerBilin_metric_le` gives `|g₁(Γ̇₂·,·)|²_{g₁} ≤ Λ²·|g₂(Γ̇₂·,·)|²_{g₁}` from the
+  *one-sided* `hΛ`.
+* **the constants** — `connSpeed_arith`, kept as pure real arithmetic so that `nlinarith` never
+  meets the (very large) tensor atoms.
 
-The displayed constant `100 n⁶` is provisional and generous; resize it when the two reductions
-land. -/
+**The one frontier: `∇¹(Ric₁ − Ric₂) = tr_{g₁}(∇¹S₀₄)`.**  Route, fully scoped: `ricciDiff_eq_trace`
+(`Evolution/ForwardUniqueRatePro.lean`) gives `Ric₁ − Ric₂ = tr_{g₁}(S₀₄∘rm04TraceSlots)`
+pointwise with **no residual `h₀₂` term** — both flows are lowered *and* traced with `g₁` —
+hence as bundled fields by `DFunLike.ext`; `nablaRealizes_metricTraceFirstTwo`
+(`Tensor/RSTensor/MetricTrace/NablaTraceGen.lean`) commutes `∇` past the trace up to
+`traceNablaShuffle`; a realizer-uniqueness step (`TotalNabla0SRealizes` is pointwise on
+`Fin.cons (X x) slots`, so two realizers agree via `ContMDiffSection.exists_eq_at`) identifies
+it with `metricNabla0S`; then `traceNormSq_le` at `s = 3` gives the `n⁵` and
+`normSq0S_domDomCongr` absorbs both reindexings.  This is pure `∇`-past-trace commutation,
+*not* second Bianchi.  It needs `[I.Boundaryless]` (authorized, ruling R9(a)) and the
+field-level `MultilinearSection.domDomCongr` plumbing that `ForwardUniqueReLower.nabla_reLower_eval`
+already exercises.
+
+**Unused inputs, pending the R9(c) prune once `htrace` lands:** this route consumes `B₁` and
+`B₃` but *not* `B₂`, `B₄` (hence not `Rm₂`/`hRm₂` either), and consumes `hΓ`/`hA` rather than
+`hRF₁`/`hRF₂`.  The constant `200(n⁶+1)` is honest for the route as written. -/
 theorem connSpeedLow_normSq_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
@@ -807,18 +1189,80 @@ theorem connSpeedLow_normSq_le
     (hB₄ : normSq0S (I := I) (g₁ t) x 4 (Rm₂ x) ≤ B₄) :
     normSq0S (I := I) (g₁ t) x 3
         (lowerBilin (I := I) (metricTensorField (I := I) (g₁ t) x) (Adot x)) ≤
-      100 * (Module.finrank Real E : Real) ^ 6 *
+      200 * ((Module.finrank Real E : Real) ^ 6 + 1) *
         (nablaRmDiffSq (I := I) (g₁ t) S x +
           (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) *
             (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
               connDiffSq (I := I) (g₁ t) (g₂ t) x)) := by
+  classical
   -- Layer A: Hamilton's `∂ₜΓ` reaches `Adot` and splits off the single `h₀₂`-defect.
   rw [connSpeedLow_eq (I := I) g₁ g₂ frame hframe hu hx Adot hA
     (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₁ nablaRic₁ t x i j k)
     (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k) hΓ]
   refine le_trans (normSq0S_sub_le (I := I) (g₁ t) x 3 _ _) ?_
-  -- Remaining: the two norm reductions (contracted trace; `Φ`-defect).  See the docstring.
-  sorry
+  -- each flow's Hamilton term is `hamSum` of that flow's `∇Ric`
+  have hT₁ : lowerBilin (I := I) (metricTensorField (I := I) (g₁ t) x)
+      (bilinOfComp (I := I) (hframe.toBasisAt hx)
+        (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₁ nablaRic₁ t x i j k)) =
+      hamSum (I := I) (metricNabla0S (I := I) (g₁ t) Ric₁ x) :=
+    lowerHam_eq_perm (I := I) (g₁ t) (hframe.toBasisAt hx) (fun i j => gInv₁ t x i j) hgInv₁
+      (metricNabla0S (I := I) (g₁ t) Ric₁ x) (fun d a c => nablaRic₁ t x d a c) hNR₁
+  have hT₂ : lowerBilin (I := I) (metricTensorField (I := I) (g₂ t) x)
+      (bilinOfComp (I := I) (hframe.toBasisAt hx)
+        (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k)) =
+      hamSum (I := I) (metricNabla0S (I := I) (g₂ t) Ric₂ x) :=
+    lowerHam_eq_perm (I := I) (g₂ t) (hframe.toBasisAt hx) (fun i j => gInv₂ t x i j) hgInv₂
+      (metricNabla0S (I := I) (g₂ t) Ric₂ x) (fun d a c => nablaRic₂ t x d a c) hNR₂
+  rw [hT₁, hT₂, hamSum_sub]
+  -- ## the `T₁ − T₂` half
+  have hham := hamSum_normSq_le (I := I) (g₁ t)
+    (metricNabla0S (I := I) (g₁ t) Ric₁ x - metricNabla0S (I := I) (g₂ t) Ric₂ x)
+  have hpt : metricNabla0S (I := I) (g₁ t) Ric₁ x - metricNabla0S (I := I) (g₂ t) Ric₂ x =
+      (metricNabla0S (I := I) (g₁ t) Ric₁ - metricNabla0S (I := I) (g₂ t) Ric₂) x := rfl
+  rw [hpt] at hham
+  have hsplit := nablaRicDiff_le (I := I) (g₁ t) (g₂ t) Ric₁ Ric₂ x
+  -- ## the `Φ`-defect half
+  have hd1 := lowerBilin_normSq_le (I := I) (g₁ t) x
+    (metricDiffAt (I := I) (g₁ t) (g₂ t) x)
+    (bilinOfComp (I := I) (hframe.toBasisAt hx)
+      (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k))
+  have hd2 := lowerBilin_metric_le (I := I) (g₁ t) (g₂ t) x hΛ
+    (bilinOfComp (I := I) (hframe.toBasisAt hx)
+      (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k))
+  have hd3 : normSq0S (I := I) (g₁ t) x 3
+      (lowerBilin (I := I) (metricTensorField (I := I) (g₂ t) x)
+        (bilinOfComp (I := I) (hframe.toBasisAt hx)
+          (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k)))
+      ≤ 10 * B₁ := by
+    rw [hT₂]
+    exact le_trans (hamSum_normSq_le (I := I) (g₁ t) _) (by linarith)
+  rw [← metricDiffSq_def (I := I) (g₁ t) (g₂ t) x] at hd1
+  -- ## the contracted trace — THE ONE REMAINING FRONTIER (see the docstring for the route)
+  have htrace : normSq0S (I := I) (g₁ t) x 3
+      (metricNabla0S (I := I) (g₁ t) (Ric₁ - Ric₂) x) ≤
+      (Module.finrank Real E : Real) ^ 5 * nablaRmDiffSq (I := I) (g₁ t) S x := by
+    sorry
+  -- ## nonnegativity bookkeeping
+  have hnnn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
+  have hpow : ∀ a : ℕ, a ≤ 6 →
+      (Module.finrank Real E : Real) ^ a ≤ (Module.finrank Real E : Real) ^ 6 + 1 := by
+    intro a ha
+    rcases Nat.eq_zero_or_pos (Module.finrank Real E) with h0 | hpos
+    · rw [h0]
+      simp only [Nat.cast_zero]
+      rcases Nat.eq_zero_or_pos a with ha0 | hapos
+      · rw [ha0]; norm_num
+      · rw [zero_pow (by omega : a ≠ 0)]; norm_num
+    · have hn1 : (1 : Real) ≤ (Module.finrank Real E : Real) := by exact_mod_cast hpos
+      have := pow_le_pow_right₀ hn1 ha
+      linarith
+  exact connSpeed_arith hnnn (nablaRmDiffSq_nonneg (I := I) (g₁ t) S x)
+    (normSq0S_nonneg (I := I) (g₁ t) x 2 _) (normSq0S_nonneg (I := I) (g₁ t) x 3 _)
+    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 3 _) hB₁)
+    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 5 _) hB₂)
+    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 2 _) hB₃)
+    (le_trans (normSq0S_nonneg (I := I) (g₁ t) x 4 _) hB₄) hΛ0
+    hham hsplit htrace hB₃ hd1 hd2 hd3 (hpow 5 (by norm_num)) (hpow 3 (by norm_num))
 
 /-- **K1C-b, the ruling's bound on `|∂ₜA₀₃|²`.**  The speed of the connection-difference
 carrier is controlled pointwise by the three difference carriers and the `∇¹S₀₄` integrand,
@@ -896,7 +1340,7 @@ theorem connDiffDot_normSq_le
     (hB₄ : normSq0S (I := I) (g₁ t) x 4 (Rm₂ x) ≤ B₄) :
     normSq0S (I := I) (g₁ t) x 3 (connDiffDot (I := I) g₁ g₂ Adot t x) ≤
       8 * Λric * connDiffSq (I := I) (g₁ t) (g₂ t) x +
-        2 * (100 * (Module.finrank Real E : Real) ^ 6 *
+        2 * (200 * ((Module.finrank Real E : Real) ^ 6 + 1) *
           (nablaRmDiffSq (I := I) (g₁ t) S x +
             (1 + Λ) ^ 2 * (B₁ + B₂ + B₃ + B₄) *
               (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
