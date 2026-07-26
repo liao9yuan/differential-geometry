@@ -237,6 +237,34 @@ leaf does the `(2,2)→(1,1)` reduction (mirror `deTurckLieDLbCoeffField_eq_slot
 `rfns_iteratedCovGrad_dlbSlotZero_le`) and discharges its sorry.  wCA/wOmega/wXi stay `private` — the
 engine producer lives IN this file so it consumes them directly; only the final producer lemma is public.
 
+## 2026-07-26 — lieCorr0 atom 2 (`lc0Insert`-diff) ENGINE LANDED (the leaf's sorry is discharged)
+
+The `lc0Insert`-diff engine is built and axiom-clean (`[propext, Classical.choice, Quot.sound]`,
+verified by targeted module build).  **KEY: the W1/W2 appCc-chain plan above was NOT needed** — a
+pure `ballUniform` bound only needs the crude triangle `wAlphaB(g₀) − wAlphaB(g_bg)` + the existing
+per-order `wAlphaB` bound.  `wOmegaDiff_eq` stays a seed for a future SHARP (top-separated) bound but
+is unused here.  Added (all just after `norm_iCG_wEndoInsert_eq_wAlpha`):
+- `cotangentToDual_cometricRaiseSlot0_gen` — generalized `cotangentToDual_cometricRaise_wAlpha` to any
+  `(0,2)` field; the old lemma is now a 1-line wrapper (no duplication).
+- `connDiffDVFSection` (public def) — the connDiff-half endo section `x ↦ connDiff g₁ g₀ x (dVF g₁ g_ref x)`
+  (smooth via `connDiffOp_homSection_contMDiff.clm_bundle_apply deTurckVF.contMDiff`).
+- `slotInsertEndoCc_sub` (private) — slot-insert subtractivity in the endo section.
+- `connDiffDVFInsert_eq_cometricRaise` (public HOIST) — `slotInsertEndoCc g₀ 0 (connDiffDVFSection …) =
+  cometricRaiseSlot0Field g₀ 0 (wAlphaB …)`; the `wAlphaA`-free half of `deTurckLieWEndoInsert_eq_cometricRaise`.
+- `norm_iCG_cometricRaiseSlot0Field_eq` (private) — cometricRaise jet isometry at the norm level (mirror
+  `norm_iCG_wEndoInsert_eq_wAlpha`, off `rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq`).
+- `wAlphaB_jetL2_perOrder_generic` (private) — extracted the `hBsum` arm of `wAlpha_order0_jetL2_generic`
+  as a standalone per-order `ballUniform` `‖∇^i wAlphaB‖²` bound (dedup opportunity: `wAlpha_order0_jetL2_generic`
+  could now call it; left as-is to avoid touching the working proof).
+- `sq_le_two_add` (private) — small squared-triangle helper (also copied into the leaf).
+- `connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` (public `(1,1)` producer) — the endpoint
+  the leaf consumes: `‖∇^i slotInsertEndoCc g₀ 0 (connDiffDVFSection … g₀ − connDiffDVFSection … g_bg)‖² ≤ K i`
+  at `g₁ = realizedFam` (clone of the sibling `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform`
+  plumbing; triangle over the two `wAlphaB` bounds via HOIST ×2 + isometry ×2).
+
+The leaf then does the `(2,2)→(1,1)` reduction and discharges its sorry; see `LieCorr0CoeffL2JetBound.md`.
+lc0VB / lc0AMix do NOT reuse this HOIST (interior-product contraction, no `wAlphaB`) — see the leaf note.
+
 ## Progress log
 - 2026-07-24 recon complete; route de-risked + SIMPLIFIED (ball-uniform remainder), then CORRECTED
   (wOmega needs genuine corner peel — see above).  **VERIFIED GREEN (3 of ~6 tower layers):**

@@ -305,3 +305,111 @@ carries `sorryAx`).  Producer file `DeTurckVectorFieldL2JetBound.lean`: two keys
 added — `appCc_sub_right`, `wOmegaDiff_eq` — verified via targeted module build (green, `Built …
 DeTurckVectorFieldL2JetBound (98s)`); both axiom-audited `[propext, Classical.choice, Quot.sound]`.
 Hoist SKIPPED (budget).  No commit made.
+
+## SESSION 4 — the SIMPLER route: ballUniform needs NO cancellation (`wOmegaDiff_eq` unused here)
+
+**Key realization.**  The atom `lc0InsertDiff_ballUniform` needs only a *ballUniform* per-order
+bound `‖∇^i(lc0Insert g_bg − lc0Insert g₀)‖² ≤ K i` (no top term).  The `wOmegaDiff_eq`
+cancellation + W1/W2 appCc-chain plan from session 3 was aimed at a SHARP top-separated bound and
+is **not needed** for ballUniform.  Instead, crudely triangle the wAlphaB-difference and reuse the
+committed per-order wAlphaB bound.  This collapses "layers 2–4" into two small steps.
+
+### The route (all committed-generic; the cancellation is bypassed)
+1. **`lieCorr0NEndo` = derivation-insert, linear in the endo.**  `lieCorr0InsertFib`
+   (`LieCorr0Core:88`) = `slotInsertEndoFib 2 0 (NEndo) + slotInsertEndoFib 2 1 (NEndo)` (slot0+slot1
+   update, LINEAR in `lieCorr0NEndo`).  So `lc0Insert(g_bg) − lc0Insert(g₀)` is the derivation-insert
+   of `NEndo(g_bg) − NEndo(g₀)`, and `nEndo_diff` (`LieCorr0Split:103`) gives that endo-difference
+   `= connDiff g₁ g₀ (dVF g₀) − connDiff g₁ g₀ (dVF g_bg)`.
+2. **Producer `connDiffDVFSection g₀ g₁ g_ref`** (public): the smooth (1,1)-endo section
+   `x ↦ connDiff g₁ g₀ x (deTurckVF g₁ g_ref x)` (smooth via `connDiffOp_homSection_contMDiff.clm_bundle_apply
+   deTurckVF.contMDiff`, exactly the `hBV`/`hBW` of `lieCorr0NEndo_homSection_contMDiff`).
+3. **HOIST** (producer) `slotInsertEndoCc g₀ 0 (connDiffDVFSection g₀ g₁ g_ref) =
+   cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g_ref)` — `deTurckLieWEndoInsert_eq_cometricRaise`
+   with the wAlphaA (covDeriv) half DELETED; uses `wAlphaB_unitModel_apply` (:418,
+   `= g₀.inner x (connDiff g₁ g₀ x (wVF g₁ g_ref x) w) u`) + `cotangentToDual_slotInsertEndoFib'` +
+   a generic `cotangentToDual_cometricRaise_gen` (the existing `cotangentToDual_cometricRaise_wAlpha`
+   generalized to any `(0,2)` `A`).
+4. **cometricRaise is a JET ISOMETRY**: `rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq`
+   (`RecoveryEndomorphismJetBound:275`) ⟹ `‖∇^i cometricRaise A‖ = ‖∇^i A‖` (mirror
+   `norm_iCG_wEndoInsert_eq_wAlpha`).  So NO cometricRaise-jet reasoning is needed.
+5. **Per-order wAlphaB bound** (producer): extract the `hBsum` block of `wAlpha_order0_jetL2_generic`
+   (:2836–2884) as a standalone `wAlphaB_jetL2_perOrder_generic`: `‖∇^i wAlphaB(g₀ g₁ g_bg)‖² ≤ F i`
+   (per-order, ballUniform, generic-in-g₁ via htie).  Apply at `g_bg := g₀` and `g_bg := g_bg`.
+6. **(1,1) endo-diff producer** (producer, PUBLIC): via `slotInsertEndoCc_sub` + hoist ×2 +
+   isometry ×2 + triangle: `‖∇^i slotInsertEndoCc g₀ 0 (connDiffDVF(g₀) − connDiffDVF(g_bg))‖² ≤
+   2 F₀ i + 2 F_bg i` at `g₁ = realizedFam` (clone lc0Riem htie/hδP/hPball plumbing).
+7. **Leaf**: (a) `lc0InsertDiff_eq_slotInsert_sum` — mirror `deTurckLieDLbCoeffField_eq_slotInsert_sum`
+   (:47) but for the `lc0Insert`-difference, giving the connDiffDVF-difference endo (fold in
+   `nEndo_diff`); (b) mirror `normSq_iCG_dlbField_le` (:358) → `‖∇^i LC‖² ≤ 4·finrank·‖∇^i(1,1)‖²`
+   via `rfns_iteratedCovGrad_slotInsertEndoCc_le_endo` (generic, MetricArmCoeffJetTower:2863) +
+   `sq_le_two_add`; (c) combine with (6) ⟹ `K i = 4·finrank·(2F₀ i + 2F_bg i)`, discharge the sorry.
+
+The two riskiest pieces are the HOIST fibre proof (step 3) and the leaf field identity (step 7a);
+both have exact committed templates.
+
+## SESSION 4 RESULT (2026-07-26) — ATOM 2 GREEN, sorry discharged, axiom-clean
+
+`lc0InsertDiff_ballUniform` no longer has a `sorry`; `lc0InsertDiff_realizedFam_perOrder_topSep`
+is GREEN and axiom-audited `[propext, Classical.choice, Quot.sound]` (0 `sorryAx` in the file).
+The whole route is committed-generic; **the `wOmegaDiff_eq` cancellation was NOT used** (crude
+triangle `wAlphaB(g₀) − wAlphaB(g_bg)` suffices for a `ballUniform` bound).
+
+### What landed
+**Producer `DeTurckVectorFieldL2JetBound.lean`** (all `[propext, Classical.choice, Quot.sound]`):
+- `cotangentToDual_cometricRaiseSlot0_gen` — generalized the existing `_wAlpha` lemma to any
+  `(0,2)` field (old lemma kept as a 1-line wrapper; no duplication).
+- `connDiffDVFSection g₀ g₁ g_ref` (public def) — the connDiff-part endo section
+  `x ↦ connDiff g₁ g₀ x (deTurckVF g₁ g_ref x)`.
+- `slotInsertEndoCc_sub` (private) — slot insertion is subtractive in the endo section.
+- `connDiffDVFInsert_eq_cometricRaise` (public, the **HOIST**) —
+  `slotInsertEndoCc g₀ 0 (connDiffDVFSection g₀ g₁ g_ref) = cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g_ref)`.
+- `norm_iCG_cometricRaiseSlot0Field_eq` (private) — the cometricRaise jet ISOMETRY at the norm level.
+- `wAlphaB_jetL2_perOrder_generic` (private) — extracted the `hBsum` arm of `wAlpha_order0_jetL2_generic`.
+- `connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` (public, the `(1,1)` producer).
+
+**Leaf `LieCorr0CoeffL2JetBound.lean`**:
+- `sq_le_two_add`, `normSq_iCG_le_scaled` — copies of the (private) `DeTurckLieCoeffL2JetBound` helpers.
+- `endoDiffSection` + `endoDiffSection_apply` (= `lieCorr0NEndo g_bg − g₀` via `nEndo_diff`).
+- `lc0InsertDiff_eq_slotInsert_sum` — the `(2,2)` field identity, transcribed from
+  `deTurckLieDLbCoeffField_eq_slotInsert_sum` with the LHS being the `lieCorr0InsertFib` DIFFERENCE
+  (reconciled to the endo-difference via `nEndo_diff` + `ContinuousMultilinearMap.map_update_sub`).
+- `normSq_iCG_lc0InsertDiff_le` — the `×4·finrank` `(2,2)→(1,1)` reduction (mirror `normSq_iCG_dlbField_le`).
+- `lc0InsertDiff_ballUniform` — discharged: `normSq_iCG_lc0InsertDiff_le` + the producer bound, `K i = 4·finrank·Kprod i`.
+
+### Lean lessons (session 4)
+- `slotInsertEndoCc_sub` at the fibre: after `slotInsertEndoFib_sub_left`, the LHS is `(A − B) D`,
+  needing `ContinuousLinearMap.sub_apply` (NOT `Tensor0SSpace.toModel_sub`) to match `A D − B D`.
+- The HOIST closes with a terminal `rfl` (the `connDiffDVFSection` coercion is defeq to the `wVF`
+  form but not syntactically equal after the `g₀.symm` rewrite).
+- Leaf `open` gap: `reindexCoeffFibGen` (bare, not just `_apply`) had to be added to the restricted
+  `TensorSpectral` open list (namespaces bite; the DLb file opens the bare name).
+- `cometricRaiseSlot0Field g₀ 0` with `s := 0` prints indices as `0+1`/`0+2`; state `have`s with
+  literal `1 1`/`0 2` and prove by the lemma (defeq accepted by `exact`) so downstream `rw` matches.
+- Final chain: `4·finrank·‖..‖² ≤ 4·finrank·K i` is `mul_le_mul_of_nonneg_left hprod hfr_nn` DIRECTLY;
+  a stray `rw [mul_assoc]` re-associates the LHS and breaks the match.
+
+### lc0VB / lc0AMix honest read (does the HOIST help? NO)
+The HOIST is specifically `slotInsert(connDiff·deTurckVF) = cometricRaise(wAlphaB)` — the DeTurck
+endomorphism's connDiff half.  `lc0VB` / `lc0AMix` are NOT slot insertions of that endo: `lc0VB`
+(`LieCorr0Core:144`) is `2·traceStep(g₁,VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) ∘
+interior_product(deTurckVF g₁ g₀)` — an **interior-product contraction** of deTurckVF into a slot,
+NOT a composition.  Their deTurckVF is NOT a `g₀↔g_bg` difference, so there is no cancellation and
+no `wAlphaB`.  **The generic interior-product / contraction-Leibniz engine question STANDS for them.**
+Reusable from this session: `slotInsertEndoCc_sub`, `norm_iCG_cometricRaiseSlot0Field_eq`, the
+`(2,2)→(1,1)` reduction pattern, and the twoArm `wAlphaB`-style integrator recipe — but NOT the HOIST.
+Committed precedent to follow instead: `deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform`
+(`DeTurckLieArm1CoeffL2JetBound.lean:4812`), "g₁-cometric trace of connection-difference ×
+interior-product(deTurckVF)" — the SAME shape as `lc0VB`.
+
+### Resumption point (atom 3 = `lc0VB`)
+Start from `deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform` as the template; the live
+frontier is the interior-product(deTurckVF) contraction jet control (Arm1 handles it via
+`lieArm1_deTurckVF_cometric_trace` / `lieArm1_appCc12_normSq_le`).  `lc0AMix` after `lc0VB`.  Assemble
+the two endpoints (`sq_le_five_add`) only once all four Kc atoms are green.
+
+## Honest accounting (updated 2026-07-26)
+`(N) ricci_flow_unif_existence` still **0%** (endpoints unstated).  Dedicated machinery = top piece
+(done) + four Kc atoms (**2 of 4 GREEN: `lc0Riem`, `lc0Insert`-diff**; 2 unstarted: `lc0VB`,
+`lc0AMix`) + 5-way assembly (helper done, wiring pending) + shared engine.  Sorry-free-content
+fraction of the leaf's four-atom machinery: **~50%** (was ~33%).  The `lc0Insert`-diff atom is the
+first to fully exercise the producer HOIST + `wAlphaB` + `(2,2)→(1,1)` chain end-to-end.

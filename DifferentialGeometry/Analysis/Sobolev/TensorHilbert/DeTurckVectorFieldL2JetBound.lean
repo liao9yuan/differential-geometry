@@ -486,14 +486,15 @@ private lemma cotangentToDual_slotInsertEndoFib' (x : M)
     funext k; fin_cases k; simp]
   rfl
 
-private lemma cotangentToDual_cometricRaise_wAlpha
-    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (om : Tensor0SSpace 1 I x)
-    (w : TangentSpace I x) :
+/-- Generic `cotangentToDual` action of a slot-`0` cometric raise of any `(0, 2)` field:
+the raise of `A` pairs against `om` as the `unitModel` of `A` fed the sharp of `om`. -/
+private lemma cotangentToDual_cometricRaiseSlot0_gen
+    (g₀ : SmoothRiemannianMetric I M) (A : SmoothCcTensor g₀ 0 2) (x : M)
+    (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     cotangentToDual (I := I)
         ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
-          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
-            (wAlpha (I := I) (M := M) g₀ g₁ g_bg)).toSection x) om) w =
-      unitModel (I := I) (M := M) g₀ 2 (wAlpha (I := I) (M := M) g₀ g₁ g_bg) x
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 A).toSection x) om) w =
+      unitModel (I := I) (M := M) g₀ 2 A x
         ![inverseMetricSharpFib (I := I) g₀ x om, w] := by
   rw [cotangentToDual_apply]
   rw [cometricRaiseSlot0Field_toSection]
@@ -501,19 +502,19 @@ private lemma cotangentToDual_cometricRaise_wAlpha
   rw [show (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (0 + 1) x
           (inverseMetricSharpFib (I := I) g₀ x om)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
-              (wAlpha (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+              A.toSection x)
             (unitTensor (I := I) (M := M) x)) (fun _ : Fin 1 => w) : ℝ) =
       Tensor0SSpace.toModel
         (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (0 + 1) x
           (inverseMetricSharpFib (I := I) g₀ x om)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
-              (wAlpha (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+              A.toSection x)
             (unitTensor (I := I) (M := M) x)))
         (fun _ : Fin 1 => w) from rfl]
   rw [interior_product_toModel_eval' (I := I) (M := M) (0 + 1) x
     (inverseMetricSharpFib (I := I) g₀ x om)
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
-        (wAlpha (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+        A.toSection x)
       (unitTensor (I := I) (M := M) x)) (fun _ : Fin 1 => w)]
   rw [unitModel]
   congr 1
@@ -522,6 +523,18 @@ private lemma cotangentToDual_cometricRaise_wAlpha
   · rfl
   · refine Fin.cases ?_ (fun j' => j'.elim0) j
     rfl
+
+private lemma cotangentToDual_cometricRaise_wAlpha
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (om : Tensor0SSpace 1 I x)
+    (w : TangentSpace I x) :
+    cotangentToDual (I := I)
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (wAlpha (I := I) (M := M) g₀ g₁ g_bg)).toSection x) om) w =
+      unitModel (I := I) (M := M) g₀ 2 (wAlpha (I := I) (M := M) g₀ g₁ g_bg) x
+        ![inverseMetricSharpFib (I := I) g₀ x om, w] :=
+  cotangentToDual_cometricRaiseSlot0_gen (I := I) (M := M) g₀
+    (wAlpha (I := I) (M := M) g₀ g₁ g_bg) x om w
 
 private theorem deTurckLieWEndoInsert_eq_cometricRaise
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
@@ -2956,6 +2969,233 @@ private lemma norm_iCG_wEndoInsert_eq_wAlpha (g₀ g₁ g_bg : SmoothRiemannianM
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact rfns_iCG_wEndoInsert_eq_wAlpha (I := I) (M := M) g₀ g₁ g_bg i x
 
+/-! ## The `wAlphaB` (connection-difference) half as an isolated `(1,1)` insert
+
+The `lc0Insert`-difference `Kc` atom needs the connection-difference half of the DeTurck
+endomorphism ISOLATED from its covariant-derivative half.  We expose that half as a smooth
+endo section `connDiffDVFSection` whose slot-`0` insertion is exactly
+`cometricRaiseSlot0Field g₀ 0 (wAlphaB …)` — the `wAlphaA`-free part of
+`deTurckLieWEndoInsert_eq_cometricRaise`. -/
+
+/-- The connection-difference half of the DeTurck endomorphism as a smooth `(1, 1)`-endo
+section: `x ↦ connDiff g₁ g₀ x (deTurckVF g₁ g_ref x)`.  `deTurckLieWEndoSection` is this plus
+the covariant-derivative (`wAlphaA`) half; its slot-`0` insert is
+`cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g_ref)` (`connDiffDVFInsert_eq_cometricRaise`). -/
+def connDiffDVFSection (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
+    ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
+  toFun := fun x : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ x (wVF (I := I) (M := M) g₁ g_ref x)
+  contMDiff_toFun :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (connDiffOp_homSection_contMDiff (I := I) g₁ g₀)
+      (PDE.DeTurck.deTurckVF (I := I) g₁ g_ref).contMDiff
+
+/-- Slot insertion is subtractive in the inserted endomorphism section. -/
+private lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (Λ Λ' : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    slotInsertEndoCc (I := I) (M := M) g₀ s (Λ - Λ') =
+      slotInsertEndoCc (I := I) (M := M) g₀ s Λ -
+        slotInsertEndoCc (I := I) (M := M) g₀ s Λ' := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  have hRHS : (show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ s Λ -
+          slotInsertEndoCc (I := I) (M := M) g₀ s Λ').toSection x) D =
+      slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) D -
+        slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ' x) D := by
+    rw [show ((slotInsertEndoCc (I := I) (M := M) g₀ s Λ -
+          slotInsertEndoCc (I := I) (M := M) g₀ s Λ').toSection x) =
+        (slotInsertEndoCc (I := I) (M := M) g₀ s Λ).toSection x -
+          (slotInsertEndoCc (I := I) (M := M) g₀ s Λ').toSection x from rfl]
+    rfl
+  rw [hRHS]
+  have hLHS : (show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ s (Λ - Λ')).toSection x) D =
+      slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x ((Λ - Λ') x) D := rfl
+  rw [hLHS, show ((Λ - Λ') x) = Λ x - Λ' x from rfl,
+    slotInsertEndoFib_sub_left (I := I) (M := M) (s + 1) 0 x (Λ x) (Λ' x)]
+  rw [ContinuousLinearMap.sub_apply]
+
+/-- **HOIST.**  Slot-`0` insertion of the connection-difference endomorphism is the slot-`0`
+cometric raise of `wAlphaB`.  The `wAlphaA`-free companion of
+`deTurckLieWEndoInsert_eq_cometricRaise`. -/
+theorem connDiffDVFInsert_eq_cometricRaise (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
+    slotInsertEndoCc (I := I) (M := M) g₀ 0 (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref) =
+      cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (wAlphaB (I := I) (M := M) g₀ g₁ g_ref) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensorRSSpace_ext 1 1 x
+  intro om
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  apply LinearMap.ext
+  intro w
+  rw [cotangentToDualLinear_apply, cotangentToDualLinear_apply]
+  rw [cotangentToDual_cometricRaiseSlot0_gen (I := I) (M := M) g₀
+    (wAlphaB (I := I) (M := M) g₀ g₁ g_ref) x om w]
+  rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref)).toSection x) om =
+      slotInsertEndoFib (I := I) (M := M) 1 0 x
+        (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x) om from rfl]
+  rw [cotangentToDual_slotInsertEndoFib' (I := I) (M := M) x
+    (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x) om w]
+  rw [wAlphaB_unitModel_apply (I := I) (M := M) g₀ g₁ g_ref x
+    (inverseMetricSharpFib (I := I) g₀ x om) w]
+  rw [show cotangentToDual (I := I) om
+        (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x w) =
+      g₀.inner x (inverseMetricSharpFib (I := I) g₀ x om)
+        (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x w) from by
+    rw [← cotangentToDualLinear_apply]
+    exact (inverseMetricSharpFib_inner (I := I) g₀ x om
+      (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x w)).symm]
+  rw [g₀.symm x (inverseMetricSharpFib (I := I) g₀ x om)
+    (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref x w)]
+  rfl
+
+/-- The slot-`0` cometric raise is a jet isometry (generic `(0, s + 2)` field). -/
+private lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 1 (s + 1) i
+        (cometricRaiseSlot0Field (I := I) (M := M) g₀ s W)‖ =
+      ‖iteratedCovGrad (I := I) g₀ 0 (s + 2) i W‖ := by
+  refine raisedKoszul_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
+  rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
+    tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs,
+    tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
+  exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ s W i x
+
+set_option linter.unusedVariables false in
+/-- **Per-order `wAlphaB` jet-`L²` (`ballUniform`).**  The connection-difference half
+`wAlphaB = appCc(wCA)(wOmega)` is `∇²P`-free, so each `∇^i` is bounded uniformly over the ball
+(the `hBsum` arm of `wAlpha_order0_jetL2_generic`, isolated for reuse by the `lc0Insert`-diff
+atom). -/
+private theorem wAlphaB_jetL2_perOrder_generic
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ F : ℕ → ℝ, (∀ i, 0 ≤ F i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ i : ℕ, i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤ F i := by
+  classical
+  obtain ⟨ΛO, FO, hΛO_nn, hFO_nn, hOgen⟩ :=
+    wOmega_lowOrder_jetL2_succ_generic (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨ΛCd, FCd, hΛCd_nn, hFCd_nn, hCdgen⟩ :=
+    connDiffSection_lowOrder_jetL2_succ_generic (I := I) (M := M) g₀ a ha_super hR hδ₀
+  have hTA_ex : ∀ q : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensor g₀ 1 2) (T : SmoothCcTensor g₀ 0 1)
+        (ΛS' ΛT' : ℝ), 0 ≤ ΛS' → 0 ≤ ΛT' →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x (S.toSection x) ≤ ΛS' ^ 2) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 1 x (T.toSection x) ≤ ΛT' ^ 2) →
+        MeasureTheory.Integrable
+            (fun x => ∑ i ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+                  ((iteratedCovGrad (I := I) g₀ 1 2 i S).toSection x)
+                * ∑ l ∈ Finset.range (q + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + l) x
+                      ((iteratedCovGrad (I := I) g₀ 0 1 l T).toSection x))
+            (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+          (∫ x, (∑ i ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+                  ((iteratedCovGrad (I := I) g₀ 1 2 i S).toSection x)
+                * ∑ l ∈ Finset.range (q + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + l) x
+                      ((iteratedCovGrad (I := I) g₀ 0 1 l T).toSection x))
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+            C * (ΛT' ^ 2 * ∑ i ∈ Finset.range (q + 1),
+                  ‖iteratedCovGrad (I := I) g₀ 1 2 i S‖ ^ 2
+                + ΛS' ^ 2 * ∑ l ∈ Finset.range (q + 1),
+                  ‖iteratedCovGrad (I := I) g₀ 0 1 l T‖ ^ 2) := by
+    intro q
+    obtain ⟨C, hC_nn, hC⟩ :=
+      exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+        (I := I) (M := M) g₀ 1 0 2 1 q
+    exact ⟨C, hC_nn, fun S T ΛS' ΛT' h1 h2 h3 h4 => hC S T ΛS' ΛT' h1 h2 h3 h4⟩
+  choose CT hCT_nn hCT using hTA_ex
+  refine ⟨fun i => appCcGdiag (E := E) i * (CT i * (ΛO 0 * FCd i + ΛCd 0 * FO i)),
+    fun i => mul_nonneg (appCcGdiag_nonneg (E := E) i)
+      (mul_nonneg (hCT_nn i) (add_nonneg (mul_nonneg (hΛO_nn 0) (hFCd_nn i))
+        (mul_nonneg (hΛCd_nn 0) (hFO_nn i)))), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hPball
+  obtain ⟨hOlow, hOsum⟩ := hOgen g₁ P htie hδ_le hδ0 hδ hPball
+  obtain ⟨hCdlow, hCdsum⟩ := hCdgen g₁ P htie hδ_le hδ0 hδ hPball
+  have hwCAlow : ∀ n : ℕ, n ≤ 1 → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 n (wCA (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      ΛCd n := by
+    intro n hn x
+    rw [rfns_iCG_wCA_eq_connDiffSection (I := I) (M := M) g₀ g₁ n x]
+    exact hCdlow n hn x
+  have hwCAsum : ∀ i : ℕ, i ≤ a + 1 →
+      ∑ q ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 1 2 q (wCA (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ FCd i := by
+    intro i hi
+    refine le_trans (le_of_eq (Finset.sum_congr rfl (fun q _ => ?_))) (hCdsum i hi)
+    rw [norm_iCG_wCA_eq_connDiffSection (I := I) (M := M) g₀ g₁ q]
+  have hBform : wAlphaB (I := I) (M := M) g₀ g₁ g_bg =
+      appCc (I := I) (M := M) g₀ 1 2 (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ g_bg) := rfl
+  intro i hi
+  have hO0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 1 x
+      ((wOmega (I := I) (M := M) g₀ g₁ g_bg).toSection x) ≤ (Real.sqrt (ΛO 0)) ^ 2 := by
+    intro x
+    rw [Real.sq_sqrt (hΛO_nn 0)]
+    have h := hOlow 0 (by omega) x
+    simpa only [iteratedCovGrad_zero] using h
+  have hCA0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+      ((wCA (I := I) (M := M) g₀ g₁).toSection x) ≤ (Real.sqrt (ΛCd 0)) ^ 2 := by
+    intro x
+    rw [Real.sq_sqrt (hΛCd_nn 0)]
+    have h := hwCAlow 0 (by omega) x
+    simpa only [iteratedCovGrad_zero] using h
+  obtain ⟨hgrid_int, hgrid_bound⟩ := hCT i (wCA (I := I) (M := M) g₀ g₁)
+    (wOmega (I := I) (M := M) g₀ g₁ g_bg) (Real.sqrt (ΛCd 0)) (Real.sqrt (ΛO 0))
+    (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hCA0 hO0
+  rw [hBform]
+  have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀
+    0 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 0 2 i
+      (appCc (I := I) (M := M) g₀ 1 2 (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ g_bg)))
+    (fun x => appCcGdiag (E := E) i *
+      ∑ n ∈ Finset.range (i + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 n (wCA (I := I) (M := M) g₀ g₁)).toSection x)
+          * ∑ l ∈ Finset.range (i + 1 - n),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + l) x
+                ((iteratedCovGrad (I := I) g₀ 0 1 l
+                  (wOmega (I := I) (M := M) g₀ g₁ g_bg)).toSection x))
+    (hgrid_int.const_mul (appCcGdiag (E := E) i))
+    (fun x => appCc_iteratedCovGrad_diagonalProductGrid_le (I := I) (M := M) g₀ 1 2
+      (wCA (I := I) (M := M) g₀ g₁) (wOmega (I := I) (M := M) g₀ g₁ g_bg) i x)
+  refine le_trans hkey ?_
+  rw [MeasureTheory.integral_const_mul]
+  refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) i)
+  refine le_trans hgrid_bound ?_
+  refine mul_le_mul_of_nonneg_left ?_ (hCT_nn i)
+  rw [Real.sq_sqrt (hΛO_nn 0), Real.sq_sqrt (hΛCd_nn 0)]
+  have e1 : ΛO 0 * (∑ n ∈ Finset.range (i + 1),
+      ‖iteratedCovGrad (I := I) g₀ 1 2 n (wCA (I := I) (M := M) g₀ g₁)‖ ^ 2) ≤
+      ΛO 0 * FCd i := mul_le_mul_of_nonneg_left (hwCAsum i (by omega)) (hΛO_nn 0)
+  have e2 : ΛCd 0 * (∑ l ∈ Finset.range (i + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 1 l (wOmega (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) ≤
+      ΛCd 0 * FO i := mul_le_mul_of_nonneg_left (hOsum i (by omega)) (hΛCd_nn 0)
+  linarith [e1, e2]
+
 set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
@@ -3169,6 +3409,162 @@ theorem deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform
     rw [hz]
     have := hF_nn i
     nlinarith [hF_nn i]
+
+/-- Squared triangle over two summands: `t ≤ u + v`, `u² ≤ c₁`, `v² ≤ c₂` give
+`t² ≤ 2·(c₁ + c₂)`. -/
+private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
+    (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
+  have huv : 0 ≤ u + v := by linarith
+  nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
+
+set_option linter.unusedVariables false in
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
+    Icc_subset_realizedSmallSet) in
+/-- **`(1, 1)` endo-difference `ballUniform` producer.**  Per-order jet-`L²` bound for the
+slot-`0` insertion of the connection-difference endomorphism DIFFERENCE
+`connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg`, at `g₁ = realizedFam`, uniform
+over the ball (`∇²P`-free ⟹ pure `ballUniform`, no top term).  The `lc0Insert`-difference `Kc`
+atom consumes this: via `nEndo_diff` the leaf's `(2, 2)` insert-difference reduces to it. -/
+theorem connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 1 1 i
+              (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                (connDiffDVFSection (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ -
+                  connDiffDVFSection (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ^ 2 ≤ K i := by
+  classical
+  obtain ⟨F0, hF0_nn, hgen0⟩ :=
+    wAlphaB_jetL2_perOrder_generic (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
+  obtain ⟨Fbg, hFbg_nn, hgenbg⟩ :=
+    wAlphaB_jetL2_perOrder_generic (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨fun i => 2 * (F0 i + Fbg i),
+    fun i => by have := hF0_nn i; have := hFbg_nn i; linarith, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  by_cases hMne : Nonempty M
+  · obtain ⟨x₀⟩ := hMne
+    have hs0 : (0 : ℝ) ≤ s := hs.1
+    have hs1 : s ≤ 1 := hs.2
+    have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+        ((1 - s) * δ' + s * δ) :=
+      convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+    have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+      have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+      have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+      have e3 : (1 - s) * δ₀ + s * δ₀ = δ₀ := by ring
+      linarith [e1, e2, e3]
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w :=
+      fun y v w =>
+        realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ'
+          (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+    have hPball : ∀ j : ℕ, j ≤ a + 2 →
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
+      intro j hj
+      have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+          = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+            + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+        rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+          iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+      rw [heq]
+      calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+              + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+          ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+              + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+        _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+              + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+            rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+              abs_of_nonneg h1ms, abs_of_nonneg hs0]
+        _ ≤ (1 - s) * R + s * R :=
+            add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+              (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+        _ = R := by ring
+    have hδP0 : 0 ≤ (1 - s) * δ' + s * δ := by
+      obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+        haveI : Nontrivial (TangentSpace I x₀) := by
+          have hfr : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+            have heq : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+            rw [heq]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+          exact Module.nontrivial_of_finrank_pos hfr
+        exact exists_ne 0
+      have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+      have hbound := hδP x₀ v v
+      have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+      have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀
+          (convexPerturbation (I := I) g₀ T T' s) x₀ v v| := abs_nonneg _
+      by_contra hδc
+      have hδc' : (1 - s) * δ' + s * δ < 0 := lt_of_not_ge hδc
+      have hrhs_neg : ((1 - s) * δ' + s * δ) * Real.sqrt (g₀.inner x₀ v v) *
+          Real.sqrt (g₀.inner x₀ v v) < 0 := by
+        have h1 : ((1 - s) * δ' + s * δ) * Real.sqrt (g₀.inner x₀ v v) < 0 :=
+          mul_neg_of_neg_of_pos hδc' hsqrt_pos
+        exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+      linarith [le_trans habs_nn hbound]
+    have hB0 := hgen0 (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      (convexPerturbation (I := I) g₀ T T' s) htie hδP_le hδP0 hδP hPball i hi
+    have hBbg := hgenbg (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      (convexPerturbation (I := I) g₀ T T' s) htie hδP_le hδP0 hδP hPball i hi
+    rw [slotInsertEndoCc_sub, connDiffDVFInsert_eq_cometricRaise,
+      connDiffDVFInsert_eq_cometricRaise, iteratedCovGrad_sub]
+    have hiso0 : ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀))‖ =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i
+          (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)‖ :=
+      norm_iCG_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 0
+        (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀) i
+    have hisobg : ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i
+          (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ :=
+      norm_iCG_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 0
+        (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) i
+    have htri' : ‖iteratedCovGrad (I := I) g₀ 1 1 i
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+              (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)) -
+          iteratedCovGrad (I := I) g₀ 1 1 i
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+              (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i
+            (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)‖ +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 i
+            (wAlphaB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ := by
+      rw [← hiso0, ← hisobg]
+      exact norm_sub_le _ _
+    exact sq_le_two_add _ _ _ (F0 i) (Fbg i) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+      htri' hB0 hBbg
+  · haveI hem : IsEmpty M := not_nonempty_iff.mp hMne
+    have hz : ‖iteratedCovGrad (I := I) g₀ 1 1 i
+        (slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (connDiffDVFSection (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ -
+            connDiffDVFSection (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ = 0 := by
+      rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
+        MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+    rw [hz]
+    have h0 := hF0_nn i
+    have hb := hFbg_nn i
+    nlinarith [hF0_nn i, hFbg_nn i]
 
 /-! ### DLb top-separated tower (insert-level producer)
 
@@ -4191,6 +4587,9 @@ theorem deTurckLieWEndoInsert_realizedFam_jetL2_summed_topSeparated
     (fun i hi => hper T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs i hi)
 
 end DLbTopSeparated
+
+#print axioms connDiffDVFInsert_eq_cometricRaise
+#print axioms connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform
 
 end DifferentialGeometry.Integral.Connection
 

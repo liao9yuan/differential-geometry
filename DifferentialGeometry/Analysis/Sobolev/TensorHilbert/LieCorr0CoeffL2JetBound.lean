@@ -42,7 +42,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckLieEndoArmField deTurckLieEndoArmField_toSection deTurckLieDLbFib
-    reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen_apply
+    reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen reindexCoeffFibGen_apply
     domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (realizedFam convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
@@ -465,34 +465,288 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
 
 /-! ## The `lc0Insert`-difference `Kc` atom (`lc0Insert g_bg − lc0Insert g₀`)
 
-By `nEndo_diff` (`LieCorr0Split.lean:103`) the difference of insertion pieces is the
-slot insertion of the endomorphism
-`Endo = connDiff g₁ g₀ (deTurckVF g₁ g₀) − connDiff g₁ g₀ (deTurckVF g₁ g_bg)`,
-i.e. the moving connection difference `connDiff g₁ g₀` contracted with the
-deTurckVF-difference `Vdiff = deTurckVF g₁ g₀ − deTurckVF g₁ g_bg`.
+By `nEndo_diff` (`LieCorr0Split.lean:103`) the difference of insertion pieces is the `(2, 2)`
+derivation insertion of the endomorphism
+`connDiff g₁ g₀ (deTurckVF g₁ g₀) − connDiff g₁ g₀ (deTurckVF g₁ g_bg)`
+= `connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg` (`endoDiffSection`).  Its
+slot-`0` `(1, 1)` insertion is `cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g₀ − wAlphaB g₀ g₁ g_bg)`
+(producer HOIST `connDiffDVFInsert_eq_cometricRaise`).  Since `wAlphaB` is `∇²P`-free its jets are
+`ballUniform` per order, so the `(1, 1)` object is bounded by the producer
+`connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` (crude triangle
+`wAlphaB g₀ − wAlphaB g_bg`; the `wOmegaDiff_eq` cancellation is NOT needed for a `ballUniform`
+bound).  Here we (a) prove the `(2, 2)` insert-difference is the slotInsert-sum of `endoDiffSection`
+(`lc0InsertDiff_eq_slotInsert_sum`, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`), (b)
+reduce it to the `(1, 1)` object `×4·finrank` (mirroring `normSq_iCG_dlbField_le`), and (c) chain the
+producer bound to discharge the atom. -/
 
-Unlike `lc0Riem` (one live cometric factor on a fixed passenger), this piece has
-**two live factors** whose product is an *interior-product contraction* — not the
-operator *composition* that `appCcRS` and its product grid
-(`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`) cover.  The tree
-has no `clm_apply`/interior-product Leibniz jet grid, and the natural
-committed home of the object,
-`cometricRaise (wAlphaB) = slotInsert (connDiff·deTurckVF)` extracted from
-`deTurckLieWEndoInsert_eq_cometricRaise`, lives entirely in the `private`
-`wAlphaB`/`wOmega`/`wCA` machinery of `DeTurckVectorFieldL2JetBound.lean`.  The
-`deTurckLieWEndo`-difference route is provably circular (it reduces `Endo` to
-`Endo`).  So the per-order jet-`L²` `ballUniform` bound for this piece is a
-genuine **missing engine** (see the same-name `.md`); it is isolated below in the
-single `sorry` of `lc0InsertDiff_ballUniform`, and the top-separated atom is
-proved from it with `Ktop = 0`. -/
+/-- Squared triangle over two summands (copied from `DeTurckLieCoeffL2JetBound`; the original is
+`private`). -/
+private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
+    (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
+  have huv : 0 ≤ u + v := by linarith
+  nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
+
+set_option linter.unusedSectionVars false in
+/-- Pointwise `rfns(∇^i X) ≤ c·rfns(∇^i Y)` upgrades to `‖∇^i X‖² ≤ c·‖∇^i Y‖²` (copied from
+`DeTurckLieCoeffL2JetBound`; the original is `private`). -/
+private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
+    (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1) (i : ℕ) (c : ℝ)
+    (hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 2 2 i X).toSection x) ≤
+        c * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+          ((iteratedCovGrad (I := I) g₀ 1 1 i Y).toSection x)) :
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i X‖ ^ 2 ≤
+      c * ‖iteratedCovGrad (I := I) g₀ 1 1 i Y‖ ^ 2 := by
+  have hF_int : MeasureTheory.Integrable
+      (fun x => c * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+        ((iteratedCovGrad (I := I) g₀ 1 1 i Y).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 1 (1 + i)
+      (iteratedCovGrad (I := I) g₀ 1 1 i Y)).const_mul c
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 2 2 i X)
+    (fun x => c * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 1 i Y).toSection x))
+    hF_int (fun x => hpt x)
+  refine le_trans key (le_of_eq ?_)
+  rw [MeasureTheory.integral_const_mul]
+  congr 1
+  rw [SmoothCcTensor.norm_def (I := I) (M := M) (iteratedCovGrad (I := I) g₀ 1 1 i Y)]
+  exact (tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 1 (1 + i)
+    (iteratedCovGrad (I := I) g₀ 1 1 i Y)).symm
+
+/-- The `(1, 1)` endomorphism-difference section carried by the `lc0Insert`-difference:
+`connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg`; equals `lieCorr0NEndo g_bg − g₀`
+pointwise (`nEndo_diff`). -/
+private def endoDiffSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
+  connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
+    connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg
+
+/-- Pointwise: the endo-difference section is the `lieCorr0NEndo` difference (`nEndo_diff`). -/
+private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x =
+      lieCorr0NEndo (I := I) g₀ g₁ g_bg x - lieCorr0NEndo (I := I) g₀ g₁ g₀ x := by
+  simp only [endoDiffSection, ContMDiffSection.coe_sub, Pi.sub_apply]
+  exact (nEndo_diff (I := I) (M := M) g₀ g₁ g_bg x).symm
+
+set_option linter.unusedSectionVars false in
+/-- **Field identity.**  The `lc0Insert`-difference is the slotInsert-sum of the endo-difference
+section (mirrors `deTurckLieDLbCoeffField_eq_slotInsert_sum`). -/
+private theorem lc0InsertDiff_eq_slotInsert_sum (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
+      slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)
+        + reindexCoeffGen (I := I) (M := M) g₀ 2 2
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+            (Equiv.swap (0 : Fin 2) 1) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  have hsum : (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x
+          + (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                  (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+              (Equiv.swap (0 : Fin 2) 1)).toSection x) D
+      = (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x) D
+        + (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                  (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+              (Equiv.swap (0 : Fin 2) 1)).toSection x) D := rfl
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
+          lc0Insert (I := I) (M := M) g₀ g₁ g₀).toSection x) D) m =
+    Tensor0SSpace.toModel
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x
+          + (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                  (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+              (Equiv.swap (0 : Fin 2) 1)).toSection x) D) m
+  rw [hsum, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
+          lc0Insert (I := I) (M := M) g₀ g₁ g₀).toSection x) D
+      = lieCorr0InsertFib (I := I) g₀ g₁ g_bg x D -
+          lieCorr0InsertFib (I := I) g₀ g₁ g₀ x D from rfl]
+  rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
+  rw [lieCorr0InsertFib_toModel (I := I) g₀ g₁ g_bg x D m,
+    lieCorr0InsertFib_toModel (I := I) g₀ g₁ g₀ x D m]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x) D
+      = slotInsertEndoFib (I := I) (M := M) 2 0 x
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x) D from rfl]
+  rw [slotInsertEndoFib_apply_eval (I := I) (M := M) 2 0 x
+    (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x) D m]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+            (Equiv.swap (0 : Fin 2) 1)).toSection x) D
+      = reindexCoeffFibGen (I := I) 2 2 (Equiv.swap (0 : Fin 2) 1) x
+          (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))).toSection x) D from rfl]
+  rw [reindexCoeffFibGen_apply (I := I) 2 2 (Equiv.swap (0 : Fin 2) 1) x
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))).toSection x) D]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))).toSection x)
+      = (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          rsDomDomCongr (I := I) (M := M) (Equiv.swap (0 : Fin 2) 1)
+            ((slotInsertEndoCc (I := I) (M := M) g₀ 1
+              (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x)) from rfl]
+  rw [toModel_rsDomDomCongr_apply (I := I) (M := M) (Equiv.swap (0 : Fin 2) 1)
+    ((slotInsertEndoCc (I := I) (M := M) g₀ 1
+      (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x)
+    (Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+        (Tensor0SSpace.toModel D)))]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)).toSection x)
+        (Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+            (Tensor0SSpace.toModel D)))
+      = slotInsertEndoFib (I := I) (M := M) 2 0 x
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x)
+          (Tensor0SSpace.ofModel
+            (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+              (Tensor0SSpace.toModel D))) from rfl]
+  rw [slotInsertEndoFib_apply_eval (I := I) (M := M) 2 0 x
+    (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x)
+    (Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+        (Tensor0SSpace.toModel D)))
+    (fun i => m ((Equiv.swap (0 : Fin 2) 1) i))]
+  rw [Tensor0SSpace.toModel_ofModel, ContinuousMultilinearMap.domDomCongr_apply]
+  have harg : (fun k => Function.update (fun i => m ((Equiv.swap (0 : Fin 2) 1) i)) 0
+        (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x
+          ((fun i => m ((Equiv.swap (0 : Fin 2) 1) i)) 0))
+        ((Equiv.swap (0 : Fin 2) 1) k))
+      = Function.update m 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x (m 1)) := by
+    funext k
+    have hswap0 : (Equiv.swap (0 : Fin 2) 1) 0 = 1 := Equiv.swap_apply_left 0 1
+    have hswap1 : (Equiv.swap (0 : Fin 2) 1) 1 = 0 := Equiv.swap_apply_right 0 1
+    simp only [Function.update_apply]
+    rw [hswap0, Equiv.swap_apply_self]
+    have hcond : ((Equiv.swap (0 : Fin 2) 1) k = 0) = (k = 1) := by
+      apply propext
+      constructor
+      · intro h
+        have h2 := congrArg (Equiv.swap (0 : Fin 2) 1) h
+        rwa [Equiv.swap_apply_self, hswap0] at h2
+      · intro h
+        rw [h, hswap1]
+    simp only [hcond]
+  rw [harg]
+  rw [endoDiffSection_apply (I := I) (M := M) g₀ g₁ g_bg x]
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
+  rw [ContinuousMultilinearMap.map_update_sub, ContinuousMultilinearMap.map_update_sub]
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- **`(2, 2) → (1, 1)` reduction.**  The `lc0Insert`-difference jet is bounded by
+`4·finrank` times the slot-`0` insert of `endoDiffSection` (mirrors `normSq_iCG_dlbField_le`). -/
+private theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
+          lc0Insert (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 ≤
+      4 * (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (slotInsertEndoCc (I := I) (M := M) g₀ 0
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))‖ ^ 2 := by
+  have hL2A : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (slotInsertEndoCc (I := I) (M := M) g₀ 1
+        (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (slotInsertEndoCc (I := I) (M := M) g₀ 0
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))‖ ^ 2 :=
+    normSq_iCG_le_scaled (I := I) (M := M) g₀
+      (slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))
+      (slotInsertEndoCc (I := I) (M := M) g₀ 0 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))
+      i (Module.finrank ℝ E : ℝ)
+      (fun x => by
+        have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo (I := I) (M := M) g₀ 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg) i x
+        rwa [pow_one] at h)
+  have hL2B : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+        (Equiv.swap (0 : Fin 2) 1))‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (slotInsertEndoCc (I := I) (M := M) g₀ 0
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))‖ ^ 2 :=
+    normSq_iCG_le_scaled (I := I) (M := M) g₀
+      (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+        (Equiv.swap (0 : Fin 2) 1))
+      (slotInsertEndoCc (I := I) (M := M) g₀ 0 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))
+      i (Module.finrank ℝ E : ℝ)
+      (fun x => by
+        have heq := rfns_iteratedCovGrad_rsDomDomCongr_both_eq (I := I) (M := M) g₀ 2 2
+          (Equiv.swap (0 : Fin 2) 1) (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)) i x
+        have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo (I := I) (M := M) g₀ 1
+          (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg) i x
+        rw [pow_one] at h
+        exact heq.trans_le h)
+  have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i
+        (lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀)
+      = iteratedCovGrad (I := I) g₀ 2 2 i
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg))
+        + iteratedCovGrad (I := I) g₀ 2 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                  (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
+              (Equiv.swap (0 : Fin 2) 1)) := by
+    rw [lc0InsertDiff_eq_slotInsert_sum (I := I) (M := M) g₀ g₁ g_bg, iteratedCovGrad_add]
+  rw [hgrad]
+  refine le_trans (sq_le_two_add _ _ _ _ _ (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+    (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
 set_option linter.unusedVariables false in
-/-- **MISSING ENGINE (single `sorry`).**  Per-order `ballUniform` jet-`L²` bound for
-the `lc0Insert`-difference piece.  Requires a jet-`L²` producer for the endomorphism
-`connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg)`, whose committed home is the
-`private` `wAlphaB`/`wOmega`/`wCA` layer of `DeTurckVectorFieldL2JetBound.lean`
-(exposed via a public `appCc(wCA, wOmega-difference)` producer, or a new
-interior-product Leibniz jet grid).  This is the only gap in the atom below. -/
+/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0Insert`-difference piece.**  Reduces the
+`(2, 2)` insert-difference to the `(1, 1)` `endoDiffSection` insert (`normSq_iCG_lc0InsertDiff_le`)
+and chains the producer bound (`connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform`).  No
+`sorry`: the former "missing engine" is the producer's HOIST + `wAlphaB` bound. -/
 private theorem lc0InsertDiff_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -510,14 +764,27 @@ private theorem lc0InsertDiff_ballUniform
               (lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
                 - lc0Insert (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)‖ ^ 2
             ≤ K i := by
-  sorry
+  obtain ⟨K, hK_nn, hK⟩ :=
+    connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform (I := I) (M := M) g₀ g_bg a
+      ha_super hR hδ₀
+  have hfr_nn : (0 : ℝ) ≤ 4 * (Module.finrank ℝ E : ℝ) := by positivity
+  refine ⟨fun i => 4 * (Module.finrank ℝ E : ℝ) * K i,
+    fun i => mul_nonneg hfr_nn (hK_nn i), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  have hprod := hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+  have hred := normSq_iCG_lc0InsertDiff_le (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i
+  simp only [endoDiffSection] at hred
+  refine le_trans hred ?_
+  exact mul_le_mul_of_nonneg_left hprod hfr_nn
 
 set_option linter.unusedVariables false in
 /-- **`lc0Insert`-difference `Kc` atom.**  Per-order top-separated jet-`L²` bound for
 `lc0Insert g_bg − lc0Insert g₀` with vanishing top constant (`∇²T`-free: all of it
 lands in the `R`-carrying `Kc`).  Proved from the `ballUniform` bound
-`lc0InsertDiff_ballUniform` by the trivial `Ktop = 0` reshape (`K i ≤ K i·(1+low)`);
-the `ballUniform` bound is the atom's single frontier `sorry`. -/
+`lc0InsertDiff_ballUniform` by the trivial `Ktop = 0` reshape (`K i ≤ K i·(1+low)`).
+Sorry-free: the former "missing engine" is the producer HOIST
+`connDiffDVFInsert_eq_cometricRaise` + `wAlphaB` per-order bound. -/
 private theorem lc0InsertDiff_realizedFam_perOrder_topSep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -555,7 +822,7 @@ private theorem lc0InsertDiff_realizedFam_perOrder_topSep
 #print axioms lc0InsertBase_realizedFam_perOrder_topSeparated
 #print axioms sq_le_five_add
 #print axioms lc0Riem_realizedFam_perOrder_topSep
--- honest: the insert-diff atom depends on `sorryAx` via `lc0InsertDiff_ballUniform`
+#print axioms lc0InsertDiff_ballUniform
 #print axioms lc0InsertDiff_realizedFam_perOrder_topSep
 
 end DifferentialGeometry.Integral.Connection
