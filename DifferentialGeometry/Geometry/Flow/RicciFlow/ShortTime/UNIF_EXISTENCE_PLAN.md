@@ -1629,3 +1629,16 @@ lc0VB/lc0AMix reuse but STOP after atom 2 is green.
 lieCorr0 honest fraction unchanged at ~33% sorry-free (top piece + lc0Riem);
 what advanced is the frontier's SHAPE: from "unstated atom" to "one named
 reusable producer".
+
+### №25 addendum 3 (same day) — wOmegaDiff cancellation ACCEPTED (`1a0d01c70`); lieCorr0 lane at a clean stop
+
+The interior-product frontier for atom 2 DISSOLVED by difference algebra:
+`wOmegaDiff_eq` telescopes the moving connDiff factor out, so the lc0Insert-diff
+endomorphism is lc0Riem-shaped (moving cometric, fixed passenger).  Keystones
+green + axiom-clean; the `slotInsert = cometricRaise(wAlphaB)` hoist honestly
+skipped (finish-or-don't-start rule).  Executor estimate: ~1–2 sessions to
+atom-2 green; remaining layers + their grids recorded in both same-name notes.
+CAUTION kept visible: lc0VB/lc0AMix get NO cancellation (single deTurckVF) —
+the contraction-Leibniz question is live for them; re-assess at their dispatch.
+
+lieCorr0 lane rests here pending the next dispatch; D_N lane still in flight.
