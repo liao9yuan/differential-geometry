@@ -7,6 +7,39 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 11 = `covStep2_diffStep_eval` core, session 4, 2026-07-26): the OC
+  SUM SPLIT landed green + axiom-clean — the structural core of (ii) the H-correction eval.**
+  `covStep2_diffStep_OCsplit` (`#print axioms` = `[propext, Classical.choice, Quot.sound]`; targeted
+  build GREEN 9519 jobs; file's ONLY `sorry` stays `covStepDiff2_mixedComm_le`).  Splits the
+  `covStep2_diffStep_peel` connection-correction sum
+  `∑_{q:Fin(s+2)} H x (update (RR·x) q (∇₂_U(RR q)))` (`H = covStep g₂ (s+1)(diffStep S)`,
+  `RR = cons W (cons V Vslots)`) by `Fin.sum_univ_succ`×2 into the three `∇₂_U`-updated-tuple
+  `H`-applications, each in the exact `Fin.cons`-`Fin.cons` form `diffStep_leibniz_eval` consumes:
+  ```
+  OC = H x [cons (∇₂_U W)   (cons  V            Vslots)]                          -- q=0
+     + H x [cons  W         (cons (∇₂_U V)       Vslots)]                          -- q=1
+     + ∑_{a₀:Fin s} H x [cons W (cons V (update Vslots a₀ (∇₂_U(Vslots a₀))))]     -- q=succ·succ a₀
+  ```
+  Value-level (no proof-local sections): each `∇₂_U ·` is the tangent value
+  `(leviCiv g₂ (fun z => · z) x)(U x)`.  Proof: `Fin.sum_univ_succ`×2 + `simp only [hRRptx, hRR0,
+  hRR1, hRRss, Fin.update_cons_zero, ← Fin.cons_update]` + `ring` (the a=1 `hβ` cons-sum idiom, but
+  keeping `H` unevaluated).  Statement-first paid off: only a LHS paren-balance fix (the `(∑ q …)`
+  wrapper needed its closing `)`), then green.
+  - **What remains for the full OC eval (ii → session 5):** apply `diffStep_leibniz_eval` to each of the
+    three `H`-applications (package `∇₂_U W`/`∇₂_U V`/`∇₂_U(Vslots a₀)` as `covApply` sections via
+    `covApply_contMDiffOn`).  `q=0`/`q=1` are direct (unmodified `Vslots`); **`q=succ·succ a₀` is the
+    hard case** — its `Vslots' = update Vslots a₀ (∇₂_U(Vslots a₀))` appears in the
+    `diffStep_leibniz_eval` output at the SECTION level, and `⇑(update Vslots a₀ Z)` is NOT defeq to the
+    function-family `update (⇑Vslots) a₀ (⇑Z)`, so a value-level statement needs a branch2-scale
+    diagonal/off-diagonal split of the inner sum (or a `coe`-update helper).  This is why the split was
+    factored out: it is the clean, wall-free, proof-local-section-free structural piece; the per-term
+    `diffStep_leibniz_eval` is mechanical for the boundary terms and branch2-scale for the interior, and
+    is cleanest inside the session-5 assembly where the modified sections are proof-local.
+  - **Core now ~70%** (peel + both branches + split + OC-split; the per-term `diffStep_leibniz_eval` OC
+    expansion + the `PieceA−PieceB` ∇₂²S-cancellation assembly + norm CS remain).  Estimate to
+    `covStepDiff2_mixedComm_le` GREEN: **~2 sessions** (OC per-term expansion folded into the assembly
+    ≈ 1, norm CS ≈ 1).
+
 - **UPDATE (a=2 campaign session 10 = `covStep2_diffStep_eval` core, session 3, 2026-07-26): the
   session-9 IPS-`NormedSpace` wall is CURED — LINEARITY SPLIT (iii) COMPLETE, green + axiom-clean.**
   The remedy is `set_option backward.isDefEq.respectTransparency false in` on the two `mdiff` lemmas

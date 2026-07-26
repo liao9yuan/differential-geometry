@@ -1520,6 +1520,74 @@ theorem covStep2_diffStep_split
     extDerivFun_sub_at (I := I) (U x) hf1.neg hf2
   rw [hsub, e1, e2]
 
+open DifferentialGeometry.Integral.Connection in
+/-- **The H-correction (OC) sum split** (session-4 core, correct-by-construction).  Splits the
+`covStep2_diffStep_peel` connection-correction sum
+`∑_{q:Fin(s+2)} H x (update (RR·x) q (∇₂_U(RR q)))` (`H = covStep g₂ (s+1)(diffStep S)`,
+`RR = cons W (cons V Vslots)`) by `Fin.sum_univ_succ`×2 into the three `∇₂_U`-updated-tuple
+`H`-applications, each in the `Fin.cons`-`Fin.cons` form that `diffStep_leibniz_eval` consumes:
+
+* `q=0`: `∇₂_U W` in the derivative slot,
+* `q=1`: `∇₂_U V` in the first covariant slot,
+* `q=succ·succ a₀` (summed over `a₀`): `∇₂_U(Vslots a₀)` in the `a₀`-th covariant slot.
+
+Value-level (no proof-local sections): each `∇₂_U ·` is the tangent value
+`(∇₂ ·)(U x) = (leviCiv g₂ (fun z => · z) x) (U x)`.  Applying `diffStep_leibniz_eval` per term
+(packaging `∇₂_U W`/`∇₂_U V`/`∇₂_U(Vslots a₀)` as `covApply` sections one level down) evaluates each
+`H`-application into its two `diffStep`-Leibniz sums — the remaining step to the full OC eval. -/
+theorem covStep2_diffStep_OCsplit
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (U W V : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Vslots : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    (∑ q : Fin (s + 2),
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x
+          (Function.update
+            (fun b : Fin (s + 2) =>
+              (Fin.cons W (Fin.cons V Vslots) :
+                Fin (s + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+                  (TangentSpace I : M -> Type _)) b x) q
+            ((leviCivitaConnectionOfMetric (I := I) g₂
+                (fun y : M =>
+                  (Fin.cons W (Fin.cons V Vslots) :
+                    Fin (s + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+                      (TangentSpace I : M -> Type _)) q y) x) (U x))))
+      = (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x
+          (Fin.cons ((leviCivitaConnectionOfMetric (I := I) g₂ (fun z => W z) x) (U x))
+            (Fin.cons (V x) (fun a : Fin s => Vslots a x)))
+        + (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x
+            (Fin.cons (W x)
+              (Fin.cons ((leviCivitaConnectionOfMetric (I := I) g₂ (fun z => V z) x) (U x))
+                (fun a : Fin s => Vslots a x)))
+        + ∑ a₀ : Fin s, (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x
+            (Fin.cons (W x)
+              (Fin.cons (V x)
+                (Function.update (fun b : Fin s => Vslots b x) a₀
+                  ((leviCivitaConnectionOfMetric (I := I) g₂ (fun z => Vslots a₀ z) x) (U x))))) := by
+  classical
+  set RR : Fin (s + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _) := Fin.cons W (Fin.cons V Vslots) with hRRdef
+  have hRR0 : (fun y : M => (RR 0) y) = (fun y : M => W y) := by
+    simp only [hRRdef, Fin.cons_zero]
+  have hRR1 : (fun y : M => (RR (Fin.succ 0)) y) = (fun y : M => V y) := by
+    simp only [hRRdef, Fin.cons_succ, Fin.cons_zero]
+  have hRRss : ∀ a₀ : Fin s, (fun y : M => (RR (Fin.succ (Fin.succ a₀))) y)
+      = (fun y : M => Vslots a₀ y) := by
+    intro a₀
+    simp only [hRRdef, Fin.cons_succ]
+  have hRRptx : (fun b : Fin (s + 2) => (RR b) x)
+      = Fin.cons (W x) (Fin.cons (V x) (fun a : Fin s => Vslots a x)) := by
+    funext b
+    refine Fin.cases ?_ (fun i => ?_) b
+    · simp only [hRRdef, Fin.cons_zero]
+    · refine Fin.cases ?_ (fun j => ?_) i <;> simp only [hRRdef, Fin.cons_succ, Fin.cons_zero]
+  rw [Fin.sum_univ_succ, Fin.sum_univ_succ]
+  simp only [hRRptx, hRR0, hRR1, hRRss, Fin.update_cons_zero, ← Fin.cons_update]
+  ring
+
 /-- **FRONTIER (`sorry`) — the a=2 mixed-commutator fibre-realization bridge (the SINGLE genuinely new
 a=2 frontier).**  The `g₂`-fibre norm of the base derivative of the a=1 mixed commutator
 `∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` — the `Term C`
