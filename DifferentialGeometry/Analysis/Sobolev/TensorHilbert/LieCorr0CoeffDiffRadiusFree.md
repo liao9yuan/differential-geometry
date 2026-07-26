@@ -84,14 +84,26 @@ and `cometricRaiseSlot0Field` added to the restricted `TensorSpectral` list (bot
 
 ## Remaining frontier assessment
 
-Discharging `lc0VBAMix_perOrder_rf` = building the two missing atoms' engines (the frozen
-note's resumption plan): (a) the `interior_product`-with-vector jet lemma + deTurckVF↔`wOmega`
-lowering, then `vbPass_jetL2`, then an R-free re-derivation of the `lc0VB` two-arm assembly
-against R-free arm producers (`metricConnDiffLoweredCc` producer is committed but BALL-UNIFORM —
-an R-free sibling via the workhorse is also needed); (b) the `lc0AMix` fibre identity + the same
-producer.  Estimate ~2-4 sessions; classified as missing-groundwork/API (a genuine engine gap,
-not a route-choice or elaboration issue).  No wall expected: both pieces are products of two
-connDiff-family arms — the same currency the workhorse already integrates.
+**UPDATE (2026-07-26, ip-engine session): the `lc0VB` half of the gap is DISSOLVED.**  The
+frozen atom's `vbPass_jetL2` is discharged (frozen leaf ZERO-sorry, axiom-clean) via the new
+generic engine `InteriorProductJetBound.lean` (`ipLowCc` + `rfns_icg_ipLow_le`/`norm_icg_ipLow_le`
+— radius-AGNOSTIC) + the exposed `wOmega_unitModel_apply` bridge + the in-leaf split
+`vbSplit : lc0VBPass = appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))` (see the frozen
+note's session 9).  What discharging `lc0VBAMix_perOrder_rf` still needs (route fully mapped in
+`THREEARM_RECON.md` §11d.7, no unknown frontier):
+
+(a) `lc0VB` R-free: expose `vbSplit`/`vbMcdArm`/`vbMcdArm_rfns_le`/`vbMcdArm_l2_le` from the
+frozen leaf; build the ONE missing producer — the R-free `metricConnDiffLoweredCc` sibling via
+`mcd = wXi g₀ g₁ g_bg + Pκ` (`wXi_lowOrder_jetL2_radiusFree` committed; `Pκ` = fixed-trace ∘
+`slotExtend³(P)` correction, P-jets = the window, P-sup = `Λ₀`); ip arm consumes
+`norm_icg_ipLow_le` + `wOmega_lowOrder_jetL2_radiusFree` (both committed) as-is; then clone this
+file's `lc0Riem_perOrder_rf` integrator assembly.  ~1 session.
+
+(b) `lc0AMix`: the 5-factor traceStep-chain fibre identity — three moving cometric traces at
+ranks `(4,2)/(5,3)/(6,4)` via `reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (`lc0RiemLive`
+pattern, `k = 1,2,3`) + two `slotExtend`-chains over the mcd arms (`g_bg`, `g₀`) + nested grids +
+integrator.  ~1–2 sessions.  Classification unchanged: missing-groundwork/API, now with all
+engines committed except the R-free mcd producer of (a).
 
 ## Honest progress (denominator: (N) `ricci_flow_unif_existence` = 0%, unstated)
 

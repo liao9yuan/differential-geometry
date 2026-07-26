@@ -142,7 +142,10 @@ private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
 
-private lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+/-- **`wXi` is the `g₀`-lowered connection difference `g₁ ↔ g_bg`** at unit-model level (via the
+endpoint cocycle).  Public bridge for the radius-free `metricConnDiffLowered` decomposition
+(`mcd = wXi + P-correction`, brick 4). -/
+lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (wXi (I := I) (M := M) g₀ g₁ g_bg) x m =
       g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (m 0) (m 1)) (m 2) := by
@@ -166,7 +169,10 @@ private lemma wOmega_toSection_unit (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   rw [wOmega, appCc_toSection]
   rfl
 
-private lemma wOmega_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+/-- **`wOmega` is the `g₀`-lowering of the DeTurck vector field**: the unit-model read of
+`wOmega g₀ g₁ g_bg` at `x` is the `g₀`-pairing with `wVF g₁ g_bg x = deTurckVF g₁ g_bg x`.
+Public bridge consumed by the `lc0VB` interior-product arm (`LieCorr0CoeffL2JetBound`). -/
+lemma wOmega_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (z : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 1 (wOmega (I := I) (M := M) g₀ g₁ g_bg) x
         (fun _ : Fin 1 => z) =

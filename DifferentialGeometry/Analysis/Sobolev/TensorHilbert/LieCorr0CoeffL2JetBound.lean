@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieC
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InteriorProductJetBound
 
 /-!
 # `lieCorr0Field` realizedFam jet-L2 top-separated producer
@@ -44,7 +46,9 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckLieEndoArmField deTurckLieEndoArmField_toSection deTurckLieDLbFib
     reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen reindexCoeffFibGen_apply
     domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib
-    metricConnDiffLoweredFib metricConnDiffLoweredFib_contMDiff)
+    tensor0SProdKappaFib_apply unitModel unitTensor
+    metricConnDiffLoweredFib metricConnDiffLoweredFib_contMDiff
+    metricConnDiffLoweredFib_toModel)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (realizedFam convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet)
@@ -895,8 +899,9 @@ private theorem lc0VBPassFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) 
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
 
 /-- **The `lc0VB` moving passenger.**  The `(2, 4)` operator field carrying the `VBPerm` reindex,
-the `metricConnDiffLowered` product, and the `deTurckVF` interior product. -/
-private noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
+the `metricConnDiffLowered` product, and the `deTurckVF` interior product.  Public for the
+radius-free re-derivation (brick 4). -/
+noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
     { toFun := fun x : M =>
@@ -918,8 +923,8 @@ private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
 
 /-- **The `lc0VB` two-arm factorization.**  The vector-bundle contraction piece is `2 ·` the
 operator-field action of the live rank-`2` cometric arm (reused from `lc0Riem`) on the moving
-passenger `lc0VBPass`. -/
-private theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
+passenger `lc0VBPass`.  Public for the radius-free re-derivation (brick 4). -/
+theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VB (I := I) (M := M) g₀ g₁ =
       (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
         (lc0RiemLive (I := I) (M := M) g₀ g₁) (lc0VBPass (I := I) (M := M) g₀ g₁) := by
@@ -929,17 +934,245 @@ private theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply, appCcRS_toSection]
   exact lc0VBFib_eq (I := I) (M := M) g₀ g₁ x
 
+/-! ### `vbPass` discharge machinery: the two-arm split of the moving passenger
+
+`lc0VBPass = [ddc(VBPerm) ∘ prodKappa(mcd)] ∘ ip(deTurckVF)`, split as
+`appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))`:
+
+* `vbMcdArm` is the `(1, 4)` head; its jets equal (`rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`
+  + the `prodKappa = slotExtend` identity `vbPK_eq_slotExt`) the jets of
+  `slotExtend (metricConnDiffLoweredCc g₀ g₁ g₀)`, hence reduce to the session-6 producer;
+* the `ip` tail is the committed `ipLowCc` at `ω := wOmega g₀ g₁ g₀` (the `g₀`-lowered
+  `deTurckVF g₁ g₀`, by `wOmega_unitModel_apply`), with jets from `wOmega`'s producer. -/
+
+/-- The `(1, 4)` head of the moving passenger: the `VBPerm` reindex composed with the
+`metricConnDiffLowered` product. -/
+private noncomputable def vbMcdArmFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x :=
+  (domDomCongrFibRank (I := I) 4 lieCorr0VBPerm x).comp
+    (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
+      (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x))
+
+private theorem vbMcdArmFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 4 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 1 4 ℝ E)
+        (E := fun z : M => TensorRSSpace 1 4 I z) x
+        (TensorRSSpace.ofCLM (vbMcdArmFib (I := I) g₀ g₁ x))) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SModel 4 ℝ E) (V₂ := fun x : M => Tensor0SSpace 4 I x)
+    (φ := fun x => vbMcdArmFib (I := I) g₀ g₁ x)
+  intro Y
+  have hprod := lieCorr0_prod_section_contMDiff (I := I) (p := 1) (q := 3)
+    (fun x => Y x) (fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
+    Y.contMDiff (metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g₀)
+  have hddc := lieCorr0_ddc_section_contMDiff (I := I) (d := 4) lieCorr0VBPerm
+    (fun x => tensor0SProdKappaFib (I := I) x (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
+      (Y x)) hprod
+  refine hddc.congr (fun x => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+    (E := fun z : M => Tensor0SSpace 4 I z) x t) ?_
+  rw [vbMcdArmFib]
+  rw [ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
+
+/-- The `(1, 4)` head of the `lc0VB` moving passenger (`VBPerm` reindex ∘ `metricConnDiffLowered`
+product) as a smooth compactly-supported operator field.  Public for the radius-free
+re-derivation (brick 4). -/
+noncomputable def vbMcdArm (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 1 4 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show TensorRSSpace 1 4 I x from
+          TensorRSSpace.ofCLM (vbMcdArmFib (I := I) g₀ g₁ x))
+      contMDiff_toFun := vbMcdArmFib_contMDiff (I := I) g₀ g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+/-- Leaf-local unit-model read of the `metricConnDiffLowered` arm (clone of the Arm1-private
+`metricConnDiffLoweredCc_unitModel_apply` at `g_bg := g₀`). -/
+private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (m : Fin 3 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) x m =
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (m 0) (m 1)) (m 2) := by
+  rw [unitModel]
+  rw [show (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x
+      (unitTensor (I := I) (M := M) x) =
+      (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+      from rfl]
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
+
+set_option linter.unusedSectionVars false in
+/-- Rank-`0` tensors are scalar multiples of the unit tensor (leaf-local clone). -/
+private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
+    c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
+      unitTensor (I := I) (M := M) x := by
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  beta_reduce
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  have h1 : Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) v = (1 : ℝ) := rfl
+  rw [h1, mul_one]
+  congr 1
+  funext i
+  exact i.elim0
+
+/-- **The session-8 `prodKappa = slotExtend` identity** (Finding 1): the
+`metricConnDiffLowered` product factor of `lc0VBPass` is the slot extension of the
+`metricConnDiffLoweredCc` tensor. -/
+private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (B : Tensor0SSpace 1 I x) :
+    Tensor0SSpace.toModel
+        (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
+          (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x) B) =
+      Tensor0SSpace.toModel
+        (slotExtendFib (I := I) (M := M) g₀ 0 3 x
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x) B) := by
+  classical
+  apply ContinuousMultilinearMap.ext
+  intro u
+  rw [show (u : Fin 4 → E) = Fin.cons (u 0) (Fin.tail u) from (Fin.cons_self_tail u).symm]
+  rw [tensor0SProdKappaFib_apply, Tensor0SSpace.toModel_ofModel,
+    Bundle.continuousMultilinearMap.modelProduct_apply]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 3 x
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
+      (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x) B (u 0) (Fin.tail u)]
+  have hc : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x B (u 0) =
+      Tensor0SSpace.toModel B (fun _ : Fin 1 => u 0) • unitTensor (I := I) (M := M) x := by
+    have h2 := vb_rank0_smul_unit (I := I) (M := M) x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x B (u 0))
+    rw [h2]
+    congr 1
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (T := B) (v0 := u 0)
+      (vs := fun i : Fin 0 => i.elim0)]
+    congr 1
+    funext k
+    fin_cases k
+    rfl
+  rw [hc, ContinuousLinearMap.map_smul, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [show Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀).toSection x)
+        (unitTensor (I := I) (M := M) x)) (Fin.tail u) =
+      unitModel (I := I) (M := M) g₀ 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) x
+        (fun j => Fin.tail u j) from by rw [unitModel]]
+  rw [vbMcd_unitModel (I := I) (M := M) g₀ g₁ x (fun j => Fin.tail u j)]
+  have hcast : ((Fin.cons (u 0) (Fin.tail u) : Fin 4 → E) ∘ Fin.castAdd 3) =
+      (fun _ : Fin 1 => u 0) := by
+    funext i
+    fin_cases i
+    rfl
+  have hnat : ((Fin.cons (u 0) (Fin.tail u) : Fin 4 → E) ∘ Fin.natAdd 1) = Fin.tail u := by
+    funext j
+    have hj : Fin.natAdd 1 j = Fin.succ j := by
+      apply Fin.ext
+      simp [Fin.natAdd, Fin.succ, Nat.add_comm]
+    show Fin.cons (u 0) (Fin.tail u) (Fin.natAdd 1 j) = Fin.tail u j
+    rw [hj, Fin.cons_succ]
+  rw [hcast, hnat]
+  rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x (fun j => Fin.tail u j)]
+
+/-- The head's jets read as an output-slot permutation of `slotExtend (mcdCc)`. -/
+private lemma vbMcdArm_rel (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ∀ (y : M) (d : Tensor0SSpace 1 I y),
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 4 I y from
+            (vbMcdArm (I := I) (M := M) g₀ g₁).toSection y) d) =
+        ContinuousMultilinearMap.domDomCongr lieCorr0VBPerm
+          (Tensor0SSpace.toModel
+            ((show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 4 I y from
+              (slotExtend (I := I) (M := M) g₀ 0 3
+                (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)).toSection y) d)) := by
+  intro y d
+  rw [show ((show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 4 I y from
+      (vbMcdArm (I := I) (M := M) g₀ g₁).toSection y) d) =
+      domDomCongrFibRank (I := I) 4 lieCorr0VBPerm y
+        (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) y
+          (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ y) d) from rfl]
+  rw [domDomCongrFibRank_apply, Tensor0SSpace.toModel_ofModel]
+  exact congrArg (ContinuousMultilinearMap.domDomCongr lieCorr0VBPerm)
+    (vbPK_eq_slotExt (I := I) (M := M) g₀ g₁ y d)
+
+/-- Pointwise: the head's jets are dominated by the `metricConnDiffLowered` jets. -/
+lemma vbMcdArm_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (4 + m) x
+        ((iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + m) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 m
+            (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)).toSection x) := by
+  rw [rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 1 4
+    lieCorr0VBPerm
+    (slotExtend (I := I) (M := M) g₀ 0 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀))
+    (vbMcdArm (I := I) (M := M) g₀ g₁) (vbMcdArm_rel (I := I) (M := M) g₀ g₁) m x]
+  exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 3
+    (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) m x
+
+/-- `L²` form of `vbMcdArm_rfns_le`. -/
+lemma vbMcdArm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 0 3 m
+          (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 := by
+  have hint : MeasureTheory.Integrable
+      (fun x => (Module.finrank ℝ E : ℝ) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + m) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 m
+            (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (3 + m)
+      (iteratedCovGrad (I := I) g₀ 0 3 m
+        (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀))).const_mul _
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 1 (4 + m)
+    (iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)) _ hint
+    (fun x => vbMcdArm_rfns_le (I := I) (M := M) g₀ g₁ m x)
+  refine le_trans key (le_of_eq ?_)
+  rw [MeasureTheory.integral_const_mul]
+  refine congrArg _ ?_
+  rw [← tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 0 (3 + m)
+      (iteratedCovGrad (I := I) g₀ 0 3 m
+        (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)),
+    ← SmoothCcTensor.norm_def]
+
+/-- **The two-arm split of the moving passenger**: `lc0VBPass` is the operator-field action of
+the `(1, 4)` head on the interior-product tail `ipLowCc (wOmega g₀ g₁ g₀)`.  Public for the
+radius-free re-derivation (brick 4). -/
+theorem vbSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
+    lc0VBPass (I := I) (M := M) g₀ g₁ =
+      appCcRS (I := I) (M := M) g₀ 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
+        (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀)) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCcRS_toSection]
+  have hflat : ∀ z : TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 1 (wOmega (I := I) (M := M) g₀ g₁ g₀) x
+          (fun _ : Fin 1 => z) =
+        g₀.inner x ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ :
+          Π b : M, TangentSpace I b) x) z := by
+    intro z
+    rw [wOmega_unitModel_apply (I := I) (M := M) g₀ g₁ g₀ x z]
+    rfl
+  rw [ipLowCc_toSec_ip (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀) x
+    ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x) hflat]
+  rfl
+
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
-/-- **VBPass jet frontier — HONEST `sorry` (the single remaining `lc0VB` frontier).**  The
-g₁-generic order-`0` fibre-norm sup + per-order jet-`L²` sum bounds for the moving passenger
-`lc0VBPass g₀ g₁ = domDomCongr(VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
-∘ ip(deTurckVF g₁ g₀)`.  Both armed producers exist —
-`metricConnDiffLoweredCc_jetL2_ballUniform_generic` (the metricConnDiffLowered arm) and
-`lieArm1_connDiff_feed` (`connDiffSection`, the deTurckVF arm via its cometric-trace fold) — but
-bounding this `(2, 4)` operator field needs the two nested-`appCcRS` Leibniz steps for `prodKappa`
-and `interior_product`, not yet committed.  Route (see `.md`): `lc0VBPass ≐ appCcRS g₀ 2 1 4
-(prodKappa mcd) (ip dvf)` → product grid → the two producers. -/
+/-- **VBPass jet bound (discharged).**  The g₁-generic order-`0` fibre-norm sup + per-order
+jet-`L²` sum bounds for the moving passenger `lc0VBPass g₀ g₁ = domDomCongr(VBPerm) ∘
+prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) ∘ ip(deTurckVF g₁ g₀)`.  Via the two-arm split
+`vbSplit` (`lc0VBPass = appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))`), the
+product grid, and the two-arm integrator: the head's jets reduce to the session-6
+`metricConnDiffLoweredCc` producer (output-permutation invariance + `slotExtend`), and the
+interior-product tail's jets reduce through the committed `ipLowCc` engine to the `wOmega`
+producer (the `g₀`-lowered `deTurckVF`). -/
 private theorem vbPass_jetL2
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -956,7 +1189,143 @@ private theorem vbPass_jetL2
         ∀ (i : ℕ), i ≤ a →
           ∑ q ∈ Finset.range (i + 1),
             ‖iteratedCovGrad (I := I) g₀ 2 4 q (lc0VBPass (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ F i := by
-  sorry
+  classical
+  obtain ⟨Λmcd, Fmcd, hΛmcd_nn, hFmcd_nn, hmcd⟩ :=
+    metricConnDiffLoweredCc_jetL2_ballUniform_generic (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
+  obtain ⟨cip, hcip_nn, hcip⟩ := rfns_icg_ipLow_le (I := I) (M := M) g₀
+  obtain ⟨cipL, hcipL_nn, hcipL⟩ := norm_icg_ipLow_le (I := I) (M := M) g₀
+  obtain ⟨ΛΩ, FΩ, hΛΩ_nn, hFΩ_nn, hΩgen⟩ :=
+    wOmega_lowOrder_jetL2_succ_generic (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
+  choose CI hCI_nn hCI using
+    (fun k : ℕ => exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g₀ 1 2 4 1 k)
+  set n : ℝ := (Module.finrank ℝ E : ℝ) with hn
+  have hn_nn : (0 : ℝ) ≤ n := Nat.cast_nonneg _
+  set BS : ℝ := n * Λmcd with hBS
+  set BT : ℝ := cip 0 * ΛΩ 0 with hBT
+  have hBS_nn : 0 ≤ BS := mul_nonneg hn_nn hΛmcd_nn
+  have hBT_nn : 0 ≤ BT := mul_nonneg (hcip_nn 0) (hΛΩ_nn 0)
+  set F : ℕ → ℝ := fun i => ∑ q ∈ Finset.range (i + 1),
+    appCcGdiag (E := E) q * (CI q * (BT * (n * Fmcd q)
+      + BS * ∑ l ∈ Finset.range (q + 1), cipL l * FΩ l)) with hF_def
+  have hF_nn : ∀ i, 0 ≤ F i := fun i => Finset.sum_nonneg (fun q _ =>
+    mul_nonneg (appCcGdiag_nonneg (E := E) q) (mul_nonneg (hCI_nn q)
+      (add_nonneg (mul_nonneg hBT_nn (mul_nonneg hn_nn (hFmcd_nn q)))
+        (mul_nonneg hBS_nn (Finset.sum_nonneg (fun l _ =>
+          mul_nonneg (hcipL_nn l) (hFΩ_nn l)))))))
+  refine ⟨BS * BT, F, mul_nonneg hBS_nn hBT_nn, hF_nn, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball
+  by_cases hM : Nonempty M
+  · -- nonempty: derive `0 ≤ δ` from the fibre bound and feed the two producers
+    obtain ⟨x0⟩ := hM
+    have hδ0 : 0 ≤ δ := by
+      haveI : Nontrivial E := Module.nontrivial_of_finrank_pos (R := ℝ) (M := E)
+        (Nat.pos_of_ne_zero (NeZero.ne _))
+      obtain ⟨v, hv⟩ := exists_ne (0 : E)
+      have hgpos : 0 < g₀.inner x0 (show TangentSpace I x0 from v)
+          (show TangentSpace I x0 from v) :=
+        g₀.pos x0 (show TangentSpace I x0 from v) hv
+      have hb := hδ x0 (show TangentSpace I x0 from v) (show TangentSpace I x0 from v)
+      have h1 : 0 ≤ δ * Real.sqrt (g₀.inner x0 (show TangentSpace I x0 from v)
+            (show TangentSpace I x0 from v)) *
+          Real.sqrt (g₀.inner x0 (show TangentSpace I x0 from v)
+            (show TangentSpace I x0 from v)) :=
+        le_trans (abs_nonneg _) hb
+      rw [mul_assoc, Real.mul_self_sqrt (le_of_lt hgpos)] at h1
+      exact (mul_nonneg_iff_of_pos_right hgpos).mp h1
+    obtain ⟨hmcd_sup, hmcd_jets⟩ := hmcd g₁ P htie hδ_le hδ0 hδ hPball
+    obtain ⟨hΩ_sup, hΩ_jets⟩ := hΩgen g₁ P htie hδ_le hδ0 hδ hPball
+    have hS_sup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 1 4 x
+        ((vbMcdArm (I := I) (M := M) g₀ g₁).toSection x) ≤ Real.sqrt BS ^ 2 := by
+      intro x
+      have h := vbMcdArm_rfns_le (I := I) (M := M) g₀ g₁ 0 x
+      rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+      rw [Real.sq_sqrt hBS_nn]
+      exact le_trans h (mul_le_mul_of_nonneg_left (hmcd_sup x) hn_nn)
+    have hT_sup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 1 x
+        ((ipLowCc (I := I) (M := M) g₀
+          (wOmega (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤ Real.sqrt BT ^ 2 := by
+      intro x
+      have h := hcip (wOmega (I := I) (M := M) g₀ g₁ g₀) 0 x
+      rw [iteratedCovGrad_zero] at h
+      rw [Real.sq_sqrt hBT_nn]
+      refine le_trans h ?_
+      rw [Finset.sum_range_one]
+      exact mul_le_mul_of_nonneg_left (hΩ_sup 0 (by omega) x) (hcip_nn 0)
+    refine ⟨?_, ?_⟩
+    · -- order-0 fibre sup for the passenger, via the product grid at order 0
+      intro x
+      rw [vbSplit (I := I) (M := M) g₀ g₁]
+      have h := rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+        (I := I) (M := M) g₀ 0 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
+        (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀)) x
+      rw [appCcGdiag, pow_zero, one_mul, Finset.sum_range_one, Finset.sum_range_one] at h
+      simp only [iteratedCovGrad_zero] at h
+      refine le_trans h ?_
+      have h1 := hS_sup x
+      rw [Real.sq_sqrt hBS_nn] at h1
+      have h2 := hT_sup x
+      rw [Real.sq_sqrt hBT_nn] at h2
+      exact mul_le_mul h1 h2
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 1 x _) hBS_nn
+    · -- per-order jet-`L²` sums
+      intro i hi
+      rw [vbSplit (I := I) (M := M) g₀ g₁]
+      simp only [hF_def]
+      refine Finset.sum_le_sum (fun q hq => ?_)
+      have hq_le : q ≤ a := by
+        rw [Finset.mem_range] at hq
+        omega
+      obtain ⟨hI_int, hI_le⟩ := hCI q (vbMcdArm (I := I) (M := M) g₀ g₁)
+        (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀))
+        (Real.sqrt BS) (Real.sqrt BT) (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+        hS_sup hT_sup
+      have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (4 + q)
+        (iteratedCovGrad (I := I) g₀ 2 4 q
+          (appCcRS (I := I) (M := M) g₀ 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
+            (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀)))) _
+        (hI_int.const_mul (appCcGdiag (E := E) q))
+        (fun x => rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+          (I := I) (M := M) g₀ q 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
+          (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀)) x)
+      refine le_trans key ?_
+      rw [MeasureTheory.integral_const_mul]
+      refine le_trans (mul_le_mul_of_nonneg_left hI_le (appCcGdiag_nonneg (E := E) q)) ?_
+      rw [Real.sq_sqrt hBS_nn, Real.sq_sqrt hBT_nn]
+      refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) q)
+      refine mul_le_mul_of_nonneg_left ?_ (hCI_nn q)
+      refine add_le_add ?_ ?_
+      · refine mul_le_mul_of_nonneg_left ?_ hBT_nn
+        calc ∑ m ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)‖ ^ 2
+            ≤ ∑ m ∈ Finset.range (q + 1), n *
+              ‖iteratedCovGrad (I := I) g₀ 0 3 m
+                (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 :=
+              Finset.sum_le_sum (fun m _ => vbMcdArm_l2_le (I := I) (M := M) g₀ g₁ m)
+          _ = n * ∑ m ∈ Finset.range (q + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 3 m
+                (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 :=
+              (Finset.mul_sum _ _ _).symm
+          _ ≤ n * Fmcd q := mul_le_mul_of_nonneg_left (hmcd_jets q hq_le) hn_nn
+      · refine mul_le_mul_of_nonneg_left ?_ hBS_nn
+        refine Finset.sum_le_sum (fun l hl => ?_)
+        have hl_le : l ≤ a + 1 := by
+          rw [Finset.mem_range] at hl
+          omega
+        refine le_trans (hcipL (wOmega (I := I) (M := M) g₀ g₁ g₀) l) ?_
+        exact mul_le_mul_of_nonneg_left (hΩ_jets l hl_le) (hcipL_nn l)
+  · -- empty manifold: the sup is vacuous and every jet-`L²` norm vanishes
+    haveI hEmpty : IsEmpty M := not_nonempty_iff.mp hM
+    refine ⟨fun x => (hEmpty.false x).elim, ?_⟩
+    intro i hi
+    have hzero : ∀ q : ℕ,
+        ‖iteratedCovGrad (I := I) g₀ 2 4 q (lc0VBPass (I := I) (M := M) g₀ g₁)‖ ^ 2 = 0 := by
+      intro q
+      rw [SmoothCcTensor.norm_def,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
+      exact MeasureTheory.integral_of_isEmpty
+    rw [Finset.sum_congr rfl (fun q _ => hzero q), Finset.sum_const, smul_zero]
+    exact hF_nn i
 
 set_option linter.unusedVariables false in
 /-- **Per-order `ballUniform` jet-`L²` bound for the `lc0VB` piece.**  Via the two-arm

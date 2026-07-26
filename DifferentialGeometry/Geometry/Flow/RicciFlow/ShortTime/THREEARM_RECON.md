@@ -734,3 +734,36 @@ symmS-jets) currency: arm0Base GREEN (brick 2), deTurckLie GREEN (brick 3), lieC
 theorem stated + 3/4 arms green + ONE named engine gap (this section).  Next on item-2 proper:
 either discharge `lc0VBAMix_perOrder_rf` (the two missing atoms' engines) or start the
 threeArm/Ψ₀ topSeparated assembly (Fork-A) against the three delivered summed siblings.
+
+### 11d.7 — ip-vector jet engine SESSION (2026-07-26, Fable): `vbPass_jetL2` DISCHARGED; frozen `lc0VB` atom GREEN
+
+The named engine gap of §11d.6's frontier is HALF-dissolved: the `lc0VB` side's missing machinery
+(the `interior_product`-with-vector Leibniz jet lemma + the deTurckVF↔`wOmega` lowering) is built
+and the frozen atom's `vbPass_jetL2` `sorry` is DISCHARGED (frozen leaf now ZERO-sorry; targeted
+builds green; `vbPass_jetL2`, `lc0VB_ballUniform`, `lc0VB_realizedFam_perOrder_topSep` all audit
+`[propext, Classical.choice, Quot.sound]`).
+
+- **NEW generic engine** `Analysis/Sobolev/TensorHilbert/InteriorProductJetBound.lean`:
+  `ipLowCc g ω : SmoothCcTensor g 2 1` (interior product with `♯ω`, built as fixed-cometric-trace ∘
+  slot-swap ∘ double-`slotExtend` of `ω`), eval `ipLowCc_toSec_ip`, jet bounds `rfns_icg_ipLow_le` /
+  `norm_icg_ipLow_le` (`≤ c l · ∑_{m≤l} |∇ᵐω|²`; **radius-agnostic**, so the R-free rederivation
+  consumes it as-is with `wOmega_lowOrder_jetL2_radiusFree`).  NO new Leibniz induction: the grid
+  collapses on the `∇`-parallel trace (`cometricDoubleTraceField_covGrad_eq_zero`).
+- **Bridge**: `wOmega_unitModel_apply` exposed (Tower) — `wOmega g₀ g₁ g₀` IS the `g₀`-lowered
+  `deTurckVF g₁ g₀` at unit-model level.
+- **Leaf discharge**: `vbSplit : lc0VBPass = appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))`
+  + session-8 Finding 1 (`prodKappa = slotExtend`, landed as `vbPK_eq_slotExt`) + output-perm jet
+  invariance (`rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`) + grid + two-arm integrator,
+  arms fed by the session-6 mcd producer and the `wOmega` producer.
+
+**Remaining in `lc0VBAMix_perOrder_rf` (the still-open brick-4 `sorry`), route fully mapped, no
+unknown frontier:** (a) `lc0VB` R-free: expose `vbSplit`/`vbMcdArm`(+jet lemmas) from the frozen
+leaf; the ONLY missing producer is the R-free `metricConnDiffLoweredCc` sibling — decompose
+`mcd = wXi g₀ g₁ g_bg + Pκ` (`wXi_unitModel_apply`, needs exposure; `wXi_lowOrder_jetL2_radiusFree`
+committed) with `Pκ` = fixed-trace ∘ `slotExtend³(P)`-product correction (P-jets = the window itself,
+P-sup = the `Λ₀` hypothesis) — same `ipLowCc`-style committed-engine assembly; then clone
+`lc0Riem_perOrder_rf`'s integrator assembly.  (b) `lc0AMix`: fibre identity over the 5-factor
+traceStep chain — three moving cometric traces at ranks `(4,2)/(5,3)/(6,4)` via
+`reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (the `lc0RiemLive` pattern at `k = 1,2,3`) + two
+`slotExtend`-chains over the two mcd arms (`g_bg`, `g₀`) + nested grids.  Est. (a) ~1 session,
+(b) ~1–2 sessions; all producers committed after (a).

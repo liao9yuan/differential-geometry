@@ -686,6 +686,69 @@ recipe for the `congr`/curry step next time.
 3. `lc0VBPass = appCcRS g₀ 2 1 4 Φ W` fibre identity + product-grid discharge of `vbPass_jetL2` + `realizedFam`.
 4. `lc0AMix`: two `slotExtend(metricConnDiffLoweredCc)` arms, NO ip — reuses Finding 1 twice.
 
+## SESSION 9 (2026-07-26) — `vbPass_jetL2` DISCHARGED; the whole `lc0VB` atom is GREEN + AXIOM-CLEAN
+
+The frozen leaf's single `sorry` is gone.  In-file `#print axioms` (this session's focused check +
+targeted build): `vbPass_jetL2`, `lc0VB_ballUniform`, `lc0VB_realizedFam_perOrder_topSep` all exactly
+`[propext, Classical.choice, Quot.sound]`; every prior atom unchanged.  **3 of 4 Kc atoms are now
+fully green** (`lc0Riem`, `lc0Insert`-diff, `lc0VB`); `lc0AMix` remains unstarted.
+
+### The ip-vector engine (NEW, generic layer) — `InteriorProductJetBound.lean`
+New file `Analysis/Sobolev/TensorHilbert/InteriorProductJetBound.lean` (green, axiom-clean):
+- `ipLowCc g ω : SmoothCcTensor g 2 1 := appCcRS g 2 3 1 (reindexCoeffGen (cometricDoubleTraceField g 1)
+  ipTracePerm) (slotExtend (slotExtend ω))` — the interior product with `♯ω` as a committed-piece
+  composition (fixed `g`-cometric trace ∘ slot swap ∘ `A ↦ A ⊗ ω`); `ipTracePerm = swap 1 2`.
+- `ipLowCc_toSec_ip` — fibre identification: given `hflat : unitModel ω = g.inner V ·` at `x`,
+  `(ipLowCc g ω).toSection x = interior_product 1 x V`.  Proof: orthoframe-diag trace eval +
+  double-`slotExtend` eval (rank-0 curry trick) + orthonormal expansion + slot-0 multilinearity —
+  all cloned from the `RicciArmResidualFieldGridWindow` private templates.
+- `rfns_icg_ipLow_le` (pointwise) / `norm_icg_ipLow_le` (jet-`L²`): `∃ c, |∇ˡ(ipLowCc g ω)|² ≤
+  c l · ∑_{m ≤ l} |∇ᵐω|²`.  KEY: **no new Leibniz induction** — the grid
+  (`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`) collapses because the trace arm is
+  `∇`-parallel (`cometricDoubleTraceField_covGrad_eq_zero`, rank-generic, committed) so only its
+  order-`0` term survives (`exists_bound_riemannianFiberNormSq_smoothCcTensor` sup), and each
+  `slotExtend` costs `dim` (`rfns_iteratedCovGrad_slotExtend_le` twice).
+Placement justification: the proof consumes the `appCcRS` grid (MetricArmCoeffJetTower layer), so it
+sits beside the grid, not beside `slotExtendFib` in `OperatorFieldFibreNormJet` (which is below it).
+
+### The deTurckVF ↔ `wOmega` bridge (task 2) — one exposure, no new math
+`wOmega_unitModel_apply` (DeTurckVFEndoInsertTower) made public (content unchanged):
+`unitModel g₀ 1 (wOmega g₀ g₁ g_bg) x (· z) = g₀.inner x (wVF g₁ g_bg x) z`, and
+`wVF g₁ g₀ x = (deTurckVF g₁ g₀ : Π b, TangentSpace I b) x` is `rfl`.  At `g_bg := g₀` this is
+exactly the `hflat` input of `ipLowCc_toSec_ip`.
+
+### The leaf discharge (session-8 plan realized verbatim)
+- `vbMcdArmFib/vbMcdArm` — the `(1,4)` head `ddc(VBPerm) ∘ prodKappa(mcd)`.
+- `vbPK_eq_slotExt` — **Finding 1 landed**: `prodKappa(p:=1,q:=3)(mcdFib) = slotExtendFib g₀ 0 3
+  (mcdCc-sec)` at tuple level.  The session-8 landmines resolved as predicted: leaf `open` got
+  `tensor0SProdKappaFib_apply`/`unitModel`/`unitTensor`/`metricConnDiffLoweredFib_toModel`; the
+  rank-0 curry step is the `vb_rank0_smul_unit` clone; `Fin.natAdd 1 = Fin.succ` by
+  `Fin.ext; simp [Fin.natAdd, Fin.succ, Nat.add_comm]` then `Fin.cons_succ`.
+- `vbMcdArm_rel` + `rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr` (committed, output-side
+  invariance) ⟹ `vbMcdArm_rfns_le`/`vbMcdArm_l2_le`: head jets ≤ `dim ·` mcd jets — NO new
+  permutation machinery.
+- `vbSplit : lc0VBPass = appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))` — closes by
+  `rfl` after `appCcRS_toSection` + `ipLowCc_toSec_ip` (comp-assoc is defeq).
+- `vbPass_jetL2` proof: grid + two-arm integrator (`choose`d over `k` at ranks `(1,4)/(2,1)`),
+  arms fed by `metricConnDiffLoweredCc_jetL2_ballUniform_generic` (session 6) and
+  `wOmega_lowOrder_jetL2_succ_generic`.  TWO statement-level wrinkles solved inside the proof:
+  (i) the producers demand `0 ≤ δ` which the leaf interface never carried — derived from
+  `gFibreOpBound` + metric positivity (`g₀.pos`) at any point/nonzero vector when `M` is nonempty;
+  (ii) the `IsEmpty M` branch closes directly (all jet-`L²` norms vanish via
+  `MeasureTheory.integral_of_isEmpty`).  Sup side via the grid at `j = 0` + `Real.sqrt` plumbing.
+
+### Verified green (this session)
+Focused leaf check green (84s) + targeted builds: `InteriorProductJetBound` (module built into the
+9267-job graph), `DeTurckVectorFieldL2JetBound` chain (Tower exposure rebuilt, 9434 jobs), leaf
+module targeted build (9461 jobs, in-build axiom audit clean).  The whole leaf compiled on the
+first full pass after the machinery landed.
+
+### Exposures for brick 4's radius-free re-derivation (end of session, content unchanged)
+Frozen leaf: `lc0VBPass`, `lc0VB_eq_app`, `vbMcdArm`, `vbMcdArm_rfns_le`, `vbMcdArm_l2_le`,
+`vbSplit` made public.  Tower: `wXi_unitModel_apply` made public (for the
+`mcd = wXi + P-correction` R-free decomposition).  Final chain build through brick 4's leaf
+re-run after the exposures.
+
 ## Honest accounting (updated 2026-07-26, session 8)
 `(N)` still **0%**.  `lc0VB` UNCHANGED: STRUCTURALLY GREEN, one isolated `vbPass_jetL2` `sorry`.  Session 8 added
 no code (a partial was reverted) but **re-scoped and de-risked** the remaining `lc0VB` frontier: the `prodKappa`
@@ -693,3 +756,14 @@ Leibniz lemma is NOT needed (it's `slotExtend`, committed), and deTurckVF jets a
 lone genuinely-new piece is an `interior_product`-with-vector jet lemma + the deTurckVF↔`wOmega` lowering.
 Honest sessions-to-`lc0VB`-green: **~1** (Findings 1–2 are reuse; only the ip-vector lemma + discharge remain).
 Sessions-to-`lc0AMix`-green after: **~1** (two `slotExtend` arms, no ip).
+
+## Honest accounting (updated 2026-07-26, session 9 — FINAL for `lc0VB`)
+`(N) ricci_flow_unif_existence` still **0%** (both endpoints STILL UNSTATED = 0%).  Dedicated
+machinery: top piece + **3 of 4 Kc atoms GREEN and axiom-clean (`lc0Riem`, `lc0Insert`-diff,
+`lc0VB` — zero `sorry` left in this leaf)**; `lc0AMix` unstarted (its route: two
+`slotExtend(metricConnDiffLoweredCc)` arms + three moving cometric trace steps at ranks
+`(4,2)/(5,3)/(6,4)` — the higher-rank traces via `reindexCoeffGen(slotExtendᵏ(cometricCastG0))`
+mirroring `lc0RiemLive`; no ip).  The generic ip engine now lives in
+`InteriorProductJetBound.lean` and is reusable (brick 4's R-free re-derivation consumes
+`norm_icg_ipLow_le`, which is radius-agnostic, + `wOmega_lowOrder_jetL2_radiusFree`).
+Sessions-to-`lc0AMix`: ~1–2 (fibre identity + rank transports; producers committed).
