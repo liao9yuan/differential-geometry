@@ -652,7 +652,40 @@ end VolumeMeasure
 ```
 
 ## Status
-- 2026-07-25 (session 13, D_N TELESCOPING — IN PROGRESS): plan settled, implementing.
+- 2026-07-25 (session 13, D_N TELESCOPING — LANDED, GREEN): `Dtower` (def), `iterCovG1_le`
+  (general, conditional on `hAcc`), and `iterCovG1_two` (unconditional `N=2`) PROVED sorry-free in
+  `section DiffStepNorm`.  Authoritative `lake build +…UnifCovSumCross` EXIT=0 (9517 jobs, 55s);
+  `#print axioms` = `[propext, Classical.choice, Quot.sound]` on both public theorems (stripped);
+  zero warnings on the file.  Imported `…HCGCompactness.ProductMFoldNorm` (for the fibre-norm
+  Minkowski triangle `sqrt_normSq0S_add_le`; verified acyclic).
+  - **`iterCovG1_le`**: `√normSq0S(g₂, iterCov g₁ r T N x) ≤ Dtower(finrank, (3/2)√(Λ³)Λ', r, Racc, N)
+    · ∑_{k<N+1} √normSq0S(g₂, iterCov g₂ r T k x)`, under `MetricUniformEquivalentOn K g₁ g₂ Λ`,
+    `MetricCovDerivOrderBoundOn K 1 g₂ g₁ Λ'`, `x∈K`, `Racc≥0`, and the single frontier hypothesis
+    `hAcc : ∀ m<N, √normSq0S(covStep g₂ (r+m)(telescAccum … m) x) ≤ Racc m · ∑_{k<m+2} P_k`.
+    `Dtower 0 = 1`, `Dtower (N+1) = 1 + Racc N + (↑(r+N)·√(↑finrank^(r+N+1))·(3/2)√(Λ³)Λ')·Dtower N`.
+  - **`iterCovG1_two`** (unconditional): instantiates `Racc := fun m => if m=1 then CA(r) else 0`
+    (`CA(r) = ↑r·√(↑finrank^(r+2))·((3/2)Λ⁴(Λ''+ΛΛ'²)+(3/2)√(Λ³)Λ')`, the `covStepDiff_of_jets`
+    constant) and discharges `hAcc` for m<2: m=0 is `telescAccum 0 = 0` (⟹ `sqrt_normSq0S_zero`),
+    m=1 is `telescAccum 1 = diffStep g₁ g₂ r T` (`telescAccum_one`) ⟹ `covStepDiff_of_jets`.  Carries
+    the metric-role asymmetry: `hjet` (K 1 g₂ g₁ Λ'), `hJet1` (K 1 g₁ g₂ Λ'), `hJet2` (K 2 g₁ g₂ Λ'').
+  - **REMAINING = discharge `hAcc` for m ≥ 2** (the `∇₂^a A`, a≥2, schematic), the multi-session
+    frontier.  Everything else in the `D_N` recursion is proved; `iterCovG1_le` is sorry-free
+    conditional on that single named producer.
+  - **Lean lessons (durable).**  (1) The `whnf`/`isDefEq` timeout wall: `sqrt_normSq0S_add_le` and
+    `exact`/`rw`-bridging on `covStep`/`diffStep`/`iterCov` fibre values explode in `whnf` because
+    those operators have heavy `def` bodies (`totalNabla0SFun` + `haveI`/`let`), and unification
+    tries to reduce them.  The `r+(N+1)` vs `(r+N)+1` rank-defeq is NOT the cause — an isolated
+    `normSq0S … (r+(N+1)) (A x) = normSq0S … (r+N+1) (A x)` with `A` a *variable* is `rfl` in <40000
+    hb.  **Fix: `set a := <heavy covStep/diffStep value> with ha` then `clear_value a` to make the
+    fibre values genuinely opaque locals** (bare `set` keeps a let-body that `whnf` still unfolds).
+    After `clear_value`, all the tensor unification is against fvars and is cheap; keep the heavy
+    field identity `hidx` in `covStep` form so every summand shares one rank.  (2) `add_le_add_right`
+    resolved to the wrong orientation here — use `add_le_add h (le_refl _)`.  (3) To normalize the
+    one leftover mixed-rank atom for `nlinarith`, `rw [show √normSq0S(…(r+(N+1))…a) =
+    √normSq0S(…(r+N+1)…a) from rfl]` — cheap once `a` is opaque.  (4) `set` does NOT fold sum bodies
+    `∑ k, f k` into `∑ k, P k` (it only replaces the whole lambda) — work with explicit summands +
+    `Finset.sum_range_succ`, and `set` only the closed partial sum `SN := ∑ k∈range(N+1), …`.
+- 2026-07-25 (session 13, D_N TELESCOPING — plan, superseded by LANDED above):
   **D_N recursion (validated on paper):** direct induction on `G_N := √normSq0S(g₂, iterCov g₁ r T N x)`
   via `iterCov_succ` + `covStep g₁ = covStep g₂ + diffStep`.  The step gives
   `G_{N+1} ≤ P_{N+1} + R_N + cstep(r+N)·G_N`, where `P_k := √normSq0S(g₂, iterCov g₂ r T k x)`,
