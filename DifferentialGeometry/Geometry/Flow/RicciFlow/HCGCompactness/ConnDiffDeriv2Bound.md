@@ -7,6 +7,54 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 9 = `covStep2_diffStep_eval` core, session 2, 2026-07-26): the T2
+  BRANCH landed green + axiom-clean; the LINEARITY SPLIT (iii) is BLOCKED by a real IPS-`NormedSpace`
+  wall.**  Targeted module build GREEN (9519 jobs); file's ONLY `sorry` stays `covStepDiff2_mixedComm_le`.
+  - **`covStep2_diffStep_branch2`** (per slot `a`; `#print axioms` = `[propext, Classical.choice,
+    Quot.sound]`).  Differentiates the T2 summand `y ↦ (∇₂S) y (cons (W y)(update (Vslots·y) a
+    (A_y(Vslots a,V))))` (field `∇₂S = covStep g₂ s S`, rank `s+1`) by `covStep_eval_smooth_slots`
+    (deriv `U`) into four branches: the leading **`∇₂²S`** term
+    `covStep g₂ (s+1)(covStep g₂ s S) x (cons U (cons W (update (Vslots·x) a (A_x(Vslots a,V)))))`, the
+    `p=0` **`∇₂_U W`-into-`W`** insertion, the diagonal **`covDerivConnDiff g₂ g₁ U V (Vslots a)`**
+    branch (`∇₂_U(A(Vslots a,V))` via the connection-difference product rule `hfact`, mirroring a=1
+    `diffStep_leibniz_eval`'s `hFact1` one variable over: `covDerivConnDiff + A(Vslots a,∇₂_U V) +
+    A(∇₂_U(Vslots a),V)`), and the off-diagonal `∇₂_U(Vslots b)` insertions.  Proof idioms: typed
+    `set ρ := Fin.cons W (update Vslots a Asec)`, `hρpt` pointwise, `Fin.sum_univ_succ` +
+    `Fin.update_cons_zero` + `← Fin.cons_update` for the `p=0`/`p=succ` split, `Function.update_idem` +
+    `hfact` + `Finset.sum_congr` for the diagonal/off-diagonal.
+  - **(iii) LINEARITY SPLIT — BLOCKED (reverted).**  `covStep2_diffStep_split` (split
+    `extDerivFun(−∑T1 − ∑T2) = −∑ₐ extDerivFun T1ₐ − ∑ₐ extDerivFun T2ₐ`) and its two required summand
+    differentiability lemmas `covStep2_branch1_mdiff`/`covStep2_branch2_mdiff` were fully drafted and
+    are mathematically correct — the split lemma itself elaborates green — BUT the `mdiff` proofs need
+    `MDifferentiableAt (fun y => (T y)(slots·y)) x` via `TensorMultilinear.contMDiffAt_section_apply_gen`
+    + `ContMDiffAt.mdifferentiableAt`, which triggers **`NormedSpace ℝ (Tensor0SModel s ℝ E)`
+    synthesis that FAILS in this `InnerProductSpace`-based file** (the documented CMM-`NormedSpace`
+    wall).  **VERIFIED not a timeout** (`synthInstance.maxHeartbeats 1000000` did not help) and **not
+    fixable by a same-file provider** (the global `Tensor0SBundle.tensor0SModel_normedSpace` instance,
+    a file-level `private instance`, and proof-local `letI` on both the folded `Tensor0SModel` and the
+    unfolded `ContinuousMultilinearMap` forms all failed) — the diamond is at the `E`-`NormedSpace`
+    level (IPS-derived vs the CMM instance's expected one).  Every WORKING use of the section-apply
+    smoothness route (`Tensor0SInnerSectionSmooth`, `NablaComponents/Basic`, `CurvatureCoefficient…`)
+    is in an explicit-`[NormedSpace ℝ E]` file, never an IPS one.  **FIX PATH (session 3):** place the
+    two `mdiff` lemmas + the split in a `NormedSpace`-based file (e.g. `MetricCovDerivLinear.lean`,
+    next to `diffStep_leibniz_eval`'s own working `hdiff`); this needs `covDerivConnDiff_contMDiff`
+    (currently in this IPS leaf) moved to its documented HOME-DEBT target
+    `RicciConnDiffPalatini.lean` (a `NormedSpace` Integral.Connection file) — a placement refactor, not
+    new mathematics.
+  - **(ii) `H`-correction (OC) eval — NOT attempted** (wall-free: it applies `diffStep_leibniz_eval`
+    one level down on the `s+2` `∇₂_U`-updated tuples as a black box, packaging `∇₂_U W`/`∇₂_U V`/
+    `∇₂_U(Vslots a)` as `covApply`-sections, so it dodges the tensor-model `NormedSpace` wall).  Its
+    per-`q` shape differs (`q=0` deriv slot, `q=1` slot-1, `q=succ·succ a` a Vslot) so it is `s+2`
+    `diffStep_leibniz_eval` applications — a genuine `hFib`-scale expansion, deferred.
+  - **Honest size:** the `covStep2_diffStep_eval` core is now ~55% done (peel + BOTH branches
+    materialised; OC eval + linearity split + assembly remain).  Revised estimate to
+    `covStepDiff2_mixedComm_le` GREEN: **~3 more focused sessions** (mdiff/split placement refactor ≈ 1,
+    OC eval ≈ 1, eval assembly + norm CS ≈ 1).
+  - **Durable lesson:** section-apply differentiability (`contMDiffAt_section_apply_gen` →
+    `.mdifferentiableAt`) is UNAVAILABLE in IPS files — `NormedSpace ℝ (Tensor0SModel s ℝ E)` will not
+    synth there regardless of local/global providers or heartbeats.  Keep differentiability of
+    `y ↦ T y (slots·y)` in `NormedSpace` files.
+
 - **UPDATE (a=2 campaign session 8 = `covStep2_diffStep_eval` core, session 1, 2026-07-26): the outer
   PEEL and the fully-materialised T1 BRANCH landed sorry-free + axiom-clean.**  Both new theorems in
   `ConnDiffDeriv2Bound.lean`, targeted module build GREEN (9519 jobs), `#print axioms` =

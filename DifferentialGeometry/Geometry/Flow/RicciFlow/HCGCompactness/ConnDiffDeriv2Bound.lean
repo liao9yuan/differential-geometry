@@ -1029,6 +1029,179 @@ theorem covStep2_diffStep_branch1
     Function.update_idem, hdiag, hoff]
   abel
 
+open DifferentialGeometry.Integral.Connection in
+/-- **The T2 branch of the a=2 base-Leibniz eval, per slot** (session-2 core).  Differentiates the
+`A`-insertion summand `y ↦ (∇₂S) y (cons (W y)(update (Vslots·y) a (A_y(Vslots a, V))))` (one slot `a`
+of the `T2` sum peeled by `covStep2_diffStep_peel`, field `∇₂S = covStep g₂ s S`, rank `s+1`) by
+`covStep_eval_smooth_slots` (derivative `U`).  Four branches: the leading **`∇₂²S`** term, the `p=0`
+`∇₂_U W`-into-`W` insertion, the diagonal **`covDerivConnDiff`** branch (`∇₂_U(A(Vslots a,V))` expanded
+by the connection-difference product rule into `covDerivConnDiff g₂ g₁ U V (Vslots a)` plus two
+`A ⋆ ∇₂` corrections), and the off-diagonal `∇₂_U(Vslots b)` insertions.  Together with
+`covStep2_diffStep_branch1` this fully resolves `−extDerivFun T1 − extDerivFun T2`; the `∇₂²S`
+cancellation against `PieceB` is the session-3 assembly. -/
+theorem covStep2_diffStep_branch2
+    (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (U W V : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Vslots : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (a : Fin s) (x : M) :
+    extDerivFun (I := I)
+        (fun y : M => covStep (I := I) g₂ s S y
+          (Fin.cons (W y) (Function.update (fun b : Fin s => Vslots b y) a
+            ((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) y
+                (Vslots a y)) (V y))))) x (U x)
+      = covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x
+          (Fin.cons (U x) (Fin.cons (W x) (Function.update (fun b : Fin s => Vslots b x) a
+            ((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x
+                (Vslots a x)) (V x)))))
+        + covStep (I := I) g₂ s S x
+            (Fin.cons ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => W y) x) (U x))
+              (Function.update (fun b : Fin s => Vslots b x) a
+                ((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x
+                    (Vslots a x)) (V x))))
+        + covStep (I := I) g₂ s S x
+            (Fin.cons (W x) (Function.update (fun b : Fin s => Vslots b x) a
+              (covDerivConnDiff (I := I) g₂ g₁
+                  (fun z => U z) (fun z => V z) (fun z => Vslots a z) x
+                + (CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x (Vslots a x))
+                    ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => V y) x) (U x))
+                + (CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x
+                    ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => Vslots a y) x) (U x)))
+                    (V x))))
+        + ∑ b ∈ Finset.univ.erase a, covStep (I := I) g₂ s S x
+            (Fin.cons (W x) (Function.update
+              (Function.update (fun c : Fin s => Vslots c x) a
+                ((CovariantDerivative.difference
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x
+                    (Vslots a x)) (V x))) b
+              ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => Vslots b y) x) (U x)))) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  haveI hcov₁ : CovariantDerivative.ContMDiffCovariantDerivative
+      (leviCivitaConnectionOfMetric (I := I) g₁) (∞ : WithTop ℕ∞) :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₁
+  haveI hcov₂ : CovariantDerivative.ContMDiffCovariantDerivative
+      (leviCivitaConnectionOfMetric (I := I) g₂) (∞ : WithTop ℕ∞) :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₂
+  set Asec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ContMDiffSection.mk
+      (diffSec (leviCivitaConnectionOfMetric (I := I) g₂)
+        (leviCivitaConnectionOfMetric (I := I) g₁) (fun y : M => V y) (fun y : M => Vslots a y))
+      (diffSec_contMDiff (leviCivitaConnectionOfMetric (I := I) g₂)
+        (leviCivitaConnectionOfMetric (I := I) g₁) V.contMDiff
+        (by simpa using (Vslots a).contMDiff)) with hAsecdef
+  set ρ : Fin (s + 1) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    Fin.cons W (Function.update Vslots a Asec) with hρdef
+  have hAcoe : ∀ y : M, (Asec) y
+      = (CovariantDerivative.difference
+          (leviCivitaConnectionOfMetric (I := I) g₁)
+          (leviCivitaConnectionOfMetric (I := I) g₂) y (Vslots a y)) (V y) := by
+    intro y
+    rw [hAsecdef]
+    rfl
+  have hρpt : ∀ y : M, (fun p : Fin (s + 1) => (ρ p) y)
+      = Fin.cons (W y) (Function.update (fun b : Fin s => Vslots b y) a
+          ((CovariantDerivative.difference
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) y (Vslots a y)) (V y))) := by
+    intro y
+    funext p
+    refine Fin.cases ?_ (fun i => ?_) p
+    · simp only [hρdef, Fin.cons_zero]
+    · rcases eq_or_ne i a with hi | hi
+      · subst hi
+        simp only [hρdef, Fin.cons_succ, Function.update_self]
+        exact hAcoe y
+      · simp only [hρdef, Fin.cons_succ, Function.update_of_ne hi]
+  have hInnerFun : (fun y : M => covStep (I := I) g₂ s S y
+        (Fin.cons (W y) (Function.update (fun b : Fin s => Vslots b y) a
+          ((CovariantDerivative.difference
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) y
+              (Vslots a y)) (V y)))))
+      = (fun y : M => covStep (I := I) g₂ s S y (fun p : Fin (s + 1) => (ρ p) y)) := by
+    funext y
+    rw [hρpt y]
+  rw [hInnerFun]
+  have hpeel := covStep_eval_smooth_slots (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) U ρ x
+  have hpeel' : extDerivFun (I := I)
+        (fun y : M => covStep (I := I) g₂ s S y (fun p : Fin (s + 1) => (ρ p) y)) x (U x)
+      = covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x
+          (Fin.cons (U x) (fun p : Fin (s + 1) => (ρ p) x))
+        + ∑ p : Fin (s + 1), (covStep (I := I) g₂ s S x) (Function.update
+            (fun b : Fin (s + 1) => (ρ b) x) p
+            ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => (ρ p) y) x) (U x))) := by
+    rw [hpeel]
+    ring
+  have hfact : (leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => (Asec) y) x) (U x)
+      = covDerivConnDiff (I := I) g₂ g₁
+          (fun z => U z) (fun z => V z) (fun z => Vslots a z) x
+        + (CovariantDerivative.difference
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x (Vslots a x))
+            ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => V y) x) (U x))
+        + (CovariantDerivative.difference
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x
+            ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => Vslots a y) x) (U x)))
+            (V x) := by
+    rw [covDerivConnDiff_eq]
+    simp only [covDerivDiff, covApply, hAsecdef, ContMDiffSection.coeFn_mk,
+      LeviCivita_eq_leviCivitaConnectionOfMetric]
+    abel
+  have hρ0 : (fun y : M => (ρ (0 : Fin (s + 1))) y) = (fun y : M => W y) := by
+    funext y
+    simp only [hρdef, Fin.cons_zero]
+  have hoff : (∑ i ∈ Finset.univ.erase a, (covStep (I := I) g₂ s S x) (Fin.cons (W x)
+        (Function.update (Function.update (fun c : Fin s => Vslots c x) a
+            ((CovariantDerivative.difference
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x (Vslots a x)) (V x))) i
+          ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => (ρ i.succ) y) x) (U x)))))
+      = ∑ i ∈ Finset.univ.erase a, (covStep (I := I) g₂ s S x) (Fin.cons (W x)
+          (Function.update (Function.update (fun c : Fin s => Vslots c x) a
+              ((CovariantDerivative.difference
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x (Vslots a x)) (V x))) i
+            ((leviCivitaConnectionOfMetric (I := I) g₂ (fun y : M => Vslots i y) x) (U x)))) := by
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    have hine : (fun y : M => (ρ i.succ) y) = (fun y : M => Vslots i y) := by
+      funext y
+      simp only [hρdef, Fin.cons_succ, Function.update_of_ne (Finset.ne_of_mem_erase hi)]
+    rw [hine]
+  rw [hpeel', hρpt x, Fin.sum_univ_succ]
+  simp only [Fin.update_cons_zero, ← Fin.cons_update, hρ0]
+  rw [← Finset.add_sum_erase Finset.univ _ (Finset.mem_univ a)]
+  have hρa : (fun y : M => (ρ a.succ) y) = (fun y : M => (Asec) y) := by
+    funext y
+    simp only [hρdef, Fin.cons_succ, Function.update_self]
+  rw [Function.update_idem, hρa, hfact, hoff]
+  abel
+
 /-- **FRONTIER (`sorry`) — the a=2 mixed-commutator fibre-realization bridge (the SINGLE genuinely new
 a=2 frontier).**  The `g₂`-fibre norm of the base derivative of the a=1 mixed commutator
 `∇₂(∇₂∇₁S − ∇₁∇₂S) = covStep g₂ (covStep g₂ (covStep g₁ S) − covStep g₁ (covStep g₂ S))` — the `Term C`
