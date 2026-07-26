@@ -17,7 +17,7 @@ single-tensor (`g₁` tied to `T` via `htie`), RHS jets over `symmS g₀ T`:
 (`2·dim E+10 ≤ a`, inherited from the DeTurck-VF tower), `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ`,
 `δ ≤ δ₀`, `htie`.
 
-## Status: HONEST PARTIAL — statement landed, 3 of 4 arm engines PROVED, ONE flagged `sorry`
+## Status: HONEST PARTIAL — statement landed, 4 of 5 arm engines PROVED, ONE flagged `sorry` (lc0AMix-only)
 
 - `lieCorr0Field_summed_l2_radiusFree` — the deliverable, STATED + summed→per-order reduction
   PROVED (verbatim brick-2/3 summed clone).
@@ -26,8 +26,13 @@ single-tensor (`g₁` tied to `T` via `htie`), RHS jets over `symmS g₀ T`:
   - `lc0Base_perOrder_rf` — **PROVED** (the only top-carrying piece).
   - `lc0Diff_perOrder_rf` — **PROVED** (top-free).
   - `lc0Riem_perOrder_rf` — **PROVED** (top-free).
-  - `lc0VBAMix_perOrder_rf` — **THE single flagged `sorry`** (see below).
-- Both public theorems therefore carry `sorryAx` from exactly this one frontier.
+  - `lc0VB_perOrder_rf` — **PROVED** (session 3, the atgw jets assembly; see the session-3
+    entry below).
+  - `lc0AMix_perOrder_rf` — **THE single flagged `sorry`** (step (6): the 5-factor
+    traceStep-chain fibre identity, unstarted).
+  - `lc0VBAMix_perOrder_rf` — PROVED from the two halves (statement unchanged; carries
+    `sorryAx` only through `lc0AMix_perOrder_rf`).
+- Both public theorems therefore carry `sorryAx` from exactly the lc0AMix frontier.
 
 ## The five-way split and per-arm routes
 
@@ -58,16 +63,16 @@ assembled by the local `sq_le_five_add` (copied from the frozen leaf) + one
    Live-arm transports `lc0RiemLive_rfns_le`/`_l2_le` (exposed) carry sup and jets from
    `cometricCastG0` at cost `fr`.  Tail: pad `1+W₁ ≤ 1+W₃` and `NPass ≤ NPass·(1+W₃)`.
    Needs `i ≤ a+1` (the tower producer's cap) — one `omega` at the call site.
-4. **lc0VB + lc0AMix — THE FRONTIER (one `sorry`, `lc0VBAMix_perOrder_rf`).**  Their pointwise
-   engines do not exist in ANY currency:
-   - `lc0VB`: its own ballUniform atom is still sorried at `vbPass_jetL2` (frozen leaf) — the
-     moving passenger `lc0VBPass = domDomCongr(VBPerm) ∘ slotExtend(metricConnDiffLoweredCc)
-     ∘ ip(deTurckVF)` lacks an `interior_product`-with-vector Leibniz jet lemma + the
-     raw-deTurckVF ↔ `wOmega` g₀-lowering correspondence (frozen note, session 8).
-   - `lc0AMix`: no jet atom at all (traceStep-chain fibre identity unstarted).
-   Both are `∇²T`-free, so the sorried statement is the pure low window `Flow i·(1+∑_{j<i+3})` —
-   exactly what their eventual engines (product of two connDiff-family arms through the
-   workhorse) will deliver.  Per the brick-4 ruling the atom machinery was NOT rebuilt here.
+4. **lc0VB — PROVED (session 3, `lc0VB_perOrder_rf`).**  Pointwise atgw assembly:
+   `lc0VB_eq_app` (live cometric arm × moving passenger, cost `4` from the `2•`) → `vbSplit`
+   (passenger = `vbMcdArm` head × `ipLowCc(wOmega)` tail) → `b4_mcd_eq` (mcd = wXi + the
+   two-orientation `b4Phi` correction), with the committed producers
+   `rfns_iCG_{cometricCastG0,wXi}_atgw_rf` + `rfns_icg_ipLow_le`; one integration at the end.
+   The window lands at `atgw(i+3)` = the `range (i+3)` low window exactly.  No `i ≤ a` cap.
+5. **lc0AMix — THE FRONTIER (one `sorry`, `lc0AMix_perOrder_rf`).**  No fibre identity yet
+   (traceStep-chain, step (6)).  `∇²T`-free, so the sorried statement is the pure low window
+   `Flow i·(1+∑_{j<i+3})` — exactly what its eventual engine (nested grids over the committed
+   arms) will deliver.
 
 ## Exposures (minimal `private`-removals, content unchanged; homes rebuilt green)
 
@@ -92,18 +97,16 @@ generic engine `InteriorProductJetBound.lean` (`ipLowCc` + `rfns_icg_ipLow_le`/`
 note's session 9).  What discharging `lc0VBAMix_perOrder_rf` still needs (route fully mapped in
 `THREEARM_RECON.md` §11d.7, no unknown frontier):
 
-(a) `lc0VB` R-free: expose `vbSplit`/`vbMcdArm`/`vbMcdArm_rfns_le`/`vbMcdArm_l2_le` from the
-frozen leaf; build the ONE missing producer — the R-free `metricConnDiffLoweredCc` sibling via
-`mcd = wXi g₀ g₁ g_bg + Pκ` (`wXi_lowOrder_jetL2_radiusFree` committed; `Pκ` = fixed-trace ∘
-`slotExtend³(P)` correction, P-jets = the window, P-sup = `Λ₀`); ip arm consumes
-`norm_icg_ipLow_le` + `wOmega_lowOrder_jetL2_radiusFree` (both committed) as-is; then clone this
-file's `lc0Riem_perOrder_rf` integrator assembly.  ~1 session.
+(a) `lc0VB` R-free: **DONE (session 3)** — see the session-3 entry: `b4_mcd_eq`-based mcd
+producer (`b4_mcd_atgw`), the atgw jets assembly, and the single integration
+(`lc0VB_perOrder_rf`), all axiom-clean.
 
-(b) `lc0AMix`: the 5-factor traceStep-chain fibre identity — three moving cometric traces at
-ranks `(4,2)/(5,3)/(6,4)` via `reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (`lc0RiemLive`
-pattern, `k = 1,2,3`) + two `slotExtend`-chains over the mcd arms (`g_bg`, `g₀`) + nested grids +
-integrator.  ~1–2 sessions.  Classification unchanged: missing-groundwork/API, now with all
-engines committed except the R-free mcd producer of (a).
+(b) `lc0AMix` (**the only remaining frontier**, = `lc0AMix_perOrder_rf`): the 5-factor
+traceStep-chain fibre identity — three moving cometric traces at ranks `(4,2)/(5,3)/(6,4)` via
+`reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (`lc0RiemLive` pattern, `k = 1,2,3`) + two
+`slotExtend`-chains over the mcd arms (`g_bg`, `g₀`; both covered by the now-committed
+`g_bg`-generic `b4_mcd_atgw`) + nested grids + integrator.  ~1–2 sessions.  Classification
+unchanged: missing-groundwork/API (fibre identity), with ALL jet engines now committed.
 
 ## SESSION 2 (2026-07-26, discharge session): R-free `mcd` FIBRE IDENTITY GREEN; workhorse currency decoded; jets assembly = resumption
 
@@ -131,41 +134,70 @@ engines committed except the R-free mcd producer of (a).
   monomial ↪ grid; the order-0 term goes through the `Λ₀` sup instead — `grid b 0 = 1`!).
 
 **RESUMPTION (jets assembly, all committed currency, no unknown frontier):**
-1. `b4_phi_atgw`: `|∇ⁱ(b4Phi)|²`-pointwise via the rankLeft grid `(3,5,3)`: trace arm =
-   `rfns_iteratedCovGrad_reindexCoeffGen_eq` + `b4_trace_succ` (only order 0 survives, const by
-   `exists_bound_riemannianFiberNormSq_smoothCcTensor`); `slotExtend³` arm = slotExtend jet lemma
-   ×3 → `bP`-window via `b4_bP_le_grid` + `hsup`.
-2. `b4_mcd_atgw`: `|∇ⁿmcd|² ≤ Kmcd n·atgw(n+2)` via `b4_mcd_eq` + rfns add/`b4_rfns_smul` +
-   `appCc_iteratedCovGrad_diagonalProductGrid_le` + `mul_le`/`mono` + `rfns_iCG_wXi_atgw_rf`.
-3. `b4_wOmega_atgw`: clone the tower's in-proof `hpt` (DeTurckVFJetRadiusFree:1151–1200) from
-   the two exposures → `|∇ⁿwOmega|² ≤ KΩ n·atgw(n+2)`.
-4. `lc0VBPass`-atgw via exposed `vbSplit` + rankLeft `(2,1,4)`: head = exposed `vbMcdArm_rfns_le`
-   → item 2; tail = `rfns_icg_ipLow_le` (pointwise, radius-agnostic) → item 3.  Then `lc0VB`-atgw
-   via exposed `lc0VB_eq_app` + `lc0RiemLive_rfns_le` → `rfns_iCG_cometricCastG0_atgw_rf`;
-   the window lands at `atgw(i+3)`, matching the sorry's `range (i+3)` exactly.
-5. Integrate per order (`antidiagonalTupleGrid_integral_radiusFree`, summed over `k < i+3`) →
-   the `lc0VB` half; NARROW the sorry (VB half proved + new `lc0AMix_perOrder_rf` sorry, public
-   statement unchanged).
-6. `lc0AMix`: the 5-factor fibre identity (traceStep transports =
+1. ✅ (session 3) `b4_phi_atgw`: `|∇ⁱ(b4Phi)|²`-pointwise via the rankLeft grid `(3,5,3)`.
+2. ✅ (session 3) `b4_mcd_atgw`: `|∇ⁿmcd|² ≤ Kmcd n·atgw(n+2)` via `b4_mcd_eq`.
+3. ✅ (session 3) `b4_wOmega_atgw`: the tower `hpt` clone, `|∇ⁿwOmega|² ≤ KΩ n·atgw(n+2)`.
+4. ✅ (session 3) `b4_vbPass_atgw` + `b4_vb_atgw`: window lands at `atgw(i+3)` exactly.
+5. ✅ (session 3) `lc0VB_perOrder_rf` integrated; sorry NARROWED to `lc0AMix_perOrder_rf`.
+6. `lc0AMix` (NEXT session): the 5-factor fibre identity (traceStep transports =
    `reindexCoeffGen(slotExtendᵏ(cometricCastG0))`, `k = 1,2,3`, the `lc0RiemLive` pattern; two
-   `slotExtend`-chains over mcd with item 2 covering both) + nested grids + one integration.
+   `slotExtend`-chains over mcd with `b4_mcd_atgw` covering both `g_bg` and `g₀` arms) + nested
+   grids + one integration.
 
-Estimate: (1)–(5) ≈ 1 session; (6) ≈ 1 session.
+## SESSION 3 (2026-07-26, brick-4 part A): resumption items (1)–(5) LANDED GREEN; sorry now lc0AMix-only
+
+All five items closed exactly along the itemized route, on the FIRST full check pass (no proof
+repair).  New in-leaf privates (all axiom-clean, `[propext, Classical.choice, Quot.sound]`):
+
+- `b4_pk3_rfns_le` — triple-`slotExtend` jet domination `|∇^q b4Pk3|² ≤ fr³·|∇^q P|²`.
+- `b4_phi_atgw` — item (1).  Deviation from the itemized route: the trace arm uses per-order
+  constants via `exists_bound_riemannianFiberNormSq_smoothCcTensor` at EVERY order (tower `hSΦ`
+  pattern) instead of `b4_trace_succ` + order-0-only; mathematically equivalent (the arm is a
+  fixed `T`-independent tensor), strictly simpler.  `b4_trace_succ` stays banked for step (6).
+  Window absorption: `bP 0` through the `Λ₀` sup, `bP (m+1)` through `b4_bP_le_grid`; per-window
+  constant `(l+1)·(1+Λ₀²)`.
+- `b4_app_atgw` — item (2a), the `appCc (b4Phi σ) (wXi)` two-arm fold (`σ` generic, so A/B
+  orientations are one lemma); `≤ Kap n·atgw(n+2)`.
+- `b4_mcd_atgw` — item (2), `g_bg`-GENERIC (step (6) needs both `g_bg` and `g₀` mcd arms):
+  `b4_mcd_eq` + rfns add ×2 + `b4_rfns_smul` (the two `½`s square to `¼`, cancelling the
+  `2·2` from the two triangle bounds) → `Kmcd n = 2·Kwx n + KapA n + KapB n`.
+- `b4_wOmega_atgw` — item (3), the tower `hpt` fold as a standalone pointwise lemma (no `hsup`
+  needed — sups enter only at integration).
+- `b4_vbPass_atgw` — item (4) head: `vbSplit` + rankLeft `(2,1,4)`; head arm
+  `vbMcdArm_rfns_le` → `b4_mcd_atgw` at `g_bg := g₀` (window `i'+2`), tail arm
+  `rfns_icg_ipLow_le` → `b4_wOmega_atgw` at `g_bg := g₀` (per-`m` mono into window `q+2`);
+  fold at `_mul_le (i'+1) (q+1)` → `atgw(n+3)`.
+- `b4_vb_atgw` — item (4) tail: `lc0VB_eq_app` + `b4_iCG_smul`/`b4_rfns_smul` (the `2•` costs
+  `×4`) + rankLeft `(2,4,2)`; head `lc0RiemLive_rfns_le` → `rfns_iCG_cometricCastG0_atgw_rf`
+  (window `i'+1`), tail = `b4_vbPass_atgw` (window `q+3`); fold at `_mul_le i' (q+2)` →
+  `atgw(i+3)` exactly.
+- `lc0VB_perOrder_rf` — item (5), the single integration (workhorse
+  `antidiagonalTupleGrid_integral_radiusFree` summed over `k < i+3`); needs NO `i ≤ a` cap
+  (all atgw producers are cap-free).
+- `lc0AMix_perOrder_rf` — the NEW lc0AMix-only `sorry` (same hypothesis bundle and low-window
+  shape as the old pair lemma, minus the `lc0VB` summand).
+- `lc0VBAMix_perOrder_rf` — REWRITTEN as the sum of the two halves; public statement unchanged,
+  so the downstream five-way assembly is untouched.
+
+Lean lessons (session 3): the whole assembly is term-mode-safe against `set`-variable folding
+(bounds combined by `mul_le_mul`/`add_le_add`, never cross-`linarith` on window atoms); the
+tower's per-l-then-extend `_mono` pattern and the `rw [mul_assoc]`-then-`mono-left` RHS
+restructure transplant verbatim; `(4+1)+q`-style literal indices unify by `exact` without any
+`show` bridges (same as the session-2 machinery).
 
 ## Honest progress (denominator: (N) `ricci_flow_unif_existence` = 0%, unstated)
 
 Item-2 proper: bricks 1-3 DONE (gate + arm0 + deTurckLie, all axiom-clean).  Brick 4
-(lieCorr0): statement + assembly + 3/4 arms done ≈ **~60% of brick 4**; the remaining 40% is
-the vb/amix engine gap above.  After brick 4: the threeArm/Ψ₀ topSeparated assembly (Fork-A)
-and the smooth-core tame lemma remain (item-2 proper); brick 4's sorry is on Ψ₀'s critical path
-only through the lieCorr0 constituent.
+(lieCorr0): statement + assembly + 4/5 arms done ≈ **~80% of brick 4**; the remaining ~20% is
+the lc0AMix fibre identity (step (6)), whose jet engines are ALL committed.  After brick 4: the
+threeArm/Ψ₀ topSeparated assembly (Fork-A) and the smooth-core tame lemma remain (item-2
+proper); brick 4's sorry is on Ψ₀'s critical path only through the lieCorr0 constituent.
 
-## Verification (2026-07-26)
+## Verification (2026-07-26, session 3)
 
-Targeted module build GREEN (9498 jobs; the three touched homes + the whole chain between them
-and the leaf rebuilt clean; brick-3's leaf and both its publics replayed unaffected).  The ONLY
-`sorry` in the leaf is `lc0VBAMix_perOrder_rf` (line 408).  In-file `#print axioms` (end of
-leaf), literal results:
+Focused check + targeted module build through the leaf: GREEN.  The ONLY `sorry` in the leaf is
+`lc0AMix_perOrder_rf` (the lc0AMix-only private).  In-file `#print axioms` (end of leaf),
+literal results:
 
 - `lieCorr0Field_perOrder_l2_radiusFree` : `[propext, sorryAx, Classical.choice, Quot.sound]`
 - `lieCorr0Field_summed_l2_radiusFree`   : `[propext, sorryAx, Classical.choice, Quot.sound]`
@@ -174,9 +206,13 @@ leaf), literal results:
   `wAlphaB_L2_perOrder_rf` / `slotInsertEndoCc_sub` / `norm_iCG_cometricRaiseSlot0Field_eq` /
   `normSq_iCG_lc0InsertDiff_le` chain is sorry-free)
 - `lc0Riem_perOrder_rf` : `[propext, Classical.choice, Quot.sound]`  (clean)
-- `lc0VBAMix_perOrder_rf` : `[propext, sorryAx, Classical.choice, Quot.sound]`  (THE frontier)
+- `b4_phi_atgw`, `b4_app_atgw`, `b4_mcd_atgw`, `b4_wOmega_atgw`, `b4_vbPass_atgw`,
+  `b4_vb_atgw`, `lc0VB_perOrder_rf` : all `[propext, Classical.choice, Quot.sound]`  (clean —
+  the whole lc0VB half is sorry-free)
+- `lc0AMix_perOrder_rf` : `[propext, sorryAx, Classical.choice, Quot.sound]`  (THE frontier)
+- `lc0VBAMix_perOrder_rf` : `[propext, sorryAx, Classical.choice, Quot.sound]`  (inherits
+  exactly the lc0AMix sorry)
 
-Frozen-leaf audit (its own in-file prints, unchanged by the exposures): all prior atoms keep
-their exact prior status — `endoArm_eq_dlb` … `lc0InsertDiff_realizedFam_perOrder_topSep` clean;
-the pre-existing `vbPass_jetL2` sorry (`:943`) untouched.  The whole leaf compiled on the first
-build pass (no proof repair was needed).
+Frozen-leaf audit (unchanged this session — no frozen-leaf edits were needed; the four
+session-9 exposures `vbSplit`/`vbMcdArm`/`vbMcdArm_rfns_le`/`lc0VB_eq_app` were already
+public).  Session 3 compiled on the first full check pass (no proof repair was needed).

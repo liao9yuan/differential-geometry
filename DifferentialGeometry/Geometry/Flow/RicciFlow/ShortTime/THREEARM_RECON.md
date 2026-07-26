@@ -778,3 +778,15 @@ needed off order 0, dissolving the connDiff-sup worry.  Exposed the per-arm poin
 `rfns_iCG_{cometricCastG0,wXi}_atgw_rf` (`DeTurckVFJetRadiusFree.lean`).  The sorry itself is
 UNCHANGED; remaining = the atgw jets assembly, itemized as (1)–(6) in the brick-4 note's
 session-2 resumption list (VB half ≈ 1 session, then `lc0AMix` ≈ 1 session).
+
+**UPDATE (2026-07-26, part-A session — Fable): the `lc0VB` half is DISCHARGED; brick 4's sorry
+is now lc0AMix-ONLY.**  Resumption items (1)–(5) landed green on the first check pass, in-leaf
+(`LieCorr0CoeffDiffRadiusFree.lean`): `b4_phi_atgw`/`b4_app_atgw`/`b4_mcd_atgw`
+(`g_bg`-generic, ready for step (6)'s two mcd arms)/`b4_wOmega_atgw` (tower-`hpt` clone)/
+`b4_vbPass_atgw`/`b4_vb_atgw` (window lands at `atgw(i+3)` exactly) + the single integration
+`lc0VB_perOrder_rf` — all `[propext, Classical.choice, Quot.sound]`.  The old pair sorry
+`lc0VBAMix_perOrder_rf` is REWRITTEN as (proved VB half) + (new lc0AMix-only private sorry
+`lc0AMix_perOrder_rf`, same hypothesis bundle and `range (i+3)` low-window shape); both public
+theorems' statements and the five-way assembly untouched, still inheriting exactly the one
+`sorryAx`.  Remaining for brick 4 = step (6) only: the `lc0AMix` 5-factor traceStep-chain fibre
+identity + nested grids + one integration (≈ 1–2 sessions; all jet engines committed).
