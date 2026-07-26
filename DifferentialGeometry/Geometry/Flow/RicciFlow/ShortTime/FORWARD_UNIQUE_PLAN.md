@@ -292,6 +292,35 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №48 (2026-07-26, WITHIN ACCEPTED+WIRED+COMMITTED — **R12 DELIVERED IN
+  FULL: the closed-edge joint tower exists; the hbounds/hedge gate is
+  OPEN**): `Analysis/Parabolic/RicciLinearization/
+  RicciDifferenceMeanValueWithin.lean` (613 lines, 0 sorry; planner
+  re-audit clean, 6 key endpoints 3-axiom; namespace
+  `DifferentialGeometry.PDE.DeTurck.RicciLinearization`).  Structural
+  fact exploited: the tower differentiates ONLY spatially —
+  `ContDiffWithinAt.fderivWithin_apply` with `s := S ×ˢ U`, `t := U`
+  (open), so the TIME SET IS COMPLETELY ARBITRARY (no IsOpen/UniqueDiffOn/
+  interval shape anywhere).  Chain: `GenJointGramOn` → `invGramWithin` →
+  `bracketWithin` → `christoffelWithin` → `partChristWithin` →
+  `riemannWithin` → `ricciWithin`; round-trip guards
+  (`christWithin_of_open`/`riemWithin_of_open` recover the originals
+  verbatim + `genJointGramOn_of_gen`); consumer layer `christSlabCont`/
+  `riemSlabCont` (`ContinuousOn` on `Icc a c ×ˢ baseSet` from (B)'s
+  VERBATIM h1smooth field, scratch-guard-verified) + `…ContAt` chart-
+  centre forms on `Icc a c ×ˢ univ` (slabBound's own set).  DensReg
+  privates NOT touched (principled: they carry the very IsOpen being
+  removed — restating was shorter).  Original file zero-diff.  Wired at
+  aggregate `:468`; root build green (10654 jobs).  Lean trap recorded:
+  namespace re-open drops `open`s and autoImplicit silently auto-binds
+  dropped identifiers as variables — file sets `autoImplicit false`.
+  NEXT (SLAB-2, dispatched): drop `hJ : IsOpen J` from
+  `normSq0S_jointContMDiffOn` (two routine 𝓝-membership uses; the
+  Within file's private `slabBase_nhdsWithin` is the exact argument),
+  re-thread `connChartJoint`/`rmChartJoint` against
+  `christWithinM`/`riemWithinM`, fire `slabBound` for the six sups, close
+  remLe algebra + reactLe (CHECK the №47 basis-free movingReact0S
+  reading first) + adotLe hΓ/hA hookup + hedge.
 - №47 (2026-07-26, CONT ACCEPTED+COMMITTED — **hpair/hrest/hrem PROVED
   OUTRIGHT (the "frame-continuity problem" was a phantom); henergy shrunk
   to the single edge point; residuals now TWO**): the wiring file grew
