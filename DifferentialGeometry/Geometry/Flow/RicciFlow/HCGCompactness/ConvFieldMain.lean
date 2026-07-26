@@ -206,7 +206,7 @@ theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
   let sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k)
     exact sourceDomT2 (I := I) Φ k
-  exact @metricDerivNormSupOn_restrictOpen E _ _ _ _ _ H _ I
+  exact @metricDerivNormSupOn_restrictOpen E _ _ _ _ _ H _ I _
     P.M P.topology P.charted P.t2 P.smooth P.sigmaCompact
     g₁ g₂ g₃ (sourceOpen (I := I) Φ k) sourceSigma sourceT2 C p
 

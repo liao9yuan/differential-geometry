@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Connection
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 section FixedManifold
 

@@ -397,6 +397,15 @@ theorem round0_of_cgh
         h0 hsubseq hconv hcomplete)
   have hbaseOne : LimitBaseScalarOne (I := I) (M := M) Lh :=
     limit_base_scalar_one (I := I) (M := M) P Q hsel hbaseConv
+  -- `Lh` is `let`-bound, so its instance-implicit structure fields are not picked
+  -- up by synthesis; install them explicitly for the evaluations below.
+  letI : TopologicalSpace Lh.N := Lh.topology
+  letI : ChartedSpace H Lh.N := Lh.charted
+  letI : IsManifold I ∞ Lh.N := Lh.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) Lh.N := Lh.smooth_plus
+  letI : SigmaCompactSpace Lh.N := Lh.sigmaCompact
+  letI : T2Space Lh.N := Lh.t2
+  letI : T2Space (TangentBundle I Lh.N) := Lh.t2TangentBundle
   have hbaseEq : Lh.S.scalar 0 Lh.basepoint = 1 := by
     simpa [LimitBaseScalarOne] using hbaseOne
   have hbasePos : 0 < Lh.S.scalar 0 Lh.basepoint := by

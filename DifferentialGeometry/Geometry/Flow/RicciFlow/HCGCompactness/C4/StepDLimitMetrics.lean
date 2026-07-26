@@ -215,6 +215,8 @@ def ballStep
   PartialDiffeomorph.opensMap (I := I) (M := M j) (N := M (j + 1))
     (Ψ j) (hsrc j) (hmap j)
 
+variable [I.Boundaryless]
+
 /-- Adjacent partial diffeomorphisms that preserve an increasing family of positive-radius open
 balls assemble into a smooth sequential direct system. -/
 def ballSystem
@@ -439,7 +441,7 @@ theorem chainPullback_zero
 /-- Peeling the first map from a finite chain identifies the source-stage pullback inner product
 with the next-stage pullback inner product evaluated along the open-to-open step map. -/
 theorem chainPullback_step
-    [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
     {j : ℕ} (U : Opens (M j)) (V : Opens (M (j + 1)))
@@ -597,7 +599,6 @@ section ApproxData
 
 open Bundle
 
-variable [I.Boundaryless]
 variable [∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (M j)]
 variable [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
 variable [∀ j, IsRiemannianManifold I (M j)]
@@ -806,7 +807,7 @@ theorem chainPrefix_cov_le
     (chainCompAssoc_eq (I := I) (Mf := M) Ψ j a b)]
   exact prefixTail_cov_le Φ Θ U hpre hnext hUK gMid g D hq1 hqp x
 
-omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 /-- The actual pullback metric has the lower quadratic bound encoded by `c0_small`. -/
 theorem ballPullback_lower {j l : ℕ}
@@ -2370,7 +2371,7 @@ theorem exists_limits_close
     exact tendsto_nhds_unique hleft' hright
 
 set_option linter.unusedSectionVars false in
-omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 /-- The order-zero part of `lbl407` eventually bounds every shrunk tail metric below by half of
 the corresponding ambient member metric. -/

@@ -321,6 +321,7 @@ def limitCGConverges
           dsimp only [stageSet, stageVal]
           exact @metricDerivNormSupOn_restrictOpen E inferInstance inferInstance
             inferInstance inferInstance inferInstance H inferInstance I
+            inferInstance
             (A k) inferInstance inferInstance inferInstance inferInstance inferInstance
             (gSeq k) (gLim k) (gLim k) (metricTargetOpen (I := I) Φ k)
             targetSigma targetT2 (F '' metricSourceCompactSet (I := I) Φ k K) p

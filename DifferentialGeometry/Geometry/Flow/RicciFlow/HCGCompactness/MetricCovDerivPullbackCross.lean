@@ -55,7 +55,7 @@ private theorem metricCovDeriv_succ_eval_smooth_slotsC
     {H' : Type*} [TopologicalSpace H'] {I' : ModelWithCorners Real E' H'}
     {M' : Type*} [TopologicalSpace M'] [ChartedSpace H' M'] [IsManifold I' ∞ M']
     [SigmaCompactSpace M'] [T2Space M'] [IsManifold I' 1 M'] [IsManifold I' 2 M']
-    [IsManifold I' ((∞ : WithTop ℕ∞) + 1) M']
+    [IsManifold I' ((∞ : WithTop ℕ∞) + 1) M'] [BoundarylessManifold I' M']
     (h gRef : SmoothRiemannianMetric I' M') (a : Nat)
     (X : ContMDiffSection I' E' (∞ : WithTop ℕ∞)
       (TangentSpace I' : M' → Type _))
