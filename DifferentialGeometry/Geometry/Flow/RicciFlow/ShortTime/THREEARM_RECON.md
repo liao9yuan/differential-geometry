@@ -576,3 +576,31 @@ NO §6 unreceivable term or `R`-dependent constant at the cometricCastG0/sharpFl
 the R-dep term, dropped) → then `connDiffSection_lowOrder` R-free via the grid-mul route → `wXi` →
 `wOmega`, then the `_L2_topsep` layer and the frontier assembly (final 3b session).  3b tower base
 ~2/≈8 producers; frontier 0% (unstated in-code beyond its `sorry`).
+
+### 11d.2 — brick 3b SESSION 2 (2026-07-26): two composers landed; raisedKoszul unneeded
+
+Two more producers landed in the same leaf, targeted-build GREEN, axioms EXACTLY `[propext,
+Classical.choice, Quot.sound]` (no `sorryAx`):
+
+- `connDiffSection_lowOrder_jetL2_radiusFree` — the grid-mul composer.
+- `wXi_lowOrder_jetL2_radiusFree` — connDiffSection triangle + `g_bg` constant.
+
+**PIVOT / correction to §11d.1's session-1 plan.**  `connDiffSection_lowOrder` R-free did NOT need the
+appCcRS-rankLeft + two-arm route (nor `raisedKoszul`/`sharpFlatEndoCc` R-free).  It routes through the
+PUBLIC R-FREE head engine `rfns_iteratedCovGrad_connDiffSection_topSeparated_le` (JetTower:1823), whose
+constants are `g₀/δ₀`-only (`Ktop = 10·S 0`, `Kc` via `exists_..._sharpFlatEndoCc_tgrid`, no `R`) and
+whose remainder is `antidiagonalTupleGrid` currency — it folds the raisedKoszul+sharpFlat product
+INTERNALLY.  Corner `‖∇^{q+1}P‖²` + remainder `∑_{k<q}rfns(∇^{q-k}P)·grid(k+1)` fold into `grid(q+1)`
+via `single_factor_mul_antidiagonalTupleGrid_le`; workhorse integrates → low window at order `i+1`.
+⟹ **task item 1 (`raisedKoszul` R-free) is OFF the critical path**, and session-1's
+`sharpFlatEndoCc_lowOrder_jetL2_radiusFree` is unconsumed by the connDiff/wXi/wOmega chain (kept
+standalone).  Only cometricCastG0 (session 1) remains a live dependency (for wOmega's corner).
+
+**Next (session 3): `wOmega_lowOrder` R-free — the genuine two-arm grid-mul.**  `wOmega =
+appCc(cometricCastG0, wXi)`.  Corner (cometricCastG0 order-0 `ΛClow 0`, R-free) × `∇ⁿwXi` is R-free;
+the lower two-arm sum in the R-dependent `wOmega_L2_topsep` (TopSep:1001) is integrated with `wXi`'s
+order-0 sup `ΛX 0` which is `R`-DEPENDENT.  R-free fix: fold the lower `∑rfns(∇^{i'}cometricCastG0)·
+∑rfns(∇ˡwXi)` into single grids via `antidiagonalTupleGrid_mul_le`, then workhorse — NEEDS a POINTWISE
+cometricCastG0 grid bound (`rfns_iteratedCovGrad_cometricCastG0_gridWindow_le`, PRIVATE in
+`CurvatureArm1KoszulTopSeparation.lean:35` → re-derive) + a pointwise wXi grid bound.  Full session;
+`g₀/g_bg/δ₀`-only.  3b tower base 4/≈8-10 producers; frontier 0%.

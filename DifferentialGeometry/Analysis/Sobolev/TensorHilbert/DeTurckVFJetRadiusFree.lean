@@ -566,4 +566,249 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
           Finset.sum_le_sum hterm
       _ = (∑ q ∈ Finset.range (i + 1), (2 * KW q + 2 * FId q)) * (1 + S) := by rw [Finset.sum_mul]
 
+/-! ### Radius-free `connDiffSection` low-order producer (grid-mul composer).
+
+Radius-free sibling of `connDiffSection_lowOrder_jetL2_succ_generic`.  Routed NOT through the
+R-dependent two-arm integrator (which needs the `R`-dependent order-0 sup of `raisedKoszul ~ ∇P`)
+but through the R-FREE head engine `rfns_iteratedCovGrad_connDiffSection_topSeparated_le` (JetTower),
+whose constants are `g₀/δ₀`-only and whose remainder is `antidiagonalTupleGrid` currency.  The head
+engine folds the `appCcRS(raisedKoszul)(sharpFlatEndoCc)` product internally, so this producer needs
+neither a `raisedKoszul` nor a `sharpFlatEndoCc` R-free sibling.  The corner `‖∇^{q+1}P‖²` and the
+remainder `∑_{k<q} rfns(∇^{q-k}P)·grid(k+1)` are folded into the single grid `grid(q+1)` via
+`single_factor_mul_antidiagonalTupleGrid_le`, then integrated by the workhorse → low window. -/
+set_option linter.unusedVariables false in
+set_option maxHeartbeats 1600000 in
+theorem connDiffSection_lowOrder_jetL2_radiusFree
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2),
+        ∀ (i : ℕ), i ≤ a + 1 →
+          ∑ q ∈ Finset.range (i + 1),
+              ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
+            Flow i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
+  obtain ⟨Kt0, hKt0_nn, Kc0, hKc0_nn, hbot⟩ :=
+    rfns_iteratedCovGrad_connDiffSection_topSeparated_le (I := I) (M := M) g₀ hδ₀
+  obtain ⟨K_rf, hK_rf_nn, hK_rf⟩ :=
+    antidiagonalTupleGrid_integral_radiusFree (I := I) (M := M) g₀ hΛ₀0
+  set D : ℕ → ℝ := fun q => (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) * K_rf (q + 1) with hD_def
+  have hD_nn : ∀ q, 0 ≤ D q := by
+    intro q; simp only [hD_def]
+    have := hKt0_nn; have := hKc0_nn q; have := hK_rf_nn (q + 1); positivity
+  refine ⟨fun i => ∑ q ∈ Finset.range (i + 1), D q,
+    fun i => Finset.sum_nonneg (fun q _ => hD_nn q), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
+  -- Single-grid integral via the workhorse: `∫ grid k ≤ K_rf k · (1 + ‖∇^k P‖²)`.
+  have hAG : ∀ k : ℕ,
+      MeasureTheory.Integrable
+          (fun x => Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+        (∫ x, Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+          K_rf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2) := by
+    intro k
+    have hExpand : (fun x => Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+        = (fun x => ∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+            ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
+      funext x; rw [Combinatorics.antidiagonalTupleGrid]
+    rw [hExpand]; exact hK_rf P hsup k
+  -- Per-order L² bound: fold corner + remainder into `grid (q+1)`, integrate.
+  have hL2 : ∀ q : ℕ,
+      ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
+        D q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by
+    intro q
+    have hpt : ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+          (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) * Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (q + 1) := by
+      intro x
+      set b : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) with hb_def
+      have hb : ∀ l, 0 ≤ b l :=
+        fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+      have heng := hbot g₁ P htie hδ_le hδ0 hδ q x
+      set Hd : SmoothCcTensor g₀ 1 (2 + q) :=
+        appCcRS (I := I) (M := M) g₀ 1 1 (2 + q)
+          (iteratedCovGrad (I := I) g₀ 1 2 q (raisedKoszul (I := I) g₀ g₁))
+          (sharpFlatEndoCc (I := I) g₀ g₁) with hHd_def
+      have hbq1_grid : b (q + 1) ≤ Combinatorics.antidiagonalTupleGrid b (q + 1) := by
+        have hsf := Combinatorics.single_factor_mul_antidiagonalTupleGrid_le b hb 0 (q + 1)
+          (by omega)
+        rwa [Combinatorics.antidiagonalTupleGrid_zero, mul_one, Nat.zero_add] at hsf
+      have hrem_fold : (∑ k ∈ Finset.range q,
+            b (q - k) * Combinatorics.antidiagonalTupleGrid b (k + 1)) ≤
+          (q : ℝ) * Combinatorics.antidiagonalTupleGrid b (q + 1) := by
+        calc (∑ k ∈ Finset.range q,
+              b (q - k) * Combinatorics.antidiagonalTupleGrid b (k + 1))
+            ≤ ∑ _k ∈ Finset.range q, Combinatorics.antidiagonalTupleGrid b (q + 1) := by
+              refine Finset.sum_le_sum (fun k hk => ?_)
+              rw [Finset.mem_range] at hk
+              have hsf := Combinatorics.single_factor_mul_antidiagonalTupleGrid_le b hb
+                (k + 1) (q - k) (by omega)
+              rwa [show (k + 1) + (q - k) = q + 1 from by omega] at hsf
+          _ = (q : ℝ) * Combinatorics.antidiagonalTupleGrid b (q + 1) := by
+              rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      have hsplit_eq :
+          (iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)).toSection x =
+            Hd.toSection x +
+              (iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀) -
+                Hd).toSection x := by
+        simp only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]; abel
+      rw [hsplit_eq]
+      refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 1 (2 + q) x
+        (Hd.toSection x) _) ?_
+      have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + q) x (Hd.toSection x) ≤
+          Kt0 * Combinatorics.antidiagonalTupleGrid b (q + 1) :=
+        le_trans heng.1 (mul_le_mul_of_nonneg_left hbq1_grid hKt0_nn)
+      have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀) -
+            Hd).toSection x) ≤
+          Kc0 q * ((q : ℝ) * Combinatorics.antidiagonalTupleGrid b (q + 1)) :=
+        le_trans heng.2 (mul_le_mul_of_nonneg_left hrem_fold (hKc0_nn q))
+      have hgrid_nn : 0 ≤ Combinatorics.antidiagonalTupleGrid b (q + 1) :=
+        Combinatorics.antidiagonalTupleGrid_nonneg b hb (q + 1)
+      nlinarith [h1, h2, hgrid_nn, hKc0_nn q, hKt0_nn]
+    obtain ⟨hAGint, hAGbd⟩ := hAG (q + 1)
+    have hFint := hAGint.const_mul (2 * Kt0 + 2 * Kc0 q * (q : ℝ))
+    have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 1 (2 + q)
+      (iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)) _ hFint hpt
+    rw [MeasureTheory.integral_const_mul] at hkey
+    refine le_trans hkey ?_
+    rw [hD_def]
+    calc (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) *
+          (∫ x, Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (q + 1)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+        ≤ (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) *
+            (K_rf (q + 1) * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2)) :=
+          mul_le_mul_of_nonneg_left hAGbd
+            (by have := hKt0_nn; have := hKc0_nn q; positivity)
+      _ = (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) * K_rf (q + 1) *
+            (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by ring
+  -- Sum over `q ≤ i` and collect into the window at order `i+1`.
+  set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
+  have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  calc ∑ q ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2
+      ≤ ∑ q ∈ Finset.range (i + 1),
+          D q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) :=
+        Finset.sum_le_sum (fun q _ => hL2 q)
+    _ ≤ ∑ q ∈ Finset.range (i + 1), D q * (1 + S') := by
+        refine Finset.sum_le_sum (fun q hq => ?_)
+        refine mul_le_mul_of_nonneg_left ?_ (hD_nn q)
+        have hqle : q + 1 < i + 2 := by have := Finset.mem_range.mp hq; omega
+        have : ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2 ≤ S' :=
+          Finset.single_le_sum (f := fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)
+            (fun j _ => sq_nonneg _) (Finset.mem_range.mpr hqle)
+        linarith
+    _ = (∑ q ∈ Finset.range (i + 1), D q) * (1 + S') := by rw [Finset.sum_mul]
+
+/-! ### Radius-free `wXi` low-order producer.
+
+`wXi = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg`.  The `g₁`-half jets equal the
+`connDiffSection g₁ g₀` jets (`norm_iCG_connDiffLoweredCc_eq_connDiffSection`) → R-free low window;
+the `g_bg`-half is `T`-independent, a fixed per-order constant absorbed into the window's `1`. -/
+set_option linter.unusedVariables false in
+theorem wXi_lowOrder_jetL2_radiusFree
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2),
+        ∀ (i : ℕ), i ≤ a + 1 →
+          ∑ q ∈ Finset.range (i + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
+            Flow i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨Flow_cd, hFcd_nn, hcd⟩ :=
+    connDiffSection_lowOrder_jetL2_radiusFree (I := I) (M := M) g₀ a ha_super hδ₀ hΛ₀0
+  set FBg : ℕ → ℝ := fun q =>
+    ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2 with hFBg_def
+  have hFBg_nn : ∀ q, 0 ≤ FBg q := fun q => sq_nonneg _
+  refine ⟨fun i => 2 * Flow_cd i + 2 * ∑ q ∈ Finset.range (i + 1), FBg q,
+    fun i => by
+      have := hFcd_nn i
+      have : 0 ≤ ∑ q ∈ Finset.range (i + 1), FBg q := Finset.sum_nonneg (fun q _ => hFBg_nn q)
+      positivity, ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
+  set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
+  have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  -- Per-order squared triangle over the `g₁` / `g_bg` halves.
+  have hper : ∀ q : ℕ,
+      ‖iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
+        2 * ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 +
+          2 * ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2 := by
+    intro q
+    have htri : ‖iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ +
+          ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ := by
+      rw [wXi, iteratedCovGrad_sub]
+      exact norm_sub_le _ _
+    nlinarith [htri, norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)),
+      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ -
+        ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖)]
+  -- The `g₁`-half sum equals the `connDiffSection` sum, controlled by `hcd`.
+  have hg1 : (∑ q ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2) ≤
+      Flow_cd i * (1 + S') := by
+    have hcongr : (∑ q ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2) =
+        ∑ q ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2 :=
+      Finset.sum_congr rfl (fun q _ => by
+        rw [norm_iCG_connDiffLoweredCc_eq_connDiffSection (I := I) (M := M) g₀ g₁ q])
+    rw [hcongr]
+    exact hcd g₁ P htie hδ_le hδ0 hδ hsup i hi
+  have hbg : (∑ q ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2) =
+      ∑ q ∈ Finset.range (i + 1), FBg q := rfl
+  calc ∑ q ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2
+      ≤ ∑ q ∈ Finset.range (i + 1),
+          (2 * ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 +
+            2 * ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2) :=
+        Finset.sum_le_sum (fun q _ => hper q)
+    _ = 2 * (∑ q ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2) +
+          2 * (∑ q ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖ ^ 2) := by
+        rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+    _ ≤ 2 * (Flow_cd i * (1 + S')) + 2 * ((∑ q ∈ Finset.range (i + 1), FBg q) * (1 + S')) := by
+        rw [hbg]
+        have hone : (1 : ℝ) ≤ 1 + S' := by linarith
+        have hbg_nn : 0 ≤ ∑ q ∈ Finset.range (i + 1), FBg q :=
+          Finset.sum_nonneg (fun q _ => hFBg_nn q)
+        nlinarith [hg1, hbg_nn, hone, mul_nonneg hbg_nn hS'_nn]
+    _ = (2 * Flow_cd i + 2 * ∑ q ∈ Finset.range (i + 1), FBg q) * (1 + S') := by ring
+
 end DifferentialGeometry.Integral.Connection
