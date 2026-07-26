@@ -7,6 +7,18 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-25)
 
+- **UPDATE (a=2 campaign session 1, 2026-07-25): the FRONTIER identity `connDiff_koszul_deriv2` is
+  PROVED sorry-free** in `Geometry/Connection/LeviCivita/ChristoffelDiffKoszulDeriv2.lean` (with its two
+  reusable engines `metricField_totalReg2` + `nablaMetric_combo_extDeriv2`, all axiom-clean
+  `[propext, Classical.choice, Quot.sound]`).  It is the master differentiated form
+  `∂_V[2 g₁(∇₂A(W,X,Y), Z)] = [three ∇₂³g₁ combos + slot corrections] − 2[∇₂²g₁·A + ∇₂g₁·∇₂A + corr]`,
+  proved by "differentiate the a=1 statement" (`congrArg ∂_V` + linearity + the two combo engines; the
+  quadratic reuses the a=1 engine verbatim).  Note: it carries `[InnerProductSpace ℝ E]` (inherited from
+  the a=1 `connDiff_koszul_deriv`, which is not IPS-`omit`ted); the two engines are NormedSpace-only.
+  See `ChristoffelDiffKoszulDeriv2.md`.  This discharges §3.1's ingredient 1.  **Still open for the
+  `covStepDiff2_exists_const` sorry:** ingredient 2 (the a=2 base-Leibniz operator identity + fibre CS
+  assembly) AND the a=2 dual core (analogue of `covDerivConnDiff_g1_le`, isolating `|∇₂²A|` in metric-jet
+  currency from the master identity via the clean `covDerivConnDiff2` collapse).
 - Ruling: **route (i) — iterate the differentiated Koszul identity** — RULED IN.  Routes (ii) and (iii)
   ruled OUT (reasons in §2).
 - Stated: `covStepDiff2_exists_const` (the a=2 base-Leibniz jet atom) — elaborates GREEN, one `sorry`,
