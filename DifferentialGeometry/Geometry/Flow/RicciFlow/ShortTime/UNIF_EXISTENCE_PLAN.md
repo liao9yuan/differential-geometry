@@ -1607,3 +1607,25 @@ carries; the ∇₂^a A (a ≥ 2) bound family is THE one allowed visible fronti
 preferably as a single named conditional hypothesis (honest-input form), not a
 second machinery excursion.  Jet-order budget expectation: order-N telescoping
 needs metric jets to ≈ N+1.
+
+### №25 addendum 2 (same day) — atom 2 honest-partial ACCEPTED (`f852e8b90`); engine brick dispatched
+
+The `lc0Insert`-difference atom hit a GENUINE missing engine (executor's
+three-route search recorded in the leaf note): the contraction
+`connDiff g₁ g₀ (dVF-difference)` is an interior product with no
+contraction-Leibniz jet grid in the tree; the WEndo-difference route is
+provably circular; the natural home (`wCA`/`wOmega`/`wAlphaB` + the identity
+`slotInsert(connDiff·dVF) = cometricRaise(wAlphaB)`) is private inside
+`DeTurckVectorFieldL2JetBound.lean`.  Atom 2 is STATED with the correct
+signature, one flagged `sorry` (`lc0InsertDiff_ballUniform`).
+
+LEVERAGE RULING: lc0VB and lc0AMix are the same interior-product shape ⟹ ONE
+public engine unblocks three of four atoms.  Dispatched (same executor, claims
+`DeTurckVectorFieldL2JetBound.lean` + the leaf): expose the minimal public API
+(thin wrappers, hoist the buried identity), build the per-order ballUniform
+jet-L² producer for the endo difference, discharge the sorry, design for
+lc0VB/lc0AMix reuse but STOP after atom 2 is green.
+
+lieCorr0 honest fraction unchanged at ~33% sorry-free (top piece + lc0Riem);
+what advanced is the frontier's SHAPE: from "unstated atom" to "one named
+reusable producer".
