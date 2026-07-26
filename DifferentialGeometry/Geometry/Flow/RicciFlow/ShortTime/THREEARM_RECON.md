@@ -451,3 +451,35 @@ true is the radius-free Gagliardo–Nirenberg `‖(∇P)²‖₂ ≤ C(‖P‖�
 Such capped antidiagonal terms belong in the TOP L² ENVELOPE.  Consequence: the
 consumer sibling is a NEW small theorem beside the existing public top-head
 APIs (which stay untouched), not a strengthening of them.
+
+---
+
+## 11b. STATUS (2026-07-26): THE GATE IS EXACT-GREEN
+
+The gate lemma and its fibre-small bridge are landed and verified in
+`Analysis/Spectral/Tensor/CovGrad/CurvatureCoefficientDifferenceJetTower.lean`
+(next to the ballUniform sibling at `:14417`):
+
+- `boundedFactorGridWindow_integral_radiusFree_topSeparated` — THE GATE (deliverable 2).
+  Radius-free, top-separated: `∫ window ≤ Klow i·(1 + ∑_{j≤i+1}‖∇ʲP‖²) + Ktop i·‖∇^{i+2}P‖²`,
+  `Klow`/`Ktop` R-free, parametrized by an abstract fixed `Λ₀` (statement-level) + a per-`P`
+  pointwise `hsup : ∀ x, rfns g₀ 0 2 x (P x) ≤ Λ₀²`.
+- `antidiagonalTupleGrid_integral_radiusFree` — the per-order workhorse it is built from.
+- `rfns_symmS_zero_le_fibreSmall` — deliverable 1, the public δ₀ fibre-small bridge
+  (`Λ₀ := (dim E)·δ₀`), a thin wrapper over the existing private `rfns_symmS_zero_le_of_ball`.
+
+All three: targeted module build GREEN (`9387 jobs`); `#print axioms` = `[propext,
+Classical.choice, Quot.sound]`.  The R^{7k} disease was confirmed a wrapper artifact
+(Pro point 4/5): the committed `grid_prod_int_le` (`:8154`) is already radius-free-capable;
+instantiate with `R := ‖∇ᵏP‖` and fixed `Λ₀`.  The top-layer subgrid argument goes through
+with NO resisting term — the antidiagonal constraint `∑ eₘ = i+2` forces the GN interpolation
+onto the top jet, so every capped top cell (incl. the `n=1, e=(i+2)` cell) is bounded by
+`C·‖∇^{i+2}P‖²` with no intermediate norm.  This is consistent with §11-addendum: the capped
+antidiagonal top terms land in the explicit `Ktop i·‖∇^{i+2}P‖²` top L² envelope, exactly the
+place the addendum reserves for them.
+
+Consumer note (NEXT brick, `DeTurckVectorFieldL2JetBound :4233`): the bridge only controls the
+SYMMETRIC part, so the gate must be consumed at `P := symmS g₀ T` (the geometrically correct
+perturbation), not raw `T`; committed raw-`T` grids (`bdOmRecover_gridWindow`) switch to
+`symmS T`.  The gate is on a general `P` and does not force this — it is the consumer's choice.
+Per-file lessons + exact statements in `CurvatureCoefficientDifferenceJetTower.md`.
