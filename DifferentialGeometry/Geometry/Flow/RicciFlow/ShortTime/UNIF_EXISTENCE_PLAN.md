@@ -1588,3 +1588,22 @@ coordinate via lake-locked; focused checks with -NoLakeLock remain fine.
 Honest numbers unchanged: (N) theorem 0%; machinery ≈ 55% (B2 closed, item-6
 tail now = wiring + D_N + 2a-hi/pkg + S0 j≥2 + S2–S4/S1b; item-2 tail = 3 Kc
 atoms + endpoints + threeArm/smooth-core, the last being the main risk).
+
+### №25 addendum (same day) — wiring ACCEPTED (`771dbebd1`); D_N dispatched
+
+`covStepDiff_of_jets` (UnifCovSumCross, public, 17 letters) accepted: the
+D_N-facing fully-discharged T-B jet step; axiom line planner-probed clean.
+Substantive design finding recorded in the commit: the metric roles do NOT
+collapse — ∇g₂/g₁ (jet_le's NA-fold) and ∇g₁/g₂ (the hA1 discharge) are
+different quantities, so the signature honestly carries both first-order jets
+(`hJet1`, `hJet1'`, shared Λ') with one comparability via
+`metricUniformEquivalentOn_symm`.  Norm-variant deliberately omitted (jet
+variant is the API).
+
+DISPATCHED next (same executor, same file): **D_N state-before-prove** per
+UnifCovSumCross.md §T-B — (1) full statement with explicit constant recursion,
+(2) N=2 proof from existing pieces, (3) general step only as far as a=1
+carries; the ∇₂^a A (a ≥ 2) bound family is THE one allowed visible frontier,
+preferably as a single named conditional hypothesis (honest-input form), not a
+second machinery excursion.  Jet-order budget expectation: order-N telescoping
+needs metric jets to ≈ N+1.
