@@ -614,3 +614,30 @@ revised and its consumer wiring proved; the exact 2026-07-18 analytic status is
 the execution record above.  Brick U remains deliberately decoupled from both
 producers and is complete independently of them.  Corollary (a) + Lemma 3
 remain unnecessary for `hglue` under this route.
+
+
+## (B) discharge path — Route-K campaign state (2026-07-26, B-lane planner)
+
+The smooth-class statement surgery (2026-07-25 Pro ruling) and the full Route-K
+machinery campaign are DONE through the assembly layer.  The endpoint sorry at
+`:189` now has a precise discharge path:
+
+- `Evolution/ForwardUniqueAssembly.lean` — `forward_unique_of_inputs` proves
+  the (B)-shaped conclusion at (B)'s EXACT hypothesis interface plus the
+  standing bundle `ForwardUniqueInputs`.
+- After K6b/K6c (`ForwardUniqueLifts.lean`, `ForwardUniqueSdec.lean`) the
+  bundle collapses to: (α) the two own-lowered per-flow
+  `Riemann04BTensorWithRicciDriftEvolutionInFrameOn` interfaces — the K2-B
+  frontier (dimension-generic single-flow ∂ₜRm₀₄ = ΔRm₀₄ + Q; the repo's
+  Lemma-6.1 second-Bianchi conversion; `curvSecondBianchi` is proved,
+  `coordRicciEvol` is the dim-generic precedent); (β) slab-constant bounds
+  (producers banked except `ForwardUniqueConnBound.lean:496` — Hamilton ∂ₜΓ
+  in invariant form); (γ) the density joint-regularity completion (four
+  located steps + one new mixed-object chart lemma); (δ) benign realization
+  slots.
+- Full ledger and per-brick history: `ShortTime/FORWARD_UNIQUE_PLAN.md`
+  Dispatch log №1–№31.
+
+Discharging `:189` = commissioning K2-B + the two small producers above, then
+one wiring pass instantiating `forward_unique_of_inputs`.  Do NOT restate the
+endpoint; the assembly already matches its interface.

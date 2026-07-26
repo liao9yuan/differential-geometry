@@ -292,6 +292,212 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №32 (2026-07-26, **WINDOW WRAP — FULL LOCKED BUILD GREEN**): final
+  `lake-locked build` of the autonomous window completed successfully
+  (10649 jobs, 0 errors).  Whole-tree sorry set audited from the full log =
+  exactly the documented frontiers: lane's ONE frontier `ForwardUniqueConnBound`
+  (decl `:455`, sorry `:496`), endpoint `ExtendViaUniqueness` `:79` (N) /
+  `:189` (B), plus pre-existing non-lane sorries (HopfRinow ×3,
+  NoncollapseInjectivity, Exterior/Basic ×4, MetricCompactness,
+  HamiltonCompactness, CurvTowerBridge, Rellich, Weyl, CinftyLimitGlue,
+  HamiltonPositiveRicci ×2).  All 19 lane/canonical modules in the root
+  aggregate compile inside the green tree.  Resume point for the next
+  session = №31's α/β/γ/δ bundle (Task: K2-B + adotLe producer + dens
+  completion, then one wiring pass instantiating `forward_unique_of_inputs`
+  at `:189`).  Note: (N)-lane commits (`6c98d9738`, `eda2c3a36`) landed on
+  the branch during the build window; their in-flight dirty files left
+  untouched per charter §4.
+- №27 (2026-07-26, ACCEPTED — **K6a OUTCOME (A): ENDGAME ASSEMBLY DONE**):
+  **Agent-K6A delivered `Evolution/ForwardUniqueAssembly.lean`** (509 lines,
+  11 public decls, 0 sorry; planner re-audit clean). `forward_unique_of_inputs`
+  proves the (B)-shaped conclusion at (B)'s EXACT interface from a minimal
+  fully-labelled standing bundle (5 data carriers + 16 Prop fields,
+  satisfiability-audited). Discharged from (B)'s own fields: hgram, both PDEs
+  (with the `metricRicciAt_apply_eq_ricciTensor` currency bridge), hinit,
+  hA/hS DERIVED at the canonical chart frame, concrete Young parameters.
+  Bundle provenance: K2-B (`gamma`/`rm`/`sdec`; rm+sdec composable-later
+  pending the QUADRILINEAR frame→invariant lift and the SolutionOn bridge —
+  both missing-API, dispatched as K6b №28), realization (`car`), slab bounds
+  (`∃`-per-subslab, deliberate), hdens tower (`dens` + 10 of 16 fields
+  collapse to `dens` alone once the tower lands). `adotLe`'s producer still
+  carries the ConnBound `:496` frontier; `ricciLe`/`reactLe` now feedable
+  from RatePro (№25). Endpoint `:189` untouched by design.
+- №31 (2026-07-26, ACCEPTED — **K6c OUTCOME (A): COMPOSITION PROGRAM
+  COMPLETE**): **Agent-K6C delivered `Evolution/ForwardUniqueSdec.lean`**
+  (1008 lines, 25 public decls, 0 sorry; planner re-audit clean). The
+  metric-argument SWAP on `reLower` makes the gap operator's trace metric AND
+  connection both g₁ → `lapComm_reLower_eq` yields a g₁-divergence directly
+  (the ∇A-cost risk of R7 dissolves entirely); `nabla1_metric2` free by the
+  same swap; gap ∂ₜ by pointwise product rule; `sdecUflux`/`sdecRemFam`
+  CONSTRUCTED (four-summand remainder, all difference×background);
+  `sdec_of_uhlenbeck` residual = exactly R1 + K6b's carried hypotheses + two
+  unavoidable field realizations (`hT₁`/`hT₂`, same papering as
+  `Sfield`/`car`); `rm` and `sdec` share `uhlRmDiffSpeed` bit-for-bit.
+  **THE ASSEMBLY BUNDLE NOW COLLAPSES TO**: (α) K2-B — the two own-lowered
+  `Riemann04BTensorWithRicciDriftEvolutionInFrameOn` interfaces (+ per-flow
+  PDE + benign realization/continuity auxiliaries) — THE mathematical
+  frontier (Lemma 6.1, ~900-line second-Bianchi conversion; `coordRicciEvol`
+  precedent; `curvSecondBianchi` proved); (β) `bounds` — slab constants,
+  producers banked except `adotLe` ← `ConnBound:496` (invariant ∂ₜΓ);
+  (γ) `dens` — the 4-step completion + ONE mixed-object chart lemma
+  (`riemannCurvature04At g₁ (metricCov g₂)` reading); (δ) benign
+  realization slots. Relocation TODOs logged.
+- №30 (2026-07-26, ACCEPTED — **K6b OUTCOME (A) beyond spec** + **PLANNER
+  RULING R7**): **Agent-K6B delivered `Evolution/ForwardUniqueLifts.lean`**
+  (630 lines, 19 public decls, 0 sorry; planner re-audit clean).
+  Quadrilinear lift (`quadOfComp` family + `rmDiffVec_hasDerivAt_of_basis`);
+  `uhlRmDiffSpeed` CONSTRUCTS `Svec`; `rm_of_uhlenbeck` collapses `rm` to
+  EXACTLY the R1 standing inputs. **`gamma` FULLY DISCHARGED from (B)'s own
+  fields** (`gamma_of_gram`): the Assembly ledger's K2-B label was WRONG —
+  the pairing route is DEAD (zero producers of
+  `ConnectionPairingDerivativeInFrameOn`, a 5th false-path finding) but
+  `solutionOn_of_joint → tailChristoffel` bypasses it; `solOfMetric g = ⟨⟨g⟩⟩`
+  trivial; tail restriction paid by the midpoint trick; `Avec` constructed.
+  **RULING R7 (`sdec`)**: the executor's carrier fork is ALREADY RESOLVED by
+  the R4 bridge — key identity `∇¹h₀₂ = −∇¹g₂ = A-algebraic` (mirror of
+  `nabla2_metric1`), so `Δ₁` of the lowering gap div-organizes (Leibniz:
+  `(Δ₁h)·Rm₂ = div₁(∇¹h·Rm₂) − ∇¹h·∇¹Rm₂`, all A-flux shapes); `sdec`
+  composes from K2A's generic capstone + K2.3 + K2.6b/c + this identity —
+  NO carrier change, NO input beyond R1's pair. K6c dispatched (№31).
+  Lesson: IPS/NormedSpace split must be a SECTION split.
+- №29 (2026-07-26, ACCEPTED — **TOWER OUTCOME (B) strong; 4TH FALSE WALL
+  CORRECTED**): **Agent-TOWER delivered `Evolution/ForwardUniqueDensReg.lean`**
+  (20 decls, 0 sorry; planner re-audit clean — borel `private local instance`
+  block = №12-precedented idiom). RECON CORRECTION: №6's "the joint
+  chart-Gram→Γ→Rm tower does NOT exist" was FALSE — `GenJointGram`
+  (`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValue.lean:401`),
+  `gen_joint_invGram` (:476), `gen_joint_christoffel` (:619),
+  `gen_joint_riemann` (:683) + transports EXIST, generic over metric families.
+  Delivered: joint moving-fibre-norm brick; `metricDiffSq_jointContMDiffOn`
+  UNCONDITIONAL; **four of eight Integrable slots discharged with NO
+  hypotheses** (typing fact) + `inner0S_smooth`; `hdcont`/`hidens` from
+  `hdens` on the open window. RESIDUAL (classified): conn/rm density joint
+  smoothness reduced to the chart-frame components of A₀₃/S₀₄ — four steps
+  (~250–450 lines; 1–3 routine composition of located lemmas; STEP 4 = the
+  ONE new lemma: chart reading of the mixed object
+  `riemannCurvature04At g₁ (metricCov g₂)`), plus the Icc-edge variant
+  blocked on the same object. **RULING R6**: `Evolution/` MAY import
+  `Analysis/Parabolic/RicciLinearization` at endpoint altitude (K2.7's
+  Analysis/Elliptic import is precedent; same R5 rationale). Ledger DEFECT:
+  `Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure` is
+  declared TWICE in the same namespace; 4 relocation TODOs in the .md.
+- №28 (2026-07-26, IN FLIGHT): **Agent-K6B** (`Evolution/ForwardUniqueLifts.lean`
+  — `quadOfComp` lift + `rm_of_uhlenbeck` collapse + the SolutionOn/`gamma`
+  bridge; `sdec` collapse only if carrier-decision-free) and **Agent-TOWER**
+  (still running).
+- №26 (2026-07-26, IN FLIGHT): **Agent-K6A** (endgame assembly
+  `Evolution/ForwardUniqueAssembly.lean` — `forward_unique_of_inputs` at (B)'s
+  exact interface + minimal labeled standing bundle) and **Agent-TOWER**
+  (`Evolution/ForwardUniqueDensReg.lean` — the hdens joint-regularity
+  producer, recon-first, priority: metricDiffSq joint → Integrable slots →
+  conn/rm layers; expected outcome (B) with the connection/curvature joint
+  tower classified).
+- №25 (2026-07-26, ACCEPTED — **K4P OUTCOME (B) strong**): **Agent-K4P
+  delivered `Tensor0SMetricCongr.lean` (canonical, NormedSpace-only:
+  `inner0S_domDomCongr`) + `Evolution/ForwardUniqueRatePro.lean`**
+  (`ricci_eq_trace_rm04` tensor-level, slot permutation (0,1,2,3)↦(0,2,3,1),
+  cross-pair gate discharged; **`ricciDiff_eq_trace` matches K4's `htr`
+  VERBATIM with B = 0** — Ric-difference is EXACTLY the g₁-trace of S₀₄,
+  same-norm representative). Discharges K4's `htr` AND K1C-b blocker (ii).
+  Correct layering: instantiation left to the consumer side to keep both new
+  files IPS-free. `movingReact_le` deferred with a SOLID classification:
+  `movingReact0S` is frame-pinned by definition (hard-codes `finBasis` +
+  `basisInvMetric`); K4's ~80-line estimate was WRONG; smallest unblocker =
+  `movingReact0S_orthoBasis` via a new slot-composition layer (~250–400
+  lines, optional-upgrade brick — `hreact` stays a named slab hypothesis, no
+  sorry anywhere). Ledger: `domDomCongr_sub` → `RSTensor/Defs`;
+  `exists_onFrame`/`onFrame_inv` now 4 copies; rw-on-Tensor0SSpace lesson now
+  SYSTEMATIC (calc/rfl/congrArg/term-form only). 9 decls axiom-clean; both
+  wired.
+- №24 (2026-07-26, ACCEPTED — **K5 OUTCOME (A): CLOSURE CHAIN COMPLETE**):
+  **Agent-K5 delivered `Evolution/ForwardUniqueClosure.lean`** (480 lines, 8
+  public decls, 0 sorry; planner re-audit clean). `gronwall_zero_on` →
+  `energy_zero_on` → `metric_eq_of_energy_zero` (measure-positivity producer
+  EXISTS: `riemannianVolumeMeasure_isOpenPosMeasure`) → `metrics_eq_on` /
+  `metrics_eq_ico`. **The capstone's named package IS K6's input inventory**
+  (K3+K4 verbatim on Ioo + `hidens`/`hdcont` on Icc + `hinit`/`hcont`; only
+  two inputs new vs K3+K4, both hdens-tower debt). RATIFIED: (1) Gronwall
+  restated off Mathlib with zero DG imports — **`EdgeStrongData.lean`
+  UNMASKED AS FALSE-GREEN** (no olean in this checkout; only consumer is the
+  un-compilable MovingEdgeEnergy; proof uses `le_of_tendsto` where
+  `ge_of_tendsto` is required — does not elaborate as written). Flag to the
+  (N)/DeTurck lane. (2) `metricExtInner` = 3rd smooth-metric-ext copy —
+  promote to `Geometry/Metric/Basic` at campaign end; merge the two Gronwall
+  statements under `Analysis/ODE/`; add `normSq0S` positive-definiteness next
+  to `normSq0S_nonneg`.
+- №23 (2026-07-26, ACCEPTED — **K2.6c OUTCOME (A): K2.6 CLOSED**):
+  **Agent-K26C delivered `Evolution/ForwardUniqueReLower.lean`** (992 lines,
+  33 public decls, 0 sorry, warning-free; planner re-audit clean, olean
+  fresh). `reLower g₁ g₂ T = tr_{g₂}(domDomCongr (rotation-by-2) (T ⊗ g₁))`
+  (slot layout PINNED in its .md — reuse, never re-derive); covariant defect
+  `∇²(reLower T) = reLower(∇²T) + reLowerPair g₂ T (∇²g₁)` — bilinear, no
+  ∇A; with `nabla2_metric1` algebraic in the A₀₃ flux; the concrete
+  divergence-form commutator instantiates `lapComm_eq_div_flux` with BOTH
+  carriers algebraic in (A₀₃-flux, T, ∇²T) — abstract defect carriers
+  RETIRED, **K2.6 complete**. `trace_reLower` was the one extra piece
+  (four-fold basis-sum exchange; no framework, no gate). Ledger: 8 Lean traps
+  in the .md (worst: `Fin.cons` motive mis-guess manifests as a bogus
+  `ChartedSpace H (Fin n)` instance failure); 5 local helpers with
+  Tensor-layer relocation TODOs (`traceField_eq_sum`, `nablaProd_eval`,
+  3 Fin/Finset lemmas).
+- №21 (2026-07-26, ACCEPTED — **K4 OUTCOME (A): `forwardUniqueRate_le` DONE**):
+  **Agent-K4 delivered `Evolution/ForwardUniqueRateLe.lean`** (933 lines, 20
+  public decls, 0 sorry; planner re-audit clean incl. the capstone). Currency
+  bridge `innerPt_eq_inner0S` (model↔fibre pairing, orthonormal diagonal +
+  POLARISATION) — without it the S-part was unprovable; IBP identities now in
+  lane currency (`intInner_lap_eq_neg`, `intInner_div_eq_neg`).
+  `ricciDiffSq_le` SHARPER than spec: `Ric₁−Ric₂ = tr_{g₁}S₀₄` exactly
+  (pure-contraction cancellation, no h-term). Two-parameter Young
+  (`habs : δ·C_A + ε ≤ 1`) handles the ∇S-feedback in the Adot slot, κ = 1.
+  Capstone `rate ≤ K·E − D`, K explicit, fully named package (hSdec = R4
+  shape verbatim; hAdot = K1C-b slot no-adapter; 8 Integrable slots = hdens
+  debt). OWED (named, none inside K4): `hreact` micro-bound; the tensor-level
+  Ric-trace slot bridge (+ missing `inner0S_domDomCongr`) — SHARED wall with
+  K1C-b blocker (ii), confirmed. Ledger: 3rd copy of
+  `rfns_eq_normSq0S_unit` (home: RiemannianFiberNormSq layer);
+  ForwardUniqueEnergy's borel-instance block may be droppable (K4 needed none).
+  For K5: `E′ ≤ K·E` is one linarith from `dissipation_nonneg`.
+- №22 (2026-07-26, IN FLIGHT): closure wave — **Agent-K5**
+  (`Evolution/ForwardUniqueClosure.lean`: edge-Gronwall E≡0 on Icc; integral-
+  zero ⟹ pointwise metric equality via measure positivity + metric ext;
+  `metrics_eq_on` capstone per-subslab then Ico; its report defines K6's
+  input inventory) and **Agent-K4P** (`Tensor0SMetricCongr.lean` canonical +
+  `ForwardUniqueRatePro.lean`: `inner0S_domDomCongr`, `movingReact_le`,
+  `ricci_eq_trace_rm04` matching K4's `htr` verbatim — discharges the shared
+  wall). K26C still unreported (long-running; check on next wake).
+- №20 (2026-07-26, ACCEPTED — **K1C-b OUTCOME (B), one documented frontier**):
+  **Agent-K1CB delivered `Evolution/ForwardUniqueConnBound.lean`** (555 lines,
+  11 public decls, EXACTLY one real `sorry` at `:496`; planner audit: 7 decls
+  axiom-clean + 2 documented sorryAx (frontier + its capstone consumer);
+  probe up-to-date). Gaps (2)+(3) COLLAPSED into one sharp-constant-1
+  lowering-comparison lemma (no isometry framework; `connDiffLow_eq_lower`);
+  the `∇¹S₀₄` carrier NAMED (`nablaRmDiff`/`nablaRmDiffSq`/`IsRmDiffField`
+  + `_self` sanity); reaction half of the ruling's bound UNCONDITIONAL;
+  capstone `connDiffDot_normSq_le` in the ruling's shape, green modulo the
+  frontier. **PLANNER FRAMING CORRECTED (gap 4)**: the route needs only
+  ∇-commutes-past-metric-trace (∇g = 0) — Bianchi is NOT on this path; the
+  REAL blockers are (i) Hamilton's ∂ₜΓ formula in INVARIANT form (repo has
+  frame components only) and (ii) the tensor-level `Ric = tr_g(Rm₀₄)` slot
+  bridge (component-level only today). SMALLEST UNBLOCKER (shared with K4's
+  likely need — wait for K4's report before dispatching): tensor-level
+  Ric-as-Rm₀₄-trace with the trace pair in slots 0,1, canonical home
+  `Geometry/Curvature/` next to `metricRicciAt_eq_trace`. Ledger:
+  `tensor02_expand` relocation now DUE (2nd consumer);
+  `exists_onFrame`/`onFrame_inv` duplicated 3× — promote to a public pair
+  under `Tensor/RSTensor/Tensor0SRiemannian/` at campaign end.
+- №19 (2026-07-25, IN FLIGHT + a PLANNER FINDING): three Opus builders
+  concurrent — K26C (re-lowering defect), **Agent-K4**
+  (`Evolution/ForwardUniqueRateLe.lean`: Ric-difference trace bound + S-part
+  IBP/Young assembly + h/A/volume parts with the K1C-b slot as a named
+  hypothesis + `forwardUniqueRate_le` capstone + `forwardUniqueDissipation`),
+  **Agent-K1CB** (`Evolution/ForwardUniqueConnBound.lean`: the named ∇¹S₀₄
+  carrier + lowering-contraction instances + the ruling's |∂ₜA₀₃|² bound).
+  FINDING (checked, №9's homework): **`curvSecondBianchi` IS PROVED**
+  (`Geometry/Curvature/Bianchi.lean:820`, operator-level, torsion-free
+  hypothesis, file 0-sorry); `second_bianchi`/`contracted_bianchi_of_second`
+  are hypothesis-unpacking combinators BESIDE the proved producer — K1C-b
+  gap (4) is contracted-trace + realization plumbing, not new mathematics;
+  K2-B's deepest geometric input is likewise banked.
 - №18 (2026-07-25, ACCEPTED — **K2.7 OUTCOME (A)** + **PLANNER RULING R5**):
   **Agent-K27 delivered `Evolution/ForwardUniqueIBP.lean`** (389 lines, 9
   public decls, 0 sorry; planner re-audit clean, probe up-to-date). The lane's
