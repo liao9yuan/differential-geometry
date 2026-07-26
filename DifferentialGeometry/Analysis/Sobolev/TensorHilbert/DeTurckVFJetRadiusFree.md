@@ -30,8 +30,18 @@ the producer's `F i` a LOW WINDOW `Flow i · (1 + ∑_{j≤W} ‖∇ʲP‖²)` w
 | `rfns_iCG_connDiffSection_atgw_rf` (pointwise) | LANDED (session 3) | clean | head engine + single_factor, atgw currency |
 | `rfns_iCG_wXi_atgw_rf` (pointwise) | LANDED (session 3) | clean | via PUBLIC `connLow_rfns` valence bridge + `g_bg` |
 | `wOmega_lowOrder_jetL2_radiusFree` | LANDED (session 3) | clean | two-arm grid-mul via `antidiagonalTupleGridWindow_mul_le` + workhorse |
+| `exists_rfns_connDiff_topsep_rf` (pointwise) | LANDED (session 4) | clean | head engine, top `rfns(∇^{l+1}P)` kept separate, `l·grid` remainder fold |
+| `connDiff_L2_topsep_rf` | LANDED (session 4) | clean | integrate top-sep engine; workhorse window → `Flow n·(1+∑_{j<n+2})` |
+| `wXi_L2_topsep_rf` | LANDED (session 4) | clean | connDiff triangle; `g_bg` half folded into window `1` |
+| `cometricCastG0_wXi_twoArm_fold_rf` (pointwise) | LANDED (session 4) | clean | reusable two-arm fold → `atgw(n+2)` (extracted from wOmega_lowOrder) |
+| `exists_rfns_wOmega_topsep_rf` (pointwise) | LANDED (session 4) | clean | corner-peel envelope `Kc_top·rfns(∇ⁿwXi)+Kwin·atgw`; SPLIT from L² for heartbeats |
+| `wOmega_L2_topsep_rf` | LANDED (session 4) | clean | corner via `wXi_L2_topsep_rf`; lower fold via workhorse |
+| `rfns_iCG_wOmega_atgw_rf` (pointwise) | LANDED (session 4) | clean | full Leibniz + fold, no `hsup` — feeds wAlphaB fold |
+| `wCA_wOmega_twoArm_fold_rf` (pointwise) | LANDED (session 4) | clean | wCA(=connDiff)×wOmega fold → `atgw(i+3)` (both arms +2 offset) |
+| `wAlphaB_L2_perOrder_rf` | LANDED (session 4) | clean | top-free arm; two-arm fold + workhorse → `FlowB i·(1+∑_{j<i+3})` |
+| `wAlpha_L2_topsep_rf` | LANDED (session 4) | clean | TOWER TOP: wAlphaA(wOmega@i+1)+wAlphaB+triangle; top `‖∇^{i+2}P‖²` |
 
-`clean` axioms = exactly `[propext, Classical.choice, Quot.sound]` (targeted build, 2026-07-26).
+`clean` axioms = exactly `[propext, Classical.choice, Quot.sound]` (targeted build + `#print axioms`, 2026-07-26).
 
 ### SESSION-3 RESULT — wOmega landed; the whole low-order tier is R-free
 
@@ -114,14 +124,46 @@ All constants are `g₀ / g_bg / a / dim E / δ₀`-only: `C_base` (fibre decomp
 `K_rf` (workhorse, fixed Λ₀), `SΦ` (T-independent Φ sup, R-free), `fr = finrank`, `appCcGdiag`.
 NO `R`.  Confirmed by inspection — no §6 unreceivable term at the cometricCastG0/sharpFlatEndoCc level.
 
-## Status line (2026-07-26, session 3)
+### SESSION-4 RESULT — the whole `_L2_topsep` layer + `wAlpha` (tower top) landed
 
-The ENTIRE `_lowOrder` tier is R-free: seven declarations LANDED green + axiom-clean (targeted build,
-exactly `[propext, Classical.choice, Quot.sound]`): session 1 `cometricCastG0`/`sharpFlatEndoCc`;
-session 2 `connDiffSection_lowOrder`/`wXi_lowOrder`; session 3 three pointwise atgw grid bounds
-(`cometricCastG0`/`connDiffSection`/`wXi`) + `wOmega_lowOrder`.  Leaf ~1320 lines.  wOmega (the genuine
-two-arm grid-mul) landed cleanly — `connLow_rfns` being PUBLIC removed the feared private valence
-bridge.  Next (session 4): the `_L2_topsep` layer (`connDiff`/`wXi`/`wOmega` top-separated L² — the
-head engine + workhorse make these R-free-ready) → `wAlpha_L2_topsep` assembly → the brick-3 frontier
-discharge (`deTurckLieCoeffField_perOrder_l2_radiusFree`, lift through `norm_iCG_wEndoInsert_eq_wAlpha`
-+ the DLa/DLb split).  Low-order tier COMPLETE; frontier still 0% in-code.  See THREEARM_RECON §11d.3.
+Ten declarations LANDED green + axiom-clean.  The four public `_L2_topsep` siblings
+(`connDiff`/`wXi`/`wOmega`) + the tower top `wAlpha_L2_topsep_rf`, plus the supporting private engines
+(`exists_rfns_connDiff_topsep_rf`, `exists_rfns_wOmega_topsep_rf`, `cometricCastG0_wXi_twoArm_fold_rf`,
+`rfns_iCG_wOmega_atgw_rf`, `wCA_wOmega_twoArm_fold_rf`, `wAlphaB_L2_perOrder_rf`).  Route = clone the
+R-dependent `_L2_topsep` proofs with the ball-uniform integrator swapped for the workhorse, keeping the
+top data term separate.  Shapes:
+- `connDiff`/`wXi`/`wOmega _L2_topsep_rf` (n ≤ a+1): `Ktop·‖∇^{n+1}P‖² + Flow n·(1+∑_{j<n+2}‖∇ʲP‖²)`.
+- `wAlpha_L2_topsep_rf` (i ≤ a): `Ktop·‖∇^{i+2}P‖² + Flow i·(1+∑_{j<i+3}‖∇ʲP‖²)`.  Top index `i+2` STILL
+  sits inside the low window (range `i+3`); session 5 splits it out (frontier wants range `i+2`, top
+  `i+2` — trivial `Finset.sum_range_succ` moving `Flow i·‖∇^{i+2}P‖²` into `Atop`).
+
+KEY Lean lessons (session 4):
+1. `/-- … -/` declaration docstrings go AFTER `set_option … in`, not before (else
+   "unexpected token 'set_option'; expected 'lemma'").
+2. **wOmega heartbeat wall + fix.** The single `wOmega_L2_topsep_rf` (corner-peel pointwise + fold +
+   workhorse in one theorem) blew `maxHeartbeats` (timeout at `whnf`, LINEAR scaling 1.6M→3.2M, so
+   cumulative not one pathological step). Fix = SPLIT the pointwise corner-peel envelope into a private
+   lemma (`exists_rfns_wOmega_topsep_rf`) so the corner-peel and the workhorse integration keep
+   SEPARATE heartbeat budgets → both fit 1.6M (51s full-file). The giant `rw [show (…).toSection x = …
+   from by rw [SmoothCcTensor.toSection_add]; rfl]` was ALSO replaced by the cheaper
+   `rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]` (avoids the terminal
+   `rfl` whnf) — but that alone did NOT fix it; the split did.
+3. `wOmega`'s pointwise atgw bound (`rfns_iCG_wOmega_atgw_rf`) needs NO `hsup` — take it from the
+   FULL Leibniz fold (folding the corner in), NOT from the corner-peeled sup engine (which bundles
+   `hsup` for the ΛC sup). Only the top-SEPARATED bounds carry `hsup`.
+4. wAlphaB's two-arm fold lands at `atgw(i+3)` (both wCA and wOmega carry the `+2` offset;
+   `atgw((n+1)+1)·atgw((l+1)+1) ≤ WMC·atgw(n+l+3) ≤ WMC·atgw(i+3)`), one higher than the wOmega fold's
+   `atgw(n+2)` (cometricCastG0 is `+1`).  `norm_iCG_wAlphaA_eq_succ_wOmega` + defeq `(i+1)+1 = i+2`,
+   `(i+1)+2 = i+3` let `exact (hom (i+1))` close wAlphaA after `rw […, hS'_def]`.
+
+## Status line (2026-07-26, session 4)
+
+The whole `_L2_topsep` layer is R-free through the TOWER TOP.  17 declarations LANDED green +
+axiom-clean (`#print axioms` = exactly `[propext, Classical.choice, Quot.sound]` on all 5 session-4
+publics/producer; targeted build 9433 jobs OK).  Leaf 2282 lines (< 2500, no split needed).  What
+session 5 (the frontier discharge) consumes: `wAlpha_L2_topsep_rf` — top `Ktop·‖∇^{i+2}P‖²` + low
+`Flow i·(1+∑_{j<i+3}‖∇ʲP‖²)` — lifted through `norm_iCG_wEndoInsert_eq_wAlpha` (private in Producers,
+`‖∇ⁱwEndoInsert‖=‖∇ⁱwAlpha‖`) + the DLa/DLb split into the brick-3 frontier
+`deTurckLieCoeffField_perOrder_l2_radiusFree` (`DeTurckLieCoeffDiffRadiusFree.lean:89`, ONE sorry;
+its window is range `i+2`, so session 5 splits the top index `i+2` out of my range `i+3`).  Frontier
+still 0% in-code (its `sorry` untouched per task).  See THREEARM_RECON §11d.4.

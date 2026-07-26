@@ -629,3 +629,35 @@ separate).  Then `wAlpha_L2_topsep` (= `‖∇^{i+1}wOmega‖²` top arm + `wAlp
 grid-mul) → lift through `norm_iCG_wEndoInsert_eq_wAlpha` + the DLa/DLb split → discharge the brick-3
 frontier `deTurckLieCoeffField_perOrder_l2_radiusFree`.  Low-order tier COMPLETE (~5/≈8-10 producers);
 frontier still 0% in-code (its `sorry` untouched).
+
+### 11d.4 — brick 3b SESSION 4 (2026-07-26): the whole `_L2_topsep` layer + `wAlpha` (tower top) landed
+
+Ten more declarations landed in the leaf, targeted-build GREEN (9433 jobs), `#print axioms` on all
+publics/producer EXACTLY `[propext, Classical.choice, Quot.sound]` (no `sorryAx`).  The **entire
+`_L2_topsep` tower is now R-free through the top**: four public siblings `connDiff_L2_topsep_rf` /
+`wXi_L2_topsep_rf` / `wOmega_L2_topsep_rf` / **`wAlpha_L2_topsep_rf`** (THE TOWER TOP), plus six private
+engines (`exists_rfns_connDiff_topsep_rf`, `cometricCastG0_wXi_twoArm_fold_rf`,
+`exists_rfns_wOmega_topsep_rf`, `rfns_iCG_wOmega_atgw_rf`, `wCA_wOmega_twoArm_fold_rf`,
+`wAlphaB_L2_perOrder_rf`).  Route as planned: clone each R-dependent `_L2_topsep` proof with the
+ball-uniform tame-window integrator swapped for the radius-free workhorse, keeping the top data term
+separate.  Shapes: `connDiff`/`wXi`/`wOmega` (n ≤ a+1) → `Ktop·‖∇^{n+1}P‖² + Flow n·(1+∑_{j<n+2})`;
+`wAlpha` (i ≤ a) → `Ktop·‖∇^{i+2}P‖² + Flow i·(1+∑_{j<i+3})`.
+
+**Heartbeat wall (the one real obstacle, resolved).**  The monolithic `wOmega_L2_topsep_rf` (corner-peel
+pointwise + two-arm fold + workhorse in ONE theorem) blew `maxHeartbeats` — timeout at `whnf`, LINEAR
+in the budget (1.6M→3.2M doubled the wall-clock without finishing ⟹ cumulative, not one pathological
+defeq).  Fix = split the pointwise corner-peel envelope into a private lemma
+(`exists_rfns_wOmega_topsep_rf`) so the corner-peel and the workhorse integration get SEPARATE budgets;
+both then fit 1.6M (full file 51s).  (Replacing the giant `rw [show … from by …; rfl]` with the cheaper
+`rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]` helped but was NOT
+sufficient alone.)  Other lessons in the leaf `.md`: docstring-after-`set_option`; `wOmega`'s pointwise
+atgw bound needs NO `hsup` (take it from the full Leibniz fold, not the sup-bundled corner engine);
+wAlphaB's fold lands at `atgw(i+3)` (both arms `+2` offset).
+
+**What session 5 (the frontier discharge) consumes.**  `wAlpha_L2_topsep_rf` — top `Ktop·‖∇^{i+2}P‖²`,
+low `Flow i·(1+∑_{j<i+3})` — lifted through `norm_iCG_wEndoInsert_eq_wAlpha`
+(`‖∇ⁱwEndoInsert‖=‖∇ⁱwAlpha‖`, private in Producers) + the DLa/DLb split into
+`deTurckLieCoeffField_perOrder_l2_radiusFree` (`DeTurckLieCoeffDiffRadiusFree.lean:89`, ONE `sorry`,
+UNTOUCHED per task).  The frontier's low window is range `i+2` (top `i+2` excluded); my `wAlpha` low
+window is range `i+3` (includes `i+2`), so session 5's remaining bookkeeping is a `Finset.sum_range_succ`
+splitting `Flow i·‖∇^{i+2}P‖²` into `Atop`.  Tower COMPLETE; frontier still 0% in-code.
