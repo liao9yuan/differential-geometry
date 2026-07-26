@@ -493,3 +493,74 @@ Sorry-free-content fraction of the leaf's four-atom machinery: still **~50%** (a
 interface and pins the frontier, but its mathematical content — `lc0VB_ballUniform` — is sorried).  What
 session 5 advanced: the recon verdict (route 3, engine gap named + shaped) and the atom interface, green
 except the single documented `sorry`.
+
+## SESSION 6 (2026-07-25) — LINCHPIN LANDED: the `metricConnDiffLowered` producer is GREEN; BOTH lc0VB arms now have committed producers
+
+The shared engine both `lc0VB` and `lc0AMix` need — the per-order jet-`L²` producer for the moving arm
+`metricConnDiffLoweredFib g₁ g₁ g₀` — is **LANDED GREEN, axiom-clean** in the Arm1 producer file
+`DeTurckLieArm1CoeffL2JetBound.lean` (namespace `DifferentialGeometry.Integral.Connection`, same as the leaf,
+so directly consumable).  Verified by a targeted module build (green, 97s); all three new declarations audit
+to exactly `[propext, Classical.choice, Quot.sound]`.
+
+### The decisive identity (why this was a short reuse, not a rebuild)
+`metricConnDiffLoweredFib gm gA gB x = gm.inner (connDiff gA gB v₀ v₁) v₂`
+(`DeTurckLieHigherOrderCoeffField.lean:453/460`).  Arm1's `lieArm1LoweredBgKappa g₀ g₁ g_bg`
+(`:260`) is **defined as** `connDiffLoweredCc g₁ g_bg`, whose unitModel is
+`g₁.inner (connDiff g_bg g₁ · ·) ·` (`lieArm1_kappa_unitModel_apply :1297`).  Since
+`connDiff g_bg g₁ = -connDiff g₁ g_bg` (antisymmetry), **`metricConnDiffLowered g₁ g₁ g_bg =
+-lieArm1LoweredBgKappa g₀ g₁ g_bg`** (sections over g₀).  Fibre-norm and jet-norm are sign-invariant, so
+Arm1's committed private `lieArm1_kappa_feed` (the g₁-lowered → g₀ P-perturbation reduction) delivers the
+bound directly.
+
+### What landed (all `[propext, Classical.choice, Quot.sound]`)
+- `metricConnDiffLoweredCc g₀ g₁ g_bg : SmoothCcTensor g₀ 0 3` (public def) — the section wrapper for
+  `metricConnDiffLoweredFib g₁ g₁ g_bg` over g₀ (mirrors `lieArm1LowFix`/`MixedSection.fromMultilinearSection`).
+- `metricConnDiffLoweredCc_eq_neg_kappa` (public) — the sign identity `= -lieArm1LoweredBgKappa`
+  (`smoothCcTensor_ext_of_unitModel` + `lieArm1_kappa_unitModel_apply` + `lieArm1_connDiff_antisymm`).
+- `metricConnDiffLoweredCc_jetL2_ballUniform_generic` (public, THE PRODUCER) — g₁-generic sup `Λ` + per-order
+  jet-`L²` sums `F i`, uniform over the perturbation ball; a thin transport of `lieArm1_kappa_feed` via the
+  sign identity (norms sign-invariant).  Same shape as `cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic`
+  (which `lc0Riem` consumed) — the consumer threads `realizedFam` for `g₁`.
+- (private helpers: `metricConnDiffLoweredField`, `metricConnDiffLoweredCc_unitModel_apply`.)
+
+### Task 2 (deTurckVF arm) — ALREADY COMMITTED, no new code
+After the interior-product fold `lieArm1_deTurckVF_cometric_trace`, the deTurckVF arm of `lc0VB` becomes the
+**pure** connection difference `connDiffSection g₁ g₀` (the cometric trace turns deTurckVF into `connDiff`,
+NOT into `connDiff·deTurckVF`).  Its g₁-generic sup+`L²` producer is the committed PUBLIC
+`lieArm1_connDiff_feed` (`:698`) — verbatim the sup+`L²` pair for `connDiffSection g₁ g₀`.  So the coordinator's
+`connDiffDVFSection` guess (atom 2's `connDiff·deTurckVF` endo) is NOT the arm; `connDiffSection` +
+`lieArm1_connDiff_feed` is, and it is done.  **Both of `lc0VB`'s fibre-identity arms now have committed
+g₁-generic producers.**
+
+### REVISED resumption order for the `lc0VB` fibre-identity brick (the next brick)
+The two producers are ready; the remaining work is the fibre identity + assembly (do NOT reduce to new
+frontiers):
+1. **Public wrapper over `lieArm1_deTurckVF_cometric_trace`** (currently `private` in the Arm1 file) — the
+   `deTurckVF g₁ g₀ = ∑ₖ connDiff g₁ g₀ (cometric dualₖ)(basisₖ)` vector identity; the claim on that file
+   protects a thin public wrapper.
+2. **Fibre identity** `lieCorr0VBFib g₀ g₁ = reindexCoeffGen(σ)(appCcRS g₀ p a b Φ W)` with
+   Φ = `metricConnDiffLoweredCc g₀ g₁ g₀` (via item 1: fold `ip(deTurckVF)` → cometric trace of `connDiff`;
+   then match `traceStep(VBPerm)` + `prodKappa` to `appCcRS`), W = `connDiffSection g₁ g₀`.  Single-term
+   (≈200–400 lines), the `lc0VB` analogue of `deTurckLieArm1Coeff_eq_lieArm1Piece_sum` (but not 2000 lines).
+3. **Discharge `lc0VB_ballUniform`** in the leaf: product grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
+   + integrator `exists_integrated_..._twoArm_rs_le` + `realizedFam` threading (clone `lc0Riem`), feeding the two
+   producers (`metricConnDiffLoweredCc_jetL2_ballUniform_generic`, `lieArm1_connDiff_feed`).
+
+### `lc0AMix` (atom 4) — reuses THIS producer twice; still no deTurckVF
+`lc0AMix` = chain of traceSteps over `prodKappa(metricConnDiffLowered g₁ g₁ g_bg)` and
+`prodKappa(metricConnDiffLowered g₁ g₁ g₀)` — two `metricConnDiffLoweredCc` arms (at `g_bg` and at `g₀`), NO
+interior product.  Both are covered by `metricConnDiffLoweredCc_jetL2_ballUniform_generic` (this session).  So
+`lc0AMix` needs only its own traceStep-chain fibre identity (no deTurckVF fold) — closest to the `lc0Riem`
+moving-arm recipe, plausibly the easiest of the four Kc atoms once the producer (now landed) is in hand.
+
+## Honest accounting (updated 2026-07-25, session 6)
+`(N) ricci_flow_unif_existence` still **0%** (both endpoints STILL UNSTATED = 0%).  Dedicated machinery = top
+piece (done) + four Kc atoms (**2 of 4 GREEN: `lc0Riem`, `lc0Insert`-diff; 1 of 4 STATED-with-`sorry`: `lc0VB`;
+1 unstarted: `lc0AMix`**) + 5-way assembly (helper done, wiring pending) + the shared `metricConnDiffLowered`
+producer (**NOW DONE, green + axiom-clean**) + the deTurckVF arm (**already committed via
+`lieArm1_connDiff_feed`**).  Leaf four-atom sorry-free-content fraction still **~50%** (the `lc0VB` atom is
+still sorried at `lc0VB_ballUniform`), BUT the two producers that discharge that sorry are now both in hand, so
+the remaining `lc0VB` work is the fibre identity + assembly (no missing engine).  Honest sessions-to-`lc0VB`-green:
+**~1–2** (fibre identity ≈200–400 lines + leaf discharge, both committed-generic).  Honest
+sessions-to-`lc0AMix`-green after `lc0VB`: **~1** (reuses this producer twice; simpler traceStep-chain fibre
+identity, no deTurckVF).
