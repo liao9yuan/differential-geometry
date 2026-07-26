@@ -767,3 +767,14 @@ traceStep chain — three moving cometric traces at ranks `(4,2)/(5,3)/(6,4)` vi
 `reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (the `lc0RiemLive` pattern at `k = 1,2,3`) + two
 `slotExtend`-chains over the two mcd arms (`g_bg`, `g₀`) + nested grids.  Est. (a) ~1 session,
 (b) ~1–2 sessions; all producers committed after (a).
+
+**UPDATE (2026-07-26, discharge session — Fable):** step (a)'s FIBRE IDENTITY landed GREEN in
+brick 4's leaf: `b4_mcd_eq` (`mcd = wXi + ½·appCc(ΦA)(wXi) + ½·appCc(ΦB)(wXi)`, the
+two-orientation `P`-trace correction — polynomial in `P`, NO symmS bridge, NO inverse-metric
+machinery), with all its eval machinery.  KEY finding: the R-free workhorse currency is
+POINTWISE `atgw` windows (`antidiagonalTupleGridWindow`) multiplied by `_mul_le`/`_mono` and
+integrated ONCE at the end (`antidiagonalTupleGrid_integral_radiusFree`) — no R-free sups are
+needed off order 0, dissolving the connDiff-sup worry.  Exposed the per-arm pointwise producers
+`rfns_iCG_{cometricCastG0,wXi}_atgw_rf` (`DeTurckVFJetRadiusFree.lean`).  The sorry itself is
+UNCHANGED; remaining = the atgw jets assembly, itemized as (1)–(6) in the brick-4 note's
+session-2 resumption list (VB half ≈ 1 session, then `lc0AMix` ≈ 1 session).

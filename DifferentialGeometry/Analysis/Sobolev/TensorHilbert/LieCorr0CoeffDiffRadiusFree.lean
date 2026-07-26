@@ -63,9 +63,11 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
     reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen reindexCoeffFibGen_apply
     domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib
     metricConnDiffLoweredFib metricConnDiffLoweredFib_contMDiff
-    symmS cometricRaiseSlot0Field)
+    symmS cometricRaiseSlot0Field unitModel unitTensor covGrad covGrad_zero
+    metricConnDiffLoweredFib_toModel smoothCcTensor_ext_of_unitModel)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open LieCorr0Core
+open TensorMultilinear
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -389,6 +391,611 @@ private lemma lc0Riem_perOrder_rf
         mul_le_mul_of_nonneg_left hpad (appCcGdiag_nonneg (E := E) i)
     _ = appCcGdiag (E := E) i *
           (Cint i * (KP * (fr * Fcg i) + fr * Λ ^ 2 * NPass i)) * (1 + W3) := by ring
+
+/-! ### The radius-free `metricConnDiffLowered` producer and the `lc0VB` arm
+
+`mcdCc g₀ g₁ g_bg` (the `g₁`-lowered connection difference) splits by `htie` as
+`wXi g₀ g₁ g_bg` (its `g₀`-lowering, with the committed pointwise `atgw` bound
+`rfns_iCG_wXi_atgw_rf`) plus the `P`-paired correction — realized here as the two-orientation
+trace `½·appCc(ΦA)(wXi) + ½·appCc(ΦB)(wXi)`, where `ΦA/ΦB` are `(3,3)`-operators built from the
+`∇`-parallel `g₀`-cometric double trace, a source reindex, and `slotExtend³ P` (the `ipLowCc`
+pattern one rank up).  Everything is pointwise in the workhorse `atgw` currency; the single
+integration at the end (`antidiagonalTupleGrid_integral_radiusFree`) produces the low window. -/
+
+private theorem b4_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
+    iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
+  induction j with
+  | zero => rfl
+  | succ j ih =>
+      rw [iteratedCovGrad_succ, ih]
+      exact covGrad_zero (I := I) (M := M) (g := g) (r := r) (s := s + j)
+
+private theorem b4_iCG_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
+    (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
+
+set_option linter.unusedSectionVars false in
+private lemma b4_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
+      c ^ 2 * riemannianFiberNormSq (I := I) (M := M) g r s x v := by
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (c • v),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x v]
+  rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
+    tensorInnerPointwise_smul_right]
+  ring
+
+/-- The jets of the fixed rank-`3` cometric double trace vanish from order `1` on. -/
+private lemma b4_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 5 (3 + (i + 1)) x
+        ((iteratedCovGrad (I := I) g 5 3 (i + 1)
+          (cometricDoubleTraceField (I := I) g 3)).toSection x) = 0 := by
+  rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g 5 3 i
+    (cometricDoubleTraceField (I := I) g 3) x]
+  rw [show covGrad (I := I) (M := M) g 5 3 (cometricDoubleTraceField (I := I) g 3) =
+      (0 : SmoothCcTensor g 5 4) from
+    cometricDoubleTraceField_covGrad_eq_zero (I := I) g 3]
+  rw [b4_icg_zero (I := I) (M := M) g 5 4 i]
+  rw [show ((0 : SmoothCcTensor g 5 (4 + i)).toSection x) =
+      (0 : TensorRSSpace 5 (4 + i) I x) from rfl]
+  exact riemannianFiberNormSq_zero (I := I) (M := M) g 5 (3 + 1 + i) x
+
+set_option linter.unusedSectionVars false in
+/-- A single positive-order jet monomial sits inside the antidiagonal grid at its own order
+(the order-`0` term instead goes through the `Λ₀` fibre-smallness sup). -/
+private lemma b4_bP_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
+    b (m + 1) ≤ Combinatorics.antidiagonalTupleGrid b (m + 1) := by
+  classical
+  have hmem : (![m + 1] : Fin 1 → ℕ) ∈ Finset.Nat.antidiagonalTuple 1 (m + 1) := by
+    rw [Finset.Nat.mem_antidiagonalTuple]
+    simp
+  have h1 : b (m + 1) ≤ ∑ e ∈ Finset.Nat.antidiagonalTuple 1 (m + 1),
+      ∏ k : Fin 1, b (e k) := by
+    have hval : (∏ k : Fin 1, b ((![m + 1] : Fin 1 → ℕ) k)) = b (m + 1) := by
+      rw [Fin.prod_univ_one]
+      rfl
+    rw [← hval]
+    exact Finset.single_le_sum (fun e _ => Finset.prod_nonneg (fun k _ => hb (e k))) hmem
+  refine le_trans h1 ?_
+  have hmem1 : (1 : ℕ) ∈ Finset.range (m + 1 + 1) := Finset.mem_range.mpr (by omega)
+  exact Finset.single_le_sum
+    (f := fun n => ∑ e ∈ Finset.Nat.antidiagonalTuple n (m + 1), ∏ k : Fin n, b (e k))
+    (fun n _ => Finset.sum_nonneg (fun e _ =>
+      Finset.prod_nonneg (fun k _ => hb (e k)))) hmem1
+
+/-- The `A`-orientation trace permutation: the diagonal pair `(0,1)` of the trace tuple is read
+into slots `(2,3)` of `wXi ⊗ P` (pairing `P`'s slot `0`). -/
+private def b4PermA : Equiv.Perm (Fin 5) :=
+  ⟨![2, 3, 0, 1, 4], ![2, 3, 0, 1, 4], by decide, by decide⟩
+
+/-- The `B`-orientation trace permutation (pairing `P`'s slot `1`). -/
+private def b4PermB : Equiv.Perm (Fin 5) :=
+  ⟨![2, 3, 0, 4, 1], ![2, 4, 0, 1, 3], by decide, by decide⟩
+
+/-- The triple slot extension `T ↦ T ⊗ P` on rank-`3` tensors. -/
+private noncomputable def b4Pk3 (g₀ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 3 5 :=
+  slotExtend (I := I) (M := M) g₀ 2 4
+    (slotExtend (I := I) (M := M) g₀ 1 3 (slotExtend (I := I) (M := M) g₀ 0 2 P))
+
+/-- The `(3,3)` correction operator at orientation `σ`. -/
+private noncomputable def b4Phi (g₀ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2) (σ : Equiv.Perm (Fin 5)) : SmoothCcTensor g₀ 3 3 :=
+  appCcRS (I := I) (M := M) g₀ 3 5 3
+    (reindexCoeffGen (I := I) (M := M) g₀ 5 3
+      (cometricDoubleTraceField (I := I) g₀ 3) σ)
+    (b4Pk3 (I := I) (M := M) g₀ P)
+
+/-- Center evaluation of the rank-`3` cometric double trace (orthoframe diagonal). -/
+private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 5 I x) (m : Fin 3 → E) :
+    Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g 3 x D) m =
+      ∑ c : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel D
+          (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E) m)) := by
+  rw [show Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g 3 x D) m =
+      modelDoubleTrace (E := E) 3 (cometricLmodel (I := I) g x)
+        (Tensor0SSpace.toModel D) m from by
+    rw [cometricDoubleTraceFib_toModel (I := I) g 3 x D]]
+  rw [modelDoubleTrace_apply (E := E) 3 (cometricLmodel (I := I) g x)
+    (Tensor0SSpace.toModel D) m]
+  exact cometric_dualTrace_eq_orthoFrame_diag (I := I) g (s := 3) x
+    (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+    (Tensor0SSpace.toModel D) m
+
+set_option linter.unusedSectionVars false in
+/-- Rank-`0` tensors are scalar multiples of the unit tensor (local clone). -/
+private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
+    c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
+      unitTensor (I := I) (M := M) x := by
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  beta_reduce
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  have h1 : Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) v = (1 : ℝ) := rfl
+  rw [h1, mul_one]
+  congr 1
+  funext i
+  exact i.elim0
+
+/-- Tuple evaluation of the triple slot extension: the `D ⊗ P` reading. -/
+private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2) (x : M) (D : Tensor0SSpace 3 I x)
+    (u0 u1 u2 u3 u4 : E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+          (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D) ![u0, u1, u2, u3, u4] =
+      Tensor0SSpace.toModel D ![u0, u1, u2] *
+        unitModel (I := I) (M := M) g₀ 2 P x ![u3, u4] := by
+  have h0 : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+        (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D) ![u0, u1, u2, u3, u4] =
+      Tensor0SSpace.toModel
+        (slotExtendFib (I := I) (M := M) g₀ 2 4 x
+          (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+            (slotExtend (I := I) (M := M) g₀ 1 3
+              (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x) D)
+        (Fin.cons u0 ![u1, u2, u3, u4]) := rfl
+  rw [h0]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 2 4 x
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+      (slotExtend (I := I) (M := M) g₀ 1 3
+        (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x) D u0 ![u1, u2, u3, u4]]
+  have h1 : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (slotExtend (I := I) (M := M) g₀ 1 3
+          (slotExtend (I := I) (M := M) g₀ 0 2 P)).toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0)) ![u1, u2, u3, u4] =
+      Tensor0SSpace.toModel
+        (slotExtendFib (I := I) (M := M) g₀ 1 3 x
+          (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (slotExtend (I := I) (M := M) g₀ 0 2 P).toSection x)
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0))
+        (Fin.cons u1 ![u2, u3, u4]) := rfl
+  rw [h1]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 3 x
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+      (slotExtend (I := I) (M := M) g₀ 0 2 P).toSection x)
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1 ![u2, u3, u4]]
+  have h2 : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (slotExtend (I := I) (M := M) g₀ 0 2 P).toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1)) ![u2, u3, u4] =
+      Tensor0SSpace.toModel
+        (slotExtendFib (I := I) (M := M) g₀ 0 2 x
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from P.toSection x)
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1))
+        (Fin.cons u2 ![u3, u4]) := rfl
+  rw [h2]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 0 2 x
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from P.toSection x)
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1) u2 ![u3, u4]]
+  have hc : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1) u2 =
+      Tensor0SSpace.toModel D ![u0, u1, u2] • unitTensor (I := I) (M := M) x := by
+    have h3 := b4_rank0_unit (I := I) (M := M) x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x D u0) u1) u2)
+    rw [h3]
+    congr 1
+  rw [hc, ContinuousLinearMap.map_smul, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [unitModel]
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`0` multilinear expansion under a finite `smul`-sum (local clone). -/
+private lemma b4_cons_sum_smul {n : ℕ}
+    (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
+    (u : Fin d → E) (rest : Fin n → E) :
+    Zm (Fin.cons (∑ c, t c • u c) rest) =
+      ∑ c, t c * Zm (Fin.cons (u c) rest) := by
+  classical
+  have h1 : ∀ v : E, (Fin.cons v rest : Fin (n + 1) → E) =
+      Function.update (Fin.cons (0 : E) rest) 0 v := by
+    intro v
+    rw [Fin.update_cons_zero]
+  have hgen : ∀ ss : Finset (Fin d),
+      Zm (Function.update (Fin.cons (0 : E) rest) 0 (∑ c ∈ ss, t c • u c)) =
+        ∑ c ∈ ss, t c * Zm (Function.update (Fin.cons (0 : E) rest) 0 (u c)) := by
+    intro ss
+    induction ss using Finset.induction_on with
+    | empty =>
+        rw [Finset.sum_empty, Finset.sum_empty]
+        rw [show (0 : E) = ((0 : ℝ) • (0 : E)) from (zero_smul ℝ (0 : E)).symm]
+        rw [ContinuousMultilinearMap.map_update_smul]
+        rw [zero_smul]
+    | @insert a ss ha ih =>
+        rw [Finset.sum_insert ha, Finset.sum_insert ha]
+        rw [ContinuousMultilinearMap.map_update_add]
+        rw [ih]
+        congr 1
+        rw [ContinuousMultilinearMap.map_update_smul]
+        rw [smul_eq_mul]
+  have h2 := hgen Finset.univ
+  rw [h1, h2]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [← h1 (u c)]
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`1` multilinear expansion under a finite `smul`-sum (local clone). -/
+private lemma b4_cons1_sum_smul {n : ℕ}
+    (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
+    (u : Fin d → E) (rest : Fin n → E) :
+    Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
+      ∑ c, t c * Zm (Fin.cons aa (Fin.cons (u c) rest)) := by
+  classical
+  have h1 : ∀ v : E, (Fin.cons aa (Fin.cons v rest) : Fin (n + 2) → E) =
+      Function.update (Fin.cons aa (Fin.cons (0 : E) rest)) 1 v := by
+    intro v
+    rw [show (1 : Fin (n + 2)) = Fin.succ 0 from rfl]
+    rw [← Fin.cons_update]
+    rw [Fin.update_cons_zero]
+  have hgen : ∀ ss : Finset (Fin d),
+      Zm (Function.update (Fin.cons aa (Fin.cons (0 : E) rest)) 1 (∑ c ∈ ss, t c • u c)) =
+        ∑ c ∈ ss, t c * Zm (Function.update (Fin.cons aa (Fin.cons (0 : E) rest)) 1 (u c)) := by
+    intro ss
+    induction ss using Finset.induction_on with
+    | empty =>
+        rw [Finset.sum_empty, Finset.sum_empty]
+        rw [show (0 : E) = ((0 : ℝ) • (0 : E)) from (zero_smul ℝ (0 : E)).symm]
+        rw [ContinuousMultilinearMap.map_update_smul]
+        rw [zero_smul]
+    | @insert a ss ha ih =>
+        rw [Finset.sum_insert ha, Finset.sum_insert ha]
+        rw [ContinuousMultilinearMap.map_update_add]
+        rw [ih]
+        congr 1
+        rw [ContinuousMultilinearMap.map_update_smul]
+        rw [smul_eq_mul]
+  have h2 := hgen Finset.univ
+  rw [h1, h2]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [← h1 (u c)]
+
+set_option linter.unusedSectionVars false in
+/-- Orthonormal-frame expansion at the frame center (local clone). -/
+private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
+    (u : TangentSpace I x) :
+    u = ∑ i : Fin (Module.finrank ℝ E),
+      g.inner x u (smoothOrthoFrame (I := I) g x i x) •
+        smoothOrthoFrame (I := I) g x i x := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x)
+        (smoothOrthoFrame (I := I) g x b x) = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  have he_li : LinearIndependent ℝ
+      (fun i => smoothOrthoFrame (I := I) g x i x) := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner x (smoothOrthoFrame (I := I) g x k x)
+        (∑ j ∈ fs, c j • smoothOrthoFrame (I := I) g x j x) = 0 := by
+      rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g.inner x (smoothOrthoFrame (I := I) g x k x)
+        (c j • smoothOrthoFrame (I := I) g x j x) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g.inner x (smoothOrthoFrame (I := I) g x k x)).map_smul (c j),
+        smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  obtain ⟨bse, hbse⟩ : ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
+      ∀ i, bse i = smoothOrthoFrame (I := I) g x i x :=
+    ⟨basisOfLinearIndependentOfCardEqFinrank he_li (Fintype.card_fin _),
+      fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li (Fintype.card_fin _)) i⟩
+  have hcoeff : ∀ j : Fin (Module.finrank ℝ E),
+      g.inner x u (smoothOrthoFrame (I := I) g x j x) = bse.repr u j := by
+    intro j
+    rw [g.symm x u (smoothOrthoFrame (I := I) g x j x)]
+    conv_lhs => rw [← bse.sum_repr u]
+    rw [map_sum]
+    rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) => by
+      rw [(g.inner x (smoothOrthoFrame (I := I) g x j x)).map_smul (bse.repr u i),
+        smul_eq_mul, hbse i, horth j i])]
+    rw [Finset.sum_eq_single_of_mem j (Finset.mem_univ j)]
+    · rw [if_pos rfl, mul_one]
+    · intro i _ hij
+      rw [if_neg (fun h => hij h.symm), mul_zero]
+  calc u = ∑ i : Fin (Module.finrank ℝ E), bse.repr u i • bse i := (bse.sum_repr u).symm
+    _ = ∑ i : Fin (Module.finrank ℝ E),
+        g.inner x u (smoothOrthoFrame (I := I) g x i x) •
+          smoothOrthoFrame (I := I) g x i x := by
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [hcoeff i, hbse i]
+
+set_option linter.unusedSectionVars false in
+/-- `unitModel` is additive (local clone). -/
+private lemma b4_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : SmoothCcTensor g₀ 0 s) (x : M) :
+    unitModel (I := I) (M := M) g₀ s (A + B) x =
+      unitModel (I := I) (M := M) g₀ s A x + unitModel (I := I) (M := M) g₀ s B x := by
+  simp only [unitModel]
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+    ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
+
+set_option linter.unusedSectionVars false in
+/-- `unitModel` commutes with real scaling (local clone). -/
+private lemma b4_unitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
+    (A : SmoothCcTensor g₀ 0 s) (x : M) :
+    unitModel (I := I) (M := M) g₀ s (c • A) x =
+      c • unitModel (I := I) (M := M) g₀ s A x := by
+  simp only [unitModel]
+  rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+    ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
+
+/-- `unitModel` of the local `metricConnDiffLoweredCc` (clone of the Arm1-private lemma,
+`g_bg`-generic). -/
+private lemma b4_mcd_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (m : Fin 3 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (m 0) (m 1)) (m 2) := by
+  rw [unitModel]
+  rw [show (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg).toSection x
+      (unitTensor (I := I) (M := M) x) =
+      (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+      from rfl]
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
+
+/-- `unitModel` of an `appCc` application, as the fibre action on the unit value. -/
+private lemma b4_appCc_unitModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) (x : M) :
+    unitModel (I := I) (M := M) g₀ s (appCc (I := I) (M := M) g₀ r s Φ W) x =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+            (unitTensor (I := I) (M := M) x))) := by
+  rw [unitModel, appCc_toSection]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The unit value of a `(0,3)`-tensor read back through `unitModel`. -/
+private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 3) (x : M) (v : Fin 3 → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) v =
+      unitModel (I := I) (M := M) g₀ 3 W x v := by
+  rw [unitModel]
+
+/-- **The radius-free `mcd` split** (the session's fibre identity): by `htie`, the `g₁`-lowered
+connection difference is its `g₀`-lowering plus the two-orientation `P`-trace correction. -/
+private theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
+    metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =
+      wXi (I := I) (M := M) g₀ g₁ g_bg +
+        ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) (wXi (I := I) (M := M) g₀ g₁ g_bg) +
+          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) (wXi (I := I) (M := M) g₀ g₁ g_bg)) := by
+  classical
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [b4_unitModel_add, b4_unitModel_add, b4_unitModel_smul, b4_unitModel_smul]
+  rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply,
+    ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul, smul_eq_mul]
+  rw [b4_mcd_unitModel (I := I) (M := M) g₀ g₁ g_bg x m]
+  rw [htie x (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (m 0) (m 1)) (m 2)]
+  set V : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g_bg x (m 0) (m 1) with hV_def
+  have hwXi_read : unitModel (I := I) (M := M) g₀ 3 (wXi (I := I) (M := M) g₀ g₁ g_bg) x m =
+      g₀.inner x V (m 2) :=
+    wXi_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x m
+  set D : Tensor0SSpace 3 I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
+      (wXi (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+      (unitTensor (I := I) (M := M) x) with hD_def
+  have hD_read : ∀ v : Fin 3 → E,
+      Tensor0SSpace.toModel D v = g₀.inner x
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (v 0) (v 1)) (v 2) := by
+    intro v
+    rw [hD_def, b4_unit_read (I := I) (M := M) g₀ (wXi (I := I) (M := M) g₀ g₁ g_bg) x v]
+    exact wXi_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x v
+  have hcommon : ∀ (σ : Equiv.Perm (Fin 5)),
+      unitModel (I := I) (M := M) g₀ 3
+        (appCc (I := I) (M := M) g₀ 3 3 (b4Phi (I := I) (M := M) g₀ P σ)
+          (wXi (I := I) (M := M) g₀ g₁ g_bg)) x m =
+      ∑ c : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+            (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D)
+          (fun i : Fin 5 =>
+            ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m) :
+                Fin 5 → E))
+            (σ i)) := by
+    intro σ
+    rw [b4_appCc_unitModel (I := I) (M := M) g₀ 3 3 (b4Phi (I := I) (M := M) g₀ P σ)
+      (wXi (I := I) (M := M) g₀ g₁ g_bg) x]
+    rw [show ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (b4Phi (I := I) (M := M) g₀ P σ).toSection x)
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (wXi (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+            (unitTensor (I := I) (M := M) x))) =
+        reindexCoeffFibGen (I := I) 5 3 σ x
+          (show Tensor0SSpace 5 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (cometricDoubleTraceField (I := I) g₀ 3).toSection x)
+          ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+            (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D) from rfl]
+    rw [reindexCoeffFibGen_apply]
+    rw [show ((show Tensor0SSpace 5 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (cometricDoubleTraceField (I := I) g₀ 3).toSection x)
+          (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+            (ContinuousMultilinearMap.domDomCongr σ
+              (Tensor0SSpace.toModel
+                ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+                  (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D))))) =
+        cometricDoubleTraceFib (I := I) g₀ 3 x
+          (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+            (ContinuousMultilinearMap.domDomCongr σ
+              (Tensor0SSpace.toModel
+                ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+                  (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D)))) from by
+      rw [cometricDoubleTraceField_toSection]]
+    rw [b4_trace_center (I := I) (M := M) g₀ x _ m]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [Tensor0SSpace.toModel_ofModel, ContinuousMultilinearMap.domDomCongr_apply]
+  have hA : unitModel (I := I) (M := M) g₀ 3
+      (appCc (I := I) (M := M) g₀ 3 3 (b4Phi (I := I) (M := M) g₀ P b4PermA)
+        (wXi (I := I) (M := M) g₀ g₁ g_bg)) x m =
+      unitModel (I := I) (M := M) g₀ 2 P x
+        (Fin.cons (show E from V) (fun _ : Fin 1 => m 2)) := by
+    rw [hcommon b4PermA]
+    have hterm : ∀ c : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+            (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D)
+          (fun i : Fin 5 =>
+            ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m) :
+                Fin 5 → E))
+            (b4PermA i)) =
+        g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) *
+          unitModel (I := I) (M := M) g₀ 2 P x
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+              (fun _ : Fin 1 => m 2)) := by
+      intro c
+      rw [show (fun i : Fin 5 =>
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m) :
+              Fin 5 → E))
+          (b4PermA i)) =
+          (![m 0, m 1, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E),
+            ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E), m 2] :
+              Fin 5 → E) from by
+        funext i
+        fin_cases i <;> rfl]
+      rw [b4_pk3_toModel (I := I) (M := M) g₀ P x D _ _ _ _ _]
+      rw [hD_read ![m 0, m 1, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)]]
+      rw [show (![((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E), m 2] :
+          Fin 2 → E) =
+          Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+            (fun _ : Fin 1 => m 2) from by
+        funext k
+        fin_cases k <;> rfl]
+      rfl
+    rw [Finset.sum_congr rfl (fun c _ => hterm c)]
+    have hVexp : (show E from V) =
+        ∑ c : Fin (Module.finrank ℝ E),
+          g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) •
+            ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) :=
+      b4_frame_expand (I := I) (M := M) g₀ x V
+    rw [show unitModel (I := I) (M := M) g₀ 2 P x
+        (Fin.cons (show E from V) (fun _ : Fin 1 => m 2)) =
+        unitModel (I := I) (M := M) g₀ 2 P x
+          (Fin.cons (∑ c : Fin (Module.finrank ℝ E),
+            g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) •
+              ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E))
+            (fun _ : Fin 1 => m 2)) from by rw [← hVexp]]
+    exact (b4_cons_sum_smul (unitModel (I := I) (M := M) g₀ 2 P x)
+      (Module.finrank ℝ E)
+      (fun c => g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x))
+      (fun c => ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E))
+      (fun _ : Fin 1 => m 2)).symm
+  have hB : unitModel (I := I) (M := M) g₀ 3
+      (appCc (I := I) (M := M) g₀ 3 3 (b4Phi (I := I) (M := M) g₀ P b4PermB)
+        (wXi (I := I) (M := M) g₀ g₁ g_bg)) x m =
+      unitModel (I := I) (M := M) g₀ 2 P x
+        (Fin.cons (m 2) (fun _ : Fin 1 => (show E from V))) := by
+    rw [hcommon b4PermB]
+    have hterm : ∀ c : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+            (b4Pk3 (I := I) (M := M) g₀ P).toSection x) D)
+          (fun i : Fin 5 =>
+            ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m) :
+                Fin 5 → E))
+            (b4PermB i)) =
+        g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) *
+          unitModel (I := I) (M := M) g₀ 2 P x
+            (Fin.cons (m 2)
+              (fun _ : Fin 1 =>
+                ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E))) := by
+      intro c
+      rw [show (fun i : Fin 5 =>
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m) :
+              Fin 5 → E))
+          (b4PermB i)) =
+          (![m 0, m 1, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E),
+            m 2, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)] :
+              Fin 5 → E) from by
+        funext i
+        fin_cases i <;> rfl]
+      rw [b4_pk3_toModel (I := I) (M := M) g₀ P x D _ _ _ _ _]
+      rw [hD_read ![m 0, m 1, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)]]
+      rw [show (![m 2, ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)] :
+          Fin 2 → E) =
+          Fin.cons (m 2)
+            (fun _ : Fin 1 =>
+              ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E)) from by
+        funext k
+        fin_cases k <;> rfl]
+      rfl
+    rw [Finset.sum_congr rfl (fun c _ => hterm c)]
+    have hVexp : (show E from V) =
+        ∑ c : Fin (Module.finrank ℝ E),
+          g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) •
+            ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) :=
+      b4_frame_expand (I := I) (M := M) g₀ x V
+    rw [show unitModel (I := I) (M := M) g₀ 2 P x
+        (Fin.cons (m 2) (fun _ : Fin 1 => (show E from V))) =
+        unitModel (I := I) (M := M) g₀ 2 P x
+          (Fin.cons (m 2) (Fin.cons (∑ c : Fin (Module.finrank ℝ E),
+            g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x) •
+              ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E))
+            (fun i : Fin 0 => i.elim0))) from by
+      rw [← hVexp]
+      congr 1
+      funext k
+      fin_cases k <;> rfl]
+    rw [b4_cons1_sum_smul (unitModel (I := I) (M := M) g₀ 2 P x) (m 2)
+      (Module.finrank ℝ E)
+      (fun c => g₀.inner x V (smoothOrthoFrame (I := I) g₀ x c x))
+      (fun c => ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E))
+      (fun i : Fin 0 => i.elim0)]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    congr 1
+    congr 1
+    funext k
+    fin_cases k <;> rfl
+  rw [hwXi_read, hA, hB]
+  have hccb : ∀ v w : TangentSpace I x,
+      ccTensorBilin (I := I) g₀ P x v w =
+        unitModel (I := I) (M := M) g₀ 2 P x
+          (Fin.cons (show E from v) (fun _ : Fin 1 => (show E from w))) := by
+    intro v w
+    rw [ccTensorBilin_apply]
+    rw [show (![v, w] : Fin 2 → TangentSpace I x) =
+        (Fin.cons (show E from v) (fun _ : Fin 1 => (show E from w)) : Fin 2 → E) from by
+      funext k
+      fin_cases k <;> rfl]
+    rfl
+  rw [ccTensorBilinSymm_apply (I := I) g₀ P x V (m 2)]
+  rw [hccb V (m 2), hccb (m 2) V]
+  ring
 
 set_option linter.unusedVariables false in
 /-- **THE BRICK-4 FRONTIER (the single flagged `sorry`).**  Radius-free per-order low-window

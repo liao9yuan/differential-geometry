@@ -819,7 +819,9 @@ bounds the fold consumes.  `rfns_iCG_cometricCastG0_atgw_rf` re-derives (in-leaf
 the private `rfns_iteratedCovGrad_cometricCastG0_gridWindow_le`. -/
 
 set_option linter.unusedVariables false in
-private lemma rfns_iCG_cometricCastG0_atgw_rf
+/-- **Pointwise radius-free `atgw` bound for the moving cometric cast** (exposed for the
+brick-4 `lc0VB`/`lc0AMix` discharge): `|∇ˡ(cometricCastG0 g₀ g₁)|²(x) ≤ Kcg l · atgw(bP)(l+1)`. -/
+lemma rfns_iCG_cometricCastG0_atgw_rf
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kcg : ℕ → ℝ, (∀ l, 0 ≤ Kcg l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1040,7 +1042,9 @@ private lemma rfns_iCG_connDiffSection_atgw_rf
 (`connDiffLoweredCc ↔ connDiffSection` fibre-norm identity) + the connDiffSection grid bound; the
 `g_bg` half is a `T`-free per-order constant folded into the window. -/
 set_option linter.unusedVariables false in
-private lemma rfns_iCG_wXi_atgw_rf
+/-- **Pointwise radius-free `atgw` bound for `wXi`** (exposed for the brick-4
+`lc0VB`/`lc0AMix` discharge): `|∇ˡ(wXi g₀ g₁ g_bg)|²(x) ≤ Kwx l · atgw(bP)(l+2)`. -/
+lemma rfns_iCG_wXi_atgw_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kwx : ℕ → ℝ, (∀ l, 0 ≤ Kwx l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

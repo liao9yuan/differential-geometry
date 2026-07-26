@@ -105,6 +105,53 @@ pattern, `k = 1,2,3`) + two `slotExtend`-chains over the mcd arms (`g_bg`, `g₀
 integrator.  ~1–2 sessions.  Classification unchanged: missing-groundwork/API, now with all
 engines committed except the R-free mcd producer of (a).
 
+## SESSION 2 (2026-07-26, discharge session): R-free `mcd` FIBRE IDENTITY GREEN; workhorse currency decoded; jets assembly = resumption
+
+**Landed green (in-leaf, private; the leaf's ONLY `sorry` is still `lc0VBAMix_perOrder_rf`):**
+
+- **Workhorse currency decoded** (from the tower's wOmega proof): the R-free tower does NOT use
+  the sup×L² integrator — it works in POINTWISE `antidiagonalTupleGridWindow` (atgw) polynomial
+  bounds in `bP j = |∇ʲP|²(x)`, multiplies windows by `antidiagonalTupleGridWindow_mul_le`
+  (`atgw(a+1)·atgw(c+1) ≤ C·atgw(a+c+1)`) + `_mono`, and integrates ONCE at the end via the
+  public `antidiagonalTupleGrid_integral_radiusFree` (`∫grid(i) ≤ K i·(1+‖∇ⁱP‖²)`, `Λ₀`-only).
+  This dissolves the "no R-free sup for connDiff arms" worry: sups are never needed off order 0.
+- **Exposed** (`DeTurckVFJetRadiusFree.lean`): `rfns_iCG_cometricCastG0_atgw_rf`
+  (`≤ Kcg l·atgw(l+1)`) and `rfns_iCG_wXi_atgw_rf` (`≤ Kwx l·atgw(l+2)`) — the per-arm pointwise
+  producers.
+- **`b4_mcd_eq` (THE identity):** `metricConnDiffLoweredCc g₀ g₁ g_bg = wXi g₀ g₁ g_bg +
+  ½·appCc(b4Phi g₀ P b4PermA)(wXi) + ½·appCc(b4Phi g₀ P b4PermB)(wXi)` under `htie`, with
+  `b4Phi g₀ P σ = appCcRS g₀ 3 5 3 (reindexCoeffGen (cometricDoubleTraceField g₀ 3) σ)
+  (slotExtend³ P)` (the `ipLowCc` pattern one rank up; `b4PermA = ![2,3,0,1,4]` self-inverse,
+  `b4PermB = ![2,3,0,4,1]`).  NO symmS bridge (the two orientations average to
+  `ccTensorBilinSymm` directly), NO inverse-metric machinery (polynomial in `P`).
+- Green supporting privates: `b4_pk3_toModel`, `b4_trace_center` (rank-3), `b4_frame_expand`,
+  `b4_cons_sum_smul`/`b4_cons1_sum_smul`, `b4_mcd_unitModel`, `b4_appCc_unitModel`,
+  `b4_unit_read`, `b4_unitModel_add/smul`, `b4_rank0_unit`, `b4_icg_zero`, `b4_iCG_smul`,
+  `b4_rfns_smul`, `b4_trace_succ` (rank-3 ∇-parallel collapse), `b4_bP_le_grid` (positive-order
+  monomial ↪ grid; the order-0 term goes through the `Λ₀` sup instead — `grid b 0 = 1`!).
+
+**RESUMPTION (jets assembly, all committed currency, no unknown frontier):**
+1. `b4_phi_atgw`: `|∇ⁱ(b4Phi)|²`-pointwise via the rankLeft grid `(3,5,3)`: trace arm =
+   `rfns_iteratedCovGrad_reindexCoeffGen_eq` + `b4_trace_succ` (only order 0 survives, const by
+   `exists_bound_riemannianFiberNormSq_smoothCcTensor`); `slotExtend³` arm = slotExtend jet lemma
+   ×3 → `bP`-window via `b4_bP_le_grid` + `hsup`.
+2. `b4_mcd_atgw`: `|∇ⁿmcd|² ≤ Kmcd n·atgw(n+2)` via `b4_mcd_eq` + rfns add/`b4_rfns_smul` +
+   `appCc_iteratedCovGrad_diagonalProductGrid_le` + `mul_le`/`mono` + `rfns_iCG_wXi_atgw_rf`.
+3. `b4_wOmega_atgw`: clone the tower's in-proof `hpt` (DeTurckVFJetRadiusFree:1151–1200) from
+   the two exposures → `|∇ⁿwOmega|² ≤ KΩ n·atgw(n+2)`.
+4. `lc0VBPass`-atgw via exposed `vbSplit` + rankLeft `(2,1,4)`: head = exposed `vbMcdArm_rfns_le`
+   → item 2; tail = `rfns_icg_ipLow_le` (pointwise, radius-agnostic) → item 3.  Then `lc0VB`-atgw
+   via exposed `lc0VB_eq_app` + `lc0RiemLive_rfns_le` → `rfns_iCG_cometricCastG0_atgw_rf`;
+   the window lands at `atgw(i+3)`, matching the sorry's `range (i+3)` exactly.
+5. Integrate per order (`antidiagonalTupleGrid_integral_radiusFree`, summed over `k < i+3`) →
+   the `lc0VB` half; NARROW the sorry (VB half proved + new `lc0AMix_perOrder_rf` sorry, public
+   statement unchanged).
+6. `lc0AMix`: the 5-factor fibre identity (traceStep transports =
+   `reindexCoeffGen(slotExtendᵏ(cometricCastG0))`, `k = 1,2,3`, the `lc0RiemLive` pattern; two
+   `slotExtend`-chains over mcd with item 2 covering both) + nested grids + one integration.
+
+Estimate: (1)–(5) ≈ 1 session; (6) ≈ 1 session.
+
 ## Honest progress (denominator: (N) `ricci_flow_unif_existence` = 0%, unstated)
 
 Item-2 proper: bricks 1-3 DONE (gate + arm0 + deTurckLie, all axiom-clean).  Brick 4
