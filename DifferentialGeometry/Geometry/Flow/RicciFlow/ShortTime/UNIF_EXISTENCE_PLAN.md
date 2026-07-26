@@ -1777,3 +1777,23 @@ connDiffSection).  lc0VB's engine gap is CLOSED; dispatched the fibre identity
 (~200-400 lines) + leaf discharge.  lc0AMix drops to ≈1 session after (reuses
 the linchpin twice, no interior product).  Lanes: a=2 absorption + lc0VB fibre
 + threeArm recon in flight.
+
+## Planner ruling №29 (2026-07-25 night) — threeArm recon ACCEPTED; Kc-currency fork → GPT Pro consult FIRED
+
+Recon (`838d4e5ea`, `THREEARM_RECON.md`) corrects the campaign premise: the
+"6/7 constituents closed" scoreboard hid a CURRENCY split — deTurckLie (and
+lieCorr0, same converter) carry R-DEPENDENT Kc on the a+2 window, which the
+R-free smooth-core target cannot consume (R ≈ ‖T‖_{a+2} lands on the forbidden
+‖T‖_{a+2}·‖T−T′‖_{a+2}).  Only arm0Base/arm1Base/deviation are route-compatible.
+Corr/Arm1 fields are Ktop=0-ABSORBABLE (no new topSeparated producers needed —
+ThreeArmTopSeparated's contrary claim is FALSE).
+
+STANDING CONSTRAINTS pending the consult: no lieCorr0 ENDPOINT dispatches (atom
+producers in flight stay valuable fork-agnostically); no layer-1 re-derivation;
+no Corr/Arm1 topSeparated producers.
+
+CONSULT: §8 prompt submitted via Chrome (branch pushed `838d4e5ea`; links
+corrected to codex/short-time-existence-align).  Question: is the R-dependent
+Kc absorbable into orientation 2 by the covariant tame lift (Fork A, ~10–18
+sessions) or is an R-free-Kc re-derivation forced (Fork B, ~18–30+, possibly
+route-dead)?  Answer to be recorded here as №30.
