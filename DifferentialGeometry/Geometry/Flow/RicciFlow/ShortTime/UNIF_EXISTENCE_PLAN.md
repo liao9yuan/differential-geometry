@@ -1717,3 +1717,14 @@ DISPATCHED (fresh executors, disjoint):
 Honest numbers: (N) theorem 0%; machinery ≈ 65% (item-6: gate identity done,
 dual core + Leibniz + assembly + m=2 glue left; item-2: Kc 2/4 + endpoints +
 threeArm/smooth-core (main risk, unstarted)).
+
+### №27 addendum (same day) — lc0VB route-3 ACCEPTED (`4e3e1c320`); linchpin producer dispatched
+
+Atom-3 recon verdict: the contraction-engine gap is REAL for lc0VB (Arm1's
+kernel transfers, its fold does not; no generic interior-product-fold engine
+tree-wide).  Atom stated in the uniform shape, one honest sorryAx
+(`lc0VB_ballUniform`).  DECISIVE finding: lc0AMix has no interior product —
+both remaining atoms converge on ONE missing producer, the per-order jet-L²
+bound for `metricConnDiffLowered g₁ g₁ g₀`.  That linchpin is dispatched (same
+executor); the lc0VB fibre identity (~200-400 lines) is the brick after.
+Parallel: a=2 session 2 (dual core + operator Leibniz) still in flight.
