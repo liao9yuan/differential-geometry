@@ -52,7 +52,7 @@ open scoped Manifold Topology ContDiff BigOperators
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
@@ -367,6 +367,7 @@ theorem koszul2_clean
 open DifferentialGeometry.Integral.Connection
   (smoothExtensionTangent smoothExtensionTangent_eq smoothExtensionTangent_contMDiff
     leviCivitaConnectionOfMetric exists_gOrthonormalBasis) in
+open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg) in
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -378,7 +379,6 @@ order-3/2/1 metric covariant derivatives of `g₁` and the a≤1 connection-diff
 then the pairing is divided by `|B₂|` (B2's step-(7) trick).  a=2 analogue of
 `ConnDiffDerivBound.covDerivConnDiff_g1_le`. -/
 theorem covDConnDiff2_g1_le
-    [InnerProductSpace ℝ E]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v' v w u : TangentSpace I x) :
@@ -406,17 +406,6 @@ theorem covDConnDiff2_g1_le
                         (leviCivitaConnectionOfMetric (I := I) g₂) x)))) *
         Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
           Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
-  sorry
-
-/- PROOF ATTEMPT (banked; the Cauchy–Schwarz + division mirrors the a=1 `covDerivConnDiff_g1_le`
-   one order up — 3 mcd3 combos, 1 mcd2·A term, 2 mcd1·∇₂A terms, then divide by |B₂|).  The attempt
-   below is complete in structure but needs finishing iteration on the known wall cluster: the
-   1.6M-heartbeat family (use `clear_value` on B₂/D5/D6/Avec/M1/M2/M3/NA after their def-dependent
-   uses), the `set`-folding of the vector norms (keep `√(g₁.inner x · ·)` literal instead of `set`ting
-   Pv/Qv/Rw/Su/SB), and the final `nlinarith` degree (pre-combine each CS bound with its atom bound,
-   as in `hTA`/`hTD5`/`hTD6`).  See `ConnDiffDeriv2Bound.md §2.1.b`.  Also needs
-   `open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg)`.
-
   classical
   haveI : IsManifold I 1 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
@@ -473,6 +462,8 @@ theorem covDConnDiff2_g1_le
     CovariantDerivative.difference
       (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁)
       (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) x u w with hAvec
+  -- make the heavy `covDerivConnDiff2`/`covDerivConnDiff`/`difference` vectors opaque (heartbeats)
+  clear_value B2 D5 D6 Avec
   -- Cauchy–Schwarz at the internal `g₁`-orthonormal basis, ranks 5/4/3.
   have hcs5 : ∀ a b c d e : TangentSpace I x,
       |metricCovDeriv (I := I) g₁ g₂ 3 x ![a, b, c, d, e]| ≤
@@ -517,11 +508,6 @@ theorem covDConnDiff2_g1_le
     exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
       (leviCivitaConnectionOfMetric (I := I) g₁)
       (leviCivitaConnectionOfMetric (I := I) g₂) w u
-  have hCA1nn : (0 : ℝ) ≤ 3 / 2 * M2 + M1 * NA := by
-    have : (0 : ℝ) ≤ M2 := hM2def ▸ Real.sqrt_nonneg _
-    have : (0 : ℝ) ≤ M1 := hM1def ▸ Real.sqrt_nonneg _
-    have : (0 : ℝ) ≤ NA := hNAdef ▸ Real.sqrt_nonneg _
-    positivity
   have hSD5 : Real.sqrt (g₁.inner x D5 D5) ≤
       (3 / 2 * M2 + M1 * NA) *
         Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
@@ -536,64 +522,54 @@ theorem covDConnDiff2_g1_le
   have hBB_nn : 0 ≤ g₁.inner x B2 B2 := metric_inner_self_nonneg (I := I) (M := M) g₁ x B2
   have hBBsq : g₁.inner x B2 B2 = Real.sqrt (g₁.inner x B2 B2) ^ 2 := (Real.sq_sqrt hBB_nn).symm
   rw [hBBsq] at hkos
-  -- combined product bounds (CS composed with the atom bounds)
-  set Pv := Real.sqrt (g₁.inner x v' v') with hPv
-  set Qv := Real.sqrt (g₁.inner x v v) with hQv
-  set Rw := Real.sqrt (g₁.inner x w w) with hRw
-  set Su := Real.sqrt (g₁.inner x u u) with hSu
-  set SB := Real.sqrt (g₁.inner x B2 B2) with hSB
-  have hPvnn : 0 ≤ Pv := hPv ▸ Real.sqrt_nonneg _
-  have hQvnn : 0 ≤ Qv := hQv ▸ Real.sqrt_nonneg _
-  have hRwnn : 0 ≤ Rw := hRw ▸ Real.sqrt_nonneg _
-  have hSunn : 0 ≤ Su := hSu ▸ Real.sqrt_nonneg _
-  have hSBnn : 0 ≤ SB := hSB ▸ Real.sqrt_nonneg _
-  have hM1nn : 0 ≤ M1 := hM1def ▸ Real.sqrt_nonneg _
-  have hM2nn : 0 ≤ M2 := hM2def ▸ Real.sqrt_nonneg _
-  have hM3nn : 0 ≤ M3 := hM3def ▸ Real.sqrt_nonneg _
-  have hNAnn : 0 ≤ NA := hNAdef ▸ Real.sqrt_nonneg _
+  -- combined product bounds (CS composed with the atom bounds); vector norms kept literal
+  have hM1nn : (0:ℝ) ≤ M1 := hM1def ▸ Real.sqrt_nonneg _
+  have hM2nn : (0:ℝ) ≤ M2 := hM2def ▸ Real.sqrt_nonneg _
+  have hM3nn : (0:ℝ) ≤ M3 := hM3def ▸ Real.sqrt_nonneg _
+  have hNAnn : (0:ℝ) ≤ NA := hNAdef ▸ Real.sqrt_nonneg _
+  have hSBnn : (0:ℝ) ≤ Real.sqrt (g₁.inner x B2 B2) := Real.sqrt_nonneg _
   -- three mcd3 combos
   have hT1 := hcs5 v' v w u B2
   have hT2 := hcs5 v' v u w B2
   have hT3 := hcs5 v' v B2 w u
-  -- mcd2 · A term
+  -- mcd2 · A term (CS composed with the a=0 atom bound `hSA`)
   have hTA : |metricCovDeriv (I := I) g₁ g₂ 2 x ![v', v, Avec, B2]| ≤
-      M2 * NA * (Pv * Qv * Rw * Su * SB) := by
+      M2 * NA * (Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+        Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) *
+          Real.sqrt (g₁.inner x B2 B2)) := by
     refine le_trans (hcs4 v' v Avec B2) ?_
-    have hAle : Real.sqrt (g₁.inner x Avec Avec) ≤ NA * (Rw * Su) := by
-      rw [hRw, hSu]; exact hSA
-    calc M2 * (Pv * Qv * Real.sqrt (g₁.inner x Avec Avec) * SB)
-        ≤ M2 * (Pv * Qv * (NA * (Rw * Su)) * SB) := by
-          apply mul_le_mul_of_nonneg_left _ hM2nn
-          apply mul_le_mul_of_nonneg_right _ hSBnn
-          apply mul_le_mul_of_nonneg_left _ (mul_nonneg hPvnn hQvnn)
-          exact hAle
-      _ = M2 * NA * (Pv * Qv * Rw * Su * SB) := by ring
-  -- mcd1 · D5 term
+    have hpre : (0:ℝ) ≤ M2 * Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+        Real.sqrt (g₁.inner x B2 B2) :=
+      mul_nonneg (mul_nonneg (mul_nonneg hM2nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _))
+        (Real.sqrt_nonneg _)
+    nlinarith [mul_le_mul_of_nonneg_left hSA hpre, hM2nn, hNAnn,
+      Real.sqrt_nonneg (g₁.inner x Avec Avec), Real.sqrt_nonneg (g₁.inner x v' v'),
+      Real.sqrt_nonneg (g₁.inner x v v), Real.sqrt_nonneg (g₁.inner x w w),
+      Real.sqrt_nonneg (g₁.inner x u u), Real.sqrt_nonneg (g₁.inner x B2 B2)]
+  -- mcd1 · D5 term (CS composed with the a=1 atom bound `hSD5`)
   have hTD5 : |metricCovDeriv (I := I) g₁ g₂ 1 x ![v, D5, B2]| ≤
-      M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by
+      M1 * (3 / 2 * M2 + M1 * NA) * (Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+        Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) *
+          Real.sqrt (g₁.inner x B2 B2)) := by
     refine le_trans (hcs3 v D5 B2) ?_
-    have hD5le : Real.sqrt (g₁.inner x D5 D5) ≤ (3 / 2 * M2 + M1 * NA) * (Pv * Rw * Su) := by
-      rw [hPv, hRw, hSu]; exact hSD5
-    calc M1 * (Qv * Real.sqrt (g₁.inner x D5 D5) * SB)
-        ≤ M1 * (Qv * ((3 / 2 * M2 + M1 * NA) * (Pv * Rw * Su)) * SB) := by
-          apply mul_le_mul_of_nonneg_left _ hM1nn
-          apply mul_le_mul_of_nonneg_right _ hSBnn
-          apply mul_le_mul_of_nonneg_left _ hQvnn
-          exact hD5le
-      _ = M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by ring
-  -- mcd1 · D6 term
+    have hpre : (0:ℝ) ≤ M1 * Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x B2 B2) :=
+      mul_nonneg (mul_nonneg hM1nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+    nlinarith [mul_le_mul_of_nonneg_left hSD5 hpre, hM1nn, hM2nn, hNAnn,
+      Real.sqrt_nonneg (g₁.inner x D5 D5), Real.sqrt_nonneg (g₁.inner x v' v'),
+      Real.sqrt_nonneg (g₁.inner x v v), Real.sqrt_nonneg (g₁.inner x w w),
+      Real.sqrt_nonneg (g₁.inner x u u), Real.sqrt_nonneg (g₁.inner x B2 B2)]
+  -- mcd1 · D6 term (CS composed with the a=1 atom bound `hSD6`)
   have hTD6 : |metricCovDeriv (I := I) g₁ g₂ 1 x ![v', D6, B2]| ≤
-      M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by
+      M1 * (3 / 2 * M2 + M1 * NA) * (Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+        Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) *
+          Real.sqrt (g₁.inner x B2 B2)) := by
     refine le_trans (hcs3 v' D6 B2) ?_
-    have hD6le : Real.sqrt (g₁.inner x D6 D6) ≤ (3 / 2 * M2 + M1 * NA) * (Qv * Rw * Su) := by
-      rw [hQv, hRw, hSu]; exact hSD6
-    calc M1 * (Pv * Real.sqrt (g₁.inner x D6 D6) * SB)
-        ≤ M1 * (Pv * ((3 / 2 * M2 + M1 * NA) * (Qv * Rw * Su)) * SB) := by
-          apply mul_le_mul_of_nonneg_left _ hM1nn
-          apply mul_le_mul_of_nonneg_right _ hSBnn
-          apply mul_le_mul_of_nonneg_left _ hPvnn
-          exact hD6le
-      _ = M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by ring
+    have hpre : (0:ℝ) ≤ M1 * Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x B2 B2) :=
+      mul_nonneg (mul_nonneg hM1nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+    nlinarith [mul_le_mul_of_nonneg_left hSD6 hpre, hM1nn, hM2nn, hNAnn,
+      Real.sqrt_nonneg (g₁.inner x D6 D6), Real.sqrt_nonneg (g₁.inner x v' v'),
+      Real.sqrt_nonneg (g₁.inner x v v), Real.sqrt_nonneg (g₁.inner x w w),
+      Real.sqrt_nonneg (g₁.inner x u u), Real.sqrt_nonneg (g₁.inner x B2 B2)]
   -- absolute-value bounds feeding the pairing
   have habs1 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 3 x ![v', v, w, u, B2])
   have habs2 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 3 x ![v', v, u, w, B2])
@@ -602,17 +578,24 @@ theorem covDConnDiff2_g1_le
   have habsD5 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 1 x ![v, D5, B2])
   have habsD6 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 1 x ![v', D6, B2])
   rcases eq_or_lt_of_le hSBnn with hSB0 | hSBpos
-  · rw [hSB] at hSB0 ⊢
-    rw [← hSB0]
-    positivity
-  · have hmul : SB * (2 * SB) ≤
-        SB * ((3 * M3 + 2 * (M2 * NA) + 4 * (M1 * (3 / 2 * M2 + M1 * NA))) *
-          (Pv * Qv * Rw * Su)) := by
+  · rw [← hSB0]
+    have hcoef : (0:ℝ) ≤ 3 / 2 * M3 + M2 * NA + 2 * M1 * (3 / 2 * M2 + M1 * NA) := by
+      have hca : (0:ℝ) ≤ 3 / 2 * M2 + M1 * NA := by nlinarith [hM2nn, mul_nonneg hM1nn hNAnn]
+      nlinarith [hM3nn, mul_nonneg hM2nn hNAnn, mul_nonneg hM1nn hca]
+    exact mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg hcoef (Real.sqrt_nonneg _))
+      (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+  · have hmul : Real.sqrt (g₁.inner x B2 B2) * (2 * Real.sqrt (g₁.inner x B2 B2)) ≤
+        Real.sqrt (g₁.inner x B2 B2) *
+          ((3 * M3 + 2 * (M2 * NA) + 4 * (M1 * (3 / 2 * M2 + M1 * NA))) *
+            (Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+              Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u))) := by
       nlinarith [hkos, hT1, hT2, hT3, hTA, hTD5, hTD6,
-        habs1, habs2, habs3, habsA, habsD5, habsD6]
+        habs1, habs2, habs3, habsA, habsD5, habsD6,
+        Real.sqrt_nonneg (g₁.inner x B2 B2), Real.sqrt_nonneg (g₁.inner x v' v'),
+        Real.sqrt_nonneg (g₁.inner x v v), Real.sqrt_nonneg (g₁.inner x w w),
+        Real.sqrt_nonneg (g₁.inner x u u), hM1nn, hM2nn, hM3nn, hNAnn]
     have hdiv := le_of_mul_le_mul_left hmul hSBpos
     nlinarith [hdiv]
--/
 
 /-- **FRONTIER (`sorry`) — the a=2 base-Leibniz jet of a single connection-difference step.**
 

@@ -7,6 +7,33 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 4, 2026-07-26): the dual core `covDConnDiff2_g1_le` is PROVED.**
+  The drafted CS+division proof was finished with the three diagnosed fixes plus one more:
+  - `clear_value B2 D5 D6 Avec` right after the `set`s (tames the 1.6M-heartbeat unfolding of the
+    heavy `covDerivConnDiff2`/`covDerivConnDiff`/`difference` vectors);
+  - vector norms kept **literal** (`√(g₁.inner x ··)`, no `set` on Pv/Qv/Rw/Su/SB) — this removes the
+    `set`-folding vs literal-assoc mismatch that broke `hSD5`/`hSD6`;
+  - each CS bound **pre-combined** with its atom bound (`hTA`/`hTD5`/`hTD6` via
+    `mul_le_mul_of_nonneg_left` + `nlinarith`), keeping the final `nlinarith` low-degree.
+  - **NormedSpace/IPS diamond fix (the real blocker):** `covDerivConnDiff_g1_le` lives in an IPS-only
+    context (`ConnDiffDerivBound`, NormedSpace from `InnerProductSpace.toNormedSpace`); calling it from
+    a file that declared BOTH explicit `[NormedSpace ℝ E]` and `[InnerProductSpace ℝ E]` created two
+    incompatible `NormedSpace` instances, cascading to a spurious `FiniteDimensional ℝ E` synth
+    failure.  Fix: drop the explicit `[NormedSpace ℝ E]` from the file's base variable block — IPS
+    provides it — so the whole file is now **IPS-based** (matching `ConnDiffDerivBound`).  Consequence:
+    the earlier `[NormedSpace]`-only decls (`covStepDiff2_opLeibniz`, the currency bridges,
+    `covDerivConnDiff2`, `covDerivConnDiff_contMDiff`) are now IPS-typed; this is unavoidable given the
+    diamond and is consistent with the a=1 `ConnDiffDerivBound` pattern (its NormedSpace-content helpers
+    also live in the IPS file).  All consumers of these decls are in the IPS a=2 chain, so nothing
+    breaks.
+  - **Coefficient (proved):** `|∇₂²A|_{g₁} ≤ (3/2·M₃ + M₂·NA + 2·M₁·(3/2·M₂ + M₁·NA)) · |v'||v||w||u|`
+    with `M₃/M₂/M₁ = √normSq0S(g₁, 5/4/3, mcd3/2/1)`, `NA = √normSqRS(g₁,1,2)(connDiff)`.
+  - Axioms of `covDConnDiff2_g1_le`: `[propext, Classical.choice, Quot.sound, sorryAx]` — the `sorryAx`
+    is inherited from `koszul2_clean` (still `sorry`); the dual core's own CS+division logic is complete
+    and becomes axiom-clean the moment `koszul2_clean` is proved.  Targeted module build GREEN (9482).
+  - **Remaining:** `koszul2_clean` (the ~200-line absorption, §2.1.a — the genuine content, now with the
+    dual core validating its survivor shape is CS-usable) and `covStepDiff2_exists_const` (assembly).
+
 - **UPDATE (a=2 campaign session 3, 2026-07-26): infra proofs landed; clean form + dual core STATED
   (corrected); §2.1 term-5 error found & fixed.**  Verified progress:
   - `ConnDiffDerivBound.lean`: **de-privatized** `sqrt_normSq0S_comp` and `covDerivConnDiff_g1_le`
