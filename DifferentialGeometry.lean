@@ -1303,6 +1303,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Pairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Producers
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueClosure
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnDot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnectionDiff
