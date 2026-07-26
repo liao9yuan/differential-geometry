@@ -1542,3 +1542,49 @@ DISPATCHED (resume-order items 2 and 3, in parallel — disjoint files):
 Unchanged honest numbers: (N) theorem 0% (unstated); its machinery ≈ 50%.
 The main remaining mathematical risk is still item-2 PROPER (threeArm/Ψ₀ assembly
 + the smooth-core tame lemma), which is NOT started and is not in either dispatch.
+
+## Planner acceptance №25 (2026-07-25) — B2 CLOSED; lieCorr0 top piece + lc0Riem banked; wiring + atom 2 dispatched
+
+Both №24 lanes accepted and committed (`9fbd0fb0b`); axiom audits clean
+(planner-independent probe on the public `covDerivConnDiff_gJet_le`; the five
+lieCorr0 declarations are private, accepted on the executor's in-module audit +
+targeted build).
+
+- **B2 is 100%**: `covDerivConnDiff_g1_le` (dual-Koszul core) +
+  `covDerivConnDiff_gJet_le` (endpoint), constant exactly
+  `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.  hA1-dischargeability proved at the TERM level
+  against `covStepDiff_norm_le` (scratch composition compiled green, deleted).
+  Executor improvement over spec: the planned re-derivation of two private
+  lemmas replaced by the public `diff_le_covOne_basis_ref_lc`
+  (AllTimesBounds:3287) via a 4-line `lcDiff_covOne_le`; `metricDerivNorm`
+  never enters the file.  P1 (`covDerivConnDiff_fibreNorm_le`) is confirmed
+  UNUSED by this route — kept as the honest fibre-norm entry point.
+- **lieCorr0 1/4 atoms**: LowJet import dropped (nothing salvaged; recon verdict
+  held).  The four drafted theorems banked green AS WRITTEN.  `lc0Riem` green;
+  key reusable move: rank-2 cometric double trace = `reindexCoeffGen`(source
+  three-cycle) ∘ `slotExtend` of the rank-1 envelope — rfns-invariant, one
+  finrank factor; NO rank-2 re-derivation of the ~250-line envelope.
+- Design ruling (the one open question B2 left): nothing imports
+  `UnifCovSumCross`; the "three T-B consumers" are the unwritten D_N recursion.
+  Therefore the discharged variant TAKES the metric-jet input bundle
+  (`hEq/hJet1/hJet2/hx`) in its signature — honest-input-bundle style — with CA
+  instantiated; D_N will consume that variant directly.
+
+DISPATCHED (both as resumptions of the same executors, disjoint files):
+- Wiring: discharged `covStepDiff_jet_le` variant in `UnifCovSumCross.lean`
+  (+ the acyclic `ConnDiffDerivBound` import).
+- lieCorr0 atom 2: the `lc0Insert` difference via `nEndo_diff` (both arms live —
+  the template's passenger-shortcut does not apply; stop-at-honest-partial rule
+  restated).
+
+CONCURRENCY NOTE: the forward-uniqueness Fable session is working in THIS SAME
+checkout (its in-flight edits: `ExtendViaUniqueness.lean` (Ico-slab statement
+per the FU Pro ruling), `DistanceBarrier.lean`, `MetricTimeCompare.lean`, new
+`ForwardUniqueConnectionDiff.lean`, root `DifferentialGeometry.lean`,
+`HamiltonPositiveRicci.md`).  Planner commits ONLY (N)-lane files; the FU
+session owns and commits its own.  Full builds must not run concurrently —
+coordinate via lake-locked; focused checks with -NoLakeLock remain fine.
+
+Honest numbers unchanged: (N) theorem 0%; machinery ≈ 55% (B2 closed, item-6
+tail now = wiring + D_N + 2a-hi/pkg + S0 j≥2 + S2–S4/S1b; item-2 tail = 3 Kc
+atoms + endpoints + threeArm/smooth-core, the last being the main risk).
