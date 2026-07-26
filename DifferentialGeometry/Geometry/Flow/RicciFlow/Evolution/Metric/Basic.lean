@@ -217,7 +217,12 @@ theorem gInv_symm [DecidableEq Idx]
       simpa [metricCompInFrame] using hinv t y a b)
     x i j
 
-/-- Componentwise regularity of a supplied inverse-metric component family. -/
+/-- Componentwise regularity of a supplied inverse-metric component family, at
+every point of `M`.
+
+This global form is only appropriate for inverse-component families that are
+defined (or cut off) on all of `M`, such as `localFrameInv`.  Frame-local
+packages use `InvMetricDerivLocal` instead. -/
 def InverseMetricDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -229,12 +234,44 @@ def InverseMetricDerivativeComponentsOn
       D.carrier
       (t : Real)
 
+/-- Componentwise regularity of a supplied inverse-metric component family on a
+frame domain `u`.
+
+This is the frame-local form of `InverseMetricDerivativeComponentsOn`: the
+inverse components are only required to be time differentiable at points of `u`,
+which is all that inverse-metric evolution and Christoffel evolution ever use.
+Component families defined through a chart, such as `coordInv`, carry no
+information outside their frame domain and only satisfy this local form. -/
+def InvMetricDerivLocal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (u : Set M) : Prop :=
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    x ∈ u -> forall i j : Idx,
+      HasDerivWithinAt
+        (fun s : Real => gInv s x i j)
+        (gInvDt (t : Real) x i j)
+        D.carrier
+        (t : Real)
+
+/-- Global inverse-component time regularity restricts to any frame domain. -/
+theorem InverseMetricDerivativeComponentsOn.toLocal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx}
+    {gInvDt : Real -> M -> Idx -> Idx -> Real}
+    (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
+    (u : Set M) :
+    InvMetricDerivLocal (D := D) gInv gInvDt u :=
+  fun t x _hx i j => hdt t x i j
+
 /-- Metric-side regularity in a fixed local frame.
 
 This package is deliberately metric-side: it records smooth time dependence of
 the frame Gram matrix, nondegeneracy through a chosen two-sided inverse frame
-matrix, time differentiability of that inverse matrix, and uniqueness of time
-derivatives on the interval.  The inverse evolution formula itself is still
+matrix, time differentiability of that inverse matrix on `u`, and uniqueness of
+time derivatives on the interval.  Every field is local to `u`.  The inverse
+evolution formula itself is still
 proved by differentiating the inverse identity in
 `inverseMetricEvolutionEquationInFrame_of_inverse_components`; it is not assumed
 here. -/
@@ -256,7 +293,7 @@ structure MetricFrameTimeRegularityInFrameOnLocal
   nondegenerateGram :
     InvMetricLocal (I := I) S gInv frame u
   inverseMetricDerivative :
-    InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt
+    InvMetricDerivLocal (D := D) gInv gInvDt u
   uniqueTimeDerivatives :
     forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)
@@ -297,6 +334,34 @@ structure MetricFrameSpacetimeRegularityInFrameOnLocal
           D.carrier
           (t : Real)
 
+/-- The inverse-metric data of a spacetime metric-frame regularity package may be
+replaced by any other two-sided frame inverse with `u`-local time derivatives.
+
+Only `nondegenerateGram` and `inverseMetricDerivative` mention the inverse
+components; the four remaining fields are statements about the frame metric
+components alone and transfer unchanged.  This is the bridge from a package built
+with one inverse-component family (typically the zero-extended `localFrameInv`)
+to the same package for the canonical chart inverse `coordInv`. -/
+theorem MetricFrameSpacetimeRegularityInFrameOnLocal.congrInv
+    [DecidableEq Idx]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {gInv gInv' : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx}
+    {gInvDt gInvDt' : Real -> M -> Idx -> Idx -> Real}
+    {frame : Idx -> (x : M) -> TangentSpace I x}
+    {u : Set M}
+    (h : MetricFrameSpacetimeRegularityInFrameOnLocal
+      (I := I) S gInv gInvDt frame u)
+    (hinv : InvMetricLocal (I := I) S gInv' frame u)
+    (hdt : InvMetricDerivLocal (D := D) gInv' gInvDt' u) :
+    MetricFrameSpacetimeRegularityInFrameOnLocal
+      (I := I) S gInv' gInvDt' frame u where
+  metricSmooth := h.metricSmooth
+  nondegenerateGram := hinv
+  inverseMetricDerivative := hdt
+  uniqueTimeDerivatives := h.uniqueTimeDerivatives
+  frameMetricSpacetimeSmooth := h.frameMetricSpacetimeSmooth
+  frameMetricExtDerivTimeDerivative := h.frameMetricExtDerivTimeDerivative
 
 end Components
 

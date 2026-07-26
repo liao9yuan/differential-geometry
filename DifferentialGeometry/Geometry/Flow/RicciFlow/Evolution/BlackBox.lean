@@ -70,7 +70,7 @@ theorem inverseMetricEvolution_of_timeRegularityBlackBox
     InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ :=
   inverseMetricEvolutionEquationInFrame_of_inverse_components
     (I := I) (u := Set.univ) S hS gInv hbb.gInvDt frame
-    hbb.inverseMetricDerivative hinv hbb.uniqueTimeDerivatives
+    (hbb.inverseMetricDerivative.toLocal Set.univ) hinv hbb.uniqueTimeDerivatives
 
 /-- Black-box regularity package for Lemma 6.2.
 

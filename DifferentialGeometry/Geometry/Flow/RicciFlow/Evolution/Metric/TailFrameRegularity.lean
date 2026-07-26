@@ -160,4 +160,39 @@ theorem tailFrameSpaceReg
     rfl
   exact hderiv.congr_deriv heq
 
+/-- On a strictly positive-time tail, the canonical chart inverse metric carries
+the full spacetime metric regularity package in the coordinate frame centred at
+`x₀`.
+
+This is the `coordInv` counterpart of `tailFrameSpaceReg`.  The four fields that
+do not mention the inverse components are transported from that theorem by
+`congrInv`; the two that do come from `coordInvLocal` and `coordInvDerivLocal`. -/
+theorem tailCoordFrameReg
+    {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
+    (hS : IsSolutionOn (I := I) S)
+    (hAlphaT0 : alpha < t0) (hT0Omega : t0 < omega)
+    (x₀ : M) :
+    MetricFrameSpacetimeRegularityInFrameOnLocal
+      (I := I)
+      (S.timeRestrict (RealTimeInterval.closedOpen t0 omega hT0Omega))
+      (coordInv (I := I)
+        (S.timeRestrict (RealTimeInterval.closedOpen t0 omega hT0Omega)) x₀)
+      (coordInvDt (I := I)
+        (S.timeRestrict (RealTimeInterval.closedOpen t0 omega hT0Omega)) x₀)
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀)
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x₀) := by
+  have hS' : IsSolutionOn (I := I)
+      (S.timeRestrict (RealTimeInterval.closedOpen t0 omega hT0Omega)) :=
+    isSoln_tailRestrict (I := I) hS hAlphaT0 hT0Omega
+  exact
+    (tailFrameSpaceReg (I := I) hS hAlphaT0 hT0Omega
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀)
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_isLocalFrame (I := I) x₀)
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open
+          (I := I) x₀)).congrInv
+      (coordInvLocal (I := I) _ x₀)
+      (coordInvDerivLocal (I := I) _ hS' x₀)
+
 end DifferentialGeometry.PDE.RicciFlow

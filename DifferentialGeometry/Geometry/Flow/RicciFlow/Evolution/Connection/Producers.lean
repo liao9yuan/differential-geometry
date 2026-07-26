@@ -126,7 +126,7 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
         (fun l _hl =>
           by
             have hprod :=
-              (hmetricFrame.inverseMetricDerivative t x k l).mul
+              (hmetricFrame.inverseMetricDerivative t x hx k l).mul
                 (hDiff t x hx i j l)
             refine hprod.congr_deriv ?_
             simp))

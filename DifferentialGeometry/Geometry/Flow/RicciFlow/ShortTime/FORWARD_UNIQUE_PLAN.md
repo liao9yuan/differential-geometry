@@ -292,6 +292,32 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №44 (2026-07-26, α5 ACCEPTED+COMMITTED — **R11 SURGERY LANDED TREE-GREEN;
+  K2-B MACHINERY COMPLETE**): the field weakening executed exactly per
+  ruling (`InvMetricDerivLocal` added, global predicate KEPT for BlackBox,
+  `.toLocal` converter, both structure fields u-local, spacetime
+  `congrInv`); consumers/constructors adapted across 8 Evolution files;
+  discharge chain `coordInvDt`/`coordInvDerivLocal` (InverseSmooth) +
+  `tailCoordFrameReg` (TailFrameRegularity) landed; unconditional tail
+  endpoints `rm04EvolTail_at`/`rm04EvolFamTail` in NEW
+  `Evolution/Rm04ProducerTail.lean` — the file split forced by the
+  IPS-vs-NormedSpace SolutionOn instance-spine mismatch (same reason
+  TailChristoffel is a separate file; `Rm04Producer.lean` byte-identical).
+  VERIFICATION: α5's full locked build + the planner's INDEPENDENT full
+  locked build both green (10654 jobs); whole-tree sorry set = baseline
+  MINUS ForwardUniqueConnBound (β4's closure) — NO new sorries, surgery
+  cascade fully contained; root aggregate rebuilt green with the tail
+  file wired (:1356); tail endpoints 3-axiom by direct lean.  **The K2-B
+  brick's machinery is COMPLETE**: hev (per-tail, unconditional from
+  S/hS) + hreal + hL all delivered.  REMAINING for the (B) endpoint = the
+  single final WIRING PASS at `:189`: build S := solOfMetric g from (B)'s
+  fields (IsSolutionOn via the joint producers, K6b precedent), pick the
+  midpoint-trick tail, instantiate `rm_of_uhlenbeck`/`sdec_of_uhlenbeck`
+  with the Rm04ProducerTail families, discharge `forwardUniqueRate_le`'s
+  hAdot from `connDiffDot_normSq_le` (+ hΓ via
+  `christoffelEvolution_of_solution` on the same tail), assemble
+  `ForwardUniqueInputs`, and replace the `:189` sorry with
+  `forward_unique_of_inputs`.
 - №43 (2026-07-26, α4 ACCEPTED+COMMITTED — **hcomm CLOSED (static side
   unconditional on S/hS); all three lane-interface items delivered;
   hmetricReg root-caused to an over-quantified structure field; RULING

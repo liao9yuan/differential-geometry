@@ -739,6 +739,42 @@ theorem coordInvSmoothAt
       (prod_mem_nhds (D.regular_isOpen.mem_nhds t.2)
         ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) x0).mem_nhds hx))
 
+/-- The canonical time-derivative field of the coordinate inverse metric. -/
+noncomputable def coordInvDt
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (x0 : M) :
+    Real -> M -> DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
+  fun t x i j =>
+    derivWithin (fun s : Real => coordInv (I := I) S x0 s x i j) D.carrier t
+
+/-- Time regularity of the canonical coordinate inverse metric on the
+coordinate-frame domain.
+
+This is the frame-local inverse-derivative field of
+`MetricFrameTimeRegularityInFrameOnLocal` for `coordInv`.  Only the local form is
+available: `coordInv` is read through the chart at `x0` and carries no
+information outside `coordinateFrameSet x0`. -/
+theorem coordInvDerivLocal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M) :
+    InvMetricDerivLocal (D := D) (coordInv (I := I) S x0) (coordInvDt (I := I) S x0)
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
+  intro t x hx i j
+  have hslice :
+      ContMDiffAt 𝓘(Real, Real) (𝓘(Real, Real).prod I) ∞
+        (fun s : Real => (s, x)) (t : Real) :=
+    contMDiffAt_id.prodMk contMDiffAt_const
+  have hcomp :=
+    (coordInvSmoothAt (I := I) S hS x0 t x hx i j).comp (t : Real) hslice
+  have hcd : ContDiffAt Real ∞ (fun s : Real => coordInv (I := I) S x0 s x i j) (t : Real) := by
+    rw [contMDiffAt_iff_contDiffAt] at hcomp
+    simpa [Function.comp_def] using hcomp
+  simpa [coordInvDt] using
+    (hcd.differentiableAt (by simp)).differentiableWithinAt.hasDerivWithinAt
+
 theorem frameGInvCLM_spacetimeSmooth
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

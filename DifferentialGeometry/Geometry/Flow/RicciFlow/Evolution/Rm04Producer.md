@@ -1,6 +1,8 @@
 # Rm04Producer — discharging the `Rm04Reduction` inputs
 
-**Status: steps 1 and 3 CLOSED; step 2 closed up to ONE named honest input.**
+**Status: all three steps CLOSED.**  Step 2's single named honest input
+(`hmetricReg`) was discharged on 2026-07-26 by ruling R11 — see
+`Evolution/Rm04ProducerTail.lean` for the unconditional per-tail endpoints.
 
 0 `sorry`, 1195 lines.  Targeted build `+…Evolution.Rm04Producer` GREEN (3783 jobs),
 warning-clean.  `#print axioms` on every public endpoint: `propext`, `Classical.choice`,
@@ -27,6 +29,13 @@ warning-clean.  `#print axioms` on every public endpoint: `propext`, `Classical.
 | **`rm04EvolFam`** | **`hev`** — `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`, conditional on the per-centre `hmetricReg` family |
 | **`rm04Fam_real`** | **`hreal`** — unconditional |
 | **`rm04LapFam_real`** | **`hL`** — unconditional |
+
+Downstream, in `Evolution/Rm04ProducerTail.lean`:
+
+| Declaration | Content |
+|---|---|
+| **`rm04EvolTail_at`** | `rm04Evol_at` on a positive-time tail, **unconditional** |
+| **`rm04EvolFamTail`** | **`hev` on a positive-time tail, unconditional** |
 
 ## Step 1 — `bianchi2` and `hcomm`.  DONE
 
@@ -66,14 +75,38 @@ plain `totalNabla0S` tower for `S.ricci t`, whose realizations come free from
 With this, `rm04StaticOfSol` lost its `hcomm` hypothesis: **the static identity is now
 unconditional on `S`/`hS`.**
 
-## Step 2 — the time half.  BLOCKED on one honest input; everything else discharged
+## Step 2 — the time half.  CLOSED on positive-time tails (ruling R11 applied)
 
 `rm04Evol_at` delivers the full evolution at the centre from `S`/`hS` **plus** `gInvDt` and
 `hmetricReg`.  The other four packages of `rm04Var_of_sol` discharge for free:
 `coordNab2Reg` (hypothesis-free), `coordGammaMix ∘ coordGammaEvol ∘ coordMetricMix ∘
 coordMetricDeriv` (a single nested term, no `simpa` needed), `rm13OfSol`, `connCurvOfSol`.
 
-### The blocker (NEW finding — supersedes the tail plan)
+### The blocker — RESOLVED by ruling R11 (option A, implemented 2026-07-26)
+
+`InverseMetricDerivativeComponentsOn` is kept (BlackBox still uses it, with
+`Set.univ`), and the two structures now carry the `u`-local
+`InvMetricDerivLocal` instead.  `InverseMetricDerivativeComponentsOn.toLocal` is
+the one-line converter.  The standalone consumers
+`inverseMetric_derivative_row_eq` (`Metric/Covariant.lean`) and
+`inverseMetricEvolutionEquationInFrame_of_inverse_components`
+(`Metric/Evolution.lean`) were weakened to the local predicate as well — their
+proofs only ever used the hypothesis at the in-scope `hx : x ∈ u`.  All four
+consumer sites plus both constructors adapted mechanically; **zero breakage
+anywhere else in the tree.**
+
+The discharge that this unlocks is `tailCoordFrameReg`
+(`Metric/TailFrameRegularity.lean`), built from
+`MetricFrameSpacetimeRegularityInFrameOnLocal.congrInv` (`Metric/Basic.lean`) +
+`coordInvLocal` + the new `coordInvDerivLocal`/`coordInvDt`
+(`Metric/InverseSmooth.lean`).  The consuming endpoints are in
+**`Evolution/Rm04ProducerTail.lean`**: `rm04EvolTail_at` and `rm04EvolFamTail`
+take `S`/`hS` on `(α, ω)`, a tail `[t₀, ω)` with `α < t₀`, and nothing else —
+`hev` is now unconditional per tail.
+
+The historical analysis is kept below for the record.
+
+### The blocker as originally diagnosed
 
 `MetricFrameSpacetimeRegularityInFrameOnLocal S gInv gInvDt frame u` has a field that is
 **not `u`-local**:
@@ -120,6 +153,11 @@ Recommendation: (A).  Note that under (A) the tail restriction is still needed f
 `frameMetricSpacetimeSmooth`, so `rm04Evol_at`/`rm04EvolFam` would be instantiated at
 `S.timeRestrict (closedOpen t₀ ω)`; their statements are already `D`-generic, so no change
 here is required — only the discharge of `hmetricReg`.
+
+**Outcome:** (A) was ruled and implemented; the prediction held exactly.  Nothing
+in this file changed — the tail instantiation lives in `Rm04ProducerTail.lean`,
+which had to be a separate module for an instance-spine reason, not a
+mathematical one (see that file's `.md`).
 
 ## Step 3 — lane packaging.  ALL THREE DELIVERED
 
