@@ -85,4 +85,8 @@ demanding it. Twelve full-build rounds and ≈40 files were spent this way on
   so only reunion remains outstanding.
 - Root-cause fix for the model-space assumption landed separately on ste-align at
   `453900554` (canonical producer swap + three `omit`s in `RicciConnDiffPalatini`).
-- Next action: create `codex/reunion-merge` and start at step 2.
+- 2026-07-25 — **HANDED OFF to a collaborator** by user decision.  This document is
+  self-contained: scope, conflict shape, resolution rule, step order, and the
+  "do not repeat" warning are all above.  Next action for whoever picks it up:
+  create `codex/reunion-merge` off the green ste-align head and start at step 2.
+  Do the work in a separate worktree so the main line stays green.
