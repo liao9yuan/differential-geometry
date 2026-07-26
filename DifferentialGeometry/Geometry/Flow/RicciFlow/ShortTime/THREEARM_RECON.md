@@ -393,3 +393,49 @@ green committed lemmas at the cited lines.  No in-flight lane file touched
 `UnifCovSumCross.lean`, `Evolution/*`, `AllTimesBounds.lean` all read-only or
 untouched); no model-space `InnerProductSpace` introduced.
 ```
+
+---
+
+## 11. GPT Pro ruling (2026-07-26, chat 6a65adf2) — VERBATIM-DISTILLED
+
+**The §6 fork was a false dichotomy.**  Full answer archived in the ChatGPT
+project; the operative content:
+
+1. **Orientation routing is fine — §4/§6's contamination claim was WRONG.**
+   The low arms m=0,1 contain no a+2 difference derivative; the committed
+   two-arm product bound (SobolevNonlinearityExistence :1222-1235, harmLow
+   :1661-1732) routes ALL coefficient jets onto D_{a+1}.  Even a coefficient
+   bound ~K(1+H) yields K·D_{a+1} + K·H·D_{a+1} — both legal (orientation 2).
+2. **What fails is the CONSTANT**: after removing the ball R ≈ H, so
+   Kc(H)·(1+H)·D_{a+1} with Kc an unbounded polynomial ⟹ exceeds the allowed
+   fixed-K·H·D_{a+1}.  "Orientation-absorbable, constant-not-absorbable."
+3. **Second inventory error (Pro-found): arm0Base's Kc is ALSO R-dependent on
+   the live branch** — the :135-138 docstring is stronger than the
+   implementation (hR is passed into the per-order producer; the converter's
+   constant is (∑Kt)·(1+R²) at :13180-13208).  ⟹ the repair is GENERIC (the
+   converter), not DeTurck-Lie-specific.
+4. **R^{7k} is a wrapper artifact, not intrinsic.**  The inverse map is a
+   smooth tame composition; the fibre-small pointwise bound |g₁⁻¹g₀|² ≤
+   (dim E)²(1−δ₀)⁻² (InverseMetricRaisedEndomorphismJetBound :979-990) and the
+   differentiated-inverse convolution recursion (:1158-1183) are already
+   R-free.  The radius enters ONLY where the ball-uniform wrapper sets
+   Λ = C_emb^{a+2}·R before `grid_prod_int_le` (:8556-8598, also :14045-14076).
+   Instantiating `grid_prod_int_le` (:8154-8178) with R := ‖∇^k P‖₂ (explicit
+   top jet on the RHS) and FIXED Λ₀ = Λ₀(dim E, δ₀) removes it.
+5. **Smallest lemma frontier (the GATE):** a radius-free top-separated
+   integrator for `boundedFactorGridWindow` in
+   CurvatureCoefficientDifferenceJetTower.lean — the sibling of :14417-14444
+   with the opposite constant choice: layers 0..i+1 → the LOW window
+   (K_low·(1+∑_{j≤i+1}‖∇^j P‖²)), layer i+2 → the explicit top leak
+   (K_top·‖∇^{i+2}P‖²); constants depend only on g₀, a, dim E, δ₀.  Plus the
+   fibre-small zero-order bridge b_P(x,0) ≤ Λ₀².  Consumer gate after: the
+   sibling coefficient theorem with no R binder (wire-in point
+   DeTurckVectorFieldL2JetBound :4233-4256).
+6. **Failure signal for abandoning R1τ:** only if, AFTER the fixed-Λ₀ fix,
+   a superlinear-in-H coefficient bound (‖C₀‖_{H^a} ≁ 1+H) or H·D_{a+2} /
+   F(H)·H·D_{a+1} with F→∞ remains.  Diagnostic: fibre-small high-frequency
+   family P_N with bounded X_{a+1}, X_{a+2}→∞ — linear growth = route survives.
+
+**Pro's explicit next-step gate:** implement ONLY the radius-free integrator;
+do NOT modify DeTurckLieCoeffL2JetBound.lean, do NOT finish lieCorr0, do NOT
+start the threeArm assembly until that generic lemma is exact-green.
