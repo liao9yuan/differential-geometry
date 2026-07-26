@@ -1,5 +1,48 @@
 # DeTurckVectorFieldL2JetBound.lean — DLb top-separated producer (in-flight)
 
+## 2026-07-26 — brick 3b-prep: SPLIT (refactor-only, this path is now an import-only umbrella)
+
+The monolith hit 4596 lines (>3000 limit).  Split by abstraction boundary into three parts,
+each ≤ ~2500 lines; `DeTurckVectorFieldL2JetBound.lean` is now import-only.  Zero math/statement/
+name changes; content moved verbatim except `private` stripped from the 27 decls that cross a new
+file boundary (forced set — the `wAlpha/wOmega/wXi/wCA/wVF/wAlphaA/wAlphaB` tower is referenced up
+to line ~4374, so it crosses every interior cut; the `.md` producer-plan already blessed exposing
+the tower + `norm_iCG_wEndoInsert_eq_wAlpha` for brick 3b's R-free leaf).
+
+- **`DeTurckVFEndoInsertTower.lean`** (a): defs `deTurckLieWEndoSection/Insert`, private tower
+  `wVF/wXi/wOmega/wAlphaA/wCA/wAlphaB/wAlpha`, pointwise/unit-model decompositions, and
+  `deTurckLieWEndoInsert_eq_cometricRaise`.  Orig lines 36–591.
+- **`DeTurckVFEndoInsertProducers.lean`** (b): jet-L² engine — integrators
+  (`diagonalProductTerm_integral_le`, `diagonalProductGrid_rfns_integral_ballUniform_succ`),
+  `RaisedKoszulSuccHelpers`, bottom producers (raisedKoszul/cometricCastG0/sharpFlatEndoCc),
+  residual generics (connDiffSection/wXi/wOmega low-order), and the `norm_iCG_*_eq_*` bridges
+  through `norm_iCG_wEndoInsert_eq_wAlpha`.  Orig lines 592–2971.  Imports (a).
+- **`DeTurckVFEndoInsertTopSep.lean`** (c): public API + assembly — `connDiffDVFSection`,
+  `connDiffDVFInsert_eq_cometricRaise`, the `realizedFam_*_ballUniform` theorems, the
+  `DLbTopSeparated` section, and the endpoints `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,
+  summed}_topSeparated`.  Orig lines 2972–4592.  Imports (b).
+
+Brick 3b's R-free tower is a SEPARATE new leaf importing (b) (which re-exports the promoted tower +
+bridge); it does NOT go inside these parts, so their headroom is preserved.  The promoted set is
+exactly `wVF/wXi/wOmega/wAlphaA/wCA/wAlphaB/wAlpha` (7 tower) + 6 (a)-decomps
+(`connDiffLoweredCc_unitModel_apply'`, `interior_product_toModel_eval'`, `wAlphaB_unitModel_apply`,
+`cotangentToDual_slotInsertEndoFib'`, `cotangentToDual_cometricRaiseSlot0_gen`,
+`deTurckLieWEndoInsert_eq_cometricRaise`) + 14 (b)-producers/bridges (`iteratedCovGrad_smul_real`,
+`raisedKoszul_norm_eq_of_sq_eq`, `cometricCastG0_order0sup_jetL2_succ_generic`,
+`connDiffSection_lowOrder_jetL2_succ_generic`, `norm_iCG_connDiffLoweredCc_eq_connDiffSection`,
+`wXi_lowOrder_jetL2_succ_generic`, `cometricCastG0_rfns_lowOrder_le`,
+`wOmega_lowOrder_jetL2_succ_generic`, `rfns_iCG_wCA_eq_connDiffSection`,
+`norm_iCG_wCA_eq_connDiffSection`, `norm_iCG_wAlphaA_eq_succ_wOmega`, `wAlpha_order0_jetL2_generic`,
+`rfns_iCG_wEndoInsert_eq_wAlpha`, `norm_iCG_wEndoInsert_eq_wAlpha`).  All 27 are the forced
+cross-boundary set; nothing else was touched.
+
+**Verification: PASSED.**  `lake build` of the umbrella chain (Tower/Producers/TopSep/umbrella) green;
+downstream `DeTurckLieCoeffL2JetBound` (direct importer) rebuilt green — public names re-export
+unchanged.  Content byte-identical to the pre-split file except the 27 `private` strips (checked
+programmatically).  Preserved `#print axioms` on `connDiffDVFInsert_eq_cometricRaise` and
+`connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` both = `[propext, Classical.choice,
+Quot.sound]` (no `sorryAx`).  Line counts: Tower 599 / Producers 2420 / TopSep 1660 / umbrella 7.
+
 ## Goal (this dispatch)
 
 The DLb sibling of the DLa half of the deTurckLie coefficient: a **top-separated realizedFam
