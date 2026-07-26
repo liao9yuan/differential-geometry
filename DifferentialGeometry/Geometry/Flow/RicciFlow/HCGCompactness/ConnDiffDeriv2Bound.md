@@ -7,9 +7,37 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 10 = `covStep2_diffStep_eval` core, session 3, 2026-07-26): the
+  session-9 IPS-`NormedSpace` wall is CURED — LINEARITY SPLIT (iii) COMPLETE, green + axiom-clean.**
+  The remedy is `set_option backward.isDefEq.respectTransparency false in` on the two `mdiff` lemmas
+  (the project's known cure for `Tensor0SModel`-`NormedSpace` synthesis in
+  `contMDiffAt_section_apply_gen` — the same option this file already carries for `covDConnDiff2_g1_le`,
+  L565).  **This SUPERSEDES the session-9 "BLOCKED / placement-refactor" conclusion:** no move to
+  `MetricCovDerivLinear.lean` and no relocation of `covDerivConnDiff_contMDiff` was needed; the
+  differentiability + split live cleanly IN this IPS leaf.  Landed green + `#print axioms` =
+  `[propext, Classical.choice, Quot.sound]` (all three): `covStep2_branch1_mdiff`,
+  `covStep2_branch2_mdiff` (`MDifferentiableAt` of the T1/T2 summands, via
+  `TensorMultilinear.contMDiffAt_section_apply_gen` + `.mdifferentiableAt`, packaging the `∇₂A`/`A`
+  slots as `ContMDiffSection`s), and `covStep2_diffStep_split`
+  (`extDerivFun(−∑T1 − ∑T2) = −∑ₐ extDerivFun T1ₐ − ∑ₐ extDerivFun T2ₐ`, via `extDerivFun_sub_at` as a
+  defeq-checked `have` + `extDerivFun_neg_at`/`extDerivFun_finset_sum_at`, the a=1 `hDF` technique).
+  Targeted module build GREEN (9519 jobs); file's ONLY `sorry` stays `covStepDiff2_mixedComm_le`.
+  - **Composition ready:** `covStep2_diffStep_peel` ▸ `covStep2_diffStep_split` ▸ (per slot)
+    `covStep2_diffStep_branch1`/`branch2` now expands `PieceA` up to the `H`-correction (OC) sum.
+  - **Durable lesson (CORRECTS session-9):** section-apply differentiability
+    (`contMDiffAt_section_apply_gen` → `.mdifferentiableAt`) IS available in IPS files after all —
+    guard the lemma with `set_option backward.isDefEq.respectTransparency false in`, which lets
+    `NormedSpace ℝ (Tensor0SModel s ℝ E)` synth.  (Local/global `NormedSpace` providers and
+    `synthInstance.maxHeartbeats` do NOT help; the transparency option is the specific cure.)
+  - **Remaining for the eval core:** (ii) the OC eval (`s+2` `diffStep_leibniz_eval` applications on the
+    `∇₂_U`-updated tuples — wall-free, packaging `∇₂_U W`/`∇₂_U V`/`∇₂_U(Vslots a)` as `covApply`
+    sections via `covApply_contMDiffOn`), then (iv) the `PieceA−PieceB` ∇₂²S-cancellation assembly and
+    the norm CS.  Core now ~65% (peel + both branches + split; OC + assembly remain).
+
 - **UPDATE (a=2 campaign session 9 = `covStep2_diffStep_eval` core, session 2, 2026-07-26): the T2
-  BRANCH landed green + axiom-clean; the LINEARITY SPLIT (iii) is BLOCKED by a real IPS-`NormedSpace`
-  wall.**  Targeted module build GREEN (9519 jobs); file's ONLY `sorry` stays `covStepDiff2_mixedComm_le`.
+  BRANCH landed green + axiom-clean; the LINEARITY SPLIT (iii) was reported BLOCKED — SUPERSEDED by
+  session 10 (the transparency option cures it).**  Targeted module build GREEN (9519 jobs); file's
+  ONLY `sorry` stays `covStepDiff2_mixedComm_le`.
   - **`covStep2_diffStep_branch2`** (per slot `a`; `#print axioms` = `[propext, Classical.choice,
     Quot.sound]`).  Differentiates the T2 summand `y ↦ (∇₂S) y (cons (W y)(update (Vslots·y) a
     (A_y(Vslots a,V))))` (field `∇₂S = covStep g₂ s S`, rank `s+1`) by `covStep_eval_smooth_slots`
