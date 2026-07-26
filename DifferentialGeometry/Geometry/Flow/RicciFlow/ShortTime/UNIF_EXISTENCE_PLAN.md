@@ -1505,3 +1505,40 @@ split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSect
   Split reverted to hygiene (opens + `← insert_base`); does NOT build; LowJet
   untouched; no commit. Consult evidence = LieCorr0CoeffL2JetBound.md §"D-ROUND
   RESULT" + §"T1". `(N)` 0%.
+
+## Planner dispatch №24 (2026-07-25) — CAMPAIGN UNFROZEN; two lanes running
+
+User unfroze the (N) route ("我们先继续N route好了") and handed the `qinz/reunion`
+merge to a collaborator (plan: `DifferentialGeometry/REUNION_MERGE_PLAN.md`), so
+the merge no longer competes for this session's attention.
+
+Precondition now satisfied that was not at №23: the merged ste-align tree is
+**verified GREEN** — `lake build` 10623/10623, exit 0, sorry count unchanged at
+248, endpoints `covOrderBound_of_soln` and
+`MetricCompactnessInputs.metricCompactness` axiom-clean.  Resume-order item (1)
+("accept & commit the two stand-down notes") is DONE: both notes came in with the
+e87b merge at `8a3ce03e8`.
+
+STANDING RULING added since №23 — read before touching any variable block:
+`InnerProductSpace ℝ E` on the MODEL space is the WRONG assumption; stay on
+`[NormedSpace ℝ E]`.  When a lemma newly demands an instance, fix the PRODUCER
+(usually: you reached for the legacy `LeviCivita` API instead of the canonical
+`leviCivitaConnectionOfMetric` one) or `omit` an unused section variable — never
+add the instance to consumers.  Doing the latter cost twelve full-build rounds.
+Details in `lessons.md` (2026-07-25) and `REUNION_MERGE_PLAN.md`.
+
+DISPATCHED (resume-order items 2 and 3, in parallel — disjoint files):
+- **Lane B2** → `HCGCompactness/ConnDiffDerivBound.lean`.  Close the dual core
+  (`covDerivConnDiff_g1_le`) and the endpoint (`covDerivConnDiff_gJet_le`) per that
+  file's note §"EXACT NEXT STEPS".  Endpoint must be literally dischargeable
+  against `covStepDiff_norm_le`'s `hA1` binder in `UnifCovSumCross.lean`.
+  Unblocks: hA1 discharge → D_N recursion → 2a-hi/pkg → S0 j≥2.
+- **Lane lieCorr0** → `Analysis/Sobolev/TensorHilbert/LieCorr0CoeffL2JetBound.lean`.
+  Drop the broken `LieCorr0LowJet` import, BANK the four drafted-but-never-built
+  theorems, then land the first Kc atom `lc0Riem`.  Scoped to stop there; the
+  endpoints wait for all four atoms.  Note: this leaf is not in the root import
+  graph, which is why the tree is green despite its broken import.
+
+Unchanged honest numbers: (N) theorem 0% (unstated); its machinery ≈ 50%.
+The main remaining mathematical risk is still item-2 PROPER (threeArm/Ψ₀ assembly
++ the smooth-core tame lemma), which is NOT started and is not in either dispatch.
