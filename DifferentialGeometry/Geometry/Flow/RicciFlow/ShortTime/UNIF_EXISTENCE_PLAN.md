@@ -1884,3 +1884,13 @@ Honest numbers, unchanged discipline: **(N) `ricci_flow_unif_existence` = 0%
 bricks (gate + arm0 + the 3b scaffold); threeArm assembly + smooth-core layers
 2-3 untouched.  Machinery overall ≈ 70%.  Est. to (N) discharge: ~12-20
 executor sessions absent surprises.
+
+## Planner ruling №33 (2026-07-26) — mixedComm bridge statement corrected (order-2 RHS)
+
+Session-5's STOP fired correctly: the bridge as stated was FALSE (∇₂(mixedComm)
+is order-2 in S; decisive s=0 Lean witness `diffStep_rank0_eq_zero`).  Ruling:
+RHS gains |∇₂²S|.  Safety checked at both consumers (exists_const's nlinarith;
+the D_N jet budget).  Dispatched: the statement amendment + the strengthened
+assembly (keep the ∇₂²S-insertions, route them through the a=0 atom in the CS).
+The session-7 note's cancellation claim is superseded; sessions 8-11 machinery
+(peel/split/branches/OCsplit) remains valid PieceA route.
