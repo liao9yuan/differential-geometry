@@ -1312,6 +1312,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueIBP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmDiff
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRateLe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmDot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
