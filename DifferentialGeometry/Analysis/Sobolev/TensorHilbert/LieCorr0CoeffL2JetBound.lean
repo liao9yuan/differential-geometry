@@ -817,6 +817,104 @@ private theorem lc0InsertDiff_realizedFam_perOrder_topSep
     Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
   nlinarith [hb, hK_nn i, hlow_nn, mul_nonneg (hK_nn i) hlow_nn]
 
+/-! ## The `lc0VB` `Kc` atom (`2·traceStep(g₁) ∘ prodKappa(metricConnDiffLowered) ∘ ip(deTurckVF)`)
+
+`lc0VB g₀ g₁` (`LieCorr0Core:144`) is the vector-bundle contraction piece
+`2 · traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
+     ∘ interior_product(deTurckVF g₁ g₀)`.  Unlike `lc0Riem` (fixed g₀-only
+passenger) and `lc0Insert`-diff (the `wAlphaB` slot-insert hoist), it carries
+**two moving arms** — the g₁-lowered connection difference `metricConnDiffLowered
+g₁ g₁ g₀` and the DeTurck field `deTurckVF g₁ g₀` — so neither of the two banked
+routes applies.  It is a genuine interior-product contraction whose deTurckVF is a
+single field (no g₀↔g_bg difference ⟹ no cancellation à la atom 2).
+
+**RECON VERDICT (route 3 — a real engine gap; see the `.md` note).**  The Arm1
+template `deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform`
+(`DeTurckLieArm1CoeffL2JetBound.lean`) has the same *shape*, and its generic
+*kernel* transfers: `lieArm1_deTurckVF_cometric_trace` expresses
+`deTurckVF g₁ gB` as the g₁-cometric trace of `connDiff g₁ gB` (generic in `gB`),
+and the committed product grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
++ integrator `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`
+bound any resulting `appCcRS` (both already used by `lc0Riem`).  But the *end-to-end*
+fold does NOT transfer: Arm1's `deTurckLieArm1Coeff_eq_lieArm1Piece_sum` is a
+~2000-line Arm1-specific identity whose live arm is `deTurckLieTraceCoeff`
+(traceHessian), not `metricConnDiffLowered`; `lieArm1_slot2_vf_trace` is
+slot-2-of-rank-3 specific; and `metricConnDiffLowered g₁ g₁ g₀` has **no reusable
+jet producer** (Arm1's `lieArm1LoweredBgKappa`/`lieArm1_kappa_feed` are private and
+field-specific).  A tree-wide grep confirms there is no committed generic
+interior-product-fold engine.  So `lc0VB` needs a hand-built fibre identity
+`lieCorr0VBFib = reindexCoeffGen(appCcRS g₀ p a b Φ W)` plus per-order producers
+for both connDiff-family arms — analogous to Arm1's `lieArm1PsiB`/`lieArm1_psiB_feed`
+chain, not a one-lemma reuse.  Stated here with ONE isolated `sorry` at the
+`ballUniform` frontier (as atom 2's first session did). -/
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0VB` piece — HONEST `sorry`.**
+The single remaining frontier for atom 3.  The bound `‖∇^i (lc0VB g₀ (realizedFam …))‖²
+≤ K i` is exactly what the missing engine delivers: the fibre identity folding
+`traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
+∘ interior_product(deTurckVF g₁ g₀)` into a bounded `appCcRS` of two connDiff-family
+arms, plus the per-order producers for `metricConnDiffLowered g₁ g₁ g₀` (g₁-lowered
+⟹ P-perturbation reduction) and `deTurckVF g₁ g₀` (via its cometric-trace of
+`connDiff`).  No committed generic engine covers this contraction; see the `.md` note
+for the exact required shape. -/
+private theorem lc0VB_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (lc0VB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2
+            ≤ K i := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **`lc0VB` `Kc` atom.**  Per-order top-separated jet-`L²` bound for the
+vector-bundle contraction piece with vanishing top constant (`∇²T`-free: all of it
+lands in the `R`-carrying `Kc`).  Proved from `lc0VB_ballUniform` by the trivial
+`Ktop = 0` reshape (`K i ≤ K i·(1 + low)`).  Carries the single `sorry` of
+`lc0VB_ballUniform` until the interior-product fold engine lands. -/
+private theorem lc0VB_realizedFam_perOrder_topSep
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (lc0VB (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
+            Ktop * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) +
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 3),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  obtain ⟨K, hK_nn, hK⟩ := lc0VB_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨0, le_refl 0, K, hK_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs i hi
+  have hb := hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+  have hlow_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 3),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+    Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
+  nlinarith [hb, hK_nn i, hlow_nn, mul_nonneg (hK_nn i) hlow_nn]
+
 #print axioms endoArm_eq_dlb
 #print axioms lc0Insert_base_eq_neg_dlb
 #print axioms lc0InsertBase_realizedFam_perOrder_topSeparated
@@ -824,6 +922,8 @@ private theorem lc0InsertDiff_realizedFam_perOrder_topSep
 #print axioms lc0Riem_realizedFam_perOrder_topSep
 #print axioms lc0InsertDiff_ballUniform
 #print axioms lc0InsertDiff_realizedFam_perOrder_topSep
+#print axioms lc0VB_ballUniform
+#print axioms lc0VB_realizedFam_perOrder_topSep
 
 end DifferentialGeometry.Integral.Connection
 

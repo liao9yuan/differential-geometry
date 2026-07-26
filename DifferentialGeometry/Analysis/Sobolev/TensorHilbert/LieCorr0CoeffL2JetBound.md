@@ -413,3 +413,83 @@ the two endpoints (`sq_le_five_add`) only once all four Kc atoms are green.
 `lc0AMix`) + 5-way assembly (helper done, wiring pending) + shared engine.  Sorry-free-content
 fraction of the leaf's four-atom machinery: **~50%** (was ~33%).  The `lc0Insert`-diff atom is the
 first to fully exercise the producer HOIST + `wAlphaB` + `(2,2)→(1,1)` chain end-to-end.
+
+## SESSION 5 (2026-07-25) — ATOM 3 = `lc0VB`: RECON VERDICT **route 3** (real engine gap); STATED with ONE `sorry`
+
+**Decision.**  `lc0VB_realizedFam_perOrder_topSep` is stated verbatim in the `lc0Riem`/`lc0Insert`-diff
+shape (`Ktop = 0`, `∇²T`-free) and derived green by the trivial reshape from the single frontier
+`lc0VB_ballUniform` (the ONE `sorry`).  Verified by a targeted module build (79s, green): the two new
+theorems carry exactly `[propext, sorryAx, Classical.choice, Quot.sound]`; every prior atom (4 banked
++ `lc0Riem` + both `lc0Insert`-diff) stays `[propext, Classical.choice, Quot.sound]`.  No commit made.
+
+### RECON VERDICT — the Arm1 template's *kernel* transfers, its *end-to-end fold* does NOT
+`lc0VB` (`LieCorr0Core:144`) = `2 · traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
+∘ interior_product(1, deTurckVF g₁ g₀)`.  **Two moving arms** (metricConnDiffLowered g₁ AND deTurckVF g₁);
+neither the `lc0Riem` fixed-passenger trick nor the `lc0Insert`-diff `wAlphaB` hoist applies (confirmed:
+`lc0VB` is not a slot insertion of the DeTurck endo).  Named checks against Arm1
+(`DeTurckLieArm1CoeffL2JetBound.lean`):
+
+- ✓ **Transfers (generic kernel).**  `lieArm1_deTurckVF_cometric_trace` (`:2897`) —
+  `deTurckVF g₁ gB = ∑ₖ connDiff g₁ gB (cometricLmodel(dualₖ)) (basisₖ)`, generic in `gB` ⟹ applies at
+  `gB := g₀`.  With `interior_product`'s linearity (`interior_product_toModel_eval` `:2250`) this rewrites
+  `ip(deTurckVF)` as a g₁-cometric sum of `ip(connDiff)`.  The committed product grid
+  `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le` (`MetricArmCoeffJetTower:2360`) +
+  integrator `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`
+  (`RemainderCoeffPerOrderJetEnvelopes:862`) bound any resulting `appCcRS` — both already used by `lc0Riem`.
+- ✗ **Does NOT transfer (Arm1-specific).**  (1) `deTurckLieArm1Coeff_eq_lieArm1Piece_sum` (`:4133`) is a
+  ~2000-line hand-rolled 13-term identity whose live arm is `deTurckLieTraceCoeff` (**traceHessian**), not
+  `metricConnDiffLowered`; `lc0VB`'s two arms are both connDiff-family (no traceHessian) — a different
+  contraction, not a reindex.  (2) `lieArm1_slot2_vf_trace` (`:2967`) is slot-2-of-rank-3 specific
+  (`lc0VB` inserts at slot-0 of rank-2 via `interior_product 1`).  (3) `metricConnDiffLoweredFib g₁ g₁ g₀`
+  has **no reusable jet producer** — the tree-wide grep finds it only in the Arm1 file and this note; Arm1's
+  `lieArm1LoweredBgKappa` + `lieArm1_kappa_feed`/`lieArm1_psiB_feed` are `private` and field-specific.
+- **No committed generic interior-product-fold engine exists** (grepped: Arm1 / Kernel / VectorField each
+  hand-roll their own `interior_product` fold; there is no `clm_apply`/`endoApply`/interior-product Leibniz
+  jet product grid).
+
+### The missing engine — exact required shape (what `lc0VB_ballUniform` needs)
+1. **Fibre identity** `lieCorr0VBFib g₀ g₁ = reindexCoeffGen(σ)(appCcRS g₀ p a b Φ W)` (or a small sum
+   thereof), folding `traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLowered g₁ g₁ g₀) ∘ ip(deTurckVF g₁ g₀)`
+   into a bounded `appCcRS` of two connDiff-family arms.  Route: `lieArm1_deTurckVF_cometric_trace`
+   (needs a thin PUBLIC wrapper — currently `private` in the Arm1 file; the claim on that file protects such a
+   wrapper) + `interior_product` linearity + `appCcRS_toSection` slot bookkeeping for `VBPerm`.  This is the
+   `lc0VB` analogue of `deTurckLieArm1Coeff_eq_lieArm1Piece_sum`, but single-term (≈200–400 lines, not 2000).
+2. **Arm producers (per-order, ballUniform, generic-in-g₁ via `htie`/P):**
+   - Φ = `metricConnDiffLowered g₁ g₁ g₀` — g₁-lowered ⟹ reduce to g₀-family + P-perturbation
+     (the `lc0VB` analogue of `lieArm1LoweredBgKappa`/`lieArm1_kappa_feed`, using `connDiffLoweredCc`
+     + `lieArm1PbLow`-style P terms).  This producer is the shared linchpin (see `lc0AMix` read).
+   - W = `deTurckVF g₁ g₀` — via its cometric-trace-of-`connDiff` form ⟹ `connDiffSection g₁ g₀`
+     (`connDiffSection_lowOrder_jetL2_succ_generic`, `DeTurckVectorFieldL2JetBound:1999`).
+3. Then the `lc0Riem` tail idiom: product grid + integrator (`choose`d over `k`) + `realizedFam`
+   `htie`/`hδP`/`hPball` threading + `Ktop = 0` reshape.
+
+Effort: comparable to atom 2's full arc (3 sessions).  No cancellation shortcut (deTurckVF is a single
+field, not a g₀↔g_bg difference), so `wOmegaDiff_eq` does NOT help.  Genuine build, not a one-lemma reuse.
+
+### `lc0AMix` (atom 4) honest read — shares the METRICCONNDIFFLOWERED producer, NOT the interior product
+`lc0AMix` (`LieCorr0Core:162`) = `2·(AMixHalf + swap∘AMixHalf)`, `AMixHalf` = a **chain of traceSteps** over
+`prodKappa(metricConnDiffLowered g₁ g₁ g_bg)` and `prodKappa(metricConnDiffLowered g₁ g₁ g₀)` — **two
+metricConnDiffLowered arms, NO `interior_product`, NO `deTurckVF`.**  So:
+- It does **not** share `lc0VB`'s interior-product-fold frontier (no deTurckVF cometric-trace needed).
+- It **does** share the `metricConnDiffLowered` per-order producer (item 2·Φ above) — both arms are exactly
+  that object, at `g_bg` and at `g₀`.  Once that producer lands (for `lc0VB` green), `lc0AMix` reuses it and
+  needs only the traceStep-chain fibre identity (pure `prodKappa`+`traceStep`, closest to the `lc0Riem`
+  moving-arm recipe) — plausibly **easier than `lc0VB`**.  Recommended order: build the `metricConnDiffLowered`
+  producer once, discharge `lc0VB_ballUniform`, then `lc0AMix` largely follows.
+
+### Resumption order for atom 3 (to turn route 3 → green)
+1. Public wrapper over `lieArm1_deTurckVF_cometric_trace` in `DeTurckLieArm1CoeffL2JetBound.lean` (claimed).
+2. `metricConnDiffLowered g₁ g₁ g₀` per-order ballUniform producer (the shared linchpin; new lemma, best home
+   near the Arm1 connDiff-feed layer or a fresh producer file).
+3. `lieCorr0VBFib = reindexCoeffGen(appCcRS …)` fibre identity in the leaf (or a producer file).
+4. Discharge `lc0VB_ballUniform` via product grid + integrator + `realizedFam` threading (clone `lc0Riem`).
+
+## Honest accounting (updated 2026-07-25, session 5)
+`(N) ricci_flow_unif_existence` still **0%** (both endpoints `lieCorr0Field_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+STILL UNSTATED = 0%).  Dedicated machinery = top piece (done) + four Kc atoms (**2 of 4 GREEN: `lc0Riem`,
+`lc0Insert`-diff; 1 of 4 STATED-with-`sorry`: `lc0VB` (this session); 1 unstarted: `lc0AMix`**) + 5-way
+assembly (helper `sq_le_five_add` done, wiring pending) + the shared `metricConnDiffLowered` producer (0%).
+Sorry-free-content fraction of the leaf's four-atom machinery: still **~50%** (atom 3 STATED locks the
+interface and pins the frontier, but its mathematical content — `lc0VB_ballUniform` — is sorried).  What
+session 5 advanced: the recon verdict (route 3, engine gap named + shaped) and the atom interface, green
+except the single documented `sorry`.
