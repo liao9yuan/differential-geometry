@@ -292,6 +292,33 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №39 (2026-07-26, ACCEPTED+WIRED — **α2 PARTIAL (B) + SCOPE-CORRECTING
+  FINDING: 5 of the "missing" K2-B inputs have EXISTING producers**):
+  Agent-K2B1's second pass delivered `Evolution/Rm04Producer.lean`
+  (110 lines, 0 sorry; `rmComp` canonical FourComp array + `rm04SymmOfSol`
+  = `Rm04Symm` from S/hS ONLY, discharging 4 of the 10 static-identity
+  inputs; planner re-audit clean, 3-axiom).  FINDING (planner
+  grep-verified every location): `canNabla2RicTrace`
+  (`LeviCivita/Curvature/Realized.lean:1068`) = n2RicTrace EXACT;
+  `canRm2Symm` (:1229) conj 2/3 = n2RmSwap12/n2RmPair; `canRmSecond`
+  (:542) = NON-existential SecondBianchiAt for the canonical field;
+  `nablaKRm04_ricciIdentityAt` (`RmRealizationBridgeAllK.lean:345`, k=0)
+  = ricciId; `nablaKRm04_nabla20SRealizesAt` (:329) = the s=4 realization
+  WITH the nablaRm04Field/nabla2Rm04Field tower — zero new Tensor-layer
+  API needed for realization.  Rule reconfirmed AGAIN (grep the can*
+  family before declaring Levi-Civita pointwise identities missing).
+  **The only genuine gap = `bianchi2`** (once-differentiated second
+  Bianchi), reduced to TWO precise missing lemmas: (i) linearity of
+  `nabla0SFun`/`totalNabla0S` in the differentiated field, (ii) its
+  naturality under a `domDomCongr` slot permutation — then differentiate
+  `canRmSecond`'s pointwise-zero cyclic section.  Layer-2 note: try
+  `coordMetricDeriv`/`coordMetricMix` for hmetricReg FIRST (may avoid the
+  positive-time tail; `tailChristoffelReg` gives `localFrameInv`, needs a
+  bridge to `coordInv`).  Layers 2-3 (discharge + packaging) NOT built —
+  dispatched as α3 to a FRESH executor (α executor at ~379k tokens,
+  signatures collected in Rm04Producer.md).  RULING R10: the two bianchi2
+  lemmas go IN-LANE (Rm04Producer.lean) with a relocation TODO naming the
+  Tensor/Operator canonical home.
 - №38 (2026-07-26, ACCEPTED+WIRED — **α1 OUTCOME (A): THE STATIC REDUCTION
   IS PROVED, MSM110 6.14 CORE INCLUDED, 0 sorry**): Agent-K2B1 delivered
   `Evolution/Rm04Reduction.lean` (801 lines; endpoint `rm04Var_eq_uhl` =
