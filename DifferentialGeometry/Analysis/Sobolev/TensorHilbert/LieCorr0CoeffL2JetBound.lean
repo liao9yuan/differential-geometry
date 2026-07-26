@@ -43,7 +43,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckLieEndoArmField deTurckLieEndoArmField_toSection deTurckLieDLbFib
     reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen reindexCoeffFibGen_apply
-    domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib)
+    domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib
+    metricConnDiffLoweredFib metricConnDiffLoweredFib_contMDiff)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (realizedFam convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet)
@@ -848,17 +849,121 @@ for both connDiff-family arms — analogous to Arm1's `lieArm1PsiB`/`lieArm1_psi
 chain, not a one-lemma reuse.  Stated here with ONE isolated `sorry` at the
 `ballUniform` frontier (as atom 2's first session did). -/
 
+/-- **The `lc0VB` moving passenger fibre.**  Everything in `lieCorr0VBFib` to the right of the
+outer `g₁`-cometric double trace: the `VBPerm` reindex, the `metricConnDiffLowered` product, and
+the `deTurckVF` interior product.  A `(2, 4)` operator field. -/
+private noncomputable def lc0VBPassFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x :=
+  (domDomCongrFibRank (I := I) 4 lieCorr0VBPerm x).comp
+    ((tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
+        (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)).comp
+      (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 1 x
+        ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x)))
+
+private theorem lc0VBPassFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 4 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 4 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 4 I z) x
+        (TensorRSSpace.ofCLM (lc0VBPassFib (I := I) g₀ g₁ x))) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SModel 4 ℝ E) (V₂ := fun x : M => Tensor0SSpace 4 I x)
+    (φ := fun x => lc0VBPassFib (I := I) g₀ g₁ x)
+  intro Y
+  have hip : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SSpace 1 I z) x
+        (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 1 x
+          ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x) (Y x))) :=
+    (Tensor0SBundle.contract_Tensor0SField (𝕜 := ℝ) (I := I) (n := (∞ : WithTop ℕ∞)) 1 Y
+      (PDE.DeTurck.deTurckVF (I := I) g₁ g₀)).contMDiff
+  have hprod := lieCorr0_prod_section_contMDiff (I := I) (p := 1) (q := 3)
+    (fun x => Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 1 x
+      ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x) (Y x))
+    (fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
+    hip (metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g₀)
+  have hddc := lieCorr0_ddc_section_contMDiff (I := I) (d := 4) lieCorr0VBPerm
+    (fun x => tensor0SProdKappaFib (I := I) x (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
+      (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 1 x
+        ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x) (Y x)))
+    hprod
+  refine hddc.congr (fun x => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+    (E := fun z : M => Tensor0SSpace 4 I z) x t) ?_
+  rw [lc0VBPassFib]
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
+
+/-- **The `lc0VB` moving passenger.**  The `(2, 4)` operator field carrying the `VBPerm` reindex,
+the `metricConnDiffLowered` product, and the `deTurckVF` interior product. -/
+private noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 4 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show TensorRSSpace 2 4 I x from
+          TensorRSSpace.ofCLM (lc0VBPassFib (I := I) g₀ g₁ x))
+      contMDiff_toFun := lc0VBPassFib_contMDiff (I := I) g₀ g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+/-- Fibrewise two-arm factorization: the live rank-`2` `g₁`-cometric double trace (shared with
+`lc0Riem` via `lc0RiemLive`) acting on the moving passenger. -/
+private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    lieCorr0VBFib (I := I) g₀ g₁ x =
+      (2 : ℝ) • ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+            (lc0VBPass (I := I) (M := M) g₀ g₁).toSection x)) := by
+  rw [lieCorr0VBFib, lc0RiemLive_toSec]
+  rfl
+
+/-- **The `lc0VB` two-arm factorization.**  The vector-bundle contraction piece is `2 ·` the
+operator-field action of the live rank-`2` cometric arm (reused from `lc0Riem`) on the moving
+passenger `lc0VBPass`. -/
+private theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
+    lc0VB (I := I) (M := M) g₀ g₁ =
+      (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
+        (lc0RiemLive (I := I) (M := M) g₀ g₁) (lc0VBPass (I := I) (M := M) g₀ g₁) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply, appCcRS_toSection]
+  exact lc0VBFib_eq (I := I) (M := M) g₀ g₁ x
+
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
-/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0VB` piece — HONEST `sorry`.**
-The single remaining frontier for atom 3.  The bound `‖∇^i (lc0VB g₀ (realizedFam …))‖²
-≤ K i` is exactly what the missing engine delivers: the fibre identity folding
-`traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
-∘ interior_product(deTurckVF g₁ g₀)` into a bounded `appCcRS` of two connDiff-family
-arms, plus the per-order producers for `metricConnDiffLowered g₁ g₁ g₀` (g₁-lowered
-⟹ P-perturbation reduction) and `deTurckVF g₁ g₀` (via its cometric-trace of
-`connDiff`).  No committed generic engine covers this contraction; see the `.md` note
-for the exact required shape. -/
+/-- **VBPass jet frontier — HONEST `sorry` (the single remaining `lc0VB` frontier).**  The
+g₁-generic order-`0` fibre-norm sup + per-order jet-`L²` sum bounds for the moving passenger
+`lc0VBPass g₀ g₁ = domDomCongr(VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
+∘ ip(deTurckVF g₁ g₀)`.  Both armed producers exist —
+`metricConnDiffLoweredCc_jetL2_ballUniform_generic` (the metricConnDiffLowered arm) and
+`lieArm1_connDiff_feed` (`connDiffSection`, the deTurckVF arm via its cometric-trace fold) — but
+bounding this `(2, 4)` operator field needs the two nested-`appCcRS` Leibniz steps for `prodKappa`
+and `interior_product`, not yet committed.  Route (see `.md`): `lc0VBPass ≐ appCcRS g₀ 2 1 4
+(prodKappa mcd) (ip dvf)` → product grid → the two producers. -/
+private theorem vbPass_jetL2
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 4 x
+            ((lc0VBPass (I := I) (M := M) g₀ g₁).toSection x) ≤ Λ) ∧
+        ∀ (i : ℕ), i ≤ a →
+          ∑ q ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 2 4 q (lc0VBPass (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ F i := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0VB` piece.**  Via the two-arm
+factorization `lc0VB = 2 · appCcRS g₀ 2 4 2 lc0RiemLive lc0VBPass` (`lc0VB_eq_app`): the live arm
+`lc0RiemLive` (reused from `lc0Riem`, the moving `g₁`-cometric double trace) is bounded by the
+committed cometric double-trace envelope, and the moving passenger `lc0VBPass` by `vbPass_jetL2`;
+the product grid + two-arm integrator combine them.  Carries the single `sorry` of `vbPass_jetL2`. -/
 private theorem lc0VB_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -875,7 +980,167 @@ private theorem lc0VB_ballUniform
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (lc0VB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2
             ≤ K i := by
-  sorry
+  classical
+  obtain ⟨Λ, F, hΛ_nn, hF_nn, hcom⟩ :=
+    cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic (I := I) (M := M) g₀ a
+      ha_super hR hδ₀
+  obtain ⟨ΛP, FP, hΛP_nn, hFP_nn, hvb⟩ := vbPass_jetL2 (I := I) (M := M) g₀ a ha_super hR hδ₀
+  choose Cint hCint_nn hCint using
+    (fun k : ℕ => exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g₀ 4 2 2 4 k)
+  set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr
+  have hfr_nn : (0 : ℝ) ≤ fr := Nat.cast_nonneg _
+  refine ⟨fun i => 4 * (appCcGdiag (E := E) i *
+    (Cint i * (ΛP * (fr * F i) + fr * Λ ^ 2 * FP i))), fun i => ?_, ?_⟩
+  · refine mul_nonneg (by norm_num) (mul_nonneg (appCcGdiag_nonneg (E := E) i)
+      (mul_nonneg (hCint_nn i) (add_nonneg
+        (mul_nonneg hΛP_nn (mul_nonneg hfr_nn (hF_nn i)))
+        (mul_nonneg (mul_nonneg hfr_nn (sq_nonneg Λ)) (hFP_nn i)))))
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+      ((1 - s) * δ' + s * δ) :=
+    convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+  have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+    have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+    have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+    have e3 : (1 - s) * δ₀ + s * δ₀ = δ₀ := by ring
+    linarith [e1, e2, e3]
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w :=
+    fun y v w =>
+      realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ'
+        (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
+    intro j hj
+    have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+        = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+          + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+      rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+        iteratedCovGrad_add, iteratedCovGrad_smul, iteratedCovGrad_smul]
+    rw [heq]
+    calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+            + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+        ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+      _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+          rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+            abs_of_nonneg h1ms, abs_of_nonneg hs0]
+      _ ≤ (1 - s) * R + s * R :=
+          add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+            (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+      _ = R := by ring
+  obtain ⟨hsup0, hjet⟩ := hcom (realizedFam (I := I) g₀ T T' hδ hδ' s)
+    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball
+  obtain ⟨hvbsup, hvbjet⟩ := hvb (realizedFam (I := I) g₀ T T' hδ hδ' s)
+    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball
+  have hLsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      ((lc0RiemLive (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤
+      Real.sqrt (fr * Λ ^ 2) ^ 2 := by
+    intro x
+    have h := lc0RiemLive_rfns_le (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 x
+    rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+    rw [Real.sq_sqrt (mul_nonneg hfr_nn (sq_nonneg Λ))]
+    exact le_trans h (mul_le_mul_of_nonneg_left (hsup0 x) hfr_nn)
+  have hPsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 4 x
+      ((lc0VBPass (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Real.sqrt ΛP ^ 2 := by
+    intro x
+    rw [Real.sq_sqrt hΛP_nn]
+    exact hvbsup x
+  obtain ⟨hgrid_int, hgrid_bd⟩ := hCint i
+    (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+    (lc0VBPass (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+    (Real.sqrt (fr * Λ ^ 2)) (Real.sqrt ΛP)
+    (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hLsup hPsup
+  have hLsum : ∑ m ∈ Finset.range (i + 1),
+      ‖iteratedCovGrad (I := I) g₀ 4 2 m
+        (lc0RiemLive (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ fr * F i := by
+    calc ∑ m ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 4 2 m
+            (lc0RiemLive (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2
+        ≤ ∑ m ∈ Finset.range (i + 1), fr *
+            ‖iteratedCovGrad (I := I) g₀ 3 1 m
+              (cometricCastG0 (I := I) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 :=
+          Finset.sum_le_sum (fun m _ => lc0RiemLive_l2_le (I := I) (M := M) g₀ _ m)
+      _ = fr * ∑ m ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 3 1 m
+              (cometricCastG0 (I := I) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 := by
+          rw [Finset.mul_sum]
+      _ ≤ fr * F i := mul_le_mul_of_nonneg_left (hjet i hi) hfr_nn
+  have hnorm : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (appCcRS (I := I) (M := M) g₀ 2 4 2
+          (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+          (lc0VBPass (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)))‖ ^ 2 ≤
+      appCcGdiag (E := E) i *
+        (Cint i * (Real.sqrt ΛP ^ 2 * ∑ m ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 4 2 m
+              (lc0RiemLive (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2
+          + Real.sqrt (fr * Λ ^ 2) ^ 2 * ∑ l ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 2 4 l
+              (lc0VBPass (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2)) := by
+    have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (appCcRS (I := I) (M := M) g₀ 2 4 2
+          (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+          (lc0VBPass (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))))
+      _ (hgrid_int.const_mul (appCcGdiag (E := E) i))
+      (fun x => rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+        (I := I) (M := M) g₀ i 2 4 2
+        (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+        (lc0VBPass (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)) x)
+    refine le_trans key ?_
+    rw [MeasureTheory.integral_const_mul]
+    exact mul_le_mul_of_nonneg_left hgrid_bd (appCcGdiag_nonneg (E := E) i)
+  -- assemble: ‖∇^i lc0VB‖² = 4·‖∇^i appCcRS‖² ≤ K i
+  have hsmul : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (lc0VB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 =
+      4 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (appCcRS (I := I) (M := M) g₀ 2 4 2
+          (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+          (lc0VBPass (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)))‖ ^ 2 := by
+    rw [lc0VB_eq_app, iteratedCovGrad_smul, norm_smul, mul_pow]
+    norm_num
+  rw [hsmul]
+  have hΛPsq : Real.sqrt ΛP ^ 2 = ΛP := Real.sq_sqrt hΛP_nn
+  have hΛsq : Real.sqrt (fr * Λ ^ 2) ^ 2 = fr * Λ ^ 2 :=
+    Real.sq_sqrt (mul_nonneg hfr_nn (sq_nonneg Λ))
+  rw [hΛPsq, hΛsq] at hnorm
+  have hmid : appCcGdiag (E := E) i *
+      (Cint i * (ΛP * ∑ m ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 4 2 m
+            (lc0RiemLive (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2
+        + fr * Λ ^ 2 * ∑ l ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 2 4 l
+            (lc0VBPass (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2)) ≤
+      appCcGdiag (E := E) i * (Cint i * (ΛP * (fr * F i) + fr * Λ ^ 2 * FP i)) := by
+    refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) i)
+    refine mul_le_mul_of_nonneg_left ?_ (hCint_nn i)
+    have hA := mul_le_mul_of_nonneg_left hLsum hΛP_nn
+    have hB := mul_le_mul_of_nonneg_left (hvbjet i hi)
+      (mul_nonneg hfr_nn (sq_nonneg Λ))
+    linarith [hA, hB]
+  refine le_trans (mul_le_mul_of_nonneg_left (le_trans hnorm hmid) (by norm_num : (0:ℝ) ≤ 4)) ?_
+  exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
 /-- **`lc0VB` `Kc` atom.**  Per-order top-separated jet-`L²` bound for the
@@ -922,6 +1187,8 @@ private theorem lc0VB_realizedFam_perOrder_topSep
 #print axioms lc0Riem_realizedFam_perOrder_topSep
 #print axioms lc0InsertDiff_ballUniform
 #print axioms lc0InsertDiff_realizedFam_perOrder_topSep
+#print axioms lc0VB_eq_app
+#print axioms vbPass_jetL2
 #print axioms lc0VB_ballUniform
 #print axioms lc0VB_realizedFam_perOrder_topSep
 

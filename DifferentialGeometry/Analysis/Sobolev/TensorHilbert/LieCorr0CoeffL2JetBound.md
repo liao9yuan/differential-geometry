@@ -564,3 +564,72 @@ the remaining `lc0VB` work is the fibre identity + assembly (no missing engine).
 **~1–2** (fibre identity ≈200–400 lines + leaf discharge, both committed-generic).  Honest
 sessions-to-`lc0AMix`-green after `lc0VB`: **~1** (reuses this producer twice; simpler traceStep-chain fibre
 identity, no deTurckVF).
+
+## SESSION 7 (2026-07-25) — lc0VB FIBRE IDENTITY + ASSEMBLY LANDED GREEN; sorry isolated to the VBPass jet bound
+
+The `lc0VB` outer decomposition + leaf discharge are **GREEN** (targeted leaf build, 90s, zero errors).  The
+fibre identity came out **cleaner than the recorded `reindexCoeffGen(appCcRS …)` guess**: `lc0VB` reuses
+`lc0Riem`'s live arm *verbatim*.
+
+### The fibre identity (what it actually looked like)
+`appCcRS g a b c Φ W = Φ.comp W` (generic fibrewise composition; the "cometric trace" lives *inside* Φ/W).
+So — since `lieCorr0TraceStep g₁ 2 VBPerm = cometricDoubleTraceFib g₁ 2 ∘ domDomCongr(VBPerm)` and
+`lc0RiemLive.toSection = cometricDoubleTraceFib g₁ 2` — the split is simply
+
+    lc0VB = 2 · appCcRS g₀ 2 4 2 (lc0RiemLive g₀ g₁) (lc0VBPass g₀ g₁)          -- `lc0VB_eq_app`, GREEN
+
+with **`lc0RiemLive` REUSED unchanged** (the live `(4,2)` `g₁`-cometric double trace) and the *only* new object
+`lc0VBPass g₀ g₁ : SmoothCcTensor g₀ 2 4 = domDomCongr(VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
+∘ ip(deTurckVF g₁ g₀)` (the moving passenger).  Proof of the fibre identity: `rw [lieCorr0VBFib,
+lc0RiemLive_toSec]; rfl` (`.comp` associativity is defeq — 2 lines).  `lc0VBPassFib_contMDiff` clones
+`lc0RiemPassFib_contMDiff` with the `ip`/`prodKappa`/`domDomCongr` blocks from `lieCorr0VBFib_contMDiff`.
+
+### The leaf discharge (GREEN) — `lc0VB_ballUniform` now proved from ONE frontier
+`lc0VB_ballUniform` and `lc0VB_realizedFam_perOrder_topSep` are **GREEN**, cloning the `lc0Riem` two-arm
+assembly: the live arm bound is `lc0Riem`'s own (`cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic`
++ `lc0RiemLive_l2_le`/`_rfns_le`), the product grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
++ integrator `exists_integrated_..._twoArm_rs_le g₀ 4 2 2 4` combine, and the `2·` gives a factor 4
+(`iteratedCovGrad_smul` + `norm_smul`).  The moving passenger's bound is the **single remaining `sorry`**:
+
+    vbPass_jetL2  -- g₁-generic sup + per-order jet-L² for lc0VBPass (2,4); ONE sorry
+
+### The isolated frontier `vbPass_jetL2` — exact remaining shape
+`lc0VBPass = domDomCongr(VBPerm) ∘ prodKappa(mcd) ∘ ip(deTurckVF)` is a `(2,4)` operator field.  It is the
+nested two-arm product `lc0VBPass ≐ appCcRS g₀ 2 1 4 (prodKappa mcd) (ip dvf)`, so its jet bound follows from a
+SECOND product-grid application over `prodKappa(mcd)` and `ip(deTurckVF)`, feeding the two armed producers:
+- Φ' = `prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)` `(1,4)` ← `metricConnDiffLoweredCc_jetL2_ballUniform_generic`
+  (session 6) via a `prodKappa` jet lemma (NOT yet committed).
+- W' = `ip(deTurckVF g₁ g₀)` `(2,1)` ← `lieArm1_connDiff_feed` (`connDiffSection`) via the
+  `lieArm1_deTurckVF_cometric_trace` fold + an `interior_product` jet lemma (NOT yet committed).
+
+The **genuinely missing pieces** are exactly two Leibniz jet lemmas: `rfns(∇^i prodKappa(Φ))` in terms of
+`rfns(∇ Φ)`, and `rfns(∇^l ip(V))` in terms of the (folded) `connDiff` jets.  Tree-wide grep found neither
+(`slotExtend` only tensors a *unit* slot, not a general `Φ`).  These are the resumption target.
+
+### Verified-green this session (axiom-clean where not sorry-dependent)
+`lc0VB_eq_app`, `lc0VBPass`, `lc0VBPassFib(+_contMDiff)`, `lc0VBFib_eq` — no sorry.  `lc0VB_ballUniform`,
+`lc0VB_realizedFam_perOrder_topSep` — carry only the `vbPass_jetL2` `sorryAx`.  `vbPass_jetL2` — the one
+flagged `sorry`.  All prior atoms (top, `lc0Riem`, `lc0Insert`-diff) stay `[propext, Classical.choice,
+Quot.sound]`.
+
+### Resumption order (turn `vbPass_jetL2` → green)
+1. **`prodKappa` jet lemma** — `rfns_iteratedCovGrad` of `tensor0SProdKappaFib(Φ)(D)` ≤ (grid) · `rfns(∇ Φ)` ·
+   `rfns(∇ D)`, the Leibniz product grid for `prodKappa`.  Best home: the `OperatorFieldFibreNormJet` /
+   `MetricArmCoeffJetTower` layer next to `rfns_iteratedCovGrad_slotExtend_le`.
+2. **`interior_product` jet lemma** — `rfns(∇^l ip(V))` via `lieArm1_deTurckVF_cometric_trace` (needs a thin
+   PUBLIC wrapper over that private Arm1 lemma) reducing `ip(deTurckVF)` to a cometric trace of
+   `connDiffSection`, then `lieArm1_connDiff_feed`.
+3. Discharge `vbPass_jetL2` = second grid application (`appCcRS g₀ 2 1 4`) + the two producers + `realizedFam`.
+4. Then `lc0AMix` (atom 4): two `metricConnDiffLoweredCc` arms, NO ip — reuses the `prodKappa` jet lemma (item 1)
+   twice; no `interior_product` lemma needed.  Likely the easiest atom.
+
+## Honest accounting (updated 2026-07-25, session 7)
+`(N) ricci_flow_unif_existence` still **0%** (both endpoints STILL UNSTATED = 0%).  Dedicated machinery = top
+piece (done) + four Kc atoms (**2 of 4 GREEN: `lc0Riem`, `lc0Insert`-diff; `lc0VB` now
+STRUCTURALLY GREEN with ONE isolated `sorry` at `vbPass_jetL2` — the fibre identity + full assembly proved;
+1 unstarted: `lc0AMix`**) + the shared producers (`metricConnDiffLowered` DONE, deTurckVF arm committed) +
+5-way assembly (helper done, wiring pending).  What session 7 advanced: `lc0VB`'s fibre identity + leaf
+discharge landed green, so the remaining `lc0VB` gap collapsed from "the whole ballUniform" to **two committed
+Leibniz jet lemmas** (`prodKappa` + `interior_product`).  Honest sessions-to-`lc0VB`-green: **~1** (build the two
+jet lemmas + discharge `vbPass_jetL2`).  Sessions-to-`lc0AMix`-green after: **~1** (reuses the `prodKappa` lemma;
+no `ip`).
