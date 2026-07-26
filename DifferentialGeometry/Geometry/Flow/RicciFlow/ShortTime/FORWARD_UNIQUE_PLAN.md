@@ -292,6 +292,31 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №8 (2026-07-25, ACCEPTED — **K2.4+K2.5 OUTCOME (A)**): **Agent-K2E delivered
+  `Evolution/ForwardUniqueRmBounds.lean`** (898 lines, 8 public + 11 private,
+  0 sorry; planner re-audit clean). `fluxNormSq_le` (|U|² ≤ s²n^{s+1}|A₀₃|²|T|²,
+  instance `rmFluxNormSq_le` 16n⁵) via the proven algebraicity `lapDiffFlux_eval`;
+  `remNormSq_le` (two-carrier split, instance `rmRemNormSq_le` 50n¹²/2n¹⁰) with
+  the №5-recorded backgrounds as NAMED arguments (`hB₁` |∇²T|², `hB₂` |∇²∇²T|²)
+  and one-sided `Λ`-comparison in `ricciEdgeMetric` shape only where needed.
+  Inverse-metric difference done frame-wise (no cometric/matrix layer).
+  SYSTEMIC CLEANUP ITEM (3rd occurrence): `diffStep_norm_le`/`connDiffVec_norm_le`
+  /`MetricBounds.lean` are `[InnerProductSpace ℝ E]`-tainted at the producer —
+  a producer-side `omit` on `normSqRS_eq_normSq0S_lowerAllSpace` + the CS lemma
+  would delete three private re-proofs now in the tree (add to campaign-end
+  dedup list with №3's items). Minor anomaly logged: executor's claim was
+  already cleared at release time (registry cleaned concurrently?) — harmless,
+  watch for recurrence.
+- №7 (2026-07-25, IN FLIGHT → K2E accepted above; K1C still running): third wave, two Opus builders.
+  **Agent-K2E** — `Evolution/ForwardUniqueRmBounds.lean`: K2.4 flux bound
+  (Cauchy–Schwarz-shaped, |U|² ≤ C·|A₀₃|²·background) + K2.5 remainder bound
+  (conn-diff + inverse-metric-diff summands; background norms incl. the
+  №5-recorded ∇²∇²T factor as EXPLICIT hypothesis arguments; no hidden metric
+  equivalence). **Agent-K1C** — `Evolution/ForwardUniqueConnDot.lean`:
+  K1C-a `connDiffDot` invariant-speed adapter (per-x chart-frame route,
+  hypothesis-taking like K1 + metric PDEs; feeds K3's `hA` exactly) then
+  K1C-b the ruling's |∂ₜA₀₃|² bound (Bianchi/trace bridges; sorry+classify
+  allowed). Both: standard protocol, LEAN_NUM_THREADS=3.
 - №6 (2026-07-25, ACCEPTED — **K3 OUTCOME (A)**): **Agent-K3 delivered
   `Evolution/ForwardUniqueEnergy.lean`** (414 lines, 10 decls, 0 sorry;
   planner re-audit clean). Exact first variation of the triple energy on an
