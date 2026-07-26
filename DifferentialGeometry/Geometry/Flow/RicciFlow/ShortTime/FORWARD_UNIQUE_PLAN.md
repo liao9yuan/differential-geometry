@@ -292,6 +292,43 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №46 (2026-07-26, SLAB PARTIAL ACCEPTED+COMMITTED — **2.5/6 fields + the
+  compactness engine + ONE genuinely new estimate; the rest gated on the
+  CLOSED-EDGE joint tower; RULING R12**): `Evolution/ForwardUniqueSup.lean`
+  (391 lines, 0 sorry; planner re-audit clean, 6 endpoints 3-axiom).
+  DONE: `ricciLe` UNCONDITIONAL (`ricciSlabLe`, C_Ric = n⁴), `fluxLe` in
+  the exact `≤ C_U·density` shape (`fluxSlabLe`; gap closed by NEW
+  `reLowerPairSq_le : |reLowerPair g T K|² ≤ n^{s+4}|T|²|K|²` — the
+  defect carrier in BOTH sdecFlux and sdecRem had no bound anywhere),
+  `volLe` modulo one joint-continuity input; engine `slabBound`/
+  `normSqSlabBound` (EVT on Icc ×ˢ univ).  THE GATE: the six sups need
+  control up to the closed initial edge (fields quantify Ioo a c, closure
+  hits t = a), but the joint Christoffel/Riemann tower (`GenJointGram`,
+  RicciDifferenceMeanValue.lean:401) demands two-sided `ContDiffAt` in
+  time — strictly stronger than (B)'s one-sided `Ico` field; the Cramer
+  chain survives the edge, the tower does not.  Classification: missing
+  groundwork (routine — only SPATIAL derivatives are taken; `Ico ×ˢ U`
+  is UniqueDiffOn); smallest unblocker = a `ContDiffWithinAt` re-thread
+  (~700 lines).  **RULING R12**: (a) commission the Within tower as a NEW
+  ADDITIVE file `Analysis/Parabolic/RicciLinearization/
+  RicciDifferenceMeanValueWithin.lean` (no edits to the settled original);
+  (b) the four `private` DensReg helpers (`genGram_of_joint`/`jointOnM`/
+  `christJoint`/`riemJoint`) may be made public IN PLACE if the Within
+  file can genuinely reuse them — executor's local call, minimal diff;
+  (c) ledger corrections: Assembly.md's `rmFluxNormSq_le`/`rmRemNormSq_le`
+  labels are WRONG for the constructed carriers (they bound
+  rmDiffFlux/lapDiffRem, wiring uses sdecFlux/sdecRemFam); the SLAB .md's
+  "ConnBound :496 live sorry" claim was STALE (0-sorry since β4 —
+  corrected in place; executors must verify sorry claims against CODE,
+  not .md history).  remLe needs new norm bounds for `rmDotRem`/
+  `uhlRm2Vec` (algebra, not sups); reactLe = №25's `movingReact_le`
+  (orthonormal-basis change; ~250-400 lines; NOTE ForwardUniqueEnergy.lean
+  may be touched by the user's separate relocation chip — check git
+  status before claiming).  Endpoint sorries now at `:97`/`:215`
+  ((N)-lane commits shifted lines).  Dedup TODO: 4th private
+  `exists_onFrame`/`onFrame_inv` copy — promote to
+  `Tensor/RSTensor/Tensor0SRiemannian/` at campaign end.  **WITHIN-TOWER
+  brick dispatched.**
 - №45 (2026-07-26, Agent-WIRE — **K7 OUTCOME (B): THE WIRING PASS LANDED;
   12 OF 16 BUNDLE MEMBERS DISCHARGED; endpoint `:189` DELIBERATELY UNTOUCHED**):
   new file `Evolution/ForwardUniqueWiring.lean` (612 lines, 0 sorry,
