@@ -292,6 +292,27 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №6 (2026-07-25, ACCEPTED — **K3 OUTCOME (A)**): **Agent-K3 delivered
+  `Evolution/ForwardUniqueEnergy.lean`** (414 lines, 10 decls, 0 sorry;
+  planner re-audit clean). Exact first variation of the triple energy on an
+  open window: `forwardUniqueEnergy/Rate/Density(+Dot)`, `metricDiffDot :=
+  −2(metricRicciAt₁ − metricRicciAt₂)` PROVED from the two RF PDEs
+  (`metricDiff_hasDerivAt`), rank-s invariant moving-norm repackaging
+  (`movingReact0S`, `normSq0S_moving_deriv`) re-derived from GREEN producers
+  (`Tensor0SMetricDeriv.lean:828` + `first_var_joint` at
+  `Analysis/Integration/Measure/FamilyLocal.lean:223`). AUDITOR RULING R3
+  (fork resolved by executor, ratified): the rate carries the A/S speeds as
+  plain arguments (`forwardUniqueRate g₁ g₂ Adot Sdot t`) with ∀-shaped
+  invariant slot-vector hypotheses `hA`/`hS`; K1/K2 owe the frame→invariant
+  adapter producing `Adot`/`Sdot`. APPROVED substitution `metricRicciAt` for
+  `ricciTensor` (avoids the model-space `InnerProductSpace` spray; endgame
+  bridge = `metricRicciAt_apply_eq_ricciTensor`). NEW LANE DEBTS RECORDED:
+  (i) `hdens` — joint (t,x)-smoothness of the density (the chart-Gram → Γ →
+  Rm joint tower does NOT exist; honest producer, also needed at K5);
+  (ii) relocation TODO: `movingReact0S`/`normSq0S_moving_deriv` → canonical
+  home `Tensor0SMetricDeriv.lean`. STATUS CORRECTION: `MovingEdgeEnergy.lean`
+  is un-compilable IN ITSELF (16 hypotheses spell `𝒰` U+1D4B0 for `𝓘`
+  U+1D4D8) — independently of its broken imports.
 - №5 (2026-07-25, ACCEPTED — **K2.3 PROBE OUTCOME (A): GO**):
   **Agent-K2P delivered `Evolution/ForwardUniqueRmDiff.lean`** (369 lines,
   21 public decls, 0 sorry; planner re-audit: `--no-build` up-to-date + axiom
