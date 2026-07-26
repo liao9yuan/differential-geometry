@@ -633,3 +633,63 @@ discharge landed green, so the remaining `lc0VB` gap collapsed from "the whole b
 Leibniz jet lemmas** (`prodKappa` + `interior_product`).  Honest sessions-to-`lc0VB`-green: **~1** (build the two
 jet lemmas + discharge `vbPass_jetL2`).  Sessions-to-`lc0AMix`-green after: **~1** (reuses the `prodKappa` lemma;
 no `ip`).
+
+## SESSION 8 (2026-07-26) — RE-SCOPING RECON: `prodKappa` DISSOLVES to `slotExtend`; deTurckVF jets are COMMITTED (`wOmega`)
+
+No new green code landed (a formalization attempt was reverted — see below); the deliverable is two verified
+findings that **re-scope the remaining `lc0VB` work from "two from-scratch Leibniz lemmas" to "reuse two
+committed facts + a discharge"**.  The leaf is UNCHANGED (still green with the one `vbPass_jetL2` `sorry`).
+
+### FINDING 1 — the `prodKappa` arm IS a `slotExtend` (lemma 1 dissolved, no new Leibniz lemma)
+Reading the exact evals: `modelProduct s q f g v = f(v∘Fin.castAdd q)·g(v∘Fin.natAdd s)` (`Tensor.lean:251`)
+sends the FIRST slot to the input and the LAST `q` to `κ`; `slotExtendFib_apply_eval`
+(`OperatorFieldCovariantCalculus:293`) reads the NEW slot first and applies the operator to the rest.  Both
+give `D(v0)·κ(vs)`.  Hence
+**`tensor0SProdKappaFib (p:=1)(q:=3) x (mcd x) = slotExtendFib g₀ 0 3 x ((metricConnDiffLoweredCc g₀ g₁ g₀).toSection x)`.**
+So the `mcd` arm's jets go through the COMMITTED `rfns_iteratedCovGrad_slotExtend_le`
+(`OperatorFieldFibreNormJet:713`) + the session-6 `metricConnDiffLoweredCc` producer — the note's earlier
+"`prodKappa` Leibniz jet lemma" is NOT needed.  (There are existing `slotExtendFib g₀ 0 3` r=0 usages to copy
+from: `RicciArmResidualFieldGridWindow:304`, `DeTurckRemainderTameLipschitz:28447`.)
+
+### FINDING 2 — deTurckVF jets are already committed (`wOmega`), so the ip arm needs NO fold
+`DeTurckVectorFieldL2JetBound.lean` has `wOmega g₀ g₁ g_bg = appCc(cometricCastG0 g₀ g₁, wXi g₀ g₁ g_bg)`
+(`:60`, the g₀-lowered deTurckVF form; `wXi = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg`), with a
+committed per-order jet bound `wOmega_lowOrder_jetL2_succ_generic` (`:2516`).  For `g_bg := g₀`,
+`wXi g₀ g₁ g₀ = connDiffLoweredCc g₀ g₁` (self-connDiff is 0), so `wOmega g₀ g₁ g₀` is the committed g₀-lowered
+`deTurckVF g₁ g₀`.  So the ip arm's CONTENT (deTurckVF) has committed jets — the note's "reduce `ip(deTurckVF)`
+to `connDiffSection` via the fold" is heavier than needed.
+
+### REVISED discharge route for `vbPass_jetL2` (the resumption target)
+`lc0VBPass = domDomCongr(VBPerm) ∘ prodKappa(mcd) ∘ ip(deTurckVF)
+          = domDomCongr(VBPerm) ∘ slotExtend(metricConnDiffLoweredCc) ∘ ip(deTurckVF)`   [Finding 1]
+Express `lc0VBPass = appCcRS g₀ 2 1 4 Φ W`, Φ = `domDomCongr(VBPerm) ∘ slotExtend(metricConnDiffLoweredCc)`
+`(1,4)`, W = `ipCc(deTurckVF)` `(2,1)`; then the committed product grid gives
+`rfns(∇ⁱ lc0VBPass) ≤ (grid)·∑rfns(∇ Φ)·∑rfns(∇ W)`, and:
+- Φ jets: `domDomCongr` (rfns-invariant) + `rfns_iteratedCovGrad_slotExtend_le` → `metricConnDiffLoweredCc`
+  producer.  ALL COMMITTED.
+- W jets: the ONLY remaining new work — an `interior_product`-with-jet-bounded-vector lemma
+  (`rfns(∇ˡ ipCc(V)) ≤ c·rfns(∇ˡ V-lowered)`, analogous to `slotExtend`) fed by `wOmega`'s committed jets +
+  the raw-deTurckVF ↔ `wOmega` (g₀-lowering) correspondence.  **This is the one genuinely-new piece left.**
+
+### Why nothing landed this session
+A formalization of Finding 1 (`prodKappaMcd_eq_slotExtend`) was written and reverted: it hit three fiddly
+issues — `tensor0SProdKappaFib_apply` missing from the leaf's `open` list, a `tensor0S_curry`-rank-0 `congr`
+gap in the `Tensor0SSpace.toModel D ![m 0] • unit` step, and a `Fin.natAdd 1 = Fin.succ` cast in the
+slot-matching — each individually small but needing careful iteration with 90–120 s builds.  Reverted to keep
+the leaf green rather than leave a broken partial.  The RicciArmResidual r=0 template (`:296–319`) is the exact
+recipe for the `congr`/curry step next time.
+
+### Resumption order (revised)
+1. Land `prodKappaMcd_eq_slotExtend` (Finding 1) — copy the `RicciArmResidualFieldGridWindow:296` curry-0 proof
+   verbatim; add `tensor0SProdKappaFib_apply` to the leaf `open`; use `Fin.natAdd`/`Fin.succ` simp for slots.
+2. The `interior_product`-with-vector jet lemma + the deTurckVF ↔ `wOmega` lowering (the one new frontier).
+3. `lc0VBPass = appCcRS g₀ 2 1 4 Φ W` fibre identity + product-grid discharge of `vbPass_jetL2` + `realizedFam`.
+4. `lc0AMix`: two `slotExtend(metricConnDiffLoweredCc)` arms, NO ip — reuses Finding 1 twice.
+
+## Honest accounting (updated 2026-07-26, session 8)
+`(N)` still **0%**.  `lc0VB` UNCHANGED: STRUCTURALLY GREEN, one isolated `vbPass_jetL2` `sorry`.  Session 8 added
+no code (a partial was reverted) but **re-scoped and de-risked** the remaining `lc0VB` frontier: the `prodKappa`
+Leibniz lemma is NOT needed (it's `slotExtend`, committed), and deTurckVF jets are committed (`wOmega`), so the
+lone genuinely-new piece is an `interior_product`-with-vector jet lemma + the deTurckVF↔`wOmega` lowering.
+Honest sessions-to-`lc0VB`-green: **~1** (Findings 1–2 are reuse; only the ip-vector lemma + discharge remain).
+Sessions-to-`lc0AMix`-green after: **~1** (two `slotExtend` arms, no ip).
