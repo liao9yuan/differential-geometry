@@ -1912,3 +1912,24 @@ USER DIRECTIVE (morning): remaining Fable quota to be used — executor
 dispatches now run on FABLE (brick 4 is the first).  Plans live at
 UNIF_EXISTENCE_PLAN.md (this file), THREEARM_RECON.md (item-2), PROJECT_MAP.md
 (HCG), REUNION_MERGE_PLAN.md (handed off).
+
+## Planner acceptance №35 (2026-07-26 afternoon) — a=2 DONE on Fable; day-2 state
+
+Fable executors have now closed, in sequence: brick 4's three arms + the mcd
+fibre identity + the ip-vector jet engine (vbPass_jetL2 discharged — the
+lieCorr0 ballUniform leaf is ZERO-sorry) + **the entire a=2 atom**
+(`covStepDiff2_exists_const` a THEOREM; `ConnDiffDeriv2Bound.lean` sorry-free;
+978436edb).  Notable Fable qualities observed: first-pass greens, honest
+partials at real walls, a dropped-unnecessary-hypothesis (hJet1'), the exact
+slot-correction cancellation refinement, and value-honest statements
+throughout.
+
+IN FLIGHT: brick-4 part A (atgw assembly, sorry → lc0AMix-only) — written,
+iterating on its focused check; the hAcc m=2 glue (N=3 unconditional; new
+leaf likely, import direction reversed).
+
+QUEUE after these: lc0AMix (brick 4 final) → threeArm/Ψ₀ topSeparated
+assembly (Fork-A, ~3-5 sessions) → smooth-core layers 2-3 (~4-8) [item 2];
+2a-hi/pkg → S0 j≥2 → S2-S4/S1b [item 6 tail]; then Stage-3 (N) assembly with
+the jet-order raise.  MAINTENANCE: split ConnDiffDeriv2Bound (3052 > 3000).
+(N) theorem: 0% (unstated), unchanged discipline.
