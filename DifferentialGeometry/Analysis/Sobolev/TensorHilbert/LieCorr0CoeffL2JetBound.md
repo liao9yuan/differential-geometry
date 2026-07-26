@@ -236,47 +236,72 @@ deTurckVF-difference `Vdiff`.  Three things make this NOT a recombination of the
    `wAlphaB`, `wCA`, `wOmega`, `wXi` are **all `private`** in that file, and the identity
    `slotInsert(connDiff·dVF) = cometricRaise(wAlphaB)` is buried, not exposed.
 
-### The precise missing engine (what the next agent must build first)
-A public jet-`L²` `ballUniform` producer for the `(1,1)` endomorphism
-`connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg)` (equivalently the `(2,2)` insert-diff
-after the DLb-style slotInsert-sum decomposition + `slotInsertEndoCc_le_endo` reduction —
-that plumbing IS committed and cheap, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`
-/ `rfns_iteratedCovGrad_dlbSlotZero_le`).  Cleanest realization: in
-`DeTurckVectorFieldL2JetBound.lean`, **expose** `wCA`, `wOmega`, and the identity
-`slotInsertEndoCc g₀ 0 (connDiff g₁ g₀ (dVF g₁ g_ref)) = cometricRaiseSlot0Field(wAlphaB g₀ g₁ g_ref)`
-as public lemmas, then the insert-diff endomorphism = `cometricRaise(appCc(wCA, wOmega-diff))`
-is controlled by `appCc_iteratedCovGrad_diagonalProductGrid_le` + `wOmega`'s committed
-top-separated producer + the cometricRaise jet bound.  (Alternative: a general
-interior-product Leibniz jet grid at the tensor layer — larger, more reusable.)
-NB: touching `DeTurckVectorFieldL2JetBound.lean` is a *different file* — coordinate the claim.
+### THE CANCELLATION (session-3 key result — frontier partially DISSOLVED for this atom)
+The interior-product frontier does NOT actually survive for `lc0Insert`-diff.  The
+`g₀↔g_bg` difference **cancels the moving factor**.  Chain (all in
+`DeTurckVectorFieldL2JetBound.lean`, `wEndo_eq_covDeriv_add_connDiff` gives the wAlphaB↔connDiff·dVF
+match):
+
+    slotInsert(Endo) = cometricRaise(wAlphaB(g₀,g₁,g₀) − wAlphaB(g₀,g₁,g_bg))
+                     = cometricRaise(appCc(wCA g₀ g₁, wOmega(g₀,g₁,g₀) − wOmega(g₀,g₁,g_bg)))
+
+and the **wOmega-difference collapses** because `wCA`/`cometricCastG0` are the SAME at both
+refs while the `wXi` connDiff-parts telescope:
+
+    wOmega(g₀,g₁,g₀) − wOmega(g₀,g₁,g_bg) = appCc(cometricCastG0 g₀ g₁, wXi g₀ g_bg g₀)   [FIXED passenger]
+
+This is **`wOmegaDiff_eq`**, now LANDED GREEN + axiom-clean (`[propext, Classical.choice,
+Quot.sound]`) in `DeTurckVectorFieldL2JetBound.lean` (with helper `appCc_sub_right`).  So the
+endomorphism is `cometricRaise(appCc(wCA, appCc(cometricCastG0, wXi g₀ g_bg g₀)))` — a
+moving-cometric-on-**FIXED**-passenger `appCc` chain, the exact `lc0Riem` shape, NOT a generic
+interior-product contraction.  The generic contraction-Leibniz engine question survives ONLY
+for `lc0VB`/`lc0AMix` (whose deTurckVF is NOT a difference, so no cancellation) — re-assess there.
+
+### Remaining assembly (all committed-generic — NO new frontier), layer order
+1. **hoist** (highest single-reuse piece; SKIPPED session-3 for budget):
+   `slotInsertEndoCc g₀ 0 (connDiffDVF g₀ g₁ g_ref) = cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g_ref)`
+   — extract from `deTurckLieWEndoInsert_eq_cometricRaise`'s proof body (the connDiff half; mirror
+   `cotangentToDual_cometricRaise_wAlpha` for wAlphaB alone). ~40–60 lines cotangentToDual algebra.
+2. **W1 producer** (`appCc(cometricCastG0 g₀ g₁, wXi g₀ g_bg g₀)`, moving cometric × FIXED):
+   `appCc_iteratedCovGrad_diagonalProductGrid_le` + `cometricCastG0_order0sup_jetL2_succ_generic`
+   (order-0 sup + jet sums, already generic-in-g₁ via htie) + `wXi g₀ g_bg g₀` fixed bounds.  This
+   IS the `lc0Riem` recipe (moving-cometric-on-fixed).
+3. **W2 producer** (`appCc(wCA g₀ g₁, W1)`, two moving arms): `appCc` grid + wCA jets (via
+   `rfns_iCG_wCA_eq_connDiffSection` → `connDiffSection` producers) + W1 producer (layer 2).
+4. **cometricRaise**: `cometricRaiseSlot0Field` jet bound → the `(1,1)` endomorphism producer.
+5. **(2,2)→(1,1) reduction IN THE LEAF**: mirror `deTurckLieDLbCoeffField_eq_slotInsert_sum`
+   (slotInsert-sum decomposition) + `rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le`
+   (`slotInsertEndoCc_le_endo` + `rsDomDomCongr_both_eq`) + `sq_le_two_add`; then discharge
+   `lc0InsertDiff_ballUniform`.  The leaf's own `nEndo_diff` gives `Endo = NEndo g_bg − NEndo g₀`.
+6. Thread `realizedFam` (all producers are generic-in-g₁ via the `htie`/P interface).
 
 ### Resumption order for a successor
-1. **Unblock the missing engine** (above) — expose the private `wCA`/`wOmega`/`wAlphaB`
-   layer, or add the interior-product grid — then discharge `lc0InsertDiff_ballUniform`.
-2. `lc0VB`, then `lc0AMix` (routing table).  Both are ALSO connDiff×deTurckVF interior
-   products (`interior_product(deTurckVF)`), so the SAME missing engine unblocks all three
-   remaining atoms — build it once, reuse three times.  `lc0Riem` was the only atom whose
-   live factor was a pure cometric trace (hence the only clean-recombination atom).
-3. Assemble the two endpoints ONLY once all four Kc atoms are green (`sq_le_five_add`).
-   `Ktop = 5·Ktop_DLb` (R-free), single summed `Kc`.
-4. The leaf is outside the root import graph — verify with a targeted module build, and
-   build its imports first (a bare focused check dies on a missing `.olean`).
+1. Do the **hoist** (layer 1) — public named lemma in `DeTurckVectorFieldL2JetBound.lean`.
+2. Build layers 2→4 (the endomorphism `(1,1)` producer), then discharge `lc0InsertDiff_ballUniform`
+   via layer 5.  `lc0Riem` + `wOmegaDiff_eq` are the working templates; NO new frontier remains
+   for THIS atom.
+3. `lc0VB`, then `lc0AMix` — these do NOT get the cancellation (deTurckVF not a difference); the
+   generic interior-product/contraction-Leibniz engine question is LIVE there, re-assess then.
+4. Assemble the two endpoints ONLY once all four Kc atoms are green (`sq_le_five_add`).
+5. The leaf is outside the root import graph — verify with a targeted module build, and build its
+   imports first (a bare focused check dies on a missing `.olean`).
 
 ## Honest accounting
 `(N) ricci_flow_unif_existence` still **0%**.  The constituent is NOT closed: the two
 endpoints are **0% (still unstated)**.  Dedicated machinery = top piece (done) + four Kc
 atoms (**1 of 4 GREEN: `lc0Riem`; 1 of 4 STATED-with-`sorry`: `lc0Insert`-diff; 2 unstarted:
-`lc0VB`, `lc0AMix`**) + the 5-way assembly (helper `sq_le_five_add` done, wiring pending).
-Counting only sorry-free content (top + `lc0Riem`) against a top+4-atoms+assembly
-denominator: **~33%** — UNCHANGED from the previous session, because this session's atom is
-not sorry-free.  What DID advance: the insert-diff is now correctly *stated* (was unstated),
-and — the real deliverable — the frontier is *pinned*: a single missing engine
-(interior-product/`wAlphaB` jet control) blocks THREE of the four Kc atoms, so building it
-once is the highest-leverage next move.
+`lc0VB`, `lc0AMix`**) + the 5-way assembly (helper `sq_le_five_add` done, wiring pending) +
+the shared engine infrastructure (`wOmegaDiff_eq` keystone landed, engine assembly pending).
+Sorry-free-content fraction: **~33%** (top + `lc0Riem`), still — the `lc0Insert`-diff atom
+remains sorried.  What session-3 advanced: (a) the **cancellation** — `lc0Insert`-diff is NOT
+a generic-interior-product frontier, it reduces to the `lc0Riem` moving-cometric-on-fixed
+shape; (b) the `wOmegaDiff_eq` keystone verified green.  Honest sessions-to-atom-2-green with
+the cancellation in hand: **~1–2** (the hoist + 4 producer layers + leaf reduction are all
+committed-generic, but intricate in a 4165-line file with slow checks).
 
-## Verification
-Focused check + trustworthy targeted module build both succeed with **exactly one `sorry`**
-(`lc0InsertDiff_ballUniform`, line 504).  `#print axioms`: the four banked + `lc0Riem` are
-`[propext, Classical.choice, Quot.sound]`; `lc0InsertDiff_realizedFam_perOrder_topSep` is
-`[propext, sorryAx, Classical.choice, Quot.sound]` (honest — the atom is stated, not proved).
-No commit made.
+## Verification (session 3)
+Leaf UNCHANGED (still one honest `sorry` at `lc0InsertDiff_ballUniform`, line 504; atom stated,
+carries `sorryAx`).  Producer file `DeTurckVectorFieldL2JetBound.lean`: two keystone lemmas
+added — `appCc_sub_right`, `wOmegaDiff_eq` — verified via targeted module build (green, `Built …
+DeTurckVectorFieldL2JetBound (98s)`); both axiom-audited `[propext, Classical.choice, Quot.sound]`.
+Hoist SKIPPED (budget).  No commit made.

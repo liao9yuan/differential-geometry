@@ -77,6 +77,38 @@ private def wAlphaB (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTens
 private def wAlpha (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
   wAlphaA (I := I) (M := M) g₀ g₁ g_bg + wAlphaB (I := I) (M := M) g₀ g₁ g_bg
 
+/-- Right-subtractivity of the operator-field action `appCc` (mirrors `appCc_add_right`). -/
+private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s Φ (W₁ - W₂) =
+      appCc (I := I) (M := M) g r s Φ W₁ - appCc (I := I) (M := M) g r s Φ W₂ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r s Φ W₁ - appCc (I := I) (M := M) g r s Φ W₂).toSection x) =
+      (appCc (I := I) (M := M) g r s Φ W₁).toSection x -
+        (appCc (I := I) (M := M) g r s Φ W₂).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection, appCc_toSection]
+  rw [show ((W₁ - W₂).toSection x : TensorRSSpace 0 r I x) = W₁.toSection x - W₂.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.comp_sub]
+
+/-- **Difference-algebra keystone.**  The `wOmega`-difference (the deTurckVF-difference in
+`wOmega` form) collapses the moving `connDiffLoweredCc g₀ g₁` factor and leaves a
+`g₁`-cometric double trace on the *fixed* passenger `wXi g₀ g_bg g₀`:
+`wOmega g₀ g₁ g₀ − wOmega g₀ g₁ g_bg = appCc (cometricCastG0 g₀ g₁) (wXi g₀ g_bg g₀)`.
+This is what turns the `lc0Insert`-difference endomorphism's interior-product contraction
+into a moving-cometric-on-fixed-passenger `appCc` (the `lc0Riem` pattern). -/
+private theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    wOmega (I := I) (M := M) g₀ g₁ g₀ - wOmega (I := I) (M := M) g₀ g₁ g_bg =
+      appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
+        (wXi (I := I) (M := M) g₀ g_bg g₀) := by
+  unfold wOmega
+  rw [← appCc_sub_right]
+  congr 1
+  unfold wXi
+  abel
+
 private lemma connDiffLoweredCc_unitModel' (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x =
       Tensor0SSpace.toModel (connDiffLoweredCovec (I := I) g₀ g₁ x) := by

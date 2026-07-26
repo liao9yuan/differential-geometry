@@ -211,6 +211,32 @@ wOmega's exact `appCc g₀ 3 1` shape; the DLa piece-4 `gridSplit_dla`/`appCcGri
 (wXi Ktop), keep `appCcGdiag n` explicit in the statement and collapse `appCcGdiag n ≤ appCcGdiag(a+1)`
 at the wrapper.
 
+## 2026-07-25 — lieCorr0 engine seed: `wOmegaDiff_eq` keystone (for `lc0Insert`-diff atom)
+Added TWO verified-green, axiom-clean (`[propext, Classical.choice, Quot.sound]`) lemmas just after
+the `wAlpha` def, seeding the reusable engine the `LieCorr0CoeffL2JetBound` leaf's
+`lc0InsertDiff_ballUniform` sorry needs:
+- `appCc_sub_right` — right-subtractivity of `appCc` (mirrors `appCc_add_right`; via `comp_sub`).
+- `wOmegaDiff_eq` — **the cancellation**: `wOmega g₀ g₁ g₀ − wOmega g₀ g₁ g_bg =
+  appCc(cometricCastG0 g₀ g₁, wXi g₀ g_bg g₀)`.  The moving `connDiffLoweredCc(g₀,g₁)` factor inside
+  the two `wXi`s telescopes, leaving a `g₁`-cometric double trace on the **FIXED** passenger
+  `wXi g₀ g_bg g₀`.  Proof: `unfold wOmega; rw [← appCc_sub_right]; congr 1; unfold wXi; abel`.
+
+Why this matters (full derivation in the leaf note `LieCorr0CoeffL2JetBound.md`): the `lc0Insert`-diff
+endomorphism `connDiff g₁ g₀ (dVF g₁ g₀ − dVF g₁ g_bg)` = `cometricRaise(appCc(wCA g₀ g₁,
+wOmega-diff))`, and `wOmegaDiff_eq` makes `wOmega-diff` a moving-cometric-on-FIXED-passenger `appCc`
+— the `lc0Riem` shape, NOT a generic interior-product contraction.  So THIS atom has no interior-product
+frontier (the generic contraction-Leibniz question survives only for `lc0VB`/`lc0AMix`, whose deTurckVF
+is not a difference).
+
+Remaining engine layers (all committed-generic; NOT built this session, budget): (1) HOIST
+`slotInsert(connDiff·dVF) = cometricRaise(wAlphaB)` from `deTurckLieWEndoInsert_eq_cometricRaise`'s
+proof body as a public lemma [highest single-reuse]; (2) W1 producer `appCc(cometricCastG0, wXi g₀ g_bg g₀)`
+via `appCc_iteratedCovGrad_diagonalProductGrid_le` + `cometricCastG0_order0sup_jetL2_succ_generic`
+(lc0Riem recipe); (3) W2 `appCc(wCA, W1)` two-arm; (4) `cometricRaiseSlot0Field` jet bound; then the
+leaf does the `(2,2)→(1,1)` reduction (mirror `deTurckLieDLbCoeffField_eq_slotInsert_sum` +
+`rfns_iteratedCovGrad_dlbSlotZero_le`) and discharges its sorry.  wCA/wOmega/wXi stay `private` — the
+engine producer lives IN this file so it consumes them directly; only the final producer lemma is public.
+
 ## Progress log
 - 2026-07-24 recon complete; route de-risked + SIMPLIFIED (ball-uniform remainder), then CORRECTED
   (wOmega needs genuine corner peel — see above).  **VERIFIED GREEN (3 of ~6 tower layers):**
