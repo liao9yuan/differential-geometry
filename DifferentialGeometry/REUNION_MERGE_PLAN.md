@@ -78,6 +78,7 @@ demanding it. Twelve full-build rounds and ≈40 files were spent this way on
 
 ## Status
 
+- 2026-07-25 — main line verified GREEN (10623/10623, exit 0, 248 sorries unchanged, endpoints axiom-clean).
 - 2026-07-25 — scope measured, merge attempted and cleanly aborted. The three-way
   target is reunion + ste-align + `codex/analytic-producers-e87b`; the e87b tail
   (3 documentation commits) is **already merged** into ste-align at `8a3ce03e8`,
