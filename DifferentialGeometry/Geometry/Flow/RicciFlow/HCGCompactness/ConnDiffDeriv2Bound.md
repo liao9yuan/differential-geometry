@@ -5,7 +5,95 @@ Companion to `ConnDiffDeriv2Bound.lean`.  Sibling of `ConnDiffDerivBound.md` (th
 lemma, and gives the honest size estimate for the campaign.  **This was a RECON brick: the deliverable
 is the route + a stated frontier lemma, not a proof.**
 
-## 0. STATUS (2026-07-26)
+## 0. STATUS (2026-07-26) — **a=2 COMPLETE, FILE SORRY-FREE**
+
+- **UPDATE (a=2 campaign session 14 FINAL, 2026-07-26): the a=2 atom is DONE.  The full eval
+  identity `covStep2_mixedComm_eval` AND the norm CS both landed; `covStepDiff2_mixedComm_le` is
+  PROVED and `covStepDiff2_exists_const` is now sorry-free — the file has ZERO sorries.  Targeted
+  module build GREEN (9519 jobs); `#print axioms` = `[propext, Classical.choice, Quot.sound]` on all
+  nine session-14 declarations INCLUDING both endpoints (`covStepDiff2_mixedComm_le`,
+  `covStepDiff2_exists_const`).  The `hAcc m = 2` consumer can now read `Racc 2 := C₂`,
+  `hRnn 2 := ·.1` from `covStepDiff2_exists_const` directly (the glue in `UnifCovSumCross.lean` is
+  the NEXT brick, out of scope here).**
+  - **The norm CS (task 4, DONE):**
+    - `covDConnDiff2_gJet_le` — the `g₂`-currency a=2 atom for `x ∈ K`:
+      `√(g₂(∇₂²A(ext v',ext v,ext w,ext u)x)) ≤ CA₂·|v'||v||w||u|` with
+      `CA₂ = 3/2·Λ⁵·Λ''' + 9/2·Λ⁶·Λ'·Λ'' + 3·Λ⁷·Λ'³`, from the dual core `covDConnDiff2_g1_le` +
+      `sqrt_normSq0S_comp` (ranks 3/4/5) + `diff_le_covOne_basis_ref_lc` (the NA conversion) +
+      vector comparability; needed `set_option maxHeartbeats 1600000` AND `clear_value M3 M2 M1 NA
+      B2` (the heavy-vector taming, the session-4 lesson — without it `isDefEq`/`whnf` heartbeat
+      deaths).
+    - `covStepDiff2_mixedComm_le` DISCHARGED by the `covStepDiff_norm_le` model: internal
+      `exists_gOrthonormalBasis` frame + `smoothExtensionTangent` sections + `component0S_apply` +
+      a rank-generic single-slot CS helper `habs` (`abs_apply_le_sqrt_normSq0S` +
+      `Finset.prod_eq_single`), six per-family bounds (`hI`…`hVI`), the 6-term abs-triangle by
+      `linarith` over chained `abs_add_le`, per-component bound
+      `B = s·(NS·CA₂) + (3s+1)·(N1·CA₁) + (2s+1)·(N2·NAb)`, assembled by
+      `normSq0S_le_card_of_component_bound`; final constant
+      `max 0 (√(n^{s+3})·(s·CA₂ + (3s+1)·CA₁ + (2s+1)·NAb))`.
+    - **The A-atom avoids the private swap machinery**: `NAb = 3/2·Λ³·Λ'` comes from
+      `connDiffVec_norm_le` measured in the **`g₁`** fibre (order `connDiff (LC g₁)(LC g₂)` is then
+      direct — no `connDiffTensor_normSqRS_swap`, which is `private` in `UnifCovSumCross.lean` and
+      NOT copied) + `diff_le_covOne_basis_ref_lc` + two-sided vector comparability.  Consequence:
+      **`hJet1'` (the role-swapped `∇g₂/g₁` jet) is NOT needed by the bridge** — it was dropped from
+      `covStepDiff2_mixedComm_le`'s signature (weakest assumptions); `covStepDiff2_exists_const`
+      still takes it (its own `covStepDiff_of_jets` piece uses it).
+  - **Session-14 Lean lessons (CS part):** (a) `hA0` (the value-level A-atom) applies at SECTION
+    values (`Zsec a x`), so the norm-1 factors are rewritten by pointwise `hn·`-equalities — never
+    `rw [hVval] at h` (it would also rewrite the vector inside the difference and break the goal
+    match).  (b) the cdc/cdc2 atoms need BASIS-vector arguments + `exact`-defeq (mk-coe/eta), the
+    model's `hA1`-idiom; the `Fin.cons`-indexed PieceB slots need one `Fin.cases j` only in the
+    atom step.  (c) chained `add_le_add_right` on a 6-term abs-triangle fights the elaborator —
+    state the five `abs_add_le`/`habs_sub` steps as `have`s and finish by `linarith`.
+  - File size after session 14: ~2960 lines — AT the 3000 cap.  Before adding anything more, split
+    per the HOME-DEBT notes (`covDerivConnDiff2`+`covDerivConnDiff_contMDiff`+the gJet atoms →
+    `RicciConnDiffPalatini.lean`/a Curvature leaf; the `covStep2_*` eval layer → its own file).
+
+- **UPDATE (a=2 campaign session 14 = the FULL EVAL IDENTITY, 2026-07-26): `covStep2_mixedComm_eval`
+  LANDED GREEN + AXIOM-CLEAN — the evaluated a=2 mixed-commutator Leibniz is DONE.  Targeted module
+  build GREEN (9519 jobs); `#print axioms` = `[propext, Classical.choice, Quot.sound]` on ALL six new
+  theorems; the file's ONLY `sorry` WAS `covStepDiff2_mixedComm_le` (discharged later this session,
+  see above).**
+  - **New theorems (all sorry-free):**
+    - `covStep2_OC_q0` / `covStep2_OC_q1` — the boundary H-correction evals: `diffStep_leibniz_eval`
+      with the `covApply (LeviCivita g₂) U ·` section in the deriv resp. first covariant slot
+      (`set N· := ContMDiffSection.mk (covApply …) (contMDiffOn_univ.mp (covApply_contMDiffOn …
+      U.contMDiff (hcast ·)))`, then `rw [hN·fun, hN·x] at key; exact key`).
+    - `covStep2_OC_int` — the interior (`q=a₀.succ.succ`) eval through the section-level
+      `Function.update Vslots a₀ NS`, split diagonal/off-diagonal by `← Finset.add_sum_erase` +
+      `Function.update_idem` + per-`a` `Function.update_of_ne`.
+    - `covStep2_pieceB_eval` — `diffStep_leibniz_eval` at rank `s+1` on `∇₂S` (deriv `U`, A-direction
+      `W`, slots `Fin.cons V Vslots` via typed `set VV`); T2_B = the retained `A⋆∇₂²S` sum.
+    - **`covStep2_diffStep_eval`** — the CLEAN full eval of `PieceA = ∇₂²(A⋆S)` (the session-7
+      "reusable core"): peel ▸ split ▸ OCsplit ▸ q0/q1 ▸ simp-only[branch1,branch2,OC_int] ▸
+      distribute ▸ `hsplitS`/`hsplitD` (slot-additivity via `Tensor0SSpace.map_update_add`, the
+      cons-wrapped one through `Fin.cons_update`) ▸ `hFub1`/`hFub2` (the `Finset.sum_comm'` +
+      `Function.update_comm` pair swaps, the a=1 `hYY'` idiom) ▸ `abel`.  EVERY `∇₂`-of-section
+      correction cancels pairwise (forced by value-honesty: the LHS is a tensor on values); survivors
+      = the a=2 Leibniz `(∇₂²A)⋆S + (∇₂A)⋆∇₂S ×2 + A⋆∇₂²S`.
+    - **`covStep2_mixedComm_eval`** — THE full identity: `∇₂(mixedComm S) x [U,W,V,Vslots] =`
+      SIX value-honest families: `−∑ₐ S(∇₂²A-insert) − ∑ₐ ∇₂S(U-lead; ∇₂A(W;V,·)-insert)
+      − ∑ₐ ∇₂S(W-lead; ∇₂A(U;V,·)-insert) − ∑ₐ ∇₂²S(U,W-lead; A(·,V)-insert)
+      + ∑ⱼ ∇₂S(∇₂A(U;W,·)-insert, all s+1 slots) + ∑ⱼ ∇₂²S(U-lead; A(·,W)-insert, all s+1 slots)`.
+      Proof: `rw [eval_sub, diffStep_eval, pieceB_eval]; abel`.
+  - **Recipe reconciliation (NOT a mismatch):** ruling №33's four groups landed as: cdc2-insertions
+    (into `S`), cdc-insertions (into `∇₂S`, three families), A⋆∇₂²S-insertions (two families,
+    RETAINED — no ∇₂²S cancellation, exactly per №33); the "slot corrections" group cancels EXACTLY
+    (pairwise verbatim-by-construction + two Fubini pair swaps) — necessarily, since every surviving
+    term must be value-level and `∇₂_U(section)` values are not.  Each surviving family is bounded by
+    precisely the atom the ruling annotated (`covDConnDiff2_g1_le` / `covDerivConnDiff_gJet_le` /
+    `lcDiff_norm_le·|∇₂²S|`).
+  - **Lean lessons:** (a) the mk-coe `have`s (`(fun y => NW y) = covApply …`) need explicit `rfl`
+    after `rw [hNWdef]` — rw's auto-rfl does not cross the `ContMDiffSection.mk` coe (3 identical
+    errors, one fix).  (b) NO transparency guard was needed anywhere in the session-14 chain —
+    `Tensor0SSpace.map_update_add` at variable rank, the eval rewrites, and `abel` on the ℝ-valued
+    goals all elaborate clean in this IPS file (the identities are scalar equations; the
+    `Tensor0SModel` wall never appears).  (c) the branch statements' argument forms
+    (`covApply (LeviCivita g₂) (fun z => U z) (fun z => ·)` vs `(leviCivitaConnectionOfMetric g₂
+    (fun z => ·) x) (U x)`) must be COPIED VERBATIM into the OC statements so the assembly's
+    cancellation pairs are syntactically equal atoms for `abel`.
+  - ~~Remaining: the norm CS~~ — DONE later the same session (see the FINAL entry above);
+    `covStepDiff2_exists_const` closed automatically and a=2 is DONE (sessions-to-done: 0).
 
 - **UPDATE (a=2 campaign session 13 = statement fix + assembly backbone, 2026-07-26; coordinator ruling
   №33, committed `348b43d31`/`8709d079e`): the session-12 blocker is RESOLVED by AMENDING the bridge
