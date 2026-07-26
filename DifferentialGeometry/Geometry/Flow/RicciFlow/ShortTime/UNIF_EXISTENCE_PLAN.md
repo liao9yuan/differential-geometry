@@ -1671,3 +1671,20 @@ state-before-prove recon of ∇₂^a A — the connDiff-as-tensor-field covarian
 derivative family); (b) lieCorr0 atom-2 finish per the recorded layer plan;
 (c) 2a-hi/pkg once (a) lands.  Do not open (a) and the atom-2 finish in the
 same file set — disjoint, can run parallel.
+
+### №26 addendum (same day) — hAcc recon ACCEPTED (`f1a7bda31`); koszul-deriv2 dispatched
+
+Queue item (a) delivered as specified: route (i) (iterated differentiated
+Koszul) ruled in with recorded eliminations of (ii)/(iii); the a=2 atom
+`covStepDiff2_exists_const` stated green in the new `ConnDiffDeriv2Bound.lean`
+(ONE flagged sorry = the single visible item-6 frontier); no false wall — the
+gate is the absent identity `connDiff_koszul_deriv2` (~150–300 lines, mirror of
+B2's `connDiff_koszul_deriv`).  Executor env lesson recorded: shell tools
+default to the STALE `E:\testdifferential-geometry`; lake-locked claim in the
+wrong tree silently succeeds — always Set-Location to ste-align first.
+
+DISPATCHED next (fresh executor): **koszul-deriv2 session 1** — state and prove
+`connDiff_koszul_deriv2` (the second base-connection differentiation of
+`connDiff_koszul_deriv`), the gate to a=2.  Honest-partial allowed; expected
+2–4 sessions to a=2 overall.  Parallel: atom-2 finisher still in flight
+(Sobolev/TensorHilbert files, disjoint).
