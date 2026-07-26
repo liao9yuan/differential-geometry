@@ -211,6 +211,29 @@ form) is respected — P1/P2 are stated on the eval `covDerivConnDiff` and the e
 
 ## 7. Session log
 
+- 2026-07-25 (**B2 session 7 — B2 CLOSED**): the two remaining lemmas landed sorry-free in
+  `ConnDiffDerivBound.lean`, whole-module `lake build` green, zero warnings.
+  **`covDerivConnDiff_gJet_le` (public) is the §0 target**, proved with exactly the pinned constant
+  **`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`** — no weakening — from hypotheses
+  `MetricUniformEquivalentOn K g₂ g₁ Λ`, `MetricCovDerivOrderBoundOn K 1 g₁ g₂ Λ'`,
+  `MetricCovDerivOrderBoundOn K 2 g₁ g₂ Λ''`, `x ∈ K`.  Axioms
+  `[propext, Classical.choice, Quot.sound]`.  Beneath it: `covDerivConnDiff_g1_le` (the dual Koszul
+  core, `g₁`-fibre) and `lcDiff_covOne_le` (`lcDiff_norm_le` in `metricCovDerivNorm` currency, read
+  off the PUBLIC `diff_le_covOne_basis_ref_lc` instead of re-deriving the private `covOne_eq_deriv`).
+  `AllTimesBounds.lean` remains UNTOUCHED, and no new import was added to `ConnDiffDerivBound.lean`.
+  **`hA1` dischargeability was verified by building it, not by inspection**: a throwaway module
+  importing both files compiled
+  `covStepDiff_norm_le g₁ g₂ s S x hCA (fun v w u => covDerivConnDiff_gJet_le hEq hJet1 hJet2 hx v w u)`
+  as a bare term proof.  P1 (`covDerivConnDiff_fibreNorm_le`) is confirmed unused by this route and
+  is kept as the alternative fibre-norm entry point; the §2 `B2 = P1 ∘ P2` factorisation is
+  superseded (P2.b/c/d were never built and are not needed).
+  **REMAINING for item 6 is consumer wiring, not mathematics**: (a) `UnifCovSumCross.lean` must
+  import `…HCGCompactness.ConnDiffDerivBound` (the dependency currently runs the other way — nothing
+  imports `ConnDiffDerivBound` yet) and replace the abstract `hA1`/`CA` threading in
+  `covStepDiff_norm_le`/`covStepDiff_jet_le` and above with the concrete endpoint; the open design
+  question is whether `hEq`/`hJet1`/`hJet2`/`hx` are already in scope at those call sites or must be
+  added to their signatures.  (b) the same for the 2a-tel composition-(b) consumer.  (c) then the
+  §5 home-debt promotion to `Geometry/Curvature/CovDerivConnDiffFibreExtraction.lean`.
 - 2026-07-25 (B2 session 6 — P2 ROUTE PIVOT + currency/comparability helpers LANDED; STAND-DOWN pause):
   **Chose the dual/eval route (recon §4 alternative), NOT the component P2.b/c/d.**  The dual route pairs
   the LOWERED identity `connDiff_koszul_deriv` against the output vector `B` itself (`Z x = B`), bounds

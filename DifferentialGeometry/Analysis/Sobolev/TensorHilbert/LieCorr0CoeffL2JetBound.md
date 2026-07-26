@@ -20,7 +20,7 @@ see `LieCorr0LowJet.md`).  It is a LIABILITY, quarantined, NOT an asset.  This
 leaf must therefore be built WITHOUT LowJet.  (The full diamond saga is retired;
 its blow-by-blow lived in this note's earlier revisions and is superseded.)
 
-### Already written + green-in-principle (the TOP piece + assembly helper)
+### BANKED GREEN (2026-07-25 build session): the TOP piece + assembly helper
 - `endoArm_eq_dlb` : `deTurckLieEndoArmField g₀ g₁ g_bg = deTurckLieDLbCoeffField
   g₀ g₁ g_bg` (both `ofCLM(deTurckLieDLbFib g₁ g_bg)`, by `ext`).
 - `lc0Insert_base_eq_neg_dlb` : `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField
@@ -105,68 +105,124 @@ pieces.  NO salvage-port from LowJet is required.
 |---|---|---|---|
 | `lc0VB` | `2·traceStep(g₁,VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) ∘ interior_product(deTurckVF g₁ g₀)` (:144) | twoArm engine (Φ = metricConnDiffLowered→connDiff, W = deTurckVF interior-product); closest to `deTurckLieArm1Coeff` (same atoms, different contraction — NOT a reindex) | MEDIUM |
 | `lc0AMix` | `2·(AMixHalf + swap·AMixHalf)`, `AMixHalf` = chain of traceSteps over prodKappa(metricConnDiffLoweredFib g₁ g₁ g_bg) and prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) (:162) | twoArm engine, both factors connection-difference (via Atom-3 push) | MEDIUM |
-| `lc0Riem` | `−traceStep(g₁,RiemPerm2) ∘ traceStep(g₀,RiemPerm1) ∘ prodKappa(lieCorr0RiemLoweredFib g₀)` (:237); passenger = FIXED g₀-curvature `g₀.inner∘riemannOp(LC g₀)` | ONE live factor (the g₁-cometric); passenger T-independent (constant jets).  Either twoArm with a constant arm, or the traceHess/gInvDiffSlotCoeff cometric template (`deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff` → `gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform`) | MEDIUM-LOW (simplest — one live factor) |
+| `lc0Riem` | `−traceStep(g₁,RiemPerm2) ∘ traceStep(g₀,RiemPerm1) ∘ prodKappa(lieCorr0RiemLoweredFib g₀)` (:237); passenger = FIXED g₀-curvature `g₀.inner∘riemannOp(LC g₀)` | **DONE — see "lc0Riem: the route that worked" below.**  Neither of the two guessed routes was used: the winner was twoArm with the live arm *reduced to the committed rank-1 cometric envelope via `slotExtend` + a source 3-cycle reindex* | landed |
 | `lc0Insert g_bg − lc0Insert g₀` | `slotInsert(NEndo g_bg − NEndo g₀)`; by `nEndo_diff` (`LieCorr0Split.lean:103`) = `slotInsert(connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg))` | twoArm engine: connDiff (Atom 3, controlled) × deTurckVF-difference (controlled via DLb `wOmega`/`wXi`); slotInsert is a fibrewise isometry | MEDIUM |
 
 All four go to `Kc` (R allowed).  Only the top piece needs the R-free `Ktop`,
 already delivered via DLb.
 
-## SESSION STATE + RESUMPTION POINT (2026-07-25, paused by planner stand-down)
+## lc0Riem: the route that worked (2026-07-25 build session)
 
-### What is verified-green vs drafted (be precise)
-- **NOTHING verified-green by this session.** No `lake`/`lean` build was run.
-- The leaf `.lean` is UNTOUCHED this session (exactly as committed).  As
-  committed it STILL imports `LieCorr0LowJet` (line 3) and therefore **does NOT
-  build** (LowJet is broken WIP).  So the four written theorems (`endoArm_eq_dlb`,
-  `lc0Insert_base_eq_neg_dlb`, `lc0InsertBase_realizedFam_perOrder_topSeparated`,
-  `sq_le_five_add`) are DRAFTED and verified-in-principle (the top piece just
-  inherits the committed DLb producer at `g_bg:=g₀`), but have NEVER been built.
-- The recon verdict above is the only deliverable finalized this session (a note).
+`lieCorr0RiemFib = (−1)·(traceStep(g₁,2,Perm2) ∘ traceStep(g₀,4,Perm1) ∘ prodKappa(Riem g₀))`.
+Only the OUTER `g₁`-cometric moves; everything to its right is `g₀`-only.  So push
+the outer permutation `Perm2` into the passenger and read the piece as a two-arm
+action:
 
-### Did LowJet turn out needed?  NO — FULLY AVOIDABLE (confirmed).
-The generic twoArm product-grid engine
-(`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le` +
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`) plus the
-`deTurckLieArm1Coeff` ballUniform precedent cover all four Kc pieces.  LowJet's
-`vb_refold`/`amix_refold`/`riem_refold`/`insert_diff` refolds are NOT needed and
-NO salvage-port from LowJet is required.  The leaf's LowJet import should be
-DROPPED (it is a pure liability).
+    lc0Riem g₀ g₁ = − appCcRS g₀ 2 4 2 (live (4,2) arm) (fixed (2,4) passenger)
+
+- **live arm** = the rank-`2` `g₁`-cometric double trace `cometricDoubleTraceFib g₁ 2`.
+- **passenger** = `domDomCongrFibRank(Perm2) ∘ traceStep(g₀,4,Perm1) ∘ prodKappa(Riem g₀)`,
+  built directly with `contMDiff_clm_section_of_pointwise` off the three committed
+  `LieCorr0Core` smoothness lemmas (`lieCorr0_prod_section_contMDiff`,
+  `lieCorr0TraceStep_section_contMDiff`, `lieCorr0_ddc_section_contMDiff`).
+
+**The key move — do NOT re-derive the cometric envelope at `p = 2`.**  The committed
+envelope `cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic` is stated only
+for `cometricCastG0` (`p = 1`, valence `(3,1)`); re-deriving its ~250-line proof at
+`p = 2` was the obvious-but-wrong plan.  Instead:
+
+    cometricDoubleTraceFib g₁ 2 = reindexCoeffGen(σ) (slotExtend (cometricCastG0 g₀ g₁))
+
+with `σ : Equiv.Perm (Fin 4)` the source three-cycle `0↦1↦2↦0` (identity on slot 3).
+Reason: `slotExtend` reads the new passenger slot as the LEADING SOURCE slot, whereas
+the rank-`2` double trace contracts slots 0,1 and puts the passenger third — the two
+tuples `(v₀, Lb^k, b_k, m)` and `(Lb^k, b_k, v₀, m)` differ by exactly that 3-cycle.
+Both TARGET slot orders already agree, so no target permutation is needed.  Then
+`rfns_iteratedCovGrad_reindexCoeffGen_eq` (source permutation is `rfns`-invariant) +
+`rfns_iteratedCovGrad_slotExtend_le` (costs one factor `finrank ℝ E`) transport BOTH
+the order-`0` sup and the jet-`L²` sums from `p = 1` to `p = 2` in six lines.
+
+Rest of the pipeline is the standard layer idiom: pointwise product grid
+`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`, then
+`normSq_le_integral_of_pointwise_fiberNormSq_le_rs` against the integrator
+`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le` (`choose`d over the
+order `k`, since it is stated per-`k`), then the `realizedFam` threading copied from
+`gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform`, then `Ktop = 0` and
+`Kc i ≤ Kc i · (1 + low)` by `nlinarith`.
+
+## SESSION STATE + RESUMPTION POINT (2026-07-25, after the first build session)
+
+### What is verified-green now (vs the previous session, which banked NOTHING)
+The previous session ran no build at all and left the leaf importing broken
+`LieCorr0LowJet`.  That import is now DELETED and the leaf is **fully green,
+sorry-free and warning-free**, verified by a real targeted module build (not only a
+focused check — `lake env lean` success alone is untrustworthy in this repo).
+Axiom-audited to exactly `[propext, Classical.choice, Quot.sound]`:
+
+- `endoArm_eq_dlb`, `lc0Insert_base_eq_neg_dlb`,
+  `lc0InsertBase_realizedFam_perOrder_topSeparated` (TOP piece), `sq_le_five_add`
+  — the four previously-drafted theorems, which **survived contact with the compiler
+  essentially unchanged**; no mathematical repair was needed.
+- `lc0Riem_realizedFam_perOrder_topSep` — **the first Kc atom, NEW and green**,
+  with its supporting layer `lc0RiemSrc`, `lc0RiemLive`, `lc0RiemLive_toSec`,
+  `lc0RiemPassFib(+_contMDiff)`, `lc0RiemPass`, `lc0RiemFib_eq`, `lc0Riem_eq_app`,
+  `lc0RiemLive_rfns_le`, `lc0RiemLive_l2_le`.
+
+The four drafted theorems needed only *plumbing* repair, never mathematical repair:
+a missing `LieCorr0Split.olean` (the leaf is outside the root import graph, so its
+own imports had never been built — build the import first, or the focused check dies
+on a missing olean), and two inherited unused-binder-name warnings, silenced with the
+layer's own `set_option linter.unusedVariables false in` idiom.
+
+### Lean lessons from this session
+- **Namespaces bite hardest.**  Four separate `unknownIdentifier` rounds, all from the
+  leaf's *restricted* `open ... (a b c)` lists.  `reindexCoeffGen`/`domDomCongrFibRank`/
+  `tensor0SProdKappaFib` are `Analysis.Parabolic.TensorSpectral`;
+  `convexPerturbation`/`convexPerturbation_gFibreOpBound`/`realizedFam_inner_of_mem`/
+  `Icc_subset_realizedSmallSet` are `PDE.DeTurck.RicciLinearization` (same home as
+  `realizedFam`); `cometricDoubleTraceFib` is `…IntrinsicSpectral.DeTurck`;
+  `lieCorr0*` needs `open LieCorr0Core`; `tensor0S_curry_apply_eval` is
+  `TensorMultilinear`.  Widen the restricted lists rather than doing a bare full
+  `open` (the restriction is deliberate).
+- `iteratedCovGrad_smul_real` has **no public home** — it exists as a copy-pasted
+  `private theorem` in at least four files.  A fifth copy was added here; the real fix
+  is one public lemma in the `iteratedCovGrad` module (flagged as a separate task).
+- Two different instantiations of the same `@[simp]` lemma in one goal: `rw` picks one
+  instantiation and the second `rw` then fails.  Use `simp only [lemma]` instead.
+- `(-1 : ℝ) • A` is NOT `rfl`-equal to `-A` for CLMs — `neg_one_smul` first.  But
+  `.comp` associativity IS defeq, so after that a bare `rfl` closes the fibre identity.
+- `add_le_add_right` in this Mathlib adds on the LEFT of the displayed goal; prefer
+  `linarith` from the `mul_le_mul_of_nonneg_left` step over guessing the orientation.
+- A `Select-String | Select-Object -First N` pipeline over a `lake build` makes the
+  build report exit 255 (broken pipe) even when it succeeded — redirect to a file, then
+  filter.
 
 ### Exact resumption point for a successor
-1. Edit the leaf `.lean`: DELETE line 3
-   (`import …DeTurckCoefficients.LieCorr0LowJet`).  Keep line 1
-   (`DeTurckLieCoeffL2JetBound`) + line 2 (`LieCorr0Split`).  For the Kc atoms,
-   ADD imports of the twoArm-engine homes as needed:
-   `Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower`,
-   `Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes`,
-   `Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound`.
-2. Whole-file check the leaf (the four drafted theorems + dropped import) to bank
-   the top piece green.  Expected clean (no LowJet symbol is used by them).
-3. Land the FIRST Kc atom green (sorry-free), standalone ballUniform →
-   topSeparated(Ktop=0) per-order producer.  Simplest-first order:
-   `lc0Riem` (one live factor: the g₁-cometric; passenger is a fixed
-   g₀-curvature with constant jets) → `insert-diff` → `lc0VB` → `lc0AMix`.
-   Each: express the piece via `appCcRS`/twoArm of controlled factors, apply the
-   pointwise product-grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
-   + the integrator `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`,
-   thread `realizedFam`, then reshape ballUniform→topSeparated with `Ktop=0`
-   (`P i ≤ 0·top + P i·(1+low)`, `nlinarith`).
-4. Assemble the two endpoints ONLY once all four Kc atoms are green (they need
-   all four via `sq_le_five_add`).  Until then keep the leaf axiom-clean
-   (top piece + landed atoms; NO sorries).  `Ktop = 5·Ktop_DLb` (R-free),
-   single summed `Kc`.
+1. **Next atom: `lc0Insert g_bg − lc0Insert g₀`.**  By `nEndo_diff` (`LieCorr0Split.lean:103`)
+   it is `slotInsert(connDiff g₁ g₀ (deTurckVF g₁ g₀ − deTurckVF g₁ g_bg))`.  Mirror the
+   `lc0Riem` skeleton exactly: factor as `appCcRS` of a controlled arm against a
+   controlled arm, reuse the same pointwise-grid → `normSq_le_integral…` → twoArm
+   integrator → `realizedFam`-threading → `Ktop = 0` pipeline.  Difference from `lc0Riem`:
+   BOTH arms are live here, so both need order-`0` sups and jet-`L²` sums (connDiff from
+   `ConnectionDifferenceJetTower`, deTurckVF-difference from the DLb `wOmega`/`wXi` low
+   atoms) — the passenger-is-fixed shortcut does not apply.
+2. Then `lc0VB`, then `lc0AMix` (see the routing table).
+3. Assemble the two endpoints ONLY once all four Kc atoms are green (they need all four
+   via `sq_le_five_add`).  `Ktop = 5·Ktop_DLb` (R-free), single summed `Kc`.
+4. Keep the leaf axiom-clean at every step; it is still outside the root import graph,
+   so nothing downstream protects it — verify the leaf itself with a targeted module
+   build, not only a focused check.
 
 ## Honest accounting
-`(N) ricci_flow_unif_existence` still **0%**.  The constituent is NOT closed:
-the two endpoints are 0% (unstated), and their dedicated machinery is the top
-piece (done) + four Kc atoms (0–1 landed this session) + the 5-way assembly
-(helper `sq_le_five_add` done, wiring pending).  Realistic constituent
-completion: top piece ~1/6, each Kc atom ~1/6, assembly ~0 until atoms land.
-This is genuinely multi-session (four medium fresh derivations + endpoints), but
-the route is now fully committed-machinery-backed with NO LowJet dependency —
-the road is reopened.
+`(N) ricci_flow_unif_existence` still **0%**.  The constituent is NOT closed: the two
+endpoints are **0% (still unstated)**.  Their dedicated machinery is the top piece
+(done) + four Kc atoms (**1 of 4 landed**) + the 5-way assembly (helper
+`sq_le_five_add` done, wiring pending).  Weighting top piece ~1/6, each Kc atom ~1/6,
+assembly ~1/6: dedicated machinery is now **~33%** (top + `lc0Riem`), up from ~17%.
+Still genuinely multi-session (three medium fresh derivations + the endpoints), but the
+`lc0Riem` skeleton is now a working template the remaining three can be cut from.
 
 ## Verification
-NONE run this session (paused at recon by planner stand-down before any build).
-The leaf `.lean` is unedited/as-committed (still imports broken LowJet ⟹ does
-not build until the resumption step 1 drops that import).  No commit.
+Focused check green, and — the trustworthy check — a targeted module build of the leaf
+completed successfully.  Leaf is sorry-free and emits no warnings of its own.  All five
+theorems axiom-audited clean.  No commit made.

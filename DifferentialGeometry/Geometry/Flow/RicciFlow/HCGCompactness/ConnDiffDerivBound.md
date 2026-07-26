@@ -12,13 +12,28 @@ Companion note for `ConnDiffDerivBound.lean`.  Full mission route: `UNIF_ITEM6_R
   `ext · = smoothExtensionTangent x ·`; norm is the `g₂`-fibre norm via `tensorRS_riemannianBundle g₂ 1 3`.
 - `covGrad_connDiffSection_flat_eval_eq_inner` (private helper): the flat/eval bridge, re-derived from the
   PUBLIC `connDiffSection_covGrad_eq_covDerivConnDiff` (the parent file's copy is `private`).
+- `covDerivConnDiff_gJet_le` (public): **the B2 endpoint** (session 7).  Under
+  `MetricUniformEquivalentOn K g₂ g₁ Λ` + `MetricCovDerivOrderBoundOn K 1/2 g₁ g₂ Λ'/Λ''` and
+  `x ∈ K`,
+  ```
+  √(g₂(covDerivConnDiff g₂ g₁ (ext v)(ext w)(ext u) x, ·))
+      ≤ (3/2)·Λ⁴·(Λ'' + Λ·Λ'²) · √(g₂ v v)·√(g₂ w w)·√(g₂ u u)
+  ```
+  This is verbatim the `hA1` binder of `covStepDiff_norm_le` (`UnifCovSumCross.lean`).
+- `covDerivConnDiff_g1_le`, `lcDiff_covOne_le`, `field_eq_mcd1`, `nabla3_eq_mcd2`,
+  `sqrt_normSq0S_comp` (private): the dual-core and currency/comparability layer beneath it.
 
 ## Why this is the right brick
 
-B2 (the full ungated output-vector bound in `Λ,Λ',Λ''`) factors as **P1 ∘ P2**:
+(Historical framing from session 1; superseded by the dual route below — B2 is now closed and the
+"remaining frontier" language here no longer applies.)
+
+B2 (the full ungated output-vector bound in `Λ,Λ',Λ''`) was planned as **P1 ∘ P2**:
 - P1 = this file (ungated Cauchy–Schwarz reduction to the fibre norm) — DONE.
-- P2 = `‖covGrad g₂ 1 2 (connDiffSection g₁ g₂)‖_{fibre} ≤ CA(Λ,Λ',Λ'')` — the SINGLE remaining frontier,
-  the a=1 analogue of `lcDiff_norm_le`.  See `UNIF_ITEM6_RECON.md` §4 for its brick sequence.
+- P2 = `‖covGrad g₂ 1 2 (connDiffSection g₁ g₂)‖_{fibre} ≤ CA(Λ,Λ',Λ'')` — the a=1 analogue of
+  `lcDiff_norm_le`.  See `UNIF_ITEM6_RECON.md` §4 for its brick sequence.  **This factorisation was
+  NOT the route taken**: the dual/eval route reaches the B2 endpoint directly and never needs the
+  fibre-norm intermediate, so P1 ended up unused by the endpoint.
 
 Compose: any P2 supply `hNW : ‖covGrad connDiffSection‖ ≤ CA` gives, in one `le_trans` +
 `mul_le_mul_of_nonneg_right`, the full B2 bound `≤ CA·√(g₂ v v)·√(g₂ w w)·√(g₂ u u)` that both consumers
@@ -111,13 +126,35 @@ HCG 2-arg one, no clash since `Integral.Connection` is NOT opened).  `LeviCivita
 Axiom audit: NOT separately run this session (stand-down); the three helpers compose only standard
 mathlib (`DFunLike.ext`, `Real.sqrt_*`) + already-axiom-clean project lemmas, so clean is expected.
 
-### DRAFTED-UNVERIFIED
+### VERIFIED-GREEN session 7 (2026-07-25) — B2 CLOSED in this file
 
-None.  Only the three green helpers were written; the dual-core and the endpoint are NOT yet written.
+The two remaining lemmas landed, both sorry-free, whole-module `lake build` green, no new imports and
+no change to the variable block (`[NormedSpace ℝ E]`-only discipline respected; nothing was added to
+`AllTimesBounds.lean`).
 
-### EXACT NEXT STEPS for a successor (resume here)
+- `lcDiff_covOne_le` (private, NEW — not in the session-6 plan).  `lcDiff_norm_le` restated in the
+  `metricCovDerivNorm` currency.  The plan called for re-deriving the private `covOne_eq_deriv`
+  (which needs the private `covSelfOneAt`, ~35 lines); instead this reads the bound straight off the
+  **public** `diff_le_covOne_basis_ref_lc` (`AllTimesBounds.lean:3287`), which is already stated in
+  `metricCovDerivNorm` — `lcDiff_norm_le`'s own proof only converts it to `metricDerivNorm` at the
+  very last step.  Four lines, and `metricDerivNorm` never enters the file.
+- `covDerivConnDiff_g1_le` (private) — the dual core, exactly the planned route.  Conclusion:
+  `√(g₁ B B) ≤ (3/2·√normSq0S(g₁,4,mcd2) + √normSq0S(g₁,3,mcd1)·√normSqRS(g₁,1,2)(connDiff))
+   · √(g₁vv)·√(g₁ww)·√(g₁uu)`.
+- `covDerivConnDiff_gJet_le` (public) — the endpoint.  **Constant proved = the predicted
+  `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`**, no weakening of the statement.
+  Axioms: `[propext, Classical.choice, Quot.sound]`.
 
-Two lemmas remain, both in `ConnDiffDerivBound.lean`, both using ONLY already-present ingredients:
+`hA1` dischargeability was **verified, not assumed**: a temporary scratch module importing both
+`ConnDiffDerivBound` and `UnifCovSumCross` was built green with
+`covStepDiff_norm_le g₁ g₂ s S x hCA (fun v w u => covDerivConnDiff_gJet_le hEq hJet1 hJet2 hx v w u)`
+as a bare term proof, then deleted.  So B3 can consume this endpoint with `CA` instantiated to
+`3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)` and no adapter.  (Note the import direction: `UnifCovSumCross`
+does NOT import this file, so the consumer side must add the import when it wires B2 in.)
+
+### Route as executed (kept for reference)
+
+Two lemmas, using ONLY already-present ingredients:
 
 1. **The dual core (`covDerivConnDiff_g1_le`, private).**  For `x`, `v w u : TangentSpace I x`, set
    `Wsec/Xsec/Ysec := ContMDiffSection.mk (smoothExtensionTangent x v/w/u) (…_contMDiff …)` (as in P1's
@@ -170,6 +207,48 @@ Two lemmas remain, both in `ConnDiffDerivBound.lean`, both using ONLY already-pr
 `metricDerivNorm`/`exists_diagInv_of_metricUniformEquivalentOn` (AllTimesBounds.lean / PointedConvergence.lean,
 namespace `DifferentialGeometry.HCGCompactness`).  B3 target `hA1`: `UnifCovSumCross.lean:709-725`.
 
+### Lean lessons (session 7)
+
+- **The whole Koszul→metric-jet rewriting chain worked first try.**  `rw [hAbr, hXx, hYx, hZx] at
+  hkos` then the three `nabla3_eq_mcd2` rewrites then `hWx`; the only real friction was instance
+  setup and one elaboration issue (below).  The session-6 currency helpers were the right bricks.
+- **`haveI : IsManifold I (1 + 1) M` is required**, not just `IsManifold I 1 M`, before
+  `TangentBundle.contMDiffVectorBundle (n := 1)` will synthesize.  Symptom is a bare
+  `failed to synthesize IsManifold I (1 + 1) M` pointing at the `haveI` line itself.  Copy both
+  `haveI`s from `covStepDiff_norm_le`.
+- **Term-4 bridge must be `exact`, not `rw`.**  `connDiff_koszul_deriv`'s quadratic term is
+  `nabla0SFun 2 (LeviCivita g₂) W (metricTensorField g₁)`, while
+  `metricCovDeriv_one_apply_section` says `nabla0SFun 2 (leviCivitaConnectionOfMetric g₂) W
+  (metricCovDeriv g₁ g₂ 0)`.  Both differences are pure delta (`LeviCivita ≡
+  leviCivitaConnectionOfMetric`, `metricCovDeriv _ _ 0 ≡ metricTensorField _`).  State the `have` in
+  the **koszul** syntactic form and close it with `exact h`; then `rw [h4] at hkos` matches.  Same
+  trick for `hJ2 : metricCovDerivNorm 2 g₁ g₂ x ≤ Λ''` used as a bound on
+  `√normSq0S(g₂, 4, mcd2)` (`2 + 2 ≡ 4` plus the `metricCovDerivNorm` delta).
+- **`Fin.cons a ![b,c,d] i` will not elaborate inside a standalone `∏`-statement**: the motive
+  `α : Fin (n+1) → Sort _` stays a metavariable and you get `argument has type ?m i but is expected
+  to have type TangentSpace I x`.  Do NOT state a separate `hprod4` helper.  Instead take the
+  Cauchy–Schwarz result first (where `Tensor0SSpace`'s domain has already pinned the motive), then
+  `refine le_trans h (le_of_eq ?_); congr 1; change (∏ i : Fin 4, … (![a,b,c,d] i) …) = _; simp
+  [Fin.prod_univ_four]`.  The `change` from `Fin.cons` to `![…]` is `rfl` (`Matrix.vecCons` is
+  `Fin.cons`) and is what lets the `Matrix.cons_val_*` simp set fire.  Use `change`, not `show` —
+  `linter.style.show` flags a `show` that alters the goal.
+- **`linarith`/`nlinarith` do the product bookkeeping for free.**  Do not hand-normalise the
+  Cauchy–Schwarz right-hand sides (`M2·(Sv·Su·Sw·SB)` vs `M2·(Sv·Sw·Su·SB)`); their ring
+  normalisation identifies the monomials.  The `|T| ≤ …` collection, the `SB·(2·SB) ≤ SB·(…)`
+  restatement before `le_of_mul_le_mul_left`, and the final halving were all one-liners.
+- **`√Λ` bookkeeping is `linear_combination` work, not `nlinarith` work.**  For the two places where
+  `(√Λ)² = Λ` has to be used inside an equality — `(Λ√ΛΛ')·(3/2·Λ√ΛΛ') = 3/2·Λ³Λ'²` and the final
+  `√Λ·(Cb·(√Λ·)³) = 3/2Λ⁴(…)` — use `linear_combination (coeff) * hs2` with
+  `hs2 : Real.sqrt Λ ^ 2 = Λ`.  For the outer one the coefficient carries the extra factor
+  `(√Λ² + Λ)` because the identity needs `s⁴ − Λ² = (s²−Λ)(s²+Λ)`.
+- **`positivity` cannot see through `set`.**  Declare every `0 ≤ …` fact BEFORE the `set` that
+  abstracts the term, so `set` rewrites the hypothesis too; afterwards the variable is opaque.  In
+  the endpoint the polynomial-in-`Λ` nonnegativity (`0 ≤ Λ'' + Λ·Λ'²`) also needs explicit
+  `add_nonneg`/`mul_nonneg` — `positivity` has no access to `hEq.1` or the jet hypotheses.
+  `Λ' , Λ'' ≥ 0` come free from `Real.sqrt_nonneg` through the jet bounds; no extra hypotheses.
+- The stale-`.olean` shape bit once at the start: `object file '…ChristoffelDiffKoszulDeriv.olean'
+  does not exist` from a dead build.  One targeted `build -NoLakeLock +Module.Name` fixed it.
+
 ### Lean lessons (session 6)
 - The `field` in `connDiff_koszul_deriv`'s RHS = `metricCovDeriv g₁ g₂ 1` — prove by `DFunLike.ext`
   (`Tensor0SField` is a `ContMDiffSection` abbrev) + `totalNabla0S_apply` + `metricCovDerivStep_apply.symm`
@@ -184,6 +263,25 @@ namespace `DifferentialGeometry.HCGCompactness`).  B3 target `hA1`: `UnifCovSumC
 
 ## Status / next
 
+- 2026-07-25 (session 7): **B2 CLOSED inside this file.**  `covDerivConnDiff_gJet_le` proved
+  sorry-free with the predicted constant `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`; axiom-clean; whole-module
+  build green with zero warnings.  `hA1` of `covStepDiff_norm_le` verified dischargeable by an
+  actual (throwaway) build, not by inspection.  Nothing in this file is a frontier any more —
+  every declaration is proved.
+  **Next is wiring, not mathematics**, and it is OUTSIDE this file:
+  1. `UnifCovSumCross.lean` must `import …HCGCompactness.ConnDiffDerivBound` and replace the `hA1`
+     binder of `covStepDiff_norm_le` (and of anything above it that still threads `hA1`/`CA`
+     abstractly) with the concrete endpoint, instantiating `CA := 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)`.
+     Check whether the metric-jet hypotheses (`hEq`, `hJet1`, `hJet2`, `hx`) are already in scope at
+     those call sites or have to be added to their signatures — that is the only real design
+     question left.
+  2. Same for the 2a-tel composition-(b) consumer.
+  3. Once both consumers are on the concrete bound, discharge the home debt: promote
+     `covDerivConnDiff_fibreNorm_le` (and possibly the dual core) to
+     `Geometry/Curvature/CovDerivConnDiffFibreExtraction.lean`, and de-privatise the parent's
+     `covGrad_connDiffSection_flat_eval_eq_inner` so this file's private copy can be dropped.
+  Note `covDerivConnDiff_fibreNorm_le` (P1) is now confirmed UNUSED by the dual route.  Keep it: it
+  is the honest fibre reduction and is the entry point if a fibre-norm endpoint is ever wanted.
 - 2026-07-25 (session 6): STAND-DOWN pause.  File GREEN.  P1 + 3 P2 currency/comparability helpers
   landed (verified, whole-file `lake build` EXIT=0).  Dual-route chosen (see above).  Resume at the two
   numbered "EXACT NEXT STEPS" (dual core + endpoint) — all ingredients present, no new frontier.

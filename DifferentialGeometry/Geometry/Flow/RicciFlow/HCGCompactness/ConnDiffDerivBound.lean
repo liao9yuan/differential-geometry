@@ -277,6 +277,356 @@ private theorem sqrt_normSq0S_comp
     _ = Real.sqrt (Λ ^ s) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x s A) := by
         rw [Real.sqrt_mul (pow_nonneg (le_trans zero_le_one hEq.1) s)]
 
+set_option linter.unusedSectionVars false in
+/-- The a=0 connection-difference atom in the `metricCovDerivNorm` currency: the
+`metricDerivNorm`-free form of `lcDiff_norm_le`, read straight off the basis-level
+`diff_le_covOne_basis_ref_lc`. -/
+private theorem lcDiff_covOne_le
+    {K : Set M} (g h : SmoothRiemannianMetric I M) {C : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g h C)
+    {x : M} (hx : x ∈ K) :
+    Real.sqrt
+        (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2
+          (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) h)
+            (leviCivitaConnectionOfMetric (I := I) g) x)) ≤
+      (3 / 2 : ℝ) * (Real.sqrt (C ^ 3) * metricCovDerivNorm (I := I) 1 h g x) := by
+  classical
+  obtain ⟨_, basis, hhinv, _, _, _⟩ :=
+    exists_diagInv_of_metricUniformEquivalentOn (I := I)
+      (metricUniformEquivalentOn_symm (I := I) hEq) hx
+  exact diff_le_covOne_basis_ref_lc (I := I) h g hx C hEq basis hhinv
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **B2 P2 — the dual Koszul core.**  Pairing the differentiated Koszul identity
+`connDiff_koszul_deriv` against the output vector itself bounds the `g₁`-length of
+`covDerivConnDiff g₂ g₁ (ext v) (ext w) (ext u) x` by the second and first metric covariant
+derivatives of `g₁` along `∇₂`, all measured in the `g₁` fibre. -/
+private theorem covDerivConnDiff_g1_le
+    (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    Real.sqrt (g₁.inner x
+        (covDerivConnDiff (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w)
+          (smoothExtensionTangent (I := I) x u) x)
+        (covDerivConnDiff (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w)
+          (smoothExtensionTangent (I := I) x u) x)) ≤
+      (3 / 2 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+            (metricCovDeriv (I := I) g₁ g₂ 2 x)) +
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+              (metricCovDeriv (I := I) g₁ g₂ 1 x)) *
+            Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+              (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                (leviCivitaConnectionOfMetric (I := I) g₁)
+                (leviCivitaConnectionOfMetric (I := I) g₂) x))) *
+        Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) *
+          Real.sqrt (g₁.inner x u u) := by
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞)
+      (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₁ x
+  set B : TangentSpace I x :=
+    covDerivConnDiff (I := I) g₂ g₁
+      (smoothExtensionTangent (I := I) x v)
+      (smoothExtensionTangent (I := I) x w)
+      (smoothExtensionTangent (I := I) x u) x with hBdef
+  set Wsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
+      (smoothExtensionTangent_contMDiff (I := I) x v) with hWsec
+  set Xsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x w)
+      (smoothExtensionTangent_contMDiff (I := I) x w) with hXsec
+  set Ysec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
+      (smoothExtensionTangent_contMDiff (I := I) x u) with hYsec
+  set Zsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x B)
+      (smoothExtensionTangent_contMDiff (I := I) x B) with hZsec
+  have hWx : Wsec x = v := smoothExtensionTangent_eq (I := I) x v
+  have hXx : Xsec x = w := smoothExtensionTangent_eq (I := I) x w
+  have hYx : Ysec x = u := smoothExtensionTangent_eq (I := I) x u
+  have hZx : Zsec x = B := smoothExtensionTangent_eq (I := I) x B
+  have hAbr : covDerivConnDiff (I := I) g₂ g₁ Wsec Xsec Ysec x = B := by rw [hBdef]; rfl
+  have hkos := DifferentialGeometry.Integral.Connection.connDiff_koszul_deriv
+    (I := I) g₁ g₂ Wsec Xsec Ysec Zsec x
+  rw [hAbr, hXx, hYx, hZx] at hkos
+  rw [nabla3_eq_mcd2 (I := I) g₁ g₂ Wsec x ![w, u, B],
+    nabla3_eq_mcd2 (I := I) g₁ g₂ Wsec x ![u, w, B],
+    nabla3_eq_mcd2 (I := I) g₁ g₂ Wsec x ![B, w, u], hWx] at hkos
+  set Avec : TangentSpace I x :=
+    CovariantDerivative.difference
+      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁)
+      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) x u w with hAvec
+  have h4 : Tensor0SBundle.nabla0SFun (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) Wsec
+        (Tensor0SBundle.metricTensorField (I := I) g₁) x ![Avec, B]
+      = metricCovDeriv (I := I) g₁ g₂ 1 x (Fin.cons v ![Avec, B]) := by
+    have h := (metricCovDeriv_one_apply_section (I := I) g₁ g₂ Wsec x ![Avec, B]).symm
+    rw [hWx] at h
+    exact h
+  rw [h4] at hkos
+  -- Cauchy–Schwarz in the `g₁` fibre, at the internal `g₁`-orthonormal basis.
+  have hcs4 : ∀ a b c d : TangentSpace I x,
+      |metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons a ![b, c, d])| ≤
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)) *
+          (Real.sqrt (g₁.inner x a a) * Real.sqrt (g₁.inner x b b) *
+            Real.sqrt (g₁.inner x c c) * Real.sqrt (g₁.inner x d d)) := by
+    intro a b c d
+    have h := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₁ x 4 basis hON
+      (metricCovDeriv (I := I) g₁ g₂ 2 x) (Fin.cons a ![b, c, d])
+    refine le_trans h (le_of_eq ?_)
+    congr 1
+    change (∏ i : Fin 4, Real.sqrt (g₁.inner x (![a, b, c, d] i) (![a, b, c, d] i))) = _
+    simp [Fin.prod_univ_four]
+  have hcs3 : ∀ a b c : TangentSpace I x,
+      |metricCovDeriv (I := I) g₁ g₂ 1 x (Fin.cons a ![b, c])| ≤
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3 (metricCovDeriv (I := I) g₁ g₂ 1 x)) *
+          (Real.sqrt (g₁.inner x a a) * Real.sqrt (g₁.inner x b b) *
+            Real.sqrt (g₁.inner x c c)) := by
+    intro a b c
+    have h := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₁ x 3 basis hON
+      (metricCovDeriv (I := I) g₁ g₂ 1 x) (Fin.cons a ![b, c])
+    refine le_trans h (le_of_eq ?_)
+    congr 1
+    change (∏ i : Fin 3, Real.sqrt (g₁.inner x (![a, b, c] i) (![a, b, c] i))) = _
+    simp [Fin.prod_univ_three]
+  -- the a=0 connection-difference atom re-expands `|A(u, w)|`
+  have hSA : Real.sqrt (g₁.inner x Avec Avec) ≤
+      Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+          (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+        Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+    rw [hAvec]
+    exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) w u
+  -- collect
+  have hBB_nn : 0 ≤ g₁.inner x B B := metric_inner_self_nonneg (I := I) (M := M) g₁ x B
+  have hBBsq : g₁.inner x B B = Real.sqrt (g₁.inner x B B) ^ 2 := (Real.sq_sqrt hBB_nn).symm
+  rw [hBBsq] at hkos
+  have hT1 := hcs4 v w u B
+  have hT2 := hcs4 v u w B
+  have hT3 := hcs4 v B w u
+  have hT4 := hcs3 v Avec B
+  have hT4' : |metricCovDeriv (I := I) g₁ g₂ 1 x (Fin.cons v ![Avec, B])| ≤
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3 (metricCovDeriv (I := I) g₁ g₂ 1 x)) *
+          Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+            (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+        (Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) *
+          Real.sqrt (g₁.inner x u u) * Real.sqrt (g₁.inner x B B)) := by
+    refine le_trans hT4 ?_
+    have hstep :
+        Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x Avec Avec) *
+            Real.sqrt (g₁.inner x B B) ≤
+          Real.sqrt (g₁.inner x v v) *
+            (Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+                (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+              Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u)) *
+            Real.sqrt (g₁.inner x B B) :=
+      mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hSA (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+    calc _ ≤ Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+              (metricCovDeriv (I := I) g₁ g₂ 1 x)) *
+            (Real.sqrt (g₁.inner x v v) *
+              (Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+                  (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                    (leviCivitaConnectionOfMetric (I := I) g₁)
+                    (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+                Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u)) *
+              Real.sqrt (g₁.inner x B B)) :=
+          mul_le_mul_of_nonneg_left hstep (Real.sqrt_nonneg _)
+      _ = _ := by ring
+  have habs1 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons v ![w, u, B]))
+  have habs2 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons v ![u, w, B]))
+  have habs3 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons v ![B, w, u]))
+  have habs4 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 1 x (Fin.cons v ![Avec, B]))
+  rcases eq_or_lt_of_le (Real.sqrt_nonneg (g₁.inner x B B)) with hSB0 | hSBpos
+  · rw [← hSB0]
+    positivity
+  · have hmul :
+        Real.sqrt (g₁.inner x B B) * (2 * Real.sqrt (g₁.inner x B B)) ≤
+          Real.sqrt (g₁.inner x B B) *
+            ((3 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+                  (metricCovDeriv (I := I) g₁ g₂ 2 x)) +
+                2 * (Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+                      (metricCovDeriv (I := I) g₁ g₂ 1 x)) *
+                    Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+                      (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                        (leviCivitaConnectionOfMetric (I := I) g₁)
+                        (leviCivitaConnectionOfMetric (I := I) g₂) x)))) *
+              (Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) *
+                Real.sqrt (g₁.inner x u u))) := by
+      nlinarith [hkos, hT1, hT2, hT3, hT4', habs1, habs2, habs3, habs4]
+    have hdiv := le_of_mul_le_mul_left hmul hSBpos
+    nlinarith [hdiv]
+
+set_option linter.unusedSectionVars false in
+/-- **B2 — the ungated order-1 connection-difference-derivative bound in the metric-jet currency.**
+
+Under uniform metric equivalence `MetricUniformEquivalentOn K g₂ g₁ Λ` and the exact-order metric
+covariant-derivative bounds `Λ'` (order 1) and `Λ''` (order 2), the output vector of
+`covDerivConnDiff g₂ g₁ (ext v) (ext w) (ext u) x` obeys the `g₂`-quadratic estimate with constant
+`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.
+
+This is the `hA1` input of `covStepDiff_norm_le` (`HCGCompactness/UnifCovSumCross.lean`), and the
+shared wall of the T-B `mixedComm_norm_le` and 2a-tel composition-(b) consumers. -/
+theorem covDerivConnDiff_gJet_le
+    {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' Λ'' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    {x : M} (hx : x ∈ K) (v w u : TangentSpace I x) :
+    Real.sqrt (g₂.inner x
+        (covDerivConnDiff (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w)
+          (smoothExtensionTangent (I := I) x u) x)
+        (covDerivConnDiff (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w)
+          (smoothExtensionTangent (I := I) x u) x)) ≤
+      3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) *
+        Real.sqrt (g₂.inner x v v) * Real.sqrt (g₂.inner x w w) *
+          Real.sqrt (g₂.inner x u u) := by
+  classical
+  have hL1 : (1 : ℝ) ≤ Λ := hEq.1
+  have hL0 : (0 : ℝ) < Λ := lt_of_lt_of_le zero_lt_one hL1
+  have hLnn : (0 : ℝ) ≤ Λ := le_of_lt hL0
+  have hJ1 : metricCovDerivNorm (I := I) 1 g₁ g₂ x ≤ Λ' := hJet1 x hx
+  have hJ2 : metricCovDerivNorm (I := I) 2 g₁ g₂ x ≤ Λ'' := hJet2 x hx
+  have hJ1nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 1 g₁ g₂ x := Real.sqrt_nonneg _
+  have hJ2nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 2 g₁ g₂ x := Real.sqrt_nonneg _
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans hJ1nn hJ1
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans hJ2nn hJ2
+  have hs2 : Real.sqrt Λ ^ 2 = Λ := Real.sq_sqrt hLnn
+  have hs4 : Real.sqrt (Λ ^ 4) = Λ ^ 2 := by
+    rw [show Λ ^ 4 = (Λ ^ 2) ^ 2 by ring, Real.sqrt_sq (by positivity)]
+  have hs3 : Real.sqrt (Λ ^ 3) = Λ * Real.sqrt Λ := by
+    rw [show Λ ^ 3 = Λ ^ 2 * Λ by ring, Real.sqrt_mul (by positivity), Real.sqrt_sq hLnn]
+  have hcoefnn : (0 : ℝ) ≤ Λ * Real.sqrt Λ * Λ' :=
+    mul_nonneg (mul_nonneg hLnn (Real.sqrt_nonneg _)) hL'nn
+  -- the dual core, in the `g₁` fibre
+  have hcore := covDerivConnDiff_g1_le (I := I) g₂ g₁ x v w u
+  -- order-2 and order-1 metric jets, converted from the `g₂` to the `g₁` fibre
+  have hM2 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+      (metricCovDeriv (I := I) g₁ g₂ 2 x)) ≤ Λ ^ 2 * Λ'' := by
+    have hcomp := sqrt_normSq0S_comp (I := I) hEq hx 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)
+    rw [hs4] at hcomp
+    refine le_trans hcomp ?_
+    exact mul_le_mul_of_nonneg_left (show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x 4
+      (metricCovDeriv (I := I) g₁ g₂ 2 x)) ≤ Λ'' from hJ2) (by positivity)
+  have hM1 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+      (metricCovDeriv (I := I) g₁ g₂ 1 x)) ≤ Λ * Real.sqrt Λ * Λ' := by
+    have hcomp := sqrt_normSq0S_comp (I := I) hEq hx 3 (metricCovDeriv (I := I) g₁ g₂ 1 x)
+    rw [hs3] at hcomp
+    refine le_trans hcomp ?_
+    exact mul_le_mul_of_nonneg_left (show Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x 3
+        (metricCovDeriv (I := I) g₁ g₂ 1 x)) ≤ Λ' from hJ1)
+      (mul_nonneg hLnn (Real.sqrt_nonneg _))
+  have hNA : Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+        (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+          (leviCivitaConnectionOfMetric (I := I) g₁)
+          (leviCivitaConnectionOfMetric (I := I) g₂) x)) ≤
+      3 / 2 * (Λ * Real.sqrt Λ * Λ') := by
+    have h := lcDiff_covOne_le (I := I) g₂ g₁ hEq hx
+    rw [hs3] at h
+    refine le_trans h ?_
+    exact mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_left hJ1 (mul_nonneg hLnn (Real.sqrt_nonneg _)))
+      (by norm_num : (0 : ℝ) ≤ 3 / 2)
+  have hM2nn : (0 : ℝ) ≤ Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+    (metricCovDeriv (I := I) g₁ g₂ 2 x)) := Real.sqrt_nonneg _
+  have hM1nn : (0 : ℝ) ≤ Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+    (metricCovDeriv (I := I) g₁ g₂ 1 x)) := Real.sqrt_nonneg _
+  have hNAnn : (0 : ℝ) ≤ Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+    (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) := Real.sqrt_nonneg _
+  -- shorten the three fibre norms
+  set M2 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+    (metricCovDeriv (I := I) g₁ g₂ 2 x)) with hM2def
+  set M1 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+    (metricCovDeriv (I := I) g₁ g₂ 1 x)) with hM1def
+  set NA := Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+    (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) with hNAdef
+  set B : TangentSpace I x :=
+    covDerivConnDiff (I := I) g₂ g₁
+      (smoothExtensionTangent (I := I) x v)
+      (smoothExtensionTangent (I := I) x w)
+      (smoothExtensionTangent (I := I) x u) x with hBdef
+  -- the polynomial bracket
+  have hbr : 3 / 2 * M2 + M1 * NA ≤ 3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) := by
+    have hprod : M1 * NA ≤ (Λ * Real.sqrt Λ * Λ') * (3 / 2 * (Λ * Real.sqrt Λ * Λ')) :=
+      mul_le_mul hM1 hNA hNAnn hcoefnn
+    have heq1 : (Λ * Real.sqrt Λ * Λ') * (3 / 2 * (Λ * Real.sqrt Λ * Λ'))
+        = 3 / 2 * Λ ^ 3 * Λ' ^ 2 := by
+      linear_combination (3 / 2 * Λ ^ 2 * Λ' ^ 2) * hs2
+    rw [heq1] at hprod
+    nlinarith [hM2, hprod]
+  have hbrnn : (0 : ℝ) ≤ 3 / 2 * M2 + M1 * NA :=
+    add_nonneg (by linarith) (mul_nonneg hM1nn hNAnn)
+  -- vector comparability
+  have hvec : ∀ z : TangentSpace I x,
+      Real.sqrt (g₁.inner x z z) ≤ Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := by
+    intro z
+    calc Real.sqrt (g₁.inner x z z) ≤ Real.sqrt (Λ * g₂.inner x z z) :=
+          Real.sqrt_le_sqrt (hEq.2 x hx z).2
+      _ = Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := Real.sqrt_mul hLnn _
+  have hBcomp : Real.sqrt (g₂.inner x B B) ≤ Real.sqrt Λ * Real.sqrt (g₁.inner x B B) := by
+    have h := (hEq.2 x hx B).1
+    have h' : g₂.inner x B B ≤ Λ * g₁.inner x B B := by
+      have h2 := mul_le_mul_of_nonneg_left h hLnn
+      rw [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hL0), one_mul] at h2
+      exact h2
+    calc Real.sqrt (g₂.inner x B B) ≤ Real.sqrt (Λ * g₁.inner x B B) := Real.sqrt_le_sqrt h'
+      _ = Real.sqrt Λ * Real.sqrt (g₁.inner x B B) := Real.sqrt_mul hLnn _
+  have hvwu : Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) *
+        Real.sqrt (g₁.inner x u u) ≤
+      Real.sqrt Λ * Real.sqrt (g₂.inner x v v) * (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+        (Real.sqrt Λ * Real.sqrt (g₂.inner x u u)) := by
+    have p1 : Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) ≤
+        Real.sqrt Λ * Real.sqrt (g₂.inner x v v) * (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) :=
+      mul_le_mul (hvec v) (hvec w) (Real.sqrt_nonneg _) (by positivity)
+    exact mul_le_mul p1 (hvec u) (Real.sqrt_nonneg _) (by positivity)
+  have hfin : Real.sqrt (g₁.inner x B B) ≤
+      3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) *
+        (Real.sqrt Λ * Real.sqrt (g₂.inner x v v) * (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x u u))) := by
+    refine le_trans hcore ?_
+    have h1 := mul_le_mul_of_nonneg_left hvwu hbrnn
+    have h2 := mul_le_mul_of_nonneg_right hbr
+      (show (0 : ℝ) ≤ Real.sqrt Λ * Real.sqrt (g₂.inner x v v) *
+        (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+        (Real.sqrt Λ * Real.sqrt (g₂.inner x u u)) by positivity)
+    linarith [h1, h2]
+  calc Real.sqrt (g₂.inner x B B) ≤ Real.sqrt Λ * Real.sqrt (g₁.inner x B B) := hBcomp
+    _ ≤ Real.sqrt Λ * (3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x v v) *
+            (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+            (Real.sqrt Λ * Real.sqrt (g₂.inner x u u)))) :=
+        mul_le_mul_of_nonneg_left hfin (Real.sqrt_nonneg _)
+    _ = 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) *
+          Real.sqrt (g₂.inner x v v) * Real.sqrt (g₂.inner x w w) *
+            Real.sqrt (g₂.inner x u u) := by
+        linear_combination (3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) * Real.sqrt (g₂.inner x v v) *
+          Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u) *
+          (Real.sqrt Λ ^ 2 + Λ)) * hs2
+
 end Curvature
 end Geometry
 end DifferentialGeometry
