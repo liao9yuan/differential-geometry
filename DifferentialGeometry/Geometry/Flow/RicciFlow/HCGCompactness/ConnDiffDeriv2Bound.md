@@ -5,7 +5,31 @@ Companion to `ConnDiffDeriv2Bound.lean`.  Sibling of `ConnDiffDerivBound.md` (th
 lemma, and gives the honest size estimate for the campaign.  **This was a RECON brick: the deliverable
 is the route + a stated frontier lemma, not a proof.**
 
-## 0. STATUS (2026-07-25)
+## 0. STATUS (2026-07-26)
+
+- **UPDATE (a=2 campaign session 3, 2026-07-26): infra proofs landed; clean form + dual core STATED
+  (corrected); §2.1 term-5 error found & fixed.**  Verified progress:
+  - `ConnDiffDerivBound.lean`: **de-privatized** `sqrt_normSq0S_comp` and `covDerivConnDiff_g1_le`
+    (both now `public`, docstrings added; whole file GREEN, sorry-free).  The dual core reuses both.
+  - `ConnDiffDeriv2Bound.lean`: **`covDerivConnDiff_contMDiff`** — section-smoothness of the a=1 jet
+    `p ↦ covDerivConnDiff g₂ g₁ W X Y p` (the sub-frontier for the LHS metric-Leibniz), PROVED
+    sorry-free from `covApply_contMDiffOn` + `diffSec_contMDiff`.
+  - **`koszul2_clean` STATED** (the clean a=2 Koszul identity, `sorry`) with the CORRECTED RHS.
+  - **`covDConnDiff2_g1_le` STATED** (the dual core, `sorry`; statement + explicit coefficient
+    `3/2·M₃ + M₂·NA + 2·M₁·(3/2·M₂ + M₁·NA)` validated by elaboration).  The full CS+division proof is
+    banked in a block comment in the file; it needs finishing iteration on the wall cluster
+    (1.6M-heartbeat → `clear_value` on B₂/D5/D6/Avec/M*/NA; `set`-folding of vector norms → keep them
+    literal, do NOT `set` Pv/Qv/Rw/Su/SB; final `nlinarith` → pre-combine each CS bound with its atom
+    bound as in `hTA`/`hTD5`/`hTD6`).
+  - **§2.1 CORRECTION (a real hand-derivation error, caught during Lean prep):** the two `∇₂g₁·∇₂A`
+    survivors carry the **clean** `covDerivConnDiff g₂ g₁ V X Y` (a=1 jet, deriv `V`, slots `X,Y`),
+    NOT the raw `∇₂_V(A-sec)`.  The raw `∇₂_V(A-sec) = covDerivConnDiff g₂ g₁ V X Y + A(Y,∇₂_V X)
+    + A(∇₂_V Y, X)`; the `A(Y,∇₂_V X)` / `A(∇₂_V Y,X)` pieces (uncontrolled `∇₂_V X`) cancel exactly
+    against the quadratic slot-corrections produced by the a=1-Koszul absorption of the input-slot
+    corrections (verified term-by-term below), so only the clean jet survives.  Without this the dual
+    core would be UNBOUNDED — the fix is load-bearing.  §2.1.a updated accordingly.
+  - Still `sorry`: `koszul2_clean` (the ~200-line absorption), `covDConnDiff2_g1_le` (CS finish),
+    `covStepDiff2_exists_const` (deliverable-3 assembly, gated).
 
 - **UPDATE (a=2 campaign session 2, 2026-07-25): infrastructure + object landed sorry-free; dual-core
   route fully de-risked.**  In `ConnDiffDeriv2Bound.lean`, all axiom-clean
@@ -138,14 +162,16 @@ The a=2 dual core `covDConnDiff2_g1_le` mirrors the a=1 `covDerivConnDiff_g1_le`
 ### 2.1.a The clean Koszul-2 identity `koszul_deriv2_clean` (the genuine frontier, ~200 lines)
 
 **Statement (target).**  For sections `V W X Y Z` and `x`, with `A(a,b) = difference (LC g₁)(LC g₂) x a b`,
-`Q = covDerivConnDiff g₂ g₁ W X Y` (the a=1 field), `mcd_k = metricCovDeriv g₁ g₂ k`:
+`mcd_k = metricCovDeriv g₁ g₂ k` (this is the CORRECTED RHS — see §0 session-3 note; both `∇₂g₁·∇₂A`
+slots carry the CLEAN a=1 jet `covDerivConnDiff`, **not** the raw `∇₂_V(A-sec)`):
 ```
 2 g₁(covDerivConnDiff2 g₂ g₁ V W X Y x, Z x)
   =  mcd3 x ![V,W,X,Y,Z] + mcd3 x ![V,W,Y,X,Z] − mcd3 x ![V,W,Z,X,Y]      -- ∇₂³g₁ combos (leading)
    − 2 · mcd2 x ![V,W, A(Y,X), Z]                                          -- ∇₂²g₁·A
-   − 2 · mcd1 x ![W, ((LC g₂)(A(Y,X)-sec))x (V x), Z]                      -- ∇₂g₁·∇₂A  (raw ∇₂_V A-section slot)
-   − 2 · mcd1 x ![V, Q x, Z]                                               -- ∇₂g₁·∇₂A  (Q = ∇₂A vector slot)
+   − 2 · mcd1 x ![W, covDerivConnDiff g₂ g₁ V X Y x, Z]                    -- ∇₂g₁·∇₂A  (clean; deriv V, slots X Y)
+   − 2 · mcd1 x ![V, covDerivConnDiff g₂ g₁ W X Y x, Z]                    -- ∇₂g₁·∇₂A  (clean; deriv W, slots X Y = Q)
 ```
+This is exactly the `koszul2_clean` statement in `ConnDiffDeriv2Bound.lean` (elaborates GREEN).
 Here the `mcd3/mcd2` slots use the `nabla4_eq_mcd3`/`nabla3_eq_mcd2` bridges, and `mcd1 ![·,vec,·]`
 uses `field1_eq_mcd1` (`(∇₂_V g₁)(a,b) = mcd1 ![V,a,b]`).  Note `Z` appears **only evaluated** — the
 `∇₂_V Z` terms cancel (verified below).

@@ -256,6 +256,364 @@ theorem covDerivConnDiff2_eq (g₂ g₁ : SmoothRiemannianMetric I M)
               (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) V Y) x :=
   rfl
 
+open DifferentialGeometry.Integral.Connection in
+/-- **Section-smoothness of the a=1 connection-difference jet** `p ↦ covDerivConnDiff g₂ g₁ W X Y p`.
+Assembled from `covApply_contMDiffOn` + `diffSec_contMDiff`:
+`covDerivConnDiff = covApply(∇₂) W (diffSec X Y) − diffSec(∇₂_W X, Y) − diffSec(X, ∇₂_W Y)`.  Needed to
+feed the a=1 output field as a smooth slot into `metric_leibniz_extDeriv` when differentiating the
+master Koszul-2 pairing (the LHS of the clean identity).
+HOME DEBT: canonical home is upstream next to `covDerivConnDiff` in `RicciConnDiffPalatini.lean`. -/
+theorem covDerivConnDiff_contMDiff
+    (g₂ g₁ : SmoothRiemannianMetric I M)
+    (W X Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (fun p => covDerivConnDiff (I := I) g₂ g₁
+        (fun b => W b) (fun b => X b) (fun b => Y b) p)) := by
+  haveI : CovariantDerivative.ContMDiffCovariantDerivative
+      (LeviCivita (I := I) g₂) (∞ : WithTop ℕ∞) :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₂
+  haveI : CovariantDerivative.ContMDiffCovariantDerivative
+      (LeviCivita (I := I) g₁) (∞ : WithTop ℕ∞) :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₁
+  have hcast : ∀ (S : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (fun b => S b)) := by
+    intro S
+    rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+    exact S.contMDiff
+  have hDXY : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+        (fun b => X b) (fun b => Y b))) :=
+    diffSec_contMDiff (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁) X.contMDiff (hcast Y)
+  have hDXYc : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+      (T% (diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+        (fun b => X b) (fun b => Y b))) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+    exact hDXY
+  have hA : ContMDiffOn I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => W b)
+        (diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+          (fun b => X b) (fun b => Y b)))) Set.univ :=
+    covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) W.contMDiff hDXYc
+  have hWX : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => W b) (fun b => X b))) :=
+    contMDiffOn_univ.mp
+      (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) W.contMDiff (hcast X))
+  have hWY : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => W b) (fun b => Y b))) :=
+    contMDiffOn_univ.mp
+      (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) W.contMDiff (hcast Y))
+  have hWYc : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+      (T% (covApply (LeviCivita (I := I) g₂) (fun b => W b) (fun b => Y b))) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+    exact hWY
+  have hB : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+        (covApply (LeviCivita (I := I) g₂) (fun b => W b) (fun b => X b)) (fun b => Y b))) :=
+    diffSec_contMDiff (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁) hWX (hcast Y)
+  have hC : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+      (T% (diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+        (fun b => X b) (covApply (LeviCivita (I := I) g₂) (fun b => W b) (fun b => Y b)))) :=
+    diffSec_contMDiff (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁) X.contMDiff hWYc
+  rw [← contMDiffOn_univ]
+  refine ((hA.sub_section hB.contMDiffOn).sub_section hC.contMDiffOn).congr (fun p _hp => ?_)
+  rfl
+
+/-! ### The clean a=2 Koszul identity + the dual core -/
+
+/-- **The clean a=2 Christoffel-difference Koszul identity** (`Z` evaluated only, `metricCovDeriv`
+currency).  Pairing the a=2 connection-difference jet `covDerivConnDiff2 = ∇₂²A` against `Z`:
+```
+2 g₁(∇₂²A(V,W;X,Y), Z)
+  = ∇₂³g₁(V;W,X,Y,Z) + ∇₂³g₁(V;W,Y,X,Z) − ∇₂³g₁(V;W,Z,X,Y)
+    − 2 ∇₂²g₁(V;W, A(Y,X), Z)
+    − 2 ∇₂g₁(W; ∇₂A(V;X,Y), Z)
+    − 2 ∇₂g₁(V; ∇₂A(W;X,Y), Z).
+```
+Obtained from the master `connDiff_koszul_deriv2` by the metric-compat Leibniz on the LHS pairing and
+absorbing every slot correction (`∇₂_V W/X/Y/Z`) via the a=1 `connDiff_koszul_deriv` — all correction
+terms cancel exactly, leaving these six survivors.  The two `∇₂g₁·∇₂A` terms carry the **clean** a=1
+jet `covDerivConnDiff` (the raw `∇₂_V` of the connection-difference section reduces to it once the
+`A(Y,∇₂_V X)` pieces cancel against the input-slot absorption).  FRONTIER (`sorry`): the ~200-line
+absorption proof; the route is de-risked in `ConnDiffDeriv2Bound.md §2.1`. -/
+theorem koszul2_clean
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (V W X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (x : M) :
+    2 * g₁.inner x (covDerivConnDiff2 (I := I) g₂ g₁
+        (fun b => V b) (fun b => W b) (fun b => X b) (fun b => Y b) x) (Z x)
+      = metricCovDeriv (I := I) g₁ g₂ 3 x ![V x, W x, X x, Y x, Z x]
+        + metricCovDeriv (I := I) g₁ g₂ 3 x ![V x, W x, Y x, X x, Z x]
+        - metricCovDeriv (I := I) g₁ g₂ 3 x ![V x, W x, Z x, X x, Y x]
+        - 2 * metricCovDeriv (I := I) g₁ g₂ 2 x
+            ![V x, W x,
+              CovariantDerivative.difference
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁)
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) x (Y x) (X x),
+              Z x]
+        - 2 * metricCovDeriv (I := I) g₁ g₂ 1 x
+            ![W x,
+              DifferentialGeometry.Integral.Connection.covDerivConnDiff (I := I) g₂ g₁
+                (fun b => V b) (fun b => X b) (fun b => Y b) x,
+              Z x]
+        - 2 * metricCovDeriv (I := I) g₁ g₂ 1 x
+            ![V x,
+              DifferentialGeometry.Integral.Connection.covDerivConnDiff (I := I) g₂ g₁
+                (fun b => W b) (fun b => X b) (fun b => Y b) x,
+              Z x] := by
+  sorry
+
+open DifferentialGeometry.Integral.Connection
+  (smoothExtensionTangent smoothExtensionTangent_eq smoothExtensionTangent_contMDiff
+    leviCivitaConnectionOfMetric exists_gOrthonormalBasis) in
+set_option maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **The a=2 dual core.**  Pairing the clean a=2 Koszul identity `koszul2_clean` against the output
+vector `B₂ = ∇₂²A(v',v;w,u)` bounds the `g₁`-length of the second connection-difference jet by the
+order-3/2/1 metric covariant derivatives of `g₁` and the a≤1 connection-difference atoms, all in the
+`g₁` fibre.  The two `∇₂A`-vector slots of `koszul2_clean` are re-expanded by the a=1 dual core
+`covDerivConnDiff_g1_le` (constant `CA1 = 3/2·M₂ + M₁·NA`); the `A`-slot by `connDiffVec_norm_le`;
+then the pairing is divided by `|B₂|` (B2's step-(7) trick).  a=2 analogue of
+`ConnDiffDerivBound.covDerivConnDiff_g1_le`. -/
+theorem covDConnDiff2_g1_le
+    [InnerProductSpace ℝ E]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v' v w u : TangentSpace I x) :
+    Real.sqrt (g₁.inner x
+        (covDerivConnDiff2 (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v') (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w) (smoothExtensionTangent (I := I) x u) x)
+        (covDerivConnDiff2 (I := I) g₂ g₁
+          (smoothExtensionTangent (I := I) x v') (smoothExtensionTangent (I := I) x v)
+          (smoothExtensionTangent (I := I) x w) (smoothExtensionTangent (I := I) x u) x)) ≤
+      (3 / 2 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 5
+            (metricCovDeriv (I := I) g₁ g₂ 3 x))
+        + Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4 (metricCovDeriv (I := I) g₁ g₂ 2 x))
+            * Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+                (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                  (leviCivitaConnectionOfMetric (I := I) g₁)
+                  (leviCivitaConnectionOfMetric (I := I) g₂) x))
+        + 2 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3 (metricCovDeriv (I := I) g₁ g₂ 1 x))
+            * (3 / 2 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+                  (metricCovDeriv (I := I) g₁ g₂ 2 x))
+              + Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3 (metricCovDeriv (I := I) g₁ g₂ 1 x))
+                  * Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+                      (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+                        (leviCivitaConnectionOfMetric (I := I) g₁)
+                        (leviCivitaConnectionOfMetric (I := I) g₂) x)))) *
+        Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x v v) *
+          Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+  sorry
+
+/- PROOF ATTEMPT (banked; the Cauchy–Schwarz + division mirrors the a=1 `covDerivConnDiff_g1_le`
+   one order up — 3 mcd3 combos, 1 mcd2·A term, 2 mcd1·∇₂A terms, then divide by |B₂|).  The attempt
+   below is complete in structure but needs finishing iteration on the known wall cluster: the
+   1.6M-heartbeat family (use `clear_value` on B₂/D5/D6/Avec/M1/M2/M3/NA after their def-dependent
+   uses), the `set`-folding of the vector norms (keep `√(g₁.inner x · ·)` literal instead of `set`ting
+   Pv/Qv/Rw/Su/SB), and the final `nlinarith` degree (pre-combine each CS bound with its atom bound,
+   as in `hTA`/`hTD5`/`hTD6`).  See `ConnDiffDeriv2Bound.md §2.1.b`.  Also needs
+   `open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg)`.
+
+  classical
+  haveI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I (1 + 1) M :=
+    IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₁ x
+  set NA : ℝ := Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+    (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x)) with hNAdef
+  set M1 : ℝ := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
+    (metricCovDeriv (I := I) g₁ g₂ 1 x)) with hM1def
+  set M2 : ℝ := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
+    (metricCovDeriv (I := I) g₁ g₂ 2 x)) with hM2def
+  set M3 : ℝ := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 5
+    (metricCovDeriv (I := I) g₁ g₂ 3 x)) with hM3def
+  set B2 : TangentSpace I x :=
+    covDerivConnDiff2 (I := I) g₂ g₁
+      (smoothExtensionTangent (I := I) x v') (smoothExtensionTangent (I := I) x v)
+      (smoothExtensionTangent (I := I) x w) (smoothExtensionTangent (I := I) x u) x with hB2def
+  set Vsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x v')
+      (smoothExtensionTangent_contMDiff (I := I) x v') with hVsec
+  set Wsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
+      (smoothExtensionTangent_contMDiff (I := I) x v) with hWsec
+  set Xsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x w)
+      (smoothExtensionTangent_contMDiff (I := I) x w) with hXsec
+  set Ysec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
+      (smoothExtensionTangent_contMDiff (I := I) x u) with hYsec
+  set Zsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    ContMDiffSection.mk (smoothExtensionTangent (I := I) x B2)
+      (smoothExtensionTangent_contMDiff (I := I) x B2) with hZsec
+  have hVx : Vsec x = v' := smoothExtensionTangent_eq (I := I) x v'
+  have hWx : Wsec x = v := smoothExtensionTangent_eq (I := I) x v
+  have hXx : Xsec x = w := smoothExtensionTangent_eq (I := I) x w
+  have hYx : Ysec x = u := smoothExtensionTangent_eq (I := I) x u
+  have hZx : Zsec x = B2 := smoothExtensionTangent_eq (I := I) x B2
+  have hAbr2 : covDerivConnDiff2 (I := I) g₂ g₁
+      (fun b => Vsec b) (fun b => Wsec b) (fun b => Xsec b) (fun b => Ysec b) x = B2 := by
+    rw [hB2def]; rfl
+  have hkos := koszul2_clean (I := I) g₁ g₂ Vsec Wsec Xsec Ysec Zsec x
+  rw [hAbr2, hVx, hWx, hXx, hYx, hZx] at hkos
+  -- the two ∇₂A vectors
+  set D5 : TangentSpace I x :=
+    DifferentialGeometry.Integral.Connection.covDerivConnDiff (I := I) g₂ g₁
+      (fun b => Vsec b) (fun b => Xsec b) (fun b => Ysec b) x with hD5def
+  set D6 : TangentSpace I x :=
+    DifferentialGeometry.Integral.Connection.covDerivConnDiff (I := I) g₂ g₁
+      (fun b => Wsec b) (fun b => Xsec b) (fun b => Ysec b) x with hD6def
+  set Avec : TangentSpace I x :=
+    CovariantDerivative.difference
+      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁)
+      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) x u w with hAvec
+  -- Cauchy–Schwarz at the internal `g₁`-orthonormal basis, ranks 5/4/3.
+  have hcs5 : ∀ a b c d e : TangentSpace I x,
+      |metricCovDeriv (I := I) g₁ g₂ 3 x ![a, b, c, d, e]| ≤
+        M3 * (Real.sqrt (g₁.inner x a a) * Real.sqrt (g₁.inner x b b) *
+          Real.sqrt (g₁.inner x c c) * Real.sqrt (g₁.inner x d d) * Real.sqrt (g₁.inner x e e)) := by
+    intro a b c d e
+    have h := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₁ x 5 basis hON
+      (metricCovDeriv (I := I) g₁ g₂ 3 x) ![a, b, c, d, e]
+    rw [hM3def]
+    refine le_trans h (le_of_eq ?_)
+    congr 1
+    change (∏ i : Fin 5, Real.sqrt (g₁.inner x (![a, b, c, d, e] i) (![a, b, c, d, e] i))) = _
+    simp [Fin.prod_univ_five]
+  have hcs4 : ∀ a b c d : TangentSpace I x,
+      |metricCovDeriv (I := I) g₁ g₂ 2 x ![a, b, c, d]| ≤
+        M2 * (Real.sqrt (g₁.inner x a a) * Real.sqrt (g₁.inner x b b) *
+          Real.sqrt (g₁.inner x c c) * Real.sqrt (g₁.inner x d d)) := by
+    intro a b c d
+    have h := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₁ x 4 basis hON
+      (metricCovDeriv (I := I) g₁ g₂ 2 x) ![a, b, c, d]
+    rw [hM2def]
+    refine le_trans h (le_of_eq ?_)
+    congr 1
+    change (∏ i : Fin 4, Real.sqrt (g₁.inner x (![a, b, c, d] i) (![a, b, c, d] i))) = _
+    simp [Fin.prod_univ_four]
+  have hcs3 : ∀ a b c : TangentSpace I x,
+      |metricCovDeriv (I := I) g₁ g₂ 1 x ![a, b, c]| ≤
+        M1 * (Real.sqrt (g₁.inner x a a) * Real.sqrt (g₁.inner x b b) *
+          Real.sqrt (g₁.inner x c c)) := by
+    intro a b c
+    have h := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I) g₁ x 3 basis hON
+      (metricCovDeriv (I := I) g₁ g₂ 1 x) ![a, b, c]
+    rw [hM1def]
+    refine le_trans h (le_of_eq ?_)
+    congr 1
+    change (∏ i : Fin 3, Real.sqrt (g₁.inner x (![a, b, c] i) (![a, b, c] i))) = _
+    simp [Fin.prod_univ_three]
+  -- the a≤1 atom bounds on the fibre norms of `Avec`, `D5`, `D6`
+  have hSA : Real.sqrt (g₁.inner x Avec Avec) ≤
+      NA * Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+    rw [hAvec, hNAdef]
+    exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) w u
+  have hCA1nn : (0 : ℝ) ≤ 3 / 2 * M2 + M1 * NA := by
+    have : (0 : ℝ) ≤ M2 := hM2def ▸ Real.sqrt_nonneg _
+    have : (0 : ℝ) ≤ M1 := hM1def ▸ Real.sqrt_nonneg _
+    have : (0 : ℝ) ≤ NA := hNAdef ▸ Real.sqrt_nonneg _
+    positivity
+  have hSD5 : Real.sqrt (g₁.inner x D5 D5) ≤
+      (3 / 2 * M2 + M1 * NA) *
+        Real.sqrt (g₁.inner x v' v') * Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+    rw [hD5def, hM2def, hM1def, hNAdef]
+    exact DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_g1_le (I := I) g₂ g₁ x v' w u
+  have hSD6 : Real.sqrt (g₁.inner x D6 D6) ≤
+      (3 / 2 * M2 + M1 * NA) *
+        Real.sqrt (g₁.inner x v v) * Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+    rw [hD6def, hM2def, hM1def, hNAdef]
+    exact DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_g1_le (I := I) g₂ g₁ x v w u
+  -- squared length of `B₂`
+  have hBB_nn : 0 ≤ g₁.inner x B2 B2 := metric_inner_self_nonneg (I := I) (M := M) g₁ x B2
+  have hBBsq : g₁.inner x B2 B2 = Real.sqrt (g₁.inner x B2 B2) ^ 2 := (Real.sq_sqrt hBB_nn).symm
+  rw [hBBsq] at hkos
+  -- combined product bounds (CS composed with the atom bounds)
+  set Pv := Real.sqrt (g₁.inner x v' v') with hPv
+  set Qv := Real.sqrt (g₁.inner x v v) with hQv
+  set Rw := Real.sqrt (g₁.inner x w w) with hRw
+  set Su := Real.sqrt (g₁.inner x u u) with hSu
+  set SB := Real.sqrt (g₁.inner x B2 B2) with hSB
+  have hPvnn : 0 ≤ Pv := hPv ▸ Real.sqrt_nonneg _
+  have hQvnn : 0 ≤ Qv := hQv ▸ Real.sqrt_nonneg _
+  have hRwnn : 0 ≤ Rw := hRw ▸ Real.sqrt_nonneg _
+  have hSunn : 0 ≤ Su := hSu ▸ Real.sqrt_nonneg _
+  have hSBnn : 0 ≤ SB := hSB ▸ Real.sqrt_nonneg _
+  have hM1nn : 0 ≤ M1 := hM1def ▸ Real.sqrt_nonneg _
+  have hM2nn : 0 ≤ M2 := hM2def ▸ Real.sqrt_nonneg _
+  have hM3nn : 0 ≤ M3 := hM3def ▸ Real.sqrt_nonneg _
+  have hNAnn : 0 ≤ NA := hNAdef ▸ Real.sqrt_nonneg _
+  -- three mcd3 combos
+  have hT1 := hcs5 v' v w u B2
+  have hT2 := hcs5 v' v u w B2
+  have hT3 := hcs5 v' v B2 w u
+  -- mcd2 · A term
+  have hTA : |metricCovDeriv (I := I) g₁ g₂ 2 x ![v', v, Avec, B2]| ≤
+      M2 * NA * (Pv * Qv * Rw * Su * SB) := by
+    refine le_trans (hcs4 v' v Avec B2) ?_
+    have hAle : Real.sqrt (g₁.inner x Avec Avec) ≤ NA * (Rw * Su) := by
+      rw [hRw, hSu]; exact hSA
+    calc M2 * (Pv * Qv * Real.sqrt (g₁.inner x Avec Avec) * SB)
+        ≤ M2 * (Pv * Qv * (NA * (Rw * Su)) * SB) := by
+          apply mul_le_mul_of_nonneg_left _ hM2nn
+          apply mul_le_mul_of_nonneg_right _ hSBnn
+          apply mul_le_mul_of_nonneg_left _ (mul_nonneg hPvnn hQvnn)
+          exact hAle
+      _ = M2 * NA * (Pv * Qv * Rw * Su * SB) := by ring
+  -- mcd1 · D5 term
+  have hTD5 : |metricCovDeriv (I := I) g₁ g₂ 1 x ![v, D5, B2]| ≤
+      M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by
+    refine le_trans (hcs3 v D5 B2) ?_
+    have hD5le : Real.sqrt (g₁.inner x D5 D5) ≤ (3 / 2 * M2 + M1 * NA) * (Pv * Rw * Su) := by
+      rw [hPv, hRw, hSu]; exact hSD5
+    calc M1 * (Qv * Real.sqrt (g₁.inner x D5 D5) * SB)
+        ≤ M1 * (Qv * ((3 / 2 * M2 + M1 * NA) * (Pv * Rw * Su)) * SB) := by
+          apply mul_le_mul_of_nonneg_left _ hM1nn
+          apply mul_le_mul_of_nonneg_right _ hSBnn
+          apply mul_le_mul_of_nonneg_left _ hQvnn
+          exact hD5le
+      _ = M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by ring
+  -- mcd1 · D6 term
+  have hTD6 : |metricCovDeriv (I := I) g₁ g₂ 1 x ![v', D6, B2]| ≤
+      M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by
+    refine le_trans (hcs3 v' D6 B2) ?_
+    have hD6le : Real.sqrt (g₁.inner x D6 D6) ≤ (3 / 2 * M2 + M1 * NA) * (Qv * Rw * Su) := by
+      rw [hQv, hRw, hSu]; exact hSD6
+    calc M1 * (Pv * Real.sqrt (g₁.inner x D6 D6) * SB)
+        ≤ M1 * (Pv * ((3 / 2 * M2 + M1 * NA) * (Qv * Rw * Su)) * SB) := by
+          apply mul_le_mul_of_nonneg_left _ hM1nn
+          apply mul_le_mul_of_nonneg_right _ hSBnn
+          apply mul_le_mul_of_nonneg_left _ hPvnn
+          exact hD6le
+      _ = M1 * (3 / 2 * M2 + M1 * NA) * (Pv * Qv * Rw * Su * SB) := by ring
+  -- absolute-value bounds feeding the pairing
+  have habs1 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 3 x ![v', v, w, u, B2])
+  have habs2 := le_abs_self (metricCovDeriv (I := I) g₁ g₂ 3 x ![v', v, u, w, B2])
+  have habs3 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 3 x ![v', v, B2, w, u])
+  have habsA := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 2 x ![v', v, Avec, B2])
+  have habsD5 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 1 x ![v, D5, B2])
+  have habsD6 := neg_le_abs (metricCovDeriv (I := I) g₁ g₂ 1 x ![v', D6, B2])
+  rcases eq_or_lt_of_le hSBnn with hSB0 | hSBpos
+  · rw [hSB] at hSB0 ⊢
+    rw [← hSB0]
+    positivity
+  · have hmul : SB * (2 * SB) ≤
+        SB * ((3 * M3 + 2 * (M2 * NA) + 4 * (M1 * (3 / 2 * M2 + M1 * NA))) *
+          (Pv * Qv * Rw * Su)) := by
+      nlinarith [hkos, hT1, hT2, hT3, hTA, hTD5, hTD6,
+        habs1, habs2, habs3, habsA, habsD5, habsD6]
+    have hdiv := le_of_mul_le_mul_left hmul hSBpos
+    nlinarith [hdiv]
+-/
+
 /-- **FRONTIER (`sorry`) — the a=2 base-Leibniz jet of a single connection-difference step.**
 
 Under `Λ`-comparability of `g₁, g₂` on `K` and metric covariant-derivative bounds through **order 3**

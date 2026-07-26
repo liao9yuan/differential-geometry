@@ -256,10 +256,11 @@ private theorem nabla3_eq_mcd2
     (metricCovDeriv (I := I) g₁ g₂ 1) x slots).symm
 
 set_option linter.unusedSectionVars false in
-/-- General-order `(0,s)` norm comparison under `MetricUniformEquivalentOn K g₂ g₁ Λ`:
+/-- **General-order `(0,s)` fibre-norm comparability** under `MetricUniformEquivalentOn K g₂ g₁ Λ`:
 `√normSq0S(g₁, s, A) ≤ √(Λ^s) · √normSq0S(g₂, s, A)`.  General-`s` sibling of
-`sqrt_normSq0S_three_le_of_metricUniformEquivalentOn` (used at `s = 3` and `s = 4`). -/
-private theorem sqrt_normSq0S_comp
+`sqrt_normSq0S_three_le_of_metricUniformEquivalentOn` (used at `s = 3, 4` here, `s = 5` by the a=2
+dual core).  Public: it is a clean reusable comparability lemma with no dependence on the B2 route. -/
+theorem sqrt_normSq0S_comp
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
     {x : M} (hx : x ∈ K) (s : ℕ)
@@ -302,8 +303,10 @@ set_option backward.isDefEq.respectTransparency false in
 /-- **B2 P2 — the dual Koszul core.**  Pairing the differentiated Koszul identity
 `connDiff_koszul_deriv` against the output vector itself bounds the `g₁`-length of
 `covDerivConnDiff g₂ g₁ (ext v) (ext w) (ext u) x` by the second and first metric covariant
-derivatives of `g₁` along `∇₂`, all measured in the `g₁` fibre. -/
-private theorem covDerivConnDiff_g1_le
+derivatives of `g₁` along `∇₂`, all measured in the `g₁` fibre.  Public: the a=2 dual core
+`covDConnDiff2_g1_le` (`ConnDiffDeriv2Bound.lean`) reuses it to bound the `∇₂A`-vector slots that
+appear in the a=2 clean Koszul identity. -/
+theorem covDerivConnDiff_g1_le
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Real.sqrt (g₁.inner x
         (covDerivConnDiff (I := I) g₂ g₁
