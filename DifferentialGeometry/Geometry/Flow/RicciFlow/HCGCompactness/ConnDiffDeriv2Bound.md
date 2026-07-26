@@ -7,6 +7,56 @@ is the route + a stated frontier lemma, not a proof.**
 
 ## 0. STATUS (2026-07-26)
 
+- **UPDATE (a=2 campaign session 7, 2026-07-26): the `covStepDiff2_mixedComm_le` eval-identity route
+  was AUDITED empirically; the plan's implied "clean one-order-up of `diffStep_leibniz_eval`" is
+  DISPROVEN — the frontier is larger than the ~100-line estimate.  KEY FINDING (verified in Lean via a
+  disposable test lemma, now removed; file is back to its clean single-`sorry` baseline, GREEN):**
+  - **`mixedComm S` has NO clean single-`covDerivConnDiff`-insertion eval.**  Evaluating
+    `mixedComm S = covStep g₂ (s+1)(diffStep g₁ g₂ s S) − diffStep g₁ g₂ (s+1)(covStep g₂ s S)` on
+    `Fin.cons (W x)(Fin.cons (V x)(Vslots·x))` via `diffStep_leibniz_eval` (rank `s`) + `diffStep_eval`
+    (rank `s+1`, field `∇₂S`) gives, **verbatim from the Lean goal**:
+    ```
+    mixedComm S x [W,V,Vslots] = −term1clean − term2 + diffStepEval
+      term1clean   = ∑ₐ S(update Vslots a (covDerivConnDiff g₂ g₁ W V (Vslots a)))          -- ∇₂A into S
+      term2        = ∑ₐ (covStep g₂ s S)(cons W (update Vslots a (A(Vslots a, V))))          -- A-dir V, ∇₂S leading W
+      diffStepEval = ∑_{q:Fin(s+1)} (covStep g₂ s S)(update (cons V Vslots) q (A((cons V Vslots) q, W)))
+      A = (LC g₁).difference (LC g₂) x
+    ```
+    The clean identity `mixedComm = −term1clean` requires `term2 = diffStepEval`; **`abel` leaves the
+    residual `−term2 + diffStepEval = 0`, which is FALSE** (`s=1`: `term2 = ∇₂S([W,A(Vs0,V)])`;
+    `diffStepEval = ∇₂S([A(V,W),Vs0]) + ∇₂S([V,A(Vs0,W)])` — one term vs two, distinct arguments).  So
+    `mixedComm S` carries genuine `∇₂S`-insertion terms; it is NOT `(∇₂A)⋆S` at the naive eval level.
+  - **Consequence for the a=2 bridge.**  `∇₂(mixedComm S)` is therefore a genuine NESTED second
+    differentiation.  It IS feasible — the tensor identity
+    `∇₂(mixedComm S) = (∇₂²A)⋆S + (∇₂A)⋆∇₂S` (product rule; airtight) guarantees the `∇₂²S` symbols
+    cancel — but the realization needs the eval of `Piece A = covStep g₂ (s+2)(covStep g₂ (s+1)(diffStep S))`
+    (`= ∇₂²(A⋆S)`, an outer `covStep_eval_smooth_slots` peel of the `diffStep_leibniz_eval` RESULT, with
+    the two inner sums each differentiated), then subtract
+    `Piece B = covStep g₂ (s+2)(diffStep g₁ g₂ (s+1)(covStep g₂ s S))` (`= diffStep_leibniz_eval` at rank
+    `s+1`), with the `∇₂²S` terms (`Piece A`'s `∂(term2)` branch vs `Piece B`'s `D2 = A-into-∇₂²S`)
+    cancelling.  Structurally this IS "`diffStep_leibniz_eval` one order up": `covDerivConnDiff2` emerges
+    from differentiating `term1clean`'s `covDerivConnDiff` insertion (its DEF is exactly
+    `covApply(∇₂) U (covDerivConnDiff-sec) − 3 slot corrections`, and `covDerivConnDiff_contMDiff`
+    supplies the smoothness), exactly as `diffStep_leibniz_eval`'s `hFact1` produced `covDerivConnDiff`
+    from `∂A`.  Honest size: **~300–450 lines** with 3–4 `hFib`-scale Finset re-indexing / cancellation
+    blocks (the a=1 `diffStep_leibniz_eval` is 230 lines for ONE peel + ONE cancellation; a=2 adds a
+    second peel and the `∇₂²S` cancellation) — a multi-session core, NOT the ~100-line port §3.2/the
+    `sorry` docstring imply.  The plan's FINAL target shape (covDerivConnDiff2-insertion +
+    covDerivConnDiff-insertion) is likely still correct AFTER the `∇₂²S` cancellation, but the
+    intermediate `mixedComm`-clean assumption that would make it a short port is false.
+  - **Smallest next lemma (the reusable core):** `covStep2_diffStep_eval` — the eval of `Piece A`
+    (`∇₂²(diffStep S) x [cons U (cons W (cons V Vslots))]`).  Build it as an outer
+    `covStep_eval_smooth_slots` peel (field `H = covStep g₂ (s+1)(diffStep S)`, deriv `U`), rewrite the
+    inner `fun y => H y (rest·y)` by `diffStep_leibniz_eval` pointwise, then differentiate the two sums
+    (`term1clean` → covDerivConnDiff2 via its DEF + `covDerivConnDiff_contMDiff`; `term2` → `∇₂²S` + a
+    covDerivConnDiff branch), mirroring `diffStep_leibniz_eval`'s `hEDF`/`hFib`/`hFact1`/`hYY'` idioms.
+    Then `covStepDiff2_mixedComm_le`'s norm assembly mirrors `covStepDiff_norm_le`
+    (`UnifCovSumCross.lean:711`) with the g₂-fibre atoms `covDerivConnDiff_gJet_le` (for the
+    covDerivConnDiff insertion) and a g₁→g₂-converted `covDConnDiff2_g1_le` (for the covDerivConnDiff2
+    insertion), assembled by `normSq0S_le_card_of_component_bound`.
+  - Verified: baseline `ConnDiffDeriv2Bound.lean` GREEN, single intended `sorry` at
+    `covStepDiff2_mixedComm_le`.  No API change; `covDConnDiff2_g1_le`/`koszul2_clean` still axiom-clean.
+
 - **UPDATE (a=2 campaign session 6, 2026-07-26): `covStepDiff2_exists_const` is PROVED conditional on a
   SINGLE minimal bridge; the a=2 fibre assembly is COMPLETE modulo one flagged realization lemma.**
   - **Reduction (the honest, minimal frontier).**  Applying `covStep g₂` to `diffStep_leibniz`
