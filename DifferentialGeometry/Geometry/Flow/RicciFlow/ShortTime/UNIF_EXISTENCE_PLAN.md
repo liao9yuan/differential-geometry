@@ -1767,3 +1767,13 @@ covDerivConnDiff section (reuse-check ordered before any build).  Session 3
 dispatched: absorption proof (§2.1 → Lean; trust Lean over hand where they
 disagree — a REAL term mismatch is planner-level), then the dual-core bound,
 then (budget) the exists_const discharge.  a=2 ≈ 45% machinery / 0% theorems.
+
+### №28 log 2 — linchpin ACCEPTED (`56e256d6d`); lc0VB fibre-identity session dispatched
+
+The metricConnDiffLowered producer landed as a short REUSE (sign identity to
+Arm1's kappa + jet-norm sign-invariance); the deTurckVF arm turned out ALREADY
+COMMITTED (`lieArm1_connDiff_feed` — the cometric-trace fold makes the arm pure
+connDiffSection).  lc0VB's engine gap is CLOSED; dispatched the fibre identity
+(~200-400 lines) + leaf discharge.  lc0AMix drops to ≈1 session after (reuses
+the linchpin twice, no interior product).  Lanes: a=2 absorption + lc0VB fibre
++ threeArm recon in flight.
