@@ -292,6 +292,70 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №13 (2026-07-25, ACCEPTED — **K2A OUTCOME (A)** + **PLANNER RULING R4**):
+  **Agent-K2A delivered `Evolution/ForwardUniqueRmDot.lean`** (691 lines, 16
+  public + 9 private, 0 sorry; planner re-audit clean). Part 1: `rmDiffVec :=
+  riemannOp(metricCov g₁) − riemannOp(metricCov g₂)` (canonical (1,3)
+  difference, no supplied carrier), `rmDiffDot` two-term speed,
+  `rmDiffLow_hasDerivAt` = K3's `hS` VERBATIM; `hPDE₂` again unnecessary.
+  Part 2: `rmDiffComp_deriv` (generic in T₁ T₂) + `rmLowComp_deriv`; benign
+  realization hypotheses `hL₁`/`hL₂` (supplied-`roughLapRm04` naming). Costs
+  logged: `[BoundarylessManifold I M]` added (riemannOp reconcile);
+  `private instance instContMDiffMetricCov` (:242, 4th InnerProductSpace-taint
+  workaround — conditionally accepted, delete at campaign-end with the
+  producer `omit`); `ContMDiffCovariantDerivative` is a MATHLIB root class
+  (grep lesson).
+  **RULING R4 (the lowering mismatch)**: the honest own-lowered Uhlenbeck
+  interfaces' difference is `metricRm04At g₁ − metricRm04At g₂` ≠ S₀₄, and the
+  gap's `Δ₁` sees uncontrolled `∇¹∇¹h₀₂` — carriers cannot be swapped post
+  hoc. DECISION: keep the ruling's S₀₄ carrier (no ripple into K3/K2.4/K2.5)
+  and bridge on the interface side — per flow, convert the own-lowered (0,4)
+  interface to the (1,3) evolution ALGEBRAICALLY (own-metric raise; Δᵢ
+  commutes with gᵢ♭/♯ since ∇ᵢgᵢ = 0 — no new frontier), difference at (1,3)
+  = `rmDiffVec` (Part 1's object!), lower with g₁; the [g₁♭, Δ₂] commutator
+  is A-algebraic (∇²g₁ = −A·g₁) with its ∇A-terms organized in DIVERGENCE
+  FORM (second flux — Kotschwar's own organization; K2.3's machinery already
+  proved this tractable on our stack). FALLBACK (recorded): the executor's
+  mixed-lowering standing input `hreal`. ESCALATION: if the commutator
+  div-organization fails on the Tensor0S stack → short Pro re-consult.
+  Sub-brick K2.6b commissioned for the R4 bridge.
+- №12 (2026-07-25, AUDIT HARDENING after user flag): the planner's hygiene
+  grep (`^instance ` etc.) MISSED modifier-prefixed forms — a hardened sweep
+  (`^(@\[..\] )?(noncomputable |private |protected |scoped |local |unsafe )*
+  (axiom|instance|notation|opaque|macro|elab|syntax)\b`) found four
+  `private local instance` (Borel measurable structure on E/M) in
+  `ForwardUniqueEnergy.lean:249–252`, unreported by the executor. RULED
+  BENIGN: identical idiom to the verified `StrongSolutionUniqueness.lean:39–42`
+  (house pattern for measure-theory files); `private local` ⟹ file-local,
+  non-leaking, no API contamination. Hardened grep is now the STANDARD
+  acceptance check. All other lane files clean under the hardened sweep.
+  COORDINATION NOTE: the user started the relocation chip
+  ("movingReact0S → tensor layer") in a SEPARATE session — it may edit
+  `ForwardUniqueEnergy.lean` + `Tensor0SMetricDeriv.lean`; this lane will not
+  touch `ForwardUniqueEnergy.lean` until that session lands (K2A's brick does
+  not edit it).
+- №11 (2026-07-25, ACCEPTED — **T0S kit OUTCOME (A+)**): **Agent-T0S delivered
+  `Tensor/RSTensor/FiberMetric/Tensor0SMetricIneq.lean`** (242 lines, 17 thms,
+  0 sorry; planner re-audit clean — NOTE namespace is top-level
+  `Tensor0SBundle`, matching the canonical layer). Full bilinearity layer +
+  add/sub expansions + `abs_inner0S_le`/`normSq0S_add_le`/`normSq0S_sub_le` +
+  frame-free Minkowski `sqrt_normSq0S_(add|sub)_le`. Route: `MetricFiberData.flat`
+  LinearEquiv level (NEW LESSON: at the flat/Module.Dual level `rw` works —
+  the FunLike diamond only bites at the CMM level); CS reused from
+  `inner0S_sq_le_mul` (:467). `normSq0S_smul` correctly NOT duplicated (exists
+  in `Tensor0SRiemannian/Scaling.lean:61`; LAYERING WART logged — it belongs
+  down in `Tensor0SMetric.lean`). K1C-b gap (1) DISCHARGED. Dedup opportunities
+  logged: HCG `sqrt_normSq0S_add_le` (basis+orthonormal hyps droppable at ~8
+  call sites), HCG `normSq0S_neg` (frame-free replacement).
+- №10 (2026-07-25, IN FLIGHT → T0S accepted above; K2A still running): fourth wave, two Opus builders.
+  **Agent-K2A** — `Evolution/ForwardUniqueRmDot.lean`: the `∂ₜS₀₄` capstone —
+  priority = `rmDiffDot` two-term speed + K3's `hS` feed (mirror K1C-a);
+  then K2.6-core (Uhlenbeck-hypothesis subtraction + K2.3 spatial identity,
+  supplied-`roughLapRm04` ↔ intrinsic realization as an explicit ∀-hypothesis).
+  **Agent-T0S** — NEW canonical-layer file
+  `Tensor/RSTensor/FiberMetric/Tensor0SMetricIneq.lean`: the fiber inequality
+  kit (CS, `normSq0S_add_le`/`_sub_le`/`_smul`, abs-inner) unblocking K1C-b
+  and the K4 rate estimates; Core-instantiation route, no component sums.
 - №9 (2026-07-25, ACCEPTED — **K1C OUTCOME (B), the honest kind**):
   **Agent-K1C delivered `Evolution/ForwardUniqueConnDot.lean`** (628 lines,
   20 decls, 0 sorry; planner re-audit clean). K1C-a COMPLETE: the moving-
