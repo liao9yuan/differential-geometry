@@ -292,6 +292,19 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №57 (2026-07-26, CODEX CURVATURE-DERIVATIVE LAYER — **CLOSED-EDGE
+  `∇^kRm` AND CROSS-LOWERED SLAB SUPS COMPLETE**): added the product-within
+  derivative bridge `prodExtDeriv_joint`, the finite frame recursion
+  `iterRmComp_joint`, and `Evolution/ForwardUniqueRmReg.lean`.  The latter
+  proves one-step and rank-uniform chart-frame regularity for own and
+  cross-lowered curvature using the intrinsic realization bridges, without
+  the unproduced `ModelDerivEqCoordDeriv0SAt`.  `ForwardUniqueSup.lean` now
+  exports the rank-five/rank-six own and cross-lowered compact-slab bounds,
+  two-sided metric equivalence, and the metric-difference supremum.  Focused
+  checks and targeted exports are green and warning-clean; representative
+  endpoints depend on exactly `[propext, Classical.choice, Quot.sound]`.
+  This completes the derivative/sup half of the last `hrem` brick; the public
+  endpoint remains 0% until its proof body is replaced.
 - №56 (2026-07-26, CODEX R13 TENSORIZATION — **RAW REMAINDER CARRIERS
   ELIMINATED; FULL `hrem` STILL OPEN**): new
   `Evolution/ForwardUniqueRem.lean` reconstructs component arrays as genuine

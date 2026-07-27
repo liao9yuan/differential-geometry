@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueAssem
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRatePro
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSdec
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmReg
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 
 set_option autoImplicit false
@@ -40,6 +41,9 @@ and nothing in the tree supplies one.  This file is the layer that does.
   compactness enters: it is the ON-frame component estimate with both slots equal.
 * `nablaRicSlabSup` — the closed-slab bound for `|∇Ric|²`, obtained from the
   one-sided chart derivative tower and `nablaRicChartJoint`.
+* `nablaKRmSlabSup`, `crossRm1SlabSup`, `crossRm2SlabSup` — the corresponding
+  rank-uniform own-curvature and rank-five/rank-six cross-curvature bounds used
+  by the final remainder estimate.
 * `movingReactAbs_le` — the **rank-uniform moving-metric reaction bound** owed since plan №25:
   `|movingReact0S (g t) x s Q W| ≤ 2·s·n^{2s+2}·√(|Q|²)·|W|²`, whence `reactSlabLe`, the
   **`reactLe` field**.
@@ -404,6 +408,23 @@ theorem normSqSlabSup {s : Nat} (g : Real → SmoothRiemannianMetric I M)
   normSqSlabBound (I := I) g A
     ((normSq0S_jointContMDiffOn (I := I) g A hgram hA).continuousOn)
 
+/-- **The sup of the metric-difference density on the closed subslab.** -/
+theorem metricDiffSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ B := by
+  obtain ⟨B, hB0, hB⟩ := slabBound (M := M)
+    (fun t x => metricDiffSq (I := I) (g₁ t) (g₂ t) x)
+    ((metricDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ hgram₂).continuousOn)
+  exact ⟨B, hB0, fun t ht x => (le_abs_self _).trans (hB t ht x)⟩
+
 /-- **The sup of `|g₂|²_{g₁}` on the closed subslab** — the `B_g` constant of `sdecFluxSq_le`.
 The chart-frame components of the `(0,2)` carrier `metricTensorField (g₂ t)` *are* the chart-Gram
 entries of `g₂`, so no curvature tower is involved. -/
@@ -524,6 +545,112 @@ theorem nablaRicSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
     hgramN
     (fun x₀ K _ ht => nablaRicChartJoint (I := I) gC x₀ (hgramC x₀) K ht)
 
+/-- **The sup of `|∇ᵏRm(gC)|²_{gN}` on the closed subslab.**
+
+The norm metric and curvature metric are independent.  The closed-edge chart
+regularity is supplied by `nablaKRmChartJoint`; the compactness step is the
+rank-uniform `normSqSlabSup`. -/
+theorem nablaKRmSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
+    (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gN p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramC : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gC p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (k : ℕ) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (gN t) x (4 + k)
+        (nablaKRm04Field (I := I)
+          (solOfMetric (I := I) (D := RealTimeInterval.univ 0) gC) t k x) ≤ B :=
+  normSqSlabSup (I := I) gN
+    (fun t x =>
+      nablaKRm04Field (I := I)
+        (solOfMetric (I := I) (D := RealTimeInterval.univ 0) gC) t k x)
+    hgramN
+    (fun x₀ K _ ht => nablaKRmChartJoint (I := I) gC x₀ (hgramC x₀) k K ht)
+
+/-- **The sup of the first covariant derivative of a cross-lowered curvature.**
+
+The four metric roles are independent: `gN` takes the norm, `gL` lowers the
+curvature, `gC` supplies its connection, and `gD` differentiates it. -/
+theorem crossRm1SlabSup
+    (gN gL gC gD : Real → SmoothRiemannianMetric I M)
+    (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gN p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramL : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gL p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramC : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gC p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramD : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gD p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (gN t) x 5
+        (metricNabla0S (I := I) (gD t)
+          (CovariantDerivative.rm04Section (I := I) (gL t)
+            (metricCov (I := I) (gC t))
+            (metricCov_smooth (I := I) (gC t))) x) ≤ B :=
+  normSqSlabSup (I := I) gN
+    (fun t =>
+      metricNabla0S (I := I) (gD t)
+        (CovariantDerivative.rm04Section (I := I) (gL t)
+          (metricCov (I := I) (gC t))
+          (metricCov_smooth (I := I) (gC t))))
+    hgramN
+    (fun x₀ K _ ht =>
+      crossRm1ChartJoint (I := I) gL gC gD x₀
+        (hgramL x₀) (hgramC x₀) (hgramD x₀) K ht)
+
+/-- **The sup of the second covariant derivative of a cross-lowered curvature.**
+
+This is the rank-six background bound required by the rough-Laplacian defect
+in the forward-uniqueness remainder. -/
+theorem crossRm2SlabSup
+    (gN gL gC gD : Real → SmoothRiemannianMetric I M)
+    (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gN p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramL : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gL p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramC : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gC p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramD : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gD p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (gN t) x 6
+        (metricNabla0S (I := I) (gD t)
+          (metricNabla0S (I := I) (gD t)
+            (CovariantDerivative.rm04Section (I := I) (gL t)
+              (metricCov (I := I) (gC t))
+              (metricCov_smooth (I := I) (gC t)))) x) ≤ B :=
+  normSqSlabSup (I := I) gN
+    (fun t =>
+      metricNabla0S (I := I) (gD t)
+        (metricNabla0S (I := I) (gD t)
+          (CovariantDerivative.rm04Section (I := I) (gL t)
+            (metricCov (I := I) (gC t))
+            (metricCov_smooth (I := I) (gC t)))))
+    hgramN
+    (fun x₀ K _ ht =>
+      crossRm2ChartJoint (I := I) gL gC gD x₀
+        (hgramL x₀) (hgramC x₀) (hgramD x₀) K ht)
+
 /-- **The pointwise metric comparison `g₁ ≤ Λ·g₂`, from a fibre-norm bound.**
 
 `g₁(v,v) ≤ √(|g₁|²_{g₂}) · g₂(v,v)` for **every** tangent vector — no eigenvalue, no positivity
@@ -576,6 +703,57 @@ theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     · exact ((g₂ t).pos x v hv0).le
   refine (metricComp_le (I := I) (g₁ t) (g₂ t) x v).trans ?_
   exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (hB t ht x)) hvv
+
+/-- **Two-sided metric equivalence, uniform on a closed subslab.**
+
+The two one-sided constants from `metricCompSlab` are absorbed into one
+constant `C ≥ 1`, in the exact form consumed by the tensor norm-comparison
+API. -/
+theorem metricEquivSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgram₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ C : Real, 1 ≤ C ∧ ∀ t ∈ Icc a c, ∀ (x : M) (v : TangentSpace I x),
+      C⁻¹ * (g₁ t).inner x v v ≤ (g₂ t).inner x v v ∧
+        (g₂ t).inner x v v ≤ C * (g₁ t).inner x v v := by
+  obtain ⟨Λ₁₂, hΛ₁₂0, hΛ₁₂⟩ := metricCompSlab (I := I) g₁ g₂ hgram₁ hgram₂
+  obtain ⟨Λ₂₁, hΛ₂₁0, hΛ₂₁⟩ := metricCompSlab (I := I) g₂ g₁ hgram₂ hgram₁
+  let C : Real := 1 + Λ₁₂ + Λ₂₁
+  have hC : 1 ≤ C := by
+    dsimp [C]
+    linarith
+  have hΛ₁₂C : Λ₁₂ ≤ C := by
+    dsimp [C]
+    linarith
+  have hΛ₂₁C : Λ₂₁ ≤ C := by
+    dsimp [C]
+    linarith
+  refine ⟨C, hC, fun t ht x v => ?_⟩
+  have hv₁ : 0 ≤ (g₁ t).inner x v v := by
+    rcases eq_or_ne v 0 with hv | hv
+    · rw [hv]
+      simp
+    · exact ((g₁ t).pos x v hv).le
+  have hv₂ : 0 ≤ (g₂ t).inner x v v := by
+    rcases eq_or_ne v 0 with hv | hv
+    · rw [hv]
+      simp
+    · exact ((g₂ t).pos x v hv).le
+  have hCpos : 0 < C := lt_of_lt_of_le zero_lt_one hC
+  have h₁₂ : (g₁ t).inner x v v ≤ C * (g₂ t).inner x v v :=
+    (hΛ₁₂ t ht x v).trans (mul_le_mul_of_nonneg_right hΛ₁₂C hv₂)
+  constructor
+  · calc
+      C⁻¹ * (g₁ t).inner x v v ≤ C⁻¹ * (C * (g₂ t).inner x v v) :=
+        mul_le_mul_of_nonneg_left h₁₂ (inv_nonneg.mpr hCpos.le)
+      _ = (g₂ t).inner x v v := by field_simp [hCpos.ne']
+  · exact (hΛ₂₁ t ht x v).trans
+      (mul_le_mul_of_nonneg_right hΛ₂₁C hv₁)
 
 /-- **The metric trace of a `(0,2)` tensor costs exactly one dimension factor.**
 

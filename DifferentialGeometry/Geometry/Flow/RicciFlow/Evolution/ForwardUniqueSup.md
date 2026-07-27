@@ -6,6 +6,38 @@ residual hypotheses), `ForwardUniqueDensReg.md` (the joint-regularity tower),
 `ForwardUniqueRmBounds.md` / `ForwardUniqueRateLe.md` / `ForwardUniqueConnBound.md` (the
 pointwise estimate producers).
 
+## Outcome — 2026-07-26, seventh pass (curvature-tower slab sup)
+
+`nablaKRmSlabSup` is written as the rank-uniform compact-slab wrapper around
+`nablaKRmChartJoint`.  It keeps the norm metric `gN` independent of the
+curvature metric `gC`, so ranks five and six will provide exactly the
+`|∇Rm₂|²` and full `|∇²Rm₂|²` background inputs of `rmDotRemSq_le`.
+
+Focused verification and the targeted export refresh passed.
+This own-curvature bound does not by itself control the cross-lowered field
+`P` in `sdecRem`; the latter needs its separate `g₁`-derivative regularity
+wrapper.
+
+## Outcome — 2026-07-26, eighth pass (cross-curvature slab sups)
+
+`crossRm1SlabSup` and `crossRm2SlabSup` are written as the compact-slab
+wrappers around `crossRm1ChartJoint` and `crossRm2ChartJoint`.  Their four
+metric roles are independent.  The remainder uses
+`(gN, gL, gC, gD) = (g₁, g₁, g₂, g₁)`, so these are exactly the rank-five and
+rank-six bounds for the cross-lowered curvature `P`.
+
+Focused verification and the targeted export refresh passed.
+
+The same pass also adds `metricEquivSlab`, which combines the two already
+proved one-sided comparison constants into a single `C ≥ 1` satisfying the
+standard two-sided metric-equivalence predicate.  This is the form needed to
+compare cross-metric tensor norms in the remainder.
+
+`metricDiffSlabSup` records the remaining closed-slab scalar bound used by the
+quadratic curvature term.  It is a direct compactness wrapper around the
+already proved joint regularity of `metricDiffSq`; it passed focused and
+targeted verification with the rest of this pass.
+
 ## Outcome — 2026-07-26, sixth pass (`∇Ric` slab sup)
 
 `nablaRicSlabSup` now supplies a closed-slab constant for
