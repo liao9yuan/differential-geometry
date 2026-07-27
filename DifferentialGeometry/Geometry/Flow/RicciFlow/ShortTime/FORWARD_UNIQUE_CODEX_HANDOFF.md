@@ -121,3 +121,17 @@ the covariant-derivative chart-frame component identity.  See step 2.)*
 ~90%.  (B) is one black box of the extension chain; (N) (`:97`) is another
 lane's 0%.  The whole HCG-compactness program is ~10%.  When you finish (B),
 say exactly that — do not let it read as more.
+
+
+## Full-build status at handoff (2026-07-26, final)
+
+The handoff-gate full `lake-locked build` FAILED — but NOT in this lane: the
+single failure is `HCGCompactness/CurvTowerBridge.lean:60:16 (kernel)
+deterministic timeout` (3278 s), which is one of the OTHER session's in-flight
+dirty files (never touched by this lane).  Every lane module built green
+earlier in the same log (10652/10658 reached; the only sorry warnings are the
+documented baseline).  Consequence for step 5: interpret the full-build gate
+modulo that foreign file — either wait for the owning session to land/revert
+its edit, or verify with `git stash`-free targeted builds of the lane +
+consumers and defer the tree-wide green to when the foreign edit resolves.  Do
+NOT edit CurvTowerBridge.lean yourself.
