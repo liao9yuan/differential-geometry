@@ -255,6 +255,81 @@ theorem chartGramEntryPDE_of_metricPDE [I.Boundaryless] [SigmaCompactSpace M] [T
   rw [← hbridge]
   exact hmpde
 
+private theorem bilin_deriv_basis
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {Idx : Type*} [Finite Idx]
+    (F : ℝ → V →L[ℝ] V →L[ℝ] ℝ)
+    (F' : V →L[ℝ] V →L[ℝ] ℝ)
+    (b : Module.Basis Idx ℝ V) {t : ℝ}
+    (hbasis : ∀ i j : Idx,
+      HasDerivAt (fun r : ℝ => F r (b i) (b j)) (F' (b i) (b j)) t)
+    (v w : V) :
+    HasDerivAt (fun r : ℝ => F r v w) (F' v w) t := by
+  classical
+  letI := Fintype.ofFinite Idx
+  have hexp : ∀ r : ℝ, F r v w =
+      ∑ j, ∑ i, (b.repr w j * b.repr v i) • F r (b i) (b j) := by
+    intro r
+    conv_lhs =>
+      rw [← b.sum_repr v, ← b.sum_repr w]
+    simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply,
+      ContinuousLinearMap.smul_apply, Finset.smul_sum, smul_smul]
+  have htgt : F' v w =
+      ∑ j, ∑ i, (b.repr w j * b.repr v i) • F' (b i) (b j) := by
+    conv_lhs =>
+      rw [← b.sum_repr v, ← b.sum_repr w]
+    simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply,
+      ContinuousLinearMap.smul_apply, Finset.smul_sum, smul_smul]
+  rw [htgt]
+  have hstep : HasDerivAt
+      (fun r : ℝ =>
+        ∑ j, ∑ i, (b.repr w j * b.repr v i) • F r (b i) (b j))
+      (∑ j, ∑ i, (b.repr w j * b.repr v i) • F' (b i) (b j)) t :=
+    HasDerivAt.fun_sum fun j _ =>
+      HasDerivAt.fun_sum fun i _ => by
+        simpa only [Pi.smul_apply] using
+          (hbasis i j).const_smul (b.repr w j * b.repr v i)
+  simpa only [← hexp] using hstep
+
+/-- Recover the invariant metric evolution equation from all chart-Gram
+component equations in the chart centered at the evaluation point. -/
+theorem metricPDE_of_gram [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    (g : ℝ → SmoothRiemannianMetric I M) (x : M) {t : ℝ}
+    (hpde : ∀ i j : Fin (Module.finrank ℝ E),
+      HasDerivAt
+        (fun s => chartGramOnE (I := I) (g s) x i j (extChartAt I x x))
+        (-2 * chartRicciTensor (I := I) (g t) x i j (extChartAt I x x)) t)
+    (v w : TangentSpace I x) :
+    HasDerivAt (fun s => (g s).inner x v w)
+      ((-2 : ℝ) * ricciTensor (I := I) (g t) x v w) t := by
+  classical
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
+  have hinv : (extChartAt I x).symm (extChartAt I x x) = x :=
+    (extChartAt I x).left_inv
+      (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hxgood)
+  let b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    chartBasisFamily (I := I) x hxbase
+  let F : ℝ → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+    fun s => (g s).inner x
+  let F' : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+    (-2 : ℝ) • ricciTensor (I := I) (g t) x
+  have hbasis (i j : Fin (Module.finrank ℝ E)) :
+      HasDerivAt (fun s => F s (b i) (b j)) (F' (b i) (b j)) t := by
+    have hric :
+        ricciTensor (I := I) (g t) x (b i) (b j) =
+          chartRicciTensor (I := I) (g t) x i j (extChartAt I x x) := by
+      rw [show b i = chartBasisVecFiber (I := I) x i x by
+        exact chartBasisFamily_apply (I := I) x hxbase i,
+        show b j = chartBasisVecFiber (I := I) x j x by
+          exact chartBasisFamily_apply (I := I) x hxbase j,
+        ricciTensor_chartBasisVec_alpha_eq (I := I) (g t) x i j hxgood]
+    simpa only [F, F', ContinuousLinearMap.smul_apply, smul_eq_mul,
+      chartGramOnE_def, hinv, chartGramMatrix_apply, hric] using hpde i j
+  exact bilin_deriv_basis F F' b hbasis v w
+
 /-- **The glued chart-Gram is jointly `C∞` across the seam (the `gram_smooth` content).** Given two
 metric families `g₁`, `g₂` whose chart-Gram fields are jointly `C∞` on the half-slabs `Iic 0 ×ˢ V` /
 `Ici 0 ×ˢ V` (the BBS / DeTurck gates), positive-definite at the seam, satisfying the chart-Gram

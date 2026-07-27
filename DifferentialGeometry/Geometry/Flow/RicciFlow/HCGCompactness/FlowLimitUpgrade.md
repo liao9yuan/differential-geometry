@@ -4,6 +4,18 @@ Historical plan pointer (superseded):
 `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md`.  Current producer
 state is tracked in the repo by `P4_CONV_PLAN.md` and `ConvFieldEndgame.md`.
 
+## 2026-07-27: retain canonical-limit connectedness
+
+`FlowUpgradeData.limit_conn` transports connectedness of the time-zero metric
+limit through `FlowLimitData.hL0` to the retained limit-flow manifold.  The
+proof rewrites only the time-zero pointed manifold; it does not add
+connectedness to arbitrary upgrade data or assume a new topology package.
+
+Focused verification passed.  The transport lemma is complete infrastructure.
+Producing connectedness of the actual canonical Step-D metric limit remains a
+separate constructor-level obligation; arbitrary `StepDCanonData` does not
+carry enough information to infer it.
+
 ## 2026-07-24: retain squared Ricci-norm convergence
 
 `FlowLimitData` now records `ricciNorm : RicNormPullback maps` next to the
@@ -230,3 +242,16 @@ lemma; (b) `SolWindowData` builder for the pulled-back flows (cited `hShi` → `
 - Superseded design choice: the exact-conclusion compatibility structure and
   its bridge were removed on 2026-07-09.  Canonical consumers now take
   `FlowUpgradeData` directly.
+
+## 2026-07-27 typed convergence projection
+
+`FlowLimitData.converges` now exposes the checked
+`SmoothCGHConverges X d.L mc.subseq` witness without first hiding `d.L` behind
+the existential `CompactnessConclusion`. `flowLimit_upgrade` is factored
+through this projection, and `HamiltonCompactness.compactnessSol` can therefore
+combine that exact limit flow with the separately proved all-time completeness
+of `d.data.L`.
+
+Focused verification and the exact targeted refresh are green (`3880/3880`).
+This is a completed assembly/API refactor, not progress on the still-missing
+unconditional time-zero `MetricCompactBase` producer.

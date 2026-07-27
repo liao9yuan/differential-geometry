@@ -75,3 +75,17 @@ conditional Chapter-4 route is 100%.  The separately named textbook B1 theorem
 and unconditional Theorem 3.9 remain 0%; `compactnessSol` and the Hamilton
 endpoint also remain theorem-level 0%.  Whole-HCG machinery remains
 approximately 60%.
+
+## 2026-07-27 base-native canonical entry
+
+The selected B/C and Step-D assembly is now also exposed directly as
+`MetricCompactBase.metricCanon`. It contains the same master-subsequence
+selection and `compactness_canon` construction formerly written inline in
+`MetricCompactnessInputs.metricCanon`; the latter remains API-compatible and is
+now the projection through `inp.toBase`.
+
+Focused verification and the exact targeted refresh are green (`4239/4239`).
+This improves the unconditional endpoint boundary without changing its honest
+status: conditional Theorem 3.9 remains 100%, while producing
+`MetricCompactBase` from the native CGT, volume-comparison, and H6 hypotheses
+remains theorem-level 0%.

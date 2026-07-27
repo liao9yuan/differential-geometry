@@ -19,6 +19,7 @@ noncomputable section
 
 open Set
 open scoped Manifold Topology ContDiff
+open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -143,23 +144,61 @@ theorem covRic0_le
       (mul_le_mul_of_nonneg_left
         (mul_le_mul_of_nonneg_left hShi (Real.sqrt_nonneg _)) (by norm_num))
 
-/-- Source-flow covariant and time-Lipschitz bounds from uniform metric
-equivalence, moving Shi estimates, and one uniform initial covariant envelope.
+/-- Source-flow covariant and time-Lipschitz bounds from a regular extension of
+the source metric family, uniform metric equivalence, moving Shi estimates, and
+one uniform initial covariant envelope.
 
 This is the analytic owner of the varying-domain quantifier uniformity.  In
 particular, it must not be replaced by applying a per-source compact estimate
 after fixing `k`, since that would choose the constants in the wrong order. -/
-theorem srcCovLip_of_soln
+theorem srcCovLip_of_flow
     (Φ : PointedCGHMaps (I := I) X P subseq)
     (R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
       letI : IsManifold I ∞ P.M := P.smooth
       SmoothRiemannianMetric I P.M)
     (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
+    (D : Nat → DifferentialGeometry.Integral.Connection.RealTimeInterval)
+    (S : (k : Nat) →
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+        sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+        sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+        sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) (D k))
+    (hS : ∀ k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+        sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+        sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+        sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      IsSolutionOn (I := I) (S k))
+    (hmet : ∀ (k : Nat) (r : ℝ),
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+        sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+        sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+        sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+        sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      (S k).family.metric r = srcMetric (I := I) Φ hsrc htgt k r)
     {β ψ t₀ : ℝ}
     (_hβψ : β ≤ ψ)
     (ht₀ : t₀ ∈ Set.Icc β ψ)
-    (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (hreg : ∀ k : Nat, Set.Icc β ψ ⊆ (D k).regular)
     (Bmax : ℝ) (hBmax : 1 ≤ Bmax)
     (hequiv :
       letI : TopologicalSpace P.M := P.topology
@@ -424,23 +463,22 @@ theorem srcCovLip_of_soln
             infer_instance
           letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
             sourceDomSigmaOf (I := I) Φ k (hsrc k)
-          have hDreg : ∀ {r : ℝ}, r ∈ X.D.regular →
-              X.D.regular ∈ nhds r :=
-            fun {r} hr => X.D.regular_isOpen.mem_nhds hr
+          have hDreg : ∀ {r : ℝ}, r ∈ (D k).regular →
+              (D k).regular ∈ nhds r :=
+            fun {r} hr => (D k).regular_isOpen.mem_nhds hr
           have hev := hevComp_of_solutions (I := I)
             (K := (Set.univ : Set (SourceDomain (I := I) Φ k)))
             (β := β) (ψ := ψ)
             (gSeq := fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
             (gRef := refRes (I := I) Φ R hsrc k) (N := q)
-            (fun _ ↦ X.D)
-            (fun _ ↦ sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-            (fun _ ↦ isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-            (fun _ _ ↦ rfl)
-            (fun _ ↦ hwin)
+            (fun _ ↦ D k)
+            (fun _ ↦ S k)
+            (fun _ ↦ hS k)
+            (fun _ r ↦ hmet k r)
+            (fun _ ↦ hreg k)
             (fun _ p' hp V x₀ ↦
               solnTowerSwap_reg (I := I) (refRes (I := I) Φ R hsrc k)
-                (sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-                (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+                (S k) (hS k)
                 q hDreg p' hp V x₀)
           have hstage := covOrderBound_stage_on (I := I)
             (U := (Set.univ : Set (SourceDomain (I := I) Φ k)))
@@ -604,22 +642,21 @@ theorem srcCovLip_of_soln
     letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
       sourceDomSigmaOf (I := I) Φ k (hsrc k)
     intro s t hs ht q hqp y
-    have hDreg : ∀ {r : ℝ}, r ∈ X.D.regular → X.D.regular ∈ nhds r :=
-      fun {r} hr => X.D.regular_isOpen.mem_nhds hr
+    have hDreg : ∀ {r : ℝ}, r ∈ (D k).regular → (D k).regular ∈ nhds r :=
+      fun {r} hr => (D k).regular_isOpen.mem_nhds hr
     have hev := hevComp_of_solutions (I := I)
       (K := (Set.univ : Set (SourceDomain (I := I) Φ k)))
       (β := β) (ψ := ψ)
       (gSeq := fun _ t' ↦ srcMetric (I := I) Φ hsrc htgt k t')
       (gRef := refRes (I := I) Φ R hsrc k) (N := q)
-      (fun _ ↦ X.D)
-      (fun _ ↦ sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-      (fun _ ↦ isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-      (fun _ _ ↦ rfl)
-      (fun _ ↦ hwin)
+      (fun _ ↦ D k)
+      (fun _ ↦ S k)
+      (fun _ ↦ hS k)
+      (fun _ r ↦ hmet k r)
+      (fun _ ↦ hreg k)
       (fun _ p' hp V x₀ ↦
         solnTowerSwap_reg (I := I) (refRes (I := I) Φ R hsrc k)
-          (sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-          (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+          (S k) (hS k)
           q hDreg p' hp V x₀)
     have hqLip : metricDerivNorm (I := I) q
           (srcMetric (I := I) Φ hsrc htgt k s)
@@ -644,6 +681,93 @@ theorem srcCovLip_of_soln
         (fun r _hr ↦ hLq0 r) hqmem
     exact hqLip.trans
       (mul_le_mul_of_nonneg_right hqle (abs_nonneg (s - t)))
+
+/-- Source-flow covariant and time-Lipschitz bounds when the common source
+flow itself is regular throughout the requested closed window. -/
+theorem srcCovLip_of_soln
+    (Φ : PointedCGHMaps (I := I) X P subseq)
+    (R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
+    {β ψ t₀ : ℝ}
+    (hβψ : β ≤ ψ)
+    (ht₀ : t₀ ∈ Set.Icc β ψ)
+    (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (Bmax : ℝ) (hBmax : 1 ≤ Bmax)
+    (hequiv :
+      letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : T2Space P.M := P.t2
+      letI : IsManifold I ∞ P.M := P.smooth
+      letI : SigmaCompactSpace P.M := P.sigmaCompact
+      ∀ k : Nat,
+        letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+        letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+        letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+        letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+        letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+        ∀ t : ℝ, t ∈ Set.Icc β ψ →
+          MetricUniformEquivalentOn (I := I)
+            (Set.univ : Set (SourceDomain (I := I) Φ k))
+            (refRes (I := I) Φ R hsrc k)
+            (srcMetric (I := I) Φ hsrc htgt k t) Bmax)
+    (hShi :
+      letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : T2Space P.M := P.t2
+      letI : IsManifold I ∞ P.M := P.smooth
+      letI : SigmaCompactSpace P.M := P.sigmaCompact
+      ∀ N : Nat, ∃ KShi : ℝ, 0 ≤ KShi ∧
+        ∀ k : Nat,
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          MovingShiBoundOn (I := I)
+            (Set.univ : Set (SourceDomain (I := I) Φ k)) β ψ
+            (fun _ t ↦ srcMetric (I := I) Φ hsrc htgt k t) N KShi)
+    (hinit :
+      letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : T2Space P.M := P.t2
+      letI : IsManifold I ∞ P.M := P.smooth
+      letI : SigmaCompactSpace P.M := P.sigmaCompact
+      ∀ q : Nat, ∃ Cq : ℝ, 0 ≤ Cq ∧
+        ∀ k : Nat,
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          ∀ y : SourceDomain (I := I) Φ k,
+            metricCovDerivNorm (I := I) q
+                (srcMetric (I := I) Φ hsrc htgt k t₀)
+                (refRes (I := I) Φ R hsrc k) y ≤ Cq) :
+    SrcCovLipData (I := I) Φ R hsrc htgt β ψ :=
+  srcCovLip_of_flow (I := I) Φ R hsrc htgt
+    (fun _ ↦ X.D)
+    (fun k ↦ sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+    (fun k ↦ isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+    (fun _ _ ↦ rfl)
+    hβψ ht₀ (fun _ ↦ hwin) Bmax hBmax hequiv hShi hinit
 
 end HCGCompactness
 end DifferentialGeometry

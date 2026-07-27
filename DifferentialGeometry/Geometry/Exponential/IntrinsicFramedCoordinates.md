@@ -16,6 +16,8 @@ Focused verification passes without diagnostics. The module now provides:
 - `intrinsicFramedExp`, the total intrinsic exponential in that frame;
 - global smoothness in the vector variable;
 - the value and manifold derivative at the origin;
+- `intrFrame_mfderiv`, the differential at every model vector as the time-one
+  intrinsic Jacobi variation;
 - positive-ball agreement with the legacy chart-fixed `framedExpMap`.
 - `intrFrameDiffeo`, the migration-only `C^1` branch obtained by restricting
   the old branch to the agreement ball; its inverse is definitionally the old
@@ -45,8 +47,12 @@ is the same underlying finite-dimensional linear map, packaged as
 - Stage 2 (temporary local branch transfer): 100% proved and focused-checked.
 - Stage 3 geometry producer (total-map pullback metric): 100% proved,
   focused-checked, and exact-checked.
-- Canonical intrinsic framed-API migration: about 35%; the HCG consumer switch,
-  name flip, and intrinsic radius definitions remain.
+- Stage 4 differential producer (`intrFrame_mfderiv`): 100% proved and
+  focused-checked; its exact artifact refresh is pending the shared write
+  window.
+- Canonical intrinsic framed-API migration: about 42%; the HCG consumer switch,
+  name flip, intrinsic quantitative metric estimate, and intrinsic radius
+  definitions remain.
 - Sequence-uniform `NormalRadiusProfile` producer theorem: 0%; its dedicated
   zero-order Jacobi/Rm04 machinery remains about 99% complete.
 - Native all-order metric-bound producer theorem: 0%; its dedicated jet
@@ -56,12 +62,10 @@ is the same underlying finite-dimensional linear map, packaged as
 
 ## Next Target
 
-Resolve the HCG completeness boundary before switching
-`C4/StepBInputs.normalCoordMetric`. The total intrinsic map requires the
-metric-induced `PseudoEMetricSpace`, `IsContinuousRiemannianBundle`, and
-`CompleteSpace` instances, while the current public `normalCoordMetric Y x`
-and `NormalCoordMetricBoundInput` carry no `MetricComplete Y` argument. The
-switch must thread completeness honestly (or move it into the producer
-package); it must not hide a classical fallback or create a second coordinate
-metric API. After that decision, redefine the existing HCG name through
-`intrFrameMetric` and migrate its local formulas once.
+Refresh this module's artifact and verify
+`Geometry/Exponential/IntrinsicFramedJacobi.lean`, which packages the
+differential and pullback metric as intrinsic Jacobi endpoint formulas. The HCG
+boundary now threads `MetricComplete Y` explicitly in `H6NormalCoord`; the next
+real producer is therefore the intrinsic Rm04 half/two estimate on a radius
+controlled without the legacy `expRadiusGp` qualitative clamp. Do not add
+another pointwise branch-radius wrapper.

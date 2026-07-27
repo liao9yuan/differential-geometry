@@ -13,6 +13,8 @@ other multiplicative factors are controlled by the lower `H2` radius.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -25,6 +27,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -42,6 +45,7 @@ private abbrev jet
   ∑ i ∈ Finset.range n,
     ‖iteratedCovGrad (I := I) g r s i W‖ ^ 2
 
+set_option linter.unusedSectionVars false in
 private theorem low_grid_nonneg
     (g : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (k : ℕ) (x : M) :
@@ -79,7 +83,8 @@ private theorem jet_add
   simp only [mul_add, Finset.sum_add_distrib, ← Finset.mul_sum] at hsum
   calc
     _ ≤ 2 * (jet (I := I) (M := M) g r s n A +
-          jet (I := I) (M := M) g r s n B) := hsum
+          jet (I := I) (M := M) g r s n B) := by
+      simpa only [jet, mul_add] using hsum
     _ ≤ 2 * (a ^ 2 + b ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hA hB) (by norm_num)
     _ ≤ (2 * (a + b)) ^ 2 := by
@@ -112,7 +117,8 @@ private theorem jet_sub
   simp only [mul_add, Finset.sum_add_distrib, ← Finset.mul_sum] at hsum
   calc
     _ ≤ 2 * (jet (I := I) (M := M) g r s n A +
-          jet (I := I) (M := M) g r s n B) := hsum
+          jet (I := I) (M := M) g r s n B) := by
+      simpa only [jet, mul_add] using hsum
     _ ≤ 2 * (a ^ 2 + b ^ 2) :=
       mul_le_mul_of_nonneg_left (add_le_add hA hB) (by norm_num)
     _ ≤ (2 * (a + b)) ^ 2 := by
@@ -128,7 +134,8 @@ private theorem jet_add_mul
       ((2 * (a + b)) * L) ^ 2 := by
   have h := jet_add (I := I) (M := M) g r s n A B
     (a * L) (b * L) (mul_nonneg ha hL) (mul_nonneg hb hL) hA hB
-  convert h using 1 <;> ring
+  convert h using 1
+  all_goals ring
 
 private theorem jet_sub_mul
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
@@ -140,7 +147,8 @@ private theorem jet_sub_mul
       ((2 * (a + b)) * L) ^ 2 := by
   have h := jet_sub (I := I) (M := M) g r s n A B
     (a * L) (b * L) (mul_nonneg ha hL) (mul_nonneg hb hL) hA hB
-  convert h using 1 <;> ring
+  convert h using 1
+  all_goals ring
 
 private theorem norm_eq_of_sq_eq {a b : ℝ}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a ^ 2 = b ^ 2) : a = b := by
@@ -164,6 +172,7 @@ private theorem conn_norm_eq
     (Filter.Eventually.of_forall fun x =>
       (connLow_rfns (I := I) (M := M) g₀ g₁ i x).symm)
 
+set_option linter.unusedSectionVars false in
 private theorem unit_sub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S T : SmoothCcTensor g 0 s) (x : M) :
@@ -184,6 +193,7 @@ private theorem unit_sub
         rfl]
   rw [Tensor0SSpace.toModel_sub]
 
+set_option linter.unusedSectionVars false in
 private theorem unit_add
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S T : SmoothCcTensor g 0 s) (x : M) :
@@ -204,6 +214,7 @@ private theorem unit_add
         rfl]
   rw [Tensor0SSpace.toModel_add]
 
+set_option linter.unusedSectionVars false in
 private theorem conn_self_zero
     (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
@@ -235,7 +246,7 @@ private theorem lie_kappa_unit
       g₁.inner x (PDE.DeTurck.connDiff (I := I) gB g₁ x
         (m 0) (m 1)) (m 2) := by
   rw [unitModel]
-  show Tensor0SSpace.toModel
+  change Tensor0SSpace.toModel
       (((lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ gB).toSection x)
         (unitTensor (I := I) (M := M) x)) m = _
   rw [show ((lieArm1LoweredBgKappa
@@ -283,12 +294,16 @@ private theorem raise_dom_normSq
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
   refine MeasureTheory.integral_congr_ae
     (Filter.Eventually.of_forall fun x => ?_)
-  rw [rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
-    (I := I) (M := M) g 1
-    (domDomCongrSection (I := I) g σ W) i x]
-  exact riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
-    (I := I) (M := M) g σ W i x
+  have hraise :=
+    rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
+      (I := I) (M := M) g 1
+      (domDomCongrSection (I := I) g σ W) i x
+  have hperm :=
+    riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+      (I := I) (M := M) g σ W i x
+  simpa only [Nat.reduceAdd] using hraise.trans hperm
 
+set_option linter.unusedSectionVars false in
 private theorem toModel_single
     (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
@@ -560,9 +575,16 @@ private theorem psi_h2_tame
   have hKap : jet (I := I) (M := M) g₀ 0 3 3
       (lc0Kappa (I := I) (M := M) g₀ g₁ gB) ≤
       (K0 R + K1 R * A) ^ 2 := by
-    rw [kappa_bg (I := I) (M := M) g₀ g₁ gB P htie]
-    convert hKapRaw using 1 <;>
-      simp only [Self, Fix, Pb, K0, K1] <;> ring
+    rw [kappa_bg (I := I) (M := M) g₀ g₁ gB P htie,
+      kappa_base_neg (I := I) (M := M) g₀ gB]
+    change jet (I := I) (M := M) g₀ 0 3 3 (Self + -Fix + Pb) ≤
+      (K0 R + K1 R * A) ^ 2
+    calc
+      _ ≤ (2 * (2 * (4 * A + AF) + BP R)) ^ 2 := by
+        simpa only [sub_eq_add_neg] using hKapRaw
+      _ = (K0 R + K1 R * A) ^ 2 := by
+        simp only [K0, K1]
+        ring
   let Raised : SmoothCcTensor g₀ 1 2 :=
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
       (domDomCongrSection (I := I) g₀ lieArm1RhoSlot0
@@ -604,11 +626,11 @@ private theorem psi_h2_tame
 private theorem traceHessian_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     traceHessianCoeff (I := I) (M := M) g₀ g₁ =
-      lc0Trace (I := I) (M := M) g₀ g₁ 2 traceHessianSlotPerm := by
+      lc0TraceRF (I := I) (M := M) g₀ g₁ 2 traceHessianSlotPerm := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [traceHessianCoeff_toSection, lc0Trace,
+  rw [traceHessianCoeff_toSection, lc0TraceRF,
     reindexCoeffGen_toSection]
   apply ContinuousLinearMap.ext
   intro D
@@ -808,7 +830,9 @@ theorem lie1_h2_tame
   have hBg : jet (I := I) (M := M) g₀ 1 2 3
       (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ gB) ≤ Qg ^ 2 := by
     rw [lieArm1_connDiffBg_decomp (I := I) (M := M) g₀ g₁ gB]
-    convert hBgRaw using 1 <;> simp only [Qg, D0, D1, Qc, FixCd] <;> ring
+    convert hBgRaw using 1
+    all_goals simp only [Qg, D0, D1, Qc]
+    all_goals ring
   let Ac : ℝ := C0 R + C1 R * A
   let Ap : ℝ := P0 R + P1 R * A
   let Ag : ℝ := G0 R + G1 R * A
@@ -825,7 +849,9 @@ theorem lie1_h2_tame
     intro σ ρ
     have h := hpiece g₁ σ ρ (connDiffSection (I := I) g₁ g₀)
       (Bt R) Qc (hBt R hR) hQc (hTrace σ) hConn
-    convert h using 1 <;> simp only [Ac, C0, C1, S, Qc] <;> ring
+    convert h using 1
+    all_goals simp only [Ac, C0, C1, S, Qc]
+    all_goals ring
   have hPp : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       jet (I := I) (M := M) g₀ 3 2 3
         (lieArm1Piece (I := I) (M := M) g₀ g₁ σ ρ
@@ -834,7 +860,9 @@ theorem lie1_h2_tame
     have h := hpiece g₁ σ ρ
       (lieArm1PsiB (I := I) (M := M) g₀ g₁ gB)
       (Bt R) Qp (hBt R hR) hQp (hTrace σ) hPsi
-    convert h using 1 <;> simp only [Ap, P0, P1, S, Qp] <;> ring
+    convert h using 1
+    all_goals simp only [Ap, P0, P1, S, Qp]
+    all_goals ring
   have hPg : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       jet (I := I) (M := M) g₀ 3 2 3
         (lieArm1Piece (I := I) (M := M) g₀ g₁ σ ρ
@@ -843,7 +871,9 @@ theorem lie1_h2_tame
     have h := hpiece g₁ σ ρ
       (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ gB)
       (Bt R) Qg (hBt R hR) hQg (hTrace σ) hBg
-    convert h using 1 <;> simp only [Ag, G0, G1, S, Qg] <;> ring
+    convert h using 1
+    all_goals simp only [Ag, G0, G1, S, Qg]
+    all_goals ring
   let Z0 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaC lieArm1RhoSlot0
       (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ gB)

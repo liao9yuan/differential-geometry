@@ -618,7 +618,7 @@ theorem appRS_h2_h1_h1
         _ ≤ ∑ j ∈ Finset.range 2,
             ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2 := by
           simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
-            iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add]
+            iteratedCovGrad_zero, iteratedCovGrad_succ]
           exact le_add_of_nonneg_right (sq_nonneg _)
         _ ≤ B ^ 2 := hWjet
     nlinarith [norm_nonneg W]
@@ -629,7 +629,7 @@ theorem appRS_h2_h1_h1
             ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2 := by
           dsimp only [GW]
           simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
-            iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add]
+            iteratedCovGrad_zero, iteratedCovGrad_succ]
           exact le_add_of_nonneg_left (sq_nonneg _)
         _ ≤ B ^ 2 := hWjet
     nlinarith [norm_nonneg GW]
@@ -642,7 +642,7 @@ theorem appRS_h2_h1_h1
         dsimp only [GΦ]
         simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
           iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
-        exact le_add_of_nonneg_left (sq_nonneg _)
+        nlinarith [sq_nonneg ‖Φ‖]
       _ ≤ A ^ 2 := hΦjet
   have hGΦH1 : ‖(⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))‖ ≤ A := by
     have hsq : ‖(⟨GΦ⟩ : SmoothCcTensorH1 g r (c + 1))‖ ^ 2 ≤ A ^ 2 := by
@@ -691,7 +691,8 @@ theorem appRS_h2_h1_h1
           ≤ (Module.finrank ℝ E : ℝ) * (Cpt * A) ^ 2 :=
         mul_le_mul_of_nonneg_left (hΦsup x) hfr
       _ = (sd * (Cpt * A)) ^ 2 := by
-        rw [show sd ^ 2 = (Module.finrank ℝ E : ℝ) by
+        rw [show (Module.finrank ℝ E : ℝ) = sd ^ 2 by
+          symm
           simp only [sd, Real.sq_sqrt hfr]]
         ring
   have hY0 : ‖Y‖ ≤ Cpt * A * B := by

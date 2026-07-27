@@ -317,3 +317,61 @@ is available.
 The adapter theorem machinery is structurally complete, but the actual
 common-window Hamilton source producer is about 20% and the Hamilton compactness
 endpoint remains 0%.
+
+## 2026-07-27 closed-window spatial jets
+
+`ham3_stage_jet` is proved and exact-green.  It uses the untruncated Hamilton
+rescaled solution as the ambient regular flow, restricts it to the CGH target
+domain, pulls it back to the source domain, and applies
+`ConvOut.gSeqJet_of_soln`.  The canonical closed window lies strictly inside
+the ambient Shi window because the source start retains the earlier buffer.
+The scalar metric realization is definitional after full evaluation; no new
+consumer assumption or whole-metric equality was added.
+
+`ham3_limit_jets` is also proved and focused-green.  It combines
+`ham3_stage_jet`, the bump-family grow cover, and
+`ConvOut.gramJets_of_stage` to obtain every finite spatial chart jet of the
+Hamilton limit metric continuously on the full closed interval
+`Icc (-(ham3_r0 ^ 2)) 0`.  This discharges the actual Hamilton stage-regularity
+premise rather than repackaging it as a hypothesis.
+
+The two jet producer theorems are 100%.  The closed `IsSolutionOn` assembly is
+still unstated and therefore 0%; its dedicated machinery is about 90%.
+`ham3_cgh_limit` itself remains an unproved endpoint (0%), and whole-HCG
+machinery remains about 60%.
+
+## 2026-07-27 closed-window Gram smoothness
+
+`ham3_gram_smooth` specializes the generic closed-window bootstrap to
+`Icc (-(ham3_r0 ^ 2)) 0` and feeds it with `ham3_limit_jets`.  It proves joint
+`C∞` chart-Gram regularity on the full retained window, including time `0`;
+no endpoint regularity assumption or new convergence package is introduced.
+
+Focused verification passes.  Exact artifact refresh is pending at the time of
+this note update.  The theorem and its dedicated machinery are 100% at source
+level.  Closed `IsSolutionOn` is still unstated (0%), with dedicated machinery
+about 96%; the remaining producer is the invariant metric PDE followed by
+direct record assembly.  `ham3_cgh_limit` remains 0%, and whole-HCG machinery
+is about 61%.
+
+## 2026-07-27 closed limit solution assembly
+
+`ham3_limit_soln` is now stated and proved at source level.  It combines the
+closed metric-family package, the invariant limit metric PDE, and the
+chart-Gram joint regularity consumers for scalar, Ricci, and lowered-Riemann
+continuity with `isSolutionOn_of_reg`.  The source carrier is definitionally
+the canonical `Icc`; no endpoint regularity, coefficient-bound package, or
+synonymous solution assumption was added.
+
+The ordered upstream refresh is exact-green, the Adapter focused check passes,
+and the Adapter exact artifact refresh is green (`10190/10190`).
+`#print axioms` for `ham3_limit_soln` reports only `propext`,
+`Classical.choice`, and `Quot.sound`, with no `sorryAx`.  The theorem and its
+dedicated common-window solution machinery are therefore 100%.
+
+`ham3_cgh_limit` itself remains a separate unproved endpoint (0%).  The next
+conditional producer is a closed-window `FlowUpgradeData` plus completeness
+assembly; the next unconditional producer is the time-zero
+`MetricCompactBase`.  Perelman noncollapsing supplies only fixed-scale
+basepoint-ball volume data and does not replace the A0-prime arbitrary-center
+overlap or H6 inputs of that metric-compactness bundle.

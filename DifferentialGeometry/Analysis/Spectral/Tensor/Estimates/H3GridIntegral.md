@@ -13,7 +13,9 @@ antidiagonal product grid of total order at most three in `L1`.
   Gagliardo--Nirenberg estimates and the canonical grid-product integral API.
 - The statement uses no derivative of the metric perturbation above order
   three.
-- Source verification is pending the shared sequential artifact refresh.  No
-  focused Lean check has yet succeeded or failed on the theorem body.
+- The focused source check passes without local warnings or sorries.  The
+  repair adds the direct Gagliardo--Nirenberg import, uses its root-qualified
+  theorem name, and transfers the top derivative bound through nonnegative
+  real powers.
 
 Endpoint theorem progress remains 0%; this is producer machinery only.

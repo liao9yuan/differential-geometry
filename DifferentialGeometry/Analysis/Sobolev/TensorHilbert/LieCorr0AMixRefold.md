@@ -22,4 +22,3 @@ refold needed by the radius-free consumer and imports no unfinished facade.
 ## Verification
 
 Focused verification and the targeted module build passed.  The file contains no `sorry`.
-

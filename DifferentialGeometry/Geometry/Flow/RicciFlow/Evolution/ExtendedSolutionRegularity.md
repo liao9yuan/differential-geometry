@@ -374,3 +374,29 @@ and no new geometric assumption was added.
 
 Focused verification passed; the four noncompact endpoint APIs are complete (100%).  This closes an
 open-endgame interface gate but does not by itself prove the unconditional HCG compactness endpoint.
+
+## 2026-07-26 — closed-window curvature continuity from spatial jets
+
+Added three reusable producers that consume only continuity of the order-zero,
+order-one, and order-two spatial `iteratedFDeriv` jets of `chartGramOnE` on
+`J × interior (extChartAt I α).target`:
+
+- `ricciCont_of_jets`;
+- `rm04Cont_of_jets`;
+- `scalarCont_of_jets`.
+
+No `UniqueDiffOn J`, endpoint regularity, joint spacetime `C∞`, or additional
+consumer-side hypothesis is required.  A private pullback bridge transports each
+model-space jet to the chart good set.  Ricci and lowered Riemann then use the
+existing chart-curvature producers and tensor-family component constructor.
+For the Riemann lowering factor, the zeroth jet is evaluated at the empty tuple
+and identified with the manifold chart-Gram entry.  Scalar curvature uses the
+existing chart-trace producer.
+
+Focused verification and the exact module refresh passed.  The two local
+component-identification proofs were normalized from `show` to `change`, leaving
+no new local style warnings.  These three generic producer theorems and their
+dedicated machinery are complete (100%).  They close the closed-window
+curvature-continuity interface needed by the HCG limit assembly; they do not by
+themselves state or prove the final closed `IsSolutionOn` upgrade or the
+CGH-limit endpoint.

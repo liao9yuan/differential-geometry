@@ -42,12 +42,9 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
-/-- The `k`th sequence flow restricted to the open target `targetOpen Φ k` and
-pulled back along the source-target diffeomorphism `sourceTargetDiff Φ k`, giving a
-Ricci-flow solution on the source domain `SourceDomain Φ k`.  This is the flow the
-conv field identifies with the metric slot `Φ^* g_k(t)` near a compact of the limit
-manifold. -/
-noncomputable def sourceFlow
+/-- Restrict any solution on the `k`th target manifold to `targetOpen Φ k` and
+pull it back along `sourceTargetDiff Φ k`. -/
+noncomputable def sourceFlowOf
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
     {subseq : Nat -> Nat}
@@ -56,7 +53,16 @@ noncomputable def sourceFlow
     (hσtgt :
       letI : TopologicalSpace (X.term (subseq k)).M :=
         (X.term (subseq k)).topology
-      IsSigmaCompact (Φ.target k)) :
+      IsSigmaCompact (Φ.target k))
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      SolutionOn (I := I) (M := (X.term (subseq k)).M) D) :
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
     letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
     letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -69,7 +75,7 @@ noncomputable def sourceFlow
     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
       change IsManifold I ∞ (SourceDomain (I := I) Φ k)
       infer_instance
-    SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) X.D := by
+    SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) D := by
   letI : TopologicalSpace (X.term (subseq k)).M :=
     (X.term (subseq k)).topology
   letI : ChartedSpace H (X.term (subseq k)).M :=
@@ -119,12 +125,12 @@ noncomputable def sourceFlow
   letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
   exact
     DifferentialGeometry.PDE.RicciFlow.solutionOn_pullback (I := I)
-      (solutionOn_restrictOpen (I := I) (X.term (subseq k)).S (targetOpen (I := I) Φ k))
+      (solutionOn_restrictOpen (I := I) S (targetOpen (I := I) Φ k))
       (sourceTargetDiff (I := I) Φ k)
 
-/-- The pulled-back flow `sourceFlow Φ k` is a Ricci-flow solution: compose Brick 1's
-`isSolutionOn_restrictOpen` with P1.4's `isSolutionOn_pullback`. -/
-theorem isSolutionOn_sourceFlow
+/-- The `k`th sequence flow restricted to the open target and pulled back to
+the source domain. -/
+noncomputable def sourceFlow
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
     {subseq : Nat -> Nat}
@@ -146,7 +152,61 @@ theorem isSolutionOn_sourceFlow
     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
       change IsManifold I ∞ (SourceDomain (I := I) Φ k)
       infer_instance
-    IsSolutionOn (I := I) (sourceFlow (I := I) Φ k hσsrc hσtgt) := by
+    SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) X.D := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  exact sourceFlowOf (I := I) Φ k hσsrc hσtgt (X.term (subseq k)).S
+
+/-- Pulling back a target solution with `sourceFlowOf` preserves the Ricci-flow
+solution predicate. -/
+theorem isSoln_sourceFlowOf
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat)
+    (hσsrc : letI : TopologicalSpace P.M := P.topology; IsSigmaCompact (Φ.source k))
+    (hσtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      SolutionOn (I := I) (M := (X.term (subseq k)).M) D)
+    (hS :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : T2Space (X.term (subseq k)).M :=
+        (X.term (subseq k)).t2
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      letI : SigmaCompactSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).sigmaCompact
+      IsSolutionOn (I := I) S) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+      sourceDomSigmaOf (I := I) Φ k hσsrc
+    letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+      IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+      change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+      infer_instance
+    IsSolutionOn (I := I) (sourceFlowOf (I := I) Φ k hσsrc hσtgt S) := by
   letI : TopologicalSpace (X.term (subseq k)).M :=
     (X.term (subseq k)).topology
   letI : ChartedSpace H (X.term (subseq k)).M :=
@@ -208,10 +268,46 @@ theorem isSolutionOn_sourceFlow
     targetDomSigmaOf (I := I) Φ k hσtgt
   exact
     DifferentialGeometry.PDE.RicciFlow.isSolutionOn_pullback (I := I)
-      (solutionOn_restrictOpen (I := I) (X.term (subseq k)).S (targetOpen (I := I) Φ k))
-      (isSolutionOn_restrictOpen (I := I) (X.term (subseq k)).S
-        (X.term (subseq k)).isSolution (targetOpen (I := I) Φ k))
+      (solutionOn_restrictOpen (I := I) S (targetOpen (I := I) Φ k))
+      (isSolutionOn_restrictOpen (I := I) S hS (targetOpen (I := I) Φ k))
       (sourceTargetDiff (I := I) Φ k)
+
+/-- The pulled-back sequence flow `sourceFlow Φ k` is a Ricci-flow solution. -/
+theorem isSolutionOn_sourceFlow
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat)
+    (hσsrc : letI : TopologicalSpace P.M := P.topology; IsSigmaCompact (Φ.source k))
+    (hσtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k)) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+      sourceDomSigmaOf (I := I) Φ k hσsrc
+    letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+      IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+      change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+      infer_instance
+    IsSolutionOn (I := I) (sourceFlow (I := I) Φ k hσsrc hσtgt) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : T2Space (X.term (subseq k)).M :=
+    (X.term (subseq k)).t2
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : SigmaCompactSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).sigmaCompact
+  exact isSoln_sourceFlowOf (I := I) Φ k hσsrc hσtgt
+    (X.term (subseq k)).S (X.term (subseq k)).isSolution
 
 /-- **Metric identity.**  The metric family of `sourceFlow Φ k` coincides with the
 `pullbackMetric` slot of `SourceDomainMetricData.ofRestrictPullback`: both are the
@@ -250,6 +346,7 @@ theorem sourceFlow_metric_eq
       infer_instance
     (sourceFlow (I := I) Φ k hσsrc hσtgt).family.metric t
       = (SourceDomainMetricData.ofRestrictPullback (I := I) hσsrc hσtgt referenceMetric gInf).pullbackMetric t := by
+  unfold sourceFlow sourceFlowOf
   rfl
 
 /-! ## Cited-input restriction primitives (metric-equivalence)

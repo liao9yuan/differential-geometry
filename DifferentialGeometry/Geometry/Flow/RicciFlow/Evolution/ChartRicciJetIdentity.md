@@ -78,3 +78,17 @@ in CinftyLimitGlue.
 - Accounting: this API repair is complete (100%).  It is supporting machinery
   only; the downstream `ConvOut.gramPDE` theorem remains unstated/unproved here
   (0%).
+
+## 2026-07-27 reverse Gram-to-metric PDE bridge
+
+`metricPDE_of_gram` is proved and exact-green.  It is the converse assembly
+interface to `chartGramEntryPDE_of_metricPDE`: componentwise chart-Gram
+evolution in the chart centered at `x` determines the invariant metric
+evolution on arbitrary tangent vectors at `x`.  The proof expands both vectors
+in `chartBasisFamily`, differentiates the finite double sum, and uses
+`ricciTensor_chartBasisVec_alpha_eq`; it never asserts equality of whole
+dependent tensor or Hom objects.
+
+The theorem and its private rank-two basis lift are 100%.  This is reusable
+geometry infrastructure; the HCG consumer still has to supply its actual limit
+component equation and assemble the solution package.

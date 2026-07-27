@@ -21,6 +21,12 @@ consumer plan lives in
   `C^{q+1}`.  Assembly of the fderiv is CLM algebra: `smulRightL`-composition for the
   `R`-part, `ContDiffOn.clm_comp` with a constant for the `W`-part, then
   `contDiffOn_succ_iff_fderiv_of_isOpen` (the `n = ω` conjunct is discharged by `simp`).
+- `contDiffIcc_succ` — the corresponding closed-time-slab induction step on
+  `Icc a b ×ˢ V`.  It combines a within-time PDE with full spatial slice
+  derivatives using a private relative mean-value kernel, then applies
+  `contDiffOn_succ_iff_hasFDerivWithinAt_of_uniqueDiffOn`.  Endpoint
+  differentiability is only asserted within `Icc`; no open time buffer or new
+  consumer assumption is introduced.
 - `contDiffOn_one_of_pde` — first bootstrap step (`q = 0`): continuous `R`, `W` give joint
   `C¹`.
 - `contDiffOn_inf_of_pde` — `C^∞` endpoint: jointly-`C^∞` `R`, `W` give jointly-`C^∞` `G`
@@ -31,7 +37,8 @@ verbatim to jet-valued families (`W_k`-bootstrap at every jet level).
 
 ## Verification
 
-Focused check + targeted build passed; all four endpoints
+Focused check + targeted build passed, including the closed-slab successor; the
+original four open-set endpoints
 `[propext, Classical.choice, Quot.sound]`, no `sorryAx` (temporary `#print axioms`
 removed after reading).  Not added to the umbrella `DifferentialGeometry.lean` — matches
 the `TimeJetCommute`/`TimeJetEvolution` precedent (these Analysis/Calculus helpers enter
@@ -49,7 +56,5 @@ the import graph through their consumers).
 
 ## What is NOT here (next bricks)
 
-- The SWAP lemma (`∂ₜ` of spatial jets = spatial jets of `R`, via FTC + parametric
-  interval-integral differentiation) — needed to run the step lemma at jet levels `k ≥ 1`.
 - The jets-of-algebra closure ("jets of the Ricci expression are `C^q` given tracked jets
   of the metric") — the one genuine wall of the full `C^∞` bootstrap; see the route note.

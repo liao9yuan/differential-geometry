@@ -56,3 +56,20 @@ complete-noncompact Shi theorem remains 0%, its dedicated P4 consumer
 machinery remains about 97%, and the whole HCG support machinery remains about
 60%.
 
+## Self-distance normalization — 2026-07-27
+
+`edistOf_self` is focused-green and exact-green (`3514/3514`).  It exposes the
+canonical self-distance identity
+
+```text
+riemannianEDistOf g x x = 0
+```
+
+while resolving the metric-induced Riemannian bundle locally.  The
+solution-generated cutoff uses this lemma at its moving center; no duplicate
+distance construction or extra completeness hypothesis is introduced.
+
+This small reusable lemma is theorem-level **100%**.  It supports the now
+closed Route B-prime cutoff producer but does not by itself alter the
+theorem-level status of the unconditional compactness endpoint.
+

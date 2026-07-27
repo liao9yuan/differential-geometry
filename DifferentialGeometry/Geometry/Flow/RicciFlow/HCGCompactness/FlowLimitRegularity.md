@@ -316,3 +316,79 @@ window after rewriting its carrier as the same `Icc`.  It does not prove the
 three curvature-continuity fields or endpoint scalar-time differentiability.
 The closed-endpoint theorem remains unstated and therefore 0%; its dedicated
 machinery is now about 77%, while whole-HCG machinery remains about 60%.
+
+### 2026-07-26 closed-carrier metric package
+
+`ConvOut.metricSmooth` is proved and exact-green.  When the source carrier is
+exactly the convergence `Icc`, it assembles all four fields of
+`MetricFamilySmoothOn`: coefficient and local-frame smoothness are required
+only on `X.D.regular`, while coefficient and tensor continuity hold on the
+whole carrier.  The proof reuses `gramSmooth_regular` and `metric_cont`; it
+adds no endpoint smoothness assumption.
+
+The first verification failure was only a local-name collision: tangent vector
+`X` shadowed the ambient pointed flow sequence `X`, so later `X.D` projections
+were elaborated against the model space.  Renaming the vectors fixed it.  The
+generic frame helpers also do not require a `Fintype` instance.
+
+This completes the closed-carrier metric-family theorem itself (100%).  It
+does not complete the closed `IsSolutionOn` endpoint, which remains unstated
+and therefore 0%.  Its dedicated machinery is about 80%: closed spatial
+metric jets still have to be converted to Ricci/Riemann/scalar continuity, and
+endpoint `scalarTime` remains the genuine analytic frontier.  Whole-HCG
+machinery remains about 60%.
+
+### 2026-07-27 ambient finite-stage jets
+
+`ConvOut.gSeqJet_of_soln` is proved and exact-green.  It derives every finite
+spatial chart jet of a bump-extended stage from an actual ambient
+`IsSolutionOn` flow whose regular set contains the requested closed time
+window.  The bridge between the stage metric and the ambient flow is required
+only after full scalar evaluation on two tangent vectors; no whole-metric or
+dependent-Hom equality is introduced.
+
+The former private `gSeqJet_contOn` proof is now a short specialization to the
+canonical source flow, so the uniform-limit machinery has one implementation.
+This theorem is a generic producer API, not an added convergence assumption.
+The theorem and its dedicated machinery are 100%.  Closed-limit joint
+smoothness is still unstated and therefore 0%; its dedicated machinery is about
+90%, while whole-HCG machinery remains about 60%.
+
+### 2026-07-27 closed-window Gram regularity
+
+`ConvOut.gramPDE_regular` is proved and exact-green.  It localizes an arbitrary
+regular source time to a closed regular subinterval, applies the existing
+limit chart-Gram PDE there, and removes the restriction using the interior
+neighborhood.  The theorem asks only that the source carrier lie in the
+convergence window; it does not assume endpoint regularity.
+
+`ConvOut.gramSmoothIcc` is also proved and exact-green.  Starting from the
+actual finite spatial chart jets on `Icc β ψ`, it builds finite-order joint
+regularity by successor induction.  The scalar PDE is extended from `Ioo` to
+the two endpoints by the interval-FTC bridge, spatial derivatives are commuted
+with the within-time equation, and finite orders are assembled into `C∞`.
+The final scalar statement is transferred back from the model chart only after
+full evaluation, so no dependent tensor/Hom equality is normalized.
+
+Both the regular-time PDE and closed Gram-smoothness theorems are 100%.
+Together with the curvature-continuity producers, they leave invariant
+metric-PDE reconstruction and the final `IsSolutionOn` record assembly as the
+remaining closed-flow step.  The closed `IsSolutionOn` theorem itself remains
+unstated (0%); its dedicated machinery is about 96%.  `ham3_cgh_limit` remains
+an endpoint theorem at 0%, while whole-HCG machinery is about 61%.
+
+### 2026-07-27 invariant limit PDE
+
+`ConvOut.metricPDE_regular` is proved and focused-green.  At each regular
+source time it evaluates `gramPDE_regular` in the chart centered at the point,
+identifies the jet right-hand side with `-2·chartRicci`, and applies the
+reusable reverse Gram-to-metric bridge.  Thus the limit metric satisfies the
+fully invariant Ricci-flow equation on arbitrary tangent vectors.  No
+coefficient lower bound, covariant-tail estimate, or new consumer assumption
+is used.
+
+Focused verification passes, and the exact targeted artifact refresh is green
+(`9569/9569`).  The theorem and its dedicated machinery are 100%.  This closes
+the last generic producer needed before the Hamilton-specific `IsSolutionOn`
+record assembly; that endpoint theorem remains separate until its own
+verification lands.

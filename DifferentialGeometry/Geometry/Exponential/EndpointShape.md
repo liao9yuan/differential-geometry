@@ -46,3 +46,18 @@ Hessian theorem and its dedicated machinery remain 100%; the later
 `calabiDist_support` theorem is still unstated (0%). Route B-prime remains
 about 45%, whole HCG supporting machinery about 60%, and unconditional
 `compactnessSol` theorem-level 0%.
+
+## 2026-07-27 intrinsic Gronwall inputs
+
+Added the canonical initial-value and regularity API for the named intrinsic
+Jacobi field:
+
+- `intrinsicJacobi_zero` proves `J(0) = 0`;
+- `intrJacobi_diff` proves differentiability of the chart representatives of
+  `J` and `D_t J` at every time.
+
+Both declarations are focused- and exact-green with zero local diagnostics.
+They move existing private comparison-layer proofs to the definition-owning
+module and introduce no radius or compactness hypothesis. The H6 relative
+profile theorem remains 0%; these declarations close its intrinsic Gronwall
+regularity sub-brick only.

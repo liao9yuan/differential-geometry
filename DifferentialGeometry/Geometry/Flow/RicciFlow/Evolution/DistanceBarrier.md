@@ -129,3 +129,25 @@ Honest accounting remains: `scaledDist_calabiUpperSupport_of_sol` is
 theorem-level 0%, its dedicated machinery is about 95%, the solution-generated
 cutoff and trusted complete-Shi theorems are 0%, whole HCG supporting machinery
 is about 60%, and unconditional `compactnessSol` is 0%.
+
+## 2026-07-27 — performance blocker resolved
+
+The thin solution wrapper is now focused- and exact-green (`3995/3995`) at the
+default heartbeat budget.  The actual performance defect was an instance
+diamond: this file declared a separate explicit `NormedSpace Real E` in
+addition to `InnerProductSpace Real E`, whereas the imported completeness API
+was compiled with the normed-space structure induced by the inner product.
+Elaboration of `complete_of_ricBound` then tried to identify two large
+dependent manifold/metric types built from different norm instances.
+
+The canonical repair removes the redundant explicit normed-space binder.
+`curv_prep` now reuses `DistanceBarrierCore.ricci_quad_of_curv`, passes its
+named coefficient and quadratic bound directly to `complete_of_ricBound`, and
+constructs `CurvPrep` without a heartbeat or transparency override.  The
+public statement and geometric assumptions are unchanged.
+
+`scaledDist_calabiUpperSupport_of_sol` is therefore theorem-level **100%** and
+its dedicated evolving-distance machinery is **100%**.  This closes the
+distance-barrier layer only; the solution cutoff and complete-Shi consumer are
+recorded separately in their own notes, and unconditional `compactnessSol`
+remains theorem-level **0%**.

@@ -295,10 +295,26 @@ theorem rem_h1_of_jets
   intro T T' hTsymm hT'symm δ hδ_lt hδ δ' hδ'_lt hδ' R hR hRρ hT hT'
     A₀ A₁ hA₀ hA₁ hΦ₀ hΦ₁
   let U : SmoothCcTensor g₀ 0 2 := T - T'
-  let Φ₀ : SmoothCcTensor g₀ 2 2 :=
-    rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
-  let Φ₁ : SmoothCcTensor g₀ 3 2 :=
-    rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  set Φ₀ : SmoothCcTensor g₀ 2 2 :=
+    rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T'
+      hδ_lt hδ hδ'_lt hδ' with hΦ₀def
+  set Φ₁ : SmoothCcTensor g₀ 3 2 :=
+    rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T'
+      hδ_lt hδ hδ'_lt hδ' with hΦ₁def
+  clear_value Φ₀ Φ₁
+  have hΦ₀eq :
+      rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T'
+        hδ_lt hδ hδ'_lt hδ' = Φ₀ := hΦ₀def.symm
+  have hΦ₁eq :
+      rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T'
+        hδ_lt hδ hδ'_lt hδ' = Φ₁ := hΦ₁def.symm
+  clear hΦ₀def hΦ₁def
+  have hΦ₀bound : (∑ j ∈ Finset.range 2,
+      ‖iteratedCovGrad (I := I) g₀ 2 2 j Φ₀‖ ^ 2) ≤ A₀ ^ 2 := by
+    simpa only [hΦ₀eq] using hΦ₀
+  have hΦ₁bound : (∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g₀ 3 2 j Φ₁‖ ^ 2) ≤ A₁ ^ 2 := by
+    simpa only [hΦ₁eq] using hΦ₁
   let Φ₂ : SmoothCcTensor g₀ 4 2 :=
     rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   have hpath :
@@ -310,7 +326,7 @@ theorem rem_h1_of_jets
             (iteratedCovGrad (I := I) g₀ 0 2 1 U) +
           appCc (I := I) (M := M) g₀ 4 2 Φ₂
             (iteratedCovGrad (I := I) g₀ 0 2 2 U) := by
-    simpa only [U, Φ₀, Φ₁, Φ₂] using
+    simpa only [U, Φ₂, hΦ₀eq, hΦ₁eq] using
       rhsArm_sub_eq_paths (I := I) (M := M) g₀ g_bg T T'
         hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   have hiter₀ : iteratedCovGrad (I := I) g₀ 0 2 0 U = U := by
@@ -327,8 +343,8 @@ theorem rem_h1_of_jets
         Ccoef * (A₀ + A₁) *
           ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by
     apply hlower Φ₀ Φ₁ U A₀ A₁ hA₀ hA₁
-    · simpa only [Φ₀] using hΦ₀
-    · simpa only [Φ₁] using hΦ₁
+    · exact hΦ₀bound
+    · exact hΦ₁bound
   have htop' :
       ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
         (appCc (I := I) (M := M) g₀ 4 2 Φ₂

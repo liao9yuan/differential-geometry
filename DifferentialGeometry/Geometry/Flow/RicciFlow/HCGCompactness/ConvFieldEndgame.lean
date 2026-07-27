@@ -314,6 +314,45 @@ noncomputable def flowUpgrade_of_maps
     have htβψ : t ∈ Set.Icc β ψ := hcarrier (hab ht)
     exact hk0 k hk t htβψ
 
+/-- The closed-window map upgrade retains the supplied pointed flow data. -/
+theorem flowUpgrade_maps_L
+    {X : PointedFlowSeq (I := I)}
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
+    (L : PointedFlowData (I := I) X.D)
+    (P : PointedRiemannianManifold (I := I))
+    (hPlim : P = mc.limit)
+    (hPL : L.atTime (I := I) 0 = P)
+    (Φ : PointedCGHMaps (I := I) X P mc.subseq)
+    (R :
+      letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    (bf : BumpFamily (I := I) Φ)
+    (hsrc : SrcSigma (I := I) Φ)
+    (htgt : TgtSigma (I := I) Φ)
+    (β ψ : Real)
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hLmetric :
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : T2Space L.M := L.t2
+      letI : IsManifold I ∞ L.M := L.smooth
+      letI : SigmaCompactSpace L.M := L.sigmaCompact
+      ∀ t : Real, t ∈ Set.Icc β ψ →
+        HEq (L.S.family.metric t) (co.gInf t))
+    (scalar : ScalarPullbackTendsto (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ)))
+    (ricciNorm : RicNormPullback (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
+    (flowUpgrade_of_maps (I := I) mc L P hPlim hPL Φ R bf hsrc htgt
+      β ψ hcarrier co hLmetric scalar ricciNorm).data.L = L := by
+  cases hPL
+  rfl
+
 /-- Assemble the smooth CGH compactness conclusion from the concrete endgame
 upgrade data produced by `flowUpgrade_of_maps`. -/
 theorem flowLimit_of_maps

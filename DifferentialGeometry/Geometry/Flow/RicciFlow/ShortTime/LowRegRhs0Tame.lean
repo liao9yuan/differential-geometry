@@ -10,6 +10,8 @@ derivative in the order-zero coefficient estimates.  The cancellation inside
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -21,6 +23,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -72,6 +76,7 @@ theorem h1_grid_tame
     exact Finset.sum_nonneg fun k _ ↦ by
       by_cases hk : k = 3
       · simp only [hk, if_pos]
+        exact le_rfl
       · simp only [if_neg hk]
         exact hK0 R hR k
   have hT : ∀ R : ℝ, 0 ≤ R → ∀ i, 0 ≤ T R i := by
@@ -81,6 +86,7 @@ theorem h1_grid_tame
       · simp only [hk, if_pos]
         exact hK3 R hR
       · simp only [if_neg hk]
+        exact le_rfl
   have hQ0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q0 R := by
     intro R hR
     exact Finset.sum_nonneg fun i _ ↦ mul_nonneg (hC i) (hL R hR i)
@@ -117,14 +123,25 @@ theorem h1_grid_tame
       (∑ k ∈ Finset.range (i + 3), Km k) = L R i + T R i * A ^ 2 := by
     intro i
     simp only [L, T]
-    rw [← Finset.sum_add_distrib]
-    apply Finset.sum_congr rfl
-    intro k _
-    by_cases hk : k = 3
-    · simp only [Km, hk, if_pos]
-      ring
-    · simp only [Km, if_neg hk]
-      ring
+    calc
+      _ = ∑ k ∈ Finset.range (i + 3),
+          ((if k = 3 then 0 else K0 R k) +
+            (if k = 3 then K3 R else 0) * A ^ 2) := by
+        apply Finset.sum_congr rfl
+        intro k _
+        by_cases hk : k = 3
+        · simp only [Km, hk, if_pos]
+          ring
+        · simp only [Km, if_neg hk]
+          ring
+      _ = (∑ k ∈ Finset.range (i + 3), if k = 3 then 0 else K0 R k) +
+          ∑ k ∈ Finset.range (i + 3),
+            (if k = 3 then K3 R else 0) * A ^ 2 := by
+        rw [Finset.sum_add_distrib]
+      _ = (∑ k ∈ Finset.range (i + 3), if k = 3 then 0 else K0 R k) +
+          (∑ k ∈ Finset.range (i + 3), if k = 3 then K3 R else 0) *
+            A ^ 2 := by
+        rw [Finset.sum_mul]
   have hQeq :
       (∑ i ∈ Finset.range 2,
         C i * ∑ k ∈ Finset.range (i + 3), Km k) =
@@ -150,60 +167,6 @@ theorem h1_grid_tame
     _ ≤ (B0 R + B1 R * A) ^ 2 := by
       nlinarith [mul_nonneg (Real.sqrt_nonneg (Q0 R))
         (mul_nonneg (Real.sqrt_nonneg (Q1 R)) hA)]
-
-/-- The endpoint spectral `H2` radius controls the lower three-term metric jet
-at every point of a convex realization segment. -/
-theorem convex_h2_jet (g₀ : SmoothRiemannianMetric I M) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (T T' : SmoothCcTensor g₀ 0 2) (R : ℝ), 0 ≤ R →
-        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
-        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
-        ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 →
-          (∑ j ∈ Finset.range 3,
-            ‖iteratedCovGrad (I := I) g₀ 0 2 j
-              (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2) ≤
-            (C * R) ^ 2 := by
-  classical
-  obtain ⟨C, hC, hjet⟩ := hsJet_le (I := I) (M := M) g₀ 2 2
-  refine ⟨C, hC, ?_⟩
-  intro T T' R hR hT hT' s hs
-  have hs0 : (0 : ℝ) ≤ s := hs.1
-  have hs1 : s ≤ 1 := hs.2
-  have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
-  have hpath :
-      ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ)
-          (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
-    rw [show convexPerturbation (I := I) g₀ T T' s =
-        (1 - s) • T' + s • T from rfl,
-      ccTensorToHs_add, ccTensorToHs_smul, ccTensorToHs_smul]
-    calc
-      ‖(1 - s) • ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T' +
-          s • ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖
-          ≤ ‖(1 - s) • ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ +
-            ‖s • ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ :=
-            norm_add_le _ _
-      _ = (1 - s) * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ +
-            s * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ := by
-          rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
-            abs_of_nonneg h1ms, abs_of_nonneg hs0]
-      _ ≤ (1 - s) * R + s * R :=
-        add_le_add (mul_le_mul_of_nonneg_left hT' h1ms)
-          (mul_le_mul_of_nonneg_left hT hs0)
-      _ = R := by ring
-  have hsum : (∑ j ∈ Finset.range 3,
-      ‖iteratedCovGrad (I := I) g₀ 0 2 j
-        (convexPerturbation (I := I) g₀ T T' s)‖) ≤ C * R := by
-    exact (hjet (convexPerturbation (I := I) g₀ T T' s)).trans
-      (mul_le_mul_of_nonneg_left hpath hC)
-  exact (Finset.sum_sq_le_sq_sum_of_nonneg
-    (fun j _ ↦ norm_nonneg
-      (iteratedCovGrad (I := I) g₀ 0 2 j
-        (convexPerturbation (I := I) g₀ T T' s)))).trans
-    (pow_le_pow_left₀
-      (Finset.sum_nonneg fun j _ ↦ norm_nonneg
-        (iteratedCovGrad (I := I) g₀ 0 2 j
-          (convexPerturbation (I := I) g₀ T T' s)))
-      hsum 2)
 
 private theorem jet_add
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
@@ -237,8 +200,18 @@ private theorem jet_add
           ‖iteratedCovGrad (I := I) g r s j X‖ ^ 2) +
         (∑ j ∈ Finset.range n,
           ‖iteratedCovGrad (I := I) g r s j Y‖ ^ 2)) := by
-      simp only [Finset.mul_sum]
-      ring
+      calc
+        _ = (∑ j ∈ Finset.range n,
+              2 * ‖iteratedCovGrad (I := I) g r s j X‖ ^ 2) +
+            ∑ j ∈ Finset.range n,
+              2 * ‖iteratedCovGrad (I := I) g r s j Y‖ ^ 2 := by
+          rw [← Finset.sum_add_distrib]
+          apply Finset.sum_congr rfl
+          intro j _
+          ring
+        _ = _ := by
+          rw [← Finset.mul_sum, ← Finset.mul_sum]
+          ring
     _ ≤ 2 * (a ^ 2 + b ^ 2) := by gcongr
 
 private theorem jet_two
@@ -253,6 +226,7 @@ private theorem jet_two
   intro j _
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
   norm_num
+  ring
 
 private theorem jet_neg_two
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
@@ -266,6 +240,7 @@ private theorem jet_neg_two
   intro j _
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
   norm_num
+  ring
 
 private theorem app_h1h2
     (hDim : Module.finrank ℝ E = 3)
@@ -447,6 +422,11 @@ theorem dlbDiff_h1_tame
     (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg -
       deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀)
     R A hR hA hP2 htop hpt'
+
+/-
+The former local Riem/VB/AMix implementations are superseded by the public
+RF-native producers in `LowRegCoeffJets`.  They remain temporarily quarantined
+here while the consumer is rewired below.
 
 /-- The fixed-curvature part of `lieCorr0` is in fact a lower-order `H1`
 coefficient; its affine top-order coefficient can be chosen to be zero. -/
@@ -849,6 +829,8 @@ theorem amix_h1_tame
       dsimp only [B0, B1, Ob, Mb, Nb, Qb]
       ring
 
+-/
+
 /-- Affine `H1` bound for the cancellation-preserving `DLb + lieCorr0` tail. -/
 theorem tail_h1_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -879,50 +861,69 @@ theorem tail_h1_tame
   obtain ⟨Bi, hBi, hins⟩ :=
     insert_h1 (I := I) (M := M) hDim g₀ g_bg hδ₀
   obtain ⟨Bv0, Bv1, hBv0, hBv1, hvb⟩ :=
-    vb_h1_tame (I := I) (M := M) hDim g₀ hδ₀
+    vb_tame (I := I) (M := M) hDim g₀ hδ₀
   obtain ⟨Ba0, Ba1, hBa0, hBa1, ham⟩ :=
-    amix_h1_tame (I := I) (M := M) hDim g₀ g_bg hδ₀
-  obtain ⟨Br0, Br1, hBr0, hBr1, hriem⟩ :=
-    riem_h1_tame (I := I) (M := M) hDim g₀ hδ₀
+    amix_tame (I := I) (M := M) hDim g₀ g_bg hδ₀
+  obtain ⟨Br, hBr, hriem⟩ :=
+    riem_low_h1 (I := I) (M := M) hDim g₀ hδ₀
+  let V0 : ℝ → ℝ := fun R => Bv0 R + Bv1 R * R
+  let A0 : ℝ → ℝ := fun R => Ba0 R + Ba1 R * R
   let S0 : ℝ → ℝ := fun R ↦
-    Bd0 R + Bi R + Bv0 R + Ba0 R + Br0 R
+    Bd0 R + Bi R + V0 R + A0 R + Br R
   let S1 : ℝ → ℝ := fun R ↦
-    Bd1 R + Bv1 R + Ba1 R + Br1 R
+    Bd1 R + Bv1 R + Ba1 R
   let c5 : ℝ := Real.sqrt 5
   let B0 : ℝ → ℝ := fun R ↦ c5 * S0 R
   let B1 : ℝ → ℝ := fun R ↦ c5 * S1 R
   have hc5 : 0 ≤ c5 := Real.sqrt_nonneg _
+  have hV0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ V0 R := by
+    intro R hR
+    exact add_nonneg (hBv0 R hR) (mul_nonneg (hBv1 R hR) hR)
+  have hA0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ A0 R := by
+    intro R hR
+    exact add_nonneg (hBa0 R hR) (mul_nonneg (hBa1 R hR) hR)
   have hS0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ S0 R := by
     intro R hR
     exact add_nonneg (add_nonneg (add_nonneg (add_nonneg
-      (hBd0 R hR) (hBi R hR)) (hBv0 R hR)) (hBa0 R hR)) (hBr0 R hR)
+      (hBd0 R hR) (hBi R hR)) (hV0 R hR)) (hA0 R hR)) (hBr R hR)
   have hS1 : ∀ R : ℝ, 0 ≤ R → 0 ≤ S1 R := by
     intro R hR
-    exact add_nonneg (add_nonneg (add_nonneg
-      (hBd1 R hR) (hBv1 R hR)) (hBa1 R hR)) (hBr1 R hR)
+    exact add_nonneg (add_nonneg (hBd1 R hR) (hBv1 R hR)) (hBa1 R hR)
   refine ⟨B0, B1, fun R hR ↦ mul_nonneg hc5 (hS0 R hR),
     fun R hR ↦ mul_nonneg hc5 (hS1 R hR), ?_⟩
   intro g₁ P htie δ hδ_le hδ_nonneg hbound R A hR hA hP2 htop
+  have hRA : 0 ≤ R + A := add_nonneg hR hA
+  have htop2 : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 ≤ A ^ 2 :=
+    pow_le_pow_left₀ (norm_nonneg _) htop 2
+  have hP3 : (∑ j ∈ Finset.range 4,
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) ≤ (R + A) ^ 2 := by
+    calc
+      _ = (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 := by
+            rw [show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ]
+      _ ≤ R ^ 2 + A ^ 2 := add_le_add hP2 htop2
+      _ ≤ (R + A) ^ 2 := by nlinarith [mul_nonneg hR hA]
   let D : ℝ := Bd0 R + Bd1 R * A
   let Ins : ℝ := Bi R
-  let V : ℝ := Bv0 R + Bv1 R * A
-  let Am : ℝ := Ba0 R + Ba1 R * A
-  let Rm : ℝ := Br0 R + Br1 R * A
+  let V : ℝ := Bv0 R + Bv1 R * (R + A)
+  let Am : ℝ := Ba0 R + Ba1 R * (R + A)
+  let Rm : ℝ := Br R
   let S : ℝ := D + Ins + V + Am + Rm
   have hD : 0 ≤ D := add_nonneg (hBd0 R hR) (mul_nonneg (hBd1 R hR) hA)
   have hIns : 0 ≤ Ins := hBi R hR
-  have hV : 0 ≤ V := add_nonneg (hBv0 R hR) (mul_nonneg (hBv1 R hR) hA)
-  have hAm : 0 ≤ Am := add_nonneg (hBa0 R hR) (mul_nonneg (hBa1 R hR) hA)
-  have hRm : 0 ≤ Rm := add_nonneg (hBr0 R hR) (mul_nonneg (hBr1 R hR) hA)
+  have hV : 0 ≤ V := add_nonneg (hBv0 R hR) (mul_nonneg (hBv1 R hR) hRA)
+  have hAm : 0 ≤ Am := add_nonneg (hBa0 R hR) (mul_nonneg (hBa1 R hR) hRA)
+  have hRm : 0 ≤ Rm := hBr R hR
   have hDjet := hdlb g₁ P htie hδ_le hδ_nonneg hbound
     R A hR hA hP2 htop
   have hIjet := hins g₁ P htie hδ_le hδ_nonneg hbound R hR hP2
   have hVjet := hvb g₁ P htie hδ_le hδ_nonneg hbound
-    R A hR hA hP2 htop
+    R (R + A) hR hRA hP2 hP3
   have hAjet := ham g₁ P htie hδ_le hδ_nonneg hbound
-    R A hR hA hP2 htop
+    R (R + A) hR hRA hP2 hP3
   have hRjet := hriem g₁ P htie hδ_le hδ_nonneg hbound
-    R A hR hA hP2 htop
+    R hR hP2
   have hraw := tail_h1_parts (I := I) (M := M) g₀ g₁ g_bg
     D Ins V Am Rm (by simpa only [D] using hDjet)
     (by simpa only [Ins] using hIjet) (by simpa only [V] using hVjet)
@@ -937,7 +938,7 @@ theorem tail_h1_tame
     positivity
   rw [Real.sq_sqrt hinside] at hraw
   have hfactor : c5 * S = B0 R + B1 R * A := by
-    dsimp only [c5, S, D, Ins, V, Am, Rm, B0, B1, S0, S1]
+    dsimp only [c5, S, D, Ins, V, Am, Rm, B0, B1, S0, S1, V0, A0]
     ring
   calc
     _ ≤ 5 * (D ^ 2 + Ins ^ 2 + V ^ 2 + Am ^ 2 + Rm ^ 2) := hraw
@@ -1021,8 +1022,10 @@ theorem rhs0_h1_tame
   have hsingle : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 ≤
       ∑ j ∈ Finset.range 4,
         ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
-    exact Finset.single_le_sum (fun j _ ↦ sq_nonneg _)
-      (Finset.mem_range.mpr (by omega))
+    have hmem : 3 ∈ Finset.range 4 := by norm_num
+    exact Finset.single_le_sum
+      (f := fun j : ℕ => ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)
+      (fun j _ => sq_nonneg _) hmem
   have htopSq : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 ≤
       (C3 * A) ^ 2 := hsingle.trans hP3
   have htop : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ≤ C3 * A := by
@@ -1099,7 +1102,7 @@ theorem rhs0_h1_tame
       (-2 : ℝ) • Ric + (DLa + Tail) := by
     simp only [rhsLow0Coeff, linearizedRicciConnDiffOrder0Coeff,
       Ric, DLa, Tail, g₁]
-    rw [deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
+    rw [← deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
     abel
   rw [hrhs]
   exact hout.trans (hbound.trans_eq (by rw [hfactor]))

@@ -50,3 +50,15 @@ The public generic spatial-jet calculus requested by the P4 route is complete
 unproved theorem (0%), the broader P4 regularity machinery remains about 90%,
 and the whole HCG compactness project remains about 60% by the current
 project-map denominator.
+
+## 2026-07-27 arbitrary time sets
+
+`spaceJet_comp` no longer asks that the time parameter set be open.  The old
+`IsOpen J` binder was used only to construct an unused product-openness fact;
+the jet-composition proof itself is pointwise in time and works for an
+arbitrary set `J`.  This lets the Ricci-flow bootstrap use the actual closed
+window `Icc β ψ` without an endpoint extension assumption.
+
+The theorem is exact-green.  This is a reusable calculus repair, not an HCG
+endpoint: the theorem itself and this API change are 100%, while the closed
+Hamilton `IsSolutionOn` theorem is still assembled in its consumer layer.

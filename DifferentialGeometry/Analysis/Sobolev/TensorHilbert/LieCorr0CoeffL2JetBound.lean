@@ -151,7 +151,7 @@ noncomputable def lc0RiemLive (g₀ g₁ : SmoothRiemannianMetric I M) :
     (slotExtend (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)) lc0RiemSrc
 
 /-- The live arm's fibre is exactly the rank-`2` `g₁`-cometric double trace. -/
-private theorem lc0RiemLive_toSec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+theorem lc0RiemLive_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
         (lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x) =
       cometricDoubleTraceFib (I := I) g₁ 2 x := by
@@ -233,7 +233,7 @@ private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
             (lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x).comp
         (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
             (lc0RiemPass (I := I) g₀).toSection x)) := by
-  rw [lieCorr0RiemFib, lc0RiemLive_toSec, neg_one_smul]
+  rw [lieCorr0RiemFib, lc0RiemLive_fiber, neg_one_smul]
   rfl
 
 /-- **The `lc0Riem` two-arm factorization.**  The fixed-curvature piece is the
@@ -918,7 +918,7 @@ private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
             (lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x).comp
         (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
             (lc0VBPass (I := I) (M := M) g₀ g₁).toSection x)) := by
-  rw [lieCorr0VBFib, lc0RiemLive_toSec]
+  rw [lieCorr0VBFib, lc0RiemLive_fiber]
   rfl
 
 /-- **The `lc0VB` two-arm factorization.**  The vector-bundle contraction piece is `2 ·` the

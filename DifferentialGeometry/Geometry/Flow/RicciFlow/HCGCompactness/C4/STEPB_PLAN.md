@@ -207,6 +207,12 @@ Current status:
   `intrinsic_jacobi_one` are focused- and exact-green and prove the global Jacobi equation
   plus its exact time-one differential identity for the complete intrinsic
   exponential, without a clamp or launch-radius assumption.
+- `IntrinsicFramedCoordinates.intrFrame_mfderiv` is source/focused-green and
+  transports that identity through the normal frame. The HCG completeness
+  boundary is now explicit in `H6NormalCoord.intr_metric_eq` and
+  `exists_intr_eq_ball`, both focused-green. The next live H6 target is the
+  quantitative intrinsic Rm04 half/two estimate; the qualitative agreement
+  ball is not counted as a uniform profile.
 
 Current B/C status: the complete stage chain through `StepCStageMaster` is
 focused- and exact-green. `StepB1MetricBridge`, `StepB1MetricLocal`,
@@ -229,8 +235,8 @@ global smoothness of the basepoint-free geodesic spray, finite-time smooth-flow
   `NormalCoordMetricBoundInput.radius` together with its profile; no positive
   ratio follows for an arbitrary record whose radius may be shrunk. The
   decision prompt and exact signatures are in `H6_RADIUS_CONSULT.md`. The
-  current `expMapC2Radius`
-inside `expRadiusGp` remains a qualitative choice and cannot be lower-bounded
+  current `expMapC2Radius` inside `expRadiusGp` remains a qualitative choice
+  and cannot be lower-bounded
 by CGT injectivity. Do not add an endpoint wrapper or a synonym profile
 assumption to bypass this gate.
 
@@ -590,3 +596,23 @@ the `lbl395` normal-coordinate metric-bound honest input.
    first introducing a separate Step B chart-data record for `H_k^alpha` /
    pulled-back metric maps.  In that case, report the smallest chart-data record
    needed; do not create an ad hoc parallel API.
+## 2026-07-27 H6 intrinsic ODE status
+
+- `Rm04OperatorBound.riemannOp_sq_le`: focused green.
+- `IntrinsicGronwall.intrJacobi_ode`: focused and exact green.
+- `IntrinsicFramedJacobi.intr_metric_jacobi`: focused and exact green.
+- `H6NormalCoord.exists_intr_radii`: focused and exact green. It gives one uniform
+  positive radius for the total intrinsic framed pullback metric, with the
+  half/two estimate and no `expRadiusGp` or qualitative-branch clamp.
+- `H6NormalCoord.exists_intr_branches`: focused and exact green. On the same radius it
+  excludes conjugate launch vectors and selects the existing smooth intrinsic
+  inverse branch pointwise, without a new assumption or wrapper frontier.
+- The unclamped route now derives the Gronwall ODE from sequence `Rm04` bounds
+  and constant intrinsic speed; no chart-radius clamp remains in this producer.
+- H6 relative profile theorem: 0% because it is not yet stated.
+- Dedicated zero-order machinery: 100%.
+- Next target: prove the off-zero local agreement/smoothness bridge on the
+  natural `expDomain`, combine it with `exp_dom_of_inj_rad` and the new
+  nonconjugacy theorem to make the geometric injectivity ball a partial
+  diffeomorphism source, then construct the bounds record and profile together.
+  The all-order metric-jet induction remains separate.

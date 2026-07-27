@@ -62,11 +62,15 @@ in the local proof.  The only source repair was to repeat the canonical
 topology/chart/manifold/compactness instances inside dependent lambda and proof
 bodies; no metric assumption or compatibility wrapper was added.
 
-The theorem and its dedicated consumer assembly are now focused and exact
-GREEN (`9720/9720`), with a current module artifact.  This does not prove the
-unconditional `compactnessSol` endpoint:
-`open_upgrade_canon` consumes a concrete `StepDCanonData`, and its Shi input
-still comes through the independent complete-noncompact analytic lane.  The
-unconditional endpoint therefore remains 0%; dedicated P4 support machinery
-is approximately 98%, while whole-HCG supporting machinery remains roughly
-60%.
+The theorem and its dedicated consumer assembly are focused and exact GREEN.
+The complete-noncompact analytic lane is now closed: `movingShi_open` is
+checked through the Route-B-prime barrier producer, and its axiom replay uses
+only the standard `propext`, `Classical.choice`, and `Quot.sound`. Thus
+`open_upgrade_canon` is the finished P4 assembly; no new Shi adapter is needed.
+
+This still does not prove the unconditional `compactnessSol` endpoint.
+`open_upgrade_canon` consumes a concrete `StepDCanonData`, while the current
+unconditional hypotheses do not yet produce the preceding time-zero
+`MetricCompactBase`/`MetricCompactnessInputs`. The unconditional endpoint
+therefore remains theorem-level 0%; the P4 producer and consumer assembly are
+100%, while whole-HCG supporting machinery remains roughly 60%.

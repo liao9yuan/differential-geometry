@@ -35,6 +35,18 @@ noncomputable def riemannianEDistOf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The explicit-metric Riemannian extended distance vanishes on the
+diagonal. -/
+@[simp] theorem edistOf_self
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    riemannianEDistOf (I := I) g x x = 0 := by
+  letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨g.toRiemannianMetric⟩
+  change Manifold.riemannianEDist I x x = 0
+  exact Manifold.riemannianEDist_self
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 private theorem edistOf_iInf
     (g : SmoothRiemannianMetric I M) (x y : M) :
     riemannianEDistOf (I := I) g x y =

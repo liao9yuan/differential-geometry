@@ -58,6 +58,69 @@ noncomputable def intrinsicJacobi
       intrinsicGeodesic (I := I) g hEnorm p (u + r • w) s)
     0 1
 
+/-- The intrinsic initial-velocity Jacobi field vanishes at the launch time. -/
+@[simp] theorem intrinsicJacobi_zero
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u w : TangentSpace I p) :
+    intrinsicJacobi (I := I) g hEnorm p u w 0 = 0 := by
+  have hconst :
+      (fun r : Real =>
+        intrinsicGeodesic (I := I) g hEnorm p (u + r • w) 0) =
+        fun _ : Real => p := by
+    funext r
+    exact intrinsicGeodesic_zero (I := I) g hEnorm p _
+  unfold intrinsicJacobi
+  rw [hconst, mfderiv_const]
+  rfl
+
+/-- The intrinsic Jacobi field and its first covariant derivative have
+differentiable chart representatives at every time. -/
+theorem intrJacobi_diff
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u w : TangentSpace I p) (t : Real) :
+    DifferentiableAt Real
+        (chartRepAt (I := I)
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (intrinsicJacobi (I := I) g hEnorm p u w) t) t ∧
+      DifferentiableAt Real
+        (chartRepAt (I := I)
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (fun s => covDerivAlong (I := I) g
+            (intrinsicGeodesic (I := I) g hEnorm p u)
+            (intrinsicJacobi (I := I) g hEnorm p u w) s) t) t := by
+  let F : Real → Real → M := fun s r =>
+    intrinsicGeodesic (I := I) g hEnorm p (u + s • w) r
+  have hF : IsSmoothVariation (I := I) F := by
+    change ContMDiff (𝓘(Real, Real).prod 𝓘(Real, Real)) I (8 : Nat)
+      (fun q : Real × Real =>
+        intrinsicGeodesic (I := I) g hEnorm p (u + q.1 • w) q.2)
+    exact (intrinsicVar_smooth (I := I) g hEnorm p (u : E) (w : E)).of_le
+      ENat.LEInfty.out
+  have hbase :
+      (fun r : Real => F 0 r) =
+        intrinsicGeodesic (I := I) g hEnorm p u := by
+    funext r
+    simp only [F, zero_smul, add_zero]
+  have hfield :
+      (fun r : Real =>
+        mfderiv 𝓘(Real, Real) I (fun s : Real => F s r) 0 (1 : Real)) =
+        intrinsicJacobi (I := I) g hEnorm p u w := by
+    funext r
+    rfl
+  constructor
+  · have h :=
+      variationField_chartRep_differentiableAt (I := I) g F hF t
+    rw [hbase, hfield] at h
+    exact h
+  · have h :=
+      variationField_covDeriv_chartRep_differentiableAt (I := I) g F hF t
+    rw [hbase, hfield] at h
+    exact h
+
 /-- Pairing an endpoint Jacobi field with the terminal radial velocity recovers
 the corresponding launch pairing. -/
 theorem intrinsicJacobi_perp

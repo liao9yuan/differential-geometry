@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCompactnessInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldCanon
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -75,7 +76,15 @@ theorem compactnessSol
     exact h0
   have hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)) :=
     hcomplete.at_time hzero
-  sorry
+  have hbase :
+      Nonempty (MetricCompactBase (I := I) (X.atZero (I := I))) := by
+    sorry
+  let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
+    (Classical.choice hbase).metricCanon hcomplete0 hconn
+  obtain ⟨d, hcompleteL⟩ :=
+    open_upgrade_canon (I := I) canon h0 hD hcomplete hcurv
+  let mc := canon.mc.compSubseq d.φ d.hφ
+  exact ⟨d.data.L, mc.subseq, mc.strictMono, d.data.converges, hcompleteL⟩
 
 end HCGCompactness
 end DifferentialGeometry

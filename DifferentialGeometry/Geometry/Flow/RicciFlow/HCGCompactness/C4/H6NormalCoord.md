@@ -1,5 +1,26 @@
 # H6NormalCoord
 
+## 2026-07-27 intrinsic ODE chain
+
+The unclamped intrinsic route now has checked lower producers:
+
+- `riemannOp_sq_le`: pointwise `metricRm04At` fiber norm controls
+  `|R(J,V)V|_g^2`;
+- `intrJacobi_ode`: sequence curvature bounds plus constant geodesic speed give
+  the covariant Gronwall ODE with constant `sqrt(dim) * R * g_p(u,u)`;
+- `intrJacobi_bounds`: all regularity, frame, and initial-value obligations are
+  already automatic.
+
+`intr_rm04_of_seq` was aligned with the stronger `Ico 0 1` package; its proof
+is unchanged because `SeqBoundedGeometry` is pointwise global.  The H6 relative
+profile theorem is still not stated (0%).  The new focused-green
+`exists_intr_radii` closes the unclamped zero-order geometry: one `r0 > 0`
+works for every sequence member and center, and the total intrinsic framed
+pullback metric satisfies the half/two estimate on `ball 0 r0`.  Its proof uses
+the scalar quarter budget, `intrJacobi_ode`, `intrJacobi_bounds`, and
+`intr_metric_jacobi`; it does not intersect the radius with `expRadiusGp`,
+`framedJacobiRadius`, or a qualitative agreement ball.
+
 ## Purpose
 
 This module is the native producer boundary between radial Jacobi estimates
@@ -111,6 +132,20 @@ injectivity can construct the radius-controlled partial diffeomorphism. Do not
 replace it by an endpoint wrapper or synonym assumption on
 `NormalRadiusProfile`.
 
+The HCG completeness boundary is now explicit rather than hidden.
+`intr_metric_eq` threads `MetricComplete Y` into the intrinsic total-map
+metric and identifies it with the existing HCG normal-coordinate metric on the
+transferred branch. `exists_intr_eq_ball` extracts the corresponding positive
+agreement ball. Both are focused-green. This is a migration bridge only: its
+radius is pointwise and qualitative, so it does not solve the relative-profile
+quantifier.
+
+At the geometry layer, `intrFrame_mfderiv` is source/focused-green and
+identifies the differential of `intrinsicFramedExp` with the time-one
+intrinsic Jacobi variation. `IntrinsicFramedJacobi.lean` now contains the
+derived differential and pullback-metric endpoint formulas; its focused check
+waits only for the narrow upstream artifact refresh.
+
 ## Honest progress
 
 - Per-center orthonormal normalizer and exact radial norm correspondence: 100%
@@ -125,14 +160,17 @@ replace it by an endpoint wrapper or synonym assumption on
   target-checked. It gives one curvature radius `r0`, but still intersects it
   with the pointwise `framedJacobiRadius`.
 - Sequence-uniform relative-radius/profile theorem: 0%; its dedicated
-  zero-order Jacobi/Rm04 machinery is about 99%. Natural-domain containment,
+  zero-order Jacobi/Rm04 machinery is 100%. Natural-domain containment,
   global spray smoothness, intrinsic-lift identification, and smooth time-one
   dependence plus the intrinsic Jacobi endpoint differential are proved. The
-  Route-A-plus-Route-C architecture is now fixed, and its first intrinsic framed
-  migration brick is focused-green. The remaining zero-order gap is the single
-  intrinsic local branch, canonical name/radius migration, and final H6 choice
-  of bounds together with its profile; the profile cannot target an arbitrary
-  shrinkable bounds record.
+  Route-A-plus-Route-C architecture is fixed, and the unclamped quantitative
+  intrinsic metric estimate is exact-green. `exists_intr_branches` now also
+  gives, on the same sequence-uniform ball, nonconjugacy and a selected smooth
+  intrinsic inverse branch at every launch vector; the H6 module refresh is
+  exact-green. The remaining profile gap is
+  the canonical name/radius migration and final H6 choice of bounds together
+  with its profile; the profile cannot target an arbitrary shrinkable bounds
+  record.
 - Native all-order `NormalCoordMetricBoundInput` producer theorem: 0%; its
   dedicated machinery is about 35%, because the high-order curvature-to-metric
   jet induction has not been formalized.
@@ -142,18 +180,16 @@ replace it by an endpoint wrapper or synonym assumption on
 ## Next target
 
 The canonical architecture in `H6_RADIUS_CONSULT.md` is resolved as Route A
-plus Route C. Geometry Stages 1--3 are focused- and exact-green in
-`Geometry/Exponential/IntrinsicFramedCoordinates.lean`: the total intrinsic
-framed map, its migration-only local partial diffeomorphism, and its total-map
-pullback metric are implemented, including local agreement with the legacy
-objects. The next target is the HCG completeness boundary. The intrinsic map
-requires `[CompleteSpace M]`, while the current `normalCoordMetric Y x` and
-`NormalCoordMetricBoundInput` do not carry `MetricComplete Y`; this dependency
-must be threaded or packaged honestly before switching the existing public
-metric name. After that, flip the canonical framed names and make injectivity
-and `expRadiusGp` intrinsic. H6 must finally choose its metric-bound record and
-relative profile together. Higher coordinate derivatives remain a separate
-curvature-jet induction.
+plus Route C. Geometry Stages 1--4, the unclamped intrinsic zero-order estimate,
+and its uniform nonconjugacy/local-branch consequence are checked at source
+  and exact module levels. The smallest remaining lower-layer API is the off-zero local agreement
+of the chart-fixed exponential with the intrinsic exponential on the natural
+`expDomain`. This is exactly the next consumer recorded in
+`Comparison/InjectivityRadius.md`: combine it with `exp_dom_of_inj_rad` and
+`intrFrame_not_conj` to obtain a partial diffeomorphism on the geometric
+injectivity ball. Then the canonical radius package can consume that ball and
+H6 can choose its metric-bound record and relative profile together. Higher
+coordinate derivatives remain a separate curvature-jet induction.
 
 ## Migration audit
 

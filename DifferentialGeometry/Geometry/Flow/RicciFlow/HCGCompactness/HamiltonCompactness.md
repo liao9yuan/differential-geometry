@@ -2,15 +2,15 @@
 
 Source used: MSM135 Chapter 3 theorem "Compactness for solutions"; MSM135 Chapter 4 was checked to identify the true proof backend.
 
-## Current canonical route (2026-07-17)
+## Current canonical route (2026-07-27)
 
 `compactnessSol_cond` is the canonical wrapper over `solutionComp_cond`.  It
 consumes `MetricCompactnessInputs`, the concrete conditional Theorem 3.9
 conclusion, and `FlowUpgradeData`; it calls neither unconditional
 `metricCompactness` nor any exact-conclusion backend.
 
-This conditional consumer body is checked infrastructure.  Conditional
-Theorem 3.9 is now checked, while the P4 producer remains open.
+This conditional consumer body is checked infrastructure. Conditional
+Theorem 3.9 and the P4 producer `open_upgrade_canon` are now checked.
 
 The file now also states the genuine target `compactnessSol`.  Its time-domain
 hypothesis is the literal book domain
@@ -24,14 +24,43 @@ constant on the whole open interval.
 The target conclusion now explicitly includes completeness of every limit
 time-slice.  This strengthens only `compactnessSol`; the generic
 `CompactnessConclusion` remains unchanged because it has existing consumers.
-There were no `compactnessSol` call sites to migrate.  The proof body now
-checks the first real reduction, `CompleteInput.at_time` at `t = 0`, before the
-remaining explicit `sorry`.  This extraction is not yet an all-time limit
-completeness proof: a checked bounded-curvature propagation/limit producer is
-still required for the final `∀ t ∈ X.D.carrier` conclusion.  Theorem-level
-completion remains 0%; dedicated P4
-machinery is about 88% and whole-HCG machinery about 60%.  Focused verification
-is green, with the expected warning at the one visible theorem-level `sorry`.
+There were no `compactnessSol` call sites to migrate. The proof body checks the
+first reduction, `CompleteInput.at_time` at `t = 0`, before the remaining
+explicit `sorry`. The all-time flow-upgrade and limit-completeness side is no
+longer the blocker: `open_upgrade_canon` consumes the checked no-extra-input
+`movingShi_open` route and returns both `FlowUpgradeData` and completeness of
+every limit time-slice.
+
+The precise missing producer is earlier, at time zero. The present hypotheses
+do not yet construct
+
+```text
+MetricCompactBase (X.atZero)
+  -> MetricCompactnessInputs (X.atZero)
+  -> StepDCanonData (X.atZero).
+```
+
+Once that data exist, the remaining final assembly is the short call
+`open_upgrade_canon canon h0 hD hcomplete hcurv`, followed by
+`FlowUpgradeData.toConclusion`. Native construction of `MetricCompactBase`
+still depends on the CGT injectivity-decay producer, the unconditional
+Bishop--Gromov volume-overlap producer, the sequence-uniform H6 radius profile,
+and the all-order `NormalCoordMetricBoundInput` producer. Consequently
+`compactnessSol` remains theorem-level 0%; the P4 producer/assembly is 100%,
+and whole-HCG machinery remains about 60%. Focused verification of the source
+is green with the expected warning at the one visible endpoint `sorry`.
+
+The target proof is now filled through that boundary. Its single `sorry` is the
+local proof of
+
+```text
+Nonempty (MetricCompactBase (X.atZero)).
+```
+
+After choosing this base, the checked code constructs `StepDCanonData`, calls
+`open_upgrade_canon`, uses `FlowLimitData.converges`, and returns both smooth
+CGH convergence and completeness of every limit slice. Focused verification is
+green; no downstream assembly hole remains.
 
 The generic carrier-capable `CompactnessConclusion` and conditional consumers
 remain unchanged.  This is intentional: the Hamilton blow-up adapter separately

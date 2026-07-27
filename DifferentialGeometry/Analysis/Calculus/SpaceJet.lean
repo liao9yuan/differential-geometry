@@ -123,14 +123,14 @@ theorem spaceJet_contAt
 
 /-- Smooth postcomposition preserves joint finite-order regularity of every
 spatial jet.  The outer map is only required to be smooth on an open set
-containing the image of the parameterized family. -/
+containing the image of the parameterized family; the time set is arbitrary. -/
 theorem spaceJet_comp
     {A B : Type*}
     [NormedAddCommGroup A] [NormedSpace ℝ A]
     [NormedAddCommGroup B] [NormedSpace ℝ B]
     {Φ : A → B} {u : ℝ → E → A}
     {J : Set ℝ} {V : Set E} {Ω : Set A} {q : ℕ}
-    (hJ : IsOpen J) (hV : IsOpen V) (hΩ : IsOpen Ω)
+    (hV : IsOpen V) (hΩ : IsOpen Ω)
     (huΩ : Set.MapsTo (Function.uncurry u) (J ×ˢ V) Ω)
     (hΦ : ContDiffOn ℝ ∞ Φ Ω)
     (hus : ∀ t ∈ J, ContDiffOn ℝ ∞ (u t) V)
@@ -138,7 +138,6 @@ theorem spaceJet_comp
     SpaceJetDiff q (fun t x => Φ (u t x)) J V := by
   classical
   let S : Set (ℝ × E) := J ×ˢ V
-  have hS : IsOpen S := hJ.prod hV
   have huJointRaw :=
     (continuousMultilinearCurryFin0 ℝ E A).contDiff.comp_contDiffOn (hu 0)
   have huJoint : ContDiffOn ℝ q (Function.uncurry u) S :=

@@ -4,25 +4,21 @@
 
 The public interface remains unchanged.  `movingShi_of_bound`,
 `movingShi_complete`, and `CurvBoundInput.movingShi_open` are focused-green and
-the exact target is current (`9634/9634`), with no local `sorry` or warning.
-The local assembly repairs installed the stored carrier instances explicitly,
-used the complete left-anchor metric for the tangent norm, and removed an
-accidental compactness requirement from the chart-local tower-norm regularity
-chain.
+the exact target is current (`9663/9663`), with no local `sorry` or warning.
+All three public theorems have been replayed with axioms consisting only of
+`propext`, `Classical.choice`, and `Quot.sound`.
 
-This remains an assembly result, not yet a trusted end-to-end complete-Shi
-theorem.  The arbitrary-dimensional direct tower is now exact-current as
-`towerHeatSol_raw` / `towerHeatSol_any`, and the unsupported sorry-backed
-`exists_rmTowerSol` has been removed.  The remaining lower analytic gap is the
-concrete solution-produced `ShiCutoffData`: this module still calls the legacy
-sorry-backed `BernsteinTower.estimate_complete`.  The corrected fixed-order
-generic consumer `BernsteinTower.estimate_cutoff_at` is exact-current, with
-`estimate_of_cutoff` retained as its all-order compatibility wrapper, but
-neither can be used here until that cutoff producer is proved.
+The route is now trusted end to end.  `movingShi_of_bound` constructs the
+solution-generated point-centered barrier-cutoff family, supplies the checked
+curvature-tower Kato estimate, and calls
+`BernsteinTower.estimate_barrier_at`.  The former private legacy adapter around
+the sorry-backed `BernsteinTower.estimate_complete` has been deleted and is not
+a dependency of any public theorem in this module.
 
 - `shiOpenConst` is an explicit constants-first envelope depending only on the
   model dimension, the common squared-curvature bound, the buffered time slab,
-  and the requested finite order.  It contains no flow or sequence-member
+  and the requested finite order.  Its finite envelope includes the extra
+  `N + 1` tower level needed by Kato, and contains no flow or sequence-member
   argument.
 - `movingShi_complete` is fully assembled from the constants-first core.
 - `CurvBoundInput.movingShi_open` is fully assembled on the canonical windows.
@@ -62,14 +58,14 @@ producer does not exist.
 
 1. exact-current `towerHeatSol_any`, with the explicit constructor-tree cost
    `rmTowerCost`;
-2. the legacy `BernsteinTower.estimate_complete`; the trusted replacement is
-   exact-current `estimate_cutoff_at` through the checked private
-   `complete_of_cutoff`, plus the still-unproved solution-produced
-   `ShiCutoffData`;
+2. exact-current `BernsteinTower.estimate_barrier_at` through the checked
+   private `complete_of_barrier`, together with solution-produced
+   `ShiBarrierCutoffData` and `towerNorm_grad_le`;
 3. the arbitrary-dimensional Ricci trace bound;
-4. one-sided metric equivalence from the complete left anchor under the
-   curvature bound; and
-5. finite truncation through order `N` with the explicit common constant.
+4. completeness transport from the complete left anchor to the shifted
+   time-zero slice; and
+5. finite truncation through order `N + 1` with an explicit common constant,
+   followed by the requested output through order `N`.
 
 The strict start needed by `towerHeatSol_any` forces the canonical midpoint
 `t0 = (alpha + beta) / 2`.  Consequently the uniform denominator in
@@ -79,13 +75,10 @@ The strict start needed by `towerHeatSol_any` forces the canonical midpoint
 shifted Bernstein slab.  No completeness-at-every-time, compactness,
 injectivity-radius, or endpoint-radius hypothesis was added.
 
-The public proof currently uses `complete_of_heat`, the compatibility consumer
-around legacy `BernsteinTower.estimate_complete`.  The same private truncation
-constructor now also feeds the checked `complete_of_cutoff`; once concrete
-cutoff data are available the public call can switch without changing the
-Bernstein algebra or adding a second public API.  Thus the exact-green
-HCG-facing assembly does not yet make the complete-Shi route trusted end to
-end.
+The public proof uses `complete_of_barrier`.  The obsolete private
+`complete_of_heat` adapter has been removed; the remaining
+`complete_of_cutoff` is a checked conditional smooth-cutoff adapter and is not
+the public route.
 
 ## 2026-07-24 point-centered barrier adapter
 
@@ -110,19 +103,36 @@ In particular, the sequence theorem must never be reproved by calling
 `movingShi_complete` separately for each member and then trying to extract a
 uniform constant.
 
+## 2026-07-27 trusted Route B-prime switch
+
+The concrete producer `shiBarrierCutoff_of_sol` is now exact-current.  The
+public `movingShi_of_bound` proof has been switched from the legacy heat
+adapter to `complete_of_barrier`.  It transports completeness from the original
+left anchor to the shifted time-zero slice, builds the cutoff family at every
+center, and supplies `towerNorm_grad_le` through the requested order.
+
+The truncation and explicit constant now retain reaction levels through
+`N + 1`.  This is the minimal extra level needed to estimate the gradient of
+the order-`N` tower norm; the public conclusion still ranges only over
+orders `k ≤ N`.  Obsolete metric-equivalence calculations and the private
+legacy `complete_of_heat` adapter were removed.
+
+Focused verification and the exact target are green (`9663/9663`).  Axiom
+replay for `movingShi_of_bound`, `movingShi_complete`, and
+`CurvBoundInput.movingShi_open` contains only `propext`,
+`Classical.choice`, and `Quot.sound`.
+
 ## Honest accounting
 
-- `movingShi_of_bound`: source proof and verification 100%; trusted theorem
-  completion remains 0% because it consumes the one remaining legacy lower
-  `sorry` in `estimate_complete`.
-- `movingShi_complete` and `CurvBoundInput.movingShi_open`: wrapper proofs and
-  verification 100%; trusted complete-Shi route remains 0% for the same lower
-  reasons.
+- `movingShi_of_bound`: theorem-level **100%**, focused/exact-green and
+  axiom-clean apart from the standard three axioms above.
+- `movingShi_complete` and `CurvBoundInput.movingShi_open`: theorem-level
+  **100%** on the trusted barrier route.
 - dedicated HCG-facing complete-Shi assembly machinery: 100%.
 - arbitrary-dimensional curvature-tower producer and dedicated machinery:
   100% checked.
 - generic fixed-order cutoff/barrier Bernstein consumers and their HCG
-  conditional adapters: 100% checked; the concrete solution-produced
-  `ShiBarrierCutoffData` theorem remains 0%.
+  adapters, plus the concrete solution-produced `ShiBarrierCutoffData`
+  theorem: 100% checked.
 - unconditional `compactnessSol`: theorem 0%.
 - whole-HCG support machinery: about 60%.

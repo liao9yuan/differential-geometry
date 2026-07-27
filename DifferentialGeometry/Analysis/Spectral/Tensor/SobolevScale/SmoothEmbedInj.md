@@ -1,17 +1,10 @@
 # SmoothEmbedInj
 
-## 2026-07-19
+## Status
 
-The generic smooth covariant-tensor spectral embedding is injective at every
-real order.  The proof
-uses exactly two existing canonical facts: spectral coordinates are the full
-Hilbert eigenbasis representation of the `L2` image, and
-`SmoothCcTensor.toL2` is injective on continuous smooth representatives.
-
-This removes an artificial supercritical-regularity dependency from the
-well-definedness step of the dimension-three low-regularity
-Ricci--DeTurck `Dense.extend` construction.  It does not by itself prove a
-nonlinear estimate or either analytic endpoint theorem.
-
-Focused verification is pending while the shared long-path `.olean`
-dependency is being rebuilt exclusively by the product-estimate lane.
+The injectivity proof is verified.  After applying injectivity of the
+eigenbasis representation, the representation target is a structured sequence
+rather than a bare function, so its extensionality theorem (`ext i`) is the
+stable proof step; `funext i` no longer matches the live API.  The coefficient
+normal form also lives in the canonical `TensorHeatEquation` namespace, which
+must be open at this layer.

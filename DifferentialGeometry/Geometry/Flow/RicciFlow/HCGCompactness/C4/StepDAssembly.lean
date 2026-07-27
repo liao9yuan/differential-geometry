@@ -1233,6 +1233,19 @@ noncomputable def compactness_canon
   · simpa only [mc] using hbounds.1
   · simpa only [mc] using hbounds.2
 
+/-- The canonical Step-D limit is connected: it is the direct limit of the
+preconnected positive-radius tail balls used by `compactness_canon`. -/
+theorem compactness_conn
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
+    (B : StepB1RawInput (X := X) P) :
+    let C := compactness_canon (I := I) P B
+    letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
+    ConnectedSpace C.mc.limit.M := by
+  classical
+  dsimp only [compactness_canon]
+  infer_instance
+
 /-- The public Step-D conclusion, obtained by forgetting the concrete
 reference-metric provenance retained by `compactness_canon`. -/
 noncomputable def compactness_of_b1

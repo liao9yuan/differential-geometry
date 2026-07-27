@@ -40,7 +40,7 @@ the flows with metrics `Φ_k^* g_k(t)` near any compact of `M_∞ = mc.limit.M`;
 subsequence converging C^∞-window-uniformly to a limit family `g_∞(t)`; `g_∞` is the metric
 of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 
-## Current status (2026-07-22)
+## Current status (2026-07-27)
 
 The P4 analytic ruling has been corrected after a theorem-shape review.  The
 solution curvature tower is produced directly as a costed `TowerHeatBoundOn`:
@@ -138,13 +138,16 @@ raw window packages plus the time-zero CP witness, and proves completeness of
 every time slice of that same limit flow.  The assembly consumes the canonical
 `flowUpgrade_open_L` projection rather than unfolding the dependent record.
 
-The remaining P4 work is producer-side and analytic: the theorem-level
-curvature and completeness inputs must yield uniform open-window lower,
-covariant, and time-Lipschitz estimates in the complete noncompact
-arbitrary-dimensional setting.  The formerly independent provenance task is
-closed.  The concrete Step-D sidecar retains the canonical time-zero
-`MetricSourceData` and its constants-first bounds, while the abstract
-`MetricCompactnessConclusion` remains intentionally unchanged.
+The producer-side analytic lanes are now closed.  The theorem-level curvature
+and completeness inputs yield uniform open-window Shi, covariant, and
+time-Lipschitz estimates in the complete noncompact arbitrary-dimensional
+setting.  The formerly independent provenance task is also closed.  The
+concrete Step-D sidecar retains the canonical time-zero `MetricSourceData` and
+its constants-first bounds, while the abstract
+`MetricCompactnessConclusion` remains intentionally unchanged. The final
+assembly audit is now complete: `compactnessSol` is filled from
+`MetricCompactBase (X.atZero)` onward. Its one visible `sorry` is the earlier
+native time-zero metric-base producer, not a P4 gap.
 
 The analytic boundary is now explicit in `MovingShiOpen.lean`.
 `movingShi_complete` and `CurvBoundInput.movingShi_open` choose the common
@@ -152,10 +155,9 @@ curvature bound and the explicit `shiOpenConst` before the member index; they
 do not uniformize memberwise existentials.
 `movingShi_of_bound`, `movingShi_complete`, and
 `CurvBoundInput.movingShi_open` are now focused- and exact-green.  The
-chart-local curvature/tower/norm regularity chain was weakened honestly to the
-complete-noncompact setting, and the anchor-norm statement mismatch was
-repaired.  Their trusted lower work is now split visibly between one closed
-producer and one genuine analytic frontier.  The arbitrary-dimensional costed
+  chart-local curvature/tower/norm regularity chain was weakened honestly to the
+  complete-noncompact setting, and the anchor-norm statement mismatch was
+  repaired.  Their lower work is now trusted end to end.  The arbitrary-dimensional costed
 residual and direct tower (`rmResidual_cost`, `towerHeatSol_raw`, and
 `towerHeatSol_any`) are focused- and exact-green.  The generic localized
 consumer is also closed: `GfunCut_parabolic_le` and
@@ -208,6 +210,21 @@ are checked: `strict_barrier_cpt_of_upperSupport`,
   The private `MovingShiOpen.complete_of_barrier` adapter is focused-green and
   transports the same finite truncation and Kato prefix to that consumer.
 
+  **2026-07-27 Route B-prime closure:** the fixed-first Calabi support,
+  `scaledDist_calabiUpperSupport_of_sol`, the concrete
+  `shiBarrierCutoff_of_sol`, and the final `MovingShiOpen` barrier switch are
+  now focused- and exact-green.  The `DistanceBarrier` performance wall was a
+  redundant `NormedSpace`/`InnerProductSpace` instance diamond, not a
+  mathematical gap; it was removed without a heartbeat override or new
+  assumption.  `movingShi_of_bound` retains the tower through `N + 1`, supplies
+  `towerNorm_grad_le`, constructs one point-centered barrier family at every
+  center, and calls `estimate_barrier_at`.  The obsolete private
+  `complete_of_heat` adapter was deleted.  Axiom replay for
+  `movingShi_of_bound`, `movingShi_complete`, and
+  `CurvBoundInput.movingShi_open` contains only `propext`,
+  `Classical.choice`, and `Quot.sound`.  These three theorems and the selected
+  complete-Shi producer sublane are theorem/machinery **100%**.
+
 The varying-source interface is also now explicit in `SourceCovLip.lean`.
 `SrcCovLipData` records constants before `k`, and `srcCovLip_of_soln` is
 focused- and exact-green.  Its positive-order strong induction consumes the
@@ -239,8 +256,10 @@ canonical provenance sidecar, varying-source bounds, and final open-field
 consumer now meet in one checked assembly.
 
 Accounting: unconditional Theorem 3.10 remains theorem-level 0%.
-The dedicated P4 consumer/assembly machinery is approximately 98%, and
-whole-HCG machinery remains approximately 60%.
+The dedicated P4 producer/consumer assembly and the selected no-extra-input
+complete-Shi route are both 100%. The next frontier is the unconditional
+time-zero `MetricCompactBase` producer, not endpoint wiring or cutoff geometry.
+Whole-HCG machinery remains approximately 60%.
 
 ## Inventory — DONE, verified, reuse (do not rebuild)
 
@@ -809,18 +828,16 @@ the stated one); same-name `.md` updated with route + gotchas; this plan's Statu
 
 ## Honest denominator
 
-The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` is now
-stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE,
-scalar, joint chart-Gram smoothness, open endgame, and raw-input capstone are
-checked, so the dedicated P4 consumer/assembly machinery is conservatively
-about 98%.  The
-common subsequence, compatible limit family, upgrade record, and all-time
-limit completeness are now checked from the existing raw fixed-window
-hypotheses.  The remaining genuine work is to produce those hypotheses
-uniformly on every canonical window.  Canonical time-zero convergence
-provenance through Step D is already checked.  The checked `ConvOut.gramSmooth`,
-`OpenConvOut.smoothMetric_of_conv`, and `open_upgrade_of_raw` close the
-fixed-window-to-open consumer path. Hamilton's
+The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` has one
+explicit `sorry`, but that hole is now exactly
+`Nonempty (MetricCompactBase (X.atZero))`. The fixed-window PDE, scalar, joint
+chart-Gram smoothness, open endgame, no-extra-input complete Shi, raw-input
+capstone, final `open_upgrade_canon` call, and all-time limit completeness are
+checked. Dedicated P4 producer/assembly machinery is therefore 100%.
+Canonical time-zero convergence provenance through Step D is also checked once
+the metric base is supplied. The remaining genuine work lies before P4:
+native CGT decay, volume overlap, the uniform H6 radius profile, and all-order
+normal-coordinate metric bounds must construct that base. Hamilton's
 nonregular endpoint extension is tracked separately and is
 not needed to prove the book theorem.  Whole-HCG machinery remains about 60%.
 The completed selected Step B/C producer and conditional Theorem 3.9 accounting

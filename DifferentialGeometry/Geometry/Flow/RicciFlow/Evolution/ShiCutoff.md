@@ -47,3 +47,27 @@ No further geometric or analytic input is currently known to be missing.
 The theorem is therefore still theorem-level **0%**; its dedicated Route
 B-prime machinery is about **85%**.  Whole HCG supporting machinery remains
 about **60%**, and unconditional `compactnessSol` remains theorem-level **0%**.
+
+## 2026-07-27 — concrete barrier-cutoff producer closed
+
+`shiBarrierCutoff_of_sol` is now focused-green and exact-green (`3997/3997`)
+with no `sorry`, `admit`, new axiom, or local heartbeat override.  It produces
+the quantifier-correct family
+
+```text
+∀ O, Nonempty (ShiBarrierCutoffData (flowG S) T O)
+```
+
+directly from one complete initial slice and the order-zero curvature bound.
+The earlier profile, scalar-chain-rule, compact-support, and evolving-distance
+items are all discharged in the checked proof.
+
+The theorem-scoped removal of the two tangent-space norm instances is retained
+only to avoid the known background-norm instance diamond; it is local and does
+not leak into the public API.  The private `metric_smul_self` avoids the same
+elaboration seam and is intentionally not promoted into a parallel public
+metric API.
+
+Honest accounting: `shiBarrierCutoff_of_sol` is theorem-level **100%**, and its
+dedicated Route B-prime cutoff machinery is **100%**.  This does not by itself
+prove `compactnessSol`; that endpoint remains theorem-level **0%**.

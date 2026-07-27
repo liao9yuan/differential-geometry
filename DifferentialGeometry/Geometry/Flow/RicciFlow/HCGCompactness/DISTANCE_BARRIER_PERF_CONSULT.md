@@ -259,3 +259,24 @@ artifact or theorem-body type error is reported.
 The desired answer is a surgical Lean elaboration fix. If no such boundary can
 work before declaration compilation, please explain precisely which term is
 being normalized and recommend the smallest justified next experiment.
+
+## Resolution — 2026-07-27
+
+The performance wall was caused by a normed-space instance diamond, not by
+reduction of `RiemannianMetricComplete`, the `CurvPrep` record, or the imported
+proof bodies.  `DistanceBarrier.lean` declared both an explicit
+`NormedSpace Real E` and `InnerProductSpace Real E`; the imported
+`MetricTimeCompare` theorem types use the normed-space instance induced by the
+inner product.  Crossing that boundary forced a large failed definitional
+equality check.
+
+Micro-probes established:
+
+- the inner-product-only binder is green;
+- adding the independent explicit normed-space binder reproduces the timeout;
+- the redundant `Module.Finite` binder is not the hotspot.
+
+The final source removes the explicit normed-space binder and uses the proposed
+named `hΛ`/`hricQuad` assembly.  No heartbeat or transparency option was added.
+`DistanceBarrier` is focused- and exact-green (`3995/3995`), and its public
+endpoint is closed.

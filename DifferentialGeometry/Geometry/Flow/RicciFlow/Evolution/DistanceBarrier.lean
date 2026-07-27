@@ -21,9 +21,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Topology Bundle
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
-  [InnerProductSpace Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+  [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -47,8 +46,6 @@ private structure CurvPrep
   complete_t :
     RiemannianMetricComplete (I := I) (S.base.metric t)
 
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Prepare the curvature coefficient and selected-slice completeness. -/
 private theorem curv_prep
     {D : RealTimeInterval}
@@ -64,22 +61,18 @@ private theorem curv_prep
       nablaKRm04NormSqIntrinsic (I := I) S 0 s y ≤ K)
     (ht : t ∈ Set.Icc 0 T) :
     CurvPrep (I := I) S T K t := by
-  have hquad :=
-    DistanceBarrierCore.ricci_quad_of_curv (I := I) S hK hcurv
-  have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : M,
-      Tensor0SBundle.normSq0S (I := I) (S.base.metric s) y 4
-        (S.base.rm04 s y) ≤ K := by
-    intro s hs y
-    simpa only [nablaKRm04NormSqIntrinsic, nablaKRm04Field_zero,
-      Nat.add_zero] using hcurv s hs y
-  exact {
-    lambda_nonneg := hquad.1
-    ricci_quad := hquad.2
-    complete_t :=
-      complete_of_rmBound
-        (I := I) (D := D) (a := 0) (b := T) (C := K) (s := t)
-        S hS hslab hreg hcurv0 hcomplete ht
-  }
+  rcases
+      DistanceBarrierCore.ricci_quad_of_curv
+        (I := I) S hK hcurv
+    with ⟨hΛ, hricQuad⟩
+  have hcomplete_t :
+      RiemannianMetricComplete (I := I) (S.base.metric t) :=
+    complete_of_ricBound
+      (I := I) (D := D) (a := 0) (b := T)
+      (K := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
+      (s := t)
+      S hS hslab hreg hΛ hricQuad hcomplete ht
+  exact CurvPrep.mk hΛ hricQuad hcomplete_t
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

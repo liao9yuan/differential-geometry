@@ -38,10 +38,10 @@ private theorem jet_time_cont
 omit [NormedSpace ℝ E] in
 /-- A jointly continuous family is uniformly bounded on a compact time interval and
 one common spatial neighborhood.  Compactness is used only in the time variable. -/
-private theorem tube_bound
+private theorem tube_bound_on
     {W : Type*} [NormedAddCommGroup W]
     {Φ : ℝ × E → W} {J : Set ℝ} {V : Set E}
-    (hJ : IsOpen J) (hV : IsOpen V)
+    (hV : IsOpen V)
     (hΦ : ContinuousOn Φ (J ×ˢ V))
     {a b : ℝ} (hab : uIcc a b ⊆ J) {x : E} (hx : x ∈ V) :
     ∃ C : ℝ,
@@ -52,16 +52,27 @@ private theorem tube_bound
   obtain ⟨C₀, hC₀⟩ := (isCompact_uIcc.image_of_continuousOn hfixed).bddAbove
   refine ⟨C₀ + 1, ?_⟩
   have hlocal : ∀ t ∈ uIcc a b,
-      ∀ᶠ z : E × ℝ in nhds (x, t), ‖Φ (z.2, z.1)‖ ≤ C₀ + 1 := by
+      ∀ᶠ z : E × ℝ in nhds (x, t),
+        z.1 ∈ V → z.2 ∈ J → ‖Φ (z.2, z.1)‖ ≤ C₀ + 1 := by
     intro t ht
-    have hc : ContinuousAt (fun z : E × ℝ => Φ (z.2, z.1)) (x, t) :=
-      (hΦ.continuousAt ((hJ.prod hV).mem_nhds ⟨hab ht, hx⟩)).comp
-        (continuous_snd.prodMk continuous_fst).continuousAt
-    filter_upwards [hc (Metric.closedBall_mem_nhds (Φ (t, x)) zero_lt_one)] with z hz
-    exact (norm_le_norm_add_const_of_dist_le hz).trans
+    have hswap : ContinuousOn (fun z : E × ℝ => (z.2, z.1)) (V ×ˢ J) :=
+      (continuous_snd.prodMk continuous_fst).continuousOn
+    have hmaps : Set.MapsTo (fun z : E × ℝ => (z.2, z.1)) (V ×ˢ J) (J ×ˢ V) :=
+      fun _ hz => ⟨hz.2, hz.1⟩
+    have hc : ContinuousWithinAt (fun z : E × ℝ => Φ (z.2, z.1))
+        (V ×ˢ J) (x, t) :=
+      (hΦ.comp hswap hmaps) (x, t) ⟨hx, hab ht⟩
+    have hev := eventually_nhdsWithin_iff.mp
+      (hc (Metric.closedBall_mem_nhds (Φ (t, x)) zero_lt_one))
+    filter_upwards [hev] with z hz hzV hzJ
+    exact (norm_le_norm_add_const_of_dist_le (hz ⟨hzV, hzJ⟩)).trans
       (by simpa [add_comm] using add_le_add_right (hC₀ ⟨t, ht, rfl⟩) 1)
+  have hall₀ : ∀ᶠ y in nhds x, ∀ t ∈ uIcc a b,
+      y ∈ V → t ∈ J → ‖Φ (t, y)‖ ≤ C₀ + 1 :=
+    isCompact_uIcc.eventually_forall_of_forall_eventually
+      (P := fun y t => y ∈ V → t ∈ J → ‖Φ (t, y)‖ ≤ C₀ + 1) hlocal
   have hall : ∀ᶠ y in nhds x, ∀ t ∈ uIcc a b, ‖Φ (t, y)‖ ≤ C₀ + 1 :=
-    isCompact_uIcc.eventually_forall_of_forall_eventually hlocal
+    hall₀.and (hV.mem_nhds hx) |>.mono fun y hy t ht => hy.1 t ht hy.2 (hab ht)
   filter_upwards [hall, hV.mem_nhds hx] with y hyall hyV
   exact ⟨hyV, hyall⟩
 
@@ -69,7 +80,7 @@ private theorem tube_bound
 when all required spatial jets are jointly continuous. -/
 private theorem iterF_integral
     {R : ℝ → E → F} {J : Set ℝ} {V : Set E}
-    (hJ : IsOpen J) (hV : IsOpen V)
+    (hV : IsOpen V)
     (hRs : ∀ t ∈ J, ContDiffOn ℝ ∞ (R t) V)
     (r : ℕ)
     (hRjet : ∀ m ≤ r,
@@ -113,9 +124,9 @@ private theorem iterF_integral
           (continuousMultilinearCurryLeftEquiv ℝ
             (fun _ : Fin (n + 1) => E) F).continuous.comp_continuousOn hnext
         exact hc.congr fun _ _ => rfl
-      obtain ⟨C, hC⟩ := tube_bound
+      obtain ⟨C, hC⟩ := tube_bound_on
         (E := E) (Φ := fun p : ℝ × E => H' p.2 p.1)
-        (J := J) (V := V) hJ hV hH' hab hx
+        (J := J) (V := V) hV hH' hab hx
       have hHcont (y : E) (hy : y ∈ V) :
           ContinuousOn (H y) (uIcc a b) :=
         jet_time_cont (hRjet n hnle) hab hy
@@ -264,11 +275,141 @@ theorem hasDerivAt_iterF
     have hsubJet : iteratedFDeriv ℝ r (fun y => G s y - G a y) x =
         iteratedFDeriv ℝ r (G s) x - iteratedFDeriv ℝ r (G a) x := by
       simpa only [Pi.sub_apply] using iteratedFDeriv_sub_apply hGsAt hGaAt
-    have hintJet := iterF_integral hJ hV hRs r hRjet hsub hx
+    have hintJet := iterF_integral hV hRs r hRjet hsub hx
     rw [← hintJet]
     rw [hjet, hsubJet]
     abel
   exact (hprim.const_add (iteratedFDeriv ℝ r (G a) x)).congr_of_eventuallyEq heq
+
+/-- A continuous time equation on the interior of a compact interval extends
+to the corresponding within-derivative equation at both endpoints. -/
+theorem hasDerivIcc_of_int
+    {f f' : ℝ → F} {a b t : ℝ}
+    (hab : a < b)
+    (hf : ContinuousOn f (Set.Icc a b))
+    (hf' : ContinuousOn f' (Set.Icc a b))
+    (hderiv : ∀ s ∈ Set.Ioo a b, HasDerivAt f (f' s) s)
+    (ht : t ∈ Set.Icc a b) :
+    HasDerivWithinAt f (f' t) (Set.Icc a b) t := by
+  let g : ℝ → F := fun s => f a + ∫ u in a..s, f' u
+  have hint : IntervalIntegrable f' volume a b :=
+    ContinuousOn.intervalIntegrable_of_Icc hab.le hf'
+  have hrepr : ∀ s ∈ Set.Icc a b, f s = g s := by
+    intro s hs
+    have hsub : Set.Icc a s ⊆ Set.Icc a b :=
+      Set.Icc_subset_Icc le_rfl hs.2
+    have hFTC : ∫ u in a..s, f' u = f s - f a :=
+      intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hs.1
+        (hf.mono hsub)
+        (fun u hu => hderiv u
+          ⟨hu.1, lt_of_lt_of_le hu.2 hs.2⟩)
+        (hint.mono_set (Set.uIcc_subset_uIcc Set.left_mem_uIcc
+          (by simpa only [Set.uIcc_of_le hab.le] using hs)))
+    dsimp only [g]
+    rw [hFTC]
+    abel
+  letI : Fact (t ∈ Set.Icc a b) := ⟨ht⟩
+  have ha : a ∈ Set.Icc a b := Set.left_mem_Icc.mpr hab.le
+  have hintT : IntervalIntegrable f' volume a t :=
+    (hf'.mono (Set.uIcc_subset_Icc ha ht)).intervalIntegrable
+  have hprim :
+      HasDerivWithinAt
+        (fun s => ∫ u in a..s, f' u) (f' t) (Set.Icc a b) t :=
+    intervalIntegral.integral_hasDerivWithinAt_right hintT
+      (hf'.stronglyMeasurableAtFilter_nhdsWithin measurableSet_Icc t)
+      (hf' t ht)
+  have heq : f =ᶠ[nhdsWithin t (Set.Icc a b)] g := by
+    filter_upwards [self_mem_nhdsWithin] with s hs
+    exact hrepr s hs
+  exact ((hprim.const_add (f a)).congr_of_eventuallyEq heq) (hrepr t ht)
+
+/-- If `G` satisfies a time equation within a closed interval, then every
+spatial iterated Fréchet derivative satisfies the differentiated equation
+within the same interval. -/
+theorem hasDerivWithin_iterF
+    {G R : ℝ → E → F}
+    {a b : ℝ} {V : Set E}
+    (hV : IsOpen V)
+    (r : ℕ)
+    (hGs : ∀ t ∈ Set.Icc a b, ContDiffOn ℝ ∞ (G t) V)
+    (hRs : ∀ t ∈ Set.Icc a b, ContDiffOn ℝ ∞ (R t) V)
+    (hpde : ∀ t ∈ Set.Icc a b, ∀ x ∈ V,
+      HasDerivWithinAt (fun s => G s x) (R t x) (Set.Icc a b) t)
+    (hRjet : ∀ m ≤ r,
+      ContinuousOn
+        (fun p : ℝ × E => iteratedFDeriv ℝ m (R p.1) p.2)
+        (Set.Icc a b ×ˢ V))
+    {t : ℝ} (ht : t ∈ Set.Icc a b)
+    {x : E} (hx : x ∈ V) :
+    HasDerivWithinAt
+      (fun s => iteratedFDeriv ℝ r (G s) x)
+      (iteratedFDeriv ℝ r (R t) x)
+      (Set.Icc a b) t := by
+  have hab : a ≤ b := ht.1.trans ht.2
+  have ha : a ∈ Set.Icc a b := Set.left_mem_Icc.mpr hab
+  have hRtime : ContinuousOn
+      (fun s => iteratedFDeriv ℝ r (R s) x) (Set.Icc a b) := by
+    exact (hRjet r le_rfl).comp (continuousOn_id.prodMk continuousOn_const)
+      (fun s hs => ⟨hs, hx⟩)
+  have hRint : IntervalIntegrable
+      (fun s => iteratedFDeriv ℝ r (R s) x) volume a t :=
+    (hRtime.mono (Set.uIcc_subset_Icc ha ht)).intervalIntegrable
+  have : Fact (t ∈ Set.Icc a b) := ⟨ht⟩
+  have hprim : HasDerivWithinAt
+      (fun s => ∫ u in a..s, iteratedFDeriv ℝ r (R u) x)
+      (iteratedFDeriv ℝ r (R t) x) (Set.Icc a b) t :=
+    intervalIntegral.integral_hasDerivWithinAt_right hRint
+      (hRtime.stronglyMeasurableAtFilter_nhdsWithin measurableSet_Icc t)
+      (hRtime t ht)
+  have heq :
+      (fun s => iteratedFDeriv ℝ r (G s) x) =ᶠ[nhdsWithin t (Set.Icc a b)]
+        fun s => iteratedFDeriv ℝ r (G a) x +
+          ∫ u in a..s, iteratedFDeriv ℝ r (R u) x := by
+    change ∀ᶠ s in nhdsWithin t (Set.Icc a b),
+      iteratedFDeriv ℝ r (G s) x =
+        iteratedFDeriv ℝ r (G a) x +
+          ∫ u in a..s, iteratedFDeriv ℝ r (R u) x
+    rw [eventually_nhdsWithin_iff]
+    exact Filter.Eventually.of_forall fun s hs => by
+      have has : a ≤ s := hs.1
+      have hsub : uIcc a s ⊆ Set.Icc a b := Set.uIcc_subset_Icc ha hs
+      have hdiff : (fun y => ∫ u in a..s, R u y) =ᶠ[nhds x]
+          fun y => G s y - G a y := by
+        filter_upwards [hV.mem_nhds hx] with y hy
+        have hRslice : ContinuousOn (fun u => R u y) (uIcc a s) :=
+          ((continuousMultilinearCurryFin0 ℝ E F).continuous.comp_continuousOn
+            (jet_time_cont (hRjet 0 (Nat.zero_le r)) hsub hy)).congr
+              (fun u _ => by simp only [Function.comp_apply,
+                continuousMultilinearCurryFin0_apply, iteratedFDeriv_zero_apply])
+        have hGcont : ContinuousOn (fun u => G u y) (uIcc a s) :=
+          HasDerivWithinAt.continuousOn fun u hu =>
+            (hpde u (hsub hu) y hy).mono hsub
+        exact intervalIntegral.integral_eq_sub_of_hasDeriv_right hGcont
+          (fun u hu => by
+            have hu' : u ∈ Set.Ioo a s := by
+              simpa only [min_eq_left has, max_eq_right has] using hu
+            exact (hpde u
+              ⟨le_trans ha.1 (le_of_lt hu'.1),
+                le_of_lt (lt_of_lt_of_le hu'.2 hs.2)⟩ y hy
+                ).mono_of_mem_nhdsWithin
+                  (Icc_mem_nhdsGT_of_mem
+                    ⟨le_of_lt hu'.1, lt_of_lt_of_le hu'.2 hs.2⟩))
+          hRslice.intervalIntegrable
+      have hjet := (Filter.EventuallyEq.iteratedFDeriv ℝ hdiff r).eq_of_nhds
+      have hGsAt : ContDiffAt ℝ r (G s) x :=
+        ((hGs s hs).contDiffAt (hV.mem_nhds hx)).of_le
+          (by exact_mod_cast le_top)
+      have hGaAt : ContDiffAt ℝ r (G a) x :=
+        ((hGs a ha).contDiffAt (hV.mem_nhds hx)).of_le
+          (by exact_mod_cast le_top)
+      have hsubJet : iteratedFDeriv ℝ r (fun y => G s y - G a y) x =
+          iteratedFDeriv ℝ r (G s) x - iteratedFDeriv ℝ r (G a) x := by
+        simpa only [Pi.sub_apply] using iteratedFDeriv_sub_apply hGsAt hGaAt
+      have hintJet := iterF_integral hV hRs r hRjet hsub hx
+      rw [← hintJet]
+      rw [hjet, hsubJet]
+      abel
+  exact (hprim.const_add (iteratedFDeriv ℝ r (G a) x)).congr_of_eventuallyEq_of_mem heq ht
 
 end Analysis
 end DifferentialGeometry

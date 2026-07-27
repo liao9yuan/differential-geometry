@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingSharpC0JetSum
+import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 /-!
 # Low-order antidiagonal jet-grid integrals in dimension three
@@ -62,21 +63,18 @@ theorem low_grid_int
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.
-      exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
-        (I := I) (M := M) g 0 2
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 0 2
   let Cgn : ℕ → ℝ := fun k =>
     if hk : 1 ≤ k then
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.
-        exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
           (I := I) (M := M) g 0 2 k hk).choose
     else 0
   have hCgn : ∀ k, 0 ≤ Cgn k := by
     intro k
     simp only [Cgn]
     split_ifs with hk
-    · exact (DifferentialGeometry.Analysis.Sobolev.Tensor.
-        exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    · exact (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
           (I := I) (M := M) g 0 2 k hk).choose_spec.1
     · exact le_rfl
   let vol : ℝ :=
@@ -119,6 +117,7 @@ theorem low_grid_int
     · rw [hgrid, MeasureTheory.integral_const, smul_eq_mul, mul_one,
         MeasureTheory.measureReal_def]
       simp only [K, if_pos rfl, vol]
+      exact le_rfl
   · have hk1 : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk0
     have hrange : Finset.range (Module.finrank ℝ E / 2 + 2) =
         Finset.range 3 := by rw [hDim]
@@ -148,8 +147,7 @@ theorem low_grid_int
         (fun j _ => sq_nonneg _) hmem).trans hPjet
     have htop : ‖iteratedCovGrad (I := I) g 0 2 k P‖ ≤ A := by
       nlinarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 k P)]
-    have hGNspec := (DifferentialGeometry.Analysis.Sobolev.Tensor.
-      exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    have hGNspec := (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g 0 2 k hk1).choose_spec.2
     have hGNP : ∀ j : ℕ, 0 < j → j < k →
         (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + j) x
@@ -158,12 +156,10 @@ theorem low_grid_int
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ^
               ((j : ℝ) / (k : ℝ)) ≤
           Cgn k * Lam ^ (2 * (1 - (j : ℝ) / (k : ℝ))) *
-            ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^
-              (2 * (j : ℝ) / (k : ℝ)) := by
+            A ^ (2 * (j : ℝ) / (k : ℝ)) := by
       intro j hj0 hjk
       have hb := hGNspec P Lam hLam hLamSup j hj0 hjk
-      have hchoose : (DifferentialGeometry.Analysis.Sobolev.Tensor.
-          exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+      have hchoose : (_root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
             (I := I) (M := M) g 0 2 k hk1).choose = Cgn k := by
         simp only [Cgn, dif_pos hk1]
       rw [hchoose] at hb
@@ -173,7 +169,11 @@ theorem low_grid_int
         (SmoothCcTensor.norm_def
           (iteratedCovGrad (I := I) g 0 2 k P)).symm
       rw [hnorm] at hb
-      exact hb
+      exact hb.trans (mul_le_mul_of_nonneg_left
+        (Real.rpow_le_rpow
+          (norm_nonneg (iteratedCovGrad (I := I) g 0 2 k P))
+          htop (by positivity))
+        (mul_nonneg (hCgn k) (Real.rpow_nonneg hLam _)))
     let G : ℝ :=
       (k : ℝ) * (max Lam (max (Cgn k) 1)) ^ (7 * k) * A ^ 2
     have hterm : ∀ n ∈ Finset.range (k + 1),
@@ -196,6 +196,7 @@ theorem low_grid_int
         hLam hLamSup htop (hCgn k) hGNP n hn_le e hsum
       refine ⟨hres.1, hres.2.trans ?_⟩
       simp only [G]
+      exact le_rfl
     have hint : MeasureTheory.Integrable
         (fun x => ∑ n ∈ Finset.range (k + 1),
           ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
@@ -306,12 +307,10 @@ theorem h3_top_grid_int
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
   obtain ⟨Cpt, hCpt, hpt⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.
-      exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
-        (I := I) (M := M) g 0 2
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 0 2
   obtain ⟨Cgn, hCgn, hGNspec⟩ :=
-    DifferentialGeometry.Analysis.Sobolev.Tensor.
-      exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    _root_.DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (I := I) (M := M) g 0 2 3 (by omega)
   let count : ℝ := ∑ n ∈ Finset.range 4,
     ((Finset.Nat.antidiagonalTuple n 3).card : ℝ)

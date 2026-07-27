@@ -140,6 +140,29 @@ structure FlowLimitData
               (Φ := maps) (k := k) (hσsrc k) (hσtgt k)
               (refMetric k) (letI : TopologicalSpace L.M := L.topology; letI : ChartedSpace H L.M := L.charted; letI : IsManifold I ∞ L.M := L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := (by change IsManifold I ∞ L.M; infer_instance); letI : SigmaCompactSpace L.M := L.sigmaCompact; letI : T2Space L.M := L.t2; L.S.family.metric)).derivNormSupOn (I := I) K p t) < ε
 
+namespace FlowLimitData
+
+/-- The smooth CGH convergence witness carried by concrete flow-limit data. -/
+theorem converges
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
+    (d : FlowLimitData (I := I) X mc) :
+    Nonempty (SmoothCGHConverges (I := I) X d.L mc.subseq) :=
+  ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
+    d.maps d.scalar d.ricciNorm d.hσsrc d.hσtgt d.refMetric
+    (letI : TopologicalSpace d.L.M := d.L.topology
+     letI : ChartedSpace H d.L.M := d.L.charted
+     letI : IsManifold I ∞ d.L.M := d.L.smooth
+     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.L.M := by
+       change IsManifold I ∞ d.L.M
+       infer_instance
+     letI : SigmaCompactSpace d.L.M := d.L.sigmaCompact
+     letI : T2Space d.L.M := d.L.t2
+     d.L.S.family.metric)
+    d.conv⟩
+
+end FlowLimitData
+
 /-- **The smooth-flow-limit upgrade, assembled.**  From the structured frontier
 ingredients (Brick A–E) the time-zero conclusion `mc` upgrades to full smooth
 Cheeger--Gromov--Hamilton convergence of the flows, via the canonical
@@ -149,9 +172,7 @@ theorem flowLimit_upgrade
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (d : FlowLimitData (I := I) X mc) :
     CompactnessConclusion (I := I) X :=
-  ⟨d.L, mc.subseq, mc.strictMono,
-    ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
-      d.maps d.scalar d.ricciNorm d.hσsrc d.hσtgt d.refMetric (letI : TopologicalSpace d.L.M := d.L.topology; letI : ChartedSpace H d.L.M := d.L.charted; letI : IsManifold I ∞ d.L.M := d.L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.L.M := (by change IsManifold I ∞ d.L.M; infer_instance); letI : SigmaCompactSpace d.L.M := d.L.sigmaCompact; letI : T2Space d.L.M := d.L.t2; d.L.S.family.metric) d.conv⟩⟩
+  ⟨d.L, mc.subseq, mc.strictMono, d.converges⟩
 
 /-- Concrete data for the Theorem 3.10 upgrade after the spacetime
 Arzela--Ascoli argument selects a further strictly monotone subsequence.
@@ -179,6 +200,30 @@ theorem toConclusion
     (d : FlowUpgradeData (I := I) X mc) :
     CompactnessConclusion (I := I) X :=
   flowLimit_upgrade (I := I) X (mc.compSubseq d.φ d.hφ) d.data
+
+/-- Connectedness of the time-zero metric limit transfers to the retained
+limit manifold of an upgrade. -/
+theorem limit_conn
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
+    (d : FlowUpgradeData (I := I) X mc)
+    (hconn :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      ConnectedSpace mc.limit.M) :
+    letI : TopologicalSpace d.data.L.M := d.data.L.topology
+    ConnectedSpace d.data.L.M := by
+  let mc' := mc.compSubseq d.φ d.hφ
+  have hconn' :
+      letI : TopologicalSpace mc'.limit.M := mc'.limit.topology
+      ConnectedSpace mc'.limit.M := by
+    simpa only [mc', MetricCompactnessConclusion.compSubseq] using hconn
+  have hconn0 :
+      letI : TopologicalSpace (d.data.L.atTime (I := I) 0).M :=
+        (d.data.L.atTime (I := I) 0).topology
+      ConnectedSpace (d.data.L.atTime (I := I) 0).M := by
+    rw [d.data.hL0]
+    exact hconn'
+  exact hconn0
 
 end FlowUpgradeData
 

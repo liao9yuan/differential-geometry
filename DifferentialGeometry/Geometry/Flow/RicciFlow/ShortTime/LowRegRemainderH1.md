@@ -114,3 +114,15 @@ frontier and should not be mixed into the coefficient proof.
 - Exact endpoint `ricci_flow_unif_existence`: 0%.
 - Whole HCG machinery remains approximately 60%; endpoint compactness
   theorems remain 0% until stated and proved.
+
+## 2026-07-27 verification blocker
+
+The current opaque-coefficient source change has not yet been checked.  The
+focused check reaches this file without a heartbeat, but its imported
+artifacts are stale: the old `LowRegPathSplit` artifact does not import the
+current `RHSPathIntegral` exports (`rhsTopPathIntegral`,
+`rhsArm_sub_eq_paths`), and the old `LowRegPathLower` artifact does not export
+`lower_jet_h1`.  Rebuilding `RHSPathIntegral` itself passed but did not change
+that result because these two direct-import artifacts still carry their old
+dependency/export lists.  Verification therefore remains failed pending
+explicitly coordinated refreshes of those two direct upstream modules.

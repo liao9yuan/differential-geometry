@@ -845,6 +845,136 @@ theorem metricFamilySmoothOn_of_chartGram
     exact metricFrameComp_jointContMDiffOn_of_chartGram (I := I) g a b hsmooth frame hframe i j
 
 omit [CompactSpace M] in
+/-- Pull a continuous spatial chart-Gram jet from the model-space chart target
+back to the corresponding spacetime chart good set. -/
+private theorem gramJet_on_good
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (α : M) (k : ℕ)
+    (a b : Fin (Module.finrank ℝ E))
+    (hjet : ContinuousOn
+      (fun p : ℝ × E =>
+        iteratedFDeriv ℝ k
+          (chartGramOnE (I := I) (g p.1) α a b) p.2)
+      (J ×ˢ interior (extChartAt I α).target)) :
+    ContinuousOn
+      (fun q : ℝ × M =>
+        iteratedFDeriv ℝ k
+          (chartGramOnE (I := I) (g q.1) α a b)
+          (extChartAt I α q.2))
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+  have hΨcont : ContinuousOn
+      (fun q : ℝ × M => (q.1, extChartAt I α q.2))
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
+    continuous_fst.continuousOn.prodMk
+      ((continuousOn_extChartAt (I := I) α).comp continuous_snd.continuousOn
+        (fun q hq =>
+          chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hq.2))
+  have hΨmaps : Set.MapsTo
+      (fun q : ℝ × M => (q.1, extChartAt I α q.2))
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α)
+      (J ×ˢ interior (extChartAt I α).target) :=
+    fun q hq =>
+      ⟨hq.1, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hq.2⟩
+  exact (hjet.comp hΨcont hΨmaps).congr (fun _ _ => rfl)
+
+omit [CompactSpace M] in
+/-- The zeroth spatial chart-Gram jet gives continuity of the corresponding
+manifold chart-Gram entry on the chart good set. -/
+private theorem gramVal_on_good
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (α : M)
+    (a b : Fin (Module.finrank ℝ E))
+    (h0 : ContinuousOn
+      (fun p : ℝ × E =>
+        iteratedFDeriv ℝ 0
+          (chartGramOnE (I := I) (g p.1) α a b) p.2)
+      (J ×ˢ interior (extChartAt I α).target)) :
+    ContinuousOn
+      (fun q : ℝ × M =>
+        Integral.Measure.chartGramMatrix (I := I) (g q.1) α q.2 a b)
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+  have hjet := gramJet_on_good (I := I) g J α 0 a b h0
+  have hL :=
+    (ContinuousMultilinearMap.apply ℝ (fun _ : Fin 0 => E) ℝ ![]).continuous
+  have hval : ContinuousOn
+      (fun q : ℝ × M =>
+        chartGramOnE (I := I) (g q.1) α a b (extChartAt I α q.2))
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+    refine (hL.comp_continuousOn hjet).congr ?_
+    intro q _
+    simp only [Function.comp_apply, ContinuousMultilinearMap.apply_apply,
+      iteratedFDeriv_zero_apply]
+  refine hval.congr ?_
+  intro q hq
+  change Integral.Measure.chartGramMatrix (I := I) (g q.1) α q.2 a b =
+    chartGramOnE (I := I) (g q.1) α a b (extChartAt I α q.2)
+  symm
+  rw [chartGramOnE_def, (extChartAt I α).left_inv
+    (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hq.2)]
+
+omit [CompactSpace M] in
+/-- Joint continuity of the canonical Ricci family from continuous spatial
+chart-Gram jets of orders zero through two on every chart target. -/
+theorem ricciCont_of_jets [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ)
+    (h0 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 0
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h1 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 1
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h2 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 2
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target)) :
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet
+      (I := I) (M := M) 2 J
+      (fun t x => metricRicciAt (I := I) (g t) x) := by
+  apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
+    (fun α => chartLeviCivitaGoodSet (I := I) α)
+    (fun α => (chartLeviCivitaGoodSet_isOpen (I := I) α).mem_nhds
+      (self_mem_chartLeviCivitaGoodSet (I := I) (α := α)))
+  intro α idx
+  have hframe := ricciChartFrameComp_jointContinuousOn (I := I) g α
+    (J ×ˢ chartLeviCivitaGoodSet (I := I) α) (fun q hq => hq.2)
+    (fun a b => gramJet_on_good (I := I) g J α 0 a b (h0 α a b))
+    (fun a b => gramJet_on_good (I := I) g J α 1 a b (h1 α a b))
+    (fun a b => gramJet_on_good (I := I) g J α 2 a b (h2 α a b))
+    (idx 0) (idx 1)
+  have hincl : ContinuousOn
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M |
+        q.2 ∈ chartLeviCivitaGoodSet (I := I) α} :=
+    ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+  have hmaps : Set.MapsTo
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M |
+        q.2 ∈ chartLeviCivitaGoodSet (I := I) α}
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) α) :=
+    fun q hq => ⟨q.1.2, hq⟩
+  refine (hframe.comp hincl hmaps).congr ?_
+  intro q _
+  have hvec :
+      (fun k : Fin 2 =>
+        Integral.Measure.chartBasisVecFiber (I := I) α (idx k) q.2) =
+        DifferentialGeometry.Integral.Connection.vec2
+          (Integral.Measure.chartBasisVecFiber (I := I) α (idx 0) q.2)
+          (Integral.Measure.chartBasisVecFiber (I := I) α (idx 1) q.2) := by
+    funext k
+    fin_cases k <;> rfl
+  change metricRicciAt (I := I) (g q.1.1) q.2
+      (fun k : Fin 2 =>
+        Integral.Measure.chartBasisVecFiber (I := I) α (idx k) q.2) = _
+  rw [hvec]
+  exact metricRicciAt_apply_eq_ricciTensor (g q.1.1) q.2 _ _
+
+omit [CompactSpace M] in
 /-- Joint continuity of the canonical Ricci family from joint chart-Gram `C∞` regularity on a
 unique-differentiability time set. -/
 theorem ricciCont_of_joint [I.Boundaryless]
@@ -886,7 +1016,7 @@ theorem ricciCont_of_joint [I.Boundaryless]
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 0) q.2)
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 1) q.2) := by
     funext k; fin_cases k <;> rfl
-  show metricRicciAt (I := I) (g q.1.1) q.2
+  change metricRicciAt (I := I) (g q.1.1) q.2
       (fun k : Fin 2 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) q.2) = _
   rw [hvec]
   exact metricRicciAt_apply_eq_ricciTensor (g q.1.1) q.2 _ _
@@ -930,6 +1060,89 @@ theorem rm04_coord_eq [I.Boundaryless]
     riemannOp_chartBasisVec_alpha_eq (I := I) g x₀ (idx 2) (idx 0) (idx 1) hx, map_sum]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [map_smul, smul_eq_mul, ← Integral.Measure.chartGramMatrix_apply]
+
+omit [CompactSpace M] in
+/-- Joint continuity of the canonical lowered Riemann family from continuous
+spatial chart-Gram jets of orders zero through two on every chart target. -/
+theorem rm04Cont_of_jets [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ)
+    (h0 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 0
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h1 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 1
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h2 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 2
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target)) :
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet
+      (I := I) (M := M) 4 J
+      (fun t x =>
+        DifferentialGeometry.Integral.Connection.metricRm04At
+          (I := I) (g t) x) := by
+  apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
+    (fun α => chartLeviCivitaGoodSet (I := I) α)
+    (fun α => (chartLeviCivitaGoodSet_isOpen (I := I) α).mem_nhds
+      (self_mem_chartLeviCivitaGoodSet (I := I) (α := α)))
+  intro α idx
+  let Sp := J ×ˢ chartLeviCivitaGoodSet (I := I) α
+  have h0g : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn
+        (fun q : ℝ × M =>
+          iteratedFDeriv ℝ 0
+            (chartGramOnE (I := I) (g q.1) α a b)
+            (extChartAt I α q.2)) Sp :=
+    fun a b => gramJet_on_good (I := I) g J α 0 a b (h0 α a b)
+  have h1g : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn
+        (fun q : ℝ × M =>
+          iteratedFDeriv ℝ 1
+            (chartGramOnE (I := I) (g q.1) α a b)
+            (extChartAt I α q.2)) Sp :=
+    fun a b => gramJet_on_good (I := I) g J α 1 a b (h1 α a b)
+  have h2g : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn
+        (fun q : ℝ × M =>
+          iteratedFDeriv ℝ 2
+            (chartGramOnE (I := I) (g q.1) α a b)
+            (extChartAt I α q.2)) Sp :=
+    fun a b => gramJet_on_good (I := I) g J α 2 a b (h2 α a b)
+  have hsum : ContinuousOn
+      (fun q : ℝ × M =>
+        ∑ l : Fin (Module.finrank ℝ E),
+          chartRiemannTensor (I := I) (g q.1) α
+              (idx 2) (idx 0) (idx 1) l (extChartAt I α q.2) *
+            Integral.Measure.chartGramMatrix (I := I) (g q.1) α q.2
+              (idx 3) l)
+      Sp := by
+    refine continuousOn_finset_sum _ (fun l _ => ?_)
+    exact (chartRiemann_jointContinuousOn (I := I) g α Sp
+        (fun q hq => hq.2) h0g h1g h2g
+        (idx 2) (idx 0) (idx 1) l).mul
+      (gramVal_on_good (I := I) g J α (idx 3) l (h0 α (idx 3) l))
+  have hincl : ContinuousOn
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M |
+        q.2 ∈ chartLeviCivitaGoodSet (I := I) α} :=
+    ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+  have hmaps : Set.MapsTo
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M |
+        q.2 ∈ chartLeviCivitaGoodSet (I := I) α}
+      Sp :=
+    fun q hq => ⟨q.1.2, hq⟩
+  refine (hsum.comp hincl hmaps).congr ?_
+  intro q hq
+  exact rm04_coord_eq (I := I) (g q.1.1) α idx hq
 
 omit [CompactSpace M] in
 /-- Joint continuity of the lowered Riemann family from joint chart-Gram `C∞` regularity on a
@@ -994,6 +1207,51 @@ theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
       (Set.Ioo a b)
       (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g t) x) :=
   rm04Cont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
+
+omit [CompactSpace M] in
+/-- Joint continuity of scalar curvature from continuous spatial chart-Gram
+jets of orders zero through two on every chart target. -/
+theorem scalarCont_of_jets [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ)
+    (h0 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 0
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h1 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 1
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target))
+    (h2 : ∀ (α : M) (a b : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × E =>
+          iteratedFDeriv ℝ 2
+            (chartGramOnE (I := I) (g p.1) α a b) p.2)
+        (J ×ˢ interior (extChartAt I α).target)) :
+    ContinuousOn
+      (fun q : ℝ × M => metricScalarAt (I := I) (g q.1) q.2)
+      (J ×ˢ (Set.univ : Set M)) := by
+  refine continuousOn_of_locally_continuousOn ?_
+  intro p hp
+  have hgood : p.2 ∈ chartLeviCivitaGoodSet (I := I) p.2 :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := p.2)
+  let U : Set (ℝ × M) :=
+    Set.univ ×ˢ chartLeviCivitaGoodSet (I := I) p.2
+  refine ⟨U, isOpen_univ.prod
+    (chartLeviCivitaGoodSet_isOpen (I := I) p.2),
+    ⟨Set.mem_univ p.1, hgood⟩, ?_⟩
+  have hcs := chartScalar_jointContinuousOn (I := I) g p.2
+    (J ×ˢ chartLeviCivitaGoodSet (I := I) p.2)
+    (fun q hq => hq.2)
+    (fun a b => gramJet_on_good (I := I) g J p.2 0 a b (h0 p.2 a b))
+    (fun a b => gramJet_on_good (I := I) g J p.2 1 a b (h1 p.2 a b))
+    (fun a b => gramJet_on_good (I := I) g J p.2 2 a b (h2 p.2 a b))
+  refine hcs.mono ?_
+  intro q hq
+  exact ⟨hq.1.1, hq.2.2⟩
 
 omit [CompactSpace M] in
 /-- Joint continuity of scalar curvature from joint chart-Gram `C∞` regularity on a

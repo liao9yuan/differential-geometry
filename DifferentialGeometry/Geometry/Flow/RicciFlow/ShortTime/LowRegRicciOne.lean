@@ -10,6 +10,8 @@ proof uses only the metric perturbation jet through order three.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -21,6 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -47,9 +50,6 @@ private theorem pure_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁ =
       pureTrace (I := I) (M := M) g₀ g₁ 2 := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
   rfl
 
 private theorem norm_eq_of_sq_eq {a b : ℝ}
@@ -152,7 +152,16 @@ private theorem core_h2
         rw [conn_norm_eq (I := I) (M := M) g₀ g₁ i, hDim]
         have hs : Real.sqrt (3 : ℝ) ^ 2 = 3 :=
           Real.sq_sqrt (by norm_num)
-        nlinarith
+        calc
+          Real.sqrt (3 : ℝ) *
+              (Real.sqrt (3 : ℝ) *
+                ‖iteratedCovGrad (I := I) g₀ 0 3 i
+                  (connDiffLoweredCc (I := I) g₀ g₁)‖) =
+              Real.sqrt (3 : ℝ) ^ 2 *
+                ‖iteratedCovGrad (I := I) g₀ 0 3 i
+                  (connDiffLoweredCc (I := I) g₀ g₁)‖ := by ring
+          _ = 3 * ‖iteratedCovGrad (I := I) g₀ 0 3 i
+                (connDiffLoweredCc (I := I) g₀ g₁)‖ := by rw [hs]
   have hsq : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 3 4 i
           (connDiffContrInsertionField (I := I) g₀ g₁)‖ ^ 2 ≤
@@ -195,8 +204,7 @@ private def ki120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
 private theorem slotPerm_smooth
-    (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
-    (ρ : Equiv.Perm (Fin d)) :
+    {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace d d I z) x
@@ -223,7 +231,7 @@ private def slotPerm1
     { toFun := fun x : M =>
         (show Tensor0SBundle.TensorRSSpace d d I x from
           slotPermCLM (I := I) ρ x)
-      contMDiff_toFun := slotPerm_smooth (I := I) (M := M) g₀ ρ }
+      contMDiff_toFun := slotPerm_smooth (I := I) (M := M) ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 private theorem kernel_split
@@ -472,14 +480,15 @@ theorem ricci1_h2_tame
     calc
       _ = ∑ i ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
-            (lc0Trace (I := I) (M := M) g₀ g₁ 2
+            (lc0TraceRF (I := I) (M := M) g₀ g₁ 2
               (Equiv.refl (Fin 4)))‖ ^ 2 := by
         apply Finset.sum_congr rfl
         intro i _
-        rw [lc0Trace, iteratedCovGrad_reindexCoeffGen
+        rw [lc0TraceRF, iteratedCovGrad_reindexCoeffGen
           (I := I) (M := M),
-          norm_reindexCoeffGen_eq (I := I) (M := M),
-          pureF, pure_eq (I := I) (M := M) g₀ g₁]
+          norm_reindexCoeffGen_eq (I := I) (M := M)]
+        dsimp only [pureF]
+        rw [pure_eq (I := I) (M := M) g₀ g₁]
       _ ≤ (Bt R) ^ 2 := ht
   have hcastNorm : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -545,7 +554,8 @@ theorem ricci1_h2_tame
         (linearizedRicciConnDiffOrder1KernelField
           (I := I) g₀ g₁)‖ ^ 2) ≤
       (15 * (Bc0 R + Bc1 R * A)) ^ 2 := by
-    convert hkernel using 1 <;> ring
+    convert hkernel using 1
+    all_goals ring
   rw [linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
     (I := I) (M := M) g₀ g₁]
   have hout := happ

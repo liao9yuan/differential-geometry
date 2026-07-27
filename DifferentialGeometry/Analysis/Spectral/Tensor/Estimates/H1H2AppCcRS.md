@@ -21,11 +21,11 @@ It integrates the canonical antidiagonal Leibniz grid with the existing
 two-arm Gagliardo--Nirenberg estimate.  This lets the nested VB and AMix
 normal forms be assembled in `H2` before the final order-zero `H1` readout.
 
-The focused source check and named `.olean` export passed for
-`appRS_h1_h2_h1`.  The public `h1_jet_sq` bridge and `appRS_h2_h2_h2`
-algebra theorem are source-complete but have not yet been rechecked because
-the shared artifact repair is currently exclusive.  The edited module is
-therefore not counted as fully reverified until that focused check is rerun.
+The focused source check passes for the complete module without local warnings
+or sorries.  This includes `appRS_h1_h2_h1`, the public `h1_jet_sq` bridge,
+and `appRS_h2_h2_h2`.  The last repair made the omitted nonnegative square and
+the identity `finrank = (sqrt finrank)^2` explicit rather than relying on
+fragile rewrite matching.
 
 ## Scope
 

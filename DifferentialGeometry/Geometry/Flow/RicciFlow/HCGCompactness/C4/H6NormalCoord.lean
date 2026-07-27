@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialRadius
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
+import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedJacobi
+import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicGronwall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
@@ -37,6 +39,154 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- On a complete pointed manifold, the intrinsic total-map pullback metric
+agrees with the existing HCG normal-coordinate metric on the transferred local
+branch. This is the completeness-aware bridge used by the canonical H6
+migration; it introduces no second coordinate metric. -/
+theorem intr_metric_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M :=
+      IsManifold.of_le (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    letI : ConnectedSpace Y.M := hconn
+    let hEnorm : ∀ (y : Y.M) (w : TangentSpace I y),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner y w w)) := by
+      intro y w
+      simpa using
+        (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := I) Y.metric y w)
+    ∀ {z : E}, z ∈
+        (intrFrameDiffeo (I := I) Y.metric hEnorm x).source →
+      intrFrameMetric (I := I) Y.metric hEnorm x z =
+        normalCoordMetric (I := I) Y x z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M :=
+    IsManifold.of_le (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  letI : ConnectedSpace Y.M := hconn
+  let hEnorm : ∀ (y : Y.M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) Y.metric y w)
+  change ∀ {z : E}, z ∈
+      (intrFrameDiffeo (I := I) Y.metric hEnorm x).source →
+    intrFrameMetric (I := I) Y.metric hEnorm x z =
+      normalCoordMetric (I := I) Y x z
+  intro z hz
+  simpa only [normalCoordMetric] using
+    (intrFrameMetric_eq (I := I) Y.metric hEnorm x (z := z) hz)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- On a complete pointed manifold, the intrinsic pullback metric agrees with
+the HCG normal-coordinate metric on some positive model-space ball. -/
+theorem exists_intr_eq_ball
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M :=
+      IsManifold.of_le (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    letI : ConnectedSpace Y.M := hconn
+    let hEnorm : ∀ (y : Y.M) (w : TangentSpace I y),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner y w w)) := by
+      intro y w
+      simpa using
+        (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := I) Y.metric y w)
+    ∃ r : Real, 0 < r ∧ ∀ z ∈ Metric.ball (0 : E) r,
+      intrFrameMetric (I := I) Y.metric hEnorm x z =
+        normalCoordMetric (I := I) Y x z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M :=
+    IsManifold.of_le (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  letI : ConnectedSpace Y.M := hconn
+  let hEnorm : ∀ (y : Y.M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) Y.metric y w)
+  change ∃ r : Real, 0 < r ∧ ∀ z ∈ Metric.ball (0 : E) r,
+    intrFrameMetric (I := I) Y.metric hEnorm x z =
+      normalCoordMetric (I := I) Y x z
+  obtain ⟨r, hr, hball⟩ :=
+    Metric.isOpen_iff.mp (intrFrameDiffeo (I := I) Y.metric hEnorm x).open_source
+      0 (zero_mem_intrFrame_source (I := I) Y.metric hEnorm x)
+  refine ⟨r, hr, fun z hz => ?_⟩
+  exact intr_metric_eq (I := I) Y hcomplete hconn x (hball hz)
 
 /-- The framed model-space radius corresponding to the canonical clamped
 Jacobi launch radius. -/
@@ -129,6 +279,99 @@ theorem framed_rm04_of_seq
   intro t ht
   exact rm04Bound_of_seq (I := I) hX k
     (radialCurve (I := I) (X.obj k).metric x
+      (normalFrame (I := I) (X.obj k).metric x z) t)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Uniform bounded geometry supplies the same Rm04 bound along the complete
+intrinsic geodesic, without intersecting with a chart smoothness radius. -/
+theorem intr_rm04_of_seq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hX : SeqBoundedGeometry (I := I) X) (k : Nat)
+    (x : (X.obj k).M) (z : E) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : IsManifold I 1 (X.obj k).M :=
+      IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+    letI : T2Space (X.obj k).M := (X.obj k).t2
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+      Manifold.metrizableSpace I (X.obj k).M
+    letI : T3Space (X.obj k).M := inferInstance
+    letI : RiemannianBundle
+        (fun y : (X.obj k).M => TangentSpace I y) :=
+      (X.obj k).riemBundle (I := I)
+    letI : (y : (X.obj k).M) →
+        InnerProductSpace Real (TangentSpace I y) :=
+      (X.obj k).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : (X.obj k).M => TangentSpace I y) :=
+      (X.obj k).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj k).M :=
+      (X.obj k).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj k).M :=
+      MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+    letI : ConnectedSpace (X.obj k).M := hconn k
+    let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+        ‖w‖ₑ =
+          ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+      intro y w
+      simpa using
+        (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := I) (X.obj k).metric y w)
+    IntrinsicRm04Bound (I := I) (X.obj k).metric hEnorm x
+      (normalFrame (I := I) (X.obj k).metric x z) (hX.C 0) := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M :=
+    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) →
+      InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M :=
+    (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (X.obj k).metric y w)
+  change ∀ t ∈ Set.Ico (0 : Real) 1,
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) (X.obj k).metric
+      (intrinsicGeodesic (I := I) (X.obj k).metric hEnorm x
+        (normalFrame (I := I) (X.obj k).metric x z) t) 4
+      (DifferentialGeometry.Integral.Connection.metricRm04At
+        (I := I) (M := (X.obj k).M) (X.obj k).metric
+        (intrinsicGeodesic (I := I) (X.obj k).metric hEnorm x
+          (normalFrame (I := I) (X.obj k).metric x z) t))) ≤ hX.C 0
+  intro t _ht
+  exact rm04Bound_of_seq (I := I) hX k
+    (intrinsicGeodesic (I := I) (X.obj k).metric hEnorm x
       (normalFrame (I := I) (X.obj k).metric x z) t)
 
 /-- The public normal-coordinate metric is the endpoint Gram form of radial
@@ -364,6 +607,292 @@ private lemma quarter_models {K s : Real} (hs : 0 ≤ s)
   have hmul := mul_le_mul_of_nonneg_left herr hs
   rw [hscale]
   constructor <;> nlinarith
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A uniform zeroth-order curvature bound gives one unclamped model-space
+radius on which every complete intrinsic framed pullback metric satisfies the
+book's half/two quadratic-form estimate. -/
+theorem exists_intr_radii
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hgeom : SeqBoundedGeometry (I := I) X) :
+    ∃ r₀ : Real, 0 < r₀ ∧ ∀ (k : Nat) (x : (X.obj k).M),
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : IsManifold I 1 (X.obj k).M :=
+        IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+      letI : T2Space (X.obj k).M := (X.obj k).t2
+      letI : T2Space (TangentBundle I (X.obj k).M) :=
+        (X.obj k).t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+        Manifold.metrizableSpace I (X.obj k).M
+      letI : T3Space (X.obj k).M := inferInstance
+      letI : RiemannianBundle
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle (I := I)
+      letI : (y : (X.obj k).M) →
+          InnerProductSpace Real (TangentSpace I y) :=
+        (X.obj k).riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle_cont (I := I)
+      letI : EMetricSpace (X.obj k).M :=
+        (X.obj k).emetricSpace (I := I)
+      letI : CompleteSpace (X.obj k).M :=
+        MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+      letI : ConnectedSpace (X.obj k).M := hconn k
+      let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+          ‖w‖ₑ =
+            ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+        intro y w
+        simpa using
+          (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (X.obj k).metric y w)
+      ∀ z ∈ Metric.ball (0 : E) r₀, ∀ v : E,
+        (1 / 2 : Real) * ‖v‖ ^ 2 ≤
+            intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ∧
+          intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ≤
+            2 * ‖v‖ ^ 2 := by
+  obtain ⟨κ, buffer, hκ, hbuffer, hsmall⟩ :=
+    exists_gron_smallK (B₀ := (1 / 4 : Real)) (D := 1)
+      (by norm_num) (by norm_num)
+  let S : Real :=
+    Real.sqrt ((Fintype.card
+      (Fin (Module.finrank Real E)) : Real)) * hgeom.C 0
+  have hS : 0 ≤ S :=
+    mul_nonneg (Real.sqrt_nonneg _) (hgeom.nonneg 0)
+  obtain ⟨r₀, hr₀, hcap⟩ := exists_pos_mul_sq_le (S := S) hκ
+  refine ⟨r₀, hr₀, ?_⟩
+  intro k x
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M :=
+    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) →
+      InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M :=
+    (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (X.obj k).metric y w)
+  change ∀ z ∈ Metric.ball (0 : E) r₀, ∀ v : E,
+    (1 / 2 : Real) * ‖v‖ ^ 2 ≤
+        intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ∧
+      intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ≤
+        2 * ‖v‖ ^ 2
+  intro z hz v
+  have hzRadius : ‖z‖ < r₀ := by
+    simpa only [Metric.mem_ball, dist_zero_right] using hz
+  let u : TangentSpace I x :=
+    normalFrame (I := I) (X.obj k).metric x z
+  let w : TangentSpace I x :=
+    normalFrame (I := I) (X.obj k).metric x v
+  let K : Real :=
+    Real.sqrt ((Fintype.card
+      (Fin (Module.finrank Real E)) : Real)) *
+        hgeom.C 0 * (X.obj k).metric.inner x u u
+  have hK : 0 ≤ K := by
+    dsimp only [K, u]
+    rw [normalFrame_normSq]
+    change 0 ≤ S * ‖z‖ ^ 2
+    exact mul_nonneg hS (sq_nonneg ‖z‖)
+  have hsq : ‖z‖ ^ 2 ≤ r₀ ^ 2 :=
+    (sq_le_sq₀ (norm_nonneg z) hr₀.le).2 hzRadius.le
+  have hKle : K ≤ κ := by
+    calc
+      K = S * ‖z‖ ^ 2 := by
+        simp only [K, S, u, normalFrame_normSq]
+      _ ≤ S * r₀ ^ 2 := mul_le_mul_of_nonneg_left hsq hS
+      _ ≤ κ := hcap
+  have herr : gronwallBound 0 (max K 1) K 1 ≤ 1 / 4 := by
+    have hsmallK := hsmall hK hKle
+    have hsmallK' :
+        buffer ≤ (1 / 4 : Real) -
+          gronwallBound 0 (max K 1) K 1 := by
+      simpa only [mul_one] using hsmallK
+    linarith
+  obtain ⟨hmodelLe, hmodelGe⟩ :=
+    quarter_models (K := K) (s := ‖v‖) (norm_nonneg _) herr
+  have hRm :=
+    intr_rm04_of_seq (I := I) hcomplete hconn hgeom k x z
+  have hODE :=
+    intrJacobi_ode (I := I) (X.obj k).metric hEnorm x u w
+      (hgeom.nonneg 0) hRm
+  obtain ⟨hupper, hlower⟩ :=
+    intrJacobi_bounds (I := I) (X.obj k).metric hEnorm x u w
+      hK zero_lt_one (by simpa only [K] using hODE)
+  have hupper1 := hupper 1 (by norm_num)
+  have hlower1 := hlower 1 (by norm_num)
+  have hwNorm :
+      Real.sqrt ((X.obj k).metric.inner x w w) = ‖v‖ := by
+    simpa only [w] using
+      normalFrame_sqrt (I := I) (X.obj k).metric x v
+  simp only [one_mul, hwNorm] at hupper1 hlower1
+  let q : (X.obj k).M :=
+    intrinsicGeodesic (I := I) (X.obj k).metric hEnorm x u 1
+  let J : TangentSpace I q :=
+    intrinsicJacobi (I := I) (X.obj k).metric hEnorm x u w 1
+  have hsqrtUpper :
+      Real.sqrt ((X.obj k).metric.inner q J J) ≤
+        (5 / 4 : Real) * ‖v‖ :=
+    hupper1.trans hmodelLe
+  have hsqrtLower :
+      (3 / 4 : Real) * ‖v‖ ≤
+        Real.sqrt ((X.obj k).metric.inner q J J) :=
+    hmodelGe.trans hlower1
+  have hmetricNonneg : 0 ≤ (X.obj k).metric.inner q J J := by
+    rcases eq_or_ne J 0 with hJ | hJ
+    · simp [hJ]
+    · exact ((X.obj k).metric.pos q J hJ).le
+  have hlowerSq :
+      ((3 / 4 : Real) * ‖v‖) ^ 2 ≤
+        (Real.sqrt ((X.obj k).metric.inner q J J)) ^ 2 :=
+    (sq_le_sq₀
+      (mul_nonneg (by norm_num) (norm_nonneg v))
+      (Real.sqrt_nonneg _)).2 hsqrtLower
+  have hupperSq :
+      (Real.sqrt ((X.obj k).metric.inner q J J)) ^ 2 ≤
+        ((5 / 4 : Real) * ‖v‖) ^ 2 :=
+    (sq_le_sq₀
+      (Real.sqrt_nonneg _)
+      (mul_nonneg (by norm_num) (norm_nonneg v))).2 hsqrtUpper
+  rw [Real.sq_sqrt hmetricNonneg] at hlowerSq hupperSq
+  have hmetric :
+      intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v =
+        (X.obj k).metric.inner q J J := by
+    simpa only [q, J, u, w, intrinsicFramedExp, intrFrameCLM_apply,
+      expMapIntrinsic] using
+      intr_metric_jacobi (I := I) (X.obj k).metric hEnorm x z v v
+  rw [hmetric]
+  constructor <;> nlinarith [sq_nonneg ‖v‖]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The uniform intrinsic H6 radius excludes conjugate vectors and therefore
+selects a smooth fixed-first inverse branch at every vector in the model ball. -/
+theorem exists_intr_branches
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hgeom : SeqBoundedGeometry (I := I) X) :
+    ∃ r₀ : Real, 0 < r₀ ∧ ∀ (k : Nat) (x : (X.obj k).M),
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : IsManifold I 1 (X.obj k).M :=
+        IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+      letI : T2Space (X.obj k).M := (X.obj k).t2
+      letI : T2Space (TangentBundle I (X.obj k).M) :=
+        (X.obj k).t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+        Manifold.metrizableSpace I (X.obj k).M
+      letI : T3Space (X.obj k).M := inferInstance
+      letI : RiemannianBundle
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle (I := I)
+      letI : (y : (X.obj k).M) →
+          InnerProductSpace Real (TangentSpace I y) :=
+        (X.obj k).riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle_cont (I := I)
+      letI : EMetricSpace (X.obj k).M :=
+        (X.obj k).emetricSpace (I := I)
+      letI : CompleteSpace (X.obj k).M :=
+        MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+      letI : ConnectedSpace (X.obj k).M := hconn k
+      let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+          ‖w‖ₑ =
+            ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+        intro y w
+        simpa using
+          (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (X.obj k).metric y w)
+      ∀ z ∈ Metric.ball (0 : E) r₀,
+        ∃ B : ExpInvBranch (I := I) (X.obj k).metric hEnorm x,
+          (normalFrame (I := I) (X.obj k).metric x z : E) ∈
+            B.hom.source := by
+  obtain ⟨r₀, hr₀, hmetric⟩ :=
+    exists_intr_radii (I := I) X hcomplete hconn hgeom
+  refine ⟨r₀, hr₀, ?_⟩
+  intro k x
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M :=
+    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) →
+      InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M :=
+    (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (X.obj k).metric y w)
+  change ∀ z ∈ Metric.ball (0 : E) r₀,
+    ∃ B : ExpInvBranch (I := I) (X.obj k).metric hEnorm x,
+      (normalFrame (I := I) (X.obj k).metric x z : E) ∈ B.hom.source
+  intro z hz
+  have hlower : ∀ v : E, (1 / 2 : Real) * ‖v‖ ^ 2 ≤
+      intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v :=
+    fun v => (hmetric k x z hz v).1
+  have hnot :
+      ¬ IsConjVec (I := I) (X.obj k).metric hEnorm x
+        (normalFrame (I := I) (X.obj k).metric x z : E) :=
+    intrFrame_not_conj (I := I) (X.obj k).metric hEnorm x z
+      (by norm_num) hlower
+  exact branch_of_not_conj (I := I) (X.obj k).metric hEnorm hnot
 
 /-- A uniform zeroth-order curvature bound gives one model-space radius on
 which every framed normal-coordinate metric in the sequence satisfies the

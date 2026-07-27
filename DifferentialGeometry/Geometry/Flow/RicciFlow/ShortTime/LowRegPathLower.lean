@@ -117,9 +117,8 @@ theorem lower_jet_h1
   obtain ⟨C₀, hC₀, hzero⟩ := appCc_h1_h2_h1 (I := I) (M := M) hDim g 2 2
   obtain ⟨C₁, hC₁, hone⟩ := appCc_h2_cov_h1 (I := I) (M := M) hDim g 1 2
   obtain ⟨Cp, hCp, hp⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.
-      exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
-        (I := I) (M := M) g 3 2
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 3 2
   let K : ℝ := 1 + Cp
   refine ⟨C₀ + C₁ * K, add_nonneg hC₀ (mul_nonneg hC₁ (by dsimp [K]; linarith)), ?_⟩
   intro Φ₀ Φ₁ U A₀ A₁ hA₀ hA₁ hΦ₀ hΦ₁
@@ -175,8 +174,12 @@ theorem lower_jet_h1
       apply add_le_add
       · exact mul_le_mul_of_nonneg_right
           (mul_le_mul_of_nonneg_left (by linarith) hC₀) hnorm
-      · exact mul_le_mul_of_nonneg_right
-          (mul_le_mul_of_nonneg_left (by nlinarith) (mul_nonneg hC₁ hK)) hnorm
+      · apply mul_le_mul_of_nonneg_right ?_ hnorm
+        calc
+          C₁ * (K * A₁) ≤ C₁ * (K * (A₀ + A₁)) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left (by linarith) hK) hC₁
+          _ = (C₁ * K) * (A₀ + A₁) := by ring
     _ = (C₀ + C₁ * K) * (A₀ + A₁) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by ring
 

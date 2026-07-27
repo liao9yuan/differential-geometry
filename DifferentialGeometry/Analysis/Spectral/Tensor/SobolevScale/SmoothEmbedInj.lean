@@ -17,6 +17,7 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 
@@ -38,7 +39,7 @@ theorem ccToHs_injective (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ) :
     (I := I) (M := M) g 0 s
   apply (tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) hcompact).repr.injective
-  funext i
+  ext i
   have hi := congrArg (fun u => u.coeff i) hST
   simpa only [ccTensorToHs_coeff, tensorL2Coeff] using hi
 
