@@ -292,6 +292,17 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №53 (2026-07-26, CODEX DERIVATIVE BRIDGE — **OFF-CENTRE `∇Ric` COMPONENT
+  IDENTITY COMPLETE**): added `Evolution/ForwardUniqueNablaChart.lean` with
+  the sorry-free `nablaRicChartComp`.  It specializes the unconditional
+  moving-slot formula `nabla0SFun_eval_coordFrame_moving_raw`, identifies the
+  Ricci coefficient germ off-centre, and uses the existing Levi-Civita
+  chart-basis correction identity.  Focused verification is warning-free and
+  the hygiene scan is clean.  The conditional
+  `ModelDerivEqCoordDeriv0SAt` route is not used.  Existing
+  `nablaRicReal_frame`/`coordNablaRealOn` remain the later `hNR` realization
+  producers.  NEXT: `nablaRicChartJoint` in `ForwardUniqueDensReg.lean`, then
+  `nablaRicSlabSup`, then `fuAdotSlab`.
 - №51 (2026-07-26, **WRAP + CODEX HANDOFF**): FINAL wave accepted+committed
   `8a0df5480` (volLe/reactLe/Λ closed — three more phantoms: volLe's port
   already existed as fuTraceRd (7th in-tree find), Λ's "sphere-bundle
