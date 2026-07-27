@@ -292,6 +292,16 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №56 (2026-07-26, CODEX R13 TENSORIZATION — **RAW REMAINDER CARRIERS
+  ELIMINATED; FULL `hrem` STILL OPEN**): new
+  `Evolution/ForwardUniqueRem.lean` reconstructs component arrays as genuine
+  `(0,4)` tensors.  `rmDotRem_low` identifies the intrinsic
+  `lapDiffRem` plus quadratic/drift tensors; `rmDotRemSq_le` uses the honest
+  rank-five `|∇Rm₂|²` and full rank-six `|∇²Rm₂|²` inputs;
+  `gapDot_uhl` eliminates the bare Uhlenbeck vector carrier.  Focused check and
+  targeted build are green; five endpoints are exactly 3-axiom clean.  This
+  is a partial R13 brick, not `hrem`: the re-lowering defect and remaining
+  tensor-product quadratic/drift bounds are still explicit frontiers.
 - №55 (2026-07-26, CODEX DERIVATIVE SUP — **CLOSED-SLAB `|∇Ric|²` BOUND
   COMPLETE**): `ForwardUniqueSup.lean` now exports `nablaRicSlabSup`, with
   separate norm and connection metrics.  It is the generic
