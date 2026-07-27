@@ -14,6 +14,10 @@ Direct `#print axioms` is exactly
 `sorry` warning in this file belongs only to the independent black box (N) at
 `ricci_flow_unif_existence`.
 
+Final integration verification also passed: after resolving a cross-import
+helper-name collision in `ForwardUniqueSup`, the full locked build completed
+successfully (10717/10717).
+
 `ricci_flow_forward_unique`: **100%**.  Its dedicated Route-K machinery:
 **100%**.  Black box (N): **0%** and unchanged.  The whole HCG compactness
 project remains about **10%**.

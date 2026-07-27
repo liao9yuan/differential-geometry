@@ -292,6 +292,17 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №62 (2026-07-27, CODEX FINAL INTEGRATION — **FULL BUILD GREEN**):
+  the first full build exposed one cross-import namespace collision:
+  `ForwardUniqueSup.metricComp_le` met the older HCG theorem of the same name
+  when `ExtendShiInputs` imported both trees.  The forward-uniqueness helper
+  was minimally renamed to `fu_metric_comp_le`; focused verification, its
+  export refresh, and the merged `ExtendShiInputs` check all passed.  The
+  repeated full locked build then completed successfully (10717/10717).
+  `ricci_flow_forward_unique` and its dedicated machinery are both 100%;
+  direct axiom inspection remains exactly
+  `[propext, Classical.choice, Quot.sound]`, with no path through black box
+  (N).  The forward-uniqueness lane is closed; push remains with the user.
 - №61 (2026-07-27, CODEX PUBLIC ENDPOINT — **BLACK BOX (B) CLOSED**):
   replaced the unchanged-statement `ricci_flow_forward_unique` `sorry` with
   the direct `forward_unique_of_gram` application, supplying the
