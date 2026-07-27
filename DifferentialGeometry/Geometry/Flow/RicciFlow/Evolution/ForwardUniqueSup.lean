@@ -36,7 +36,7 @@ and nothing in the tree supplies one.  This file is the layer that does.
 * `tracePairSq_le` — `(tr_g Q)² ≤ n·|Q|²_g`; with it, `volSlabSup` gives the **`volLe` field**
   from the flow identity `tr_{g₁}(∂ₜg₁) = −2·tr_{g₁}Ric₁` and the Ricci sup alone, so no joint
   continuity of the volume drift is needed.
-* `metricComp_le` / `metricCompSlab` — the **pointwise metric comparison** `g₁ ≤ Λ·g₂`, the `Λ`
+* `fu_metric_comp_le` / `metricCompSlab` — the **pointwise metric comparison** `g₁ ≤ Λ·g₂`, the `Λ`
   input of `connDiffDot_normSq_le`, with `Λ = √(sup |g₁|²_{g₂})`.  No unit-sphere-bundle
   compactness enters: it is the ON-frame component estimate with both slots equal.
 * `nablaRicSlabSup` — the closed-slab bound for `|∇Ric|²`, obtained from the
@@ -661,7 +661,8 @@ estimate `abs_apply_le_sqrt_normSq0S` at rank `2` with both slots equal to `v`: 
 This is the `Λ` input of `connDiffDot_normSq_le` (`Evolution/ForwardUniqueConnBound.lean`), and
 `metricSlabSup g₂ g₁` supplies the sup of its coefficient on a closed subslab — so `Λ` is a
 `normSq0S` sup after all, contrary to the previous note's reading. -/
-theorem metricComp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+theorem fu_metric_comp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
     g₁.inner x v v ≤
       Real.sqrt (normSq0S (I := I) g₂ x 2 (metricTensorField (I := I) g₁ x)) *
         g₂.inner x v v := by
@@ -682,7 +683,7 @@ theorem metricComp_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (v : Tang
   rw [hval, hprod] at h
   exact (le_abs_self _).trans h
 
-/-- **The `Λ` of `connDiffDot_normSq_le`, uniform on the closed subslab.**  `metricComp_le`
+/-- **The `Λ` of `connDiffDot_normSq_le`, uniform on the closed subslab.**  `fu_metric_comp_le`
 on top of `metricSlabSup` with the two metric roles exchanged. -/
 theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -701,7 +702,7 @@ theorem metricCompSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     rcases eq_or_ne v 0 with hv0 | hv0
     · rw [hv0]; simp
     · exact ((g₂ t).pos x v hv0).le
-  refine (metricComp_le (I := I) (g₁ t) (g₂ t) x v).trans ?_
+  refine (fu_metric_comp_le (I := I) (g₁ t) (g₂ t) x v).trans ?_
   exact mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt (hB t ht x)) hvv
 
 /-- **Two-sided metric equivalence, uniform on a closed subslab.**

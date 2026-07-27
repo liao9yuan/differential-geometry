@@ -6,6 +6,17 @@ residual hypotheses), `ForwardUniqueDensReg.md` (the joint-regularity tower),
 `ForwardUniqueRmBounds.md` / `ForwardUniqueRateLe.md` / `ForwardUniqueConnBound.md` (the
 pointwise estimate producers).
 
+## Outcome — 2026-07-27, ninth pass (cross-import name collision)
+
+The first final full build exposed a namespace collision when `ExtendShiInputs`
+imported both the forward-uniqueness and HCG Ricci-bound trees: both exported a
+theorem named `metricComp_le`.  The forward-uniqueness helper is now named
+`fu_metric_comp_le`; its statement and proof are unchanged.
+
+Focused verification, the targeted export refresh, and the merged
+`ExtendShiInputs` focused check all passed.  This was an integration-only name
+repair and does not change the completed forward-uniqueness argument.
+
 ## Outcome — 2026-07-26, seventh pass (curvature-tower slab sup)
 
 `nablaKRmSlabSup` is written as the rank-uniform compact-slab wrapper around
@@ -243,7 +254,7 @@ once `hrem`/`hadot` have producers.  0 `sorry`, warning-clean, ten endpoints 3-a
    bundle`, or a Grönwall-type comparison".  It needs neither: `abs_apply_le_sqrt_normSq0S`
    with **both slots equal to `v`** returns `|g₁(v,v)| ≤ √(|g₁|²_{g₂})·√(g₂(v,v))·√(g₂(v,v))`,
    and the two square roots multiply back to `g₂(v,v)`.  So `Λ = √(sup |g₁|²_{g₂})` and
-   `metricSlabSup g₂ g₁` (roles exchanged) is the sup.  `metricComp_le` / `metricCompSlab`,
+   `metricSlabSup g₂ g₁` (roles exchanged) is the sup.  `fu_metric_comp_le` / `metricCompSlab`,
    ~15 lines each.  **`Λ` was a `normSq0S` sup all along.**
 3. **`movingReact_le` was never needed.**  The rank-2 cite in
    `Analysis/Spectral/Intrinsic/DeTurck/MovingEdgeEnergy.lean:643` is false-green (that file has
