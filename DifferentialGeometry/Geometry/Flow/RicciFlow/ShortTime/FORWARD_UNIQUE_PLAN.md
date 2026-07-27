@@ -292,6 +292,13 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №55 (2026-07-26, CODEX DERIVATIVE SUP — **CLOSED-SLAB `|∇Ric|²` BOUND
+  COMPLETE**): `ForwardUniqueSup.lean` now exports `nablaRicSlabSup`, with
+  separate norm and connection metrics.  It is the generic
+  `normSqSlabSup` fed by `nablaRicChartJoint`, so `(gN,gC) = (g₁,g₂)` gives
+  exactly `connDiffDot_normSq_le`'s `B₁`.  Focused verification and targeted
+  module build are green; the endpoint is exactly 3-axiom clean.  This is
+  derivative-continuation step 3/4.  NEXT: `fuAdotSlab`.
 - №54 (2026-07-26, CODEX DERIVATIVE REGULARITY — **CLOSED-EDGE `∇Ric`
   COMPONENT REGULARITY COMPLETE**): `ForwardUniqueDensReg.lean` now exports
   `nablaRicChartJoint`.  It composes `partRicciWithinM`, `christWithinM`, and

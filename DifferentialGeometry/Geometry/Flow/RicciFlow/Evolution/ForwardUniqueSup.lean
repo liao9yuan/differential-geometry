@@ -38,6 +38,8 @@ and nothing in the tree supplies one.  This file is the layer that does.
 * `metricComp_le` / `metricCompSlab` — the **pointwise metric comparison** `g₁ ≤ Λ·g₂`, the `Λ`
   input of `connDiffDot_normSq_le`, with `Λ = √(sup |g₁|²_{g₂})`.  No unit-sphere-bundle
   compactness enters: it is the ON-frame component estimate with both slots equal.
+* `nablaRicSlabSup` — the closed-slab bound for `|∇Ric|²`, obtained from the
+  one-sided chart derivative tower and `nablaRicChartJoint`.
 * `movingReactAbs_le` — the **rank-uniform moving-metric reaction bound** owed since plan №25:
   `|movingReact0S (g t) x s Q W| ≤ 2·s·n^{2s+2}·√(|Q|²)·|W|²`, whence `reactSlabLe`, the
   **`reactLe` field**.
@@ -50,11 +52,10 @@ and nothing in the tree supplies one.  This file is the layer that does.
 
 ## What is *not* here
 
-`remLe` and `adotLe` are not produced; see `ForwardUniqueSup.md` for the field-by-field ledger
-and the exact obstruction of each.  Both now bottom out on the *same* missing layer — a
-`∂(chart Riemann)` derivative tower in
-`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean` — which is what
-`adotLe`'s `B₁ ≥ |∇²Ric₂|²` and `remLe`'s `roughLap(Rm₂)` sup both need.
+`remLe` and `adotLe` are assembled in the wiring layer.  This file supplies
+`adotLe`'s previously missing closed-slab `B₁ ≥ |∇Ric₂|²`; the remainder still
+needs the full rank-five and rank-six curvature derivative sups recorded in
+`ForwardUniqueSup.md`.
 -/
 
 noncomputable section
@@ -378,8 +379,9 @@ section BackgroundSups
 (`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`) and the
 arbitrary-time-set upgrade of `Evolution/ForwardUniqueDensReg.lean`'s brick.  With those, every
 background quantity whose chart-frame components are readable from the two chart-Gram packages
-produces its constant.  The three below are the ones the remaining fields consume:
-the moving metric itself, the background curvature (in any lowering), and the Ricci tensors. -/
+produces its constant.  The four below are the ones the remaining fields consume:
+the moving metric itself, the background curvature (in any lowering), the Ricci tensors, and
+the first covariant derivative of Ricci. -/
 
 variable {a c : Real}
 
@@ -494,6 +496,33 @@ theorem ricciSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   refine ⟨(Module.finrank Real E : Real) ^ 4 * B, mul_nonneg hpow hB0, fun t ht x => ?_⟩
   exact (ricciSq_le_rm04 (I := I) (g₁ t) (g₂ t) x).trans
     (mul_le_mul_of_nonneg_left (hB t ht x) hpow)
+
+/-- **The sup of `|∇^{gC} Ric(gC)|²_{gN}` on the closed subslab.**
+
+The chart-frame regularity input is `nablaRicChartJoint`, so the estimate is
+valid at the one-sided initial edge.  Taking `(gN, gC) = (g₁, g₂)` supplies
+`connDiffDot_normSq_le`'s `B₁`. -/
+theorem nablaRicSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
+    (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gN p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgramC : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (gC p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∃ B : Real, 0 ≤ B ∧ ∀ t ∈ Icc a c, ∀ x : M,
+      normSq0S (I := I) (gN t) x 3
+        (metricNabla0S (I := I) (gC t)
+          (CovariantDerivative.ricciSection (I := I)
+            (metricCov (I := I) (gC t)) (metricCov_smooth (I := I) (gC t))) x) ≤ B :=
+  normSqSlabSup (I := I) gN
+    (fun t x =>
+      metricNabla0S (I := I) (gC t)
+        (CovariantDerivative.ricciSection (I := I)
+          (metricCov (I := I) (gC t)) (metricCov_smooth (I := I) (gC t))) x)
+    hgramN
+    (fun x₀ K _ ht => nablaRicChartJoint (I := I) gC x₀ (hgramC x₀) K ht)
 
 /-- **The pointwise metric comparison `g₁ ≤ Λ·g₂`, from a fibre-norm bound.**
 

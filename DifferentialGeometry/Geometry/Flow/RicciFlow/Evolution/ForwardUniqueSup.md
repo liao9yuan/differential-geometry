@@ -6,6 +6,23 @@ residual hypotheses), `ForwardUniqueDensReg.md` (the joint-regularity tower),
 `ForwardUniqueRmBounds.md` / `ForwardUniqueRateLe.md` / `ForwardUniqueConnBound.md` (the
 pointwise estimate producers).
 
+## Outcome — 2026-07-26, sixth pass (`∇Ric` slab sup)
+
+`nablaRicSlabSup` now supplies a closed-slab constant for
+`|∇^{gC} Ric(gC)|²_{gN}` directly from the two chart-Gram packages.  Its two
+metric roles are intentionally separate: `(gN,gC) = (g₁,g₂)` is precisely the
+`B₁` input of `connDiffDot_normSq_le`.
+
+The proof is the generic `normSqSlabSup` instantiated with
+`nablaRicChartJoint`; no new estimate is introduced.  Focused verification and
+the targeted module build passed, the touched file is warning-free, and the new
+endpoint has exactly `[propext, Classical.choice, Quot.sound]`.
+
+This completes step 3/4 of the `hadot` continuation.  `fuAdotSlab` remains the
+last wiring step for that field.  The theorem `ricci_flow_forward_unique`
+remains unproved (0%); its dedicated machinery remains about 90%, and the whole
+HCG compactness program remains about 10%.
+
 ## Outcome — 2026-07-26, fifth pass (DERIVATIVE-LAYER + audit of the residue)
 
 **The named brick is delivered; the audit of what it buys says it is NOT sufficient, and the
@@ -558,8 +575,8 @@ collapsed to a single brick.)*
    stands between `fuSlab_of_gram` and an unconditional `hbounds`" — was **wrong**: those are
    chart *coefficient* statements, and a chart-*frame component* formula for a covariant
    derivative is a second, independent gate.  See §"The second gate" at the top.
-5. **THE REMAINING BRICK — `nablaRicChartComp`**, the off-centre chart-frame component identity
-   for `metricNabla0S g Ric`.  Route and every ingredient are located in §"The route"; sizing
-   and the four-step plan on top of it are in §"Honest size of the residue".  It delivers
-   `adotLe`'s `B₁` **and** its `hNR₁`/`hNR₂` at once; `remLe` needs the same one derivative
-   further, plus the R13 identities.
+5. ~~`nablaRicChartComp` → `nablaRicChartJoint` → `nablaRicSlabSup`~~ **DONE**.
+   These supply `adotLe`'s `B₁`; the existing `nablaRicReal_frame` supplies
+   `hNR₁`/`hNR₂`.  Remaining for this field: the single `fuAdotSlab` wiring
+   theorem.  Separately, `remLe` still needs the full rank-five/rank-six
+   curvature derivative sups plus the R13 identities.
