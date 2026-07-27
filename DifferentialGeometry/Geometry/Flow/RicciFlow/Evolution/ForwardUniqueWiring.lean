@@ -2,8 +2,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSdec
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSup
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSpeed
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04ProducerTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
+import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -205,6 +207,218 @@ theorem fuLapRm_real (g : Real → SmoothRiemannianMetric I M)
       roughLap0SField (I := I) (g r) (fuTf (I := I) g r) y
         (frameVec4 (I := I) (fun m z => coordBasisAt (I := I) z m) y i j k l) :=
   rm04LapFam_real (I := I) (D := refD) (solOfMetric (I := I) g) r y i j k l
+
+private theorem fuInv_real (g : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    MetricInverseInBasis_gen (I := I) (g t) x (coordBasisAt (I := I) x)
+      (fun i j => coordInv (I := I) (solOfMetric (I := I) (D := refD) g) x t x i j) := by
+  have hbasis :
+      coordBasisAt (I := I) x =
+        coordinateFrameAt_toBasis (I := I) x := by
+    ext i
+    simp
+  simpa only [solOfMetric_metric, hbasis] using
+    coordInvReal (I := I) (solOfMetric (I := I) (D := refD) g) x t
+
+set_option maxHeartbeats 1000000 in
+/-- The canonical Uhlenbeck `B` components reconstruct the invariant
+quadratic curvature combination, independently of the metric used to lower
+the supplied component array. -/
+theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
+        (fun i j k l =>
+          fuBRm (I := I) g t x i j k l - fuBRm (I := I) g t x i j l k +
+            fuBRm (I := I) g t x i k j l - fuBRm (I := I) g t x i l j k) =
+      bComb (I := I) (g t) (fuTf (I := I) g t) x := by
+  let basis := coordBasisAt (I := I) x
+  let gInv := fun i j =>
+    coordInv (I := I) (solOfMetric (I := I) (D := refD) g) x t x i j
+  have hinv : MetricInverseInBasis_gen (I := I) (g t) x basis gInv := by
+    simpa only [basis, gInv] using fuInv_real (I := I) g t x
+  have hRm : ∀ i j k l,
+      component0S (I := I) basis (fuTf (I := I) g t x) ![i, j, k, l] =
+        fuRm04 (I := I) g t x i j k l := by
+    intro i j k l
+    simpa only [basis, component0S_apply, fuTf_apply] using
+      (fuRm04_real (I := I) g t x i j k l).symm
+  have hB (a b c d : CoordinateIdx (𝕜 := Real) E) :
+      fuBRm (I := I) g t x a b c d =
+        ∑ f, ∑ r, ∑ e, ∑ q,
+          gInv f r * gInv e q *
+            fuRm04 (I := I) g t x a e b f *
+              fuRm04 (I := I) g t x c q d r := by
+    change
+      (∑ e, ∑ q, ∑ f, ∑ r,
+        gInv e q * gInv f r *
+          fuRm04 (I := I) g t x a e b f *
+            fuRm04 (I := I) g t x c q d r) = _
+    rw [DifferentialGeometry.Tensor.SlotAlgebra.sum_rotate4_two]
+    refine Finset.sum_congr rfl fun f _ => ?_
+    refine Finset.sum_congr rfl fun r _ => ?_
+    refine Finset.sum_congr rfl fun e _ => ?_
+    refine Finset.sum_congr rfl fun q _ => ?_
+    ring
+  apply lowOfComp_ext (I := I)
+  intro i j k l
+  have hcomp := bComb_comp (I := I) (g t) basis gInv hinv
+    (fuTf (I := I) g t) ![i, j, k, l]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.cons_val_three, hRm] at hcomp
+  simp only [component0S_apply, basis] at hcomp
+  simp only [Matrix.head_cons, Matrix.tail_cons] at hcomp
+  have hslots :
+      (fun a : Fin 4 => coordBasisAt (I := I) x (![i, j, k, l] a)) =
+        vec4 (I := I) (coordBasisAt (I := I) x i) (coordBasisAt (I := I) x j)
+          (coordBasisAt (I := I) x k) (coordBasisAt (I := I) x l) := by
+    funext p
+    fin_cases p <;> simp [vec4]
+  rw [hslots] at hcomp
+  rw [hcomp, hB i j k l, hB i j l k, hB i k j l, hB i l j k]
+
+set_option maxHeartbeats 1000000 in
+/-- The canonical raised-Ricci and curvature components reconstruct the
+invariant Ricci drift, independently of the reconstruction metric. -/
+theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
+        (fun i j k l =>
+          riemann04RicciDriftInFrame (fuRicUp (I := I) g) (fuRm04 (I := I) g)
+            t x i j k l) =
+      ricciDrift04 (I := I) (g t) x := by
+  let basis := coordBasisAt (I := I) x
+  let gInv := fun i j =>
+    coordInv (I := I) (solOfMetric (I := I) (D := refD) g) x t x i j
+  have hinv : MetricInverseInBasis_gen (I := I) (g t) x basis gInv := by
+    simpa only [basis, gInv] using fuInv_real (I := I) g t x
+  have hUp (i p : CoordinateIdx (𝕜 := Real) E) :
+      fuRicUp (I := I) g t x i p =
+        ∑ a, gInv p a *
+          metricRicciAt (I := I) (g t) x
+            (vec2 (I := I) (basis i) (basis a)) := by
+    simp only [fuRicUp, ricUpFam, ricciOneUpCompInFrame,
+      ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt,
+      solOfMetric_metric, coordBasisAt_coe, basis, gInv]
+  apply lowOfComp_ext (I := I)
+  intro i j k l
+  change
+    ricciDrift04 (I := I) (g t) x
+        (vec4 (I := I) (basis i) (basis j) (basis k) (basis l)) =
+      riemann04RicciDriftInFrame (fuRicUp (I := I) g) (fuRm04 (I := I) g)
+        t x i j k l
+  rw [ricciDrift_comp (I := I) (g t) basis gInv hinv]
+  simp only [riemann04RicciDriftInFrame, hUp, fuRm04_real, basis]
+
+set_option maxHeartbeats 1000000 in
+/-- Lowering the canonical raised Uhlenbeck speed by its own metric gives the
+coordinate-free curvature speed tensor. -/
+theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    lowerTri (I := I) (metricTensorField (I := I) (g t) x)
+        (uhlRm2Vec (I := I) g (coordBasisAt (I := I))
+          (fuRm04 (I := I) g) (fuLapRm (I := I) g) (fuBRm (I := I) g)
+          (fuRicUp (I := I) g) t x) =
+      uhlSpeed04 (I := I) (g t) (fuTf (I := I) g t) x := by
+  rw [← uhlSpeed_low (I := I) g (coordBasisAt (I := I))
+    (fuRm04 (I := I) g) (fuLapRm (I := I) g) (fuBRm (I := I) g)
+    (fuRicUp (I := I) g) t x]
+  rw [← uhlSpeed04_low (I := I) (g t) (fuTf (I := I) g t) x
+    (coordBasisAt (I := I) x)]
+  apply lowOfComp_ext (I := I)
+  intro i j k l
+  rw [fuLapRm_real (I := I) g t x i j k l]
+  have hB := congrArg
+    (fun T => T (vec4 (I := I) (coordBasisAt (I := I) x i)
+      (coordBasisAt (I := I) x j) (coordBasisAt (I := I) x k)
+      (coordBasisAt (I := I) x l)))
+    (fuB_low (I := I) g g t x)
+  have hD := congrArg
+    (fun T => T (vec4 (I := I) (coordBasisAt (I := I) x i)
+      (coordBasisAt (I := I) x j) (coordBasisAt (I := I) x k)
+      (coordBasisAt (I := I) x l)))
+    (fuDrift_low (I := I) g g t x)
+  simp only [lowOfComp_eval] at hB hD
+  rw [hB, hD]
+  rw [lowOfComp_eval]
+  simp only [frameVec4]
+
+set_option maxHeartbeats 1000000 in
+private theorem fuB_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
+        (fun i j k l =>
+          (fuBRm (I := I) g₁ t x i j k l - fuBRm (I := I) g₂ t x i j k l) -
+              (fuBRm (I := I) g₁ t x i j l k - fuBRm (I := I) g₂ t x i j l k) +
+            (fuBRm (I := I) g₁ t x i k j l - fuBRm (I := I) g₂ t x i k j l) -
+              (fuBRm (I := I) g₁ t x i l j k - fuBRm (I := I) g₂ t x i l j k)) =
+      bComb (I := I) (g₁ t) (fuTf (I := I) g₁ t) x -
+        bComb (I := I) (g₂ t) (fuTf (I := I) g₂ t) x := by
+  rw [← fuB_low (I := I) g₁ g₁ t x, ← fuB_low (I := I) g₁ g₂ t x]
+  apply lowOfComp_ext (I := I)
+  intro i j k l
+  change
+    (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x) _)
+        (vec4 (I := I) (coordBasisAt (I := I) x i) (coordBasisAt (I := I) x j)
+          (coordBasisAt (I := I) x k) (coordBasisAt (I := I) x l)) -
+      (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x) _)
+        (vec4 (I := I) (coordBasisAt (I := I) x i) (coordBasisAt (I := I) x j)
+          (coordBasisAt (I := I) x k) (coordBasisAt (I := I) x l)) = _
+  rw [lowOfComp_eval, lowOfComp_eval]
+  ring
+
+set_option maxHeartbeats 1000000 in
+private theorem fuDrift_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
+        (fun i j k l =>
+          riemann04RicciDriftInFrame (fuRicUp (I := I) g₁) (fuRm04 (I := I) g₁)
+              t x i j k l -
+            riemann04RicciDriftInFrame (fuRicUp (I := I) g₂) (fuRm04 (I := I) g₂)
+              t x i j k l) =
+      ricciDrift04 (I := I) (g₁ t) x - ricciDrift04 (I := I) (g₂ t) x := by
+  rw [← fuDrift_low (I := I) g₁ g₁ t x, ← fuDrift_low (I := I) g₁ g₂ t x]
+  apply lowOfComp_ext (I := I)
+  intro i j k l
+  change
+    (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x) _)
+        (vec4 (I := I) (coordBasisAt (I := I) x i) (coordBasisAt (I := I) x j)
+          (coordBasisAt (I := I) x k) (coordBasisAt (I := I) x l)) -
+      (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x) _)
+        (vec4 (I := I) (coordBasisAt (I := I) x i) (coordBasisAt (I := I) x j)
+          (coordBasisAt (I := I) x k) (coordBasisAt (I := I) x l)) = _
+  rw [lowOfComp_eval, lowOfComp_eval]
+
+private theorem lowerRm_cross
+    (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
+    lowerTri (I := I) (metricTensorField (I := I) g₁ x)
+        (riemannOp (metricCov (I := I) g₂) x) =
+      CovariantDerivative.riemannCurvature04At (I := I) g₁
+        (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) x := by
+  refine ContinuousMultilinearMap.ext fun v => ?_
+  have hv : v = vec4 (I := I) (v 0) (v 1) (v 2) (v 3) := by
+    funext i
+    fin_cases i <;> rfl
+  rw [hv]
+  calc
+    lowerTri (I := I) (metricTensorField (I := I) g₁ x)
+        (riemannOp (metricCov (I := I) g₂) x)
+        (vec4 (I := I) (v 0) (v 1) (v 2) (v 3)) =
+      metricTensorField (I := I) g₁ x
+        (fun a : Fin 2 =>
+          if a = 0 then
+            riemannOp (metricCov (I := I) g₂) x (v 0) (v 1) (v 2)
+          else v 3) :=
+      lowerTri_apply (I := I) (metricTensorField (I := I) g₁ x)
+        (riemannOp (metricCov (I := I) g₂) x)
+        (vec4 (I := I) (v 0) (v 1) (v 2) (v 3))
+    _ = g₁.inner x (riemannOp (metricCov (I := I) g₂) x (v 0) (v 1) (v 2))
+        (v 3) := by
+      rw [metricTensorField_apply]
+      simp
+    _ = CovariantDerivative.riemannCurvature04At (I := I) g₁
+        (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) x
+          (vec4 (I := I) (v 0) (v 1) (v 2) (v 3)) :=
+      (rm04mix_inner (I := I) g₁ g₂ x (v 0) (v 1) (v 2) (v 3)).symm
 
 /-! ## The `SolutionOn` package of a flow, and the tail Uhlenbeck interface -/
 
@@ -1238,6 +1452,616 @@ theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Rea
     (fun t ht x X Y => pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x X Y)
     (fun t ht x => hΛ t (Ioo_subset_Icc_self ht) x)
 
+set_option synthInstance.maxHeartbeats 1000000 in
+set_option maxHeartbeats 2000000 in
+/-- **The `remLe` field of `ForwardUniqueSlab` at the constructed carrier.**
+
+Every background curvature, derivative, and metric-comparison factor in `sdecRem`
+has a closed-subslab supremum supplied by the chart-Gram regularity layer.  The
+four remainder summands are then controlled respectively by `rmDotRemSq_le`, the
+invariant `gapDot` split, `reLowerDefSq_le`, and the traced `reLowerPair` bound. -/
+theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {c : Real} (hc : c ∈ Ioo a b) :
+    ∃ C_rem : Real, ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x) ≤
+        C_rem * forwardUniqueDensity (I := I) g₁ g₂ t x := by
+  have hsub : Icc a c ⊆ Ico a b := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hc.2⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h1smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  have hres₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h2smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  obtain ⟨Λ, hΛ0, hΛ⟩ := metricCompSlab (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨Ce, hCe, hEquiv⟩ := metricEquivSlab (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨BH, hBH0, hBH⟩ := metricDiffSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨BR1, hBR10, hBR1⟩ := rm04SlabSup (I := I) g₁ g₁ g₁ hres₁ hres₁ hres₁
+  obtain ⟨BR2, hBR20, hBR2⟩ := rm04SlabSup (I := I) g₁ g₂ g₂ hres₁ hres₂ hres₂
+  obtain ⟨BP, hBP0, hBP⟩ := rm04SlabSup (I := I) g₁ g₁ g₂ hres₁ hres₁ hres₂
+  obtain ⟨BRic21, hBRic210, hBRic21⟩ :=
+    ricciSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨B5, hB50, hB5⟩ :=
+    crossRm1SlabSup (I := I) g₁ g₂ g₂ g₂ hres₁ hres₂ hres₂ hres₂
+  obtain ⟨B6, hB60, hB6⟩ :=
+    crossRm2SlabSup (I := I) g₁ g₂ g₂ g₂ hres₁ hres₂ hres₂ hres₂
+  obtain ⟨BP1, hBP10, hBP1⟩ :=
+    crossRm1SlabSup (I := I) g₁ g₁ g₂ g₁ hres₁ hres₁ hres₂ hres₁
+  obtain ⟨BP2, hBP20, hBP2⟩ :=
+    crossRm2SlabSup (I := I) g₁ g₁ g₂ g₁ hres₁ hres₁ hres₂ hres₁
+  obtain ⟨BR2g2, hBR2g20, hBR2g2⟩ :=
+    rm04SlabSup (I := I) g₂ g₂ g₂ hres₂ hres₂ hres₂
+  obtain ⟨BRic2g2, hBRic2g20, hBRic2g2⟩ :=
+    ricciSlabSup (I := I) g₂ g₂ hres₂ hres₂
+  obtain ⟨B6g2, hB6g20, hB6g2⟩ :=
+    crossRm2SlabSup (I := I) g₂ g₂ g₂ g₂ hres₂ hres₂ hres₂ hres₂
+  obtain ⟨Bg, _, hBg⟩ := metricSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  let n : Real := Module.finrank Real E
+  let KQ : Real :=
+    16 * (4 * n ^ 14 * (2 + 2 * n ^ 6 * BP) * (BR1 + BR2) +
+      2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) * BR2 ^ 2)
+  let KD : Real := 32 * n ^ 6 * (n ^ 4 * BR1 + BRic21)
+  let KR0 : Real :=
+    200 * n ^ 12 * B5 + 8 * n ^ 10 * Λ ^ 2 * B6 + 16 * KQ + 2 * KD
+  let BSpeed : Real :=
+    8 * n ^ 6 * B6g2 + 512 * n ^ 14 * BR2g2 ^ 2 +
+      72 * n ^ 6 * (BRic2g2 * BR2g2)
+  let KG : Real := 8 * n ^ 10 * BP + 2 * Ce ^ 6 * n ^ 6 * BSpeed
+  let KL : Real := n ^ 12 * BP2
+  let KT : Real := 4 * n ^ 17 * BP1 * Bg
+  let C_rem : Real := 8 * KR0 + 8 * KG + 4 * KL + 2 * KT
+  refine ⟨C_rem, fun t ht x => ?_⟩
+  have hIcc : t ∈ Icc a c := Ioo_subset_Icc_self ht
+  let d : Real := forwardUniqueDensity (I := I) g₁ g₂ t x
+  let P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4 :=
+    fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t
+  let R0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+    lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
+      (rmDotRem (I := I) (g₁ t) (g₂ t) (fuTf (I := I) g₂ t)
+        (fuRm04 (I := I) g₁) (fuRm04 (I := I) g₂)
+        (fuBRm (I := I) g₁) (fuBRm (I := I) g₂)
+        (fuRicUp (I := I) g₁) (fuRicUp (I := I) g₂)
+        (fun m z => coordBasisAt (I := I) z m) t x)
+  let V₂ :
+      TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
+        TangentSpace I x :=
+    uhlRm2Vec (I := I) g₂ (coordBasisAt (I := I))
+      (fuRm04 (I := I) g₂) (fuLapRm (I := I) g₂) (fuBRm (I := I) g₂)
+      (fuRicUp (I := I) g₂) t x
+  let G : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+    gapDot (I := I) (g₁ t) (g₂ t) V₂
+  let L : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+    (reLower (I := I) (g₂ t) (g₁ t) (roughLap0SField (I := I) (g₁ t) P) -
+      roughLap0SField (I := I) (g₁ t) P) x
+  let K : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3 :=
+    lapDiffFlux (I := I) (g₁ t) (g₂ t) (metricTensorField (I := I) (g₂ t))
+  let T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+    metricTraceFirstTwoField (I := I) (M := M) (s := 4) (g₁ t)
+      (reLowerPair (I := I) (g₁ t) (metricNabla0S (I := I) (g₁ t) P) K) x
+  have hR0 : normSq0S (I := I) (g₁ t) x 4 R0 ≤ KR0 * d := by
+    have hn : 0 ≤ n := by
+      dsimp only [n]
+      positivity
+    have hd : 0 ≤ d := by
+      simpa only [d] using density_nonneg (I := I) g₁ g₂ t x
+    have hmetric :
+        metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using metricDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hconn :
+        connDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using connDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hrm :
+        rmDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using rmDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hTf1 :
+        normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₁ t x) ≤ BR1 := by
+      simpa only [fuTf_apply, metricRm04At] using hBR1 t hIcc x
+    have hTf2 :
+        normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) ≤ BR2 := by
+      simpa only [fuTf_apply, metricRm04At] using hBR2 t hIcc x
+    have hown0 := ownRmDiffSq_le (I := I) (g₁ t) (g₂ t) x (hBP t hIcc x)
+    have hown :
+        normSq0S (I := I) (g₁ t) x 4
+            (fuTf (I := I) g₁ t x - fuTf (I := I) g₂ t x) ≤
+          (2 + 2 * n ^ 6 * BP) * d := by
+      calc
+        normSq0S (I := I) (g₁ t) x 4
+            (fuTf (I := I) g₁ t x - fuTf (I := I) g₂ t x) ≤
+            2 * rmDiffSq (I := I) (g₁ t) (g₂ t) x +
+              2 * n ^ 6 * BP * metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
+          simpa only [fuTf_apply, metricRm04At, n] using hown0
+        _ ≤ 2 * d + 2 * n ^ 6 * BP * d := by
+          exact add_le_add
+            (mul_le_mul_of_nonneg_left hrm (by norm_num))
+            (mul_le_mul_of_nonneg_left hmetric
+              (mul_nonneg (mul_nonneg (by norm_num) (pow_nonneg hn 6)) hBP0))
+        _ = (2 + 2 * n ^ 6 * BP) * d := by ring
+    have hsum :
+        normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₁ t x) +
+            normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) ≤
+          BR1 + BR2 :=
+      add_le_add hTf1 hTf2
+    have hTf20 :
+        0 ≤ normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 4 _
+    have hTf10 :
+        0 ≤ normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₁ t x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 4 _
+    have hTf2sq :
+        normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 ≤ BR2 ^ 2 := by
+      nlinarith
+    have hQ0 := bCombDiffSq_le (I := I) (g₁ t) (g₂ t)
+      (fuTf (I := I) g₁ t) (fuTf (I := I) g₂ t) x hΛ0
+      (hΛ t hIcc x) (hBH t hIcc x)
+    have hQ :
+        normSq0S (I := I) (g₁ t) x 4
+            (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
+              (fun i j k l =>
+                (fuBRm (I := I) g₁ t x i j k l - fuBRm (I := I) g₂ t x i j k l) -
+                    (fuBRm (I := I) g₁ t x i j l k -
+                      fuBRm (I := I) g₂ t x i j l k) +
+                  (fuBRm (I := I) g₁ t x i k j l -
+                    fuBRm (I := I) g₂ t x i k j l) -
+                    (fuBRm (I := I) g₁ t x i l j k -
+                      fuBRm (I := I) g₂ t x i l j k))) ≤
+          KQ * d := by
+      rw [fuB_diff_low (I := I) g₁ g₂ t x]
+      let ND := normSq0S (I := I) (g₁ t) x 4
+        (fuTf (I := I) g₁ t x - fuTf (I := I) g₂ t x)
+      let N1 := normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₁ t x)
+      let N2 := normSq0S (I := I) (g₁ t) x 4 (fuTf (I := I) g₂ t x)
+      let HM := metricDiffSq (I := I) (g₁ t) (g₂ t) x
+      have hQ0' :
+          normSq0S (I := I) (g₁ t) x 4
+              (bComb (I := I) (g₁ t) (fuTf (I := I) g₁ t) x -
+                bComb (I := I) (g₂ t) (fuTf (I := I) g₂ t) x) ≤
+            16 * (4 * n ^ 14 * ND * (N1 + N2) +
+              2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
+                HM * N2 ^ 2) := by
+        simpa only [ND, N1, N2, HM, n] using hQ0
+      have hND : ND ≤ (2 + 2 * n ^ 6 * BP) * d := by
+        simpa only [ND] using hown
+      have hNsum : N1 + N2 ≤ BR1 + BR2 := by
+        simpa only [N1, N2] using hsum
+      have hNsum0 : 0 ≤ N1 + N2 := by
+        simpa only [N1, N2] using add_nonneg hTf10 hTf20
+      have hCD0 : 0 ≤ (2 + 2 * n ^ 6 * BP) * d := by
+        exact mul_nonneg (by positivity) hd
+      have hprod1 :
+          ND * (N1 + N2) ≤ ((2 + 2 * n ^ 6 * BP) * d) * (BR1 + BR2) :=
+        mul_le_mul hND hNsum hNsum0 hCD0
+      have hterm1 :
+          4 * n ^ 14 * ND * (N1 + N2) ≤
+            4 * n ^ 14 * ((2 + 2 * n ^ 6 * BP) * d) * (BR1 + BR2) := by
+        simpa only [mul_assoc] using
+          mul_le_mul_of_nonneg_left hprod1 (mul_nonneg (by norm_num) (pow_nonneg hn 14))
+      have hN2sq : N2 ^ 2 ≤ BR2 ^ 2 := by
+        simpa only [N2] using hTf2sq
+      have hHM : HM ≤ d := by
+        simpa only [HM] using hmetric
+      have hprod2 : HM * N2 ^ 2 ≤ d * BR2 ^ 2 :=
+        mul_le_mul hHM hN2sq (sq_nonneg _) hd
+      have hcoef2 :
+          0 ≤ 2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) := by
+        positivity
+      have hterm2 :
+          2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) * HM * N2 ^ 2 ≤
+            2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) * d *
+              BR2 ^ 2 := by
+        simpa only [mul_assoc] using mul_le_mul_of_nonneg_left hprod2 hcoef2
+      refine hQ0'.trans ?_
+      dsimp only [KQ]
+      calc
+        _ ≤ 16 * (4 * n ^ 14 * ((2 + 2 * n ^ 6 * BP) * d) * (BR1 + BR2) +
+            2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
+              d * BR2 ^ 2) := by
+          exact mul_le_mul_of_nonneg_left (add_le_add hterm1 hterm2) (by norm_num)
+        _ = (16 * (4 * n ^ 14 * (2 + 2 * n ^ 6 * BP) * (BR1 + BR2) +
+              2 * (6 * n ^ 18 * Λ ^ 2 + 4 * n ^ 22 * Λ ^ 4 * BH) *
+                BR2 ^ 2)) * d := by ring
+    have hD0 := ricciDriftSq_le (I := I) (g₁ t) (g₂ t) x
+    have hRicDiff := ricciSlabLe (I := I) g₁ g₂ t x
+    have hRicDiffUpper0 : 0 ≤ n ^ 4 * d :=
+      mul_nonneg (pow_nonneg hn 4) hd
+    have hRic2zero :
+        0 ≤ normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₂ t) x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 2 _
+    have hrm0 : 0 ≤ rmDiffSq (I := I) (g₁ t) (g₂ t) x := by
+      rw [rmDiffSq_def]
+      exact normSq0S_nonneg (I := I) (g₁ t) x 4 _
+    have hDprod1 :
+        normSq0S (I := I) (g₁ t) x 2
+              (metricRicciAt (I := I) (g₁ t) x -
+                metricRicciAt (I := I) (g₂ t) x) *
+            normSq0S (I := I) (g₁ t) x 4 (metricRm04At (I := I) (g₁ t) x) ≤
+          (n ^ 4 * d) * BR1 := by
+      have hRm1 :
+          normSq0S (I := I) (g₁ t) x 4 (metricRm04At (I := I) (g₁ t) x) ≤
+            BR1 := by
+        simpa only [fuTf_apply] using hTf1
+      exact mul_le_mul hRicDiff hRm1
+        (normSq0S_nonneg (I := I) (g₁ t) x 4 _) hRicDiffUpper0
+    have hDprod2 :
+        normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₂ t) x) *
+            rmDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+          BRic21 * d :=
+      mul_le_mul (hBRic21 t hIcc x) hrm hrm0 hBRic210
+    have hD :
+        normSq0S (I := I) (g₁ t) x 4
+            (lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
+              (fun i j k l =>
+                riemann04RicciDriftInFrame (fuRicUp (I := I) g₁)
+                    (fuRm04 (I := I) g₁) t x i j k l -
+                  riemann04RicciDriftInFrame (fuRicUp (I := I) g₂)
+                    (fuRm04 (I := I) g₂) t x i j k l)) ≤
+          KD * d := by
+      rw [fuDrift_diff_low (I := I) g₁ g₂ t x]
+      refine hD0.trans ?_
+      dsimp only [KD]
+      calc
+        _ ≤ 32 * n ^ 6 *
+            ((n ^ 4 * d) * BR1 + BRic21 * d) := by
+          exact mul_le_mul_of_nonneg_left (add_le_add hDprod1 hDprod2)
+            (mul_nonneg (by norm_num) (pow_nonneg hn 6))
+        _ = (32 * n ^ 6 * (n ^ 4 * BR1 + BRic21)) * d := by ring
+    have hR0raw := rmDotRemSq_le (I := I) (g₁ t) (g₂ t)
+      (fuTf (I := I) g₂ t) (coordBasisAt (I := I))
+      (fuRm04 (I := I) g₁) (fuRm04 (I := I) g₂)
+      (fuBRm (I := I) g₁) (fuBRm (I := I) g₂)
+      (fuRicUp (I := I) g₁) (fuRicUp (I := I) g₂) t x
+      hΛ0 (hΛ t hIcc x) (hB5 t hIcc x) (hB6 t hIcc x) hQ hD
+    dsimp only [R0]
+    refine hR0raw.trans ?_
+    have hspace1 :
+        50 * n ^ 12 * connDiffSq (I := I) (g₁ t) (g₂ t) x * B5 ≤
+          50 * n ^ 12 * d * B5 := by
+      have h := mul_le_mul_of_nonneg_right hconn hB50
+      simpa only [mul_assoc] using
+        mul_le_mul_of_nonneg_left h (mul_nonneg (by norm_num) (pow_nonneg hn 12))
+    have hspace2 :
+        2 * n ^ 10 * Λ ^ 2 * metricDiffSq (I := I) (g₁ t) (g₂ t) x * B6 ≤
+          2 * n ^ 10 * Λ ^ 2 * d * B6 := by
+      have h := mul_le_mul_of_nonneg_right hmetric hB60
+      simpa only [mul_assoc] using
+        mul_le_mul_of_nonneg_left h
+          (mul_nonneg (mul_nonneg (by norm_num) (pow_nonneg hn 10)) (sq_nonneg Λ))
+    have hspace :
+        4 * (50 * n ^ 12 * connDiffSq (I := I) (g₁ t) (g₂ t) x * B5 +
+            2 * n ^ 10 * Λ ^ 2 * metricDiffSq (I := I) (g₁ t) (g₂ t) x * B6) ≤
+          4 * (50 * n ^ 12 * d * B5 + 2 * n ^ 10 * Λ ^ 2 * d * B6) :=
+      mul_le_mul_of_nonneg_left (add_le_add hspace1 hspace2) (by norm_num)
+    dsimp only [KR0]
+    calc
+      _ ≤ 4 * (50 * n ^ 12 * d * B5 + 2 * n ^ 10 * Λ ^ 2 * d * B6) +
+          16 * (KQ * d) + 2 * (KD * d) := by
+        exact add_le_add (add_le_add hspace (le_refl _)) (le_refl _)
+      _ = (200 * n ^ 12 * B5 + 8 * n ^ 10 * Λ ^ 2 * B6 +
+          16 * KQ + 2 * KD) * d := by ring
+  have hG : normSq0S (I := I) (g₁ t) x 4 G ≤ KG * d := by
+    have hn : 0 ≤ n := by
+      dsimp only [n]
+      positivity
+    have hd : 0 ≤ d := by
+      simpa only [d] using density_nonneg (I := I) g₁ g₂ t x
+    have hmetric :
+        metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using metricDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hmetric0 : 0 ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
+      rw [metricDiffSq_def]
+      exact normSq0S_nonneg (I := I) (g₁ t) x 2 _
+    let Rg : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+      lowerTri (I := I)
+        (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x)
+        (riemannOp (metricCov (I := I) (g₂ t)) x)
+    let Hg : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
+      lowerTri (I := I) (metricDiffAt (I := I) (g₁ t) (g₂ t) x) V₂
+    have hGsplit : G = (2 : Real) • Rg - Hg := rfl
+    have hRg0 := lowerTriSq_le (I := I) (g₁ t)
+      (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x)
+      (riemannOp (metricCov (I := I) (g₂ t)) x)
+    rw [lowerRm_cross (I := I) (g₁ t) (g₂ t) x] at hRg0
+    have hRicDiff := ricciSlabLe (I := I) g₁ g₂ t x
+    have hCross0 :
+        0 ≤ normSq0S (I := I) (g₁ t) x 4
+          (CovariantDerivative.riemannCurvature04At (I := I) (g₁ t)
+            (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 4 _
+    have hRicUpper0 : 0 ≤ n ^ 4 * d := mul_nonneg (pow_nonneg hn 4) hd
+    have hprodR :
+        normSq0S (I := I) (g₁ t) x 2
+              (metricRicciAt (I := I) (g₁ t) x -
+                metricRicciAt (I := I) (g₂ t) x) *
+            normSq0S (I := I) (g₁ t) x 4
+              (CovariantDerivative.riemannCurvature04At (I := I) (g₁ t)
+                (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) x) ≤
+          (n ^ 4 * d) * BP :=
+      mul_le_mul hRicDiff (hBP t hIcc x) hCross0 hRicUpper0
+    have hRg :
+        normSq0S (I := I) (g₁ t) x 4 Rg ≤ n ^ 10 * BP * d := by
+      refine hRg0.trans ?_
+      calc
+        _ ≤ n ^ 6 * ((n ^ 4 * d) * BP) :=
+          mul_le_mul_of_nonneg_left hprodR (pow_nonneg hn 6)
+        _ = n ^ 10 * BP * d := by ring
+    have h2Rg_eq :
+        normSq0S (I := I) (g₁ t) x 4 ((2 : Real) • Rg) =
+          4 * normSq0S (I := I) (g₁ t) x 4 Rg := by
+      calc
+        normSq0S (I := I) (g₁ t) x 4 ((2 : Real) • Rg) =
+            (2 : Real) ^ 2 * normSq0S (I := I) (g₁ t) x 4 Rg :=
+          Tensor0SBundle.normSq0S_smul (I := I) (g₁ t) (2 : Real) Rg
+        _ = 4 * normSq0S (I := I) (g₁ t) x 4 Rg := by norm_num
+    have h2Rg :
+        normSq0S (I := I) (g₁ t) x 4 ((2 : Real) • Rg) ≤
+          4 * (n ^ 10 * BP * d) := by
+      rw [h2Rg_eq]
+      exact mul_le_mul_of_nonneg_left hRg (by norm_num)
+    have hNabla2 :
+        normSq0S (I := I) (g₂ t) x 6
+            (metricNabla0S (I := I) (g₂ t)
+              (metricNabla0S (I := I) (g₂ t) (fuTf (I := I) g₂ t)) x) ≤
+          B6g2 := by
+      simpa only [fuTf, metricRm04] using hB6g2 t hIcc x
+    have hRm2 :
+        normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) ≤ BR2g2 := by
+      simpa only [fuTf_apply, metricRm04At] using hBR2g2 t hIcc x
+    have hRm20 :
+        0 ≤ normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) :=
+      normSq0S_nonneg (I := I) (g₂ t) x 4 _
+    have hRm2sq :
+        normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 ≤
+          BR2g2 ^ 2 := by
+      nlinarith
+    have hRicRm :
+        normSq0S (I := I) (g₂ t) x 2 (metricRicciAt (I := I) (g₂ t) x) *
+            normSq0S (I := I) (g₂ t) x 4 (metricRm04At (I := I) (g₂ t) x) ≤
+          BRic2g2 * BR2g2 := by
+      have hRm2' :
+          normSq0S (I := I) (g₂ t) x 4 (metricRm04At (I := I) (g₂ t) x) ≤
+            BR2g2 := by
+        simpa only [fuTf_apply] using hRm2
+      exact mul_le_mul (hBRic2g2 t hIcc x) hRm2'
+        (normSq0S_nonneg (I := I) (g₂ t) x 4 _) hBRic2g20
+    have hSpeed0 := uhlSpeedSq_le (I := I) (g₂ t) (fuTf (I := I) g₂ t) x
+    have hSpeed :
+        normSq0S (I := I) (g₂ t) x 4
+            (uhlSpeed04 (I := I) (g₂ t) (fuTf (I := I) g₂ t) x) ≤
+          BSpeed := by
+      have hS1 :
+          8 * n ^ 6 *
+              normSq0S (I := I) (g₂ t) x 6
+                (metricNabla0S (I := I) (g₂ t)
+                  (metricNabla0S (I := I) (g₂ t) (fuTf (I := I) g₂ t)) x) ≤
+            8 * n ^ 6 * B6g2 :=
+        mul_le_mul_of_nonneg_left hNabla2
+          (mul_nonneg (by norm_num) (pow_nonneg hn 6))
+      have hS2 :
+          512 * n ^ 14 *
+              normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 ≤
+            512 * n ^ 14 * BR2g2 ^ 2 :=
+        mul_le_mul_of_nonneg_left hRm2sq
+          (mul_nonneg (by norm_num) (pow_nonneg hn 14))
+      have hS3 :
+          72 * n ^ 6 *
+              (normSq0S (I := I) (g₂ t) x 2 (metricRicciAt (I := I) (g₂ t) x) *
+                normSq0S (I := I) (g₂ t) x 4 (metricRm04At (I := I) (g₂ t) x)) ≤
+            72 * n ^ 6 * (BRic2g2 * BR2g2) :=
+        mul_le_mul_of_nonneg_left hRicRm
+          (mul_nonneg (by norm_num) (pow_nonneg hn 6))
+      have hSpeed0' :
+          normSq0S (I := I) (g₂ t) x 4
+              (uhlSpeed04 (I := I) (g₂ t) (fuTf (I := I) g₂ t) x) ≤
+            8 * n ^ 6 *
+                normSq0S (I := I) (g₂ t) x 6
+                  (metricNabla0S (I := I) (g₂ t)
+                    (metricNabla0S (I := I) (g₂ t) (fuTf (I := I) g₂ t)) x) +
+              512 * n ^ 14 *
+                  normSq0S (I := I) (g₂ t) x 4 (fuTf (I := I) g₂ t x) ^ 2 +
+                72 * n ^ 6 *
+                  (normSq0S (I := I) (g₂ t) x 2
+                      (metricRicciAt (I := I) (g₂ t) x) *
+                    normSq0S (I := I) (g₂ t) x 4
+                      (metricRm04At (I := I) (g₂ t) x)) := by
+        simpa only [n] using hSpeed0
+      refine hSpeed0'.trans ?_
+      dsimp only [BSpeed]
+      exact add_le_add (add_le_add hS1 hS2) hS3
+    have hBSpeed0 : 0 ≤ BSpeed := by
+      dsimp only [BSpeed]
+      positivity
+    have hVlow :
+        lowerTri (I := I) (metricTensorField (I := I) (g₂ t) x) V₂ =
+          uhlSpeed04 (I := I) (g₂ t) (fuTf (I := I) g₂ t) x := by
+      simpa only [V₂] using fuSpeed_low (I := I) g₂ t x
+    have hswap := lowerTriSwapSq_le (I := I) (g₁ t) (g₂ t) V₂ hCe
+      (hEquiv t hIcc x)
+    rw [hVlow] at hswap
+    have hSpeedMetric :
+        normSq0S (I := I) (g₂ t) x 4
+              (uhlSpeed04 (I := I) (g₂ t) (fuTf (I := I) g₂ t) x) *
+            metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+          BSpeed * d :=
+      mul_le_mul hSpeed hmetric hmetric0 hBSpeed0
+    have hHg : normSq0S (I := I) (g₁ t) x 4 Hg ≤
+        Ce ^ 6 * n ^ 6 * BSpeed * d := by
+      refine hswap.trans ?_
+      calc
+        _ ≤ Ce ^ 6 * n ^ 6 * (BSpeed * d) :=
+          mul_le_mul_of_nonneg_left hSpeedMetric
+            (mul_nonneg (pow_nonneg (le_trans (by norm_num) hCe) 6) (pow_nonneg hn 6))
+        _ = Ce ^ 6 * n ^ 6 * BSpeed * d := by ring
+    rw [hGsplit]
+    refine (normSq0S_sub_le (I := I) (g₁ t) x 4 ((2 : Real) • Rg) Hg).trans ?_
+    dsimp only [KG]
+    calc
+      _ ≤ 2 * (4 * (n ^ 10 * BP * d)) +
+          2 * (Ce ^ 6 * n ^ 6 * BSpeed * d) :=
+        add_le_add
+          (mul_le_mul_of_nonneg_left h2Rg (by norm_num))
+          (mul_le_mul_of_nonneg_left hHg (by norm_num))
+      _ = (8 * n ^ 10 * BP + 2 * Ce ^ 6 * n ^ 6 * BSpeed) * d := by ring
+  have hPfield :
+      P = CovariantDerivative.rm04Section (I := I) (g₁ t)
+        (metricCov (I := I) (g₂ t)) (metricCov_smooth (I := I) (g₂ t)) := by
+    refine DFunLike.ext _ _ fun y => ?_
+    simpa only [P, CovariantDerivative.rm04Section_apply] using
+      fuP_eq (I := I) g₁ g₂ t y
+  have hL : normSq0S (I := I) (g₁ t) x 4 L ≤ KL * d := by
+    have hn : 0 ≤ n := by
+      dsimp only [n]
+      positivity
+    have hd : 0 ≤ d := by
+      simpa only [d] using density_nonneg (I := I) g₁ g₂ t x
+    have hmetric :
+        metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using metricDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hmetric0 : 0 ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
+      rw [metricDiffSq_def]
+      exact normSq0S_nonneg (I := I) (g₁ t) x 2 _
+    have hDeriv :
+        normSq0S (I := I) (g₁ t) x 6
+            (metricNabla0S (I := I) (g₁ t)
+              (metricNabla0S (I := I) (g₁ t) P) x) ≤
+          BP2 := by
+      rw [hPfield]
+      exact hBP2 t hIcc x
+    have hLap0 := roughLapSq_le (I := I) (s := 4) (g₁ t) P x
+    have hLap :
+        normSq0S (I := I) (g₁ t) x 4
+            (roughLap0SField (I := I) (g₁ t) P x) ≤
+          n ^ 6 * BP2 := by
+      refine hLap0.trans ?_
+      simpa only [n] using
+        mul_le_mul_of_nonneg_left hDeriv (pow_nonneg hn 6)
+    have hLapUpper0 : 0 ≤ n ^ 6 * BP2 :=
+      mul_nonneg (pow_nonneg hn 6) hBP20
+    have hprod :
+        normSq0S (I := I) (g₁ t) x 4
+              (roughLap0SField (I := I) (g₁ t) P x) *
+            metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+          (n ^ 6 * BP2) * d :=
+      mul_le_mul hLap hmetric hmetric0 hLapUpper0
+    have hDef0 := reLowerDefSq_le (I := I) (s := 3) (g₁ t) (g₂ t)
+      (roughLap0SField (I := I) (g₁ t) P) x
+    have hDef :
+        normSq0S (I := I) (g₁ t) x 4 L ≤
+          n ^ 6 *
+            (normSq0S (I := I) (g₁ t) x 4
+                (roughLap0SField (I := I) (g₁ t) P x) *
+              metricDiffSq (I := I) (g₁ t) (g₂ t) x) := by
+      simpa only [L, ContMDiffSection.coe_sub, Pi.sub_apply, n] using hDef0
+    refine hDef.trans ?_
+    dsimp only [KL]
+    calc
+      _ ≤ n ^ 6 * ((n ^ 6 * BP2) * d) :=
+        mul_le_mul_of_nonneg_left hprod (pow_nonneg hn 6)
+      _ = n ^ 12 * BP2 * d := by ring
+  have hT : normSq0S (I := I) (g₁ t) x 4 T ≤ KT * d := by
+    have hn : 0 ≤ n := by
+      dsimp only [n]
+      positivity
+    have hd : 0 ≤ d := by
+      simpa only [d] using density_nonneg (I := I) g₁ g₂ t x
+    have hconn :
+        connDiffSq (I := I) (g₁ t) (g₂ t) x ≤ d := by
+      simpa only [d] using connDiffSq_le_dens (I := I) g₁ g₂ t x
+    have hMetricField0 :
+        0 ≤ normSq0S (I := I) (g₁ t) x 2
+          (metricTensorField (I := I) (g₂ t) x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 2 _
+    have hGradP :
+        normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) P x) ≤ BP1 := by
+      rw [hPfield]
+      exact hBP1 t hIcc x
+    have hFluxProd :
+        connDiffSq (I := I) (g₁ t) (g₂ t) x *
+            normSq0S (I := I) (g₁ t) x 2
+              (metricTensorField (I := I) (g₂ t) x) ≤
+          d * Bg :=
+      mul_le_mul hconn (hBg t hIcc x) hMetricField0 hd
+    have hFlux0 := fluxNormSq_le (I := I) (s := 2) (g₁ t) (g₂ t)
+      (metricTensorField (I := I) (g₂ t)) x
+    have hFlux : normSq0S (I := I) (g₁ t) x 3 (K x) ≤
+        4 * n ^ 3 * Bg * d := by
+      dsimp only [K]
+      refine hFlux0.trans ?_
+      calc
+        _ = (2 : Real) ^ 2 * n ^ 3 *
+            (connDiffSq (I := I) (g₁ t) (g₂ t) x *
+              normSq0S (I := I) (g₁ t) x 2
+                (metricTensorField (I := I) (g₂ t) x)) := by ring
+        _ ≤ (2 : Real) ^ 2 * n ^ 3 * (d * Bg) :=
+          mul_le_mul_of_nonneg_left hFluxProd
+            (mul_nonneg (sq_nonneg (2 : Real)) (pow_nonneg hn 3))
+        _ = 4 * n ^ 3 * Bg * d := by ring
+    have hFluxNorm0 : 0 ≤ normSq0S (I := I) (g₁ t) x 3 (K x) :=
+      normSq0S_nonneg (I := I) (g₁ t) x 3 _
+    have hPairProd :
+        normSq0S (I := I) (g₁ t) x 5
+              (metricNabla0S (I := I) (g₁ t) P x) *
+            normSq0S (I := I) (g₁ t) x 3 (K x) ≤
+          BP1 * (4 * n ^ 3 * Bg * d) :=
+      mul_le_mul hGradP hFlux hFluxNorm0 hBP10
+    have hPair0 := reLowerPairSq_le (I := I) (s := 4) (g₁ t)
+      (metricNabla0S (I := I) (g₁ t) P) K x
+    have hPair :
+        normSq0S (I := I) (g₁ t) x 6
+            (reLowerPair (I := I) (g₁ t)
+              (metricNabla0S (I := I) (g₁ t) P) K x) ≤
+          4 * n ^ 11 * BP1 * Bg * d := by
+      refine hPair0.trans ?_
+      calc
+        _ ≤ n ^ 8 * (BP1 * (4 * n ^ 3 * Bg * d)) :=
+          mul_le_mul_of_nonneg_left hPairProd (pow_nonneg hn 8)
+        _ = 4 * n ^ 11 * BP1 * Bg * d := by ring
+    have hTrace0 := traceNormSq_le (I := I) (s := 4) (g₁ t) x
+      (reLowerPair (I := I) (g₁ t) (metricNabla0S (I := I) (g₁ t) P) K x)
+    have hTrace :
+        normSq0S (I := I) (g₁ t) x 4 T ≤
+          n ^ 6 *
+            normSq0S (I := I) (g₁ t) x 6
+              (reLowerPair (I := I) (g₁ t)
+                (metricNabla0S (I := I) (g₁ t) P) K x) := by
+      simpa only [T, metricTraceFirstTwoField_apply, n] using hTrace0
+    refine hTrace.trans ?_
+    dsimp only [KT]
+    calc
+      _ ≤ n ^ 6 * (4 * n ^ 11 * BP1 * Bg * d) :=
+        mul_le_mul_of_nonneg_left hPair (pow_nonneg hn 6)
+      _ = 4 * n ^ 17 * BP1 * Bg * d := by ring
+  have hAB := normSq0S_add_le (I := I) (g₁ t) x 4 R0 G
+  have hABC := normSq0S_sub_le (I := I) (g₁ t) x 4 (R0 + G) L
+  have hABCD := normSq0S_sub_le (I := I) (g₁ t) x 4 ((R0 + G) - L) T
+  change normSq0S (I := I) (g₁ t) x 4 (((R0 + G) - L) - T) ≤ C_rem * d
+  calc
+    normSq0S (I := I) (g₁ t) x 4 (((R0 + G) - L) - T) ≤
+        2 * normSq0S (I := I) (g₁ t) x 4 ((R0 + G) - L) +
+          2 * normSq0S (I := I) (g₁ t) x 4 T := hABCD
+    _ ≤ 8 * normSq0S (I := I) (g₁ t) x 4 R0 +
+          8 * normSq0S (I := I) (g₁ t) x 4 G +
+          4 * normSq0S (I := I) (g₁ t) x 4 L +
+          2 * normSq0S (I := I) (g₁ t) x 4 T := by
+      nlinarith [hAB, hABC]
+    _ ≤ 8 * (KR0 * d) + 8 * (KG * d) + 4 * (KL * d) + 2 * (KT * d) := by
+      nlinarith [hR0, hG, hL, hT]
+    _ = C_rem * d := by
+      dsimp only [C_rem]
+      ring
+
 /-- **The `adotLe` field of `ForwardUniqueSlab` at the constructed carrier.**
 
 The four background constants of `connDiffDot_normSq_le` are supplied on the closed subslab
@@ -1474,26 +2298,11 @@ theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **`hbounds` at the constructed carriers, modulo the two residual fields.**
+/-- **`hbounds` at the constructed carriers, with all six estimates produced internally.**
 
-Four of the six `ForwardUniqueSlab` fields are supplied here from black box (B)'s own data:
-`ricciLe` (`ricciSlabLe`, `C_Ric = n⁴`, hypothesis-free), `fluxLe` (`fuFluxSlab`), `volLe`
-(`fuVolSlab`) and `reactLe` (`fuReactSlab`).  The remaining two are taken as named arguments
-because their producers are still missing:
-
-* `hrem` — the `remLe` field at `fuRem = sdecRemFam`.  Two of the four `sdecRem` summands
-  (`lowOfComp g₁ b (rmDotRem …)`, `gapDot g₁ g₂ (uhlRm2Vec …)`) still have to be identified
-  with tensorial combinations of the background curvature before any norm bound applies, and
-  the identification consumes a `roughLap(Rm₂)` slab sup that no derivative layer produces yet.
-* `hadot` — the `adotLe` field at `connSpeed g₁ g₂ (fuAvec g₁ g₂)`.  `connDiffDot_normSq_le`
-  (`Evolution/ForwardUniqueConnBound.lean`) is the producer and its `hΓ`/`hA` inputs are
-  available from `fuGamma`, but two of its four background constants are not: `B₁ ≥ |∇²Ric₂|²`
-  needs a `∂(chart Riemann)` layer in
-  `Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`, and `Λ` is a
-  pointwise metric comparison `g₁ ≤ Λ·g₂`, not a fibre-norm sup.
-
-Substituting a producer for either argument turns this into that much of an unconditional
-`hbounds`; substituting both discharges `forward_unique_of_gram`'s last hypothesis outright. -/
+The chart-Gram regularity and Ricci-flow equations supply the closed-subslab background
+bounds used by `fuFluxSlab`, `fuVolSlab`, `fuReactSlab`, `fuRemSlab`, and `fuAdotSlab`;
+`ricciSlabLe` supplies the remaining universal curvature coefficient. -/
 theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1506,14 +2315,9 @@ theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : 
     (h1pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
         ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
-    (hrem : ∀ c ∈ Ioo a b, ∃ C_rem : Real, ∀ t ∈ Ioo a c, ∀ x : M,
-      normSq0S (I := I) (g₁ t) x 4 (fuRem (I := I) g₁ g₂ t x) ≤
-        C_rem * forwardUniqueDensity (I := I) g₁ g₂ t x)
-    (hadot : ∀ c ∈ Ioo a b, ∃ C_A : Real, ∀ t ∈ Ioo a c, ∀ x : M,
-      normSq0S (I := I) (g₁ t) x 3 (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x) ≤
-        C_A * (forwardUniqueDensity (I := I) g₁ g₂ t x +
-          normSq0S (I := I) (g₁ t) x 5
-            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x))) :
+    (h2pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t) :
     ∀ c ∈ Ioo a b, ∃ C_A C_R C_Ric C_V C_U C_rem : Real,
       ForwardUniqueSlab (I := I) g₁ g₂ (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂))
         (fuSfield (I := I) g₁ g₂) (fuUflux (I := I) g₁ g₂) (fuRem (I := I) g₁ g₂)
@@ -1522,8 +2326,10 @@ theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : 
   obtain ⟨C_U, hU⟩ := fuFluxSlab (I := I) g₁ g₂ h1smooth h2smooth hc
   obtain ⟨C_V, _, hV⟩ := fuVolSlab (I := I) g₁ h1smooth h1pde hc
   obtain ⟨C_R, _, hR⟩ := fuReactSlab (I := I) g₁ g₂ h1smooth h1pde hc
-  obtain ⟨C_rem, hrem'⟩ := hrem c hc
-  obtain ⟨C_A, hadot'⟩ := hadot c hc
+  obtain ⟨C_rem, hrem'⟩ := fuRemSlab (I := I) g₁ g₂ h1smooth h2smooth hc
+  obtain ⟨C_A, hadot'⟩ :=
+    fuAdotSlab (I := I) g₁ g₂ (lt_trans hc.1 hc.2)
+      h1smooth h2smooth h1pde h2pde hc
   exact ⟨C_A, C_R, (Module.finrank Real E : Real) ^ 4, C_V, C_U, C_rem,
     { fluxLe := hU
       remLe := hrem'

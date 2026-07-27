@@ -292,6 +292,19 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №60 (2026-07-27, CODEX ARGUMENT-FREE SLAB — **LAST MACHINERY BRICK
+  CLOSED**): `fuB_low`, `fuDrift_low`, and `fuSpeed_low` identify the
+  solution component families with the invariant quadratic, Ricci-drift, and
+  Uhlenbeck-speed tensors.  `fuRemSlab` combines the four `sdecRem` summands
+  with the already verified generic estimates and all closed-subslab
+  background suprema.  `fuSlab_of_gram` now produces both `remLe` and `adotLe`
+  internally and no longer accepts `hrem`/`hadot`.  The source is sorry-free,
+  focused- and targeted-green without local warnings; both endpoints depend
+  on exactly `[propext, Classical.choice, Quot.sound]`.  Dedicated
+  forward-uniqueness machinery is 100%; NEXT: replace the unchanged-statement
+  `ricci_flow_forward_unique` sorry with the direct
+  `forward_unique_of_gram` application, then audit axioms and run the full
+  locked build.
 - №59 (2026-07-27, CODEX CONNECTION-SPEED SLAB BOUND — **`adotLe`
   COMPLETE**): `Evolution/ForwardUniqueWiring.lean` now proves `fuAdotSlab`
   directly from the chart-Gram regularity and Ricci-flow PDE inputs.  It

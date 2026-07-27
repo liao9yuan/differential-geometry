@@ -6,6 +6,27 @@ provenance ledger), `ForwardUniqueLifts.md`, `ForwardUniqueSdec.md`, `ForwardUni
 
 ## Status
 
+### Sixth pass (2026-07-27, REMAINDER): argument-free `fuSlab_of_gram` CLOSED
+
+`fuRemSlab` now bounds the actual `sdecRemFam` carrier on every compact subslab
+using only the two chart-Gram regularity hypotheses.  The proof reconstructs the
+solution component families as the invariant quadratic-curvature, Ricci-drift,
+and own Uhlenbeck-speed tensors (`fuB_low`, `fuDrift_low`, `fuSpeed_low`), then
+combines the four `sdecRem` summands with coefficients `8, 8, 4, 2`.  All
+background factors come from the closed-slab supremum layer.
+
+`fuSlab_of_gram` now takes only `h1smooth`, `h2smooth`, `h1pde`, and `h2pde`;
+it produces `remLe` through `fuRemSlab` and `adotLe` through `fuAdotSlab`
+internally.  The source contains no `sorry`, passes both the focused check and
+targeted module build without local warnings, and both `fuRemSlab` and
+`fuSlab_of_gram` depend on exactly `[propext, Classical.choice, Quot.sound]`.
+
+The dedicated forward-uniqueness machinery is now **100%**.  The public
+`ricci_flow_forward_unique` theorem remains **0% proved** until its existing
+`sorry` is replaced in `ExtendViaUniqueness.lean`; that one-line endpoint wiring
+is the only remaining lane step.  The whole HCG compactness project remains
+about **10%**.
+
 ### Fifth pass (2026-07-27, ADOT): `fuAdotSlab` CLOSED
 
 `fuAdotSlab` now supplies the `ForwardUniqueSlab.adotLe` field at the real
@@ -146,7 +167,11 @@ and `densInt` (`dcont_idens`, unconditional), `lapInt`, `divInt`, `nabInt`, `dis
 Second pass: `pairInt` (`fuPairInt`), `restInt` (`fuRestInt`), `remInt` (`fuRemInt`), and
 `energyCont` at every *interior* time (`fuEnergyDeriv`, assembled by `fuEnergyCont`).
 
-### Residual (2 hypotheses)
+### Historical residual after the second pass (closed by later passes)
+
+The following was the exact residual at that earlier checkpoint.  It is retained
+as route history; the sixth pass above closes `hbounds`, while the third pass
+closed `hedge`.
 
 1. **`hbounds`** — `∀ c ∈ Ioo a b, ∃ C…, ForwardUniqueSlab … a c …`, i.e. K4's six
    slab-uniform pointwise estimates (`fluxLe`, `remLe`, `reactLe`, `ricciLe`, `adotLe`,
@@ -324,9 +349,8 @@ time, leaving only `t = a`.
 
 ## Next targets, in order of leverage
 
-1. `hbounds` — the slab-uniform background-norm layer (compactness of `Icc a c`, then the six
-   named producers).  Dominant; includes the deferred `movingReact_le` decision.  Lane file:
-   `Evolution/ForwardUniqueSup.lean`.
-2. `hedge` — continuity of the energy at `t = a`.  Requires the `ContDiffWithinAt`-on-`Ici a`
-   variant of `gen_joint_christoffel` / `gen_joint_riemann`, plus a decay estimate for
-   `E(t) → E(a) = 0`; i.e. it is really a sub-problem of (1).
+1. Replace the unchanged-statement `ricci_flow_forward_unique` `sorry` with the
+   checked `forward_unique_of_gram` application, supplying `fuSlab_of_gram` and
+   `energyEdgeCont`.
+2. Audit the public theorem directly for the exact three permitted axioms, then
+   run the full locked build.  Do not route the proof through black box (N).
