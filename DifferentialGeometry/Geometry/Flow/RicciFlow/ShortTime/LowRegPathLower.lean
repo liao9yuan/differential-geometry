@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCc
 
 
 
@@ -19,6 +20,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 
+section GeneralModel
+
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -26,13 +29,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
 theorem lower_coeff_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -88,5 +84,113 @@ theorem lower_coeff_h1
           (mul_le_mul_of_nonneg_left (by linarith) hC₁) hnorm
     _ = (C₀ + C₁) * (B₀ + B₀' + B₁) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by ring
+
+end GeneralModel
+
+section GeneralJetModel
+
+variable
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+      [T2Space M] [SigmaCompactSpace M]
+
+/-- In dimension three, integral `H1` control of the order-zero coefficient
+and integral `H2` control of the order-one coefficient are sufficient for the
+lower Ricci--DeTurck path arms to act from spectral `H2` to spectral `H1`.
+
+Unlike `lower_coeff_h1`, this statement has no pointwise hypothesis on the
+order-zero coefficient.  The pointwise bound needed by the order-one arm is a
+consequence of its mixed-tensor `H2` jet. -/
+theorem lower_jet_h1
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (Φ₀ : SmoothCcTensor g 2 2) (Φ₁ : SmoothCcTensor g 3 2)
+        (U : SmoothCcTensor g 0 2) (A₀ A₁ : ℝ),
+        0 ≤ A₀ → 0 ≤ A₁ →
+        (∑ j ∈ Finset.range 2,
+          ‖iteratedCovGrad (I := I) g 2 2 j Φ₀‖ ^ 2) ≤ A₀ ^ 2 →
+        (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 3 2 j Φ₁‖ ^ 2) ≤ A₁ ^ 2 →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U +
+              operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
+                (covGrad (I := I) (M := M) g 0 2 U))‖ ≤
+          C * (A₀ + A₁) *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by
+  obtain ⟨C₀, hC₀, hzero⟩ := appCc_h1_h2_h1
+    (I := I) (M := M) (hDim := hDim) (g := g) (r := 2) (c := 2)
+  obtain ⟨C₁, hC₁, hone⟩ := appCc_h2_cov_h1
+    (I := I) (M := M) (hDim := hDim) (g := g) (s := 1) (c := 2)
+  obtain ⟨Cp, hCp, hp⟩ :=
+    exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 3 2
+  let K : ℝ := 1 + Cp
+  refine ⟨C₀ + C₁ * K, add_nonneg hC₀ (mul_nonneg hC₁ (by dsimp [K]; linarith)), ?_⟩
+  intro Φ₀ Φ₁ U A₀ A₁ hA₀ hA₁ hΦ₀ hΦ₁
+  have hK : 0 ≤ K := by dsimp [K]; linarith
+  have hKone : 1 ≤ K := by dsimp [K]; linarith
+  have hzero' := hzero Φ₀ U A₀ hA₀ hΦ₀
+  have hrange :
+      Finset.range (Module.finrank ℝ E / 2 + 2) = Finset.range 3 := by
+    rw [hDim]
+  have hpoint : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 3 2 x
+          (Φ₁.toSection x) ≤ (K * A₁) ^ 2 := by
+    intro x
+    have hpx := hp Φ₁ x
+    rw [hrange] at hpx
+    calc
+      riemannianFiberNormSq (I := I) (M := M) g 3 2 x
+          (Φ₁.toSection x)
+          ≤ Cp ^ 2 * (∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 3 2 j Φ₁‖ ^ 2) := hpx
+      _ ≤ Cp ^ 2 * A₁ ^ 2 :=
+        mul_le_mul_of_nonneg_left hΦ₁ (sq_nonneg Cp)
+      _ = (Cp * A₁) ^ 2 := by ring
+      _ ≤ (K * A₁) ^ 2 := by
+        apply pow_le_pow_left₀ (mul_nonneg hCp hA₁)
+        exact mul_le_mul_of_nonneg_right (by dsimp [K]; linarith) hA₁
+  have hjet : (∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 3 2 j Φ₁‖ ^ 2) ≤ (K * A₁) ^ 2 := by
+    refine hΦ₁.trans ?_
+    have hA₁K : A₁ ≤ K * A₁ := by
+      simpa only [one_mul] using mul_le_mul_of_nonneg_right hKone hA₁
+    exact pow_le_pow_left₀ hA₁ hA₁K 2
+  have hone' := hone Φ₁ U (K * A₁) (mul_nonneg hK hA₁) hpoint hjet
+  have hnorm : 0 ≤
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := norm_nonneg _
+  rw [ccTensorToHs_add]
+  calc
+    _ ≤
+        ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
+            (operatorFieldApply (I := I) (M := M) g 2 2 Φ₀ U)‖ +
+          ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
+            (operatorFieldApply (I := I) (M := M) g 3 2 Φ₁
+              (covGrad (I := I) (M := M) g 0 2 U))‖ := norm_add_le _ _
+    _ ≤ C₀ * A₀ *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ +
+        C₁ * (K * A₁) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ :=
+      add_le_add hzero' hone'
+    _ ≤ C₀ * (A₀ + A₁) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ +
+        (C₁ * K) * (A₀ + A₁) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by
+      apply add_le_add
+      · exact mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left (by linarith) hC₀) hnorm
+      · apply mul_le_mul_of_nonneg_right _ hnorm
+        calc
+          C₁ * (K * A₁) = (C₁ * K) * A₁ := by ring
+          _ ≤ (C₁ * K) * (A₀ + A₁) :=
+            mul_le_mul_of_nonneg_left (by linarith) (mul_nonneg hC₁ hK)
+    _ = (C₀ + C₁ * K) * (A₀ + A₁) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by ring
+
+end GeneralJetModel
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

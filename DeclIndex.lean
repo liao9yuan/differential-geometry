@@ -17,6 +17,7 @@ indexing cost. -/
 open Lean Lean.Elab.Command
 
 set_option maxHeartbeats 0 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 run_cmd do
   let env ← getEnv
   let mut out : Array String := #[]

@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -28,10 +28,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
-theorem coordTowerSmooth [CompactSpace M]
+/-- Every finite level of the realized coordinate-frame curvature tower is
+jointly smooth at regular spacetime points in the chart good set. -/
+theorem coordTowerSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}

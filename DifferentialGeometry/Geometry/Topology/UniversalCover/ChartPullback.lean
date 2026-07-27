@@ -46,7 +46,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -80,7 +80,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem chartBasisVecFiber_lifted
     (g : SmoothRiemannianMetric I M)
@@ -168,7 +168,7 @@ theorem chartBasisVecFiber_lifted
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem chartGramMatrix_lifted
     (g : SmoothRiemannianMetric I M)
@@ -191,82 +191,10 @@ theorem chartGramMatrix_lifted
       chartBasisVecFiber_lifted (I := I) (M := M) g α' j x' hx']
   rfl
 
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M]
-    [SigmaCompactSpace M] [ConnectedSpace M] in
-lemma extChartAt_proj_eq
-    (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
-    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
-    extChartAt I α' x' = extChartAt I (proj (X := M) α') (proj (X := M) x') := by
-  have hConj := (uc_coverChartAt_extend_conjugacy (I := I) α').1
-  have := congrArg (fun f => f x') hConj
-  simp only [Function.comp_apply] at this
-  have hLS : (localSection α') x' = proj x' := by
-    have := congrArg (fun f => f x') (proj_eq_localSection α')
-    simpa using this.symm
-  change ((coverChartAt α').extend I) x' = _ at this
-  rw [hLS] at this
-  exact this
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
+/-- `chartChristoffel` is natural under universal-cover projection. -/
 theorem chartChristoffel_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -488,7 +416,7 @@ theorem chartChristoffel_lifted
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem chartChristoffelContraction_lifted
     (g : SmoothRiemannianMetric I M)
@@ -534,7 +462,7 @@ theorem chartChristoffelContraction_lifted
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 lemma chartChristoffel_lifted_eventuallyEq
     (g : SmoothRiemannianMetric I M)
@@ -601,7 +529,7 @@ lemma chartChristoffel_lifted_eventuallyEq
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem chartRiemannTensor_lifted
     (g : SmoothRiemannianMetric I M)
@@ -679,7 +607,7 @@ theorem chartRiemannTensor_lifted
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
 theorem chartRicciTensor_lifted
     (g : SmoothRiemannianMetric I M)

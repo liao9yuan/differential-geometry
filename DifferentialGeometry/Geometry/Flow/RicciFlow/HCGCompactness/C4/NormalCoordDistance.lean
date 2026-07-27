@@ -28,7 +28,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -351,6 +351,7 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
     have hetaVel : mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1 =
         deriv eta t := by
       rw [mfderiv_eq_fderiv]
+      change (fderiv Real eta t : Real →L[Real] E) 1 = deriv eta t
       exact fderiv_apply_one_eq_deriv
     have hvel : mfderiv 𝓘(Real, E) I e (eta t) (deriv eta t) =
         mfderiv 𝓘(Real, Real) I gamma t 1 := by

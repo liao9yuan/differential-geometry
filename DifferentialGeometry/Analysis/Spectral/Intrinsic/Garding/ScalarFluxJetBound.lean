@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffTime
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDiffJoint
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
@@ -22,7 +23,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -34,7 +35,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -43,26 +44,22 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
-    [SigmaCompactSpace M] in
-private lemma metricDiff_apply (q h : SmoothRiemannianMetric I M)
-    (x : M) (c : Tensor0SSpace 0 I x) :
-    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-      (metricDifferenceCcTensor (I := I) (M := M) q h).toSection x) c =
-      tensor0SSpace_evalScalar x c •
-        (metricCcTensorFib (I := I) h x - metricCcTensorFib (I := I) q x) := by
-  rw [metricDifferenceCcTensor, SmoothCcTensor.toSection_sub,
-    ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply]
-  change
-    (MixedSection.eval₀ (F := E) (E := TangentSpace I) x c) •
-          metricCcTensorFib (I := I) h x -
-        (MixedSection.eval₀ (F := E) (E := TangentSpace I) x c) •
-          metricCcTensorFib (I := I) q x =
-      tensor0SSpace_evalScalar x c •
-        (metricCcTensorFib (I := I) h x - metricCcTensorFib (I := I) q x)
-  rw [Tensor0SSpace.evalScalar_apply, MixedSection.eval₀_apply, smul_sub]
+private local instance scalarFluxTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
 
+private local instance scalarFluxTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
 
+private local instance scalarFluxTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance scalarFluxTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
@@ -70,28 +67,8 @@ theorem metricDiff_bilin (q h : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) q
         (metricDifferenceCcTensor (I := I) (M := M) q h) x v w =
-      h.inner x v w - q.inner x v w := by
-  unfold metricDifferenceCcTensor
-  rw [ccTensorBilinSymm_apply]
-  have hvw : smoothCcTensorBilinForm (I := I) q
-      (metricCcTensor (I := I) (M := M) q h -
-        metricCcTensor (I := I) (M := M) q q) x v w =
-      smoothCcTensorBilinForm (I := I) q (metricCcTensor (I := I) (M := M) q h) x v w -
-        smoothCcTensorBilinForm (I := I) q (metricCcTensor (I := I) (M := M) q q) x v w := by
-    rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
-      ccTensorModel_sub, ContinuousMultilinearMap.sub_apply]
-  have hwv : smoothCcTensorBilinForm (I := I) q
-      (metricCcTensor (I := I) (M := M) q h -
-        metricCcTensor (I := I) (M := M) q q) x w v =
-      smoothCcTensorBilinForm (I := I) q (metricCcTensor (I := I) (M := M) q h) x w v -
-        smoothCcTensorBilinForm (I := I) q (metricCcTensor (I := I) (M := M) q q) x w v := by
-    rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
-      ccTensorModel_sub, ContinuousMultilinearMap.sub_apply]
-  rw [hvw, hwv,
-    metricCcTensor_apply, metricCcTensor_apply,
-    metricCcTensor_apply, metricCcTensor_apply,
-    h.symm x v w, q.symm x v w]
-  ring
+      h.inner x v w - q.inner x v w :=
+  metricDiff_symVal (I := I) (M := M) q h x v w
 
 private lemma grid_mono {a b : ℕ → ℝ}
     (ha : ∀ j, 0 ≤ a j) (hab : ∀ j, a j ≤ b j) (i : ℕ) :
@@ -102,122 +79,6 @@ private lemma grid_mono {a b : ℕ → ℝ}
     DifferentialGeometry.Combinatorics.antidiagonalTupleGrid]
   refine Finset.sum_le_sum (fun n _ => Finset.sum_le_sum (fun e _ => ?_))
   exact Finset.prod_le_prod (fun m _ => ha (e m)) (fun m _ => hab (e m))
-
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
-private theorem metricDiff_eval
-    {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
-    (q : SmoothRiemannianMetric I M)
-    (Y Z : Cₛ^∞⟮I; E, fun x : M => TangentSpace I x⟯) :
-    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
-      (fun p : M × ℝ =>
-        (G.metric p.2).inner p.1 (Y p.1) (Z p.1) -
-          q.inner p.1 (Y p.1) (Z p.1))
-      ((Set.univ : Set M) ×ˢ D.regular) := by
-  intro p hp
-  have hpair := hG.pairSmoothAt (t := p.2) (x := p.1)
-    (D.regular_isOpen.mem_nhds hp.2) (![Y, Z])
-  have hswap : ContMDiffAt (I.prod 𝓘(ℝ, ℝ))
-      (𝓘(ℝ, ℝ).prod I) ∞ (fun r : M × ℝ => (r.2, r.1)) p :=
-    contMDiffAt_snd.prodMk contMDiffAt_fst
-  have hmove : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
-      (fun r : M × ℝ =>
-        (G.metric r.2).inner r.1 (Y r.1) (Z r.1)) p :=
-    hpair.comp p hswap
-  have hfixedM :=
-    DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
-      (I := I) (M := M) q Y Z
-  have hfixed : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
-      (fun r : M × ℝ => q.inner r.1 (Y r.1) (Z r.1)) p :=
-    hfixedM.contMDiffAt.comp p contMDiffAt_fst
-  have hscalar := hmove.sub hfixed
-  refine hscalar.contMDiffWithinAt.congr_of_eventuallyEq ?_ ?_
-  · filter_upwards with r
-    rfl
-  · rfl
-
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
-    [SigmaCompactSpace M] in
-private theorem metricDiff_joint
-    {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
-    (q : SmoothRiemannianMetric I M) :
-    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
-      (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E)) ∞
-      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
-        (E := fun x : M => TensorRSSpace 0 2 I x) p.1
-        ((metricDifferenceCcTensor (I := I) (M := M) q
-          (G.metric p.2)).toSection p.1))
-      ((Set.univ : Set M) ×ˢ D.regular) := by
-  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
-    (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun x : M => Tensor0SSpace 0 I x)
-    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
-    (φ := fun p : M × ℝ =>
-      (show Tensor0SSpace 0 I p.1 →L[ℝ] Tensor0SSpace 2 I p.1 from
-        (metricDifferenceCcTensor (I := I) (M := M) q
-          (G.metric p.2)).toSection p.1))
-  intro Y
-  have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (Tensor0SNabla.scalarFn I M (fun x : M => Y x)) :=
-    (Tensor0SNabla.contMDiff_scalarFn_iff_section I M
-      (fun x : M => Y x)).mpr Y.contMDiff
-  have hscalar' : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
-      (fun p : M × ℝ =>
-        Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1)
-      ((Set.univ : Set M) ×ˢ D.regular) :=
-    hscalar.comp_contMDiffOn contMDiffOn_fst
-  have hbilin : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
-      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
-      (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
-        (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-        p.1 ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)))
-      ((Set.univ : Set M) ×ˢ D.regular) := by
-    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
-      (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
-      (F₂ := E →L[ℝ] ℝ) (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
-      (φ := fun p : M × ℝ =>
-        (Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1))
-    intro Z
-    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
-      (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
-      (F₂ := ℝ) (V₂ := fun _ : M => ℝ)
-      (φ := fun p : M × ℝ =>
-        ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)) (Z p.1))
-    intro W p hp
-    rw [Bundle.contMDiffWithinAt_totalSpace]
-    refine ⟨contMDiffWithinAt_fst, ?_⟩
-    simpa only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.sub_apply,
-      smul_eq_mul] using
-        (hscalar' p hp).mul
-          (metricDiff_eval (I := I) (M := M) (D := D) G hG q Z W p hp)
-  have hscaled : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
-      (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
-      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
-        (E := fun x : M => Tensor0SSpace 2 I x) p.1
-        ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          (metricCcTensorFib (I := I) (G.metric p.2) p.1 -
-            metricCcTensorFib (I := I) q p.1)))
-      ((Set.univ : Set M) ×ˢ D.regular) := by
-    refine (joint_to02 (I := I) (M := M)
-      (fun p : M × ℝ =>
-        (Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)) hbilin).congr (fun p _ => ?_)
-    congr 1
-  refine hscaled.congr (fun p _ => ?_)
-  refine congrArg (fun z : Tensor0SSpace 2 I p.1 =>
-    TotalSpace.mk' (Tensor0SModel 2 ℝ E)
-      (E := fun x : M => Tensor0SSpace 2 I x) p.1 z) ?_
-  rw [metricDiff_apply (I := I) (M := M)]
-  congr 1
-  rw [Tensor0SNabla.scalarFn_eq_apply_zero, Tensor0SSpace.evalScalar_apply]
-  exact congrArg (Y p.1) (Subsingleton.elim _ _)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -309,14 +170,14 @@ theorem scalarTrace_joint
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
-        ((scalarTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+        ((scalarTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
     (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
     (φ := fun p : M × ℝ =>
       (show Tensor0SSpace 2 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
-        (scalarTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+        (scalarTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
     (S := D.regular)
   intro W
   have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -357,14 +218,14 @@ theorem connTrace_joint
       (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
-        ((connTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+        ((connTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
     (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
     (φ := fun p : M × ℝ =>
       (show Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
-        (connTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+        (connTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
     (S := D.regular)
   intro W
   have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -394,7 +255,8 @@ theorem scalarTrace_rev
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
-        ((scalarTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+        ((scalarTraceCoeff (I := I) (M := M) q
+          (G.metric (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun p : M × ℝ => (p.1, T - p.2))
@@ -418,7 +280,8 @@ theorem connTrace_rev
       (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
-        ((connTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+        ((connTraceCoeff (I := I) (M := M) q
+          (G.metric (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun p : M × ℝ => (p.1, T - p.2))
@@ -442,7 +305,8 @@ theorem scalarTrace_rev_on
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
-        ((scalarTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+        ((scalarTraceCoeff (I := I) (M := M) q
+          (G.metric (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) :=
   (scalarTrace_rev (I := I) (M := M) G hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
@@ -461,7 +325,8 @@ theorem connTrace_rev_on
       (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
-        ((connTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+        ((connTraceCoeff (I := I) (M := M) q
+          (G.metric (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) :=
   (connTrace_rev (I := I) (M := M) G hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
@@ -477,11 +342,11 @@ theorem scalarTrace_small
     ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 2 (0 + i) x
         ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 2 0 i
-          (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
+          (scalarTraceCoeff (I := I) (M := M) (G.metric (T : ℝ))
             (G.metric t))).toSection x) < ε := by
   let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
   let P : ℝ → SmoothCcTensor q 2 0 := fun t =>
-    scalarTraceCoeff (I := I) q (G.metric t)
+    scalarTraceCoeff (I := I) (M := M) q (G.metric t)
   have hPzero : P (T : ℝ) = 0 := by
     simp only [P, q, scalarTraceCoeff, traceCast_self, sub_self]
   have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -519,11 +384,11 @@ theorem connTrace_small
     ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 1 (0 + i) x
         ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 0 i
-          (connTraceCoeff (I := I) (G.metric (T : ℝ))
+          (connTraceCoeff (I := I) (M := M) (G.metric (T : ℝ))
             (G.metric t))).toSection x) < ε := by
   let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
   let P : ℝ → SmoothCcTensor q 1 0 := fun t =>
-    connTraceCoeff (I := I) q (G.metric t)
+    connTraceCoeff (I := I) (M := M) q (G.metric t)
   have hPzero : P (T : ℝ) = 0 := by
     apply SmoothCcTensor.ext
     apply ContMDiffSection.ext
@@ -549,9 +414,9 @@ theorem connTrace_small
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarFlux_eq_slot (q h : SmoothRiemannianMetric I M) :
-    scalarFluxCoeff (I := I) q h =
+    scalarFluxCoeff (I := I) (M := M) q h =
       endoSlotZeroCcTensor (I := I) (M := M) q 0
-        (gInvDiffRaisedEndoField (I := I) q h) := by
+      (gInvDiffRaisedEndoField (I := I) (M := M) q h) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -579,7 +444,7 @@ theorem scalarFlux_jet_grid
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) q 1 (1 + i) x
             ((iteratedCovGrad (I := I) q 1 1 i
-              (scalarFluxCoeff (I := I) q h)).toSection x) ≤
+              (scalarFluxCoeff (I := I) (M := M) q h)).toSection x) ≤
           C i * DifferentialGeometry.Combinatorics.antidiagonalTupleGrid
             (fun j => riemannianFiberNormSq (I := I) (M := M) q 0 (2 + j) x
               ((iteratedCovGrad (I := I) q 0 2 j T).toSection x)) i := by
@@ -666,7 +531,7 @@ theorem scalarFlux_slab
           riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ))
               1 (1 + i) x
               ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 1 i
-                (scalarFluxCoeff (I := I) (G.metric (T : ℝ))
+                (scalarFluxCoeff (I := I) (M := M) (G.metric (T : ℝ))
                   (G.metric ((T : ℝ) - s)))).toSection x) ≤
             B i := by
   classical

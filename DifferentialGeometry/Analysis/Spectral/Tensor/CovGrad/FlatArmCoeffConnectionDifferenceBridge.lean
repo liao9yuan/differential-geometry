@@ -19,7 +19,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -276,6 +276,46 @@ private lemma connDiffSection_eq_cometricRaiseSlot0Field (g₀ g₁ : SmoothRiem
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
+
+/-!
+The lowered connection-difference tensor is the covariant realization of the
+usual `(1,2)` connection-difference section.  Exporting the pointwise norm
+identity here avoids rebuilding this realization inside every low-regularity
+coefficient estimate.
+-/
+omit [NeZero (Module.finrank ℝ E)] in
+theorem connLow_rfns
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+        ((iteratedCovGrad (I := I) g₀ 0 3 n
+          (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 n
+          (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+        ((iteratedCovGrad (I := I) g₀ 0 3 n
+          (connDiffLoweredCc (I := I) g₀ g₁)).toSection x)
+        = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
+            ((iteratedCovGrad (I := I) g₀ 0 3 n
+              (domDomCongrSection (I := I) g₀ (finRotate 3)
+                (connDiffLoweredCc (I := I) g₀ g₁))).toSection x) :=
+          (riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+            (I := I) (M := M) g₀ (finRotate 3)
+            (connDiffLoweredCc (I := I) g₀ g₁) n x).symm
+    _ = riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
+              (domDomCongrSection (I := I) g₀ (finRotate 3)
+                (connDiffLoweredCc (I := I) g₀ g₁)))).toSection x) :=
+        (riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
+          (I := I) (M := M) g₀ 1
+          (domDomCongrSection (I := I) g₀ (finRotate 3)
+            (connDiffLoweredCc (I := I) g₀ g₁)) n x).symm
+    _ = riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+        rw [connDiffSection_eq_cometricRaiseSlot0Field]
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

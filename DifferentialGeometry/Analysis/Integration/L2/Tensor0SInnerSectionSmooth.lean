@@ -28,11 +28,11 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-private instance tensor0SModelNormedSpace_local {n : ℕ} :
+private local instance tensor0SModelNormedSpace_local {n : ℕ} :
     NormedSpace ℝ (Tensor0SModel n ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace n
 
-private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
 
@@ -158,7 +158,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-private instance tensor0SModelNormedSpace_local {n : ℕ} :
+private local instance tensor0SModelNormedSpace_local {n : ℕ} :
     NormedSpace ℝ (Tensor0SModel n ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace n
 

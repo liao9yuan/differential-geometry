@@ -95,17 +95,18 @@ variable {g₀ g_bg : SmoothRiemannianMetric I M}
 
 omit [BoundarylessManifold I M] in
 theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
-    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
-    timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+    {r s : ℕ}
+    (u₀ : tensorHs (I := I) (M := M) g₀ r s (a + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ r s a) T) :
+    timeL2Inclusion (I := I) (M := M) (g := g₀) (r := r) (s := s)
         (show a + 1 ≤ a + 2 by linarith)
-        (maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := r) (s := s)
           (T := T) a hT hT1 u₀ gforce) =
-      maxRegDuhamelSolFieldHa1 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      maxRegDuhamelSolFieldHa1 (I := I) (M := M) (g := g₀) (r := r) (s := s)
         (T := T) a hT hT1 u₀ gforce := by
-  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ r s
   refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
-  rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)]
+  rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) (g := g₀) (r := r) (s := s)]
   rw [maxRegDuhamelSolField, maxRegDuhamelSolFieldHa1,
     timeModeCoeff_add (I := I) (M := M), timeModeCoeff_add (I := I) (M := M),
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT.le u₀ i,
@@ -158,34 +159,35 @@ theorem deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (a : ℕ)
 
 omit [BoundarylessManifold I M] in
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
-    ‖maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+    {r s : ℕ} (F : timeL2 (tensorHs (I := I) (M := M) g₀ r s a) T) :
+    ‖maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := r) (s := s)
         (T := T) a hT hT1
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2)) F‖ ≤ (1 + T) * ‖F‖ := by
-  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+        (0 : tensorHs (I := I) (M := M) g₀ r s (a + 2)) F‖ ≤ (1 + T) * ‖F‖ := by
+  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ r s
   rw [maxRegDuhamelSolField]
   refine le_trans (norm_add_le _ _) ?_
   have hhom : ‖maxRegHomogeneousSolField (I := I) (M := M) a T
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))‖ ≤ Real.sqrt T * ‖(0 : tensorHs
-        (I := I) (M := M) g₀ 0 2 (a + 2))‖ :=
+      (0 : tensorHs (I := I) (M := M) g₀ r s (a + 2))‖ ≤ Real.sqrt T * ‖(0 : tensorHs
+        (I := I) (M := M) g₀ r s (a + 2))‖ :=
     maxRegHomogeneousSolField_norm_le (I := I) (M := M) (h_compact := h_compact) _ hT.le
   rw [norm_zero, mul_zero] at hhom
   have hreg : ‖maximalRegularitySolField (I := I) (M := M) a hT.le F‖ ≤ (1 + T) * ‖F‖ :=
     maximalRegularitySolField_norm_le (I := I) (M := M) (h_compact := h_compact) hT.le F
   have hhom0 : ‖maxRegHomogeneousSolField (I := I) (M := M) a T
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))‖ = 0 :=
+      (0 : tensorHs (I := I) (M := M) g₀ r s (a + 2))‖ = 0 :=
     le_antisymm hhom (norm_nonneg _)
   rw [hhom0, zero_add]
   exact hreg
 
 omit [BoundarylessManifold I M] in
-theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
-    maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    {r s : ℕ} :
+    maxRegDuhamelSolField (I := I) (M := M) (g := g₀) (r := r) (s := s)
         (T := T) a hT hT1
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
-        (0 : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) = 0 := by
+        (0 : tensorHs (I := I) (M := M) g₀ r s (a + 2))
+        (0 : timeL2 (tensorHs (I := I) (M := M) g₀ r s a) T) = 0 := by
   have h := norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) (g₀ := g₀)
-    hT hT1 (0 : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T)
+    hT hT1 (0 : timeL2 (tensorHs (I := I) (M := M) g₀ r s a) T)
   rw [norm_zero, mul_zero] at h
   exact norm_le_zero_iff.mp h
 
@@ -574,7 +576,8 @@ theorem nemytskii_sol_const
     have := hρt_mem F
     rw [Metric.mem_closedBall, hz₀, dist_zero_right] at this
     exact this
-  have hρt_lip : LipschitzWith 1 ρt := recenteredBallRetraction_lipschitzWith hρpos.le z₀
+  have hρt_lip : LipschitzWith 1 ρt :=
+    recenteredBallRetraction_lipschitzWith_one hρpos.le z₀
   have hΨ'_lip : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖Ψ' F - Ψ' F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F'

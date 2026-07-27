@@ -26,15 +26,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-private instance tensor0SModelNormedSpace_local2 {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local2 {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace s
 
-private instance tensorRSModelFiniteDimensional_local2 {r s : ℕ} :
+private local instance tensorRSModelFiniteDimensional_local2 {r s : ℕ} :
     FiniteDimensional ℝ (TensorRSModel r s ℝ E) :=
   Tensor0SBundle.tensorRSModel_finiteDimensional r s
 
-private instance tensor0SModelFiniteDimensional_local2 {s : ℕ} :
+private local instance tensor0SModelFiniteDimensional_local2 {s : ℕ} :
     FiniteDimensional ℝ (Tensor0SModel s ℝ E) :=
   continuousMultilinearMap_finiteDimensional s
 

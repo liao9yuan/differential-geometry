@@ -26,7 +26,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open IntrinsicSpectral.DeTurckCoefficients
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
@@ -177,10 +177,15 @@ private lemma chartRmEqJet
     chartChristoffel_eq_jet g x0 hG k m l,
     chartChristoffel_eq_jet g x0 hG i j m]
 
-omit [CompleteSpace E] in
-omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
-theorem chartRmSmoothAt [CompactSpace M]
+omit [CompleteSpace E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
+/-- Joint smoothness of a chart Riemann component from joint smoothness of the
+metric's chart-Gram components. -/
+theorem chartRmSmoothAt
     (g : Real -> SmoothRiemannianMetric I M)
     (a b : Real) (x0 : M)
     (hsmooth : ∀ x : M, ∀ i j : Fin (Module.finrank Real E),
@@ -274,11 +279,11 @@ theorem chartRmSmoothAt [CompactSpace M]
       chartRmEqJet (I := I) (g q.1) x0 hq.2 hDiff hDiffNhd hDiff2 i j k l
   exact hmodel.congr_of_eventuallyEq heq
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
-theorem coordRmSmoothInf [CompactSpace M]
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
+/-- The chart-basis components of the canonical lowered Riemann tensor are
+jointly smooth at every regular spacetime point. -/
+theorem coordRmSmoothInf
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
@@ -359,11 +364,11 @@ theorem coordRmSmoothInf [CompactSpace M]
   rw [chartGramOnE_def, (extChartAt I x0).left_inv
     (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hp)]
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
-theorem coordRmFinSmooth [CompactSpace M]
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
+/-- The coordinate-frame level-zero Riemann array is jointly smooth at every
+regular spacetime point in the chart good set. -/
+theorem coordRmFinSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}

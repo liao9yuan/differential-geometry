@@ -80,7 +80,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -103,7 +103,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 1 M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_identity_of_orthonormal
     (g : SmoothMetric_gen I M) {x : M}
@@ -138,7 +138,7 @@ theorem metricInverseInBasis_identity_of_orthonormal
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
@@ -176,7 +176,7 @@ variable {n : ℕ}
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
@@ -212,7 +212,7 @@ theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
@@ -283,7 +283,6 @@ end ProducerNorms
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_spatialCommNablaRm_intrinsic_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

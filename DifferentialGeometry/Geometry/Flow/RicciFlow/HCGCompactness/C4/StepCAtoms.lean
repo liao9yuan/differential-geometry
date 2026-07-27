@@ -30,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -334,8 +334,9 @@ theorem seqWeights_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hcover : s ⊆ ⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma) :
     centerAverage.WeightDataOn s
       (fun gamma : Fin (pb.A r) => L.hatBall hd D P pb r k gamma)
-      (rawWeights
-        (cutRaw (seqAtom hd hD P L pb r k i0)
+      (rawWeights (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+        (cutRaw (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+          (seqAtom hd hD P L pb r k i0)
           (seqAtom hd hD P L pb r k) i0)) := by
   apply cutWeights_data
   · intro x _hx
@@ -362,8 +363,9 @@ theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     ∀ᶠ k in Filter.atTop,
       centerAverage.WeightDataOn (L.hatSourceBall hd P r k)
         (fun gamma : Fin (pb.A r) => L.hatBall hd D P pb r k gamma)
-        (rawWeights
-          (cutRaw (seqAtom hd hD P L pb r k i0)
+        (rawWeights (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+          (cutRaw (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+            (seqAtom hd hD P L pb r k i0)
             (seqAtom hd hD P L pb r k) i0)) := by
   filter_upwards [L.innerBall_cover hd hD P hre pb r, hgp] with k hcover hgpAt
   exact seqWeights_data hd hD P L pb r k hgpAt i0 hcover
@@ -423,10 +425,14 @@ theorem seqWeights_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     {r : Real} (hr : 0 ≤ r) (k : Nat)
     (hgp : Item3GpScaleAt (I := I) hd D P L pb r k) :
     let i0 := baseIndex hd hre pb hr
-    let num := cutRaw (seqAtom hd hD P L pb r k i0)
+    let num := cutRaw (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+      (seqAtom hd hD P L pb r k i0)
       (seqAtom hd hD P L pb r k) i0
-    rawWeights num (X.obj (L.φ k)).basepoint i0 = 1 ∧
-      ∀ j, j ≠ i0 → rawWeights num (X.obj (L.φ k)).basepoint j = 0 := by
+    rawWeights (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+        num (X.obj (L.φ k)).basepoint i0 = 1 ∧
+      ∀ j, j ≠ i0 →
+        rawWeights (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+          num (X.obj (L.φ k)).basepoint j = 0 := by
   dsimp only
   have hbase := seqAtom_base hd hD P L hre pb hr k hgp
   have hdelta := cutRaw_delta
@@ -446,8 +452,9 @@ theorem seqWeights_zero_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     ∀ᶠ k in Filter.atTop,
       centerAverage.WeightDataOn (L.hatSourceBall hd P r k)
         (fun gamma : Fin (pb.A r) => L.hatBall hd D P pb r k gamma)
-        (rawWeights
-          (cutRaw (seqAtom hd hD P L pb r k (baseIndex hd hre pb hr))
+        (rawWeights (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+          (cutRaw (X := (X.obj (L.φ k)).M) (ι := Fin (pb.A r))
+            (seqAtom hd hD P L pb r k (baseIndex hd hre pb hr))
             (seqAtom hd hD P L pb r k) (baseIndex hd hre pb hr))) :=
   seqWeights_ev hd hD P L hre pb r hgp (baseIndex hd hre pb hr)
 

@@ -1309,8 +1309,7 @@ theorem centerB_hasStrict
       (nhds params₀) (nhds z₀)) :
     ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
       HasStrictFDerivAt
-        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df
-          params₀ := by
+        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df params₀ := by
   obtain ⟨f, Df, hf0, hfderiv, hsolves, huniq⟩ :=
     readoutSolB_strict (I := I) g hEnorm p B z₀ params₀ hchz hchξ hsm hinv hzero
   refine ⟨Df, ?_⟩
@@ -1394,8 +1393,7 @@ theorem center_hasStrictFDerivAt
       (nhds params₀) (nhds z₀)) :
     ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
       HasStrictFDerivAt
-        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df
-          params₀ := by
+        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df params₀ := by
   obtain ⟨f, Df, hf0, hfderiv, hsolves, huniq⟩ :=
     readoutSol_hasStrictFDerivAt (I := I) g hEnorm p z₀ params₀ hchz hchξ hsm hinv' hz₀'
   refine ⟨Df, ?_⟩
@@ -1490,8 +1488,7 @@ theorem centerOfMass_hasStrictFDerivAt
             join p r (H params)) : E)) Df params₀ :=
   center_hasStrictFDerivAt (I := I) g hEnorm p z₀ params₀ hchz hchξ hsm hinv' hz₀'
     (fun params => centerOfMass (I := I) g params.1
-      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r
-        (H params))
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r (H params))
     hc_solves hc_cont
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -1537,8 +1534,7 @@ theorem centerOfMass_contDiffAt
           join p r (H params)) : E)) params₀ :=
   center_contDiffAt (I := I) g hEnorm p z₀ params₀ n hn hchz hchξ hsm hinv' hz₀'
     (fun params => centerOfMass (I := I) g params.1
-      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r
-        (H params))
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) join p r (H params))
     hc_solves hc_cont
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup

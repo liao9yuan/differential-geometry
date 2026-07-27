@@ -11,14 +11,14 @@ open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 theorem maxreg_l2deriv_to_pointwise_hasderivwithinat
-    {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     [CompleteSpace X] {T : ℝ} (u : timeH1 X T) {g : ℝ → X}
     (hg : ContinuousOn g (Set.Icc (0 : ℝ) T))
     (hrep : u.deriv =ᵐ[timeMeasure T] g) :

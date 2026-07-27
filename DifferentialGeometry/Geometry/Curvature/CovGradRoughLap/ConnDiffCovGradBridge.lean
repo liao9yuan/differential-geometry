@@ -236,11 +236,28 @@ def connDiffSection (g₁ g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
       contMDiff_toFun := connDiffFib_contMDiff (I := I) g₁ g₀ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+/-- The connection-difference tensor between `g₁` and `g₀`, realized using an
+independent background metric `gBase` for the tensor bundle. -/
+def connDiffSectionWith (gBase g₁ g₀ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor gBase 1 2 where
+  toSection :=
+    { toFun := fun x : M => connDiffFib (I := I) g₁ g₀ x
+      contMDiff_toFun := connDiffFib_contMDiff (I := I) g₁ g₀ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 @[simp] lemma connDiffSection_toSection (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffSection (I := I) g₁ g₀).toSection x = connDiffFib (I := I) g₁ g₀ x := rfl
+
+omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
+@[simp] lemma connDiffSectionWith_toSection
+    (gBase g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
+    (connDiffSectionWith (I := I) gBase g₁ g₀).toSection x =
+      connDiffFib (I := I) g₁ g₀ x := rfl
 
 
 omit [NeZero (Module.finrank ℝ E)] in

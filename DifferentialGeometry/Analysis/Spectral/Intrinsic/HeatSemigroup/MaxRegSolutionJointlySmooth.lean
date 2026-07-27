@@ -18,6 +18,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SmallTimeSmoothness
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1Modulus
 
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -1237,5 +1238,285 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
       φ hφ_smooth hcoeff hmodemass
   exact ⟨T₁, hT₁_pos, hT₁_le, F, 1 / 2, hδ_lt, hF_small, hF_zero, hF_pin, hF_flow,
     hF_joint⟩
+
+/-- **Fixed-horizon representative (R1τ ruling item 5).**  The maximal-regularity
+smooth representative on the FULL given horizon `T`, with no existential
+shrinking.  Sibling of `maxreg_solution_jointly_smooth_representative_of_nemytskii`
+whose three horizon shrinks (`d`, `d₂`, `d₂F`) are all removed:
+
+* the qualitative `t = 0` continuity `δ` is replaced by the a-priori √t trace
+  modulus `timeH1.norm_toFun_sub_init_le` (ruling item 1): with `u.init = 0`
+  the fibre-operator smallness holds on all of `[0, T)` once `T` lies below the
+  explicit floor `Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C)`, where `C` is the
+  lossy fibre constant of `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`;
+* the `H^{a+2}`-realizability ball (`hball_full`) and the forcing/mode-mass
+  window (`hf_mass`, `hf_id`) are supplied on the full interval (`d₂`, `d₂F`
+  folded to `T`).
+
+Returns the solution package on EXACTLY the supplied `T` (no `∃ T₁ ≤ T`
+shrink), so a caller who has an a-priori `T`-floor gets an a-priori lifetime —
+the input the black-box `(N)` assembly needs to choose `τ₀` without appeal to
+qualitative continuity. -/
+theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (_ha_eq : a = 4 * Module.finrank ℝ E + 10)
+    (F_RHS : SmoothRiemannianMetric I M →
+      (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
+    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ S) δ),
+      SmoothCcTensor g₀ 0 2)
+    (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ S) δ)
+        (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g₀
+          (Nsec S hδ_lt hδ + rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w =
+        F_RHS (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ) x v w)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (htrace : timeH1.trace0 _ T u = 0)
+    (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hf_smooth : ∀ i, ContDiff ℝ ∞ (f i))
+    (hf_mass : ∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i τ *
+              (iteratedDeriv j (f i) t) ^ 2 ≤ B i)
+    (hf_id : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
+    (C : ℝ) (hC_pos : 0 < C)
+    (hC : ∀ (S : SmoothCcTensor g₀ 0 2),
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
+        (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) S‖))
+    (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C))
+    {R₀ : ℝ} (_hR₀_pos : 0 < R₀)
+    (hball_full : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g₀ 0 2,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t) →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀)
+    (hForce : ∀ (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+        (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+          SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
+            tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Nat.cast_nonneg a) (timeH1.toFun u t))
+        (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀),
+      ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
+        f i t = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (Nsec (F t) hδ_lt (hδ t))) i) :
+    ∃ (F : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
+        (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (F t)) δ),
+      F 0 = 0 ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t)) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+        HasDerivWithinAt
+          (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
+          (F_RHS
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) x v w)
+          (Set.Ici 0) t) ∧
+      JointChartGramSmooth (I := I) T
+        (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) := by
+  classical
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  have hinit : u.init = 0 := by have := htrace; rwa [timeH1.trace0_apply] at this
+  have hu0 : timeH1.toFun u 0 = 0 := by rw [timeH1.toFun_zero, hinit]
+  set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) with hφ_def
+  have hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i) := fun i =>
+    perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
+  have hf_endpoint_sum : ∀ c : ℝ, 0 ≤ c → ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i c *
+        ∫ s in (0 : ℝ)..t, (f i s) ^ 2) := by
+    intro c hc t ht
+    obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 c hc
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) (hB_sum.mul_left T)
+    · refine mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) ?_
+      refine intervalIntegral.integral_nonneg ht.1 ?_
+      intro x _; positivity
+    · have hwt_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c :=
+        tensorSobolevWeight_nonneg (I := I) (M := M) i c
+      have hcont_sq : Continuous (fun s => (f i s) ^ 2) := ((hf_smooth i).continuous).pow 2
+      have htint : (∫ s in (0 : ℝ)..t, (f i s) ^ 2) ≤ ∫ s in (0 : ℝ)..T, (f i s) ^ 2 := by
+        rw [intervalIntegral.integral_of_le ht.1, intervalIntegral.integral_of_le hT.le,
+          ← MeasureTheory.integral_Icc_eq_integral_Ioc,
+          ← MeasureTheory.integral_Icc_eq_integral_Ioc]
+        refine MeasureTheory.setIntegral_mono_set hcont_sq.integrableOn_Icc ?_ ?_
+        · filter_upwards with x; positivity
+        · exact HasSubset.Subset.eventuallyLE (Set.Icc_subset_Icc le_rfl ht.2)
+      have hbig : tensorSobolevWeight (I := I) (M := M) i c *
+          ∫ s in (0 : ℝ)..T, (f i s) ^ 2 ≤ T * B i := by
+        have hi_lhs : IntervalIntegrable
+            (fun s => tensorSobolevWeight (I := I) (M := M) i c * (f i s) ^ 2)
+            MeasureTheory.volume 0 T :=
+          (hcont_sq.const_mul _).intervalIntegrable 0 T
+        have hi_const : IntervalIntegrable (fun _ : ℝ => B i) MeasureTheory.volume 0 T :=
+          intervalIntegrable_const
+        have hmono : ∫ s in (0 : ℝ)..T,
+              tensorSobolevWeight (I := I) (M := M) i c * (f i s) ^ 2
+            ≤ ∫ _s in (0 : ℝ)..T, B i := by
+          refine intervalIntegral.integral_mono_on hT.le hi_lhs hi_const ?_
+          intro s hs
+          have := hB_le i s hs
+          rwa [iteratedDeriv_zero] at this
+        rw [intervalIntegral.integral_const_mul] at hmono
+        simp only [intervalIntegral.integral_const, smul_eq_mul, sub_zero] at hmono
+        exact hmono
+      calc tensorSobolevWeight (I := I) (M := M) i c * ∫ s in (0 : ℝ)..t, (f i s) ^ 2
+          ≤ tensorSobolevWeight (I := I) (M := M) i c * ∫ s in (0 : ℝ)..T, (f i s) ^ 2 :=
+            mul_le_mul_of_nonneg_left htint hwt_nn
+        _ ≤ T * B i := hbig
+  have hF₀_exists : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∃ S : SmoothCcTensor g₀ 0 2,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            h_compact (Nat.cast_nonneg a) (timeH1.toFun u t) := by
+    intro t ht
+    obtain ⟨uDuh, huDuh_coeff, huDuh_mem⟩ :=
+      duhamel_into_all_tensorHs (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (t := t) ht.1 h_compact f (fun i => (hf_smooth i).continuous)
+        (fun c hc => hf_endpoint_sum c hc t ht)
+    have hval : uDuh = tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        h_compact (Nat.cast_nonneg a) (timeH1.toFun u t) := by
+      refine tensorL2_ext_of_tensorL2Coeff_jsmooth (I := I) (M := M) h_compact (fun i => ?_)
+      rw [huDuh_coeff i]
+      exact (hf_id t ht i).symm
+    have hmem : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
+        ∃ v : tensorHs (I := I) (M := M) g₀ 0 2 σ,
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              h_compact hσ v = uDuh := huDuh_mem
+    obtain ⟨S, hS⟩ := spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) (g := g₀) uDuh hmem
+    refine ⟨S, ?_⟩
+    rw [show SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S = (S : TensorL2 0 2 g₀) from rfl,
+      hS, hval]
+  choose F₀ hF₀ using hF₀_exists
+  set Fdef : ℝ → SmoothCcTensor g₀ 0 2 :=
+    fun t => if ht : t ∈ Set.Icc (0 : ℝ) T then F₀ t ht else 0 with hFdef_def
+  have hFdef_pin : ∀ t (ht : t ∈ Set.Icc (0 : ℝ) T),
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Fdef t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          h_compact (Nat.cast_nonneg a) (timeH1.toFun u t) := by
+    intro t ht
+    simp only [hFdef_def, dif_pos ht]
+    exact hF₀ t ht
+  set F : ℝ → SmoothCcTensor g₀ 0 2 :=
+    fun t => if t ∈ Set.Ioc (0 : ℝ) T then Fdef t else 0 with hF_def
+  have hF_zero : F 0 = 0 := by
+    simp only [hF_def]
+    rw [if_neg]
+    intro hmem; exact absurd hmem.1 (lt_irrefl 0)
+  have hF_small : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) (1 / 2) := by
+    intro t
+    by_cases ht : t ∈ Set.Ioc (0 : ℝ) T
+    · have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht]
+      have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1.le, ht.2⟩
+      have hpin := hFdef_pin t ht_icc
+      have heq : smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t) =
+          timeH1.toFun u t := by
+        refine tensorHs.ext (funext (fun i => ?_))
+        rw [smoothCcToTensorHs_coeff, hpin, tensorHsToL2_tensorL2Coeff]
+      have hnorm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖ ≤
+          1 / (2 * C) := by
+        rw [heq]
+        calc ‖timeH1.toFun u t‖
+            = ‖timeH1.toFun u t - u.init‖ := by rw [hinit, sub_zero]
+          _ ≤ Real.sqrt t * ‖u.deriv‖ := u.norm_toFun_sub_init_le ht_icc
+          _ ≤ Real.sqrt T * ‖u.deriv‖ :=
+              mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg _)
+          _ ≤ 1 / (2 * C) := hfloor
+      intro x v w
+      rw [hFt]
+      refine le_trans (hC (Fdef t) x v w) ?_
+      have hCN_le : C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖ ≤ 1 / 2 := by
+        calc C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖
+            ≤ C * (1 / (2 * C)) := mul_le_mul_of_nonneg_left hnorm_le hC_pos.le
+          _ = 1 / 2 := by field_simp
+      have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+      have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+      have hmul_nn : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+        mul_nonneg hsv_nn hsw_nn
+      calc (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖) *
+            Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)
+          = (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖) *
+              (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) := by ring
+        _ ≤ (1 / 2 : ℝ) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) :=
+            mul_le_mul_of_nonneg_right hCN_le hmul_nn
+        _ = (1 / 2 : ℝ) * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
+    · have hFt : F t = 0 := by simp only [hF_def, if_neg ht]
+      intro x v w
+      rw [hFt, ccTensorBilinSymm_zero_apply_jsmooth]
+      have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+      have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+      rw [abs_zero]
+      positivity
+  have hF_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          h_compact (Nat.cast_nonneg a) (timeH1.toFun u t) := by
+    intro t ht
+    rcases eq_or_lt_of_le ht.1 with h0 | h0
+    · rw [← h0, hF_zero, hu0]
+      simp only [map_zero]
+    · have ht_ioc : t ∈ Set.Ioc (0 : ℝ) T := ⟨h0, ht.2⟩
+      have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht_ioc]
+      rw [hFt]
+      exact hFdef_pin t ht
+  have hδ_lt : (1 / 2 : ℝ) < 1 := by norm_num
+  have hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀ := by
+    intro t ht
+    have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, ht.2.le⟩
+    exact hball_full t ht_icc (F t) (hF_pin t ht_icc)
+  have hForceRepr : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
+      f i t = tensorL2Coeff (I := I) (M := M) h_compact
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (Nsec (F t) hδ_lt (hF_small t))) i :=
+    hForce F hδ_lt hF_small hF_pin hball
+  have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a ha_super
+    F_RHS Nsec hRepr hT hT1 hT (le_refl T) hT (le_refl T) (le_refl T) u F hδ_lt hF_small
+    hF_pin f hf_smooth hf_mass hf_id hForceRepr
+  have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M) h_compact
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t := by
+    intro t ht i
+    rw [hF_pin t ht, tensorHsToL2_tensorL2Coeff]
+    have hid := hf_id t ht i
+    rw [tensorHsToL2_tensorL2Coeff] at hid
+    rw [hid]
+  have hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i := by
+    intro k σ hσ
+    obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ :=
+      perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+        (g := g₀) (r := 0) (s := 2) (T := T) hT.le f hf_smooth hf_mass k σ hσ
+    exact ⟨Cmaj, hCmaj_sum, fun i t ht => hCmaj_le i t ht⟩
+  have hF_joint : JointChartGramSmooth (I := I) T
+      (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hF_small t)) :=
+    realizedFamily_jointChartGramSmooth (I := I) (M := M) g₀ hT F hδ_lt hF_small
+      φ hφ_smooth hcoeff hmodemass
+  exact ⟨F, 1 / 2, hδ_lt, hF_small, hF_zero, hF_pin, hF_flow, hF_joint⟩
 
 end DifferentialGeometry.PDE.RicciFlow

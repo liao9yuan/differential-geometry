@@ -22,7 +22,7 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -191,14 +191,8 @@ theorem metricFamilySmoothOn_pullback
     have hm : (solutionOn_pullback (I := I) S Φ).family.metric t
         = Diffeomorph.pullbackMetric (I := I) (S.family.metric t) Φ := rfl
     ext slots
-    rw [hm]
-    change (S.family.metric t).inner (Φ x)
-        (mfderiv I I (Φ : M → N) x (slots 0))
-        (mfderiv I I (Φ : M → N) x (slots 1)) =
-      (Diffeomorph.pullbackMetric (I := I) (S.family.metric t) Φ).inner x
-        (slots 0) (slots 1)
-    exact (Diffeomorph.pullbackMetric_inner (I := I) (S.family.metric t) Φ x
-      (slots 0) (slots 1)).symm
+    rw [hm, Tensor0SBundle.metricTensorField_apply, Diffeomorph.pullbackMetric_inner]
+    rfl
   frameCompSmooth := by
     intro Idx _ frame u hframe i j
     have heq : (fun p : ℝ × M =>

@@ -32,7 +32,7 @@ private local instance instBorelSpaceM
 
 
 theorem w_fixed_lower
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -211,7 +211,7 @@ theorem w_fixed_lower
 
 
 theorem w_density_lower
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

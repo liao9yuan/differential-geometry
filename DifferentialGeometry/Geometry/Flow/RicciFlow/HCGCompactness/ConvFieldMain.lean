@@ -44,7 +44,7 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [finiteE : FiniteDimensional Real E] [CompleteSpace E]
   [neZeroE : NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -226,20 +226,20 @@ theorem supOn_resSrc_eq
     g₁ g₂ g₃ (sourceOpen (I := I) Φ k) sourceSigma sourceT2 C p
 
 
-
-
-
-
-
-
-
+/-- **The Brick-5 output package** (ruling 5a: data, not bare existentials).
+One subsequence `φ`, one global limit family `gInf` on the limit manifold
+`P.M`, the sup-level convergence `conv` of the bump-extended sequence `gSeqExt`
+along `φ` toward `gInf` on the fixed window `[β, ψ]` for every spatial compact
+and every order, and its pointwise companion `convPt` along the same subsequence
+(the form consumed by the Brick-6 regularity/PDE layer). -/
 structure ConvOut
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
     (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : Real) where
-
+  /-- The single subsequence serving all spatial compacts and orders on the
+  fixed window `[β, ψ]`. -/
   φ : Nat -> Nat
 
   hφ : StrictMono φ
@@ -273,12 +273,44 @@ structure ConvOut
           metricDerivNorm (I := I) a
             (gSeqExt (I := I) Φ R bf hsrc htgt (φ k) t) (gInf t) R x < ε
 
+namespace ConvOut
 
+/-- Reindex a fixed-window convergence output along a further strict
+subsequence, retaining its limit metric family and both convergence fields. -/
+noncomputable def comp_subseq
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (η : Nat → Nat) (hη : StrictMono η) :
+    ConvOut (I := I) Φ R bf hsrc htgt β ψ where
+  φ := co.φ ∘ η
+  hφ := co.hφ.comp hη
+  gInf := co.gInf
+  conv := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.conv K hK p ε hε
+    refine ⟨k₀, fun k hk t ht => ?_⟩
+    simpa only [Function.comp_apply] using
+      hk₀ (η k) (hk.trans (hη.id_le k)) t ht
+  convPt := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK p ε hε
+    refine ⟨k₀, fun k hk t ht a ha x hx => ?_⟩
+    simpa only [Function.comp_apply] using
+      hk₀ (η k) (hk.trans (hη.id_le k)) t ht a ha x hx
 
+end ConvOut
 
-
-
-
+/-- **Brick-5 Step 1+2: the Arzelà–Ascoli extraction, packaged.**  Applies
+`windowGInfAll` to the bump-extended sequence `gSeqExt` (Brick 4), with the
+three raw hypotheses discharged by `hgLip_gSeqExt`/`hbdd_gSeqExt`/`hlow_gSeqExt`
+from the cited inputs (threaded through verbatim at the Brick-4 granularity),
+and derives the pointwise companion along the same subsequence via the
+`BddAbove` pattern of `windowGInfAll_pt`. -/
 noncomputable def convOut
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
@@ -302,7 +334,7 @@ noncomputable def convOut
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
       forall q : Nat, exists C : Real, forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-        forall z : P.M, z ∈ Φ.source k ->
+        forall z : P.M, z ∈ bf.grow k ->
           metricCovDerivNorm (I := I) q (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C)
     (hlipTail : letI : TopologicalSpace P.M := P.topology;
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
@@ -503,10 +535,13 @@ theorem ofRP_supOn_eq
     have hysrc : ((y : SourceDomain (I := I) Φ k) : P.M) ∈ Φ.source k :=
       (y : SourceDomain (I := I) Φ k).2
     change
-      (srcMetric (I := I) Φ hsrc htgt k t).inner
-          (y : SourceDomain (I := I) Φ k) (v 0) (v 1) =
-        (gSeqExt (I := I) Φ R bf hsrc htgt k t).inner
-          ((y : SourceDomain (I := I) Φ k) : P.M) (v 0) (v 1)
+      ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O).inner y (v 0) (v 1) =
+        ((resSrc (I := I) Φ hsrc k
+          (gSeqExt (I := I) Φ R bf hsrc htgt k t)).restrictOpen (I := I) O).inner
+          y (v 0) (v 1)
+    rw [SmoothRiemannianMetric.restrictOpen_inner,
+      SmoothRiemannianMetric.restrictOpen_inner]
+    rw [resSrc_inner (I := I) Φ hsrc k]
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
       ((y : SourceDomain (I := I) Φ k) : P.M) hysrc (v 0) (v 1)]
     rw [hW1 _ hyW]

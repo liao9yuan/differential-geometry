@@ -48,7 +48,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -243,25 +243,26 @@ instance instIsManifold :
         exact localSection_collapse a b hhCaTarget
     exact StructureGroupoid.mem_of_eqOnSource _ hRestrIn hEq
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
+  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
+lemma extChartAt_proj_eq
+    (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
+    extChartAt I a x =
+      extChartAt I (proj (X := M) a) (proj (X := M) x) := by
+  change ((coverChartAt a).extend I) x =
+    ((chartAt H (proj (X := M) a)).extend I) (proj (X := M) x)
+  rw [OpenPartialHomeomorph.extend_coe, OpenPartialHomeomorph.extend_coe,
+    Function.comp_apply, Function.comp_apply]
+  unfold coverChartAt
+  rw [OpenPartialHomeomorph.trans_apply]
+  have h : (proj (X := M) x) = (localSection a) x :=
+    congrArg (fun f => f x) (proj_eq_localSection a)
+  rw [h.symm]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
-omit [ConnectedSpace M] in
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [ConnectedSpace M] in
+/-- **The projection `proj : UniversalCover M → M` is smooth.** -/
 theorem proj_contMDiff :
     ContMDiff I I ∞
       (proj :
@@ -363,19 +364,13 @@ instance instT2Space :
     rw [Set.disjoint_iff] at hUVdisj ⊢
     rintro z ⟨hzU, hzV⟩
     exact hUVdisj ⟨hzU, hzV⟩
-
-
-
-
-
-
-
-
-
-
-
-
-
+/-- Auxiliary intermediate step for `fundamentalGroup_countable_of_secondCountable`.
+On a second-countable, connected, locally path-connected, semi-locally
+simply connected space, the homotopy classes of loops at `x` are in
+surjective image of a countable indexing set. Concretely, one fixes a
+countable basis of "small" path-connected opens whose ambient loops are
+null-homotopic, and represents every loop by finite sequences of segment
+basis indices and vertex-refinement indices. -/
 theorem fundamentalGroup_isCountablyGenerated_aux
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X]
@@ -388,30 +383,15 @@ theorem fundamentalGroup_isCountablyGenerated_aux
     (hBnull : ∀ n, ∀ (y : X) (_ : y ∈ B n) (γ : _root_.Path y y),
       Set.range γ.toContinuousMap ⊆ B n →
         (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y) = ⟦_root_.Path.refl y⟧)
-    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B))
-    (hpcInter :
-      ∀ (m n : ℕ),
-        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
-          JoinedIn (B m ∩ B n) a b) :
+    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B)) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f :=
-  fundamentalGroup_countable_surjection_of_nullHomotopic_basis X x B hBopen hBpc hBnull hBbasis
-    hpcInter
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  fundamentalGroup_countable_surjection_of_nullHomotopic_basis
+    X x B hBopen hBpc hBnull hBbasis
+/-- For a second-countable, connected, locally path-connected, semi-locally
+simply connected space `X`, given a countable family `B : ℕ → Set X` that is
+a topological basis of open, path-connected sets whose ambient loops are
+null-homotopic (`hBnull`), `FundamentalGroup X x` is `Countable`. -/
 theorem fundamentalGroup_countable_of_secondCountable
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X]
@@ -424,29 +404,20 @@ theorem fundamentalGroup_countable_of_secondCountable
     (hBnull : ∀ n, ∀ (y : X) (_ : y ∈ B n) (γ : _root_.Path y y),
       Set.range γ.toContinuousMap ⊆ B n →
         (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y) = ⟦_root_.Path.refl y⟧)
-    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B))
-    (hpcInter :
-      ∀ (m n : ℕ),
-        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
-          JoinedIn (B m ∩ B n) a b) :
+    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B)) :
     Countable (FundamentalGroup X x) := by
   obtain ⟨S, hS, f, hf⟩ :=
-    fundamentalGroup_isCountablyGenerated_aux X x B hBopen hBpc hBnull hBbasis hpcInter
+    fundamentalGroup_isCountablyGenerated_aux X x B hBopen hBpc hBnull hBbasis
   exact Function.Surjective.countable hf
 
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- **Fibres of the universal cover are countable.**
 
-
-
-
-
-
-
-
-
-
-
-
-
+For a second-countable smooth manifold `M`, every fibre `proj ⁻¹' {x}` is
+`Countable`. The fibre is in bijection with `Path.Homotopic.Quotient
+default x`, which by transport along a path from `default` to `x` is in
+bijection with `FundamentalGroup M default`; the latter is countable by
+`fundamentalGroup_countable_of_secondCountable`. -/
 theorem fibre_countable
     [SecondCountableTopology M]
     (x : M) :
@@ -456,14 +427,10 @@ theorem fibre_countable
         ⁻¹' {x}) := by
   obtain ⟨B, hBopen, hBpc, hBnull, hBbasis⟩ :=
     uc_pi1_countable_basis_refinement M
-  have hpcInter :
-      ∀ (m n : ℕ),
-        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
-          JoinedIn (B m ∩ B n) a b := by
-    sorry
   have h_pi1_countable :
       Countable (FundamentalGroup M (default : M)) :=
-    fundamentalGroup_countable_of_secondCountable M default B hBopen hBpc hBnull hBbasis hpcInter
+    fundamentalGroup_countable_of_secondCountable
+      M default B hBopen hBpc hBnull hBbasis
   haveI : PathConnectedSpace M := PathConnectedSpace.of_locPathConnectedSpace
   have hpath : Path (default : M) x := PathConnectedSpace.somePath default x
   let e_fibre :
@@ -662,13 +629,8 @@ theorem sigmaCompact_from_countable_fibre
   exact isSigmaCompact_iUnion_of_isCompact _ hgS_compact
 
 variable [SecondCountableTopology M] [Nonempty M]
-
-
-
-
-
-
-
+/-- Combines `UniversalCover.proj_isCoveringMap`, `fibre_countable`, and
+`sigmaCompact_from_countable_fibre`. -/
 instance instSigmaCompactSpace :
     SigmaCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
@@ -677,7 +639,7 @@ instance instSigmaCompactSpace :
 
 
 
-omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
     [LocPathConnectedSpace M] [SemilocallySimplyConnectedSpace M] [Inhabited M]
     [SecondCountableTopology M] [Nonempty M] in
 theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :

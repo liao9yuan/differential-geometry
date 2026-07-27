@@ -13,7 +13,7 @@ open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry.Geometry.Riemannian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -285,13 +285,79 @@ private theorem bGramSchmidt_mem
 
 end PerpFrameAux
 
+omit [NeZero (Module.finrank ℝ E)] in
+/-- A nonzero tangent vector extends pointwise to an orthonormal basis of its
+orthogonal complement. -/
+theorem exists_perp_pos
+    (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
+    (hu : 0 < g.inner x u u) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → TangentSpace I x,
+      (∀ i j, g.inner x (e i) (e j) = if i = j then 1 else 0) ∧
+      (∀ i, g.inner x (e i) u = 0) := by
+  classical
+  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner x
+  have hBsymm : ∀ y z : E, B y z = B z y := fun y z => g.symm x y z
+  have hBpos : ∀ y : E, y ≠ 0 → 0 < B y y := fun y hy => g.pos x y hy
+  let φ : E →ₗ[ℝ] ℝ := (B u).toLinearMap
+  let W : Submodule ℝ E := LinearMap.ker φ
+  have hφu : 0 < φ u := hu
+  have hφsurj : Function.Surjective φ := by
+    intro c
+    refine ⟨(c / φ u) • u, ?_⟩
+    calc
+      φ ((c / φ u) • u) = (c / φ u) • φ u := φ.map_smul (c / φ u) u
+      _ = c := by
+        rw [smul_eq_mul]
+        exact div_mul_cancel₀ c hφu.ne'
+  have hrange : LinearMap.range φ = ⊤ := LinearMap.range_eq_top.mpr hφsurj
+  have hfrange : Module.finrank ℝ ↥(LinearMap.range φ) = 1 := by
+    rw [hrange]
+    simp
+  have hfinrank : Module.finrank ℝ ↥W = Module.finrank ℝ E - 1 := by
+    have hsum := LinearMap.finrank_range_add_finrank_ker φ
+    rw [hfrange] at hsum
+    have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
+    rw [this]
+    omega
+  letI : Module.Finite ℝ ↥W := inferInstance
+  let bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
+    Module.finBasisOfFinrankEq ℝ ↥W hfinrank
+  let v : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E)
+  have hv_mem : ∀ i, v i ∈ W := fun i => (bW i).2
+  have hv_li : LinearIndependent ℝ v := by
+    have hb_li : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
+    exact hb_li.map' W.subtype (Submodule.ker_subtype W)
+  let e : Fin (Module.finrank ℝ E - 1) → E :=
+    fun i => PerpFrameAux.bGramSchmidt B v i
+  have he_on : ∀ i j, B (e i) (e j) = if i = j then 1 else 0 :=
+    fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos v hv_li i j
+  have he_mem : ∀ i, e i ∈ W :=
+    fun i => PerpFrameAux.bGramSchmidt_mem B v W hv_mem i
+  have he_perp : ∀ i, B (e i) u = 0 := by
+    intro i
+    have hker : φ (e i) = 0 := (LinearMap.mem_ker).mp (he_mem i)
+    have hzero : B u (e i) = 0 := hker
+    rw [hBsymm (e i) u]
+    exact hzero
+  exact ⟨e, he_on, he_perp⟩
+
+omit [NeZero (Module.finrank ℝ E)] in
+/-- Unit-vector specialization of `exists_perp_pos`. -/
+theorem exists_ortho_perp
+    (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
+    (hu : g.inner x u u = 1) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → TangentSpace I x,
+      (∀ i j, g.inner x (e i) (e j) = if i = j then 1 else 0) ∧
+      (∀ i, g.inner x (e i) u = 0) :=
+  exists_perp_pos (I := I) g x u (by rw [hu]; norm_num)
+
 section PerpFrame
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -462,7 +528,6 @@ theorem perp_to_velocity_preserved_of_parallel
   exact hPerp0
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
-omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -482,48 +547,9 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
         g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 0) := by
   classical
   set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
-  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
-  have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
-  have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
   have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
-  have hu₀_unit : B u₀ u₀ = 1 := hUnit 0 h0mem
-  have hu₀_ne : u₀ ≠ 0 := by
-    intro h; rw [h] at hu₀_unit; simp at hu₀_unit
-  set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
-  set W : Submodule ℝ E := LinearMap.ker φ with hW_def
-  have hφ_u₀ : φ u₀ = 1 := hu₀_unit
-  have hφ_surj : Function.Surjective φ := by
-    intro c
-    refine ⟨c • u₀, ?_⟩
-    rw [map_smul, hφ_u₀, smul_eq_mul, mul_one]
-  have hrange : LinearMap.range φ = ⊤ := LinearMap.range_eq_top.mpr hφ_surj
-  have hfr_range : Module.finrank ℝ ↥(LinearMap.range φ) = 1 := by
-    rw [hrange]; simp
-  have hfinrankW : Module.finrank ℝ ↥W = Module.finrank ℝ E - 1 := by
-    have hsum := LinearMap.finrank_range_add_finrank_ker φ
-    rw [hfr_range] at hsum
-    have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
-    rw [this]; omega
-  letI : Module.Finite ℝ ↥W := inferInstance
-  set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
-    Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
-  set vfam : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E) with hvfam_def
-  have hvfam_mem : ∀ i, vfam i ∈ W := fun i => (bW i).2
-  have hvfam_LI : LinearIndependent ℝ vfam := by
-    have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
-    have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
-    exact this
-  set seed : Fin (Module.finrank ℝ E - 1) → E :=
-    fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
-  have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
-    fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos vfam hvfam_LI i j
-  have hseed_mem : ∀ i, seed i ∈ W :=
-    fun i => PerpFrameAux.bGramSchmidt_mem B vfam W hvfam_mem i
-  have hseed_perp : ∀ i, B (seed i) u₀ = 0 := by
-    intro i
-    have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
-    have : B u₀ (seed i) = 0 := hker
-    rw [hBsymm (seed i) u₀]; exact this
+  obtain ⟨seed, hseed_ON, hseed_perp⟩ :=
+    exists_ortho_perp (I := I) g (γ 0) u₀ (hUnit 0 h0mem)
   have htransport : ∀ i, ∃ V : ∀ t, TangentSpace I (γ t),
       V 0 = seed i ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
@@ -560,7 +586,6 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     exact hperp
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
-omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_frame
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ) {L : ℝ} (hL : 0 < L)
@@ -593,7 +618,6 @@ theorem exists_parallel_frame
   exact hON0 i j
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
-omit [InnerProductSpace ℝ E] in
 theorem parallel_on_frame_perp_to_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
@@ -624,7 +648,7 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
     [T2Space (TangentBundle I M)] in
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
@@ -643,7 +667,7 @@ section SmoothPerpFrame
 
 variable [I.Boundaryless]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem contMDiff_smul_bundleField_perp
     {γ : ℝ → M} {V : ℝ → E} {χ : ℝ → ℝ} {n : WithTop ℕ∞}
     (hγ : ContMDiff (𝓘(ℝ, ℝ)) I n γ) (hχ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n χ)
@@ -780,7 +804,7 @@ theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
       simpa [hchi_zero] using hlam_pos.le
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_on
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (_hL : 0 < L)
@@ -949,7 +973,7 @@ theorem perp_to_velocity_preserved_on
   rw [hft]
   exact hPerp0
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem velocity_chartRepAt_differentiableAt
     (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     DifferentiableAt ℝ
@@ -992,7 +1016,6 @@ theorem velocity_chartRepAt_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [InnerProductSpace ℝ E] in
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -1016,48 +1039,8 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
   classical
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
-  set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner (γ 0) with hB_def
-  have hBsymm : ∀ x y : E, B x y = B y x := fun x y => g.symm (γ 0) x y
-  have hBpos : ∀ x : E, x ≠ 0 → 0 < B x x := fun x hx => g.pos (γ 0) x hx
-  have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) L := ⟨le_refl _, hL.le⟩
-  have hu₀_unit : B u₀ u₀ = 1 := hUnit0
-  have hu₀_ne : u₀ ≠ 0 := by
-    intro h; rw [h] at hu₀_unit; simp at hu₀_unit
-  set φ : E →ₗ[ℝ] ℝ := (B u₀).toLinearMap with hφ_def
-  set W : Submodule ℝ E := LinearMap.ker φ with hW_def
-  have hφ_u₀ : φ u₀ = 1 := hu₀_unit
-  have hφ_surj : Function.Surjective φ := by
-    intro c
-    refine ⟨c • u₀, ?_⟩
-    rw [map_smul, hφ_u₀, smul_eq_mul, mul_one]
-  have hrange : LinearMap.range φ = ⊤ := LinearMap.range_eq_top.mpr hφ_surj
-  have hfr_range : Module.finrank ℝ ↥(LinearMap.range φ) = 1 := by
-    rw [hrange]; simp
-  have hfinrankW : Module.finrank ℝ ↥W = Module.finrank ℝ E - 1 := by
-    have hsum := LinearMap.finrank_range_add_finrank_ker φ
-    rw [hfr_range] at hsum
-    have : Module.finrank ℝ ↥W = Module.finrank ℝ ↥(LinearMap.ker φ) := rfl
-    rw [this]; omega
-  letI : Module.Finite ℝ ↥W := inferInstance
-  set bW : Module.Basis (Fin (Module.finrank ℝ E - 1)) ℝ ↥W :=
-    Module.finBasisOfFinrankEq ℝ ↥W hfinrankW with hbW_def
-  set vfam : Fin (Module.finrank ℝ E - 1) → E := fun i => (bW i : E) with hvfam_def
-  have hvfam_mem : ∀ i, vfam i ∈ W := fun i => (bW i).2
-  have hvfam_LI : LinearIndependent ℝ vfam := by
-    have hbWLI : LinearIndependent ℝ (fun i => bW i) := bW.linearIndependent
-    have := hbWLI.map' (W.subtype) (Submodule.ker_subtype W)
-    exact this
-  set seed : Fin (Module.finrank ℝ E - 1) → E :=
-    fun i => PerpFrameAux.bGramSchmidt B vfam i with hseed_def
-  have hseed_ON : ∀ i j, B (seed i) (seed j) = if i = j then 1 else 0 :=
-    fun i j => PerpFrameAux.bGramSchmidt_orthonormal B hBsymm hBpos vfam hvfam_LI i j
-  have hseed_mem : ∀ i, seed i ∈ W :=
-    fun i => PerpFrameAux.bGramSchmidt_mem B vfam W hvfam_mem i
-  have hseed_perp : ∀ i, B (seed i) u₀ = 0 := by
-    intro i
-    have hker : φ (seed i) = 0 := (LinearMap.mem_ker).mp (hseed_mem i)
-    have : B u₀ (seed i) = 0 := hker
-    rw [hBsymm (seed i) u₀]; exact this
+  obtain ⟨seed, hseed_ON, hseed_perp⟩ :=
+    exists_ortho_perp (I := I) g (γ 0) u₀ hUnit0
   have htransport : ∀ i, ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
       V 0 = seed i ∧
       (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧

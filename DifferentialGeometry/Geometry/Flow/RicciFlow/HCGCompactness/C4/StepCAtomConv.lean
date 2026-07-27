@@ -339,14 +339,15 @@ open scoped Manifold
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
+/-- On a normal-chart overlap, the intrinsic quadratic bump is the
+scalar bump applied to the origin metric coefficient and the normal
+transition vector. -/
 theorem quadNormal_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (f : ContDiffBump (0 : Real)) {z : E}
@@ -401,7 +402,7 @@ theorem stepCAtom_readout
           (normalTransition (I := I) Y beta gamma z)) := by
   exact quadNormal_readout (I := I) Y beta gamma (stepCBump lam hlam) hsrc
 
-
+/-- Pull one Step-C atom back by the exponential-side chart at `beta`. -/
 noncomputable def stepCAtomChart
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
@@ -512,8 +513,9 @@ theorem seqCenter_dead
     | none => rfl
     | some c => simp [hc, hgamma] at hk
 
-
-
+/-- Pull one ordered-net atom back by the exponential-side chart at
+`beta`. The wrapper installs the bundled manifold instances hidden in the
+sequence. -/
 noncomputable def seqAtomChart
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -551,8 +553,8 @@ omit [NeZero (Module.finrank ℝ E)] in
       rfl
   | some c => congr
 
-
-
+/-- Pulling a globally smooth ordered-net atom back by an exponential-side
+chart is smooth on every set contained in its intrinsic source-radius ball. -/
 theorem seqAtomChart_smooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)

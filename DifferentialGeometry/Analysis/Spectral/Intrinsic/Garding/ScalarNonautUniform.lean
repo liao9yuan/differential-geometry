@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -148,7 +148,9 @@ private theorem flux_jet_of_bdd
       (fun j => hP j t ht x) i
   exact hlocal.trans (mul_le_mul_of_nonneg_left hgrid (hC_nn i))
 
-private theorem fluxDiv_jet_bdd
+/-- Pointwise jet envelopes for a family of scalar-flux coefficients induce
+pointwise jet envelopes for their traced covariant derivatives. -/
+theorem fluxDiv_jet_bdd
     (q : SmoothRiemannianMetric I M) {α : Type*}
     (C : α → SmoothCcTensor q 1 1) (A : Set α)
     (B : ℕ → ℝ) (hB_nn : ∀ i, 0 ≤ B i)
@@ -660,7 +662,9 @@ theorem cc_lap_unif
     P + -Q ≤ (Dtop + Cp * J) + Cc * J := add_le_add hprincipal hconnection
     _ = Dtop + (Cp + Cc) * J := by ring
 
-private theorem finite_lap_unif
+/-- A uniform smooth scalar Laplacian pairing estimate transfers to the finite
+spectral-core energy inequality, independently of the chosen support. -/
+theorem finite_lap_unif
     (q : SmoothRiemannianMetric I M) {alpha : Type*}
     (h : alpha → SmoothRiemannianMetric I M) (A : Set alpha)
     (n : ℕ) (Clap : ℝ) (hClap_nn : 0 ≤ Clap)

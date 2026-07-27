@@ -58,7 +58,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
@@ -2205,6 +2205,356 @@ theorem scalarConv_of_dnConv
       metricDerivNorm (I := I) a (gSeq k t) (gInf t) gRef x)
       < C * (3 * (ε / (3 * C + 1))) := by
     exact mul_lt_mul_of_pos_left hS hC0
+  have hfin : C * (3 * (ε / (3 * C + 1))) < ε := by
+    have h2 : (3 * C + 1) * (ε / (3 * C + 1)) = ε := by
+      field_simp
+    nlinarith
+  exact lt_of_le_of_lt hb (lt_trans hlt hfin)
+
+/-- A four-factor telescoping bound, used for contractions whose metric and
+tensor factors both vary. -/
+private lemma abs_prod4_sub_le
+    (a b c d A B C D : Real) :
+    |a * b * c * d - A * B * C * D| ≤
+      |a - A| * |b| * |c| * |d| +
+        |A| * |b - B| * |c| * |d| +
+        |A| * |B| * |c - C| * |d| +
+        |A| * |B| * |C| * |d - D| := by
+  have h :
+      a * b * c * d - A * B * C * D =
+        (a - A) * b * c * d +
+          A * (b - B) * c * d +
+          A * B * (c - C) * d +
+          A * B * C * (d - D) := by
+    ring
+  rw [h]
+  calc
+    |(a - A) * b * c * d +
+          A * (b - B) * c * d +
+          A * B * (c - C) * d +
+          A * B * C * (d - D)|
+        ≤ |(a - A) * b * c * d +
+              A * (b - B) * c * d +
+              A * B * (c - C) * d| +
+            |A * B * C * (d - D)| := abs_add_le _ _
+    _ ≤ (|(a - A) * b * c * d + A * (b - B) * c * d| +
+              |A * B * (c - C) * d|) +
+            |A * B * C * (d - D)| := by
+          gcongr
+          exact abs_add_le _ _
+    _ ≤ ((|(a - A) * b * c * d| + |A * (b - B) * c * d|) +
+              |A * B * (c - C) * d|) +
+            |A * B * C * (d - D)| := by
+          gcongr
+          exact abs_add_le _ _
+    _ = |a - A| * |b| * |c| * |d| +
+          |A| * |b - B| * |c| * |d| +
+          |A| * |B| * |c - C| * |d| +
+          |A| * |B| * |C| * |d - D| := by
+        simp only [abs_mul]
+
+/-- Monotonicity for a product of four nonnegative-controlled factors. -/
+private lemma mul4_le_mul4
+    {a b c d A B C D : Real}
+    (ha : a ≤ A) (hb : b ≤ B) (hc : c ≤ C) (hd : d ≤ D)
+    (hb0 : 0 ≤ b) (hc0 : 0 ≤ c) (hd0 : 0 ≤ d)
+    (hA0 : 0 ≤ A) (hB0 : 0 ≤ B) (hC0 : 0 ≤ C) :
+    a * b * c * d ≤ A * B * C * D := by
+  have hAB : a * b ≤ A * B := mul_le_mul ha hb hb0 hA0
+  have hABC : a * b * c ≤ A * B * C :=
+    mul_le_mul hAB hc hc0 (mul_nonneg hA0 hB0)
+  exact mul_le_mul hABC hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
+
+omit [IsManifold I 2 M] in
+/-- Pair-uniform convergence estimate for the intrinsic squared Ricci norm.
+Both inverse-metric contractions and both Ricci factors are allowed to vary. -/
+theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
+    ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
+      (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
+      (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u'.inner x ξ ξ) →
+      (∀ a : ℕ, a ≤ 2 → metricCovDerivNorm (I := I) a u gRef x ≤ B) →
+      (∀ a : ℕ, a ≤ 2 → metricCovDerivNorm (I := I) a u' gRef x ≤ B) →
+      |normSq0S (I := I) u x 2 (metricRicci (I := I) (M := M) u x) -
+          normSq0S (I := I) u' x 2 (metricRicci (I := I) (M := M) u' x)| ≤
+        C * ∑ a ∈ Finset.range 3, metricDerivNorm (I := I) a u u' gRef x := by
+  classical
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  let basis : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x) :=
+    chartBasisFamily (I := I) x hxbase
+  obtain ⟨Minv, hMinv0, hMinv⟩ := invGram_le_of_low gRef x lam hlam
+  obtain ⟨Cd, hCd0, hCd⟩ := invGram_sub_le gRef x lam hlam
+  choose CR hCR0 hCR using
+    fun t : Fin (Module.finrank Real E) × Fin (Module.finrank Real E) =>
+      ricciSub_le_dNorm gRef x lam B hlam hB (basis t.1) (basis t.2)
+  choose CA hCA0 hCA using
+    fun t : Fin (Module.finrank Real E) × Fin (Module.finrank Real E) =>
+      ricci_abs_le gRef x lam B hlam hB (basis t.1) (basis t.2)
+  let K : Fin (Module.finrank Real E) → Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real :=
+    fun i j k l =>
+      Cd * Minv * CA (i, j) * CA (k, l) +
+        Minv * Cd * CA (i, j) * CA (k, l) +
+        Minv * Minv * CR (i, j) * CA (k, l) +
+        Minv * Minv * CA (i, j) * CR (k, l)
+  have hK0 : ∀ i j k l, 0 ≤ K i j k l := by
+    intro i j k l
+    dsimp only [K]
+    have hCRij : 0 ≤ CR (i, j) := (hCR0 (i, j)).le
+    have hCRkl : 0 ≤ CR (k, l) := (hCR0 (k, l)).le
+    exact add_nonneg
+      (add_nonneg
+        (add_nonneg
+          (mul_nonneg
+            (mul_nonneg (mul_nonneg hCd0 hMinv0) (hCA0 (i, j)))
+            (hCA0 (k, l)))
+          (mul_nonneg
+            (mul_nonneg (mul_nonneg hMinv0 hCd0) (hCA0 (i, j)))
+            (hCA0 (k, l))))
+        (mul_nonneg
+          (mul_nonneg (mul_nonneg hMinv0 hMinv0) hCRij)
+          (hCA0 (k, l))))
+      (mul_nonneg
+        (mul_nonneg (mul_nonneg hMinv0 hMinv0) (hCA0 (i, j)))
+        hCRkl)
+  have hsum0 : 0 ≤ ∑ i, ∑ j, ∑ k, ∑ l, K i j k l :=
+    Finset.sum_nonneg fun i _ =>
+      Finset.sum_nonneg fun j _ =>
+        Finset.sum_nonneg fun k _ =>
+          Finset.sum_nonneg fun l _ => hK0 i j k l
+  refine ⟨(∑ i, ∑ j, ∑ k, ∑ l, K i j k l) + 1, by linarith,
+    fun u u' hlow hlow' hbdd hbdd' => ?_⟩
+  let S : Real := ∑ a ∈ Finset.range 3, metricDerivNorm (I := I) a u u' gRef x
+  have hS0 : 0 ≤ S :=
+    Finset.sum_nonneg fun a _ => Real.sqrt_nonneg _
+  have hd0S : metricDerivNorm (I := I) 0 u u' gRef x ≤ S := by
+    dsimp only [S]
+    exact Finset.single_le_sum
+      (f := fun a => metricDerivNorm (I := I) a u u' gRef x)
+      (fun a _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by norm_num))
+  have hnorm (g : SmoothRiemannianMetric I M) :
+      normSq0S (I := I) g x 2 (metricRicci (I := I) (M := M) g x) =
+        ∑ i, ∑ j, ∑ k, ∑ l,
+          chartInvGramMatrix (I := I) g x x i k *
+            chartInvGramMatrix (I := I) g x x j l *
+            ricciTensor (I := I) g x (basis i) (basis j) *
+            ricciTensor (I := I) g x (basis k) (basis l) := by
+    have hinv : MetricInverseInBasis (I := I) g x basis
+        (fun i j => chartInvGramMatrix (I := I) g x x i j) := by
+      simpa only [basis] using chartInvGram_inverse (I := I) g x hxbase
+    rw [normSq0S_two_eq_coord (I := I) g x basis
+      (fun i j => chartInvGramMatrix (I := I) g x x i j) hinv]
+    refine Finset.sum_congr rfl fun i _ =>
+      Finset.sum_congr rfl fun j _ =>
+        Finset.sum_congr rfl fun k _ =>
+          Finset.sum_congr rfl fun l _ => ?_
+    simp only [metricRicci_apply]
+    change
+      chartInvGramMatrix (I := I) g x x i k *
+            chartInvGramMatrix (I := I) g x x j l *
+            metricRicciAt (I := I) g x (vec2 (basis i) (basis j)) *
+            metricRicciAt (I := I) g x (vec2 (basis k) (basis l)) =
+        chartInvGramMatrix (I := I) g x x i k *
+            chartInvGramMatrix (I := I) g x x j l *
+            ricciTensor (I := I) g x (basis i) (basis j) *
+            ricciTensor (I := I) g x (basis k) (basis l)
+    rw [metricRicciAt_apply_eq_ricciTensor,
+      metricRicciAt_apply_eq_ricciTensor]
+  rw [hnorm u, hnorm u']
+  have hdiff :
+      (∑ i, ∑ j, ∑ k, ∑ l,
+          chartInvGramMatrix (I := I) u x x i k *
+            chartInvGramMatrix (I := I) u x x j l *
+            ricciTensor (I := I) u x (basis i) (basis j) *
+            ricciTensor (I := I) u x (basis k) (basis l)) -
+        (∑ i, ∑ j, ∑ k, ∑ l,
+          chartInvGramMatrix (I := I) u' x x i k *
+            chartInvGramMatrix (I := I) u' x x j l *
+            ricciTensor (I := I) u' x (basis i) (basis j) *
+            ricciTensor (I := I) u' x (basis k) (basis l)) =
+        ∑ i, ∑ j, ∑ k, ∑ l,
+          (chartInvGramMatrix (I := I) u x x i k *
+                chartInvGramMatrix (I := I) u x x j l *
+                ricciTensor (I := I) u x (basis i) (basis j) *
+                ricciTensor (I := I) u x (basis k) (basis l) -
+            chartInvGramMatrix (I := I) u' x x i k *
+                chartInvGramMatrix (I := I) u' x x j l *
+                ricciTensor (I := I) u' x (basis i) (basis j) *
+                ricciTensor (I := I) u' x (basis k) (basis l)) := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [← Finset.sum_sub_distrib]
+  rw [hdiff]
+  have hterm : ∀ i j k l : Fin (Module.finrank Real E),
+      |chartInvGramMatrix (I := I) u x x i k *
+            chartInvGramMatrix (I := I) u x x j l *
+            ricciTensor (I := I) u x (basis i) (basis j) *
+            ricciTensor (I := I) u x (basis k) (basis l) -
+          chartInvGramMatrix (I := I) u' x x i k *
+            chartInvGramMatrix (I := I) u' x x j l *
+            ricciTensor (I := I) u' x (basis i) (basis j) *
+            ricciTensor (I := I) u' x (basis k) (basis l)|
+        ≤ K i j k l * S := by
+    intro i j k l
+    have hdik : |chartInvGramMatrix (I := I) u x x i k -
+          chartInvGramMatrix (I := I) u' x x i k| ≤ Cd * S := by
+      exact (hCd u u' hlow hlow' i k).trans
+        (mul_le_mul_of_nonneg_left hd0S hCd0)
+    have hdjl : |chartInvGramMatrix (I := I) u x x j l -
+          chartInvGramMatrix (I := I) u' x x j l| ≤ Cd * S := by
+      exact (hCd u u' hlow hlow' j l).trans
+        (mul_le_mul_of_nonneg_left hd0S hCd0)
+    have hRij : |ricciTensor (I := I) u x (basis i) (basis j) -
+          ricciTensor (I := I) u' x (basis i) (basis j)| ≤ CR (i, j) * S :=
+      hCR (i, j) u u' hlow hlow' hbdd hbdd'
+    have hRkl : |ricciTensor (I := I) u x (basis k) (basis l) -
+          ricciTensor (I := I) u' x (basis k) (basis l)| ≤ CR (k, l) * S :=
+      hCR (k, l) u u' hlow hlow' hbdd hbdd'
+    have e1 :
+        |chartInvGramMatrix (I := I) u x x i k -
+            chartInvGramMatrix (I := I) u' x x i k| *
+              |chartInvGramMatrix (I := I) u x x j l| *
+              |ricciTensor (I := I) u x (basis i) (basis j)| *
+              |ricciTensor (I := I) u x (basis k) (basis l)|
+          ≤ (Cd * Minv * CA (i, j) * CA (k, l)) * S := by
+      calc
+        _ ≤ (Cd * S) * Minv * CA (i, j) * CA (k, l) := by
+          exact mul4_le_mul4 hdik (hMinv u hlow j l)
+            (hCA (i, j) u hlow hbdd) (hCA (k, l) u hlow hbdd)
+            (abs_nonneg _) (abs_nonneg _) (abs_nonneg _)
+            (mul_nonneg hCd0 hS0) hMinv0 (hCA0 (i, j))
+        _ = _ := by ring
+    have e2 :
+        |chartInvGramMatrix (I := I) u' x x i k| *
+              |chartInvGramMatrix (I := I) u x x j l -
+                chartInvGramMatrix (I := I) u' x x j l| *
+              |ricciTensor (I := I) u x (basis i) (basis j)| *
+              |ricciTensor (I := I) u x (basis k) (basis l)|
+          ≤ (Minv * Cd * CA (i, j) * CA (k, l)) * S := by
+      calc
+        _ ≤ Minv * (Cd * S) * CA (i, j) * CA (k, l) := by
+          exact mul4_le_mul4 (hMinv u' hlow' i k) hdjl
+            (hCA (i, j) u hlow hbdd) (hCA (k, l) u hlow hbdd)
+            (abs_nonneg _) (abs_nonneg _) (abs_nonneg _)
+            hMinv0 (mul_nonneg hCd0 hS0) (hCA0 (i, j))
+        _ = _ := by ring
+    have e3 :
+        |chartInvGramMatrix (I := I) u' x x i k| *
+              |chartInvGramMatrix (I := I) u' x x j l| *
+              |ricciTensor (I := I) u x (basis i) (basis j) -
+                ricciTensor (I := I) u' x (basis i) (basis j)| *
+              |ricciTensor (I := I) u x (basis k) (basis l)|
+          ≤ (Minv * Minv * CR (i, j) * CA (k, l)) * S := by
+      calc
+        _ ≤ Minv * Minv * (CR (i, j) * S) * CA (k, l) := by
+          exact mul4_le_mul4 (hMinv u' hlow' i k) (hMinv u' hlow' j l)
+            hRij (hCA (k, l) u hlow hbdd)
+            (abs_nonneg _) (abs_nonneg _) (abs_nonneg _)
+            hMinv0 hMinv0 (mul_nonneg (hCR0 (i, j)).le hS0)
+        _ = _ := by ring
+    have e4 :
+        |chartInvGramMatrix (I := I) u' x x i k| *
+              |chartInvGramMatrix (I := I) u' x x j l| *
+              |ricciTensor (I := I) u' x (basis i) (basis j)| *
+              |ricciTensor (I := I) u x (basis k) (basis l) -
+                ricciTensor (I := I) u' x (basis k) (basis l)|
+          ≤ (Minv * Minv * CA (i, j) * CR (k, l)) * S := by
+      calc
+        _ ≤ Minv * Minv * CA (i, j) * (CR (k, l) * S) := by
+          exact mul4_le_mul4 (hMinv u' hlow' i k) (hMinv u' hlow' j l)
+            (hCA (i, j) u' hlow' hbdd') hRkl
+            (abs_nonneg _) (abs_nonneg _) (abs_nonneg _)
+            hMinv0 hMinv0 (hCA0 (i, j))
+        _ = _ := by ring
+    refine (abs_prod4_sub_le
+      (chartInvGramMatrix (I := I) u x x i k)
+      (chartInvGramMatrix (I := I) u x x j l)
+      (ricciTensor (I := I) u x (basis i) (basis j))
+      (ricciTensor (I := I) u x (basis k) (basis l))
+      (chartInvGramMatrix (I := I) u' x x i k)
+      (chartInvGramMatrix (I := I) u' x x j l)
+      (ricciTensor (I := I) u' x (basis i) (basis j))
+      (ricciTensor (I := I) u' x (basis k) (basis l))).trans ?_
+    calc
+      _ ≤ (Cd * Minv * CA (i, j) * CA (k, l)) * S +
+            (Minv * Cd * CA (i, j) * CA (k, l)) * S +
+            (Minv * Minv * CR (i, j) * CA (k, l)) * S +
+            (Minv * Minv * CA (i, j) * CR (k, l)) * S :=
+        add_le_add (add_le_add (add_le_add e1 e2) e3) e4
+      _ = K i j k l * S := by
+        dsimp only [K]
+        ring
+  refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+  refine (Finset.sum_le_sum fun i _ => Finset.abs_sum_le_sum_abs _ _).trans ?_
+  refine (Finset.sum_le_sum fun i _ =>
+    Finset.sum_le_sum fun j _ => Finset.abs_sum_le_sum_abs _ _).trans ?_
+  refine (Finset.sum_le_sum fun i _ =>
+    Finset.sum_le_sum fun j _ =>
+      Finset.sum_le_sum fun k _ => Finset.abs_sum_le_sum_abs _ _).trans ?_
+  refine (Finset.sum_le_sum fun i _ =>
+    Finset.sum_le_sum fun j _ =>
+      Finset.sum_le_sum fun k _ =>
+        Finset.sum_le_sum fun l _ => hterm i j k l).trans ?_
+  have hEq :
+      (∑ i, ∑ j, ∑ k, ∑ l, K i j k l * S) =
+        (∑ i, ∑ j, ∑ k, ∑ l, K i j k l) * S := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [Finset.sum_mul]
+  rw [hEq]
+  exact mul_le_mul_of_nonneg_right (by linarith) hS0
+
+  omit [IsManifold I 2 M] in
+  /-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
+  point from the same `C²` metric-jet convergence package as Ricci and scalar
+curvature convergence. -/
+theorem ricNormConv_of_dn
+    (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
+    (gInf : Real → SmoothRiemannianMetric I M)
+    (β ψ lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B)
+    (hlowSeq : ∀ k : ℕ, ∀ t ∈ Set.Icc β ψ, ∀ ξ : TangentSpace I x,
+      lam * gRef.inner x ξ ξ ≤ (gSeq k t).inner x ξ ξ)
+    (hlowInf : ∀ t ∈ Set.Icc β ψ, ∀ ξ : TangentSpace I x,
+      lam * gRef.inner x ξ ξ ≤ (gInf t).inner x ξ ξ)
+    (hbddSeq : ∀ k : ℕ, ∀ t ∈ Set.Icc β ψ, ∀ a : ℕ, a ≤ 2 →
+      metricCovDerivNorm (I := I) a (gSeq k t) gRef x ≤ B)
+    (hbddInf : ∀ t ∈ Set.Icc β ψ, ∀ a : ℕ, a ≤ 2 →
+      metricCovDerivNorm (I := I) a (gInf t) gRef x ≤ B)
+    (hconv : ∀ ε : Real, 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k →
+      ∀ t ∈ Set.Icc β ψ, ∀ a : ℕ, a ≤ 2 →
+        metricDerivNorm (I := I) a (gSeq k t) (gInf t) gRef x < ε) :
+    ∀ ε : Real, 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ t ∈ Set.Icc β ψ,
+      |normSq0S (I := I) (gSeq k t) x 2
+            (metricRicci (I := I) (M := M) (gSeq k t) x) -
+          normSq0S (I := I) (gInf t) x 2
+            (metricRicci (I := I) (M := M) (gInf t) x)| < ε := by
+  obtain ⟨C, hC0, hC⟩ := ricNormSub_le_dn gRef x lam B hlam hB
+  intro ε hε
+  have hε' : 0 < ε / (3 * C + 1) := by positivity
+  obtain ⟨k0, hk0⟩ := hconv (ε / (3 * C + 1)) hε'
+  refine ⟨k0, fun k hk t ht => ?_⟩
+  have hb := hC (gSeq k t) (gInf t) (hlowSeq k t ht) (hlowInf t ht)
+    (hbddSeq k t ht) (hbddInf t ht)
+  have hS : ∑ a ∈ Finset.range 3,
+      metricDerivNorm (I := I) a (gSeq k t) (gInf t) gRef x
+      < 3 * (ε / (3 * C + 1)) := by
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
+    have h0 := hk0 k hk t ht 0 (by norm_num)
+    have h1 := hk0 k hk t ht 1 (by norm_num)
+    have h2 := hk0 k hk t ht 2 (by norm_num)
+    linarith
+  have hlt : C * (∑ a ∈ Finset.range 3,
+      metricDerivNorm (I := I) a (gSeq k t) (gInf t) gRef x)
+      < C * (3 * (ε / (3 * C + 1))) :=
+    mul_lt_mul_of_pos_left hS hC0
   have hfin : C * (3 * (ε / (3 * C + 1))) < ε := by
     have h2 : (3 * C + 1) * (ε / (3 * C + 1)) = ε := by
       field_simp

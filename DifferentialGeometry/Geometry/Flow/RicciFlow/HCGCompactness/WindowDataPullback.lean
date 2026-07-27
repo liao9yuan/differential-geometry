@@ -30,7 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
@@ -304,10 +304,9 @@ theorem solnEvolField_pullback
     solnEvolField (I := I) (solutionOn_pullback (I := I) S Φ) t y slots
       = solnEvolField (I := I) S t (Φ y)
           (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q)) := by
-  change (-2 : ℝ) * solnRicField (I := I) (solutionOn_pullback (I := I) S Φ) t y slots =
-    (-2 : ℝ) * solnRicField (I := I) S t (Φ y)
-      (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q))
-  rw [solnRicField_pullback (I := I) S Φ t y slots]
+  simp only [solnEvolField, ContMDiffSection.coe_smul, Pi.smul_apply,
+    Tensor0SBundle.Tensor0SSpace.smul_apply,
+    solnRicField_pullback (I := I) S Φ t y slots]
 
 
 

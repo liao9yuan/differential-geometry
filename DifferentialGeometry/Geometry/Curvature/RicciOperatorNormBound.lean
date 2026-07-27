@@ -321,7 +321,7 @@ theorem exists_rm04_bound [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 
 theorem exists_ricci_bound
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [NeZero (Module.finrank Real E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) :

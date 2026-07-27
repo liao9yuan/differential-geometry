@@ -15,13 +15,13 @@ import Mathlib.LinearAlgebra.Multilinear.Basic
 
 namespace DifferentialGeometry
 
-open scoped Manifold
+open scoped Manifold ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsRCLikeNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ⊤ M]
+variable [IsManifold I ∞ M]
 
 def VectorField :=
   ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)
@@ -65,7 +65,8 @@ noncomputable instance : AddCommGroup (VectorField (I := I) (M := M)) :=
   inferInstanceAs (AddCommGroup (ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)))
 
 noncomputable instance :
-    Module (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
+    Module (ScalarField (I := I) (M := M))
+      (ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)) where
   smul f V := ⟨fun x => f x • V x, f.contMDiff.smul_section V.contMDiff⟩
   smul_add f V W := DFunLike.ext _ _ fun x => smul_add (f x) (V x) (W x)
   add_smul f g V := DFunLike.ext _ _ fun x => add_smul (f x) (g x) (V x)

@@ -7,7 +7,7 @@ open scoped Topology NNReal
 
 namespace DifferentialGeometry.Analysis.ODE
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 theorem forward_solution_of_lipschitzWith_affineBound
     {f : ℝ → E → E} {T : ℝ} (hT : 0 < T) {K : ℝ≥0} {C : ℝ} (hC : 0 ≤ C)
@@ -25,7 +25,7 @@ theorem forward_solution_of_lipschitzWith_affineBound
     have hle := hmono (show (0 : ℝ) ≤ T from le_of_lt hT)
     rw [gronwallBound_x0] at hle
     exact le_trans hx₀_nn hle
-  have hret_lip : LipschitzWith 1 (ballRetraction (X := E) ρ) :=
+  have hret_lip : LipschitzWith 2 (ballRetraction (X := E) ρ) :=
     lipschitzWith_ballRetraction hρ_nn
   have hret_norm_le : ∀ x : E, ‖ballRetraction (X := E) ρ x‖ ≤ ‖x‖ := by
     intro x
@@ -37,14 +37,15 @@ theorem forward_solution_of_lipschitzWith_affineBound
   have hret_ball : ∀ x : E, ‖ballRetraction (X := E) ρ x‖ ≤ ρ :=
     fun x => ballRetraction_mem_closedBall hρ_nn x
   set g : ℝ → E → E := fun t x => f t (ballRetraction (X := E) ρ x) with hg_def
+  set Kret : ℝ≥0 := K * 2 with hKret_def
   set L : ℝ := C + (K : ℝ) * ρ with hL_def
   have hL_nn : 0 ≤ L := by
     have : 0 ≤ (K : ℝ) * ρ := mul_nonneg hK_nn hρ_nn
     rw [hL_def]; linarith
-  have hg_lip : ∀ t ∈ Icc (0 : ℝ) T, LipschitzWith K (g t) := by
+  have hg_lip : ∀ t ∈ Icc (0 : ℝ) T, LipschitzWith Kret (g t) := by
     intro t ht
     have := (hlip t ht).comp hret_lip
-    simpa [hg_def, mul_one] using this
+    simpa [hg_def, Kret] using this
   have hg_norm_all : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : E, ‖g t x‖ ≤ L := by
     intro t ht x
     have h1 : ‖f t (ballRetraction (X := E) ρ x)‖ ≤
@@ -64,7 +65,7 @@ theorem forward_solution_of_lipschitzWith_affineBound
   set LN : ℝ≥0 := ⟨L, hL_nn⟩ with hLN_def
   set aN : ℝ≥0 := ⟨L * T, mul_nonneg hL_nn (le_of_lt hT)⟩ with haN_def
   have hg_lip_ball : ∀ t ∈ Icc (0 : ℝ) T,
-      LipschitzOnWith K (g t) (closedBall x₀ aN) :=
+      LipschitzOnWith Kret (g t) (closedBall x₀ aN) :=
     fun t ht => (hg_lip t ht).lipschitzOnWith (s := closedBall x₀ aN)
   have hg_cont_ball : ∀ x ∈ closedBall x₀ aN, ContinuousOn (g · x) (Icc (0 : ℝ) T) :=
     fun x _ => hg_cont x
@@ -77,7 +78,7 @@ theorem forward_solution_of_lipschitzWith_affineBound
     rw [mem_closedBall, dist_self]; exact le_rfl
   obtain ⟨γ, hγ0, hγcont, hγderiv_g⟩ :=
     forward_picard_solution_from_zero (f := g) (x₀ := x₀) (a := aN) (r := (0 : ℝ≥0))
-      (L := LN) (K := K) (δ := T) hT hg_lip_ball hg_cont_ball hg_norm_ball hmul hx_mem
+      (L := LN) (K := Kret) (δ := T) hT hg_lip_ball hg_cont_ball hg_norm_ball hmul hx_mem
   have hγderiv_Ici : ∀ t ∈ Ico (0 : ℝ) T,
       HasDerivWithinAt γ (g t (γ t)) (Ici t) t :=
     fun t ht => hasDerivWithinAt_Ici_of_Ici_zero (hγderiv_g t ht) ht.1

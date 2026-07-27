@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Metric.Sphere.OrthogonalAction
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundShape
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
+import DifferentialGeometry.Geometry.Curvature.MetricSectional
 
 
 
@@ -57,17 +58,18 @@ theorem metricRm04_round_invariant [NeZero n]
     x X Y Z W
   rwa [pullbackMetric_round_eq] at h
 
-
-
-
-
-
-
-
+set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero n] in
 omit [FiniteDimensional ℝ E] in
-theorem roundMetric_sec_value [NeZero n]
-    (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x) :
+/-- **The round sphere's sectional-curvature numerator is the Gram determinant** (constant curvature
+`c = 1`): `Rm04(X,Y,Y,X) = g(X,X)g(Y,Y) − g(X,Y)²` at every point.  This is the curvature content of
+`ConstPosSecMetric roundMetric`; the `∃ c, …` wrapper is assembled where `ConstPosSecMetric` is in
+scope (the Hamilton space-form file).  The curvature operator on the chart-constant extensions is
+reduced to genuinely smooth sections by germ congruence
+(`connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst`), then evaluated by the Gauss
+equation `dIncl_curv_inner`. -/
+theorem roundMetric_sec_value (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x) :
     metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
       = (roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x Y Y
         - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x X
@@ -101,14 +103,14 @@ theorem roundMetric_sec_value [NeZero n]
     real_inner_comm (dIncl (n := n) x Y) (dIncl (n := n) x X)]
   ring
 
-
-
-
-
-
-omit [NeZero n] in
-omit [FiniteDimensional ℝ E] in
-theorem roundMetric_constPosSec [NeZero n] :
+omit [NeZero n]
+  [FiniteDimensional ℝ E] in
+/-- **The round metric has constant positive sectional curvature (`c = 1`).**  This is precisely the
+unfolding of `ConstPosSecMetric roundMetric` (defined in the Hamilton space-form file, which cannot be
+imported here): `∃ c > 0, ∀ x X Y, Rm04(X,Y,Y,X) = c·(g(X,X)g(Y,Y) − g(X,Y)²)`.  It is therefore usable
+directly wherever `ConstPosSecMetric roundMetric` is expected (definitional equality), feeding the
+spherical-space-form quotient descent. -/
+theorem roundMetric_constPosSec :
     ∃ c : ℝ, 0 < c ∧ ∀ (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n) x),
       metricRm04StdAt (roundMetric (E := E) (n := n)) x X Y Y X
         = c * ((roundMetric (E := E) (n := n)).inner x X X * (roundMetric (E := E) (n := n)).inner x
@@ -116,6 +118,41 @@ theorem roundMetric_constPosSec [NeZero n] :
             - (roundMetric (E := E) (n := n)).inner x X Y * (roundMetric (E := E) (n := n)).inner x
               X Y) :=
   ⟨1, one_pos, fun x X Y => by rw [one_mul]; exact roundMetric_sec_value x X Y⟩
+
+private instance sphereModel_neZero :
+    NeZero (finrank ℝ (EuclideanSpace ℝ (Fin n))) := by
+  rw [finrank_euclideanSpace_fin]
+  infer_instance
+
+omit [FiniteDimensional ℝ E] in
+/-- The round metric has the curvature-one Riemann-operator formula. -/
+theorem round_riemann_one (x : sphere (0 : E) 1)
+    (X Y Z : TangentSpace (𝓡 n) x) :
+    riemannOp (LeviCivita (I := 𝓡 n) (roundMetric (E := E) (n := n))) x X Y Z =
+      (roundMetric (E := E) (n := n)).inner x Y Z • X -
+        (roundMetric (E := E) (n := n)).inner x X Z • Y := by
+  haveI : IsManifold (𝓡 n) 1 (sphere (0 : E) 1) :=
+    EuclideanSpace.instIsManifoldSphere.of_le le_top
+  haveI : IsManifold (𝓡 n) 2 (sphere (0 : E) 1) :=
+    EuclideanSpace.instIsManifoldSphere.of_le le_top
+  haveI : IsManifold (𝓡 n) 3 (sphere (0 : E) 1) :=
+    EuclideanSpace.instIsManifoldSphere.of_le le_top
+  haveI : IsManifold (𝓡 n) ((∞ : WithTop ℕ∞) + 1) (sphere (0 : E) 1) :=
+    EuclideanSpace.instIsManifoldSphere.of_le le_top
+  have hRm :
+      ∀ A B C D : TangentSpace (𝓡 n) x,
+        metricRm04StdAt (roundMetric (E := E) (n := n)) x A B C D =
+          1 * ((roundMetric (E := E) (n := n)).inner x B C *
+              (roundMetric (E := E) (n := n)).inner x A D -
+            (roundMetric (E := E) (n := n)).inner x A C *
+              (roundMetric (E := E) (n := n)).inner x B D) := by
+    exact metricRm_of_sec (I := 𝓡 n)
+      (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)) x 1
+        (fun A B => by
+          simpa only [one_mul] using roundMetric_sec_value (E := E) (n := n) x A B)
+  simpa only [one_smul] using
+    riemannOp_of_rm (I := 𝓡 n)
+      (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)) x 1 hRm X Y Z
 
 end Geometry
 end DifferentialGeometry

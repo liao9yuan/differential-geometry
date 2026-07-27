@@ -33,7 +33,7 @@ private theorem sub_eq_sub_add_sub {A : Type*} [AddCommGroup A] (a b c : A) :
     a - c = (b - c) + (a - b) := by
   abel
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]

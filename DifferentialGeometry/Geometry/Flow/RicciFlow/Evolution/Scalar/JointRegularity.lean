@@ -22,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}

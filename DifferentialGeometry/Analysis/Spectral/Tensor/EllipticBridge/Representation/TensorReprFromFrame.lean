@@ -41,9 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-abbrev TensorCompIdx (r s : ℕ) : Type _ :=
-  (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))
-
 def chartL2Measure (α : M) : Measure EuclN :=
   (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
 

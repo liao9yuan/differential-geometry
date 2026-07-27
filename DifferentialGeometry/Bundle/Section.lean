@@ -9,7 +9,7 @@ import DifferentialGeometry.Bundle.Frame
 
 
 
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Topology
 open Bundle
 
 section ModuleOverSmoothFunctions
@@ -46,6 +46,109 @@ instance instModuleContMDiffMap : Module C^n⟮I, M; 𝕜⟯ Cₛ^n⟮I; F, V⟯
 end ContMDiffSection
 
 end ModuleOverSmoothFunctions
+
+section BundledFamilies
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
+  {HB : Type*} [TopologicalSpace HB]
+  {IB : ModelWithCorners 𝕜 EB HB}
+  {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+  {EM : Type*} [NormedAddCommGroup EM] [NormedSpace 𝕜 EM]
+  {HM : Type*} [TopologicalSpace HM]
+  {IM : ModelWithCorners 𝕜 EM HM}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {V : B → Type*} [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)]
+  [TopologicalSpace (TotalSpace F V)] [∀ x, TopologicalSpace (V x)]
+  [FiberBundle F V] [VectorBundle 𝕜 F V]
+  {n : WithTop ℕ∞}
+
+/-- Fibrewise scalar multiplication preserves smoothness for a vector-bundle
+family lying over an arbitrary smooth base map. -/
+theorem ContMDiff.smul_bundle
+    {b : M → B} {f : M → 𝕜} {s : ∀ x, V (b x)}
+    (hf : ContMDiff IM 𝓘(𝕜, 𝕜) n f)
+    (hs : ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (s x))) :
+    ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (f x • s x)) := by
+  intro x
+  have hsx := hs x
+  rw [Bundle.contMDiffAt_totalSpace] at hsx ⊢
+  refine ⟨hsx.1, ?_⟩
+  let e := trivializationAt F V (b x)
+  apply ((hf x).smul hsx.2).congr_of_eventuallyEq
+  have he : ∀ᶠ y in 𝓝 x, b y ∈ e.baseSet := by
+    apply hsx.1.continuousAt
+    exact e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt F V (b x))
+  filter_upwards [he] with y hy
+  change (e ⟨b y, f y • s y⟩).2 = f y • (e ⟨b y, s y⟩).2
+  exact (e.linear 𝕜 hy).map_smul (f y) (s y)
+
+/-- The zero family over an arbitrary smooth base map is smooth as a
+vector-bundle-valued map. -/
+theorem ContMDiff.zero_bundle
+    {b : M → B} (hb : ContMDiff IM IB n b) :
+    ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (0 : V (b x))) := by
+  intro x
+  rw [Bundle.contMDiffAt_totalSpace]
+  refine ⟨hb x, ?_⟩
+  let e := trivializationAt F V (b x)
+  apply (contMDiffAt_const (I := IM) (I' := 𝓘(𝕜, F)) (n := n)
+    (x := x) (c := (0 : F))).congr_of_eventuallyEq
+  have he : ∀ᶠ y in 𝓝 x, b y ∈ e.baseSet := by
+    apply (hb x).continuousAt
+    exact e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt F V (b x))
+  filter_upwards [he] with y hy
+  change (e ⟨b y, (0 : V (b y))⟩).2 = 0
+  exact (e.linear 𝕜 hy).map_zero
+
+/-- Fibrewise addition preserves smoothness for vector-bundle families over
+the same arbitrary base map. -/
+theorem ContMDiff.add_bundle
+    {b : M → B} {s t : ∀ x, V (b x)}
+    (hs : ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (s x)))
+    (ht : ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (t x))) :
+    ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (s x + t x)) := by
+  intro x
+  have hsx := hs x
+  have htx := ht x
+  rw [Bundle.contMDiffAt_totalSpace] at hsx htx ⊢
+  refine ⟨hsx.1, ?_⟩
+  let e := trivializationAt F V (b x)
+  apply (hsx.2.add htx.2).congr_of_eventuallyEq
+  have he : ∀ᶠ y in 𝓝 x, b y ∈ e.baseSet := by
+    apply hsx.1.continuousAt
+    exact e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt F V (b x))
+  filter_upwards [he] with y hy
+  change (e ⟨b y, s y + t y⟩).2 =
+    (e ⟨b y, s y⟩).2 + (e ⟨b y, t y⟩).2
+  exact (e.linear 𝕜 hy).map_add (s y) (t y)
+
+/-- A finite fibrewise sum of smooth vector-bundle families over an arbitrary
+smooth base map is smooth. -/
+theorem ContMDiff.sum_bundle
+    {b : M → B} (hb : ContMDiff IM IB n b)
+    {ι : Type*} {u : ι → ∀ x, V (b x)} (S : Finset ι)
+    (hu : ∀ i ∈ S, ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (u i x))) :
+    ContMDiff IM (IB.prod 𝓘(𝕜, F)) n
+      (fun x => TotalSpace.mk' F (b x) (∑ i ∈ S, u i x)) := by
+  classical
+  induction S using Finset.induction_on with
+  | empty =>
+      simpa only [Finset.sum_empty] using ContMDiff.zero_bundle (F := F) hb
+  | @insert i S hi ih =>
+      simp only [Finset.sum_insert hi]
+      exact ContMDiff.add_bundle (hu i (Finset.mem_insert_self i S))
+        (ih fun j hj => hu j (Finset.mem_insert_of_mem hj))
+
+end BundledFamilies
 
 section MapSection
 

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbitUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.SeeleyTimeExtension
 
 
 open Set Function Filter Bundle
@@ -57,8 +58,6 @@ omit [IsManifold I ∞ M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M
 theorem timeWindowBump_section_contMDiff (a b δ : ℝ) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => timeWindowBump a b δ q.1) :=
   (timeWindowBump_contDiff a b δ).contMDiff.comp contMDiff_fst
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem smul_tangentBundleSection_contMDiffWithinAt
@@ -85,8 +84,6 @@ theorem smul_tangentBundleSection_contMDiffWithinAt
     simpa using (e.linear ℝ hx).2 (η x.1) (X x.1 x.2)
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).2 (η q₀.1) (X q₀.1 q₀.2)
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem smul_tangentBundleSection_contMDiff
@@ -129,8 +126,6 @@ theorem smul_tangentBundleSection_contMDiff
     · exact Or.inl (htsupp h)
     · exact Or.inr h
   exact contMDiff_of_contMDiffOn_union_of_isOpen honU honV hcover hUopen hVopen
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem interior_field_global_cutoff_extension_loc
@@ -198,8 +193,6 @@ theorem interior_field_global_cutoff_extension_loc
         exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
       exact smul_tangentBundleSection_contMDiff X_DT (timeWindowBump a b δ) T hηsm hint htsupp
     exact autonomizedFieldJointC1_of_contMDiff (fun s x => timeWindowBump a b δ s • X_DT s x) hsm
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_timeSlice_of_jointlyContMDiffOn
@@ -218,8 +211,6 @@ theorem contMDiff_timeSlice_of_jointlyContMDiffOn
         (Set.Ioo a b ×ˢ (Set.univ : Set M)) (t, x) := hsm (t, x) hmem
     exact h1.comp x (hpair x).contMDiffWithinAt hmaps
   exact hcomp.contMDiffAt (by simp)
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem hasMFDerivWithinAt_piecewise_of_agree_at_junction
@@ -357,10 +348,9 @@ theorem exists_local_flow_anchored_at_interior_time
     rw [show ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ p t)))
         = ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ p t))) by rw [heq]]
     exact hbare
-
-
-omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
-private theorem integralCurves_eqOn_Icc_of_agree_at_left
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] in
+theorem integralCurves_eqOn_Icc_of_agree_at_left
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
@@ -398,6 +388,122 @@ private theorem integralCurves_eqOn_Icc_of_agree_at_left
     intro t ht
     rw [hXt_eq t (hsub ht) (Φ' t x')]; exact hflow' t ht
   exact bare_forward_flow_eqOn_of_jointC1 Xt hXt_auto Φ Φ' x x' hflowXt hflowXt' hstart
+
+omit [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [FiniteDimensional ℝ E] in
+/-- Two forward bare integral curves of a field which is smooth for positive
+time agree on the whole common half-open interval once the field has one
+uniform chart-Lipschitz window at each initial point.
+
+The endpoint window is handled by `bare_fromZero_local`.  After choosing one
+positive time in that window, `integralCurves_eqOn_Icc_of_agree_at_left` propagates equality to
+an arbitrary later target using only the positive-time joint smoothness of the
+field. -/
+theorem bare_fromZero_full
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hLip : ∀ α : M, ∃ (a : ℝ≥0) (delta₀ : ℝ) (K : ℝ≥0),
+      0 < (a : ℝ) ∧ 0 < delta₀ ∧
+        ∀ t ∈ Set.Icc (0 : ℝ) delta₀,
+          LipschitzOnWith K (fromZeroChartField (I := I) X α t)
+            (Metric.closedBall (extChartAt I α α) a))
+    (Φ Φ' : ℝ → M → M) (x x' : M)
+    (hflow : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x'))))
+    (hstart : Φ 0 x = Φ' 0 x') :
+    ∀ t ∈ Set.Ico (0 : ℝ) T, Φ t x = Φ' t x' := by
+  obtain ⟨a, delta₀, K, ha, hdelta₀, hlip⟩ := hLip (Φ 0 x)
+  obtain ⟨delta, hdelta, hlocal⟩ :=
+    bare_fromZero_local (I := I) X (Φ 0 x) ha hdelta₀ hlip
+      (fun t => Φ t x) (fun t => Φ' t x') hT rfl hstart.symm hflow hflow'
+  intro t ht
+  rcases eq_or_lt_of_le ht.1 with ht0 | ht0
+  · simpa [ht0] using hstart
+  · set e : ℝ := min (delta / 2) (t / 2) with he
+    have he0 : 0 < e := by
+      rw [he]
+      exact lt_min (half_pos hdelta) (half_pos ht0)
+    have het : e < t := by
+      have he_le : e ≤ t / 2 := by rw [he]; exact min_le_right _ _
+      linarith
+    have hedelta : e ≤ delta := by
+      have he_le : e ≤ delta / 2 := by rw [he]; exact min_le_left _ _
+      linarith
+    have heq : Φ e x = Φ' e x' := hlocal ⟨he0.le, hedelta⟩
+    have hflowIcc : ∀ s ∈ Set.Icc e t,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Icc e t) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ s x))) := by
+      intro s hs
+      exact (hflow s ⟨le_trans he0.le hs.1, lt_of_le_of_lt hs.2 ht.2⟩).mono
+        (fun u hu => le_trans he0.le hu.1)
+    have hflowIcc' : ∀ s ∈ Set.Icc e t,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Icc e t) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ' s x'))) := by
+      intro s hs
+      exact (hflow' s ⟨le_trans he0.le hs.1, lt_of_le_of_lt hs.2 ht.2⟩).mono
+        (fun u hu => le_trans he0.le hu.1)
+    exact integralCurves_eqOn_Icc_of_agree_at_left X T hint Φ Φ' x x' he0 het ht.2
+          hflowIcc hflowIcc' heq t ⟨het.le, le_rfl⟩
+
+omit [CompactSpace M] in
+/-- Forward uniqueness on a half-open interval for a field which is jointly smooth on the
+closed slab.  Seeley extension turns the closed-slab field into a globally smooth field; the
+existing one-sided autonomous uniqueness theorem then applies on each compact initial segment.
+
+Unlike `bare_fromZero_full`, this theorem needs no separately supplied chart-Lipschitz datum.
+It is the shorter endpoint tool when a canonical parabolic solution already supplies joint
+smoothness of its vector field through `t = 0`. -/
+theorem bare_Ico_unique
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (Φ Φ' : ℝ → M → M) (x x' : M)
+    (hflow : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Ici (0 : ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x'))))
+    (hstart : Φ 0 x = Φ' 0 x') :
+    ∀ t ∈ Set.Ico (0 : ℝ) T, Φ t x = Φ' t x' := by
+  obtain ⟨Xext, hXext, hXeq⟩ := seeley_time_extend X T hT hsmooth
+  have hXc1 : AutonomizedFieldJointC1 (I := I) Xext :=
+    autonomizedFieldJointC1_of_contMDiff Xext hXext
+  intro t ht
+  rcases eq_or_lt_of_le ht.1 with ht0 | ht0
+  · simpa [ht0] using hstart
+  · have hsub : Set.Icc (0 : ℝ) t ⊆ Set.Ici 0 := by
+      intro s hs
+      exact hs.1
+    have hflowIcc : ∀ s ∈ Set.Icc (0 : ℝ) t,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Icc (0 : ℝ) t) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Xext s (Φ s x))) := by
+      intro s hs
+      have hsT : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_of_le_of_lt hs.2 ht.2⟩
+      have hsT' : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, (lt_of_le_of_lt hs.2 ht.2).le⟩
+      have hd := (hflow s hsT).mono hsub
+      rw [hXeq s hsT' (Φ s x)]
+      exact hd
+    have hflowIcc' : ∀ s ∈ Set.Icc (0 : ℝ) t,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Icc (0 : ℝ) t) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Xext s (Φ' s x'))) := by
+      intro s hs
+      have hsT : s ∈ Set.Ico (0 : ℝ) T := ⟨hs.1, lt_of_le_of_lt hs.2 ht.2⟩
+      have hsT' : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, (lt_of_le_of_lt hs.2 ht.2).le⟩
+      have hd := (hflow' s hsT).mono hsub
+      rw [hXeq s hsT' (Φ' s x')]
+      exact hd
+    exact bare_forward_flow_eqOn_of_jointC1 Xext hXc1 Φ Φ' x x'
+      hflowIcc hflowIcc' hstart t ⟨ht0.le, le_rfl⟩
 
 
 
@@ -559,8 +665,6 @@ private def existsForwardIntegralCurveUpTo (X : ℝ → ∀ x : M, TangentSpace 
     ∀ t ∈ Set.Ico (0:ℝ) s,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Ici (0:ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t)))
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem existsForwardIntegralCurveUpTo_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)
@@ -569,8 +673,6 @@ private theorem existsForwardIntegralCurveUpTo_mono (X : ℝ → ∀ x : M, Tang
       s' := by
   obtain ⟨c, hc0, hc⟩ := h
   exact ⟨c, hc0, fun t ht => hc t ⟨ht.1, lt_of_lt_of_le ht.2 hss⟩⟩
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem existsForwardIntegralCurveUpTo_extend
@@ -603,8 +705,6 @@ private theorem existsForwardIntegralCurveUpTo_extend
     have hagree : c e = f2 e := by rw [hf2def]; exact (hWinit (c e)).symm
     exact hasMFDerivWithinAt_piecewise_of_agree_at_junction X c f2 (c := e) (c' := e + ρ)
       (by linarith) hagree hf1 hf1c hf2
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem existsForwardIntegralCurveUpTo_chain

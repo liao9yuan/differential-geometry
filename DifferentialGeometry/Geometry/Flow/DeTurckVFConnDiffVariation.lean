@@ -173,6 +173,22 @@ private theorem bilin_ortho_family_diag_eq_chartGram_trace
   rw [← Finset.sum_smul]
   rw [sum_famCoord_eq_chartInvGram (I := I) g hx hxsrc F hF m n]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+theorem deTurckVF_eq_orthonormal_trace
+    (g g_bg : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ i j, g.inner x (F i) (F j) = if i = j then 1 else 0) :
+    (deTurckVF (I := I) g g_bg :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+      ∑ i : Fin (Module.finrank ℝ E), connDiff (I := I) g g_bg x (F i) (F i) := by
+  classical
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hxsrc : x ∈ (extChartAt I x).source := mem_extChartAt_source x
+  rw [deTurckVF_apply_eq (I := I) g g_bg x]
+  rw [bilin_ortho_family_diag_eq_chartGram_trace (I := I) g hx hxsrc F hF
+    (connDiff (I := I) g g_bg x)]
+
 omit [SigmaCompactSpace M] in
 theorem deTurckVF_eq_orthoFrame_trace
     (g g_bg : SmoothRiemannianMetric I M) (x : M) :
@@ -182,15 +198,9 @@ theorem deTurckVF_eq_orthoFrame_trace
         connDiff (I := I) g g_bg x
           (smoothOrthoFrame (I := I) g x i x)
           (smoothOrthoFrame (I := I) g x i x) := by
-  classical
-  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
-    FiberBundle.mem_baseSet_trivializationAt' x
-  have hxsrc : x ∈ (extChartAt I x).source := mem_extChartAt_source x
-  rw [deTurckVF_apply_eq (I := I) g g_bg x]
-  rw [bilin_ortho_family_diag_eq_chartGram_trace (I := I) g hx hxsrc
+  exact deTurckVF_eq_orthonormal_trace (I := I) g g_bg x
     (fun i => smoothOrthoFrame (I := I) g x i x)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)
-    (connDiff (I := I) g g_bg x)]
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

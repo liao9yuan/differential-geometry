@@ -37,7 +37,7 @@ open scoped Manifold ContDiff Topology BigOperators ENNReal
 open Bundle Manifold
 open DifferentialGeometry.Integral.Connection Tensor0SBundle
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]

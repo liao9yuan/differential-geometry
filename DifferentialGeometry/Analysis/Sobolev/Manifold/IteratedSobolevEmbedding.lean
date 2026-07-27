@@ -18,7 +18,7 @@ namespace Analysis
 namespace Sobolev
 namespace Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -749,7 +749,7 @@ private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
 end ChartTower
 
 theorem wkpNormChart_succ_subcritical_step
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -934,7 +934,7 @@ end IterationCalc
 
 namespace IteratedC0
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1081,7 +1081,7 @@ namespace IteratedC0
 
 private theorem statement_holds_aux :
     ∀ (k : ℕ),
-      ∀ {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+      ∀ {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
         [FiniteDimensional ℝ E]
         {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
         {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1181,7 +1181,7 @@ private theorem statement_holds_aux :
 end IteratedC0
 
 theorem iterated_sobolev_embedding_chart_C0
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -1208,7 +1208,7 @@ theorem iterated_sobolev_embedding_chart_C0
   exact IteratedC0.statement_holds_aux j g hp_one hreg hkp' hu_meas hu
 
 theorem sobolev_embedding_chart_C0_Hk
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -1612,7 +1612,7 @@ theorem memWkpChart_mono_exponent [CompactSpace M]
 end ChartLevelMonoExp
 
 theorem iterated_sobolev_embedding_chart_C0_unconditional
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

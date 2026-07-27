@@ -72,7 +72,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -90,7 +90,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 theorem solution_rm04LowersRm13At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -122,7 +122,7 @@ theorem solution_rm04LowersRm13At
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem rm13_apply_eq_rm04_raise
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -162,7 +162,7 @@ theorem rm13_apply_eq_rm04_raise
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_eq_rm04_raise
     (g : SmoothRiemannianMetric I M)
@@ -208,7 +208,7 @@ theorem curvatureAction0SAt_eq_rm04_raise
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 theorem nablaLapComm_secondTerm_eq_rm04_raise
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)

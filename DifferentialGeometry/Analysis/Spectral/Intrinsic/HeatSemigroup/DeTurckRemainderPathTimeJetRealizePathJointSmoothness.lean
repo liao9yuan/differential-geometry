@@ -54,10 +54,10 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-private instance tensor0SModelNormedAddCommGroup_local {nn : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {nn : ℕ} :
     NormedAddCommGroup (Tensor0SBundle.Tensor0SModel nn ℝ E) := inferInstance
 
-private instance tensor0SModelNormedSpace_local {nn : ℕ} :
+private local instance tensor0SModelNormedSpace_local {nn : ℕ} :
     NormedSpace ℝ (Tensor0SBundle.Tensor0SModel nn ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace nn
 

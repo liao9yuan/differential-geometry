@@ -18,19 +18,17 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] [T2Space M] in
 theorem connDiff_eq_difference (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiff (I := I) g₁ g₀ =
       CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) := rfl
-
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 def covDerivConnDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁) X Y Z x
-
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] [T2Space M] in
 theorem covDerivConnDiff_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff (I := I) g₀ g₁ X Y Z x =

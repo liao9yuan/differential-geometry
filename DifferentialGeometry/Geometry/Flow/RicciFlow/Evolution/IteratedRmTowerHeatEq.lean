@@ -81,7 +81,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -90,11 +90,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
-private instance tensor0SModelNormedSpace_local {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
 
-private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
 
@@ -172,7 +172,7 @@ end Fields
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNorm_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -192,7 +192,39 @@ noncomputable def nablaKNormDu
   duSec (I := I) (nablaKRm04NormSqIntrinsic (I := I) S k t)
     (nablaKNorm_smooth (I := I) S t k)
 
+omit [I.Boundaryless]
+  [SigmaCompactSpace M] in
+/-- The differential of `|∇^k Rm|²` satisfies the curvature-tower Kato bound
+`|d|∇^k Rm|²|² ≤ 4 |∇^k Rm|² |∇^(k+1) Rm|²`. -/
+theorem towerNorm_grad_le
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : Nat) (t : Real) (x : M) :
+    (S.base.metric t).inner x
+        (gradientFun (I := I) (S.base.metric t)
+          (nablaKRm04NormSqIntrinsic (I := I) S k t) x)
+        (gradientFun (I := I) (S.base.metric t)
+          (nablaKRm04NormSqIntrinsic (I := I) S k t) x) <=
+      4 * nablaKRm04NormSqIntrinsic (I := I) S k t x *
+        nablaKRm04NormSqIntrinsic (I := I) S (k + 1) t x := by
+  have hf := nablaKNorm_smooth (I := I) S t k
+  have hdu : DuFieldRealizes (I := I)
+      (nablaKRm04NormSqIntrinsic (I := I) S k t)
+      (nablaKNormDu (I := I) S t k) := by
+    simpa [nablaKNormDu] using
+      (duSec_realizes (I := I)
+        (nablaKRm04NormSqIntrinsic (I := I) S k t) hf)
+  have hK := normSq0S_du_le (I := I)
+    (cov := S.family.connection t) (g := S.base.metric t)
+    (solution_isMetricCompatible (I := I) S t)
+    (T := nablaKRm04Field (I := I) S t k)
+    (nablaT := nablaKRm04Field (I := I) S t (k + 1))
+    (nablaKRm04Field_realizes (I := I) S t k)
+    (du := nablaKNormDu (I := I) S t k) hdu x
+  simpa [nablaKNormDu, nablaKRm04NormSqIntrinsic, duSec_apply,
+    normSq0S_eq_inner, Nat.add_assoc,
+    inner0S_differential1FormFun_pair_eq_grad_inner] using hK
 
+/-- Canonical Hessian of the fixed-time scalar field `|∇ᵏRm|²`. -/
 noncomputable def nablaKNormHess
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
@@ -223,7 +255,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNormHeatAt
     [FiniteDimensional Real E]
@@ -389,7 +421,7 @@ theorem nablaKNormHeatAt
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormHeatEquationOn_intrinsic
     [FiniteDimensional Real E]
@@ -683,7 +715,7 @@ section Nonneg
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormSqIntrinsic_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

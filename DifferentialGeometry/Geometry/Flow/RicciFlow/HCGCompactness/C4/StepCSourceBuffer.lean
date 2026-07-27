@@ -29,7 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -242,7 +242,7 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
     have hetaVel : mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta s 1 =
         deriv eta s := by
       rw [mfderiv_eq_fderiv]
-      exact fderiv_apply_one_eq_deriv
+      exact fderiv_apply_one_eq_deriv (𝕜 := Real) (f := eta) (x := s)
     have hvel : mfderiv 𝓘(Real, E) I e (eta s) (deriv eta s) =
         mfderiv 𝓘(Real, Real) I gamma s 1 := by
       have hv := DFunLike.congr_fun hcomp (1 : Real)

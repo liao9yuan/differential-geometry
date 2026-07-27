@@ -86,10 +86,33 @@ lemma normalDensity_det
       Real.sqrt (normalGramMatrix (I := I) g p w).det :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
+/-- The normal-coordinate Gram matrix is continuous at the chart centre. -/
+lemma normalGram_contAt
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    ContinuousAt (normalGramMatrix (I := I) g p) 0 := by
+  let Ψ := expMapDiffeo (I := I) g p
+  let U : Set E := Ψ.source ∩
+    Ψ ⁻¹' (trivializationAt E (TangentSpace I) p).baseSet
+  have hUopen : IsOpen U := by
+    dsimp only [U]
+    exact Ψ.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage
+      Ψ.open_source (trivializationAt E (TangentSpace I) p).open_baseSet
+  have hzero_src : (0 : E) ∈ Ψ.source := by
+    simpa only [Ψ] using zero_mem_expMapDiffeo_source (I := I) g p
+  have hzeroU : (0 : E) ∈ U := by
+    refine ⟨hzero_src, ?_⟩
+    change Ψ (0 : E) ∈ (trivializationAt E (TangentSpace I) p).baseSet
+    rw [show Ψ (0 : E) = p by
+      simpa only [Ψ] using expMapDiffeo_zero (I := I) g p]
+    exact mem_baseSet_trivializationAt E (TangentSpace I) p
+  have hcont : ContinuousOn (normalGramMatrix (I := I) g p) U := by
+    simpa only [normalGramMatrix, Ψ] using
+      paramGram_contOn (I := I) g p Ψ hUopen
+        Set.inter_subset_left (fun w hw => hw.2)
+  exact hcont.continuousAt (hUopen.mem_nhds hzeroU)
 
-
-
-
+/-- The radial variation field along the geodesic launched by `x`. -/
 def radialJacobiField (g : SmoothRiemannianMetric I M) (p : M)
     (x w : E) (t : ℝ) :
     TangentSpace I
@@ -123,7 +146,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 theorem exists_radialJacobi_zero_radius
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -180,8 +203,79 @@ lemma radialJacobi_one
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_one (I := I) g p x w hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+/-- Radial time scaling can be transferred to both launch vectors and then
+evaluated at time one.  This is an algebraic identity of the defining
+exponential variations, valid at every scale; the radial Gram comparison uses
+it inside the source of `expMapDiffeo` to obtain linear independence. -/
+lemma radialJacobi_scale
+    (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : ℝ) :
+    radialJacobiField (I := I) g p x w t =
+      radialJacobiField (I := I) g p (t • x) (t • w) 1 := by
+  have hfun :
+      (fun s : ℝ => (expMap (I := I) g p
+        (show TangentSpace I p from t • (x + s • w)) : M)) =
+      fun s : ℝ => (expMap (I := I) g p
+        (show TangentSpace I p from (1 : ℝ) • (t • x + s • (t • w))) : M) := by
+    funext s
+    apply congrArg (fun v : E =>
+      (expMap (I := I) g p (show TangentSpace I p from v) : M))
+    module
+  unfold radialJacobiField
+  rw [hfun]
+  rfl
 
 omit [T2Space M] [SigmaCompactSpace M] in
+/-- At any radial time in the local `C²` range, the radial Jacobi field is the
+exponential differential applied to the scaled variation direction. -/
+lemma radialJacobi_at
+    (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : ℝ)
+    (htx : ‖t • x‖ < expMapC2Radius (I := I) g p) :
+    radialJacobiField (I := I) g p x w t =
+      mfderiv 𝓘(ℝ, E) I
+        (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
+        (t • x) (t • w) := by
+  rw [radialJacobi_scale (I := I) g p x w t,
+    radialJacobi_one (I := I) g p (t • x) (t • w) htx]
+
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- Radial Jacobi fields preserve finite linear combinations at every time in
+the local `C²` range. -/
+lemma radialJacobi_sum_at
+    {ι : Type*} [Fintype ι]
+    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
+    (w : ι → E) (c : ι → ℝ) (t : ℝ)
+    (htx : ‖t • x‖ < expMapC2Radius (I := I) g p) :
+    radialJacobiField (I := I) g p x (∑ i, c i • w i) t =
+      ∑ i, c i • radialJacobiField (I := I) g p x (w i) t := by
+  classical
+  rw [radialJacobi_at (I := I) g p x (∑ i, c i • w i) t htx]
+  set L :=
+    mfderiv 𝓘(ℝ, E) I
+      (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M))
+      (t • x)
+  have hinput : t • ∑ i, c i • w i = ∑ i, c i • (t • w i) := by
+    rw [Finset.smul_sum]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    module
+  rw [hinput]
+  have hmap : L (∑ i, c i • (t • w i)) =
+      ∑ i, L (c i • (t • w i)) := by
+    simpa only using
+      (map_sum L (fun i : ι => c i • (t • w i)) Finset.univ)
+  calc
+    L (∑ i, c i • (t • w i)) = ∑ i, L (c i • (t • w i)) := hmap
+    _ = ∑ i, c i • radialJacobiField (I := I) g p x (w i) t := by
+      refine Finset.sum_congr rfl fun i _ => ?_
+      calc
+        L (c i • (t • w i)) = c i • L (t • w i) :=
+          L.map_smul (c i) (t • w i)
+        _ = c i • radialJacobiField (I := I) g p x (w i) t := by
+          rw [radialJacobi_at (I := I) g p x (w i) t htx]
+
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- Endpoint radial Jacobi fields are linear in the variation direction. -/
 lemma radialJacobi_one_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (a : ℝ)
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -192,9 +286,31 @@ lemma radialJacobi_one_smul
   exact (mfderiv 𝓘(ℝ, E) I
     (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) x).map_smul a w
 
-
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- Endpoint radial Jacobi fields preserve arbitrary finite linear
+combinations of variation directions. -/
+lemma radialJacobi_sum
+    {ι : Type*} [Fintype ι]
+    (g : SmoothRiemannianMetric I M) (p : M) (x : E)
+    (w : ι → E) (c : ι → ℝ)
+    (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
+    radialJacobiField (I := I) g p x (∑ i, c i • w i) 1 =
+      ∑ i, c i • radialJacobiField (I := I) g p x (w i) 1 := by
+  classical
+  rw [radialJacobi_one (I := I) g p x (∑ i, c i • w i) hx]
+  set L :=
+    mfderiv 𝓘(ℝ, E) I
+      (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) x
+  change L (∑ i, c i • w i) =
+    ∑ i, c i • radialJacobiField (I := I) g p x (w i) 1
+  rw [map_sum L]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [radialJacobi_one (I := I) g p x (w i) hx]
+  exact L.map_smul (c i) (w i)
 
 omit [T2Space M] [SigmaCompactSpace M] in
+/-- Endpoint radial Jacobi fields are linear over finite combinations of
+variation directions. -/
 lemma radialJacobi_one_sum
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
     (c : Fin (Module.finrank ℝ E) → ℝ)
@@ -202,16 +318,7 @@ lemma radialJacobi_one_sum
     radialJacobiField (I := I) g p x
         (∑ i, c i • (chartModelBasis E) i) 1 =
       ∑ i, c i • radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1 := by
-  rw [radialJacobi_one (I := I) g p x (∑ i, c i • (chartModelBasis E) i) hx]
-  set L :=
-    mfderiv 𝓘(ℝ, E) I
-      (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) x
-  change L (∑ i, c i • (chartModelBasis E) i) =
-    ∑ i, c i • radialJacobiField (I := I) g p x ((chartModelBasis E) i) 1
-  rw [map_sum L]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [radialJacobi_one (I := I) g p x ((chartModelBasis E) i) hx]
-  exact L.map_smul (c i) ((chartModelBasis E) i)
+  exact radialJacobi_sum (I := I) g p x (chartModelBasis E) c hx
 
 
 

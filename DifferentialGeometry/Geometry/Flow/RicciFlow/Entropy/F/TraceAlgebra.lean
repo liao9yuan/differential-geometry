@@ -26,7 +26,6 @@ variable {M : Type*}
 section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -37,7 +36,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem connTraceAction_coord
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -431,7 +429,6 @@ def christoffelWeightedDivergenceTrace
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem weightedTrace_eq
     (g : SmoothRiemannianMetric I M)
     (nablaChristoffelVariation :
@@ -538,7 +535,6 @@ theorem weightedTrace_eq
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem connTraceAction_eq
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -556,7 +552,6 @@ theorem connTraceAction_eq
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem connTraceAction_eq_gamma
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -594,7 +589,6 @@ theorem connTraceAction_eq_gamma
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem weightedTrace_of_raw
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)

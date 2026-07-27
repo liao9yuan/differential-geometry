@@ -21,7 +21,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -45,6 +45,35 @@ theorem compactnessSol_cond
         inp hcomplete0 hderiv.at_zero_geom hflowInj hconn)) :
     CompactnessConclusion (I := I) X :=
   solutionComp_cond (I := I) X inp hcomplete0 hflowInj hconn hderiv hflow
+
+/-- **MSM135 Theorem 3.10 (Compactness for solutions).**  A sequence of
+complete pointed Ricci flows on one open interval, with locally uniform
+curvature bounds and a uniform time-zero basepoint injectivity-radius bound,
+has a smoothly convergent pointed subsequence on that open interval. -/
+theorem compactnessSol
+    {α b : Real} (h0 : (0 : Real) ∈ Set.Ioo α b)
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (hD : X.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.openInterval
+        α b 0 h0)
+    (hcomplete : CompleteInput (I := I) X)
+    (hcurv : CurvBoundInput (I := I) X)
+    (hinj : FlowBaseInjBound (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.term k).M := (X.term k).topology
+      ConnectedSpace (X.term k).M) :
+    ∃ L : PointedFlowData.{u, uE, uH} (I := I) X.D,
+      ∃ subseq : Nat → Nat,
+        StrictMono subseq ∧
+          Nonempty (SmoothCGHConverges (I := I) X L subseq) ∧
+            ∀ t : Real, t ∈ X.D.carrier →
+              MetricComplete (I := I) (L.atTime (I := I) t) := by
+  have hzero : (0 : Real) ∈ X.D.carrier := by
+    rw [hD]
+    exact h0
+  have hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)) :=
+    hcomplete.at_time hzero
+  sorry
 
 end HCGCompactness
 end DifferentialGeometry

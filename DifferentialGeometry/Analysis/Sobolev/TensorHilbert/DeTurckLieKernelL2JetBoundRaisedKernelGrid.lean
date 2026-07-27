@@ -269,7 +269,7 @@ private lemma rfns_iteratedCovGrad_armSlotPass_connArm_le_dla
     (armSlotEndoCc (I := I) (M := M) g₀ 0 (dLaConnArmPt (I := I) (M := M) g₀ gc)) j x) ?_
   rw [← connDiffSection_eq_armSlotEndoCc_zero_dla (I := I) (M := M) g₀ gc]
 
-private lemma dLaQuad_tower_of_factors (g₀ ga gb : SmoothRiemannianMetric I M)
+lemma dLaQuad_tower_of_factors (g₀ ga gb : SmoothRiemannianMetric I M)
     (j : ℕ) (x : M) (b : ℕ → ℝ) (hb : ∀ l, 0 ≤ b l)
     (Ba Bb : ℕ → ℝ) (hBa_nn : ∀ i, 0 ≤ Ba i) (hBb_nn : ∀ l, 0 ≤ Bb l)
     (harm : ∀ i, i ≤ j →
@@ -539,7 +539,7 @@ private theorem exists_rfns_dLaKernelRaised_tgrid (g₀ g_bg : SmoothRiemannianM
   linarith [t1, t2, t3, t4, t5, t6, t7, hA1, hA2, hQ1, hQ2, hQ3,
     hP1_le, hP2_le, hP3_le, hP4_le]
 
-private theorem exists_rfns_dLaLowered_tgrid (g₀ g_bg : SmoothRiemannianMetric I M)
+theorem exists_rfns_dLaLowered_tgrid (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -573,7 +573,7 @@ private theorem exists_rfns_dLaLowered_tgrid (g₀ g_bg : SmoothRiemannianMetric
   exact hC g₁ T htie hδ_le hδ0 hbound i x
 
 omit [NeZero (Module.finrank ℝ E)] in
-private lemma rfns_iCG_symmS_le_dla (g₀ : SmoothRiemannianMetric I M)
+lemma rfns_iCG_symmS_le_dla (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
         ((iteratedCovGrad (I := I) g₀ 0 2 j (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x) ≤
@@ -606,7 +606,7 @@ private lemma rfns_iCG_symmS_le_dla (g₀ : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-private lemma rfns_symmS_zero_le_dla (g₀ : SmoothRiemannianMetric I M)
+lemma rfns_symmS_zero_le_dla (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
     (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) :
@@ -688,7 +688,7 @@ private lemma rfns_symmS_zero_le_dla (g₀ : SmoothRiemannianMetric I M)
           ring
         rw [hc0, hc2, one_mul, hnE]
 
-private lemma rfns_iCG_slotInsert3_dLaPerturb_le (g₀ : SmoothRiemannianMetric I M)
+lemma rfns_iCG_slotInsert3_dLaPerturb_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + j) x
         ((iteratedCovGrad (I := I) g₀ 4 4 j

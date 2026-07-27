@@ -91,6 +91,10 @@ variable {P₀ : Type*} [TopologicalSpace P₀] [T2Space P₀]
 
 omit [NormedSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
+/-- Local pinned inverses along a compact graph glue to one continuous ambient
+root extension.  The common injectivity neighborhood is returned explicitly;
+agreement with the original root on `B` follows from injectivity, not merely
+from the fact that both functions solve the same equation. -/
 theorem existsRootExtension
     (G : E -> P₀ -> E) {A B : Set P₀} (hA : IsCompact A) (hAB : A ⊆ B)
     (c : P₀ -> E) (hc : ContinuousOn c B)
@@ -624,7 +628,7 @@ theorem chartCenterOn_cont
         (centerOfMass (I := I) g params.1.1
           (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm
             (params.1.2 i)) join p r (H params)) :=
-      (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn.continuousAt
+      (NormalCoordinates.normalChartAt (I := I) g p).contMDiffOn_toFun.continuousOn.continuousAt
         ((NormalCoordinates.normalChartAt (I := I) g p).open_source.mem_nhds
           (hsrc params))
     exact hchart.tendsto.comp hcm

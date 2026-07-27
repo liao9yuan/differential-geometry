@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
+import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Geodesic.AffineReparam
 
 
@@ -30,6 +31,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section DiagExp
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 def diagExp
@@ -41,6 +43,7 @@ def diagExp
     TangentBundle I M → M × M :=
   fun u => (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd)
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in
@@ -54,6 +57,7 @@ omit [ConnectedSpace M] in
     diagExp (I := I) g hEnorm u =
       (u.proj, expMapIntrinsic (I := I) g hEnorm u.proj u.snd) := rfl
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in
@@ -66,6 +70,7 @@ omit [ConnectedSpace M] in
     (u : TangentBundle I M) :
     (diagExp (I := I) g hEnorm u).1 = u.proj := rfl
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in
@@ -89,6 +94,7 @@ private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle 
   fun s => (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).symm
     (chartCurve (I := I) α Γ s, deriv (chartCurve (I := I) α Γ) s)
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
@@ -204,6 +210,7 @@ private theorem chartVelocityLift_isMIntegralCurveOn
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -231,6 +238,7 @@ private theorem chartVelocityLift_proj
   change (extChartAt I α).symm (chartCurve (I := I) α Γ s) = Γ s
   rw [chartCurve_def, (extChartAt I α).left_inv hext_src]
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in
@@ -924,6 +932,7 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
   filter_upwards [hO_nhds] with p hp
   exact hO_sub p hp
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in
@@ -945,17 +954,67 @@ theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
           expMapIntrinsic (I := I) g hEnorm (γ p.2)
             ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) (s₀, t₀) := by
   classical
-  obtain ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode,
-    hΦ_target, _hΦ_cd⟩ :=
-    exists_chartExp_jointContDiffOn_nat (I := I) g (γ t₀) n hn
-  obtain ⟨δ, hδ_pos, hphase⟩ :=
-    expMapIntrinsic_variation_smallField_phaseBall (I := I) γ V₀ hγ hV₀ hproj
-      t₀ t' ρ hρ_pos
-  refine ⟨δ, hδ_pos, fun s₀ hs₀ => ?_⟩
-  exact expMapIntrinsic_variation_contMDiff (I := I) g hEnorm γ V₀ hγ hV₀ hproj n hn
-    s₀ t₀ Φ ρ T t'
-    ⟨hρ_pos, hT_pos, ht'_Ioo, ht'_pos, hG_cd, hΦ_init, hΦ_ode, hΦ_target⟩
-    (hphase s₀ hs₀)
+  let W : ℝ × ℝ → TangentBundle I M := fun p =>
+    ⟨(V₀ p.2).proj, p.1 • (V₀ p.2).snd⟩
+  have hW : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I.tangent ∞ W := by
+    have hVcomp : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I.tangent ∞
+        (fun p : ℝ × ℝ => V₀ p.2) :=
+      hV₀.comp contMDiff_snd
+    have hbaseDiff : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
+        (fun p : ℝ × ℝ => (V₀ p.2).proj) := by
+      have heq : (fun p : ℝ × ℝ => (V₀ p.2).proj) =
+          fun p : ℝ × ℝ => γ p.2 := by
+        funext p
+        exact hproj p.2
+      rw [heq]
+      exact hγ.comp contMDiff_snd
+    intro p₀
+    rw [contMDiffAt_totalSpace]
+    have hVcomp₀ :=
+      (contMDiffAt_totalSpace (f := fun p : ℝ × ℝ => V₀ p.2)).1 (hVcomp p₀)
+    refine ⟨hbaseDiff p₀, ?_⟩
+    have hsmul := contMDiffAt_fst.smul hVcomp₀.2
+    refine hsmul.congr_of_eventuallyEq ?_
+    have hbase : ∀ᶠ p in 𝓝 p₀,
+        (V₀ p.2).proj ∈
+          (trivializationAt E (TangentSpace I) (V₀ p₀.2).proj).baseSet := by
+      have hmem : (V₀ p₀.2).proj ∈
+          (trivializationAt E (TangentSpace I) (V₀ p₀.2).proj).baseSet :=
+        FiberBundle.mem_baseSet_trivializationAt' (V₀ p₀.2).proj
+      exact (hbaseDiff p₀).continuousAt.preimage_mem_nhds
+        ((trivializationAt E (TangentSpace I) (V₀ p₀.2).proj).open_baseSet.mem_nhds hmem)
+    filter_upwards [hbase] with p hp
+    change
+      ((trivializationAt E (TangentSpace I) (V₀ p₀.2).proj)
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (V₀ p.2).proj (p.1 • (V₀ p.2).snd))).2 =
+        p.1 •
+          ((trivializationAt E (TangentSpace I) (V₀ p₀.2).proj)
+            (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+              (V₀ p.2).proj (V₀ p.2).snd)).2
+    rw [(trivializationAt E (TangentSpace I) (V₀ p₀.2).proj).apply_eq_prod_continuousLinearEquivAt
+          ℝ (V₀ p.2).proj hp,
+        (trivializationAt E (TangentSpace I) (V₀ p₀.2).proj).apply_eq_prod_continuousLinearEquivAt
+          ℝ (V₀ p.2).proj hp]
+    exact map_smul _ _ _
+  have hsmooth : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
+      (fun p : ℝ × ℝ =>
+        expMapIntrinsic (I := I) g hEnorm (V₀ p.2).proj
+          (p.1 • (V₀ p.2).snd)) :=
+    (intrinsicExp_smooth (I := I) g hEnorm).comp hW
+  have hfun :
+      (fun p : ℝ × ℝ =>
+        expMapIntrinsic (I := I) g hEnorm (γ p.2)
+          ((p.1 • (V₀ p.2).snd : E) : TangentSpace I (γ p.2))) =
+      fun p : ℝ × ℝ =>
+        expMapIntrinsic (I := I) g hEnorm (V₀ p.2).proj
+          (p.1 • (V₀ p.2).snd) := by
+    funext p
+    rw [hproj]
+  refine ⟨(n : ℝ), ?_, fun s₀ _ => ?_⟩
+  · exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one hn)
+  rw [hfun]
+  exact hsmooth.contMDiffAt.of_le ENat.LEInfty.out
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -998,6 +1057,7 @@ theorem diagExp_variation_contMDiffAt_of_smallField
     hfst.prodMk hsnd
   simpa [diagExp, TotalSpace.mk'] using hpair
 
+omit [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] in

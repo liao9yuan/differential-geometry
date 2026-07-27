@@ -200,6 +200,15 @@ noncomputable def Diffeomorph.pullbackMetric
     rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
+theorem Diffeomorph.pullbackMetric_inner
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
+    (x : M) (v w : TangentSpace I x) :
+    (Diffeomorph.pullbackMetric g Φ).inner x v w =
+      g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w) :=
+  pullbackInner_eval g Φ x v w
+
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffeomorph_pullback_metric_exists
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -235,6 +244,34 @@ theorem Diffeomorph.pullbackMetric_refl
     rfl
   unfold Diffeomorph.pullbackMetric
   congr 1
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem Diffeomorph.pullbackMetric_trans
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M)
+    (Φ Ψ : M ≃ₘ⟮I, I⟯ M) :
+    Diffeomorph.pullbackMetric (Diffeomorph.pullbackMetric g Ψ) Φ =
+      Diffeomorph.pullbackMetric g (Φ.trans Ψ) := by
+  have metric_ext : ∀ (g₁ g₂ : SmoothRiemannianMetric I M),
+      (∀ (x : M) (v w : TangentSpace I x), g₁.inner x v w = g₂.inner x v w) → g₁ = g₂ := by
+    intro g₁ g₂ h
+    obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g₁
+    obtain ⟨i₂, s₂, p₂, b₂, c₂⟩ := g₂
+    have hi : i₁ = i₂ :=
+      funext fun x => ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => h x v w
+    subst hi
+    rfl
+  apply metric_ext
+  intro x v w
+  rw [Diffeomorph.pullbackMetric_inner, Diffeomorph.pullbackMetric_inner,
+    Diffeomorph.pullbackMetric_inner]
+  have hcomp : mfderiv I I (Φ.trans Ψ : M → M) x =
+      (mfderiv I I (Ψ : M → M) (Φ x)).comp (mfderiv I I (Φ : M → M) x) :=
+    mfderiv_comp x
+      (Ψ.contMDiff.mdifferentiableAt (by decide : (∞ : WithTop ℕ∞) ≠ 0))
+      (Φ.contMDiff.mdifferentiableAt (by decide : (∞ : WithTop ℕ∞) ≠ 0))
+  rw [hcomp]
+  rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackInner_contMDiff

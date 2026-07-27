@@ -58,7 +58,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -70,7 +70,7 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem stMetricCompat
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -111,7 +111,7 @@ def mtIter (g : SmoothRiemannianMetric I M) {s : ℕ} :
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem mtIter_add (g : SmoothRiemannianMetric I M) {s : ℕ} (τ : ℕ) :
     ∀ A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -197,7 +197,7 @@ inductive StarSum2Cost (Idx : Type*) [Fintype Idx]
         ((Fintype.card Idx : Real) ^ (2 + r))
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.mem {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
@@ -212,7 +212,7 @@ theorem StarSum2Cost.mem {Idx : Type*} [Fintype Idx]
   | base a b r σ => exact StarSum2.base _ a b r σ
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.nonneg {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
@@ -226,7 +226,7 @@ theorem StarSum2Cost.nonneg {Idx : Type*} [Fintype Idx]
   | base => positivity
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2.cost {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
@@ -247,7 +247,7 @@ theorem StarSum2.cost {Idx : Type*} [Fintype Idx]
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {ι : Type*} (s : Finset ι)
@@ -268,7 +268,7 @@ theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
 set_option backward.isDefEq.respectTransparency false in
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem starSum2Cost_sum {Idx : Type*} [Fintype Idx]
     {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
@@ -310,7 +310,7 @@ def stNabla (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem stNabla_realizes (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -325,7 +325,7 @@ theorem stNabla_realizes (S : SolutionOn (I := I) (M := M) D) (t : Real) {k : �
 set_option backward.isDefEq.respectTransparency false in
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem stNabla_zero
     [Module.Finite ℝ E]
@@ -345,7 +345,7 @@ theorem stNabla_zero
 set_option backward.isDefEq.respectTransparency false in
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem stNabla_add
     [Module.Finite ℝ E]
@@ -359,7 +359,7 @@ theorem stNabla_add
 set_option backward.isDefEq.respectTransparency false in
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem stNabla_smul
     [Module.Finite ℝ E]
@@ -382,7 +382,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem starProdNabla
     [Module.Finite ℝ E]
@@ -426,7 +426,7 @@ theorem starProdNabla
 set_option backward.isDefEq.respectTransparency false in
 
 
-omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem stNablaMtIter
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -473,7 +473,6 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem stNabla_starBase
     [Module.Finite ℝ E]
@@ -507,7 +506,6 @@ theorem stNabla_starBase
 set_option backward.isDefEq.respectTransparency false in
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2.nabla
     [Module.Finite ℝ E]
@@ -538,7 +536,6 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.nabla
     [Module.Finite ℝ E]
@@ -602,7 +599,7 @@ private theorem sumIdentityDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mtInputBasis {x : M} {Idx : Type*} {s' : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -621,7 +618,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 private theorem mtfOrthoBd
     [Module.Finite ℝ E]
@@ -657,7 +654,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 private theorem mtIterOrthoBd
     [Module.Finite ℝ E]
@@ -691,7 +688,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (a b : ℕ) {x : M}
@@ -742,7 +739,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2Cost.bound
     [Module.Finite ℝ E]
@@ -821,7 +818,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem StarSum2.bound
     [Module.Finite ℝ E]
@@ -909,7 +906,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 private theorem mtfDiag
     [Module.Finite ℝ E]
@@ -941,7 +938,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem starBase_comp_eq
     [Module.Finite ℝ E]
@@ -979,7 +976,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem starBaseProd_eq
     [Module.Finite ℝ E]
@@ -1025,7 +1022,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem btStar_eq
     [Module.Finite ℝ E]
@@ -1112,7 +1109,7 @@ def e0Field (S : SolutionOn (I := I) (M := M) D) (t : Real) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem e0Field_mem (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     StarSum2 (I := I) S t 0 (e0Field (I := I) S t) := by
@@ -1131,7 +1128,7 @@ theorem e0Field_mem (S : SolutionOn (I := I) (M := M) D) (t : Real) :
 set_option backward.isDefEq.respectTransparency false in
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem e0Field_cost (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     StarSum2Cost (I := I) (Fin 3) S t 0 (e0Field (I := I) S t) 108 := by
@@ -1164,7 +1161,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 theorem rmComp_eq_rm
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
@@ -1221,7 +1218,7 @@ include horth
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem btStar2
     [Module.Finite ℝ E]
@@ -1249,7 +1246,7 @@ theorem btStar2
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem btStar3
     [Module.Finite ℝ E]
@@ -1277,7 +1274,7 @@ theorem btStar3
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem btStar4
     [Module.Finite ℝ E]
@@ -1305,7 +1302,7 @@ theorem btStar4
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem drStar1
     [Module.Finite ℝ E]
@@ -1333,7 +1330,7 @@ theorem drStar1
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem drStar2
     [Module.Finite ℝ E]
@@ -1361,7 +1358,7 @@ theorem drStar2
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem drStar3
     [Module.Finite ℝ E]
@@ -1389,7 +1386,7 @@ theorem drStar3
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem drStar4
     [Module.Finite ℝ E]
@@ -1421,7 +1418,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 theorem e0Field_comp
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M}
@@ -1476,7 +1473,7 @@ end ComponentIdentity
 open DifferentialGeometry.Dim3Reaction in
 set_option backward.isDefEq.respectTransparency false in
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 theorem residualStarSum_zero
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D)

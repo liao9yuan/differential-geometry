@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,7 +35,7 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem solution_isMetricCompatible
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -56,7 +56,7 @@ theorem solution_isMetricCompatible
 open DifferentialGeometry.Integral.DivergenceTheorem
   DifferentialGeometry.Integral.Measure in
 set_option backward.isDefEq.respectTransparency false in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rmFrozenSlot_chartBasis_contMDiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -98,7 +98,7 @@ theorem rmFrozenSlot_chartBasis_contMDiffOn
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [IsManifold I 2 M] in
+omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rmFrozenSlotSharp_mdiffAt
     [FiniteDimensional Real E]
@@ -131,7 +131,7 @@ def rmFrozenSlotSharpSection
       (fun α j => rmFrozenSlot_chartBasis_contMDiffOn (I := I) S t q Y α j))
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [IsManifold I 2 M] in
+omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 @[simp] theorem rmFrozenSlotSharpSection_apply [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -179,7 +179,6 @@ def rmRaiseSlotSections
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem rmRaise_summand_covDeriv
     [FiniteDimensional Real E]
@@ -320,7 +319,7 @@ def nabla2SlotSections
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nabla2SlotSections_apply
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -348,7 +347,6 @@ theorem nabla2SlotSections_apply
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
@@ -480,7 +478,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -591,7 +588,7 @@ variable {n : ℕ}
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem cotangentSharp_orthoBasis_expand'
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -626,7 +623,7 @@ theorem cotangentSharp_orthoBasis_expand'
   · intro h; exact absurd (Finset.mem_univ i) h
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor05_vec5_sum_last
     {x : M}
@@ -656,7 +653,7 @@ theorem tensor05_vec5_sum_last
   simp [smul_eq_mul]
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor04_vec4_sum_last'
     {x : M}
@@ -693,7 +690,7 @@ theorem tensor04_vec4_sum_last'
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor05_sharp_last_le
     [FiniteDimensional Real E]
@@ -738,7 +735,7 @@ theorem abs_tensor05_sharp_last_le
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem abs_tensor04_sharp_last_le
     [FiniteDimensional Real E]
@@ -784,7 +781,7 @@ theorem abs_tensor04_sharp_last_le
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
     {x : M}
@@ -825,7 +822,7 @@ variable {n : ℕ}
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
+omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rmFrozenSlot_basis_component
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -839,7 +836,6 @@ theorem rmFrozenSlot_basis_component
 
 open TensorLieDeriv in
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapComm_T1_covConst_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1040,7 +1036,6 @@ theorem abs_nablaLapComm_T1_covConst_le
 
 open TensorLieDeriv in
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapComm_T1_orthoBasis_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1124,7 +1119,7 @@ private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem compNormSqMulti_eq_compNormSq4_basis
     {x₀ : M}
@@ -1171,7 +1166,6 @@ theorem compNormSqMulti_eq_compNormSq4_basis
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapCommReactionTermF_orthoBasis_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1219,7 +1213,6 @@ theorem abs_nablaLapCommReactionTermF_orthoBasis_le
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1284,7 +1277,6 @@ theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem abs_spatialCommNablaRm_orthoFrame_le
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

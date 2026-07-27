@@ -555,7 +555,7 @@ private theorem deTurckForceRetractedMapSymm_dist_le_half
   have hdist := nemytskiiMixedForcingMap_dist_le (I := I) (M := M) g₀ a hLip hsingle
     hT hT1 hρpos.le (ρt x) (ρt y) (hρt_norm x) (hρt_norm y)
   have hretr : ‖ρt x - ρt y‖ ≤ ‖x - y‖ := by
-    have h := (recenteredBallRetraction_lipschitzWith hρpos.le
+    have h := (recenteredBallRetraction_lipschitzWith_one hρpos.le
       (0 : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)).dist_le_mul x y
     rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at h
     exact h

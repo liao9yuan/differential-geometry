@@ -18,8 +18,8 @@ open MeasureTheory
 namespace DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 variable {X Y : Type*}
-variable [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-variable [NormedAddCommGroup Y] [InnerProductSpace ℝ Y]
+variable [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+variable [NormedAddCommGroup Y] [NormedSpace ℝ Y]
 variable {T : ℝ}
 
 

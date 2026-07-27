@@ -87,7 +87,7 @@ theorem metric_equiv_of_div_one_sub_le
     have hone : a ≤ (1 + q) * ((1 - c) * a) := by
       simpa [mul_assoc] using mul_le_mul_of_nonneg_right hfactor ha
     exact hone.trans hmul
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]

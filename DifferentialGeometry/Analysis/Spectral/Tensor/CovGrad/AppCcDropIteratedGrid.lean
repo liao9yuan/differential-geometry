@@ -70,6 +70,22 @@ def slotExtendIter (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) :
   | (w + 1), C =>
       slotExtend (I := I) (M := M) g (b₀ + w) (s₀ + w) (slotExtendIter g b₀ s₀ w C)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] [CompleteSpace E] in
+/-- Iterated slot extension is linear with respect to subtraction in its passenger. -/
+theorem slotExtendIter_sub (g : SmoothRiemannianMetric I M) (b₀ s₀ w : ℕ)
+    (A B : SmoothCcTensor g b₀ s₀) :
+    slotExtendIter (I := I) (M := M) g b₀ s₀ w (A - B) =
+      slotExtendIter (I := I) (M := M) g b₀ s₀ w A -
+        slotExtendIter (I := I) (M := M) g b₀ s₀ w B := by
+  induction w with
+  | zero => simp only [slotExtendIter]
+  | succ w ih =>
+      change slotExtend (I := I) (M := M) g (b₀ + w) (s₀ + w)
+          (slotExtendIter (I := I) (M := M) g b₀ s₀ w (A - B)) = _
+      rw [ih, slotExtend_sub]
+      rfl
+
 def appCcLeibnizTower (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : SmoothCcTensor g b₀ s₀) :
     ∀ (p w : ℕ), SmoothCcTensor g 0 (b₀ + w) → SmoothCcTensor g 0 ((s₀ + w) + p)
   | 0, w => fun W =>
