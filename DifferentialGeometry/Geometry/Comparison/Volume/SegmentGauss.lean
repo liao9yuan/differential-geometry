@@ -41,7 +41,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -188,7 +188,7 @@ theorem velJac_density_split
   rw [curveDensity, curveDensity, velJac_gram_split (I := I) g hEnorm x u w hperp,
     Real.sqrt_mul hnn]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M]
   [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)] in
@@ -228,7 +228,7 @@ theorem curveGram_recomb
   rw [Finset.sum_mul]
   exact Finset.sum_congr rfl fun l _ => by ring
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M]
   [IsRiemannianManifold I M] [CompleteSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -251,7 +251,7 @@ theorem curveDensity_reindex
     ext i j; simp only [curveGram, Matrix.of_apply, Matrix.submatrix_apply]
   rw [hsub, Matrix.det_submatrix_equiv_self]
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M]
   [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)] in

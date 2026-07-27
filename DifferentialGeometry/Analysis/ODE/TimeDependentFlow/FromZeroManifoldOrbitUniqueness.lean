@@ -95,7 +95,6 @@ private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : 
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] in
-private theorem weak_datum_uniqueness_core
 /-- **From-`0` bare-flow uniqueness from an explicit chart-field Lipschitz datum.**  The core
 uniqueness step.  Given, at the basepoint `α`, a chart ball `closedBall x₀ a` on which the
 trivialised chart field `fromZeroChartField X α t` is `K`-Lipschitz for `t ∈ [0, δ₀]`, two curves

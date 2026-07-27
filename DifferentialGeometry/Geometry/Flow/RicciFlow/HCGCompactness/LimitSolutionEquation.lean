@@ -10,6 +10,9 @@ set_option autoImplicit false
 
 
 
+/-!
+# Limits of Ricci-flow solutions
+
 Main statements:
 * `hasDerivWithinAt_lim` — generic 1-D uniform-limit derivative passage on a
   convex set.
@@ -142,7 +145,7 @@ theorem hasDeriv_lim_tail
 
 /-! ## Manifold layer -/
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -202,6 +205,9 @@ theorem metricInner_tendsto
   rw [tendsto_iff_dist_tendsto_zero]
   exact squeeze_zero (fun k => dist_nonneg) hbound hb
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 /-- **Plain-sequence tail consumer for the limit Ricci-flow equation.**  If the
 metric sequence satisfies the coefficientwise Ricci-flow equation after a fixed
 index, its coefficients converge pointwise, and its Ricci coefficients converge
@@ -243,21 +249,14 @@ theorem metricLimit_pde'
   rw [hfactor, abs_mul, show |(-2 : Real)| = 2 by norm_num]
   linarith
 
-/-- **The window limit of Ricci-flow solutions satisfies the Ricci-flow
-equation** (core bridge, fixed manifold `M`, fixed `x, v, w`).
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [SigmaCompactSpace M] in
+/-- **The window limit of Ricci-flow solutions satisfies the Ricci-flow
+equation** (core bridge, fixed manifold `M`, fixed `x, v, w`).
+
+The derivative identities, pointwise metric convergence, and uniform Ricci
+convergence imply the Ricci-flow equation for the limit on the closed window. -/
 theorem metricLimit_pde
     [Module.Finite ℝ E]
     [NeZero (Module.finrank Real E)]

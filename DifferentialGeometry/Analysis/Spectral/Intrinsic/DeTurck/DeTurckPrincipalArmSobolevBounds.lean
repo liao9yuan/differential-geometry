@@ -631,11 +631,23 @@ lemma hs_norm_family_shift (g₀ : SmoothRiemannianMetric I M)
   | zero => intro σ; simp only [oneMinusConnLapSmoothIter_zero, Nat.mul_zero, Nat.add_zero]
   | succ p ih =>
     intro σ
-    rw [oneMinusConnLapSmoothIter_succ,
-      ← smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap (I := I) (M := M) g₀ σ
-        (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀),
-      ih (σ + 2)]
-    exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+    rw [oneMinusConnLapSmoothIter_succ]
+    calc
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ : ℝ)
+          (oneMinusConnLapSmooth (I := I) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀))‖ =
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((σ + 2 : ℕ) : ℝ)
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖ :=
+        by
+          exact (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+            (E := E) (H := H) (I := I) (M := M) g₀ σ
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)).symm
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((σ + 2) + 2 * p : ℕ) : ℝ) T₀‖ := ih (σ + 2)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          ((σ + 2 * (p + 1) : ℕ) : ℝ) T₀‖ :=
+        smoothCcToTensorHs_norm_order_congr
+          (I := I) (M := M) g₀ (by push_cast; ring) T₀
 
 lemma hs_extreme_interp {f : ℕ → ℝ} (hf_nn : ∀ k, 0 ≤ f k)
     (hlc : ∀ k, f (k + 1) ^ 2 ≤ f (k + 2) * f k)

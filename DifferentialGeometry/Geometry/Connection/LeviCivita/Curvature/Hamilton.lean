@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Differentia
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -69,9 +67,10 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+  [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem cons_vec4_eq_vec5 {x : M}
     (A B C D F : TangentSpace I x) :
     Fin.cons A (vec4 (I := I) B C D F) = vec5 (I := I) A B C D F := by
@@ -247,6 +246,7 @@ private theorem five_actions_eq
       rw [hswap2]
       ring
 
+omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem curvatureAction_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -306,6 +306,7 @@ private theorem curvatureAction_basis
   simp_rw [hvec0, hvec1, hvec2, hvec3]
   simp [rmAction4, Finset.sum_add_distrib]
 
+omit [I.Boundaryless] in
 private theorem canRmActionSum
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -418,6 +419,7 @@ private theorem canRmActionSum
   rw [Finset.sum_congr rfl fun i _ => hActions i]
   simpa [cov, hcov, Rm13, Rm04, R] using hAlg
 
+omit [I.Boundaryless] [IsManifold I 1 M] in
 private theorem canRic_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -469,6 +471,7 @@ private theorem canRic_basis
   have h := hTrace a b
   simpa [cov, hcov, Rm04, Ric, identityInvMetric, diagonalInvMetric] using h
 
+omit [I.Boundaryless] in
 private theorem canRawLowering
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -552,6 +555,7 @@ private theorem canRawLowering
     _ = _ := by
       rw [Finset.sum_comm]
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Canonical Levi-Civita `nabla^2 Rm04` satisfies the covariant-tensor Ricci
 identity, so every derivative commutator is the curvature action on `Rm04`. -/
 theorem canRmRicci
@@ -602,6 +606,7 @@ theorem canRmRicci
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         5 cov X nablaRm04 x slots
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- The six second-Ricci-derivative terms in the lowered-Riemann variation
 equal one rough-trace summand plus five curvature actions.  This is the static,
 pointwise Hamilton commutator identity before summing an orthonormal basis. -/

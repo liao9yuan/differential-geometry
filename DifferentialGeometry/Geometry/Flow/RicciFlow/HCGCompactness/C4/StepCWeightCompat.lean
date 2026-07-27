@@ -71,7 +71,7 @@ end AlgebraCompat
 
 section NormalRawBridge
 
-variable {E0 : Type uE} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
+variable {E0 : Type uE} [NormedAddCommGroup E0] [NormedSpace Real E0]
 variable [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
 variable {H0 : Type uH} [TopologicalSpace H0]
 variable {I0 : ModelWithCorners Real E0 H0} [I0.Boundaryless]

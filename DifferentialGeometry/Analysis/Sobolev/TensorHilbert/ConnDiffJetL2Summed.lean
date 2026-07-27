@@ -33,9 +33,6 @@ This is constituent 3-of-5 of the data-weighted threeArm precursor (R1τ item (2
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
@@ -50,7 +47,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-  (gFibreOpBound ccTensorBilinSymm ccTensorBilin ccTensorBilin_apply ccTensorModel
+  (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply ccTensorModel
     ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -131,7 +128,7 @@ private lemma jetL2_sum_lowShift
 
 /-! ### Geometry setting. -/
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -139,6 +136,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Real-scalar linearity of `iteratedCovGrad` (copied from the private helper of
 `RemainderCoeffL2JetMoser.lean`; needed for the `convexPerturbation` jet expansion). -/
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
@@ -151,7 +149,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
 
 /-! ### Generic per-order top-separated bound (DIRECT route). -/
 
-set_option linter.unusedVariables false in
 /-- DIRECT per-order top-separated jet-L2 bound for the connection-difference field, generic in
 `(g₁, P, htie)`.  The **top-split coefficient** `2·finrank²·Kt0` (`Kt0` = engine head `10·S 0`) is
 `R`-independent; the lumped low coefficient carries the ball-uniform tame-window constant `KI`
@@ -162,9 +159,9 @@ theorem connDiffContrInsertionField_perOrder_l2_topSeparated_generic
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
@@ -241,10 +238,11 @@ theorem connDiffContrInsertionField_perOrder_l2_topSeparated_generic
                   (slotExtend (I := I) (M := M) g₀ 1 2
                     (connDiffSection (I := I) g₁ g₀)))).toSection x) := by
           rw [connDiffContrInsertionField_eq_reindex_slotExtend_two (I := I) (M := M) g₀ g₁]
-          exact rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
+          exact riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
+            (I := I) (M := M) g₀ 3 4
             (slotExtend (I := I) (M := M) g₀ 2 3
               (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
-            coreInPerm201 i x
+            connDiffContrInsertionReindexPerm i x
         have h1 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 3
           (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)) i x
         have h2 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 2
@@ -270,7 +268,7 @@ theorem connDiffContrInsertionField_perOrder_l2_topSeparated_generic
       have heng := hbot g₁ P htie hδ_le hδ0 hδ i x
       -- fold the head into `Hd`
       set Hd : SmoothCcTensor g₀ 1 (2 + i) :=
-        appCcRS (I := I) (M := M) g₀ 1 1 (2 + i)
+        ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 (2 + i)
           (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
           (sharpFlatEndoCc (I := I) g₀ g₁) with hHd_def
       have hhead := heng.1
@@ -363,8 +361,7 @@ theorem connDiffContrInsertionField_perOrder_l2_topSeparated_generic
       (fun x => uFun x + vFun x) (hu_int.add hv_int) hpt) ?_
     rw [MeasureTheory.integral_add hu_int hv_int, hu_eval]
     linarith [hv_eval]
-  · -- empty manifold: the jet L² seminorm is `0`
-    haveI hem : IsEmpty M := not_nonempty_iff.mp hMne
+  · haveI hem : IsEmpty M := not_nonempty_iff.mp hMne
     have hz : ‖iteratedCovGrad (I := I) g₀ 3 4 i
         (connDiffContrInsertionField (I := I) g₀ g₁)‖ = 0 := by
       rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
@@ -385,7 +382,6 @@ theorem connDiffContrInsertionField_perOrder_l2_topSeparated_generic
 
 /-! ### `realizedFam` per-order and summed bounds. -/
 
-set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet) in
@@ -398,10 +394,10 @@ theorem connDiffContrInsertionField_realizedFam_jetL2_perOrder_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -424,7 +420,7 @@ theorem connDiffContrInsertionField_realizedFam_jetL2_perOrder_topSeparated
   have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
   have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
-  have hδP : gFibreOpBound (I := I) (M := M) g₀
+  have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
       ((1 - s) * δ' + s * δ) :=
     convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
@@ -503,7 +499,6 @@ theorem connDiffContrInsertionField_realizedFam_jetL2_perOrder_topSeparated
       (fun j (_ : j ∈ Finset.range (i + 2)) => hwin j)
     linarith
 
-set_option linter.unusedVariables false in
 /-- **Summed** data-weighted jet-L2 bound for the connection-difference field (constituent
 3-of-5 of the data-weighted threeArm precursor).  Summing the `realizedFam` per-order bound over
 `i ≤ a` lands both data windows at order `a+2`, with `Ktop` `R`-independent (the engine head,
@@ -514,10 +509,10 @@ theorem connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℝ, 0 ≤ Kc ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →

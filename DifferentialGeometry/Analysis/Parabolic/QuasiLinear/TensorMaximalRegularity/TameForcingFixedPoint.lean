@@ -256,7 +256,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -266,11 +266,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 consumer is the three-arm fixed-point theorem below. -/
 private theorem l2_four
     {T : ℝ} {X Y Z W V : Type*}
-    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-    [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
-    [NormedAddCommGroup Z] [InnerProductSpace ℝ Z] [CompleteSpace Z]
-    [NormedAddCommGroup W] [InnerProductSpace ℝ W] [CompleteSpace W]
-    [NormedAddCommGroup V] [InnerProductSpace ℝ V] [CompleteSpace V]
+    [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+    [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
+    [NormedAddCommGroup Z] [NormedSpace ℝ Z] [CompleteSpace Z]
+    [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
+    [NormedAddCommGroup V] [NormedSpace ℝ V] [CompleteSpace V]
     (h : timeL2 X T) (p : timeL2 Y T) (q : timeL2 Z T)
     (r : timeL2 W T) (s : timeL2 V T) {A B C D : ℝ}
     (hA : 0 ≤ A) (hB : 0 ≤ B) (hC : 0 ≤ C) (hD : 0 ≤ D)
@@ -382,8 +382,8 @@ private theorem l2_four
 top-order `L²` field which remains in the state set to an `L²` forcing field. -/
 private theorem memLp_tame
     {T R : ℝ} {X Y Z : Type*}
-    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-    [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
+    [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+    [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
     [NormedAddCommGroup Z] [NormedSpace ℝ Z]
     {S : Set X} (hzero : (0 : X) ∈ S) (hR : 0 ≤ R)
     (J : X →L[ℝ] Z) (hstate : ∀ u : S, ‖J (u : X)‖ ≤ R)
@@ -574,7 +574,6 @@ theorem partial_sol_tame
       _ = 1 / 8 := by norm_num
   have hΛle : Λ ≤ 1 / 2 := by rw [hΛdef]; linarith
   have hΛlt : Λ < 1 := by linarith
-
   set z₀ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := 0 with hz₀
   set ρt := recenteredBallRetraction z₀ ρ with hρtdef
   have hρt_mem : ∀ F, ρt F ∈ Metric.closedBall z₀ ρ := fun F =>
@@ -585,7 +584,7 @@ theorem partial_sol_tame
     rw [Metric.mem_closedBall, hz₀, dist_zero_right] at h
     exact h
   have hρt_lip : LipschitzWith 1 ρt :=
-    recenteredBallRetraction_lipschitzWith hρ.le z₀
+    recenteredBallRetraction_lipschitzWith_one hρ.le z₀
   set field : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T :=
     fun F => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
@@ -611,7 +610,6 @@ theorem partial_sol_tame
   set Ψ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T :=
     fun F => liftN (field F) (hstate F) with hΨdef
-
   have hΨ_retr : ∀ F F', ‖Ψ F - Ψ F'‖ ≤ Λ * ‖ρt F - ρt F'‖ := by
     intro F F'
     have hfield_dist : ‖field F - field F'‖ ≤
@@ -827,7 +825,6 @@ theorem partial_sol_tame
         rw [hΛdef]
         dsimp only [S]
         ring
-
   have hΨ_lip : ∀ F F', ‖Ψ F - Ψ F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F'
     refine (hΨ_retr F F').trans ?_
@@ -841,7 +838,6 @@ theorem partial_sol_tame
     · refine LipschitzWith.of_dist_le_mul (fun F F' => ?_)
       rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hΛnn]
       exact hΨ_lip F F'
-
   have hρt0 : ρt z₀ = z₀ :=
     recenteredBallRetraction_eq_self_of_mem (Metric.mem_closedBall_self hρ.le)
   have hfield0 : field z₀ = 0 := by
@@ -898,7 +894,6 @@ theorem partial_sol_tame
           ((mul_le_mul_of_nonneg_left hretr0 hΛnn).trans
             (mul_le_mul_of_nonneg_right hΛle hρ.le)) le_rfl
       _ = ρ := by ring
-
   set Fstar := ContractingWith.fixedPoint Ψ hcontr with hFstar_def
   have hfix : Ψ Fstar = Fstar := ContractingWith.fixedPoint_isFixedPt hcontr
   have hFstar : ‖Fstar‖ ≤ ρ := by rw [← hfix]; exact hΨstay Fstar
@@ -930,7 +925,6 @@ theorem partial_sol_tame
   have hforceAe : ⇑Fstar =ᵐ[timeMeasure T]
       fun t => Nfun (aeSetLift hz trueField t) := by
     simpa only [hfieldstar] using hforceAe₀
-
   refine ⟨maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar,
     Fstar, ?_⟩

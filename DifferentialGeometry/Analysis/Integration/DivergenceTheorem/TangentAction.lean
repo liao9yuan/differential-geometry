@@ -35,10 +35,7 @@ omit [Module.Finite ℝ E] in
 @[simp] lemma tangentSectionAction_def
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
     tangentSectionAction (I := I) X f x = mfderiv I 𝓘(ℝ) f x (X x) := rfl
-
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
-/-- The tangent action obeys the scalar Leibniz rule at points where both
-factors are manifold-differentiable. -/
+omit [Module.Finite ℝ E] in
 theorem tangent_mul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f h : M → ℝ} {x : M}
@@ -66,19 +63,17 @@ omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 extended-chart target. -/
 def chartPullZero (α : M) (f : M → ℝ) : E → ℝ :=
   (extChartAt I α).target.indicator (scalarOnE (I := I) α f)
-
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartPullZero_mem (α : M) (f : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     chartPullZero (I := I) α f y = scalarOnE (I := I) α f y :=
   Set.indicator_of_mem hy _
-
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartPullZero_nmem (α : M) (f : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     chartPullZero (I := I) α f y = 0 :=
   Set.indicator_of_notMem hy _
-
-/-- The map `f : M → ℝ` on the chart source equals the composition of its
-chart-pullback `scalarOnE α f` with the extended chart. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma scalarOnE_extChartAt (α : M) (f : M → ℝ) {x : M}
     (hx : x ∈ (extChartAt I α).source) :
     scalarOnE (I := I) α f (extChartAt I α x) = f x := by

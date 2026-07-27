@@ -189,11 +189,7 @@ theorem exists_Icc_regular (D : RealTimeInterval) {t : Real}
     exists_Icc_mem_subset_of_mem_nhds (D.regular_isOpen.mem_nhds ht)
   exact ⟨a, b, Icc_mem_nhds_iff.mp hIcc, hsub⟩
 
-/-- Time translation of an interval.
-
-
-
-
+/-- Time translation of an interval. -/
 def timeShift (D : RealTimeInterval) (τ : Real) : RealTimeInterval where
   carrier := {s : Real | s + τ ∈ D.carrier}
   regular := {s : Real | s + τ ∈ D.regular}

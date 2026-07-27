@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Calculus.DyadicScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Smaller curvature-controlled flow balls
@@ -23,13 +22,12 @@ open DifferentialGeometry.Integral.Measure
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [T2Space M] [SigmaCompactSpace M]
 variable {D : RealTimeInterval}
 
@@ -50,16 +48,19 @@ def dyadic (B : FlowMetricBall S time) (j : ℕ) : FlowMetricBall S time :=
   B.shrink ((1 / 2 : ℝ) ^ j) (by positivity)
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I 1 M] in
 @[simp] theorem dyadic_radius (B : FlowMetricBall S time) (j : ℕ) :
     (B.dyadic j).radius = (1 / 2 : ℝ) ^ j * B.radius := rfl
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I 1 M] in
 theorem dyadic_succ_rad (B : FlowMetricBall S time) (j : ℕ) :
     (B.dyadic (j + 1)).radius = (B.dyadic j).radius / 2 := by
   simp only [dyadic_radius, pow_succ]
   ring
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I 1 M] in
 /-- A shrink factor at most one gives pointwise inclusion at every time. -/
 theorem shrink_setAt
     (B : FlowMetricBall S time) {q : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) (t : ℝ) :
@@ -70,12 +71,14 @@ theorem shrink_setAt
   exact lt_of_lt_of_le hx (ENNReal.ofReal_le_ofReal hqr)
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+omit [IsManifold I 1 M] in
 /-- A concentric shrink is nested in the original distinguished-time ball. -/
 theorem shrink_nested
     (B : FlowMetricBall S time) {q : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) :
     (B.shrink q hq).Nested B :=
   shrink_setAt B hq hq1 time
 
+omit [SigmaCompactSpace M] in
 /-- Backward parabolic curvature control is inherited by every concentric
 shrink whose radius factor is at most one. -/
 theorem shrink_rm

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Conjugate vectors of the intrinsic exponential
@@ -43,7 +42,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -51,6 +50,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)]
   [CompleteSpace E]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [CompleteSpace E] in
 private theorem covDeriv_comp_affine
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (c d t : ℝ) :
@@ -79,6 +80,9 @@ private theorem covDeriv_comp_affine
   rw [hderiv, hderiv,
     ChartChristoffel.contraction_smul_left, smul_add]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] [CompleteSpace E] in
 private theorem curveVelocity_comp_affine
     (γ : ℝ → M) (c d t : ℝ)
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ (c * t + d)) :
@@ -105,6 +109,8 @@ private theorem curveVelocity_comp_affine
   simpa only [smul_eq_mul, mul_one] using
     map_smul (mfderiv 𝓘(ℝ, ℝ) I γ (a t)) c (1 : ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] in
 private theorem jacobi_comp_affine
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t, TangentSpace I (γ t)) (c d : ℝ)
@@ -147,6 +153,7 @@ private theorem jacobi_comp_affine
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 private theorem intrinsicGeodesic_smooth
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -163,6 +170,7 @@ private theorem intrinsicGeodesic_smooth
     contMDiff_const.prodMk contMDiff_id
   simpa only [Function.comp_apply, smul_zero, add_zero] using hvar.comp hincl
 
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem intrinsicGeodesic_reverse
@@ -236,6 +244,7 @@ private theorem intrinsicGeodesic_reverse
   congr 1
   ring
 
+omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exp_pair_reverse
@@ -541,6 +550,7 @@ def IsConjVec
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- **Singularity ⟺ nonzero kernel vector.** -/
 theorem isConjVec_iff
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
@@ -582,6 +592,7 @@ theorem isConjVec_iff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 /-- Conjugacy of an intrinsic exponential vector is invariant under reversing
 the corresponding unit-time geodesic segment. -/
 theorem conjVec_reverse
@@ -660,6 +671,7 @@ theorem conjVec_reverse
       exact (ne_of_gt (g.pos p (x - y) hne)) hsquare
     exact sub_eq_zero.mp hsub
 
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Jacobi characterization of conjugate vectors.**  `x` is conjugate iff
@@ -686,6 +698,7 @@ theorem isConjVec_iff_jacobi
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- **The variation Jacobi field vanishes at time zero.**  Every geodesic of
 the variation starts at `p`, so the `s`-derivative at `t = 0` is zero.  With
 `isConjVec_iff_jacobi` this gives the classical phrasing: a conjugate vector
@@ -710,6 +723,7 @@ theorem jacobiVar_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- Rescaling the launch vector and evaluating at time one agrees, after
 differentiation, with evaluating the rescaled variation at the original
 time. -/
@@ -753,6 +767,7 @@ theorem jacobiVar_smul
   rw [hfun]
   rfl
 
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- A conjugate vector at `c • u` produces a nontrivial intrinsic Jacobi

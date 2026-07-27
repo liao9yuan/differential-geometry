@@ -21,20 +21,20 @@ namespace Parabolic
 namespace Euclidean
 
 variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
 
 /-- Real form of the late divergence-source exponent `n + 4`. -/
-def klPReal (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klPReal (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ :=
   Module.finrank ℝ V + 4
 
 /-- Hölder conjugate of `klPReal`. -/
-def klPDual (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klPDual (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ :=
   (Module.finrank ℝ V + 4 : ℝ) / (Module.finrank ℝ V + 3 : ℝ)
 
 /-- Time exponent in the exact `klPDual`-power first-derivative kernel mass. -/
-def klD1Exp (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klD1Exp (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ :=
   ((Module.finrank ℝ V : ℝ) * (1 - klPDual V) - klPDual V) / 2
 
@@ -48,7 +48,7 @@ theorem klPReal_ofReal : ENNReal.ofReal (klPReal V) = klP V := by
 
 /-- The late flux exponent and first-derivative kernel exponent are Hölder
 conjugate. -/
-theorem klP_holder : (klPDual V).HolderConjugate (klPReal V) := by
+theorem klPDual_holder : (klPDual V).HolderConjugate (klPReal V) := by
   let n : ℝ := Module.finrank ℝ V
   have hn3 : 0 < n + 3 := by
     dsimp [n]
@@ -68,7 +68,7 @@ theorem klP_holder : (klPDual V).HolderConjugate (klPReal V) := by
 
 /-- The first-derivative dual exponent is at least one. -/
 theorem klPDual_one : 1 ≤ klPDual V :=
-  (klP_holder (V := V)).lt.le
+  (klPDual_holder (V := V)).lt.le
 
 /-- The first-derivative dual exponent lies in the `L¹ ∩ L²` interpolation
 range used by `baseD1Maj_rpow`. -/

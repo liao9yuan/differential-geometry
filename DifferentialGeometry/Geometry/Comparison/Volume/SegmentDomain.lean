@@ -45,7 +45,7 @@ namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -100,6 +100,7 @@ theorem mem_segDom [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSp
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 /-- The origin is a segment-domain vector: `exp_x 0 = x` has distance `0`. -/
 theorem segDom_zero [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -113,6 +114,7 @@ theorem segDom_zero [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteS
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 /-- **Star-shapedness of the segment domain.**  Sub-segments of a distance
 realizing radial geodesic are themselves distance realizing: if `v ∈ SegDom`
 and `0 ≤ s ≤ 1` then `s • v ∈ SegDom`.  The proof combines the constant-speed
@@ -224,12 +226,24 @@ theorem ball_sub_image_segDom [ConnectedSpace M] [PseudoEMetricSpace M]
     rw [hlen]
     exact ENNReal.toReal_lt_of_lt_ofReal hy
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- The `g`-length ball is open. -/
 theorem isOpen_gBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
     IsOpen (gBall (I := I) g x R) :=
   isOpen_lt (Real.continuous_sqrt.comp (continuous_gInner_self (I := I) g x))
     continuous_const
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- The `g`-length ball is measurable. -/
 theorem measurableSet_gBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
     MeasurableSet (gBall (I := I) g x R) :=

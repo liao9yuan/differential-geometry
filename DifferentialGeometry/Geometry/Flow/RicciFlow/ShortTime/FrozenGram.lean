@@ -22,28 +22,32 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma frozenGram_quad
     (g : SmoothRiemannianMetric I M) (alpha b : M)
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
-    ⟪x, Matrix.toEuclideanCLM
-      (chartInvGramMatrix (I := I) g alpha b) x⟫_ℝ =
+    ⟪x, Matrix.toEuclideanCLM (𝕜 := ℝ)
+      (chartInvGramMatrix (I := I) g alpha b) x⟫ =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g alpha b i j * x i * x j := by
   rw [Matrix.inner_toEuclideanCLM]
-  simp only [dotProduct, Matrix.mulVec, Pi.star_apply, star_trivial]
+  simp only [dotProduct, Matrix.mulVec]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun j _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- The frozen inverse-Gram matrix at every active low-regularity chart point
 is positive definite. -/
 theorem frozenGram_posDef {index : Type*}
@@ -76,15 +80,16 @@ theorem frozenGram_posDef {index : Type*}
           ∑ p : Fin (Module.finrank ℝ E),
             ∑ q : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) (gSeq k) alpha b p q * xi p * xi q := hEll
-      _ = star xi ⋝ᵥ
-          chartInvGramMatrix (I := I) (gSeq k) alpha b *ᵥ xi := by
-        symmetry
+      _ = dotProduct (star xi)
+          (Matrix.mulVec
+            (chartInvGramMatrix (I := I) (gSeq k) alpha b) xi) := by
         simp only [dotProduct, Matrix.mulVec, Pi.star_apply, star_trivial]
         refine Finset.sum_congr rfl (fun p _ => ?_)
         rw [Finset.mul_sum]
         refine Finset.sum_congr rfl (fun q _ => ?_)
         ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Intrinsic low-regularity ellipticity rewritten as the Euclidean quadratic
 form bounds consumed by `spdSqrtEquiv`. -/
 theorem frozenGram_bounds {index : Type*}
@@ -97,10 +102,10 @@ theorem frozenGram_bounds {index : Type*}
       ((chartAtlasPOU I M alpha : C^∞⟮I, M; ℝ⟯) : M → ℝ))
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     D.ellMin * ‖x‖ ^ 2 ≤
-        ⟪x, Matrix.toEuclideanCLM
-          (chartInvGramMatrix (I := I) (gSeq k) alpha b) x⟫_ℝ ∧
-      ⟪x, Matrix.toEuclideanCLM
-          (chartInvGramMatrix (I := I) (gSeq k) alpha b) x⟫_ℝ ≤
+        ⟪x, Matrix.toEuclideanCLM (𝕜 := ℝ)
+          (chartInvGramMatrix (I := I) (gSeq k) alpha b) x⟫ ∧
+      ⟪x, Matrix.toEuclideanCLM (𝕜 := ℝ)
+          (chartInvGramMatrix (I := I) (gSeq k) alpha b) x⟫ ≤
         D.ellMax * ‖x‖ ^ 2 := by
   have hEll := hD.elliptic alpha hAlpha k b hb (fun i => x i)
   constructor
@@ -127,6 +132,8 @@ def frozenGramEquiv {index : Type*}
   spdSqrtEquiv (chartInvGramMatrix (I := I) (gSeq k) alpha b)
     (frozenGram_posDef (I := I) gBase gSeq D hD alpha hAlpha k b hb)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Exact frozen-principal factorization. -/
 theorem frozenGram_comp {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -139,10 +146,11 @@ theorem frozenGram_comp {index : Type*}
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     frozenGramEquiv (I := I) gBase gSeq D hD alpha hAlpha k b hb
         (frozenGramEquiv (I := I) gBase gSeq D hD alpha hAlpha k b hb x) =
-      Matrix.toEuclideanCLM
+      Matrix.toEuclideanCLM (𝕜 := ℝ)
         (chartInvGramMatrix (I := I) (gSeq k) alpha b) x := by
   exact spdSqrt_comp _ _ x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Uniform operator-norm bound for all active frozen coordinate maps. -/
 theorem frozenGram_norm_le {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -159,6 +167,7 @@ theorem frozenGram_norm_le {index : Type*}
   intro x
   exact (frozenGram_bounds (I := I) gBase gSeq D hD alpha hAlpha k b hb x).2
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Uniform inverse operator-norm bound for all active frozen coordinate
 maps. -/
 theorem frozenGram_inv_le {index : Type*}

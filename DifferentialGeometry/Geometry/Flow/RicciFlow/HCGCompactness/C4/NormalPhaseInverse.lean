@@ -105,7 +105,7 @@ theorem exists_normal_inv
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x / 4)) :
+        (Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x / 4)) :
     ∃ (q : NNReal) (Φ : (E × E) → Real → E × E)
         (e : OpenPartialHomeomorph (E × E) (E × E)) (δ : Real),
       0 < q ∧

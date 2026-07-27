@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjointPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
 
 /-!
@@ -26,12 +27,9 @@ not an uninstantiated symbolic decomposition.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
-open scoped BigOperators Manifold ContDiff RealInnerProductSpace
+open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -42,14 +40,36 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+
+private local instance edgeTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance edgeTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance edgeTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance edgeTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
 
 /-- The Ricci order-zero combination left after adding and subtracting one
 Riemann coefficient.  It is the low-order Palatini residual; the complementary
@@ -75,21 +95,23 @@ def edgeFold0 (g g₁ g_bg : SmoothRiemannianMetric I M) :
 def edgeRefoldArm (g g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (C₀ : SmoothCcTensor g 2 2)
     (C₂ : SmoothCcTensor g 4 2) : SmoothCcTensor g 0 2 :=
-  (-2 : Real) • appCc (I := I) (M := M) g 2 2
+  (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
       (edgeRicciHalf (I := I) (M := M) g g₁) W +
-    appCc (I := I) (M := M) g 2 2 C₀ W +
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2 C₀ W +
+    operatorFieldApply (I := I) (M := M) g 2 2
       (edgeFold0 (I := I) (M := M) g g₁ g_bg) W +
-    appCc (I := I) (M := M) g 3 2
+    operatorFieldApply (I := I) (M := M) g 3 2
       (edgeQuad1 (I := I) (M := M) g g₁ g_bg)
       (iteratedCovGrad (I := I) g 0 2 1 W) +
-    appCc (I := I) (M := M) g 4 2 C₂
+    operatorFieldApply (I := I) (M := M) g 4 2 C₂
       (iteratedCovGrad (I := I) g 0 2 2 W)
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- The zero endpoint obeys any nonnegative fibre-operator bound. -/
 theorem edgeZeroBoundAt (g : SmoothRiemannianMetric I M) {delta : Real}
     (hdelta : 0 ≤ delta) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta := by
   intro x v w
   have h0 : (0 : SmoothCcTensor g 0 2) =
@@ -98,6 +120,7 @@ theorem edgeZeroBoundAt (g : SmoothRiemannianMetric I M) {delta : Real}
   simp only [zero_mul, abs_zero]
   exact mul_nonneg (mul_nonneg hdelta (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
 
+omit [CompactSpace M] [BoundarylessManifold I M] in
 /-- On the genuine segment, the path using the sharp zero bound and the path
 using the same radius at both endpoints are the same metric.  This bridge lets
 the equal-radius public refold packages feed the exact closed-edge slope split.
@@ -105,9 +128,9 @@ the equal-radius public refold packages feed the exact closed-edge slope split.
 theorem edgeMetric_bal
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     {s : Real} (hs : s ∈ Set.Icc (0 : Real) 1) :
     edgeMetric (I := I) (M := M) g W hdelta s =
@@ -126,6 +149,9 @@ theorem edgeMetric_bal
       (edgeZeroBound (I := I) (M := M) g) hs0 x v w,
     realizedFam_inner_of_mem (I := I) g W 0 hdelta hdeltaZ hsdelta x v w]
 
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_rank0_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) •
       unitTensor (I := I) (M := M) x := by
@@ -142,7 +168,9 @@ private lemma edge_rank0_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     rfl]
   rw [smul_eq_mul, mul_one]
 
-private lemma edge_cons_sum (x : M) {n : Nat}
+omit [NeZero (Module.finrank Real E)] [TopologicalSpace M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] in
+private lemma edge_cons_sum (_x : M) {n : Nat}
     (Zm : Tensor0SModel (n + 1) Real E) (d : Nat) (t : Fin d → Real)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons (∑ c, t c • u c) rest) =
@@ -174,7 +202,9 @@ private lemma edge_cons_sum (x : M) {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-private lemma edge_cons2_sum (x : M) {n : Nat}
+omit [NeZero (Module.finrank Real E)] [TopologicalSpace M] [CompactSpace M]
+  [T2Space M] [SigmaCompactSpace M] in
+private lemma edge_cons2_sum (_x : M) {n : Nat}
     (Zm : Tensor0SModel (n + 2) Real E) (aa : E) (d : Nat)
     (t : Fin d → Real) (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
@@ -210,6 +240,8 @@ private lemma edge_cons2_sum (x : M) {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank Real E),
@@ -266,161 +298,19 @@ private lemma edge_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [hrepr v i, hbB_coe i]
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- A moving-metric double trace is a fixed-background trace after inserting
 the relative inverse-metric endomorphism in the first contracted slot. -/
 theorem edgeMvTrace (g gm : SmoothRiemannianMetric I M) (s : Nat) :
-    mvDoubleTraceField (I := I) (M := M) g gm s =
-      appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
+    secondMetricCometricDoubleTraceField (I := I) (M := M) g gm s =
+      ccOperatorFieldComp (I := I) (M := M) g (s + 2) (s + 2) s
         (cometricDoubleTraceField (I := I) g s)
-        (slotInsertEndoCc (I := I) (M := M) g (s + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1)
           (fullRaisedEndoField (I := I) (M := M) g gm)) := by
-  classical
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  apply ContinuousLinearMap.ext
-  intro Z
-  apply Tensor0SSpace.toModel_injective
-  apply ContinuousMultilinearMap.ext
-  intro mm
-  have hLHS : Tensor0SSpace.toModel
-      ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (mvDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) mm =
-      ∑ c : Fin (Module.finrank Real E),
-        Tensor0SSpace.toModel Z
-          (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
-            (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E) mm)) := by
-    rw [show ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (mvDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) =
-        cometricDoubleTraceFib (I := I) gm s x Z from rfl]
-    rw [cometricDoubleTraceFib_toModel (I := I) gm s x Z]
-    rw [modelDoubleTrace_apply (E := E) s (cometricLmodel (I := I) gm x)]
-    rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) gm x
-      (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
-      (Tensor0SSpace.toModel Z) mm]
-  rw [hLHS]
-  have hRHS : Tensor0SSpace.toModel
-      ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
-          (cometricDoubleTraceField (I := I) g s)
-          (slotInsertEndoCc (I := I) (M := M) g (s + 1)
-            (fullRaisedEndoField (I := I) (M := M) g gm))).toSection x) Z) mm =
-      ∑ a : Fin (Module.finrank Real E),
-        Tensor0SSpace.toModel Z
-          (Fin.cons (show E from gInvRaisedEndo (I := I) g gm x
-              (smoothOrthoFrame (I := I) g x a x))
-            (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)) := by
-    rw [show ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
-          (cometricDoubleTraceField (I := I) g s)
-          (slotInsertEndoCc (I := I) (M := M) g (s + 1)
-            (fullRaisedEndoField (I := I) (M := M) g gm))).toSection x) Z) =
-        cometricDoubleTraceFib (I := I) g s x
-          (slotInsertEndoFib (I := I) (M := M) (s + 2) 0 x
-            (fullRaisedEndoField (I := I) (M := M) g gm x) Z) from by
-      rw [appCcRS_toSection]
-      rfl]
-    rw [cometricDoubleTraceFib_toModel (I := I) g s x]
-    rw [modelDoubleTrace_apply (E := E) s (cometricLmodel (I := I) g x)]
-    rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g x
-      (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
-      (Tensor0SSpace.toModel
-        (slotInsertEndoFib (I := I) (M := M) (s + 2) 0 x
-          (fullRaisedEndoField (I := I) (M := M) g gm x) Z)) mm]
-    refine Finset.sum_congr rfl fun a _ => ?_
-    rw [slotInsertEndoFib_apply_eval]
-    rw [Fin.update_cons_zero]
-    rfl
-  rw [hRHS]
-  have hGrep : ∀ a : Fin (Module.finrank Real E),
-      (show E from gInvRaisedEndo (I := I) g gm x
-        (smoothOrthoFrame (I := I) g x a x)) =
-        ∑ c : Fin (Module.finrank Real E),
-          g.inner x (smoothOrthoFrame (I := I) g x a x)
-              (smoothOrthoFrame (I := I) gm x c x) •
-            (smoothOrthoFrame (I := I) gm x c x : E) := by
-    intro a
-    have h1 := edge_frame_repr (I := I) (M := M) gm x
-      (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
-    rw [show (show E from gInvRaisedEndo (I := I) g gm x
-        (smoothOrthoFrame (I := I) g x a x)) =
-        gInvRaisedEndo (I := I) g gm x
-          (smoothOrthoFrame (I := I) g x a x) from rfl]
-    conv_lhs => rw [h1]
-    refine Finset.sum_congr rfl fun c _ => ?_
-    congr 1
-    rw [gm.symm x (smoothOrthoFrame (I := I) gm x c x)
-      (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))]
-    rw [show gm.inner x
-        (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
-        (smoothOrthoFrame (I := I) gm x c x) =
-        g.inner x (smoothOrthoFrame (I := I) g x a x)
-          (smoothOrthoFrame (I := I) gm x c x) from by
-      rw [gInvRaisedEndo_apply]
-      rw [inverseMetricSharpFib_inner (I := I) gm x
-        (g0FlatCLM (I := I) g x (smoothOrthoFrame (I := I) g x a x))
-        (smoothOrthoFrame (I := I) gm x c x)]
-      rw [show cotangentToDualLinear (I := I) (x := x)
-          (g0FlatCLM (I := I) g x (smoothOrthoFrame (I := I) g x a x))
-          (smoothOrthoFrame (I := I) gm x c x) =
-          cotangentToDual (I := I) (x := x)
-            (g0FlatCLM (I := I) g x (smoothOrthoFrame (I := I) g x a x))
-            (smoothOrthoFrame (I := I) gm x c x) from rfl]
-      rw [cotangentToDual_g0FlatCLM]]
-  symm
-  calc (∑ a : Fin (Module.finrank Real E),
-        Tensor0SSpace.toModel Z
-          (Fin.cons (show E from gInvRaisedEndo (I := I) g gm x
-              (smoothOrthoFrame (I := I) g x a x))
-            (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm))) =
-      ∑ a : Fin (Module.finrank Real E), ∑ c : Fin (Module.finrank Real E),
-        g.inner x (smoothOrthoFrame (I := I) g x a x)
-            (smoothOrthoFrame (I := I) gm x c x) *
-          Tensor0SSpace.toModel Z
-            (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
-              (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)) := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [hGrep a]
-        exact edge_cons_sum (E := E) x (Tensor0SSpace.toModel Z)
-          (Module.finrank Real E)
-          (fun c => g.inner x (smoothOrthoFrame (I := I) g x a x)
-            (smoothOrthoFrame (I := I) gm x c x))
-          (fun c => (smoothOrthoFrame (I := I) gm x c x : E))
-          (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)
-    _ = ∑ c : Fin (Module.finrank Real E), ∑ a : Fin (Module.finrank Real E),
-        g.inner x (smoothOrthoFrame (I := I) g x a x)
-            (smoothOrthoFrame (I := I) gm x c x) *
-          Tensor0SSpace.toModel Z
-            (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
-              (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)) :=
-        Finset.sum_comm
-    _ = ∑ c : Fin (Module.finrank Real E),
-        Tensor0SSpace.toModel Z
-          (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
-            (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E) mm)) := by
-        refine Finset.sum_congr rfl fun c _ => ?_
-        have hsum := edge_cons2_sum (E := E) x (Tensor0SSpace.toModel Z)
-          ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
-          (Module.finrank Real E)
-          (fun a => g.inner x (smoothOrthoFrame (I := I) g x a x)
-            (smoothOrthoFrame (I := I) gm x c x))
-          (fun a => (smoothOrthoFrame (I := I) g x a x : E)) mm
-        rw [← hsum]
-        congr 2
-        have hrep0 := edge_frame_repr (I := I) (M := M) g x
-          (smoothOrthoFrame (I := I) gm x c x)
-        rw [show (∑ a : Fin (Module.finrank Real E),
-            g.inner x (smoothOrthoFrame (I := I) g x a x)
-              (smoothOrthoFrame (I := I) gm x c x) •
-              (smoothOrthoFrame (I := I) g x a x : E)) =
-            ((∑ a : Fin (Module.finrank Real E),
-              g.inner x (smoothOrthoFrame (I := I) g x a x)
-                (smoothOrthoFrame (I := I) gm x c x) •
-                smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) from rfl]
-        rw [← hrep0]
+  exact pairTrace_refold (I := I) (M := M) g gm s
 
 private lemma edge_sum4_comm
     {A B C D : Type*} [Fintype A] [Fintype B] [Fintype C] [Fintype D]
@@ -436,6 +326,8 @@ private lemma edge_sum4_comm
     _ = ∑ c, ∑ d, ∑ a, ∑ b, F a b c d := by
           simp only [Fintype.sum_prod_type]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_bitrace_move
     (g gm : SmoothRiemannianMetric I M) (x : M)
     (S Z : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real)
@@ -447,8 +339,8 @@ private lemma edge_bitrace_move
           Z (smoothOrthoFrame (I := I) gm x a x)
             (smoothOrthoFrame (I := I) gm x b x)) =
       ∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),
-        S (gInvRaisedEndo (I := I) g gm x (e i))
-            (gInvRaisedEndo (I := I) g gm x (e j)) * Z (e i) (e j) := by
+        S (metricComparisonEndo (I := I) g gm x (e i))
+            (metricComparisonEndo (I := I) g gm x (e j)) * Z (e i) (e j) := by
   classical
   let f : Fin (Module.finrank Real E) → TangentSpace I x :=
     fun a => smoothOrthoFrame (I := I) gm x a x
@@ -457,16 +349,15 @@ private lemma edge_bitrace_move
   have hf : ∀ a b, gm.inner x (f a) (f b) = if a = b then (1 : Real) else 0 := by
     intro a b
     exact smoothOrthoFrame_orthonormal_at_center (I := I) gm x a b
-  have hraise : ∀ i, gInvRaisedEndo (I := I) g gm x (e i) =
+  have hraise : ∀ i, metricComparisonEndo (I := I) g gm x (e i) =
       ∑ a, c i a • f a := by
     intro i
     have hrep := orthonormal_tangent_expansion (I := I) (M := M) gm x f hf
-      (gInvRaisedEndo (I := I) g gm x (e i))
+      (metricComparisonEndo (I := I) g gm x (e i))
     rw [← hrep]
     refine Finset.sum_congr rfl fun a _ => ?_
     congr 1
-    rw [gm.symm x (f a) (gInvRaisedEndo (I := I) g gm x (e i))]
-    change gm.inner x (gInvRaisedEndo (I := I) g gm x (e i)) (f a) = c i a
+    rw [gm.symm x (f a) (metricComparisonEndo (I := I) g gm x (e i))]
     rw [gInvRaisedEndo_apply]
     rw [inverseMetricSharpFib_inner (I := I) gm x
       (g0FlatCLM (I := I) g x (e i)) (f a)]
@@ -479,29 +370,31 @@ private lemma edge_bitrace_move
     intro a
     exact (orthonormal_tangent_expansion (I := I) (M := M) g x e he (f a)).symm
   have hS : ∀ i j,
-      S (gInvRaisedEndo (I := I) g gm x (e i))
-          (gInvRaisedEndo (I := I) g gm x (e j)) =
+      S (metricComparisonEndo (I := I) g gm x (e i))
+          (metricComparisonEndo (I := I) g gm x (e j)) =
         ∑ a, ∑ b, (c i a * c j b) * S (f a) (f b) := by
     intro i j
-    rw [hraise i, hraise j, map_sum]
+    rw [hraise i, map_sum S (fun a => c i a • f a) Finset.univ]
     simp only [map_smul, ContinuousLinearMap.sum_apply,
       ContinuousLinearMap.smul_apply, smul_eq_mul]
     refine Finset.sum_congr rfl fun a _ => ?_
-    rw [map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [hraise j, map_sum (S (f a)) (fun b => c j b • f b) Finset.univ]
+    simp only [map_smul,
+      smul_eq_mul]
+    rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     ring
   have hZ : ∀ a b, Z (f a) (f b) =
       ∑ i, ∑ j, (c i a * c j b) * Z (e i) (e j) := by
     intro a b
-    rw [hframe a, hframe b, map_sum]
+    rw [hframe a, map_sum Z (fun i => c i a • e i) Finset.univ]
     simp only [map_smul, ContinuousLinearMap.sum_apply,
       ContinuousLinearMap.smul_apply, smul_eq_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [hframe b, map_sum (Z (e i)) (fun j => c j b • e j) Finset.univ]
+    simp only [map_smul,
+      smul_eq_mul]
+    rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     ring
   calc
@@ -520,8 +413,8 @@ private lemma edge_bitrace_move
       edge_sum4_comm (fun a b i j =>
         (c i a * c j b) * (S (f a) (f b) * Z (e i) (e j)))
     _ = ∑ i, ∑ j,
-        S (gInvRaisedEndo (I := I) g gm x (e i))
-            (gInvRaisedEndo (I := I) g gm x (e j)) * Z (e i) (e j) := by
+        S (metricComparisonEndo (I := I) g gm x (e i))
+            (metricComparisonEndo (I := I) g gm x (e j)) * Z (e i) (e j) := by
       refine Finset.sum_congr rfl fun i _ => ?_
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [hS i j, Finset.sum_mul]
@@ -537,8 +430,8 @@ def edgeSlot2 (g : SmoothRiemannianMetric I M)
       (fun x : M => TangentSpace I x →L[Real] TangentSpace I x))
     (j : Fin 2) (S : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
   domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j)
-    (appCc (I := I) (M := M) g 2 2
-      (slotInsertEndoCc (I := I) (M := M) g 1 Lambda)
+    (operatorFieldApply (I := I) (M := M) g 2 2
+      (endoSlotZeroCcTensor (I := I) (M := M) g 1 Lambda)
       (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j) S))
 
 /-- Apply the relative inverse-metric endomorphism in both slots. -/
@@ -552,7 +445,7 @@ def edgeRaise2 (g gm : SmoothRiemannianMetric I M)
 /-- Covariant tensor product with the first factor occupying slots `0,1`. -/
 def edgeProd4 (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 4 :=
-  appCc (I := I) (M := M) g 2 4
+  operatorFieldApply (I := I) (M := M) g 2 4
     (slotExtendIter (I := I) (M := M) g 0 2 2 B) A
 
 /-- Formal rank-four partner of one moving Palatini pair-trace monomial. -/
@@ -570,16 +463,17 @@ identity before any pointwise estimate is taken. -/
 def edgePairMono (g gm : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :
     SmoothCcTensor g 2 2 :=
-  appCcRS (I := I) (M := M) g 2 6 2
-    (mvPairTraceOp (I := I) (M := M) g gm)
-    (rsDomDomCongrSection (I := I) (M := M) g 2 6 sigmaE
+  ccOperatorFieldComp (I := I) (M := M) g 2 6 2
+    (secondMetricPairTraceOp (I := I) (M := M) g gm)
+    (rsDomDomCongrSection (I := I) (M := M) g 2 6 ricciFoldRemainderSlotPerm
       (slotExtendIter (I := I) (M := M) g 0 4 2
         (domDomCongrSection (I := I) g
           (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G)))
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- One moving pair-trace action is exactly one Palatini refold monomial.
 
 This is the public-API reconstruction of the algebraic identity needed by the
@@ -589,10 +483,10 @@ refold file. -/
 theorem edgeMonoRefold (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (edgePairMono (I := I) (M := M) g gm G σ) S =
-      appCc (I := I) (M := M) g 4 2
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
+      operatorFieldApply (I := I) (M := M) g 4 2
+        (curvatureActionMonomialCoeffField (I := I) (M := M) g gm
           (ccTensorUnitValueSection (I := I) (M := M) g S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g S) σ) G := by
   classical
@@ -610,22 +504,23 @@ theorem edgeMonoRefold (g gm : SmoothRiemannianMetric I M)
   simp only [map_smul, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
+  rw [edgePairMono]
   rw [mvPairTraceOp_apply_toModel (I := I) (M := M) g gm
     (domDomCongrSection (I := I) g
       (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G) x
     ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from S.toSection x)
       (unitTensor (I := I) (M := M) x)) v]
   rw [show ((show Tensor0SSpace 4 I x →L[Real] Tensor0SSpace 2 I x from
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g gm
         (ccTensorUnitValueSection (I := I) (M := M) g S)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g S) σ).toSection x)
       ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
         (unitTensor (I := I) (M := M) x))) =
-    curvatureRefoldMonomialBiContrFib (I := I) (M := M) gm
+    curvatureActionMonomialTrace (I := I) (M := M) gm
       (ccTensorUnitValueSection (I := I) (M := M) g S) σ x
       ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
         (unitTensor (I := I) (M := M) x)) from rfl]
-  rw [curvatureRefoldMonomialBiContrFib,
+  rw [curvatureActionMonomialTrace,
     curvatureRefoldMonomialFibFixedFrame_toModel]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => ?_
@@ -643,8 +538,9 @@ theorem edgeMonoRefold (g gm : SmoothRiemannianMetric I M)
   generalize σ i = k
   fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 /-- Evaluation of `edgeSlot2`: the chosen covariant slot is read through the
 given endomorphism. -/
 theorem edgeSlot2_eval (g : SmoothRiemannianMetric I M)
@@ -672,6 +568,8 @@ theorem edgeSlot2_eval (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases j <;> fin_cases k <;> simp [Equiv.swap_apply_def]
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Both relative inverse-metric insertions in `edgeRaise2` are visible on
 the two covariant arguments. -/
 theorem edgeRaise2_eval (g gm : SmoothRiemannianMetric I M)
@@ -686,6 +584,8 @@ theorem edgeRaise2_eval (g gm : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma edge_extend_cons
     (g : SmoothRiemannianMetric I M) (r s : Nat)
     (Φ : SmoothCcTensor g r s) (x : M)
@@ -703,15 +603,16 @@ private lemma edge_extend_cons
   rw [show ((show Tensor0SSpace (r + 1) I x →L[Real]
       Tensor0SSpace (s + 1) I x from
       (slotExtend (I := I) (M := M) g r s Φ).toSection x) D) =
-      slotExtendFib (I := I) (M := M) g r s x
+      slotExtendPointwise (I := I) (M := M) g r s x
         (show Tensor0SSpace r I x →L[Real] Tensor0SSpace s I x from
           Φ.toSection x) D from rfl]
   exact slotExtendFib_apply_eval (I := I) (M := M) g r s x
     (show Tensor0SSpace r I x →L[Real] Tensor0SSpace s I x from
       Φ.toSection x) D (show E from v0) vs
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma edge_extend2_eval (g : SmoothRiemannianMetric I M)
     (B : SmoothCcTensor g 0 2) (x : M) (D : Tensor0SSpace 2 I x)
     (u : Fin 4 → TangentSpace I x) :
@@ -758,8 +659,6 @@ private lemma edge_extend2_eval (g : SmoothRiemannianMetric I M)
       (T := D) (v0 := (u 0 : E))
       (vs := Fin.cons (show E from u 1) (fun i : Fin 0 => i.elim0))]
     congr 1
-    funext k
-    fin_cases k <;> rfl
   have hdecomp := tensor0S_rank0_eq_smul_unit (I := I) (M := M) x t
   rw [htval] at hdecomp
   rw [hdecomp, map_smul]
@@ -767,6 +666,8 @@ private lemma edge_extend2_eval (g : SmoothRiemannianMetric I M)
     smul_eq_mul]
   rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The rank-four product carrier evaluates as the product of its first and
 last pair of covariant components. -/
 theorem edgeProd4_eval (g : SmoothRiemannianMetric I M)
@@ -779,6 +680,8 @@ theorem edgeProd4_eval (g : SmoothRiemannianMetric I M)
   rw [edge_extend2_eval (I := I) (M := M) g B x]
   rfl
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Component formula for the formal rank-four partner of one monomial. -/
 theorem edgePartner_eval (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4))
@@ -793,14 +696,15 @@ theorem edgePartner_eval (g gm : SmoothRiemannianMetric I M)
   rw [edgePairPartner, domDomCongrSection_unitModel,
     ContinuousMultilinearMap.domDomCongr_apply, edgeProd4_eval,
     edgeRaise2_eval]
-  congr 2 <;> funext k <;> fin_cases k <;> rfl
+  congr 2 ; funext k ; fin_cases k <;> rfl
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Pointwise component formula for one public pair-trace monomial. -/
 theorem edgeMono_eval (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) (v : Fin 2 → E) :
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (edgePairMono (I := I) (M := M) g gm G σ) S) x v =
       ∑ a : Fin (Module.finrank Real E), ∑ b : Fin (Module.finrank Real E),
         unitModel (I := I) (M := M) g 2 S x
@@ -814,11 +718,11 @@ theorem edgeMono_eval (g gm : SmoothRiemannianMetric I M)
   rw [edgeMonoRefold (I := I) (M := M) g gm S G σ]
   rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply]
   change Tensor0SSpace.toModel
-      (curvatureRefoldMonomialBiContrFib (I := I) (M := M) gm
+      (curvatureActionMonomialTrace (I := I) (M := M) gm
         (ccTensorUnitValueSection (I := I) (M := M) g S) σ x
         ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from
           G.toSection x) (unitTensor (I := I) (M := M) x))) v = _
-  rw [curvatureRefoldMonomialBiContrFib,
+  rw [curvatureActionMonomialTrace,
     curvatureRefoldMonomialFibFixedFrame_toModel]
   rfl
 
@@ -833,6 +737,8 @@ private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     edgeEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel D v := rfl
@@ -841,32 +747,61 @@ private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
 private def edgeFeedCLM (s : Nat) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real :=
-  haveI : FiniteDimensional Real (TangentSpace I x) :=
-    inferInstanceAs (FiniteDimensional Real E)
-  LinearMap.toContinuousLinearMap
-    { toFun := fun p => (edgeEvalCLM (I := I) (M := M) s x v).comp
-        (tensor0S_curry (𝕜 := Real) (I := I) (M := M) s x
-          ((tensor0S_curry (𝕜 := Real) (I := I) (M := M) (s + 1) x G) p))
-      map_add' := fun p p' => by
-        rw [map_add, map_add, ContinuousLinearMap.comp_add]
-      map_smul' := fun c p => by
-        rw [map_smul, map_smul, RingHom.id_apply]
-        ext q
-        simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
-          map_smul] }
+  let split : Fin (s + 2) ≃ Fin 2 ⊕ Fin s :=
+    (finCongr (Nat.add_comm s 2)).trans finSumFinEquiv.symm
+  let onModel : ContinuousMultilinearMap Real (fun _ : Fin 2 => E) Real :=
+    (ContinuousMultilinearMap.apply Real (fun _ : Fin s => E) Real v)
+      |>.compContinuousMultilinearMap
+        ((ContinuousMultilinearMap.domDomCongr split (Tensor0SSpace.toModel G)).currySum)
+  let onTangent : ContinuousMultilinearMap Real
+      (fun _ : Fin 2 => TangentSpace I x) Real :=
+    onModel.compContinuousLinearMap (fun _ => trivToE (I := I) x x)
+  (continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).toContinuousLinearMap.comp
+    onTangent.curryLeft
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edgeFeedCLM_apply (s : Nat) (x : M)
     (G : Tensor0SSpace (s + 2) I x) (v : Fin s → E)
     (p q : TangentSpace I x) :
     edgeFeedCLM (I := I) (M := M) s x G v p q =
       Tensor0SSpace.toModel G (Fin.cons (p : E) (Fin.cons (q : E) v)) := by
-  rw [edgeFeedCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
-    AddHom.coe_mk, ContinuousLinearMap.comp_apply, edgeEvalCLM_apply,
-    TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
-      (T := tensor0S_curry (𝕜 := Real) (I := I) (M := M) (s + 1) x G p)
-      (v0 := q) (vs := v),
-    TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
-      (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
+  let split : Fin (s + 2) ≃ Fin 2 ⊕ Fin s :=
+    (finCongr (Nat.add_comm s 2)).trans finSumFinEquiv.symm
+  let onModel : ContinuousMultilinearMap Real (fun _ : Fin 2 => E) Real :=
+    (ContinuousMultilinearMap.apply Real (fun _ : Fin s => E) Real v)
+      |>.compContinuousMultilinearMap
+        ((ContinuousMultilinearMap.domDomCongr split (Tensor0SSpace.toModel G)).currySum)
+  let onTangent : ContinuousMultilinearMap Real
+      (fun _ : Fin 2 => TangentSpace I x) Real :=
+    onModel.compContinuousLinearMap (fun _ => trivToE (I := I) x x)
+  change (continuousMultilinearCurryFin1 Real (TangentSpace I x) Real
+      (onTangent.curryLeft p)) q =
+    Tensor0SSpace.toModel G (Fin.cons (p : E) (Fin.cons (q : E) v))
+  rw [continuousMultilinearCurryFin1_apply,
+    ContinuousMultilinearMap.curryLeft_apply]
+  simp only [onTangent, onModel, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+    ContinuousLinearMap.compContinuousMultilinearMap_coe,
+    Function.comp_apply,
+    trivToE_self_apply]
+  change (ContinuousMultilinearMap.domDomCongr split (Tensor0SSpace.toModel G)).currySum
+      (fun i : Fin 2 =>
+        @Fin.cons 1 (fun _ : Fin 2 => E) (p : E)
+          (@Fin.snoc 0 (fun _ : Fin 1 => E) (fun j => j.elim0) (q : E)) i) v =
+    Tensor0SSpace.toModel G (Fin.cons (p : E) (Fin.cons (q : E) v))
+  rw [ContinuousMultilinearMap.currySum_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  funext i
+  refine Fin.cases rfl (fun j => Fin.cases rfl (fun k => ?_) j) i
+  have hcast :
+      Fin.cast (Nat.add_comm s 2) k.succ.succ = Fin.natAdd 2 k := by
+    apply Fin.ext
+    change k.val + 1 + 1 = 2 + k.val
+    omega
+  simp only [split, Equiv.trans_apply, finCongr_apply, hcast,
+    finSumFinEquiv_symm_apply_natAdd, Sum.elim_inr]
+  rfl
 
 private lemma edge_sum_succ {A R : Type*} [Fintype A] [AddCommMonoid R]
     (s : Nat) (F : (Fin (s + 1) → A) → R) :
@@ -894,8 +829,6 @@ private lemma edge_sum2 {A : Type*} [Fintype A] (F : (Fin 2 → A) → Real) :
       refine Finset.sum_congr rfl fun a _ => ?_
       refine Finset.sum_congr rfl fun b _ => ?_
       congr 1
-      funext k
-      fin_cases k <;> rfl
 
 private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
     (∑ J : Fin 4 → A, F J) =
@@ -911,15 +844,14 @@ private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [Finset.sum_eq_single (fun i : Fin 0 => i.elim0)]
   · congr 1
-    funext k
-    fin_cases k <;> rfl
   · intro q _ hq
     exact absurd (Subsingleton.elim q (fun i : Fin 0 => i.elim0)) hq
   · intro h
     exact absurd (Finset.mem_univ _) h
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M)
     (e : Fin (Module.finrank Real E) → TangentSpace I x)
@@ -963,14 +895,15 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
   refine Finset.sum_congr rfl fun J _ => ?_
   rw [hcomp A Fin.elim0 J, hcomp B Fin.elim0 J]
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 2 x (S.toFun x)
-        ((appCc (I := I) (M := M) g 2 2
+        ((operatorFieldApply (I := I) (M := M) g 2 2
           (edgePairMono (I := I) (M := M) g gm G σ) S).toFun x) =
       tensorInnerPointwise (I := I) (M := M) g 0 4 x
         ((edgePairPartner (I := I) (M := M) g gm S σ).toFun x) (G.toFun x) := by
@@ -978,7 +911,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
   obtain ⟨e, bse, hbse, horth⟩ :=
     exists_orthoFrame_basis_E (I := I) (M := M) g x
   rw [edge_inner0 (I := I) (M := M) g 2 S
-      (appCc (I := I) (M := M) g 2 2
+      (operatorFieldApply (I := I) (M := M) g 2 2
         (edgePairMono (I := I) (M := M) g gm G σ) S) x e bse hbse horth,
     edge_inner0 (I := I) (M := M) g 4
       (edgePairPartner (I := I) (M := M) g gm S σ) G x e bse hbse horth,
@@ -994,15 +927,15 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                 (smoothOrthoFrame (I := I) gm x a x : E)
                 (Fin.cons (smoothOrthoFrame (I := I) gm x b x : E)
                   ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k))) =
-        ∑ a : Fin (Module.finrank Real E),
+        (∑ a : Fin (Module.finrank Real E),
         ∑ b : Fin (Module.finrank Real E),
           unitModel (I := I) (M := M) g 2 S x
-              ![gInvRaisedEndo (I := I) g gm x (e a),
-                gInvRaisedEndo (I := I) g gm x (e b)] *
+              ![metricComparisonEndo (I := I) g gm x (e a),
+                metricComparisonEndo (I := I) g gm x (e b)] *
             unitModel (I := I) (M := M) g 4 G x
               (fun k => (Fin.cons (e a : E)
                 (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-                (σ k)) := by
+                (σ k))) := by
     intro i j
     let Sx : Tensor0SSpace 2 I x :=
       (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from S.toSection x)
@@ -1013,15 +946,21 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
     have hm := edge_bitrace_move (I := I) (M := M) g gm x
       (edgeFeedCLM (I := I) (M := M) 0 x Sx ![])
       (edgeFeedCLM (I := I) (M := M) 2 x
-        (slotPerm4Fib (I := I) (M := M) x σ Gx) ![(e i : E), (e j : E)])
+        (tensorRank4PermuteCLM (I := I) (M := M) x σ Gx) ![(e i : E), (e j : E)])
       e horth
     simpa only [edgeFeedCLM_apply, slotPerm4Fib_toModel,
       ContinuousMultilinearMap.domDomCongr_apply, Sx, Gx, unitModel] using hm
+  have hvec : ∀ i j : Fin (Module.finrank Real E),
+      (fun k : Fin 2 => (e (![i, j] k) : E)) = ![(e i : E), (e j : E)] := by
+    intro i j
+    funext k
+    fin_cases k <;> rfl
+  simp_rw [hvec]
   calc
     (∑ i, ∑ j,
         unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
           unitModel (I := I) (M := M) g 2
-            (appCc (I := I) (M := M) g 2 2
+            (operatorFieldApply (I := I) (M := M) g 2 2
               (edgePairMono (I := I) (M := M) g gm G σ) S) x
             ![(e i : E), (e j : E)]) =
       ∑ i, ∑ j,
@@ -1034,7 +973,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                 (fun k => (Fin.cons
                   (smoothOrthoFrame (I := I) gm x a x : E)
                   (Fin.cons (smoothOrthoFrame (I := I) gm x b x : E)
-                    ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k)))) := by
+                    ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k))) := by
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [edgeMono_eval (I := I) (M := M) g gm S G σ x]
@@ -1042,8 +981,8 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
           (∑ a, ∑ b,
             unitModel (I := I) (M := M) g 2 S x
-                ![gInvRaisedEndo (I := I) g gm x (e a),
-                  gInvRaisedEndo (I := I) g gm x (e b)] *
+                ![metricComparisonEndo (I := I) g gm x (e a),
+                  metricComparisonEndo (I := I) g gm x (e b)] *
               unitModel (I := I) (M := M) g 4 G x
                 (fun k => (Fin.cons (e a : E)
                   (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
@@ -1053,28 +992,28 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         rw [hmove i j]
     _ = ∑ a, ∑ b, ∑ i, ∑ j,
         (unitModel (I := I) (M := M) g 2 S x
-              ![gInvRaisedEndo (I := I) g gm x (e a),
-                gInvRaisedEndo (I := I) g gm x (e b)] *
+              ![metricComparisonEndo (I := I) g gm x (e a),
+                metricComparisonEndo (I := I) g gm x (e b)] *
             unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)]) *
           unitModel (I := I) (M := M) g 4 G x
             (fun k => (Fin.cons (e a : E)
               (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-              (σ k)) := by
+                (σ k)) := by
         rw [show (∑ i, ∑ j,
             unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
               (∑ a, ∑ b,
                 unitModel (I := I) (M := M) g 2 S x
-                    ![gInvRaisedEndo (I := I) g gm x (e a),
-                      gInvRaisedEndo (I := I) g gm x (e b)] *
+                    ![metricComparisonEndo (I := I) g gm x (e a),
+                      metricComparisonEndo (I := I) g gm x (e b)] *
                   unitModel (I := I) (M := M) g 4 G x
                     (fun k => (Fin.cons (e a : E)
                       (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-                      (σ k))) =
+                      (σ k)))) =
             ∑ i, ∑ j, ∑ a, ∑ b,
               unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
                 (unitModel (I := I) (M := M) g 2 S x
-                    ![gInvRaisedEndo (I := I) g gm x (e a),
-                      gInvRaisedEndo (I := I) g gm x (e b)] *
+                    ![metricComparisonEndo (I := I) g gm x (e a),
+                      metricComparisonEndo (I := I) g gm x (e b)] *
                   unitModel (I := I) (M := M) g 4 G x
                     (fun k => (Fin.cons (e a : E)
                       (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
@@ -1087,12 +1026,12 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         rw [edge_sum4_comm (fun i j a b =>
           unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
             (unitModel (I := I) (M := M) g 2 S x
-                ![gInvRaisedEndo (I := I) g gm x (e a),
-                  gInvRaisedEndo (I := I) g gm x (e b)] *
+                ![metricComparisonEndo (I := I) g gm x (e a),
+                  metricComparisonEndo (I := I) g gm x (e b)] *
               unitModel (I := I) (M := M) g 4 G x
                 (fun k => (Fin.cons (e a : E)
                   (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-                  (σ k)))]
+                  (σ k))))]
         refine Finset.sum_congr rfl fun a _ => ?_
         refine Finset.sum_congr rfl fun b _ => ?_
         refine Finset.sum_congr rfl fun i _ => ?_
@@ -1100,8 +1039,8 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         ring
     _ = ∑ K : Fin 4 → Fin (Module.finrank Real E),
         (unitModel (I := I) (M := M) g 2 S x
-              ![gInvRaisedEndo (I := I) g gm x (e (K 0)),
-                gInvRaisedEndo (I := I) g gm x (e (K 1))] *
+              ![metricComparisonEndo (I := I) g gm x (e (K 0)),
+                metricComparisonEndo (I := I) g gm x (e (K 1))] *
             unitModel (I := I) (M := M) g 2 S x
               ![(e (K 2) : E), (e (K 3) : E)]) *
           unitModel (I := I) (M := M) g 4 G x
@@ -1111,7 +1050,18 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl fun b _ => ?_
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
-        rfl
+        have h0 : e (![a, b, i, j] 0) = e a := rfl
+        have h1 : e (![a, b, i, j] 1) = e b := rfl
+        have h2 : e (![a, b, i, j] 2) = e i := rfl
+        have h3 : e (![a, b, i, j] 3) = e j := rfl
+        have hcomp :
+            (fun k => (e (![a, b, i, j] (σ k)) : E)) =
+              fun k => (Fin.cons (e a : E)
+                (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k) := by
+          funext k
+          generalize σ k = l
+          fin_cases l <;> rfl
+        rw [h0, h1, h2, h3, hcomp]
     _ = ∑ J : Fin 4 → Fin (Module.finrank Real E),
         unitModel (I := I) (M := M) g 4
             (edgePairPartner (I := I) (M := M) g gm S σ) x
@@ -1123,8 +1073,8 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
             (Equiv.refl (Fin (Module.finrank Real E))))
           (fun K =>
             (unitModel (I := I) (M := M) g 2 S x
-                  ![gInvRaisedEndo (I := I) g gm x (e (K 0)),
-                    gInvRaisedEndo (I := I) g gm x (e (K 1))] *
+                  ![metricComparisonEndo (I := I) g gm x (e (K 0)),
+                    metricComparisonEndo (I := I) g gm x (e (K 1))] *
                 unitModel (I := I) (M := M) g 2 S x
                   ![(e (K 2) : E), (e (K 3) : E)]) *
               unitModel (I := I) (M := M) g 4 G x
@@ -1142,11 +1092,13 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
               (fun k => K (σ k)) := by
           funext k
           simp [Equiv.arrowCongr]
-        rw [heqv, edgePartner_eval]
+        rw [heqv]
+        simp only
+        rw [edgePartner_eval]
         simp only [Equiv.apply_symm_apply]
         rfl
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 /-- Exact global formal-partner identity for one moving Palatini pair-trace
 monomial.  This is the Green-ready replacement for estimating the rank-four
 coefficient and `nabla² S` separately. -/
@@ -1154,7 +1106,7 @@ theorem edgePair_l2 (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
     tensorL2Inner (I := I) (M := M) g 0 2 S.toFun
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (edgePairMono (I := I) (M := M) g gm G σ) S).toFun =
       tensorL2Inner (I := I) (M := M) g 0 4
         (edgePairPartner (I := I) (M := M) g gm S σ).toFun G.toFun := by
@@ -1164,23 +1116,24 @@ theorem edgePair_l2 (g gm : SmoothRiemannianMetric I M)
     (Filter.Eventually.of_forall fun x => ?_)
   exact edgePair_point (I := I) (M := M) g gm S G σ x
 
+omit [BoundarylessManifold I M] in
 /-- Inner-product form of `edgePair_l2`, convenient for finite linear
 combinations of refold monomials. -/
 theorem edgePair_inner (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
-    (⟪S, appCc (I := I) (M := M) g 2 2
-        (edgePairMono (I := I) (M := M) g gm G σ) S⟫_Real : Real) =
-      ⟪edgePairPartner (I := I) (M := M) g gm S σ, G⟫_Real := by
+    (⟪S, (operatorFieldApply (I := I) (M := M) g 2 2
+        (edgePairMono (I := I) (M := M) g gm G σ) S)⟫_ℝ : Real) =
+      ⟪edgePairPartner (I := I) (M := M) g gm S σ, G⟫_ℝ := by
   rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
   exact edgePair_l2 (I := I) (M := M) g gm S G σ
 
 /-- Pair-trace form of the DeTurck part of the second-order refold family. -/
 def edgeLiePairFam (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) : SmoothCcTensor g 2 2 :=
@@ -1196,9 +1149,9 @@ def edgeLiePairFam (g : SmoothRiemannianMetric I M)
 /-- Rank-four formal partner of the DeTurck second-order pair family. -/
 def edgeLiePartner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) : SmoothCcTensor g 0 4 :=
@@ -1209,20 +1162,21 @@ def edgeLiePartner (g : SmoothRiemannianMetric I M)
         (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
         ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
 
+omit [BoundarylessManifold I M] in
 /-- The DeTurck second-order action is exactly the application of its
 rank-two pair-trace form to the metric difference. -/
 theorem edgeLiePair_apply
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ q epsilon s) T =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (deTurckLieCovDerivRefoldC2Family
           (I := I) (M := M) g T hdelta hdeltaZ q epsilon s)
         (iteratedCovGrad (I := I) g 0 2 2 T) := by
@@ -1271,19 +1225,20 @@ def edgeKernelPartner (g gm : SmoothRiemannianMetric I M)
       edgePairPartner (I := I) (M := M) g gm S (q 2) -
       edgePairPartner (I := I) (M := M) g gm S (q 3))
 
+omit [BoundarylessManifold I M] in
 /-- Applying a Palatini kernel pair field to its weight reproduces the
 corresponding rank-four kernel coefficient acting on the chosen input. -/
 theorem edgeKernel_apply (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (q : Fin 4 → Equiv.Perm (Fin 4)) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (edgeKernelPair (I := I) (M := M) g gm G q) S =
-      appCc (I := I) (M := M) g 4 2
-        (curvatureRefoldKernelCoeffField (I := I) (M := M) g gm
+      operatorFieldApply (I := I) (M := M) g 4 2
+        (curvatureActionKernelCoeffField (I := I) (M := M) g gm
           (ccTensorUnitValueSection (I := I) (M := M) g S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g S)
           (q 0) (q 1) (q 2) (q 3)) G := by
-  rw [edgeKernelPair, curvatureRefoldKernelCoeffField]
+  rw [edgeKernelPair, curvatureActionKernelCoeffField]
   simp only [appCc_smul_left, appCc_add_left, appCc_sub_left]
   rw [edgeMonoRefold (I := I) (M := M) g gm S G (q 0),
     edgeMonoRefold (I := I) (M := M) g gm S G (q 1),
@@ -1293,9 +1248,9 @@ theorem edgeKernel_apply (g gm : SmoothRiemannianMetric I M)
 /-- Pair-trace form of the Riemann--Palatini second-order refold family. -/
 def edgeRiemPairFam (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) (s : Real) :
     SmoothCcTensor g 2 2 :=
@@ -1310,9 +1265,9 @@ def edgeRiemPairFam (g : SmoothRiemannianMetric I M)
 /-- Rank-four formal partner of the Riemann--Palatini pair family. -/
 def edgeRiemPartner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) (s : Real) :
     SmoothCcTensor g 0 4 :=
@@ -1322,19 +1277,20 @@ def edgeRiemPartner (g : SmoothRiemannianMetric I M)
       edgeKernelPartner (I := I) (M := M) g
         (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T qB))
 
+omit [BoundarylessManifold I M] in
 /-- The Riemann--Palatini second-order action is exactly the application of
 its rank-two pair-trace form to the metric difference. -/
 theorem edgeRiemPair_apply
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) (s : Real) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (edgeRiemPairFam (I := I) (M := M) g T hdelta hdeltaZ qA qB s) T =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (riemannPalatiniRefoldC2Family
           (I := I) (M := M) g T hdelta hdeltaZ qA qB s)
         (iteratedCovGrad (I := I) g 0 2 2 T) := by
@@ -1351,9 +1307,9 @@ theorem edgeRiemPair_apply
 closed-edge refold package. -/
 def edgeTopPair (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
@@ -1364,9 +1320,9 @@ def edgeTopPair (g : SmoothRiemannianMetric I M)
 /-- Rank-four formal partner of the complete top refold coefficient. -/
 def edgeTopPartner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
@@ -1375,20 +1331,21 @@ def edgeTopPartner (g : SmoothRiemannianMetric I M)
       edgeRiemPartner (I := I) (M := M) g T hdelta hdeltaZ qA qB s +
     edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ q epsilon s
 
+omit [BoundarylessManifold I M] in
 /-- Exact action identity for the complete top refold coefficient. -/
 theorem edgeTopPair_apply
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ qA qB q epsilon s) T =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         ((2 : Real) • riemannPalatiniRefoldC2Family
             (I := I) (M := M) g T hdelta hdeltaZ qA qB s +
           deTurckLieCovDerivRefoldC2Family
@@ -1400,32 +1357,34 @@ theorem edgeTopPair_apply
     edgeLiePair_apply (I := I) (M := M) g T hdelta hdeltaZ q epsilon s]
 
 set_option maxHeartbeats 12800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
+omit [BoundarylessManifold I M] in
 /-- Exact formal-partner identity for the complete top coefficient returned by
 the Riemann--DeTurck refold. -/
 theorem edgeTop_inner
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    (⟪T, (operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
+          qA qB q epsilon s) T)⟫_ℝ : Real) =
       ⟪edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
           qA qB q epsilon s,
-        iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+        iteratedCovGrad (I := I) g 0 2 2 T⟫_ℝ := by
   rw [edgeTopPair, edgeTopPartner, edgeRiemPairFam, edgeRiemPartner,
-    edgeKernelPair, edgeKernelPartner, edgeLiePairFam, edgeLiePartner,
+    edgeKernelPair, edgeKernelPair, edgeKernelPartner, edgeKernelPartner,
+    edgeLiePairFam, edgeLiePartner,
     Fin.sum_univ_three, Fin.sum_univ_three]
   simp only [appCc_add_left, appCc_sub_left, appCc_smul_left,
-    real_inner_add_left, real_inner_add_right, real_inner_sub_left,
-    real_inner_sub_right, real_inner_smul_left, real_inner_smul_right]
+    inner_add_left, inner_add_right, inner_sub_left, inner_sub_right,
+    real_inner_smul_left, real_inner_smul_right]
   simp_rw [edgePair_inner (I := I) (M := M) g]
-  module
 
 /-- Green form of the complete top refold pairing.  All second derivatives of
 `T` have been moved onto the explicit formal partner before any estimate is
@@ -1433,45 +1392,45 @@ taken. -/
 theorem edgeTop_green
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+    (hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    (⟪T, (operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
+          qA qB q epsilon s) T)⟫_ℝ : Real) =
       -⟪covDivergence (I := I) (M := M) g 3
           (edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
             qA qB q epsilon s),
-        iteratedCovGrad (I := I) g 0 2 1 T⟫_Real := by
+        iteratedCovGrad (I := I) g 0 2 1 T⟫_ℝ := by
   let P : SmoothCcTensor g 0 4 :=
     edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
       qA qB q epsilon s
   let T₁ : SmoothCcTensor g 0 3 := iteratedCovGrad (I := I) g 0 2 1 T
   have hjet : iteratedCovGrad (I := I) g 0 2 2 T =
       covGrad (I := I) (M := M) g 0 3 T₁ := by
-    rw [T₁]
+    simp only [T₁]
     exact (iteratedCovGrad_succ g 0 2 1 T).symm
   have hgreen :
-      (⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real : Real) =
-        -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := by
+      (⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_ℝ : Real) =
+        -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_ℝ := by
     rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
     exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
       (I := I) (M := M) g 3 T₁ P
   calc
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    (⟪T, operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
-        ⟪P, iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+          qA qB q epsilon s) T⟫_ℝ : Real) =
+        ⟪P, iteratedCovGrad (I := I) g 0 2 2 T⟫_ℝ := by
       exact edgeTop_inner (I := I) (M := M) g T hdelta hdeltaZ
         qA qB q epsilon s
-    _ = ⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real := by
+    _ = ⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_ℝ := by
       rw [hjet, real_inner_comm]
-    _ = -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := hgreen
-    _ = -⟪covDivergence (I := I) (M := M) g 3 P, T₁⟫_Real := by
+    _ = -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_ℝ := hgreen
+    _ = -⟪covDivergence (I := I) (M := M) g 3 P, T₁⟫_ℝ := by
       rw [real_inner_comm]
 
 /-- Exact full nonlinear refold on the closed-edge segment.
@@ -1485,9 +1444,10 @@ visible for the subsequent low-edge joint estimate. -/
 theorem exists_edgeRefold
     (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
+      smoothCcTensorBilinForm (I := I) g W x v w =
+        smoothCcTensorBilinForm (I := I) g W x w v)
     {delta : Real} (hdelta_nn : 0 ≤ delta) (hdelta_half : delta ≤ 1 / 2)
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) delta) :
     ∃ B₀ : Real, 0 ≤ B₀ ∧
       ∃ (C₀ : Real → SmoothCcTensor g 2 2)
@@ -1495,18 +1455,18 @@ theorem exists_edgeRefold
         (∀ s ∈ Set.Icc (0 : Real) 1,
           edgeQuadArm (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W =
-            (-2 : Real) • appCc (I := I) (M := M) g 2 2
+            (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
                 (edgeRicciHalf (I := I) (M := M) g
                   (edgeMetric (I := I) (M := M) g W hdelta s)) W +
-              appCc (I := I) (M := M) g 2 2 (C₀ s) W +
-              appCc (I := I) (M := M) g 2 2
+              operatorFieldApply (I := I) (M := M) g 2 2 (C₀ s) W +
+              operatorFieldApply (I := I) (M := M) g 2 2
                 (edgeFold0 (I := I) (M := M) g
                   (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
-              appCc (I := I) (M := M) g 3 2
+              operatorFieldApply (I := I) (M := M) g 3 2
                 (edgeQuad1 (I := I) (M := M) g
                   (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
                 (iteratedCovGrad (I := I) g 0 2 1 W) +
-              appCc (I := I) (M := M) g 4 2 (C₂ s)
+              operatorFieldApply (I := I) (M := M) g 4 2 (C₂ s)
                 (iteratedCovGrad (I := I) g 0 2 2 W)) ∧
         (∀ s ∈ Set.Icc (0 : Real) 1, ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 2 2 x
@@ -1519,22 +1479,22 @@ theorem exists_edgeRefold
               2 * (max (3 * deTurckArmFibreConst (Module.finrank Real E) *
                 (delta / (1 - delta) ^ 2)) 0) ^ 2) ∧
         (∀ s ∈ Set.Icc (0 : Real) 1,
-          (⟪W, edgeQuadArm (I := I) (M := M) g
-              (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W⟫_Real : Real) =
+          (⟪W, (edgeQuadArm (I := I) (M := M) g
+              (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W)⟫_ℝ : Real) =
             (-2 : Real) *
-                ⟪W, appCc (I := I) (M := M) g 2 2
+                ⟪W, operatorFieldApply (I := I) (M := M) g 2 2
                   (edgeRicciHalf (I := I) (M := M) g
-                    (edgeMetric (I := I) (M := M) g W hdelta s)) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 2 2 (C₀ s) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 2 2
+                    (edgeMetric (I := I) (M := M) g W hdelta s)) W⟫_ℝ +
+              ⟪W, operatorFieldApply (I := I) (M := M) g 2 2 (C₀ s) W⟫_ℝ +
+              ⟪W, operatorFieldApply (I := I) (M := M) g 2 2
                 (edgeFold0 (I := I) (M := M) g
-                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 3 2
+                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W⟫_ℝ +
+              ⟪W, operatorFieldApply (I := I) (M := M) g 3 2
                 (edgeQuad1 (I := I) (M := M) g
                   (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
-                (iteratedCovGrad (I := I) g 0 2 1 W)⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 4 2 (C₂ s)
-                (iteratedCovGrad (I := I) g 0 2 2 W)⟫_Real) := by
+                (iteratedCovGrad (I := I) g 0 2 1 W)⟫_ℝ +
+              ⟪W, operatorFieldApply (I := I) (M := M) g 4 2 (C₂ s)
+                (iteratedCovGrad (I := I) g 0 2 2 W)⟫_ℝ) := by
   classical
   let a : Nat := 2 * Module.finrank Real E + 10
   let R : Real := ∑ j ∈ Finset.range (a + 3),
@@ -1551,7 +1511,7 @@ theorem exists_edgeRefold
       (Finset.mem_range.mpr (by omega))
   have hhalf_lt : (1 / 2 : Real) < 1 := by norm_num
   have hdelta_lt : delta < 1 := lt_of_le_of_lt hdelta_half hhalf_lt
-  let hdeltaZ : gFibreOpBound (I := I) (M := M) g
+  let hdeltaZ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta :=
     edgeZeroBoundAt (I := I) (M := M) g hdelta_nn
   obtain ⟨LambdaR, hLambdaR, KR, hKR, qA, qB, hq, hRmain⟩ :=
@@ -1569,7 +1529,7 @@ theorem exists_edgeRefold
       (I := I) (M := M) g a ha hR hhalf_lt q epsilon hepsilon
   obtain ⟨hj2D, hsup2D, henv2D⟩ :=
     hDcap W hdelta_half hdelta hdeltaZ hball
-  have hsup2R := riemannPalatiniRefoldC2Family_rfns_le
+  have hsup2R := riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le
     (I := I) (M := M) g W hdelta_lt hdelta_half hdelta hdeltaZ qA qB hq
   let C₀ : Real → SmoothCcTensor g 2 2 := fun s => C0R s + C0D s
   let C₂ : Real → SmoothCcTensor g 4 2 := fun s =>
@@ -1580,18 +1540,18 @@ theorem exists_edgeRefold
   have hnormal : ∀ s ∈ Set.Icc (0 : Real) 1,
       edgeQuadArm (I := I) (M := M) g
           (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W =
-        (-2 : Real) • appCc (I := I) (M := M) g 2 2
+        (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
             (edgeRicciHalf (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s)) W +
-          appCc (I := I) (M := M) g 2 2 (C₀ s) W +
-          appCc (I := I) (M := M) g 2 2
+          operatorFieldApply (I := I) (M := M) g 2 2 (C₀ s) W +
+          operatorFieldApply (I := I) (M := M) g 2 2
             (edgeFold0 (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
-          appCc (I := I) (M := M) g 3 2
+          operatorFieldApply (I := I) (M := M) g 3 2
             (edgeQuad1 (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
             (iteratedCovGrad (I := I) g 0 2 1 W) +
-          appCc (I := I) (M := M) g 4 2 (C₂ s)
+          operatorFieldApply (I := I) (M := M) g 4 2 (C₂ s)
             (iteratedCovGrad (I := I) g 0 2 2 W) := by
     intro s hs
     have hmetric := edgeMetric_bal (I := I) (M := M) g W hdelta_lt hdelta hdeltaZ hs
@@ -1599,11 +1559,28 @@ theorem exists_edgeRefold
     have hlie := hidD s hs
     simp only [iteratedCovGrad_zero] at hriem hlie
     rw [hmetric]
+    have hriemInsert :
+        (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
+            (linearizedRicciConnDiffOrder0CoeffField
+              (I := I) (M := M) g
+              (realizedFam (I := I) g W 0 hdelta hdeltaZ s)) W =
+          (-2 : Real) • operatorFieldApply (I := I) (M := M) g 2 2
+              (edgeRicciHalf (I := I) (M := M) g
+                (realizedFam (I := I) g W 0 hdelta hdeltaZ s)) W +
+            (operatorFieldApply (I := I) (M := M) g 2 2 (C0R s) W +
+              operatorFieldApply (I := I) (M := M) g 4 2
+                ((2 : Real) • riemannPalatiniRefoldC2Family
+                  (I := I) (M := M) g W hdelta hdeltaZ qA qB s)
+                (iteratedCovGrad (I := I) g 0 2 2 W)) := by
+      symm
+      rw [← hriem]
+      simp only [edgeRicciHalf, appCc_add_left, appCc_smul_left]
+      module
     simp only [edgeQuadArm, edgeLowerArm, edgeQuad0,
       deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
-    rw [hriem, hlie]
-    simp only [edgeRicciHalf, edgeFold0, C₀, C₂,
+    rw [hriemInsert, hlie]
+    simp only [edgeFold0, C₀, C₂,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
     module
   have hBsq : 0 ≤ 2 * LambdaR ^ 2 + 2 * LambdaD ^ 2 := by positivity
@@ -1612,7 +1589,8 @@ theorem exists_edgeRefold
   · exact hnormal
   · intro s hs x
     dsimp only [C₀]
-    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    change riemannianFiberNormSq (I := I) (M := M) g 2 2 x
+        ((C0R s).toSection x + (C0D s).toSection x) ≤ _
     have hadd := riemannianFiberNormSq_add_le
       (I := I) (M := M) g 2 2 x ((C0R s).toSection x) ((C0D s).toSection x)
     have hR0 := hsupR s hs x
@@ -1621,7 +1599,11 @@ theorem exists_edgeRefold
     linarith
   · intro s hs x
     dsimp only [C₂]
-    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    change riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+        (((2 : Real) • riemannPalatiniRefoldC2Family
+            (I := I) (M := M) g W hdelta hdeltaZ qA qB s).toSection x +
+          (deTurckLieCovDerivRefoldC2Family
+            (I := I) (M := M) g W hdelta hdeltaZ q epsilon s).toSection x) ≤ _
     have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 4 2 x
       (((2 : Real) •
         riemannPalatiniRefoldC2Family
@@ -1634,7 +1616,7 @@ theorem exists_edgeRefold
   · intro s hs
     have hid := hnormal s hs
     rw [hid]
-    simp only [real_inner_add_right, real_inner_smul_right]
+    simp only [inner_add_right, real_inner_smul_right]
 
 /-- Consumer-shaped full slope normal form.  This composes the closed-edge
 three-arm cancellation with `exists_edgeRefold`; no residual coefficient or
@@ -1642,9 +1624,10 @@ pairing identity is supplied as a hypothesis. -/
 theorem exists_edgeSlopeRef
     (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
+      smoothCcTensorBilinForm (I := I) g W x v w =
+        smoothCcTensorBilinForm (I := I) g W x w v)
     {delta : Real} (hdelta_nn : 0 ≤ delta) (hdelta_half : delta ≤ 1 / 2)
-    (hdelta : gFibreOpBound (I := I) (M := M) g
+    (hdelta : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) delta) :
     ∃ B₀ : Real, 0 ≤ B₀ ∧
       ∃ (C₀ : Real → SmoothCcTensor g 2 2)

@@ -20,7 +20,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open TopologicalSpace
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
@@ -103,9 +103,8 @@ private theorem metric_ext
   subst hi
   rfl
 
-omit [T2Space M] [SigmaCompactSpace M] in
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-private theorem flatMetric_eq
+omit [T2Space M] [SigmaCompactSpace M] [CompleteSpace E]
+    [NeZero (Module.finrank ℝ E)] in
 /-- Flat restriction to a smaller ambient open carrier is the pullback of the
 ordinary restriction to the corresponding nested open subtype. -/
 theorem restrictSubset_pull

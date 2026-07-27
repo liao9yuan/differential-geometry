@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
@@ -33,6 +33,8 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace OpenConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- A time slice of an open-window metric limit is complete when the reference
 metric is complete and the selected sequence has positive windowwise lower
 bounds relative to it. -/

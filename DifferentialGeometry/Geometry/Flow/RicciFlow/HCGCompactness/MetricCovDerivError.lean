@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackField
+import DifferentialGeometry.Geometry.Metric.TensorInner.CoerciveBilinInverse
 
 set_option autoImplicit false
 
@@ -20,7 +21,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology BigOperators
 open Tensor0SBundle
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -33,7 +34,7 @@ variable [CompleteSpace E] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- At covariant order zero, the metric-tensor error norm is exactly the
 metric-difference seminorm. -/
 theorem metricError_eq_zero
@@ -146,6 +147,140 @@ theorem sqrt_norm_le_comp
   exact (sqrt_normSq0S_le_of_metric_equiv (I := I)
     g0 g x s hC hequiv T).trans
       (mul_le_mul_of_nonneg_left hroot (Real.sqrt_nonneg _))
+
+/-- A component bound in an arbitrary finite basis controls the intrinsic
+tensor norm whenever the metric is coercive relative to the ambient norm.
+The coordinate-norm factor records the norm equivalence of that basis, so no
+inner-product structure on the model space is needed. -/
+theorem sqrt_norm_le_basis_comp_of_coercive
+    {Idx : Type*} [Fintype Idx]
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    {c B : Real} (hc : 0 < c)
+    (hlow : ∀ v : TangentSpace I x,
+      c * ‖v‖ * ‖v‖ ≤ g.inner x v v)
+    (T : Tensor0SSpace s I x) (hBnn : 0 ≤ B)
+    (hB : ∀ slots : Fin s → Idx,
+      |component0S (I := I) basis T slots| ≤ B) :
+    let coordSum :=
+      ∑ i : Idx, ‖(basis.coord i).toContinuousLinearMap‖
+    let epsBasis := c⁻¹ * coordSum ^ 2 + 1
+    Real.sqrt (normSq0S (I := I) g x s T) ≤
+      Real.sqrt
+          (((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s) *
+        (Real.sqrt (Fintype.card (Fin s → Idx) : Real) * B) := by
+  classical
+  dsimp only
+  let coordSum : Real :=
+    ∑ i : Idx, ‖(basis.coord i).toContinuousLinearMap‖
+  let epsBasis : Real := c⁻¹ * coordSum ^ 2 + 1
+  let gInv := basisInvMetric (I := I) g x basis
+  have hcoordSum_nonneg : 0 ≤ coordSum :=
+    Finset.sum_nonneg fun i _ => norm_nonneg
+      (basis.coord i).toContinuousLinearMap
+  have hcoord_le (i : Idx) :
+      ‖(basis.coord i).toContinuousLinearMap‖ ≤ coordSum := by
+    exact Finset.single_le_sum
+      (fun j _ => norm_nonneg (basis.coord j).toContinuousLinearMap)
+      (Finset.mem_univ i)
+  have hco : IsCoercive (g.inner x) := ⟨c, hc, hlow⟩
+  have hsharp_eq (i : Idx) :
+      (tangentFlatEquiv_gen (I := I) g x).symm (basis.coord i) =
+        IsCoercive.sharp hco (basis.coord i).toContinuousLinearMap := by
+    apply (tangentFlatEquiv_gen (I := I) g x).injective
+    rw [(tangentFlatEquiv_gen (I := I) g x).apply_symm_apply]
+    ext v
+    change basis.coord i v =
+      g.inner x
+        (IsCoercive.sharp hco (basis.coord i).toContinuousLinearMap) v
+    exact congrArg (fun eta : TangentSpace I x →L[Real] Real => eta v)
+      (IsCoercive.apply_sharp hco
+        (basis.coord i).toContinuousLinearMap).symm
+  have hgInv_bound (i j : Idx) :
+      |gInv i j| ≤ c⁻¹ * coordSum ^ 2 := by
+    have hsharp := IsCoercive.sharp_norm_le hco hc hlow
+      (basis.coord i).toContinuousLinearMap
+    have heval := (basis.coord j).toContinuousLinearMap.le_opNorm
+      (IsCoercive.sharp hco (basis.coord i).toContinuousLinearMap)
+    calc
+      |gInv i j| =
+          ‖(basis.coord j).toContinuousLinearMap
+            (IsCoercive.sharp hco
+              (basis.coord i).toContinuousLinearMap)‖ := by
+        rw [Real.norm_eq_abs]
+        simp only [gInv, basisInvMetric, hsharp_eq i]
+        rfl
+      _ ≤ ‖(basis.coord j).toContinuousLinearMap‖ *
+          ‖hco.sharp (basis.coord i).toContinuousLinearMap‖ := heval
+      _ ≤ coordSum *
+          (c⁻¹ * ‖(basis.coord i).toContinuousLinearMap‖) :=
+        mul_le_mul (hcoord_le j) hsharp
+          (norm_nonneg _) hcoordSum_nonneg
+      _ ≤ coordSum * (c⁻¹ * coordSum) := by
+        exact mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left (hcoord_le i) (inv_nonneg.mpr hc.le))
+          hcoordSum_nonneg
+      _ = c⁻¹ * coordSum ^ 2 := by ring
+  have heps_nonneg : 0 ≤ epsBasis := by
+    dsimp only [epsBasis]
+    positivity
+  have hnear : ∀ i j : Idx,
+      |gInv i j - (if i = j then (1 : Real) else 0)| ≤ epsBasis := by
+    intro i j
+    calc
+      |gInv i j - (if i = j then (1 : Real) else 0)| ≤
+          |gInv i j| + |(if i = j then (1 : Real) else 0)| :=
+        by simpa using
+          (abs_sub_le (gInv i j) 0
+            (if i = j then (1 : Real) else 0))
+      _ ≤ c⁻¹ * coordSum ^ 2 + 1 := by
+        apply add_le_add (hgInv_bound i j)
+        split_ifs <;> simp
+      _ = epsBasis := rfl
+  have hginv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
+    basisInvMetric_real (I := I) g x basis
+  have hnorm := normSq0S_le_pow_sum_comp_sq
+    (I := I) g x s basis gInv epsBasis heps_nonneg hginv hnear T
+  have hsum :
+      (∑ slots : Fin s → Idx,
+          tensor0SComponent (I := I) T (fun i => basis i) slots ^ 2) ≤
+        (Fintype.card (Fin s → Idx) : Real) * B ^ 2 := by
+    calc
+      (∑ slots : Fin s → Idx,
+          tensor0SComponent (I := I) T (fun i => basis i) slots ^ 2) ≤
+          ∑ _slots : Fin s → Idx, B ^ 2 := by
+        apply Finset.sum_le_sum
+        intro slots _
+        have habs :
+            |tensor0SComponent (I := I) T (fun i => basis i) slots| ≤
+              |B| := by
+          simpa only [component0S_apply, abs_of_nonneg hBnn] using hB slots
+        simpa only [sq_abs] using sq_le_sq.mpr habs
+      _ = (Fintype.card (Fin s → Idx) : Real) * B ^ 2 := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+  have hfactor_nonneg :
+      0 ≤ ((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s := by
+    positivity
+  have hnorm' :
+      normSq0S (I := I) g x s T ≤
+        ((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s *
+          ((Fintype.card (Fin s → Idx) : Real) * B ^ 2) :=
+    hnorm.trans (mul_le_mul_of_nonneg_left hsum hfactor_nonneg)
+  calc
+    Real.sqrt (normSq0S (I := I) g x s T) ≤
+        Real.sqrt
+          (((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s *
+            ((Fintype.card (Fin s → Idx) : Real) * B ^ 2)) :=
+      Real.sqrt_le_sqrt hnorm'
+    _ = Real.sqrt
+          (((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s) *
+        Real.sqrt ((Fintype.card (Fin s → Idx) : Real) * B ^ 2) :=
+      Real.sqrt_mul hfactor_nonneg _
+    _ = Real.sqrt
+          (((1 + epsBasis) * (Fintype.card Idx : Real)) ^ s) *
+        (Real.sqrt (Fintype.card (Fin s → Idx) : Real) * B) := by
+      rw [Real.sqrt_mul (Nat.cast_nonneg _), Real.sqrt_sq_eq_abs,
+        abs_of_nonneg hBnn]
 
 end HCGCompactness
 end DifferentialGeometry

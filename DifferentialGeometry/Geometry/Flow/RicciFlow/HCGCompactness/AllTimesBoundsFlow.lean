@@ -375,6 +375,7 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
     _ <= δ * gInf.inner x v v :=
         mul_le_mul_of_nonneg_right (hsmall x hx) hgnn
 
+omit [CompleteSpace E] in
 /-- Two smooth Riemannian metrics are uniformly equivalent on a compact set. -/
 theorem equivOn_compact
     {K : Set M} (hK : IsCompact K)
@@ -411,6 +412,7 @@ theorem equivOn_compact
     calc h.inner x v v <= c'⁻¹ * gRef.inner x v v := hub
       _ <= C * gRef.inner x v v := mul_le_mul_of_nonneg_right hc'_inv_le_C hgnn
 
+omit [CompleteSpace E] in
 /-- **(A): two metrics on a closed manifold are uniformly equivalent.** -/
 theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
     (gRef h : SmoothRiemannianMetric I M) :

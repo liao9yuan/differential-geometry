@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Split
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0LowJet
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Split
 
 /-!
 # `lieCorr0Field` realizedFam jet-L2 top-separated producer
@@ -22,10 +22,7 @@ four pieces are `∇²T`-free and land in the `R`-carrying `Kc`.
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
@@ -42,7 +39,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckLieEndoArmField deTurckLieEndoArmField_toSection deTurckLieDLbFib)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +47,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The reanchoring endomorphism arm field and the DLb coefficient field are the
 same object (both are `ofCLM (deTurckLieDLbFib g₁ g_bg)`). -/
 private theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
@@ -60,6 +58,7 @@ private theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   intro x
   rw [deTurckLieEndoArmField_toSection, deTurckLieDLbCoeffField_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The base insertion piece is the negative of the DLb coefficient field.
 Combines `insert_base` (at `g_bg := g₀`) with `endoArm_eq_dlb`; this routes
 `lieCorr0Field`'s top window through the committed DLb producer. -/
@@ -78,10 +77,10 @@ private theorem lc0InsertBase_realizedFam_perOrder_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →

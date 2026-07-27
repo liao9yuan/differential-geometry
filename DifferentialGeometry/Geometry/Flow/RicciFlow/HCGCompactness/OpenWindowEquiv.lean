@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBoundFlow
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Metric equivalence on canonical open-interval windows
@@ -24,13 +22,14 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace CurvBoundInput
 
+omit [I.Boundaryless] in
 /-- On one canonical compact window, the time-zero metrics uniformly control
 all time-slice metrics.  The curvature/Ricci constant and the finite window
 majorant are chosen before the sequence member. -/
@@ -118,7 +117,7 @@ theorem metricEquiv_open
   have hSseq : ∀ i : Nat, PDE.RicciFlow.IsSolutionOn (I := I) (Sseq i) :=
     fun _ => (X.term k).isSolution
   have hquad := twoTensorQuadBound_of_solutions (I := I) Sseq Set.univ
-    beta psi C hC hcarrier (fun _ t ht x _ => by
+    beta psi C hcarrier (fun _ t ht x _ => by
       simpa only [PointedFlowData.rmNormSq, Sseq] using hcurvC k t ht x)
   have hequiv0 : ∀ i : Nat,
       MetricUniformEquivalentOn (I := I) Set.univ

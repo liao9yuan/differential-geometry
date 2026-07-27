@@ -15,7 +15,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff ENNReal BigOperators
+open scoped Manifold Topology ContDiff ENNReal BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
 namespace PDE
@@ -26,7 +26,9 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+section LapDiffOperator
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -39,8 +41,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
-
 noncomputable def lapDiffA2
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -49,6 +49,19 @@ noncomputable def lapDiffA2
       TensorL2 0 0 (G.metric (T : Real)) :=
   lapDiffOp (I := I) (M := M) (G.metric (T : Real))
     (G.metric ((T : Real) - s))
+
+end LapDiffOperator
+
+section MetricShortTime
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 omit [I.Boundaryless] in
@@ -171,7 +184,22 @@ theorem lapDiff_short
     exact hs.2.trans_lt htau_delta
   simpa only [U] using hball hsball
 
+end MetricShortTime
 
+section LapDiffOperator
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
 
 theorem lapDiffA2_core
     {D : RealTimeInterval}
@@ -276,6 +304,8 @@ theorem lapDiffA2_zero
   filter_upwards [hsmall] with s hs
   simpa only [lapDiffA2, rho] using
     hop (G.metric ((T : Real) - s)) hs.le
+
+end LapDiffOperator
 
 end IntrinsicSpectral
 end RicciFlow

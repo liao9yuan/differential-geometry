@@ -360,6 +360,7 @@ theorem gradientFun_comp
   rw [mul_comm]
   rfl
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 /-- Directional derivative product rule for scalar functions. -/
 theorem extDerivFun_mul
     {f h : M -> Real} {x : M} (v : TangentSpace I x)
@@ -467,6 +468,7 @@ theorem gradientFun_pow
               rw [show f x ^ (n + 1) = f x ^ n * f x by rw [pow_succ]]
               ring
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 /-- Directional derivative chain rule for real powers, valid away from zero. -/
 theorem extDerivFun_rpow
     {f : M -> Real} {x : M} (p : Real) (v : TangentSpace I x)
@@ -776,6 +778,7 @@ theorem divergence_sub
     exact gradientFun_const (I := I) g c y
   simp [laplacian, hgrad]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- Adding a spatial constant does not change the Laplacian at a point, provided
 the scalar is differentiable near that point and its gradient field is
 differentiable there. -/
@@ -819,6 +822,7 @@ theorem laplacian_add_const
   unfold laplacian divergence
   rw [hcov]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The Laplacian is unchanged by subtracting a spatial constant. -/
 theorem laplacian_sub_const
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -950,10 +954,7 @@ theorem laplacian_smul_at
       rfl
     _ = a * laplacian (I := I) cov g f x := by
       simpa only [laplacian] using
-        (divergence_const_smul (I := I) cov a hgrad)
-
-/-- Divergence of `u ∇u`: the middle identity in the scalar square
-Laplacian formula. -/
+        (divergence_const_smul (I := I) cov inferInstance a hgrad)
 theorem divergence_smul_gradientFun
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)

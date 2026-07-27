@@ -24,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 omit [ConnectedSpace M] in
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **The manifold derivative of the intrinsic exponential map at the zero tangent

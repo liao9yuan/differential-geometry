@@ -58,7 +58,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
@@ -2265,6 +2265,7 @@ private lemma mul4_le_mul4
     mul_le_mul hAB hc hc0 (mul_nonneg hA0 hB0)
   exact mul_le_mul hABC hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
+omit [IsManifold I 2 M] in
 /-- Pair-uniform convergence estimate for the intrinsic squared Ricci norm.
 Both inverse-metric contractions and both Ricci factors are allowed to vary. -/
 theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
@@ -2511,8 +2512,9 @@ theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
   rw [hEq]
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
-/-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
-point from the same `C²` metric-jet convergence package as Ricci and scalar
+  omit [IsManifold I 2 M] in
+  /-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
+  point from the same `C²` metric-jet convergence package as Ricci and scalar
 curvature convergence. -/
 theorem ricNormConv_of_dn
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)

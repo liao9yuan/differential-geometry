@@ -27,7 +27,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -35,8 +35,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
 
+private local instance : MeasurableSpace M := borel M
+
+private local instance : BorelSpace M := ⟨rfl⟩
+
 /-! ## The real total-volume consequence -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The common two-sided measure comparison on a compact initial window also
 gives one real upper bound for every moving total volume.  The same comparison
 constant is retained so that its reverse inequality can subsequently provide
@@ -77,6 +83,8 @@ theorem hmfVolumeReal
 
 /-! ## Operator-valued time continuity -/
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- On one state ball chosen before the metric family and compact time set,
 the faithful finite mass is continuous in time in operator norm.  The scalar
 moving-integral continuity from `hmfStateTime_cont` is promoted through the
@@ -96,9 +104,9 @@ theorem hmfSpecTime_cont
   obtain ⟨Rt, hRt, htime⟩ :=
     hmfStateTime_cont (I := I) (M := M) q S
   obtain ⟨Rm, hRm, hmass⟩ :=
-    hmfSpecMassPt_cd (I := I) (M := M) q S
+    hmfSpecMassPt_continuous (I := I) (M := M) q S
   obtain ⟨Ra, hRa, hmap⟩ :=
-    hmfSpecMap_cd (I := I) (M := M) q S 1 (by norm_num)
+    hmfSpecMap_md (I := I) (M := M) q S
   let R := min Rt (min Rm Ra)
   have hR : 0 < R := lt_min hRt (lt_min hRm hRa)
   refine ⟨R, hR, ?_⟩
@@ -116,43 +124,33 @@ theorem hmfSpecTime_cont
       ((min_le_right Rt (min Rm Ra)).trans (min_le_right Rm Ra)) hu
   have hpt : Continuous
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x) := by
-    rw [← continuousOn_univ]
-    exact hmass.continuousOn.comp
-      (continuousOn_const.prodMk continuousOn_id)
-      (fun x _ ↦ ⟨hu_m, Set.mem_univ x⟩)
+    exact hmass u hu_m
   have hmd : ∀ x : M,
       MDifferentiableAt 𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I
         (fun z : EuclideanSpace ℝ {i // i ∈ S} ↦
           hmfAdd (I := I) (M := M) q
             (hmfSpecIncl (I := I) (M := M) q S z) x) u := by
     intro x
-    have hp : (u, x) ∈
-        Metric.ball (0 : EuclideanSpace ℝ {i // i ∈ S}) Ra ×ˢ
-          (Set.univ : Set M) := ⟨hu_a, Set.mem_univ _⟩
-    have hopen : IsOpen
-        (Metric.ball (0 : EuclideanSpace ℝ {i // i ∈ S}) Ra ×ˢ
-          (Set.univ : Set M)) := Metric.isOpen_ball.prod isOpen_univ
-    have hjoint := (hmap (u, x) hp).contMDiffAt (hopen.mem_nhds hp)
-    have hincl : ContMDiffAt
-        𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S})
-        (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) (1 : ℕ∞)
-        (fun z : EuclideanSpace ℝ {i // i ∈ S} ↦ (z, x)) u :=
-      contMDiffAt_id.prodMk contMDiffAt_const
-    exact (hjoint.comp u hincl).mdifferentiableAt (by norm_num)
+    simpa only [hmfSpecMap_eq] using hmap u hu_a x
   rw [continuousOn_clm_apply]
   intro v
   rw [continuousOn_clm_apply]
   intro w
   refine (htime g hK hgram u hu_t v w).congr (fun t ht ↦ ?_)
+  let μt := riemannianVolumeMeasure (I := I) (M := M) (g t)
+  haveI : IsFiniteMeasure μt :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
   have hint : Integrable
       (fun x : M ↦ hmfSpecMassPt (I := I) (M := M) q S u x)
-      (riemannianVolumeMeasure (I := I) (M := M) (g t)) :=
+      μt :=
     integrableOn_univ.mp
       (hpt.continuousOn.integrableOn_compact isCompact_univ)
-  exact (hmfSpecMass_state (I := I) (M := M) q (g t) S u v w hmd hint).symm
+  exact hmfSpecMass_state (I := I) (M := M) q (g t) S u v w hmd hint
 
 /-! ## The compact-window package -/
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Joint chart-Gram continuity on an initial window supplies one radius for
 the entire finite faithful mass family.  On that radius the family is
 uniformly state-Lipschitz, retains half of its common zero-state coercivity,

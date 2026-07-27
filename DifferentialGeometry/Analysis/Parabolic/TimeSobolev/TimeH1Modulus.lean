@@ -42,7 +42,7 @@ namespace Analysis
 namespace Parabolic
 namespace TimeSobolev
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
 
 /-- **Sharp-horizon Cauchy–Schwarz bound for the interval integral.**  For an

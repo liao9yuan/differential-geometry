@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBound
-import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DLaCoefficientFieldRealizedFam
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
@@ -349,7 +349,6 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B
 
-set_option linter.unusedSectionVars false in
 /-- Per-order `×4·finrank` transport of the `(2,2)` field jet to the `(1,1)` insert jet, via the
 slotInsert/reindex decomposition (`deTurckLieDLbCoeffField_eq_slotInsert_sum`); each summand is
 `≤ finrank·‖∇ⁱ wEndoInsert‖²` (`rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le`), and
@@ -360,19 +359,19 @@ private theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric 
         ‖iteratedCovGrad (I := I) g₀ 1 1 i
           (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 := by
   have hL2A : ‖iteratedCovGrad (I := I) g₀ 2 2 i
-      (slotInsertEndoCc (I := I) (M := M) g₀ 1
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
         (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g₀ 1 1 i
           (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 :=
     normSq_iteratedCovGrad_le_scaled_of_pointwise (I := I) (M := M) g₀
-      (slotInsertEndoCc (I := I) (M := M) g₀ 1 (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
       (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg) i (Module.finrank ℝ E : ℝ)
-      (fun x => rfns_iteratedCovGrad_dlbSlotZero_le (I := I) (M := M) g₀ g₁ g_bg i x)
+      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbFirstSummand_le (I := I) (M := M) g₀ g₁ g_bg i x)
   have hL2B : ‖iteratedCovGrad (I := I) g₀ 2 2 i
       (reindexCoeffGen (I := I) (M := M) g₀ 2 2
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
             (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
         (Equiv.swap (0 : Fin 2) 1))‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
@@ -381,40 +380,40 @@ private theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric 
     normSq_iteratedCovGrad_le_scaled_of_pointwise (I := I) (M := M) g₀
       (reindexCoeffGen (I := I) (M := M) g₀ 2 2
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
             (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
         (Equiv.swap (0 : Fin 2) 1))
       (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg) i (Module.finrank ℝ E : ℝ)
-      (fun x => rfns_iteratedCovGrad_dlbSlotOne_le (I := I) (M := M) g₀ g₁ g_bg i x)
+      (fun x => riemannianFiberNormSq_iteratedCovGrad_deTurckLieDLbSecondSummand_le (I := I) (M := M) g₀ g₁ g_bg i x)
   have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)
       = iteratedCovGrad (I := I) g₀ 2 2 i
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
             (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
         + iteratedCovGrad (I := I) g₀ 2 2 i
             (reindexCoeffGen (I := I) (M := M) g₀ 2 2
               (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
                   (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
               (Equiv.swap (0 : Fin 2) 1)) := by
     rw [deTurckLieDLbCoeffField_eq_slotInsert_sum (I := I) (M := M) g₀ g₁ g_bg, iteratedCovGrad_add]
   rw [hgrad]
   refine le_trans (sq_le_two_add
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
           (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))
       + iteratedCovGrad (I := I) g₀ 2 2 i
           (reindexCoeffGen (I := I) (M := M) g₀ 2 2
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
                 (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
             (Equiv.swap (0 : Fin 2) 1))‖
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g₀ 1
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
           (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg))‖
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (reindexCoeffGen (I := I) (M := M) g₀ 2 2
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
               (deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg)))
           (Equiv.swap (0 : Fin 2) 1))‖
     ((Module.finrank ℝ E : ℝ) *
@@ -424,7 +423,6 @@ private theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric 
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 /-- **`realizedFam` per-order top-separated jet-L2 bound** for the DLb coefficient field.  Thin
 `×4·finrank` transport of `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated` through
 `normSq_iCG_dlbField_le`; `Ktop = 4·finrank·Ktop_insert` stays `R`-free. -/
@@ -434,10 +432,10 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -476,7 +474,6 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_topSeparated
   refine le_trans hstep (le_of_eq ?_)
   ring
 
-set_option linter.unusedVariables false in
 /-- **Summed** `realizedFam` top-separated jet-L2 bound for the DLb coefficient field.  Thin
 `×4·finrank` transport of the summed insert bound; both windows `a+3`, `Ktop` `R`-free. -/
 theorem deTurckLieDLbCoeffField_realizedFam_jetL2_summed_topSeparated
@@ -485,10 +482,10 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_summed_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℝ, 0 ≤ Kc ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -530,7 +527,6 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_summed_topSeparated
     (le_of_eq ?_)
   ring
 
-set_option linter.unusedVariables false in
 theorem deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -706,31 +702,29 @@ theorem deTurckLieCoeffField_realizedFam_rfns_order0_ballUniform
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg).toSection x)
   linarith [hadd, ha, hb]
 
-set_option linter.unusedSectionVars false in
 /-- Pointwise combined triangle `‖∇ⁱ deTurckLieCoeffField‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²`, from the
 committed additive split `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` + `sq_le_two_add`.
 Generic over `g₁`, so both combined endpoints reuse it. -/
 private theorem normSq_iCG_deTurckLieCoeff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
-      2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2
+      2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2
       + 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 := by
   have hgrad : iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)
-      = iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)
+      = iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)
         + iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg) := by
     rw [← deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg,
       iteratedCovGrad_add]
   rw [hgrad]
   refine le_trans (sq_le_two_add
-    ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)
       + iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖
-    ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)‖
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖
-    (‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2)
+    (‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2)
     (‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2)
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) (le_refl _) (le_refl _)) (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 /-- **`realizedFam` per-order top-separated jet-L2 bound** for the full DeTurck-Lie coefficient field
 `deTurckLieCoeffField = deTurckLieDLaCoeffField + deTurckLieDLbCoeffField`.  Combines the DLa and DLb
 field endpoints by the pointwise triangle; `Ktop = 2·(Ktop_DLa + Ktop_DLb)` stays `R`-free, single
@@ -741,10 +735,10 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -772,7 +766,7 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated
   refine le_trans (normSq_iCG_deTurckLieCoeff_le (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg i) ?_
   have h1 : 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (deTurckLieDLaCoeffField (I := I) g₀
+        (deTurckLieConnDiffDerivCoeffField (I := I) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
       2 * (Ktop_a * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
           ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) +
@@ -792,7 +786,6 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated
   refine le_trans (add_le_add h1 h2) (le_of_eq ?_)
   ring
 
-set_option linter.unusedVariables false in
 /-- **Summed** `realizedFam` top-separated jet-L2 bound for the full DeTurck-Lie coefficient field.
 Both windows `a+3`, `Ktop = 2·(Ktop_DLa + Ktop_DLb)` `R`-free, single combined `Kc`. -/
 theorem deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated
@@ -801,10 +794,10 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℝ, 0 ≤ Kc ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -835,7 +828,7 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2 ≤
       2 * (∑ i ∈ Finset.range (a + 1),
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieDLaCoeffField (I := I) g₀
+            (deTurckLieConnDiffDerivCoeffField (I := I) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2)
         + 2 * (∑ i ∈ Finset.range (a + 1),
             ‖iteratedCovGrad (I := I) g₀ 2 2 i

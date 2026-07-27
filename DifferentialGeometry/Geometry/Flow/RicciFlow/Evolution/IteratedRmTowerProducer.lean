@@ -90,7 +90,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -118,7 +118,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem inner0S_orthoBasis_eq_compContract
     [Module.Finite ℝ E]
@@ -412,7 +412,7 @@ def combinedStarArray {s : ℕ}
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04Reaction_orthoBasis_eq_compContract
     [Module.Finite ℝ E]
@@ -477,7 +477,7 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKReactionAt_eq
     [Module.Finite ℝ E]

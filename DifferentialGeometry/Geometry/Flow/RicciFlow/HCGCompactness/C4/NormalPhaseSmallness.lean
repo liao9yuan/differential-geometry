@@ -81,7 +81,7 @@ theorem phaseRadius_exp
     letI : T2Space (TangentBundle I (X.obj k).M) :=
       (X.obj k).t2TangentBundle
     Metric.ball (0 : E) (h.phaseRadius R) ⊆ Metric.ball (0 : E)
-      (Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x / 4) := by
+      (Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x / 4) := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth

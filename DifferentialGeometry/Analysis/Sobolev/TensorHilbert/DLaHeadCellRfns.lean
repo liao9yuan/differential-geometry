@@ -41,9 +41,6 @@ The full `deTurckLieDLaCoeffField` top-separated bound requires the private brid
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
@@ -58,7 +55,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-  (gFibreOpBound ccTensorBilinSymm ccTensorBilin ccTensorBilin_apply ccTensorModel
+  (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply ccTensorModel
     ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -87,7 +84,7 @@ private lemma tsResSum_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j
 
 /-! ### Geometry setting. -/
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -97,8 +94,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-! ### Pointwise (`rfns`) top-separated head cell for `covGrad (connDiffSection)`. -/
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 /-- **Pointwise head cell** — the `riemannianFiberNormSq`, pointwise-in-`x` top-separated bound for
 `covGrad (connDiffSection g₁ g₀)`, the `A1` top of the DLa 8-summand kernel.  The top coefficient
 `2·Kt0` (`Kt0` the engine head `10·S 0`) is `R`-independent; the remainder is a
@@ -109,10 +104,10 @@ theorem covGradConnDiffSection_perOrder_rfns_topSeparated
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 1 + i) x
             ((iteratedCovGrad (I := I) g₀ 1 (2 + 1) i
@@ -136,7 +131,7 @@ theorem covGradConnDiffSection_perOrder_rfns_topSeparated
   have heng := hbot g₁ P htie hδ_le hδ0 hδ (i + 1) x
   -- fold the engine head into `Hd`
   set Hd : SmoothCcTensor g₀ 1 (2 + (i + 1)) :=
-    appCcRS (I := I) (M := M) g₀ 1 1 (2 + (i + 1))
+    ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 (2 + (i + 1))
       (iteratedCovGrad (I := I) g₀ 1 2 (i + 1) (raisedKoszul (I := I) g₀ g₁))
       (sharpFlatEndoCc (I := I) g₀ g₁)
   -- engine head bound, re-ascribed to the clean `i+2` index (defeq `(i+1)+1 = i+2`)

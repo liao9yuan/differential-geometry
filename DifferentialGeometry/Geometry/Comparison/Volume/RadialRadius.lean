@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Explicit radial-Jacobi radius packages
@@ -27,7 +26,7 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -79,6 +78,8 @@ def Rm04DataAt
         (radialJacobiField (I := I) g p x w t)
         (radialJacobiField (I := I) g p x w t)
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The canonical Jacobi launch radius lies inside the exponential smoothness
 radius used to construct it. -/
 lemma jacobi_radius_le_c2
@@ -88,6 +89,7 @@ lemma jacobi_radius_le_c2
   have hpos := expMapC2Radius_pos (I := I) g p
   linarith
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma jacobiRadius_lt_exp
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : ‖x‖ < jacobiVarRadius (I := I) g p) :

@@ -88,7 +88,7 @@ theorem klFluxNear_holder {T R : ℝ} {A₂ Aₚ : ℝ≥0}
     simpa only [klPReal_ofReal] using
       (klFluxSrc_memLp (V := V) h x hR hRT)
   simpa only [klFluxNear1, μ] using
-    (integral_holder (klP_holder (V := V))
+    (integral_holder (klPDual_holder (V := V))
       (klFluxKernel (R ^ 2) w x) f hk hf)
 
 end Euclidean

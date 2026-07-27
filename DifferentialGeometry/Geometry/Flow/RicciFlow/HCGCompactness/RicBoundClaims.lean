@@ -61,6 +61,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **Geometric Claim 1** (ric_bound Step 3, MSM135 Lemma 3.11).  On a local-frame
 domain `u`, let `chrG`/`chrH` be the frame Christoffels of the Levi-Civita
 connections of the moving metric `g` and the fixed reference `gRef`.  If the
@@ -146,6 +147,7 @@ theorem claim1_LC_bound {u : Set M} (hu : IsOpen u)
     norm_num
   simpa only [hKR] using hmain
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_LC_bound`. -/
 theorem claim1_LC {u : Set M} (hu : IsOpen u)
     (gRef : SmoothRiemannianMetric I M)
@@ -727,6 +729,8 @@ theorem claim2Const_spec (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A
 
 /-! ## R2: geometric Claim 2 -/
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **Geometric Claim 2** (mixed derivatives, ric_bound Step 3).  If the
 `chrH`-towers of the difference-Christoffel array are bounded below order `L`
 (`hDbound`, Claim 1's output) and the pure `chrG`-towers of `T` are bounded up to
@@ -818,6 +822,8 @@ theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       (iterCovComp (I := I) frame chrG T i) k x))
     (fun i k => compL2_nonneg _) hbase hone b a (by omega)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `claim2_component_bound`. -/
 theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -879,6 +885,8 @@ theorem mixedDescentConst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {C₂ K : Rea
       (mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (by linarith)) hC₂)
       (mul_nonneg hOS (mul_nonneg (Nat.cast_nonneg N) hC₂))))
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **The mixed descent** — the analytic core of ric_bound Step 4's `(A_N)`:
 `|∇_H^N T| ≤ C·(1 + |∇_{H,U}^{N-1} D|)` pointwise on `u`, from uniform
 difference-tower bounds BELOW the top order (`hDlow`), mixed-tower bounds up to
@@ -1064,6 +1072,8 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     mul_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (Nat.cast_nonneg N)
       (Nat.cast_nonneg N)) hOS0) hC₂0) hd0]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `mixed_descent_bound`. -/
 theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1096,7 +1106,12 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 /-! ## R4a: the per-frame component `(A_N)` bound
 
-
+The component-level heart of ric_bound Step 4, stated generically in the two
+frame Christoffels and the metric component field, taking Claim 1's two outputs
+(`hDlow` = the lower-order difference-tower constants, `hDtop` = the top
+difference-tower bounded linearly by `|∇_H^N g|`) as hypotheses. Composing
+`claim2_component` (the mixed bounds), `mixed_descent` (the `(A_N)` descent),
+and `hDtop` gives the linear bound `|∇_H^N T| ≤ Cpp·|∇_H^N g| + Cppp`. -/
 /-- The explicit slope and offset in the per-frame component `(A_N)` bound. -/
 noncomputable def aNConst (r₀ N : ℕ) (B : ℕ → Real) (Ctop KShi : Real) :
     Real × Real :=
@@ -1126,6 +1141,8 @@ theorem aNConst_snd_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
       hKShi)
     (by linarith)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- **Per-frame component `(A_N)`** (ric_bound Step 4, component form).  On a
 smooth frame domain `u`, for two connections whose difference-Christoffel tower
 satisfies the Claim-1 bounds — lower orders bounded by constants (`hDlow`, the
@@ -1190,6 +1207,8 @@ theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
       Cdesc * (1 + Ctop)
   nlinarith [hd, hkey]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
+    [DecidableEq Idx] in
 /-- Existential compatibility form of `aN_component_bound`. -/
 theorem aN_component {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)

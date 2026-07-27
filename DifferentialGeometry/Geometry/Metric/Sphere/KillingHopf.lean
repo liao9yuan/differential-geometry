@@ -108,7 +108,8 @@ private theorem hlocAt_congr_open
     change f₂ z = Φ z
     exact (heq hz.2).trans (hfΦ hz.1)
 
-omit [SimplyConnectedSpace N] [LocPathConnectedSpace N] in
+omit [SimplyConnectedSpace N] [LocPathConnectedSpace N]
+  [ConnectedSpace N] in
 /-- Two Cartan maps whose second initial jet is taken from the first agree on
 the connected overlap of their one-pole domains. -/
 theorem punctCartan_match
@@ -276,6 +277,7 @@ theorem punctCartan_match
     have hx' := congrFun heq (⟨x, hx⟩ : U)
     simpa only [Fp, Fq, q'] using hx'
 
+omit [ConnectedSpace N] in
 /-- A complete simply connected curvature-one manifold is globally isometric
 to the round sphere, in a form retaining the differential isometry needed by
 the later deck-action construction. -/

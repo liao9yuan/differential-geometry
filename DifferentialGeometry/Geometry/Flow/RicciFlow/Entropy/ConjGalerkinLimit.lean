@@ -28,7 +28,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -216,6 +216,7 @@ private lemma scalarGalPert_continuousOn_of_parts
   exact hsum
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Exact-interval energy bounds and perturbation continuity produce a
 modewise uniformly convergent Galerkin subsequence on that same interval. -/
 theorem gal_subseq_on
@@ -278,11 +279,6 @@ theorem gal_subseq_on
         galerkinEnergy (I := I) (M := M) (Fs N) (V N) (k : Real) t ≤ Bound := by
     intro k
     obtain ⟨Bound, hBound⟩ := henergyE k
-    exact ⟨Bound, fun N t ht => hBound N t (hIccE ht)⟩
-  have hpert_cont : ContinuousOn
-      (fun t => scalarGalPert (I := I) (M := M) S T t)
-      (Icc (0 : Real) tau) :=
-    scalarGalPert_continuousOn_of_parts S T (hcont2.mono hIcc2) (hcont1.mono hIcc1)
     exact ⟨Bound, hBound⟩
   obtain ⟨B0, hB0⟩ := henergy 0
   obtain ⟨B2, hB2⟩ := henergy 2
@@ -414,6 +410,7 @@ theorem gal_subseq_on
 
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Every smooth scalar initial datum has, on one common time interval, a
 modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
 The limit inherits the all-order weighted spectral mass bounds. -/

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Chart-composed regularity of the intrinsic exponential map
@@ -46,7 +45,7 @@ namespace Exponential
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -56,6 +55,8 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
 /-- **The intrinsic exponential map is `C^∞` in a chart at its target.**
 
 For a base point `p`, a launch vector `v`, and any chart center `y₀` whose chart

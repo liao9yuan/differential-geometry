@@ -15,7 +15,7 @@ from `HmfStateQuad.lean`.
 -/
 
 noncomputable section
-
+set_option backward.isDefEq.respectTransparency false
 open MeasureTheory
 open scoped ENNReal RealInnerProductSpace
 
@@ -65,12 +65,16 @@ namespace HeatRoughBound
 variable {T : ℝ} {tr : X →L[ℝ] E}
   {fluxPot sourcePot : (ℝ × V → F) → X}
 
+omit [CompleteSpace X]
+  [NormedSpace ℝ F] in
 private theorem flux_neg
     (H : HeatRoughBound T tr fluxPot sourcePot) (p : ℝ × V → F) :
     fluxPot (fun z ↦ -p z) = -fluxPot p := by
   have h := H.flux_sub (0 : ℝ × V → F) p
   simpa only [Pi.zero_apply, zero_sub, H.flux_zero] using h
 
+omit [CompleteSpace X]
+  [NormedSpace ℝ F] in
 /-- The subtraction law in `HeatRoughBound` implies addition of flux
 potentials. -/
 theorem flux_add

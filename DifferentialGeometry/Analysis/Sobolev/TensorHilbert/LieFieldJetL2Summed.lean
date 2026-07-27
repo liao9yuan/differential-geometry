@@ -42,9 +42,6 @@ comments mark each.  They use only public sub-lemmas.
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
@@ -65,7 +62,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -104,9 +101,9 @@ private def kInPerm102 : Equiv.Perm (Fin 3) :=
 private def kInPerm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-private theorem slotPermCcFib_contMDiff (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
+private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
@@ -132,64 +129,63 @@ private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv
       contMDiff_toFun := slotPermCcFib_contMDiff (I := I) (M := M) g₀ ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
             (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120
-        + appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
+        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
             (connDiffContrInsertionField (I := I) g₀ g₁)
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
               (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem armOuter_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁))).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
-  refine rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 3 4 σ
+  refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
+    (I := I) (M := M) g₀ 3 4 σ
     (connDiffContrInsertionField (I := I) g₀ g₁)
-    (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁))
     (fun y d => ?_) q x
   have hy : (show Tensor0SBundle.Tensor0SSpace 3 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I y from
-      (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
         (connDiffContrInsertionField (I := I) g₀ g₁)).toSection y) d =
       slotPermCLM (I := I) σ y
         ((show Tensor0SBundle.Tensor0SSpace 3 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I y from
           (connDiffContrInsertionField (I := I) g₀ g₁).toSection y) d) := rfl
   rw [hy, slotPermCLM_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
-set_option linter.unusedSectionVars false in
 private theorem armFull_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
-  rw [rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
-    (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+  rw [riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁)) ρ q x]
   exact armOuter_rfns_eq (I := I) (M := M) g₀ g₁ σ q x
 
@@ -198,24 +194,23 @@ private lemma c3_norm_eq_of_sq_eq {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
   have hs := congrArg Real.sqrt h
   rwa [Real.sqrt_sq_eq_abs, Real.sqrt_sq_eq_abs, abs_of_nonneg ha, abs_of_nonneg hb] at hs
 
-set_option linter.unusedSectionVars false in
 private theorem armOuter_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
-        (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁))‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁)‖ := by
   refine c3_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
   rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q
-        (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁))),
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁))]
   have hpt : (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁))).toSection x)) =
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
@@ -223,12 +218,11 @@ private theorem armOuter_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     funext fun x => armOuter_rfns_eq (I := I) (M := M) g₀ g₁ σ q x
   rw [hpt]
 
-set_option linter.unusedSectionVars false in
 private theorem armFull_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
         (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁)‖ := by
   refine c3_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
@@ -236,14 +230,14 @@ private theorem armFull_norm_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q
         (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)),
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (4 + q)
       (iteratedCovGrad (I := I) g₀ 3 4 q (connDiffContrInsertionField (I := I) g₀ g₁))]
   have hpt : (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ σ)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)).toSection x)) =
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
@@ -262,7 +256,6 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
 
 /-! ### Per-order structural bridge: Lie ≤ 5 · connDiff (squared: 25 ·) -/
 
-set_option linter.unusedSectionVars false in
 /-- Per-order structural bridge (generic in `g₁`): the Lie field's jet-L2 norm is bounded by
 `5 ·` the connection-difference field's, because the Lie field is the negation of a sum of five
 slot-permuted / reindexed copies of `connDiffContrInsertionField`, each an isometry of the jet.
@@ -296,8 +289,6 @@ private theorem lie_normSq_le_25 (g₀ g₁ : SmoothRiemannianMetric I M) (i : �
 
 /-! ### `realizedFam` per-order and summed bounds (REUSE of the connDiff producers). -/
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 /-- `realizedFam` per-order top-separated bound for the Lie field: the connDiff per-order producer
 composed with the `25 ·` structural bridge.  Top coefficient `Ktop = 25 · Ktop_connDiff` is
 `R`-independent; the lumped low coefficient `Kc i = 25 · Kc_connDiff i` follows the house
@@ -308,10 +299,10 @@ theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_perOrder_topS
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
@@ -350,8 +341,6 @@ theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_perOrder_topS
             (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by ring
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 /-- **Summed** data-weighted jet-L2 bound for the Lie field (constituent 4-of-5 of the
 data-weighted threeArm precursor).  Sums the `25 ·` structural bridge over `i ≤ a` and reuses the
 already-landed connDiff summed producer
@@ -365,10 +354,10 @@ theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_summed_topSep
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℝ, 0 ≤ Kc ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →

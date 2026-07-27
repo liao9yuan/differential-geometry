@@ -4,16 +4,18 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
 open scoped InnerProductSpace
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+section Normed
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 noncomputable def ballRetraction (R : ℝ) (x : X) : X := (min 1 (R / ‖x‖)) • x
 
-omit [InnerProductSpace ℝ X] in
+omit [NormedSpace ℝ X] in
 private theorem ballRetraction_factor_nonneg {R : ℝ} (hR : 0 ≤ R) (x : X) :
     0 ≤ min 1 (R / ‖x‖) :=
   le_min zero_le_one (div_nonneg hR (norm_nonneg x))
 
-omit [InnerProductSpace ℝ X] in
+omit [NormedSpace ℝ X] in
 private theorem ballRetraction_factor_mul_norm {R : ℝ} (hR : 0 ≤ R) (x : X) :
     (min 1 (R / ‖x‖)) * ‖x‖ = min ‖x‖ R := by
   rcases eq_or_lt_of_le (norm_nonneg x) with hx | hx
@@ -43,7 +45,104 @@ private theorem ballRetraction_eq_smul_of_lt {R : ℝ} {x : X} (hx : R < ‖x‖
     · exact (div_le_one hx0).2 (le_of_lt hx)
   rw [ballRetraction, min_eq_right hle]
 
+/-- Radial retraction onto a closed ball is `2`-Lipschitz in every real
+normed space.  In an inner-product space the sharper constant `1` is
+available as `lipschitzWith_one_ballRetraction`. -/
 theorem lipschitzWith_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
+    LipschitzWith 2 (ballRetraction (X := X) R) := by
+  refine LipschitzWith.of_dist_le_mul fun x y => ?_
+  rw [dist_eq_norm, dist_eq_norm]
+  change ‖ballRetraction R x - ballRetraction R y‖ ≤ 2 * ‖x - y‖
+  rcases eq_or_lt_of_le hR with rfl | hRpos
+  · simp [ballRetraction]
+  rcases le_or_gt ‖x‖ R with hx | hx
+  · rcases le_or_gt ‖y‖ R with hy | hy
+    · rw [ballRetraction_eq_self_of_mem hx, ballRetraction_eq_self_of_mem hy]
+      exact (le_mul_of_one_le_left (norm_nonneg _) one_le_two)
+    · rw [ballRetraction_eq_self_of_mem hx, ballRetraction_eq_smul_of_lt hy]
+      have hy0 : 0 < ‖y‖ := hRpos.trans hy
+      have hfac0 : 0 ≤ 1 - R / ‖y‖ := sub_nonneg.mpr
+        ((div_le_one hy0).mpr hy.le)
+      have hsplit :
+          x - (R / ‖y‖) • y = (x - y) + (1 - R / ‖y‖) • y := by
+        module
+      rw [hsplit]
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hfac0]
+      have hradial : (1 - R / ‖y‖) * ‖y‖ = ‖y‖ - R := by
+        field_simp
+      rw [hradial]
+      have hnormdiff : ‖y‖ - R ≤ ‖x - y‖ := by
+        have hxy := norm_sub_norm_le y x
+        rw [norm_sub_rev] at hxy
+        linarith
+      linarith [norm_nonneg (x - y)]
+  · rcases le_or_gt ‖y‖ R with hy | hy
+    · rw [ballRetraction_eq_smul_of_lt hx, ballRetraction_eq_self_of_mem hy]
+      have hx0 : 0 < ‖x‖ := hRpos.trans hx
+      have hfac0 : 0 ≤ 1 - R / ‖x‖ := sub_nonneg.mpr
+        ((div_le_one hx0).mpr hx.le)
+      have hsplit :
+          (R / ‖x‖) • x - y = (x - y) - (1 - R / ‖x‖) • x := by
+        module
+      rw [hsplit]
+      refine (norm_sub_le _ _).trans ?_
+      rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hfac0]
+      have hradial : (1 - R / ‖x‖) * ‖x‖ = ‖x‖ - R := by
+        field_simp
+      rw [hradial]
+      have hnormdiff : ‖x‖ - R ≤ ‖x - y‖ := by
+        have hxy := norm_sub_norm_le x y
+        linarith
+      linarith [norm_nonneg (x - y)]
+    · rw [ballRetraction_eq_smul_of_lt hx, ballRetraction_eq_smul_of_lt hy]
+      have hx0 : 0 < ‖x‖ := hRpos.trans hx
+      have hy0 : 0 < ‖y‖ := hRpos.trans hy
+      wlog hxy : ‖x‖ ≤ ‖y‖ generalizing x y
+      · have hswap := this y x hy hx hy0 hx0 (le_of_not_ge hxy)
+        calc
+          ‖(R / ‖x‖) • x - (R / ‖y‖) • y‖ =
+              ‖(R / ‖y‖) • y - (R / ‖x‖) • x‖ := norm_sub_rev _ _
+          _ ≤ 2 * ‖y - x‖ := hswap
+          _ = 2 * ‖x - y‖ := by rw [norm_sub_rev]
+      have ha0 : 0 ≤ R / ‖x‖ := div_nonneg hR (norm_nonneg x)
+      have hb0 : 0 ≤ R / ‖y‖ := div_nonneg hR (norm_nonneg y)
+      have hb1 : R / ‖y‖ ≤ 1 := (div_le_one hy0).mpr hy.le
+      have hab : 0 ≤ R / ‖x‖ - R / ‖y‖ := by
+        exact sub_nonneg.mpr (div_le_div_of_nonneg_left hR hx0 hxy)
+      have hsplit :
+          (R / ‖x‖) • x - (R / ‖y‖) • y =
+            (R / ‖y‖) • (x - y) +
+              (R / ‖x‖ - R / ‖y‖) • x := by
+        module
+      rw [hsplit]
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+        abs_of_nonneg hb0, abs_of_nonneg hab]
+      have hfirst :
+          (R / ‖y‖) * ‖x - y‖ ≤ ‖x - y‖ :=
+        mul_le_of_le_one_left (norm_nonneg _) hb1
+      have hsecond :
+          (R / ‖x‖ - R / ‖y‖) * ‖x‖ ≤ ‖x - y‖ := by
+        have hformula :
+            (R / ‖x‖ - R / ‖y‖) * ‖x‖ =
+              (R / ‖y‖) * (‖y‖ - ‖x‖) := by
+          field_simp
+        rw [hformula]
+        have hdiff : ‖y‖ - ‖x‖ ≤ ‖x - y‖ := by
+          have := norm_sub_norm_le y x
+          rw [norm_sub_rev] at this
+          exact this
+        exact (mul_le_of_le_one_left (sub_nonneg.mpr hxy) hb1).trans hdiff
+      linarith
+
+end Normed
+
+section Hilbert
+
+variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+
+theorem lipschitzWith_one_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
     LipschitzWith 1 (ballRetraction (X := X) R) := by
   refine LipschitzWith.of_dist_le_mul fun x y => ?_
   rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm]
@@ -75,6 +174,12 @@ theorem lipschitzWith_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
       mul_self_le_mul_self (abs_nonneg (min ‖x‖ R - min ‖y‖ R)) h1]
   nlinarith [hmin, hab, hcs, mul_nonneg hp0 hq0,
     mul_nonneg hab (sub_nonneg.2 hcs)]
+
+end Hilbert
+
+section NormedDifference
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 theorem norm_map_ballRetraction_sub_le {Y : Type*} [NormedAddCommGroup Y]
     [NormedSpace ℝ Y] {R : ℝ} (hR : 0 < R) (J : X →L[ℝ] Y) (u u' : X) :
@@ -213,3 +318,5 @@ theorem norm_map_ballRetraction_sub_le {Y : Type*} [NormedAddCommGroup Y]
               · exact mul_nonneg hjn hD0
           _ = (1 / R) * max ‖J u‖ ‖J u'‖ * ‖u - u'‖ := by ring
       linarith
+
+end NormedDifference

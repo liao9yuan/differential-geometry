@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelApprox
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelPDE
 import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
 import Mathlib.Analysis.Calculus.ParametricIntegral
+import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
@@ -21,10 +22,8 @@ constant-SPD conjugation are built on this producer below.
 -/
 
 noncomputable section
-
-open MeasureTheory Real
-open scoped RealInnerProductSpace
-
+open Asymptotics Filter MeasureTheory Real Set
+open scoped Interval NNReal RealInnerProductSpace Topology
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
@@ -43,11 +42,57 @@ def lapEval : (V →L[ℝ] V →L[ℝ] F) →L[ℝ] F :=
       (ContinuousLinearMap.apply ℝ (V →L[ℝ] F)
         ((stdOrthonormalBasis ℝ V) i))
 
+@[simp]
+theorem lapEval_apply (A : V →L[ℝ] V →L[ℝ] F) :
+    lapEval A =
+      ∑ i : Fin (Module.finrank ℝ V),
+        A ((stdOrthonormalBasis ℝ V) i)
+          ((stdOrthonormalBasis ℝ V) i) := by
+  simp [lapEval]
+
+/-- Trace evaluation is Lipschitz with constant equal to the dimension. -/
+theorem lapEval_dist_le
+    (A B : V →L[ℝ] V →L[ℝ] F) :
+    dist (lapEval A) (lapEval B) ≤
+      Module.finrank ℝ V * dist A B := by
+  rw [dist_eq_norm, ← map_sub]
+  simp only [lapEval_apply]
+  calc
+    ‖∑ i : Fin (Module.finrank ℝ V),
+        (A - B) ((stdOrthonormalBasis ℝ V) i)
+          ((stdOrthonormalBasis ℝ V) i)‖ ≤
+        ∑ i : Fin (Module.finrank ℝ V),
+          ‖(A - B) ((stdOrthonormalBasis ℝ V) i)
+            ((stdOrthonormalBasis ℝ V) i)‖ :=
+      norm_sum_le _ _
+    _ ≤ ∑ _i : Fin (Module.finrank ℝ V), ‖A - B‖ := by
+      gcongr with i
+      calc
+        ‖(A - B) ((stdOrthonormalBasis ℝ V) i)
+            ((stdOrthonormalBasis ℝ V) i)‖ ≤
+            ‖(A - B) ((stdOrthonormalBasis ℝ V) i)‖ *
+              ‖(stdOrthonormalBasis ℝ V) i‖ :=
+          ((A - B) ((stdOrthonormalBasis ℝ V) i)).le_opNorm _
+        _ ≤ (‖A - B‖ * ‖(stdOrthonormalBasis ℝ V) i‖) *
+              ‖(stdOrthonormalBasis ℝ V) i‖ := by
+          gcongr
+          exact (A - B).le_opNorm _
+        _ = ‖A - B‖ := by simp
+    _ = Module.finrank ℝ V * dist A B := by
+      rw [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
+      congr 1
+      exact (dist_eq_norm A B).symm
+
 /-- The bounded continuous Euclidean Laplacian associated to a bounded
 continuous realized second Frechet derivative. -/
 def coreLap (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F)) :
     BoundedContinuousFunction V F :=
-  (lapEval (V := V) (F := F)).compLeftContinuousBounded V d2u
+  ⟨⟨fun x => lapEval (V := V) (F := F) (d2u x),
+      (lapEval (V := V) (F := F)).continuous.comp d2u.continuous⟩, by
+    obtain ⟨C, hC⟩ := d2u.bounded
+    refine ⟨Module.finrank ℝ V * C, fun x y => ?_⟩
+    exact (lapEval_dist_le (d2u x) (d2u y)).trans
+      (mul_le_mul_of_nonneg_left (hC x y) (Nat.cast_nonneg _))⟩
 
 @[simp]
 theorem coreLap_apply
@@ -56,7 +101,7 @@ theorem coreLap_apply
       ∑ i : Fin (Module.finrank ℝ V),
         d2u x ((stdOrthonormalBasis ℝ V) i)
           ((stdOrthonormalBasis ℝ V) i) := by
-  simp [coreLap, lapEval]
+  simp [coreLap]
 
 end CoreOperators
 
@@ -72,6 +117,8 @@ variable {V F : Type*}
 def heatScaled (t : ℝ) (u : BoundedContinuousFunction V F) (x : V) : F :=
   ∫ z : V, baseHeat z • u (x - heatScale t • z)
 
+omit [Nontrivial V]
+  [CompleteSpace F] in
 /-- Positive-time heat convolution equals its fixed-Gaussian scaled form. -/
 theorem heatSup_scaled {t : ℝ} (ht : 0 < t)
     (u : BoundedContinuousFunction V F) (x : V) :
@@ -86,7 +133,7 @@ theorem heatSup_scaled {t : ℝ} (ht : 0 < t)
       (∫ y : V, baseHeat (r⁻¹ • y) • u (x - y)) =
         r ^ Module.finrank ℝ V •
           ∫ z : V, baseHeat z • u (x - r • z) := by
-    simpa only [f, smul_smul, inv_mul_cancel₀ hr.ne', one_smul] using hscale
+    simpa only [f, smul_smul, mul_inv_cancel₀ hr.ne', one_smul] using hscale
   unfold heatSup supKernel heatKernel heatScaled
   change
     (∫ y : V,
@@ -107,6 +154,7 @@ theorem heatSup_scaled {t : ℝ} (ht : 0 < t)
     _ = ∫ z : V, baseHeat z • u (x - r • z) := by
       rw [inv_smul_smul₀ (pow_ne_zero _ hr.ne')]
 
+omit [CompleteSpace F] in
 /-- The fixed-Gaussian scaled heat evolution is continuous in its time
 parameter, including at time zero. -/
 theorem heatScaled_cont (u : BoundedContinuousFunction V F) (x : V) :
@@ -116,6 +164,7 @@ theorem heatScaled_cont (u : BoundedContinuousFunction V F) (x : V) :
     (bound := fun z : V => ‖u‖ * baseHeat z)
   · intro t
     apply Continuous.aestronglyMeasurable
+    unfold baseHeat
     fun_prop
   · intro t
     apply Filter.Eventually.of_forall
@@ -126,8 +175,10 @@ theorem heatScaled_cont (u : BoundedContinuousFunction V F) (x : V) :
   · exact (baseHeat_int (V := V)).const_mul ‖u‖
   · apply Filter.Eventually.of_forall
     intro z
+    unfold heatScale
     fun_prop
 
+omit [Nontrivial V] in
 /-- The fixed-Gaussian formula has the correct value at time zero. -/
 @[simp]
 theorem heatScaled_zero (u : BoundedContinuousFunction V F) (x : V) :
@@ -136,6 +187,7 @@ theorem heatScaled_zero (u : BoundedContinuousFunction V F) (x : V) :
   simp only [Real.sqrt_zero, zero_smul, sub_zero]
   rw [integral_smul_const, integral_baseHeat, one_smul]
 
+omit [CompleteSpace F] in
 /-- The fixed-Gaussian heat formula is a contraction at every real parameter.
 For negative parameters this merely uses Lean's convention `sqrt t = 0`. -/
 theorem heatScaled_norm (t : ℝ) (u : BoundedContinuousFunction V F) (x : V) :
@@ -149,12 +201,21 @@ theorem heatScaled_norm (t : ℝ) (u : BoundedContinuousFunction V F) (x : V) :
       filter_upwards with z
       rw [norm_smul, Real.norm_eq_abs,
         abs_of_nonneg (baseHeat_nonneg z)]
-      exact mul_le_mul_of_nonneg_left
+      simpa only [mul_comm] using mul_le_mul_of_nonneg_left
         (u.norm_coe_le_norm (x - heatScale t • z)) (baseHeat_nonneg z)
     _ = ‖u‖ := by
       rw [integral_const_mul, integral_baseHeat, mul_one]
-
-/-- A continuous linear map commutes with the fixed-Gaussian heat formula. -/
+omit [Nontrivial V]
+  [CompleteSpace F] in
+private theorem kernel_comp_int {K : V → ℝ} (hK : Integrable K)
+    (u : BoundedContinuousFunction V F) {p : V → V} (hp : Continuous p) :
+    Integrable (fun z : V => K z • u (p z)) := by
+  refine (hK.norm.mul_const ‖u‖).mono' ?_ ?_
+  · exact hK.aestronglyMeasurable.smul
+      ((u.continuous.comp hp).aestronglyMeasurable)
+  · filter_upwards with z
+    rw [norm_smul]
+    exact mul_le_mul_of_nonneg_left (u.norm_coe_le_norm (p z)) (norm_nonneg _)
 theorem heatScaled_map {G : Type*}
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
     (L : F →L[ℝ] G) (t : ℝ) (u : BoundedContinuousFunction V F) (x : V) :
@@ -169,6 +230,7 @@ theorem heatScaled_map {G : Type*}
   filter_upwards with z
   simp
 
+omit [CompleteSpace F] in
 /-- Spatial differentiation commutes with the fixed-Gaussian heat formula
 when the supplied bounded first jet is globally realized. -/
 theorem heatScaled_space (t : ℝ)
@@ -181,13 +243,14 @@ theorem heatScaled_space (t : ℝ)
   let F₁ : V → V → (V →L[ℝ] F) := fun y z =>
     baseHeat z • du (y - heatScale t • z)
   let bound : V → ℝ := fun z => ‖du‖ * baseHeat z
-  have hs : (Set.univ : Set V) ∈ 𝓝 x := Set.univ_mem
+  have hs : (Set.univ : Set V) ∈ 𝓝 x := Filter.univ_mem
   have hmeas : ∀ᶠ y in 𝓝 x,
       AEStronglyMeasurable (F₀ y) (volume : Measure V) := by
     apply Filter.Eventually.of_forall
     intro y
     apply Continuous.aestronglyMeasurable
     dsimp only [F₀]
+    unfold baseHeat
     fun_prop
   have hint : Integrable (F₀ x) := by
     dsimp only [F₀]
@@ -195,6 +258,7 @@ theorem heatScaled_space (t : ℝ)
   have hder_meas : AEStronglyMeasurable (F₁ x) (volume : Measure V) := by
     apply Continuous.aestronglyMeasurable
     dsimp only [F₁]
+    unfold baseHeat
     fun_prop
   have hbound : ∀ᵐ z ∂(volume : Measure V), ∀ y ∈ Set.univ,
       ‖F₁ y z‖ ≤ bound z := by
@@ -203,7 +267,7 @@ theorem heatScaled_space (t : ℝ)
     dsimp only [F₁, bound]
     rw [norm_smul, Real.norm_eq_abs,
       abs_of_nonneg (baseHeat_nonneg z)]
-    exact mul_le_mul_of_nonneg_left
+    simpa only [mul_comm] using mul_le_mul_of_nonneg_left
       (du.norm_coe_le_norm (y - heatScale t • z)) (baseHeat_nonneg z)
   have hbound_int : Integrable bound := by
     dsimp only [bound]
@@ -227,31 +291,24 @@ theorem heatScaled_space (t : ℝ)
 heat evolution to its bounded half-Holder datum. -/
 theorem heatSup_zero {K : ℝ≥0} (u : BoundedContinuousFunction V F)
     (hu : HolderWith K (1 / 2 : ℝ≥0) u) (x : V) :
-    Tendsto (fun t : ℝ => heatSup t u x) (ᵊ[>] (0 : ℝ)) (ᵊ (u x)) := by
+    Tendsto (fun t : ℝ => heatSup t u x) (𝓝[>] (0 : ℝ)) (𝓝 (u x)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   have hsqrt : Tendsto (fun t : ℝ => Real.sqrt (heatScale t))
-      (ᵊ[>] (0 : ℝ)) (ᵊ 0) := by
-    have hfull := (Real.continuous_sqrt.comp Real.continuous_sqrt).continuousAt
+      (𝓝[>] (0 : ℝ)) (𝓝 0) := by
+    have hfull : Tendsto (fun t : ℝ => Real.sqrt (Real.sqrt t))
+        (𝓝 0) (𝓝 0) := by
+      simpa only [Function.comp_apply, Real.sqrt_zero] using
+        (Real.continuous_sqrt.comp Real.continuous_sqrt).tendsto (0 : ℝ)
     simpa only [heatScale, Real.sqrt_zero] using hfull.mono_left nhdsWithin_le_nhds
   have hupper : Tendsto
       (fun t : ℝ => (K : ℝ) * Real.sqrt (heatScale t) * heatC0Half V)
-      (ᵊ[>] (0 : ℝ)) (ᵊ 0) := by
+      (𝓝[>] (0 : ℝ)) (𝓝 0) := by
     have h₁ := Tendsto.const_mul (K : ℝ) hsqrt
     have h₂ := Tendsto.mul_const (heatC0Half V) h₁
-    simpa only [mul_zero] using h₂
+    simpa only [mul_zero, zero_mul] using h₂
   refine squeeze_zero' (Filter.Eventually.of_forall fun t => norm_nonneg _) ?_ hupper
   filter_upwards [self_mem_nhdsWithin] with t ht
   exact heatSup_id_norm ht hu x
-
-private theorem kernel_comp_int {K : V → ℝ} (hK : Integrable K)
-    (u : BoundedContinuousFunction V F) {p : V → V} (hp : Continuous p) :
-    Integrable (fun z : V => K z • u (p z)) := by
-  refine (hK.norm.mul_const ‖u‖).mono' ?_ ?_
-  · exact hK.aestronglyMeasurable.smul
-      ((u.continuous.comp hp).aestronglyMeasurable)
-  · filter_upwards with z
-    rw [norm_smul]
-    exact mul_le_mul_of_nonneg_left (u.norm_coe_le_norm (p z)) (norm_nonneg _)
 
 private theorem baseFirst_int :
     Integrable (fun z : V => ‖z‖ * baseHeat z) := by
@@ -271,6 +328,7 @@ private def scaledDt (t : ℝ)
   baseHeat z •
     du (x - heatScale t • z) ((-(2 * heatScale t)⁻¹) • z)
 
+omit [CompleteSpace F] in
 /-- Differentiation of the fixed-Gaussian scaled heat evolution at positive
 time.  The derivative is still in first-derivative form; the following layer
 identifies it with the heat evolution of the Laplacian. -/
@@ -292,14 +350,15 @@ theorem heatScaled_time {t : ℝ} (ht : 0 < t)
   let F₁ : ℝ → V → F := fun s z => scaledDt s du x z
   let bound : V → ℝ := fun z =>
     ((2 * r₀)⁻¹ * ‖du‖) * (‖z‖ * baseHeat z)
-  have hs : Set.Ioi s₀ ∈ ᵊ t := Set.Ioi_mem_nhds (by
+  have hs : Set.Ioi s₀ ∈ 𝓝 t := Ioi_mem_nhds (by
     dsimp only [s₀]
     linarith)
-  have hmeas : ∀ᶠ s in ᵊ t, AEStronglyMeasurable (F₀ s) := by
+  have hmeas : ∀ᶠ s in 𝓝 t, AEStronglyMeasurable (F₀ s) := by
     apply Filter.Eventually.of_forall
     intro s
     apply Continuous.aestronglyMeasurable
     dsimp only [F₀]
+    unfold baseHeat
     fun_prop
   have hint : Integrable (F₀ t) := by
     apply kernel_comp_int (baseHeat_int (V := V)) u
@@ -307,6 +366,7 @@ theorem heatScaled_time {t : ℝ} (ht : 0 < t)
   have hder_meas : AEStronglyMeasurable (F₁ t) := by
     apply Continuous.aestronglyMeasurable
     dsimp only [F₁, scaledDt]
+    unfold baseHeat
     fun_prop
   have hbound_int : Integrable bound := by
     dsimp only [bound]
@@ -334,13 +394,22 @@ theorem heatScaled_time {t : ℝ} (ht : 0 < t)
           ‖du (x - heatScale s • z) ((-(2 * heatScale s)⁻¹) • z)‖ ≤
           baseHeat z *
             (‖du (x - heatScale s • z)‖ * ‖(-(2 * heatScale s)⁻¹ : ℝ) • z‖) := by
-        gcongr
-        exact (du (x - heatScale s • z)).le_opNorm _
+        exact mul_le_mul_of_nonneg_left
+          ((du (x - heatScale s • z)).le_opNorm _) (baseHeat_nonneg z)
       _ ≤ baseHeat z * (‖du‖ * ((2 * r₀)⁻¹ * ‖z‖)) := by
         rw [norm_smul]
-        gcongr
-        · exact du.norm_coe_le_norm _
-        · exact hc
+        apply mul_le_mul_of_nonneg_left _ (baseHeat_nonneg z)
+        calc
+          ‖du (x - heatScale s • z)‖ *
+                (‖(-(2 * heatScale s)⁻¹ : ℝ)‖ * ‖z‖) ≤
+              ‖du‖ * (‖(-(2 * heatScale s)⁻¹ : ℝ)‖ * ‖z‖) :=
+            mul_le_mul_of_nonneg_right
+              (du.norm_coe_le_norm (x - heatScale s • z))
+              (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+          _ ≤ ‖du‖ * ((2 * r₀)⁻¹ * ‖z‖) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_right hc (norm_nonneg _))
+              (norm_nonneg du)
       _ = ((2 * r₀)⁻¹ * ‖du‖) * (‖z‖ * baseHeat z) := by ring
   have hdiff : ∀ᵐ z ∂(volume : Measure V), ∀ s ∈ Set.Ioi s₀,
       HasDerivAt (F₀ · z) (F₁ s z) s := by
@@ -372,22 +441,30 @@ private def evalD2
   ((ContinuousLinearMap.apply ℝ F w).comp
     (ContinuousLinearMap.apply ℝ (V →L[ℝ] F) v)).compLeftContinuousBounded V d2u
 
+omit [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V]
+  [CompleteSpace F] in
 @[simp] private theorem evalD1_apply
     (du : BoundedContinuousFunction V (V →L[ℝ] F)) (v x : V) :
     evalD1 du v x = du x v := rfl
 
+omit [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V]
+  [CompleteSpace F] in
 @[simp] private theorem evalD2_apply
     (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F))
     (v w x : V) : evalD2 d2u v w x = d2u x v w := rfl
 
 private theorem baseD1_integrable (v : V) :
     Integrable (baseD1 v : V → ℝ) := by
-  simpa [heatD1, heatScale] using
-    (heatD1_int (V := V) (t := (1 : ℝ)) (by norm_num) v)
-
-/-- The scaled first-derivative expression is the fixed-Gaussian heat
-evolution of the realized Euclidean Laplacian.  This is the analytic
-integration-by-parts step; no heat equation is assumed. -/
+  refine (heatD1_int (V := V) (t := (1 : ℝ)) (by norm_num) v).congr ?_
+  filter_upwards with x
+  simp [heatD1, heatScale]
+omit [CompleteSpace F] in
 theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
     (du : BoundedContinuousFunction V (V →L[ℝ] F))
     (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F))
@@ -406,7 +483,7 @@ theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
       HasFDerivAt p (-r • ContinuousLinearMap.id ℝ V) z := by
     intro z
     dsimp only [p]
-    simpa using (hasFDerivAt_const z x).sub
+    simpa using (hasFDerivAt_const x z).sub
       ((r • ContinuousLinearMap.id ℝ V).hasFDerivAt)
   have hgder : ∀ (i : Fin (Module.finrank ℝ V)) (z : V),
       fderiv ℝ (fun y : V => du (p y) (b i)) z (b i) =
@@ -415,8 +492,11 @@ theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
     let ev : (V →L[ℝ] F) →L[ℝ] F := ContinuousLinearMap.apply ℝ F (b i)
     have hcomp := (hdu (p z)).comp z (harg z)
     have heval := ev.hasFDerivAt.comp z hcomp
-    rw [heval.fderiv]
-    simp [ev, ContinuousLinearMap.comp_apply]
+    have hfd : fderiv ℝ (fun y : V => du (p y) (b i)) z =
+        ev.comp ((d2u (p z)).comp (-r • ContinuousLinearMap.id ℝ V)) := by
+      simpa only [Function.comp_apply] using heval.fderiv
+    rw [hfd]
+    simp [ev]
   have hgdiff : ∀ (i : Fin (Module.finrank ℝ V)) (z : V),
       DifferentiableAt ℝ (fun y : V => du (p y) (b i)) z := by
     intro i z
@@ -446,8 +526,12 @@ theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
       simpa only [(baseHeat_hasFDeriv _).fderiv, baseD1Map_apply] using hD1int i
     have hright : Integrable (fun z : V =>
         baseHeat z • fderiv ℝ (fun y : V => du (p y) (b i)) z (b i)) := by
-      have hraw := (hD2int i).const_smul (-r)
+      have hi : Integrable
+          (fun z : V => baseHeat z • d2u (p z) (b i) (b i)) := hD2int i
+      have hraw := hi.smul (-r)
       refine hraw.congr (Filter.Eventually.of_forall fun z => ?_)
+      change (-r) • (baseHeat z • d2u (p z) (b i) (b i)) =
+        baseHeat z • fderiv ℝ (fun y : V => du (p y) (b i)) z (b i)
       rw [hgder i z]
       simp only [smul_smul]
       congr 1
@@ -496,13 +580,15 @@ theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
     intro i hi
     unfold baseD1
     rw [real_inner_comm z (b i)]
-    simp only [smul_smul]
+    rw [hz]
     congr 1
     field_simp [hr.ne']
-    ring
   have hterm_int : ∀ i : Fin (Module.finrank ℝ V),
       Integrable (fun z : V => r⁻¹ • (baseD1 (b i) z • du (p z) (b i))) :=
-    fun i => (hD1int i).const_smul r⁻¹
+    fun i => by
+      have hi : Integrable
+          (fun z : V => baseD1 (b i) z • du (p z) (b i)) := hD1int i
+      exact hi.smul r⁻¹
   unfold heatScaled
   change (∫ z : V, scaledDt t du x z) =
     ∫ z : V, baseHeat z • coreLap d2u (p z)
@@ -529,6 +615,7 @@ theorem scaledDt_eq_lap {t : ℝ} (ht : 0 < t)
       filter_upwards with z
       simp only [coreLap_apply, b, Finset.smul_sum]
 
+omit [CompleteSpace F] in
 /-- Positive-time heat evolution of a bounded realized `C²` spatial jet
 satisfies the Euclidean heat equation pointwise. -/
 theorem heatSup_time {t : ℝ} (ht : 0 < t)
@@ -542,7 +629,7 @@ theorem heatSup_time {t : ℝ} (ht : 0 < t)
   have hscaled := heatScaled_time ht u du hu x
   rw [scaledDt_eq_lap ht du d2u hdu x, ← heatSup_scaled ht] at hscaled
   apply hscaled.congr_of_eventuallyEq
-  filter_upwards [Set.Ioi_mem_nhds ht] with s hs
+  filter_upwards [Ioi_mem_nhds ht] with s hs
   exact heatSup_scaled hs u x
 
 /-- Fundamental heat-evolution identity on a positive interval.  This is the
@@ -561,16 +648,15 @@ theorem heatSup_primitive {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     exact heatSup_time hs.1 u du d2u hu hdu x
   have hint : IntervalIntegrable (fun s : ℝ => heatSup s (coreLap d2u) x)
       volume 0 t := by
-    have hscaled := (heatScaled_cont (coreLap d2u) x).intervalIntegrable 0 t
+    have hscaled :=
+      (heatScaled_cont (coreLap d2u) x).intervalIntegrable (μ := volume) 0 t
     apply hscaled.congr_ae
-    rw [ae_restrict_iff' measurableSet_uIoc]
-    filter_upwards [ae_ne (0 : ℝ)] with s hs_ne
-    intro hs_mem
+    filter_upwards [ae_restrict_mem measurableSet_uIoc] with s hs_mem
     rw [uIoc_of_le ht.le] at hs_mem
     exact (heatSup_scaled hs_mem.1 (coreLap d2u) x).symm
   have hzero := heatSup_zero u hholder x
-  have htlim : Tendsto (fun s : ℝ => heatSup s u x) (ᵊ[<] t)
-      (ᵊ (heatSup t u x)) :=
+  have htlim : Tendsto (fun s : ℝ => heatSup s u x) (𝓝[<] t)
+      (𝓝 (heatSup t u x)) :=
     (heatSup_time ht u du d2u hu hdu x).continuousAt.tendsto.mono_left
       nhdsWithin_le_nhds
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto
@@ -578,6 +664,7 @@ theorem heatSup_primitive {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
 
 section Duhamel
 
+omit [CompleteSpace F] in
 /-- A Volterra integral whose coefficient vanishes at zero has no moving-
 endpoint boundary term.  The proof separates a fixed interval from the
 moving sliver; boundedness of the realized derivative makes the latter
@@ -599,7 +686,7 @@ private theorem volterra_zero {t : ℝ}
   let bound : ℝ → ℝ := fun _ => ‖db‖ * Ck
   have hfixed : HasDerivAt fixed
       (∫ r in (0 : ℝ)..t, db (t - r) • k r) t := by
-    have hs : (Set.univ : Set ℝ) ∈ 𝓝 t := Set.univ_mem
+    have hs : (Set.univ : Set ℝ) ∈ 𝓝 t := Filter.univ_mem
     have hmeas : ∀ᶠ q in 𝓝 t,
         AEStronglyMeasurable (F₀ q)
           (volume.restrict (Set.uIoc (0 : ℝ) t)) := by
@@ -633,7 +720,8 @@ private theorem volterra_zero {t : ℝ}
         simpa using (hasDerivAt_id q).sub_const r
       have hcomp := (hb (q - r)).comp q harg
       dsimp only [F₀, F₁]
-      exact hcomp.smul_const (k r)
+      simpa only [Function.comp_apply, mul_one, one_mul] using
+        hcomp.smul_const (k r)
     have key := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
       (F := F₀) (F' := F₁) (bound := bound) hs hmeas hint hder_meas
         hbound hbound_int hdiff
@@ -652,6 +740,7 @@ private theorem volterra_zero {t : ℝ}
       _ = ‖db‖ * |q - r| := by simp [Real.norm_eq_abs]
   have htail_bound : ∀ q : ℝ,
       ‖tail q‖ ≤ (‖db‖ * Ck) * ‖q - t‖ ^ 2 := by
+    have hCk : 0 ≤ Ck := (norm_nonneg (k 0)).trans (hk_bound 0)
     intro q
     have hraw := intervalIntegral.norm_integral_le_of_norm_le_const
       (a := t) (b := q)
@@ -667,7 +756,8 @@ private theorem volterra_zero {t : ℝ}
             exact mul_le_mul (hb_lip q r) (hk_bound r)
               (norm_nonneg _) (mul_nonneg (norm_nonneg _) (abs_nonneg _))
           _ ≤ (‖db‖ * |q - t|) * Ck := by
-            gcongr
+            exact mul_le_mul_of_nonneg_right
+              (mul_le_mul_of_nonneg_left hdist (norm_nonneg db)) hCk
           _ = (‖db‖ * Ck) * |q - t| := by ring)
     dsimp only [tail]
     calc
@@ -680,8 +770,8 @@ private theorem volterra_zero {t : ℝ}
     apply isBigO_iff.2
     refine ⟨‖db‖ * Ck, ?_⟩
     filter_upwards with q
-    simpa only [Real.norm_eq_abs, abs_pow,
-      abs_of_nonneg (norm_nonneg (q - t))] using htail_bound q
+    simpa only [Real.norm_eq_abs, abs_pow, abs_abs,
+      abs_of_nonneg (sq_nonneg |q - t|)] using htail_bound q
   have htail_der : HasDerivAt tail 0 t := by
     rw [hasDerivAt_iff_hasFDerivAt]
     simpa using htail_big.hasFDerivAt (by norm_num : 1 < (2 : ℕ))
@@ -689,17 +779,14 @@ private theorem volterra_zero {t : ℝ}
       (fun q : ℝ => ∫ r in (0 : ℝ)..q, b (q - r) • k r) =
         fun q => fixed q + tail q := by
     funext q
-    symmetry
+    symm
     apply intervalIntegral.integral_add_adjacent_intervals
     · exact ((b.continuous.comp (continuous_const.sub continuous_id)).smul hk)
         |>.intervalIntegrable 0 t
     · exact ((b.continuous.comp (continuous_const.sub continuous_id)).smul hk)
         |>.intervalIntegrable t q
   rw [hsplit]
-  exact hfixed.add htail_der
-
-/-- Leibniz rule for a bounded `C¹` Volterra coefficient and a bounded
-continuous Banach-valued path. -/
+  simpa only [Pi.add_apply, add_zero] using hfixed.add htail_der
 private theorem volterra_time {t : ℝ}
     (b db : BoundedContinuousFunction ℝ ℝ)
     (hb : ∀ q : ℝ, HasDerivAt (b : ℝ → ℝ) (db q) q)
@@ -716,25 +803,34 @@ private theorem volterra_time {t : ℝ}
       BoundedContinuousFunction.const_apply, Pi.sub_apply] using
       (hb q).sub_const (b 0)
   have hbz0 : bz 0 = 0 := by simp [bz]
-  have hz := volterra_zero bz db hbz hbz0 k hk Ck hk_bound
+  have hz := volterra_zero (t := t) bz db hbz hbz0 k hk Ck hk_bound
   have hc : HasDerivAt
       (fun q : ℝ => ∫ r in (0 : ℝ)..q, b 0 • k r) (b 0 • k t) t :=
-    (hk.smul_const (b 0)).integral_hasStrictDerivAt 0 t |>.hasDerivAt
+    (continuous_const.smul hk).integral_hasStrictDerivAt 0 t |>.hasDerivAt
   have hsplit :
       (fun q : ℝ => ∫ r in (0 : ℝ)..q, b (q - r) • k r) =
         fun q => (∫ r in (0 : ℝ)..q, b 0 • k r) +
           ∫ r in (0 : ℝ)..q, bz (q - r) • k r := by
     funext q
+    have hb0cont : Continuous (fun _ : ℝ => b 0) := continuous_const
+    have hconst :=
+      (hb0cont.smul hk).intervalIntegrable (μ := volume) 0 q
+    have hshift : Continuous (fun r : ℝ => q - r) :=
+      continuous_const.sub continuous_id
+    have hbzint :=
+      ((bz.continuous.comp hshift).smul hk).intervalIntegrable
+        (μ := volume) 0 q
     rw [← intervalIntegral.integral_add
-      ((hk.smul_const (b 0)).intervalIntegrable 0 q)
-      (((bz.continuous.comp (continuous_const.sub continuous_id)).smul hk)
-        |>.intervalIntegrable 0 q)]
+      (f := fun r : ℝ => b 0 • k r)
+      (g := fun r : ℝ => bz (q - r) • k r) hconst hbzint]
     apply intervalIntegral.integral_congr
     intro r hr
     dsimp only [bz]
     simp only [BoundedContinuousFunction.coe_sub,
       BoundedContinuousFunction.const_apply, Pi.sub_apply]
-    rw [add_smul, sub_add_cancel]
+    rw [← add_smul]
+    congr 1
+    ring
   rw [hsplit]
   simpa only [add_assoc] using hc.add hz
 
@@ -744,12 +840,15 @@ def frozenDuh (t : ℝ) (a : BoundedContinuousFunction ℝ ℝ)
     (u : BoundedContinuousFunction V F) (x : V) : F :=
   ∫ r in (0 : ℝ)..t, a (t - r) • heatScaled r u x
 
+omit [Nontrivial V]
+  [CompleteSpace F] in
 @[simp]
 theorem frozenDuh_zero (a : BoundedContinuousFunction ℝ ℝ)
     (u : BoundedContinuousFunction V F) (x : V) :
     frozenDuh 0 a u x = 0 := by
   simp [frozenDuh]
 
+omit [CompleteSpace F] in
 /-- The spatial first jet of the simple-tensor Duhamel evolution is the
 Duhamel evolution of the supplied realized first jet. -/
 theorem frozenDuh_space (t : ℝ) (a : BoundedContinuousFunction ℝ ℝ)
@@ -763,7 +862,7 @@ theorem frozenDuh_space (t : ℝ) (a : BoundedContinuousFunction ℝ ℝ)
   let F₁ : V → ℝ → (V →L[ℝ] F) := fun y r =>
     a (t - r) • heatScaled r du y
   let bound : ℝ → ℝ := fun r => |a (t - r)| * ‖du‖
-  have hs : (Set.univ : Set V) ∈ 𝓝 x := Set.univ_mem
+  have hs : (Set.univ : Set V) ∈ 𝓝 x := Filter.univ_mem
   have hmeas : ∀ᶠ y in 𝓝 x,
       AEStronglyMeasurable (F₀ y)
         (volume.restrict (Set.uIoc (0 : ℝ) t)) := by
@@ -815,16 +914,19 @@ theorem frozenDuh_map {G : Type*}
   rw [← L.intervalIntegral_comp_comm hint]
   apply intervalIntegral.integral_congr
   intro r hr
+  change L (a (t - r) • heatScaled r u x) =
+    a (t - r) • heatScaled r (L.compLeftContinuousBounded V u) x
   rw [map_smul, heatScaled_map]
 
 /-- Tracing the realized Duhamel Hessian is Duhamel evolution of the traced
 spatial Hessian. -/
 theorem frozenDuh_lap (t : ℝ) (a : BoundedContinuousFunction ℝ ℝ)
     (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F)) (x : V) :
-    lapEval (frozenDuh t a d2u x) =
-      frozenDuh t a (coreLap d2u) x := by
+    lapEval (frozenDuh (V := V) (F := V →L[ℝ] V →L[ℝ] F) t a d2u x) =
+      frozenDuh (V := V) (F := F) t a (coreLap d2u) x := by
   simpa only [coreLap] using
-    frozenDuh_map (lapEval (V := V) (F := F)) t a d2u x
+    frozenDuh_map (V := V) (F := V →L[ℝ] V →L[ℝ] F)
+      (G := F) (lapEval (V := V) (F := F)) t a d2u x
 
 /-- Time derivative of the simple-tensor Duhamel evolution.  The coefficient
 Leibniz formula is converted to the heat form by one interval integration by
@@ -840,7 +942,7 @@ theorem frozenDuh_time {t : ℝ} (ht : 0 < t)
     (x : V) :
     HasDerivAt (fun q : ℝ => frozenDuh q a u x)
       (a t • u x + frozenDuh t a (coreLap d2u) x) t := by
-  have hraw := volterra_time a da ha
+  have hraw := volterra_time (t := t) a da ha
     (fun r : ℝ => heatScaled r u x) (heatScaled_cont u x) ‖u‖
       (fun r => heatScaled_norm r u x)
   let g : ℝ → F := fun r => a (t - r) • heatScaled r u x
@@ -861,13 +963,13 @@ theorem frozenDuh_time {t : ℝ} (ht : 0 < t)
       HasDerivAt g (gp r) r := by
     intro r hr
     have harg : HasDerivAt (fun s : ℝ => t - s) (-1) r := by
-      convert (hasDerivAt_const r t).sub (hasDerivAt_id r) using 1 <;> ring
+      convert (hasDerivAt_const r t).sub (hasDerivAt_id r) using 1 ; ring
     have harev : HasDerivAt (fun s : ℝ => a (t - s)) (-da (t - r)) r := by
-      convert (ha (t - r)).comp r harg using 1 <;> ring
+      convert (ha (t - r)).comp r harg using 1 ; ring
     have hheat := heatScaled_time hr.1 u du hu x
     rw [scaledDt_eq_lap hr.1 du d2u hdu x] at hheat
     dsimp only [g, gp]
-    convert harev.smul hheat using 1 <;> simp [sub_eq_add_neg, add_comm]
+    convert harev.smul hheat using 1 ; simp [sub_eq_add_neg]
   have hftc : (∫ r in (0 : ℝ)..t, gp r) = g t - g 0 := by
     have hzero : Tendsto g (𝓝[>] (0 : ℝ)) (𝓝 (g 0)) :=
       hg_cont.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
@@ -894,13 +996,16 @@ theorem frozenDuh_time {t : ℝ} (ht : 0 < t)
         a t • u x +
           ∫ r in (0 : ℝ)..t,
             a (t - r) • heatScaled r (coreLap d2u) x := by
-    abel
+    simp only [sub_self, sub_zero] at hftc
+    have hadd := congrArg
+      (fun y : F => y +
+        (∫ r in (0 : ℝ)..t, da (t - r) • heatScaled r u x) +
+        a t • u x) hftc
+    abel_nf at hadd ⊢
+    exact hadd.symm
   unfold frozenDuh
   convert hraw using 1
-  exact hcoef
-
-/-- Complete isotropic zero-trace Duhamel PDE producer.  The two spatial
-statements realize the Hessian jet used in the PDE derivative. -/
+  exact hcoef.symm
 theorem frozenDuh_pde {t : ℝ} (ht : 0 < t)
     (a da : BoundedContinuousFunction ℝ ℝ)
     (ha : ∀ q : ℝ, HasDerivAt (a : ℝ → ℝ) (da q) q)
@@ -913,9 +1018,11 @@ theorem frozenDuh_pde {t : ℝ} (ht : 0 < t)
     HasFDerivAt (fun y : V => frozenDuh t a u y)
         (frozenDuh t a du x) x ∧
       HasFDerivAt (fun y : V => frozenDuh t a du y)
-        (frozenDuh t a d2u x) x ∧
+        (frozenDuh (V := V) (F := V →L[ℝ] V →L[ℝ] F) t a d2u x) x ∧
       HasDerivAt (fun q : ℝ => frozenDuh q a u x)
-        (lapEval (frozenDuh t a d2u x) + a t • u x) t := by
+        (lapEval
+          (frozenDuh (V := V) (F := V →L[ℝ] V →L[ℝ] F) t a d2u x) +
+            a t • u x) t := by
   refine ⟨frozenDuh_space t a u du hu x,
     frozenDuh_space t a du d2u hdu x, ?_⟩
   rw [frozenDuh_lap, add_comm]

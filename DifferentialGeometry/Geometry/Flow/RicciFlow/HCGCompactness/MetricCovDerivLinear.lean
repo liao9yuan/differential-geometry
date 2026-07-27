@@ -42,12 +42,7 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M]
-
-
-
-
-
+variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 noncomputable def covDerivOfField
     (gRef : SmoothRiemannianMetric I M)
     (A0 :
@@ -274,6 +269,7 @@ theorem covStep_add
   rw [covStep_apply, ContMDiffSection.coe_add, Pi.add_apply,
     covStep_apply, covStep_apply, Tensor0SBundle.totalNabla0SFun_add]
 
+omit [SigmaCompactSpace M] in
 /-- `covStep` is scalar-homogeneous in the tensor field. -/
 theorem covStep_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real) (s : Nat)
@@ -285,6 +281,7 @@ theorem covStep_smul
   rw [covStep_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
     covStep_apply, Tensor0SBundle.totalNabla0SFun_smul]
 
+omit [SigmaCompactSpace M] in
 /-- `covStep` preserves differences in the tensor field (additivity plus
 `(-1)`-homogeneity).  This is the linearity fact behind the connection-difference
 splitting `covStep g₂ (∇^{g₁}S − ∇^{g₂}S)`. -/
@@ -297,6 +294,7 @@ theorem covStep_sub
   rw [sub_eq_add_neg, covStep_add, ← neg_one_smul Real B,
     covStep_smul, neg_one_smul, ← sub_eq_add_neg]
 
+omit [SigmaCompactSpace M] in
 /-- **Boundaryless-free smooth-slot recursion for one `covStep`** (generic rank).
 The `covStep` analogue of `metricCovDeriv_succ_eval_smooth_slots_gen`: evaluating
 `covStep g₂ r A` on `Fin.cons (X x) (V · x)` gives the leading scalar directional
@@ -384,6 +382,7 @@ noncomputable def diffStep
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s + 1) :=
   covStep (I := I) g₁ s S - covStep (I := I) g₂ s S
 
+omit [SigmaCompactSpace M] in
 /-- **Generic-rank evaluation of the connection-difference step** (`diffStep_apply`).
 
 Contracting the single-step connection difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S`
@@ -439,6 +438,7 @@ theorem diffStep_apply
     (leviCivitaConnectionOfMetric (I := I) g₁)
     (leviCivitaConnectionOfMetric (I := I) g₂) X V S x
 
+omit [SigmaCompactSpace M] in
 /-- **Pointwise evaluation of the connection-difference step on arbitrary tangent vectors.**
 
 The pointwise companion of `diffStep_apply`: it drops the smooth-section hypotheses, evaluating
@@ -506,6 +506,7 @@ theorem iterCov_telescoping
       simp only [telescAccum, diffStep]
       abel
 
+omit [SigmaCompactSpace M] in
 /-- **The base-connection Leibniz split of the connection-difference step**
 (brick T-B, committed-currency form).  Differentiating the single-step connection
 difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` once more with the *base*
@@ -538,6 +539,7 @@ theorem diffStep_leibniz
   rw [covStep_sub]
   abel
 
+omit [SigmaCompactSpace M] in
 /-- **Base-connection splitting of one `iterCov` step.**  One further `∇^{g₁}`
 derivative of the `g₁`-iterated tower is the *base* `∇^{g₂}` derivative plus the
 single-step connection difference, both applied to `iterCov g₁ r T N`:
@@ -557,6 +559,7 @@ theorem iterCov_succ_diffStep
   simp only [diffStep]
   abel
 
+omit [SigmaCompactSpace M] in
 /-- **The eval-form base-connection Leibniz for the connection-difference step**
 (brick T-B, the mixed-commutator/`∇₂A` insertion identity).  Evaluating one further
 *base* covariant derivative `∇^{g₂}` of the single-step connection difference

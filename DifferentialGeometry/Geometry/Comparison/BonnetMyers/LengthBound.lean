@@ -201,6 +201,7 @@ theorem ricci_eq_sum_sectional_curvature_of_orthonormal_perp_frame
   rw [hR_self]
   simp only [map_zero, ContinuousLinearMap.zero_apply, zero_add]
 
+omit [SigmaCompactSpace M] in
 /-- The Ricci trace over an orthonormal basis of the perpendicular complement
 holds for every nonzero vector, without normalizing it in the conclusion. -/
 theorem ricci_eq_sum_perp
@@ -304,6 +305,7 @@ theorem ricci_eq_sum_perp
     _ = a ^ 2 * ricciTensor (I := I) g x X₀ X₀ := by rw [htrace]
     _ = ricciTensor (I := I) g x X X := hric.symm
 
+omit [SigmaCompactSpace M] in
 /-- In model dimension one, every smooth Riemannian metric has Ricci curvature
 bounded below by zero. -/
 theorem ricciLower_dim1
@@ -340,6 +342,7 @@ theorem ricciLower_dim1
     rw [hempty] at hsum
     exact hsum.le
 
+omit [SigmaCompactSpace M] in
 /-- Pointwise integrand identity used by `sum_index_form_frame_evaluation`.
 At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
 `V_i := sin(πt/L) • e_i` equals the trig–Ricci expression. Derivation:

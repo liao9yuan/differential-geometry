@@ -24,7 +24,7 @@ namespace HCGCompactness
 open Set Filter Bundle Manifold
 open scoped ContDiff Manifold
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -97,7 +97,6 @@ theorem preapprox_pair
       (Φ.contMDiffOn_toFun.mono hKsrc) hTf (hfwd Gf hGfF)
   have hfwdF : PreApproxIsoDataOn (I := I) K eps p F g h :=
     hfwdΦ.congr (fun x hx ↦ (hevF x (hKK' hx)).symm)
-
   have himage : (Φ : M → N) '' K' = F '' K' :=
     Set.EqOn.image_eq (fun x hx ↦ hEq (hK'U hx))
   have hFK'c : IsCompact (F '' K') := by

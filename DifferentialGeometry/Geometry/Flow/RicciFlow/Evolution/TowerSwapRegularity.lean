@@ -19,7 +19,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -27,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Given the level-zero curvature and Christoffel time derivatives, every
 local-frame curvature-tower component satisfies the fixed-base time/spatial
 derivative swap on regular times. -/
@@ -148,6 +149,7 @@ theorem frameTowerSwap
   intro k m
   exact (hboth k).2 m
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a strictly positive-time tail, a Ricci-flow solution supplies the
 level-zero time derivatives and every fixed-base curvature-tower swap needed
 by the local-frame heat recursion. -/
@@ -301,6 +303,7 @@ theorem tailTowerData
       christoffelRHS_id (M := M) gInv nablaRic hinvId i j p
   · simpa only [S', D'] using hswap
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- At any regular time of an arbitrary Ricci-flow interval, a smooth local
 frame carries the level-zero curvature derivative, the Christoffel derivative
 and its orthonormal-frame value, and every fixed-base curvature-tower swap.

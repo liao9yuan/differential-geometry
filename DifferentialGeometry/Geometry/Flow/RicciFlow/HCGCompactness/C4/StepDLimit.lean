@@ -72,7 +72,7 @@ def limitPointedCoc
 
 section StepD4a
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
@@ -137,7 +137,7 @@ end StepD4a
 
 section StepD4bc
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
@@ -254,10 +254,10 @@ def limitCGConverges
   let sourceT2 : T2Space (metricSourceOpen (I := I) Φ k) := by
     change T2Space (MetricSourceDomain (I := I) Φ k)
     exact metricSourceDomT2 (I := I) Φ k
-  let targetSigma : SigmaCompactSpace (metricTargetOpen (I := I) Φ k) := by
+  letI targetSigma : SigmaCompactSpace (metricTargetOpen (I := I) Φ k) := by
     change SigmaCompactSpace (MetricTargetDomain (I := I) Φ k)
     exact metricTargetDomSigmaOf (I := I) Φ k (hσtgt k)
-  let targetT2 : T2Space (metricTargetOpen (I := I) Φ k) := by
+  letI targetT2 : T2Space (metricTargetOpen (I := I) Φ k) := by
     change T2Space (MetricTargetDomain (I := I) Φ k)
     exact metricTargetDomT2 (I := I) Φ k
   let sourceMetric : SmoothRiemannianMetric I (MetricSourceDomain (I := I) Φ k) :=
@@ -319,9 +319,8 @@ def limitCGConverges
           dsimp only [targetSeq, targetLim]
           dsimp only [stageSet, stageVal]
           exact @metricDerivNormSupOn_restrictOpen E inferInstance inferInstance
-            inferInstance inferInstance inferInstance H inferInstance I
-            inferInstance
-            (A k) inferInstance inferInstance inferInstance inferInstance inferInstance
+            inferInstance inferInstance H inferInstance I
+            (A k) inferInstance inferInstance inferInstance inferInstance
             (gSeq k) (gLim k) (gLim k) (metricTargetOpen (I := I) Φ k)
             targetSigma targetT2 (F '' metricSourceCompactSet (I := I) Φ k K) p
     _ < ε := hkConv k hkC stageSet hKstage
@@ -385,7 +384,7 @@ theorem exists_first_exit
     exact ⟨htK, htNot⟩
 
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]

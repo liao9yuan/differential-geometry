@@ -21,7 +21,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 namespace NormalBranchHessian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {Q : Type*} [NormedAddCommGroup Q] [NormedSpace Real Q]
 

@@ -66,11 +66,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
-private instance tensor0SModelNormedSpace_local {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
 
-private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
 
@@ -511,6 +511,7 @@ theorem du_norm0S {s : ℕ}
           (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x (nablaT x) W) (T x) := by
           rw [hAderiv, hWsec]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Kato bound for the differential of the squared norm of a covariant tensor. -/
 theorem normSq0S_du_le {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -583,6 +584,7 @@ theorem normSq0S_du_le {s : ℕ}
           normSq0S (I := I) g x (s + 1) (nablaT x) := by
           rw [normSq0S_curry_sum (I := I) g x s basis hinv]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- **The pointwise Hessian product rule of a covariant-tensor norm**, in basis
 component form — the genuine geometric input of the general Bochner Laplacian
 split, here **derived** (not assumed) from metric compatibility.  This is the
@@ -696,31 +698,6 @@ theorem hess_norm0S {s : ℕ}
     (partialEval0SField (I := I) nablaT (Xb i) x)
     (partialEval0SField (I := I) nablaT (Xb j) x)]
   rw [partialEval0SField_apply, partialEval0SField_apply, hfields i, hfields j]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem tensorNormBochnerSplit_mc {s : ℕ}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

@@ -50,14 +50,14 @@ theorem crossChartJointK
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
               (chartPullback I α v))
             (chartTargetEuclid (I := I) (M := M) γ) ∧
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
               (chartPullback I α v))
             (chartTargetEuclid (I := I) (M := M) γ) ≤
           ENNReal.ofReal K *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k p v
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -605,14 +605,14 @@ theorem cross_chart_bound_strict_strong_memWkp_k
             (chartTargetEuclid (I := I) (M := M) α) →
         tsupport v ⊆
           (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
             (chartPullback I α v))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p v
             (chartTargetEuclid (I := I) (M := M) α) := by
   obtain ⟨K, hK, hjoint⟩ := crossChartJointK (I := I) (M := M)

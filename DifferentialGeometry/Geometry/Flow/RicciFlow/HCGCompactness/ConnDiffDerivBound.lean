@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovDerivConnDiffQuadraticBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv
@@ -21,21 +21,18 @@ It reduces the output-vector `g₂`-norm to the **fibre** norm of the bundled or
 ```
 There is **no `δ < 1` gate**: the reduction uses only the flat/eval bridge
 `connDiffSection_covGrad_eq_covDerivConnDiff` and the fibre Cauchy–Schwarz
-`abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt` (both public).  The δ<1 gate in the parent theorem is
+`abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt` (both public).  The δ<1 gate in the parent theorem is
 consumed exclusively by the fibre bound `‖covGrad connDiffSection‖ ≤ CA` (P2), which is the single
 remaining B2 frontier (the a=1 analogue of `lcDiff_norm_le`).
 
 NOTE (home debt): this brick is pure fibre-currency Curvature-layer content and canonically belongs
-next to `abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt` in
+next to `abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt` in
 `Geometry/Curvature/CovDerivConnDiffFibreExtraction.lean`; it is placed in this HCG leaf only because the
 leaf is the ratified B2 home and its editable set.  Promote upstream once B2 assembles.
 -/
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -53,7 +50,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -62,7 +59,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
 /-- The flat/eval bridge specialised to the connection-difference section: the model-basis evaluation of
 `covGrad g₂ 1 2 (connDiffSection g₁ g₂)` on the `g₂`-flat of `A = covDerivConnDiff g₂ g₁ …` reads off the
@@ -123,7 +120,11 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner
   rw [hA_def]
   exact hbridge
 
-set_option linter.unusedSectionVars false in
+set_option synthInstance.maxHeartbeats 1600000 in
+-- Elaborating the tensor-bundle instance chain requires the larger synthesis budget.
+set_option maxHeartbeats 1600000 in
+-- Cancelling the fibre-norm estimate requires the larger normalization budget.
+omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **B2 P1 — the ungated fibre→vector reduction.**
@@ -169,7 +170,8 @@ theorem covDerivConnDiff_fibreNorm_le
   have hNA_nn : 0 ≤ NA := Real.sqrt_nonneg _
   have hbridge := covGrad_connDiffSection_flat_eval_eq_inner (I := I) (M := M) g₂ g₁ x v w u
   rw [← hA_def, ← hW_def] at hbridge
-  have hprim := abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₂ x W A v u w
+  have hprim := abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt
+    (I := I) (M := M) g₂ x W A v u w
   rw [hbridge] at hprim
   rw [abs_of_nonneg hAA_nn] at hprim
   have hAA_sq : g₂.inner x A A = NA ^ 2 := by rw [hNA_def, Real.sq_sqrt hAA_nn]
@@ -209,7 +211,8 @@ against the output vector itself, bound each right-hand term by the multilinear 
 `abs_apply_le_sqrt_normSq0S` in the `∇₂²g₁`/`∇₂g₁` currency, re-expand the connection difference by the
 a=0 atom `connDiffVec_norm_le` + `lcDiff_norm_le`, then convert `g₁ ↔ g₂` by comparability. -/
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Currency bridge: the bundled `∇₂g₁` field `totalNabla0S 2 (LC g₂) (metricTensorField g₁)` used by
 `connDiff_koszul_deriv` is the HCG metric covariant derivative `metricCovDeriv g₁ g₂ 1`. -/
 private theorem field_eq_mcd1
@@ -230,7 +233,8 @@ private theorem field_eq_mcd1
   exact (metricCovDerivStep_apply (I := I) g₂ 0
     (Tensor0SBundle.metricTensorField (I := I) g₁) x).symm
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Currency bridge (order 2): the directional derivative `nabla0SFun 3 (LC g₂) W (∇₂g₁-field)` of the
 bundled first metric covariant derivative equals the second metric covariant derivative
 `metricCovDeriv g₁ g₂ 2` with the derivative direction `W x` in the leading slot. -/
@@ -255,7 +259,8 @@ private theorem nabla3_eq_mcd2
     3 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
     (metricCovDeriv (I := I) g₁ g₂ 1) x slots).symm
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 /-- General-order `(0,s)` norm comparison under `MetricUniformEquivalentOn K g₂ g₁ Λ`:
 `√normSq0S(g₁, s, A) ≤ √(Λ^s) · √normSq0S(g₂, s, A)`.  General-`s` sibling of
 `sqrt_normSq0S_three_le_of_metricUniformEquivalentOn` (used at `s = 3` and `s = 4`). -/

@@ -310,8 +310,8 @@ theorem bilinCarl (B : G →L[ℝ] H →L[ℝ] F)
             ((C₁ * ENNReal.ofReal (R ^ Module.finrank ℝ V)) +
               C₂ * ENNReal.ofReal (R ^ Module.finrank ℝ V)) := by
         gcongr
-        exact h₁.bound x R hR hRT
-        exact h₂.bound x R hR hRT
+        · exact h₁.bound x R hR hRT
+        · exact h₂.bound x R hR hRT
       _ = (ENNReal.ofReal ‖B‖ * (C₁ + C₂)) *
             ENNReal.ofReal (R ^ Module.finrank ℝ V) := by
         ring
@@ -373,8 +373,8 @@ theorem bilinCarl_bound (B : ℝ × V → G →L[ℝ] H →L[ℝ] F)
           ((C₁ * ENNReal.ofReal (R ^ Module.finrank ℝ V)) +
             C₂ * ENNReal.ofReal (R ^ Module.finrank ℝ V)) := by
       gcongr
-      exact h₁.bound x R hR hRT
-      exact h₂.bound x R hR hRT
+      · exact h₁.bound x R hR hRT
+      · exact h₂.bound x R hR hRT
     _ = (ENNReal.ofReal K * (C₁ + C₂)) *
           ENNReal.ofReal (R ^ Module.finrank ℝ V) := by
       ring

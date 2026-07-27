@@ -26,7 +26,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -281,10 +281,10 @@ theorem normalBrAccept
     dsimp only [NormalRadiusProfile.phaseRadius]
     nlinarith [h.floor_pos R]
   have hqExp : (q : Real) <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
     (hqPhase.trans_le hphaseFloor).trans_le (h.floor_le_exp hx)
   have hρExp : aρ * hd.mu R <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
     hρq.trans hqExp
   have hclosed : ∀ w ∈ Metric.closedBall (0 : E × E) (aρ * hd.mu R),
       normalPair (I := I) (X.obj k) x w ∈

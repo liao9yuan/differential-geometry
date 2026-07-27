@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.NormalFrame
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Orthonormally framed normal coordinates
@@ -47,6 +46,8 @@ noncomputable def framedExpMap (g : SmoothRiemannianMetric I M) (p : M) :
     E -> M :=
   fun z => expMap (I := I) g p (normalFrame (I := I) g p z)
 
+omit [CompleteSpace E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
+    [T2Space (TangentBundle I M)] in
 @[simp] theorem framedExpMap_apply (g : SmoothRiemannianMetric I M) (p : M)
     (z : E) :
     framedExpMap (I := I) g p z =
@@ -98,22 +99,27 @@ noncomputable def framedChartAt (g : SmoothRiemannianMetric I M) (p : M) :
     PartialDiffeomorph I (modelWithCornersSelf Real E) M E 1 :=
   (framedExpDiffeo (I := I) g p).symm
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem framedExp_source (g : SmoothRiemannianMetric I M) (p : M) :
     (framedExpDiffeo (I := I) g p).source =
       normalFrame (I := I) g p ⁻¹' (expMapDiffeo (I := I) g p).source := by
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem framedExp_target (g : SmoothRiemannianMetric I M) (p : M) :
     (framedExpDiffeo (I := I) g p).target =
       (expMapDiffeo (I := I) g p).target := by
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem framedExp_apply (g : SmoothRiemannianMetric I M) (p : M)
     (z : E) :
     framedExpDiffeo (I := I) g p z =
       expMapDiffeo (I := I) g p (normalFrame (I := I) g p z) := by
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
+    [T2Space (TangentBundle I M)] in
 /-- A Riemannian radial ball in `T_p M` becomes the Euclidean model ball with
 the same radius after applying the normal frame. -/
 theorem framed_norm_lt_iff (g : SmoothRiemannianMetric I M) (p : M)
@@ -124,24 +130,28 @@ theorem framed_norm_lt_iff (g : SmoothRiemannianMetric I M) (p : M)
       z ∈ Metric.ball (0 : E) r := by
   rw [normalFrame_sqrt, Metric.mem_ball, dist_zero_right]
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem framedChart_apply (g : SmoothRiemannianMetric I M) (p : M)
     (q : M) :
     framedChartAt (I := I) g p q =
       (normalFrame (I := I) g p).symm (normalChartAt (I := I) g p q) := by
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The origin belongs to the source of the framed exponential chart. -/
 theorem zero_mem_framedExp_source (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (framedExpDiffeo (I := I) g p).source := by
   rw [framedExp_source]
   simpa using zero_mem_expMapDiffeo_source (I := I) g p
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The framed exponential sends the model origin to its center. -/
 @[simp] theorem framedExp_zero (g : SmoothRiemannianMetric I M) (p : M) :
     framedExpDiffeo (I := I) g p (0 : E) = p := by
   rw [framedExp_apply, map_zero]
   exact expMapDiffeo_zero (I := I) g p
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The framed normal chart sends its center to the model origin. -/
 @[simp] theorem framedChart_centre (g : SmoothRiemannianMetric I M) (p : M) :
     framedChartAt (I := I) g p p = (0 : E) := by
@@ -155,12 +165,14 @@ noncomputable def framedTransition (g : SmoothRiemannianMetric I M) (p q : M) :
     E -> E :=
   fun z => framedChartAt (I := I) g q (framedExpDiffeo (I := I) g p z)
 
+omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem framedTrans_apply (g : SmoothRiemannianMetric I M) (p q : M)
     (z : E) :
     framedTransition (I := I) g p q z =
       framedChartAt (I := I) g q (framedExpDiffeo (I := I) g p z) := by
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 /-- On its selected source, the framed exponential agrees with the geometric
 exponential launched with velocity `normalFrame g p z`. -/
 theorem framedExp_eq_expMap (g : SmoothRiemannianMetric I M) (p : M)
@@ -171,6 +183,7 @@ theorem framedExp_eq_expMap (g : SmoothRiemannianMetric I M) (p : M)
   exact expMapDiffeo_apply_eq (I := I) g p (by
     simpa only [framedExp_source] using hz)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The differential of the framed exponential is the differential of the
 raw tangent-fiber exponential followed by the fixed-center normal frame. -/
 theorem mfderiv_framedExp (g : SmoothRiemannianMetric I M) (p : M)
@@ -211,6 +224,7 @@ noncomputable def framedMetric (g : SmoothRiemannianMetric I M) (p : M) :
     (ContinuousLinearMap.precomp Real D).comp
       ((g.inner (framedExpDiffeo (I := I) g p z)).comp D)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Evaluation of the metric pulled back through the framed exponential. -/
 theorem framedMetric_apply (g : SmoothRiemannianMetric I M) (p : M)
     (z v w : E) :
@@ -224,6 +238,7 @@ theorem framedMetric_apply (g : SmoothRiemannianMetric I M) (p : M)
     ContinuousLinearMap.precomp_apply]
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 /-- At the center of an orthonormally framed normal chart, the pulled-back
 metric is the fixed model inner product. -/
 @[simp] theorem framedMetric_zero (g : SmoothRiemannianMetric I M) (p : M) :

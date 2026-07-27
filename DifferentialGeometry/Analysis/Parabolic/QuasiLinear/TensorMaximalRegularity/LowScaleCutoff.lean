@@ -1,5 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.BallRetraction
-
+import DifferentialGeometry.Analysis.Calculus.BallRetraction
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
@@ -9,7 +8,7 @@ set_option maxSynthPendingDepth 3
 
 This is the lower-topology sibling of `ballRetraction`.  Fix a continuous linear
 inclusion `ι : X →L[ℝ] H` of a top-scale normed space `X` (think `H^{a+2}`) into a
-lower-scale inner-product space `H` (think `H^{a+1}`).  The cutoff
+lower-scale normed space `H` (think `H^{a+1}`).  The cutoff
 
 `lowScaleCutoff ι ρ U = (min 1 (ρ / ‖ι U‖)) • U`
 
@@ -34,7 +33,9 @@ We record the four properties the tame Nemytskii lane consumes:
   `‖ι (lowScaleCutoff ι ρ U)‖ ≤ ρ`;
 * `lowScaleCutoff_eq_self` — (ii) it is the identity on that ball
   (`‖ι U‖ ≤ ρ ⟹ lowScaleCutoff ι ρ U = U`), using injectivity of `ι`;
-* `lowScaleCutoff_incl_lip` — (iii) it is `1`-Lipschitz in the `H^{a+1}` topology;
+* `lowScaleCutoff_incl_lip` — (iii) it is `2`-Lipschitz in an arbitrary
+  normed lower-scale space;
+* `lowScaleCutoff_incl_lip_one` — the sharp Hilbert-space strengthening;
 * `lowScaleCutoff_sub_le` — (iv) the mixed `H^{a+2}/H^{a+1}` difference estimate
   `‖lowScaleCutoff ι ρ U − lowScaleCutoff ι ρ V‖ ≤ ‖U − V‖ + (1/ρ)·max ‖U‖ ‖V‖·‖ι U − ι V‖`,
   whose cross term is exactly the tame `max ‖U‖_{a+2}·‖U − V‖_{a+1}` contribution and
@@ -50,8 +51,10 @@ instantiation.
 
 open scoped InnerProductSpace
 
+section Normed
+
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
+variable {H : Type*} [NormedAddCommGroup H] [NormedSpace ℝ H]
 variable (ι : X →L[ℝ] H)
 
 /-- The lower-topology radial cutoff: rescale the top-scale element `U` by the
@@ -93,22 +96,47 @@ private theorem lowScaleCutoff_eq_smul {ρ : ℝ} {U : X} (h : ρ < ‖ι U‖) 
     · exact (div_le_one h0).2 (le_of_lt h)
   rw [lowScaleCutoff, min_eq_right hle]
 
+/-- In arbitrary normed lower-scale spaces, the cutoff is `2`-Lipschitz
+after applying the inclusion. -/
+theorem lowScaleCutoff_incl_lip {ρ : ℝ} (hρ : 0 ≤ ρ) (U V : X) :
+    ‖ι (lowScaleCutoff ι ρ U) - ι (lowScaleCutoff ι ρ V)‖ ≤
+      2 * ‖ι U - ι V‖ := by
+  rw [incl_lowScaleCutoff, incl_lowScaleCutoff]
+  simpa [dist_eq_norm] using
+    (lipschitzWith_ballRetraction (X := H) hρ).dist_le_mul (ι U) (ι V)
+
+end Normed
+
+section Hilbert
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
+variable (ι : X →L[ℝ] H)
+
 /-- (iii) The lower-topology cutoff is `1`-Lipschitz measured in the `H^{a+1}`
 topology: `‖ι (cutoff U) − ι (cutoff V)‖ ≤ ‖ι U − ι V‖`.  This is the radial
 retraction's nonexpansiveness transferred through `ι`. -/
-theorem lowScaleCutoff_incl_lip {ρ : ℝ} (hρ : 0 ≤ ρ) (U V : X) :
+theorem lowScaleCutoff_incl_lip_one {ρ : ℝ} (hρ : 0 ≤ ρ) (U V : X) :
     ‖ι (lowScaleCutoff ι ρ U) - ι (lowScaleCutoff ι ρ V)‖ ≤ ‖ι U - ι V‖ := by
   rw [incl_lowScaleCutoff, incl_lowScaleCutoff]
   simpa [dist_eq_norm, NNReal.coe_one, one_mul] using
-    (lipschitzWith_ballRetraction (X := H) hρ).dist_le_mul (ι U) (ι V)
+    (lipschitzWith_one_ballRetraction (X := H) hρ).dist_le_mul (ι U) (ι V)
+
+end Hilbert
+
+section NormedDifference
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable {H : Type*} [NormedAddCommGroup H] [NormedSpace ℝ H]
+variable (ι : X →L[ℝ] H)
 
 /-- (iv) Mixed `H^{a+2}/H^{a+1}` difference estimate for the lower-topology cutoff.
 The endpoint top-scale norms `‖U‖`, `‖V‖` appear only LINEARLY as tame factors, and
 the driving difference is the lower-scale `‖ι U − ι V‖`: there is no pointwise
 `H^{a+2}`-ball hypothesis.  The cross term is exactly the tame
 `max ‖U‖_{a+2}·‖U − V‖_{a+1}` contribution required by the R1τ route. -/
-theorem lowScaleCutoff_sub_le (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 < ρ)
-    (U V : X) :
+theorem lowScaleCutoff_sub_le
+    (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 < ρ) (U V : X) :
     ‖lowScaleCutoff ι ρ U - lowScaleCutoff ι ρ V‖ ≤
       ‖U - V‖ + (1 / ρ) * max ‖U‖ ‖V‖ * ‖ι U - ι V‖ := by
   have hRinv : 0 ≤ 1 / ρ := by positivity
@@ -120,11 +148,9 @@ theorem lowScaleCutoff_sub_le (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 
     mul_nonneg (mul_nonneg hRinv hc0) hD0
   rcases le_or_gt ‖ι U‖ ρ with hu | hu
   · rcases le_or_gt ‖ι V‖ ρ with hv | hv
-    · -- both inside: cutoff is the identity on both, difference is `U - V`.
-      rw [lowScaleCutoff_eq_self ι hι hu, lowScaleCutoff_eq_self ι hι hv]
+    · rw [lowScaleCutoff_eq_self ι hι hu, lowScaleCutoff_eq_self ι hι hv]
       linarith [hcorr0]
-    · -- `U` inside, `V` outside.
-      rw [lowScaleCutoff_eq_self ι hι hu, lowScaleCutoff_eq_smul ι hv]
+    · rw [lowScaleCutoff_eq_self ι hι hu, lowScaleCutoff_eq_smul ι hv]
       have hv0 : 0 < ‖ι V‖ := lt_trans hρ hv
       have hkey : ‖U - (ρ / ‖ι V‖) • V‖ ≤ ‖U - V‖ + (1 - ρ / ‖ι V‖) * ‖V‖ := by
         have hexp : U - (ρ / ‖ι V‖) • V = (U - V) + (1 - ρ / ‖ι V‖) • V := by
@@ -159,8 +185,7 @@ theorem lowScaleCutoff_sub_le (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 
               · exact mul_nonneg hRinv hc0
       linarith
   · rcases le_or_gt ‖ι V‖ ρ with hv | hv
-    · -- `U` outside, `V` inside.
-      rw [lowScaleCutoff_eq_smul ι hu, lowScaleCutoff_eq_self ι hι hv]
+    · rw [lowScaleCutoff_eq_smul ι hu, lowScaleCutoff_eq_self ι hι hv]
       have hu0 : 0 < ‖ι U‖ := lt_trans hρ hu
       have hkey : ‖(ρ / ‖ι U‖) • U - V‖ ≤ ‖U - V‖ + (1 - ρ / ‖ι U‖) * ‖U‖ := by
         have hexp : (ρ / ‖ι U‖) • U - V = (U - V) - (1 - ρ / ‖ι U‖) • U := by
@@ -193,8 +218,7 @@ theorem lowScaleCutoff_sub_le (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 
               · linarith
               · exact mul_nonneg hRinv hc0
       linarith
-    · -- both outside: pure two-scalar radial difference.
-      rw [lowScaleCutoff_eq_smul ι hu, lowScaleCutoff_eq_smul ι hv]
+    · rw [lowScaleCutoff_eq_smul ι hu, lowScaleCutoff_eq_smul ι hv]
       have hu0 : 0 < ‖ι U‖ := lt_trans hρ hu
       have hv0 : 0 < ‖ι V‖ := lt_trans hρ hv
       have hexp : (ρ / ‖ι U‖) • U - (ρ / ‖ι V‖) • V =
@@ -239,4 +263,4 @@ theorem lowScaleCutoff_sub_le (hι : Function.Injective ι) {ρ : ℝ} (hρ : 0 
           _ = (1 / ρ) * max ‖U‖ ‖V‖ * ‖ι U - ι V‖ := by ring
       linarith
 
--- AUDIT (strip after green)
+end NormedDifference

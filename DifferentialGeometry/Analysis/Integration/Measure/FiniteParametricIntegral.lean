@@ -24,6 +24,7 @@ supplies all measurability, integrability, and domination hypotheses. -/
 theorem hasFDerivAt_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]
+    [T2Space X] [SecondCountableTopology X]
     [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
     (μ : Measure X) [IsFiniteMeasure μ]
@@ -56,7 +57,7 @@ theorem hasFDerivAt_integral_compact
       ‖F' v x‖ ≤ C := by
     filter_upwards [] with x
     intro v hv
-    exact hC (v, x) ⟨hv, Set.mem_univ x⟩
+    simpa using hC (v, x) ⟨hv, Set.mem_univ x⟩
   have hCint : Integrable (fun _ : X => C) μ := integrable_const C
   have hdiff' : ∀ᵐ x ∂μ, ∀ v ∈ Metric.closedBall u 1,
       HasFDerivAt (fun w : V => F w x) (F' v x) v := by
@@ -71,6 +72,7 @@ pointwise derivatives under the same joint-continuity assumptions. -/
 theorem fderiv_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]
+    [T2Space X] [SecondCountableTopology X]
     [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
     (μ : Measure X) [IsFiniteMeasure μ]
@@ -90,6 +92,7 @@ baked into the conclusion. -/
 theorem continuous_fderiv_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]
+    [T2Space X] [SecondCountableTopology X]
     [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
     (μ : Measure X) [IsFiniteMeasure μ]

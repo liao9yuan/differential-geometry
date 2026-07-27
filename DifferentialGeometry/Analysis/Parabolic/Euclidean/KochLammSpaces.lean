@@ -32,13 +32,10 @@ namespace Analysis
 namespace Parabolic
 namespace Euclidean
 
-variable {V : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
+section Scaling
 
-/-- Product Lebesgue measure on Euclidean space-time. -/
-def klVolume : Measure (ℝ × V) :=
-  (volume : Measure ℝ).prod (volume : Measure V)
+variable {V : Type*}
+  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
 
 /-- The forward parabolic cylinder `(0,R²] × B(x,R)`. -/
 def klCyl (x : V) (R : ℝ) : Set (ℝ × V) :=
@@ -49,33 +46,29 @@ def klLateCyl (x : V) (R : ℝ) : Set (ℝ × V) :=
   Set.Ioc (R ^ 2 / 2) (R ^ 2) ×ˢ Metric.ball x R
 
 /-- The dimension, viewed as a real scaling exponent. -/
-def klDim (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klDim (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ :=
   Module.finrank ℝ V
 
 /-- Koch--Lamm's supercritical exponent `p = n + 4`. -/
-def klP (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klP (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ≥0∞ :=
   ((Module.finrank ℝ V + 4 : ℕ) : ℝ≥0∞)
 
 /-- The ordinary-source late exponent `q = (n+4)/2`. -/
-def klQ (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+def klQ (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] : ℝ≥0∞ :=
   klP V / 2
 
-omit [MeasurableSpace V] [BorelSpace V] in
 theorem klP_ne_zero : klP V ≠ 0 := by
   simp [klP]
 
-omit [MeasurableSpace V] [BorelSpace V] in
 theorem klP_ne_top : klP V ≠ ∞ := by
   simp [klP]
 
-omit [MeasurableSpace V] [BorelSpace V] in
 theorem klQ_ne_zero : klQ V ≠ 0 := by
   simp [klQ, klP]
 
-omit [MeasurableSpace V] [BorelSpace V] in
 theorem klQ_ne_top : klQ V ≠ ∞ := by
   unfold klQ
   exact ENNReal.div_ne_top (klP_ne_top (V := V)) (by norm_num)
@@ -113,6 +106,18 @@ def klLqScaleR (R : ℝ) : ℝ :=
 /-- `ENNReal` form of the ordinary-source late scale. -/
 def klLqScale (R : ℝ) : ℝ≥0∞ :=
   ENNReal.ofReal (klLqScaleR (V := V) R)
+
+end Scaling
+
+section MeasureSpaces
+
+variable {V : Type*}
+  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [MeasurableSpace V] [BorelSpace V]
+
+/-- Product Lebesgue measure on Euclidean space-time. -/
+def klVolume : Measure (ℝ × V) :=
+  (volume : Measure ℝ).prod (volume : Measure V)
 
 variable {F G : Type*}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -173,6 +178,8 @@ structure KLSplit (T : ℝ) (A₁ A_q A₂ Aₚ : ℝ≥0)
     (f₀ : ℝ × V → F) (f₁ : ℝ × V → G) : Prop where
   source : KLSource0 T A₁ A_q f₀
   flux : KLSource1 T A₂ Aₚ f₁
+
+end MeasureSpaces
 
 end Euclidean
 end Parabolic

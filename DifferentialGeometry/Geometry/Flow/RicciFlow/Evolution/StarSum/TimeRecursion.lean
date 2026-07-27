@@ -32,7 +32,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -46,7 +46,7 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRicReal_frame
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
@@ -175,7 +175,6 @@ theorem nablaRicReal_frame
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem ricciCovDeriv_trace_nablaRm
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) {x : M} {u : Set M}
@@ -271,7 +270,7 @@ def lfChr
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 private theorem traceOrthoEq
     [Module.Finite ℝ E]
@@ -309,10 +308,11 @@ def gammaStarField
     ∑ q : Fin (4 + k),
       starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q)
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Exact constructor cost of the canonical Christoffel-time correction. -/
 theorem gammaStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    {Idx : Type*} [Fintype Idx] :
     StarSum2Cost (I := I) Idx S t (k + 1)
       (gammaStarField (I := I) S t k)
       (rmGammaCost (Fintype.card Idx) k) := by
@@ -353,6 +353,7 @@ theorem gammaStarField_cost
   push_cast
   ring
 
+omit [FiniteDimensional Real E] in
 /-- **The gamma correction is a `StarSum2` element, UNIFORMLY on `u`.**  ONE global witness `Tgamma`,
 with the component equality holding for every `y ∈ u` — the shape the `resStarLFU` succ assembly
 needs (`spatialCommStarSum` is already `∀x`; a fixed-`x` `∃` would give a per-`y` witness that could
@@ -519,7 +520,7 @@ private theorem gammaStarU
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtGerm {Idx : Type*} {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -548,7 +549,7 @@ def resStarNext
 theorem resStarNext_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx]
     (Tk : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (4 + k))
     (hTk : StarSum2Cost (I := I) Idx S (t : Real) k Tk
@@ -556,6 +557,7 @@ theorem resStarNext_cost
     StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
       (resStarNext (I := I) S t k Tk)
       (rmResidualCost (Fintype.card Idx) (k + 1)) := by
+  classical
   have hcomm := commStarField_cost (I := I) S hS t k (Idx := Idx)
   have hgamma := gammaStarField_cost (I := I) S (t : Real) k (Idx := Idx)
   unfold resStarNext
@@ -564,6 +566,7 @@ theorem resStarNext_cost
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The fixed canonical successor has the exact constructor cost and realizes
 the level-`k+1` component heat equation on every supplied orthonormal frame
 patch. -/
@@ -933,7 +936,6 @@ private theorem resCost_eq (k : ℕ) :
 
 open DifferentialGeometry.Dim3Reaction in
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 theorem resStarLFU
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)

@@ -339,13 +339,14 @@ open scoped Manifold
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- On a framed normal-chart overlap, the intrinsic quadratic bump is the
-scalar bump applied to the origin metric coefficient and the framed normal
+omit [NeZero (Module.finrank ℝ E)] in
+/-- On a normal-chart overlap, the intrinsic quadratic bump is the
+scalar bump applied to the origin metric coefficient and the normal
 transition vector. -/
 theorem quadNormal_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
@@ -356,14 +357,14 @@ theorem quadNormal_readout
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space Y.M := Y.t2
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      framedExpDiffeo (I := I) Y.metric beta z ∈
-        (framedChartAt (I := I) Y.metric gamma).source) :
+      expMapDiffeo (I := I) Y.metric beta z ∈
+        (normalChartAt (I := I) Y.metric gamma).source) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    quadNormal Y.metric gamma f (framedExpDiffeo (I := I) Y.metric beta z) =
+    quadNormal Y.metric gamma f (expMapDiffeo (I := I) Y.metric beta z) =
       f (normalCoordMetric (I := I) Y gamma 0
         (normalTransition (I := I) Y beta gamma z)
         (normalTransition (I := I) Y beta gamma z)) := by
@@ -372,25 +373,9 @@ theorem quadNormal_readout
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  have hsrcRaw : framedExpDiffeo (I := I) Y.metric beta z ∈
-      (normalChartAt (I := I) Y.metric gamma).source := by
-    change framedExpDiffeo (I := I) Y.metric beta z ∈
-      (framedExpDiffeo (I := I) Y.metric gamma).target at hsrc
-    rw [framedExp_target] at hsrc
-    exact hsrc
-  rw [quadNormal_of_mem Y.metric gamma f hsrcRaw,
+  rw [quadNormal_of_mem Y.metric gamma f hsrc,
     normalMetric_zero (I := I) Y gamma]
-  congr 1
-  simp only [normalTransition, framedTransition, framedChart_apply]
-  change Y.metric.inner gamma _ _ = Inner.inner Real _ _
-  simpa only [ContinuousLinearEquiv.apply_symm_apply] using
-    normalFrame_inner (I := I) Y.metric gamma
-    ((normalFrame (I := I) Y.metric gamma).symm
-      (normalChartAt (I := I) Y.metric gamma
-        (framedExpDiffeo (I := I) Y.metric beta z)))
-    ((normalFrame (I := I) Y.metric gamma).symm
-      (normalChartAt (I := I) Y.metric gamma
-        (framedExpDiffeo (I := I) Y.metric beta z)))
+  rfl
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -403,21 +388,21 @@ theorem stepCAtom_readout
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space Y.M := Y.t2
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      framedExpDiffeo (I := I) Y.metric beta z ∈
-        (framedChartAt (I := I) Y.metric gamma).source) :
+      expMapDiffeo (I := I) Y.metric beta z ∈
+        (normalChartAt (I := I) Y.metric gamma).source) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space Y.M := Y.t2
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    stepCAtom Y gamma lam hlam (framedExpDiffeo (I := I) Y.metric beta z) =
+    stepCAtom Y gamma lam hlam (expMapDiffeo (I := I) Y.metric beta z) =
       stepCBump lam hlam
         (normalCoordMetric (I := I) Y gamma 0
           (normalTransition (I := I) Y beta gamma z)
           (normalTransition (I := I) Y beta gamma z)) := by
   exact quadNormal_readout (I := I) Y beta gamma (stepCBump lam hlam) hsrc
 
-/-- Pull one Step-C atom back by the framed exponential-side chart at `beta`. -/
+/-- Pull one Step-C atom back by the exponential-side chart at `beta`. -/
 noncomputable def stepCAtomChart
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
     (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
@@ -426,7 +411,7 @@ noncomputable def stepCAtomChart
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  stepCAtom Y gamma lam hlam (framedExpDiffeo (I := I) Y.metric beta z)
+  stepCAtom Y gamma lam hlam (expMapDiffeo (I := I) Y.metric beta z)
 
 
 
@@ -528,7 +513,7 @@ theorem seqCenter_dead
     | none => rfl
     | some c => simp [hc, hgamma] at hk
 
-/-- Pull one ordered-net atom back by the framed exponential-side chart at
+/-- Pull one ordered-net atom back by the exponential-side chart at
 `beta`. The wrapper installs the bundled manifold instances hidden in the
 sequence. -/
 noncomputable def seqAtomChart
@@ -545,7 +530,7 @@ noncomputable def seqAtomChart
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   seqAtom hd hD P L pb r k gamma
-    (framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -568,7 +553,7 @@ omit [NeZero (Module.finrank ℝ E)] in
       rfl
   | some c => congr
 
-/-- Pulling a globally smooth ordered-net atom back by a framed exponential-side
+/-- Pulling a globally smooth ordered-net atom back by an exponential-side
 chart is smooth on every set contained in its intrinsic source-radius ball. -/
 theorem seqAtomChart_smooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -585,7 +570,7 @@ theorem seqAtomChart_smooth
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       U ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj (L.φ k)).metric (beta k))) :
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (beta k))) :
     ContDiffOn Real (∞ : WithTop ℕ∞)
       (seqAtomChart (I := I) hd hD P L pb r beta gamma k) U := by
   letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
@@ -597,7 +582,7 @@ theorem seqAtomChart_smooth
   rw [← contMDiffOn_iff_contDiffOn]
   simpa only [seqAtomChart] using
     (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
-      ((framedExp_smoothOn (I := I) (X.obj (L.φ k)) (beta k)).mono hUx)
+      ((expMapDiffeo_contMDiffOn_expBall (I := I) (X.obj (L.φ k)) (beta k)).mono hUx)
 
 
 
@@ -627,7 +612,7 @@ theorem seqAtom_live_conv
     (X.obj (L.φ k)).t2TangentBundle
   simpa only [seqAtomChart, stepCAtomChart] using congrFun
     (seqAtom_some hd hD P L pb r k gamma hk)
-    (framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
 
 
 
@@ -667,7 +652,7 @@ theorem atom_disjoint_conv
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
-        (fun z => framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
         U (L.hatBall hd D P pb r k alpha))
     (hdisjoint : ∀ᶠ k in Filter.atTop,
       ¬ BInter hd D P L.lamInf (alpha : Nat) (gamma : Nat) (L.φ k)) :
@@ -744,8 +729,8 @@ theorem stepCAtom_conv {ι : Type*} [Fintype ι]
       letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
       letI : T2Space (X.obj k).M := (X.obj k).t2
       letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-      framedExpDiffeo (I := I) (X.obj k).metric (beta k) z ∈
-        (framedChartAt (I := I) (X.obj k).metric (center i k)).source)
+      expMapDiffeo (I := I) (X.obj k).metric (beta k) z ∈
+        (normalChartAt (I := I) (X.obj k).metric (center i k)).source)
     (i : ι) :
     MapCInfConvOnCompacts U
       (fun k => stepCAtomChart (I := I) (X.obj k) (beta k) (center i k)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Metric.FiberExpansion
 import DifferentialGeometry.Analysis.ODE.SecondOrderLinearExistence
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Frame coordinates of a Jacobi field: derivative identities
@@ -38,13 +37,16 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- **Coordinate against a parallel section: first derivative.**  If `Fi` is
 parallel at `t` and both chart representations differentiate, then
 `s ↦ g.inner (γ s) (Fi s) (Y s)` has derivative
@@ -63,6 +65,8 @@ theorem parInner_deriv
   rw [hFpar] at h
   simpa using h
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- **Coordinate against a parallel section: second derivative through the
 Jacobi equation.**  If additionally the chart representation of `D_t Y`
 differentiates and `Y` is Jacobi at `t`, then
@@ -92,9 +96,12 @@ theorem parInner_d2
   rw [jacobi_d2_eq (I := I) g γ Y hY] at h
   simpa using h
 
+set_option synthInstance.maxHeartbeats 400000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option synthInstance.maxHeartbeats 400000 in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- **Curvature term in frame coordinates.**  Expanding `Y t` in a full
 `g`-orthonormal family `F · t` at `γ t`, the curvature pairing
 `g(F i, R(Y, γ̇)γ̇)` is the linear combination
@@ -125,9 +132,12 @@ theorem parInner_curv_expand
   simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
     ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
 
+set_option synthInstance.maxHeartbeats 400000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option synthInstance.maxHeartbeats 400000 in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] in
 /-- **Uniqueness of Jacobi fields with given initial data.**  Along a curve
 carrying a parallel `g`-orthonormal frame of full cardinality on `[0, b]`,
 two fields that are Jacobi on `[0, b]`, have the required chart-representation

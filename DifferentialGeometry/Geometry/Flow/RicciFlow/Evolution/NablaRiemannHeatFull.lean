@@ -80,7 +80,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -89,11 +89,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
-private instance tensor0SModelNormedSpace_local {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
 
-private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
 
@@ -177,7 +177,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04NormHeatEquationOn_intrinsic
     [FiniteDimensional Real E]
@@ -293,7 +293,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nabla2Rm04NormSqIntrinsic_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -324,7 +324,7 @@ theorem nabla2Rm04NormSqIntrinsic_nonneg
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04NormHeatBoundOn_intrinsic
     [FiniteDimensional Real E]

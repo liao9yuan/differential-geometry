@@ -14,7 +14,6 @@ norms.
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-set_option linter.unusedSectionVars false
 
 open scoped ContDiff Manifold Topology ENNReal
 open MeasureTheory
@@ -24,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -35,6 +34,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem l2_sq_eq_fiber_int
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -50,6 +51,8 @@ private theorem l2_sq_eq_fiber_int
   exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
     (I := I) (M := M) g r s _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem l2_sq_le_integral
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (F : M → ℝ)
@@ -78,6 +81,8 @@ noncomputable def fiberLpFun
   Real.sqrt
     (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private theorem fiberLpFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) : Continuous (fiberLpFun g r s S) := by
@@ -88,11 +93,15 @@ private theorem fiberLpFun_continuous
     (I := I) (M := M) g r s x (S.toSection x),
     ← SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private theorem fiberLpFun_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) : 0 ≤ fiberLpFun g r s S x :=
   Real.sqrt_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem fiber_lp2_eq_l2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -121,6 +130,8 @@ private theorem fiber_lp2_eq_l2
     Real.sqrt_sq (tensorL2Norm_nonneg (I := I) (M := M) g r s S.toFun),
     ← SmoothCcTensor.norm_def (I := I) (M := M) S]
 
+omit [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- Slot extension scales every intrinsic fibre `lpNorm` by the square root of
 the manifold dimension. -/
 theorem fiberLp_slotExtend
@@ -149,6 +160,7 @@ theorem fiberLp_slotExtend
   rw [hfun, lpNorm_const_smul]
   rw [coe_nnnorm, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 /-- On a closed manifold, the intrinsic fibre `L6` norm controls its `L3`
 norm.  The constant depends only on the background volume. -/
 theorem fiberLp3_le_lp6
@@ -185,6 +197,7 @@ theorem fiberLp3_le_lp6
       (1 / 6 : ℝ) by norm_num] at hreal
   simpa only [V, mul_comm] using hreal
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 /-- An operator field in metric `L2` acting on a pointwise-bounded covariant
 tensor is bounded in metric `L2`. -/
 theorem appCc_l2_right
@@ -194,7 +207,7 @@ theorem appCc_l2_right
     (hW : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 r x
         (W.toSection x) ≤ B ^ 2) :
-    ‖appCc (I := I) (M := M) g r s Φ W‖ ≤ ‖Φ‖ * B := by
+    ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤ ‖Φ‖ * B := by
   classical
   set F : M → ℝ := fun x => B ^ 2 *
     riemannianFiberNormSq (I := I) (M := M) g r s x
@@ -206,7 +219,7 @@ theorem appCc_l2_right
       (I := I) (M := M) g r s Φ).const_mul _
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
-          ((appCc (I := I) (M := M) g r s Φ W).toSection x) ≤ F x := by
+          ((operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x) ≤ F x := by
     intro x
     rw [appCc_toSection]
     refine le_trans (riemannianFiberNormSq_compRS_le_mul
@@ -221,11 +234,11 @@ theorem appCc_l2_right
           (riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x _)
       _ = B ^ 2 * riemannianFiberNormSq (I := I) (M := M) g r s x
           (Φ.toSection x) := by ring
-  have hsq : ‖appCc (I := I) (M := M) g r s Φ W‖ ^ 2 ≤
+  have hsq : ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ^ 2 ≤
       ‖Φ‖ ^ 2 * B ^ 2 := by
     have h1 := l2_sq_le_integral
       (I := I) (M := M) g 0 s
-      (appCc (I := I) (M := M) g r s Φ W) F hF_int hpt
+      (operatorFieldApply (I := I) (M := M) g r s Φ W) F hF_int hpt
     rw [hF_def, integral_const_mul] at h1
     have hbridge :=
       l2_sq_eq_fiber_int
@@ -237,12 +250,13 @@ theorem appCc_l2_right
   rw [mul_pow]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 /-- The intrinsic `L6 x L3 -> L2` Holder estimate for an operator-field
 action. -/
 theorem appCc_l6_l3_l2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    ‖appCc (I := I) (M := M) g r s Φ W‖ ≤
+    ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤
       lpNorm (fiberLpFun g r s Φ) 6
           (riemannianVolumeMeasure (I := I) (M := M) g) *
         lpNorm (fiberLpFun g 0 r W) 3
@@ -252,7 +266,8 @@ theorem appCc_l6_l3_l2
     dsimp [μ]
     exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
-  let Y : SmoothCcTensor g 0 s := appCc (I := I) (M := M) g r s Φ W
+  let Y : SmoothCcTensor g 0 s :=
+    operatorFieldApply (I := I) (M := M) g r s Φ W
   have hΦc := fiberLpFun_continuous (I := I) (M := M) g r s Φ
   have hWc := fiberLpFun_continuous (I := I) (M := M) g 0 r W
   have hYc := fiberLpFun_continuous (I := I) (M := M) g 0 s Y

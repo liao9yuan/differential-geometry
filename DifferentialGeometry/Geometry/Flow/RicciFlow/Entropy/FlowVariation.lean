@@ -88,9 +88,9 @@ theorem revGram_smooth
 
 end Normed
 
-section InnerProduct
+section TraceVariation
 
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -159,7 +159,7 @@ theorem revTrace_eq
   dsimp only [scalar]
   ring
 
-end InnerProduct
+end TraceVariation
 
 section Normed
 

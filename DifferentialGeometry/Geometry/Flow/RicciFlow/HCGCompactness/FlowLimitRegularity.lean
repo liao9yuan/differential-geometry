@@ -50,7 +50,7 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn)
 open Tensor0SBundle
 open Filter Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -284,7 +284,7 @@ private theorem metricFrameComp_Ioo
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    {Idx : Type*} [Fintype Idx]
+    {Idx : Type*}
     (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -330,6 +330,7 @@ namespace ConvOut
 
 variable [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem gSeqJet_contOn
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -386,24 +387,22 @@ private theorem gSeqJet_contOn
   obtain ⟨σj, hσj⟩ := exists_section_eqOn_compact (I := I) x₀
     ((chartModelBasis E) j) isCompact_singleton
     (Set.singleton_subset_iff.mpr (by simpa only [extChartAt_source] using hxchart))
-  let sourceSigma : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := by
-    change SigmaCompactSpace (SourceDomain (I := I) Φ k)
-    exact sourceDomSigmaOf (I := I) Φ k (hsrc k)
-  let sourceT2 : T2Space ↑(sourceOpen (I := I) Φ k) := by
-    change T2Space (SourceDomain (I := I) Φ k)
-    exact sourceDomT2 (I := I) Φ k
-  let Vi := @Integral.Connection.restrictOpenTangentSection E inferInstance inferInstance
-    inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.t2 P.smooth
-    P.sigmaCompact (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi
-  let Vj := @Integral.Connection.restrictOpenTangentSection E inferInstance inferInstance
-    inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.t2 P.smooth
-    P.sigmaCompact (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj
   letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
   letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
   letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
     sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI sourceSigma : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) :=
+    sourceDomT2 (I := I) Φ k
+  let Vi := @Integral.Connection.restrictOpenTangentSection E inferInstance
+    inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
+    (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi
+  let Vj := @Integral.Connection.restrictOpenTangentSection E inferInstance
+    inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
+    (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj
   letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
     IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
       (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
@@ -495,14 +494,12 @@ private theorem gSeqJet_contOn
       simp only [core, dif_pos hps, z]
     have hViz : Vi (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σi z := by
       exact @Integral.Connection.restrictOpenTangentSection_apply E inferInstance
-        inferInstance inferInstance inferInstance H inferInstance I P.M P.topology P.charted
-        P.t2 P.smooth P.sigmaCompact (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi
-        ⟨z, hps⟩
+        inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
+        (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi ⟨z, hps⟩
     have hVjz : Vj (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σj z := by
       exact @Integral.Connection.restrictOpenTangentSection_apply E inferInstance
-        inferInstance inferInstance inferInstance H inferInstance I P.M P.topology P.charted
-        P.t2 P.smooth P.sigmaCompact (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj
-        ⟨z, hps⟩
+        inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
+        (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj ⟨z, hps⟩
     have hV0 : V 0 (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σi z := by
       simpa only [V, Matrix.cons_val_zero] using hViz
     have hV1 : V 1 (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σj z := by
@@ -521,6 +518,7 @@ private theorem gSeqJet_contOn
     (WithTop.coe_le_coe.2 (le_top : (r : ℕ∞) ≤ (⊤ : ℕ∞)))
   simpa only [F] using hjet.continuousWithinAt
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every finite spatial chart jet of the fixed-window limit metric is jointly
 continuous in time and chart position.  This is the locally uniform limit of
 the corresponding finite-stage jets; the conversion from covariant metric
@@ -670,6 +668,7 @@ theorem gramJets
   exact (hcOn.continuousWithinAt
     ⟨hp₀.1, interior_subset hCint⟩).mono_of_mem_nhdsWithin hmem
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The matrix-valued spatial chart jets of the limit metric are jointly
 continuous on the fixed time window and the interior chart target. -/
 private theorem gramPiJets
@@ -760,6 +759,7 @@ private theorem gramPiJets
   funext i
   exact iteratedFDeriv_pi (fun j => hentryCD i j) le_rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem gramPiJet_contOn
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -803,6 +803,7 @@ private theorem uniform_comp_cpt
   exact hi x hx ⟨x, hx, rfl⟩
 
 set_option synthInstance.maxHeartbeats 100000 in
+-- Elaborating the geometric instance chain requires the larger synthesis budget.
 private theorem gramJet_tendsto
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1194,6 +1195,7 @@ private theorem gramModel_to_mfld
   rw [(extChartAt I x₀).left_inv hxsrc]
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option synthInstance.maxHeartbeats 100000 in
 /-- Fixed-window joint spacetime smoothness of the limit metric in the
 trivialization-based chart-Gram readout. This is the remaining analytic
@@ -1404,6 +1406,7 @@ end ConvOut
 namespace OpenConvOut
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Assemble joint smoothness of the open-interval limit metric from joint
 chart-Gram smoothness on every canonical compact window. -/
 theorem smoothMetric

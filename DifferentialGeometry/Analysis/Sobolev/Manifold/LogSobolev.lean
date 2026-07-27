@@ -23,7 +23,7 @@ open scoped Manifold ContDiff ENNReal
 
 
 theorem logSobolev_closed
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]

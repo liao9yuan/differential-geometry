@@ -39,10 +39,11 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -52,6 +53,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 /-! ## A jointly regular spatial pushforward -/
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The differential in the spatial slot of the finite-spectral local
 addition, applied to a fixed smooth tangent field, is jointly `C^2` in the
 coefficient and spatial variables.
@@ -128,7 +130,9 @@ private theorem hmfSpecPush_cd
       (2 : ℕ∞)
       (fun z : EuclideanSpace ℝ {i // i ∈ S} × M ↦
         (TotalSpace.mk' E z.2 (B z.2) : TangentBundle I M)) D p :=
-    (hv0.of_le (by simp)).contMDiffAt.contMDiffWithinAt
+    (hv0.of_le
+      (show ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) from
+        WithTop.coe_le_coe.mpr le_top)).contMDiffAt.contMDiffWithinAt
   have hb₂ : ContMDiffWithinAt
       (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I (2 : ℕ∞)
       (fun z : EuclideanSpace ℝ {i // i ∈ S} × M ↦ f z z.2) D p :=
@@ -166,6 +170,7 @@ private theorem hmfSpecPush_cd
 
 /-! ## Frozen-frame density -/
 
+omit [CompactSpace M] [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Applying the inverse-cometric endomorphism to a frozen smooth
 orthonormal-frame vector gives a smooth tangent section, jointly with an
 unused finite-spectral parameter. -/
@@ -174,13 +179,14 @@ private theorem hmfRaisedFrame_cd
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M ↦ (TotalSpace.mk' E x
-        (gInvRaisedEndo (I := I) q h x
+        (metricComparisonEndo (I := I) q h x
           (smoothOrthoFrame (I := I) q x₀ i x)) : TangentBundle I M)) := by
   simpa only [fullRaisedEndoField_apply] using ContMDiff.clm_bundle_apply
     (b := id)
     (fullRaisedEndoField (I := I) (M := M) q h).contMDiff_toFun
     (smoothOrthoFrame_smooth (I := I) q x₀ i)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- With the orthonormal frame frozen at `x₀`, the finite-spectral
 Dirichlet-density expression is jointly `C^2` on the coefficient ball. -/
 private theorem hmfSpecFrozen_cd
@@ -205,7 +211,7 @@ private theorem hmfSpecFrozen_cd
               (mfderiv I I
                 (hmfAdd (I := I) (M := M) q
                   (hmfSpecIncl (I := I) (M := M) q S p.1)) p.2
-                (gInvRaisedEndo (I := I) q h p.2
+                (metricComparisonEndo (I := I) q h p.2
                   (smoothOrthoFrame (I := I) q x₀ i p.2)))
               (mfderiv I I
                 (hmfAdd (I := I) (M := M) q
@@ -222,9 +228,15 @@ private theorem hmfSpecFrozen_cd
       (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I)
       (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (2 : ℕ∞)
       (fun p : EuclideanSpace ℝ {i // i ∈ S} × M ↦
-        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (F p) (q.inner (F p))) D := by
+        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y : M ↦
+            TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+          (F p) (q.inner (F p))) D := by
     simpa only [Function.comp_apply] using
-      (q.contMDiff.of_le (by simp)).comp_contMDiffOn (hmap.of_le (by norm_num))
+      (q.contMDiff.of_le
+        (show ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) from
+          WithTop.coe_le_coe.mpr le_top)).comp_contMDiffOn
+        (hmap.of_le (by norm_num))
   have hterm : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, EuclideanSpace ℝ {j // j ∈ S}).prod I) 𝓘(ℝ)
         (2 : ℕ∞)
@@ -233,7 +245,7 @@ private theorem hmfSpecFrozen_cd
             (mfderiv I I
               (hmfAdd (I := I) (M := M) q
                 (hmfSpecIncl (I := I) (M := M) q S p.1)) p.2
-              (gInvRaisedEndo (I := I) q h p.2
+              (metricComparisonEndo (I := I) q h p.2
                 (smoothOrthoFrame (I := I) q x₀ i p.2)))
             (mfderiv I I
               (hmfAdd (I := I) (M := M) q
@@ -248,11 +260,14 @@ private theorem hmfSpecFrozen_cd
     have hpush := hmfSpecPush_cd (I := I) (M := M) q S R hmap
       (fun x : M ↦ smoothOrthoFrame (I := I) q x₀ i x) hframe
     have hpushRaised := hmfSpecPush_cd (I := I) (M := M) q S R hmap
-      (fun x : M ↦ gInvRaisedEndo (I := I) q h x
+      (fun x : M ↦ metricComparisonEndo (I := I) q h x
         (smoothOrthoFrame (I := I) q x₀ i x))
       hraised
     have happ := ContMDiffOn.clm_bundle_apply₂
       (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := fun y : M ↦ TangentSpace I y)
+      (E₂ := fun y : M ↦ TangentSpace I y)
+      (E₃ := fun _ : M ↦ ℝ)
       (b := F) hmetric hpushRaised hpush
     intro p hp
     have hat := happ p hp
@@ -265,6 +280,8 @@ private theorem hmfSpecFrozen_cd
     contMDiffWithinAt_const
   exact hc.mul (ContMDiffWithinAt.sum (fun i _ ↦ hterm i p hp))
 
+omit [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The pointwise density computed in the moving-centre orthonormal frame is
 equal, on the frozen frame's orthonormality neighbourhood, to the expression
 computed in that frozen frame. -/
@@ -277,14 +294,14 @@ private theorem hmfDens_eq_frozen
         ∑ i : Fin (Module.finrank ℝ E),
           q.inner (Φ y)
             (mfderiv I I Φ y
-              (gInvRaisedEndo (I := I) q h y
+              (metricComparisonEndo (I := I) q h y
                 (smoothOrthoFrame (I := I) q x₀ i y)))
             (mfderiv I I Φ y
               (smoothOrthoFrame (I := I) q x₀ i y)) := by
   classical
   let dΦ : TangentSpace I y →L[ℝ] TangentSpace I (Φ y) := mfderiv I I Φ y
   let A : TangentSpace I y →L[ℝ] TangentSpace I y :=
-    gInvRaisedEndo (I := I) q h y
+    metricComparisonEndo (I := I) q h y
   let step₁ : TangentSpace I y →L[ℝ] TangentSpace I (Φ y) →L[ℝ] ℝ :=
     (q.inner (Φ y)).comp (dΦ.comp A)
   let precomp : (TangentSpace I (Φ y) →L[ℝ] ℝ) →L[ℝ]
@@ -304,6 +321,7 @@ private theorem hmfDens_eq_frozen
 
 /-! ## The moving-centre density -/
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- On one coefficient ball, the finite-spectral Dirichlet density is jointly
 `C^2` in the coefficient and spatial variables.  The radius is uniform in the
 spatial point and is exactly the radius on which the local-addition map is
@@ -322,7 +340,15 @@ theorem hmfSpecDens_cd
   obtain ⟨R, hR, hmap⟩ := hmfSpecMap_cd (I := I) (M := M) q S 3 (by norm_num)
   refine ⟨R, hR, ?_⟩
   intro p hp
-  have hfrozen := hmfSpecFrozen_cd (I := I) (M := M) q h S R hmap p.2 p hp
+  have hmap' : ContMDiffOn
+      (𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}).prod I) I (3 : ℕ∞)
+      (fun z : EuclideanSpace ℝ {i // i ∈ S} × M ↦
+        hmfAdd (I := I) (M := M) q
+          (hmfSpecIncl (I := I) (M := M) q S z.1) z.2)
+      (Metric.ball 0 R ×ˢ (Set.univ : Set M)) := by
+    intro z hz
+    simpa only [hmfSpecMap_apply] using hmap z hz
+  have hfrozen := hmfSpecFrozen_cd (I := I) (M := M) q h S R hmap' p.2 p hp
   refine hfrozen.congr_of_eventuallyEq_of_mem ?_ hp
   have hnbhd : ∀ᶠ z : EuclideanSpace ℝ {i // i ∈ S} × M in
       𝓝[Metric.ball 0 R ×ˢ (Set.univ : Set M)] p,
@@ -337,6 +363,8 @@ theorem hmfSpecDens_cd
 
 /-! ## The jointly regular coefficient derivative -/
 
+omit [BoundarylessManifold I M]
+  [ConnectedSpace M] in
 /-- For a fixed finite coefficient direction, the derivative of the
 local-addition map in that coefficient direction is a jointly `C^2`
 tangent-bundle section on one coefficient ball.  The radius is the same
@@ -353,12 +381,9 @@ theorem hmfSpecCoeff_cd
         (I.prod 𝓘(ℝ, E)) (2 : ℕ∞)
         (fun p : EuclideanSpace ℝ {i // i ∈ S} × M ↦
           (TotalSpace.mk' E
-            (hmfAdd (I := I) (M := M) q
-              (hmfSpecIncl (I := I) (M := M) q S p.1) p.2)
+            (hmfSpecMap (I := I) (M := M) q S p.2 p.1)
             (mfderiv 𝓘(ℝ, EuclideanSpace ℝ {i // i ∈ S}) I
-              (fun u : EuclideanSpace ℝ {i // i ∈ S} ↦
-                hmfAdd (I := I) (M := M) q
-                  (hmfSpecIncl (I := I) (M := M) q S u) p.2)
+              (hmfSpecMap (I := I) (M := M) q S p.2)
               p.1 v) : TangentBundle I M))
         (Metric.ball 0 R ×ˢ (Set.univ : Set M)) := by
   obtain ⟨R, hR, hmap⟩ :=
@@ -367,25 +392,23 @@ theorem hmfSpecCoeff_cd
   intro p hp
   let V := EuclideanSpace ℝ {i // i ∈ S}
   let IV : ModelWithCorners ℝ V V := 𝓘(ℝ, V)
-  let P : ModelWithCorners ℝ (V × E) (V × H) := IV.prod I
   let F : V × M → M := fun z ↦
-    hmfAdd (I := I) (M := M) q
-      (hmfSpecIncl (I := I) (M := M) q S z.1) z.2
-  let f : (V × M) → V → M := fun z u ↦
-    hmfAdd (I := I) (M := M) q
-      (hmfSpecIncl (I := I) (M := M) q S u) z.2
+    hmfSpecMap (I := I) (M := M) q S z.2 z.1
+  let f : (V × M) → V → M := fun z =>
+    hmfSpecMap (I := I) (M := M) q S z.2
   have hopen : IsOpen (Metric.ball (0 : V) R ×ˢ (Set.univ : Set M)) :=
     Metric.isOpen_ball.prod isOpen_univ
-  have hmapAt : ContMDiffAt P I (3 : ℕ∞) F p := by
+  have hmapAt : ContMDiffAt (𝓘(ℝ, V).prod I) I (3 : ℕ∞) F p := by
     exact (hmap p hp).contMDiffAt (hopen.mem_nhds hp)
-  have hf : ContMDiffAt (P.prod IV) I (3 : ℕ∞)
+  have hf : ContMDiffAt ((𝓘(ℝ, V).prod I).prod 𝓘(ℝ, V)) I (3 : ℕ∞)
       (Function.uncurry f) (p, p.1) := by
-    have hpre : ContMDiffAt (P.prod IV) P (3 : ℕ∞)
+    have hpre : ContMDiffAt ((𝓘(ℝ, V).prod I).prod 𝓘(ℝ, V))
+        (𝓘(ℝ, V).prod I) (3 : ℕ∞)
         (fun z : (V × M) × V ↦ (z.2, z.1.2)) (p, p.1) :=
       contMDiffAt_snd.prodMk (contMDiffAt_fst.snd)
     simpa only [Function.uncurry_apply_pair, f, F] using
       hmapAt.comp (p, p.1) hpre
-  have hg : ContMDiffAt P IV (2 : ℕ∞)
+  have hg : ContMDiffAt (𝓘(ℝ, V).prod I) 𝓘(ℝ, V) (2 : ℕ∞)
       (fun z : V × M ↦ z.1) p := contMDiffAt_fst
   have hφ := ContMDiffAt.mfderiv
     (I := IV) (I' := I) (n := (3 : ℕ∞)) (m := (2 : ℕ∞))
@@ -394,11 +417,15 @@ theorem hmfSpecCoeff_cd
       (fun u : V ↦ (TotalSpace.mk' V u v : TangentBundle IV V)) :=
     (contMDiff_vectorSpace_iff_contDiff (V := fun _ : V ↦ v)).mpr
       contDiff_const
-  have hv : ContMDiffAt P (IV.prod 𝓘(ℝ, V)) (2 : ℕ∞)
+  have hv : ContMDiffAt (𝓘(ℝ, V).prod I)
+      (𝓘(ℝ, V).prod 𝓘(ℝ, V)) (2 : ℕ∞)
       (fun z : V × M ↦
         (TotalSpace.mk' V z.1 v : TangentBundle IV V)) p := by
-    exact (hv0.of_le (by simp)).contMDiffAt.comp p contMDiffAt_fst
-  have hb₂ : ContMDiffAt P I (2 : ℕ∞) F p :=
+    exact (hv0.of_le
+      (show ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) from
+        WithTop.coe_le_coe.mpr le_top)).contMDiffAt.comp
+      p contMDiffAt_fst
+  have hb₂ : ContMDiffAt (𝓘(ℝ, V).prod I) I (2 : ℕ∞) F p :=
     hmapAt.of_le (by norm_num)
   have hkey := ContMDiffAt.clm_apply_of_inCoordinates
     (IB₁ := IV) (IB₂ := I) (F₁ := V) (F₂ := E)
@@ -459,6 +486,9 @@ private noncomputable def hmfFiberExp
     (hmfDiagExp (I := I) (M := M) q
       (⟨x, (show TangentSpace I x from v)⟩ : TangentBundle I M)).2
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The derivative of the fixed-base HMF exponential at the zero tangent
 vector is the identity.  The local metric instances duplicate the concrete
 instances hidden inside `hmfDiagExp`; no global Riemannian-bundle instance is
@@ -483,6 +513,7 @@ private theorem hmfFiberExp_mfd
   simpa only [hmfFiberExp, hmfDiagExp, diagExp_snd] using
     (mfderiv_expMapIntrinsic_at_zero (I := I) q hEnorm x)
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The fixed-base HMF exponential is manifold differentiable at the zero
 tangent vector.  This follows from its already identified nonzero derivative:
 if differentiability failed, `mfderiv` would be the zero map. -/
@@ -501,6 +532,7 @@ private theorem hmfFiberExp_md
     simpa using DFunLike.congr_fun hzero v
   exact hv hv'.symm
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- At the zero state, the derivative of the exponential local-addition
 coordinate in a smooth tensor direction is exactly the raised one-form field
 represented by that tensor. -/
@@ -518,6 +550,7 @@ represented by that tensor. -/
     funext a
     simp only [zero_add, Function.comp_apply, line, w, hmfFiberExp,
       hmfAdd, hmfUnknown_smul]
+    rfl
   have hline_md : MDifferentiableAt 𝓘(ℝ) 𝓘(ℝ, E) line 0 := by
     have hMD : ContMDiff 𝓘(ℝ) 𝓘(ℝ, E) ∞ line := by
       simpa only [line] using contMDiff_id.smul contMDiff_const
@@ -528,30 +561,34 @@ represented by that tensor. -/
         ((1 : ℝ →L[ℝ] ℝ).smulRight w) 0 := by
       simpa only [line] using (hasFDerivAt_id (0 : ℝ)).smul_const w
     rw [h.fderiv]
-    simp only [ContinuousLinearMap.smulRight_apply,
-      ContinuousLinearMap.one_apply, one_smul]
+    change (1 : ℝ) • w = w
+    exact one_smul ℝ w
+  have hline_zero : line 0 = 0 := by
+    simp only [line, zero_smul]
   have houter : MDifferentiableAt 𝓘(ℝ, E) I
       (hmfFiberExp (I := I) (M := M) q x) (line 0) := by
     simpa only [line, zero_smul] using
       hmfFiberExp_md (I := I) (M := M) q x
   unfold hmfStateVar
   rw [hpath]
-  calc
-    mfderiv 𝓘(ℝ) I
-        (hmfFiberExp (I := I) (M := M) q x ∘ line) 0 (1 : ℝ) =
-        mfderiv 𝓘(ℝ, E) I
+  have hcomp := mfderiv_comp_apply (f := line) (x := (0 : ℝ))
+    houter hline_md (1 : ℝ)
+  have hgoal :
+      mfderiv 𝓘(ℝ, E) I
           (hmfFiberExp (I := I) (M := M) q x) (line 0)
-          (mfderiv 𝓘(ℝ) 𝓘(ℝ, E) line 0 (1 : ℝ)) :=
-      mfderiv_comp_apply (f := line) (x := (0 : ℝ))
-        houter hline_md (1 : ℝ)
-    _ = hmfUnknown (I := I) q U x := by
-      rw [hline]
-      simp only [line, zero_smul]
-      rw [hmfFiberExp_mfd]
-      rfl
+          (mfderiv 𝓘(ℝ) 𝓘(ℝ, E) line 0 (1 : ℝ)) =
+        hmfUnknown (I := I) q U x := by
+    rw [hline]
+    rw [hline_zero]
+    have hmfd := DFunLike.congr_fun
+      (hmfFiberExp_mfd (I := I) (M := M) q x) w
+    simpa only [ContinuousLinearMap.id_apply, w] using hmfd
+  exact hcomp.trans hgoal
 
 /-! ### The rank-one mass bridge -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Every upper-rank-zero mixed tensor is the canonical rank-zero lift of
 its value on the unit scalar tensor. -/
 private theorem hmfUnitLift
@@ -578,7 +615,10 @@ private theorem hmfUnitLift
       Tensor0SSpace.evalScalar_apply, mul_one]
     exact congrArg (Tensor0SSpace.toModel c)
       (Subsingleton.elim v Fin.elim0)
-  rw [Tensor0SSpace.toRS0_apply, unitEvalSection_apply]
+  change tensor0SSpace_evalScalar x c •
+      unitEvalSection (I := I) (M := M) q 1 S x =
+    (S.toSection x) c
+  rw [unitEvalSection_apply]
   calc
     tensor0SSpace_evalScalar x c •
           (S.toSection x) (unitZeroSec (I := I) (M := M) x) =
@@ -588,6 +628,8 @@ private theorem hmfUnitLift
       rw [map_smul]
     _ = (S.toSection x) c := congrArg (S.toSection x) hc.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The inverse Gram matrix on the fixed model basis is a genuine inverse
 metric in that basis. -/
 private theorem hmfChartInv
@@ -609,6 +651,8 @@ private theorem hmfChartInv
     have hij := congrFun (congrFun hmul i) j
     simpa only [Matrix.mul_apply, gramMatrixAt_apply, Matrix.one_apply] using hij
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- For one-forms, the recursively defined Gram-matrix tensor pairing is the
 target-metric pairing of their musical sharps. -/
 private theorem hmfCovInner
@@ -617,7 +661,7 @@ private theorem hmfCovInner
     q.inner x
         (inverseMetricSharpFib (I := I) q x α)
         (inverseMetricSharpFib (I := I) q x β) =
-      tensorInnerPointwise_0s (I := I) (M := M) 1 q x
+      covariantTensorInnerPointwise (I := I) (M := M) 1 q x
         (Tensor0SSpace.toModel α) (Tensor0SSpace.toModel β) := by
   classical
   have hsharp : ∀ γ : Tensor0SSpace 1 I x,
@@ -635,7 +679,7 @@ private theorem hmfCovInner
     (fun i j ↦ (gramMatrixAt (I := I) (M := M) q x)⁻¹ i j)
     (hmfChartInv (I := I) (M := M) q x) α β
   have htensor :
-      tensorInnerPointwise_0s (I := I) (M := M) 1 q x
+      covariantTensorInnerPointwise (I := I) (M := M) 1 q x
           (Tensor0SSpace.toModel α) (Tensor0SSpace.toModel β) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
@@ -682,9 +726,11 @@ private theorem hmfCovInner
             (gramMatrixAt (I := I) (M := M) q x)⁻¹ i j *
               cotangentToDual (I := I) α ((chartModelBasis E) i) *
                 cotangentToDual (I := I) β ((chartModelBasis E) j) := hcoord
-    _ = tensorInnerPointwise_0s (I := I) (M := M) 1 q x
+    _ = covariantTensorInnerPointwise (I := I) (M := M) 1 q x
           (Tensor0SSpace.toModel α) (Tensor0SSpace.toModel β) := htensor.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
+  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Pointwise, the target pairing of the raised HMF one-forms is exactly the
 mixed-tensor pairing used by `hmfMass`. -/
 private theorem hmfMassPt
@@ -713,6 +759,7 @@ private theorem hmfMassPt
   rw [hU, hV, inner_toRS0]
   exact hmfCovInner (I := I) (M := M) q x α β
 
+omit [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- At the zero state, the faithful state-dependent mass is exactly the
 older fixed-coordinate mass pairing. -/
 @[simp] theorem hmfStateMass_zero_eq
@@ -721,7 +768,8 @@ older fixed-coordinate mass pairing. -/
     hmfStateMass (I := I) (M := M) q h 0 U V =
       hmfMass (I := I) (M := M) q h U V := by
   unfold hmfStateMass hmfMass
-  simp only [hmfAdd_zero, id_eq, hmfStateVar_zero]
+  rw [hmfAdd_zero]
+  simp only [id_eq, hmfStateVar_zero]
   apply integral_congr_ae
   filter_upwards with x
   exact hmfMassPt (I := I) (M := M) q U V x

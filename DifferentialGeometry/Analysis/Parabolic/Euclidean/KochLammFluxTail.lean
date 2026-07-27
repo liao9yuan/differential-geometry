@@ -201,7 +201,7 @@ theorem klFluxTail_pow {R k : ℝ} (hR : 0 < R) (hk : 0 ≤ k)
           (klD1Exp V + 1)) * baseD1HalfMass V (klPDual V)) := by
   let p : ℝ := klPDual V
   let D : ℝ := (Real.exp (-(8 : ℝ)⁻¹ * k ^ 2)) ^ p
-  have hp : 0 < p := (klP_holder (V := V)).pos
+  have hp : 0 < p := (klPDual_holder (V := V)).pos
   have hμ : klTailMeasure (V := V) R S ≤
       klTermMeasure (V := V) (R ^ 2) := by
     unfold klTailMeasure klTermMeasure

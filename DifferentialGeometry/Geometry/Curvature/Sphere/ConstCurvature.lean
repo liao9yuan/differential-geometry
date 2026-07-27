@@ -59,7 +59,9 @@ theorem metricRm04_round_invariant [NeZero n]
   rwa [pullbackMetric_round_eq] at h
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero n] in
+omit [FiniteDimensional ℝ E] in
 /-- **The round sphere's sectional-curvature numerator is the Gram determinant** (constant curvature
 `c = 1`): `Rm04(X,Y,Y,X) = g(X,X)g(Y,Y) − g(X,Y)²` at every point.  This is the curvature content of
 `ConstPosSecMetric roundMetric`; the `∃ c, …` wrapper is assembled where `ConstPosSecMetric` is in
@@ -101,7 +103,8 @@ theorem roundMetric_sec_value (x : sphere (0 : E) 1) (X Y : TangentSpace (𝓡 n
     real_inner_comm (dIncl (n := n) x Y) (dIncl (n := n) x X)]
   ring
 
-omit [NeZero n] in
+omit [NeZero n]
+  [FiniteDimensional ℝ E] in
 /-- **The round metric has constant positive sectional curvature (`c = 1`).**  This is precisely the
 unfolding of `ConstPosSecMetric roundMetric` (defined in the Hamilton space-form file, which cannot be
 imported here): `∃ c > 0, ∀ x X Y, Rm04(X,Y,Y,X) = c·(g(X,X)g(Y,Y) − g(X,Y)²)`.  It is therefore usable
@@ -121,6 +124,7 @@ private instance sphereModel_neZero :
   rw [finrank_euclideanSpace_fin]
   infer_instance
 
+omit [FiniteDimensional ℝ E] in
 /-- The round metric has the curvature-one Riemann-operator formula. -/
 theorem round_riemann_one (x : sphere (0 : E) 1)
     (X Y Z : TangentSpace (𝓡 n) x) :

@@ -26,15 +26,9 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable {M : Type*} [UniformSpace M] [ChartedSpace H M]
   [CompactSpace M] [T2Space M] [LocallyConnectedSpace M]
 variable {ι : Type*}
-
-/-- Uniform `C1` persistence data for a family of local-addition self-maps.
-
-`localInj` uses one fixed neighborhood cover for all sufficiently late
-parameters.  `localDiff` is the differential-invertibility output, while
-`toId` is supplied by the vanishing local-addition section. -/
-structure HmfC1Data (F : ι → M → M) (l : Filter ι) : Prop where
+structure HmfC1Data (F : ι → M → M) (l : Filter ι) where
   cover : M → Set M
-  cover_nhds : ∀ x, cover x ∈ 𝒩 x
+  cover_nhds : ∀ x, cover x ∈ nhds x
   toId : TendstoUniformly F id l
   localInj : ∀ᶠ i in l, ∀ z, Set.InjOn (F i) (cover z)
   localDiff : ∀ᶠ i in l, IsLocalDiffeomorph I I ∞ (F i)
@@ -54,8 +48,7 @@ theorem HmfC1Data.diffeo {F : ι → M → M} {l : Filter ι}
     (h : HmfC1Data I F l) :
     ∀ᶠ i in l, ∃ Φ : M ≃ₘ⟮I, I⟯ M, (Φ : M → M) = F i := by
   filter_upwards [h.localDiff, h.bij] with i hlocal hbij
-  exact ⟨hlocal.diffeomorphOfBijective hbij, rfl⟩
-
+  exact ⟨IsLocalDiffeomorph.diffeomorphOfBijective hlocal hbij, rfl⟩
 end DifferentialGeometry.PDE.RicciFlow.Pullback
 
 end

@@ -32,7 +32,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -92,6 +92,8 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
     (φ : Nat -> Nat) (hφ : StrictMono φ) (k : Nat) :
     (Φ.compSubseq φ hφ).source k = Φ.source (φ k) := rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+    [I.Boundaryless] in
 @[simp] theorem ofSeqSubseq_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (f : Nat -> Nat)
@@ -101,6 +103,8 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
     (k : Nat) :
     (Φ.ofSeqSubseq f).source k = Φ.source k := rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
+    [I.Boundaryless] in
 /-- The identity-inner lift preserves each source definitionally. -/
 @[simp] theorem ofSubseq_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -172,6 +176,7 @@ def ofSubseq
     MetricSourceData (I := I) (Φ.ofSubseq f) k :=
   MetricSourceData.ofSeqSubseq (I := I) f k D
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The source-domain seminorm `derivNormSupOn` is unchanged by the
 re-indexing re-wrap (definitional). -/
 @[simp] theorem compSubseq_supOn
@@ -184,6 +189,7 @@ re-indexing re-wrap (definitional). -/
     (MetricSourceData.compSubseq (I := I) φ hφ k D).derivNormSupOn (I := I) K p =
       D.derivNormSupOn (I := I) K p := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem ofSeqSubseq_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (f : Nat -> Nat)
@@ -195,6 +201,7 @@ re-indexing re-wrap (definitional). -/
     (MetricSourceData.ofSeqSubseq (I := I) f k D).derivNormSupOn (I := I) K p =
       D.derivNormSupOn (I := I) K p := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The identity-inner source-data lift preserves `derivNormSupOn`. -/
 @[simp] theorem ofSubseq_supOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -309,6 +316,7 @@ def ofSeqSubseq
   maps := mc.maps.ofSeqSubseq f
   convergence := mc.convergence.ofSeqSubseq f
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The lifted conclusion extracts the composed subsequence. -/
 @[simp] theorem ofSeqSubseq_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -316,6 +324,7 @@ def ofSeqSubseq
     (mc : MetricCompactnessConclusion (I := I) (X.subseq f)) :
     (mc.ofSeqSubseq f hf).subseq = f ∘ mc.subseq := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The lifted conclusion keeps the same limit manifold. -/
 @[simp] theorem ofSeqSubseq_limit
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

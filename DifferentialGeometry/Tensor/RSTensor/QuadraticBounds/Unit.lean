@@ -830,12 +830,7 @@ theorem metricUnit_compact
   simpa using metricUnitOn_compact (I := I) (M := M) g isCompact_univ
 
 /-- Continuity of evaluating a smooth `(0,2)` tensor field on the repeated
-unit-tangent vector.
-
-
-
-
-
+unit-tangent vector. -/
 theorem metricUnit_quadCont
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

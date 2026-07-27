@@ -44,10 +44,6 @@ agreement `nabla0SFun_eq_tensor0SCovariantDerivative`.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
@@ -58,7 +54,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -84,6 +80,8 @@ private def VecSmooth (Y : Π b : M, TangentSpace I b) : Prop :=
   ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
     (fun b : M => TotalSpace.mk' E (E := fun x : M => TangentSpace I x) b (Y b))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- Round-trip of `(tensor0Iso x).symm a` at the unique empty input gives `a`
 (copied from the rank-0 agreement file; kept private here). -/
 private lemma tensor0Iso_symm_apply_empty' (x : M) (a : ℝ) :
@@ -106,6 +104,8 @@ private lemma tensor0Iso_symm_apply_empty' (x : M) (a : ℝ) :
     Subsingleton.elim _ _
   rw [h_inputs, ← hT0x, hscalarFn, hscalar]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- Round-trip of the un-curry inverse on a `Fin.cons` tuple (copied from the
 succ agreement file; kept private here). -/
 private lemma curry_symm_cons (s : ℕ) {b : M}
@@ -133,6 +133,8 @@ private lemma curry_symm_cons (s : ℕ) {b : M}
   rw [hroundtrip] at hcur
   exact hcur.symm
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- Evaluate `T x` on `Fin.cons v0 m` through the curried section (CMLM form). -/
 private lemma cmlm_cons_eq_curry (s : ℕ) {x : M}
     (T : Π b : M, Tensor0SSpace (s + 1) I b) (v0 : TangentSpace I x)
@@ -151,6 +153,7 @@ private lemma cmlm_cons_eq_curry (s : ℕ) {x : M}
   exact (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T x) (v0 := v0) (vs := m)).symm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **Tensor-derivation (Leibniz) rule for the abstract `(0, s)` covariant
 derivative, closed intrinsic form.**  Induction on `s`; the step uses the
 Hom-bundle product rule and the rank-`s` inductive hypothesis on the partial
@@ -332,6 +335,7 @@ theorem abstractDerivEval_aux
     simp only [hcons0, hconsSucc]
     ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 /-- **Headline agreement.**  The chart/model derivative `nabla0SFun s (LeviCivita g)`
 of a smooth `(0, s)`-tensor field agrees, as a fibre `(0, s)`-tensor, with the
 abstract bundled covariant derivative built from the Levi-Civita connection. -/

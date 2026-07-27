@@ -23,8 +23,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 
 variable {X Y : Type*}
-  [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-  [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
+  [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
+  [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
 variable {T : ℝ}
 
 /-- Lift a time field to a state-set subtype, using the zero state off the
@@ -51,7 +51,7 @@ theorem aeSetLift_aesm {S : Set X} (hzero : (0 : X) ∈ S)
   exact (Lp.aestronglyMeasurable f).congr
     (aeSetLift_coe_ae hzero f hf).symm
 
-omit [InnerProductSpace ℝ Y] [CompleteSpace Y] in
+omit [NormedSpace ℝ Y] [CompleteSpace Y] in
 /-- A Lipschitz map on a state-set subtype sends every top-norm time field
 which remains in that state set almost everywhere to an `L²` field. -/
 theorem memLp_on {S : Set X} (hzero : (0 : X) ∈ S)

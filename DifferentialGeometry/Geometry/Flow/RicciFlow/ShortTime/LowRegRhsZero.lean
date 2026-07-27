@@ -13,6 +13,8 @@ parameter-integral jet theorem, the same jet of `rhsLow0PathIntegral`.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -23,10 +25,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -46,9 +50,9 @@ theorem rhs0_h1
     ∃ B : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R : ℝ), 0 ≤ R →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ ≤ R →
@@ -88,7 +92,7 @@ theorem rhs0_h1
     exact (Finset.sum_le_sum_of_subset_of_nonneg
       (Finset.range_subset_range.mpr (by omega))
       (fun j _ _ => sq_nonneg _)).trans hP3
-  have hPbound : gFibreOpBound (I := I) (M := M) g₀
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ P) δ₀ := by
     have h := convexPerturbation_gFibreOpBound
       (I := I) (M := M) g₀ T T' hδ hδ' hs.1 hs.2
@@ -134,9 +138,9 @@ theorem rhs0_path_h1
     ∃ B : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R : ℝ), 0 ≤ R →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ ≤ R →

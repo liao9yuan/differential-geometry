@@ -22,7 +22,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
@@ -119,7 +119,7 @@ private structure D6ChainData
         (metric (n + 1)).inner (F x)
           (mfderiv I I F x v) (mfderiv I I F x w)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The all-tail comparison estimate restricted to the shrunk stage, with the
 zeroth chain pullback rewritten as the ambient stage metric. -/
 private theorem D6ChainData.tail_close
@@ -172,7 +172,6 @@ private def tailCollar
     Set (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
   {x | dist (x : M (j₀ + n)) (b (j₀ + n)) ≤ (2 : ℝ) ^ n}
 
-set_option linter.unusedSectionVars false in
 /-- The full-radius tail collar is compact by ambient properness; the positive
 tail shift keeps its closed boundary inside the large open stage. -/
 private theorem tailCollar_compact
@@ -572,9 +571,9 @@ noncomputable def canonDomain
 
 end StepDCanonData
 
+omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 /-- On a direct-limit stage source, the canonical restricted limit metric is
 the pullback of the compatible stage metric by the source-target
 diffeomorphism. -/
@@ -676,7 +675,6 @@ private theorem chain_canon_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 /-- Covariant metric norms are unchanged by flat restriction to a smaller
 ambient open carrier. -/
 private theorem covFlat_eq
@@ -720,7 +718,6 @@ private theorem covFlat_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 /-- The concrete all-tail estimate and compact finite head give one set of
 whole-stage constants, uniform in the stage index. -/
 private theorem D6ChainData.stage_bounds
@@ -959,6 +956,7 @@ def ofSeqSubseq
 end StepDCanonData
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The complete Step D assembly from the honest B/C comparison-map package,
@@ -1085,7 +1083,11 @@ noncomputable def compactness_canon
     constructor
     · obtain ⟨Crel, hCrel, hrel⟩ := hstage.1
       refine ⟨Crel, hCrel, fun k => ?_⟩
-      rw [hchain_domain k]
+      simp only [hchain, tailAmbientConv, ambientCGConverges,
+        PointedRiemannianCGConverges.ofRestrictPullback,
+        MetricCGConvergenceData.ofRestrictPullback,
+        MetricCGConvergenceData.of_derivNormSupOn,
+        limitPointedCoc, limitPointed]
       let Φc := chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail
       let Dc := StepDCanonData.canonDomain (I := I) Φc k
@@ -1106,7 +1108,8 @@ noncomputable def compactness_canon
         metricTargetDomSigmaOf (I := I) Φc k
           (StepDCanonData.canonTgt (I := I) Φc k)
       let F := metricSourceTargetDiff (I := I) Φc k
-      dsimp only
+      change MetricUniformEquivalentOn (I := I) Set.univ
+        Dc.limitMetric Dc.pullbackMetric Crel
       rw [chain_canon_eq (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail k]
       change MetricUniformEquivalentOn (I := I) Set.univ
@@ -1120,7 +1123,11 @@ noncomputable def compactness_canon
     · intro q
       obtain ⟨Cq, hCq, hcov⟩ := hstage.2 q
       refine ⟨Cq, hCq, fun k x => ?_⟩
-      rw [hchain_domain k]
+      simp only [hchain, tailAmbientConv, ambientCGConverges,
+        PointedRiemannianCGConverges.ofRestrictPullback,
+        MetricCGConvergenceData.ofRestrictPullback,
+        MetricCGConvergenceData.of_derivNormSupOn,
+        limitPointedCoc, limitPointed]
       let Φc := chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail
       let Dc := StepDCanonData.canonDomain (I := I) Φc k
@@ -1141,7 +1148,8 @@ noncomputable def compactness_canon
         metricTargetDomSigmaOf (I := I) Φc k
           (StepDCanonData.canonTgt (I := I) Φc k)
       let F := metricSourceTargetDiff (I := I) Φc k
-      dsimp only
+      change metricCovDerivNorm (I := I) q
+        Dc.pullbackMetric Dc.limitMetric x ≤ Cq
       rw [chain_canon_eq (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail k]
       change metricCovDerivNorm (I := I) q

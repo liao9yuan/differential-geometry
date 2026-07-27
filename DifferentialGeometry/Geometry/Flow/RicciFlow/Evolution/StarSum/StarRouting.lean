@@ -31,7 +31,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -92,7 +92,7 @@ theorem sigmaCurvPos_nat_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0
 
 
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem wRoute_val {Idx : Type*} [Finite Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x)) (k : ℕ) (i j : Idx)
@@ -121,7 +121,7 @@ theorem wRoute_val {Idx : Type*} [Finite Idx] {x : M}
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem curvactStarPos
     [Module.Finite ℝ E]
@@ -259,7 +259,7 @@ theorem sigmaCurv0_nat_val (k : ℕ) (p : Fin (4 + 0)) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem curvactStar0
     [Module.Finite ℝ E]
@@ -391,7 +391,7 @@ theorem sigmaDiffA_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem slotdiffStarA
     [Module.Finite ℝ E]
@@ -542,7 +542,7 @@ theorem sigmaDiffB_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + (k + 1))) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem slotdiffStarB
     [Module.Finite ℝ E]
@@ -711,7 +711,7 @@ theorem sigmaRic1_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem slotRic1
     [Module.Finite ℝ E]
@@ -849,7 +849,7 @@ theorem sigmaRic2_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem slotRic2
     [Module.Finite ℝ E]
@@ -987,7 +987,7 @@ theorem sigmaRic3_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   split_ifs <;> first | rfl | omega
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem slotRic3
     [Module.Finite ℝ E]

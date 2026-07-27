@@ -25,7 +25,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -163,7 +163,7 @@ theorem branchRadius_ray
     branchRadius_exp (I := I) B hs,
     sqrt_gInner_smul_self (I := I) g p hsp.le x]
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+omit [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

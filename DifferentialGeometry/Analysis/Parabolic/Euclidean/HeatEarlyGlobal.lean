@@ -35,9 +35,9 @@ theorem shellWeight_sum (d : ℕ) : Summable (shellWeight d) := by
   have hsucc := hbase.comp_injective Nat.succ_injective
   have hmul := hsucc.mul_left
     ((5 : ℝ) ^ d * Real.exp (4 : ℝ)⁻¹)
-  convert hmul using 1 with k
-  unfold shellWeight
-  simp only [Nat.cast_add, Nat.cast_one, Nat.cast_ofNat, Nat.cast_succ]
+  convert hmul using 1
+  funext k
+  simp only [shellWeight, Function.comp_apply, Nat.cast_succ]
   rw [mul_pow]
   calc
     5 ^ d * (k + 1 : ℝ) ^ d *
@@ -45,8 +45,14 @@ theorem shellWeight_sum (d : ℕ) : Summable (shellWeight d) := by
         (5 ^ d * Real.exp (4 : ℝ)⁻¹) *
           ((k + 1 : ℝ) ^ d *
             Real.exp (-(4 : ℝ)⁻¹ * (k + 1))) := by
-      rw [← Real.exp_add]
-      congr 1
+      have hexp :
+          Real.exp (-(4 : ℝ)⁻¹ * k) =
+            Real.exp (4 : ℝ)⁻¹ *
+              Real.exp (-(4 : ℝ)⁻¹ * (k + 1)) := by
+        rw [← Real.exp_add]
+        congr 1
+        ring
+      rw [hexp]
       ring
     _ = _ := rfl
 
@@ -67,9 +73,11 @@ theorem earlyHeatC_ne_top (V : Type*) [NormedAddCommGroup V]
     earlyHeatC V ≠ ∞ := by
   exact ENNReal.mul_ne_top ENNReal.ofReal_ne_top
     (shellSeries_ne_top (Module.finrank ℝ V))
+variable {V F : Type*}
 
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [MeasurableSpace V] [BorelSpace V]
   [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
@@ -78,6 +86,7 @@ def heatShell (t : ℝ) (x : V) (k : ℕ) : Set V :=
   {y | ((k : ℕ) : ℝ) * heatScale t ≤ ‖x - y‖ ∧
     ‖x - y‖ < (((k + 1 : ℕ) : ℝ) * heatScale t)}
 
+omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [Nontrivial V] in
 private theorem heatShell_meas (t : ℝ) (x : V) (k : ℕ) :
     MeasurableSet (heatShell t x k) := by
   have hnorm : Continuous (fun y : V ↦ ‖x - y‖) :=
@@ -89,10 +98,16 @@ private theorem heatShell_meas (t : ℝ) (x : V) (k : ℕ) :
 def shellCyl (t : ℝ) (x : V) (k : ℕ) : Set (ℝ × V) :=
   Set.Ioc 0 (t / 2) ×ˢ heatShell t x k
 
+omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [Nontrivial V] in
 theorem shellCyl_meas (t : ℝ) (x : V) (k : ℕ) :
     MeasurableSet (shellCyl t x k) :=
   measurableSet_Ioc.prod (heatShell_meas t x k)
 
+omit [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V] in
 /-- Every spatial point lies in one integer heat shell. -/
 theorem mem_shell_union {t : ℝ} (ht : 0 < t) (x y : V) :
     y ∈ ⋃ k : ℕ, heatShell t x k := by
@@ -109,6 +124,11 @@ theorem mem_shell_union {t : ℝ} (ht : 0 < t) (x y : V) :
   · have := (div_lt_iff₀ hrho).1 hkhi
     simpa only [Nat.cast_add, Nat.cast_one] using this
 
+omit [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V] in
 /-- The whole early Duhamel slab is covered by the shell cylinders. -/
 theorem earlySlab_sub {t : ℝ} (ht : 0 < t) (x : V) :
     (Set.Ioc 0 (t / 2) ×ˢ (Set.univ : Set V)) ⊆
@@ -117,6 +137,11 @@ theorem earlySlab_sub {t : ℝ} (ht : 0 < t) (x : V) :
   obtain ⟨k, hyk⟩ := Set.mem_iUnion.mp (mem_shell_union ht x z.2)
   exact Set.mem_iUnion.2 ⟨k, hzs, hyk⟩
 
+omit [InnerProductSpace ℝ V]
+  [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V] in
 /-- A time-half ball cylinder is contained in the Carleson cylinder at the
 observation-time heat radius. -/
 theorem ballCyl_sub {t : ℝ} (ht : 0 < t) (c : V) :
@@ -141,6 +166,7 @@ theorem nat_sq_ge (k : ℕ) : (k : ℝ) ≤ (k : ℝ) ^ 2 := by
         exact_mod_cast Nat.succ_le_succ (Nat.zero_le k)
       nlinarith
 
+omit [CompleteSpace F] in
 /-- One shell is controlled by its polynomial cover count times a summable
 exponential weight. -/
 theorem shellMass_le {T t : ℝ} {C : ℝ≥0∞}
@@ -247,7 +273,7 @@ theorem shellMass_le {T t : ℝ} {C : ℝ≥0∞}
       _ ≤ ENNReal.ofReal K *
           ((s.card : ℝ≥0∞) *
             (C * ENNReal.ofReal (rho ^ Module.finrank ℝ V))) :=
-        mul_le_mul_left' hsource _
+        mul_le_mul_right hsource _
   have hreal : K * rho ^ Module.finrank ℝ V =
       ((Real.sqrt 2) ^ Module.finrank ℝ V *
         (baseHeatMass V)⁻¹) * G := by
@@ -290,9 +316,12 @@ theorem shellMass_le {T t : ℝ} {C : ℝ≥0∞}
       rw [ENNReal.ofReal_mul hK0]
     _ = (nearHeatC V * ENNReal.ofReal G) *
           (s.card : ℝ≥0∞) * C := by
-      rw [hreal, ENNReal.ofReal_mul (by positivity :
-        0 ≤ (Real.sqrt 2) ^ Module.finrank ℝ V *
-          (baseHeatMass V)⁻¹)]
+      have hcoeff0 :
+          0 ≤ (Real.sqrt 2) ^ Module.finrank ℝ V *
+            (baseHeatMass V)⁻¹ :=
+        mul_nonneg (pow_nonneg (Real.sqrt_nonneg _) _)
+          (inv_nonneg.mpr (baseHeatMass_pos (V := V)).le)
+      rw [hreal, ENNReal.ofReal_mul hcoeff0]
       rfl
     _ ≤ (nearHeatC V * ENNReal.ofReal G) *
           ENNReal.ofReal
@@ -315,6 +344,7 @@ def heatEarly0 (t : ℝ) (f : ℝ × V → F) (x : V) : F :=
     heatKernel (t - z.1) (x - z.2) • f z
       ∂(stVolume : Measure (ℝ × V))
 
+omit [CompleteSpace F] in
 /-- The unconditional global early `Y⁰ -> C⁰` heat-potential estimate. -/
 theorem heatEarly0_norm {T t : ℝ} {C : ℝ≥0∞}
     (ht : 0 < t) (htT : t ≤ T) (f : ℝ × V → F) (x : V)

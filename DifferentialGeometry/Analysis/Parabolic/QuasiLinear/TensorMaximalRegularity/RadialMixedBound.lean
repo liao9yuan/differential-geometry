@@ -1,21 +1,13 @@
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.BallRetraction
-
-/-!
-# Mixed estimates through radial retraction
-
-This file packages the algebra which transfers a two-scale nonlinear estimate
-through a bounded linear symmetry operation followed by radial retraction.
-The application is the low-regularity Ricci--DeTurck dense extension, but the
-result is independent of geometry.
--/
-
+import DifferentialGeometry.Analysis.Calculus.BallRetraction
 noncomputable section
 
 open scoped InnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+section Normed
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
 variable {Z : Type*} [NormedAddCommGroup Z]
 
@@ -42,30 +34,34 @@ theorem norm_map_ball_le {R : ℝ} (hR : 0 ≤ R) (J : X →L[ℝ] Y) (x : X) :
   simpa only [one_mul] using
     mul_le_mul_of_nonneg_right hfac1 (norm_nonneg (J x))
 
-/-- Transfer one mixed two-scale estimate through radial retraction after a
-map which is bounded in both the high norm and the lower view `J`.
+end Normed
 
-The first new high-norm coefficient is the ordinary product of the high and
-low bounds.  The second comes from differentiating the radial scale factor and
-is proportional to `R⁻¹`; the lower coefficient is unchanged except for the
-low-norm bound. -/
-theorem radial_mixed
+section RadialMixed
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+variable {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+variable {Z : Type*} [NormedAddCommGroup Z]
+
+private theorem radial_mixed_of_ball_bound
     (J : X →L[ℝ] Y) (N : X → Z)
-    {R A B cH cL : ℝ}
+    {R A B cH cL κ : ℝ}
     (hR : 0 < R) (hA : 0 ≤ A) (hB : 0 ≤ B)
-    (hcH : 0 ≤ cH) (hcL : 0 ≤ cL)
+    (hcL : 0 ≤ cL)
     (x y sx sy : X)
     (hJx : ‖J sx‖ ≤ cL * ‖J x‖)
     (hJy : ‖J sy‖ ≤ cL * ‖J y‖)
     (hhigh : ‖sx - sy‖ ≤ cH * ‖x - y‖)
     (hlow : ‖J (sx - sy)‖ ≤ cL * ‖J (x - y)‖)
+    (hdistBall :
+      ‖ballRetraction R sx - ballRetraction R sy‖ ≤
+        κ * (cH * ‖x - y‖))
     (hbase :
       ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
         A * max ‖J (ballRetraction R sx)‖ ‖J (ballRetraction R sy)‖ *
             ‖ballRetraction R sx - ballRetraction R sy‖ +
           B * ‖J (ballRetraction R sx - ballRetraction R sy)‖) :
     ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
-      (A * cL * cH + B * (1 / R) * cL * cH) *
+      (A * cL * κ * cH + B * (1 / R) * cL * cH) *
           max ‖J x‖ ‖J y‖ * ‖x - y‖ +
         (B * cL) * ‖J (x - y)‖ := by
   have hRinv : 0 ≤ 1 / R := by positivity
@@ -85,11 +81,6 @@ theorem radial_mixed
         (hJx.trans (mul_le_mul_of_nonneg_left (le_max_left _ _) hcL))
     · exact (norm_map_ball_le hR.le J sy).trans
         (hJy.trans (mul_le_mul_of_nonneg_left (le_max_right _ _) hcL))
-  have hdistBall :
-      ‖ballRetraction R sx - ballRetraction R sy‖ ≤ cH * ‖x - y‖ := by
-    have hnonexp := (lipschitzWith_ballRetraction (X := X) hR.le).dist_le_mul sx sy
-    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at hnonexp
-    exact hnonexp.trans hhigh
   have hcorr :
       (1 / R) * max ‖J sx‖ ‖J sy‖ * ‖sx - sy‖ ≤
         (1 / R) * (cL * max ‖J x‖ ‖J y‖) *
@@ -109,7 +100,8 @@ theorem radial_mixed
   have hfirst :
       A * max ‖J (ballRetraction R sx)‖ ‖J (ballRetraction R sy)‖ *
           ‖ballRetraction R sx - ballRetraction R sy‖ ≤
-        A * (cL * max ‖J x‖ ‖J y‖) * (cH * ‖x - y‖) := by
+        A * (cL * max ‖J x‖ ‖J y‖) *
+          (κ * (cH * ‖x - y‖)) := by
     apply mul_le_mul
     · exact mul_le_mul_of_nonneg_left hmaxBall hA
     · exact hdistBall
@@ -120,14 +112,91 @@ theorem radial_mixed
         ≤ A * max ‖J (ballRetraction R sx)‖ ‖J (ballRetraction R sy)‖ *
               ‖ballRetraction R sx - ballRetraction R sy‖ +
             B * ‖J (ballRetraction R sx - ballRetraction R sy)‖ := hbase
-    _ ≤ A * (cL * max ‖J x‖ ‖J y‖) * (cH * ‖x - y‖) +
+    _ ≤ A * (cL * max ‖J x‖ ‖J y‖) *
+          (κ * (cH * ‖x - y‖)) +
           B * (cL * ‖J (x - y)‖ +
             (1 / R) * (cL * max ‖J x‖ ‖J y‖) *
               (cH * ‖x - y‖)) :=
       add_le_add hfirst (mul_le_mul_of_nonneg_left hlowBall hB)
-    _ = (A * cL * cH + B * (1 / R) * cL * cH) *
+    _ = (A * cL * κ * cH + B * (1 / R) * cL * cH) *
           max ‖J x‖ ‖J y‖ * ‖x - y‖ +
         (B * cL) * ‖J (x - y)‖ := by ring
+
+/-- Transfer a mixed two-scale estimate through radial retraction in an
+arbitrary real normed space.  The factor `2` is the general Lipschitz
+constant of radial retraction. -/
+theorem radial_mixed
+    (J : X →L[ℝ] Y) (N : X → Z)
+    {R A B cH cL : ℝ}
+    (hR : 0 < R) (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hcL : 0 ≤ cL)
+    (x y sx sy : X)
+    (hJx : ‖J sx‖ ≤ cL * ‖J x‖)
+    (hJy : ‖J sy‖ ≤ cL * ‖J y‖)
+    (hhigh : ‖sx - sy‖ ≤ cH * ‖x - y‖)
+    (hlow : ‖J (sx - sy)‖ ≤ cL * ‖J (x - y)‖)
+    (hbase :
+      ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
+        A * max ‖J (ballRetraction R sx)‖ ‖J (ballRetraction R sy)‖ *
+            ‖ballRetraction R sx - ballRetraction R sy‖ +
+          B * ‖J (ballRetraction R sx - ballRetraction R sy)‖) :
+    ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
+      (2 * A * cL * cH + B * (1 / R) * cL * cH) *
+          max ‖J x‖ ‖J y‖ * ‖x - y‖ +
+        (B * cL) * ‖J (x - y)‖ := by
+  have hdist :
+      ‖ballRetraction R sx - ballRetraction R sy‖ ≤
+        2 * (cH * ‖x - y‖) := by
+    have hret :=
+      (lipschitzWith_ballRetraction (X := X) hR.le).dist_le_mul sx sy
+    rw [dist_eq_norm, dist_eq_norm] at hret
+    exact hret.trans
+      (mul_le_mul_of_nonneg_left hhigh (by norm_num))
+  have h := radial_mixed_of_ball_bound J N hR hA hB hcL
+    x y sx sy hJx hJy hhigh hlow hdist hbase
+  convert h using 1 ; ring
+
+end RadialMixed
+
+section Hilbert
+
+variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+variable {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
+variable {Z : Type*} [NormedAddCommGroup Z]
+
+/-- In an inner-product space, the same mixed estimate has the sharp
+coefficient furnished by nonexpansiveness of radial retraction. -/
+theorem radial_mixed_one
+    (J : X →L[ℝ] Y) (N : X → Z)
+    {R A B cH cL : ℝ}
+    (hR : 0 < R) (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hcL : 0 ≤ cL)
+    (x y sx sy : X)
+    (hJx : ‖J sx‖ ≤ cL * ‖J x‖)
+    (hJy : ‖J sy‖ ≤ cL * ‖J y‖)
+    (hhigh : ‖sx - sy‖ ≤ cH * ‖x - y‖)
+    (hlow : ‖J (sx - sy)‖ ≤ cL * ‖J (x - y)‖)
+    (hbase :
+      ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
+        A * max ‖J (ballRetraction R sx)‖ ‖J (ballRetraction R sy)‖ *
+            ‖ballRetraction R sx - ballRetraction R sy‖ +
+          B * ‖J (ballRetraction R sx - ballRetraction R sy)‖) :
+    ‖N (ballRetraction R sx) - N (ballRetraction R sy)‖ ≤
+      (A * cL * cH + B * (1 / R) * cL * cH) *
+          max ‖J x‖ ‖J y‖ * ‖x - y‖ +
+        (B * cL) * ‖J (x - y)‖ := by
+  have hdist :
+      ‖ballRetraction R sx - ballRetraction R sy‖ ≤
+        1 * (cH * ‖x - y‖) := by
+    have hret :=
+      (lipschitzWith_one_ballRetraction (X := X) hR.le).dist_le_mul sx sy
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at hret
+    simpa only [one_mul] using hret.trans hhigh
+  have h := radial_mixed_of_ball_bound J N hR hA hB hcL
+    x y sx sy hJx hJy hhigh hlow hdist hbase
+  convert h using 1 ; ring
+
+end Hilbert
 
 end DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 

@@ -1,13 +1,23 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransition
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.FramedNormalMetric
+
+/-!
+# Normal-coordinate transition overlap
+
+Raw normal-coordinate overlap adapters and their orthonormally framed
+specializations.
+-/
 
 set_option autoImplicit false
 
 
-The transition compactness layer asks for chart-overlap, image, and cancellation
-facts separately.  For the canonical framed normal-coordinate transition these facts
-come from one exponential-image containment together with the two coordinate
-radius containments.  This file records those reusable low-level adapters.
--/
+
+
+
+
+
+
+
 
 noncomputable section
 
@@ -22,14 +32,174 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 universe u uE uH
 
+section Raw
+
+variable {E : Type uE} [NormedAddCommGroup E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+
+
+theorem normalOverlap_of_map
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
+    {U V : Set E}
+    (hUx :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x))
+    (hVy :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      V ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y))
+    (hmaps :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Set.MapsTo (fun z => expMapDiffeo (I := I) Y.metric x z) U
+        ((fun v : E =>
+          (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) '' V)) :
+    NormalOverlapOn (I := I) Y x y U := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  intro z hz
+  have hzx : z ∈ (expMapDiffeo (I := I) Y.metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x (by
+      simpa only [Metric.mem_ball, dist_zero_right] using hUx hz)
+  refine ⟨hzx, ?_⟩
+  obtain ⟨v, hv, hvz⟩ := hmaps hz
+  change (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M) =
+    expMapDiffeo (I := I) Y.metric x z at hvz
+  have hvy : v ∈ (expMapDiffeo (I := I) Y.metric y).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric y (by
+      simpa only [Metric.mem_ball, dist_zero_right] using hVy hv)
+  rw [normalChartAt_source_eq]
+  rw [← hvz, ← expMapDiffeo_apply_eq (I := I) Y.metric y hvy]
+  exact (expMapDiffeo (I := I) Y.metric y).map_source hvy
+
+
+
+theorem normalTrans_mapsTo
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
+    {U V : Set E}
+    (hVy :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      V ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y))
+    (hmaps :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Set.MapsTo (fun z => expMapDiffeo (I := I) Y.metric x z) U
+        ((fun v : E =>
+          (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) '' V)) :
+    Set.MapsTo (normalTransition (I := I) Y x y) U V := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  intro z hz
+  obtain ⟨v, hv, hvz⟩ := hmaps hz
+  change (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M) =
+    expMapDiffeo (I := I) Y.metric x z at hvz
+  have hvy : v ∈ (normalChartAt (I := I) Y.metric y).target :=
+    ball_subset_normalChartAt_target (I := I) Y.metric y (by
+      simpa only [Metric.mem_ball, dist_zero_right] using hVy hv)
+  change normalChartAt (I := I) Y.metric y
+      (expMapDiffeo (I := I) Y.metric x z) ∈ V
+  rw [← hvz, ← normalChartAt_symm_apply (I := I) Y.metric y hvy]
+  rw [normalChartAt_right_inv (I := I) Y.metric y hvy]
+  exact hv
+
+
+
+omit [NeZero (Module.finrank Real E)] in
+theorem NormalOverlapOn.decode
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
+    {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
+    {z : E} (hz : z ∈ U) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (normalChartAt (I := I) Y.metric y).symm
+        (normalTransition (I := I) Y x y z) =
+      (normalChartAt (I := I) Y.metric x).symm z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  obtain ⟨_hzx, hzy⟩ := h z hz
+  change (normalChartAt (I := I) Y.metric x).symm z ∈
+    (normalChartAt (I := I) Y.metric y).source at hzy
+  change (normalChartAt (I := I) Y.metric y).symm
+      (normalChartAt (I := I) Y.metric y
+        ((normalChartAt (I := I) Y.metric x).symm z)) =
+    (normalChartAt (I := I) Y.metric x).symm z
+  exact normalChartAt_left_inv (I := I) Y.metric y hzy
+
+
+
+omit [NeZero (Module.finrank Real E)] in
+theorem NormalOverlapOn.cancel
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
+    {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
+    {z : E} (hz : z ∈ U) :
+    normalTransition (I := I) Y y x
+        (normalTransition (I := I) Y x y z) = z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  obtain ⟨hzx, hzy⟩ := h z hz
+  change (normalChartAt (I := I) Y.metric x).symm z ∈
+    (normalChartAt (I := I) Y.metric y).source at hzy
+  have hzt : z ∈ (normalChartAt (I := I) Y.metric x).target := by
+    rwa [normalChartAt_target_eq]
+  change normalChartAt (I := I) Y.metric x
+      ((normalChartAt (I := I) Y.metric y).symm
+        (normalChartAt (I := I) Y.metric y
+          ((normalChartAt (I := I) Y.metric x).symm z))) = z
+  rw [normalChartAt_left_inv (I := I) Y.metric y hzy]
+  exact normalChartAt_right_inv (I := I) Y.metric x hzt
+
+end Raw
+
+section Framed
+
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
+/-- Chart-overlap input for orthonormally framed normal coordinates. -/
+def FramedNormalOverlapOn
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x y : Y.M) (U : Set E) : Prop :=
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  ∀ z : E, z ∈ U →
+    z ∈ (framedExpDiffeo (I := I) Y.metric x).source ∧
+      framedExpDiffeo (I := I) Y.metric x z ∈
+        (framedChartAt (I := I) Y.metric y).source
+
 private theorem mem_framed_src
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {z : E}
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) {z : E}
     (hz :
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
@@ -51,11 +221,10 @@ private theorem mem_framed_src
   apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric x
   simpa only [normalFrame_sqrt] using hz
 
-/-- Exponential-image containment between two coordinate balls implies the
-chart-overlap predicate used by transition compactness. -/
-theorem normalOverlap_of_map
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
-    {U V : Set E}
+/-- Exponential-image containment gives framed chart overlap. -/
+theorem framedOverlap_of_map
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x y : Y.M) {U V : Set E}
     (hUx :
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
@@ -75,7 +244,7 @@ theorem normalOverlap_of_map
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       Set.MapsTo (fun z => framedExpDiffeo (I := I) Y.metric x z) U
         (framedExpMap (I := I) Y.metric y '' V)) :
-    NormalOverlapOn (I := I) Y x y U := by
+    FramedNormalOverlapOn (I := I) Y x y U := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -85,20 +254,19 @@ theorem normalOverlap_of_map
     mem_framed_src (I := I) Y x (hUx hz)
   refine ⟨hzx, ?_⟩
   obtain ⟨v, hv, hvz⟩ := hmaps hz
-  change framedExpMap (I := I) Y.metric y v =
-    framedExpDiffeo (I := I) Y.metric x z at hvz
   have hvy : v ∈ (framedExpDiffeo (I := I) Y.metric y).source :=
     mem_framed_src (I := I) Y y (hVy hv)
-  change framedExpDiffeo (I := I) Y.metric x z ∈
-    (framedExpDiffeo (I := I) Y.metric y).target
-  rw [← hvz, ← framedExp_eq_expMap (I := I) Y.metric y hvy]
+  have heq : framedExpDiffeo (I := I) Y.metric y v =
+      framedExpDiffeo (I := I) Y.metric x z :=
+    (framedExp_eq_expMap (I := I) Y.metric y hvy).trans hvz
+  rw [← heq]
   exact (framedExpDiffeo (I := I) Y.metric y).map_source hvy
 
-
-
-theorem normalTrans_mapsTo
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M)
-    {U V : Set E}
+/-- Framed exponential-image containment maps a framed transition into the
+target coordinate set. -/
+theorem framedTrans_mapsTo
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x y : Y.M) {U V : Set E}
     (hVy :
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
@@ -112,36 +280,36 @@ theorem normalTrans_mapsTo
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       Set.MapsTo (fun z => framedExpDiffeo (I := I) Y.metric x z) U
         (framedExpMap (I := I) Y.metric y '' V)) :
-    Set.MapsTo (normalTransition (I := I) Y x y) U V := by
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    Set.MapsTo (framedTransition (I := I) Y.metric x y) U V := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro z hz
   obtain ⟨v, hv, hvz⟩ := hmaps hz
-  change framedExpMap (I := I) Y.metric y v =
-    framedExpDiffeo (I := I) Y.metric x z at hvz
   have hvy : v ∈ (framedExpDiffeo (I := I) Y.metric y).source :=
     mem_framed_src (I := I) Y y (hVy hv)
   have hvTarget : v ∈ (framedChartAt (I := I) Y.metric y).target := by
     change v ∈ (framedExpDiffeo (I := I) Y.metric y).source
     exact hvy
-  change framedChartAt (I := I) Y.metric y
-      (framedExpDiffeo (I := I) Y.metric x z) ∈ V
-  rw [← hvz, ← framedExp_eq_expMap (I := I) Y.metric y hvy]
+  have heq : framedExpDiffeo (I := I) Y.metric y v =
+      framedExpDiffeo (I := I) Y.metric x z :=
+    (framedExp_eq_expMap (I := I) Y.metric y hvy).trans hvz
+  rw [framedTrans_apply]
+  rw [← heq]
   change framedChartAt (I := I) Y.metric y
       ((framedChartAt (I := I) Y.metric y).symm v) ∈ V
-  have hyInv : framedChartAt (I := I) Y.metric y
-      ((framedChartAt (I := I) Y.metric y).symm v) = v :=
-    (framedChartAt (I := I) Y.metric y).right_inv hvTarget
-  exact hyInv.symm ▸ hv
-
-
+  exact (framedChartAt (I := I) Y.metric y).right_inv hvTarget |>.symm ▸ hv
 
 omit [NeZero (Module.finrank Real E)] in
-theorem NormalOverlapOn.decode
-    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
-    {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
+theorem FramedNormalOverlapOn.decode
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {x y : Y.M} {U : Set E}
+    (h : FramedNormalOverlapOn (I := I) Y x y U)
     {z : E} (hz : z ∈ U) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
@@ -161,15 +329,18 @@ theorem NormalOverlapOn.decode
     (framedChartAt (I := I) Y.metric x).symm z
   exact (framedChartAt (I := I) Y.metric y).left_inv hzy
 
-
-
 omit [NeZero (Module.finrank Real E)] in
-theorem NormalOverlapOn.cancel
-    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
-    {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
+theorem FramedNormalOverlapOn.cancel
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {x y : Y.M} {U : Set E}
+    (h : FramedNormalOverlapOn (I := I) Y x y U)
     {z : E} (hz : z ∈ U) :
-    normalTransition (I := I) Y y x
-        (normalTransition (I := I) Y x y z) = z := by
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    framedTransition (I := I) Y.metric y x
+        (framedTransition (I := I) Y.metric x y z) = z := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -184,7 +355,10 @@ theorem NormalOverlapOn.cancel
           ((framedChartAt (I := I) Y.metric x).symm z))) = z
   have hyInv := (framedChartAt (I := I) Y.metric y).left_inv hzy
   have hxInv := (framedChartAt (I := I) Y.metric x).right_inv hzt
-  exact (congrArg (fun q => framedChartAt (I := I) Y.metric x q) hyInv).trans hxInv
+  exact (congrArg (fun q => framedChartAt (I := I) Y.metric x q) hyInv).trans
+    hxInv
+
+end Framed
 
 end HCGCompactness
 end DifferentialGeometry

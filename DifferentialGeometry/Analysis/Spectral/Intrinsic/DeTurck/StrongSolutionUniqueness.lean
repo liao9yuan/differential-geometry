@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -41,6 +41,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [BoundarylessManifold I M] in
 /-- Two fixed points of the concrete mixed-view forcing map in the same force
 ball coincide whenever its exported mixed Lipschitz modulus is less than one. -/
 theorem mixForce_unique
@@ -84,6 +85,7 @@ theorem mixForce_unique
     mul_pos (sub_pos.mpr hsmall) hnorm
   nlinarith
 
+omit [BoundarylessManifold I M] in
 /-- Local uniqueness for two independently supplied zero-trace strong
 Ricci--DeTurck perturbation pairs under the same mixed forcing-ball budgets.
 The pairs need not have been constructed by the fixed-point solver. -/

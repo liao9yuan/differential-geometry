@@ -205,6 +205,8 @@ theorem punctCartan_mfd
   simpa only [punctCartan, expf, midf, logf, Function.comp_apply,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using hv
 
+omit [T2Space (TangentBundle J N)]
+  [ConnectedSpace N] in
 /-- The differential of the punctured Cartan map preserves the metric
 quadratic form. -/
 theorem punctCartan_sq
@@ -354,6 +356,8 @@ theorem punctCartan_sq
       (roundMetric (E := A) (n := n)).inner x Y Y
   exact htransfer'.trans hsource
 
+omit [T2Space (TangentBundle J N)]
+  [ConnectedSpace N] in
 /-- The differential of the punctured Cartan map preserves the full
 Riemannian inner product away from the antipode. -/
 theorem punctCartan_inner
@@ -385,6 +389,8 @@ theorem punctCartan_inner
     (mfderiv (𝓡 n) J (punctCartan g hEnorm p' i p) x)
     (punctCartan_sq hRound g hEnorm p p' i hi hR hx) Y Z
 
+omit [T2Space (TangentBundle J N)]
+  [ConnectedSpace N] in
 /-- The punctured Cartan map is a smooth local diffeomorphism away from the
 antipode. -/
 theorem punctCartan_local

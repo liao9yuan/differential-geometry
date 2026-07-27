@@ -16,6 +16,8 @@ coefficient field.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -26,10 +28,12 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -48,9 +52,9 @@ theorem rhs1_h2_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
@@ -103,7 +107,7 @@ theorem rhs1_h2_tame
   have hP3 : (∑ j ∈ Finset.range 4,
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) ≤ (C3 * A) ^ 2 := by
     simpa only [P] using hpath3 T T' A hA hT3 hT3' s hs
-  have hPbound : gFibreOpBound (I := I) (M := M) g₀
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ P) δ₀ := by
     have h := convexPerturbation_gFibreOpBound
       (I := I) (M := M) g₀ T T' hδ hδ' hs.1 hs.2
@@ -121,14 +125,14 @@ theorem rhs1_h2_tame
   let LB : ℝ := L0 R + L1 R * A
   have hRB : 0 ≤ RB := add_nonneg (hR0 R hR) (mul_nonneg (hR1 R hR) hA)
   have hLB : 0 ≤ LB := add_nonneg (hL0 R hR) (mul_nonneg (hL1 R hR) hA)
-  have hRicRaw := hric g₁ P htie (hδ_le := le_rfl) hδ₀_nonneg hPbound
+  have hRicRaw := hric g₁ P htie (_hδ_le := le_rfl) hδ₀_nonneg hPbound
     (C2 * R) (C3 * A) hlow hhigh hP2 hP3
   have hRic : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 3 2 i
         (linearizedRicciConnDiffOrder1CoeffField
           (I := I) (M := M) g₀ g₁)‖ ^ 2) ≤ RB ^ 2 := by
     simpa only [RB, R0, R1, mul_assoc] using hRicRaw
-  have hLieRaw := hlie g₁ P htie (hδ_le := le_rfl) hδ₀_nonneg hPbound
+  have hLieRaw := hlie g₁ P htie (_hδ_le := le_rfl) hδ₀_nonneg hPbound
     (C2 * R) (C3 * A) hlow hhigh hP2 hP3
   have hLie : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 3 2 i
@@ -157,9 +161,9 @@ theorem rhs1_path_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →

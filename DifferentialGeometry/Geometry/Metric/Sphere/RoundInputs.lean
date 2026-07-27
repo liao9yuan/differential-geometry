@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundMetric
 
 set_option autoImplicit false

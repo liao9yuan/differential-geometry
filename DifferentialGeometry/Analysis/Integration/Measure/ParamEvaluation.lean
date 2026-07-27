@@ -382,7 +382,6 @@ lemma paramChartMap_contDiffOn
   exact contMDiffOn_iff_contDiffOn.mp
     (by simpa [paramChartMap, Function.comp_def] using hcomp)
 
-set_option linter.unusedSectionVars false in
 /-- The parametrized Gram matrix is continuous on any open source subset whose
 image lies in one canonical chart. -/
 lemma paramGram_contOn
@@ -433,15 +432,9 @@ lemma paramGram_contOn
       paramGramMatrix_pullback_eq_sum (I := I) g x₀ Ψ
         (hs_source hw) (hs_chart w hw) i j).restrict
 
-set_option linter.unusedSectionVars false in
 /-- The parametrized density is continuous on any open source subset whose image
 lies in one canonical chart.
-
-
-
-
-
-
+-/
 lemma paramDensity_continuousOn_chart
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
@@ -468,7 +461,6 @@ lemma paramDensity_continuousOn_chart
     paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ
       (hs_source hw) (hs_chart w hw))
 
-set_option linter.unusedSectionVars false in
 /-- The parametrized density is continuous on the full source of a partial
 diffeomorphism. -/
 lemma paramDensity_contOn
@@ -501,7 +493,6 @@ lemma paramDensity_contOn
   exact (hcontU.continuousAt (hUopen.mem_nhds hwU)).comp
     continuous_subtype_val.continuousAt
 
-set_option linter.unusedSectionVars false in
 /-- Measurability form of chart-local continuity of the parametrized density. -/
 lemma aemeasurable_ofReal_paramDensity_on_chart
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -1418,7 +1409,6 @@ theorem riemannianVolumeMeasure_image_param_eq
   exact riemannianMeasure_image_param_eq (I := I) g (chartAtlasPOU I M)
     (chartAtlasPOU_isSubordinate I M) Ψ hB_meas hB_source
 
-set_option linter.unusedSectionVars false in
 /-- A pointwise lower bound for a parametrized Riemannian density gives the
 corresponding lower bound for the volume of the parametrized image. -/
 theorem param_vol_ge
@@ -1443,15 +1433,8 @@ theorem param_vol_ge
       intro w hw
       exact ENNReal.ofReal_le_ofReal (hdens w hw)
 
-set_option linter.unusedSectionVars false in
 /-- Set-form V0 evaluation formula on a measurable target subset.
-
-
-
-
-
-
-
+-/
 theorem riemannianVolumeMeasure_param_target_eq
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

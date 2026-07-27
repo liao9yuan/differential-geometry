@@ -121,7 +121,12 @@ private theorem sourceD2_apply (v w : V) (f : ℝ × V → ℝ)
     ((iteratedFDeriv ℝ 2 (fun p : ℝ × V => f (p + (s, 0))) (J y))
       fun i => J (mV i) : ℂ)
   rw [iteratedFDeriv_comp_add_right]
-  simp [x, mW, mV, P, J, spaceDir]
+  simp only [ofRealCLM_apply, ofReal_inj]
+  suffices h :
+    ((iteratedFDeriv ℝ 2 f (s, y))
+      fun i => (![WithLp.toLp 2 (0, v), WithLp.toLp 2 (0, w)] i).ofLp) =
+        (iteratedFDeriv ℝ 2 f (s, y)) fun i => (0, ![v, w] i)
+    by simpa [x, mW, mV, P, J, spaceDir] using h
   congr 1
   funext i
   fin_cases i <;> rfl

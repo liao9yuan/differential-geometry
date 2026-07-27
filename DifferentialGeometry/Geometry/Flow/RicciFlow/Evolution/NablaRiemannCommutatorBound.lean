@@ -80,11 +80,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
-private instance tensor0SModelNormedSpace_local {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace Real (Tensor0SModel s Real E) :=
   Tensor0SBundle.tensor0SModel_normedSpace s
 
-private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s Real E) := inferInstance
 
 

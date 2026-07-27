@@ -14,7 +14,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -35,6 +35,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance connDiffJointTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance connDiffJointTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance connDiffJointTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance connDiffJointTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in

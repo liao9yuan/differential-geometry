@@ -166,7 +166,7 @@ theorem velocity_converges_of_bounded_accel_Ioo
         rwa [mul_one] at this
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartChristoffelContraction_continuousOn_prod
@@ -198,7 +198,7 @@ theorem chartChristoffelContraction_continuousOn_prod
   exact (hΓp.mul hci.continuousOn).mul hcj.continuousOn
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint
@@ -242,7 +242,7 @@ theorem chartVelocity_converges_at_finite_endpoint
     hderiv_pf hbound_pf
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint_Ioo
@@ -293,7 +293,7 @@ private def chartGramQuad (g : SmoothRiemannianMetric I M) (y : M)
       chartCoord (E := E) i V * chartCoord (E := E) j V
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_eq_inner
@@ -311,7 +311,7 @@ private lemma chartGramQuad_eq_inner
   rw [chartGramOnE_def, hx_def]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_pos
@@ -339,7 +339,7 @@ private lemma chartGramQuad_pos
   exact g.pos x _ hsymm_ne
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_smul
@@ -355,7 +355,7 @@ private lemma chartGramQuad_smul
   ring
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_continuousOn
@@ -376,7 +376,7 @@ private lemma chartGramQuad_continuousOn
   exact (hG.mul hci.continuousOn).mul hcj.continuousOn
 
 omit [I.Boundaryless]
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma exists_chartGramQuad_lower_bound
@@ -435,7 +435,7 @@ private lemma exists_chartGramQuad_lower_bound
           mul_le_mul_of_nonneg_left hmin hr2_nn
 
 omit
-  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_bound_near_limit

@@ -23,17 +23,19 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [CompactSpace M] in
 /-- The inverse of a harmonic-map heat-flow gauge pulls a Ricci flow back to
 a Ricci--DeTurck solution relative to the fixed target metric.
 

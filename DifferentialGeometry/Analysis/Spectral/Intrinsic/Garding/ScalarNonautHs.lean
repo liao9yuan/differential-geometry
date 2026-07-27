@@ -24,7 +24,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -212,9 +212,9 @@ theorem lapHs_core
           ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
             (iteratedCovGrad (I := I) q 0 0 1 W) := by
       exact iterCovGradHs_core (I := I) (M := M) q 0 1 m W
-    let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+    let X := operatorFieldApply (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 2 W)
-    let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+    let Y := operatorFieldApply (I := I) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 W)
     have hsub :
         ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =
@@ -299,9 +299,9 @@ theorem lapHs_eq
         ccTensorToHs (I := I) (M := M) q 1 (m : ℝ)
           (iteratedCovGrad (I := I) q 0 0 1 U) := by
     exact iterCovGradHs_core (I := I) (M := M) q 0 1 m U
-  let X := appCc (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
+  let X := operatorFieldApply (I := I) q 2 0 (scalarTraceCoeff (I := I) q h)
     (iteratedCovGrad (I := I) q 0 0 2 U)
-  let Y := appCc (I := I) q 1 0 (connTraceCoeff (I := I) q h)
+  let Y := operatorFieldApply (I := I) q 1 0 (connTraceCoeff (I := I) q h)
     (iteratedCovGrad (I := I) q 0 0 1 U)
   have hsub :
       ccTensorToHs (I := I) (M := M) q 0 (m : ℝ) (X - Y) =

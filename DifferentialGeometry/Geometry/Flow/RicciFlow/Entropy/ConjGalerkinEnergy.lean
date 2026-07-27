@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}

@@ -376,17 +376,14 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-def tensorRSSpace_totalSpace_topologicalSpace (r s : ℕ) :
+@[reducible] def tensorRSSpace_totalSpace_topologicalSpace (r s : ℕ) :
     TopologicalSpace (Bundle.TotalSpace (TensorRSModel r s ℝ E)
       (TensorRSSpace r s I (M := M))) :=
   Tensor0SBundle.tensorRSBundle_topology r s
-
-def tensorRSSpace_fiberBundle (r s : ℕ) :
+@[reducible] def tensorRSSpace_fiberBundle (r s : ℕ) :
     FiberBundle (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M)) :=
   Tensor0SBundle.tensorRSBundle_fiber r s
-
-def tensorRSSpace_vectorBundle (r s : ℕ) :
+@[reducible] def tensorRSSpace_vectorBundle (r s : ℕ) :
     VectorBundle ℝ (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M)) :=
   Tensor0SBundle.tensorRSBundle_vector r s
 

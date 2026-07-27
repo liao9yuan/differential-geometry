@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.FineInvGram
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.RetractionParametrix
+import DifferentialGeometry.Geometry.Operator.VossWeyl
 
 /-!
 # The uniformly small principal freezing error
@@ -21,11 +22,12 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open scoped ContDiff Manifold Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -100,6 +102,10 @@ theorem fineOsc_mul_lt {r₀ L K₂ : ℝ}
       rw [div_lt_iff₀ hden]
       nlinarith
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- On the fixed fine ball every inverse-Gram coefficient differs from its
 frozen value by at most `L` times the fixed fine radius, uniformly over the
 metric family.  Retaining this constant is what later yields a strict
@@ -129,7 +135,7 @@ theorem invGramOscBound
     (hR_nn := le_of_lt hRpos) (hR := fineOscRadius_le hr₀)
     hcollar hL k hx hy i j
   have hynorm : ‖y - extChartAt I α x‖ ≤ fineOscRadius r₀ L K₂ := by
-    simpa only [dist_eq_norm] using hy
+    simpa only [Metric.mem_closedBall, dist_eq_norm] using hy
   calc
     |chartInvGramOnE (I := I) (gSeq k) α i j y -
         chartInvGramOnE (I := I) (gSeq k) α i j
@@ -138,6 +144,10 @@ theorem invGramOscBound
     _ ≤ L * fineOscRadius r₀ L K₂ :=
       mul_le_mul_of_nonneg_left hynorm hL_nn
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- On the fixed fine ball every inverse-Gram coefficient differs from its
 frozen value by strictly less than one quarter, uniformly over the metric
 family. -/
@@ -170,15 +180,15 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 /-- The pointwise principal freezing error acting on a finite Hessian array. -/
 def principalOsc
-    (a a₀ : Fin n → Fin n → ℝ) (D²u : Fin n → Fin n → F) : F :=
-  ∑ i, ∑ j, (a i j - a₀ i j) • D²u i j
+    (a a₀ : Fin n → Fin n → ℝ) (D2u : Fin n → Fin n → F) : F :=
+  ∑ i, ∑ j, (a i j - a₀ i j) • D2u i j
 
 /-- Triangle inequality for the principal freezing error, before inserting
 any coefficient-smallness estimate. -/
 theorem principalOsc_bound
-    (a a₀ : Fin n → Fin n → ℝ) (D²u : Fin n → Fin n → F) :
-    ‖principalOsc a a₀ D²u‖ ≤
-      ∑ i, ∑ j, |a i j - a₀ i j| * ‖D²u i j‖ := by
+    (a a₀ : Fin n → Fin n → ℝ) (D2u : Fin n → Fin n → F) :
+    ‖principalOsc a a₀ D2u‖ ≤
+      ∑ i, ∑ j, |a i j - a₀ i j| * ‖D2u i j‖ := by
   classical
   rw [principalOsc]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
@@ -188,34 +198,38 @@ theorem principalOsc_bound
 /-- A common nonnegative entrywise coefficient bound controls the complete
 second-order freezing arm against the `ℓ¹` Hessian size. -/
 theorem principalOsc_const
-    (a a₀ : Fin n → Fin n → ℝ) (D²u : Fin n → Fin n → F)
+    (a a₀ : Fin n → Fin n → ℝ) (D2u : Fin n → Fin n → F)
     {δ : ℝ}
     (ha : ∀ i j, |a i j - a₀ i j| ≤ δ) :
-    ‖principalOsc a a₀ D²u‖ ≤
-      δ * ∑ i, ∑ j, ‖D²u i j‖ := by
-  refine (principalOsc_bound a a₀ D²u).trans ?_
+    ‖principalOsc a a₀ D2u‖ ≤
+      δ * ∑ i, ∑ j, ‖D2u i j‖ := by
+  refine (principalOsc_bound a a₀ D2u).trans ?_
   calc
-    ∑ i, ∑ j, |a i j - a₀ i j| * ‖D²u i j‖
-        ≤ ∑ i, ∑ j, δ * ‖D²u i j‖ := by
+    ∑ i, ∑ j, |a i j - a₀ i j| * ‖D2u i j‖
+        ≤ ∑ i, ∑ j, δ * ‖D2u i j‖ := by
           refine Finset.sum_le_sum fun i _ => ?_
           exact Finset.sum_le_sum fun j _ =>
             mul_le_mul_of_nonneg_right (ha i j) (norm_nonneg _)
-    _ = ∑ i, δ * ∑ j, ‖D²u i j‖ := by
+    _ = ∑ i, δ * ∑ j, ‖D2u i j‖ := by
       apply Finset.sum_congr rfl
       intro i hi
       rw [Finset.mul_sum]
-    _ = δ * ∑ i, ∑ j, ‖D²u i j‖ := by
+    _ = δ * ∑ i, ∑ j, ‖D2u i j‖ := by
       rw [Finset.mul_sum]
 
 /-- Entrywise coefficient oscillation at most one quarter makes the complete
 second-order freezing arm at most one quarter of the `ℓ¹` Hessian size. -/
 theorem principalOscQuarter
-    (a a₀ : Fin n → Fin n → ℝ) (D²u : Fin n → Fin n → F)
+    (a a₀ : Fin n → Fin n → ℝ) (D2u : Fin n → Fin n → F)
     (ha : ∀ i j, |a i j - a₀ i j| ≤ (1 : ℝ) / 4) :
-    ‖principalOsc a a₀ D²u‖ ≤
-      ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D²u i j‖ :=
-  principalOsc_const a a₀ D²u ha
+    ‖principalOsc a a₀ D2u‖ ≤
+      ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D2u i j‖ :=
+  principalOsc_const a a₀ D2u ha
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The actual inverse-Gram freezing arm retains the strict uniform constant
 `L * fineOscRadius r₀ L K₂`. -/
 theorem invGramB2Bound
@@ -233,18 +247,22 @@ theorem invGramB2Bound
     (k : ι) {x : M} (hx : x ∈ K) {y : E}
     (hy : y ∈ Metric.closedBall (extChartAt I α x)
       (fineOscRadius r₀ L K₂))
-    (D²u : Fin (Module.finrank ℝ E) →
+    (D2u : Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → F) :
     ‖principalOsc
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j y)
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j
-          (extChartAt I α x)) D²u‖ ≤
-      (L * fineOscRadius r₀ L K₂) * ∑ i, ∑ j, ‖D²u i j‖ := by
+          (extChartAt I α x)) D2u‖ ≤
+      (L * fineOscRadius r₀ L K₂) * ∑ i, ∑ j, ‖D2u i j‖ := by
   apply principalOsc_const
   intro i j
   exact invGramOscBound (I := I) (M := M) gSeq α
     hr₀ hL_nn hK₂_nn hcollar hL k hx hy i j
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The actual inverse-Gram freezing arm has the uniform one-quarter bound on
 the fixed fine ball.  This is the pointwise `B₂` estimate used by the
 retraction--coretraction parametrix. -/
@@ -263,22 +281,22 @@ theorem invGramB2Quarter
     (k : ι) {x : M} (hx : x ∈ K) {y : E}
     (hy : y ∈ Metric.closedBall (extChartAt I α x)
       (fineOscRadius r₀ L K₂))
-    (D²u : Fin (Module.finrank ℝ E) →
+    (D2u : Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → F) :
     ‖principalOsc
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j y)
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j
-          (extChartAt I α x)) D²u‖ ≤
-      ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D²u i j‖ := by
+          (extChartAt I α x)) D2u‖ ≤
+      ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D2u i j‖ := by
   calc
     ‖principalOsc
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j y)
         (fun i j => chartInvGramOnE (I := I) (gSeq k) α i j
-          (extChartAt I α x)) D²u‖
-        ≤ (L * fineOscRadius r₀ L K₂) * ∑ i, ∑ j, ‖D²u i j‖ :=
+          (extChartAt I α x)) D2u‖
+        ≤ (L * fineOscRadius r₀ L K₂) * ∑ i, ∑ j, ‖D2u i j‖ :=
           invGramB2Bound (I := I) (M := M) gSeq α hr₀ hL_nn hK₂_nn
-            hcollar hL k hx hy D²u
-    _ ≤ ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D²u i j‖ :=
+            hcollar hL k hx hy D2u
+    _ ≤ ((1 : ℝ) / 4) * ∑ i, ∑ j, ‖D2u i j‖ :=
       mul_le_mul_of_nonneg_right (fineOsc_coeff_lt hL_nn hK₂_nn).le
         (Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => norm_nonneg _)
 

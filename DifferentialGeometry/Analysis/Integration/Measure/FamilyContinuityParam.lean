@@ -63,7 +63,9 @@ private lemma density_cont_param
   exact Real.continuous_sqrt.comp_continuousOn hdet
 
 set_option maxHeartbeats 4000000 in
+-- The compact chart estimate expands a parametric density through a finite atlas.
 private theorem chart_int_cont_param
+    [FirstCountableTopology P]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : P → SmoothRiemannianMetric I M}
     {f : P → M → ℝ} {K : Set P}
@@ -196,10 +198,9 @@ private theorem chart_int_cont_param
   simpa only [F, ρ, symm, target, μ] using hdct
 
 set_option maxHeartbeats 1600000 in
-/-- On a compact parameter set, entrywise joint continuity of a metric family
-and joint continuity of a scalar integrand imply continuity of its integral
-against the moving Riemannian volume measure. -/
+-- The global statement unfolds the finite atlas decomposition at each parameter.
 theorem integral_family_cont_param
+    [FirstCountableTopology P]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : P → SmoothRiemannianMetric I M}
     {f : P → M → ℝ} {K : Set P}

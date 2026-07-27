@@ -29,7 +29,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 open Set Topology TopologicalSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
@@ -239,7 +239,7 @@ def ballPullbackMetric {j l : ℕ}
   exact Diffeomorph.pullbackMetric (I := I) (g.restrictOpen (I := I) W) F
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_inner {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -291,7 +291,7 @@ def nestedBallPullback {j l m : ℕ}
   exact Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_trans {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -342,7 +342,7 @@ theorem ballPullback_trans {j l m : ℕ}
   rfl
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_congr {j l : ℕ}
     (Φ Ψ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hΦ : (U : Set (M j)) ⊆ Φ.source)
@@ -365,7 +365,7 @@ theorem ballPullback_congr {j l : ℕ}
 
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_cast {j l m : ℕ} (h : l = m)
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (g : ∀ n, SmoothRiemannianMetric I (M n))
@@ -376,7 +376,7 @@ theorem ballPullback_cast {j l m : ℕ} (h : l = m)
   rfl
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_assoc
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -401,7 +401,7 @@ noncomputable def chainPullbackSeq
   ballPullbackMetric (chainComp (I := I) (Mf := M) Ψ j k) U (hU k) (g (j + k))
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_zero
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -433,7 +433,7 @@ theorem chainPullback_zero
 
 
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_step
     [NeZero (Module.finrank ℝ E)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -524,7 +524,7 @@ noncomputable def chainBallSystem
 
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)]
-    [∀ (j : ℕ), T2Space (M j)] in
+    [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless] in
 theorem chainMetricCocycle
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     [∀ n, SigmaCompactSpace (U n)]
@@ -595,7 +595,6 @@ section ApproxData
 
 open Bundle
 
-variable [∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (M j)]
 variable [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
 variable [∀ j, IsRiemannianManifold I (M j)]
 variable [NeZero (Module.finrank ℝ E)]
@@ -799,7 +798,8 @@ theorem chainPrefix_cov_le
     (chainCompAssoc_eq (I := I) (Mf := M) Ψ j a b)]
   exact prefixTail_cov_le Φ Θ U hpre hnext hUK gMid g D hq1 hqp x
 
-omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [I.Boundaryless]
+  [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 theorem ballPullback_lower {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -2334,8 +2334,8 @@ theorem exists_limits_close
     have hleft' := Filter.Tendsto.congr' hevent hleft
     exact tendsto_nhds_unique hleft' hright
 
-set_option linter.unusedSectionVars false in
-omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+omit [I.Boundaryless]
+  [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
 theorem half_ambient_le_tail
     (b : ∀ j, M j) (j₀ : ℕ)

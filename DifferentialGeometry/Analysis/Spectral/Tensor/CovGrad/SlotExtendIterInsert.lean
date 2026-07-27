@@ -13,7 +13,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Tensor0SBundle
-open scoped Manifold Topology ContDiff
+open scoped Manifold Topology ContDiff InnerProductSpace
 
 namespace DifferentialGeometry
 namespace Integral
@@ -21,13 +21,30 @@ namespace Connection
 
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
+
+private local instance slotIterTensorRSModelNormedAddCommGroup (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
+
+private local instance slotIterTensorRSModelNormedSpace (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance slotIterTensorRSTotalSpaceTopology (r s : ℕ) :
+    TopologicalSpace
+      (TotalSpace (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance slotIterTensorRSFiberBundle (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
 
 
 omit [CompleteSpace E] in

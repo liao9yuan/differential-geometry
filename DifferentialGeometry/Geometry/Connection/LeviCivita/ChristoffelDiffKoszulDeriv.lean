@@ -37,7 +37,7 @@ namespace Connection
 
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -45,7 +45,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 /-- **The Christoffel-difference Koszul identity in `nabla0SFun` currency** (the a=0 differentiation
 base).  Specialisation of the Tensor-layer `koszul_difference` to the Levi-Civita pair `(LC g₁, LC g₂)`:
 pairing the connection difference `A = difference (LC g₁) (LC g₂)` against `g₁` equals the symmetric
@@ -86,7 +87,8 @@ theorem connDiff_koszul_nabla
   exact Tensor0SBundle.koszul_difference (I := I)
     (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) g₁ hmc htf htf' X Y Z
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 /-- Smoothness of `∇₂g₁ = totalNabla0SFun 2 (LC g₂) (metricTensorField g₁)` as a `(0,3)`-field, so it
 can be bundled via `totalNabla0S` and differentiated a second time.  From `totalNabla0S_reg` and the
 local smoothness of the `g₂`-Levi-Civita connection. -/
@@ -100,7 +102,8 @@ theorem metricField_totalReg
     (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g₂)
     (Tensor0SBundle.metricTensorField (I := I) g₁)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- **One combo term of the differentiated Koszul RHS.**  The directional derivative along `W` of a
 `∇₂g₁` combo term (direction `V 0`, slots `V 1, V 2`) equals the second covariant derivative `∇₂²g₁`
 (`nabla0SFun 3 (LC g₂) W (∇₂g₁-field)`) plus the Leibniz slot corrections, by
@@ -148,7 +151,9 @@ theorem nablaMetric_combo_extDeriv
     (LeviCivita (I := I) g₂) W V α x, hbridge]
   abel
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M]
+  [T2Space M] in
 /-- **The LHS metric-compatibility Leibniz** for the differentiated Koszul identity.  The directional
 derivative along `W` of the `g₁`-contraction `p ↦ g₁(a p, b p)` (slots `a = V 0`, `b = V 1`) equals the
 first covariant derivative `(∇₂g₁)(a,b)` (`nabla0SFun 2 (LC g₂) W (metricTensorField g₁)`) plus the two
@@ -175,7 +180,7 @@ theorem metric_leibniz_extDeriv
     (LeviCivita (I := I) g₂) W V (Tensor0SBundle.metricTensorField (I := I) g₁) x]
   abel
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- **Field-eval form of the a=0 Koszul identity.**  Pairing the connection difference
 `A = difference (LC g₁) (LC g₂)` against `g₁` equals the symmetric Koszul combination of the bundled
 `∇₂g₁` field `totalNabla0S 2 (LC g₂) (metricTensorField g₁)`, evaluated on the three cyclic slot
@@ -218,6 +223,7 @@ private theorem koszul_field
   rw [connDiff_koszul_nabla (I := I) g₁ g₂ Q P R,
     hbr Q (P x) (R x), hbr P (Q x) (R x), hbr R (Q x) (P x)]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- **The differentiated Christoffel-difference Koszul identity (B2 P2.a).**  Differentiating the a=0
 Koszul identity `2 g₁(A(X,Y), Z) = ∇₂g₁ combo` covariantly along `W` under `∇₂ = LeviCivita g₂`:
 `2 g₁(covDerivConnDiff g₂ g₁ W X Y x, Z) = [∇₂²g₁ combo] − 2 (∇₂_W g₁)(A(X,Y), Z)`, with

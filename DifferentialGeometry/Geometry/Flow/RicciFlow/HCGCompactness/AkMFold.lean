@@ -1426,6 +1426,7 @@ theorem claim1Const_nonneg (C0 KR K : Real) (m : ℕ) :
             (mul_nonneg (ih c (Finset.mem_range.mp hc)) (by linarith [le_max_right K 0])))
           (le_max_right K 0)
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- **Abstract Claim 1**: on the smooth frame domain, if the contraction field `A∗g`
 norm-realizes the metric derivative up to a constant (`hrelB`, the Koszul/eq-3.7 input:
 `|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` — geometrically `Ǎ = A∗g` is a constant slot-permutation
@@ -1561,6 +1562,7 @@ theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
           rw [claim1Const_eq, hSdef]
           ring
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_abstract_bound`. -/
 theorem claim1_abstract {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1590,6 +1592,7 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
   exact ⟨claim1Const C0 KR K m, claim1Const_nonneg C0 KR K m,
     claim1_abstract_bound hu frame chr hframe hchr C0 KR K m⟩
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- **Claim 1** (component form, with the lowered-Koszul relation explicit).  The connection
 difference `A` lowered by `g` (`contrTail A g`) is, on `u`, a fixed three-term slot
 combination of `∇g` (`hkoszul` — the eq-3.7 / `connDiffCompEq` content in this frame, with
@@ -1694,6 +1697,7 @@ theorem claim1_bound {u : Set M} (hu : IsOpen u)
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `claim1_bound`. -/
 theorem claim1 {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)

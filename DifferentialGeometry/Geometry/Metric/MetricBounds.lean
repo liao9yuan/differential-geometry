@@ -30,6 +30,15 @@ lemma metric_inner_self_nonneg
   · exact (g.pos x v hv0).le
 
 omit [Module.Finite ℝ E] in
+lemma metric_inner_smul_self
+    (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
+    (v : TangentSpace I x) :
+    g.inner x (c • v) (c • v) = c ^ 2 * g.inner x v v := by
+  rw [(g.inner x).map_smul, ContinuousLinearMap.smul_apply,
+    (g.inner x v).map_smul, smul_eq_mul, smul_eq_mul]
+  ring
+
+omit [Module.Finite ℝ E] in
 lemma metric_inner_cauchy_schwarz_sq
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (g.inner x v w) ^ 2 ≤ g.inner x v v * g.inner x w w := by
@@ -119,7 +128,7 @@ lemma abs_metric_inner_le_sqrt_metric_quadratic
   rw [hsqrt_mul] at h_le_sqrt
   exact h_le_sqrt
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 /-- The square root of the metric quadratic form satisfies the triangle
 inequality on each tangent fibre. -/
 lemma gNorm_add_le

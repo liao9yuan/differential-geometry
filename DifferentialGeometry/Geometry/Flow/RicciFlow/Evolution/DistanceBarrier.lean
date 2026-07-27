@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MetricTimeCompare
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Calabi upper supports for evolving Riemannian distance
@@ -31,16 +30,19 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open scoped Manifold ContDiff Topology Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
-  [InnerProductSpace Real E] [CompleteSpace E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [SigmaCompactSpace M] [T2Space M]
 
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I 2 M]
+  [SigmaCompactSpace M] in
 /-- The time derivative of the length of a fixed regular path under Ricci flow.
 
 Only the metric evolves: the path and its velocity are held fixed.  The
@@ -258,6 +260,9 @@ theorem pathLength_timeDeriv_of_ricciFlow
   rw [← hderiv]
   simpa only [Variation.arcLength, F, G, Ric, v] using hkey.2
 
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I 2 M]
+  [SigmaCompactSpace M] in
 /-- A quadratic Ricci bound gives the expected lower bound for the time
 derivative of the length of a fixed regular path. -/
 theorem pathLength_deriv_ge
@@ -392,6 +397,7 @@ theorem pathLength_deriv_ge
     ← intervalIntegral.integral_const_mul]
   simpa only [Q, Ric, G, v] using hmono
 
+omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- An intrinsic geodesic with positive launch speed has nonzero velocity at
@@ -459,6 +465,7 @@ private structure ScaledDistSupport
         (I := I) (flowG (I := I) S) T
         (fun _ y => (0 : TangentSpace I y)) rho t x
 
+omit [IsManifold I 1 M] [IsManifold I 2 M] [SigmaCompactSpace M] in
 /-- Choose the dimension-normalized transverse Ricci comparison coefficient. -/
 private theorem exists_calabi_coeff
     (g : SmoothRiemannianMetric I M)
@@ -551,6 +558,7 @@ private theorem exists_calabi_coeff
       nlinarith
   exact ⟨q, hq, hRicLower, hnq⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Convert the scalar curvature bound into the uniform quadratic Ricci bound. -/
 private theorem ricci_quad_of_curv
     {D : RealTimeInterval}
@@ -629,6 +637,7 @@ private structure CalabiFlowCore
         (S.base.metric t) rho0 x ≤
       2 * n / r + n * q
 
+omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Construct the unscaled Calabi support and its broken-path time estimate. -/
@@ -906,6 +915,7 @@ private theorem calabi_core_of_sol
     exact hvSupport_t y
   · exact hrho0_x.trans hr.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
 /-- Multiply the unscaled Calabi core by the exponential Ricci-flow weight. -/
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
@@ -1071,6 +1081,7 @@ private theorem CalabiFlowCore.scale
   rw [hcoef]
   exact hpar
 
+omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Assemble the fixed-time Calabi core and apply the exponential time weight

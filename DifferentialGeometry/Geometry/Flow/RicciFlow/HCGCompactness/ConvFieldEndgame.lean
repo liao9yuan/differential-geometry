@@ -8,11 +8,15 @@ set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 
-Assembles the DONE Bricks 4–7a into the theorem-facing upgrade
+/-!
+# Convergent-field endgame
+
+Assembles Bricks 4–7a into the theorem-facing upgrade
 `CompactnessConclusion X`, modulo the THREE tracked inputs (Thm 3.9's `mc`, the
 moving-Shi bound `hShiT`, and the joint regularity `hsmooth` of the limit) plus
 the mc-comparison data the plan sanctions (`hequivT`/`hrel`/`hcp`/`hcovSrc`/
 `hlipG`/`hkcont`).
+-/
 
 
 
@@ -34,12 +38,13 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Compatibility wrapper promoting the pointwise closed-window scalar
 producer to all carrier times when the carrier lies in that one window. -/
 theorem ConvOut.scalar_conv
@@ -115,6 +120,7 @@ theorem ConvOut.scalar_conv
       hcovTail co (hcarrier ht) x
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Compatibility wrapper promoting the pointwise closed-window squared
 Ricci-norm producer to all carrier times. -/
 theorem ConvOut.ricNorm_conv
@@ -1013,18 +1019,18 @@ theorem flowLimit_of_reg
       infer_instance
     let co := endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax
       hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG
-    ∀ (hsmooth : MetricFamilySmoothOn (I := I) (M := mc.limit.M) X.D
+    ∀ (_hsmooth : MetricFamilySmoothOn (I := I) (M := mc.limit.M) X.D
           ({ base := { metric := co.gInf } } :
             SolutionOn (I := I) (M := mc.limit.M) X.D).family)
-      (hscalarCont : ContinuousOn
+      (_hscalarCont : ContinuousOn
         (fun q : Real × mc.limit.M ↦ metricScalarAt (I := I) (co.gInf q.1) q.2)
         (X.D.carrier ×ˢ (Set.univ : Set mc.limit.M)))
-      (hscalarTime : ∀ t ∈ X.D.carrier, ∀ x : mc.limit.M,
+      (_hscalarTime : ∀ t ∈ X.D.carrier, ∀ x : mc.limit.M,
         DifferentiableWithinAt Real
           (fun s : Real ↦ metricScalarAt (I := I) (co.gInf s) x) X.D.carrier t)
-      (hricciCont : Tensor0SFamilyContinuousOnSet (I := I) (M := mc.limit.M) 2
+      (_hricciCont : Tensor0SFamilyContinuousOnSet (I := I) (M := mc.limit.M) 2
         X.D.carrier (fun t x ↦ metricRicciAt (I := I) (co.gInf t) x))
-      (hrm04Cont : Tensor0SFamilyContinuousOnSet (I := I) (M := mc.limit.M) 4
+      (_hrm04Cont : Tensor0SFamilyContinuousOnSet (I := I) (M := mc.limit.M) 4
         X.D.carrier (fun t x ↦ metricRm04At (I := I) (co.gInf t) x)),
       CompactnessConclusion (I := I) X := by
   dsimp only

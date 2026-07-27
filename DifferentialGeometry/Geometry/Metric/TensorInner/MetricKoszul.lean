@@ -16,10 +16,7 @@ set_option autoImplicit false
 noncomputable section
 
 namespace MetricKoszul
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E]
-
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 def koszulCov
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     E →L[Real] Real :=

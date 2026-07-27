@@ -1,16 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivativePointwise
-
-/-!
-# Naturality of the connection difference under a diffeomorphism
-
-This file proves the connection-level transport identity needed to identify a
-harmonic-map tension with the DeTurck vector field of the pushed-forward
-metric.  The proof uses the already established pointwise naturality of each
-Levi-Civita covariant derivative and subtracts the two identities.
--/
-
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 noncomputable section
 
 open Bundle Manifold
@@ -19,29 +9,25 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem pull_symm_cancel
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     Diffeomorph.pullbackMetric
         (Diffeomorph.pullbackMetric g Φ.symm) Φ = g := by
-  rw [DifferentialGeometry.Diffeomorph.pullbackMetric_trans,
-    Φ.self_trans_symm, DifferentialGeometry.Diffeomorph.pullbackMetric_refl]
-
-/-- Simultaneously transporting both Levi-Civita endpoints carries their
-connection difference through the differential of a diffeomorphism.
-
-The source endpoints are `g` and `Φ*h`.  On the target they become
-`(Φ⁻¹)*g` and `h`, respectively. -/
+  rw [Diffeomorph.pullbackMetric_trans, Φ.self_trans_symm,
+    Diffeomorph.pullbackMetric_refl]
 theorem connDiff_push
     (g h : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (u v : TangentSpace I x) :
@@ -53,14 +39,17 @@ theorem connDiff_push
   classical
   obtain ⟨σ, hσx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x u
-  have hσ : MDiffAt (T% fun z => σ z) x := σ.mdifferentiableAt
-  have hpushSmooth :
-      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-        (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
-          (Diffeomorph.pushforward Φ (fun z => σ z) y)) :=
-    ODE.flowFamily_pushforward_contMDiff (I := I) (fun _ : ℝ => Φ) 0 σ.contMDiff
-  have hpush : MDiffAt
-      (T% fun y => Diffeomorph.pushforward Φ (fun z => σ z) y) (Φ x) :=
+  have hσ :
+      MDiffAt (fun y : M => (⟨y, σ y⟩ : TangentBundle I M)) x :=
+    σ.mdifferentiableAt
+  have hpushSmooth :=
+    ODE.flowFamily_pushforward_contMDiff (E := E) (H := H) (M := M) (I := I)
+      (fun _ : ℝ => Φ) (0 : ℝ) (Y := fun z => σ z) σ.contMDiff
+  have hpush :
+      MDiffAt
+        (fun y : M => (⟨y,
+          Diffeomorph.pushforward Φ (fun z => σ z) y⟩ : TangentBundle I M))
+        (Φ x) :=
     hpushSmooth.mdifferentiableAt (by simp)
   have hnatG :=
     LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise
@@ -73,7 +62,9 @@ theorem connDiff_push
   have htgt := connDiff_apply (I := I)
     (Diffeomorph.pullbackMetric g Φ.symm) h hpush
     (mfderiv I I (Φ : M → M) x v)
-  rw [Diffeomorph.pushforward_image, hσx] at htgt
+  have hpushImage := Diffeomorph.pushforward_image (E := E) (H := H) (M := M)
+    (I := I) Φ (fun z => σ z) x
+  rw [hpushImage, hσx] at htgt
   calc
     mfderiv I I (Φ : M → M) x
         (connDiff (I := I) g (Diffeomorph.pullbackMetric h Φ) x u v) =
@@ -113,9 +104,9 @@ theorem deTurckVF_push
     (g h : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     mfderiv I I (Φ : M → M) x
         ((deTurckVF (I := I) g (Diffeomorph.pullbackMetric h Φ) :
-          Cₘ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
       (deTurckVF (I := I) (Diffeomorph.pullbackMetric g Φ.symm) h :
-        Cₘ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (Φ x) := by
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (Φ x) := by
   classical
   let F : Fin (Module.finrank ℝ E) → TangentSpace I (Φ x) := fun i =>
     mfderiv I I (Φ : M → M) x
@@ -124,15 +115,26 @@ theorem deTurckVF_push
       (Diffeomorph.pullbackMetric g Φ.symm).inner (Φ x) (F i) (F j) =
         if i = j then 1 else 0 := by
     intro i j
-    simp only [F, Diffeomorph.pullbackMetric_inner, Φ.symm_apply_apply,
-      Diffeomorph.mfderiv_symm_self]
-    exact smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
-  rw [deTurckVF_eq_trace (I := I) g
+    have hcancel := pull_symm_cancel (I := I) g Φ
+    have hinner := congrArg
+      (fun metric : SmoothRiemannianMetric I M =>
+        metric.inner x (smoothOrthoFrame (I := I) g x i x)
+          (smoothOrthoFrame (I := I) g x j x)) hcancel
+    change (Diffeomorph.pullbackMetric
+      (Diffeomorph.pullbackMetric g Φ.symm) Φ).inner x
+        (smoothOrthoFrame (I := I) g x i x)
+        (smoothOrthoFrame (I := I) g x j x) =
+      g.inner x (smoothOrthoFrame (I := I) g x i x)
+        (smoothOrthoFrame (I := I) g x j x) at hinner
+    rw [Diffeomorph.pullbackMetric_inner] at hinner
+    exact hinner.trans
+      (smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)
+  rw [deTurckVF_eq_orthonormal_trace (I := I) g
     (Diffeomorph.pullbackMetric h Φ) x
     (fun i => smoothOrthoFrame (I := I) g x i x)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)]
   rw [map_sum]
-  rw [deTurckVF_eq_trace (I := I) (Diffeomorph.pullbackMetric g Φ.symm)
+  rw [deTurckVF_eq_orthonormal_trace (I := I) (Diffeomorph.pullbackMetric g Φ.symm)
     h (Φ x) F hF]
   apply Finset.sum_congr rfl
   intro i _hi
@@ -147,11 +149,11 @@ theorem push_deTurckVF
     Diffeomorph.pushforward Φ
         (deTurckVF (I := I) g (Diffeomorph.pullbackMetric h Φ)) y =
       (deTurckVF (I := I) (Diffeomorph.pullbackMetric g Φ.symm) h :
-        Cₘ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y := by
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y := by
   obtain ⟨x, rfl⟩ := Φ.surjective y
-  rw [Diffeomorph.pushforward_image]
-  exact deTurckVF_push (I := I) g h Φ x
-
+  exact (Diffeomorph.pushforward_image (E := E) (H := H) (M := M) (I := I) Φ
+    (fun z => deTurckVF (I := I) g (Diffeomorph.pullbackMetric h Φ) z) x).trans
+      (deTurckVF_push (I := I) g h Φ x)
 end DifferentialGeometry.PDE.RicciFlow.Pullback
 
 end

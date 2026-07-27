@@ -17,7 +17,6 @@ them only inside its own `letI` scope.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open MeasureTheory Set Filter Topology
 open scoped ENNReal NNReal
@@ -66,15 +65,14 @@ theorem EuclidAEEq.symm
     {k : ℕ} {p : ℝ≥0∞} {hp : 1 ≤ p}
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)]
     {u v : EuclidWkp (d := d) k p hp Ω}
-    (h : EuclidAEEq u v) : EuclidAEEq v u := h.symm
-
+    (h : EuclidAEEq u v) : EuclidAEEq v u :=
+  Filter.EventuallyEq.symm h
 theorem EuclidAEEq.trans
     {k : ℕ} {p : ℝ≥0∞} {hp : 1 ≤ p}
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)]
     {u v w : EuclidWkp (d := d) k p hp Ω}
     (huv : EuclidAEEq u v) (hvw : EuclidAEEq v w) : EuclidAEEq u w :=
-  huv.trans hvw
-
+  Filter.EventuallyEq.trans huv hvw
 private theorem eadd_rel
     {k : ℕ} {p : ℝ≥0∞} {hp : 1 ≤ p}
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)]
@@ -82,25 +80,24 @@ private theorem eadd_rel
     (hu : EuclidAEEq u₁ u₂) (hv : EuclidAEEq v₁ v₂) :
     EuclidAEEq (u₁ + v₁) (u₂ + v₂) := by
   filter_upwards [hu, hv] with x hux hvx
-  simp only [Pi.add_apply, hux, hvx]
-
+  change u₁.1 x + v₁.1 x = u₂.1 x + v₂.1 x
+  rw [hux, hvx]
 private theorem eneg_rel
     {k : ℕ} {p : ℝ≥0∞} {hp : 1 ≤ p}
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)]
     {u v : EuclidWkp (d := d) k p hp Ω}
     (h : EuclidAEEq u v) : EuclidAEEq (-u) (-v) := by
   filter_upwards [h] with x hx
-  simp only [Pi.neg_apply, hx]
-
+  change -u.1 x = -v.1 x
+  rw [hx]
 private theorem esmul_rel
     {k : ℕ} {p : ℝ≥0∞} {hp : 1 ≤ p}
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)]
     (c : ℝ) {u v : EuclidWkp (d := d) k p hp Ω}
     (h : EuclidAEEq u v) : EuclidAEEq (c • u) (c • v) := by
   filter_upwards [h] with x hx
-  simp only [Pi.smul_apply, smul_eq_mul, hx]
-
-/-- The a.e.-equality setoid on the Euclidean Sobolev carrier. -/
+  change c * u.1 x = c * v.1 x
+  rw [hx]
 def euclidWkpSetoid
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
@@ -306,9 +303,27 @@ private theorem ezero_smul
   change Quotient.mk (euclidWkpSetoid (d := d) k p hp Ω) (0 • f) =
     Quotient.mk (euclidWkpSetoid (d := d) k p hp Ω) 0
   rw [zero_smul]
-
-/-- The explicit quotient operations form an additive commutative group. -/
-noncomputable def ewkpAddGroup
+@[reducible] private noncomputable instance ewkpZero
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Zero (EuclidWkpQ (d := d) k p hp Ω) :=
+  ⟨ezero k p hp Ω⟩
+@[reducible] private noncomputable instance ewkpAdd
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Add (EuclidWkpQ (d := d) k p hp Ω) :=
+  ⟨eadd k p hp Ω⟩
+@[reducible] private noncomputable instance ewkpNeg
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Neg (EuclidWkpQ (d := d) k p hp Ω) :=
+  ⟨eneg k p hp Ω⟩
+@[reducible] private noncomputable instance ewkpSub
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Sub (EuclidWkpQ (d := d) k p hp Ω) :=
+  ⟨esub k p hp Ω⟩
+@[reducible] noncomputable def ewkpAddGroup
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     AddCommGroup (EuclidWkpQ (d := d) k p hp Ω) where
@@ -324,8 +339,12 @@ noncomputable def ewkpAddGroup
   sub_eq_add_neg := esub_add_neg k hp
   nsmul := nsmulRec
   zsmul := zsmulRec
-
-private noncomputable def ewkpModule
+@[reducible] private noncomputable instance ewkpAddGroupInst
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    AddCommGroup (EuclidWkpQ (d := d) k p hp Ω) :=
+  ewkpAddGroup (d := d) k p hp Ω
+@[reducible] private noncomputable def ewkpModule
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     @Module ℝ (EuclidWkpQ (d := d) k p hp Ω)
@@ -337,14 +356,16 @@ private noncomputable def ewkpModule
   smul_add := esmul_add k hp
   add_smul := eadd_smul k hp
   zero_smul := ezero_smul k hp
-
-/-! ## Quotient norm and theorem-valued Banach structures -/
-
+@[reducible] private noncomputable instance ewkpModuleInst
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Module ℝ (EuclidWkpQ (d := d) k p hp Ω) :=
+  ewkpModule (d := d) k p hp Ω
 noncomputable def ewkpNorm
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     EuclidWkpQ (d := d) k p hp Ω → ℝ≥0∞ :=
-  Quotient.lift (fun u => wkpNorm (d := d) k p u.1 Ω) (by
+  Quotient.lift (fun u => iteratedWeakSobolevNorm (d := d) k p u.1 Ω) (by
     intro u v huv
     exact wkpNorm_congr_ae (d := d) hp (by exact Fact.out) huv)
 
@@ -369,7 +390,7 @@ private theorem enorm_smul
     {Ω : Set (EuclideanSpace ℝ (Fin d))} [Fact (IsOpen Ω)] (c : ℝ)
     (a : EuclidWkpQ (d := d) k p hp Ω) :
     ewkpNorm (d := d) k p hp Ω (esmul k p hp Ω c a) =
-      ‖c‖ₙ * ewkpNorm (d := d) k p hp Ω a := by
+      ‖c‖ₑ * ewkpNorm (d := d) k p hp Ω a := by
   refine Quotient.inductionOn a ?_
   intro u
   exact wkpNorm_const_smul (d := d) hp Fact.out u.2 c
@@ -392,6 +413,7 @@ private theorem enorm_eq_zero
   constructor
   · intro hzero
     have heLp_le := eLpNorm_le_wkpNorm (d := d) k p Ω u.1
+    change iteratedWeakSobolevNorm (d := d) k p u.1 Ω = 0 at hzero
     rw [hzero] at heLp_le
     have heLp : eLpNorm u.1 p (volume.restrict Ω) = 0 :=
       le_antisymm heLp_le (zero_le _)
@@ -405,13 +427,16 @@ private theorem enorm_eq_zero
     have hae : EuclidAEEq u 0 := Quotient.exact h
     exact (wkpNorm_congr_ae (d := d) hp Fact.out hae).trans
       (wkpNorm_zero_fun_zero (d := d) hp Fact.out)
-
-private noncomputable def ewkpNormInst
+@[reducible] private noncomputable def ewkpNormInst
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     Norm (EuclidWkpQ (d := d) k p hp Ω) where
   norm a := (ewkpNorm (d := d) k p hp Ω a).toReal
-
+@[reducible] private noncomputable instance ewkpNormInstance
+    (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
+    (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
+    Norm (EuclidWkpQ (d := d) k p hp Ω) :=
+  ewkpNormInst (d := d) k p hp Ω
 private noncomputable def ewkpCore
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
@@ -445,9 +470,7 @@ private noncomputable def ewkpCore
     · intro h
       rw [h, enorm_zero (d := d) k hp]
       exact ENNReal.toReal_zero
-
-/-- The theorem-valued normed additive group on Euclidean Sobolev classes. -/
-noncomputable def ewkpNormedGroup
+@[reducible] noncomputable def ewkpNormedGroup
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     NormedAddCommGroup (EuclidWkpQ (d := d) k p hp Ω) :=
@@ -456,10 +479,7 @@ noncomputable def ewkpNormedGroup
     (ewkpModule (d := d) k p hp Ω)
     (ewkpNormInst (d := d) k p hp Ω)
     (ewkpCore (d := d) k p hp Ω)
-
-/-- The theorem-valued normed real vector space on Euclidean Sobolev
-classes. -/
-noncomputable def ewkpNormedSpace
+@[reducible] noncomputable def ewkpNormedSpace
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) [Fact (IsOpen Ω)] :
     @NormedSpace ℝ (EuclidWkpQ (d := d) k p hp Ω) _
@@ -500,7 +520,7 @@ theorem ewkpComplete
   have hc := (Metric.cauchySeq_iff.mp hu)
   have hrep_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p
+      iteratedWeakSobolevNorm (d := d) k p
           (fun x => (rep m (u m)).1 x - (rep n (u n)).1 x) Ω ≤
         ENNReal.ofReal ε := by
     intro ε hε
@@ -511,10 +531,10 @@ theorem ewkpComplete
     rw [← emk_erep (d := d) k p hp Ω (u m),
       ← emk_erep (d := d) k p hp Ω (u n), dist_eq_norm] at hdist
     have hreal :
-        (wkpNorm (d := d) k p
+        (iteratedWeakSobolevNorm (d := d) k p
           (fun x => (rep m (u m)).1 x - (rep n (u n)).1 x) Ω).toReal < ε := by
       exact hdist
-    have hfinite : wkpNorm (d := d) k p
+    have hfinite : iteratedWeakSobolevNorm (d := d) k p
         (fun x => (rep m (u m)).1 x - (rep n (u n)).1 x) Ω ≠ ∞ := by
       apply (wkpNorm_lt_top_of_memWkp (d := d) ?_).ne
       exact MemWkp.sub (d := d) hp Fact.out (rep m (u m)).2 (rep n (u n)).2
@@ -529,11 +549,17 @@ theorem ewkpComplete
   apply tendsto_iff_dist_tendsto_zero.mpr
   have hreal := (ENNReal.tendsto_toReal ENNReal.zero_ne_top).comp hv
   have hdist_eq : (fun n => dist (u n) vq) =
-      (fun n => (wkpNorm (d := d) k p
+      (fun n => (iteratedWeakSobolevNorm (d := d) k p
         (fun x => (rep n (u n)).1 x - v x) Ω).toReal) := by
     funext n
-    rw [← emk_erep (d := d) k p hp Ω (u n), dist_eq_norm]
-    rfl
+    have hu := emk_erep (d := d) k p hp Ω (u n)
+    let qrep : EuclidWkpQ (d := d) k p hp Ω :=
+      Quotient.mk (euclidWkpSetoid (d := d) k p hp Ω) (rep n (u n))
+    rw [dist_eq_norm]
+    calc
+      ‖u n - vq‖ = ‖qrep - vq‖ :=
+        congrArg norm (congrArg (fun q => q - vq) (show u n = qrep from hu.symm))
+      _ = _ := rfl
   rw [hdist_eq]
   exact hreal
 

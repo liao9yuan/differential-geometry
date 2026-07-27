@@ -71,14 +71,12 @@ theorem of_uniformEquiv
     Manifold.metrizableSpace I M
   letI : T3Space M := inferInstance
   refine ⟨?_⟩
-
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     ⟨h.toRiemannianMetric⟩
   letI : IsContinuousRiemannianBundle E
       (fun x : M => TangentSpace I x) :=
     ⟨h.inner, h.contMDiff.continuous, by intro x v w; rfl⟩
   letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
-
   have hCpos : 0 < C := zero_lt_one.trans_le hC
   have hCinv : 0 < C⁻¹ := inv_pos.mpr hCpos
   let a : ENNReal := ENNReal.ofReal (Real.sqrt C⁻¹)
@@ -93,7 +91,6 @@ theorem of_uniformEquiv
     exact edistOf_mono (I := I) _ _ (by
       intro z v
       simpa only [scaleMetric_inner] using (hcomp z v).1) x y
-
   refine EMetric.complete_of_cauchySeq_tendsto (α := M) fun s hs => ?_
   have hsTarget : ∀ ε > (0 : ENNReal), ∃ N,
       ∀ m, N ≤ m → ∀ n, N ≤ n →
@@ -103,7 +100,6 @@ theorem of_uniformEquiv
     refine ⟨N, fun m hm n hn => ?_⟩
     change edist (s m) (s n) < ε
     exact hN m hm n hn
-
   change ∃ x, Filter.Tendsto s Filter.atTop (𝓝 x)
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
     ⟨g.toRiemannianMetric⟩

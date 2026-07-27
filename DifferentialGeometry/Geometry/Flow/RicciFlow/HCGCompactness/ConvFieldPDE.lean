@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFromJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuous
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Local Ricci-flow equation for the bump-extended comparison metrics
@@ -27,8 +25,8 @@ open DifferentialGeometry.PDE.RicciFlow (metric_derivWithin_eq_neg_two_ricci)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
@@ -37,6 +35,7 @@ variable {P : PointedRiemannianManifold (I := I)}
 variable {subseq : Nat → Nat}
 variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem ricNorm_restrict
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
@@ -56,6 +55,7 @@ private theorem ricNorm_restrict
     exact metricRicci_restrictOpen_eval (I := I) g U x slots
   rw [normSq0S_restrictOpen_apply (I := I) g U 2 x, hsec]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the Ricci tensor of `gSeqExt` is the Ricci tensor
 of the genuine pulled-back source flow. -/
 theorem gSeqExt_ricci
@@ -164,15 +164,17 @@ theorem gSeqExt_ricci
   haveI sourceSigmaInst : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↥(sourceOpen (I := I) Φ k) := sourceT2
   have hricAmbient :=
-    @ricciTensor_restrictOpen E _ _ _ _ _ _ H _ I P.M
+    @ricciTensor_restrictOpen E _ _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
-      (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
+      (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
       sourceSigma sourceT2 (by infer_instance) (by infer_instance) (by infer_instance)
       xsrc v w
   exact hricAmbient.symm.trans hricSource.symm
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the scalar curvature of `gSeqExt` is the scalar
 curvature of the original sequence flow at the comparison-map image. -/
 theorem gSeqExt_scalar
@@ -313,9 +315,9 @@ theorem gSeqExt_scalar
   haveI sourceSigmaInst : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↑(sourceOpen (I := I) Φ k) := sourceT2
   have hscalarAmbient :=
-    @metricScalarAt_restrictOpen E _ _ _ _ _ _ H _ I P.M
+    @metricScalarAt_restrictOpen E _ _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
-      (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
+      (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
       sourceSigma sourceT2 (by infer_instance) (by infer_instance) (by infer_instance)
       xsrc
@@ -341,6 +343,8 @@ theorem gSeqExt_scalar
       rw [sourceTargetDiff_apply]
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the intrinsic squared Ricci norm of `gSeqExt`
 equals the squared Ricci norm of the original sequence flow at the
 comparison-map image. -/
@@ -499,7 +503,7 @@ theorem gSeqExt_ricNorm
   haveI sourceSigmaInst : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↑(sourceOpen (I := I) Φ k) := sourceT2
   have hnormAmbient :=
-    @ricNorm_restrict E _ _ _ _ _ _ H _ I _ P.M
+    @ricNorm_restrict E _ _ _ H _ I P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
       (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
@@ -534,6 +538,8 @@ theorem gSeqExt_ricNorm
       rw [sourceTargetDiff_apply]
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a regular time window, `gSeqExt` satisfies the scalar Ricci-flow metric
 equation at every point of its agreement region. -/
 theorem gSeqExt_pde
@@ -613,6 +619,7 @@ theorem gSeqExt_pde
   exact hder.congr_deriv (congrArg (fun q : Real => (-2 : Real) * q) hric.symm)
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The Arzelà–Ascoli limit of the bump-extended sequence satisfies the
 Ricci-flow metric equation on its closed regular-time window. -/
 theorem ConvOut.gInf_pde
@@ -753,6 +760,7 @@ theorem ConvOut.gInf_pde
       (hxgrow k) v w
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Scalar curvature of the reindexed source flow converges at one time in the
 closed convergence window.  This is the local analytic producer behind the
 carrier-wide compatibility theorem in `ConvFieldEndgame`. -/
@@ -911,6 +919,7 @@ theorem ConvOut.scalar_conv_at
     gSeqExt_scalar (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) t x (hxgrow k)
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The intrinsic squared Ricci norm of the reindexed source flow converges at
 one time in the closed convergence window. -/
 theorem ConvOut.ricNorm_conv_at

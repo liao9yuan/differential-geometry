@@ -26,7 +26,7 @@ open DifferentialGeometry.Integral.Connection
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+variable {I : ModelWithCorners Real E H}
 
 section FixedManifold
 
@@ -347,6 +347,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {Idx : Type*} [Fintype Idx]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 /-- A constant-frame component tower commutes with restriction to an open
 subtype of its model space.  The differentiability premise is exactly what is
 needed to restrict the scalar directional derivative at each recursive level. -/

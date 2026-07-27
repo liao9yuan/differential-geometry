@@ -1380,8 +1380,7 @@ structure MetricCompactnessConclusion
   convergence : PointedRiemannianCGConverges (I := I) X limit subseq maps
 
 
-
-**Endpoint ruling (2026-07-05):** this unconditional form is NOT the Chapter 4
+/-- **Endpoint ruling (2026-07-05):** this unconditional form is NOT the Chapter 4
 working target.  Its `sorry` decomposes as
 `C4.MetricCompactnessInputs.metricCompactness` (the now-checked conditional
 Theorem 3.9) **plus** native producers for the book-external theorems bundled
@@ -1397,9 +1396,6 @@ def metricCompactness
     (_hgeom : SeqBoundedGeometry (I := I) X)
     (_hinj : BaseInjBound (I := I) X) :
     MetricCompactnessConclusion (I := I) X := by
-  -- The conditional direct-limit assembly is checked.  The remaining
-  -- frontier is to produce its external comparison inputs (and the required
-  -- connectedness) from these unconditional hypotheses.
   sorry
 
 end HCGCompactness

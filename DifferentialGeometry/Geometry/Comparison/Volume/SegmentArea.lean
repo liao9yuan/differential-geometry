@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.JacobianImageLe
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Manifold-valued non-injective area inequality for the intrinsic exponential (L5)
@@ -48,7 +47,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -79,6 +78,7 @@ private def expJacDensity
       intrinsicJacobi g hEnorm x (show TangentSpace I x from v)
         (show TangentSpace I x from (chartModelBasis E i)) t) 1
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The intrinsic Jacobi endpoint density is continuous in the launch velocity.
@@ -107,7 +107,7 @@ private theorem expJacDensity_continuous
     hFcont.continuousAt.preimage_mem_nhds ((chartAt H y₀).open_source.mem_nhds hsrc0)
   have heq : (fun v : E => expJacDensity (I := I) g hEnorm x v) =ᶠ[𝓝 v₀] ψ := by
     filter_upwards [hUnhds] with v hv
-    show expJacDensity (I := I) g hEnorm x v = chartDensity g y₀ (F v) * |(fderiv ℝ φ v).det|
+    change expJacDensity (I := I) g hEnorm x v = chartDensity g y₀ (F v) * |(fderiv ℝ φ v).det|
     exact (exp_density_curve (I := I) g hEnorm x v y₀ hv).symm
   -- `ψ` is continuous at `v₀`.
   have hcd : ContinuousAt (fun v : E => chartDensity g y₀ (F v)) v₀ := by
@@ -125,6 +125,7 @@ private theorem expJacDensity_continuous
       (ContinuousLinearMap.continuous_det.continuousAt.comp hfd)
   exact (hcd.mul hdet).congr heq.symm
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Per-chart summand bound (the crux of L5): the `α`-summand of the POU-weighted
@@ -285,6 +286,7 @@ private theorem pou_term_exp_le
           * ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ∂(modelHaar (E := E)) :=
         lintegral_mono_set Set.inter_subset_left
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Non-injective area inequality for the intrinsic exponential** (L5).

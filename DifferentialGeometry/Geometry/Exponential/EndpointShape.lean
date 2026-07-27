@@ -30,7 +30,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -77,7 +77,7 @@ theorem intrinsicJacobi_perp
   rw [← hjac] at hgauss
   simpa only [intrinsicJacobi, expMapIntrinsic_def] using hgauss
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+omit [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M]
   [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
@@ -464,7 +464,9 @@ theorem branchHess_jacobi
       (J w₁ 1) (J w₂ 1)
   simp only [J, expMapIntrinsic_def] at hhess ⊢
   refine hhess.trans ?_
-  rw [hpair]
+  have hpair' := hpair
+  simp only [gradient_eq_gradFun] at hpair'
+  rw [hpair']
   have hroot_ne : Real.sqrt (g.inner p u u) ≠ 0 :=
     ne_of_gt (Real.sqrt_pos.2 hu_pos)
   field_simp [hroot_ne]

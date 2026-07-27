@@ -2,10 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Variation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 /-!
 # Arbitrary-dimensional Hamilton base producer
@@ -25,7 +21,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -77,6 +73,8 @@ private def ricciSharpCLM
     ((cotangentSharpLinear_gen (I := I) g x).comp
       (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x Ric).toLinearMap)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] in
 @[simp] private theorem ricciSharpCLM_apply
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -131,6 +129,7 @@ private def solNabla2Ric
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (solNablaRic (I := I) S t) x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem coordNab2_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -145,6 +144,8 @@ private theorem coordNab2_eq
   simpa only [solNabla2Ric, solNablaRic] using
     coordNab2Ric_eq_nabla2RicField (I := I) S x₀ t d a i j
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+  [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_sum_last
     {Idx : Type*} [Fintype Idx] {x : M}
     (T : Tensor04At (I := I) (M := M) x)
@@ -174,6 +175,8 @@ private theorem tensor04_sum_last
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+  [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem invContract
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -203,6 +206,8 @@ private theorem invContract
       rw [(hinv d l).2]
     _ = F d := by simp
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] in
 private theorem rawTensor_eval
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -227,6 +232,8 @@ private theorem rawTensor_eval
     fin_cases i <;> simp [vec4]
   rw [hslots, ricciSharpCLM_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+  [T2Space M] in
 private theorem rawTensor_apply
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -256,6 +263,8 @@ private theorem rawTensor_apply
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [Finset.sum_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+  [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem hessVar_apply {x : M}
     (N : Tensor04At (I := I) (M := M) x)
     (A B C D : TangentSpace I x) :
@@ -300,6 +309,7 @@ private theorem hessVar_apply {x : M}
         N (fun i ↦ vec4 (I := I) A B C D (permBDAC i))) = _
   rw [hAC, hADBC, hBA, hBCA, hBDAC]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem gammaLower_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -325,6 +335,7 @@ private theorem gammaLower_eq
   simpa [nablaGammaDtFromNabla2RicInFrame, metricCompInFrame, basis,
     coordinateFrameAt_toBasis_apply] using h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rawCoord_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -388,6 +399,7 @@ private theorem rawCoord_eq
         fin_cases q <;> rfl]
       rw [rawTensor_eval]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rm04Var_eq_tensor
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -479,6 +491,7 @@ private theorem rm04Var_eq_tensor
       rw [hessVar_apply]
       simp only [coordNab2_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem varTensor_eq_ham
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -535,6 +548,9 @@ private theorem varTensor_eq_ham
     DifferentialGeometry.Integral.Connection.metricRicciAt,
     DifferentialGeometry.Integral.Connection.metricCov] using hstatic
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- Coordinate derivatives of the lowered-Riemann components determine the
 time derivative on any four fixed tangent vectors.  The coefficients are the
 time-independent coordinates of those vectors in the centered chart basis. -/
@@ -577,6 +593,7 @@ theorem rm04Deriv_of_coord
   intro m _
   exact (hD m).mul_const _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem rm04Var_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -737,6 +754,7 @@ private theorem rm04Var_of_solution
       (S.base.ricciAt (t : Real) x₀) (S.base.rm04 (t : Real) x₀)) v
   simpa only [component0S_apply, coordinateFrameAt_toBasis_apply] using hexp.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The arbitrary-dimensional Hamilton evolution of lowered Riemann in a
 fixed orthonormal basis, produced directly from a Ricci-flow solution. -/
 theorem rm04Base_of_solution_any

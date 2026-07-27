@@ -232,6 +232,7 @@ private lemma tensorInner_le_const_mul_sum_scalar_sq
     h_CS.trans (mul_le_mul_of_nonneg_left h_per_α hN_nn)
   linarith [h_combined, (show N * (Cmax * sumSS) = N * Cmax * sumSS by ring)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- **Pointwise finite-component reconstruction.** The intrinsic squared fibre
 norm of a smooth mixed tensor is controlled by the finite sum of squares of
 its partition-of-unity weighted chart-frame scalar components. -/

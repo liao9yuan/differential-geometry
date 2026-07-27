@@ -155,7 +155,7 @@ theorem normalFlow_geoOn
       letI : T2Space (TangentBundle I (X.obj k).M) :=
         (X.obj k).t2TangentBundle
       Metric.ball (0 : E) r ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) (X.obj k).metric x / 4))
+        (expMapC2Radius (I := I) (X.obj k).metric x / 4))
     (R : NNReal) {Z : Real → E × E}
     (hZcont : ContinuousOn Z (Set.Icc 0 1))
     (hZright : ∀ t ∈ Set.Ico 0 1, HasDerivWithinAt Z

@@ -18,31 +18,17 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- The connection-difference tensor `connDiff g₁ g₀` is the difference one-form
-`CovariantDerivative.difference (LeviCivita g₁) (LeviCivita g₀)`, the object the curvature-difference
-machinery of `ConnectionDifferenceCurvature.lean` is phrased in.  This is a definitional identity
-(`connDiff` unfolds to exactly this `CovariantDerivative.difference`), recorded as a named bridge so
-the Palatini identity can be cited in the project's primary `connDiff` vocabulary. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] [T2Space M] in
 theorem connDiff_eq_difference (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiff (I := I) g₁ g₀ =
       CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) := rfl
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- The **directional covariant derivative of the connection-difference tensor** `A = connDiff g₁ g₀`
-under the `g₀`-Levi-Civita connection:
-`(∇₀_X A)(Y, Z) (x) = ∇₀_X(A(Y, Z)) (x) - A(∇₀_X Y, Z)(x) - A(Y, ∇₀_X Z)(x)`.
-
-This is the `connDiff`-native packaging of `covDerivDiff (LeviCivita g₀) (LeviCivita g₁)`; it is the
-first-order, divergence-type (`div(∇A)`) term of the intrinsic Palatini identity, the part that feeds
-the principal symbol of the Ricci–DeTurck `C₂` linearization. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 def covDerivConnDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁) X Y Z x
-
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- Unfolding of `covDerivConnDiff` to the underlying `covDerivDiff` of the Levi-Civita pair. -/
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] [T2Space M] in
 theorem covDerivConnDiff_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff (I := I) g₀ g₁ X Y Z x =

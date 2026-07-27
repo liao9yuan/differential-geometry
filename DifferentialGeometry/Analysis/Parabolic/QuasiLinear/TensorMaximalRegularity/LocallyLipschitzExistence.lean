@@ -317,7 +317,7 @@ theorem maximalRegularityDerivField_norm_le
   exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
 theorem timeL2_norm_le_of_ae_bound
-    {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (f : timeL2 X T) {C : ℝ} (hC : 0 ≤ C)
     (hbound : ∀ᵐ s ∂(timeMeasure T), ‖f s‖ ≤ C) :
     ‖f‖ ≤ Real.sqrt T * C := by

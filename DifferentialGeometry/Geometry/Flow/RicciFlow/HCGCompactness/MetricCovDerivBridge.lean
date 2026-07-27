@@ -47,8 +47,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -62,7 +60,7 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -71,6 +69,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Tower match (no arity cast).**  The unit-value of the abstract iterated covariant
 gradient of the realized `(0,2)` metric tensor equals, at every point and every order `j`,
 the intrinsic `iterCov` tower of the metric tensor field.  Both sides live at arity `2 + j`,
@@ -114,7 +113,7 @@ private lemma iterCovGrad_unit_eq_iterCov
     set Tj : SmoothCcTensor gBase 0 (2 + j) :=
       iteratedCovGrad (I := I) gBase 0 2 j
         (metricCcTensor (I := I) (M := M) gBase h) with hTj
-    show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace ((2 + j) + 1) I x from
+    change (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace ((2 + j) + 1) I x from
         (covGrad (I := I) (M := M) gBase 0 (2 + j) Tj).toSection x)
         (unitZeroSec (I := I) (M := M) x) =
       iterCov (I := I) gBase 2 (Tensor0SBundle.metricTensorField (I := I) h) (j + 1) x
@@ -152,7 +151,8 @@ private lemma iterCovGrad_unit_eq_iterCov
       (Matrix.vecTail v)]
     rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 /-- **The `r = 0` index-lowering is unit-evaluation.**  Replica of the (private) upstream
 `lowerAllUpperIndices_zero_apply_unitModel`: lowering the model coercion of a `(0, s)`-tensor
 section against no upper slots is exactly evaluating the section on the unit `(0,0)`-tensor. -/
@@ -171,6 +171,8 @@ private lemma lowerAllUpper_zero_eq_unit
     (unitZeroSec (I := I) (M := M) x)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 /-- **Fibre-inner bridge (`(0, s)`).**  The `gBase`-Riemannian squared fibre norm of a smooth
 `(0, s)`-tensor section (the currency of the abstract `iteratedCovGrad` jet envelope) equals the
 intrinsic `normSq0S` of its unit-value (the currency of `metricCovDeriv`/`MetricCovDerivOrderBoundOn`).
@@ -190,7 +192,7 @@ private lemma rfns_eq_normSq0S_unit
     (W.toSection x)]
   rw [show tensorInnerPointwise (I := I) (M := M) gBase 0 s x
         (TensorRSSpace.toModel (W.toSection x)) (TensorRSSpace.toModel (W.toSection x)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) gBase x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + s) gBase x
         (lowerAllUpperIndices (I := I) (M := M) gBase 0 s x
           (TensorRSSpace.toModel (W.toSection x)))
         (lowerAllUpperIndices (I := I) (M := M) gBase 0 s x
@@ -213,7 +215,11 @@ private lemma rfns_eq_normSq0S_unit
      apply Fin.ext;
      simp)
 
-set_option linter.unusedSectionVars false in
+set_option synthInstance.maxHeartbeats 1600000 in
+-- Elaborating the tensor-bundle instance chain requires the larger synthesis budget.
+set_option maxHeartbeats 1600000 in
+-- Reconciling the fibre-norm realizations requires the larger normalization budget.
+omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.mixed_instNormedAddCommGroup

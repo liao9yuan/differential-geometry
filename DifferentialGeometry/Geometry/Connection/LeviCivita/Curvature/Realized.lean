@@ -326,12 +326,15 @@ private theorem slots4_eq_vec4 {x : M}
   funext q
   fin_cases q <;> rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M]
+    [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 private theorem slots5_eq_vec5 {x : M}
     (slots : Fin 5 -> TangentSpace I x) :
     slots = vec5 (I := I) (slots 0) (slots 1) (slots 2) (slots 3) (slots 4) := by
   funext q
   fin_cases q <;> rfl
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
 is last-pair-skew in its curvature slots. -/
 theorem nabla4OutSkew
@@ -1259,6 +1262,7 @@ theorem canNabla2RicTrace
   simpa [cov, hcov, Rm04, Ric, nablaRm04, nabla2Rm04, nablaRic, nabla2Ric,
     metricTrace_finCons_vec3_eq_vec4] using hmain
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 /-- Canonical Levi-Civita `∇²Rm04` inherits the three algebraic Riemann
 symmetries in its four curvature slots. -/
@@ -1395,11 +1399,7 @@ theorem canRm2Symm
     rw [hleft, hright]
     simpa [σ, vec5, Equiv.ofBijective] using h
 
-/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric.
-
-
-
-
+/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric. -/
 theorem canBianchiCore
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)

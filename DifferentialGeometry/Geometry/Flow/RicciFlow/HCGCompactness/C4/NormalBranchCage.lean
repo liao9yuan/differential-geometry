@@ -30,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -377,7 +377,7 @@ theorem exists_slot_min
     change Metric.ball (0 : E)
         (h.phaseRadius (L.rInf (gamma.1 : Nat) + 1)) ⊆
       Metric.ball (0 : E)
-        (expRadiusGp (I := I)
+        (Geometry.Riemannian.expMapC2Radius (I := I)
           (X.obj (L.φ k)).metric
           (seqCenterD hd P L k (gamma.1 : Nat)) / 4)
     exact h.phaseRadius_exp (hk gamma).le
@@ -622,10 +622,10 @@ theorem HasNormalBrFull.exists_cm_eqn
             (I := I) (X.obj k) hcomplete hconn x hq he
           let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
           let xi : ι → E := fun i =>
-            NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (pts i)
+            NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
           chartCmEqnB (I := I) (X.obj k).metric
             (normal_enorm (I := I) (X.obj k)) x B
-            (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c)
+            (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
             (mu, xi) = 0 := by
   classical
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -662,7 +662,7 @@ theorem HasNormalBrFull.exists_cm_eqn
         ENNReal.ofReal (ρ / 2) := by
     simpa only [c, riemannianEDist_comm] using hpairs₀
   have hsrc (i : ι) :
-      pts i ∈ (NormalCoordinates.framedChartAt
+      pts i ∈ (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).source := by
     have hiLt := (le_max_right (riemannianEDist I x c)
       (riemannianEDist I x (pts i))).trans_lt (hpairs i)
@@ -673,15 +673,15 @@ theorem HasNormalBrFull.exists_cm_eqn
     exact (hb.chart_mem_norm_le k x (pts i)
       ⟨hiFin, hiReal.trans_le hρexp⟩).1
   let xi : ι → E := fun i =>
-    NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (pts i)
+    NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
   have hdecode :
-      (fun i => (NormalCoordinates.framedChartAt
+      (fun i => (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).symm (xi i)) = pts := by
     funext i
-    exact (NormalCoordinates.framedChartAt
+    exact (NormalCoordinates.normalChartAt
       (I := I) (X.obj k).metric x).left_inv (hsrc i)
   have h' : CenterInput (I := I) (X.obj k).metric mu
-      (fun i => (NormalCoordinates.framedChartAt
+      (fun i => (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).symm (xi i)) join p r := by
     rw [hdecode]
     exact h
@@ -689,16 +689,16 @@ theorem HasNormalBrFull.exists_cm_eqn
   rcases hfull with ⟨hq, e, he, hf, _hclosed, _hδdom, _htransport⟩
   refine ⟨hq, e, he, hf, ?_⟩
   have hpairs' := centerPairs_lt_le (I := I) (X.obj k).metric mu
-    (fun i => (NormalCoordinates.framedChartAt
+    (fun i => (NormalCoordinates.normalChartAt
       (I := I) (X.obj k).metric x).symm (xi i))
     join p r h' x R hpq hscale
   have hpairs'' : ∀ i,
       max (riemannianEDist I x
           (centerOfMass (I := I) (X.obj k).metric mu
-            (fun j => (NormalCoordinates.framedChartAt
+            (fun j => (NormalCoordinates.normalChartAt
               (I := I) (X.obj k).metric x).symm (xi j)) join p r h'))
         (riemannianEDist I x
-          ((NormalCoordinates.framedChartAt
+          ((NormalCoordinates.normalChartAt
             (I := I) (X.obj k).metric x).symm (xi i))) <
         ENNReal.ofReal (ρ / 2) := by
     simpa only [riemannianEDist_comm] using hpairs'
@@ -758,11 +758,11 @@ theorem HasNormalBrFull.exists_cm_deriv
           let B := IsNormalDiag.toBranch
             (I := I) (X.obj k) hcomplete hconn x hq he
           let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
-          let z := NormalCoordinates.framedChartAt
+          let z := NormalCoordinates.normalChartAt
             (I := I) (X.obj k).metric x c
           let xi : ι → E := fun i =>
-            NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (pts i)
-          c ∈ (NormalCoordinates.framedChartAt
+            NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
+          c ∈ (NormalCoordinates.normalChartAt
               (I := I) (X.obj k).metric x).source ∧
             (∀ i, (z, xi i) ∈ e.target) ∧
               z ∈ normalBall (I := I) (X.obj k) x ∧
@@ -820,7 +820,7 @@ theorem HasNormalBrFull.exists_cm_deriv
         ENNReal.ofReal (ρ / 2) := by
     simpa only [c, riemannianEDist_comm] using hpairs₀
   have hsrc (i : ι) :
-      pts i ∈ (NormalCoordinates.framedChartAt
+      pts i ∈ (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).source := by
     have hiLt := (le_max_right (riemannianEDist I x c)
       (riemannianEDist I x (pts i))).trans_lt (hpairs i)
@@ -831,15 +831,15 @@ theorem HasNormalBrFull.exists_cm_deriv
     exact (hb.chart_mem_norm_le k x (pts i)
       ⟨hiFin, hiReal.trans_le hρexp⟩).1
   let xi : ι → E := fun i =>
-    NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (pts i)
+    NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
   have hdecode :
-      (fun i => (NormalCoordinates.framedChartAt
+      (fun i => (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).symm (xi i)) = pts := by
     funext i
-    exact (NormalCoordinates.framedChartAt
+    exact (NormalCoordinates.normalChartAt
       (I := I) (X.obj k).metric x).left_inv (hsrc i)
   have h' : CenterInput (I := I) (X.obj k).metric mu
-      (fun i => (NormalCoordinates.framedChartAt
+      (fun i => (NormalCoordinates.normalChartAt
         (I := I) (X.obj k).metric x).symm (xi i)) join p r := by
     rw [hdecode]
     exact h
@@ -849,16 +849,16 @@ theorem HasNormalBrFull.exists_cm_deriv
       _hδinv, eta, heta, happrox⟩
   refine ⟨hq, e, he, hf, ?_⟩
   have hpairs' := centerPairs_lt_le (I := I) (X.obj k).metric mu
-    (fun i => (NormalCoordinates.framedChartAt
+    (fun i => (NormalCoordinates.normalChartAt
       (I := I) (X.obj k).metric x).symm (xi i))
     join p r h' x R hpq hscale
   have hpairs'' : ∀ i,
       max (riemannianEDist I x
           (centerOfMass (I := I) (X.obj k).metric mu
-            (fun j => (NormalCoordinates.framedChartAt
+            (fun j => (NormalCoordinates.normalChartAt
               (I := I) (X.obj k).metric x).symm (xi j)) join p r h'))
         (riemannianEDist I x
-          ((NormalCoordinates.framedChartAt
+          ((NormalCoordinates.normalChartAt
             (I := I) (X.obj k).metric x).symm (xi i))) <
         ENNReal.ofReal (ρ / 2) := by
     simpa only [riemannianEDist_comm] using hpairs'
@@ -867,7 +867,7 @@ theorem HasNormalBrFull.exists_cm_deriv
   have hzero : chartCmEqnB (I := I) (X.obj k).metric
       (normal_enorm (I := I) (X.obj k)) x
       (IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he)
-      (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c)
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
       (mu, xi) = 0 := by
     simpa only [c, xi, hdecode] using hzero'
   obtain ⟨i0, _hi0⟩ := h.μ_pos
@@ -877,11 +877,11 @@ theorem HasNormalBrFull.exists_cm_deriv
     ne_of_lt (hcLt.trans ENNReal.ofReal_lt_top)
   have hcReal : (riemannianEDist I x c).toReal < ρ / 2 :=
     (ENNReal.lt_ofReal_iff_toReal_lt hcFin).mp hcLt
-  have hcSource : c ∈ (NormalCoordinates.framedChartAt
+  have hcSource : c ∈ (NormalCoordinates.normalChartAt
       (I := I) (X.obj k).metric x).source :=
     (hb.chart_mem_norm_le k x c ⟨hcFin, hcReal.trans_le hρexp⟩).1
   have htgt (i : ι) :
-      (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c,
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c,
         xi i) ∈ e.target := by
     have hdom := (IsNormalDiag.inv_is_min (I := I) hb k hcomplete hconn x
       hq he hf hρ hρq hρmetric hρexp (hpairs i)).choose_spec.1
@@ -889,21 +889,21 @@ theorem HasNormalBrFull.exists_cm_deriv
       IsNormalDiag.target_of_chart_dom (I := I) (X.obj k) hcomplete hconn x
         hq he hf hcSource (hsrc i) hdom
   have hzNormal :
-      NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c ∈
+      NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c ∈
         normalBall (I := I) (X.obj k) x := by
     have hpre : e.symm
-        (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c,
+        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c,
           xi i0) ∈ Metric.ball (0 : E × E) q := by
       rw [← he.1]
       exact e.map_target (htgt i0)
     have hout := (hf (e.symm
-      (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c,
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c,
         xi i0)) (Metric.ball_subset_closedBall hpre)).2.1
     simpa only [e.right_inv (htgt i0)] using hout
   have heta_one : eta < 1 := heta.trans (by norm_num)
   have hsol := IsNormalDiag.cm_sol_strict (I := I) (X.obj k) hcomplete hconn x
     hq he hf happrox heta_one
-    (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c)
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
     mu xi htgt h.μ_nonneg hsum hzero
   simpa only [c, xi] using ⟨hcSource, htgt, hzNormal, hzero, hsol⟩
 
@@ -1000,11 +1000,11 @@ theorem exists_hat_cm_eqn_at
               let c := centerOfMass (I := I) (X.obj (L.φ k)).metric
                 mu pts join x rad h
               let xi : Fin (pb.A r) → E := fun i =>
-                NormalCoordinates.framedChartAt
+                NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
               chartCmEqnB (I := I) (X.obj (L.φ k)).metric
                 (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
-                (NormalCoordinates.framedChartAt
+                (NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 c)
                 (mu, xi) = 0 := by
   classical
@@ -1156,12 +1156,12 @@ theorem exists_hat_cm_sol_at
                 (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hq he
               let c := centerOfMass (I := I) (X.obj (L.φ k)).metric
                 mu pts join x rad h
-              let z := NormalCoordinates.framedChartAt
+              let z := NormalCoordinates.normalChartAt
                 (I := I) (X.obj (L.φ k)).metric x0 c
               let xi : Fin (pb.A r) → E := fun i =>
-                NormalCoordinates.framedChartAt
+                NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
-              c ∈ (NormalCoordinates.framedChartAt
+              c ∈ (NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0).source ∧
                 (∀ i, (z, xi i) ∈ e.target) ∧
                   z ∈ normalBall (I := I) (X.obj (L.φ k)) x0 ∧
@@ -1344,11 +1344,11 @@ theorem exists_hat_cm_eqn
               let c := centerOfMass (I := I) (X.obj (L.φ k)).metric
                 mu pts join x rad h
               let xi : Fin (pb.A r) → E := fun i ↦
-                NormalCoordinates.framedChartAt
+                NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
               chartCmEqnB (I := I) (X.obj (L.φ k)).metric
                 (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
-                (NormalCoordinates.framedChartAt
+                (NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 c)
                 (mu, xi) = 0 := by
   classical

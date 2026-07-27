@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenComplete
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Open-window flow-upgrade assembly
@@ -24,8 +22,8 @@ open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]

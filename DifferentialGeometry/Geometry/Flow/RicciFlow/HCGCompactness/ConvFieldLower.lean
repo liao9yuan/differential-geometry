@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldMain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.LimitSolutionEquation
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Lower bounds inherited by a fixed-window metric limit
@@ -20,8 +19,8 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -33,6 +32,8 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace ConvOut
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- A pointwise quadratic-form lower bound that is uniform along the selected
 sequence passes to the fixed-window limit metric. -/
 theorem lower_of

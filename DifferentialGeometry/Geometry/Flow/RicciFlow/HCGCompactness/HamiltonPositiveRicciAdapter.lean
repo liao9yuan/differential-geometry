@@ -25,7 +25,7 @@ open scoped Manifold ContDiff
 open DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -222,6 +222,7 @@ theorem baseScalarConv_of_smoothCGH
         (Q.point (hsource.origIndex (subseq k))) := by
           simpa using hsource.baseScalar (subseq k)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Smooth CGH convergence transfers the time-zero improved-pinching decay to
 the limit trace-free Ricci norm. -/
 theorem tf_decay0_of_cgh
@@ -343,6 +344,7 @@ theorem tf_decay0_of_cgh
             (L.sourceToOrig i (L.cgh.spatial.maps.map k x)))
   exact hsmall 0 h0
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The genuine time-zero smooth-CGH scalar and Ricci-norm convergence,
 Hamilton's improved pinching estimate, and the basepoint normalization make
 the retained limit slice a positive constant-curvature metric. -/
@@ -418,6 +420,7 @@ theorem round0_of_cgh
   exact limit_round_base (I := I) (M := M) hdim hconn hbdry
     hbasePos heinstein
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- A compactness conclusion from the new HCG interface supplies the old
 Hamilton Section 12 black-box conclusion. -/
 theorem toHam3Exists

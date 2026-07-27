@@ -3,7 +3,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivTower
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 /-!
 # Compact-open convergence of component covariant-derivative towers
@@ -44,6 +43,7 @@ private theorem covCompStep_contDiff (e : Idx → E) {r : Nat} :
   unfold covCompStep
   fun_prop
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem iterCovComp_succ_eq_step
     {U : Set E} (hU : IsOpen U) (e : Idx → E) {r : Nat}
     (chr : E → Idx → Idx → Idx → Real)
@@ -81,6 +81,7 @@ private theorem iterCovComp_succ_eq_step
       L (e (n 0)) (Fin.tail n)) hpi
   simpa only [constFrame, ContinuousLinearMap.pi_apply] using happ.symm
 
+omit [CompleteSpace E] in
 /-- Compact-open \`C∞\` convergence of both the base component array and the
 Christoffel array is preserved by every finite level of \`iterCovComp\` in a
 fixed model-space frame. -/
@@ -238,6 +239,7 @@ theorem iter_comp_conv
             (iterCovComp_succ_eq_step hU e chrInf baseInf q hTInf_cd)⟩
   exact (hall a).1
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem iterCovComp_zero_base
     (e : Idx → E) {r : Nat}
     (chr : E → Idx → Idx → Idx → Real) (a : Nat) :
@@ -255,6 +257,7 @@ private theorem iterCovComp_zero_base
         ContinuousLinearMap.zero_apply, mul_zero, Finset.sum_const_zero, sub_zero]
       rfl
 
+omit [CompleteSpace E] in
 /-- If the base arrays converge to zero, every finite component
 covariant-derivative tower converges to zero as well. -/
 theorem iter_comp_zero

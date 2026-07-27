@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Orthonormal frames for normal coordinates

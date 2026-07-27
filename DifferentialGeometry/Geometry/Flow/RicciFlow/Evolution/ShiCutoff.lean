@@ -1,9 +1,10 @@
 import DifferentialGeometry.Analysis.Calculus.CutoffProfile
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.DistanceBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
+import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Barrier cutoffs for complete Ricci flows
@@ -20,20 +21,18 @@ universe u uE uH
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Filter Set
+open Bundle Filter Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Topology Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-  [Module.Finite Real E] [FiniteDimensional Real E]
-  [InnerProductSpace Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [SigmaCompactSpace M] [T2Space M]
 
 private theorem cutoff_par_bound
@@ -204,10 +203,11 @@ theorem shiBarrierCutoff_of_sol
     exact inv_pos.mpr (hR n)
   have ha_le_one : ∀ n, a n ≤ 1 := by
     intro n
-    rw [a, inv_le_one₀]
+    dsimp only [a]
+    rw [inv_le_one₀]
     · dsimp only [R]
       norm_num
-    · exact (hR n).le
+    · exact hR n
   have ha_sq : ∀ n, a n ^ 2 ≤ a n := by
     intro n
     nlinarith [ha_pos n, ha_le_one n]
@@ -247,8 +247,8 @@ theorem shiBarrierCutoff_of_sol
       dsimp only [chi, z]
       apply
         DifferentialGeometry.Analysis.CutoffProfile.evalue_one_of_le
-      simp only [riemannianEDistOf, Manifold.riemannianEDist_self,
-        mul_zero, zero_le_one]
+      rw [riemannianEDistOf_self]
+      simp only [mul_zero, zero_le_one]
   have hanchor :
       ∀ s ∈ Set.Icc 0 T, ∀ y : M,
         riemannianEDistOf (I := I) (S.base.metric 0) O y ≤
@@ -257,27 +257,27 @@ theorem shiBarrierCutoff_of_sol
               (I := I) (S.base.metric s) O y := by
     intro s hs y
     have hmetric :
-        ∀ v : TangentSpace I y,
-          (S.base.metric 0).inner y v v ≤
+        ∀ z : M, ∀ v : TangentSpace I z,
+          (S.base.metric 0).inner z v v ≤
             Real.exp (2 * Λ * s) *
-              (S.base.metric s).inner y v v := by
-      intro v
-      have hlo := (hequiv s hs y v).1
+              (S.base.metric s).inner z v v := by
+      intro z v
+      have hlo := (hequiv s hs z v).1
       have hlo' :
           Real.exp (-(2 * Λ * s)) *
-              (S.base.metric 0).inner y v v ≤
-            (S.base.metric s).inner y v v := by
+              (S.base.metric 0).inner z v v ≤
+            (S.base.metric s).inner z v v := by
         simpa only [sub_zero] using hlo
       calc
-        (S.base.metric 0).inner y v v =
+        (S.base.metric 0).inner z v v =
             Real.exp (2 * Λ * s) *
               (Real.exp (-(2 * Λ * s)) *
-                (S.base.metric 0).inner y v v) := by
+                (S.base.metric 0).inner z v v) := by
           rw [← mul_assoc, ← Real.exp_add]
           ring_nf
           simp only [Real.exp_zero, one_mul]
         _ ≤ Real.exp (2 * Λ * s) *
-              (S.base.metric s).inner y v v :=
+              (S.base.metric s).inner z v v :=
           mul_le_mul_of_nonneg_left hlo' (Real.exp_pos _).le
     have hdist :=
       edistOf_le_of_quad
@@ -356,7 +356,8 @@ theorem shiBarrierCutoff_of_sol
           ENNReal.ofReal (Real.exp (Λ * s)) *
             riemannianEDistOf
               (I := I) (S.base.metric s) O y := by
-      rw [z, ENNReal.ofReal_div_of_pos (hR n)]
+      dsimp only [z]
+      rw [ENNReal.ofReal_div_of_pos (hR n)]
       calc
         (ENNReal.ofReal (Real.exp (Λ * s)) /
               ENNReal.ofReal (R n) *
@@ -417,7 +418,8 @@ theorem shiBarrierCutoff_of_sol
       DifferentialGeometry.Analysis.CutoffProfile.evalue_eq_value
         hzfin]
     congr 1
-    rw [z, ENNReal.toReal_mul,
+    dsimp only [z]
+    rw [ENNReal.toReal_mul,
       ENNReal.toReal_ofReal
         (div_nonneg (Real.exp_pos _).le (hR n).le)]
     dsimp only [a]
@@ -442,8 +444,8 @@ theorem shiBarrierCutoff_of_sol
       dsimp only [chi, z]
       apply
         DifferentialGeometry.Analysis.CutoffProfile.evalue_one_of_le
-      simp only [riemannianEDistOf, Manifold.riemannianEDist_self,
-        mul_zero, zero_le_one]
+      rw [riemannianEDistOf_self]
+      simp only [mul_zero, zero_le_one]
     have hz_at :
         ContinuousWithinAt
           (fun p : Real × M => z n p.1 p.2)
@@ -452,8 +454,8 @@ theorem shiBarrierCutoff_of_sol
         (hzcont n (t, O) ⟨ht, Set.mem_univ O⟩)
     have hzlt : z n t O < (1 : ENNReal) := by
       dsimp only [z]
-      simp only [riemannianEDistOf, Manifold.riemannianEDist_self,
-        mul_zero, ENNReal.zero_lt_one]
+      rw [riemannianEDistOf_self]
+      simpa only [mul_zero] using (zero_lt_one : (0 : ENNReal) < 1)
     have hz_nhds :
         ∀ᶠ p in 𝓝[spacetimeSlab (M := M) T] (t, O),
           z n p.1 p.2 < (1 : ENNReal) :=
@@ -480,16 +482,17 @@ theorem shiBarrierCutoff_of_sol
         mdifferentiableAt_const
     · simpa only [phi] using
         (gradientFun_mdiffAt
-          (I := I) (flowG (I := I) S).metric t
+          (I := I) ((flowG (I := I) S).metric t)
           (f := fun _ : M => (1 : Real)) contMDiff_const O)
     · have hgradzero :
           gradientFun
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (phi t) O = 0 := by
         exact gradientFun_const
-          (I := I) (flowG (I := I) S).metric t 1 O
+          (I := I) ((flowG (I := I) S).metric t) 1 O
       rw [hgradzero]
-      simpa only [map_zero, herr_nonneg n, zero_le_mul]
+      dsimp only [phi]
+      simpa only [map_zero, mul_one] using herr_nonneg n
     · have hheat_one :
           heatOperatorWithDrift
               (I := I) (flowG (I := I) S) t
@@ -499,11 +502,11 @@ theorem shiBarrierCutoff_of_sol
           driftTerm gradientAt
         have hzero :
             gradientFun
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (phi t) = 0 := by
           funext y
           exact gradientFun_const
-            (I := I) (flowG (I := I) S).metric t 1 y
+            (I := I) ((flowG (I := I) S).metric t) 1 y
         rw [hzero]
         simp
       have hpar :
@@ -513,7 +516,9 @@ theorem shiBarrierCutoff_of_sol
               phi t O = 0 := by
         unfold parabolicOperatorWithDrift
         rw [hheat_one]
-        simp only [phi, derivWithin_const, zero_sub]
+        change derivWithin (Function.const Real (1 : Real)) (Set.Icc 0 T) t - 0 = 0
+        rw [derivWithin_const]
+        simp only [Pi.zero_apply, sub_self]
       rw [hpar]
       exact herr_nonneg n
   · have hdist_fin :
@@ -525,17 +530,27 @@ theorem shiBarrierCutoff_of_sol
         ENNReal.ofReal_ne_zero_iff.mpr
           (div_pos (Real.exp_pos _) (hR n))
       have hz_top : z n t x = ⊤ := by
-        rw [z, htop, ENNReal.mul_top hcoef0]
+        change ENNReal.ofReal (Real.exp (Λ * t) / R n) *
+            riemannianEDistOf (I := I) (S.base.metric t) O x = ⊤
+        rw [htop, ENNReal.mul_top hcoef0]
       have hchi_zero : chi n t x = 0 := by
         dsimp only [chi]
         rw [hz_top,
           DifferentialGeometry.Analysis.CutoffProfile.evalue_top]
       linarith
-    obtain ⟨rho, hrho_eq, hrho_upper, hrho_time, hrho_space,
-        hrho_grad, hrho_grad_sq, hrho_par⟩ :=
+    let hrho_exists :=
       scaledDist_calabiUpperSupport_of_sol
         (I := I) S hS O hT hslab hreg hcomplete hK hcurv
           ht htpos x hdist_fin hOx
+    let rho := Classical.choose hrho_exists
+    have hrho_spec := Classical.choose_spec hrho_exists
+    have hrho_eq := hrho_spec.1
+    have hrho_upper := hrho_spec.2.1
+    have hrho_time := hrho_spec.2.2.1
+    have hrho_space := hrho_spec.2.2.2.1
+    have hrho_grad := hrho_spec.2.2.2.2.1
+    have hrho_grad_sq := hrho_spec.2.2.2.2.2.1
+    have hrho_par := hrho_spec.2.2.2.2.2.2
     let u : Real → M → Real := fun s y => a n * rho s y
     let phi : Real → M → Real := fun s y =>
       DifferentialGeometry.Analysis.CutoffProfile.value (u s y)
@@ -549,24 +564,26 @@ theorem shiBarrierCutoff_of_sol
       filter_upwards [hrho_space] with y hy
       simpa only [u] using hy.const_smul (a n)
     have hlin : Differentiable Real (fun q : Real => a n * q) :=
-      differentiable_const.mul differentiable_id
+      fun q => (hasDerivAt_const_mul (x := q) (a n)).differentiableAt
     have hlin' :
         DifferentiableAt Real
           (deriv (fun q : Real => a n * q)) (rho t x) := by
-      have hcd :
-          ContDiff Real ∞ (fun q : Real => a n * q) :=
-        contDiff_const.mul contDiff_id
+      have hderiv :
+          deriv (fun q : Real => a n * q) = fun _ => a n := by
+        funext q
+        exact (hasDerivAt_const_mul (x := q) (a n)).deriv
+      rw [hderiv]
       exact
-        (hcd.deriv' (n := 1)).differentiable
-          (by simp) (rho t x)
+        (differentiableAt_const (c := a n) :
+          DifferentiableAt Real (fun _ : Real => a n) (rho t x))
     have hu_grad :
         MDifferentiableAt I (I.prod 𝓘(Real, E))
           (T% fun y : M =>
             gradientFun
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (u t) y) x := by
       exact grad_comp_mdiffAt
-        (I := I) (flowG (I := I) S).metric t
+        (I := I) ((flowG (I := I) S).metric t)
         hlin hlin' hrho_space hrho_grad
     have hvalue :
         Differentiable Real
@@ -578,15 +595,22 @@ theorem shiBarrierCutoff_of_sol
           (deriv
             DifferentialGeometry.Analysis.CutoffProfile.value)
           (u t x) := by
+      have hvalueC2 :
+          ContDiff Real 2
+            DifferentialGeometry.Analysis.CutoffProfile.value :=
+        DifferentialGeometry.Analysis.CutoffProfile.contDiff.of_le (by
+          have h :
+              ((2 : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+            exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
+          exact h)
       exact
-        (DifferentialGeometry.Analysis.CutoffProfile.contDiff.deriv'
-          (n := 1)).differentiable
+        (hvalueC2.deriv' (n := 1)).differentiable
             (by simp) (u t x)
     have hphi_time :
         DifferentiableWithinAt Real
           (fun s => phi s x) (Set.Icc 0 T) t := by
       simpa only [phi, Function.comp_apply] using
-        (hvalue (u t x)).differentiableWithinAt.comp t hu_time
+        (hvalue (u t x)).comp_differentiableWithinAt t hu_time
     have hphi_space :
         ∀ᶠ y in 𝓝 x,
           MDifferentiableAt I 𝓘(Real, Real) (phi t) y := by
@@ -596,10 +620,10 @@ theorem shiBarrierCutoff_of_sol
         MDifferentiableAt I (I.prod 𝓘(Real, E))
           (T% fun y : M =>
             gradientFun
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (phi t) y) x := by
       exact grad_comp_mdiffAt
-        (I := I) (flowG (I := I) S).metric t
+        (I := I) ((flowG (I := I) S).metric t)
         hvalue hvalue' hu_space hu_grad
     have hdist_nhds :
         ∀ᶠ p in 𝓝[spacetimeSlab (M := M) T] (t, x),
@@ -648,15 +672,15 @@ theorem shiBarrierCutoff_of_sol
             (hchi_real n p.1 p.2 hfin).symm
     have heq : phi t x = chi n t x := by
       rw [hchi_real n t x hdist_fin]
-      dsimp only [phi, u]
+      dsimp only [phi, u, rho]
       rw [hrho_eq]
     have hquant :
         ((flowG (I := I) S).metric t).inner x
             (gradientFun
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (phi t) x)
             (gradientFun
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (phi t) x) ≤
           err n * phi t x ∧
         parabolicOperatorWithDrift
@@ -670,29 +694,29 @@ theorem shiBarrierCutoff_of_sol
           hu_space.self_of_nhds
         have hgrad_u :
             gradientFun
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (u t) x =
               a n •
                 gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (rho t) x := by
           simpa only [u, Pi.smul_apply, smul_eq_mul] using
             (gradientFun_const_smul
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (a n) hrho_xdiff)
         have hgrad_phi :
             gradientFun
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (phi t) x =
               deriv
                   DifferentialGeometry.Analysis.CutoffProfile.value
                   (u t x) •
                 gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (u t) x := by
           simpa only [phi] using
             (gradientFun_comp
-              (I := I) (flowG (I := I) S).metric t
+              (I := I) ((flowG (I := I) S).metric t)
               (hvalue (u t x)) hu_xdiff)
         have hexp_le :
             Real.exp (Λ * t) ≤ U := by
@@ -713,15 +737,15 @@ theorem shiBarrierCutoff_of_sol
         have hgrad_u_sq :
             ((flowG (I := I) S).metric t).inner x
                 (gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (u t) x)
                 (gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (u t) x) ≤
               a n ^ 2 * U ^ 2 := by
           rw [hgrad_u,
-            gInner_smul_self
-              (I := I) (flowG (I := I) S).metric t x]
+            metric_inner_smul_self
+              (I := I) ((flowG (I := I) S).metric t) x]
           exact
             (mul_le_mul_of_nonneg_left hrho_grad_sq
               (sq_nonneg (a n))).trans
@@ -745,24 +769,24 @@ theorem shiBarrierCutoff_of_sol
         calc
           ((flowG (I := I) S).metric t).inner x
                 (gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (phi t) x)
                 (gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (phi t) x) =
               (deriv
                   DifferentialGeometry.Analysis.CutoffProfile.value
                   (u t x)) ^ 2 *
                 ((flowG (I := I) S).metric t).inner x
                   (gradientFun
-                    (I := I) (flowG (I := I) S).metric t
+                    (I := I) ((flowG (I := I) S).metric t)
                     (u t) x)
                   (gradientFun
-                    (I := I) (flowG (I := I) S).metric t
+                    (I := I) ((flowG (I := I) S).metric t)
                     (u t) x) := by
             rw [hgrad_phi,
-              gInner_smul_self
-                (I := I) (flowG (I := I) S).metric t x]
+              metric_inner_smul_self
+                (I := I) ((flowG (I := I) S).metric t) x]
           _ ≤
               (deriv
                   DifferentialGeometry.Analysis.CutoffProfile.value
@@ -797,7 +821,8 @@ theorem shiBarrierCutoff_of_sol
             mul_le_mul_of_nonneg_right hCpart
               (mul_nonneg (ha_pos n).le hphi_nonneg)
           _ = err n * phi t x := by
-            rfl
+            dsimp only [err, phi]
+            ring
       · have htime_u :
             derivWithin
                 (fun s : Real => u s x) (Set.Icc 0 T) t =
@@ -852,10 +877,10 @@ theorem shiBarrierCutoff_of_sol
                     (u t x) *
                   ((flowG (I := I) S).metric t).inner x
                     (gradientFun
-                      (I := I) (flowG (I := I) S).metric t
+                      (I := I) ((flowG (I := I) S).metric t)
                       (u t) x)
                     (gradientFun
-                      (I := I) (flowG (I := I) S).metric t
+                      (I := I) ((flowG (I := I) S).metric t)
                       (u t) x) := by
           simpa only [phi, gradientAt] using
             (parabolic_comp_nhds
@@ -881,10 +906,10 @@ theorem shiBarrierCutoff_of_sol
                       (u t x) *
                     ((flowG (I := I) S).metric t).inner x
                       (gradientFun
-                        (I := I) (flowG (I := I) S).metric t
+                        (I := I) ((flowG (I := I) S).metric t)
                         (u t) x)
                       (gradientFun
-                        (I := I) (flowG (I := I) S).metric t
+                        (I := I) ((flowG (I := I) S).metric t)
                         (u t) x) := hcomp
             _ = 0 := by
               rw [
@@ -905,14 +930,14 @@ theorem shiBarrierCutoff_of_sol
           let G2 : Real :=
             ((flowG (I := I) S).metric t).inner x
               (gradientFun
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (u t) x)
               (gradientFun
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (u t) x)
           have hu_gt : 1 < u t x := lt_of_not_ge hsmall
           have hu_eq : u t x = a n * e * r0 := by
-            dsimp only [u, e, r0]
+            dsimp only [u, e, r0, rho]
             rw [hrho_eq]
             ring
           have hactive : 1 ≤ a n * e * r0 := by
@@ -932,15 +957,15 @@ theorem shiBarrierCutoff_of_sol
               (mul_le_mul_of_nonneg_left ht.2 hΛ)
           have hgrad_u :
               gradientFun
-                  (I := I) (flowG (I := I) S).metric t
+                  (I := I) ((flowG (I := I) S).metric t)
                   (u t) x =
                 a n •
                   gradientFun
-                    (I := I) (flowG (I := I) S).metric t
+                    (I := I) ((flowG (I := I) S).metric t)
                     (rho t) x := by
             simpa only [u, Pi.smul_apply, smul_eq_mul] using
               (gradientFun_const_smul
-                (I := I) (flowG (I := I) S).metric t
+                (I := I) ((flowG (I := I) S).metric t)
                 (a n) hrho_space.self_of_nhds)
           have he_sq :
               Real.exp (2 * Λ * t) = e ^ 2 := by
@@ -955,13 +980,13 @@ theorem shiBarrierCutoff_of_sol
           have hG2_nonneg : 0 ≤ G2 := by
             dsimp only [G2]
             exact
-              gInner_self_nonneg
-                (I := I) ((flowG (I := I) S).metric t) x _
+              metric_inner_self_nonneg
+                (I := I) (M := M) ((flowG (I := I) S).metric t) x _
           have hG2 : G2 ≤ a n ^ 2 * U ^ 2 := by
             dsimp only [G2]
             rw [hgrad_u,
-              gInner_smul_self
-                (I := I) (flowG (I := I) S).metric t x]
+              metric_inner_smul_self
+                (I := I) ((flowG (I := I) S).metric t) x]
             exact
               (mul_le_mul_of_nonneg_left hrho_grad_sq
                 (sq_nonneg (a n))).trans

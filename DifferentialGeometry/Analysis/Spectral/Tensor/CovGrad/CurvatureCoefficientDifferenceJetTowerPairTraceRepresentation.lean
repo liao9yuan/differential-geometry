@@ -196,7 +196,7 @@ lemma appCcRS_sub_right_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
         (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W₂.toSection x) D from rfl]
   rw [map_sub]
 
-private instance tensorRSModelNormedSpaceCC {r s : ℕ} :
+private local instance tensorRSModelNormedSpaceCC {r s : ℕ} :
     NormedSpace ℝ (TensorRSModel r s ℝ E) :=
   Tensor0SBundle.tensorRSModel_normedSpace r s
 
@@ -868,6 +868,32 @@ private lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetr
     (cometricDoubleTraceField (I := I) g₀ s)]
   rw [appCcRS_slotInsert_id_eq (I := I) (M := M) g₀ (s + 1) s
     (cometricDoubleTraceField (I := I) g₀ s)]
+
+/-- The moving cometric double-trace field, retagged to the frozen metric. -/
+noncomputable def pureTrace (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
+    SmoothCcTensor g₀ (s + 2) s :=
+  pureDoubleTraceField (I := I) (M := M) g₀ g₁ s
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
+/-- Fibre readout of the moving cometric double trace. -/
+@[simp] theorem pureTrace_toSection
+    (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+    (pureTrace (I := I) (M := M) g₀ g₁ s).toSection x =
+      (show TensorRSSpace (s + 2) s I x from
+        cometricDoubleTraceFib (I := I) g₁ s x) := rfl
+
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
+/-- The moving double trace is the fixed parallel trace plus its exact
+inverse-metric-difference correction. -/
+theorem pureTrace_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
+    pureTrace (I := I) (M := M) g₀ g₁ s =
+      ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s
+        (cometricDoubleTraceField (I := I) g₀ s)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (s + 1)
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁)) +
+      cometricDoubleTraceField (I := I) g₀ s :=
+  pureDoubleTraceField_cross_split (I := I) (M := M) g₀ g₁ s
 
 theorem exists_fiberNormSq_iteratedCovGrad_pairTraceOp_diff_grid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

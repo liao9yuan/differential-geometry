@@ -24,7 +24,7 @@ namespace HCGCompactness
 open Set Filter Topology Bundle Manifold
 open scoped ContDiff Manifold Topology
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

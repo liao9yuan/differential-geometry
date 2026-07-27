@@ -38,7 +38,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open LieCorr0Core
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -89,6 +89,10 @@ def lc0Riem (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := lieCorr0RiemFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- At the frozen base background, the insertion endomorphism is exactly the
 negative of the DeTurck `W` endomorphism. -/
 theorem nEndo_base (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -96,6 +100,10 @@ theorem nEndo_base (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
       -deTurckLieWEndo (I := I) g₁ g₀ x := by
   rw [lieCorr0NEndo, sub_self, zero_sub]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- After the base cancellation, the insertion endomorphism is a product of
 the moving-to-frozen connection difference with the difference of the two
 DeTurck vector fields.  In particular its first covariant derivative uses at
@@ -112,6 +120,8 @@ theorem nEndo_diff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
   rw [nEndo_base (I := I) (M := M) g₀ g₁ x, lieCorr0NEndo]
   abel
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- The insertion part cancels the base-background DeTurck endomorphism arm.
 Writing the result as a background difference prevents the highest derivative
 of the metric perturbation from reappearing in a separate norm estimate. -/
@@ -165,6 +175,7 @@ theorem insert_base (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [e0, e1]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Exact four-piece smooth-field realization of `lieCorr0Field`. -/
 theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg =
@@ -180,6 +191,7 @@ theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [lieCorr0TotalFib]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- In the base-background tail, keep the insertion field next to the
 endomorphism arm.  This is the cancellation-preserving normal form consumed by
 the low-regularity coefficient estimate. -/

@@ -20,9 +20,6 @@ a high-order bound for the arbitrary endpoint solution.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold ContDiff RealInnerProductSpace
@@ -36,8 +33,9 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -49,17 +47,19 @@ covariant two-tensor. -/
 def edgeLowerArm (g : SmoothRiemannianMetric I M)
     (C₀ : SmoothCcTensor g 2 2) (C₁ : SmoothCcTensor g 3 2)
     (W : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
-  appCc (I := I) (M := M) g 2 2 C₀ W +
-    appCc (I := I) (M := M) g 3 2 C₁
+  operatorFieldApply (I := I) (M := M) g 2 2 C₀ W +
+    operatorFieldApply (I := I) (M := M) g 3 2 C₁
       (iteratedCovGrad (I := I) g 0 2 1 W)
 
 /-! ## Exact carrier/residual split at the closed initial edge -/
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- The zero perturbation has fibre operator bound zero.  This local
 analysis-layer lemma avoids importing the later geometric solution package
 merely to instantiate the second endpoint of `realizedFam`. -/
 theorem edgeZeroBound (g : SmoothRiemannianMetric I M) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) 0 := by
   intro x v w
   have h0 : (0 : SmoothCcTensor g 0 2) =
@@ -67,12 +67,14 @@ theorem edgeZeroBound (g : SmoothRiemannianMetric I M) :
   rw [h0, ccTensorBilinSymm_smul]
   simp only [zero_mul, abs_zero, le_refl]
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- The zero endpoint satisfies the unsymmetrized tensor symmetry premise
 used by the exact Ricci--DeTurck slope theorem. -/
 theorem edgeZeroSymm (g : SmoothRiemannianMetric I M) :
     ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x v w =
-        ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x w v := by
+      smoothCcTensorBilinForm (I := I) g (0 : SmoothCcTensor g 0 2) x v w =
+        smoothCcTensorBilinForm (I := I) g (0 : SmoothCcTensor g 0 2) x w v := by
   intro x v w
   have h0 : (0 : SmoothCcTensor g 0 2) =
       (0 : Real) • (0 : SmoothCcTensor g 0 2) := (zero_smul Real _).symm
@@ -84,7 +86,7 @@ theorem edgeZeroSymm (g : SmoothRiemannianMetric I M) :
 endpoint fixed at the carrier. -/
 def edgeMetric (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {δ : Real}
-    (hδ : gFibreOpBound (I := I) (M := M) g
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) δ) (s : Real) :
     SmoothRiemannianMetric I M :=
   realizedFam (I := I) g W 0 hδ (edgeZeroBound (I := I) (M := M) g) s
@@ -147,15 +149,15 @@ zeroth-order curvature reaction. -/
 theorem edgeTop_split
     (g g_bg g1 : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 4 2
+    operatorFieldApply (I := I) (M := M) g 4 2
         (deTurckPhiMetTotal (I := I) (M := M) g g_bg g1)
         (iteratedCovGrad (I := I) g 0 2 2 W) =
       (rawTensorConnLapSmooth (I := I) g 0 2 W +
           deTurckPrincipalCometricArm (I := I) (M := M) g g1 W) +
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (phiMetCurvCoeff (I := I) g g_bg g1) W := by
   have hlap : rawTensorConnLapSmooth (I := I) g 0 2 W =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (ricciArmPrincipalCoeffPure (I := I) (M := M) g g)
         (iteratedCovGrad (I := I) g 0 2 2 W) := by
     apply smoothCcTensor_ext_of_unitModel
@@ -174,6 +176,7 @@ theorem edgeTop_split
     deTurckPrincipalCometricCoeff, appCc_sub_left, hlap]
   abel
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 private theorem edgeLower_add
     (g : SmoothRiemannianMetric I M)
     (C0 D0 : SmoothCcTensor g 2 2) (C1 D1 : SmoothCcTensor g 3 2)
@@ -202,9 +205,10 @@ spatial derivative bound for the arbitrary endpoint metric. -/
 theorem edgeSlope_split
     (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
+      smoothCcTensorBilinForm (I := I) g W x v w =
+        smoothCcTensorBilinForm (I := I) g W x w v)
     {δ : Real} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g W) δ)
     (x : M) (v w : TangentSpace I x) {s : Real} (hs : s ∈ Set.Ioo (0 : Real) 1) :
     DeTurckCoefficients.rhsSumSlope (I := I) g g_bg W 0
@@ -239,10 +243,10 @@ theorem edgeSlope_split
     abel
   have htop := edgeTop_split (I := I) (M := M) g g_bg gs W
   have hsmooth :
-      appCc (I := I) (M := M) g 2 2 R0 W +
-          appCc (I := I) (M := M) g 3 2 R1
+      operatorFieldApply (I := I) (M := M) g 2 2 R0 W +
+          operatorFieldApply (I := I) (M := M) g 3 2 R1
             (iteratedCovGrad (I := I) g 0 2 1 W) +
-          appCc (I := I) (M := M) g 4 2
+          operatorFieldApply (I := I) (M := M) g 4 2
             (deTurckPhiMetTotal (I := I) (M := M) g g_bg gs)
             (iteratedCovGrad (I := I) g 0 2 2 W) =
         (rawTensorConnLapSmooth (I := I) g 0 2 W +
@@ -251,12 +255,12 @@ theorem edgeSlope_split
             edgeQuadArm (I := I) (M := M) g gs g_bg W) := by
     rw [htop]
     calc
-      appCc (I := I) (M := M) g 2 2 R0 W +
-            appCc (I := I) (M := M) g 3 2 R1
+      operatorFieldApply (I := I) (M := M) g 2 2 R0 W +
+            operatorFieldApply (I := I) (M := M) g 3 2 R1
               (iteratedCovGrad (I := I) g 0 2 1 W) +
             ((rawTensorConnLapSmooth (I := I) g 0 2 W +
                 deTurckPrincipalCometricArm (I := I) (M := M) g gs W) +
-              appCc (I := I) (M := M) g 2 2
+              operatorFieldApply (I := I) (M := M) g 2 2
                 (phiMetCurvCoeff (I := I) g g_bg gs) W) =
           (rawTensorConnLapSmooth (I := I) g 0 2 W +
               deTurckPrincipalCometricArm (I := I) (M := M) g gs W) +
@@ -285,14 +289,15 @@ theorem edgeSlope_split
   simp only [sub_zero, iteratedCovGrad_zero] at hslope
   rw [hslope]
   change unitModel (I := I) (M := M) g 2
-      (appCc (I := I) (M := M) g 2 2 R0 W +
-        appCc (I := I) (M := M) g 3 2 R1
+      (operatorFieldApply (I := I) (M := M) g 2 2 R0 W +
+        operatorFieldApply (I := I) (M := M) g 3 2 R1
           (iteratedCovGrad (I := I) g 0 2 1 W) +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (deTurckPhiMetTotal (I := I) (M := M) g g_bg gs)
           (iteratedCovGrad (I := I) g 0 2 2 W)) x ![v, w] = _
   rw [hsmooth]
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 /-- Pointwise bounds for the order-zero and order-one coefficient fields give
 the exact lower-order energy estimate used after principal-arm absorption.
 
@@ -319,23 +324,23 @@ theorem edgeLower_pair_le
   let D : SmoothCcTensor g 0 3 :=
     iteratedCovGrad (I := I) g 0 2 1 W
   let U₀ : SmoothCcTensor g 0 2 :=
-    appCc (I := I) (M := M) g 2 2 C₀ W
+    operatorFieldApply (I := I) (M := M) g 2 2 C₀ W
   let U₁ : SmoothCcTensor g 0 2 :=
-    appCc (I := I) (M := M) g 3 2 C₁ D
+    operatorFieldApply (I := I) (M := M) g 3 2 C₁ D
   have hU₀ : ‖U₀‖ ≤ B₀ * ‖W‖ := by
     dsimp only [U₀]
-    exact appCc_l2_le_of_pointwise_fiberNormSq_bound_left
+    exact operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
       (I := I) (M := M) g 2 2 C₀ W B₀ hB₀ hC₀
   have hU₁ : ‖U₁‖ ≤ B₁ * ‖D‖ := by
     dsimp only [U₁]
-    exact appCc_l2_le_of_pointwise_fiberNormSq_bound_left
+    exact operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
       (I := I) (M := M) g 3 2 C₁ D B₁ hB₁ hC₁
   have hpair₀ :
       tensorL2Inner (I := I) (M := M) g 0 2 W.toFun U₀.toFun ≤
         B₀ * ‖W‖ ^ 2 := by
     rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₀]
     calc
-      ⟨W, U₀⟩_Real ≤ ‖W‖ * ‖U₀‖ := real_inner_le_norm W U₀
+      ⟪W, U₀⟫ ≤ ‖W‖ * ‖U₀‖ := real_inner_le_norm W U₀
       _ ≤ ‖W‖ * (B₀ * ‖W‖) :=
         mul_le_mul_of_nonneg_left hU₀ (norm_nonneg W)
       _ = B₀ * ‖W‖ ^ 2 := by ring
@@ -344,7 +349,7 @@ theorem edgeLower_pair_le
         B₁ * ‖W‖ * ‖D‖ := by
     rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₁]
     calc
-      ⟨W, U₁⟩_Real ≤ ‖W‖ * ‖U₁‖ := real_inner_le_norm W U₁
+      ⟪W, U₁⟫ ≤ ‖W‖ * ‖U₁‖ := real_inner_le_norm W U₁
       _ ≤ ‖W‖ * (B₁ * ‖D‖) :=
         mul_le_mul_of_nonneg_left hU₁ (norm_nonneg W)
       _ = B₁ * ‖W‖ * ‖D‖ := by ring
@@ -361,7 +366,7 @@ theorem edgeLower_pair_le
       (edgeLowerArm (I := I) (M := M) g C₀ C₁ W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W U₀,
       ← SmoothCcTensor.inner_def (I := I) (M := M) W U₁]
-    simp only [edgeLowerArm, U₀, U₁, D, real_inner_add_right]
+    simp only [edgeLowerArm, U₀, U₁, D, inner_add_right]
   rw [hadd]
   dsimp only [D] at hyoung ⊢
   nlinarith
@@ -381,9 +386,9 @@ theorem edgeCore_pair_le [Nonempty M]
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g W y v w) →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g W) δ →
-        symmS (I := I) (M := M) g W = W →
+        ccTensor02Symm (I := I) (M := M) g W = W →
         δ / (1 - δ) + C * δ ≤ 1 / 2 →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 2 2 x
@@ -400,6 +405,7 @@ theorem edgeCore_pair_le [Nonempty M]
   refine ⟨C, hC, ?_⟩
   intro g₁ C₀ C₁ W B₀ B₁ δ hB₀ hB₁ hδ hδ0 htie hbound hsymm hsmall hC₀ hC₁
   have hp := hprincipal g₁ W hδ hδ0 htie hbound hsymm hsmall
+  rw [SmoothCcTensor.norm_toL2] at hp
   have hlo := edgeLower_pair_le (I := I) (M := M)
     g C₀ C₁ W hB₀ hB₁ hC₀ hC₁
   have hadd :
@@ -417,7 +423,7 @@ theorem edgeCore_pair_le [Nonempty M]
           deTurckPrincipalCometricArm (I := I) (M := M) g g₁ W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W
         (edgeLowerArm (I := I) (M := M) g C₀ C₁ W)]
-    simp only [edgeCoreArm, real_inner_add_right]
+    simp only [edgeCoreArm, inner_add_right]
   rw [hadd]
   nlinarith
 

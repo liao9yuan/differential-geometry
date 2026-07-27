@@ -29,7 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Variation
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -43,7 +43,7 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+omit [FiniteDimensional Real E]
     [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -161,7 +161,7 @@ theorem intrinsic_gauss
       simpa only [speedSq, F] using
         (intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p
           (show TangentSpace I p from u + s • w) t)
-    have hS1 := S1_moving_foot_metric_compatibility (I := I) g F t hF
+    have hS1 := speedSq_hasDerivAt (I := I) g F t hF
     rw [hspeed] at hS1
     have hlaunch := launch_inner_deriv (I := I) g p u w
     have hcov_pair :

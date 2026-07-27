@@ -565,6 +565,16 @@ noncomputable def cometricDoubleTraceField (g₀ : SmoothRiemannianMetric I M) (
       contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₀ p }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+noncomputable def secondMetricCometricDoubleTraceField
+    (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ) :
+    Integral.L2.SmoothCcTensor g₀ (p + 2) p where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace (p + 2) p I x from
+          cometricDoubleTraceFib (I := I) g₁ p x)
+      contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ p }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
 
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in

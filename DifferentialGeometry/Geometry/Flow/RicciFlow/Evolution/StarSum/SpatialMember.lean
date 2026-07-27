@@ -30,7 +30,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -40,7 +40,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 private theorem cotangentSharp_ortho_expand
     [Module.Finite ℝ E]
@@ -65,7 +65,7 @@ private theorem cotangentSharp_ortho_expand
   · intro h
     exact absurd (Finset.mem_univ i) h
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor05_vec5_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
@@ -96,7 +96,7 @@ private theorem tensor05_vec5_sum_last_idx
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor04_vec4_sum_last_idx
     {Idx : Type*} [Fintype Idx] {x : M}
@@ -128,7 +128,6 @@ private theorem tensor04_vec4_sum_last_idx
   simp [smul_eq_mul]
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 private theorem slotdiffBasisEq
     [Module.Finite ℝ E]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -323,7 +322,7 @@ private theorem slotdiffBasisEq
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 private theorem curvactReduce
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
@@ -382,7 +381,6 @@ private theorem curvactReduce
   rw [Finset.sum_comm]
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] in
 private theorem slotdiffReduce
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D)
@@ -467,7 +465,7 @@ private theorem sumDiag {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   · intro h; exact absurd (Finset.mem_univ i) h
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 private theorem curvRoute
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
@@ -768,17 +766,18 @@ cost `commStarCost`. -/
 theorem commStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
+    {Idx : Type*} [Fintype Idx] :
     StarSum2Cost (I := I) Idx S (t : Real) (k + 1)
-      (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) :=
-  (commStarField_data (I := I) S hS t k).1
+      (commStarField (I := I) S t k) (commStarCost (Fintype.card Idx) k) := by
+  classical
+  exact (commStarField_data (I := I) S hS t k).1
 
 /-- Components of the canonical spatial-commutator field agree with the
 intrinsic commutator expression in every orthonormal basis. -/
 theorem commStarField_spec
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
     (horth : ∀ i j : Idx, (S.base.metric (t : Real)).inner x (basis i) (basis j)
       = if i = j then (1 : Real) else 0)
@@ -790,8 +789,9 @@ theorem commStarField_spec
             (metricTraceFirstTwoField (I := I) (M := M) (S.base.metric (t : Real))
               (nablaKRm04Field (I := I) S (t : Real) (k + 2))) x (fun p => basis (I0 p))
       = tensor0SComponent (I := I) (commStarField (I := I) S t k x)
-          (fun i => basis i) I0 :=
-  (commStarField_data (I := I) S hS t k).2 x basis horth I0
+          (fun i => basis i) I0 := by
+  letI : Fintype Idx := Fintype.ofFinite Idx
+  exact (commStarField_data (I := I) S hS t k).2 x basis horth I0
 
 /-- **Brick 4, P2 (compatibility form): the spatial commutator
 `[Δ,∇]∇ᵏRm` is a star sum.** -/

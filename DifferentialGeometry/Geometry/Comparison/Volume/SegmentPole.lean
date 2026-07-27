@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicRatio
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Sharp pole limit of the intrinsic transverse Jacobi density
@@ -48,7 +47,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -139,7 +138,7 @@ theorem poleLimit
       (Module.finrank Real E - 1) t :=
     hypDensity_pos (mul_nonneg hq (Real.sqrt_nonneg _)) ht0
   simp only [Pi.div_apply]
-  rw [div_div_div_cancel_right₀ _ hpow.ne']
+  field_simp [hpow.ne', hmdpos.ne']
 
 /-- **Step-(c) corollary consumed by the L6 assembly (deliverable 3).**  On the
 conjugate-free window `Ioo 0 b`, under a Ricci lower bound `Ric ≥ -(n-1)q²`, the

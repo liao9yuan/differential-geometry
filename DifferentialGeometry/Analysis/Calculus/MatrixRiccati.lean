@@ -25,16 +25,19 @@ open scoped Matrix.Norms.Operator
 namespace DifferentialGeometry
 namespace Analysis
 
-variable {n : Type*} [Fintype n] [DecidableEq n]
+variable {n : Type*} [DecidableEq n]
 
-set_option linter.unusedFintypeInType false in
 omit [DecidableEq n] in
 /-- Entrywise real derivatives assemble into a matrix-valued derivative. -/
 theorem hasDerivAt_matrix
+    [Finite n]
     (A : ℝ → Matrix n n ℝ) (A' : Matrix n n ℝ) (t : ℝ)
     (hA : ∀ i j, HasDerivAt (fun s => A s i j) (A' i j) t) :
     HasDerivAt A A' t := by
+  letI : Fintype n := Fintype.ofFinite n
   exact hasDerivAt_pi.mpr fun i => hasDerivAt_pi.mpr fun j => hA i j
+
+variable [Fintype n]
 
 omit [DecidableEq n] in
 /-- The trace of a differentiable matrix path has the trace of its derivative. -/

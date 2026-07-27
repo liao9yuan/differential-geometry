@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.QuadraticFormBound
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Endpoint smallness of a metric difference
@@ -30,9 +28,10 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -48,32 +47,35 @@ theorem jointSmall_compact
     (hf : Continuous (fun p : P × X => f p.1 p.2))
     (hzero : ∀ x : X, f p₀ x = 0)
     {ε : Real} (hε : 0 < ε) :
-    ∀ᶠ p in 𝒩 p₀, ∀ x : X, f p x < ε := by
+    ∀ᶠ p in 𝓝 p₀, ∀ x : X, f p x < ε := by
   classical
   have hpatch (x : X) :
-      ∃ V : Set P, V ∈ 𝒩 p₀ ∧
+      ∃ V : Set P, V ∈ 𝓝 p₀ ∧
         ∃ W : Set X, IsOpen W ∧ x ∈ W ∧
           ∀ p ∈ V, ∀ y ∈ W, f p y < ε := by
-    have hsmall : {q : P × X | f q.1 q.2 < ε} ∈ 𝒩 (p₀, x) := by
+    have hsmall : {q : P × X | f q.1 q.2 < ε} ∈ 𝓝 (p₀, x) := by
       exact hf.continuousAt.eventually_lt_const (by simpa [hzero x] using hε)
     obtain ⟨V, W, hVopen, hp₀V, hWopen, hxW, hVW⟩ :=
       mem_nhds_prod_iff'.mp hsmall
     refine ⟨V, hVopen.mem_nhds hp₀V, W, hWopen, hxW, ?_⟩
     intro p hp y hy
-    exact hVW ⟨hp, hy⟩
+    exact hVW (show (p, y) ∈ V ×ˢ W from ⟨hp, hy⟩)
   choose V hV W hWopen hxW hloc using hpatch
   obtain ⟨F, _, hF⟩ :=
     (isCompact_univ : IsCompact (Set.univ : Set X)).elim_nhds_subcover W
       (fun x _ => (hWopen x).mem_nhds (hxW x))
-  have htime : ∀ᶠ p in 𝒩 p₀, ∀ x ∈ F, p ∈ V x :=
+  have htime : ∀ᶠ p in 𝓝 p₀, ∀ x ∈ F, p ∈ V x :=
     (Finset.eventually_all
-      (I := F) (l := 𝒩 p₀) (p := fun x p => p ∈ V x)).2
+      (I := F) (l := 𝓝 p₀) (p := fun x p => p ∈ V x)).2
       (fun x _ => hV x)
   filter_upwards [htime] with p hp
   intro y
   obtain ⟨x, hxF, hyW⟩ := Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
   exact hloc x p (hp x hxF) y hyW
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A uniform bound on the quadratic form of a symmetric bilinear field over
 the fixed metric's unit tangent bundle implies the intrinsic bilinear
 operator bound with the same constant. -/
@@ -83,10 +85,10 @@ theorem gOpBound_unitQuad
       TangentSpace I x →L[Real] Real)
     (hsymm : ∀ (x : M) (v w : TangentSpace I x),
       A x v w = A x w v)
-    {δ : Real} (hδ : 0 ≤ δ)
+    {δ : Real}
     (hunit : ∀ (x : M) (u : TangentSpace I x),
       q.inner x u u = 1 → |A x u u| ≤ δ) :
-    gFibreOpBound (I := I) (M := M) q A δ := by
+    metricCauchySchwarzBound (I := I) (M := M) q A δ := by
   intro x v w
   let Q : Tensor02At (I := I) (M := M) x :=
     Tensor0SSpace.ofModel (I := I) (x := x)
@@ -96,6 +98,7 @@ theorem gOpBound_unitQuad
     change Tensor0SSpace.toModel Q (vec2 (I := I) z₁ z₂) = A x z₁ z₂
     rw [Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
     simp [vec2]
+    rfl
   have hdiag (z : TangentSpace I x) :
       |A x z z| ≤ δ * q.inner x z z := by
     rw [← hQeval z z]
@@ -117,7 +120,7 @@ theorem gOpBound_unitQuad
         |(4 : Real) * A x u z| ≤
           |A x (u + z) (u + z)| + |A x (u - z) (u - z)| := by
       rw [hpolar]
-      exact abs_sub_le _ _
+      exact abs_sub _ _
     have hsum := add_le_add (hdiag (u + z)) (hdiag (u - z))
     have hmetric :
         q.inner x (u + z) (u + z) + q.inner x (u - z) (u - z) = 4 := by
@@ -129,6 +132,7 @@ theorem gOpBound_unitQuad
       |A x u z| = (1 / 4 : Real) * |(4 : Real) * A x u z| := by
         rw [abs_mul]
         norm_num
+        ring
       _ ≤ (1 / 4 : Real) *
           (|A x (u + z) (u + z)| + |A x (u - z) (u - z)|) :=
         mul_le_mul_of_nonneg_left habs (by norm_num)
@@ -167,7 +171,6 @@ theorem gOpBound_unitQuad
     ring
   have habsval : |A x v w| = rv * sw * |A x u z| := by
     rw [hval, abs_mul, abs_mul, abs_of_pos hrvpos, abs_of_pos hswpos]
-    ring
   rw [habsval]
   calc
     rv * sw * |A x u z| ≤ rv * sw * δ :=
@@ -177,6 +180,8 @@ theorem gOpBound_unitQuad
       simp only [rv, sw]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- Joint chart-Gram continuity at a closed initial edge and equality to the
 background metric at that edge produce one positive window on which the
 fixed-background metric difference is uniformly small in `gFibreOpBound`.
@@ -195,7 +200,7 @@ theorem metricDiff_smallC0
     (hga : g a = q) (hδ : 0 < δ) :
     ∃ T : Real, 0 < T ∧ a + T < b ∧
       ∀ t ∈ Set.Icc a (a + T),
-        gFibreOpBound (I := I) (M := M) q
+        metricCauchySchwarzBound (I := I) (M := M) q
           (ccTensorBilinSymm (I := I) q
             (metricDifferenceCcTensor (I := I) (M := M) q (g t))) δ := by
   let K : Set Real := Set.Ico a b
@@ -218,7 +223,7 @@ theorem metricDiff_smallC0
   let X := MetricUnitTangent (I := I) (M := M) q
   have hXcompact : IsCompact (Set.univ : Set X) :=
     metricUnit_compact (I := I) (M := M) q
-  letI : CompactSpace X := isCompact_iff_compactSpace.mp hXcompact
+  letI : CompactSpace X := ⟨hXcompact⟩
   let bfun : ({t : Real // t ∈ K} × X) → M :=
     fun p => MetricUnitTangent.base (I := I) (M := M) p.2
   let vfun : Fin 2 → (p : {t : Real // t ∈ K} × X) →
@@ -267,7 +272,7 @@ theorem metricDiff_smallC0
   have hfzero : ∀ p : X, f ta p = 0 := by
     intro p
     simp [f, ta, hga]
-  have hsmall : ∀ᶠ t in 𝒩 ta, ∀ p : X, f t p < δ :=
+  have hsmall : ∀ᶠ t in 𝓝 ta, ∀ p : X, f t p < δ :=
     jointSmall_compact f ta hf hfzero hδ
   obtain ⟨r, hr, hball⟩ := Metric.mem_nhds_iff.mp hsmall
   let T : Real := min (b - a) r / 2
@@ -298,16 +303,18 @@ theorem metricDiff_smallC0
     let p : X := ⟨(⟨x, u⟩ : TangentBundle I M), hu⟩
     have hs := (hball htsBall) p
     rw [metricDiff_symVal]
-    simpa [f, ts, p] using hs.le
+    simpa [f, ts, p, hu] using hs.le
   apply gOpBound_unitQuad q
     (ccTensorBilinSymm (I := I) q
       (metricDifferenceCcTensor (I := I) (M := M) q (g t)))
     (ccTensorBilinSymm_symm (I := I) q
       (metricDifferenceCcTensor (I := I) (M := M) q (g t)))
-    hδ.le hunit
+    hunit
 
 /-! ## Transfer from a fixed initial metric to a moving carrier -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- If two metrics are both `Îµ`-close to `q`, then their difference is
 `2Îµ / (1 - Îµ)`-small relative to the first metric.
 
@@ -315,124 +322,126 @@ The proof uses only quadratic forms.  A `gâ‚€`-unit vector has `q`-length a
 most `(1 - Îµ)â»Â¹`; polarization then recovers the full bilinear operator
 bound. -/
 theorem pairOpBound
-    (q gâ‚€ gâ‚ : SmoothRiemannianMetric I M) {Îµ : Real}
-    (hÎµâ‚€ : 0 â‰¤ Îµ) (hÎµâ‚ : Îµ < 1)
-    (hâ‚€ : gFibreOpBound (I := I) (M := M) q
+    (q g₀ g₁ : SmoothRiemannianMetric I M) {ε : Real}
+    (hε₀ : 0 ≤ ε) (hε₁ : ε < 1)
+    (h₀ : metricCauchySchwarzBound (I := I) (M := M) q
       (ccTensorBilinSymm (I := I) q
-        (metricDifferenceCcTensor (I := I) (M := M) q gâ‚€)) Îµ)
-    (hâ‚ : gFibreOpBound (I := I) (M := M) q
+        (metricDifferenceCcTensor (I := I) (M := M) q g₀)) ε)
+    (h₁ : metricCauchySchwarzBound (I := I) (M := M) q
       (ccTensorBilinSymm (I := I) q
-        (metricDifferenceCcTensor (I := I) (M := M) q gâ‚)) Îµ) :
-    gFibreOpBound (I := I) (M := M) gâ‚€
-      (ccTensorBilinSymm (I := I) gâ‚€
-        (metricDifferenceCcTensor (I := I) (M := M) gâ‚€ gâ‚))
-      (2 * Îµ / (1 - Îµ)) := by
-  have hden : 0 < 1 - Îµ := sub_pos.mpr hÎµâ‚
-  apply gOpBound_unitQuad gâ‚€
-    (ccTensorBilinSymm (I := I) gâ‚€
-      (metricDifferenceCcTensor (I := I) (M := M) gâ‚€ gâ‚))
-    (ccTensorBilinSymm_symm (I := I) gâ‚€
-      (metricDifferenceCcTensor (I := I) (M := M) gâ‚€ gâ‚))
-    (div_nonneg (mul_nonneg (by norm_num) hÎµâ‚€) hden.le)
+        (metricDifferenceCcTensor (I := I) (M := M) q g₁)) ε) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀
+        (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
+      (2 * ε / (1 - ε)) := by
+  have hden : 0 < 1 - ε := sub_pos.mpr hε₁
+  apply gOpBound_unitQuad g₀
+    (ccTensorBilinSymm (I := I) g₀
+      (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
+    (ccTensorBilinSymm_symm (I := I) g₀
+      (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
   intro x u hu
   let qu : Real := q.inner x u u
-  have hqu : 0 â‰¤ qu := by
+  have hqu : 0 ≤ qu := by
     dsimp only [qu]
-    exact metric_inner_self_nonneg (I := I) (M := M) q x u
+    exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
+      (I := I) (M := M) q x u
   have hsqrt : Real.sqrt qu * Real.sqrt qu = qu := by
-    rw [â† Real.sqrt_mul hqu, Real.sqrt_mul_self hqu]
-  have hâ‚€u := hâ‚€ x u u
-  have hâ‚u := hâ‚ x u u
-  rw [metricDiff_symVal (I := I) (M := M)] at hâ‚€u hâ‚u
-  have hâ‚€u' : |gâ‚€.inner x u u - q.inner x u u| â‰¤ Îµ * qu := by
+    rw [← Real.sqrt_mul hqu, Real.sqrt_mul_self hqu]
+  have h₀u := h₀ x u u
+  have h₁u := h₁ x u u
+  rw [metricDiff_symVal (I := I) (M := M)] at h₀u h₁u
+  have h₀u' : |g₀.inner x u u - q.inner x u u| ≤ ε * qu := by
     calc
-      |gâ‚€.inner x u u - q.inner x u u| â‰¤
-          Îµ * Real.sqrt qu * Real.sqrt qu := by simpa only [qu] using hâ‚€u
-      _ = Îµ * qu := by rw [hsqrt]
-  have hâ‚u' : |gâ‚.inner x u u - q.inner x u u| â‰¤ Îµ * qu := by
+      |g₀.inner x u u - q.inner x u u| ≤
+          ε * Real.sqrt qu * Real.sqrt qu := by simpa only [qu] using h₀u
+      _ = ε * qu := by nlinarith [hsqrt]
+  have h₁u' : |g₁.inner x u u - q.inner x u u| ≤ ε * qu := by
     calc
-      |gâ‚.inner x u u - q.inner x u u| â‰¤
-          Îµ * Real.sqrt qu * Real.sqrt qu := by simpa only [qu] using hâ‚u
-      _ = Îµ * qu := by rw [hsqrt]
-  have hqcarrier : (1 - Îµ) * qu â‰¤ gâ‚€.inner x u u := by
-    have hneg := neg_le_of_abs_le hâ‚€u'
-    dsimp only [qu] at hneg âŠ¢
+      |g₁.inner x u u - q.inner x u u| ≤
+          ε * Real.sqrt qu * Real.sqrt qu := by simpa only [qu] using h₁u
+      _ = ε * qu := by nlinarith [hsqrt]
+  have hqcarrier : (1 - ε) * qu ≤ g₀.inner x u u := by
+    have hneg := neg_le_of_abs_le h₀u'
+    dsimp only [qu] at hneg ⊢
     linarith
-  have hqone : qu â‰¤ 1 / (1 - Îµ) := by
-    apply (le_div_iffâ‚€ hden).2
+  have hqone : qu ≤ 1 / (1 - ε) := by
+    apply (le_div_iff₀ hden).2
     simpa only [hu, mul_comm] using hqcarrier
   have htri :
-      |gâ‚.inner x u u - gâ‚€.inner x u u| â‰¤
-        |gâ‚.inner x u u - q.inner x u u| +
-          |gâ‚€.inner x u u - q.inner x u u| := by
-    rw [show gâ‚.inner x u u - gâ‚€.inner x u u =
-      (gâ‚.inner x u u - q.inner x u u) -
-        (gâ‚€.inner x u u - q.inner x u u) by ring]
+      |g₁.inner x u u - g₀.inner x u u| ≤
+        |g₁.inner x u u - q.inner x u u| +
+          |g₀.inner x u u - q.inner x u u| := by
+    rw [show g₁.inner x u u - g₀.inner x u u =
+      (g₁.inner x u u - q.inner x u u) -
+        (g₀.inner x u u - q.inner x u u) by ring]
     exact abs_sub _ _
   rw [metricDiff_symVal (I := I) (M := M)]
   calc
-    |gâ‚.inner x u u - gâ‚€.inner x u u| â‰¤ 2 * Îµ * qu := by
+    |g₁.inner x u u - g₀.inner x u u| ≤ 2 * ε * qu := by
       calc
-        _ â‰¤ |gâ‚.inner x u u - q.inner x u u| +
-            |gâ‚€.inner x u u - q.inner x u u| := htri
-        _ â‰¤ Îµ * qu + Îµ * qu := add_le_add hâ‚u' hâ‚€u'
-        _ = 2 * Îµ * qu := by ring
-    _ â‰¤ 2 * Îµ * (1 / (1 - Îµ)) :=
-      mul_le_mul_of_nonneg_left hqone (mul_nonneg (by norm_num) hÎµâ‚€)
-    _ = 2 * Îµ / (1 - Îµ) := by ring
-
-/-- Two jointly continuous metric paths with the same initial metric become
-uniformly close relative to the first, moving path on one common positive
-window.  The time and the operator bound are common to all base points and
-tangent vectors. -/
+        _ ≤ |g₁.inner x u u - q.inner x u u| +
+            |g₀.inner x u u - q.inner x u u| := htri
+        _ ≤ ε * qu + ε * qu := add_le_add h₁u' h₀u'
+        _ = 2 * ε * qu := by ring
+    _ ≤ 2 * ε * (1 / (1 - ε)) :=
+      mul_le_mul_of_nonneg_left hqone (mul_nonneg (by norm_num) hε₀)
+    _ = 2 * ε / (1 - ε) := by ring
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 theorem metricPair_smallC0
-    (gâ‚€ gâ‚ : Real â†’ SmoothRiemannianMetric I M)
-    (q : SmoothRiemannianMetric I M) {a b Î´ : Real}
+    (g₀ g₁ : Real → SmoothRiemannianMetric I M)
+    (q : SmoothRiemannianMetric I M) {a b δ : Real}
     (hab : a < b)
-    (hcontâ‚€ : âˆ€ (xâ‚€ : M) (i j : Fin (Module.finrank Real E)),
+    (hcont₀ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContinuousOn
-        (fun p : Real Ã— M â†¦
-          chartGramMatrix (I := I) (gâ‚€ p.1) xâ‚€ p.2 i j)
-        (Set.Ico a b Ã—Ë¢
-          (trivializationAt E (TangentSpace I) xâ‚€).baseSet))
-    (hcontâ‚ : âˆ€ (xâ‚€ : M) (i j : Fin (Module.finrank Real E)),
+        (fun p : Real × M ↦
+          chartGramMatrix (I := I) (g₀ p.1) x₀ p.2 i j)
+        (Set.Ico a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcont₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContinuousOn
-        (fun p : Real Ã— M â†¦
-          chartGramMatrix (I := I) (gâ‚ p.1) xâ‚€ p.2 i j)
-        (Set.Ico a b Ã—Ë¢
-          (trivializationAt E (TangentSpace I) xâ‚€).baseSet))
-    (hgâ‚€ : gâ‚€ a = q) (hgâ‚ : gâ‚ a = q) (hÎ´ : 0 < Î´) :
-    âˆƒ T : Real, 0 < T âˆ§ a + T < b âˆ§
-      âˆ€ t âˆˆ Set.Icc a (a + T),
-        gFibreOpBound (I := I) (M := M) (gâ‚€ t)
-          (ccTensorBilinSymm (I := I) (gâ‚€ t)
-            (metricDifferenceCcTensor (I := I) (M := M) (gâ‚€ t) (gâ‚ t))) Î´ := by
-  let Îµ : Real := Î´ / (2 + Î´)
-  have hden : 0 < 2 + Î´ := by linarith
-  have hÎµ : 0 < Îµ := div_pos hÎ´ hden
-  have hÎµlt : Îµ < 1 := by
-    dsimp only [Îµ]
+        (fun p : Real × M ↦
+          chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Set.Ico a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hg₀ : g₀ a = q) (hg₁ : g₁ a = q) (hδ : 0 < δ) :
+    ∃ T : Real, 0 < T ∧ a + T < b ∧
+      ∀ t ∈ Set.Icc a (a + T),
+        metricCauchySchwarzBound (I := I) (M := M) (g₀ t)
+          (ccTensorBilinSymm (I := I) (g₀ t)
+            (metricDifferenceCcTensor (I := I) (M := M) (g₀ t) (g₁ t))) δ := by
+  let ε : Real := δ / (2 + δ)
+  have hden : 0 < 2 + δ := by linarith
+  have hε : 0 < ε := div_pos hδ hden
+  have hεlt : ε < 1 := by
+    dsimp only [ε]
     exact (div_lt_one hden).2 (by linarith)
-  obtain âŸ¨Tâ‚€, hTâ‚€, hTâ‚€b, hsmallâ‚€âŸ© :=
-    metricDiff_smallC0 (I := I) (M := M) gâ‚€ q hab hcontâ‚€ hgâ‚€ hÎµ
-  obtain âŸ¨Tâ‚, hTâ‚, hTâ‚b, hsmallâ‚âŸ© :=
-    metricDiff_smallC0 (I := I) (M := M) gâ‚ q hab hcontâ‚ hgâ‚ hÎµ
-  let T : Real := min Tâ‚€ Tâ‚
+  obtain ⟨T₀, hT₀, hT₀b, hsmall₀⟩ :=
+    metricDiff_smallC0 (I := I) (M := M) g₀ q hab hcont₀ hg₀ hε
+  obtain ⟨T₁, hT₁, hT₁b, hsmall₁⟩ :=
+    metricDiff_smallC0 (I := I) (M := M) g₁ q hab hcont₁ hg₁ hε
+  let T : Real := min T₀ T₁
   have hT : 0 < T := by
     dsimp only [T]
-    exact lt_min hTâ‚€ hTâ‚
+    exact lt_min hT₀ hT₁
   have hTb : a + T < b := by
-    exact lt_of_le_of_lt (add_le_add_left (min_le_left Tâ‚€ Tâ‚) a) hTâ‚€b
-  refine âŸ¨T, hT, hTb, ?_âŸ©
+    have hTle : T ≤ T₀ := by exact min_le_left T₀ T₁
+    nlinarith
+  refine ⟨T, hT, hTb, ?_⟩
   intro t ht
-  have htâ‚€ : t âˆˆ Set.Icc a (a + Tâ‚€) :=
-    âŸ¨ht.1, le_trans ht.2 (add_le_add_left (min_le_left Tâ‚€ Tâ‚) a)âŸ©
-  have htâ‚ : t âˆˆ Set.Icc a (a + Tâ‚) :=
-    âŸ¨ht.1, le_trans ht.2 (add_le_add_left (min_le_right Tâ‚€ Tâ‚) a)âŸ©
-  have hp := pairOpBound (I := I) (M := M) q (gâ‚€ t) (gâ‚ t)
-    hÎµ.le hÎµlt (hsmallâ‚€ t htâ‚€) (hsmallâ‚ t htâ‚)
-  have hratio : 2 * Îµ / (1 - Îµ) = Î´ := by
-    dsimp only [Îµ]
+  have ht₀ : t ∈ Set.Icc a (a + T₀) :=
+    ⟨ht.1, by
+      have hTle : T ≤ T₀ := by exact min_le_left T₀ T₁
+      linarith [ht.2, hTle]⟩
+  have ht₁ : t ∈ Set.Icc a (a + T₁) :=
+    ⟨ht.1, by
+      have hTle : T ≤ T₁ := by exact min_le_right T₀ T₁
+      linarith [ht.2, hTle]⟩
+  have hp := pairOpBound (I := I) (M := M) q (g₀ t) (g₁ t)
+    hε.le hεlt (hsmall₀ t ht₀) (hsmall₁ t ht₁)
+  have hratio : 2 * ε / (1 - ε) = δ := by
+    dsimp only [ε]
     field_simp
     ring
   simpa only [hratio] using hp

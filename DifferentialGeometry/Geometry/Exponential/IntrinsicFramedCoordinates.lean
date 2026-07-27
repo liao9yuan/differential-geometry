@@ -77,6 +77,7 @@ noncomputable def intrinsicFramedExp
     (show TangentSpace I p from intrFrameCLM (I := I) g p z)
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrame_apply
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -92,6 +93,7 @@ omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
   rw [intrinsicFramedExp, intrFrameCLM_apply]
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 /-- The intrinsic framed exponential is globally smooth in its model-vector
 argument. -/
 theorem intrFrame_smooth
@@ -108,6 +110,8 @@ theorem intrFrame_smooth
   exact (intrinsicFiber_smooth (I := I) g hEnorm p).comp
     (intrFrameCLM (I := I) g p).contMDiff
 
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 /-- The intrinsic framed exponential sends the model origin to its center. -/
 @[simp] theorem intrFrame_zero
     [PseudoEMetricSpace M]
@@ -127,6 +131,7 @@ theorem intrFrame_smooth
   rw [intrFrame_apply, map_zero, hagree hzero]
   exact expMap_zero (I := I) g p
 
+omit [ConnectedSpace M] in
 /-- At the origin, the derivative of the intrinsic framed exponential is the
 normal-frame linear equivalence. -/
 theorem intrFrame_deriv_zero
@@ -171,6 +176,8 @@ theorem intrFrame_deriv_zero
     hchain.trans (ContinuousLinearMap.id_comp L)
   simpa only [intrinsicFramedExp, F, L, Function.comp_apply] using hchain'
 
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 /-- On a positive model ball, the intrinsic framed exponential agrees with
 the existing chart-fixed framed exponential. -/
 theorem exists_intrFrame_eq
@@ -208,6 +215,8 @@ noncomputable def intrFrameRadius
     (p : M) : Real :=
   Classical.choose (exists_intrFrame_eq (I := I) g hEnorm p)
 
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 theorem intrFrameRadius_pos
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -220,6 +229,8 @@ theorem intrFrameRadius_pos
     0 < intrFrameRadius (I := I) g hEnorm p :=
   (Classical.choose_spec (exists_intrFrame_eq (I := I) g hEnorm p)).1
 
+omit [CompleteSpace E]
+  [ConnectedSpace M] in
 theorem intrFrame_eq_of_mem
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -292,6 +303,7 @@ noncomputable def intrFrameDiffeo
         rintro q ⟨z, hz, rfl⟩
         exact Φ.map_source' hz.1 }
 
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrameDiffeo_source
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -306,6 +318,7 @@ noncomputable def intrFrameDiffeo
         Metric.ball (0 : E) (intrFrameRadius (I := I) g hEnorm p) := by
   rfl
 
+omit [ConnectedSpace M] in
 theorem zero_mem_intrFrame_source
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -320,6 +333,7 @@ theorem zero_mem_intrFrame_source
   exact ⟨zero_mem_framedExp_source (I := I) g p,
     by simpa using intrFrameRadius_pos (I := I) g hEnorm p⟩
 
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrameDiffeo_apply
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -333,6 +347,7 @@ theorem zero_mem_intrFrame_source
       intrinsicFramedExp (I := I) g hEnorm p z := by
   rfl
 
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrame_symm_eq
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -346,6 +361,7 @@ theorem zero_mem_intrFrame_source
       framedChartAt (I := I) g p q := by
   rfl
 
+omit [ConnectedSpace M] in
 /-- On the temporary branch source, the total intrinsic framed exponential is
 the legacy selected branch. -/
 theorem intrFrame_eq_old
@@ -383,6 +399,7 @@ noncomputable def intrFrameMetric
       ((g.inner (F z)).comp D)
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
+omit [ConnectedSpace M] in
 theorem intrFrameMetric_apply
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -402,6 +419,7 @@ theorem intrFrameMetric_apply
     ContinuousLinearMap.precomp_apply]
   rfl
 
+omit [ConnectedSpace M] in
 @[simp] theorem intrFrameMetric_zero
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -420,6 +438,7 @@ theorem intrFrameMetric_apply
     (normalFrame (I := I) g p w) = Inner.inner Real v w
   exact normalFrame_inner (I := I) g p v w
 
+omit [ConnectedSpace M] in
 /-- On the migration branch source, the intrinsic total-map pullback metric is
 the legacy selected-branch pullback metric. -/
 theorem intrFrameMetric_eq

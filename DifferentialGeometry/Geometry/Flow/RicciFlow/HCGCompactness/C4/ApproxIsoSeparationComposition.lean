@@ -25,7 +25,7 @@ namespace HCGCompactness
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]

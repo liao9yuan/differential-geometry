@@ -1239,7 +1239,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
   exact ⟨T₁, hT₁_pos, hT₁_le, F, 1 / 2, hδ_lt, hF_small, hF_zero, hF_pin, hF_flow,
     hF_joint⟩
 
-set_option linter.unusedVariables false in
 /-- **Fixed-horizon representative (R1τ ruling item 5).**  The maximal-regularity
 smooth representative on the FULL given horizon `T`, with no existential
 shrinking.  Sibling of `maxreg_solution_jointly_smooth_representative_of_nemytskii`
@@ -1261,15 +1260,15 @@ qualitative continuity. -/
 theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
+    (_ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
-    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ S) δ),
       SmoothCcTensor g₀ 0 2)
     (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ S) δ)
         (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g₀
@@ -1294,10 +1293,10 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
     (C : ℝ) (hC_pos : 0 < C)
     (hC : ∀ (S : SmoothCcTensor g₀ 0 2),
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
         (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) S‖))
     (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C))
-    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
+    {R₀ : ℝ} (_hR₀_pos : 0 < R₀)
     (hball_full : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g₀ 0 2,
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -1305,14 +1304,14 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
             (Nat.cast_nonneg a) (timeH1.toFun u t) →
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀)
     (hForce : ∀ (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+        (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
-        (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+        (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
           SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
             tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Nat.cast_nonneg a) (timeH1.toFun u t))
-        (hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
+        (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀),
       ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
         f i t = tensorL2Coeff (I := I) (M := M)
@@ -1320,7 +1319,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
             (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
               (Nsec (F t) hδ_lt (hδ t))) i) :
     ∃ (F : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
-        (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+        (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (F t)) δ),
       F 0 = 0 ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -1338,15 +1337,12 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) := by
   classical
   set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
-
   have hinit : u.init = 0 := by have := htrace; rwa [timeH1.trace0_apply] at this
   have hu0 : timeH1.toFun u 0 = 0 := by rw [timeH1.toFun_zero, hinit]
-
   set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) with hφ_def
   have hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i) := fun i =>
     perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
-
   have hf_endpoint_sum : ∀ c : ℝ, 0 ≤ c → ∀ t ∈ Set.Icc (0 : ℝ) T,
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i c *
         ∫ s in (0 : ℝ)..t, (f i s) ^ 2) := by
@@ -1388,7 +1384,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
           ≤ tensorSobolevWeight (I := I) (M := M) i c * ∫ s in (0 : ℝ)..T, (f i s) ^ 2 :=
             mul_le_mul_of_nonneg_left htint hwt_nn
         _ ≤ T * B i := hbig
-
   have hF₀_exists : ∀ t ∈ Set.Icc (0 : ℝ) T,
       ∃ S : SmoothCcTensor g₀ 0 2,
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
@@ -1412,7 +1407,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     refine ⟨S, ?_⟩
     rw [show SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S = (S : TensorL2 0 2 g₀) from rfl,
       hS, hval]
-
   choose F₀ hF₀ using hF₀_exists
   set Fdef : ℝ → SmoothCcTensor g₀ 0 2 :=
     fun t => if ht : t ∈ Set.Icc (0 : ℝ) T then F₀ t ht else 0 with hFdef_def
@@ -1423,16 +1417,13 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     intro t ht
     simp only [hFdef_def, dif_pos ht]
     exact hF₀ t ht
-
   set F : ℝ → SmoothCcTensor g₀ 0 2 :=
     fun t => if t ∈ Set.Ioc (0 : ℝ) T then Fdef t else 0 with hF_def
-
   have hF_zero : F 0 = 0 := by
     simp only [hF_def]
     rw [if_neg]
     intro hmem; exact absurd hmem.1 (lt_irrefl 0)
-
-  have hF_small : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+  have hF_small : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (F t)) (1 / 2) := by
     intro t
     by_cases ht : t ∈ Set.Ioc (0 : ℝ) T
@@ -1477,7 +1468,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
       have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
       rw [abs_zero]
       positivity
-
   have hF_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
       SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
         tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -1490,25 +1480,20 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
       have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht_ioc]
       rw [hFt]
       exact hFdef_pin t ht
-
   have hδ_lt : (1 / 2 : ℝ) < 1 := by norm_num
-
   have hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀ := by
     intro t ht
     have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, ht.2.le⟩
     exact hball_full t ht_icc (F t) (hF_pin t ht_icc)
-
   have hForceRepr : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
       f i t = tensorL2Coeff (I := I) (M := M) h_compact
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
             (Nsec (F t) hδ_lt (hF_small t))) i :=
     hForce F hδ_lt hF_small hF_pin hball
-
   have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a ha_super
     F_RHS Nsec hRepr hT hT1 hT (le_refl T) hT (le_refl T) (le_refl T) u F hδ_lt hF_small
     hF_pin f hf_smooth hf_mass hf_id hForceRepr
-
   have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
       ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
         tensorL2Coeff (I := I) (M := M) h_compact
@@ -1518,7 +1503,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     have hid := hf_id t ht i
     rw [tensorHsToL2_tensorL2Coeff] at hid
     rw [hid]
-
   have hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -1529,7 +1513,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
       perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
         (g := g₀) (r := 0) (s := 2) (T := T) hT.le f hf_smooth hf_mass k σ hσ
     exact ⟨Cmaj, hCmaj_sum, fun i t ht => hCmaj_le i t ht⟩
-
   have hF_joint : JointChartGramSmooth (I := I) T
       (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hF_small t)) :=
     realizedFamily_jointChartGramSmooth (I := I) (M := M) g₀ hT F hδ_lt hF_small

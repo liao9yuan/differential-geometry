@@ -31,7 +31,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (jointContMDiff_toModel_continuous_slice)
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

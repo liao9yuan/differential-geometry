@@ -50,7 +50,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+omit [T2Space M] [SigmaCompactSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -74,7 +74,7 @@ def HasEndpointContinuation
     (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
-omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+omit [T2Space M] [SigmaCompactSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M] in
 omit [I.Boundaryless] in
@@ -103,7 +103,6 @@ theorem chartPhaseVF_orbit_uniqueness_Icc_left
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-omit [ConnectedSpace M] in
 theorem hasEndpointContinuation_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {aL b c : ℝ}

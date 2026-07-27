@@ -30,7 +30,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -200,7 +200,7 @@ def HasSuppCmData
         (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
       z gamma
   let chi := fun (alpha : LiveSlot L inp.pack r) =>
-    NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+    NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
   let sourceBall := Lphi.hatSourceBall inp.decay P r n
   let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
     sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -210,20 +210,10 @@ def HasSuppCmData
   let pairPts : (alpha : LiveSlot L inp.pack r) →
       InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
     fun alpha target a b x =>
-      let Ya := X.obj (Lphi.φ a)
-      letI : TopologicalSpace Ya.M := Ya.topology
-      letI : ChartedSpace H Ya.M := Ya.charted
-      letI : IsManifold I ∞ Ya.M := Ya.smooth
-      letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-      let Yb := X.obj (Lphi.φ b)
-      letI : TopologicalSpace Yb.M := Yb.topology
-      letI : ChartedSpace H Yb.M := Yb.charted
-      letI : IsManifold I ∞ Yb.M := Yb.smooth
-      letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
       (chi alpha).symm
-        (NormalCoordinates.framedTransition (I := I) Yb.metric
+        (normalTransition (I := I) (X.obj (Lphi.φ b))
           (beta b target.1) (beta b alpha)
-          (NormalCoordinates.framedTransition (I := I) Ya.metric
+          (normalTransition (I := I) (X.obj (Lphi.φ a))
             (beta a alpha) (beta a target.1) (chi alpha x)))
   let pts := fun (alpha : LiveSlot L inp.pack r) a b x gamma =>
     totalPts (X := X) pairPts alpha a b x gamma
@@ -473,7 +463,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
         letI : MetricSpace Y.M :=
           HopfRinow.riemMetricSpace (I := I) (M := Y.M)
         let chi := fun (alpha : LiveSlot L inp.pack r) =>
-          NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+          NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
         let sourceBall := Lphi.hatSourceBall inp.decay P r n
         let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
           sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -483,20 +473,10 @@ theorem MetricCompactBase.exists_supp_cm_fin
         let pairPts : (alpha : LiveSlot L inp.pack r) →
             InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
           fun alpha target a b x =>
-            let Ya := X.obj (Lphi.φ a)
-            letI : TopologicalSpace Ya.M := Ya.topology
-            letI : ChartedSpace H Ya.M := Ya.charted
-            letI : IsManifold I ∞ Ya.M := Ya.smooth
-            letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-            let Yb := X.obj (Lphi.φ b)
-            letI : TopologicalSpace Yb.M := Yb.topology
-            letI : ChartedSpace H Yb.M := Yb.charted
-            letI : IsManifold I ∞ Yb.M := Yb.smooth
-            letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
             (chi alpha).symm
-              (NormalCoordinates.framedTransition (I := I) Yb.metric
+              (normalTransition (I := I) (X.obj (Lphi.φ b))
                 (beta b target.1) (beta b alpha)
-                (NormalCoordinates.framedTransition (I := I) Ya.metric
+                (normalTransition (I := I) (X.obj (Lphi.φ a))
                   (beta a alpha) (beta a target.1) (chi alpha x)))
         let pts := fun (alpha : LiveSlot L inp.pack r) =>
           totalPts (X := X) pairPts alpha
@@ -600,7 +580,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
           (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
         z gamma
     let chi := fun (alpha : LiveSlot L inp.pack r) =>
-      NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+      NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
     let sourceBall := Lphi.hatSourceBall inp.decay P r n
     let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
       sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -610,20 +590,10 @@ theorem MetricCompactBase.exists_supp_cm_fin
     let pairPts : (alpha : LiveSlot L inp.pack r) →
         InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
       fun alpha target a b x =>
-        let Ya := X.obj (Lphi.φ a)
-        letI : TopologicalSpace Ya.M := Ya.topology
-        letI : ChartedSpace H Ya.M := Ya.charted
-        letI : IsManifold I ∞ Ya.M := Ya.smooth
-        letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-        let Yb := X.obj (Lphi.φ b)
-        letI : TopologicalSpace Yb.M := Yb.topology
-        letI : ChartedSpace H Yb.M := Yb.charted
-        letI : IsManifold I ∞ Yb.M := Yb.smooth
-        letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
         (chi alpha).symm
-          (NormalCoordinates.framedTransition (I := I) Yb.metric
+          (normalTransition (I := I) (X.obj (Lphi.φ b))
             (beta b target.1) (beta b alpha)
-            (NormalCoordinates.framedTransition (I := I) Ya.metric
+            (normalTransition (I := I) (X.obj (Lphi.φ a))
               (beta a alpha) (beta a target.1) (chi alpha x)))
     let pts := fun (alpha : LiveSlot L inp.pack r) =>
       totalPts (X := X) pairPts alpha
@@ -973,7 +943,7 @@ theorem MetricCompactBase.exists_cm_on_source
         letI : MetricSpace Y.M :=
           HopfRinow.riemMetricSpace (I := I) (M := Y.M)
         let chi := fun (alpha : LiveSlot L inp.pack r) =>
-          NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+          NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
         let sourceBall := Lphi.hatSourceBall inp.decay P r n
         let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
           sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
@@ -983,20 +953,10 @@ theorem MetricCompactBase.exists_cm_on_source
         let pairPts : (alpha : LiveSlot L inp.pack r) →
             InterSlot L inp.pack r alpha → Nat → Nat → Y.M → Y.M :=
           fun alpha target a b x =>
-            let Ya := X.obj (Lphi.φ a)
-            letI : TopologicalSpace Ya.M := Ya.topology
-            letI : ChartedSpace H Ya.M := Ya.charted
-            letI : IsManifold I ∞ Ya.M := Ya.smooth
-            letI : T2Space (TangentBundle I Ya.M) := Ya.t2TangentBundle
-            let Yb := X.obj (Lphi.φ b)
-            letI : TopologicalSpace Yb.M := Yb.topology
-            letI : ChartedSpace H Yb.M := Yb.charted
-            letI : IsManifold I ∞ Yb.M := Yb.smooth
-            letI : T2Space (TangentBundle I Yb.M) := Yb.t2TangentBundle
             (chi alpha).symm
-              (NormalCoordinates.framedTransition (I := I) Yb.metric
+              (normalTransition (I := I) (X.obj (Lphi.φ b))
                 (beta b target.1) (beta b alpha)
-                (NormalCoordinates.framedTransition (I := I) Ya.metric
+                (normalTransition (I := I) (X.obj (Lphi.φ a))
                   (beta a alpha) (beta a target.1) (chi alpha x)))
         let pts := fun (alpha : LiveSlot L inp.pack r) =>
           totalPts (X := X) pairPts alpha

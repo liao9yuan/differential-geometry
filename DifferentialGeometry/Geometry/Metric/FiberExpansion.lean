@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Fiberwise expansion in a `g`-orthonormal family
@@ -36,6 +35,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 /-- **Expansion in a supplied full `g`-orthonormal family.**  If
 `e : ι → TangentSpace I x` is `g`-orthonormal and `card ι = finrank`, then
 every tangent vector at `x` is `∑ i, g.inner x (e i) v • e i`. -/

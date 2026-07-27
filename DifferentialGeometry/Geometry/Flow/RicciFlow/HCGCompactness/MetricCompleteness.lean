@@ -72,7 +72,6 @@ theorem complete_of_lower
     Manifold.metrizableSpace I X.M
   letI : T3Space X.M := inferInstance
   intro h c hc hlower
-
   let Y : PointedRiemannianManifold.{u, uE, uH} (I := I) :=
     { X with metric := h }
   letI : RiemannianBundle (fun x : X.M => TangentSpace I x) :=
@@ -83,7 +82,6 @@ theorem complete_of_lower
       (fun x : X.M => TangentSpace I x) :=
     Y.riemBundle_cont (I := I)
   letI : EMetricSpace X.M := EMetricSpace.ofRiemannianMetric I X.M
-
   let a : ENNReal := ENNReal.ofReal (Real.sqrt c)
   have ha0 : a ≠ 0 := by
     exact ne_of_gt (ENNReal.ofReal_pos.mpr (Real.sqrt_pos.2 hc))
@@ -96,7 +94,6 @@ theorem complete_of_lower
     exact edistOf_mono (I := I) _ _ (by
       intro z v
       simpa only [scaleMetric_inner] using hlower z v) x y
-
   refine EMetric.complete_of_cauchySeq_tendsto fun s hs => ?_
   have hsTarget : ∀ ε > (0 : ENNReal), ∃ N,
       ∀ m, N ≤ m → ∀ n, N ≤ n →
@@ -105,7 +102,6 @@ theorem complete_of_lower
     obtain ⟨N, hN⟩ := EMetric.cauchySeq_iff.mp hs ε hε
     refine ⟨N, fun m hm n hn => ?_⟩
     simpa only [Y] using hN m hm n hn
-
   change ∃ x, Filter.Tendsto s Filter.atTop (@nhds X.M X.topology x)
   letI : RiemannianBundle (fun x : X.M => TangentSpace I x) :=
     X.riemBundle (I := I)

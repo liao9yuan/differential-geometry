@@ -19,7 +19,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -283,6 +283,7 @@ usual `(1,2)` connection-difference section.  Exporting the pointwise norm
 identity here avoids rebuilding this realization inside every low-regularity
 coefficient estimate.
 -/
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connLow_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -307,7 +308,7 @@ theorem connLow_rfns
             (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
               (domDomCongrSection (I := I) g₀ (finRotate 3)
                 (connDiffLoweredCc (I := I) g₀ g₁)))).toSection x) :=
-        (rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
+        (riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
           (I := I) (M := M) g₀ 1
           (domDomCongrSection (I := I) g₀ (finRotate 3)
             (connDiffLoweredCc (I := I) g₀ g₁)) n x).symm
@@ -316,7 +317,8 @@ theorem connLow_rfns
             (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [connDiffSection_eq_cometricRaiseSlot0Field]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma flatArmCoeffCc_true_eq_cometricRaiseSlot0Field
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     flatArmCoeffCc (I := I) g₀ g₁ true =

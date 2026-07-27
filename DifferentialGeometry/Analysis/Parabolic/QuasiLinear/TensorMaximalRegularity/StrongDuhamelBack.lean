@@ -38,7 +38,7 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -155,6 +155,8 @@ def strongCross
         (TimeSobolev.coeFn_ofContinuousOn u.continuousOn_toFun)
     exact hincl.symm.trans (heq.trans hfun)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- A zero-initial-data homogeneous strong pair is zero.  This is the linear
 energy uniqueness theorem needed for reverse Duhamel realization. -/
 theorem strongPair_zero (hT : 0 < T)
@@ -250,6 +252,8 @@ theorem strongPair_zero (hT : 0 < T)
       (by simpa only [timeH1.deriv_zero] using hderiv)
   · exact hfield
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- The canonical top-scale Duhamel field and the canonical `timeH1` Duhamel
 map represent the same lower-scale `L²` class. -/
 theorem duhField_pin (hT : 0 < T) (hT1 : T ≤ 1)
@@ -287,6 +291,8 @@ theorem duhField_pin (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ force).toFun t at hft
   exact hit.trans (hst.trans hft.symm)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- Reverse Duhamel realization: an arbitrary strong pair with the correct
 trace, cross-scale link, and linear equation is the canonical Duhamel pair. -/
 theorem strongPair_eq_duh (hT : 0 < T) (hT1 : T ≤ 1)
@@ -338,6 +344,8 @@ theorem strongPair_eq_duh (hT : 0 < T) (hT1 : T ≤ 1)
       hzeroTrace hzeroLink hzeroEq with ⟨hu, hf⟩
   exact ⟨sub_eq_zero.mp hf, sub_eq_zero.mp hu⟩
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- A strong pair whose forcing is its Nemytskii nonlinearity yields exactly
 the forcing fixed-point representation consumed by
 `quasilinear_strong_unique`. -/
@@ -372,6 +380,8 @@ theorem strongNemy_fixed {L : ℝ≥0}
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ force) := by
       rw [hfield]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- Two independently supplied strong pairs for the same Lipschitz
 quasilinear tensor heat equation and the same initial datum coincide.  This is
 the local strong-solution uniqueness theorem obtained by feeding the reverse

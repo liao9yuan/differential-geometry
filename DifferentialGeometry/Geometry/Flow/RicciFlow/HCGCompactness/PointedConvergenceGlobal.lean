@@ -37,7 +37,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [CompleteSpace E] in
 theorem compact_of_ricci
-    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [NeZero (Module.finrank Real E)]
     [I.Boundaryless]
     {P : PointedRiemannianManifold.{u} (I := I)}
     (hconn :

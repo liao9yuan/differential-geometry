@@ -14,9 +14,6 @@ can depend on these identities without an import cycle.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
@@ -34,14 +31,14 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] in
 private lemma pair_cons_sum {n : Nat}
     (Zm : Tensor0SModel (n + 1) Real E) (d : Nat) (t : Fin d → Real)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -74,7 +71,7 @@ private lemma pair_cons_sum {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] in
 private lemma pair_cons2_sum {n : Nat}
     (Zm : Tensor0SModel (n + 2) Real E) (aa : E) (d : Nat)
     (t : Fin d → Real) (u : Fin d → E) (rest : Fin n → E) :
@@ -111,7 +108,8 @@ private lemma pair_cons2_sum {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma pair_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank Real E),
@@ -168,16 +166,17 @@ private lemma pair_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [hrepr v i, hbB_coe i]
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- A moving-metric double trace is a fixed-background trace after inserting
 the relative inverse-metric endomorphism in the first contracted slot. -/
 theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
-    mvDoubleTraceField (I := I) (M := M) g gm s =
-      appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
+    secondMetricCometricDoubleTraceField (I := I) (M := M) g gm s =
+      ccOperatorFieldComp (I := I) (M := M) g (s + 2) (s + 2) s
         (cometricDoubleTraceField (I := I) g s)
-        (slotInsertEndoCc (I := I) (M := M) g (s + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1)
           (fullRaisedEndoField (I := I) (M := M) g gm)) := by
   classical
   apply SmoothCcTensor.ext
@@ -190,13 +189,13 @@ theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
   intro mm
   have hLHS : Tensor0SSpace.toModel
       ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (mvDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) mm =
+        (secondMetricCometricDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) mm =
       ∑ c : Fin (Module.finrank Real E),
         Tensor0SSpace.toModel Z
           (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
             (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E) mm)) := by
     rw [show ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (mvDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) =
+        (secondMetricCometricDoubleTraceField (I := I) (M := M) g gm s).toSection x) Z) =
         cometricDoubleTraceFib (I := I) gm s x Z from rfl]
     rw [cometricDoubleTraceFib_toModel (I := I) gm s x Z]
     rw [modelDoubleTrace_apply (E := E) s (cometricLmodel (I := I) gm x)]
@@ -206,19 +205,19 @@ theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
   rw [hLHS]
   have hRHS : Tensor0SSpace.toModel
       ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
+        (ccOperatorFieldComp (I := I) (M := M) g (s + 2) (s + 2) s
           (cometricDoubleTraceField (I := I) g s)
-          (slotInsertEndoCc (I := I) (M := M) g (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1)
             (fullRaisedEndoField (I := I) (M := M) g gm))).toSection x) Z) mm =
       ∑ a : Fin (Module.finrank Real E),
         Tensor0SSpace.toModel Z
-          (Fin.cons (show E from gInvRaisedEndo (I := I) g gm x
+          (Fin.cons (show E from metricComparisonEndo (I := I) g gm x
               (smoothOrthoFrame (I := I) g x a x))
             (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)) := by
     rw [show ((show Tensor0SSpace (s + 2) I x →L[Real] Tensor0SSpace s I x from
-        (appCcRS (I := I) (M := M) g (s + 2) (s + 2) s
+        (ccOperatorFieldComp (I := I) (M := M) g (s + 2) (s + 2) s
           (cometricDoubleTraceField (I := I) g s)
-          (slotInsertEndoCc (I := I) (M := M) g (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1)
             (fullRaisedEndoField (I := I) (M := M) g gm))).toSection x) Z) =
         cometricDoubleTraceFib (I := I) g s x
           (slotInsertEndoFib (I := I) (M := M) (s + 2) 0 x
@@ -238,7 +237,7 @@ theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
     rfl
   rw [hRHS]
   have hGrep : ∀ a : Fin (Module.finrank Real E),
-      (show E from gInvRaisedEndo (I := I) g gm x
+      (show E from metricComparisonEndo (I := I) g gm x
         (smoothOrthoFrame (I := I) g x a x)) =
         ∑ c : Fin (Module.finrank Real E),
           g.inner x (smoothOrthoFrame (I := I) g x a x)
@@ -246,18 +245,18 @@ theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
             (smoothOrthoFrame (I := I) gm x c x : E) := by
     intro a
     have h1 := pair_frame_repr (I := I) (M := M) gm x
-      (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
-    rw [show (show E from gInvRaisedEndo (I := I) g gm x
+      (metricComparisonEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
+    rw [show (show E from metricComparisonEndo (I := I) g gm x
         (smoothOrthoFrame (I := I) g x a x)) =
-        gInvRaisedEndo (I := I) g gm x
+        metricComparisonEndo (I := I) g gm x
           (smoothOrthoFrame (I := I) g x a x) from rfl]
     conv_lhs => rw [h1]
     refine Finset.sum_congr rfl fun c _ => ?_
     congr 1
     rw [gm.symm x (smoothOrthoFrame (I := I) gm x c x)
-      (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))]
+      (metricComparisonEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))]
     rw [show gm.inner x
-        (gInvRaisedEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
+        (metricComparisonEndo (I := I) g gm x (smoothOrthoFrame (I := I) g x a x))
         (smoothOrthoFrame (I := I) gm x c x) =
         g.inner x (smoothOrthoFrame (I := I) g x a x)
           (smoothOrthoFrame (I := I) gm x c x) from by
@@ -275,7 +274,7 @@ theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :
   symm
   calc (∑ a : Fin (Module.finrank Real E),
         Tensor0SSpace.toModel Z
-          (Fin.cons (show E from gInvRaisedEndo (I := I) g gm x
+          (Fin.cons (show E from metricComparisonEndo (I := I) g gm x
               (smoothOrthoFrame (I := I) g x a x))
             (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm))) =
       ∑ a : Fin (Module.finrank Real E), ∑ c : Fin (Module.finrank Real E),
@@ -331,18 +330,19 @@ def pairSlot2 (g : SmoothRiemannianMetric I M)
       (fun x : M => TangentSpace I x →L[Real] TangentSpace I x))
     (j : Fin 2) (S : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
   domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j)
-    (appCc (I := I) (M := M) g 2 2
-      (slotInsertEndoCc (I := I) (M := M) g 1 Λ)
+    (operatorFieldApply (I := I) (M := M) g 2 2
+      (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)
       (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) j) S))
 
 /-- Covariant tensor product with the first factor occupying slots `0,1`. -/
 def pairProd4 (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 4 :=
-  appCc (I := I) (M := M) g 2 4
+  operatorFieldApply (I := I) (M := M) g 2 4
     (slotExtendIter (I := I) (M := M) g 0 2 2 B) A
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 /-- Evaluation of `pairSlot2`: the chosen covariant slot is read through the
 given endomorphism. -/
 theorem pairSlot2_eval (g : SmoothRiemannianMetric I M)
@@ -370,6 +370,8 @@ theorem pairSlot2_eval (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases j <;> fin_cases k <;> simp [Equiv.swap_apply_def]
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma pair_extend_cons
     (g : SmoothRiemannianMetric I M) (r s : Nat)
     (Φ : SmoothCcTensor g r s) (x : M)
@@ -387,14 +389,16 @@ private lemma pair_extend_cons
   rw [show ((show Tensor0SSpace (r + 1) I x →L[Real]
       Tensor0SSpace (s + 1) I x from
       (slotExtend (I := I) (M := M) g r s Φ).toSection x) D) =
-      slotExtendFib (I := I) (M := M) g r s x
+      slotExtendPointwise (I := I) (M := M) g r s x
         (show Tensor0SSpace r I x →L[Real] Tensor0SSpace s I x from
           Φ.toSection x) D from rfl]
   exact slotExtendFib_apply_eval (I := I) (M := M) g r s x
     (show Tensor0SSpace r I x →L[Real] Tensor0SSpace s I x from
       Φ.toSection x) D (show E from v0) vs
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma pair_rank0_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) •
       unitTensor (I := I) (M := M) x := by
@@ -411,8 +415,9 @@ private lemma pair_rank0_decomp (x : M) (t : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma pair_extend2_eval (g : SmoothRiemannianMetric I M)
     (B : SmoothCcTensor g 0 2) (x : M) (D : Tensor0SSpace 2 I x)
     (u : Fin 4 → TangentSpace I x) :
@@ -466,6 +471,8 @@ private lemma pair_extend2_eval (g : SmoothRiemannianMetric I M)
     smul_eq_mul]
   rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The rank-four product carrier evaluates as the product of its first and
 last pair of covariant components. -/
 theorem pairProd4_eval (g : SmoothRiemannianMetric I M)

@@ -24,7 +24,7 @@ namespace HCGCompactness
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -72,14 +72,14 @@ theorem MetricCompactnessInputs.atom_trans_small
     (L : NetLimitData inp.decay inp.D P) (r : Real) (k : Nat)
     (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack r k)
     (x : (X.obj (L.φ k)).M) (gamma : Fin (inp.pack.A r))
-    (hGp :
+    (hC2 :
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
       letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (gamma : Nat) ≤
-      Geometry.Riemannian.expRadiusGp
+      Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
         (seqCenterD inp.decay P L k (gamma : Nat)))
     (z : E)
@@ -90,7 +90,7 @@ theorem MetricCompactnessInputs.atom_trans_small
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       seqAtom inp.decay inp.hD P L inp.pack r k gamma
-      (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+      (Geometry.Riemannian.NormalCoordinates.expMapDiffeo
         (I := I) (X.obj (L.φ k)).metric x z) ≠ 0) :
     letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -113,32 +113,52 @@ theorem MetricCompactnessInputs.atom_trans_small
   | some y =>
       have hyD : seqCenterD inp.decay P L k (gamma : Nat) = y := by
         simp [seqCenterD, hc]
-      rw [hyD] at hGp ⊢
-      let q := Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
+      rw [hyD] at hC2 ⊢
+      let q := Geometry.Riemannian.NormalCoordinates.expMapDiffeo
         (I := I) (X.obj (L.φ k)).metric x z
       have hqHat : q ∈ L.hatBall inp.decay inp.D P inp.pack r k gamma :=
         seqAtom_mem_hat inp.decay inp.hD P L inp.pack r k hgp gamma hne
       have hqBall : q ∈ Metric.ball y (4 * L.lamInf (gamma : Nat)) := by
         simpa only [NetLimitData.hatBall, hc] using hqHat
+      have hhalf : (1 / 2 : Real) ≤ Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj (L.φ k)).metric y :=
+        inp.normalBounds.half_le_gpConst (L.φ k) y
+      have hsqrtPos : 0 < Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj (L.φ k)).metric y) :=
+        Real.sqrt_pos.mpr ((by norm_num : (0 : Real) < 1 / 2).trans_le hhalf)
+      have hsqrtHalf : (2 / 3 : Real) < Real.sqrt (1 / 2 : Real) := by
+        have hs := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
+        have hn := Real.sqrt_nonneg (1 / 2 : Real)
+        nlinarith
+      have hsqrt : (2 / 3 : Real) < Real.sqrt
+          (Geometry.Riemannian.gpCoerciveConst
+            (I := I) (X.obj (L.φ k)).metric y) :=
+        hsqrtHalf.trans_le (Real.sqrt_le_sqrt hhalf)
       have hlam : 0 < L.lamInf (gamma : Nat) :=
         inp.decay.lambda_pos inp.hD (L.rInf (gamma : Nat))
-      have hcoord : 4 * L.lamInf (gamma : Nat) <
-          6 * L.lamInf (gamma : Nat) := by nlinarith
+      have hcoord :
+          (4 * L.lamInf (gamma : Nat)) /
+              Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+                (I := I) (X.obj (L.φ k)).metric y) <
+            6 * L.lamInf (gamma : Nat) := by
+        rw [div_lt_iff₀ hsqrtPos]
+        nlinarith
       have htarget := properBall_to_exp (I := I) (X.obj (L.φ k))
         (P (L.φ k)).ms (P (L.φ k)).realizes
         (c := y) (R := 4 * L.lamInf (gamma : Nat))
         (σ := 6 * L.lamInf (gamma : Nat)) (hgp gamma y hc) hcoord
       have hVy : Metric.ball (0 : E) (6 * L.lamInf (gamma : Nat)) ⊆
-          Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+          Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric y) :=
         Metric.ball_subset_ball ((by nlinarith :
-          6 * L.lamInf (gamma : Nat) ≤ 8 * L.lamInf (gamma : Nat)).trans hGp)
+          6 * L.lamInf (gamma : Nat) ≤ 8 * L.lamInf (gamma : Nat)).trans hC2)
       have hmaps : Set.MapsTo
-          (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-            (I := I) (X.obj (L.φ k)).metric x)
+          (fun w : E => Geometry.Riemannian.NormalCoordinates.expMapDiffeo
+            (I := I) (X.obj (L.φ k)).metric x w)
           ({z} : Set E)
-          (Geometry.Riemannian.NormalCoordinates.framedExpMap
-            (I := I) (X.obj (L.φ k)).metric y ''
+          ((fun v : E => Geometry.Riemannian.Exponential.expMap
+            (I := I) (X.obj (L.φ k)).metric y
+              (show TangentSpace I y from v)) ''
             Metric.ball 0 (6 * L.lamInf (gamma : Nat))) := by
         intro w hw
         rw [Set.mem_singleton_iff] at hw
@@ -156,14 +176,14 @@ theorem MetricCompactnessInputs.weight_trans_small
     (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack r k)
     (beta : ∀ j : Nat, (X.obj (L.φ j)).M)
     (i0 gamma : Fin (inp.pack.A r))
-    (hGp :
+    (hC2 :
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
       letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       8 * L.lamInf (gamma : Nat) ≤
-        Geometry.Riemannian.expRadiusGp
+        Geometry.Riemannian.expMapC2Radius
           (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (gamma : Nat)))
     (z : E)
@@ -181,7 +201,7 @@ theorem MetricCompactnessInputs.weight_trans_small
     normalTransition (I := I) (X.obj (L.φ k)) (beta k)
         (seqCenterD inp.decay P L k (gamma : Nat)) z ∈
       Metric.ball 0 (6 * L.lamInf (gamma : Nat)) := by
-  apply inp.atom_trans_small P L r k hgp (beta k) gamma hGp z
+  apply inp.atom_trans_small P L r k hgp (beta k) gamma hC2 z
   simpa only [seqAtomChart] using
     (num_ne_of_cut_ne (num_ne_of_raw_ne hweight))
 
@@ -209,11 +229,11 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
         (X.obj (L.φ k)).t2TangentBundle
       letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
       Set.MapsTo
-        (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-          (I := I) (X.obj (L.φ k)).metric x)
+        (fun z : E => Geometry.Riemannian.NormalCoordinates.expMapDiffeo
+          (I := I) (X.obj (L.φ k)).metric x z)
         (Metric.ball 0 (8 * L.lamInf (α.1 : Nat)))
-        (Geometry.Riemannian.NormalCoordinates.framedExpMap
-          (I := I) (X.obj (L.φ k)).metric y ''
+        ((fun v : E => Geometry.Riemannian.Exponential.expMap
+          (I := I) (X.obj (L.φ k)).metric y (show TangentSpace I y from v)) ''
             Metric.ball 0
               (item3RadiusFactor inp.decay inp.D * L.lamInf (β.1 : Nat))) := by
   have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
@@ -237,8 +257,24 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  have hzero : (0 : E) ∈ Metric.ball 0
+      (inp.normalBounds.radius (L.φ k)
+        (seqCenterD inp.decay P L k (α.1 : Nat))) := by
+    rw [Metric.mem_ball, dist_self]
+    exact inp.normalBounds.radius_pos (L.φ k)
+      (seqCenterD inp.decay P L k (α.1 : Nat))
+  have hmetric : ∀ z : E,
+      (X.obj (L.φ k)).metric.inner
+          (seqCenterD inp.decay P L k (α.1 : Nat)) z z ≤ 2 * ‖z‖ ^ 2 := by
+    intro z
+    simpa only [normalMetric_zero (I := I) (X.obj (L.φ k))
+      (seqCenterD inp.decay P L k (α.1 : Nat))] using
+        (inp.normalBounds.metric_equiv (L.φ k)
+          (seqCenterD inp.decay P L k (α.1 : Nat)) 0 hzero z).2
   exact L.pair_exp_maps inp.decay inp.hD P inp.pack r α.1 β.1
-    hfreq k hk hx hy hradk
+    hfreq k hk hx hy hradk hmetric
+    (inp.normalBounds.half_le_gpConst
+      (L.φ k) (seqCenterD inp.decay P L k (β.1 : Nat)))
     (hgpk β.1 (seqCenterD inp.decay P L k (β.1 : Nat)) hy)
 
 
@@ -270,10 +306,10 @@ theorem MetricCompactnessInputs.pair_overlap_tail
       U ⊆ Metric.ball 0 (inp.normalBounds.radius (L.φ k) x) ∧
         Va ⊆ Metric.ball 0 (inp.normalBounds.radius (L.φ k) y) ∧
         U ⊆ Metric.ball 0
-          (Geometry.Riemannian.expRadiusGp
+          (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric x) ∧
         Va ⊆ Metric.ball 0
-          (Geometry.Riemannian.expRadiusGp
+          (Geometry.Riemannian.expMapC2Radius
             (I := I) (X.obj (L.φ k)).metric y) ∧
         ContDiffOn Real (⊤ : ℕ∞)
           (normalTransition (I := I) (X.obj (L.φ k)) x y) U ∧
@@ -321,7 +357,7 @@ theorem MetricCompactnessInputs.pair_overlap_tail
     Metric.ball_subset_ball <|
       hmetrick β.1 (seqCenterD inp.decay P L k (β.1 : Nat)) hy
   have hUx : Metric.ball (0 : E) (8 * L.lamInf (α.1 : Nat)) ⊆
-      Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+      Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (α.1 : Nat))) := by
     intro z hz
@@ -331,7 +367,7 @@ theorem MetricCompactnessInputs.pair_overlap_tail
         (hradk α.1 (seqCenterD inp.decay P L k (α.1 : Nat)) hx).2
   have hVy : Metric.ball (0 : E)
         (item3RadiusFactor inp.decay inp.D * L.lamInf (β.1 : Nat)) ⊆
-      Metric.ball 0 (Geometry.Riemannian.expRadiusGp
+      Metric.ball 0 (Geometry.Riemannian.expMapC2Radius
         (I := I) (X.obj (L.φ k)).metric
           (seqCenterD inp.decay P L k (β.1 : Nat))) := by
     intro z hz

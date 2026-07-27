@@ -30,7 +30,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -733,6 +733,7 @@ theorem galPert_bdd_on
   exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 /-- Prescribed-interval scalar Galerkin existence from continuity of the full
 perturbation.  The interval is independent of the finite spectral set. -/
@@ -760,11 +761,10 @@ theorem gal_exists_on
       EuclideanSpace Real {i // i ∈ F} →L[Real]
         EuclideanSpace Real {i // i ∈ F} :=
     scalarGalDiag (I := I) (M := M) q F
-  let B : Real := scalarGalFieldBound (I := I) (M := M) S T F C1
   let B : Real :=
     ‖Diag‖ + ‖Rst‖ * (Cp : Real) * ‖Emb‖
   have hB : 0 ≤ B := by
-    dsimp only [B, scalarGalFieldBound, q, Inc, Emb, Rst, Diag]
+    dsimp only [B]
     positivity
   let K : NNReal := ⟨B, hB⟩
   have hfield_apply
@@ -772,8 +772,6 @@ theorem gal_exists_on
       (w : EuclideanSpace Real {i // i ∈ F}) :
       ‖scalarGalField (I := I) (M := M) S T F t w‖ ≤
         B * ‖w‖ := by
-    exact scalarGalField_norm_le (I := I) (M := M) S T F t C1
-      (hbound2 t (hIcc2 ht)) (hbound1 t (hIcc1 ht)) w
     let Pert :
         tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
           tensorHs (I := I) (M := M) q 0 0 0 :=
@@ -865,6 +863,7 @@ theorem gal_time_mono
     exact hV.deriv t ⟨ht.1, ht.2.trans_le hle⟩ i hi
 
 set_option maxHeartbeats 800000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 /-- On one time interval independent of the finite spectral set, every scalar
 Galerkin truncation of the reversed conjugate-heat equation has a solution. -/

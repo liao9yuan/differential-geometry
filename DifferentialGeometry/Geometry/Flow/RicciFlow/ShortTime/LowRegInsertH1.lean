@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTowe
 
 This file bounds the cancellation-preserving background difference of the
 two-slot `lieCorr0` insertion coefficient.  The exact refolds in
-`LieCorr0LowJet` remove the self-background top derivative before any norm
+the Lie-correction background-difference identities remove the self-background top derivative before any norm
 estimate is taken.  Consequently the complete `H1` bound depends only on the
 metric `H2` radius.
 -/
@@ -23,9 +23,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -34,6 +35,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_add
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (A B : SmoothCcTensor g r s) (a b : ℝ)
@@ -66,10 +68,10 @@ private theorem jet_add
           ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2) +
         (∑ j ∈ Finset.range n,
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2)) := by
-      simp only [Finset.mul_sum]
-      ring
+      simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
     _ ≤ 2 * (a ^ 2 + b ^ 2) := by gcongr
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_sub
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (A B : SmoothCcTensor g r s) (a b : ℝ)
@@ -102,8 +104,7 @@ private theorem jet_sub
           ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2) +
         (∑ j ∈ Finset.range n,
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2)) := by
-      simp only [Finset.mul_sum]
-      ring
+      simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
     _ ≤ 2 * (a ^ 2 + b ^ 2) := by gcongr
 
 private theorem app_h2h1
@@ -118,7 +119,7 @@ private theorem app_h2h1
           ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) ≤ B ^ 2 →
         (∑ j ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g p c j
-            (appCcRS (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
           (C * A * B) ^ 2 := by
   obtain ⟨C, hC, happ⟩ :=
     appRS_h2_h1_h1 (I := I) (M := M) hDim g p r c
@@ -126,17 +127,18 @@ private theorem app_h2h1
   intro Φ W A B hA hB hΦ hW
   have hnorm := happ Φ W A B hA hB hΦ hW
   have hsquare := pow_le_pow_left₀
-    (norm_nonneg (⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+    (norm_nonneg (⟨ccOperatorFieldComp (I := I) (M := M) g p r c Φ W⟩ :
       SmoothCcTensorH1 g p c)) hnorm 2
   rw [h1_jet_sq (I := I) (M := M) g p c
-    (appCcRS (I := I) (M := M) g p r c Φ W)] at hsquare
+    (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)] at hsquare
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grid_h1_low
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (P : SmoothCcTensor g 0 2)
     (K C : ℕ → ℝ)
-    (hK : ∀ k, 0 ≤ K k)
+    (_hK : ∀ k, 0 ≤ K k)
     (hgrid : ∀ k : ℕ, k ≤ 2 →
       MeasureTheory.Integrable (lowJetGrid (I := I) (M := M) g P k)
         (riemannianVolumeMeasure (I := I) (M := M) g) ∧
@@ -191,11 +193,11 @@ theorem connSec_h1
     ∃ B : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R : ℝ), 0 ≤ R →
         (∑ j ∈ Finset.range 3,
@@ -242,7 +244,7 @@ theorem kappaDiff_h2
     ∃ B : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
         (R : ℝ), 0 ≤ R →
@@ -273,7 +275,8 @@ theorem kappaDiff_h2
     change SF ≤ AF ^ 2
     rw [show AF ^ 2 = SF by simp only [AF, Real.sq_sqrt hSF]]
   have hp' := hp P R hR hP
-  rw [kappa_diff (I := I) (M := M) g₀ g₁ gB P htie]
+  rw [lc0Kappa_self_sub_eq_connDiffLowered_sub_pbLow
+    (I := I) (M := M) g₀ g₁ gB P htie]
   have hle := jet_sub (I := I) (M := M) g₀ 0 3 3
     (connDiffLoweredCc (I := I) g₀ gB)
     (lc0PbLow (I := I) (M := M) g₀ P g₀ gB) AF (BP R) hfix hp'
@@ -282,10 +285,12 @@ theorem kappaDiff_h2
     simp only [B, Real.sq_sqrt (hQ R)]]
   simpa only [Q, AF, Real.sq_sqrt hSF] using hle
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem normSq_scaled
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)
     (X : SmoothCcTensor g r₁ s₁) (Y : SmoothCcTensor g r₂ s₂)
-    (c : ℝ) (hc : 0 ≤ c)
+    (c : ℝ) (_hc : 0 ≤ c)
     (hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g r₁ s₁ x (X.toSection x) ≤
         c * riemannianFiberNormSq (I := I) (M := M) g r₂ s₂ x
@@ -307,23 +312,23 @@ private theorem slotIns_h1
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g₀ 1 N)‖ ^ 2) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 N)‖ ^ 2) ≤
       (Module.finrank ℝ E : ℝ) *
         ∑ i ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g₀ 1 1 i
-            (slotInsertEndoCc (I := I) (M := M) g₀ 0 N)‖ ^ 2 := by
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 N)‖ ^ 2 := by
   have hfr : 0 ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
   calc
     _ ≤ ∑ i ∈ Finset.range 2, (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g₀ 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g₀ 0 N)‖ ^ 2 := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 N)‖ ^ 2 := by
       apply Finset.sum_le_sum
       intro i _
       refine normSq_scaled (I := I) (M := M) g₀ 2 (2 + i) 1 (1 + i)
         (iteratedCovGrad (I := I) g₀ 2 2 i
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1 N))
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 N))
         (iteratedCovGrad (I := I) g₀ 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g₀ 0 N))
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 N))
         (Module.finrank ℝ E : ℝ) hfr ?_
       intro x
       have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
@@ -339,11 +344,11 @@ theorem insert_h1
     ∃ B : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R : ℝ), 0 ≤ R →
         (∑ j ∈ Finset.range 3,
@@ -383,9 +388,9 @@ theorem insert_h1
     (hBD R hR), ?_⟩
   intro g₁ P htie δ hδ_le hδ_nonneg hbound R hR hP
   let T : SmoothCcTensor g₀ 3 1 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _)
+    lc0Tr (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _)
   let Ti : SmoothCcTensor g₀ 3 1 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 1 lieCorr0IVPerm
+    lc0Tr (I := I) (M := M) g₀ g₁ 1 lc0IVPerm
   let KD : SmoothCcTensor g₀ 0 3 :=
     lc0Kappa (I := I) (M := M) g₀ g₁ g₀ -
       lc0Kappa (I := I) (M := M) g₀ g₁ gB
@@ -395,15 +400,15 @@ theorem insert_h1
   let VDs : SmoothCcTensor g₀ 2 3 :=
     slotExtendIter (I := I) (M := M) g₀ 0 1 2 VD
   let ID : SmoothCcTensor g₀ 2 1 :=
-    lc0IV (I := I) (M := M) g₀ g₁ g₀ -
-      lc0IV (I := I) (M := M) g₀ g₁ gB
+    lc0IVField (I := I) (M := M) g₀ g₁ g₀ -
+      lc0IVField (I := I) (M := M) g₀ g₁ gB
   let CD : SmoothCcTensor g₀ 1 1 :=
-    lc0CdV (I := I) (M := M) g₀ g₁ g₀ -
-      lc0CdV (I := I) (M := M) g₀ g₁ gB
-  let ND := lc0NSec (I := I) (M := M) g₀ g₁ gB -
-    lc0NSec (I := I) (M := M) g₀ g₁ g₀
+    lc0CdVField (I := I) (M := M) g₀ g₁ g₀ -
+      lc0CdVField (I := I) (M := M) g₀ g₁ gB
+  let ND := lc0NEndoSec (I := I) (M := M) g₀ g₁ gB -
+    lc0NEndoSec (I := I) (M := M) g₀ g₁ g₀
   let S : SmoothCcTensor g₀ 2 2 :=
-    slotInsertEndoCc (I := I) (M := M) g₀ 1 ND
+    endoSlotZeroCcTensor (I := I) (M := M) g₀ 1 ND
   let SS : SmoothCcTensor g₀ 2 2 :=
     reindexCoeffGen (I := I) (M := M) g₀ 2 2
       (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2
@@ -416,13 +421,14 @@ theorem insert_h1
   have hTi : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 3 1 i Ti‖ ^ 2) ≤ (Bt R) ^ 2 := by
     simpa only [Ti] using htr g₁ P htie hδ_le hδ_nonneg hbound
-      lieCorr0IVPerm R hR hP
+      lc0IVPerm R hR hP
   have hKD : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 0 3 i KD‖ ^ 2) ≤ (BK R) ^ 2 := by
     simpa only [KD] using hk g₁ P htie R hR hP
   have hVD : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 0 1 i VD‖ ^ 2) ≤ (BV R) ^ 2 := by
-    rw [vflat_diff (I := I) (M := M) g₀ g₁ gB]
+    dsimp only [VD]
+    rw [lc0VFlat_sub_eq_trace_comp_kappa_sub (I := I) (M := M) g₀ g₁ gB]
     simpa only [T, KD, BV] using
       hvprod T KD (Bt R) (BK R) (hBt R hR) (hBK R hR) hT hKD
   have hVDs : (∑ i ∈ Finset.range 3,
@@ -432,7 +438,9 @@ theorem insert_h1
       g₀ 0 1 2 VD (BV R) hVD
   have hID : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 2 1 i ID‖ ^ 2) ≤ (BI R) ^ 2 := by
-    rw [iv_diff (I := I) (M := M) g₀ g₁ gB]
+    dsimp only [ID]
+    rw [lc0IVField_sub_eq_trace_comp_slotExtend_vflat_sub
+      (I := I) (M := M) g₀ g₁ gB]
     simpa only [Ti, VDs, BI] using
       hiprod Ti VDs (Bt R) (sf 2 * BV R) (hBt R hR)
         (mul_nonneg (hsf 2) (hBV R hR)) hTi hVDs
@@ -442,15 +450,17 @@ theorem insert_h1
     hc g₁ P htie hδ_le hδ_nonneg hbound R hR hP
   have hCD : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 1 1 i CD‖ ^ 2) ≤ (BD R) ^ 2 := by
-    rw [cdv_diff (I := I) (M := M) g₀ g₁ gB]
+    dsimp only [CD]
+    rw [lc0CdVField_sub_eq_comp_connDiff (I := I) (M := M) g₀ g₁ gB]
     simpa only [ID, BD] using
       hcdvprod ID (connDiffSection (I := I) g₁ g₀) (BI R) (BC R)
         (hBI R hR) (hBC R hR) hID hCsec
   have hN0 : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 1 1 i
-        (slotInsertEndoCc (I := I) (M := M) g₀ 0 ND)‖ ^ 2) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 ND)‖ ^ 2) ≤
         (BD R) ^ 2 := by
-    rw [nins_diff (I := I) (M := M) g₀ g₁ gB]
+    rw [lc0NEndoSec_sub_insert_eq_lc0CdVField_sub
+      (I := I) (M := M) g₀ g₁ gB]
     simpa only [CD] using hCD
   have hSraw : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i S‖ ^ 2) ≤
@@ -459,7 +469,7 @@ theorem insert_h1
       _ ≤ (Module.finrank ℝ E : ℝ) *
           ∑ i ∈ Finset.range 2,
             ‖iteratedCovGrad (I := I) g₀ 1 1 i
-              (slotInsertEndoCc (I := I) (M := M) g₀ 0 ND)‖ ^ 2 := by
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 ND)‖ ^ 2 := by
         simpa only [S] using slotIns_h1 (I := I) (M := M) g₀ ND
       _ ≤ (Module.finrank ℝ E : ℝ) * (BD R) ^ 2 :=
         mul_le_mul_of_nonneg_left hN0 (Nat.cast_nonneg _)
@@ -468,8 +478,14 @@ theorem insert_h1
         (sf 1 * BD R) ^ 2 := by
     refine hSraw.trans_eq ?_
     dsimp only [sf]
-    rw [mul_pow, Real.sq_sqrt (pow_nonneg (Nat.cast_nonneg _) 1)]
-    simp only [pow_one]
+    have hsqrt :
+        Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 1) ^ 2 =
+          (Module.finrank ℝ E : ℝ) ^ 1 :=
+      Real.sq_sqrt (pow_nonneg (Nat.cast_nonneg _) 1)
+    calc
+      _ = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 1) ^ 2 *
+          (BD R) ^ 2 := by rw [hsqrt]; simp only [pow_one]
+      _ = _ := by ring
   have hSS_eq : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i SS‖ ^ 2) =
       ∑ i ∈ Finset.range 2,
@@ -490,7 +506,9 @@ theorem insert_h1
         (sf 1 * BD R) ^ 2 := by
     rw [hSS_eq]
     exact hS
-  rw [insert_diff (I := I) (M := M) g₀ g₁ gB]
+  rw [lc0Insert_eq_lc0InsertField (I := I) (M := M) g₀ g₁ gB,
+    lc0Insert_eq_lc0InsertField (I := I) (M := M) g₀ g₁ g₀,
+    lc0InsertField_sub_eq_nEndoInsert (I := I) (M := M) g₀ g₁ gB]
   change (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i (S + SS)‖ ^ 2) ≤ _
   have hout := jet_add (I := I) (M := M) g₀ 2 2 2 S SS

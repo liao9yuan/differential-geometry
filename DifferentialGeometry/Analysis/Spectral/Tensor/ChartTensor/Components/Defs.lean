@@ -38,6 +38,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- The pair of covariant and contravariant chart-component multi-indices
+for an `(r,s)`-tensor on the model space. -/
+abbrev TensorCompIdx (r s : ℕ) : Type _ :=
+  (Fin r → Fin (Module.finrank ℝ E)) ×
+    (Fin s → Fin (Module.finrank ℝ E))
+
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M

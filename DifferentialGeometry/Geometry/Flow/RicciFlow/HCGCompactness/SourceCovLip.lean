@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAsse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Uniform source-flow covariant and time-Lipschitz bounds
@@ -23,8 +21,8 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
   {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -96,6 +94,8 @@ structure SrcCovLipData
                   (srcMetric (I := I) Φ hsrc htgt k t)
                   (refRes (I := I) Φ R hsrc k) y ≤ Lp * |s - t|
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] in
 /-- Joint order-zero metric and Ricci-evolution bounds in a fixed reference
 norm.  Both constants are explicit, so the result can be applied uniformly on
 varying source manifolds without choosing a compact spatial subcover. -/
@@ -143,6 +143,7 @@ theorem covRic0_le
       (mul_le_mul_of_nonneg_left
         (mul_le_mul_of_nonneg_left hShi (Real.sqrt_nonneg _)) (by norm_num))
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Source-flow covariant and time-Lipschitz bounds from uniform metric
 equivalence, moving Shi estimates, and one uniform initial covariant envelope.
 

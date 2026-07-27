@@ -32,13 +32,15 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 def riemannianMeasureFamily
+    {P : Type*}
     [T2Space M] [SigmaCompactSpace M]
-    (g_fam : ℝ → SmoothRiemannianMetric I M) : ℝ → MeasureTheory.Measure M :=
+    (g_fam : P → SmoothRiemannianMetric I M) : P → MeasureTheory.Measure M :=
   fun t => riemannianVolumeMeasure (I := I) (M := M) (g_fam t)
 
 lemma riemannianMeasureFamily_def
+    {P : Type*}
     [T2Space M] [SigmaCompactSpace M]
-    (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
+    (g_fam : P → SmoothRiemannianMetric I M) (t : P) :
     riemannianMeasureFamily (I := I) (M := M) g_fam t =
       riemannianVolumeMeasure (I := I) (M := M) (g_fam t) := rfl
 

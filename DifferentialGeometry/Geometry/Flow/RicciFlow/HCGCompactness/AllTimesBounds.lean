@@ -224,7 +224,7 @@ end ScalarLogDerivative
 
 section ComponentL2
 
-variable {Idx : Type*} [Fintype Idx]
+variable {Idx : Type*}
 
 
 
@@ -236,7 +236,6 @@ noncomputable def componentVec3
     EuclideanSpace Real (Idx × Idx × Idx) :=
   WithLp.toLp 2 (fun p : Idx × Idx × Idx => A p.1 p.2.1 p.2.2)
 
-omit [Fintype Idx] in
 @[simp]
 theorem componentVec3_apply
     (A : Idx -> Idx -> Idx -> Real)
@@ -246,6 +245,10 @@ theorem componentVec3_apply
 
 
 
+section FintypeNorm
+
+variable [Fintype Idx]
+
 theorem norm_componentVec3
     (A : Idx -> Idx -> Idx -> Real) :
     ‖componentVec3 A‖ = Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 A) := by
@@ -253,10 +256,12 @@ theorem norm_componentVec3
   simp [componentVec3, DifferentialGeometry.Integral.Connection.componentL2Sq3, Real.norm_eq_abs,
     sq_abs]
 
+end FintypeNorm
 
 
-set_option linter.unusedFintypeInType false in
+
 theorem hasDerivAt_componentVec3
+    [finiteIdx : Finite Idx]
     (A A' : Real -> Idx -> Idx -> Idx -> Real) {t : Real}
     (hderiv :
       forall p : Idx × Idx × Idx,
@@ -265,6 +270,7 @@ theorem hasDerivAt_componentVec3
     HasDerivAt (fun s : Real => componentVec3 (A s))
       (componentVec3 (A' t)) t := by
   classical
+  letI : Fintype Idx := Fintype.ofFinite Idx
   let L :
       (((Idx × Idx × Idx) → Real) →L[Real]
         EuclideanSpace Real (Idx × Idx × Idx)) :=
@@ -291,8 +297,8 @@ theorem hasDerivAt_componentVec3
   simpa [componentVec3, L, PiLp.coe_symm_continuousLinearEquiv] using hL
 
 
-set_option linter.unusedFintypeInType false in
 theorem hasDerivWithinAt_componentVec3
+    [finiteIdx : Finite Idx]
     (A A' : Real -> Idx -> Idx -> Idx -> Real) {s : Set Real} {t : Real}
     (hderiv :
       forall p : Idx × Idx × Idx,
@@ -301,6 +307,7 @@ theorem hasDerivWithinAt_componentVec3
     HasDerivWithinAt (fun r : Real => componentVec3 (A r))
       (componentVec3 (A' t)) s t := by
   classical
+  letI : Fintype Idx := Fintype.ofFinite Idx
   let L :
       (((Idx × Idx × Idx) -> Real) →L[Real]
         EuclideanSpace Real (Idx × Idx × Idx)) :=
@@ -325,6 +332,8 @@ theorem hasDerivWithinAt_componentVec3
       simpa using (hasDerivAt_const (x := t) (c := L)).hasDerivWithinAt
     simpa using hconst.clm_apply hpi
   simpa [componentVec3, L, PiLp.coe_symm_continuousLinearEquiv] using hL
+
+variable [Fintype Idx]
 
 
 

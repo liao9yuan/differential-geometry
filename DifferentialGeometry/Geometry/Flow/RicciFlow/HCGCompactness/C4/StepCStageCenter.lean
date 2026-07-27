@@ -21,7 +21,7 @@ namespace HCGCompactness
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -645,9 +645,9 @@ theorem HasStageRootCube.symm_dist_tail
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
       letI : MetricSpace Y.M := (P (Lphi.φ n)).ms
       dist
-          ((Geometry.Riemannian.NormalCoordinates.framedChartAt
+          ((Geometry.Riemannian.NormalCoordinates.normalChartAt
             (I := I) Y.metric c).symm (Phi3 n k l z))
-          ((Geometry.Riemannian.NormalCoordinates.framedChartAt
+          ((Geometry.Riemannian.NormalCoordinates.normalChartAt
             (I := I) Y.metric c).symm z) < eps := by
   obtain ⟨_hU, hC0, _hC1, hC01, hC1U⟩ :=
     hdata.core_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
@@ -687,19 +687,15 @@ theorem HasStageRootCube.symm_dist_tail
     intro w hw v
     exact inp.normalBounds.metric_equiv (Lphi.φ n) c w (hRad hw) v
   have hUtgt : U alpha ⊆
-      (Geometry.Riemannian.NormalCoordinates.framedChartAt
+      (Geometry.Riemannian.NormalCoordinates.normalChartAt
         (I := I) Y.metric c).target := by
     intro w hw
     have hwBall := hExp hw
-    rw [Metric.mem_ball, dist_zero_right] at hwBall
-    change w ∈ (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-      (I := I) Y.metric c).source
-    rw [Geometry.Riemannian.NormalCoordinates.framedExp_source]
-    apply Geometry.Riemannian.mem_expMapDiffeo_source_of_norm_lt_radius
-      (I := I) Y.metric c
-    apply Geometry.Riemannian.norm_lt_expMapC2Radius_of_sqrt_inner_lt
-      (I := I) Y.metric c
-    simpa only [Geometry.Riemannian.NormalCoordinates.normalFrame_sqrt] using hwBall
+    have hwNorm : ‖w‖ < Geometry.Riemannian.expMapC2Radius
+        (I := I) Y.metric c := by
+      simpa only [Metric.mem_ball, dist_zero_right] using hwBall
+    exact Geometry.Riemannian.ball_subset_normalChartAt_target
+      (I := I) Y.metric c hwNorm
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Y (P (Lphi.φ n)) hEquiv hUtgt hseg
   have hsqrt : Real.sqrt 2 ≤ 2 := by
@@ -742,9 +738,9 @@ theorem HasSuppConvData.pts_dist_tail
         letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
         letI : MetricSpace Y.M := (P (Lphi.φ l)).ms
         dist
-            ((Geometry.Riemannian.NormalCoordinates.framedChartAt
+            ((Geometry.Riemannian.NormalCoordinates.normalChartAt
               (I := I) Y.metric c).symm z)
-            ((Geometry.Riemannian.NormalCoordinates.framedChartAt
+            ((Geometry.Riemannian.NormalCoordinates.normalChartAt
               (I := I) Y.metric c).symm
                 (stagePtsSub inp P L phi hphi alpha k l z gamma)) < eps := by
   obtain ⟨_hU, hC0, _hC1, hC01, hC1U⟩ :=
@@ -807,19 +803,15 @@ theorem HasSuppConvData.pts_dist_tail
     intro w hw v
     exact inp.normalBounds.metric_equiv (Lphi.φ l) c w (hRad hw) v
   have hUtgt : U alpha ⊆
-      (Geometry.Riemannian.NormalCoordinates.framedChartAt
+      (Geometry.Riemannian.NormalCoordinates.normalChartAt
         (I := I) Y.metric c).target := by
     intro w hw
     have hwBall := hExp hw
-    rw [Metric.mem_ball, dist_zero_right] at hwBall
-    change w ∈ (Geometry.Riemannian.NormalCoordinates.framedExpDiffeo
-      (I := I) Y.metric c).source
-    rw [Geometry.Riemannian.NormalCoordinates.framedExp_source]
-    apply Geometry.Riemannian.mem_expMapDiffeo_source_of_norm_lt_radius
-      (I := I) Y.metric c
-    apply Geometry.Riemannian.norm_lt_expMapC2Radius_of_sqrt_inner_lt
-      (I := I) Y.metric c
-    simpa only [Geometry.Riemannian.NormalCoordinates.normalFrame_sqrt] using hwBall
+    have hwNorm : ‖w‖ < Geometry.Riemannian.expMapC2Radius
+        (I := I) Y.metric c := by
+      simpa only [Metric.mem_ball, dist_zero_right] using hwBall
+    exact Geometry.Riemannian.ball_subset_normalChartAt_target
+      (I := I) Y.metric c hwNorm
   have hman := NormalCoordMetricEquivOn.symm_dist_le
     (I := I) Y (P (Lphi.φ l)) hEquiv hUtgt hseg
   have hsqrt : Real.sqrt 2 ≤ 2 := by

@@ -120,6 +120,7 @@ theorem driftTerm_const_smul
   rw [gradientFun_const_smul (I := I) (G.metric t) a hf]
   simp
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term is additive in the scalar field. -/
 theorem driftTerm_add
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -134,6 +135,7 @@ theorem driftTerm_add
   rw [gradientFun_add (I := I) (G.metric t) hf hh]
   simp only [map_add]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The heat operator with drift is unchanged by subtracting a spatial constant. -/
 theorem heatOperatorWithDrift_sub_const
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -213,9 +215,8 @@ theorem laplacianAt_add
     funext y
     exact gradientFun_add (I := I) (G.metric t) (hf y) (hh y)
   rw [hgradient]
-  exact divergence_add (I := I) (G.connection t) hgradf hgradh
-
-/-- Family-facing product rule for the realized gradient. -/
+  exact divergence_add (I := I) (G.connection t) inferInstance hgradf hgradh
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem gradientAt_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
@@ -227,6 +228,7 @@ theorem gradientAt_mul
   unfold gradientAt
   exact gradientFun_mul (I := I) (G.metric t) hf hh
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term satisfies the scalar product rule. -/
 theorem driftTerm_mul
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -241,6 +243,7 @@ theorem driftTerm_mul
   rw [gradientAt_mul (I := I) G t hf hh]
   simp only [map_add, map_smul, smul_eq_mul]
 
+omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- Family-facing chain rule for the realized gradient of a real power. -/
 theorem gradientAt_rpow
     (G : RealizedMetricFamily (I := I) (M := M) Time)

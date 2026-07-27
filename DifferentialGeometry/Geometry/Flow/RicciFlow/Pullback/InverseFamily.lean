@@ -15,14 +15,16 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle Filter
+open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Pullback first by `Φ` and then by `Φ.symm` recovers the original metric. -/
 theorem Diffeomorph.pbMetric_symm
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -31,6 +33,7 @@ theorem Diffeomorph.pbMetric_symm
   rw [Diffeomorph.pullbackMetric_trans, Φ.symm_trans_self,
     Diffeomorph.pullbackMetric_refl]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Pullback first by `Φ.symm` and then by `Φ` recovers the original metric. -/
 theorem Diffeomorph.pbMetric_self
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -39,6 +42,12 @@ theorem Diffeomorph.pbMetric_self
   rw [Diffeomorph.pullbackMetric_trans, Φ.self_trans_symm,
     Diffeomorph.pullbackMetric_refl]
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 /-- If the time-preserving total map of a diffeomorphism family is itself a
 local diffeomorphism, then evaluation of the inverse family is jointly smooth.
 
@@ -89,6 +98,12 @@ theorem joint_symm_smooth
     exact e.symm.contMDiff
   exact contMDiff_snd.comp hpair
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 /-- Joint smoothness of the inverse evaluation map on an open time slab only
 requires the time-preserving total map to be a local diffeomorphism on that
 slab.
@@ -143,6 +158,9 @@ theorem joint_symm_smoothOn
     contMDiffAt_snd.comp q hG_at
   simpa only [Function.comp_apply, G] using hsnd.contMDiffWithinAt
 
+omit [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 /-- The inverse of a diffeomorphism family satisfying the negative gauge
 equation satisfies the positive pushed-forward gauge equation.
 
@@ -152,7 +170,7 @@ Joint smoothness of both evaluation families supplies the chain rule; it is
 not an existence hypothesis for the harmonic-map heat flow itself. -/
 theorem symm_gauge_vel
     (Ψ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (W : ℝ → Cₘ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (W : ℝ → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (T : ℝ)
     (hΨode : ∀ y : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
@@ -179,7 +197,9 @@ theorem symm_gauge_vel
     isOpen_Ioo.prod isOpen_univ
   have hsymm_at : ContMDiffAt 𝓘(ℝ, ℝ) I ∞
       (fun s : ℝ => ((Ψ_fam s).symm : M → M) x) t := by
-    have htotal := hsymm_joint.contMDiffAt
+    have htotal : ContMDiffAt (𝓘(ℝ, ℝ).prod I) I ∞
+        (fun q : ℝ × M => ((Ψ_fam q.1).symm : M → M) q.2) (t, x) :=
+      hsymm_joint.contMDiffAt
       (hopen.mem_nhds ⟨ht, Set.mem_univ x⟩)
     exact htotal.comp t (contMDiffAt_id.prodMk contMDiffAt_const)
   have hsymm_diff : MDifferentiableAt 𝓘(ℝ, ℝ) I
@@ -200,69 +220,79 @@ theorem symm_gauge_vel
     simpa only [C] using mdifferentiableAt_id.prodMk hsymm_diff
   have hC_val : mfderiv 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) C t (1 : ℝ) =
       ((1 : ℝ), vΦ) := by
-    rw [show C = (fun s : ℝ =>
-      (s, ((Ψ_fam s).symm : M → M) x)) from rfl]
-    rw [mfderiv_prodMk mdifferentiableAt_id hsymm_diff]
-    simp only [ContinuousLinearMap.prod_apply, mfderiv_id,
-      ContinuousLinearMap.id_apply, vΦ]
+    have hprod := mfderiv_prodMk mdifferentiableAt_id hsymm_diff
+    have happ := congrArg (fun A => A (1 : ℝ)) hprod
+    simpa only [C, id_eq, ContinuousLinearMap.prod_apply, mfderiv_id,
+      ContinuousLinearMap.id_apply, vΦ] using happ
   have hPC : P ∘ C = (fun _ : ℝ => x) := by
     funext s
     exact (Ψ_fam s).apply_symm_apply x
   have htotal_zero :
       mfderiv (𝓘(ℝ, ℝ).prod I) I P (t, y) ((1 : ℝ), vΦ) = 0 := by
-    have hchain := mfderiv_comp t hP_diff hC_diff
-    have happ := congrArg (fun A => A (1 : ℝ)) hchain
-    rw [hPC, mfderiv_const, ContinuousLinearMap.zero_apply,
-      ContinuousLinearMap.comp_apply, hC_val] at happ
-    exact happ.symm
+    have hCt : C t = (t, y) := rfl
+    have hchain := mfderiv_comp_apply t hP_diff hC_diff (1 : ℝ)
+    rw [hCt, hC_val] at hchain
+    have hchain' :
+        mfderiv 𝓘(ℝ, ℝ) I (P ∘ C) t (1 : ℝ) =
+          mfderiv (𝓘(ℝ, ℝ).prod I) I P (t, y) ((1 : ℝ), vΦ) :=
+      hchain
+    calc
+      mfderiv (𝓘(ℝ, ℝ).prod I) I P (t, y) ((1 : ℝ), vΦ) =
+          mfderiv 𝓘(ℝ, ℝ) I (P ∘ C) t (1 : ℝ) := hchain'.symm
+      _ = 0 := by
+        rw [hPC, mfderiv_const, ContinuousLinearMap.zero_apply]
   have htime_has :=
     (hΨode y t ht).hasMFDerivAt (Ici_mem_nhds ht.1)
   have htime :
       mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => P (s, y)) t (1 : ℝ) =
-        -(W t x) := by
+        -(W t ((Ψ_fam t : M → M) y)) := by
+    rw [show (fun s : ℝ => P (s, y)) =
+      (fun s : ℝ => (Ψ_fam s : M → M) y) from rfl]
     rw [htime_has.mfderiv]
-    simp only [ContinuousLinearMap.smulRight_apply,
-      ContinuousLinearMap.one_apply, one_smul, P, hΨy]
-  have hsum :
-      -(W t x) + mfderiv I I (Ψ_fam t : M → M) y vΦ = 0 := by
-    have hsplit := mfderiv_prod_eq_add_apply hP_diff
-      (v := ((1 : ℝ), vΦ))
-    rw [hsplit, htime] at htotal_zero
-    exact htotal_zero
+    change (1 : ℝ) • (-(W t ((Ψ_fam t : M → M) y))) =
+      -(W t ((Ψ_fam t : M → M) y))
+    rw [one_smul]
+  have hsplit := mfderiv_prod_eq_add_apply hP_diff
+    (v := ((1 : ℝ), vΦ))
+  have hsum := hsplit.symm.trans htotal_zero
+  simp only [P] at hsum
+  have htime' :
+      mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => (Ψ_fam s : M → M) y) t (1 : ℝ) =
+        -(W t ((Ψ_fam t : M → M) y)) := by
+    simpa only [P] using htime
+  rw [htime'] at hsum
   have hspace :
-      mfderiv I I (Ψ_fam t : M → M) y vΦ = W t x := by
+      mfderiv I I (Ψ_fam t : M → M) y vΦ =
+        W t ((Ψ_fam t : M → M) y) := by
     apply sub_eq_zero.mp
     simpa only [sub_eq_add_neg, add_comm] using hsum
   have hinv := Diffeomorph.mfderiv_symm_self (Ψ_fam t) y vΦ
-  rw [hΨy] at hinv
-  have hvΦ : vΦ = mfderiv I I ((Ψ_fam t).symm : M → M) x (W t x) := by
+  have hvΦ0 :
+      vΦ = mfderiv I I ((Ψ_fam t).symm : M → M) ((Ψ_fam t : M → M) y)
+        (W t ((Ψ_fam t : M → M) y)) := by
     calc
-      vΦ = mfderiv I I ((Ψ_fam t).symm : M → M) x
+      vΦ = mfderiv I I ((Ψ_fam t).symm : M → M) ((Ψ_fam t : M → M) y)
           (mfderiv I I (Ψ_fam t : M → M) y vΦ) := hinv.symm
-      _ = mfderiv I I ((Ψ_fam t).symm : M → M) x (W t x) := by
+      _ = mfderiv I I ((Ψ_fam t).symm : M → M) ((Ψ_fam t : M → M) y)
+          (W t ((Ψ_fam t : M → M) y)) := by
         rw [hspace]
+  have hvΦ := hvΦ0
+  rw [hΨy] at hvΦ
   have hvPush : vΦ = Diffeomorph.pushforward (Ψ_fam t).symm (W t)
       (((Ψ_fam t).symm : M → M) x) :=
     hvΦ.trans (Diffeomorph.pushforward_image (Ψ_fam t).symm (W t) x).symm
   have hderiv := hsymm_diff.hasMFDerivAt
   apply (hderiv.congr_mfderiv ?_).hasMFDerivWithinAt
-  ext a
+  apply ContinuousLinearMap.ext_ring
   calc
     mfderiv 𝓘(ℝ, ℝ) I
-          (fun s : ℝ => ((Ψ_fam s).symm : M → M) x) t a =
-        mfderiv 𝓘(ℝ, ℝ) I
-          (fun s : ℝ => ((Ψ_fam s).symm : M → M) x) t (a • (1 : ℝ)) := by
-            rw [smul_eq_mul, mul_one]
-    _ = a • vΦ := by
-      rw [map_smul]
-      rfl
-    _ = a • Diffeomorph.pushforward (Ψ_fam t).symm (W t)
-        (((Ψ_fam t).symm : M → M) x) := by rw [hvPush]
+        (fun s : ℝ => ((Ψ_fam s).symm : M → M) x) t (1 : ℝ) = vΦ := rfl
+    _ = Diffeomorph.pushforward (Ψ_fam t).symm (W t)
+        (((Ψ_fam t).symm : M → M) x) := hvPush
     _ = ((1 : ℝ →L[ℝ] ℝ).smulRight
         (Diffeomorph.pushforward (Ψ_fam t).symm (W t)
-          (((Ψ_fam t).symm : M → M) x))) a := by
-      simp only [ContinuousLinearMap.smulRight_apply,
-        ContinuousLinearMap.one_apply]
+          (((Ψ_fam t).symm : M → M) x))) (1 : ℝ) := by
+      simp
 
 section Gauge
 
@@ -271,6 +301,8 @@ variable [CompactSpace M] [I.Boundaryless]
 open DifferentialGeometry
 open DifferentialGeometry.PDE.DeTurck
 
+omit [CompactSpace M]
+  [I.Boundaryless] in
 /-- At the identity gauge, the positive gauge velocity is exactly the DeTurck
 vector field of the unpulled metric.  This is the initial compatibility
 identity for a harmonic-map heat-flow gauge starting from `id`. -/
@@ -282,6 +314,7 @@ identity for a harmonic-map heat-flow gauge starting from `id`. -/
       deTurckVF (I := I) g g_bg x := by
   rw [Diffeomorph.pullbackMetric_refl, Diffeomorph.pushforward_refl]
 
+omit [CompactSpace M] in
 /-- Pulling a Ricci flow back by a jointly smooth diffeomorphism family whose
 velocity is the pushforward of the DeTurck field produces the Ricci--DeTurck
 PDE.  This is the reverse gauge identity; it does not assert existence of the
@@ -365,7 +398,6 @@ theorem ricci_pullback_DT
       deTurckRicciRHS (I := I) g_bg
         (Diffeomorph.pullbackMetric (g_RF t) (Φ_fam t)) x v w := by
     rw [deTurckRicciRHS_apply, ← h_ric, ← h_lie]
-    rfl
   have h_total' : HasDerivWithinAt
       (fun s : ℝ => (g_RF s).inner ((Φ_fam s : M → M) x)
         (mfderiv I I (Φ_fam s : M → M) x v)

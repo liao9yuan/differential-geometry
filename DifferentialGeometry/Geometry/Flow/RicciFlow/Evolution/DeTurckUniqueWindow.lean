@@ -13,7 +13,7 @@ theorem.
 
 noncomputable section
 
-open Bundle Manifold Set
+open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -23,13 +23,15 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Two smooth Riemannian metrics are equal if their Gram matrices agree in
 the chart basis centred at every base point. -/
 theorem metric_eq_chartGram
@@ -67,6 +69,10 @@ theorem metric_eq_chartGram
       cases hinner
       rfl
 
+set_option maxHeartbeats 800000 in
+-- The endpoint argument elaborates two restricted-filter limits through chart-Gram coercions.
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Equality on a left half-window passes to its right endpoint from the
 existing joint chart-Gram `C⁰` regularity.  This is the closedness input for
 forward Ricci--DeTurck continuation. -/
@@ -102,24 +108,24 @@ theorem metric_eq_leftLim
     exact (hcont₂ x i j).comp hincl.continuousOn
       (fun t ht => ⟨ht, hx⟩)
   have hdmem : d ∈ Ico a b := ⟨hd.1.le, hd.2⟩
-  have hdnhds : Ico a b ∈ 𝒩 d := Ico_mem_nhds hd.1 hd.2
+  have hdnhds : Ico a b ∈ 𝓝 d := Ico_mem_nhds hd.1 hd.2
   have hf₁d : ContinuousAt f₁ d := (hf₁ d hdmem).continuousAt hdnhds
   have hf₂d : ContinuousAt f₂ d := (hf₂ d hdmem).continuousAt hdnhds
   have hclos : d ∈ closure (Ico c d) := by
     rw [closure_Ico (ne_of_lt hcd)]
     exact ⟨hcd.le, le_rfl⟩
-  have hcluster : (𝒩[Ico c d] d).NeBot := by
+  have hcluster : (𝓝[Ico c d] d).NeBot := by
     rw [mem_closure_iff_clusterPt] at hclos
     exact hclos
-  have hlim₁ : Tendsto f₁ (𝒩[Ico c d] d) (𝒩 (f₁ d)) :=
+  have hlim₁ : Tendsto f₁ (𝓝[Ico c d] d) (𝓝 (f₁ d)) :=
     hf₁d.tendsto.mono_left inf_le_left
-  have hlim₂ : Tendsto f₂ (𝒩[Ico c d] d) (𝒩 (f₂ d)) :=
+  have hlim₂ : Tendsto f₂ (𝓝[Ico c d] d) (𝓝 (f₂ d)) :=
     hf₂d.tendsto.mono_left inf_le_left
   have heqGram : EqOn f₁ f₂ (Ico c d) := by
     intro t ht
     simp only [f₁, f₂]
     rw [heq t ht]
-  have hlim₁' : Tendsto f₁ (𝒩[Ico c d] d) (𝒩 (f₂ d)) :=
+  have hlim₁' : Tendsto f₁ (𝓝[Ico c d] d) (𝓝 (f₂ d)) :=
     hlim₂.congr' (heqGram.eventuallyEq_of_mem self_mem_nhdsWithin).symm
   exact tendsto_nhds_unique hlim₁ hlim₁'
 
@@ -186,14 +192,16 @@ theorem chartRD_local
       HasDerivAt (fun tau => (G₁.metric (c + tau)).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (G₁.metric (c + t)) x v w) t := by
     intro t ht x v w
+    have hpde := hPDE₁ (t + c) (by simpa only [add_comm] using ht) x v w
     simpa only [G₁, Sol₁, SolutionOn.family, SolutionFamily.connection,
-      add_comm] using (hPDE₁ (c + t) ht x v w).comp_add_const t c
+      add_comm] using hpde.comp_add_const t c
   have hshift₂ : ∀ t ∈ S, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivAt (fun tau => (G₂.metric (c + tau)).inner x v w)
         (deTurckRicciRHS (I := I) g_bg (G₂.metric (c + t)) x v w) t := by
     intro t ht x v w
+    have hpde := hPDE₂ (t + c) (by simpa only [add_comm] using ht) x v w
     simpa only [G₂, Sol₂, SolutionOn.family, SolutionFamily.connection,
-      add_comm] using (hPDE₂ (c + t) ht x v w).comp_add_const t c
+      add_comm] using hpde.comp_add_const t c
   obtain ⟨T, hT, huniq⟩ := metricRD_local (I := I) (M := M)
     G₁ G₂ hG₁ hG₂ (g₁ c) g_bg c hS h0S hmap rfl (by
       simpa only [G₂, Sol₂, SolutionOn.family] using hagree.symm) hshift₁ hshift₂
@@ -210,7 +218,7 @@ theorem chartRD_forward
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b c : Real} (hab : a < b)
     (hc : c ∈ Ioo a b) (g_bg : SmoothRiemannianMetric I M)
     (hsmooth₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝒘(Real, Real).prod I) 𝒘(Real) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M =>
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
@@ -220,7 +228,7 @@ theorem chartRD_forward
           chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hsmooth₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝒘(Real, Real).prod I) 𝒘(Real) ∞
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M =>
           chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
         (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
@@ -274,7 +282,7 @@ theorem chartRD_forward
     · exact heqBelow r ⟨hr.1, hrd⟩
   rcases eq_or_lt_of_le hdIcc.2 with hdt | hdt
   · rw [hdt] at hdS
-    exact hdS.2 ⟨ht.1, le_rfl⟩
+    exact hdS.2 t ⟨ht.1, le_rfl⟩
   · exfalso
     have hdreg : d ∈ Ioo a b :=
       ⟨lt_of_lt_of_le hc.1 hdIcc.1, lt_of_le_of_lt hdIcc.2 ht.2⟩

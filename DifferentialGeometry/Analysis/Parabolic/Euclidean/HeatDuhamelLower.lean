@@ -53,6 +53,7 @@ theorem d0DuhMajor_int (t : ℝ) (K : ℝ≥0) :
 def heatDuh (t : ℝ) (f : ℝ → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatSup (t - s) (f s) x
 
+omit [CompleteSpace F] in
 /-- A strongly measurable, uniformly bounded forcing path has an integrable
 value heat-potential integrand. -/
 theorem heatDuh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
@@ -76,6 +77,7 @@ theorem heatDuh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     _ ≤ K := hf s ⟨hs.1.le, hs.2⟩
     _ = d0DuhMajor K t s := by rfl
 
+omit [CompleteSpace F] in
 /-- The value heat potential gains one full power of the time horizon. -/
 theorem heatDuh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     (f : ℝ → BoundedContinuousFunction V F)
@@ -101,6 +103,7 @@ theorem heatDuh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
         _ = d0DuhMajor K t s := by rfl
     _ = t * (K : ℝ) := d0DuhMajor_int t K
 
+omit [CompleteSpace F] in
 /-- On a horizon at most one, the value estimate may be absorbed into the
 common `sqrt t` lower-jet factor. -/
 theorem heatDuh_sqrt {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) {K : ℝ≥0}
@@ -114,8 +117,7 @@ theorem heatDuh_sqrt {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) {K : ℝ≥0}
     have hsqrt_le : Real.sqrt t ≤ 1 := Real.sqrt_le_one.mpr ht1
     nlinarith [Real.sq_sqrt ht.le, Real.sqrt_nonneg t]
   exact (heatDuh_norm ht f hf x hmeas).trans
-    (mul_le_mul_of_nonneg_right htsqrt NNReal.coe_nonneg)
-
+    (mul_le_mul_of_nonneg_right htsqrt (NNReal.coe_nonneg K))
 end ValuePotential
 
 section GradientPotential
@@ -135,11 +137,13 @@ potential. -/
 def d1DuhMajor (v : V) (K : ℝ≥0) (t s : ℝ) : ℝ :=
   d1DuhConst v K * heatScale12 (t - s)
 
+omit [Nontrivial V] in
 /-- The gradient-potential majorant is interval integrable. -/
 theorem d1DuhMajor_intble {t : ℝ} (ht : 0 < t) (v : V) (K : ℝ≥0) :
     IntervalIntegrable (d1DuhMajor v K t) volume 0 t := by
   exact (scale12_intble ht).const_mul (d1DuhConst v K)
 
+omit [Nontrivial V] in
 /-- Exact integral of the gradient-potential majorant. -/
 theorem d1DuhMajor_int {t : ℝ} (ht : 0 < t) (v : V) (K : ℝ≥0) :
     ∫ s : ℝ in 0..t, d1DuhMajor v K t s =
@@ -152,6 +156,7 @@ def heatD1Duh (t : ℝ) (v : V)
     (f : ℝ → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatD1Sup (t - s) v (f s) x
 
+omit [CompleteSpace F] in
 /-- A strongly measurable, uniformly bounded forcing path has an integrable
 first-derivative heat-potential integrand. -/
 theorem heatD1Duh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
@@ -186,6 +191,7 @@ theorem heatD1Duh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       unfold d1DuhMajor d1DuhConst
       ring
 
+omit [CompleteSpace F] in
 /-- The first spatial derivative of the heat potential gains the explicit
 factor `2 * sqrt t`. -/
 theorem heatD1Duh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
@@ -235,4 +241,3 @@ end Euclidean
 end Parabolic
 end Analysis
 end DifferentialGeometry
-

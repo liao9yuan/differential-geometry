@@ -62,7 +62,7 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -118,6 +118,7 @@ noncomputable def srcMetric (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ) (k : Nat) 
     change IsManifold I ∞ (SourceDomain (I := I) Φ k); infer_instance
   fun t => (sourceFlow (I := I) Φ k (hsrc k) (htgt k)).family.metric t
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The source-flow metric family commutes definitionally with reindexing the
 comparison maps and their sigma-compactness witnesses. -/
 @[simp] theorem srcMetric_compSubseq
@@ -156,6 +157,7 @@ noncomputable def refRes (R : letI : TopologicalSpace P.M := P.topology;
     P.M P.topology P.charted P.smooth inferInstance
     R (sourceOpen (I := I) Φ k) sourceSigma sourceT2
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Restricting the reference metric to a source domain commutes
 definitionally with reindexing the comparison maps. -/
 @[simp] theorem refRes_compSubseq
@@ -169,16 +171,7 @@ definitionally with reindexing the comparison maps. -/
       refRes (I := I) Φ R hsrc (ρ k) :=
   rfl
 
-/-- A coherent bump family on the limit manifold `P.M` for the comparison maps `Φ`.
-
-
-
-
-
-
-
-
-
+/-- A coherent bump family on the limit manifold `P.M` for the comparison maps `Φ`. -/
 structure BumpFamily where
 
   grow : Nat -> Set P.M
@@ -272,6 +265,7 @@ noncomputable def gSeqExt (R : letI : TopologicalSpace P.M := P.topology;
     (srcMetric (I := I) Φ hsrc htgt k t)
     (bf.chi k) (bf.chi_smooth k) (bf.chi01 k) (bf.chi_supp k)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Reindexing all inputs to `gSeqExt` is definitionally the same as reading
 the original extended sequence at the reindexed stage. -/
 @[simp] theorem gSeqExt_compSubseq
@@ -288,16 +282,8 @@ the original extended sequence at the reindexed stage. -/
       gSeqExt (I := I) Φ R bf hsrc htgt (ρ k) t :=
   rfl
 
-/-- A coherent bump family always exists for the limit manifold `P.M`.
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+/-- A coherent bump family always exists for the limit manifold `P.M`. -/
 theorem nonempty_bumpFamily : Nonempty (BumpFamily (I := I) Φ) := by
   classical
   letI : TopologicalSpace P.M := P.topology
@@ -459,6 +445,7 @@ end Eval
 
 section Low
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Every bump-extended metric has the canonical exact lower bound
 `min cLow 1 · R`, uniformly over the full sequence and the time window. -/
 theorem gSeqExt_lower
@@ -502,8 +489,7 @@ theorem gSeqExt_lower
     · subst hv; simp
     · exact (R.pos x v hv).le
   by_cases hx : x ∈ Φ.source k
-  · -- on the source: convex combination
-    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  · letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
     letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
     letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t x hx v v]
@@ -526,13 +512,13 @@ theorem gSeqExt_lower
             mul_le_mul_of_nonneg_right hc1 (mul_nonneg h1χ hRnn)
         _ = (1 - χ) * r := one_mul _
     nlinarith [hc0, h1, hterm2, mul_le_mul_of_nonneg_left hccLow hχ0, hRnn, hχ0, hRnn]
-  · -- off the source ⟹ off the support ⟹ value is `R`
-    have hxsupp : x ∉ tsupport (bf.chi k) := fun h => hx (bf.chi_supp k h)
+  · have hxsupp : x ∉ tsupport (bf.chi k) := fun h => hx (bf.chi_supp k h)
     rw [gSeqExt_inner_of_notMem (I := I) Φ R bf hsrc htgt k t x hxsupp v v]
     calc c * R.inner x v v <= 1 * R.inner x v v :=
           mul_le_mul_of_nonneg_right hc1 hRnn
       _ = R.inner x v v := one_mul _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- **`hlow` for the bump-extended sequence.**  The canonical lower bound is positive and
 therefore supplies the existential bound required by `windowGInfAll`, along any strict
 subsequence. -/
@@ -575,6 +561,7 @@ end Low
 
 section Bdd
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- **`hbdd` for the bump-extended sequence.**  From a uniform covariant-derivative
 bound on the bump agreement regions — for each order `q`, a single constant bounding
 `metricCovDerivNorm q (gSeqExt (ρ k) t) R` on `bf.grow (ρ k)` uniformly in `k` and `t` — the
@@ -622,11 +609,9 @@ theorem hbdd_gSeqExt
   have hne : (Finset.range (k0 + 1)).Nonempty := ⟨0, Finset.mem_range.2 (Nat.succ_pos k0)⟩
   refine ⟨max Ctail ((Finset.range (k0 + 1)).sup' hne Chead), fun k z hz => ?_⟩
   by_cases hk : k0 <= k
-  · -- tail: `k0 ≤ k ≤ ρ k`, so `z ∈ K' ⊆ grow (ρ k)`.
-    have hk' : k0 <= rho k := le_trans hk (hrho.id_le k)
+  · have hk' : k0 <= rho k := le_trans hk (hrho.id_le k)
     exact le_trans (hCtail (rho k) t ht z (hk0 (rho k) hk' hz)) (le_max_left _ _)
-  · -- head/mid: `k < k0`, use the fixed-metric bound and the finite maximum.
-    have hklt : k < k0 := Nat.lt_of_not_le hk
+  · have hklt : k < k0 := Nat.lt_of_not_le hk
     refine le_trans (hChead k z hz) (le_trans ?_ (le_max_right _ _))
     exact Finset.le_sup' Chead (Finset.mem_range.2 (by omega))
 

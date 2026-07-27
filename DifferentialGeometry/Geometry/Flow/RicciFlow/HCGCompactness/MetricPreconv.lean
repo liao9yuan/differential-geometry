@@ -627,6 +627,7 @@ theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
   rw [ContinuousLinearMap.norm_smulRight_apply]
   exact mul_le_of_le_one_left (norm_nonneg _) ContinuousLinearMap.norm_id_le
 
+omit [IsManifold I 2 M] in
 /-- Pointwise all-orders covariant-to-coordinate conversion.  The compact set
 controls the chart and slot constants, while the tensor norms on the right are
 evaluated at the same point as the chart derivative. -/
@@ -852,6 +853,7 @@ theorem iterFDeriv_tower_le
       rw [Finset.sum_mul]
       exact Finset.sum_congr rfl (fun i _ => (mul_assoc _ _ _).symm)
 
+omit [IsManifold I 2 M] in
 /-- **All-orders covariant → coordinate conversion** (MSM135 `lbl351`, P3
 Brick A2).  This constants-first form is retained for consumers with uniform
 covariant bounds; it follows from the pointwise estimate
@@ -1103,6 +1105,7 @@ theorem chartGram_iter_le
   exact le_trans (hC (i, j) k y hy)
     (Finset.single_le_sum (fun p _ => hC0 p) (Finset.mem_univ (i, j)))
 
+omit [IsManifold I 2 M] in
 /-- Fixed-order chart Gram differences are controlled by the covariant metric
 difference through the same order.  The tower estimate is applied to the
 tensor-field difference before taking norms, so the constant depends only on
@@ -1212,8 +1215,11 @@ theorem chartJet_sub_le
     (mul_le_mul_of_nonneg_right
       (Finset.single_le_sum (fun p _ => hC0 p) (Finset.mem_univ (i, j))) hsum0)
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [IsManifold I 1 M]
+    [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 private theorem gramPi_sub_le
-    [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (u u' : SmoothRiemannianMetric I M) (x₀ : M) (z : E) (r : ℕ) (B : ℝ)
     (hB : 0 ≤ B)
     (hentry : ∀ i j : Fin (Module.finrank ℝ E),
@@ -1265,10 +1271,11 @@ private theorem gramPi_sub_le
     ((hsmooth u' i j).of_le hr)]
   exact hentry i j
 
+omit [IsManifold I 2 M] in
 /-- The full chart-Gram spatial `2`-jet difference is controlled by the
 covariant metric difference through order two. -/
 theorem chartJet2_sub_le
-    [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+    [NeZero (Module.finrank ℝ E)]
     (gRef : SmoothRiemannianMetric I M) (x₀ : M)
     {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
@@ -1354,6 +1361,7 @@ theorem chartJet2_sub_le
   exact Analysis.jet2_sub_le ((hmat u).of_le htwoInf) ((hmat u').of_le htwoInf)
     hpi₀ hpi₁ hpi₂
 
+omit [IsManifold I 2 M] in
 /-- The theorem-facing exact-order predicate supplies the fixed-order chart
 Gram bounds required by `chartGram_iter_le`. -/
 theorem chartGram_of_orders

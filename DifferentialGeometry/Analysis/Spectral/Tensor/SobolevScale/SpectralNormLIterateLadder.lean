@@ -102,9 +102,11 @@ theorem smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2) w i p,
       ladder_weight_natCast (I := I) (M := M) g₀ i (2 * p + 1)]
     ring
-  have hcross := tensorL2Inner_eq_tsum_l2Coeff_cross_arm (I := I) (M := M) g₀
-    (oneMinusConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w))
-    (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
+  have hcross := tensorL2Inner_eq_tsum_l2Coeff_cross_arm
+    (I := I) (M := M) (g₀ := g₀)
+    (A := oneMinusConnLapSmooth (I := I) g₀ 0 2
+      (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w))
+    (B := oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
   have hadd := oneMinusConnLapSmooth_l2Inner_eq_add_covGrad (I := I) (M := M) g₀ 0 2
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p w)

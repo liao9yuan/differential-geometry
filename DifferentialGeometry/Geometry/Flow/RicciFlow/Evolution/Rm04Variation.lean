@@ -1,10 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 /-!
 # Lowered-Riemann variation in second-Ricci-derivative form
@@ -24,7 +20,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -58,6 +54,7 @@ def rm04VarRHS
           ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
             t x₀ (m 3) p))
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Along a Ricci-flow solution, the time derivative of the canonical
 coordinate component of lowered Riemann is `rm04VarRHS`, the explicit
 arbitrary-dimensional `∇²Ric` variation formula. -/

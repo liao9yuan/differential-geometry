@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.MetricFamilyConnDiff
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
 import DifferentialGeometry.Tensor.RSTensor.Metric
 
@@ -15,18 +16,17 @@ against one fixed background metric, gives a jointly smooth family of
 -/
 
 noncomputable section
-
+set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Tensor0SBundle
-open scoped Manifold Topology ContDiff
-
+open scoped Manifold Topology ContDiff RealInnerProductSpace InnerProductSpace
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -35,14 +35,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma metricDiff_apply (q h : SmoothRiemannianMetric I M)
     (x : M) (c : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
       (metricDifferenceCcTensor (I := I) (M := M) q h).toSection x) c =
       tensor0SSpace_evalScalar x c •
         (metricCcTensorFib (I := I) h x - metricCcTensorFib (I := I) q x) := by
-  rw [metricDifferenceCcTensor, SmoothCcTensor.toSection_sub,
-    ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply]
+  unfold metricDifferenceCcTensor
   change
     (MixedSection.eval₀ (F := E) (E := TangentSpace I) x c) •
           metricCcTensorFib (I := I) h x -
@@ -50,29 +51,19 @@ private lemma metricDiff_apply (q h : SmoothRiemannianMetric I M)
           metricCcTensorFib (I := I) q x =
       tensor0SSpace_evalScalar x c •
         (metricCcTensorFib (I := I) h x - metricCcTensorFib (I := I) q x)
-  rw [Tensor0SSpace.evalScalar_apply, MixedSection.eval₀_apply, smul_sub]
-
-/-- The unsymmetrized tensor extracted from the fixed-background metric
-difference is already the pointwise metric bilinear-form difference. -/
+  rw [Tensor0SSpace.evalScalar_apply, MixedSection.eval₀_apply]
+  rw [← smul_sub]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricDiff_raw (q h : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) q
+    smoothCcTensorBilinForm (I := I) q
         (metricDifferenceCcTensor (I := I) (M := M) q h) x v w =
       h.inner x v w - q.inner x v w := by
   unfold metricDifferenceCcTensor
-  have hvw : ccTensorBilin (I := I) q
-      (metricCcTensor (I := I) (M := M) q h -
-        metricCcTensor (I := I) (M := M) q q) x v w =
-      ccTensorBilin (I := I) q
-          (metricCcTensor (I := I) (M := M) q h) x v w -
-        ccTensorBilin (I := I) q
-          (metricCcTensor (I := I) (M := M) q q) x v w := by
-    rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
-      ccTensorModel_sub, ContinuousMultilinearMap.sub_apply]
-  rw [hvw, metricCcTensor_apply, metricCcTensor_apply]
-
-/-- Unit-model evaluation of a metric-difference tensor is the moving metric
-component minus the fixed background component. -/
+  rw [ccTensorBilin_sub, metricCcTensor_apply, metricCcTensor_apply]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricDiff_unit (q h : SmoothRiemannianMetric I M)
     (x : M) (slots : Fin 2 → E) :
     unitModel (I := I) (M := M) q 2
@@ -82,17 +73,19 @@ theorem metricDiff_unit (q h : SmoothRiemannianMetric I M)
     funext i
     fin_cases i <;> rfl
   rw [hslots, unitModel_eq_ccTensorBilin_local, metricDiff_raw]
-
-/-- A metric-difference tensor is symmetric before applying the realization
-symmetrizer. -/
+  simp
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricDiff_symm (q h : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) q
+    smoothCcTensorBilinForm (I := I) q
         (metricDifferenceCcTensor (I := I) (M := M) q h) x v w =
-      ccTensorBilin (I := I) q
+      smoothCcTensorBilinForm (I := I) q
         (metricDifferenceCcTensor (I := I) (M := M) q h) x w v := by
   rw [metricDiff_raw, metricDiff_raw, h.symm x v w, q.symm x v w]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The symmetrized fixed-background metric difference is exactly the
 pointwise metric bilinear-form difference. -/
 theorem metricDiff_symVal (q h : SmoothRiemannianMetric I M)
@@ -103,8 +96,10 @@ theorem metricDiff_symVal (q h : SmoothRiemannianMetric I M)
   rw [ccTensorBilinSymm_apply, metricDiff_raw, metricDiff_raw,
     h.symm x v w, q.symm x v w]
   ring
-
-private theorem metric_ext_inner
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
+theorem metric_ext_inner
     {g h : SmoothRiemannianMetric I M}
     (heq : ∀ (x : M) (v w : TangentSpace I x),
       g.inner x v w = h.inner x v w) :
@@ -120,11 +115,12 @@ private theorem metric_ext_inner
       cases hinner
       rfl
 
+omit [BoundarylessManifold I M] in
 /-- Realizing the fixed-background tensor difference recovers the target
 metric exactly; no separate realization-identification hypothesis is needed. -/
 theorem realize_metricDiff (q h : SmoothRiemannianMetric I M)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) q
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) q
       (ccTensorBilinSymm (I := I) q
         (metricDifferenceCcTensor (I := I) (M := M) q h)) δ) :
     tensorSectionRealizeMetric (I := I) q
@@ -134,14 +130,15 @@ theorem realize_metricDiff (q h : SmoothRiemannianMetric I M)
   rw [tensorSectionRealizeMetric_inner, metricDiff_symVal]
   ring
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff_eval
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (q : SmoothRiemannianMetric I M)
-    (Y Z : Cₘ^∞⟮I; E, fun x : M => TangentSpace I x⟯) :
+    (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ =>
         (G.metric p.2).inner p.1 (Y p.1) (Z p.1) -
@@ -169,6 +166,8 @@ private theorem metricDiff_eval
     rfl
   · rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- A `MetricFamilySmoothOn` family gives a jointly smooth path of fixed-base
 metric-difference tensors on its regular time set. -/
 theorem metricDiff_joint
@@ -183,7 +182,7 @@ theorem metricDiff_joint
         ((metricDifferenceCcTensor (I := I) (M := M) q
           (G.metric p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun x : M => Tensor0SSpace 0 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
     (φ := fun p : M × ℝ =>
@@ -207,14 +206,14 @@ theorem metricDiff_joint
         p.1 ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
           ((G.metric p.2).inner p.1 - q.inner p.1)))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := E →L[ℝ] ℝ) (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (φ := fun p : M × ℝ =>
         (Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
           ((G.metric p.2).inner p.1 - q.inner p.1))
     intro Z
-    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := ℝ) (V₂ := fun _ : M => ℝ)
       (φ := fun p : M × ℝ =>
@@ -249,6 +248,8 @@ theorem metricDiff_joint
   rw [Tensor0SNabla.scalarFn_eq_apply_zero, Tensor0SSpace.evalScalar_apply]
   exact congrArg (Y p.1) (Subsingleton.elim _ _)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Joint smoothness is stable under translating a regular-time window.  The
 explicit image hypothesis records that this is an interior restart and makes
 no assertion at a merely continuous endpoint of the original family. -/

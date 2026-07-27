@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Lipschitz
-import DifferentialGeometry.Analysis.Elliptic.MetricBounds
-import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
@@ -33,11 +33,12 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Chart.ChartTower
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [IsManifold I ∞ M] in
 private lemma raw_eq_smooth
     (α : M) (f : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f =
@@ -51,6 +52,7 @@ private lemma raw_eq_smooth
     (I := I) (M := M) α]
   rfl
 
+omit [IsManifold I ∞ M] in
 private lemma raw_fderiv_eq
     [I.Boundaryless] (α : M) (f : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -140,13 +142,13 @@ private lemma raw_sub_lip
 private lemma raw_wkp_eq
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α
           (fun x => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x * u x))
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
           (I := I) (M := M) (chartAtlasPOU I M) α u)
@@ -192,6 +194,7 @@ private lemma grad_eq_pou
   rw [hw]
   exact DifferentialGeometry.Integral.Connection.gradFun_finset (I := I) g S f hf
 
+omit [FiniteDimensional ℝ E] in
 private lemma gNorm_sum_le
     (g : SmoothRiemannianMetric I M) (x : M) {ι : Type*}
     (s : Finset ι) (v : ι → TangentSpace I x) :
@@ -360,7 +363,7 @@ private lemma local_grad_l2_le
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) y * (u y - v y)) x)) ≤ q x) ∧
       eLpNorm q 2 (riemannianMeasure (I := I) g (chartAtlasPOU I M)) ≤
         ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α
             (fun x => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x * (u x - v x)))
@@ -521,7 +524,7 @@ private lemma local_grad_l2_le
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
               (I := I) (M := M) α)) ≤
         ENNReal.ofReal (Real.sqrt Cg) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2 raw
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
               (I := I) (M := M) α) := by
@@ -595,7 +598,7 @@ theorem grad_sub_l2_le
     (gradFun (I := I) g (fun y =>
       (chartAtlasPOU I M a.1 : C^∞⟮I, M; ℝ⟯) y * (u y - v y)) x))
   let W : S → ENNReal := fun a =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 2
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I a.1
         (fun x => (chartAtlasPOU I M a.1 : C^∞⟮I, M; ℝ⟯) x * (u x - v x)))
@@ -673,7 +676,7 @@ theorem grad_sub_l2_le
     rw [DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_eq_finset_sum
       (I := I) (M := M) g 1 (by norm_num) (fun x => u x - v x)]
     change (∑ a : S, W a) = ∑ α ∈ S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
           (I := I) (M := M) (chartAtlasPOU I M) α (fun x => u x - v x))
@@ -681,7 +684,7 @@ theorem grad_sub_l2_le
           (I := I) (M := M) α)
     calc
       (∑ a : S, W a) = ∑ a : S,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
               (I := I) (M := M) (chartAtlasPOU I M) a.1 (fun x => u x - v x))
@@ -692,7 +695,7 @@ theorem grad_sub_l2_le
         simpa only [W] using raw_wkp_eq (I := I) (M := M) a.1
           (fun x => u x - v x)
       _ = _ := Finset.sum_attach S (fun α =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M) (chartAtlasPOU I M) α (fun x => u x - v x))

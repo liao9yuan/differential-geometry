@@ -35,10 +35,11 @@ namespace DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -51,12 +52,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a T : ℝ}
-
-private abbrev Ha := tensorHs (I := I) (M := M) g r s a
-private abbrev ET := MaxRegSolutionSpace (I := I) (M := M) (g := g) r s a T
-
-/-- The forcing obtained by moving a small mass coefficient to the frozen
-right-hand side. -/
+private abbrev Ha (a : ℝ) := tensorHs (I := I) (M := M) g r s a
+private abbrev ET (a T : ℝ) :=
+  MaxRegSolutionSpace (I := I) (M := M) (g := g) (r := r) (s := s) a T
 noncomputable def massForce
     (B : ℝ → Ha (I := I) (M := M) (g := g) (r := r) (s := s) a →L[ℝ]
       Ha (I := I) (M := M) (g := g) (r := r) (s := s) a)
@@ -84,6 +82,8 @@ noncomputable def massDuh
   maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀
     (massForce B hB C hC f u)
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 theorem massForce_sub
     (B : ℝ → Ha (I := I) (M := M) (g := g) (r := r) (s := s) a →L[ℝ]
       Ha (I := I) (M := M) (g := g) (r := r) (s := s) a)
@@ -98,6 +98,8 @@ theorem massForce_sub
   simp only [massForce, map_sub]
   abel
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- The moving-mass forcing arm has exactly the small pointwise operator
 bound; no time or spatial derivative of the coefficient occurs. -/
 theorem massForce_bound
@@ -127,6 +129,8 @@ theorem massForce_bound
       exact mul_le_mul_of_nonneg_left
         (timeH1.norm_deriv_le (u - v)) C.coe_nonneg
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- Difference estimate for the moving-mass Duhamel map. -/
 theorem massDuh_diff
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -153,6 +157,8 @@ theorem massDuh_diff
       exact massForce_bound B hB C hC f u v
     _ = (2 * (C : ℝ)) * ‖u - v‖ := by ring
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- The moving-mass Duhamel map is a contraction when the essential mass
 perturbation is smaller than the explicit maximal-regularity threshold. -/
 theorem massDuh_contract
@@ -176,6 +182,8 @@ theorem massDuh_contract
     simpa only [NNReal.coe_mul, NNReal.coe_ofNat] using
       massDuh_diff h_compact hT hT1 B hB C hC u₀ f u v
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- Existence and uniqueness for the small moving-mass perturbation of the
 frozen tensor heat equation. -/
 theorem massDuh_exists
@@ -199,6 +207,8 @@ theorem massDuh_exists
   intro v hv
   exact ContractingWith.fixedPoint_unique hcontr hv
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- Every moving-mass fixed point has the prescribed initial trace. -/
 theorem massDuh_trace
     (hT : 0 < T) (hT1 : T ≤ 1)

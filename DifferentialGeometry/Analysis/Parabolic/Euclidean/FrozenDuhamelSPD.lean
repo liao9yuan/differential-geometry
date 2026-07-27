@@ -20,17 +20,16 @@ double matrix contraction.
 noncomputable section
 
 open MeasureTheory Real Matrix
-open scoped RealInnerProductSpace
-
+open scoped RealInnerProductSpace InnerProductSpace TensorProduct
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
 namespace Euclidean
-
+private abbrev Euc (n : Type*) := EuclideanSpace ℝ n
 section Pullback
 
 variable {V F : Type*}
-  [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V] [NormedSpace ℝ V]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 /-- Precomposition of a bounded continuous function by a continuous linear
@@ -43,6 +42,7 @@ def linPullBcf (L : V ≃L[ℝ] V) (u : BoundedContinuousFunction V F) :
     obtain ⟨C, hC⟩ := u.bounded
     exact ⟨C, fun x y => hC (L x) (L y)⟩
 
+omit [NormedSpace ℝ F] in
 @[simp]
 theorem linPullBcf_apply (L : V ≃L[ℝ] V)
     (u : BoundedContinuousFunction V F) (x : V) :
@@ -80,11 +80,20 @@ def pullJet1 (L : V ≃L[ℝ] V)
     BoundedContinuousFunction V (V →L[ℝ] F) :=
   (precompJet (F := F) L).compLeftContinuousBounded V (linPullBcf L du)
 
+set_option maxSynthPendingDepth 8 in
 /-- The second derivative jet of a pullback. -/
 def pullJet2 (L : V ≃L[ℝ] V)
     (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F)) :
-    BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F) :=
-  (pushHess (F := F) L).compLeftContinuousBounded V (linPullBcf L d2u)
+    BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F) := by
+  let P : (V →L[ℝ] V →L[ℝ] F) →L[ℝ] V →L[ℝ] V →L[ℝ] F :=
+    pushHess (V := V) (F := F) L
+  refine
+    { toFun := fun x => P (d2u (L x))
+      continuous_toFun := P.continuous.comp (d2u.continuous.comp L.continuous)
+      map_bounded' := ?_ }
+  obtain ⟨C, hC⟩ := d2u.bounded
+  refine ⟨‖P‖ * C, fun x y => (P.dist_le_opNorm _ _).trans ?_⟩
+  exact mul_le_mul_of_nonneg_left (hC (L x) (L y)) (norm_nonneg P)
 
 @[simp]
 theorem pullJet1_apply (L : V ≃L[ℝ] V)
@@ -148,8 +157,6 @@ theorem lapEval_basis {ι : Type*} [Fintype ι]
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-private abbrev Euc (n : Type*) := EuclideanSpace ℝ n
-
 /-- Trace in the directions obtained by applying a fixed linear equivalence
 to the canonical Euclidean orthonormal basis. -/
 def factorLap (L : Euc n ≃L[ℝ] Euc n)
@@ -165,24 +172,23 @@ def matrixLap (A : Matrix n n ℝ)
     A i j • B (EuclideanSpace.basisFun n ℝ i)
       (EuclideanSpace.basisFun n ℝ j)
 
+omit [DecidableEq n] in
 /-- Pulling a Hessian back by `L⁻¹` converts the factor trace for `L` to the
 ordinary isotropic trace. -/
 theorem factorLap_pull (L : Euc n ≃L[ℝ] Euc n)
     (B : Euc n →L[ℝ] Euc n →L[ℝ] F) :
     factorLap L (pushHess (F := F) L.symm B) = lapEval B := by
-  rw [lapEval_basis (EuclideanSpace.basisFun n ℝ)]
-  apply Finset.sum_congr rfl
-  intro i hi
-  simp [factorLap]
-
-/-- Expansion of a self-adjoint factor trace. -/
+  unfold factorLap
+  simp only [pushHess_apply, ContinuousLinearEquiv.symm_apply_apply]
+  exact (lapEval_basis (EuclideanSpace.basisFun n ℝ) B).symm
+omit [DecidableEq n] in
 private theorem factorLap_self (L : Euc n ≃L[ℝ] Euc n)
     (hL : IsSelfAdjoint (L : Euc n →L[ℝ] Euc n))
     (B : Euc n →L[ℝ] Euc n →L[ℝ] F) :
     factorLap L B =
       ∑ i : n, ∑ j : n,
-        ⟪EuclideanSpace.basisFun n ℝ i,
-          L (L (EuclideanSpace.basisFun n ℝ j))⟫_ℝ •
+        (⟪EuclideanSpace.basisFun n ℝ i,
+          L (L (EuclideanSpace.basisFun n ℝ j))⟫_ℝ) •
             B (EuclideanSpace.basisFun n ℝ i)
               (EuclideanSpace.basisFun n ℝ j) := by
   let e := EuclideanSpace.basisFun n ℝ
@@ -195,16 +201,18 @@ private theorem factorLap_self (L : Euc n ≃L[ℝ] Euc n)
     calc
       B (L (e k)) (L (e k)) =
           B (∑ i : n, ⟪e i, L (e k)⟫_ℝ • e i)
-            (∑ j : n, ⟪e j, L (e k)⟫_ℝ • e j) := by rw [hk, hk]
+            (∑ j : n, ⟪e j, L (e k)⟫_ℝ • e j) :=
+        (congrArg (fun z => B z z) hk).symm
       _ = ∑ i : n, ∑ j : n,
           (⟪e i, L (e k)⟫_ℝ * ⟪e j, L (e k)⟫_ℝ) • B (e i) (e j) := by
         simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply,
           ContinuousLinearMap.smul_apply, Finset.smul_sum, smul_smul]
+        rw [Finset.sum_comm]
         apply Finset.sum_congr rfl
         intro i hi
         apply Finset.sum_congr rfl
         intro j hj
-        ring_nf
+        rw [mul_comm]
   have hcoef : ∀ i j : n,
       (∑ k : n, ⟪e i, L (e k)⟫_ℝ * ⟪e j, L (e k)⟫_ℝ) =
         ⟪e i, L (L (e j))⟫_ℝ := by
@@ -214,13 +222,21 @@ private theorem factorLap_self (L : Euc n ≃L[ℝ] Euc n)
           ∑ k : n, ⟪L (e i), e k⟫_ℝ * ⟪e k, L (e j)⟫_ℝ := by
         apply Finset.sum_congr rfl
         intro k hk
-        rw [hL.isSymmetric, hL.isSymmetric]
-        rw [real_inner_comm (e j) (L (e k)),
-          real_inner_comm (L (e j)) (e k)]
+        have hleft :
+            ⟪e i, L (e k)⟫_ℝ = ⟪L (e i), e k⟫_ℝ := by
+          simpa only using (hL.isSymmetric (e i) (e k)).symm
+        have hright :
+            ⟪e j, L (e k)⟫_ℝ = ⟪e k, L (e j)⟫_ℝ := by
+          calc
+            ⟪e j, L (e k)⟫_ℝ = ⟪L (e k), e j⟫_ℝ :=
+              real_inner_comm _ _
+            _ = ⟪e k, L (e j)⟫_ℝ := by
+              simpa only using hL.isSymmetric (e k) (e j)
+        rw [hleft, hright]
       _ = ⟪L (e i), L (e j)⟫_ℝ := e.sum_inner_mul_inner _ _
       _ = ⟪e i, L (L (e j))⟫_ℝ := hL.isSymmetric _ _
   unfold factorLap
-  simp_rw [hdiag]
+  rw [Finset.sum_congr rfl (fun k _ => hdiag k)]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
   intro i hi
@@ -242,8 +258,9 @@ theorem spd_factorLap (A : Matrix n n ℝ) (hA : A.PosDef)
   intro j hj
   rw [spdSqrt_comp]
   have hentry :
-      ⟪EuclideanSpace.basisFun n ℝ i,
-        Matrix.toEuclideanCLM A (EuclideanSpace.basisFun n ℝ j)⟫_ℝ = A i j := by
+      (⟪EuclideanSpace.basisFun n ℝ i,
+        Matrix.toEuclideanCLM (n := n) (𝕜 := ℝ) A
+          (EuclideanSpace.basisFun n ℝ j)⟫_ℝ) = A i j := by
     rw [Matrix.inner_toEuclideanCLM]
     simp [EuclideanSpace.basisFun_apply, dotProduct, Matrix.mulVec]
   rw [hentry]
@@ -254,8 +271,6 @@ section SPDEvolution
 
 variable {n F : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
-
-private abbrev Euc (n : Type*) := EuclideanSpace ℝ n
 
 /-- Frozen positive-definite Duhamel value in the original coordinates. -/
 def spdDuh (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
@@ -283,6 +298,8 @@ def spdDuhD2 (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
   pushHess (F := F) L.symm
     (frozenDuh t a (pullJet2 L d2u) (L.symm x))
 
+omit [Nonempty n]
+  [CompleteSpace F] in
 @[simp]
 theorem spdDuh_zero (A : Matrix n n ℝ) (hA : A.PosDef)
     (a : BoundedContinuousFunction ℝ ℝ)
@@ -290,6 +307,8 @@ theorem spdDuh_zero (A : Matrix n n ℝ) (hA : A.PosDef)
     spdDuh A hA 0 a u x = 0 := by
   simp [spdDuh]
 
+omit [Nonempty n]
+  [CompleteSpace F] in
 @[simp]
 theorem spdDuhD1_zero (A : Matrix n n ℝ) (hA : A.PosDef)
     (a : BoundedContinuousFunction ℝ ℝ)
@@ -298,6 +317,8 @@ theorem spdDuhD1_zero (A : Matrix n n ℝ) (hA : A.PosDef)
   ext v
   simp [spdDuhD1]
 
+omit [Nonempty n]
+  [CompleteSpace F] in
 @[simp]
 theorem spdDuhD2_zero (A : Matrix n n ℝ) (hA : A.PosDef)
     (a : BoundedContinuousFunction ℝ ℝ)
@@ -307,6 +328,7 @@ theorem spdDuhD2_zero (A : Matrix n n ℝ) (hA : A.PosDef)
   ext v w
   simp [spdDuhD2]
 
+omit [CompleteSpace F] in
 /-- Original-coordinate value derivative. -/
 theorem spdDuh_space (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
     (a : BoundedContinuousFunction ℝ ℝ)
@@ -324,6 +346,7 @@ theorem spdDuh_space (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
     (pullJet1 L du) hpull (L.symm x)).comp x L.symm.hasFDerivAt
   simpa only [spdDuh, spdDuhD1, L, ContinuousLinearMap.comp_apply] using h
 
+omit [CompleteSpace F] in
 /-- Original-coordinate gradient derivative realizes the Hessian map. -/
 theorem spdDuhD1_space (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
     (a : BoundedContinuousFunction ℝ ℝ)
@@ -347,6 +370,8 @@ theorem spdDuhD1_space (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
   simpa only [spdDuhD1, spdDuhD2, L, Function.comp_apply,
     ContinuousLinearMap.comp_apply] using h
 
+set_option maxHeartbeats 800000 in
+-- Elaborating the nested continuous-linear-map conjugation is expensive.
 /-- The original-coordinate Hessian contraction is the isotropic trace of
 the pulled-back Hessian. -/
 theorem spdDuh_lap (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
@@ -354,13 +379,26 @@ theorem spdDuh_lap (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
     (d2u : BoundedContinuousFunction (Euc n)
       (Euc n →L[ℝ] Euc n →L[ℝ] F)) (x : Euc n) :
     matrixLap A (spdDuhD2 A hA t a d2u x) =
-      lapEval (frozenDuh t a
-        (pullJet2 (spdSqrtEquiv A hA) d2u)
-        ((spdSqrtEquiv A hA).symm x)) := by
-  rw [← spd_factorLap A hA]
-  exact factorLap_pull (spdSqrtEquiv A hA)
-    (frozenDuh t a (pullJet2 (spdSqrtEquiv A hA) d2u)
-      ((spdSqrtEquiv A hA).symm x))
+      frozenDuh t a
+        (coreLap (pullJet2 (spdSqrtEquiv A hA) d2u))
+        ((spdSqrtEquiv A hA).symm x) := by
+  let L := spdSqrtEquiv A hA
+  let d2p := pullJet2 L d2u
+  let B : Euc n →L[ℝ] Euc n →L[ℝ] F :=
+    frozenDuh t a d2p (L.symm x)
+  have hfactor :
+      factorLap L (pushHess L.symm B) = lapEval B :=
+    factorLap_pull (F := F) (n := n) L B
+  have hlap :
+      lapEval B = frozenDuh t a (coreLap d2p) (L.symm x) := by
+    exact frozenDuh_lap (V := Euc n) (F := F) t a d2p (L.symm x)
+  change matrixLap A (pushHess L.symm B) =
+    frozenDuh t a (coreLap d2p) (L.symm x)
+  calc
+    _ = factorLap L (pushHess L.symm B) :=
+      (spd_factorLap A hA _).symm
+    _ = lapEval B := hfactor
+    _ = frozenDuh t a (coreLap d2p) (L.symm x) := hlap
 
 /-- Consumer-shaped frozen positive-definite zero-trace Duhamel PDE. -/
 theorem spdDuh_pde {t : ℝ} (ht : 0 < t)

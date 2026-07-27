@@ -1317,6 +1317,7 @@ theorem riemannOp_inner_pair_symm
   change riemann4 (I := I) g x v w Z W = riemann4 (I := I) g x Z W v w
   exact riemann4_pair_symm (I := I) g x v w Z W
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- The Jacobi curvature endomorphism `X ↦ R(X, v)v` is self-adjoint for the
 Riemannian metric. -/
 theorem riemannOp_diag_symm

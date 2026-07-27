@@ -74,7 +74,6 @@ def dom
   B.hom.target
 
 
-omit [ConnectedSpace M] in
 theorem right_inv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -89,7 +88,6 @@ theorem right_inv
     _ = y := by simpa only [inv] using B.hom.right_inv hy
 
 
-omit [ConnectedSpace M] in
 theorem left_inv
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -104,7 +102,6 @@ theorem left_inv
 
 
 
-omit [ConnectedSpace M] in
 theorem inv_eq_of_exp
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -123,7 +120,6 @@ theorem inv_eq_of_exp
 
 
 
-omit [ConnectedSpace M] in
 theorem proj_eq
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -135,7 +131,6 @@ theorem proj_eq
 
 
 
-omit [ConnectedSpace M] in
 theorem inv_snd_inf
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -382,7 +377,6 @@ theorem inv_eq_normal_lt
   exact heq_of_eq hcoord.symm
 
 
-omit [ConnectedSpace M] in
 theorem center_mem
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}
@@ -403,7 +397,6 @@ theorem center_mem
   exact hmap
 
 
-omit [ConnectedSpace M] in
 theorem center_inv
     [T2Space (TangentBundle I M)]
     {g : SmoothRiemannianMetric I M}

@@ -49,7 +49,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open Tensor0SBundle
 open TensorRSNabla
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -62,6 +62,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **Composition/reindex of iterated covariant gradients under the `L²` fibre norm:**
 `‖∇^i(∇^j S)‖ = ‖∇^{j+i} S‖`.  Local inline of the `private`
 `DirichletSpectralBochnerGap.norm_iteratedCovGrad_comp_local` (that declaration is not
@@ -86,7 +87,7 @@ private theorem norm_iterCovGrad_comp
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
   have h1 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i
       (iteratedCovGrad (I := I) g₀ 0 s j S)‖ := norm_nonneg _
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
@@ -682,6 +683,7 @@ theorem bochner_step_hcurv
   exact ⟨Cbase + Fc 0, add_nonneg hCbase_nn (hFc 0),
     bochner_step_unif (I := I) (M := M) g₀ s k Fc hFc hcurv Cbase hbase⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 /-- **Reindex of the iterated rough Laplacian under one extra `Δ_∇`:**
 `Δ_∇^i(Δ_∇ S) = Δ_∇^{i+1} S`.  Local inline of the `private`
 `AllOrderGardingConstant.rawTensorConnLapIter_rawTensorConnLapSmooth` (that declaration is not
@@ -720,6 +722,7 @@ private theorem lap_shift_le
   linarith [key, hmono, hnn]
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- **Uniform elliptic jet engine (strong form).**  For every jet-order budget `J` there is a
 single nonnegative constant `C` such that every covariant-gradient iterate up to order `J` is
 controlled by the rough-Laplacian jet up to order `⌈a/2⌉`:
@@ -759,8 +762,7 @@ private theorem elliptic_engine
             C * ∑ i ∈ Finset.range ((J + 1 + 1) / 2 + 1),
               ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
       rcases J with _ | J'
-      · -- top order `a = 1`: curvature-free order-1 Dirichlet-energy estimate
-        refine ⟨1, zero_le_one, fun S => ?_⟩
+      · refine ⟨1, zero_le_one, fun S => ?_⟩
         have hdir :
             ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤
               ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ * ‖S‖ := by
@@ -787,8 +789,7 @@ private theorem elliptic_engine
             mul_nonneg (norm_nonneg S)
               (norm_nonneg (rawTensorConnLapSmooth (I := I) g₀ 0 s S))]
         exact le_of_sq_le_sq hsq (add_nonneg (norm_nonneg _) (norm_nonneg _))
-      · -- top order `a = J' + 2 ≥ 2`: the class-uniform Bochner step at `k = J'`
-        obtain ⟨Cb, hCb_nn, hstep⟩ :=
+      · obtain ⟨Cb, hCb_nn, hstep⟩ :=
           bochner_step_hcurv (I := I) (M := M) g₀ Fc hFc hcurv s J'
         have hpos : (0 : ℝ) ≤ 1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2 := by positivity
         refine ⟨CJ * Real.sqrt (1 + Cb * ((J' + 2 : ℕ) : ℝ) ^ 2),
@@ -1493,7 +1494,7 @@ theorem rawConnLapCovComm_unif
   have h := hbound 0 S
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using h
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Reindex of the covariant-jet norm under a proof of order equality (inline of the private
 `IteratedCovGradHsJetBound.norm_iteratedCovGrad_order_eq:596`). -/
 private theorem norm_icg_order_eq

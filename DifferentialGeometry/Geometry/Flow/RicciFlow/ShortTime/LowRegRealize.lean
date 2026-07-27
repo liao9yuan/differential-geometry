@@ -13,10 +13,12 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology
 open DifferentialGeometry
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -30,13 +32,13 @@ theorem lowreg_realize_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ p : ℝ × ℝ, 0 < p.1 ∧
-      p.2 ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E) ∧
+      p.2 ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E) ∧
       ∀ (T : SmoothCcTensor g 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤ p.1 →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) p.2 := by
   obtain ⟨C, hC, hOp⟩ := hs2_op_bound (I := I) (M := M) hDim g
-  let θ : ℝ := deTurckArmContractionThreshold'' (Module.finrank ℝ E)
+  let θ : ℝ := deTurckArmContractionThresholdSharp (Module.finrank ℝ E)
   have hθ : 0 < θ := deTurckArmContractionThreshold''_pos (Module.finrank ℝ E)
   refine ⟨(θ / C, θ), div_pos hθ hC, le_rfl, ?_⟩
   intro T hT
@@ -62,13 +64,13 @@ theorem lowreg_realize
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ p : ℝ × ℝ, 0 < p.1 ∧
-      p.2 ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E) ∧
+      p.2 ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E) ∧
       ∀ (T : SmoothCcTensor g 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g (3 : ℝ) T‖ ≤ p.1 →
-        gFibreOpBound (I := I) (M := M) g
+        metricCauchySchwarzBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) p.2 := by
   obtain ⟨C, hC, hOp⟩ := hs2_op_bound (I := I) (M := M) hDim g
-  let θ : ℝ := deTurckArmContractionThreshold'' (Module.finrank ℝ E)
+  let θ : ℝ := deTurckArmContractionThresholdSharp (Module.finrank ℝ E)
   have hθ : 0 < θ := deTurckArmContractionThreshold''_pos (Module.finrank ℝ E)
   refine ⟨(θ / C, θ), div_pos hθ hC, le_rfl, ?_⟩
   intro T hT

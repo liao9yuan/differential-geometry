@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
@@ -209,6 +209,7 @@ theorem exists_pairR_of_seqBoundedGeometry
   intro s hs hsd
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Uniform bounded geometry gives the common lower Ricci bound used by the
 Bishop--Gromov stage of the volume-comparison route. -/
 theorem ricciLower_of_seq
@@ -234,13 +235,7 @@ theorem ricciLower_of_seq
   simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
     (rm04Bound_of_seq (I := I) hgeom k)
 
-/-- Uniform local-volume packing input for the Step A volume-comparison field.
-
-
-
-
-
-
+/-- Uniform local-volume packing input for the Step A volume-comparison field. -/
 structure UniformBallPack
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
 

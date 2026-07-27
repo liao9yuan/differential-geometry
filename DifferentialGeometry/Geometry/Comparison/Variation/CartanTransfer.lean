@@ -23,7 +23,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -31,7 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 variable {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
-  [InnerProductSpace ℝ E'] [FiniteDimensional ℝ E']
+  [FiniteDimensional ℝ E']
   [NeZero (Module.finrank ℝ E')]
 variable {H' : Type*} [TopologicalSpace H'] {I' : ModelWithCorners ℝ E' H'}
   [I'.Boundaryless]
@@ -40,6 +40,10 @@ variable {M' : Type*} [TopologicalSpace M'] [ChartedSpace H' M']
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [NeZero (Module.finrank ℝ E')]
+  [SigmaCompactSpace M'] in
 /-- Jacobi fields on two manifolds have the same parallel-frame coordinates
 when the frames see the same curvature matrix and the initial coordinates
 match. -/

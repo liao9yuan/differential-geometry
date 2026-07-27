@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
 /-!
 # Low-regularity order-one Ricci coefficient
@@ -9,6 +11,8 @@ proof uses only the metric perturbation jet through order three.
 -/
 
 noncomputable section
+
+set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -21,9 +25,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,6 +37,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem iteratedCovGrad_smul_real
     (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (W : SmoothCcTensor g r s) :
@@ -43,14 +49,11 @@ private theorem iteratedCovGrad_smul_real
       rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
         DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pure_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁ =
-      pureTrace (I := I) (M := M) g₀ g₁ 2 := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  rfl
+      lc0PureDT (I := I) (M := M) g₀ g₁ 2 := rfl
 
 private theorem norm_eq_of_sq_eq {a b : ℝ}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a ^ 2 = b ^ 2) : a = b := by
@@ -97,6 +100,7 @@ private theorem slotExtend_norm_le
     (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ))]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem conn_norm_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 2 i
@@ -152,7 +156,11 @@ private theorem core_h2
         rw [conn_norm_eq (I := I) (M := M) g₀ g₁ i, hDim]
         have hs : Real.sqrt (3 : ℝ) ^ 2 = 3 :=
           Real.sq_sqrt (by norm_num)
-        nlinarith
+        calc
+          _ = Real.sqrt (3 : ℝ) ^ 2 *
+              ‖iteratedCovGrad (I := I) g₀ 0 3 i
+                (connDiffLoweredCc (I := I) g₀ g₁)‖ := by ring
+          _ = _ := by rw [hs]
   have hsq : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 3 4 i
           (connDiffContrInsertionField (I := I) g₀ g₁)‖ ^ 2 ≤
@@ -194,87 +202,85 @@ private def ki102 : Equiv.Perm (Fin 3) :=
 private def ki120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotPerm_smooth
-    (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
-    (ρ : Equiv.Perm (Fin d)) :
-    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace d d I z) x
-        (show Tensor0SBundle.TensorRSSpace d d I x from
+    (_g₀ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4)) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 4 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 4 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 4 I z) x
+        (show Tensor0SBundle.TensorRSSpace 4 4 I x from
           slotPermCLM (I := I) ρ x)) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel d ℝ E)
-    (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace d I z)
-    (F₂ := Tensor0SBundle.Tensor0SModel d ℝ E)
-    (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace d I z)
+    (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z)
+    (F₂ := Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z)
     (φ := fun x : M => slotPermCLM (I := I) ρ x)
   intro Y
   have h := slotPermCLM_field_contMDiff
     (I := I) ρ (fun x => Y x) Y.contMDiff
   refine h.congr (fun x => ?_)
   exact congrArg (fun t => TotalSpace.mk'
-    (Tensor0SBundle.Tensor0SModel d ℝ E)
-    (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
+    (Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
 private def slotPerm1
-    (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
-    (ρ : Equiv.Perm (Fin d)) : SmoothCcTensor g₀ d d where
+    (g₀ : SmoothRiemannianMetric I M)
+    (ρ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 4 4 where
   toSection :=
     { toFun := fun x : M =>
-        (show Tensor0SBundle.TensorRSSpace d d I x from
+        (show Tensor0SBundle.TensorRSSpace 4 4 I x from
           slotPermCLM (I := I) ρ x)
       contMDiff_toFun := slotPerm_smooth (I := I) (M := M) g₀ ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem kernel_split
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
             (slotPerm1 (I := I) (M := M) g₀ ko0312)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ki102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
               (slotPerm1 (I := I) (M := M) g₀ ko0213)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ki120
-        + appCcRS (I := I) (M := M) g₀ 3 4 4
+        + ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
             (slotPerm1 (I := I) (M := M) g₀ ko2301)
             (connDiffContrInsertionField (I := I) g₀ g₁)
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
               (slotPerm1 (I := I) (M := M) g₀ ko1302)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ki102
         + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
               (slotPerm1 (I := I) (M := M) g₀ ko1203)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) ki120) := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  rfl
+              (connDiffContrInsertionField (I := I) g₀ g₁)) ki120) := rfl
 
 private theorem arm_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
-          (appCcRS (I := I) (M := M) g₀ 3 4 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
             (slotPerm1 (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁))).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
-  refine rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
+  refine riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (I := I) (M := M) g₀ 3 4 σ
     (connDiffContrInsertionField (I := I) g₀ g₁)
-    (appCcRS (I := I) (M := M) g₀ 3 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
       (slotPerm1 (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁))
     (fun y d => ?_) q x
   have hy :
       (show Tensor0SBundle.Tensor0SSpace 3 I y →L[ℝ]
           Tensor0SBundle.Tensor0SSpace 4 I y from
-        (appCcRS (I := I) (M := M) g₀ 3 4 4
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
           (slotPerm1 (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection y) d =
         slotPermCLM (I := I) σ y
@@ -290,15 +296,15 @@ private theorem fullArm_rfns
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
               (slotPerm1 (I := I) (M := M) g₀ σ)
               (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + q) x
         ((iteratedCovGrad (I := I) g₀ 3 4 q
           (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) := by
-  rw [rfns_iteratedCovGrad_reindexCoeffGen_eq
+  rw [riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (I := I) (M := M) g₀ 3 4
-    (appCcRS (I := I) (M := M) g₀ 3 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
       (slotPerm1 (I := I) (M := M) g₀ σ)
       (connDiffContrInsertionField (I := I) g₀ g₁)) ρ q x]
   exact arm_rfns (I := I) (M := M) g₀ g₁ σ q x
@@ -307,7 +313,7 @@ private theorem arm_norm
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
-        (appCcRS (I := I) (M := M) g₀ 3 4 4
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
           (slotPerm1 (I := I) (M := M) g₀ σ)
           (connDiffContrInsertionField (I := I) g₀ g₁))‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q
@@ -327,7 +333,7 @@ private theorem fullArm_norm
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)) (q : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 q
         (reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
             (slotPerm1 (I := I) (M := M) g₀ σ)
             (connDiffContrInsertionField (I := I) g₀ g₁)) ρ)‖ =
       ‖iteratedCovGrad (I := I) g₀ 3 4 q
@@ -411,11 +417,11 @@ theorem ricci1_h2_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -447,11 +453,11 @@ theorem ricci1_h2_tame
   let pureF : SmoothCcTensor g₀ 4 2 :=
     ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁
   let R1 : SmoothCcTensor g₀ 4 2 :=
-    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceArgPerm0231
+    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceCyclePerm123
   let R2 : SmoothCcTensor g₀ 4 2 :=
-    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceArgPerm0321
+    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceSwap13Perm
   let R3 : SmoothCcTensor g₀ 4 2 :=
-    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceArgPerm2301
+    reindexCoeffGen (I := I) (M := M) g₀ 4 2 pureF fourTraceDoubleTranspositionPerm
   have hcomb : ricciCometricFourTraceCastG0 (I := I) g₀ g₁ =
       ((1 : ℝ) / 2) • (R1 + R2 - pureF - R3) := by
     simpa only [pureF, R1, R2, R3] using
@@ -472,14 +478,15 @@ theorem ricci1_h2_tame
     calc
       _ = ∑ i ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
-            (lc0Trace (I := I) (M := M) g₀ g₁ 2
+            (lc0Tr (I := I) (M := M) g₀ g₁ 2
               (Equiv.refl (Fin 4)))‖ ^ 2 := by
         apply Finset.sum_congr rfl
         intro i _
-        rw [lc0Trace, iteratedCovGrad_reindexCoeffGen
+        dsimp only [pureF]
+        rw [lc0Tr, iteratedCovGrad_reindexCoeffGen
           (I := I) (M := M),
           norm_reindexCoeffGen_eq (I := I) (M := M),
-          pureF, pure_eq (I := I) (M := M) g₀ g₁]
+          pure_eq (I := I) (M := M) g₀ g₁]
       _ ≤ (Bt R) ^ 2 := ht
   have hcastNorm : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -504,13 +511,13 @@ theorem ricci1_h2_tame
       (iteratedCovGrad (I := I) g₀ 4 2 i R3)
     rw [show ‖iteratedCovGrad (I := I) g₀ 4 2 i R1‖ =
         ‖iteratedCovGrad (I := I) g₀ 4 2 i pureF‖ by
-          exact hreindex fourTraceArgPerm0231 i,
+          exact hreindex fourTraceCyclePerm123 i,
       show ‖iteratedCovGrad (I := I) g₀ 4 2 i R2‖ =
         ‖iteratedCovGrad (I := I) g₀ 4 2 i pureF‖ by
-          exact hreindex fourTraceArgPerm0321 i] at h1
+          exact hreindex fourTraceSwap13Perm i] at h1
     rw [show ‖iteratedCovGrad (I := I) g₀ 4 2 i R3‖ =
         ‖iteratedCovGrad (I := I) g₀ 4 2 i pureF‖ by
-          exact hreindex fourTraceArgPerm2301 i] at h3
+          exact hreindex fourTraceDoubleTranspositionPerm i] at h3
     linarith [norm_nonneg
       (iteratedCovGrad (I := I) g₀ 4 2 i pureF)]
   have hcast : (∑ i ∈ Finset.range 3,
@@ -545,7 +552,7 @@ theorem ricci1_h2_tame
         (linearizedRicciConnDiffOrder1KernelField
           (I := I) g₀ g₁)‖ ^ 2) ≤
       (15 * (Bc0 R + Bc1 R * A)) ^ 2 := by
-    convert hkernel using 1 <;> ring
+    convert hkernel using 1 ; ring
   rw [linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
     (I := I) (M := M) g₀ g₁]
   have hout := happ
@@ -571,11 +578,11 @@ theorem ricci1_h2
     ∃ B : ℝ → ℝ,
       (∀ A : ℝ, 0 ≤ A → 0 ≤ B A) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (A : ℝ), 0 ≤ A →
         (∑ j ∈ Finset.range 4,

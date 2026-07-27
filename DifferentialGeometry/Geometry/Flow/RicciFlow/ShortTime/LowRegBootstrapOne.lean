@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -50,6 +50,9 @@ def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
   link := solField_toFun_ae (I := I) (M := M) hT hT1
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) u₀ f
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- The intermediate representative realizes the continuous lower carrier at
 every time of the original interval. -/
 theorem crossRepr_toFun
@@ -62,6 +65,9 @@ theorem crossRepr_toFun
   rw [tensorHsInclusion_coeff_apply, u.repr_coeff hT ht]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- The intermediate representative is the intermediate inclusion of the top
 companion field almost everywhere on the original interval. -/
 theorem crossRepr_hi_ae
@@ -77,6 +83,7 @@ theorem crossRepr_hi_ae
   rw [u.repr_coeff hT ht, tensorHsInclusion_coeff_apply]
   exact hcoeff i
 
+omit [BoundarylessManifold I M] in
 /-- The same-horizon Duhamel cross representative realizes the affine carrier
 at every time. -/
 theorem duhRepr_toFun
@@ -93,6 +100,7 @@ theorem duhRepr_toFun
     crossRepr_toFun (I := I) (M := M)
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT ht
 
+omit [BoundarylessManifold I M] in
 /-- The same-horizon Duhamel cross representative realizes the intermediate
 inclusion of the top Duhamel field almost everywhere. -/
 theorem duhRepr_field_ae
@@ -109,6 +117,9 @@ theorem duhRepr_field_ae
     crossRepr_hi_ae (I := I) (M := M)
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- An almost-everywhere intermediate-order ball bound for the top companion
 holds for the cross-scale representative at every time.  The proof uses the
 already established continuity of its squared norm, so it does not require a
@@ -144,26 +155,30 @@ theorem crossRepr_ball
   have hmax := heqOn ht
   have hsub : ‖u.repr t‖ ^ 2 - R ^ 2 ≤ 0 := by
     have hle := le_max_left (‖u.repr t‖ ^ 2 - R ^ 2) 0
-    rw [hmax] at hle
-    exact hle
+    exact hle.trans_eq hmax
   exact (sq_le_sq₀ (norm_nonneg _) hR).1 (sub_nonpos.mp hsub)
 
+omit [BoundarylessManifold I M] in
 /-- For the order-one Ricci--DeTurck solver, its almost-everywhere lower-state
 condition becomes an every-time `H2` bound for the same-horizon cross-scale
 representative. -/
 theorem duhRepr_ball
     (g₀ : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ)) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2
+      ((1 : ℕ) : ℝ)) T)
     (hR : 0 ≤ R)
     (hstate : ∀ᵐ t ∂(timeMeasure T),
-      maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2)) f t ∈
+      maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2)) f t ∈
         lowerState (I := I) (M := M) g₀ 1 R) :
     ∀ t ∈ Set.Icc (0 : ℝ) T,
-      ‖(duhamelCross (I := I) (M := M) g₀ 0 2 (1 : ℝ) hT hT1 0 f).repr t‖ ≤ R := by
+      ‖(duhamelCross (I := I) (M := M) g₀ 0 2
+        ((1 : ℕ) : ℝ) hT hT1 0 f).repr t‖ ≤ R := by
   apply crossRepr_ball (I := I) (M := M)
-    (duhamelCross (I := I) (M := M) g₀ 0 2 (1 : ℝ) hT hT1 0 f) hT hR
+    (duhamelCross (I := I) (M := M) g₀ 0 2
+      ((1 : ℕ) : ℝ) hT hT1 0 f) hT hR
   filter_upwards [hstate] with t ht
   exact ht
 

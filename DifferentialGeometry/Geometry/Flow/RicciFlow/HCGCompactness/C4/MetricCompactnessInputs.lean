@@ -90,6 +90,7 @@ foundational layer does not participate in an import cycle.
 
 
 
+-/
 
 noncomputable section
 
@@ -130,7 +131,7 @@ structure NormalRadiusProfile
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x
 
 namespace NormalRadiusProfile
 
@@ -156,7 +157,7 @@ def subseq
     letI : T2Space (TangentBundle I (X.obj (f k)).M) :=
       (X.obj (f k)).t2TangentBundle
     change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj (f k)).metric x
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj (f k)).metric x
     exact h.le_exp_radius (f k) x
 
 /-- Compatibility name for the relative intrinsic framed-radius coefficient. -/
@@ -165,7 +166,7 @@ def gpRatio
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : Real :=
-  h.ratio
+  Real.sqrt (1 / 2 : Real) * h.ratio
 
 
 theorem gpRatio_pos
@@ -173,7 +174,8 @@ theorem gpRatio_pos
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : 0 < h.gpRatio := by
-  exact h.ratio_pos
+  rw [gpRatio]
+  exact mul_pos (Real.sqrt_pos.mpr (by norm_num)) h.ratio_pos
 
 
 
@@ -182,7 +184,11 @@ theorem gpRatio_le_ratio
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) : h.gpRatio ≤ h.ratio := by
-  exact le_rfl
+  rw [gpRatio]
+  have hsqrt : Real.sqrt (1 / 2 : Real) ≤ 1 :=
+    Real.sqrt_le_one.mpr (by norm_num)
+  simpa only [one_mul] using
+    mul_le_mul_of_nonneg_right hsqrt h.ratio_pos.le
 
 
 
@@ -222,7 +228,7 @@ theorem floor_le_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     h.ratio * hd.mu R ≤
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -231,7 +237,7 @@ theorem floor_le_exp
     h.ratio * hd.mu R ≤
         h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
-    _ ≤ Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x :=
+    _ ≤ Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
       h.le_exp_radius k x
 
 
@@ -252,7 +258,18 @@ theorem floor_le_expGp
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
   letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
-  simpa only [gpRatio] using h.floor_le_exp hx
+  rw [gpRatio, Geometry.Riemannian.expRadiusGp]
+  calc
+    Real.sqrt (1 / 2 : Real) * h.ratio * hd.mu R =
+        Real.sqrt (1 / 2 : Real) * (h.ratio * hd.mu R) := by ring
+    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj k).metric x) * (h.ratio * hd.mu R) :=
+      mul_le_mul_of_nonneg_right
+        (Real.sqrt_le_sqrt (hb.half_le_gpConst k x)) (h.floor_pos R).le
+    _ ≤ Real.sqrt (Geometry.Riemannian.gpCoerciveConst
+          (I := I) (X.obj k).metric x) *
+          Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
+      mul_le_mul_of_nonneg_left (h.floor_le_exp hx) (Real.sqrt_nonneg _)
 
 
 
@@ -297,7 +314,7 @@ theorem mul_lambda_lt_exp
     letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
     letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
     c * hd.lambda D R <
-      Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -399,9 +416,17 @@ theorem halfGpScaleTail
         (a / 2) * L.lamInf (γ : Nat) <
           Geometry.Riemannian.expRadiusGp
             (I := I) (X.obj (L.φ n)).metric c := by
+  have hsqrt : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
+    have hsqrtSq := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
+    have hsqrtNonneg := Real.sqrt_nonneg (1 / 2 : Real)
+    nlinarith
+  have hratioD : 0 < h.ratio * D := mul_pos h.ratio_pos hD
   have haGp : a < h.gpRatio * D := by
-    rw [gpRatio]
-    nlinarith [ha]
+    calc
+      a < (1 / 2 : Real) * (h.ratio * D) := by nlinarith
+      _ < Real.sqrt (1 / 2 : Real) * (h.ratio * D) :=
+        mul_lt_mul_of_pos_right hsqrt hratioD
+      _ = h.gpRatio * D := by rw [gpRatio]; ring
   have hwin : ∀ᶠ n in atTop, ∀ γ ∈ Finset.range (pb.A r),
       L.lamInf γ / 2 ≤ hd.lambda D (seqRadius hd D P (L.φ n) γ) :=
     (Filter.eventually_all_finset _).mpr fun γ _ =>

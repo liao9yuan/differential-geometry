@@ -25,6 +25,8 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
@@ -33,7 +35,7 @@ open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -44,6 +46,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [BoundarylessManifold I M] in
 /-- Uniform intrinsic metric bounds through order three give one uniform
 Frechet-jet bound for every POU-weighted scalar component of the
 fixed-background metric difference. -/
@@ -170,7 +173,7 @@ theorem metricDiff_fam_jet
             (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c]) with hraw_def
       have hev :
           tensorChartComp (I := I) (M := M) gBase 0 2 T α
-              (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c] =ᵉ[nhds y]
+              (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c] =ᶠ[nhds y]
             (fun z => ρ z * raw z) := by
         simpa only [tensorChartComp_def, hρ_def, hraw_def] using
           tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_raw
@@ -204,8 +207,8 @@ theorem metricDiff_fam_jet
         intro m hm
         rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := raw) m
           (chartTargetEuclid_isOpen (I := I) (M := M) α) hyT]
-        have hraw_ev : raw =ᵉ[nhds y]
-            rawPullR (I := I) (M := M) gBase 0 2 T α
+        have hraw_ev : raw =ᶠ[nhds y]
+            tensorComponentEuclideanChart (I := I) (M := M) gBase 0 2 T α
               (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c] := by
           filter_upwards [
             (chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hyT] with z hz
@@ -233,7 +236,7 @@ theorem metricDiff_fam_jet
             (I := I) (M := M) gBase T α ![a, c] m hy_int
         have hrawComp :
             ‖iteratedFDerivWithin ℝ m
-              (rawCompOnE (I := I) (M := M) gBase T α ![a, c])
+              (tensorChartComponentOnModel (I := I) (M := M) gBase T α ![a, c])
               (interior (extChartAt I α).target)
               ((toEuclidean (E := E)).symm y)‖ ≤ Q + Q := by
           have heq := gramDiff_eqOn (I := I) (M := M)
@@ -241,7 +244,7 @@ theorem metricDiff_fam_jet
           change Set.EqOn
             (fun w : E => chartGramOnE (I := I) (gSeq k) α a c w -
               chartGramOnE (I := I) gBase α a c w)
-            (rawCompOnE (I := I) (M := M) gBase T α ![a, c])
+            (tensorChartComponentOnModel (I := I) (M := M) gBase T α ![a, c])
             (interior (extChartAt I α).target) at heq
           rw [← iteratedFDerivWithin_congr (𝕜 := ℝ) heq hy_int m]
           rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) m isOpen_interior hy_int]
@@ -255,6 +258,10 @@ theorem metricDiff_fam_jet
               ((toEuclidean (E := E)).symm y) :=
             ((chartGramOnE_contDiffOn (I := I) gBase α a c).mono
               interior_subset).contDiffAt (isOpen_interior.mem_nhds hy_int)
+          change ‖iteratedFDeriv ℝ m
+            (chartGramOnE (I := I) (gSeq k) α a c -
+              chartGramOnE (I := I) gBase α a c)
+            ((toEuclidean (E := E)).symm y)‖ ≤ Q + Q
           rw [iteratedFDeriv_sub_apply
             (hseq.of_le (by exact_mod_cast le_top))
             (hbasecd.of_le (by exact_mod_cast le_top))]
@@ -266,14 +273,17 @@ theorem metricDiff_fam_jet
         have hterm :
             ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ ^ m *
                 ‖iteratedFDerivWithin ℝ m
-                  (rawCompOnE (I := I) (M := M) gBase T α ![a, c])
+                  (tensorChartComponentOnModel (I := I) (M := M) gBase T α ![a, c])
                   (interior (extChartAt I α).target)
                   ((toEuclidean (E := E)).symm y)‖ ≤
               ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ ^ m *
                 (Q + Q) := by
           exact mul_le_mul_of_nonneg_left hrawComp (by positivity)
         refine hbridge.trans (hterm.trans ?_)
+        dsimp [R]
         exact Finset.single_le_sum
+          (f := fun q : ℕ =>
+            ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ ^ q * (Q + Q))
           (fun q _ => by positivity)
           (Finset.mem_range.mpr (by omega : m < 4))
       have hterm : ∀ l ∈ Finset.range (j + 1),
@@ -301,12 +311,15 @@ theorem metricDiff_fam_jet
               ≤ ((j.choose l : ℝ) * P) * R := by gcongr
           _ = (j.choose l : ℝ) * P * R := rfl
       refine hLeib.trans ((Finset.sum_le_sum hterm).trans ?_)
+      dsimp [C]
       exact Finset.single_le_sum
+        (f := fun q : ℕ =>
+          ∑ l ∈ Finset.range (q + 1), (q.choose l : ℝ) * P * R)
         (fun q _ => Finset.sum_nonneg fun l _ => by positivity)
         (Finset.mem_range.mpr (by omega : j < 4))
     · have hev0 :
           tensorChartComp (I := I) (M := M) gBase 0 2 T α
-              (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c] =ᵉ[nhds y]
+              (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![a, c] =ᶠ[nhds y]
             (fun _ : EuclN => (0 : ℝ)) := by
         have hclosed := (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
         filter_upwards [hclosed.isOpen_compl.mem_nhds hyK] with z hz
@@ -326,6 +339,7 @@ theorem metricDiff_fam_jet
     rw [hzero, iteratedFDeriv_fun_zero]
     simpa using hC_nn
 
+omit [BoundarylessManifold I M] in
 /-- On every fixed atlas chart, the metric-difference components of the whole
 family have one common finite `W^{3,p}` bound.  The chart may affect the bound;
 the metric-family index and tensor component do not. -/
@@ -344,7 +358,7 @@ theorem metricDiff_wkp_terms
             (metricDifferenceCcTensor (I := I) (M := M) gBase (gSeq w.1))
             α (![] : Fin 0 → Fin (Module.finrank ℝ E)) w.2)
           (chartTargetEuclid (I := I) (M := M) α) ∧
-        wkpNorm (d := Module.finrank ℝ E) 3 p
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 3 p
           (tensorChartComp (I := I) (M := M) gBase 0 2
             (metricDifferenceCcTensor (I := I) (M := M) gBase (gSeq w.1))
             α (![] : Fin 0 → Fin (Module.finrank ℝ E)) w.2)

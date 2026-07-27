@@ -67,6 +67,7 @@ private noncomputable def modelBasisAt (p : M) :
   chartModelBasis E
 
 omit [Nontrivial E] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma frame_gram_change
     (g : SmoothRiemannianMetric I M) (p : M) {z : E}
     (hz : z ∈ (framedExpDiffeo (I := I) g p).source) :
@@ -137,6 +138,9 @@ private lemma frame_det_ne
     (frameBasis (I := I) g p)).ne_zero
 
 omit [Nontrivial E] in
+omit [T2Space M]
+  [SigmaCompactSpace M]
+  [NeZero (Module.finrank ℝ E)] in
 /-- The framed exponential density differs from the raw normal density by one
 positive factor depending only on the center. -/
 theorem exists_framed_den
@@ -154,7 +158,10 @@ theorem exists_framed_den
   rw [Real.sqrt_mul (sq_nonneg d)]
   rw [Real.sqrt_sq_eq_abs]
 
-omit [Nontrivial E] in
+omit [Nontrivial E]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [NeZero (Module.finrank ℝ E)] in
 /-- Antitonicity of a raw normal-density ratio transfers to the corresponding
 ratio in orthonormally framed normal coordinates. -/
 theorem framedRatio_anti
@@ -202,6 +209,7 @@ private lemma smul_mem_ball
     mul_one]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Riemannian volume of a measurable framed-normal image is the polar
 integral of its parametrized density. -/
 theorem framedImage_polar
@@ -250,6 +258,7 @@ theorem framedImage_polar
           ∂(modelHaar (E := E)).toSphere := by
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Polar volume formula for a center-metric tangent ball contained in the
 selected framed normal source. -/
 theorem framedBall_polar

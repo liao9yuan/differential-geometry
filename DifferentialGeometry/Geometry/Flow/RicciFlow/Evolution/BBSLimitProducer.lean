@@ -63,7 +63,7 @@ open DifferentialGeometry.Integral.Connection
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -143,6 +143,5 @@ def cinftyLimitData_of_solution
     positivity
   have hEquiv := hell_of_soln (I := I) hS hRicConst hRic
   exact cinftyLimitData_of_allMBounds (I := I) S hS hdim hCan hEquiv
-    (bbsAllMBounds (I := I) S hS hdim Rm04 hRm hbound)
 
 end DifferentialGeometry.PDE.RicciFlow

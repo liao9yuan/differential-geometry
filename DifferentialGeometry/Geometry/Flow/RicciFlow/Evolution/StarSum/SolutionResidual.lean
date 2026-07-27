@@ -16,7 +16,7 @@ open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
@@ -36,7 +36,7 @@ noncomputable def rmResidualField
   | 0 => e0Field (I := I) S (t : Real)
   | k + 1 => resStarNext (I := I) S t k (rmResidualField S t k)
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 /-- The canonical residual field has the exact recursive constructor cost in
 every finite component index type. -/
 theorem rmResidualField_cost
@@ -59,7 +59,7 @@ theorem rmResidualField_cost
         resStarNext_cost (I := I) S hS k t
           (rmResidualField (I := I) S t k) ih
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 /-- On one orthonormal local-frame patch, the fixed recursive field realizes
 the component heat equation at every tower level. -/
 private theorem rmResidual_local
@@ -199,6 +199,7 @@ theorem rmResidual_cost
     rmResidual_local (I := I) S hS t frame hframe1 hu horthU
       baseDt chrDt hrm hchr hchrId hswap k x hx I0
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a positive-time tail, a dimension-three Ricci-flow solution produces
 the local-frame StarSum residual and its component bound without additional
 time-regularity or derivative-swap assumptions. -/

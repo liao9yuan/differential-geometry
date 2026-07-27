@@ -53,7 +53,7 @@ theorem klFluxMajor_memLp {t : ℝ} (ht : 0 < t) (x : V) :
     MemLp (klFluxMajor t x) (ENNReal.ofReal (klPDual V))
       (klTermMeasure (V := V) t) := by
   let p : ℝ := klPDual V
-  have hp : 0 < p := (klP_holder (V := V)).pos
+  have hp : 0 < p := (klPDual_holder (V := V)).pos
   have hmmeas : Measurable (klFluxMajor t x) := by
     unfold klFluxMajor heatD1Maj heatScale baseD1Maj baseHeat baseHeatMass
     fun_prop
@@ -160,7 +160,7 @@ theorem klFluxPowMass_eq {t : ℝ} (ht : 0 < t) (x : V) :
     klFluxPowMass t x =
       ((t / 2) ^ (klD1Exp V + 1) / (klD1Exp V + 1)) *
         baseD1PowMass V (klPDual V) := by
-  have hp : 0 < klPDual V := (klP_holder (V := V)).pos
+  have hp : 0 < klPDual V := (klPDual_holder (V := V)).pos
   have hi : Integrable
       (fun z : ℝ × V ↦ ‖klFluxMajor t x z‖ ^ klPDual V)
       (klTermMeasure (V := V) t) := by

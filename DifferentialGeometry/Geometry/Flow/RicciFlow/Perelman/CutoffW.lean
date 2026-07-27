@@ -28,7 +28,7 @@ open DifferentialGeometry.Analysis.Integration
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -37,6 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- A nonzero smooth scalar can be normalized to unit `L²` mass without
 changing its support. Its Dirichlet energy is divided by the original squared
 `L²` norm. -/

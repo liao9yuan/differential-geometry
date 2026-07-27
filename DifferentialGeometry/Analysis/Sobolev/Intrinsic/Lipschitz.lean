@@ -26,16 +26,17 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ⊤ M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 
+omit [IsManifold I ∞ M] in
 private lemma pull_lip_of_raw
     (α : M) (φ : M → ℝ) {C : NNReal}
     (hφ : LipschitzWith C (chartPushedRaw (I := I) (M := M) α φ)) :
@@ -61,9 +62,9 @@ private lemma pull_lip_of_raw
   rw [heq]
   exact hφ.comp (toEuclidean (E := E)).lipschitz
 
-omit [IsManifold I ⊤ M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [IsManifold I ∞ M] in
 /-- A function Lipschitz for the extended distance of an explicit smooth
 Riemannian metric is continuous in the manifold topology. -/
 theorem intrinsic_lip_cont
@@ -279,7 +280,7 @@ theorem weak_grad_of_lip
             inner_gradFun (I := I) g u x (X x)
       _ = _ := hibp
 
-omit [IsManifold I ⊤ M] in
+omit [IsManifold I ∞ M] in
 /-- The metric norm of `gradFun` is strongly measurable whenever the scalar
 function is manifold-differentiable almost everywhere. -/
 theorem grad_norm_aesm

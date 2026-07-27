@@ -283,7 +283,6 @@ omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 open DifferentialGeometry.PDE.RicciFlow.Pullback in
 omit [NeZero (Module.finrank ℝ E)] in
-private theorem evalFormTwoVar_hasFDerivWithinAt
 /-- **Joint Fréchet differentiability of the two-variable evaluation form.**
 
 At an interior `(t, t)`, the scalar two-variable evaluation map `evalFormTwoVar g_DT Φ_fam x v w`
@@ -415,8 +414,6 @@ open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.PDE.RicciFlow.Pullback in
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
-private theorem flow_pushforward_slot_hasDerivWithinAt
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
 /-- **Moving-geometry slot of the evaluation form, via the covariant variational equation.**
 
 With a metric `g` frozen, the moving-pushforward inner-product curve
@@ -527,6 +524,8 @@ theorem flow_slot_deriv
     rw [← hsumval]; exact hmc
   exact hmc'.hasDerivWithinAt
 
+omit [NeZero (Module.finrank ℝ E)]
+  [CompactSpace M] in
 /-- The positive-generator form of `flow_slot_deriv`: if `Φ_fam` is generated
 by `Y`, then the moving pullback slots contribute `𝓛_Y g`. -/
 theorem flow_slot_pos

@@ -26,7 +26,7 @@ open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measu
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -52,7 +52,7 @@ theorem compNormSqMulti_le_card {Idx : Type*} [Fintype Idx] {r : ℕ}
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
+omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem normSq0S_le_card
     [Module.Finite ℝ E]
@@ -168,7 +168,7 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKReactionAt_le
     [Module.Finite ℝ E]
@@ -224,7 +224,7 @@ theorem nablaKReactionAt_le
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKReaction_le
     [Module.Finite ℝ E]

@@ -18,10 +18,11 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.L2
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -38,7 +39,7 @@ theorem ccToHs_injective (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ) :
     (I := I) (M := M) g 0 s
   apply (tensorResolventHilbertEigenbasisSigma
     (I := I) (M := M) hcompact).repr.injective
-  funext i
+  ext i
   have hi := congrArg (fun u => u.coeff i) hST
   simpa only [ccTensorToHs_coeff, tensorL2Coeff] using hi
 

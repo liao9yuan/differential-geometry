@@ -36,7 +36,7 @@ open DifferentialGeometry.PDE.RicciFlow
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -49,9 +49,9 @@ private noncomputable def constTangentSection (v : E) :
   toFun := fun x : E => (show TangentSpace 𝓘(Real, E) x from v)
   contMDiff_toFun := contMDiff_vectorSpace_iff_contDiff.mpr contDiff_const
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [FiniteDimensional ℝ E] in
 private theorem constBasis_isLocalFrame_open
-    {Idx : Type*} [Fintype Idx]
+    {Idx : Type*}
     (U : TopologicalSpace.Opens E) [SigmaCompactSpace U] [T2Space U]
     (e : Module.Basis Idx Real E) :
     IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
@@ -79,76 +79,44 @@ private theorem constBasis_isLocalFrame_open
     simpa only [Integral.Connection.restrictOpenTangentSection_apply,
       constTangentSection] using hsec
 
-/-- The fixed Euclidean metric used only to read constant-frame components on
-normal-coordinate open subtypes. -/
-private noncomputable def flatModelMetricB1 :
-    SmoothRiemannianMetric 𝓘(Real, E) E where
-  inner := (riemannianMetricVectorSpace E).inner
-  symm := (riemannianMetricVectorSpace E).symm
-  pos := (riemannianMetricVectorSpace E).pos
-  isVonNBounded := (riemannianMetricVectorSpace E).isVonNBounded
-  contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
-
 omit [NeZero (Module.finrank Real E)] in
 private theorem metric_norm_le_comp
     (V : TopologicalSpace.Opens E) [SigmaCompactSpace V] [T2Space V]
     (G g : SmoothRiemannianMetric 𝓘(Real, E) V) (a : Nat) (z : V)
+    (e : Module.Basis (Fin (Module.finrank Real E)) Real E)
     {B : Real} (hB : 0 ≤ B)
-    (hequiv : ∀ v : E,
-      (1 / 2 : Real) * ‖v‖ ^ 2 ≤ g.inner z v v ∧
-        g.inner z v v ≤ 2 * ‖v‖ ^ 2)
+    (hlow : ∀ v : E,
+      (1 / 2 : Real) * ‖v‖ * ‖v‖ ≤ g.inner z v v)
     (hcomp : ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
       |iterCovComp (I := 𝓘(Real, E)) (M := V)
-          (fun i _ ↦ (stdOrthonormalBasis Real E).toBasis i)
+          (fun i _ ↦ e i)
           (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
             (Integral.Connection.leviCivitaConnectionOfMetric
               (I := 𝓘(Real, E)) g)
-            (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i)
-            (constBasis_isLocalFrame_open V
-              (stdOrthonormalBasis Real E).toBasis) y)
+            (fun i (_ : V) ↦ e i)
+            (constBasis_isLocalFrame_open V e) y)
           (frameComp0S (I := 𝓘(Real, E))
             (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
               Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g)
-            (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i))
+            (fun i (_ : V) ↦ e i))
           a z slots| ≤ B) :
+    let coordSum :=
+      ∑ i : Fin (Module.finrank Real E),
+        ‖(e.coord i).toContinuousLinearMap‖
+    let epsBasis := (1 / 2 : Real)⁻¹ * coordSum ^ 2 + 1
     metricDerivNorm (I := 𝓘(Real, E)) a G g g z ≤
-      Real.sqrt (2 ^ (2 + a)) *
+      Real.sqrt
+          (((1 + epsBasis) *
+            (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ (2 + a)) *
         (Real.sqrt
           (Fintype.card
             (Fin (2 + a) → Fin (Module.finrank Real E)) : Real) * B) := by
   classical
-  let e : Module.Basis (Fin (Module.finrank Real E)) Real E :=
-    (stdOrthonormalBasis Real E).toBasis
+  dsimp only
   let frame : Fin (Module.finrank Real E) →
       (y : V) → TangentSpace 𝓘(Real, E) y := fun i _ ↦ e i
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
       frame Set.univ := constBasis_isLocalFrame_open V e
-  let g0 := (flatModelMetricB1 (E := E)).restrictOpen (I := 𝓘(Real, E)) V
-  have hON0 : ∀ i j : Fin (Module.finrank Real E),
-      g0.inner z (e i) (e j) = if i = j then (1 : Real) else 0 := by
-    intro i j
-    simpa only [g0, SmoothRiemannianMetric.restrictOpen_inner,
-      flatModelMetricB1, riemannianMetricVectorSpace] using
-        (stdOrthonormalBasis Real E).inner_eq_ite i j
-  have hinv0 : Tensor0SBundle.MetricInverseInBasis_gen
-      (I := 𝓘(Real, E)) g0 z e
-      (Tensor0SBundle.identityInvMetric
-        (Idx := Fin (Module.finrank Real E))) := by
-    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
-      (I := 𝓘(Real, E)) g0 e hON0
-    simpa [Tensor0SBundle.identityInvMetric,
-      Tensor0SBundle.diagonalInvMetric] using h
-  have hequiv' : ∀ v : TangentSpace 𝓘(Real, E) z,
-      (2 : Real)⁻¹ * g0.inner z v v ≤ g.inner z v v ∧
-        g.inner z v v ≤ 2 * g0.inner z v v := by
-    intro v
-    change E at v
-    have hg0 : g0.inner z v v = ‖v‖ ^ 2 := by
-      simpa only [g0, SmoothRiemannianMetric.restrictOpen_inner,
-        flatModelMetricB1, riemannianMetricVectorSpace] using
-          real_inner_self_eq_norm_sq v
-    rw [hg0]
-    simpa only [one_div] using hequiv v
   obtain ⟨b, hbON⟩ :=
     DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
       (I := 𝓘(Real, E)) g z
@@ -161,8 +129,9 @@ private theorem metric_norm_le_comp
     simpa [Tensor0SBundle.identityInvMetric,
       Tensor0SBundle.diagonalInvMetric] using h
   rw [metricDerivNorm_eq_iterCov (I := 𝓘(Real, E)) G g g a b hbinv]
-  apply sqrt_norm_le_comp (I := 𝓘(Real, E)) g0 g z (2 + a) e hinv0
-    (C := 2) (B := B) (by norm_num) hequiv' _ hB
+  apply sqrt_norm_le_basis_comp_of_coercive
+    (I := 𝓘(Real, E)) g z (2 + a) e
+      (c := (1 / 2 : Real)) (B := B) (by norm_num) hlow _ hB
   intro slots
   rw [Tensor0SBundle.component0S_apply]
   have ht := iterCovComp_eq_iterCov (I := 𝓘(Real, E)) g
@@ -196,7 +165,7 @@ private theorem metric_norm_le_comp
             (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
               Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g) frame)
           a z slots| := congrArg abs ht'.symm
-    _ ≤ B := by simpa only [e, frame, hframe] using hcomp slots
+    _ ≤ B := by simpa only [frame, hframe] using hcomp slots
 
 private noncomputable def quarterPull
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -242,11 +211,11 @@ private theorem quarterPull_inner
     ∀ (G : SmoothRiemannianMetric I Y.M)
       (z : normalQuarter (I := I) Y x) (v w : E),
       (quarterPull (I := I) Y x G).inner z v w =
-        G.inner (framedExpDiffeo (I := I) Y.metric x (z : E))
+        G.inner (expMapDiffeo (I := I) Y.metric x (z : E))
           (mfderiv 𝓘(Real, E) I
-            (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) v)
+            (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v)
           (mfderiv 𝓘(Real, E) I
-            (fun u : E ↦ framedExpDiffeo (I := I) Y.metric x u) (z : E) w) := by
+            (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) w) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -283,7 +252,7 @@ private theorem quarter_norm_eq
           ((normalTotal (I := I) Y x).restrictOpen
             (I := 𝓘(Real, E)) (normalQuarter (I := I) Y x)) z =
         metricDerivNorm (I := I) a G Y.metric Y.metric
-          (framedExpDiffeo (I := I) Y.metric x (z : E)) := by
+          (expMapDiffeo (I := I) Y.metric x (z : E)) := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
@@ -391,23 +360,23 @@ private theorem stagePull_coeff
       normalQuarterSigma (I := I) Yk ck
     ∀ (F : Yk.M → Yl.M) (G : SmoothRiemannianMetric I Yk.M)
       (z : normalQuarter (I := I) Yk ck),
-      F (framedExpDiffeo (I := I) Yk.metric ck (z : E)) ∈
-          (framedChartAt (I := I) Yl.metric cl).source →
+      F (expMapDiffeo (I := I) Yk.metric ck (z : E)) ∈
+          (normalChartAt (I := I) Yl.metric cl).source →
       MDifferentiableAt I I F
-          (framedExpDiffeo (I := I) Yk.metric ck (z : E)) →
+          (expMapDiffeo (I := I) Yk.metric ck (z : E)) →
       (∀ v w : TangentSpace I
-          (framedExpDiffeo (I := I) Yk.metric ck (z : E)),
-        G.inner (framedExpDiffeo (I := I) Yk.metric ck (z : E)) v w =
+          (expMapDiffeo (I := I) Yk.metric ck (z : E)),
+        G.inner (expMapDiffeo (I := I) Yk.metric ck (z : E)) v w =
           Yl.metric.inner
-            (F (framedExpDiffeo (I := I) Yk.metric ck (z : E)))
+            (F (expMapDiffeo (I := I) Yk.metric ck (z : E)))
             (mfderiv I I F
-              (framedExpDiffeo (I := I) Yk.metric ck (z : E)) v)
+              (expMapDiffeo (I := I) Yk.metric ck (z : E)) v)
             (mfderiv I I F
-              (framedExpDiffeo (I := I) Yk.metric ck (z : E)) w)) →
+              (expMapDiffeo (I := I) Yk.metric ck (z : E)) w)) →
       ∀ u v : E,
         let A : E → E := fun q =>
-          framedChartAt (I := I) Yl.metric cl
-            (F (framedExpDiffeo (I := I) Yk.metric ck q))
+          normalChartAt (I := I) Yl.metric cl
+            (F (expMapDiffeo (I := I) Yk.metric ck q))
         (quarterPull (I := I) Yk ck G).inner z u v =
           _root_.DifferentialGeometry.HCGCompactness.pullbackForm
             (normalCoordMetric (I := I) Yl cl (A (z : E)),
@@ -428,22 +397,20 @@ private theorem stagePull_coeff
     normalQuarterSigma (I := I) Yk ck
   intro F G z htarget hF hG u v
   dsimp only
-  let eK := framedExpDiffeo (I := I) Yk.metric ck
-  let eL := framedExpDiffeo (I := I) Yl.metric cl
-  let chiL := framedChartAt (I := I) Yl.metric cl
+  let eK := expMapDiffeo (I := I) Yk.metric ck
+  let eL := expMapDiffeo (I := I) Yl.metric cl
+  let chiL := normalChartAt (I := I) Yl.metric cl
   let A : E → E := fun q => chiL (F (eK q))
   have hzBall : (z : E) ∈ normalBall (I := I) Yk ck :=
     normalInner_sub (I := I) Yk ck z.2
-  have hzNorm : ‖(z : E)‖ < expRadiusGp (I := I) Yk.metric ck := by
-    change (z : E) ∈ Metric.ball (0 : E) (expRadiusGp (I := I) Yk.metric ck) at hzBall
+  have hzNorm : ‖(z : E)‖ < expMapC2Radius (I := I) Yk.metric ck := by
+    change (z : E) ∈
+      Metric.ball (0 : E) (expMapC2Radius (I := I) Yk.metric ck) at hzBall
     rw [Metric.mem_ball, dist_zero_right] at hzBall
     exact hzBall
   have hzK : (z : E) ∈ eK.source := by
-    change (z : E) ∈ (framedExpDiffeo (I := I) Yk.metric ck).source
-    rw [framedExp_source]
-    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-    simpa only [normalFrame_sqrt] using hzNorm
+    exact mem_expMapDiffeo_source_of_norm_lt_radius
+      (I := I) Yk.metric ck hzNorm
   have hK : MDifferentiableAt 𝓘(Real, E) I (eK : E → Yk.M) (z : E) :=
     ((eK.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _ hzK).mdifferentiableAt
       (eK.open_source.mem_nhds hzK))
@@ -498,6 +465,7 @@ private theorem local_norm_le
       normalQuarterSigma (I := I) Y x
     ∀ (V : TopologicalSpace.Opens E) [SigmaCompactSpace V] [T2Space V]
       (hVQ : V ≤ normalQuarter (I := I) Y x)
+      (e : Module.Basis (Fin (Module.finrank Real E)) Real E)
       (G : SmoothRiemannianMetric I Y.M)
       (Q : E → (E →L[Real] E →L[Real] Real))
       (a : Nat) (z : V) {bnd : Real},
@@ -509,12 +477,9 @@ private theorem local_norm_le
       (∀ w : E, w ∈ V →
         IsCoercive (normalCoordMetric (I := I) Y x w)) →
       (∀ v : E,
-        (1 / 2 : Real) * ‖v‖ ^ 2 ≤
-            normalCoordMetric (I := I) Y x (z : E) v v ∧
-          normalCoordMetric (I := I) Y x (z : E) v v ≤
-            2 * ‖v‖ ^ 2) →
-      (let e := (stdOrthonormalBasis Real E).toBasis
-       let B := normalCoordMetric (I := I) Y x
+        (1 / 2 : Real) * ‖v‖ * ‖v‖ ≤
+          normalCoordMetric (I := I) Y x (z : E) v v) →
+      (let B := normalCoordMetric (I := I) Y x
        let Gamma := fun w i j m ↦ e.coord m
          (MetricKoszul.raisedKoszulOp (B w) (fderiv Real B w)
            (e i) (e j))
@@ -525,8 +490,7 @@ private theorem local_norm_le
            MDifferentiableAt 𝓘(Real, E) 𝓘(Real, Real)
              (fun y : E ↦ iterCovComp (I := 𝓘(Real, E))
                (fun i _ ↦ e i) Gamma base q y slots) (w : E)) →
-      (let e := (stdOrthonormalBasis Real E).toBasis
-       let B := normalCoordMetric (I := I) Y x
+      (let B := normalCoordMetric (I := I) Y x
        let Gamma := fun w i j m ↦ e.coord m
          (MetricKoszul.raisedKoszulOp (B w) (fderiv Real B w)
            (e i) (e j))
@@ -535,6 +499,10 @@ private theorem local_norm_le
        ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
          |iterCovComp (I := 𝓘(Real, E)) (fun i _ ↦ e i)
             Gamma base a (z : E) slots| ≤ bnd) →
+      let coordSum :=
+        ∑ i : Fin (Module.finrank Real E),
+          ‖(e.coord i).toContinuousLinearMap‖
+      let epsBasis := (1 / 2 : Real)⁻¹ * coordSum ^ 2 + 1
       metricDerivNorm (I := 𝓘(Real, E)) a
           ((quarterPull (I := I) Y x G).restrictOpenOfSubset
             (I := 𝓘(Real, E)) hVQ)
@@ -544,7 +512,9 @@ private theorem local_norm_le
           (((normalTotal (I := I) Y x).restrictOpen
             (I := 𝓘(Real, E)) (normalQuarter (I := I) Y x)).restrictOpenOfSubset
               (I := 𝓘(Real, E)) hVQ) z ≤
-        Real.sqrt (2 ^ (2 + a)) *
+        Real.sqrt
+            (((1 + epsBasis) *
+              (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ (2 + a)) *
           (Real.sqrt
             (Fintype.card
               (Fin (2 + a) → Fin (Module.finrank Real E)) : Real) * bnd) := by
@@ -557,9 +527,7 @@ private theorem local_norm_le
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   letI : SigmaCompactSpace (normalQuarter (I := I) Y x) :=
     normalQuarterSigma (I := I) Y x
-  intro V _ _ hVQ G Q a z bnd hbnd hQ hco hequiv hdiff hcomp
-  let e : Module.Basis (Fin (Module.finrank Real E)) Real E :=
-    (stdOrthonormalBasis Real E).toBasis
+  intro V _ _ hVQ e G Q a z bnd hbnd hQ hco hlow hdiff hcomp
   let B := normalCoordMetric (I := I) Y x
   let Gamma := fun w i j m ↦ e.coord m
     (MetricKoszul.raisedKoszulOp (B w) (fderiv Real B w) (e i) (e j))
@@ -573,14 +541,13 @@ private theorem local_norm_le
   have hgv : gv = (normalTotal (I := I) Y x).restrictOpen
       (I := 𝓘(Real, E)) V := by
     simp only [gv, gQ, SmoothRiemannianMetric.restrictOpen_flat]
-  have hequivV : ∀ v : E,
-      (1 / 2 : Real) * ‖v‖ ^ 2 ≤ gv.inner z v v ∧
-        gv.inner z v v ≤ 2 * ‖v‖ ^ 2 := by
+  have hlowV : ∀ v : E,
+      (1 / 2 : Real) * ‖v‖ * ‖v‖ ≤ gv.inner z v v := by
     intro v
     rw [hgv, SmoothRiemannianMetric.restrictOpen_inner,
       normalTotal_inner (I := I) Y x (z : E) (hVQ z.2) v v]
-    exact hequiv v
-  apply metric_norm_le_comp V Gv gv a z hbnd hequivV
+    exact hlow v
+  apply metric_norm_le_comp V Gv gv a z e hbnd hlowV
   intro slots
   let frame : Fin (Module.finrank Real E) →
       (w : V) → TangentSpace 𝓘(Real, E) w := fun i _ ↦ e i
@@ -619,28 +586,26 @@ private theorem local_norm_le
     V (fun i ↦ e i) Gamma base hdiff a z slots
   calc
     |iterCovComp (I := 𝓘(Real, E)) (M := V)
-        (fun i _ ↦ (stdOrthonormalBasis Real E).toBasis i)
+        (fun i _ ↦ e i)
         (fun w ↦ Tensor.Coordinates.christoffelSymbolInFrame
           (Integral.Connection.leviCivitaConnectionOfMetric
             (I := 𝓘(Real, E)) gv)
-          (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i)
-          (constBasis_isLocalFrame_open V
-            (stdOrthonormalBasis Real E).toBasis) w)
+          (fun i (_ : V) ↦ e i)
+          (constBasis_isLocalFrame_open V e) w)
         (frameComp0S (I := 𝓘(Real, E))
           (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) Gv -
             Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) gv)
-          (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i))
+          (fun i (_ : V) ↦ e i))
         a z slots| =
       |iterCovComp (I := 𝓘(Real, E)) (M := V)
         (fun i _ ↦ e i) (fun w ↦ Gamma (w : E))
         (fun w ↦ base (w : E)) a z slots| := by
-          simp only [e, frame, hchrEq, hbaseEq]
+          simp only [frame, hchrEq, hbaseEq]
     _ = |iterCovComp (I := 𝓘(Real, E)) (fun i _ ↦ e i)
         Gamma base a (z : E) slots| := congrArg abs hres
-    _ ≤ bnd := by simpa only [e, B, Gamma, base] using hcomp slots
+    _ ≤ bnd := by simpa only [B, Gamma, base] using hcomp slots
 
-omit [NeZero (Module.finrank Real E)] in
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] in
 /-- Smooth coefficient fields make every level of their metric covariant
 component tower differentiable on the same open coordinate buffer. -/
 private theorem metricTower_mdiff
@@ -730,9 +695,9 @@ theorem HasStageJetData.cov_comp_tail
         letI : IsManifold I ∞ Yl.M := Yl.smooth
         letI : T2Space Yl.M := Yl.t2
         letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-        let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+        let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
           (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
         chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
     let B : LiveSlot L inp.pack r → Nat →
@@ -770,7 +735,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
         ∀ y ∈ Lphi.hatSourceBall inp.decay P R k,
           ∃ (alpha : LiveSlot L inp.pack r) (z : E),
-            (NormalCoordinates.framedChartAt (I := I) Yk.metric
+            (NormalCoordinates.normalChartAt (I := I) Yk.metric
               (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z = y ∧
             Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha) ∧
             ∀ a ≤ p, ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
@@ -800,9 +765,9 @@ theorem HasStageJetData.cov_comp_tail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
   let B : LiveSlot L inp.pack r → Nat →
@@ -841,7 +806,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : T2Space Yk.M := Yk.t2
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
         chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
           ∀ slots : Fin (2 + (a : Nat)) → Fin (Module.finrank Real E),
@@ -862,7 +827,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : T2Space Yk.M := Yk.t2
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ (k n))).ms
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (k n) (alpha.1 : Nat))
         chiK.symm (z n) ∈ Lphi.hatSourceBall inp.decay P R (k n) ∧
           ∃ slots : Fin (2 + (a : Nat)) → Fin (Module.finrank Real E),
@@ -880,7 +845,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : T2Space Yk.M := Yk.t2
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ (k n))).ms
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (k n) (alpha.1 : Nat))
         chiK.symm (z n) ∈ Lphi.hatSourceBall inp.decay P R (k n) :=
       fun n => (hrest' n).1
@@ -912,7 +877,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : T2Space Yk.M := Yk.t2
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (zn n) ∈
             Lphi.hatSourceBall inp.decay P R (kn n) := by
       intro n
@@ -931,7 +896,7 @@ theorem HasStageJetData.cov_comp_tail
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
         Set.MapsTo
-          (NormalCoordinates.framedChartAt (I := I) Yk.metric
+          (NormalCoordinates.normalChartAt (I := I) Yk.metric
             (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
           W (Lphi.hatSourceBall inp.decay P S (kn n)) := by
       simpa only [V, W, Lphi] using hstay
@@ -1046,12 +1011,12 @@ theorem HasStageJetData.cov_comp_tail
         let cl := seqCenterD inp.decay P Lphi (ln n) (alpha.1 : Nat)
         have hquarter := inp.normalRadius.phaseRadius_exp hcenter.le
         have hDexp : D ⊆ Metric.ball (0 : E)
-            (expRadiusGp (I := I) Yl.metric cl) := by
+            (expMapC2Radius (I := I) Yl.metric cl) := by
           have hquarter' : D ⊆ Metric.ball (0 : E)
-              (expRadiusGp (I := I) Yl.metric cl / 4) := by
+              (expMapC2Radius (I := I) Yl.metric cl / 4) := by
             simpa only [D, Ralpha, Yl, cl, Lphi] using hquarter
           exact hquarter'.trans (Metric.ball_subset_ball (by
-            nlinarith [expRadiusGp_pos (I := I) Yl.metric cl]))
+            nlinarith [expMapC2Radius_pos (I := I) Yl.metric cl]))
         simpa only [B, Yl, cl, Lphi] using
           (normalCoordMetric_contDiffOn_expBall (I := I) Yl cl).mono hDexp
       exact ⟨hAcd, hAmap, hBtarget⟩
@@ -1159,7 +1124,7 @@ theorem HasStageJetData.cov_comp_tail
   have hyBig : y ∈ Lphi.hatSourceBall inp.decay P r k :=
     cball_subset_of_le (hRS.trans hSr).le hy
   obtain ⟨alpha, z, hzy, hzbuffer⟩ := hcover k y hyBig
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
     (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
   have hzy' : chiK.symm z = y := by
     simpa only [chiK, Yk, Lphi] using hzy
@@ -1229,9 +1194,16 @@ theorem HasStageJetData.fwd_norm_tail
           metricDerivNorm (I := I) a G Yk.metric Yk.metric y ≤ eps := by
   classical
   let e : Module.Basis (Fin (Module.finrank Real E)) Real E :=
-    (stdOrthonormalBasis Real E).toBasis
+    Module.finBasis Real E
+  let coordSum : Real :=
+    ∑ i : Fin (Module.finrank Real E),
+      ‖(e.coord i).toContinuousLinearMap‖
+  let epsBasis : Real := (1 / 2 : Real)⁻¹ * coordSum ^ 2 + 1
   let fac : Fin (p + 1) → Real := fun a ↦
-    Real.sqrt (2 ^ (2 + (a : Nat))) *
+    Real.sqrt
+        (((1 + epsBasis) *
+          (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^
+            (2 + (a : Nat))) *
       Real.sqrt
         (Fintype.card
           (Fin (2 + (a : Nat)) → Fin (Module.finrank Real E)) : Real)
@@ -1308,8 +1280,8 @@ theorem HasStageJetData.fwd_norm_tail
   rcases hstage with ⟨hdata, hmetric, _hjets, _hbase⟩
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   let A : E → E := fun q => chiL (F (chiK.symm q))
   let B : E → (E →L[Real] E →L[Real] Real) :=
     normalCoordMetric (I := I) Yk ck
@@ -1353,15 +1325,12 @@ theorem HasStageJetData.fwd_norm_tail
         (interior_subset (hbuffer (Metric.mem_closedBall_self (heta alpha).le)))))
     have hgeomK :=
       hdata.geom_on inp P L r hr U C0 C1 aInf Jinf Jbarinf k alpha
-    have hzNorm : ‖z‖ < expRadiusGp (I := I) Yk.metric ck := by
+    have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric ck := by
       simpa only [Metric.mem_ball, dist_zero_right, Yk, ck, Lphi] using
         hgeomK.2.1 hzU
     refine ⟨?_, ?_⟩
-    · change z ∈ (framedExpDiffeo (I := I) Yk.metric ck).source
-      rw [framedExp_source]
-      apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-      simpa only [normalFrame_sqrt] using hzNorm
+    · exact mem_expMapDiffeo_source_of_norm_lt_radius
+        (I := I) Yk.metric ck hzNorm
     · change chiK.symm z ∈ Bmid
       rw [hzy']
       exact hyBall
@@ -1387,18 +1356,15 @@ theorem HasStageJetData.fwd_norm_tail
       q ∈ (normalExpPD (I := I) Yl cl).target → q ∈ chiL.source := by
     intro q hq
     rcases hq with ⟨v, hv, rfl⟩
-    have hvNorm : ‖v‖ < expRadiusGp (I := I) Yl.metric cl := by
+    have hvNorm : ‖v‖ < expMapC2Radius (I := I) Yl.metric cl := by
       change v ∈ Metric.ball (0 : E)
-        (expRadiusGp (I := I) Yl.metric cl) at hv
+        (expMapC2Radius (I := I) Yl.metric cl) at hv
       simpa only [Metric.mem_ball, dist_zero_right] using hv
-    have hvSource : v ∈ (framedExpDiffeo
-        (I := I) Yl.metric cl).source := by
-      rw [framedExp_source]
-      apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yl.metric cl
-      simpa only [normalFrame_sqrt] using hvNorm
+    have hvSource : v ∈ (expMapDiffeo
+        (I := I) Yl.metric cl).source :=
+      mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl hvNorm
     have hmap :=
-      (framedExpDiffeo (I := I) Yl.metric cl).map_source hvSource
+      (expMapDiffeo (I := I) Yl.metric cl).map_source hvSource
     simpa only [normalExpPD, chiL] using hmap
   have hsourceS (w : V) : chiK.symm (w : E) ∈
       Lphi.hatSourceBall inp.decay P S k := by
@@ -1442,11 +1408,11 @@ theorem HasStageJetData.fwd_norm_tail
     simpa only [B] using hraw
   have hBcd : ContDiffOn Real (∞ : WithTop ℕ∞) B V := by
     have hVexp : (V : Set E) ⊆ Metric.ball (0 : E)
-        (expRadiusGp (I := I) Yk.metric ck) := by
+        (expMapC2Radius (I := I) Yk.metric ck) := by
       intro w hw
       have hwq := hVQ hw
       exact Metric.ball_subset_ball (by
-        nlinarith [expRadiusGp_pos (I := I) Yk.metric ck]) hwq
+        nlinarith [expMapC2Radius_pos (I := I) Yk.metric ck]) hwq
     simpa only [B] using
       (normalCoordMetric_contDiffOn_expBall (I := I) Yk ck).mono hVexp
   have hAcd : ContDiffOn Real (∞ : WithTop ℕ∞) A V := by
@@ -1498,16 +1464,18 @@ theorem HasStageJetData.fwd_norm_tail
     normalQuarterSigma (I := I) Yk ck
   let gQ := (normalTotal (I := I) Yk ck).restrictOpen
     (I := 𝓘(Real, E)) (normalQuarter (I := I) Yk ck)
-  have hlocal := local_norm_le (I := I) Yk ck V hVQ G Q a zV
-    hepsComp.le hQcoeff hBco hequiv hdiff hcompLe
-  have hpoint : framedExpDiffeo (I := I) Yk.metric ck
+  have hlocal := local_norm_le (I := I) Yk ck V hVQ e G Q a zV
+    hepsComp.le hQcoeff hBco
+      (fun v => by
+        simpa only [zV, B, pow_two, mul_assoc] using (hequiv v).1) hdiff hcompLe
+  have hpoint : expMapDiffeo (I := I) Yk.metric ck
       (TopologicalSpace.Opens.inclusion hVQ zV : E) = y := by
     change chiK.symm z = y
     simpa only [chiK, ck, Yk, Lphi] using hzy
   calc
     metricDerivNorm (I := I) a G Yk.metric Yk.metric y =
         metricDerivNorm (I := I) a G Yk.metric Yk.metric
-          (framedExpDiffeo (I := I) Yk.metric ck
+          (expMapDiffeo (I := I) Yk.metric ck
             (TopologicalSpace.Opens.inclusion hVQ zV : E)) :=
       congrArg (fun q => metricDerivNorm (I := I) a G Yk.metric Yk.metric q)
         hpoint.symm
@@ -1523,7 +1491,9 @@ theorem HasStageJetData.fwd_norm_tail
           (gQ.restrictOpenOfSubset (I := 𝓘(Real, E)) hVQ) zV :=
       (metricDerivNorm_flat (I := 𝓘(Real, E)) hVQ
         (quarterPull (I := I) Yk ck G) gQ gQ a zV).symm
-    _ ≤ Real.sqrt (2 ^ (2 + a)) *
+    _ ≤ Real.sqrt
+          (((1 + epsBasis) *
+            (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ (2 + a)) *
           (Real.sqrt
             (Fintype.card
               (Fin (2 + a) → Fin (Module.finrank Real E)) : Real) * epsComp) :=
@@ -1588,9 +1558,16 @@ theorem HasStageJetData.inv_norm_tail
           metricDerivNorm (I := I) a G Yl.metric Yl.metric y ≤ eps := by
   classical
   let e : Module.Basis (Fin (Module.finrank Real E)) Real E :=
-    (stdOrthonormalBasis Real E).toBasis
+    Module.finBasis Real E
+  let coordSum : Real :=
+    ∑ i : Fin (Module.finrank Real E),
+      ‖(e.coord i).toContinuousLinearMap‖
+  let epsBasis : Real := (1 / 2 : Real)⁻¹ * coordSum ^ 2 + 1
   let fac : Fin (p + 1) → Real := fun a ↦
-    Real.sqrt (2 ^ (2 + (a : Nat))) *
+    Real.sqrt
+        (((1 + epsBasis) *
+          (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^
+            (2 + (a : Nat))) *
       Real.sqrt
         (Fintype.card
           (Fin (2 + (a : Nat)) → Fin (Module.finrank Real E)) : Real)
@@ -1681,8 +1658,8 @@ theorem HasStageJetData.inv_norm_tail
   rcases hstage with ⟨hdata, hmetric, _hjets, _hbase⟩
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   let A : E → E := fun w => chiL (F (chiK.symm w))
   let Grev : E → E := fun w => chiK (Hinv (chiL.symm w))
   let BK : E → (E →L[Real] E →L[Real] Real) :=
@@ -1815,18 +1792,15 @@ theorem HasStageJetData.inv_norm_tail
       q ∈ dL.target → q ∈ chiL.source := by
     intro q hq
     rcases hq with ⟨v, hv, rfl⟩
-    have hvNorm : ‖v‖ < expRadiusGp (I := I) Yl.metric cl := by
+    have hvNorm : ‖v‖ < expMapC2Radius (I := I) Yl.metric cl := by
       change v ∈ Metric.ball (0 : E)
-        (expRadiusGp (I := I) Yl.metric cl) at hv
+        (expMapC2Radius (I := I) Yl.metric cl) at hv
       simpa only [Metric.mem_ball, dist_zero_right] using hv
-    have hvSource : v ∈ (framedExpDiffeo
-        (I := I) Yl.metric cl).source := by
-      rw [framedExp_source]
-      apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yl.metric cl
-      simpa only [normalFrame_sqrt] using hvNorm
+    have hvSource : v ∈ (expMapDiffeo
+        (I := I) Yl.metric cl).source :=
+      mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yl.metric cl hvNorm
     have hmap :=
-      (framedExpDiffeo (I := I) Yl.metric cl).map_source hvSource
+      (expMapDiffeo (I := I) Yl.metric cl).map_source hvSource
     simpa only [dL, normalExpPD, chiL] using hmap
   have hdecode : chiL.symm (A z) = F y := by
     have hzy' : chiK.symm z = y := by
@@ -1890,18 +1864,15 @@ theorem HasStageJetData.inv_norm_tail
       q ∈ dK.target → q ∈ chiK.source := by
     intro q hq
     rcases hq with ⟨v, hv, rfl⟩
-    have hvNorm : ‖v‖ < expRadiusGp (I := I) Yk.metric ck := by
+    have hvNorm : ‖v‖ < expMapC2Radius (I := I) Yk.metric ck := by
       change v ∈ Metric.ball (0 : E)
-        (expRadiusGp (I := I) Yk.metric ck) at hv
+        (expMapC2Radius (I := I) Yk.metric ck) at hv
       simpa only [Metric.mem_ball, dist_zero_right] using hv
-    have hvSource : v ∈ (framedExpDiffeo
-        (I := I) Yk.metric ck).source := by
-      rw [framedExp_source]
-      apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-      simpa only [normalFrame_sqrt] using hvNorm
+    have hvSource : v ∈ (expMapDiffeo
+        (I := I) Yk.metric ck).source :=
+      mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck hvNorm
     have hmap :=
-      (framedExpDiffeo (I := I) Yk.metric ck).map_source hvSource
+      (expMapDiffeo (I := I) Yk.metric ck).map_source hvSource
     simpa only [dK, normalExpPD, chiK] using hmap
   have hQcoeff : ∀ (w : V) (u v : E),
       (quarterPull (I := I) Yl cl G).inner
@@ -2005,16 +1976,18 @@ theorem HasStageJetData.inv_norm_tail
     normalQuarterSigma (I := I) Yl cl
   let gQ := (normalTotal (I := I) Yl cl).restrictOpen
     (I := 𝓘(Real, E)) (normalQuarter (I := I) Yl cl)
-  have hlocal := local_norm_le (I := I) Yl cl V hVQ G Q a wV
-    hepsComp.le hQcoeff hBLco hequiv hdiff hcompLe
-  have hpoint : framedExpDiffeo (I := I) Yl.metric cl
+  have hlocal := local_norm_le (I := I) Yl cl V hVQ e G Q a wV
+    hepsComp.le hQcoeff hBLco
+      (fun v => by
+        simpa only [wV, BL, pow_two, mul_assoc] using (hequiv v).1) hdiff hcompLe
+  have hpoint : expMapDiffeo (I := I) Yl.metric cl
       (TopologicalSpace.Opens.inclusion hVQ wV : E) = F y := by
     change chiL.symm (A z) = F y
     exact hdecode
   calc
     metricDerivNorm (I := I) a G Yl.metric Yl.metric (F y) =
         metricDerivNorm (I := I) a G Yl.metric Yl.metric
-          (framedExpDiffeo (I := I) Yl.metric cl
+          (expMapDiffeo (I := I) Yl.metric cl
             (TopologicalSpace.Opens.inclusion hVQ wV : E)) :=
       congrArg (fun q' => metricDerivNorm (I := I) a G
         Yl.metric Yl.metric q') hpoint.symm
@@ -2030,7 +2003,9 @@ theorem HasStageJetData.inv_norm_tail
           (gQ.restrictOpenOfSubset (I := 𝓘(Real, E)) hVQ) wV :=
       (metricDerivNorm_flat (I := 𝓘(Real, E)) hVQ
         (quarterPull (I := I) Yl cl G) gQ gQ a wV).symm
-    _ ≤ Real.sqrt (2 ^ (2 + a)) *
+    _ ≤ Real.sqrt
+          (((1 + epsBasis) *
+            (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ (2 + a)) *
           (Real.sqrt
             (Fintype.card
               (Fin (2 + a) → Fin (Module.finrank Real E)) : Real) * epsComp) :=

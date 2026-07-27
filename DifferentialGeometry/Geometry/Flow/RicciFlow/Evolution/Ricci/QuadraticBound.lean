@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Ricci quadratic bound from the lowered curvature norm
@@ -21,13 +20,14 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Ricci quadratic form of a solution-family metric is controlled
 pointwise by the norm of its canonical lowered Riemann tensor. -/
 theorem ricci_quad_sol

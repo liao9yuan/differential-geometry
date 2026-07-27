@@ -27,7 +27,7 @@ open scoped Manifold ContDiff
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
@@ -47,7 +47,7 @@ def reverseFamily
   connection := fun s => G.connection (T - s)
   metricCompatible := fun s => G.metricCompatible (T - s)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem reverse_metric
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -144,7 +144,6 @@ theorem reverse_deriv
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_forward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -170,7 +169,6 @@ theorem conj_heat_forward
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_backward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -215,7 +213,6 @@ def IsConjHeatOn
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_of_pot
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -228,7 +225,6 @@ theorem conj_heat_of_pot
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem heat_pot_to_conj
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -261,7 +257,6 @@ theorem heat_pot_to_conj
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_deriv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -308,7 +303,6 @@ theorem conj_heat_mass_deriv
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -349,7 +343,6 @@ theorem conj_heat_mass_eq
 
 
 
-omit [InnerProductSpace ℝ E] in
 theorem conj_heat_mass_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily

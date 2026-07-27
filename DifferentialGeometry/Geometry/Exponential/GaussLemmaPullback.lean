@@ -540,7 +540,6 @@ lemma radialCurve_contMDiffAt2
     expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p ht₀
   exact hexp.comp t₀ hbase
 
-private lemma radialCurve_hasGeodesicEquationAt
 /-- The central radial curve `t ↦ expMap g p (t • a)` satisfies the
 moving-foot geodesic equation at every `t₀ ∈ (-1, 2)` provided
 `‖a‖ < expMapC2Radius g p`.  Transferred from the maximal geodesic via the

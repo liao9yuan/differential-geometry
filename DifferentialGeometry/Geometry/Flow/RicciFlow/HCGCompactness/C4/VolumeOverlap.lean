@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # A0′ `VolumeComparisonInput` producer (brick B7, sequence assembly)
@@ -59,7 +57,7 @@ open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -71,6 +69,9 @@ section Dim1
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] in
 /-- In dimension one the Levi-Civita Riemann operator vanishes identically: it is
 antisymmetric in its first two arguments, which both lie in a one-dimensional
 space and are therefore proportional. -/
@@ -97,6 +98,9 @@ theorem riemannOp_dim1_zero (h1 : Module.finrank ℝ E = 1)
     ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, hee,
     smul_zero, smul_zero]
 
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [T2Space (TangentBundle I M)] in
 /-- In dimension one the Ricci tensor vanishes, so `Ric ≥ 0`. -/
 theorem ricci_dim1_bddBelow (h1 : Module.finrank ℝ E = 1)
     (g : SmoothRiemannianMetric I M) :

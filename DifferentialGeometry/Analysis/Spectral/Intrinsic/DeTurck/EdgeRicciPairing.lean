@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder0KernelJetGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankReducingOperatorFieldGreenIBP
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RankReducingOperatorFieldGreenIBP
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 
 /-!
@@ -18,9 +18,6 @@ integrated by parts.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 3200000
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
@@ -35,9 +32,11 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -78,8 +77,16 @@ private def ricPerm102 : Equiv.Perm (Fin 3) :=
 private def ricPerm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-set_option linter.unusedSectionVars false in
-private theorem permCoeff_smooth (g : SmoothRiemannianMetric I M) {d : Nat}
+omit [NormedAddCommGroup E] [NormedSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)] in
+private lemma ricUpdate2Zero (a b c : E) :
+    Function.update ![a, b] (0 : Fin 2) c = ![c, b] := by
+  funext i
+  fin_cases i <;> simp [Function.update]
+
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private theorem permCoeff_smooth (_g : SmoothRiemannianMetric I M) {d : Nat}
     (rho : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(Real, Tensor0SBundle.TensorRSModel d d Real E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d Real E)
@@ -112,79 +119,79 @@ def permCoeff (g : SmoothRiemannianMetric I M) {d : Nat}
 
 private def ricQuad0 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
-  appCcRS (I := I) (M := M) g 2 4 4
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm3201)
-    (appCcRS (I := I) (M := M) g 2 3 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm)
-      (appCcRS (I := I) (M := M) g 2 3 3
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 3
         (permCoeff (I := I) (M := M) g ricPerm102)
         (connDiffContrInsertionInnerField (I := I) g gm)))
 
 private def ricQuad1 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
   reindexCoeffGen (I := I) (M := M) g 2 4
-    (appCcRS (I := I) (M := M) g 2 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm2301)
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gm)
-        (appCcRS (I := I) (M := M) g 2 3 3
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 3
           (permCoeff (I := I) (M := M) g ricPerm102)
           (connDiffContrInsertionInnerField (I := I) g gm))))
-    innerCoreInPerm10
+    innerContractionSwapPerm
 
 private def ricQuad2 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
-  appCcRS (I := I) (M := M) g 2 4 4
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm3102)
-    (appCcRS (I := I) (M := M) g 2 3 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm)
-      (appCcRS (I := I) (M := M) g 2 3 3
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 3
         (permCoeff (I := I) (M := M) g ricPerm120)
         (connDiffContrInsertionInnerField (I := I) g gm)))
 
 private def ricQuad3 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
   reindexCoeffGen (I := I) (M := M) g 2 4
-    (appCcRS (I := I) (M := M) g 2 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm1302)
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gm)
         (connDiffContrInsertionInnerField (I := I) g gm)))
-    innerCoreInPerm10
+    innerContractionSwapPerm
 
 private def ricQuad4 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
-  appCcRS (I := I) (M := M) g 2 4 4
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm1203)
-    (appCcRS (I := I) (M := M) g 2 3 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
       (connDiffContrInsertionField (I := I) g gm)
       (connDiffContrInsertionInnerField (I := I) g gm))
 
 private def ricQuad5 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
   reindexCoeffGen (I := I) (M := M) g 2 4
-    (appCcRS (I := I) (M := M) g 2 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm2103)
-      (appCcRS (I := I) (M := M) g 2 3 4
+      (ccOperatorFieldComp (I := I) (M := M) g 2 3 4
         (connDiffContrInsertionField (I := I) g gm)
-        (appCcRS (I := I) (M := M) g 2 3 3
+        (ccOperatorFieldComp (I := I) (M := M) g 2 3 3
           (permCoeff (I := I) (M := M) g ricPerm120)
           (connDiffContrInsertionInnerField (I := I) g gm))))
-    innerCoreInPerm10
+    innerContractionSwapPerm
 
 private def ricDer0 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
-  appCcRS (I := I) (M := M) g 2 4 4
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 4
     (permCoeff (I := I) (M := M) g ricPerm3012)
     (connDiffGradContrInsertionField (I := I) g gm)
 
 private def ricDer1 (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 4 :=
   reindexCoeffGen (I := I) (M := M) g 2 4
-    (appCcRS (I := I) (M := M) g 2 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 2 4 4
       (permCoeff (I := I) (M := M) g ricPerm2013)
       (connDiffGradContrInsertionField (I := I) g gm))
-    innerCoreInPerm10
+    innerContractionSwapPerm
 
 /-- The six connection-difference-quadratic arms of the order-zero Ricci
 kernel. -/
@@ -204,6 +211,7 @@ def ricciDAKer (g gm : SmoothRiemannianMetric I M) :
   -ricDer0 (I := I) (M := M) g gm -
     ricDer1 (I := I) (M := M) g gm
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Exact derivative/non-derivative split of the order-zero Ricci kernel. -/
 theorem ricciKer_split (g gm : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder0KernelField (I := I) g gm =
@@ -224,28 +232,31 @@ theorem ricciKer_split (g gm : SmoothRiemannianMetric I M) :
 /-- Four-trace contraction of the quadratic kernel arms. -/
 def ricciAAArm (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 2 :=
-  appCcRS (I := I) (M := M) g 2 4 2
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 2
     (ricciCometricFourTraceCastG0 (I := I) g gm)
     (ricciAAKer (I := I) (M := M) g gm)
 
 /-- Four-trace contraction of the derivative-only kernel arms. -/
 def ricciDAArm (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 2 2 :=
-  appCcRS (I := I) (M := M) g 2 4 2
+  ccOperatorFieldComp (I := I) (M := M) g 2 4 2
     (ricciCometricFourTraceCastG0 (I := I) g gm)
     (ricciDAKer (I := I) (M := M) g gm)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Exact split of the full order-zero Ricci connection-difference
 coefficient into its quadratic and derivative-only parts. -/
 theorem ricciCoeff_split (g gm : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g gm =
       ricciAAArm (I := I) (M := M) g gm +
         ricciDAArm (I := I) (M := M) g gm := by
-  rw [linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS,
+  rw [linearizedRicciConnDiffOrder0CoeffField_eq_ricciCometricFourTrace_comp_kernelField,
     ricciKer_split, appCcRS_add_right]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricPerm3012_eval (x : M) (D : Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SSpace.toModel (slotPermCLM (I := I) ricPerm3012 x D)
@@ -255,7 +266,9 @@ private lemma ricPerm3012_eval (x : M) (D : Tensor0SSpace 4 I x)
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricPerm2013_eval (x : M) (D : Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SSpace.toModel (slotPermCLM (I := I) ricPerm2013 x D)
@@ -265,16 +278,19 @@ private lemma ricPerm2013_eval (x : M) (D : Tensor0SSpace 4 I x)
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricPerm2_eval (x : M) (D : Tensor0SSpace 2 I x)
     (a b : TangentSpace I x) :
-    Tensor0SSpace.toModel (slotPermCLM (I := I) innerCoreInPerm10 x D)
+    Tensor0SSpace.toModel (slotPermCLM (I := I) innerContractionSwapPerm x D)
         ![a, b] =
       Tensor0SSpace.toModel D ![b, a] := by
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The derivative kernel consists of exactly the two expected contractions
 of `covGrad connDiffSection` against its rank-two input. -/
 theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
@@ -303,7 +319,7 @@ theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
           (connContrCLM (I := I) 1 2 x DA) -
         (slotPermCLM (I := I) ricPerm2013 x).comp
           ((connContrCLM (I := I) 1 2 x DA).comp
-            (slotPermCLM (I := I) innerCoreInPerm10 x))) T)
+            (slotPermCLM (I := I) innerContractionSwapPerm x))) T))
         ![a, b, c, d] = _
   simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.neg_apply,
     ContinuousLinearMap.comp_apply, Tensor0SSpace.toModel_sub,
@@ -312,13 +328,16 @@ theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
   rw [ricPerm3012_eval, ricPerm2013_eval]
   rw [connContr12_insert, connContr12_insert]
   rw [ricPerm2_eval]
+  simp
+  simp only [DA]
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- A single moving-metric trace is a `g`-orthonormal diagonal trace with
 one relative inverse-metric insertion. -/
 theorem ricTrace_eval (g gm : SmoothRiemannianMetric I M)
     (Z : SmoothCcTensor g 0 4) (x : M) (v : Fin 2 → E) :
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z) x v =
       ∑ i : Fin (Module.finrank Real E),
         unitModel (I := I) (M := M) g 4 Z x
@@ -327,15 +346,15 @@ theorem ricTrace_eval (g gm : SmoothRiemannianMetric I M)
             smoothOrthoFrame (I := I) g x i x, v 0, v 1] := by
   classical
   rw [show ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
-      mvDoubleTraceField (I := I) (M := M) g gm 2 from rfl]
+      secondMetricCometricDoubleTraceField (I := I) (M := M) g gm 2 from rfl]
   rw [pairTrace_refold (I := I) (M := M) g gm 2]
   rw [← appCc_assoc (I := I) (M := M) g 4 4 2]
   rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply]
   rw [show ((show Tensor0SSpace 4 I x →L[Real] Tensor0SSpace 2 I x from
         (cometricDoubleTraceField (I := I) g 2).toSection x)
       ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from
-        (appCc (I := I) (M := M) g 4 4
-          (slotInsertEndoCc (I := I) (M := M) g 3
+        (operatorFieldApply (I := I) (M := M) g 4 4
+          (endoSlotZeroCcTensor (I := I) (M := M) g 3
             (fullRaisedEndoField (I := I) (M := M) g gm)) Z).toSection x)
         (unitTensor (I := I) (M := M) x))) =
       cometricDoubleTraceFib (I := I) g 2 x
@@ -351,11 +370,15 @@ theorem ricTrace_eval (g gm : SmoothRiemannianMetric I M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [slotInsertEndoFib_apply_eval, Fin.update_cons_zero]
-  rfl
+  rw [unitModel]
+  congr 1
+  funext k
+  fin_cases k <;> rfl
 
 /-! ## The genuine one-moving-trace flux -/
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ricUnit_sub (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (A - B) x =
@@ -374,7 +397,8 @@ private lemma ricUnit_sub (g : SmoothRiemannianMetric I M) (s : Nat)
     rfl
   rw [unitModel, unitModel, unitModel, h, Tensor0SSpace.toModel_sub]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ricUnit_add (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (A + B) x =
@@ -391,7 +415,8 @@ private lemma ricUnit_add (g : SmoothRiemannianMetric I M) (s : Nat)
           rfl]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ricUnit_smul (g : SmoothRiemannianMetric I M) (s : Nat)
     (c : Real) (A : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (c • A) x =
@@ -418,6 +443,8 @@ def ricciDAFlux (g gm : SmoothRiemannianMetric I M)
     pairProd4 (I := I) (M := M) g W WR
   P - domDomCongrSection (I := I) g ricPerm1203 P
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Component formula for `ricciDAFlux`.  In a `g`-orthonormal frame it is
 `W[p,u] W(L v,r) - W[u,v] W(L p,r)`. -/
 theorem ricciDAFlux_eval (g gm : SmoothRiemannianMetric I M)
@@ -446,7 +473,8 @@ theorem ricciDAFlux_eval (g gm : SmoothRiemannianMetric I M)
     fin_cases i <;> rfl
   rw [hv]
   simp only [P, pairProd4_eval, WR, pairSlot2_eval]
-  congr 1 <;> congr 1 <;> funext i <;> fin_cases i <;> rfl
+  simp_rw [ricUpdate2Zero]
+  simp
 
 /-! ## A slot-aligned carrier for the Green pairing -/
 
@@ -468,6 +496,7 @@ def ricciDAPart (g gm : SmoothRiemannianMetric I M)
   domDomCongrSection (I := I) g ricPerm3012.symm
     (ricciDAFlux (I := I) (M := M) g gm W)
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The Ricci DA flux is a difference of a rank-four product and one slot
 permutation of that product, so every covariant-derivative fibre norm costs at
 most the universal factor four.  This public estimate hides the internal
@@ -512,6 +541,7 @@ theorem ricciFlux_rfns (g gm : SmoothRiemannianMetric I M)
       ring
     _ = _ := by rfl
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The outer slot alignment in `ricciDAPart` preserves every covariant
 derivative fibre norm.  This is the bound-facing interface which hides the
 internal alignment permutation. -/
@@ -528,6 +558,7 @@ theorem ricciPart_rfns (g gm : SmoothRiemannianMetric I M)
     (I := I) (M := M) g ricPerm3012.symm
       (ricciDAFlux (I := I) (M := M) g gm W) j x
 
+omit [NeZero (Module.finrank Real E)] in
 /-- `ricciDAG` is just the first-two-slot swap of the covariant derivative
 of the rotated lowered connection-difference tensor. -/
 theorem ricciDAG_eval (g gm : SmoothRiemannianMetric I M)
@@ -545,6 +576,8 @@ theorem ricciDAG_eval (g gm : SmoothRiemannianMetric I M)
   funext i
   fin_cases i <;> rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [SigmaCompactSpace M] in
 private lemma ricLow_unitModel (g gm : SmoothRiemannianMetric I M)
     (x : M) :
     unitModel (I := I) (M := M) g 3
@@ -562,6 +595,8 @@ private lemma ricLow_unitModel (g gm : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [SigmaCompactSpace M] in
 private lemma ricLow_eval (g gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g 3
@@ -571,7 +606,8 @@ private lemma ricLow_eval (g gm : SmoothRiemannianMetric I M)
   rw [ricLow_unitModel]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ricInterior_eval (s : Nat) (x : M)
     (v : TangentSpace I x) (D : Tensor0SSpace (s + 1) I x)
     (w : Fin s → TangentSpace I x) :
@@ -586,6 +622,7 @@ private lemma ricInterior_eval (s : Nat) (x : M)
   rw [h]
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 private lemma ricCDual_coord
     (B : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (k : Fin (Module.finrank Real E)) :
@@ -594,7 +631,9 @@ private lemma ricCDual_coord
   exact congrArg (fun L : E →ₗ[Real] Real => LinearMap.toContinuousLinearMap L)
     (congrFun (Module.Basis.coe_dualBasis B) k)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
     (beta : Tensor0SSpace 1 I x) (v : Fin 3 → E) :
     Tensor0SSpace.toModel
@@ -633,7 +672,7 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
             if j = i then (1 : Real) else 0 from Finsupp.single_apply,
         mul_ite, mul_one, mul_zero])]
     rw [Finset.sum_ite_eq' Finset.univ i]
-    simp
+    simp only [Finset.mem_univ, ↓reduceIte]
     rw [ricCDual_coord (Module.finBasis Real E) i]
   have hexp : Tensor0SSpace.toModel beta =
       ∑ i : Fin (Module.finrank Real E),
@@ -679,6 +718,7 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
   exact Finset.sum_congr rfl (fun i _ => by
     rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul])
 
+omit [NeZero (Module.finrank Real E)] [SigmaCompactSpace M] in
 /-- Public realization of the connection difference by raising the first
 slot of its lowered covariant tensor. -/
 theorem connRaise_eq (g gm : SmoothRiemannianMetric I M) :
@@ -759,6 +799,7 @@ theorem connRaise_eq (g gm : SmoothRiemannianMetric I M) :
   rw [g.symm x u
     (PDE.DeTurck.connDiff (I := I) gm g x (YZ 0) (YZ 1))]
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The covariant derivative consumed by the Ricci derivative kernel is the
 first-slot raise of the slot-aligned lowered carrier `ricciDAG`. -/
 theorem covConnRaise_eq (g gm : SmoothRiemannianMetric I M) :
@@ -769,6 +810,7 @@ theorem covConnRaise_eq (g gm : SmoothRiemannianMetric I M) :
     covGrad_cometricRaiseSlot0Field_eq (I := I) (M := M)]
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Pairing the vector reconstructed from the raised derivative tensor with
 its lowering slot recovers the corresponding `ricciDAG` component. -/
 theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
@@ -809,16 +851,12 @@ theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
     dsimp [B]
     rw [cometricRaiseSlot0Fib_clm_apply,
       inverseMetricSharpFib_g0FlatCLM]
-    rw [show (Tensor0SBundle.interior_product (𝕜 := Real) (I := I) 3 x r
-          D q : Real) =
-        Tensor0SSpace.toModel
-          (Tensor0SBundle.interior_product (𝕜 := Real) (I := I) 3 x r D) q
-        from rfl]
-    rw [ricInterior_eval]
+    change Tensor0SSpace.toModel
+      (Tensor0SBundle.interior_product (𝕜 := Real) (I := I) 3 x r D) q =
+        Tensor0SSpace.toModel D ![r, p, u, v]
+    rw [ricInterior_eval (I := I) (M := M) 3 x r D q]
     dsimp [q]
     congr 1
-    funext k
-    fin_cases k <;> rfl
   have hright :
       Tensor0SSpace.toModel (g0FlatCLM (I := I) g x r)
           (fun _ : Fin 1 => R) = g.inner x r R := by
@@ -834,7 +872,8 @@ theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
   rw [hright] at hp
   rw [g.symm x R r, ← hp]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M]
+  [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma ricL_self (g gm : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g.inner x (fullRaisedEndoField (I := I) (M := M) g gm x v) w =
@@ -855,6 +894,7 @@ def ricDAVec (g gm : SmoothRiemannianMetric I M) (x : M)
         (connDiffSection (I := I) gm g)).toSection x)
     ![a, b, c]
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Lowering `ricDAVec` in its output slot gives the corresponding
 `ricciDAG` component. -/
 theorem ricDAVec_pair (g gm : SmoothRiemannianMetric I M) (x : M)
@@ -865,13 +905,14 @@ theorem ricDAVec_pair (g gm : SmoothRiemannianMetric I M) (x : M)
   simpa only [ricDAVec] using
     ricciDAG_pair (I := I) (M := M) g gm x r p u v
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Evaluation of the derivative-only kernel after applying it to a
 covariant two-tensor. -/
 theorem ricciDAKer_app (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M)
     (a b c d : TangentSpace I x) :
     unitModel (I := I) (M := M) g 4
-        (appCc (I := I) (M := M) g 2 4
+        (operatorFieldApply (I := I) (M := M) g 2 4
           (ricciDAKer (I := I) (M := M) g gm) W) x ![a, b, c, d] =
       -unitModel (I := I) (M := M) g 2 W x
           ![ricDAVec (I := I) (M := M) g gm x a b c, d] -
@@ -883,6 +924,7 @@ theorem ricciDAKer_app (g gm : SmoothRiemannianMetric I M)
       ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from
         W.toSection x) (unitTensor (I := I) (M := M) x)) a b c d
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The derivative of the connection difference remains symmetric in the
 two connection-input slots. -/
 theorem ricDAVec_symm (g gm : SmoothRiemannianMetric I M) (x : M)
@@ -909,7 +951,8 @@ theorem ricDAVec_symm (g gm : SmoothRiemannianMetric I M) (x : M)
   rw [h1, h2]
   exact covDerivConnDiff_symm23 (I := I) (M := M) gm g X Y Z x
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricW_expand (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M)
     (y z : TangentSpace I x) :
@@ -930,10 +973,12 @@ private lemma ricW_expand (g : SmoothRiemannianMetric I M)
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
   have hy := Geometry.Riemannian.expand_orthonormal
     (I := I) (M := M) g x hcard e horth y
-  rw [unitModel_eq_ccTensorBilin_local, hy, map_sum]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [map_smul, smul_eq_mul, ← unitModel_eq_ccTensorBilin_local]
-  rfl
+  rw [unitModel_eq_ccTensorBilin_local]
+  conv_lhs => rw [hy]
+  rw [map_sum, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl fun (i : Fin (Module.finrank Real E)) _ => ?_
+  rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+    ← unitModel_eq_ccTensorBilin_local]
 
 private lemma ricSum_succ {A R : Type*} [Fintype A] [AddCommMonoid R]
     (s : Nat) (F : (Fin (s + 1) → A) → R) :
@@ -962,8 +1007,6 @@ private lemma ricSum2 {A : Type*} [Fintype A]
       refine Finset.sum_congr rfl fun a _ => ?_
       refine Finset.sum_congr rfl fun b _ => ?_
       congr 1
-      funext k
-      fin_cases k <;> rfl
 
 private lemma ricSum4 {A : Type*} [Fintype A]
     (F : (Fin 4 → A) → Real) :
@@ -981,8 +1024,6 @@ private lemma ricSum4 {A : Type*} [Fintype A]
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [Finset.sum_eq_single (fun i : Fin 0 => i.elim0)]
   · congr 1
-    funext k
-    fin_cases k <;> rfl
   · intro q _ hq
     exact absurd (Subsingleton.elim q (fun i : Fin 0 => i.elim0)) hq
   · intro h
@@ -1075,8 +1116,9 @@ private lemma ricPair_alg {A : Type*} [Fintype A]
       (fun p u v => w p u * h v r * d r p u v)
   rw [hL, hR, hFP]
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma ricInner0 (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M)
     (e : Fin (Module.finrank Real E) → TangentSpace I x)
@@ -1126,7 +1168,8 @@ private lemma ricInner0 (g : SmoothRiemannianMetric I M) (s : Nat)
   refine Finset.sum_congr rfl fun J _ => ?_
   rw [hcomp A Fin.elim0 J, hcomp B Fin.elim0 J]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma ricSmooth_basis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank Real E)) Real
         (TangentSpace I x),
@@ -1161,8 +1204,9 @@ private lemma ricSmooth_basis (g : SmoothRiemannianMetric I M) (x : M) :
   refine ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_⟩
   exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma ricSwap_point (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 4) (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 4 x (A.toFun x)
@@ -1207,8 +1251,9 @@ private lemma ricSwap_point (g : SmoothRiemannianMetric I M)
     funext k
     simp [tau, sigma, Equiv.arrowCongr]
   rw [htau]
-  congr 1 <;> congr 1 <;> funext k <;> simp [sigma]
+  simp [sigma]
 
+omit [I.Boundaryless] [BoundarylessManifold I M] in
 /-- Moving the first-two-slot swap from one rank-four covariant tensor to the
 other leaves the global `L²` pairing unchanged. -/
 theorem ricSwap_l2 (g : SmoothRiemannianMetric I M)
@@ -1225,6 +1270,8 @@ theorem ricSwap_l2 (g : SmoothRiemannianMetric I M)
     (Filter.Eventually.of_forall fun x => ?_)
   exact ricSwap_point (I := I) (M := M) g A B x
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 /-- Component formula for the slot-aligned Ricci derivative partner. -/
 theorem ricciDAPart_eval (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M) (v : Fin 4 → E) :
@@ -1243,51 +1290,53 @@ theorem ricciDAPart_eval (g gm : SmoothRiemannianMetric I M)
     funext i
     fin_cases i <;> rfl
   rw [hv, ricciDAFlux_eval]
+  simp
 
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
 /-- The Ricci four-trace is the signed half-sum of four genuine single
 moving-metric traces. -/
 theorem ricFour_eval (g gm : SmoothRiemannianMetric I M)
     (Z : SmoothCcTensor g 0 4) (x : M) (v : Fin 2 → E) :
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciCometricFourTraceCastG0 (I := I) g gm) Z) x v =
       (1 / 2 : Real) *
         (unitModel (I := I) (M := M) g 2
-            (appCc (I := I) (M := M) g 4 2
+            (operatorFieldApply (I := I) (M := M) g 4 2
               (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-              (domDomCongrSection (I := I) g fourTraceArgPerm0231 Z)) x v +
+              (domDomCongrSection (I := I) g fourTraceCyclePerm123 Z)) x v +
           unitModel (I := I) (M := M) g 2
-            (appCc (I := I) (M := M) g 4 2
+            (operatorFieldApply (I := I) (M := M) g 4 2
               (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-              (domDomCongrSection (I := I) g fourTraceArgPerm0321 Z)) x v -
+              (domDomCongrSection (I := I) g fourTraceSwap13Perm Z)) x v -
           unitModel (I := I) (M := M) g 2
-            (appCc (I := I) (M := M) g 4 2
+            (operatorFieldApply (I := I) (M := M) g 4 2
               (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z) x v -
           unitModel (I := I) (M := M) g 2
-            (appCc (I := I) (M := M) g 4 2
+            (operatorFieldApply (I := I) (M := M) g 4 2
               (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-              (domDomCongrSection (I := I) g fourTraceArgPerm2301 Z)) x v) := by
+              (domDomCongrSection (I := I) g fourTraceDoubleTranspositionPerm Z)) x v) := by
   let Z1 : SmoothCcTensor g 0 4 :=
-    domDomCongrSection (I := I) g fourTraceArgPerm0231 Z
+    domDomCongrSection (I := I) g fourTraceCyclePerm123 Z
   let Z2 : SmoothCcTensor g 0 4 :=
-    domDomCongrSection (I := I) g fourTraceArgPerm0321 Z
+    domDomCongrSection (I := I) g fourTraceSwap13Perm Z
   let Z3 : SmoothCcTensor g 0 4 :=
-    domDomCongrSection (I := I) g fourTraceArgPerm2301 Z
+    domDomCongrSection (I := I) g fourTraceDoubleTranspositionPerm Z
   have h1 := reindexCoeffGen_appCc_eq (I := I) (M := M) g 4
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-    fourTraceArgPerm0231 Z Z1
+    fourTraceCyclePerm123 Z Z1
     (fun y => domDomCongrSection_unitModel (I := I) g
-      fourTraceArgPerm0231 Z y) x
+      fourTraceCyclePerm123 Z y) x
   have h2 := reindexCoeffGen_appCc_eq (I := I) (M := M) g 4
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-    fourTraceArgPerm0321 Z Z2
+    fourTraceSwap13Perm Z Z2
     (fun y => domDomCongrSection_unitModel (I := I) g
-      fourTraceArgPerm0321 Z y) x
+      fourTraceSwap13Perm Z y) x
   have h3 := reindexCoeffGen_appCc_eq (I := I) (M := M) g 4
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm)
-    fourTraceArgPerm2301 Z Z3
+    fourTraceDoubleTranspositionPerm Z Z3
     (fun y => domDomCongrSection_unitModel (I := I) g
-      fourTraceArgPerm2301 Z y) x
+      fourTraceDoubleTranspositionPerm Z y) x
   rw [ricciCometricFourTraceCastG0_eq_reindex_combination]
   simp only [appCc_smul_left, appCc_add_left, appCc_sub_left]
   rw [ricUnit_smul, ricUnit_sub, ricUnit_sub, ricUnit_add]
@@ -1296,16 +1345,16 @@ theorem ricFour_eval (g gm : SmoothRiemannianMetric I M)
     smul_eq_mul]
   change _ = (1 / 2 : Real) *
     (unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z1) x v +
       unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z2) x v -
       unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z) x v -
       unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 4 2
+        (operatorFieldApply (I := I) (M := M) g 4 2
           (ricciArmPrincipalCoeffPure (I := I) (M := M) g gm) Z3) x v)
   rw [h1, h2, h3]
 
@@ -1318,7 +1367,7 @@ theorem ricciDAOut_eval (g gm : SmoothRiemannianMetric I M)
     let L : TangentSpace I x →L[Real] TangentSpace I x :=
       fullRaisedEndoField (I := I) (M := M) g gm x
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W) x v =
       (1 / 2 : Real) *
         ∑ i : Fin (Module.finrank Real E),
@@ -1357,7 +1406,7 @@ theorem ricciDAOut_eval (g gm : SmoothRiemannianMetric I M)
         (![fullRaisedEndoField (I := I) (M := M) g gm x
               (smoothOrthoFrame (I := I) g x i x),
             smoothOrthoFrame (I := I) g x i x, v 0, v 1] : Fin 4 → E)
-          (fourTraceArgPerm0231 k)) =
+          (fourTraceCyclePerm123 k)) =
         ![fullRaisedEndoField (I := I) (M := M) g gm x
             (smoothOrthoFrame (I := I) g x i x),
           v 0, v 1, smoothOrthoFrame (I := I) g x i x] := by
@@ -1369,7 +1418,7 @@ theorem ricciDAOut_eval (g gm : SmoothRiemannianMetric I M)
         (![fullRaisedEndoField (I := I) (M := M) g gm x
               (smoothOrthoFrame (I := I) g x i x),
             smoothOrthoFrame (I := I) g x i x, v 0, v 1] : Fin 4 → E)
-          (fourTraceArgPerm0321 k)) =
+          (fourTraceSwap13Perm k)) =
         ![fullRaisedEndoField (I := I) (M := M) g gm x
             (smoothOrthoFrame (I := I) g x i x),
           v 1, v 0, smoothOrthoFrame (I := I) g x i x] := by
@@ -1381,7 +1430,7 @@ theorem ricciDAOut_eval (g gm : SmoothRiemannianMetric I M)
         (![fullRaisedEndoField (I := I) (M := M) g gm x
               (smoothOrthoFrame (I := I) g x i x),
             smoothOrthoFrame (I := I) g x i x, v 0, v 1] : Fin 4 → E)
-          (fourTraceArgPerm2301 k)) =
+          (fourTraceDoubleTranspositionPerm k)) =
         ![v 0, v 1,
           fullRaisedEndoField (I := I) (M := M) g gm x
             (smoothOrthoFrame (I := I) g x i x),
@@ -1396,12 +1445,13 @@ theorem ricciDAOut_eval (g gm : SmoothRiemannianMetric I M)
   refine Finset.sum_congr rfl fun i _ => ?_
   ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ricW_symm (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) (u v : TangentSpace I x) :
     unitModel (I := I) (M := M) g 2 W x ![u, v] =
       unitModel (I := I) (M := M) g 2 W x ![v, u] := by
@@ -1409,7 +1459,6 @@ private lemma ricW_symm (g : SmoothRiemannianMetric I M)
     unitModel_eq_ccTensorBilin_local]
   exact hWsymm x u v
 
-set_option linter.unusedSectionVars false in
 private lemma ricW_D (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M)
     (p u v z : TangentSpace I x) :
@@ -1432,15 +1481,15 @@ eight-term Ricci derivative output reduces to three terms. -/
 theorem ricciDAOut_red (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) (v : Fin 2 → E) :
     let e : Fin (Module.finrank Real E) → TangentSpace I x :=
       fun i => smoothOrthoFrame (I := I) g x i x
     let L : TangentSpace I x →L[Real] TangentSpace I x :=
       fullRaisedEndoField (I := I) (M := M) g gm x
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W) x v =
       (1 / 2 : Real) *
         ∑ i : Fin (Module.finrank Real E),
@@ -1476,12 +1525,11 @@ theorem ricciDAOut_red (g gm : SmoothRiemannianMetric I M)
           (smoothOrthoFrame (I := I) g x i x)) (v 1)]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma ricMove2 (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) (r u v : TangentSpace I x) :
     let e : Fin (Module.finrank Real E) → TangentSpace I x :=
       fun i => smoothOrthoFrame (I := I) g x i x
@@ -1511,7 +1559,7 @@ private lemma ricMove2 (g gm : SmoothRiemannianMetric I M)
     Wm.curryLeft r
   let Bm : ContinuousMultilinearMap Real
       (fun _ : Fin 1 => TangentSpace I x) Real :=
-    (((Dm.domDomCongr fourTraceArgPerm2301).curryLeft u).curryLeft v).curryLeft r
+    (((Dm.domDomCongr fourTraceDoubleTranspositionPerm).curryLeft u).curryLeft v).curryLeft r
   have horth : ∀ i j, g.inner x (e i) (e j) =
       if i = j then (1 : Real) else 0 :=
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
@@ -1522,15 +1570,16 @@ private lemma ricMove2 (g gm : SmoothRiemannianMetric I M)
   have hAm (q : TangentSpace I x) : Am ![q] = Wm ![r, q] := by
     rfl
   have hBm (q : TangentSpace I x) : Bm ![q] = Dm ![r, q, u, v] := by
-    simp only [Bm, ContinuousMultilinearMap.curryLeft_apply,
-      ContinuousMultilinearMap.domDomCongr_apply]
+    change Dm (fun i => ![u, v, r, q] (fourTraceDoubleTranspositionPerm i)) =
+      Dm ![r, q, u, v]
     congr 1
     funext k
     fin_cases k <;> rfl
-  change (∑ p : Fin (Module.finrank Real E),
-      Am ![e p] * Bm ![L (e p)]) =
-    ∑ p : Fin (Module.finrank Real E),
-      Am ![L (e p)] * Bm ![e p] at hkey
+  have hcons (q : TangentSpace I x) :
+      Fin.cons q (fun k : Fin 0 => e k.elim0) = ![q] := by
+    funext k
+    fin_cases k ; rfl
+  simp_rw [hcons] at hkey
   simp_rw [hAm, hBm] at hkey
   calc
     (∑ p : Fin (Module.finrank Real E),
@@ -1542,12 +1591,11 @@ private lemma ricMove2 (g gm : SmoothRiemannianMetric I M)
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [ricW_symm (I := I) (M := M) g W hWsymm x r (L (e p))]
 
-set_option linter.unusedSectionVars false in
 private lemma ricMove4 (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) (r u v : TangentSpace I x) :
     let e : Fin (Module.finrank Real E) → TangentSpace I x :=
       fun i => smoothOrthoFrame (I := I) g x i x
@@ -1589,10 +1637,11 @@ private lemma ricMove4 (g gm : SmoothRiemannianMetric I M)
     rfl
   have hBm (q : TangentSpace I x) : Bm ![q] = Dm ![r, u, v, q] := by
     rfl
-  change (∑ p : Fin (Module.finrank Real E),
-      Am ![e p] * Bm ![L (e p)]) =
-    ∑ p : Fin (Module.finrank Real E),
-      Am ![L (e p)] * Bm ![e p] at hkey
+  have hcons (q : TangentSpace I x) :
+      Fin.cons q (fun k : Fin 0 => e k.elim0) = ![q] := by
+    funext k
+    fin_cases k ; rfl
+  simp_rw [hcons] at hkey
   simp_rw [hAm, hBm] at hkey
   calc
     (∑ p : Fin (Module.finrank Real E),
@@ -1609,15 +1658,15 @@ two surviving components are exactly the two arms of `ricciDAPart`. -/
 theorem ricciDAOut_fin (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) (v : Fin 2 → E) :
     let e : Fin (Module.finrank Real E) → TangentSpace I x :=
       fun i => smoothOrthoFrame (I := I) g x i x
     let L : TangentSpace I x →L[Real] TangentSpace I x :=
       fullRaisedEndoField (I := I) (M := M) g gm x
     unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W) x v =
       ∑ r : Fin (Module.finrank Real E),
         ∑ p : Fin (Module.finrank Real E),
@@ -1733,6 +1782,7 @@ theorem ricciDAOut_fin (g gm : SmoothRiemannianMetric I M)
                 ![e r, v 0, v 1, e p] *
               unitModel (I := I) (M := M) g 2 W x ![e r, L (e p)] := by
         simp_rw [ricW_D (I := I) (M := M) g gm W]
+        rfl
       _ = ∑ r : Fin (Module.finrank Real E),
           ∑ p : Fin (Module.finrank Real E),
             unitModel (I := I) (M := M) g 4
@@ -1784,16 +1834,15 @@ theorem ricciDAOut_fin (g gm : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem ricDA_point (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u)
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u)
     (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 2 x
         (W.toFun x)
-        ((appCc (I := I) (M := M) g 2 2
+        ((operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W).toFun x) =
       tensorInnerPointwise (I := I) (M := M) g 0 4 x
         ((ricciDAPart (I := I) (M := M) g gm W).toFun x)
@@ -1806,7 +1855,7 @@ private theorem ricDA_point (g gm : SmoothRiemannianMetric I M)
       if i = j then (1 : Real) else 0 :=
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
   rw [ricInner0 (I := I) (M := M) g 2 W
-      (appCc (I := I) (M := M) g 2 2
+      (operatorFieldApply (I := I) (M := M) g 2 2
         (ricciDAArm (I := I) (M := M) g gm) W)
       x e bse hbse horth,
     ricInner0 (I := I) (M := M) g 4
@@ -1830,6 +1879,18 @@ private theorem ricDA_point (g gm : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g 4
         (ricciDAG (I := I) (M := M) g gm) x
         ![e r, e p, e u, e v]
+  have hvec2 (a b : Fin (Module.finrank Real E)) :
+      (fun k => e (![a, b] k)) = ![e a, e b] := by
+    funext k
+    fin_cases k <;> rfl
+  have hvec4 (a b c q : Fin (Module.finrank Real E)) :
+      (fun k => e (![a, b, c, q] k)) = ![e a, e b, e c, e q] := by
+    funext k
+    fin_cases k <;> rfl
+  simp_rw [hvec2, hvec4]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.cons_val_three,
+    Matrix.head_cons, Matrix.tail_cons]
   change (∑ u, ∑ v, w u v *
       (∑ r, ∑ p, h p r * (d r u v p - d r p u v))) =
     ∑ r, ∑ p, ∑ u, ∑ v,
@@ -1841,10 +1902,10 @@ the rank-four single-relative-trace partner. -/
 theorem ricciDA_pair (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u) :
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u) :
     tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W).toFun =
       tensorL2Inner (I := I) (M := M) g 0 4
         (ricciDAPart (I := I) (M := M) g gm W).toFun
@@ -1874,10 +1935,10 @@ entirely to the explicit single-relative-trace partner. -/
 theorem ricciDA_green (g gm : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
-      ccTensorBilin (I := I) g W x u v =
-        ccTensorBilin (I := I) g W x v u) :
+      smoothCcTensorBilinForm (I := I) g W x u v =
+        smoothCcTensorBilinForm (I := I) g W x v u) :
     tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-        (appCc (I := I) (M := M) g 2 2
+        (operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W).toFun =
       -tensorL2Inner (I := I) (M := M) g 0 3
         (ricciDAAdj (I := I) (M := M) g gm W).toFun
@@ -1902,9 +1963,12 @@ theorem ricciDA_green (g gm : SmoothRiemannianMetric I M)
     (ricciDABase (I := I) (M := M) g gm)
     (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 4) 1)
       (ricciDAPart (I := I) (M := M) g gm W))]
+  rw [ricciDAAdj]
   rw [tensorL2Inner_symm (I := I) (M := M) g 0 3
     (ricciDABase (I := I) (M := M) g gm).toFun
-    (ricciDAAdj (I := I) (M := M) g gm W).toFun]
+    (covDivergence (I := I) (M := M) g 3
+      (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 4) 1)
+        (ricciDAPart (I := I) (M := M) g gm W))).toFun]
 
 end IntrinsicSpectral
 end RicciFlow

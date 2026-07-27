@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1RawP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDAssembly
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # MSM135 Theorem 3.9 -- conditional Chapter-4 endpoint
@@ -20,7 +18,7 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]

@@ -41,15 +41,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-
-def secondMetricCometricDoubleTraceField (s : ℕ) : SmoothCcTensor g₀ (s + 2) s where
-  toSection :=
-    { toFun := fun x : M =>
-        (show TensorRSSpace (s + 2) s I x from cometricDoubleTraceFib (I := I) g₁ s x)
-      contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ s }
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
-
-set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma mvDoubleTraceField_self_eq (s : ℕ) :
     secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₀ s = cometricDoubleTraceField

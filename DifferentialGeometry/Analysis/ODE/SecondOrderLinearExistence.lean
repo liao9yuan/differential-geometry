@@ -4,7 +4,6 @@ import Mathlib.Analysis.InnerProductSpace.ProdL2
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Algebra.Order.Chebyshev
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Global forward solutions of second-order linear ODEs
@@ -36,7 +35,7 @@ open scoped NNReal
 
 namespace DifferentialGeometry.Analysis.ODE
 
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 /-- **Global forward existence for `y'' = A(t) y`.**  If each `A t` is a
 continuous linear operator, `t ↦ A t x` is continuous on `[0, T]` for every
@@ -116,9 +115,9 @@ theorem forward_ode2_of_bound
     forward_solution_of_lipschitzWith_affineBound (f := f) hT (le_refl 0)
       hlip hcont haff (toLp 2 (y₀, v₀))
   refine ⟨fun t => (γ t).fst, fun t => (γ t).snd, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · show (γ 0).fst = y₀
+  · change (γ 0).fst = y₀
     rw [hγ0]; rfl
-  · show (γ 0).snd = v₀
+  · change (γ 0).snd = v₀
     rw [hγ0]; rfl
   · exact ((ContinuousLinearMap.fst ℝ F F).comp
       (prodContinuousLinearEquiv 2 ℝ F F).toContinuousLinearMap)
@@ -229,13 +228,13 @@ theorem ode2_pi_zero
   have hY0 : ‖Y 0‖ ≤ 0 := by
     have hy0 : y 0 = 0 := funext h0
     have hz : Y 0 = 0 := by
-      show L (y 0) = 0
+      change L (y 0) = 0
       rw [hy0, map_zero]
     rw [hz, norm_zero]
   have hV0 : ‖V 0‖ ≤ 0 := by
     have hv0 : v 0 = 0 := funext h0'
     have hz : V 0 = 0 := by
-      show L (v 0) = 0
+      change L (v 0) = 0
       rw [hv0, map_zero]
     rw [hz, norm_zero]
   have hg := norm_le_gronwall_secondOrder (Y := Y) (Y' := V) (Y'' := W)

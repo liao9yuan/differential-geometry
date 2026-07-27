@@ -24,7 +24,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -45,7 +45,7 @@ private theorem clm_smul_apply
   have h := congrArg (fun L : F →L[ℝ] ℝ => L w) (B.map_smul c v)
   simpa only [ContinuousLinearMap.smul_apply, smul_eq_mul] using h
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
 private theorem linIndep_of_ortho
@@ -77,6 +77,7 @@ private theorem linIndep_of_ortho
   · intro hj
     exact absurd (Finset.mem_univ j) hj
 
+omit [SigmaCompactSpace M] in
 /-- The inverse-Gram trace of the radial curvature matrix is Ricci curvature,
 independently of the transverse basis used to form the Gram matrix. -/
 theorem curvTrace_eq_ricci
@@ -251,7 +252,7 @@ theorem curvTrace_eq_ricci
       BonnetMyers.ricci_eq_sum_perp
         (I := I) g (γ t) u hu e hON hEperp
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
+omit [NeZero (Module.finrank ℝ E)]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- The square of the mean-curvature trace is bounded by the transverse
 dimension times the quadratic shape trace. -/
@@ -445,6 +446,7 @@ theorem mean_sq_le_shape
   rw [hmean, hsq]
   simpa only [Fintype.card_fin] using hineq
 
+omit [SigmaCompactSpace M] in
 /-- Under a Ricci lower bound, the radial mean curvature satisfies the scalar
 Riccati differential inequality for the hyperbolic comparison model. -/
 theorem mean_riccati_le

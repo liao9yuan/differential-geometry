@@ -11,10 +11,10 @@ namespace Analysis
 namespace Parabolic
 namespace TimeSobolev
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ} {f : ℝ → X}
 
-omit [InnerProductSpace ℝ X] [CompleteSpace X] in
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 theorem aestronglyMeasurable_of_continuousOn_Ioo
     (hf : ContinuousOn f (Set.Ioo (0 : ℝ) T)) :
     AEStronglyMeasurable f (timeMeasure T) := by
@@ -23,7 +23,7 @@ theorem aestronglyMeasurable_of_continuousOn_Ioo
   rw [hrestrict]
   exact hf.aestronglyMeasurable measurableSet_Ioo
 
-omit [InnerProductSpace ℝ X] [CompleteSpace X] in
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 theorem memLp_of_continuousOn_Ioo
     (hf : ContinuousOn f (Set.Ioo (0 : ℝ) T)) {M : ℝ}
     (hM : ∀ᵐ t ∂(timeMeasure T), ‖f t‖ ≤ M) :

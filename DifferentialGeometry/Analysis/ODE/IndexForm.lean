@@ -2,7 +2,6 @@ import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # The index form of the Jacobi ODE
@@ -44,7 +43,9 @@ noncomputable section
 
 namespace DifferentialGeometry.Analysis.ODE
 
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
+section Normed
+
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 /-- The pair `(y, v)` solves the Jacobi-type second-order linear ODE
 `y'' + R(t) y = 0` on `[a, b]`, in the first-order form `y' = v`,
@@ -64,6 +65,12 @@ theorem contOn_snd (h : IsJacobiSolOn R a b y v) : ContinuousOn v (Icc a b) :=
   fun t ht => (h.deriv_snd t ht).continuousWithinAt
 
 end IsJacobiSolOn
+
+end Normed
+
+section InnerProduct
+
+variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 
 /-- The index-form integrand of the Jacobi ODE: for a field `y` with
 derivative `v` and a field `z` with derivative `w`,
@@ -264,5 +271,7 @@ theorem exists_indexForm_neg {R : ℝ → F →L[ℝ] F} {a b : ℝ} {y v z w : 
       rw [abs_of_pos hpos'] at h1
       linarith
     exact mul_neg_of_neg_of_pos hcneg hsum
+
+end InnerProduct
 
 end DifferentialGeometry.Analysis.ODE

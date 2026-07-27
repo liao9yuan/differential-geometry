@@ -81,7 +81,7 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -90,11 +90,11 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 
-private instance tensor0SModelNormedSpace_local {s : ℕ} :
+private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
 
-private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
+private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
 
@@ -172,7 +172,7 @@ end Fields
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNorm_smooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -192,6 +192,8 @@ noncomputable def nablaKNormDu
   duSec (I := I) (nablaKRm04NormSqIntrinsic (I := I) S k t)
     (nablaKNorm_smooth (I := I) S t k)
 
+omit [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- The differential of `|∇^k Rm|²` satisfies the curvature-tower Kato bound
 `|d|∇^k Rm|²|² ≤ 4 |∇^k Rm|² |∇^(k+1) Rm|²`. -/
 theorem towerNorm_grad_le
@@ -253,7 +255,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNormHeatAt
     [FiniteDimensional Real E]
@@ -419,7 +421,7 @@ theorem nablaKNormHeatAt
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormHeatEquationOn_intrinsic
     [FiniteDimensional Real E]
@@ -713,7 +715,7 @@ section Nonneg
 
 
 
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormSqIntrinsic_nonneg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

@@ -7,10 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProdu
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
-set_option linter.unusedDecidableInType false
 
 /-!
 # The arbitrary-dimensional curvature-derivative tower of a Ricci-flow solution
@@ -28,14 +24,13 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable [I.Boundaryless]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 /-- An arbitrary-dimensional Ricci-flow solution directly produces the

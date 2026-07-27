@@ -8,7 +8,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Scalar
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjugateHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
@@ -41,7 +41,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -445,6 +445,7 @@ the prescribed smooth initial tensor in that same Sobolev scale. -/
   rw [galLimExt_coeff hτ hlim m ⟨le_rfl, hτ⟩,
     ccTensorToHs_coeff, hlim.lim_init i]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The first covariant derivative of a smooth rank-zero tensor, after full
 evaluation, is the differential of its scalar readout. -/
 private theorem covGrad0_apply

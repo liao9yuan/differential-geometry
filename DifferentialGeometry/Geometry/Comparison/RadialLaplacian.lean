@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.LineSplit
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Laplacian of a selected branch radius
@@ -37,7 +36,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -235,6 +234,10 @@ theorem branchLap_eq_mean
   change metricTracePair0SAt (I := I) g Hess = _
   simpa only [G, A, hradial, mul_zero, zero_add, hmean] using hsplit
 
+omit [SigmaCompactSpace M]
+  [RiemannianBundle (fun x : M ↦ TangentSpace I x)] [PseudoEMetricSpace M]
+  [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private theorem smul_c2_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {t : Real}
     (htx : ‖t • x‖ < expMapC2Radius (I := I) g p) :
@@ -248,6 +251,9 @@ private theorem smul_c2_eventually
     hmap.continuousAt.eventually (Metric.isOpen_ball.mem_nhds hmem)
   simpa only [Metric.mem_ball, dist_zero_right] using hev
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private lemma metric_smul_left
     (g : SmoothRiemannianMetric I M) (p : M)
     (c : Real) (v y : E) :
@@ -264,6 +270,9 @@ private lemma metric_smul_left
       _
   rw [map_smul (g.inner p), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private lemma metric_smul_right
     (g : SmoothRiemannianMetric I M) (p : M)
     (c : Real) (v y : E) :

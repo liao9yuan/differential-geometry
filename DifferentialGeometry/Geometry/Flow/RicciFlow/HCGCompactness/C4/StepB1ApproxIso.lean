@@ -53,7 +53,7 @@ open scoped Manifold ContDiff BigOperators Topology
 open DifferentialGeometry.Geometry.Riemannian
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -96,7 +96,7 @@ noncomputable def PreApproxIsoDataOn.congr {K : Set M} {ε : Real} {p : Nat} {F 
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [SigmaCompactSpace N] in
 theorem stepB1_glue
     (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
@@ -193,7 +193,7 @@ structure StepB1RawInput (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) : 
 
 
 omit [Module.Finite ℝ E] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem stepB1_of_raw
     [FiniteDimensional Real E]
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

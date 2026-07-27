@@ -29,6 +29,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 /-- A family of smooth functions with one compact support and one finite-jet
 bound has a uniform finite chart-Sobolev norm.  The displayed witness is the
 finite sum, over all coordinate partials of order at most `k`, of
@@ -48,7 +49,7 @@ theorem wkp_bdd_of_jet
       ‖iteratedFDeriv ℝ j (F i) x‖ ≤ C) :
     ∃ A : ℝ≥0∞, A < ⊤ ∧ ∀ i : ι,
       MemWkp (d := d) k p (F i) Ω ∧
-        wkpNorm (d := d) k p (F i) Ω ≤ A := by
+        iteratedWeakSobolevNorm (d := d) k p (F i) Ω ≤ A := by
   classical
   let A : ℝ≥0∞ :=
     ∑ j ∈ Finset.range (k + 1),

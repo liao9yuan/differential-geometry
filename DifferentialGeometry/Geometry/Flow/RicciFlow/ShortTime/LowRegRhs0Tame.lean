@@ -10,6 +10,8 @@ derivative in the order-zero coefficient estimates.  The cancellation inside
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -20,10 +22,14 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open LieCorr0Core
 
 variable
-    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -71,7 +77,7 @@ theorem h1_grid_tame
     intro R hR i
     exact Finset.sum_nonneg fun k _ ↦ by
       by_cases hk : k = 3
-      · simp only [hk, if_pos]
+      · simp [hk]
       · simp only [if_neg hk]
         exact hK0 R hR k
   have hT : ∀ R : ℝ, 0 ≤ R → ∀ i, 0 ≤ T R i := by
@@ -80,7 +86,7 @@ theorem h1_grid_tame
       by_cases hk : k = 3
       · simp only [hk, if_pos]
         exact hK3 R hR
-      · simp only [if_neg hk]
+      · simp [hk]
   have hQ0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q0 R := by
     intro R hR
     exact Finset.sum_nonneg fun i _ ↦ mul_nonneg (hC i) (hL R hR i)
@@ -117,7 +123,7 @@ theorem h1_grid_tame
       (∑ k ∈ Finset.range (i + 3), Km k) = L R i + T R i * A ^ 2 := by
     intro i
     simp only [L, T]
-    rw [← Finset.sum_add_distrib]
+    rw [Finset.sum_mul, ← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro k _
     by_cases hk : k = 3
@@ -205,6 +211,7 @@ theorem convex_h2_jet (g₀ : SmoothRiemannianMetric I M) :
           (convexPerturbation (I := I) g₀ T T' s)))
       hsum 2)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_add
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (X Y : SmoothCcTensor g r s) (a b : ℝ)
@@ -237,10 +244,10 @@ private theorem jet_add
           ‖iteratedCovGrad (I := I) g r s j X‖ ^ 2) +
         (∑ j ∈ Finset.range n,
           ‖iteratedCovGrad (I := I) g r s j Y‖ ^ 2)) := by
-      simp only [Finset.mul_sum]
-      ring
+      simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
     _ ≤ 2 * (a ^ 2 + b ^ 2) := by gcongr
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_two
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (X : SmoothCcTensor g r s) :
@@ -252,8 +259,9 @@ private theorem jet_two
   apply Finset.sum_congr rfl
   intro j _
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
-  norm_num
+  ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_neg_two
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (X : SmoothCcTensor g r s) :
@@ -265,7 +273,7 @@ private theorem jet_neg_two
   apply Finset.sum_congr rfl
   intro j _
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs]
-  norm_num
+  ring
 
 private theorem app_h1h2
     (hDim : Module.finrank ℝ E = 3)
@@ -279,17 +287,17 @@ private theorem app_h1h2
           ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) ≤ B ^ 2 →
         (∑ j ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g p c j
-            (appCcRS (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
           (C * A * B) ^ 2 := by
   obtain ⟨C, hC, happ⟩ := appRS_h1_h2_h1 (I := I) (M := M) hDim g p r c
   refine ⟨C, hC, ?_⟩
   intro Φ W A B hA hB hΦ hW
   have hnorm := happ Φ W A B hA hB hΦ hW
   have hsquare := pow_le_pow_left₀
-    (norm_nonneg (⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+    (norm_nonneg (⟨ccOperatorFieldComp (I := I) (M := M) g p r c Φ W⟩ :
       SmoothCcTensorH1 g p c)) hnorm 2
   rw [h1_jet_sq (I := I) (M := M) g p c
-    (appCcRS (I := I) (M := M) g p r c Φ W)] at hsquare
+    (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)] at hsquare
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
@@ -305,17 +313,17 @@ private theorem app_h2h1
           ‖iteratedCovGrad (I := I) g p r j W‖ ^ 2) ≤ B ^ 2 →
         (∑ j ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g p c j
-            (appCcRS (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
+            (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)‖ ^ 2) ≤
           (C * A * B) ^ 2 := by
   obtain ⟨C, hC, happ⟩ := appRS_h2_h1_h1 (I := I) (M := M) hDim g p r c
   refine ⟨C, hC, ?_⟩
   intro Φ W A B hA hB hΦ hW
   have hnorm := happ Φ W A B hA hB hΦ hW
   have hsquare := pow_le_pow_left₀
-    (norm_nonneg (⟨appCcRS (I := I) (M := M) g p r c Φ W⟩ :
+    (norm_nonneg (⟨ccOperatorFieldComp (I := I) (M := M) g p r c Φ W⟩ :
       SmoothCcTensorH1 g p c)) hnorm 2
   rw [h1_jet_sq (I := I) (M := M) g p c
-    (appCcRS (I := I) (M := M) g p r c Φ W)] at hsquare
+    (ccOperatorFieldComp (I := I) (M := M) g p r c Φ W)] at hsquare
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
@@ -328,11 +336,11 @@ theorem ricci0_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -344,7 +352,7 @@ theorem ricci0_h1_tame
               (I := I) (M := M) g₀ g₁)‖ ^ 2) ≤
           (B0 R + B1 R * A) ^ 2 := by
   obtain ⟨C, hC, hpt⟩ :=
-    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0Coeff_diagGrid_le
       (I := I) (M := M) g₀ hδ₀
   obtain ⟨B0, B1, hB0, hB1, hgrid⟩ :=
     h1_grid_tame (I := I) (M := M) (r := 2) (s := 2) hDim g₀ C hC
@@ -364,11 +372,11 @@ theorem dla_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -376,7 +384,7 @@ theorem dla_h1_tame
         ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ≤ A →
         (∑ i ∈ Finset.range 2,
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) ≤
+            (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) ≤
           (B0 R + B1 R * A) ^ 2 := by
   obtain ⟨C, hC, hpt⟩ :=
     rfns_iteratedCovGrad_deTurckLieDLaCoeffField_diagonalProductGrid_le
@@ -386,7 +394,7 @@ theorem dla_h1_tame
   refine ⟨B0, B1, hB0, hB1, ?_⟩
   intro g₁ P htie δ hδ_le hδ_nonneg hbound R A hR hA hP2 htop
   exact hgrid P
-    (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg)
+    (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg)
     R A hR hA hP2 htop
     (fun i hi x ↦ hpt g₁ P htie hδ_le hδ_nonneg hbound i x)
 
@@ -399,11 +407,11 @@ theorem dlbDiff_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -415,7 +423,8 @@ theorem dlbDiff_h1_tame
               deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2) ≤
           (B0 R + B1 R * A) ^ 2 := by
   classical
-  obtain ⟨C, hC, hpt⟩ := dlbDiff_grid (I := I) (M := M) g₀ g_bg hδ₀
+  obtain ⟨C, hC, hpt⟩ :=
+    bdEndoArmDiff_pointwise_gridWindow (I := I) (M := M) g₀ g_bg hδ₀
   obtain ⟨B0, B1, hB0, hB1, hgrid⟩ :=
     h1_grid_tame (I := I) (M := M) (r := 2) (s := 2) hDim g₀ C hC
   refine ⟨B0, B1, hB0, hB1, ?_⟩
@@ -448,6 +457,8 @@ theorem dlbDiff_h1_tame
       deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀)
     R A hR hA hP2 htop hpt'
 
+set_option maxHeartbeats 800000 in
+-- The rank-changing operator composition needs an enlarged local elaboration budget.
 /-- The fixed-curvature part of `lieCorr0` is in fact a lower-order `H1`
 coefficient; its affine top-order coefficient can be chosen to be zero. -/
 theorem riem_h1_tame
@@ -457,11 +468,11 @@ theorem riem_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -476,44 +487,54 @@ theorem riem_h1_tame
     trace2_h2 (I := I) (M := M) hDim g₀ hδ₀
   obtain ⟨Cp, hCp, happ⟩ :=
     appRS_h2_h2_h2 (I := I) (M := M) hDim g₀ 2 4 2
-  let Rf : SmoothCcTensor g₀ 2 4 := lc0RiemRest (I := I) (M := M) g₀
   let Fr : ℝ := ∑ j ∈ Finset.range 3,
-    ‖iteratedCovGrad (I := I) g₀ 2 4 j Rf‖ ^ 2
+    ‖iteratedCovGrad (I := I) g₀ 2 4 j
+      (lc0RiemRestField (I := I) (M := M) g₀)‖ ^ 2
   let Br : ℝ := Real.sqrt Fr
   let B0 : ℝ → ℝ := fun R ↦ Cp * Bt R * Br
   let B1 : ℝ → ℝ := fun _ ↦ 0
   have hFr : 0 ≤ Fr := Finset.sum_nonneg fun j _ ↦ sq_nonneg _
   have hBr : 0 ≤ Br := Real.sqrt_nonneg _
   have hRf : (∑ j ∈ Finset.range 3,
-      ‖iteratedCovGrad (I := I) g₀ 2 4 j Rf‖ ^ 2) ≤ Br ^ 2 := by
+      ‖iteratedCovGrad (I := I) g₀ 2 4 j
+        (lc0RiemRestField (I := I) (M := M) g₀)‖ ^ 2) ≤ Br ^ 2 := by
     rw [show Br ^ 2 = Fr by simp only [Br, Real.sq_sqrt hFr]]
   refine ⟨B0, B1, fun R hR ↦
     mul_nonneg (mul_nonneg hCp (hBt R hR)) hBr,
     fun R hR ↦ le_rfl, ?_⟩
   intro g₁ P htie δ hδ_le hδ_nonneg hbound R A hR hA hP2 htop
-  let Tr : SmoothCcTensor g₀ 4 2 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2
   have hTr : (∑ i ∈ Finset.range 3,
-      ‖iteratedCovGrad (I := I) g₀ 4 2 i Tr‖ ^ 2) ≤ (Bt R) ^ 2 := by
-    simpa only [Tr] using htrace g₁ P htie hδ_le hδ_nonneg hbound
+      ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)‖ ^ 2) ≤
+      (Bt R) ^ 2 :=
+    htrace g₁ P htie hδ_le hδ_nonneg hbound
       lieCorr0RiemPerm2 R hR hP2
-  have hApp := happ Tr Rf (Bt R) Br (hBt R hR) hBr hTr hRf
-  have hApp1 : (∑ i ∈ Finset.range 2,
+  have hApp := happ
+    (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)
+    (lc0RiemRestField (I := I) (M := M) g₀)
+    (Bt R) Br (hBt R hR) hBr hTr hRf
+  have hAppJet : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i
-        (appCcRS (I := I) (M := M) g₀ 2 4 2 Tr Rf)‖ ^ 2) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
+          (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)
+          (lc0RiemRestField (I := I) (M := M) g₀))‖ ^ 2) ≤
       (B0 R) ^ 2 := by
     calc
       _ ≤ ∑ i ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (appCcRS (I := I) (M := M) g₀ 2 4 2 Tr Rf)‖ ^ 2 :=
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
+              (lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0RiemPerm2)
+              (lc0RiemRestField (I := I) (M := M) g₀))‖ ^ 2 :=
         Finset.sum_le_sum_of_subset_of_nonneg
           (Finset.range_subset_range.mpr (by omega))
           (fun i _ _ ↦ sq_nonneg _)
       _ ≤ (Cp * Bt R * Br) ^ 2 := hApp
       _ = (B0 R) ^ 2 := by rfl
-  rw [riem_refold (I := I) (M := M) g₀ g₁]
-  simpa only [Tr, Rf, B1, add_zero, zero_mul, iteratedCovGrad_smul,
-    norm_smul, Real.norm_eq_abs, abs_neg, abs_one, one_mul] using hApp1
+  rw [lc0Riem_eq_lc0RiemField (I := I) (M := M) g₀ g₁]
+  simpa only [lc0RiemField, B1, zero_mul, add_zero,
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.iteratedCovGrad_smul_real,
+    norm_smul, Real.norm_eq_abs,
+    abs_neg, abs_one, one_mul] using hAppJet
 
 /-- Affine `H1` bound for the genuine vector--bilinear correction.  Its only
 top-order factor is the self-background Koszul tensor. -/
@@ -524,11 +545,11 @@ theorem vb_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -590,25 +611,25 @@ theorem vb_h1_tame
       _ ≤ R ^ 2 + A ^ 2 := add_le_add hP2 htop2
       _ ≤ (R + A) ^ 2 := by nlinarith [mul_nonneg hR hA]
   let T1 : SmoothCcTensor g₀ 3 1 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _)
+    lc0Tr (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _)
   let T1i : SmoothCcTensor g₀ 3 1 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 1 lieCorr0IVPerm
+    lc0Tr (I := I) (M := M) g₀ g₁ 1 lc0IVPerm
   let T2 : SmoothCcTensor g₀ 4 2 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 2 lieCorr0VBPerm
+    lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0VBPerm
   let K : SmoothCcTensor g₀ 0 3 :=
     lc0Kappa (I := I) (M := M) g₀ g₁ g₀
   let Vf : SmoothCcTensor g₀ 0 1 :=
-    appCcRS (I := I) (M := M) g₀ 0 3 1 T1 K
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 T1 K
   let Vs : SmoothCcTensor g₀ 2 3 :=
     slotExtendIter (I := I) (M := M) g₀ 0 1 2 Vf
   let Iv : SmoothCcTensor g₀ 2 1 :=
-    appCcRS (I := I) (M := M) g₀ 2 3 1 T1i Vs
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 3 1 T1i Vs
   let Ks : SmoothCcTensor g₀ 1 4 :=
     slotExtendIter (I := I) (M := M) g₀ 0 3 1 K
   let Inn : SmoothCcTensor g₀ 2 4 :=
-    appCcRS (I := I) (M := M) g₀ 2 1 4 Ks Iv
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 1 4 Ks Iv
   let Out : SmoothCcTensor g₀ 2 2 :=
-    appCcRS (I := I) (M := M) g₀ 2 4 2 T2 Inn
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 T2 Inn
   have hT1 : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 3 1 i T1‖ ^ 2) ≤ (Bt1 R) ^ 2 := by
     simpa only [T1] using htr1 g₁ P htie hδ_le hδ_nonneg hbound
@@ -616,7 +637,7 @@ theorem vb_h1_tame
   have hT1i : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 3 1 i T1i‖ ^ 2) ≤ (Bt1 R) ^ 2 := by
     simpa only [T1i] using htr1 g₁ P htie hδ_le hδ_nonneg hbound
-      lieCorr0IVPerm R hR hP2
+      lc0IVPerm R hR hP2
   have hT2 : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 4 2 i T2‖ ^ 2) ≤ (Bt2 R) ^ 2 := by
     simpa only [T2] using htr2 g₁ P htie hδ_le hδ_nonneg hbound
@@ -659,9 +680,9 @@ theorem vb_h1_tame
         (Ob R (R + A)) ^ 2 := by
     simpa only [Out, Ob] using hoprod T2 Inn (Bt2 R) (Nb R (R + A))
       (hBt2 R hR) (hNb R hR (R + A) hRA) hT2 hInn
-  rw [vb_refold (I := I) (M := M) g₀ g₁]
+  rw [lc0VB_eq_lc0VBField (I := I) (M := M) g₀ g₁]
   have htwo := jet_two (I := I) (M := M) g₀ 2 2 2 Out
-  rw [show lc0VBForm (I := I) (M := M) g₀ g₁ = (2 : ℝ) • Out by rfl,
+  rw [show lc0VBField (I := I) (M := M) g₀ g₁ = (2 : ℝ) • Out by rfl,
     htwo]
   change 4 * (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i Out‖ ^ 2) ≤
@@ -683,11 +704,11 @@ theorem amix_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -749,14 +770,14 @@ theorem amix_h1_tame
       _ ≤ R ^ 2 + A ^ 2 := add_le_add hP2 htop2
       _ ≤ (R + A) ^ 2 := by nlinarith [mul_nonneg hR hA]
   let T2a : SmoothCcTensor g₀ 4 2 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 2 lieCorr0AMixPerm2
+    lc0Tr (I := I) (M := M) g₀ g₁ 2 lieCorr0AMixPerm2
   let T2b : SmoothCcTensor g₀ 4 2 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 2
-      (lc0SwapPerm * lieCorr0AMixPerm2)
+    lc0Tr (I := I) (M := M) g₀ g₁ 2
+      (lc0SwapOutPerm * lieCorr0AMixPerm2)
   let T3 : SmoothCcTensor g₀ 5 3 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 3 lieCorr0AMixPermQ
+    lc0Tr (I := I) (M := M) g₀ g₁ 3 lieCorr0AMixPermQ
   let T4 : SmoothCcTensor g₀ 6 4 :=
-    lc0Trace (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1
+    lc0Tr (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1
   let K0 : SmoothCcTensor g₀ 0 3 :=
     lc0Kappa (I := I) (M := M) g₀ g₁ g₀
   let KB : SmoothCcTensor g₀ 0 3 :=
@@ -764,17 +785,17 @@ theorem amix_h1_tame
   let K0s : SmoothCcTensor g₀ 2 5 :=
     slotExtendIter (I := I) (M := M) g₀ 0 3 2 K0
   let Q : SmoothCcTensor g₀ 2 3 :=
-    appCcRS (I := I) (M := M) g₀ 2 5 3 T3 K0s
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 5 3 T3 K0s
   let KBs : SmoothCcTensor g₀ 3 6 :=
     slotExtendIter (I := I) (M := M) g₀ 0 3 3 KB
   let N : SmoothCcTensor g₀ 2 6 :=
-    appCcRS (I := I) (M := M) g₀ 2 3 6 KBs Q
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 3 6 KBs Q
   let Mid : SmoothCcTensor g₀ 2 4 :=
-    appCcRS (I := I) (M := M) g₀ 2 6 4 T4 N
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 4 T4 N
   let Oa : SmoothCcTensor g₀ 2 2 :=
-    appCcRS (I := I) (M := M) g₀ 2 4 2 T2a Mid
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 T2a Mid
   let Ob' : SmoothCcTensor g₀ 2 2 :=
-    appCcRS (I := I) (M := M) g₀ 2 4 2 T2b Mid
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 T2b Mid
   have hT2a : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 4 2 i T2a‖ ^ 2) ≤ (Bt2 R) ^ 2 := by
     simpa only [T2a] using htr2 g₁ P htie hδ_le hδ_nonneg hbound
@@ -782,7 +803,7 @@ theorem amix_h1_tame
   have hT2b : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 4 2 i T2b‖ ^ 2) ≤ (Bt2 R) ^ 2 := by
     simpa only [T2b] using htr2 g₁ P htie hδ_le hδ_nonneg hbound
-      (lc0SwapPerm * lieCorr0AMixPerm2) R hR hP2
+      (lc0SwapOutPerm * lieCorr0AMixPerm2) R hR hP2
   have hT3 : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 5 3 i T3‖ ^ 2) ≤ (Bt3 R) ^ 2 := by
     simpa only [T3] using htr3 g₁ P htie hδ_le hδ_nonneg hbound
@@ -835,9 +856,9 @@ theorem amix_h1_tame
       (hBt2 R hR) (hMb R hR (R + A) hRA) hT2b hMid
   have hsum := jet_add (I := I) (M := M) g₀ 2 2 2 Oa Ob'
     (Ob R (R + A)) (Ob R (R + A)) hOa hOb'
-  rw [amix_refold (I := I) (M := M) g₀ g₁ gB]
+  rw [lc0AMix_eq_lc0AMixField (I := I) (M := M) g₀ g₁ gB]
   have htwo := jet_two (I := I) (M := M) g₀ 2 2 2 (Oa + Ob')
-  rw [show lc0AMixForm (I := I) (M := M) g₀ g₁ gB =
+  rw [show lc0AMixField (I := I) (M := M) g₀ g₁ gB =
       (2 : ℝ) • (Oa + Ob') by rfl, htwo]
   change 4 * (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i (Oa + Ob')‖ ^ 2) ≤
@@ -858,11 +879,11 @@ theorem tail_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         (∑ j ∈ Finset.range 3,
@@ -947,6 +968,8 @@ theorem tail_h1_tame
       rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)]
     _ = (B0 R + B1 R * A) ^ 2 := by rw [hfactor]
 
+set_option maxHeartbeats 2000000 in
+-- The affine assembly combines several rank-changing coefficient estimates.
 /-- A lower endpoint `H2` radius and an independent endpoint `H3` radius give
 the complete affine `H1` bound for `rhsLow0Coeff` along the same convex path. -/
 theorem rhs0_h1_tame
@@ -957,9 +980,9 @@ theorem rhs0_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
@@ -1021,14 +1044,14 @@ theorem rhs0_h1_tame
   have hsingle : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 ≤
       ∑ j ∈ Finset.range 4,
         ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
-    exact Finset.single_le_sum (fun j _ ↦ sq_nonneg _)
-      (Finset.mem_range.mpr (by omega))
+    rw [show (4 : ℕ) = 3 + 1 by norm_num, Finset.sum_range_succ]
+    exact le_add_of_nonneg_left (Finset.sum_nonneg fun j _ ↦ sq_nonneg _)
   have htopSq : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ^ 2 ≤
       (C3 * A) ^ 2 := hsingle.trans hP3
   have htop : ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖ ≤ C3 * A := by
     nlinarith [htopSq, hhigh,
       norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 3 P)]
-  have hPbound : gFibreOpBound (I := I) (M := M) g₀
+  have hPbound : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ P) δ₀ := by
     have h := convexPerturbation_gFibreOpBound
       (I := I) (M := M) g₀ T T' hδ hδ' hs.1 hs.2
@@ -1045,7 +1068,7 @@ theorem rhs0_h1_tame
   let Ric : SmoothCcTensor g₀ 2 2 :=
     linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
   let DLa : SmoothCcTensor g₀ 2 2 :=
-    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg
+    deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg
   let Tail : SmoothCcTensor g₀ 2 2 :=
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg +
       lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg
@@ -1055,17 +1078,17 @@ theorem rhs0_h1_tame
   have hRB : 0 ≤ RB := add_nonneg (hR0 R hR) (mul_nonneg (hR1 R hR) hA)
   have hDB : 0 ≤ DB := add_nonneg (hD0 R hR) (mul_nonneg (hD1 R hR) hA)
   have hTB : 0 ≤ TB := add_nonneg (hT0 R hR) (mul_nonneg (hT1 R hR) hA)
-  have hRicRaw := hric g₁ P htie (hδ_le := le_rfl) hδ₀_nonneg hPbound
+  have hRicRaw := hric g₁ P htie (_hδ_le := le_rfl) hδ₀_nonneg hPbound
     (C2 * R) (C3 * A) hlow hhigh hP2 htop
   have hRic : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i Ric‖ ^ 2) ≤ RB ^ 2 := by
     simpa only [Ric, RB, R0, R1, mul_assoc] using hRicRaw
-  have hDlaRaw := hdla g₁ P htie (hδ_le := le_rfl) hδ₀_nonneg hPbound
+  have hDlaRaw := hdla g₁ P htie (_hδ_le := le_rfl) hδ₀_nonneg hPbound
     (C2 * R) (C3 * A) hlow hhigh hP2 htop
   have hDla : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i DLa‖ ^ 2) ≤ DB ^ 2 := by
     simpa only [DLa, DB, D0, D1, mul_assoc] using hDlaRaw
-  have hTailRaw := htail g₁ P htie (hδ_le := le_rfl) hδ₀_nonneg hPbound
+  have hTailRaw := htail g₁ P htie (_hδ_le := le_rfl) hδ₀_nonneg hPbound
     (C2 * R) (C3 * A) hlow hhigh hP2 htop
   have hTail : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 2 2 i Tail‖ ^ 2) ≤ TB ^ 2 := by
@@ -1099,7 +1122,7 @@ theorem rhs0_h1_tame
       (-2 : ℝ) • Ric + (DLa + Tail) := by
     simp only [rhsLow0Coeff, linearizedRicciConnDiffOrder0Coeff,
       Ric, DLa, Tail, g₁]
-    rw [deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
+    rw [← deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
     abel
   rw [hrhs]
   exact hout.trans (hbound.trans_eq (by rw [hfactor]))

@@ -47,7 +47,7 @@ private theorem mapDerivNorm_tri
     ((hh.sub hg).of_le (by exact_mod_cast le_top))]
   exact norm_sub_le _ _
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -83,7 +83,7 @@ theorem HasSuppConvData.source_stay
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
-      (NormalCoordinates.framedChartAt (I := I) Yk.metric
+      (NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (z n) ∈
           Lphi.hatSourceBall inp.decay P R (kn n)) :
     ∃ q : Real, 0 < q ∧
@@ -101,7 +101,7 @@ theorem HasSuppConvData.source_stay
           letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
           letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
           Set.MapsTo
-            (NormalCoordinates.framedChartAt (I := I) Yk.metric
+            (NormalCoordinates.normalChartAt (I := I) Yk.metric
               (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
             W (Lphi.hatSourceBall inp.decay P S (kn n)) := by
   classical
@@ -147,7 +147,7 @@ theorem HasSuppConvData.source_stay
     letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
     letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
     let ck := seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat)
-    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
+    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
     intro w hw
     have hwzq : dist w (z n) < 3 * q := by
       calc
@@ -170,11 +170,9 @@ theorem HasSuppConvData.source_stay
       intro v hv
       have hvBall := hExp hv
       rw [Metric.mem_ball, dist_zero_right] at hvBall
-      change v ∈ (NormalCoordinates.framedExpDiffeo (I := I) Yk.metric ck).source
-      rw [NormalCoordinates.framedExp_source]
+      change v ∈ (NormalCoordinates.expMapDiffeo (I := I) Yk.metric ck).source
       apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-      apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-      simpa only [NormalCoordinates.normalFrame_sqrt] using hvBall
+      exact hvBall
     have hman := NormalCoordMetricEquivOn.symm_dist_le
       (I := I) Yk (P (Lphi.φ (kn n))) hEquiv hUtgt
         (hsegInt.trans hIntU)
@@ -203,6 +201,7 @@ theorem HasSuppConvData.source_stay
     exact hdist.le
 
 set_option maxHeartbeats 2400000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option synthInstance.maxHeartbeats 1000000 in
 /-- On one retained source patch with a fixed coordinate buffer, every finite
 jet of the actual pulled-back target metric converges to the corresponding
@@ -241,9 +240,9 @@ theorem HasStageJetData.pb_buf_tail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
     let B : Nat → E → (E →L[Real] E →L[Real] Real) := fun l ↦
@@ -261,7 +260,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
       chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
         mapDerivNorm j (Q k l) (B k) z ≤ eps := by
@@ -289,9 +288,9 @@ theorem HasStageJetData.pb_buf_tail
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-    let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
       (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
     chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
   let B : Nat → E → (E →L[Real] E →L[Real] Real) := fun l ↦
@@ -309,7 +308,7 @@ theorem HasStageJetData.pb_buf_tail
     letI : T2Space Yk.M := Yk.t2
     letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
     letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
-    let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
     chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
       mapDerivNorm j (Q k l) (B k) z ≤ eps
@@ -329,7 +328,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (k n))).ms
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (k n) (alpha.1 : Nat))
       chiK.symm (z n) ∈ Lphi.hatSourceBall inp.decay P R (k n) ∧
         eps < mapDerivNorm (j n) (Q (k n) (l n)) (B (k n)) (z n) := by
@@ -346,7 +345,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (k n))).ms
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (k n) (alpha.1 : Nat))
       chiK.symm (z n) ∈ Lphi.hatSourceBall inp.decay P R (k n) :=
     fun n ↦ (hrest' n).1
@@ -377,7 +376,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
-      (NormalCoordinates.framedChartAt (I := I) Yk.metric
+      (NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (zn n) ∈
           Lphi.hatSourceBall inp.decay P R (kn n) := by
     intro n
@@ -396,7 +395,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
       Set.MapsTo
-        (NormalCoordinates.framedChartAt (I := I) Yk.metric
+        (NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm
         W (Lphi.hatSourceBall inp.decay P S (kn n)) := by
     simpa only [V, W, Lphi] using hstay
@@ -457,7 +456,7 @@ theorem HasStageJetData.pb_buf_tail
       letI : T2Space Yk.M := Yk.t2
       letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
       letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
-      (NormalCoordinates.framedChartAt (I := I) Yk.metric
+      (NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (zn n) ∈
           Lphi.hatSourceBall inp.decay P S (kn n) := by
     dsimp only
@@ -470,11 +469,11 @@ theorem HasStageJetData.pb_buf_tail
     letI : MetricSpace Yk.M := (P (Lphi.φ (kn n))).ms
     have hsrc := hsource' n
     change dist
-      ((NormalCoordinates.framedChartAt (I := I) Yk.metric
+      ((NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (zn n))
       Yk.basepoint ≤ R at hsrc
     change dist
-      ((NormalCoordinates.framedChartAt (I := I) Yk.metric
+      ((NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi (kn n) (alpha.1 : Nat))).symm (zn n))
       Yk.basepoint ≤ S
     exact hsrc.trans hRS.le
@@ -538,6 +537,7 @@ theorem HasStageJetData.pb_buf_tail
   simpa only [kn, ln, zn] using (not_lt_of_ge hle hbad')
 
 set_option maxHeartbeats 1600000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option synthInstance.maxHeartbeats 800000 in
 /-- On a smaller source ball, the producer-owned finite buffered chart cover
 admits one common two-stage tail for all coefficient jets through a prescribed
@@ -576,9 +576,9 @@ theorem HasStageJetData.pb_local_tail
         letI : IsManifold I ∞ Yl.M := Yl.smooth
         letI : T2Space Yl.M := Yl.t2
         letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-        let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+        let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
           (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
         chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
     let B : LiveSlot L inp.pack r → Nat →
@@ -601,7 +601,7 @@ theorem HasStageJetData.pb_local_tail
         letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
         ∀ y ∈ Lphi.hatSourceBall inp.decay P R k,
           ∃ (alpha : LiveSlot L inp.pack r) (z : E),
-            (NormalCoordinates.framedChartAt (I := I) Yk.metric
+            (NormalCoordinates.normalChartAt (I := I) Yk.metric
               (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z = y ∧
             Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha) ∧
             ∀ j ≤ p,
@@ -623,9 +623,9 @@ theorem HasStageJetData.pb_local_tail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
+      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z))
   let B : LiveSlot L inp.pack r → Nat →
@@ -648,7 +648,7 @@ theorem HasStageJetData.pb_local_tail
       letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
       ∀ y ∈ Lphi.hatSourceBall inp.decay P R k,
         ∃ (alpha : LiveSlot L inp.pack r) (z : E),
-          (NormalCoordinates.framedChartAt (I := I) Yk.metric
+          (NormalCoordinates.normalChartAt (I := I) Yk.metric
             (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z = y ∧
           Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha) ∧
           ∀ j ≤ p, mapDerivNorm j (Q alpha k l) (B alpha k) z ≤ eps
@@ -664,7 +664,7 @@ theorem HasStageJetData.pb_local_tail
         letI : T2Space Yk.M := Yk.t2
         letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
         letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
-        let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
         chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
           mapDerivNorm j (Q alpha k l) (B alpha k) z ≤ eps := by
@@ -688,7 +688,7 @@ theorem HasStageJetData.pb_local_tail
   have hyBig : y ∈ Lphi.hatSourceBall inp.decay P r k :=
     cball_subset_of_le (hRS.trans hSr).le hy
   obtain ⟨alpha, z, hzy, hzbuffer⟩ := hcover k y hyBig
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
     (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
   have hzy' : chiK.symm z = y := by
     simpa only [chiK, Yk, Lphi] using hzy

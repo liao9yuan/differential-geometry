@@ -36,7 +36,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -47,13 +47,13 @@ def chartGramPi (g : SmoothRiemannianMetric I M) (α : M) :
     E → (Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) :=
   fun w l m => chartGramOnE (I := I) g α l m w
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem chartGramPi_apply (g : SmoothRiemannianMetric I M) (α : M) (w : E)
     (l m : Fin (Module.finrank ℝ E)) :
     chartGramPi (I := I) g α w l m = chartGramOnE (I := I) g α l m w := rfl
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_d1 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y)
     (i l m : Fin (Module.finrank ℝ E)) :
@@ -65,7 +65,7 @@ theorem jet2_chartGram_d1 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hG1 : ∀ᶠ w in nhds y, DifferentiableAt ℝ (chartGramPi (I := I) g α) w)
     (hG2 : DifferentiableAt ℝ (fun w => fderiv ℝ (chartGramPi (I := I) g α) w) y)
@@ -84,7 +84,7 @@ theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_invGram (g : SmoothRiemannianMetric I M) (α : M) (y : E)
     (k l : Fin (Module.finrank ℝ E)) :
     (Matrix.of (jet2 (chartGramPi (I := I) g α) y).1)⁻¹ k l = chartInvGramOnE (I := I) g α k l
@@ -98,7 +98,7 @@ theorem jet2_chartGram_invGram (g : SmoothRiemannianMetric I M) (α : M) (y : E)
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffel_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y) (i j k : Fin (Module.finrank ℝ E)) :
     chartChristoffel (I := I) g α i j k y
@@ -113,7 +113,6 @@ theorem chartChristoffel_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelDeriv_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -133,7 +132,6 @@ theorem chartChristoffelDeriv_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemann_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -154,7 +152,6 @@ theorem chartRiemann_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicci_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -171,7 +168,6 @@ theorem chartRicci_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jetRicciFlow_chartGram (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -189,7 +185,7 @@ theorem jetRicciFlow_chartGram (g : SmoothRiemannianMetric I M) (α : M) {y : E}
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFlowChartGram_jetMatch (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (α : M)
     {V : Set E} {sL sR : Set ℝ}
     (hsL : UniqueDiffOn ℝ sL) (haccL : sL ⊆ closure (interior sL)) (h0L : (0 : ℝ) ∈ sL)
@@ -220,7 +216,6 @@ theorem ricciFlowChartGram_jetMatch (g₁ g₂ : ℝ → SmoothRiemannianMetric 
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramEvolution_of_pde (g : ℝ → SmoothRiemannianMetric I M) (α : M) {y : E} {sL : Set ℝ}
     {t : ℝ} (hsL : UniqueDiffWithinAt ℝ sL t)
@@ -251,7 +246,6 @@ theorem chartGramEvolution_of_pde (g : ℝ → SmoothRiemannianMetric I M) (α :
 
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramEntryPDE_of_metricPDE [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
     (g : ℝ → SmoothRiemannianMetric I M) (α : M) {y : E} {sL : Set ℝ} {t : ℝ}
@@ -281,7 +275,7 @@ theorem chartGramEntryPDE_of_metricPDE [I.Boundaryless] [SigmaCompactSpace M] [T
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramGlue_contDiffOn (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (α : M) {V : Set E}
     (hV : IsOpen V)
     (hL : ContDiffOn ℝ ∞ (Function.uncurry (fun t => chartGramPi (I := I) (g₁ t) α))

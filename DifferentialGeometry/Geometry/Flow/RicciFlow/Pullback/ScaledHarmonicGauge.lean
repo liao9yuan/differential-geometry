@@ -1,3 +1,5 @@
+import DifferentialGeometry.Bundle.VectorField
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.InverseFamily
 
@@ -18,9 +20,12 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -34,16 +39,33 @@ def transportScalar
     ScalarField (I := I) (M := M) :=
   ⟨fun y => r (Φ.symm y), r.contMDiff.comp Φ.symm.contMDiff⟩
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 @[simp] theorem trScalar_apply
     (r : ScalarField (I := I) (M := M)) (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     transportScalar (I := I) r Φ y = r (Φ.symm y) :=
   rfl
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [CompactSpace M]
+  [I.Boundaryless]
+  [SigmaCompactSpace M]
+  [T2Space M]
+  [BoundarylessManifold I M] in
 @[simp] theorem trScalar_image
     (r : ScalarField (I := I) (M := M)) (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     transportScalar (I := I) r Φ (Φ x) = r x := by
   simp only [trScalar_apply, Diffeomorph.symm_apply_apply]
 
+omit [CompactSpace M] in
 /-- A Ricci flow pulled back by a family whose velocity is the pushforward of
 an arbitrary smooth drift `Z` solves Ricci flow plus `ℒ_Z g`.
 
@@ -150,6 +172,7 @@ theorem ricci_pullback_drift
     exact pullback_metric_evaluation_formula (I := I) (g_RF s) (Φ_fam s) x v w
   rwa [hcurve]
 
+omit [CompactSpace M] in
 /-- Pulling a fixed metric back by a family whose velocity is the pushforward
 of `Z` differentiates to `ℒ_Z` of the pulled-back metric. -/
 theorem fixed_pullback_drift
@@ -216,6 +239,8 @@ theorem fixed_pullback_drift
     exact pullback_metric_evaluation_formula (I := I) q (Φ_fam s) x v w
   rwa [hcurve]
 
+omit [CompactSpace M]
+  [I.Boundaryless] in
 /-- Multiplying the source tension by `r` produces the negative DeTurck field
 multiplied by the transported target scalar `r ∘ Φ⁻¹`. -/
 theorem scaled_hmf_target
@@ -223,8 +248,8 @@ theorem scaled_hmf_target
     (r : ScalarField (I := I) (M := M)) (x : M) :
     r x • diffeoTension (I := I) g h Φ (Φ x) =
       -((transportScalar (I := I) r Φ •
-          deTurckVF (I := I) (Diffeomorph.pullbackMetric g Φ.symm) h :
-            VectorField (I := I) (M := M)) (Φ x)) := by
+          (deTurckVF (I := I) (Diffeomorph.pullbackMetric g Φ.symm) h :
+            VectorField (I := I) (M := M))) (Φ x)) := by
   rw [tension_eq_DT]
   change r x •
       (-(deTurckVF (I := I) (Diffeomorph.pullbackMetric g Φ.symm) h :
@@ -234,6 +259,8 @@ theorem scaled_hmf_target
         VectorField (I := I) (M := M)) (Φ x))
   rw [trScalar_image, smul_neg]
 
+omit [CompactSpace M]
+  [I.Boundaryless] in
 /-- The inverse of a source-scaled harmonic-map gauge has velocity
 `DΨ⁻¹ ((r ∘ Ψ⁻¹) • W)`.  This is the first-order gauge variable in the
 closed `(G, Ψ⁻¹)` formulation. -/
@@ -260,15 +287,18 @@ theorem scaled_inv_vel
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (Diffeomorph.pushforward (Ψ_fam t).symm
-            (transportScalar (I := I) (r t) (Ψ_fam t) •
-              deTurckVF (I := I)
-                (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg)
+            ((transportScalar (I := I) (r t) (Ψ_fam t) •
+              (deTurckVF (I := I)
+                (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg :
+                  VectorField (I := I) (M := M))) :
+              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
             (((Ψ_fam t).symm : M → M) x))) := by
   let a : ℝ → ScalarField (I := I) (M := M) := fun s =>
     transportScalar (I := I) (r s) (Ψ_fam s)
   let W : ℝ → VectorField (I := I) (M := M) := fun s =>
-    a s • deTurckVF (I := I)
-      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg
+    a s • (deTurckVF (I := I)
+      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg :
+        VectorField (I := I) (M := M))
   have hΨneg : ∀ y : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
         (fun s : ℝ => (Ψ_fam s : M → M) y) (Set.Ici (0 : ℝ)) t
@@ -280,6 +310,7 @@ theorem scaled_inv_vel
   simpa only [W, a] using
     (symm_gauge_vel (I := I) Ψ_fam W T hΨneg hjoint hsymm_joint t ht x)
 
+omit [CompactSpace M] in
 /-- The inverse of a density-scaled harmonic-map gauge pulls a Ricci flow
 back to Ricci flow with drift
 `(r ∘ Ψ⁻¹) • W(Ψ⁻¹* g, g_bg)`.
@@ -324,15 +355,17 @@ theorem scaled_hmf_inverse
           lieDerivMetric (I := I)
             (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm)
             (transportScalar (I := I) (r t) (Ψ_fam t) •
-              deTurckVF (I := I)
-                (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg)
+              (deTurckVF (I := I)
+                (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg :
+                  VectorField (I := I) (M := M)))
             x v w)
         (Set.Ici 0) t := by
   let a : ℝ → ScalarField (I := I) (M := M) := fun s =>
     transportScalar (I := I) (r s) (Ψ_fam s)
   let W : ℝ → VectorField (I := I) (M := M) := fun s =>
-    a s • deTurckVF (I := I)
-      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg
+    a s • (deTurckVF (I := I)
+      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg :
+        VectorField (I := I) (M := M))
   have hInvOde : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
         (fun s : ℝ => ((Ψ_fam s).symm : M → M) x)
@@ -350,6 +383,7 @@ theorem scaled_hmf_inverse
   · exact hsymm_joint
   · exact hgram_RF
 
+omit [CompactSpace M] in
 /-- The inverse density-scaled gauge transports the fixed background metric
 by the same drift that appears in `scaled_hmf_inverse`.
 
@@ -379,15 +413,17 @@ theorem scaled_bg_inverse
         (lieDerivMetric (I := I)
           (Diffeomorph.pullbackMetric g_bg (Ψ_fam t).symm)
           (transportScalar (I := I) (r t) (Ψ_fam t) •
-            deTurckVF (I := I)
-              (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg)
+            (deTurckVF (I := I)
+              (Diffeomorph.pullbackMetric (g_RF t) (Ψ_fam t).symm) g_bg :
+                VectorField (I := I) (M := M)))
           x v w)
         (Set.Ici 0) t := by
   let a : ℝ → ScalarField (I := I) (M := M) := fun s =>
     transportScalar (I := I) (r s) (Ψ_fam s)
   let W : ℝ → VectorField (I := I) (M := M) := fun s =>
-    a s • deTurckVF (I := I)
-      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg
+    a s • (deTurckVF (I := I)
+      (Diffeomorph.pullbackMetric (g_RF s) (Ψ_fam s).symm) g_bg :
+        VectorField (I := I) (M := M))
   have hInvOde : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
         (fun s : ℝ => ((Ψ_fam s).symm : M → M) x)

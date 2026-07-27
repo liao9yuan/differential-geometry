@@ -35,6 +35,7 @@ noncomputable def hessTensorAt
   (((continuousMultilinearCurryFin1 ℝ (TangentSpace I x) ℝ).symm.toContinuousLinearMap).comp
     (hessFun (I := I) g f x).toContinuousBilinearMap).uncurryLeft
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem hessTensorAt_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
@@ -43,6 +44,7 @@ theorem hessTensorAt_apply
       hessFun (I := I) g f x v w := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- On a scalar-smooth open set, the realized Levi-Civita Laplacian is the
 intrinsic metric trace of the chart Hessian tensor at each point of the set. -/
 theorem lap_eq_hess_on [I.Boundaryless]

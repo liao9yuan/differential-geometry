@@ -176,7 +176,7 @@ private lemma chartActionE_meas
   unfold chartActionE
   refine Finset.measurable_sum _ (fun i _ => ?_)
   exact (coeffZero_meas (I := I) α X i).mul (measurable_lineDeriv hφ)
-
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma chartCoordZero_meas (α : M) :
     Measurable (chartCoordZero (I := I) α) := by
   classical
@@ -259,9 +259,7 @@ theorem tangent_aesm [I.Boundaryless]
       (chartLocalMeasure (I := I) g α) := by
   exact (chartActionM_meas (I := I) α X hφ_lip.continuous).aestronglyMeasurable.congr
     (tangent_ae_chart (I := I) g α X hφ_lip hφ_supp).symm
-
-/-- A scalar function is globally continuous when its zero-extended chart
-pullback is Lipschitz and its topological support stays inside the chart. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phi_cont_of_lip
     (α : M) {φ : M → ℝ} {C : NNReal}
     (hφ_lip : LipschitzWith C (phiOnE (I := I) α φ))
@@ -287,8 +285,7 @@ private lemma phi_cont_of_lip
       (extChartAt I α).left_inv hxext]
   exact hφ_on.continuous_of_tsupport_subset
     (chartAt H α).open_source hφ_supp
-
-/-- On the chart target, `phiOnE α φ` agrees with `scalarOnE α φ`. -/
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_eq_scalarOnE_on_target
     (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Member-level Bishop–Gromov packing count
@@ -197,7 +196,7 @@ theorem one_le_segImult (n : ℕ) (q r0 m : ℝ) : 1 ≤ segImult n q r0 m := by
 /-! ## Geometric setup -/
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -215,6 +214,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
+omit [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [T2Space (TangentBundle I M)] in
 /-- The open `riemannianEDist`-ball is open. -/
 theorem edistBall_open
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -225,12 +227,26 @@ theorem edistBall_open
       (fun _ => Manifold.riemannianEDist_comm))
     continuous_const
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [IsManifold I ∞ M]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- Radius monotonicity of the `riemannianEDist`-ball. -/
 theorem edistBall_mono (x : M) {ρ₁ ρ₂ : ℝ} (h : ρ₁ ≤ ρ₂) :
     {y : M | riemannianEDist I x y < ENNReal.ofReal ρ₁} ⊆
       {y : M | riemannianEDist I x y < ENNReal.ofReal ρ₂} :=
   fun _ hy => lt_of_lt_of_le hy (ENNReal.ofReal_le_ofReal h)
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [IsManifold I ∞ M]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- Center-shift containment: if `d(a,b) ≤ t` then the `ρ`-ball at `a` sits
 inside the `(t+ρ)`-ball at `b`. -/
 theorem edistBall_shift {a b : M} {t ρ : ℝ}
@@ -249,6 +265,13 @@ theorem edistBall_shift {a b : M} {t ρ : ℝ}
         ENNReal.add_lt_add_left ENNReal.ofReal_ne_top hy
     _ = ENNReal.ofReal (t + ρ) := (ENNReal.ofReal_add ht hρ).symm
 
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless]
+  [IsManifold I ∞ M]
+  [T2Space M]
+  [T2Space (TangentBundle I M)]
+  [SigmaCompactSpace M] in
 /-- Balls of radius `r/2` about an `r`-separated family are pairwise disjoint. -/
 theorem edistBall_disj {ι : Type*} {J : Finset ι} {centers : ι → M} {r : ℝ}
     (hsep : ∀ i ∈ J, ∀ j ∈ J, i ≠ j →
@@ -300,8 +323,7 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
       riemannianEDist I (centers j) z ≤ ENNReal.ofReal (m * r)) :
     J.card ≤ segImult (Module.finrank ℝ E) q r0 m := by
   by_cases hm : m < 1 / 2
-  · -- Degenerate case `m < 1/2`: at most one center.
-    refine le_trans ?_ (one_le_segImult (Module.finrank ℝ E) q r0 m)
+  · refine le_trans ?_ (one_le_segImult (Module.finrank ℝ E) q r0 m)
     rw [Finset.card_le_one]
     intro a ha b hb
     by_contra hab
@@ -330,8 +352,7 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
     have hr2 : r ≤ 2 * (m * r) :=
       (ENNReal.ofReal_le_ofReal_iff (by linarith [hmr])).mp hle2
     nlinarith [hr2, mul_pos (show (0 : ℝ) < 1 / 2 - m by linarith) hr]
-  · -- Main case `1/2 ≤ m`.
-    rw [not_lt] at hm
+  · rw [not_lt] at hm
     rcases J.eq_empty_or_nonempty with hJe | hJne
     · subst hJe; simp
     have hm0 : 0 < m := by linarith

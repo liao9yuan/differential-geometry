@@ -31,6 +31,7 @@ time into the existing early and full terminal potentials. -/
 def klHeat1 (t : ℝ) (w : V) (f : ℝ × V → F) (x : V) : F :=
   heatEarly1 t w f x + klFluxFull1 (Real.sqrt t) w f x
 
+omit [CompleteSpace F] in
 /-- The directional heat integrand is Bochner integrable on the complete
 early half-slab under the local `L²` arm of `KLSource1`. -/
 theorem klEarly1_int {T t : ℝ} {A₂ Aₚ : ℝ≥0}
@@ -107,6 +108,7 @@ theorem klEarly1_int {T t : ℝ} {A₂ Aₚ : ℝ≥0}
   refine ⟨hmeas, hasFiniteIntegral_iff_enorm.2 ?_⟩
   simpa only [q] using hfinite
 
+omit [CompleteSpace F] in
 /-- The same directional heat integrand is Bochner integrable on the
 terminal half-slab, with terminal radius `sqrt t`. -/
 theorem klLate1_int {T t : ℝ} {A₂ Aₚ : ℝ≥0}
@@ -122,6 +124,7 @@ theorem klLate1_int {T t : ℝ} {A₂ Aₚ : ℝ≥0}
     simpa only [Real.sq_sqrt ht.le] using htT) s hcard hcover
   simpa only [Real.sq_sqrt ht.le] using hi
 
+omit [CompleteSpace F] in
 /-- The early/terminal split directional potential is exactly the canonical
 Duhamel potential `heatPot1`, with the same direction `w` in both halves. -/
 theorem klHeat1_eq_heatPot {T t : ℝ} {A₂ Aₚ : ℝ≥0}
@@ -147,7 +150,7 @@ theorem klHeat1_eq_heatPot {T t : ℝ} {A₂ Aₚ : ℝ≥0}
   have hEL : E ∪ L = Ioc 0 t ×ˢ (Set.univ : Set V) := by
     unfold E L
     rw [← Set.union_prod, Ioc_union_Ioc_eq_Ioc]
-    · exact le_rfl
+    · linarith
     · linarith
   rw [hEL] at hsplit
   have hfull : IntegrableOn g
@@ -173,6 +176,7 @@ theorem klHeat1_eq_heatPot {T t : ℝ} {A₂ Aₚ : ℝ≥0}
       ∫ s in 0..t, ∫ y : V, g (s, y)
   rw [intervalIntegral.integral_of_le ht.le, ← hprod, hsplit, hlateEq]
 
+omit [CompleteSpace F] in
 /-- The full directional flux value is bounded by the sum of its local `L²`
 and terminal `L^(n+4)` Koch--Lamm radii. -/
 theorem klHeat1_norm {T t : ℝ} {A₂ Aₚ : ℝ≥0}
@@ -192,8 +196,8 @@ theorem klHeat1_norm {T t : ℝ} {A₂ Aₚ : ℝ≥0}
         ENNReal.ofReal
           (klFluxSeries (Module.finrank ℝ V) *
             (‖w‖ * (klFluxTailC V * (Aₚ : ℝ)))) := by
-    rw [← ofReal_norm_eq_enorm]
-    exact ENNReal.ofReal_le_ofReal hlate
+    simpa only [ofReal_norm_eq_enorm, enorm_eq_nnnorm] using
+      ENNReal.ofReal_le_ofReal hlate
   have hearly := kl1_early_norm (V := V) ht htT w f x h
   unfold klHeat1
   calc
@@ -201,10 +205,9 @@ theorem klHeat1_norm {T t : ℝ} {A₂ Aₚ : ℝ≥0}
         klFluxFull1 (V := V) (Real.sqrt t) w f x‖₊ : ℝ≥0∞) ≤
         (↑‖heatEarly1 t w f x‖₊ : ℝ≥0∞) +
           (↑‖klFluxFull1 (V := V) (Real.sqrt t) w f x‖₊ : ℝ≥0∞) := by
-      rw [← ofReal_norm_eq_enorm, ← ofReal_norm_eq_enorm,
-        ← ofReal_norm_eq_enorm,
-        ENNReal.ofReal_add (norm_nonneg _) (norm_nonneg _)]
-      exact ENNReal.ofReal_le_ofReal (norm_add_le _ _)
+      simpa only [enorm_eq_nnnorm] using
+        enorm_add_le (heatEarly1 t w f x)
+          (klFluxFull1 (V := V) (Real.sqrt t) w f x)
     _ ≤ ENNReal.ofReal ‖w‖ * earlyFluxC V * (A₂ : ℝ≥0∞) *
           fluxShellSeries (Module.finrank ℝ V) +
         ENNReal.ofReal

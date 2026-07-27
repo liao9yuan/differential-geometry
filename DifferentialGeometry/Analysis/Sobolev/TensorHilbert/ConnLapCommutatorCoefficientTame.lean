@@ -281,11 +281,22 @@ private lemma hs_norm_family_shift (g₀ : SmoothRiemannianMetric I M)
   | zero => intro σ; simp only [oneMinusConnLapSmoothIter_zero, Nat.mul_zero, Nat.add_zero]
   | succ p ih =>
     intro σ
-    rw [oneMinusConnLapSmoothIter_succ,
-      ← smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap (I := I) (M := M) g₀ σ
-        (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀),
-      ih (σ + 2)]
-    exact hs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+    rw [oneMinusConnLapSmoothIter_succ]
+    calc
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ : ℝ)
+          (oneMinusConnLapSmooth (I := I) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀))‖ =
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((σ + 2 : ℕ) : ℝ)
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖ :=
+        by
+          exact (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+            (E := E) (H := H) (I := I) (M := M) g₀ σ
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)).symm
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((σ + 2) + 2 * p : ℕ) : ℝ) T₀‖ := ih (σ + 2)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          ((σ + 2 * (p + 1) : ℕ) : ℝ) T₀‖ :=
+        hs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
 
 private lemma hs_logConvex (g₀ : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g₀ 0 2) (k : ℕ) :
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((k + 1 : ℕ) : ℝ) T₀‖ ^ 2 ≤
@@ -1429,14 +1440,21 @@ theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
       (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)‖ with hP_def
     have hQ_nn : 0 ≤ Q := norm_nonneg _
     have hP_nn : 0 ≤ P := norm_nonneg _
-    have ha2 := smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad (I := I) (M := M) g₀ 0
-      (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S))
+    let W : SmoothCcTensor g₀ 0 2 :=
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+    have ha2 :
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * 0 + 1 : ℕ) : ℝ) W‖ ^ 2 =
+          ‖SmoothCcTensor.toL2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 W)‖ ^ 2 +
+          ‖SmoothCcTensor.toL2
+            (covGrad (I := I) (M := M) g₀ 0 2
+              (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 W))‖ ^ 2 := by
+      exact smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad
+        (E := E) (H := H) (I := I) (M := M) g₀ 0 W
     simp only [oneMinusConnLapSmoothIter_zero] at ha2
-    rw [hs_norm_order_congr (I := I) (M := M) g₀
-        (show ((2 * 0 + 1 : ℕ) : ℝ) = ((1 : ℕ) : ℝ) by norm_num)
-        (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
-          (iteratedCovGrad (I := I) g₀ 0 2 2 S)),
-      SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2] at ha2
+    norm_num at ha2
+    dsimp only [W] at ha2
     have hA2jet := hCj0 S
     have hdrop := hs_rawConnLap_order_le (I := I) (M := M) g₀ 0 S
     have hdrop_congr : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((0 + 2 : ℕ) : ℝ) S‖ = Q :=
@@ -1546,11 +1564,17 @@ theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
     | (i + 2), IH =>
       have ih := IH i (by omega)
       intro S hSfam
-      have hA3 := smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap (I := I) (M := M) g₀ i
-        (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S))
-      have hLarm : oneMinusConnLapSmooth (I := I) g₀ 0 2
-            (operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
-              (iteratedCovGrad (I := I) g₀ 0 2 2 S)) =
+      let W : SmoothCcTensor g₀ 0 2 :=
+        operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
+          (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+      have hA3 :
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 : ℕ) : ℝ) W‖ =
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ (i : ℝ)
+              (oneMinusConnLapSmooth (I := I) g₀ 0 2 W)‖ :=
+        by
+          exact smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+            (E := E) (H := H) (I := I) (M := M) g₀ i W
+      have hLarm : oneMinusConnLapSmooth (I := I) g₀ 0 2 W =
           operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
               (iteratedCovGrad (I := I) g₀ 0 2 2
                 (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)) -
@@ -1560,8 +1584,14 @@ theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
               operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C₂
                 (iteratedCovGrad (I := I) g₀ 0 2 2
                   (rawTensorConnLapSmooth (I := I) g₀ 0 2 S))) := by
+        dsimp only [W]
         rw [oneMinusConnLapSmooth, oneMinusConnLapSmooth, coeffContraction_secondCovGrad_sub]
         abel
+      change ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 : ℕ) : ℝ) W‖ ≤
+        εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 : ℕ) : ℝ)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)‖ +
+        ClowerFn (i + 2) *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + 2 + 1 : ℕ) : ℝ) S‖
       rw [hA3, hLarm, smoothCcToTensorHs_sub]
       refine le_trans (norm_sub_le _ _) ?_
       have hih := ih (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)

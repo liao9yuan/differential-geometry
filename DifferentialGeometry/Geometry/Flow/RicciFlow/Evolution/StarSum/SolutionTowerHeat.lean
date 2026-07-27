@@ -20,7 +20,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

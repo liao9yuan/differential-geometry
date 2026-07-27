@@ -38,7 +38,7 @@ open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -51,7 +51,7 @@ variable {Idx : Type*}
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem metricCompInFrame_timeDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -75,7 +75,7 @@ theorem metricCompInFrame_timeDeriv
 
 
 omit [NeZero (Module.finrank ℝ E)] in
-omit [InnerProductSpace ℝ E] [I.Boundaryless] in
+omit [I.Boundaryless] in
 theorem realizedRmBase_eq_curvCoeff_lower
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -123,7 +123,7 @@ theorem realizedRmBase_eq_curvCoeff_lower
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem realizedRmBase_timeDeriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -228,7 +228,7 @@ theorem realizedRmBase_timeDeriv
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_firstTrace_gform_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
@@ -259,7 +259,7 @@ theorem solution_rm04_kn_firstTrace_gform_at
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
@@ -288,7 +288,7 @@ theorem solution_rm04_kn_field
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_timeDeriv_kn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -381,7 +381,7 @@ theorem solution_rm04_timeDeriv_kn
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_eq_trace_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -409,7 +409,7 @@ theorem scalar_eq_trace_ortho
   simp [DifferentialGeometry.Integral.Connection.delta3, Fin.sum_univ_three]
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem scalarDot_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -448,7 +448,7 @@ theorem scalarDot_ortho
   simp only [hcomp]
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04CompknOrtho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -478,7 +478,7 @@ theorem rm04CompknOrtho
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricDot_ortho
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -520,7 +520,7 @@ theorem ricDot_ortho
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricDot_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -606,7 +606,7 @@ theorem ricDot_of_solution
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04BaseEvolution_at
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -665,7 +665,7 @@ theorem rm04BaseEvolution_at
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ricciSymFrame_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -677,7 +677,7 @@ theorem ricciSymFrame_can
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_all
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
@@ -708,7 +708,7 @@ theorem solution_rm04_kn_all
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem rmBaseDeriv_basis
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -756,7 +756,7 @@ theorem rmBaseDeriv_basis
   exact (hD (slots 0) (slots 1) (slots 2) (slots 3)).mul_const _
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem connSmoothSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -767,7 +767,7 @@ theorem connSmoothSol
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -783,7 +783,7 @@ theorem metricCompatSol
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem ricNablaRealizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -805,7 +805,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knTermRealizes
     [IsManifold I 2 M]
@@ -850,7 +850,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knScalRealizes
     [IsManifold I 2 M]
@@ -967,7 +967,7 @@ private noncomputable def knField
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 private theorem knFieldRealizes
     [IsManifold I 2 M]
@@ -985,7 +985,7 @@ private theorem knFieldRealizes
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem ric2NablaRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -1007,7 +1007,7 @@ theorem ric2NablaRealizes
     (2 + 1) (S.family.connection t) _ _
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem duNablaRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -1089,7 +1089,7 @@ private noncomputable def knFieldD
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 private theorem knTerm2Realizes
     [IsManifold I 2 M]
@@ -1163,7 +1163,7 @@ private theorem knTerm2Realizes
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 private theorem knScal2Realizes
     [IsManifold I 2 M]
@@ -1267,7 +1267,7 @@ private theorem knScal2Realizes
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem knField_eq_rm04
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1378,7 +1378,7 @@ private theorem knField_eq_rm04
 
 
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem nablaRm04Kn
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1416,7 +1416,7 @@ private noncomputable def rm04DerivsKn
 
 
 omit [IsManifold I 1 M] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rm04Nab2Kn_eq
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1444,7 +1444,7 @@ private theorem rm04Nab2Kn_eq
 
 
 open DifferentialGeometry.Integral.Connection in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceRicWit
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -1508,7 +1508,7 @@ private theorem traceRicWit
   rw [metricTraceFirstTwoField_product]
 
 open DifferentialGeometry.Integral.Connection in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceScalWit
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -1649,7 +1649,7 @@ private noncomputable def lapRm04Kn
 
 open DifferentialGeometry.Integral.Connection in
 omit [IsManifold I 1 M] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lapRm04Kn_apply
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
@@ -1777,7 +1777,7 @@ private theorem lapRm04Kn_apply
 
 open DifferentialGeometry.Integral.Connection in
 omit [IsManifold I 1 M] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem traceRm04Kn
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1792,7 +1792,7 @@ theorem traceRm04Kn
 
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
 omit [IsManifold I 1 M] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem roughRm04_comp
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1855,7 +1855,7 @@ theorem roughRm04_comp
 end KnField
 
 open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rm04Base_of_sol
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
@@ -1941,7 +1941,7 @@ theorem rm04Base_of_sol
   ring
 
 open DifferentialGeometry.Dim3Reaction in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04HrmProducer
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)

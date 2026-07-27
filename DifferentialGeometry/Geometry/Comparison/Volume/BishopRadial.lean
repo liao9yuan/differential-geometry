@@ -27,7 +27,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -43,7 +43,7 @@ private noncomputable def familyCoeffMap
     ((Fintype.linearCombination ℝ v).comp
       (WithLp.linearEquiv 2 ℝ (ι → ℝ)).toLinearMap)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma familyCoeffMap_apply
     {ι : Type*} [Fintype ι] (v : ι → E)
     (c : EuclideanSpace ℝ ι) :
@@ -53,7 +53,7 @@ private lemma familyCoeffMap_apply
     toEuclidean (E := E) (∑ i, c i • v i)
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_coeff_ge
     {ι : Type*} [Fintype ι]
     (v : ι → E) (hv : LinearIndependent ℝ v) :
@@ -79,7 +79,7 @@ private lemma exists_coeff_ge
   exact (div_le_iff₀ (by positivity : 0 < (K : ℝ) + 1)).2 (by
     simpa only [one_mul, mul_comm] using hone')
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartCoeff_sum
     (w : E) :
     (∑ i, (toEuclidean (E := E) w) i • (chartModelBasis E) i) = w := by
@@ -102,7 +102,7 @@ private lemma chartCoeff_sum
       congrArg (toEuclidean (E := E)).symm hsum.symm
     _ = w := (toEuclidean (E := E)).symm_apply_apply w
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_quad_sub_le
     {ι : Type*} [Fintype ι]
     (A B : Matrix ι ι ℝ) (c : EuclideanSpace ℝ ι) (hc : ‖c‖ = 1) :
@@ -142,7 +142,7 @@ private lemma abs_quad_sub_le
       simp only [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
       ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma quad_sub
     {ι : Type*} [Fintype ι]
     (A B : Matrix ι ι ℝ) (c : ι → ℝ) :
@@ -162,6 +162,8 @@ private lemma quad_sub
   rw [hsum]
   ring
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields in every unit chart direction retain a
 uniform positive length for launch points tending to the pole. -/
 theorem exists_radial_base
@@ -303,6 +305,8 @@ theorem exists_radial_base
       (fun z => g.inner (radialCurve (I := I) g p x t) z z) hsum
   rwa [hAt] at hquadLower
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A radial Jacobi field launched orthogonally to the radial direction remains
 orthogonal to the radial velocity while the exponential map is in its `C²`
 range. -/
@@ -342,6 +346,8 @@ lemma radialJacobi_perp
       simpa only [ContinuousLinearMap.smul_apply, smul_eq_mul] using hleft.trans hright.symm
     _ = 0 := by simpa only [radialCurve, L] using hgauss
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The first covariant derivative of a transverse radial Jacobi field is also
 orthogonal to the radial velocity. -/
 lemma radialJacobi_dperp
@@ -398,6 +404,8 @@ lemma radialJacobi_dperp
   simp only [hvelZero, map_zero, ContinuousLinearMap.zero_apply, zero_add] at huniq
   simpa only [γ, J] using huniq
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A uniform endpoint lower bound for the scaled radial family gives the
 positive density-ratio input at the pole. -/
 theorem radialRatio_ge
@@ -487,6 +495,8 @@ theorem radialRatio_ge
   exact denRatio_ge_of_dir (I := I) g (radialCurve (I := I) g p x)
     (fun i => radialJacobiField (I := I) g p x (v i)) q B hq hB hLI hdir
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- A unit-direction endpoint lower bound for the full chart model basis gives
 the positive pole-density ratio for any linearly independent finite family.
 
@@ -620,6 +630,8 @@ theorem radialRatio_basis
             (∑ i, c i • v i) 1) := by rfl
   exact radialRatio_ge (I := I) g p x v q (δ * B) hq (mul_pos hδ hB) hv hone
 
+omit [T2Space M]
+  [SigmaCompactSpace M] in
 /-- The radial density ratio has a positive pole lower bound for every linearly
 independent finite family, with no extra endpoint assumption. -/
 theorem radialRatio_auto
@@ -793,6 +805,7 @@ theorem exists_radial_cmp
         (q * a) b (Module.finrank ℝ E - 1) (mul_nonneg hq ha.le)
         hγ hVdiff hLI hWronsk hmean
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Antitonicity of a transverse radial-Jacobi density ratio transfers to the
 corresponding normal-coordinate density ratio. -/
 theorem normalRatio_anti

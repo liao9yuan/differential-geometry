@@ -190,6 +190,7 @@ theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_smul_right]
   rw [smul_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Covariant differentiation along a multiplicatively reparametrized curve
 scales by the parameter factor. -/
 theorem covDeriv_comp_mul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -209,6 +210,7 @@ theorem covDeriv_comp_mul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     deriv_comp_mul_left, deriv_comp_mul_left,
     ChartChristoffel.contraction_smul_left, smul_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Leibniz rule for a scalar-function multiple.** If the chart-`(γ t)`-
 coordinate representation of `V` and the scalar function `f` are both
 differentiable at `t`, then

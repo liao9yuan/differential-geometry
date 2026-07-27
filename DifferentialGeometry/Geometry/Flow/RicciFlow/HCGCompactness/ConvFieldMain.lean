@@ -44,7 +44,7 @@ open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [finiteE : FiniteDimensional Real E] [CompleteSpace E]
   [neZeroE : NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -221,8 +221,8 @@ theorem supOn_resSrc_eq
   letI sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) := by
     change T2Space (SourceDomain (I := I) Φ k)
     exact sourceDomT2 (I := I) Φ k
-  exact @metricDerivNormSupOn_restrictOpen E _ _ _ _ _ H _ I _
-    P.M P.topology P.charted P.t2 P.smooth P.sigmaCompact
+  exact @metricDerivNormSupOn_restrictOpen E _ _ finiteE _ H _ I
+    P.M P.topology P.charted P.t2 P.smooth
     g₁ g₂ g₃ (sourceOpen (I := I) Φ k) sourceSigma sourceT2 C p
 
 

@@ -33,14 +33,40 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-section Recentre
+section RecentreNormed
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 noncomputable def recenteredBallRetraction (c : X) (R : ℝ) (v : X) : X :=
   c + ballRetraction R (v - c)
 
-theorem recenteredBallRetraction_lipschitzWith {R : ℝ} (hR : 0 ≤ R) (c : X) :
+/-- In an arbitrary normed space, recentered radial retraction is
+`2`-Lipschitz. -/
+theorem recenteredBallRetraction_lipschitzWith
+    {R : ℝ} (hR : 0 ≤ R) (c : X) :
+    LipschitzWith 2 (recenteredBallRetraction c R) := by
+  have hshift : LipschitzWith 1 (fun v : X => v - c) :=
+    LipschitzWith.of_dist_le_mul fun x y => by
+      rw [NNReal.coe_one, one_mul, dist_sub_right]
+  have hadd : LipschitzWith 1 (fun w : X => c + w) :=
+    LipschitzWith.of_dist_le_mul fun x y => by
+      rw [NNReal.coe_one, one_mul, dist_add_left]
+  have hcomp :
+      LipschitzWith (1 * (2 * 1))
+        (fun v : X => c + ballRetraction R (v - c)) :=
+    hadd.comp ((lipschitzWith_ballRetraction (X := X) hR).comp hshift)
+  simpa [recenteredBallRetraction] using hcomp
+
+end RecentreNormed
+
+section RecentreHilbert
+
+variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+
+/-- In an inner-product space, recentered radial retraction has the sharp
+Lipschitz constant `1`. -/
+theorem recenteredBallRetraction_lipschitzWith_one
+    {R : ℝ} (hR : 0 ≤ R) (c : X) :
     LipschitzWith 1 (recenteredBallRetraction c R) := by
   have hshift : LipschitzWith 1 (fun v : X => v - c) :=
     LipschitzWith.of_dist_le_mul fun x y => by
@@ -51,8 +77,14 @@ theorem recenteredBallRetraction_lipschitzWith {R : ℝ} (hR : 0 ≤ R) (c : X) 
   have hcomp :
       LipschitzWith (1 * (1 * 1))
         (fun v : X => c + ballRetraction R (v - c)) :=
-    hadd.comp ((lipschitzWith_ballRetraction (X := X) hR).comp hshift)
+    hadd.comp ((lipschitzWith_one_ballRetraction (X := X) hR).comp hshift)
   simpa [recenteredBallRetraction] using hcomp
+
+end RecentreHilbert
+
+section RecentreNormed
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
 theorem recenteredBallRetraction_mapsTo {R : ℝ} (hR : 0 ≤ R) (c : X) :
     Set.MapsTo (recenteredBallRetraction c R) Set.univ (Metric.closedBall c R) := by
@@ -67,7 +99,7 @@ theorem recenteredBallRetraction_eq_self_of_mem {R : ℝ} {c v : X}
   rw [Metric.mem_closedBall, dist_eq_norm] at hv
   rw [recenteredBallRetraction, ballRetraction_eq_self_of_mem hv, add_sub_cancel]
 
-end Recentre
+end RecentreNormed
 
 section Truncation
 
@@ -98,7 +130,7 @@ theorem truncatedNonlin_lipschitzWith {L_R : ℝ≥0}
     LipschitzWith L_R (truncatedNonlin (I := I) (M := M) N u₀' R) := by
   have hρ : LipschitzOnWith 1 (recenteredBallRetraction u₀' R) Set.univ :=
     lipschitzOnWith_univ.mpr
-      (recenteredBallRetraction_lipschitzWith (X := _) hR u₀')
+      (recenteredBallRetraction_lipschitzWith_one (X := _) hR u₀')
   have hmaps := recenteredBallRetraction_mapsTo (X := _) hR u₀'
   have hcomp : LipschitzOnWith (L_R * 1)
       (N ∘ recenteredBallRetraction u₀' R) Set.univ :=

@@ -12,10 +12,9 @@ tensors on an open time set.
 -/
 
 noncomputable section
-
+set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter MeasureTheory Tensor0SBundle
-open scoped Manifold Topology ContDiff ENNReal BigOperators
-
+open scoped Manifold Topology ContDiff ENNReal BigOperators RealInnerProductSpace InnerProductSpace
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
@@ -24,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -33,6 +32,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private theorem rankZero_one (x : M) (A : Tensor0SSpace 0 I x) :
     tensor0SSpace_evalScalar x A •
         Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
@@ -54,16 +55,23 @@ private noncomputable def oneCc (g : SmoothRiemannianMetric I M) :
   scalarCc (I := I) (M := M) g
     ⟨(fun _ : M => (1 : ℝ)), contMDiff_const⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 private theorem oneCc_apply (g : SmoothRiemannianMetric I M)
     (x : M) (A : Tensor0SSpace 0 I x) :
     (oneCc (I := I) (M := M) g).toSection x A = A := by
   simp only [oneCc, scalarCc, tensorRSField_smulByFun_apply]
-  rw [ContinuousLinearMap.smul_apply, one_smul,
-    Tensor0SField.toRS0_apply, rankZero_one (I := I) (M := M)]
-
+  change
+    (((1 : ℝ) •
+      (Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+        (I := I) (M := M) ∞).toTensorRSField ∞ x) A) = A
+  rw [one_smul]
+  rw [Tensor0SField.toRS0_apply, rankZero_one (I := I) (M := M)]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 private theorem appCc_one (g : SmoothRiemannianMetric I M) (c : ℕ)
     (Phi : SmoothCcTensor g 0 c) :
-    appCc (I := I) (M := M) g 0 c Phi (oneCc (I := I) (M := M) g) = Phi := by
+    operatorFieldApply (I := I) (M := M) g 0 c Phi (oneCc (I := I) (M := M) g) = Phi := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x

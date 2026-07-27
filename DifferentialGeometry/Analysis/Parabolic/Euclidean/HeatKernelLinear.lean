@@ -29,7 +29,7 @@ section LinearPull
 
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [Nontrivial V]
+  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 /-- Pull a Banach-valued function back by a continuous linear equivalence. -/
@@ -41,6 +41,12 @@ def linPull (L : V ≃L[ℝ] V) (f : V → F) : V → F :=
 def linHalfConst (L : V ≃L[ℝ] V) (K : ℝ≥0) : ℝ≥0 :=
   K * ‖(L : V →L[ℝ] V)‖₊ ^ (1 / 2 : ℝ)
 
+omit [FiniteDimensional ℝ V]
+  [MeasurableSpace V]
+  [BorelSpace V]
+  [Nontrivial V]
+  [NormedSpace ℝ F]
+  [CompleteSpace F] in
 /-- Pullback through a continuous linear equivalence preserves exponent
 `1/2`, with the expected half power of the Lipschitz constant. -/
 theorem linPull_holder (L : V ≃L[ℝ] V) {K : ℝ≥0} {f : V → F}
@@ -57,6 +63,7 @@ def linD2Cancel (L : V ≃L[ℝ] V) (t : ℝ) (v w : V)
     (f : V → F) (x : V) : F :=
   heatD2Cancel t (L.symm v) (L.symm w) (linPull L f) (L.symm x)
 
+omit [CompleteSpace F] in
 /-- Cancellation bound in the conjugated directional variables. -/
 theorem linD2Cancel_norm (L : V ≃L[ℝ] V) {t : ℝ} (ht : 0 < t)
     {K : ℝ≥0} {f : V → F} (hf : HolderWith K (1 / 2 : ℝ≥0) f)
@@ -67,6 +74,7 @@ theorem linD2Cancel_norm (L : V ≃L[ℝ] V) {t : ℝ} (ht : 0 < t)
   unfold linD2Cancel
   exact heatD2Cancel_norm ht (linPull_holder L hf) (L.symm v) (L.symm w) (L.symm x)
 
+omit [CompleteSpace F] in
 /-- Operator-norm version of the conjugated cancellation bound. -/
 theorem linD2Cancel_op (L : V ≃L[ℝ] V) {t : ℝ} (ht : 0 < t)
     {K : ℝ≥0} {f : V → F} (hf : HolderWith K (1 / 2 : ℝ≥0) f)
@@ -90,7 +98,7 @@ theorem linD2Cancel_op (L : V ≃L[ℝ] V) {t : ℝ} (ht : 0 < t)
     exact (Real.rpow_pos_of_pos ht _).le
   exact mul_le_mul_of_nonneg_right
     (mul_le_mul_of_nonneg_right
-      (mul_le_mul_of_nonneg_right hvw NNReal.coe_nonneg) hs)
+      (mul_le_mul_of_nonneg_right hvw (NNReal.coe_nonneg _)) hs)
     (heatC2Half_nonneg (V := V))
 
 end LinearPull

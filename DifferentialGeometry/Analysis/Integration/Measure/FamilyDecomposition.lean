@@ -618,9 +618,10 @@ theorem volume_variation_formula_from_chart_derivs
   exact HasDerivAt.fun_sum hα_deriv
 
 theorem integral_riemannianMeasureFamily_eq_finset_sum
+    {P : Type*}
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g_fam : ℝ → SmoothRiemannianMetric I M)
-    (f : ℝ → M → ℝ) (t : ℝ)
+    (g_fam : P → SmoothRiemannianMetric I M)
+    (f : P → M → ℝ) (t : P)
     (hf_cont : Continuous (f t)) :
     ∫ x, f t x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t)
       = ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),

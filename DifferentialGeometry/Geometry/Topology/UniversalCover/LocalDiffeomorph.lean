@@ -23,7 +23,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -32,6 +32,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
+omit [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+  [ConnectedSpace M] in
 private theorem proj_deriv_id
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     HasMFDerivAt I I
@@ -70,6 +72,7 @@ private theorem proj_deriv_id
     rw [hproj, extChartAt_to_inv]
   exact hId.congr_of_eventuallyEq hEq hx0
 
+omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
 /-- The universal-cover projection is a smooth local diffeomorphism. -/
 theorem proj_localDiffeo :
     IsLocalDiffeomorph I I ∞

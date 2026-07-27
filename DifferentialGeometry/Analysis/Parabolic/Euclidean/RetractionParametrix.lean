@@ -1,19 +1,5 @@
 import Mathlib.Analysis.Calculus.Deriv.Linear
-
-/-!
-# Retraction--coretraction parametrices
-
-A diagonal collection of frozen chart heat solvers does not preserve the
-closed subspace of compatible tensor components.  Consequently it cannot be
-made into a genuine tensor solver merely by projecting each Duhamel output.
-
-The correct construction extracts genuine forcing data, solves the local
-diagonal equations, and reassembles once.  This file records the exact
-operator algebra behind that construction.  It also records that fixed
-extraction and reassembly maps commute with the time derivative, so there is
-no spurious time-dependent transition term.
--/
-
+import Mathlib.Analysis.Calculus.Deriv.Comp
 noncomputable section
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
@@ -136,9 +122,7 @@ theorem factoredError_le
 /-- A horizon chosen only from the fixed lower-order multiplier and
 zero-trace maximal-regularity constants. -/
 def lowerTime (C K : ℝ) : ℝ :=
-  min 1 (1 / (8 * (C + 1) * (K + 1))) ^ 2
-
-/-- The lower-order horizon is positive for nonnegative uniform constants. -/
+  min 1 ((1 / (8 * (C + 1) * (K + 1))) ^ 2)
 theorem lowerTime_pos {C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K) :
     0 < lowerTime C K := by
   have hCp : 0 < C + 1 := by linarith
@@ -296,10 +280,7 @@ theorem retractParam_factor
   have h := retractParam_split T R E RF L H
     (C₂.comp D₂) (C₁₀.comp D₁₀) hTR hLH hRE
   simpa only [factoredError, principalError, lowerError, localErrorArm,
-    ContinuousLinearMap.comp_assoc] using h
-
-/-- The error operator is exactly `TQ - id`; this orientation is the one used
-by the Neumann correction of the right parametrix. -/
+    ContinuousLinearMap.comp_assoc, add_assoc] using h
 def parametrixError (T : X →L[ℝ] Y) (Q : Y →L[ℝ] X) : Y →L[ℝ] Y :=
   T.comp Q - ContinuousLinearMap.id ℝ Y
 

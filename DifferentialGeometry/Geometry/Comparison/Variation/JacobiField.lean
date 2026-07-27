@@ -32,7 +32,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -64,7 +64,6 @@ def IsJacobiAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   ∀ t : ℝ, IsJacobiAt (I := I) g γ J t
 
 
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -95,6 +94,7 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         = 0
     linear_combination (norm := module) h
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- Read the second covariant derivative directly from the pointwise Jacobi
 equation. -/
 theorem jacobi_d2_eq
@@ -122,6 +122,7 @@ def jacobiWronskian
   g.inner (γ t) (covDerivAlong (I := I) g γ J t) (K t) -
     g.inner (γ t) (J t) (covDerivAlong (I := I) g γ K t)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- The Wronskian of two pointwise Jacobi fields has zero derivative under
 pointwise curve regularity. -/
 theorem wronskian_deriv_at
@@ -154,6 +155,7 @@ theorem wronskian_deriv_at
   simp only [map_neg, ContinuousLinearMap.neg_apply]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- Smooth-curve wrapper for `wronskian_deriv_at`. -/
 theorem hasDerivAt_wronsk
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
@@ -174,6 +176,7 @@ theorem hasDerivAt_wronsk
   wronskian_deriv_at (I := I) hn g γ J K t hγ.contMDiffAt
     hJdiff hKdiff hDJdiff hDKdiff hJ hK
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- Two Jacobi fields that vanish initially have zero Wronskian on an interval
 when the curve is smooth at each point of that interval. -/
 theorem wronskian_zero_on
@@ -213,6 +216,7 @@ theorem wronskian_zero_on
   intro t ht
   rw [hconst t ht, hzero]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- Two Jacobi fields that vanish at the initial endpoint have zero Wronskian
 throughout the interval. -/
 theorem wronskian_eq_zero
@@ -237,6 +241,7 @@ theorem wronskian_eq_zero
   wronskian_zero_on (I := I) hn g γ J K (fun _ _ => hγ.contMDiffAt)
     hJdiff hKdiff hDJdiff hDKdiff hJacJ hJacK hJ0 hK0
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- A pointwise Jacobi equation plus a curvature-term norm bound gives the
 second-covariant-derivative norm bound used by Gronwall estimates. -/
 theorem ode_bound_of_isJacobiAt

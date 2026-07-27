@@ -26,10 +26,10 @@ open Bundle Filter Manifold Set TopologicalSpace
 open scoped Topology Manifold ContDiff
 open Geodesic Exponential
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [FiniteDimensional ℝ F] [CompleteSpace F]
   [NeZero (Module.finrank ℝ F)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

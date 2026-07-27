@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmEnergyPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DLaCoefficientFieldTopSeparated
 
 /-!
 # Boundary Ricci--DeTurck difference energy
@@ -15,9 +16,6 @@ high-jet bound on the moving endpoint.
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -38,7 +36,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -72,7 +70,7 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ T y v w) →
-        gFibreOpBound (I := I) (M := M) g₀
+        metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ →
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
@@ -87,7 +85,7 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
     exists_uniform_riemannianFiberNormSq_appCcRS_le
       (I := I) (M := M) g₀ 3 4 2 Φ
   obtain ⟨A, hA0, hA⟩ :=
-    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
       (I := I) (M := M) g₀ (show (1 / 2 : ℝ) < 1 by norm_num)
   let fr : ℝ := Module.finrank ℝ E
   let B : ℝ := K * (fr ^ 2 * A 1)
@@ -102,12 +100,12 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
   let Λ := gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁
   let W : SmoothCcTensor g₀ 3 4 :=
     covGrad (I := I) (M := M) g₀ 3 3
-      (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λ)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λ)
   have hgrid := hA g₁ T htie (le_of_lt hδ) hδ0 hbound 1 x
   have hgrid' :
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
           ((covGrad (I := I) (M := M) g₀ 1 1
-            (slotInsertEndoCc (I := I) (M := M) g₀ 0 Λ)).toSection x) ≤
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 Λ)).toSection x) ≤
         A 1 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
           ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) := by
     simpa [Λ, Finset.sum_range_succ, Finset.sum_range_one] using hgrid
@@ -125,14 +123,14 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
           fr ^ 2 *
             riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
               ((covGrad (I := I) (M := M) g₀ 1 1
-                (slotInsertEndoCc (I := I) (M := M) g₀ 0 Λ)).toSection x) := by
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 Λ)).toSection x) := by
       simpa [W, fr] using hslot
     calc
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x (W.toSection x)
           ≤ fr ^ 2 *
               riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
                 ((covGrad (I := I) (M := M) g₀ 1 1
-                  (slotInsertEndoCc (I := I) (M := M) g₀ 0 Λ)).toSection x) := hslot'
+                  (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 Λ)).toSection x) := hslot'
       _ ≤ fr ^ 2 *
           (A 1 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
             ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x)) :=
@@ -143,11 +141,11 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
   have happ := hK W x
   rw [edgeArmCoeff, SmoothCcTensor.toSection_neg]
   change riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-      (-((appCcRS (I := I) (M := M) g₀ 3 4 2 Φ W).toSection x)) ≤ _
+      (-((ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 2 Φ W).toSection x)) ≤ _
   rw [edge_rfns_neg (I := I) (M := M) g₀ 3 2 x]
   calc
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-        ((appCcRS (I := I) (M := M) g₀ 3 4 2 Φ W).toSection x)
+        ((ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 2 Φ W).toSection x)
         ≤ K * riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
           (W.toSection x) := happ
     _ ≤ K * (fr ^ 2 * A 1 *
@@ -163,13 +161,14 @@ theorem edgeCoeff_rfns (g₀ : SmoothRiemannianMetric I M) :
           ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) := by
       rw [Real.sq_sqrt hB0]
 
+omit [BoundarylessManifold I M] in
 private theorem edgePair_point_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {C δ : ℝ}
     (hC0 : 0 ≤ C) (hδ0 : 0 ≤ δ)
     (hT : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-          ((symmS (I := I) (M := M) g₀ T).toSection x) ≤
+          ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) ≤
         (Module.finrank ℝ E : ℝ) ^ 2 * δ ^ 2)
     (hF : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
@@ -178,19 +177,19 @@ private theorem edgePair_point_le
           ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x))
     (x : M) :
     |tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
-        ((symmS (I := I) (M := M) g₀ T).toFun x)
-        ((appCc (I := I) (M := M) g₀ 3 2
+        ((ccTensor02Symm (I := I) (M := M) g₀ T).toFun x)
+        ((operatorFieldApply (I := I) (M := M) g₀ 3 2
           (edgeArmCoeff (I := I) (M := M) g₀ g₁)
           (iteratedCovGrad (I := I) g₀ 0 2 1 T)).toFun x)| ≤
       (Module.finrank ℝ E : ℝ) * C * δ *
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
           ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) := by
   classical
-  let S := (symmS (I := I) (M := M) g₀ T).toSection x
+  let S := (ccTensor02Symm (I := I) (M := M) g₀ T).toSection x
   let D := (iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x
   let F := (edgeArmCoeff (I := I) (M := M) g₀ g₁).toSection x
   let U :=
-    (appCc (I := I) (M := M) g₀ 3 2
+    (operatorFieldApply (I := I) (M := M) g₀ 3 2
       (edgeArmCoeff (I := I) (M := M) g₀ g₁)
       (iteratedCovGrad (I := I) g₀ 0 2 1 T)).toSection x
   let d : ℝ := Module.finrank ℝ E
@@ -255,11 +254,11 @@ theorem edgeArm_resid_le (g₀ : SmoothRiemannianMetric I M) :
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ T y v w) →
-        gFibreOpBound (I := I) (M := M) g₀
+        metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ →
-        symmS (I := I) (M := M) g₀ T = T →
+        ccTensor02Symm (I := I) (M := M) g₀ T = T →
         |tensorL2Inner (I := I) (M := M) g₀ 0 2 T.toFun
-          (appCc (I := I) (M := M) g₀ 3 2
+          (operatorFieldApply (I := I) (M := M) g₀ 3 2
             (edgeArmCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 1 T)).toFun| ≤
           C * δ *
@@ -272,7 +271,7 @@ theorem edgeArm_resid_le (g₀ : SmoothRiemannianMetric I M) :
   refine ⟨C, hC0, ?_⟩
   intro g₁ T δ hδ hδ0 htie hbound hsymm
   let U : SmoothCcTensor g₀ 0 2 :=
-    appCc (I := I) (M := M) g₀ 3 2
+    operatorFieldApply (I := I) (M := M) g₀ 3 2
       (edgeArmCoeff (I := I) (M := M) g₀ g₁)
       (iteratedCovGrad (I := I) g₀ 0 2 1 T)
   let μ := riemannianVolumeMeasure (I := I) (M := M) g₀
@@ -334,9 +333,9 @@ theorem edgeArm_energy_le [Nonempty M]
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ T y v w) →
-        gFibreOpBound (I := I) (M := M) g₀
+        metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ →
-        symmS (I := I) (M := M) g₀ T = T →
+        ccTensor02Symm (I := I) (M := M) g₀ T = T →
         tensorL2Inner (I := I) (M := M) g₀ 0 2 T.toFun
             (deTurckPrincipalCometricArm
               (I := I) (M := M) g₀ g₁ T).toFun ≤
@@ -352,23 +351,23 @@ theorem edgeArm_energy_le [Nonempty M]
   have hres0 := hres g₁ T hδ hδ0 htie hbound hsymm
   have hinner :
       (⟪iteratedCovGrad (I := I) g₀ 0 2 0 T,
-          appCc (I := I) (M := M) g₀ 3 2
+          operatorFieldApply (I := I) (M := M) g₀ 3 2
             (edgeArmCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 1 T)⟫_ℝ : ℝ) =
         tensorL2Inner (I := I) (M := M) g₀ 0 2 T.toFun
-          (appCc (I := I) (M := M) g₀ 3 2
+          (operatorFieldApply (I := I) (M := M) g₀ 3 2
             (edgeArmCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 1 T)).toFun := by
     simpa only [iteratedCovGrad_zero] using
       SmoothCcTensor.inner_def (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ 0 2 0 T)
-      (appCc (I := I) (M := M) g₀ 3 2
+      (operatorFieldApply (I := I) (M := M) g₀ 3 2
         (edgeArmCoeff (I := I) (M := M) g₀ g₁)
         (iteratedCovGrad (I := I) g₀ 0 2 1 T))
   rw [hinner] at hibp
   have hresle :
       tensorL2Inner (I := I) (M := M) g₀ 0 2 T.toFun
-          (appCc (I := I) (M := M) g₀ 3 2
+          (operatorFieldApply (I := I) (M := M) g₀ 3 2
             (edgeArmCoeff (I := I) (M := M) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 1 T)).toFun ≤
         C * δ *
@@ -389,9 +388,9 @@ theorem edgePrincipal_half [Nonempty M]
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w +
             ccTensorBilinSymm (I := I) g₀ T y v w) →
-        gFibreOpBound (I := I) (M := M) g₀
+        metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ →
-        symmS (I := I) (M := M) g₀ T = T →
+        ccTensor02Symm (I := I) (M := M) g₀ T = T →
         δ / (1 - δ) + C * δ ≤ 1 / 2 →
         tensorL2Inner (I := I) (M := M) g₀ 0 2 T.toFun
           ((rawTensorConnLapSmooth (I := I) g₀ 0 2 T) +

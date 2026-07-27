@@ -70,7 +70,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-
+set_option maxHeartbeats 400000 in
+-- Normalizing the finite tensor expansion requires the larger heartbeat budget.
+/-- Maximal regularity for the connection Laplacian on tensor-valued `L²`
+paths.  The enlarged heartbeat budget is needed to elaborate the final
+transported operator identity through the Sobolev equivalences. -/
 theorem connection_laplacian_l2_maximal_regularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
     (_hT : 0 < T) (_hT1 : T ≤ 1) :

@@ -43,7 +43,7 @@ namespace Topology
 namespace UniversalCover
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -54,6 +54,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
 
 omit [PseudoEMetricSpace M] in
+omit [NeZero (Module.finrank ℝ E)]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M]
+  [SecondCountableTopology M] in
 /-- The canonical lowered metric curvature of the lifted metric is the
 base curvature evaluated at the projected point. -/
 theorem metricRm_lifted
@@ -87,7 +91,11 @@ theorem metricRm_lifted
     metricRm04StdAt_eq_chartRiemannCLM, hR]
   rfl
 
-omit [PseudoEMetricSpace M] in
+omit [PseudoEMetricSpace M]
+  [NeZero (Module.finrank ℝ E)]
+  [ConnectedSpace M]
+  [SecondCountableTopology M]
+  [SigmaCompactSpace M] in
 /-- A positive constant-sectional-curvature metric, scaled by its curvature
 constant and lifted to the universal cover, has the curvature-one tensor
 formula. -/
@@ -113,7 +121,10 @@ theorem metricRm_lift_one
   exact metricRm_scale_one (I := I) (M := M) g (proj (X := M) x') c hc
     (hsec (proj (X := M) x')) X Y Z W
 
-omit [PseudoEMetricSpace M] in
+omit [PseudoEMetricSpace M]
+  [ConnectedSpace M]
+  [SecondCountableTopology M]
+  [SigmaCompactSpace M] in
 /-- The normalized lifted metric of a positive constant-sectional-curvature
 metric has the curvature-one operator formula. -/
 theorem riemannOp_lift_one
@@ -151,6 +162,11 @@ theorem riemannOp_lift_one
       (liftedMetric (I := I) (scaleMetric (I := I) c hc g)) x' 1 hRm X Y Z
 
 omit [NeZero (Module.finrank ℝ E)] [PseudoEMetricSpace M] in
+omit [I.Boundaryless]
+  [T2Space M]
+  [SigmaCompactSpace M]
+  [ConnectedSpace M]
+  [SecondCountableTopology M] in
 /-- **Naturality of the Levi-Civita connection under `proj`.**
 The Levi-Civita connection of the lifted metric on `M'` agrees, fibrewise
 through the linear isometric equivalence `liftedMetric_inner_eq`, with the
@@ -165,6 +181,8 @@ theorem leviCivita_lifted_eq_pullback (g : SmoothRiemannianMetric I M) :
       LeviCivita (I := I) (liftedMetric (I := I) g) := rfl
 
 omit [PseudoEMetricSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 /-- **Naturality of `riemannOp` under `proj`.**
 For any `x' : M'` and lifted tangent vectors `v', w', u'`, the Riemann
 curvature operator on `M'` (built from the lifted Levi-Civita) commutes with
@@ -172,35 +190,7 @@ curvature operator on `M'` (built from the lifted Levi-Civita) commutes with
 `riemannOp (LC)` after `dproj` on each slot.
 Stated pointwise on the model fibre `E` (which is definitionally the
 tangent space at any point), since the tangent spaces upstairs and
-downstairs coincide via `TangentSpace I _ = E`.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-omit [PseudoEMetricSpace M] in
-omit [InnerProductSpace ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
+downstairs coincide via `TangentSpace I _ = E`. -/
 theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (v' w' u' : E)
@@ -241,10 +231,6 @@ theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
       (mem_chart_source H x') i j k l
   rw [hT]
 
-omit [PseudoEMetricSpace M] in
-/-- **Naturality of `ricciTensor` under `proj`.**
-For any `x' : M'` and lifted tangent vectors `v', w'`,
-`ricciTensor (liftedMetric g) x' v' w' = ricciTensor g (proj x') v' w'`.
 
 
 
@@ -255,9 +241,11 @@ For any `x' : M'` and lifted tangent vectors `v', w'`,
 
 
 omit [PseudoEMetricSpace M] in
-omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
+/-- **Naturality of `ricciTensor` under `proj`.**
+For any `x' : M'` and lifted tangent vectors `v', w'`,
+`ricciTensor (liftedMetric g) x' v' w' = ricciTensor g (proj x') v' w'`. -/
 theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (v' w' : E)
@@ -286,27 +274,14 @@ theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
   rw [hRiem]
 
 omit [PseudoEMetricSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
 /-- **Ricci lower bound transfers to the universal cover.**
 If `RicciBoundedBelow g κ` holds on `M` (i.e. `Ric_g ≥ κ · g`), then
 `RicciBoundedBelow (liftedMetric g) κ` holds on the universal cover.
 At any cover point `x'` and tangent vector `v'`, set `x := proj x'`; the
 inner products agree by `liftedMetric_inner_eq` and the Ricci values agree
-by `ricciTensor_lifted_natural`, so the base bound `hRic x v'` carries over.
-
-
-
-
-
-
-
-
-
-
-
-omit [PseudoEMetricSpace M] in
-omit [InnerProductSpace ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] [ConnectedSpace M] [SecondCountableTopology M] in
+by `ricciTensor_lifted_natural`, so the base bound `hRic x v'` carries over. -/
 theorem ricciBoundedBelow_liftedMetric_of_base
     {g : SmoothRiemannianMetric I M} {κ : ℝ}
     (hRic : RicciBoundedBelow (I := I) g κ)

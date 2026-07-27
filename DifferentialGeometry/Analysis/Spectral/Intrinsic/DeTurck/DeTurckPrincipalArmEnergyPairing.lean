@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricDifferenceSlotPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.OperatorFieldPairingIBP
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
@@ -23,10 +23,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvature
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 1600000
-
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
@@ -45,13 +41,14 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Analysis.Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm
     (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 0 2) :
@@ -113,9 +110,11 @@ private noncomputable def negGInvDiffSlotApplied
     (W : TensorRSSpace 0 (s + 1) I x) : TensorRSSpace 0 (s + 1) I x :=
   TensorRSSpace.ofCLM
     ((slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
-        (-gInvDiffRaisedEndo (I := I) g₀ g₁ x)).comp
+        (-metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from W))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem slotInsertEndoFib_neg_left (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (-Λ) =
@@ -123,6 +122,8 @@ private theorem slotInsertEndoFib_neg_left (s : ℕ) (k : Fin s) (x : M)
   rw [show (-Λ) = (-1 : ℝ) • Λ from by rw [neg_one_smul],
     slotInsertEndoFib_smul_left (I := I) (M := M) s k x (-1 : ℝ) Λ, neg_one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem negGInvDiffSlotApplied_eq_neg
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : TensorRSSpace 0 (s + 1) I x) :
@@ -130,10 +131,12 @@ private theorem negGInvDiffSlotApplied_eq_neg
       - gInvDiffSlotApplied (I := I) g₀ g₁ s x W := by
   rw [negGInvDiffSlotApplied, gInvDiffSlotApplied,
     slotInsertEndoFib_neg_left (I := I) (M := M) (s + 1) 0 x
-      (gInvDiffRaisedEndo (I := I) g₀ g₁ x),
+      (metricComparisonDiffEndo (I := I) g₀ g₁ x),
     ContinuousLinearMap.neg_comp]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem toModel_negGInvDiffSlotApplied_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : TensorRSSpace 0 (s + 1) I x) :
@@ -143,41 +146,47 @@ private theorem toModel_negGInvDiffSlotApplied_eq
           (gInvDiffSlotApplied (I := I) g₀ g₁ s x W) := by
   rw [negGInvDiffSlotApplied_eq_neg (I := I) g₀ g₁ s x W, TensorRSSpace.toModel_neg]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem negGInvDiffRaisedEndo_g0_self_adjoint
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
-    g₀.inner x ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) a) b
-      = g₀.inner x a ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) b) := by
+    g₀.inner x ((-metricComparisonDiffEndo (I := I) g₀ g₁ x) a) b
+      = g₀.inner x a ((-metricComparisonDiffEndo (I := I) g₀ g₁ x) b) := by
   simp only [ContinuousLinearMap.neg_apply, map_neg]
   rw [gInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x a b]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem negGInvDiffRaisedEndo_inner_self_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (x : M) (v : TangentSpace I x) :
-    g₀.inner x ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) v) v
+    g₀.inner x ((-metricComparisonDiffEndo (I := I) g₀ g₁ x) v) v
       ≤ (δ / (1 - δ)) * g₀.inner x v v := by
   rw [ContinuousLinearMap.neg_apply, map_neg]
   have hbnd := abs_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v v
   have hv_nn : 0 ≤ g₀.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
   have hsq : Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v) = g₀.inner x v v := by
     rw [← Real.sqrt_mul hv_nn, Real.sqrt_mul_self hv_nn]
-  have hle : -g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v
-      ≤ |g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v| := neg_le_abs _
-  calc -g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v
-      ≤ |g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v| := hle
+  have hle : -g₀.inner x (metricComparisonDiffEndo (I := I) g₀ g₁ x v) v
+      ≤ |g₀.inner x (metricComparisonDiffEndo (I := I) g₀ g₁ x v) v| := neg_le_abs _
+  calc -g₀.inner x (metricComparisonDiffEndo (I := I) g₀ g₁ x v) v
+      ≤ |g₀.inner x (metricComparisonDiffEndo (I := I) g₀ g₁ x v) v| := hle
     _ ≤ (δ / (1 - δ)) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v)) := hbnd
     _ = (δ / (1 - δ)) * g₀.inner x v v := by rw [hsq]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private theorem tensorInnerPointwise_negGInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (s : ℕ) (x : M) (W : TensorRSSpace 0 (s + 1) I x) :
     tensorInnerPointwise (I := I) (M := M) g₀ 0 (s + 1) x
         (TensorRSSpace.toModel W)
@@ -188,7 +197,7 @@ private theorem tensorInnerPointwise_negGInvDiffSlot_le
     DifferentialGeometry.Analysis.Sobolev.TensorHilbert.exists_orthoFrame_basis_E
       (I := I) (M := M) g₀ x
   exact DifferentialGeometry.Analysis.Sobolev.TensorHilbert.tensorInnerPointwise_slotΛ_le
-    (I := I) (M := M) g₀ s x (-gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+    (I := I) (M := M) g₀ s x (-metricComparisonDiffEndo (I := I) g₀ g₁ x)
     (negGInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x)
     (fun v => negGInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
     W e bse hbse horth
@@ -208,6 +217,12 @@ theorem rawConnLap_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (rawTensorConnLapSmooth (I := I) g r s v).toFun T.toFun
   rw [hsymm1, hvT] at hTv; rw [← hsymm2]; linarith [hTv]
 
+set_option maxHeartbeats 800000 in
+-- Elaborating the pointwise tensor integral identity needs additional reduction budget.
+set_option synthInstance.maxHeartbeats 800000 in
+-- Resolving scalar multiplication through the bundled tensor section is instance-search heavy.
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s (S₁.toFun - S₂.toFun) T.toFun =
@@ -227,7 +242,8 @@ private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M)
         = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
           (S₂.toFun x) (T.toFun x)) := by
       funext x
-      show tensorInnerPointwise (I := I) (M := M) g r s x ((-1 : ℝ) • S₂.toFun x) (T.toFun x) = _
+      change tensorInnerPointwise (I := I) (M := M) g r s x
+        ((-1 : ℝ) • S₂.toFun x) (T.toFun x) = _
       rw [tensorInnerPointwise_smul_left]
     rw [heq]
     exact hbase.const_mul (-1 : ℝ)
@@ -237,6 +253,12 @@ private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M)
     tensorL2Inner_smul_left]
   ring
 
+set_option maxHeartbeats 800000 in
+-- Elaborating the pointwise tensor integral identity needs additional reduction budget.
+set_option synthInstance.maxHeartbeats 800000 in
+-- Resolving scalar multiplication through the bundled tensor section is instance-search heavy.
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T₁ T₂ : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s S.toFun (T₁.toFun - T₂.toFun) =
@@ -256,7 +278,8 @@ private theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M
         = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
           (S.toFun x) (T₂.toFun x)) := by
       funext x
-      show tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) ((-1 : ℝ) • T₂.toFun x) = _
+      change tensorInnerPointwise (I := I) (M := M) g r s x
+        (S.toFun x) ((-1 : ℝ) • T₂.toFun x) = _
       rw [tensorInnerPointwise_smul_right]
     rw [heq]
     exact hbase.const_mul (-1 : ℝ)
@@ -276,20 +299,25 @@ private noncomputable def armPrincipalSlotPairing
         (I := I) g₀ g₁ (2 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x)))
 
+set_option maxHeartbeats 800000 in
+-- Normalizing the tensor-slot pairing through the bundled section maps is reduction-heavy.
+set_option synthInstance.maxHeartbeats 800000 in
+-- Resolving scalar multiplication on the pointwise tensor model is instance-search heavy.
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armPrincipalSlotPairing_eq_neg_inner
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) :
     armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
       - (⟪iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀,
-          appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+          operatorFieldApply (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + n)
               (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) := by
   classical
   set A : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
     iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀ with hA_def
   set B : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
-    appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+    operatorFieldApply (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + n)
         (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁)) A with hB_def
   have hBfun : ∀ x : M,
       B.toFun x =
@@ -307,24 +335,26 @@ private theorem armPrincipalSlotPairing_eq_neg_inner
   rw [show (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) = A.toFun from rfl,
     heq]
   have hsmul : (fun x => - B.toFun x) = (-1 : ℝ) • B.toFun := by
-    funext x; rw [Pi.smul_apply, neg_one_smul]
+    funext x
+    exact (neg_one_smul ℝ (B.toFun x)).symm
   rw [hsmul,
     tensorL2Inner_smul_right (I := I) (M := M) g₀ 0 ((2 + n) + 1) (-1 : ℝ) A.toFun B.toFun]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_vecTail_cons {α : Type*} {n : ℕ} (a : α) (w : Fin n → α) :
     Matrix.vecTail (Fin.cons a w) = w := by
   funext j
   simp [Matrix.vecTail, Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma armResidual_toModel_sum {s : ℕ} (b : M) {ι : Type*} (fs : Finset ι)
     (f : ι → Tensor0SSpace s I b) :
     Tensor0SSpace.toModel (∑ i ∈ fs, f i) = ∑ i ∈ fs, Tensor0SSpace.toModel (f i) :=
   map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) s b) f fs
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -337,7 +367,7 @@ private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1 + 1) ℝ E) (a : E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -354,7 +384,8 @@ private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset
       c f rest]
   exact Finset.sum_congr rfl fun j _ => by rw [hcur]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I M) (b : M)
     (u : TangentSpace I b) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -407,7 +438,8 @@ private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I 
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_toModel_contract_covariant (s : ℕ) (b : M) (v : TangentSpace I b)
     (A : TensorRSSpace 0 (s + 1) I b) (D : Tensor0SSpace 0 I b) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -418,7 +450,6 @@ private lemma armResidual_toModel_contract_covariant (s : ℕ) (b : M) (v : Tang
         (Fin.cons ((v : TangentSpace I b) : E) m) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_covDivergence_toSection (g₀ : SmoothRiemannianMetric I M)
     (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) (b : M) :
     ((covDivergence (I := I) (M := M) g₀ s V).toSection b : TensorRSSpace 0 s I b) =
@@ -438,7 +469,8 @@ private lemma armResidual_covDivergence_toSection (g₀ : SmoothRiemannianMetric
   rw [tensorCovDerivAt_def (I := I) (M := M) g₀ 0 (s + 1) V b
     (smoothOrthoFrame (I := I) g₀ b i b)]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric I M) (b : M)
     (W : Tensor0SSpace (2 + 2) I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (DeTurck.cometricDoubleTraceFib (I := I) g₀ 2 b W) m =
@@ -464,22 +496,23 @@ private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric 
     (v0 := ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E))
     (vs := Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E) m)]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I M) (b : M)
     (T : Tensor0SBundle.Tensor0SModel (2 + 1 + 1) ℝ E) (m : Fin 2 → E) :
     (∑ i : Fin (Module.finrank ℝ E),
         T (Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E)
-            (Fin.cons ((gInvDiffRaisedEndo (I := I) g₀ g₁ b
+            (Fin.cons ((metricComparisonDiffEndo (I := I) g₀ g₁ b
                 (smoothOrthoFrame (I := I) g₀ b i b) : TangentSpace I b) : E) m))) =
       ∑ i : Fin (Module.finrank ℝ E),
-        T (Fin.cons ((gInvDiffRaisedEndo (I := I) g₀ g₁ b
+        T (Fin.cons ((metricComparisonDiffEndo (I := I) g₀ g₁ b
               (smoothOrthoFrame (I := I) g₀ b i b) : TangentSpace I b) : E)
             (Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E) m)) := by
   classical
   set e : Fin (Module.finrank ℝ E) → TangentSpace I b :=
     fun i => smoothOrthoFrame (I := I) g₀ b i b with he
   set Λ : TangentSpace I b →L[ℝ] TangentSpace I b :=
-    gInvDiffRaisedEndo (I := I) g₀ g₁ b with hΛ
+    metricComparisonDiffEndo (I := I) g₀ g₁ b with hΛ
   have hadj : ∀ a c : TangentSpace I b, g₀.inner b (Λ a) c = g₀.inner b a (Λ c) :=
     fun a c => gInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ b a c
   have hexp : ∀ v : TangentSpace I b,
@@ -513,7 +546,7 @@ private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I
     rw [hadj (e j) (e i), g₀.symm b (e j) (Λ (e i))]
   rw [hco]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 s) (b : M) (D : Tensor0SSpace 0 I b)
     (v0 : E) (vs : Fin s → E) :
@@ -532,7 +565,7 @@ private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : 
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from
         tensorCovDerivAt (I := I) (M := M) g₀ 0 s W b v0) D) w) ht)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E)
     (i : Fin (Module.finrank ℝ E)) :
@@ -540,8 +573,8 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
         ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from
           Tensor0SBundle.contract_covariant 0 2 b (smoothOrthoFrame (I := I) g₀ b i b)
             (tensorCovDerivAt (I := I) (M := M) g₀ 0 (2 + 1)
-              (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ 2
+              (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))
                 (covGrad (I := I) (M := M) g₀ 0 2 u₀)) b
               (smoothOrthoFrame (I := I) g₀ b i b))) D) m =
@@ -558,7 +591,7 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
             (covGrad (I := I) (M := M) g₀ 0 (2 + 1)
               (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toSection b) D)
           (Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E)
-            (Fin.cons ((gInvDiffRaisedEndo (I := I) g₀ g₁ b
+            (Fin.cons ((metricComparisonDiffEndo (I := I) g₀ g₁ b
                 (smoothOrthoFrame (I := I) g₀ b i b) : TangentSpace I b) : E) m)) := by
   classical
   set ei : TangentSpace I b := smoothOrthoFrame (I := I) g₀ b i b with hei
@@ -566,23 +599,23 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
   set Λf := gInvDiffRaisedEndoField (I := I) g₀ g₁ with hΛf
   rw [armResidual_toModel_contract_covariant (I := I) (M := M) 2 b ei _ D m]
   have hderiv := tensorCovDerivAt_appCc_eq (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-    (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λf) Du b ((ei : TangentSpace I b) : E)
+    (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λf) Du b ((ei : TangentSpace I b) : E)
   rw [hderiv]
   rw [show ((((show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
           tensorCovDerivAt (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λf) b ((ei : TangentSpace I b) : E)).comp
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λf) b ((ei : TangentSpace I b) : E)).comp
           (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from Du.toSection b) +
         (show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λf).toSection b).comp
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λf).toSection b).comp
           (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
             tensorCovDerivAt (I := I) (M := M) g₀ 0 (2 + 1) Du b
               ((ei : TangentSpace I b) : E))) : TensorRSSpace 0 (2 + 1) I b)) D =
       (show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
           tensorCovDerivAt (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λf) b ((ei : TangentSpace I b) : E))
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λf) b ((ei : TangentSpace I b) : E))
         ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from Du.toSection b) D) +
       (show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2 Λf).toSection b)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 Λf).toSection b)
         ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
           tensorCovDerivAt (I := I) (M := M) g₀ 0 (2 + 1) Du b
             ((ei : TangentSpace I b) : E)) D) from rfl]
@@ -606,7 +639,7 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
       ((ei : TangentSpace I b) : E)
       (Fin.cons ((Λf b (ei : TangentSpace I b) : TangentSpace I b) : E) m)).symm
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
@@ -617,7 +650,7 @@ private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M
           ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace ((2 + 1) + 1) I b from
             (covGrad (I := I) (M := M) g₀ 0 (2 + 1)
               (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toSection b) D)
-          (Fin.cons ((gInvDiffRaisedEndo (I := I) g₀ g₁ b
+          (Fin.cons ((metricComparisonDiffEndo (I := I) g₀ g₁ b
               (smoothOrthoFrame (I := I) g₀ b i b) : TangentSpace I b) : E)
             (Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E) m)) := by
   classical
@@ -625,10 +658,10 @@ private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M
     deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo (I := I) (M := M) g₀ g₁]
   rw [show Tensor0SSpace.toModel
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from
-        (appCc (I := I) (M := M) g₀ 4 2
-          (DifferentialGeometry.Integral.Connection.appCcRS (I := I) (M := M) g₀ 4 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (DifferentialGeometry.Integral.Connection.ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2
             (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-            (DifferentialGeometry.Integral.Connection.slotInsertEndoCc (I := I) (M := M) g₀ 3
+            (DifferentialGeometry.Integral.Connection.endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
           (iteratedCovGrad (I := I) g₀ 0 2 2 u₀)).toSection b) D) m =
     Tensor0SSpace.toModel
@@ -652,16 +685,15 @@ private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M
   rw [Fin.cons_zero, Fin.update_cons_zero]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-            (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
               (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
               (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ 2
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
             (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toSection b) D) m =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -676,25 +708,25 @@ private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
   classical
   rw [show Tensor0SSpace.toModel
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-          (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
             (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
             (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-              (slotInsertEndoCc (I := I) (M := M) g₀ 2
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                 (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toSection b) D) m =
     Tensor0SSpace.toModel
       (DeTurck.cometricDoubleTraceFib (I := I) g₀ 2 b
         ((show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace ((2 + 1) + 1) I b from
           (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 2
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection b)
           ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
             (covGrad (I := I) (M := M) g₀ 0 2 u₀).toSection b) D))) m from rfl]
   rw [armResidual_toModel_doubleTraceFib (I := I) (M := M) g₀ b
     ((show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace ((2 + 1) + 1) I b from
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection b)
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
         (covGrad (I := I) (M := M) g₀ 0 2 u₀).toSection b) D)) m]
@@ -702,7 +734,7 @@ private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
   have hstep : Tensor0SSpace.toModel
       ((show Tensor0SSpace (2 + 1) I b →L[ℝ] Tensor0SSpace ((2 + 1) + 1) I b from
         (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection b)
         ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (2 + 1) I b from
           (covGrad (I := I) (M := M) g₀ 0 2 u₀).toSection b) D))
@@ -765,20 +797,19 @@ private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
     from rfl]
   rw [Fin.update_cons_zero]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem armResidual_covDivergence_split (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) :
     covDivergence (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)) =
       deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀ +
-        appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-          (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+        operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
             (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
             (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-              (slotInsertEndoCc (I := I) (M := M) g₀ 2
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                 (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀) := by
   classical
@@ -792,15 +823,15 @@ private theorem armResidual_covDivergence_split (g₀ g₁ : SmoothRiemannianMet
   refine ContinuousMultilinearMap.ext fun m => ?_
   beta_reduce
   set P : SmoothCcTensor g₀ 0 (2 + 1) :=
-    appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       (covGrad (I := I) (M := M) g₀ 0 2 u₀) with hP
   set Garm : SmoothCcTensor g₀ 0 (2 + 0) :=
-    appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-      (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
         (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
         (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
       (covGrad (I := I) (M := M) g₀ 0 2 u₀) with hGarm
   rw [show ((deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀ + Garm).toSection b :
@@ -848,12 +879,16 @@ private theorem armResidual_covDivergence_split (g₀ g₁ : SmoothRiemannianMet
 
 def edgeArmCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
-  -(appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+  -(ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
     (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
     (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ 2
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
 
+set_option maxHeartbeats 800000 in
+-- The integration-by-parts normalization expands several bundled tensor operators.
+set_option synthInstance.maxHeartbeats 800000 in
+-- Resolving the tensor-valued scalar operations in the expanded identity is instance-search heavy.
 private theorem deTurckArm_residual_ibp_zero
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (u₀ : SmoothCcTensor g₀ 0 2),
@@ -862,35 +897,35 @@ private theorem deTurckArm_residual_ibp_zero
           (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
         armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
       (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
-          appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
+          operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
             (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) := by
   classical
   intro u₀
   set G₀ : SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
-    appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
       (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))) with hG₀
   rw [edgeArmCoeff, ← hG₀]
   set Du : SmoothCcTensor g₀ 0 (2 + 1) := covGrad (I := I) (M := M) g₀ 0 2 u₀ with hDu
   set P : SmoothCcTensor g₀ 0 (2 + 1) :=
-    appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       Du with hP
   rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ 0 u₀, sub_neg_eq_add,
     oneMinusConnLapSmoothIter_zero]
   have hslot : (⟪iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u₀,
-      appCc (I := I) (M := M) g₀ ((2 + 0) + 1) ((2 + 0) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + 0)
+      operatorFieldApply (I := I) (M := M) g₀ ((2 + 0) + 1) ((2 + 0) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + 0)
           (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u₀)⟫_ℝ : ℝ) =
       tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1) Du.toFun P.toFun := by
     rw [hDu, hP]
     exact SmoothCcTensor.inner_def (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u₀)
-      (appCc (I := I) (M := M) g₀ ((2 + 0) + 1) ((2 + 0) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + 0)
+      (operatorFieldApply (I := I) (M := M) g₀ ((2 + 0) + 1) ((2 + 0) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + 0)
           (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u₀))
   rw [hslot]
@@ -899,33 +934,34 @@ private theorem deTurckArm_residual_ibp_zero
   have hsplit := armResidual_covDivergence_split (I := I) (M := M) g₀ g₁ u₀
   have hfun : (covDivergence (I := I) (M := M) g₀ 2 P).toFun =
       (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun +
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
     rw [hP, hDu, hG₀, hsplit, SmoothCcTensor.toFun_add]
   rw [hfun] at hgreen
   rw [tensorL2Inner_add_right (I := I) (M := M) g₀ 0 2 u₀.toFun
     (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun
-    (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun
+    (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) u₀ (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀))
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
-      (I := I) (M := M) u₀ (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du))] at hgreen
+      (I := I) (M := M) u₀ (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du))] at hgreen
   have hrhs : (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
-      appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (-G₀)
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) (-G₀)
         (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) =
       - tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 0) u₀.toFun
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
     have hinner := SmoothCcTensor.inner_def (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ 0 2 0 u₀)
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (-G₀)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) (-G₀)
         (iteratedCovGrad (I := I) g₀ 0 2 1 u₀))
     rw [hinner]
     rw [show (iteratedCovGrad (I := I) g₀ 0 2 1 u₀ : SmoothCcTensor g₀ 0 (2 + 1)) = Du from rfl]
     rw [appCc_neg_left (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du,
       SmoothCcTensor.toFun_neg]
-    rw [show (-(appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun) =
-        (-1 : ℝ) • (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun from by
+    rw [show (-(operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun) =
+        (-1 : ℝ) • (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun from by
       funext x
-      rw [Pi.neg_apply, Pi.smul_apply, neg_one_smul]]
+      exact (neg_one_smul ℝ
+        ((operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun x)).symm]
     rw [tensorL2Inner_smul_right]
     rw [show (iteratedCovGrad (I := I) g₀ 0 2 0 u₀).toFun = u₀.toFun from rfl]
     ring
@@ -933,9 +969,9 @@ private theorem deTurckArm_residual_ibp_zero
   have hDuFun : Du.toFun = (covGrad (I := I) (M := M) g₀ 0 2 u₀).toFun := rfl
   rw [hDuFun]
   have hY : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 0) u₀.toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun =
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 2 u₀.toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := rfl
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := rfl
   linarith [hgreen, hY]
 
 theorem edgeArm_ibp (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -945,10 +981,11 @@ theorem edgeArm_ibp (g₀ g₁ : SmoothRiemannianMetric I M)
         (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
       armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
     (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
-        appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
+        operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) (edgeArmCoeff (I := I) g₀ g₁)
           (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) :=
   deTurckArm_residual_ibp_zero (I := I) (M := M) g₀ g₁ u₀
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_norm_comp (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ)
     (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ =
@@ -972,28 +1009,30 @@ private theorem armJet_norm_comp (g₀ : SmoothRiemannianMetric I M) (s j i : �
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
   have ha : (0 : ℝ) ≤
       ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ :=
     norm_nonneg _
   have hb : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   rw [← Real.sqrt_sq ha, ← Real.sqrt_sq hb, hsq]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_norm_order_congr (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 s n S‖ = ‖iteratedCovGrad (I := I) g₀ 0 s n' S‖ := by
   subst h
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_appCcRS_norm_le (g₀ : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ V : SmoothCcTensor g₀ 0 b,
-      ‖appCcRS (I := I) (M := M) g₀ 0 b c Φ V‖ ≤ C * ‖V‖ := by
+      ‖ccOperatorFieldComp (I := I) (M := M) g₀ 0 b c Φ V‖ ≤ C * ‖V‖ := by
   classical
   obtain ⟨Cop, hCop_nn, hCop⟩ :=
     exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g₀ 0 b c Φ
   refine ⟨Real.sqrt Cop, Real.sqrt_nonneg _, fun V => ?_⟩
-  set Z : SmoothCcTensor g₀ 0 c := appCcRS (I := I) (M := M) g₀ 0 b c Φ V with hZ_def
+  set Z : SmoothCcTensor g₀ 0 c := ccOperatorFieldComp (I := I) (M := M) g₀ 0 b c Φ V with hZ_def
   have hZn : ‖Z‖ = tensorL2Norm (I := I) (M := M) g₀ 0 c Z.toFun :=
     SmoothCcTensor.norm_def (I := I) (M := M) Z
   have hVn : ‖V‖ = tensorL2Norm (I := I) (M := M) g₀ 0 b V.toFun :=
@@ -1034,10 +1073,11 @@ private theorem armJet_appCcRS_norm_le (g₀ : SmoothRiemannianMetric I M) (b c 
     _ = Real.sqrt Cop * ‖V‖ := by
         rw [Real.sqrt_mul hCop_nn, Real.sqrt_sq hVnn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armJet_iteratedCovGrad_appCc_le (g₀ : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
     ∃ Cf : ℕ → ℝ, (∀ q, 0 ≤ Cf q) ∧ ∀ (q : ℕ) (W : SmoothCcTensor g₀ 0 b),
-      ‖iteratedCovGrad (I := I) g₀ 0 c q (appCc (I := I) (M := M) g₀ b c Φ W)‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ 0 c q (operatorFieldApply (I := I) (M := M) g₀ b c Φ W)‖ ≤
         Cf q * ∑ k ∈ Finset.range (q + 1), ‖iteratedCovGrad (I := I) g₀ 0 b k W‖ := by
   classical
   choose CC hCC_nn hCC using fun (q k : ℕ) =>
@@ -1045,10 +1085,10 @@ private theorem armJet_iteratedCovGrad_appCc_le (g₀ : SmoothRiemannianMetric I
       (appCcLeibnizPsi (I := I) (M := M) g₀ b c Φ q k)
   refine ⟨fun q => ∑ k ∈ Finset.range (q + 1), CC q k,
     fun q => Finset.sum_nonneg (fun k _ => hCC_nn q k), fun q W => ?_⟩
-  rw [iteratedCovGrad_appCc_eq (I := I) (M := M) g₀ b c Φ W q]
+  rw [iteratedCovGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b c Φ W q]
   refine le_trans (norm_sum_le _ _) ?_
   have hterm : ∀ k ∈ Finset.range (q + 1),
-      ‖appCcRS (I := I) (M := M) g₀ 0 (b + k) (c + q)
+      ‖ccOperatorFieldComp (I := I) (M := M) g₀ 0 (b + k) (c + q)
           (appCcLeibnizPsi (I := I) (M := M) g₀ b c Φ q k)
           (iteratedCovGrad (I := I) g₀ 0 b k W)‖ ≤
         CC q k * ∑ j ∈ Finset.range (q + 1), ‖iteratedCovGrad (I := I) g₀ 0 b j W‖ := by
@@ -1352,6 +1392,8 @@ private theorem armJet_iteratedCovGrad_iterL_le (g₀ : SmoothRiemannianMetric I
             add_le_add h1 h2
         _ = (Cf p + C5 p * ∑ b ∈ Finset.range (p + 3), Cf b) * SFULL := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armJet_abs_pairing_le (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) :
     |tensorL2Inner (I := I) (M := M) g₀ 0 s A.toFun B.toFun| ≤ ‖A‖ * ‖B‖ := by
@@ -1359,6 +1401,7 @@ private theorem armJet_abs_pairing_le (g₀ : SmoothRiemannianMetric I M) (s : �
   rw [← h]
   exact abs_real_inner_le_norm A B
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_jetSum_mono (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {m m' : ℕ}
     (h : m ≤ m') (v : SmoothCcTensor g₀ 0 s) :
     ∑ q ∈ Finset.range m, ‖iteratedCovGrad (I := I) g₀ 0 s q v‖ ≤
@@ -1366,6 +1409,7 @@ private theorem armJet_jetSum_mono (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_subset_range.mpr h)
     (fun _ _ _ => norm_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_jetSum_covGrad_le (g₀ : SmoothRiemannianMetric I M) (s m : ℕ)
     (v : SmoothCcTensor g₀ 0 s) :
     ∑ q ∈ Finset.range m,
@@ -1383,6 +1427,7 @@ private theorem armJet_jetSum_covGrad_le (g₀ : SmoothRiemannianMetric I M) (s 
   have h0 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s 0 v‖ := norm_nonneg _
   linarith [h]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armJet_jetProduct_le (g₀ : SmoothRiemannianMetric I M) (n p q : ℕ)
     (hp : p ≤ n + 2) (hq : q ≤ n + 2) (hpq : p + q ≤ 2 * n + 3)
     (u₀ : SmoothCcTensor g₀ 0 2) :
@@ -1410,11 +1455,11 @@ private theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric
     ∃ C : ℝ, 0 ≤ C ∧ ∀ u₀ : SmoothCcTensor g₀ 0 2,
       |tensorL2Inner (I := I) (M := M) g₀ 0 2
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-            (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
               (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
               (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ 2
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
             (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun| ≤
       C * ((∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -1423,10 +1468,10 @@ private theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric
   set a : ℕ := n / 2 with ha_def
   set b : ℕ := n - n / 2 with hb_def
   set Gf : SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
-    appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
       (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))) with hGf_def
   obtain ⟨CfL, hCfL_nn, hCfL⟩ := armJet_iteratedCovGrad_iterL_le (I := I) (M := M) g₀ 2 b
   obtain ⟨CfR, hCfR_nn, hCfR⟩ := armJet_iteratedCovGrad_iterL_le (I := I) (M := M) g₀ 2 a
@@ -1436,7 +1481,7 @@ private theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric
   · exact mul_nonneg (hCfL_nn 0)
       (mul_nonneg (hCfR_nn 0) (Finset.sum_nonneg (fun q _ => hCfG_nn q)))
   · set GT : SmoothCcTensor g₀ 0 (2 + 0) :=
-      appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
       with hGT_def
     have hsym := oneMinusConnLapSmoothIter_l2Inner_sym_split (I := I) (M := M) g₀ 0 2 a b u₀ GT
     have hab : a + b = n := by omega
@@ -1522,18 +1567,24 @@ private theorem armLadder_pairing_abs_le_transport (g : SmoothRiemannianMetric I
     (oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X)
     (oneMinusConnLapSmoothIter (I := I) g 0 σ r Y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armAsm_l2Inner_zero_left (g : SmoothRiemannianMetric I M) (σ : ℕ)
     (Z : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ (0 : SmoothCcTensor g 0 σ).toFun Z.toFun = 0 := by
   rw [SmoothCcTensor.toFun_zero]
   exact tensorL2Inner_zero_left (I := I) (M := M) g 0 σ Z.toFun
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armAsm_l2Inner_zero_right (g : SmoothRiemannianMetric I M) (σ : ℕ)
     (Z : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ Z.toFun (0 : SmoothCcTensor g 0 σ).toFun = 0 := by
   rw [SmoothCcTensor.toFun_zero]
   exact tensorL2Inner_zero_right (I := I) (M := M) g 0 σ Z.toFun
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armAsm_l2Inner_add_left (g : SmoothRiemannianMetric I M) (σ : ℕ)
     (A B Z : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ (A + B).toFun Z.toFun =
@@ -1547,6 +1598,8 @@ private theorem armAsm_l2Inner_add_left (g : SmoothRiemannianMetric I M) (σ : �
     armAsm_l2Inner_zero_left (I := I) (M := M) g σ Z]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armAsm_l2Inner_add_right (g : SmoothRiemannianMetric I M) (σ : ℕ)
     (Z A B : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ Z.toFun (A + B).toFun =
@@ -1560,6 +1613,8 @@ private theorem armAsm_l2Inner_add_right (g : SmoothRiemannianMetric I M) (σ : 
     armAsm_l2Inner_zero_right (I := I) (M := M) g σ Z]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 private theorem armAsm_l2Inner_sum_left (g : SmoothRiemannianMetric I M) (σ c : ℕ)
     (f : ℕ → SmoothCcTensor g 0 σ) (Z : SmoothCcTensor g 0 σ) :
     tensorL2Inner (I := I) (M := M) g 0 σ (∑ i ∈ Finset.range c, f i).toFun Z.toFun =
@@ -1597,6 +1652,7 @@ private theorem armAsm_iterL_norm_le (g₀ : SmoothRiemannianMetric I M) (σ a :
   have h := hCf 0 v
   simpa only [Nat.zero_add, iteratedCovGrad_zero] using h
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armAsm_shifted_jetSum_le (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
     (u₀ : SmoothCcTensor g₀ 0 2) :
     ∑ a ∈ Finset.range c,
@@ -1622,11 +1678,12 @@ private theorem armAsm_shifted_jetSum_le (g₀ : SmoothRiemannianMetric I M) (ba
   rw [Finset.mem_range]
   omega
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armAsm_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
     (Φ : SmoothCcTensor g₀ (2 + base) c) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c p
-          (appCc (I := I) (M := M) g₀ (2 + base) c Φ
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + base) c Φ
             (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ := armJet_iteratedCovGrad_appCc_le (I := I) (M := M) g₀ (2 + base) c Φ
@@ -1637,11 +1694,12 @@ private theorem armAsm_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (bas
   rw [show p + 1 + base = p + base + 1 from by omega] at hsh
   exact hsh
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armAsm_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) 0 (2 + base) c I) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c p
-          (appFullSec (I := I) (M := M) g₀ 0 (2 + base) c Q
+          (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) c Q
             (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨cq, hcq_nn, hcq⟩ :=
@@ -1653,13 +1711,14 @@ private theorem armAsm_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M)
   rw [show p + 1 + base = p + base + 1 from by omega] at hsh
   exact hsh
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armAsm_appCc_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M)
     (base b2 c2 : ℕ) (Q : HomTensorRSField (E := E) (M := M) 0 (2 + base) b2 I)
     (Φ : SmoothCcTensor g₀ b2 c2) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c2 p
-          (appCc (I := I) (M := M) g₀ b2 c2 Φ
-            (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+          (operatorFieldApply (I := I) (M := M) g₀ b2 c2 Φ
+            (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
               (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ := armJet_iteratedCovGrad_appCc_le (I := I) (M := M) g₀ b2 c2 Φ
@@ -1668,25 +1727,26 @@ private theorem armAsm_appCc_appFullSec_jet_window (g₀ : SmoothRiemannianMetri
   refine ⟨fun p => Cf p * ∑ e ∈ Finset.range (p + 1), cq e,
     fun p => mul_nonneg (hCf_nn p) (Finset.sum_nonneg fun e _ => hcq_nn e),
     fun u₀ p => ?_⟩
-  refine le_trans (hCf p (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+  refine le_trans (hCf p (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
     (iteratedCovGrad (I := I) g₀ 0 2 base u₀))) ?_
   rw [mul_assoc]
   refine mul_le_mul_of_nonneg_left ?_ (hCf_nn p)
   have hwin := armAsm_sum_window_le (p + 1) base cq
     (fun e => ‖iteratedCovGrad (I := I) g₀ 0 b2 e
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
         (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖)
     (fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)
     hcq_nn (fun _ => norm_nonneg _) (fun e _ => hcq u₀ e)
   rw [show p + 1 + base = p + base + 1 from by omega] at hwin
   exact hwin
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem armAsm_covGrad_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (base : ℕ)
     (Φ : SmoothCcTensor g₀ (2 + base) (2 + base)) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 ((2 + base) + 1) p
           (covGrad (I := I) (M := M) g₀ 0 (2 + base)
-            (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+            (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
               (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ :=
@@ -1694,13 +1754,13 @@ private theorem armAsm_covGrad_appCc_jet_window (g₀ : SmoothRiemannianMetric I
   refine ⟨fun p => Cf (1 + p), fun p => hCf_nn (1 + p), fun u₀ p => ?_⟩
   have hnc : ‖iteratedCovGrad (I := I) g₀ 0 ((2 + base) + 1) p
       (covGrad (I := I) (M := M) g₀ 0 (2 + base)
-        (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
           (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ =
       ‖iteratedCovGrad (I := I) g₀ 0 (2 + base) (1 + p)
-        (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
           (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ :=
     armJet_norm_comp (I := I) (M := M) g₀ (2 + base) 1 p
-      (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
         (iteratedCovGrad (I := I) g₀ 0 2 base u₀))
   rw [hnc]
   refine le_trans (hCf (1 + p) (iteratedCovGrad (I := I) g₀ 0 2 base u₀)) ?_
@@ -1792,20 +1852,22 @@ private theorem armAsm_transport_pairing_jet_le (g₀ : SmoothRiemannianMetric I
           (∑ j ∈ Finset.range (NB + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)) := by
         ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 private theorem armSwap_appFullSec_sub_right (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (A B : SmoothCcTensor g 0 (t + 2)) :
-    appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F (A - B) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
-        appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B := by
+    homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F (A - B) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
+        homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x) =
-    (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toSection x -
-      (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x from by
+  rw [show ((homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x) =
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toSection x -
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
   rw [show ((A - B).toSection x : TensorRSSpace 0 (t + 2) I x) =
@@ -1826,8 +1888,8 @@ private theorem armSwap_oneMinusConnLapSmooth_comm (g : SmoothRiemannianMetric I
           (Fin.cons b (Fin.cons a w)))
     (U : SmoothCcTensor g 0 (t + 2)) :
     oneMinusConnLapSmooth (I := I) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
         (oneMinusConnLapSmooth (I := I) g 0 (t + 2) U) := by
   unfold oneMinusConnLapSmooth
   rw [appFullSec_swap_rawConnLap_comm (I := I) (M := M) g t F hF U,
@@ -1847,8 +1909,8 @@ private theorem armSwap_iterL_comm (g : SmoothRiemannianMetric I M) (t : ℕ)
           (Fin.cons b (Fin.cons a w)))
     (k : ℕ) (U : SmoothCcTensor g 0 (t + 2)) :
     oneMinusConnLapSmoothIter (I := I) g 0 (t + 2) k
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
         (oneMinusConnLapSmoothIter (I := I) g 0 (t + 2) k U) := by
   induction k with
   | zero => simp only [oneMinusConnLapSmoothIter_zero]
@@ -1858,6 +1920,7 @@ private theorem armSwap_iterL_comm (g : SmoothRiemannianMetric I M) (t : ℕ)
         (oneMinusConnLapSmoothIter (I := I) g 0 (t + 2) d U),
       oneMinusConnLapSmoothIter_succ]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private theorem armLadder_oneMinusConnLapSmooth_sub (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmooth (I := I) g r s (A - B) =
@@ -1866,6 +1929,7 @@ private theorem armLadder_oneMinusConnLapSmooth_sub (g : SmoothRiemannianMetric 
   rw [rawTensorConnLapSmooth_sub (I := I) (M := M) g r s A B]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 private theorem armLadder_iterL_sub (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s j (A - B) =
@@ -2206,15 +2270,15 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun -
         tensorL2Inner (I := I) (M := M) g₀ 0 (2 + (m + 1) + 1)
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + (m + 1) + 1) k
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun
-          (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun| ≤
       C * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -2225,22 +2289,22 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
     exists_secondCovGrad_swap_ricciDefect_homField (I := I) (M := M) g₀ 0 (2 + m)
   obtain ⟨cWm, hcWm_nn, hcWm⟩ := armAsm_appCc_jet_window (I := I) (M := M) g₀ (m + 1)
     (2 + m + 1)
-    (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁))
   obtain ⟨cDWm, hcDWm_nn, hcDWm⟩ := armAsm_covGrad_appCc_jet_window (I := I) (M := M) g₀ (m + 1)
-    (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁))
   obtain ⟨cGY, hcGY_nn, hcGY⟩ := armAsm_appCc_jet_window (I := I) (M := M) g₀ (m + 1)
     (2 + m + 1 + 1)
     (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
   obtain ⟨cDD, hcDD_nn, hcDD⟩ :=
     armAsm_appFullSec_jet_window (I := I) (M := M) g₀ m ((2 + m) + 2) R
   obtain ⟨cD2Y, hcD2Y_nn, hcD2Y⟩ := armAsm_appCc_appFullSec_jet_window (I := I) (M := M) g₀ m
     ((2 + m) + 2) (2 + m + 1 + 1) R
     (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m) (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
   obtain ⟨cWm', hcWm'_nn, hcWm'⟩ := armAsm_appCc_jet_window (I := I) (M := M) g₀ (m + 1 + 1)
     (2 + (m + 1) + 1)
-    (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+    (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
       (gInvDiffRaisedEndoField (I := I) g₀ g₁))
   have hV1win : ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 (2 + m + 1) p
@@ -2288,9 +2352,9 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
             (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-          (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
             (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-              (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
                 (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun| ≤
         CG * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -2303,9 +2367,9 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       have h := hCG u₀
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
           (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
         (hCVwin u₀) (fun p => hcGY u₀ p)
@@ -2313,16 +2377,16 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         show m + k + 1 + 1 = m + k + 2 from by omega] at h
       rw [appCcRS_zero_eq_appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
         (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)]
       calc |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
               (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
                 (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-            (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
+            (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
               (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun|
           ≤ CG * ((∑ j ∈ Finset.range (m + k + 3),
@@ -2340,9 +2404,9 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       have h := hCG u₀
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
           (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
         (hCVwin u₀) (fun p => hcGY u₀ p)
@@ -2350,7 +2414,7 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         show m + k + 2 + 1 = m + k + 3 from by omega] at h
       rw [appCcRS_zero_eq_appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1 + 1)
         (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)]
       exact h
@@ -2362,8 +2426,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
               (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
                 (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-            (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-              (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+            (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
                 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun| ≤
         Ci * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -2376,8 +2440,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       refine ⟨Ci, hCi_nn, fun u₀ _ => ?_⟩
       have h := hCi u₀ (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))
         (hV1win u₀) (fun p => hcDWm u₀ p)
@@ -2389,8 +2453,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
                 (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
                   (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
             (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-              (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+              (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))
                 (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun|
           ≤ Ci * ((∑ j ∈ Finset.range (m + k + 3),
@@ -2410,15 +2474,15 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
   have hDir : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun +
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
@@ -2426,16 +2490,16 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun := by
     rw [oneMinusConnLapSmoothIter_succ]
     exact oneMinusConnLapSmooth_l2Inner_eq_add_covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
   have hsplit1 : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
@@ -2443,8 +2507,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
@@ -2452,8 +2516,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun +
     ∑ i ∈ Finset.range k,
@@ -2463,8 +2527,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun := by
     rw [covGrad_iterL (I := I) (M := M) g₀ (2 + m + 1) k
@@ -2472,27 +2536,27 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       armAsm_l2Inner_add_left (I := I) (M := M) g₀ (2 + m + 1 + 1),
       armAsm_l2Inner_sum_left (I := I) (M := M) g₀ (2 + m + 1 + 1) k]
   have hgradW : covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) =
-    appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
       (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
       (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀) +
-    appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) := by
     rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)]
     exact covGrad_appCcRS_eq (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)
   have hMainSplit : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
@@ -2500,74 +2564,74 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-        (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
         (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun +
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun := by
     rw [hgradW, armAsm_l2Inner_add_right (I := I) (M := M) g₀ (2 + m + 1 + 1)]
   have hE2v : covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
       (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀) =
-    appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) +
-    appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
       (iteratedCovGrad (I := I) g₀ 0 2 m u₀) :=
     hE2 (iteratedCovGrad (I := I) g₀ 0 2 m u₀)
-  have hPsplit : appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+  have hPsplit : ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) =
-    appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))) +
-    appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+    ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀)) := by
     conv_lhs => rw [hE2v]
     exact appCcRS_add_right (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀))
   have hsplitP : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun =
@@ -2575,41 +2639,41 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun +
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun := by
     rw [hPsplit, armAsm_l2Inner_add_right (I := I) (M := M) g₀ (2 + m + 1 + 1)]
-  have hconj : appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+  have hconj : ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))) =
-    appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)) := by
     rw [appCcRS_zero_eq_appCc (I := I) (M := M) g₀ (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))]
     exact appCc_slotExtend_slotInsert_appFullSec_swap_conj (I := I) (M := M) g₀ (2 + m)
@@ -2620,20 +2684,20 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun := by
     rw [hconj]
@@ -2641,70 +2705,70 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀))).symm
-  have hσiter : appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+  have hσiter : homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))) =
     oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))) :=
     (armSwap_iterL_comm (I := I) (M := M) g₀ (2 + m) F hF k
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).symm
-  have hσsub : appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+  have hσsub : homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) =
     covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
       (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀) -
-    appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
       (iteratedCovGrad (I := I) g₀ 0 2 m u₀) :=
     eq_sub_of_add_eq hE2v.symm
   have hitersub : oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-      (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))) =
     oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) -
     oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀)) := by
     rw [hσsub]
     exact armLadder_iterL_sub (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) k
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀))
   have hlast : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)) -
         oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-          (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+          (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
             (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun -
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun := by
     rw [SmoothCcTensor.toFun_sub]
@@ -2713,73 +2777,73 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀)))
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀))
   have hbr : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + (m + 1) + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + (m + 1) + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun := rfl
   have hPσ : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 ((2 + m) + 2) ((2 + m) + 2) F
           (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + (m + 1) + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + (m + 1) + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun -
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun := by
     rw [hhop, hσiter, hitersub, hlast, hbr]
   have hEq : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun -
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + (m + 1) + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + (m + 1) + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun +
     (∑ i ∈ Finset.range k,
@@ -2789,35 +2853,35 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun) +
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1) (2 + m + 1 + 1)
         (covGrad (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun +
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun -
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun := by
     linarith [hDir, hsplit1, hMainSplit, hsplitP, hPσ]
@@ -2825,15 +2889,15 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
   have hA2 : |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) k
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)).toFun| ≤
       CA * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
         (∑ j ∈ Finset.range (m + k + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)) := by
     have h := hCA u₀ (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)
-      (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
       (hV1win u₀) (fun p => hcWm u₀ p)
@@ -2843,19 +2907,19 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
     ring
   have hD1b : |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + m + 1 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀)).toFun| ≤
       CD1 * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
         (∑ j ∈ Finset.range (m + k + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)) := by
     have h := hCD1 u₀
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀))
-      (appCc (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + (m + 1))
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + (m + 1) + 1) (2 + (m + 1) + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + (m + 1))
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1 + 1) u₀))
       (fun p => hcDD u₀ p) (fun p => hcWm' u₀ p)
@@ -2866,31 +2930,31 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1 + 1) k
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
           (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun
-      (appCcRS (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀))).toFun| ≤
       CD2 * ((∑ j ∈ Finset.range (m + k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
         (∑ j ∈ Finset.range (m + k + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)) := by
     have h := hCD2 u₀
       (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
         (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))
-      (appCc (I := I) (M := M) g₀ (2 + m + 1 + 1) (2 + m + 1 + 1)
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1 + 1) (2 + m + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
             (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-        (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+        (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
           (iteratedCovGrad (I := I) g₀ 0 2 m u₀)))
       (hCVwin u₀) (fun p => hcD2Y u₀ p)
     rw [show m + k + 2 + 1 = m + k + 3 from by omega,
       show m + k + 1 + 1 = m + k + 2 from by omega] at h
     rw [appCcRS_zero_eq_appCc (I := I) (M := M) g₀ (2 + m + 1 + 1) (2 + m + 1 + 1)
       (slotExtend (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + m) ((2 + m) + 2) R
         (iteratedCovGrad (I := I) g₀ 0 2 m u₀))]
     refine le_trans h (le_of_eq ?_)
     ring
@@ -2901,8 +2965,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun| ≤
       (∑ i ∈ Finset.range k, Ci i) *
@@ -2927,8 +2991,8 @@ private theorem armStep_pairing_diff_abs_le (g₀ g₁ : SmoothRiemannianMetric 
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + m + 1) (k - 1 - i)
               (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀)))).toFun
         (covGrad (I := I) (M := M) g₀ 0 (2 + m + 1)
-          (appCc (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + m)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + m + 1) (2 + m + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + m)
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (iteratedCovGrad (I := I) g₀ 0 2 (m + 1) u₀))).toFun| ≤
       (∑ i ∈ Finset.range k, Ci i) *
@@ -2945,8 +3009,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
       |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
           (covGrad (I := I) (M := M) g₀ 0 2
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀)).toFun
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 2
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun +
         armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀| ≤
@@ -2954,14 +3018,14 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
         (∑ j ∈ Finset.range (n + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)) := by
   classical
   obtain ⟨cW0, hcW0_nn, hcW0⟩ := armAsm_appCc_jet_window (I := I) (M := M) g₀ 1 (2 + 1)
-    (slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
   have hCbEx : ∀ i : ℕ, ∃ Cb : ℝ, 0 ≤ Cb ∧ ∀ u₀ : SmoothCcTensor g₀ 0 2, i < n →
       |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) i
             (pointwiseTensorCurv (I := I) (M := M) g₀ 2
               (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (n - 1 - i) u₀))).toFun
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 2
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))
             (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun| ≤
         Cb * ((∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -2981,8 +3045,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
           (f := fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)
           (fun j _ => norm_nonneg _) (Finset.mem_range.mpr (by omega))
       have h := hCb u₀ u₀
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀))
         hSwin (fun p => hcW0 u₀ p)
@@ -3000,8 +3064,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
   set H : ℕ → ℝ := fun μ => tensorL2Inner (I := I) (M := M) g₀ 0 (2 + μ + 1)
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + μ + 1) (n - μ)
       (iteratedCovGrad (I := I) g₀ 0 2 (μ + 1) u₀)).toFun
-    (appCc (I := I) (M := M) g₀ (2 + μ + 1) (2 + μ + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + μ)
+    (operatorFieldApply (I := I) (M := M) g₀ (2 + μ + 1) (2 + μ + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + μ)
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       (iteratedCovGrad (I := I) g₀ 0 2 (μ + 1) u₀)).toFun with hH
   have htele : ∑ μ ∈ Finset.range n, (H μ - H (μ + 1)) = H 0 - H n :=
@@ -3009,8 +3073,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
   have hH0 : H 0 = tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) n
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun := by
     simp only [hH]
@@ -3025,15 +3089,15 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
   have hbase : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
       (covGrad (I := I) (M := M) g₀ 0 2
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun =
     tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) n
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun +
     ∑ i ∈ Finset.range n,
@@ -3041,8 +3105,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g₀ 2
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (n - 1 - i) u₀))).toFun
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun := by
     rw [covGrad_iterL (I := I) (M := M) g₀ 2 n u₀,
@@ -3051,8 +3115,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
   have hgoal_eq : tensorL2Inner (I := I) (M := M) g₀ 0 (2 + 1)
       (covGrad (I := I) (M := M) g₀ 0 2
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀)).toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))
         (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun +
       armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
@@ -3061,8 +3125,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g₀ 2
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (n - 1 - i) u₀))).toFun
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun) +
     ∑ μ ∈ Finset.range n, (H μ - H (μ + 1)) := by
@@ -3085,8 +3149,8 @@ private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairin
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 (2 + 1) i
           (pointwiseTensorCurv (I := I) (M := M) g₀ 2
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (n - 1 - i) u₀))).toFun
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
             (gInvDiffRaisedEndoField (I := I) g₀ g₁))
           (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun| ≤
       Cb i * ((∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -3115,34 +3179,34 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le_jetProduc
   refine ⟨C₁ + C₂, add_nonneg hC₁_nn hC₂_nn, fun u₀ => ?_⟩
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   set G₀ : SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
-    appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
       (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))) with hG₀
   set Du : SmoothCcTensor g₀ 0 (2 + 1) := covGrad (I := I) (M := M) g₀ 0 2 u₀ with hDu
   set P : SmoothCcTensor g₀ 0 (2 + 1) :=
-    appCc (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
+    operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁))
       Du with hP
   have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
     (I := I) (M := M) g₀ 2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀) P
   have hsplit := armResidual_covDivergence_split (I := I) (M := M) g₀ g₁ u₀
   have hfun : (covDivergence (I := I) (M := M) g₀ 2 P).toFun =
       (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun +
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun := by
     rw [hP, hDu, hG₀, hsplit, SmoothCcTensor.toFun_add]
   rw [hfun] at hgreen
   rw [tensorL2Inner_add_right (I := I) (M := M) g₀ 0 2
     (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
     (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun
-    (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun
+    (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀)
       (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀))
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀)
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du))] at hgreen
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du))] at hgreen
   have h₁u := h₁ u₀
   have h₂u := h₂ u₀
   rw [← hDu] at h₂u
@@ -3157,19 +3221,19 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le_jetProduc
         armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀| := neg_le_abs _
   have habs2 : -(tensorL2Inner (I := I) (M := M) g₀ 0 2
       (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-      (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun) ≤
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun) ≤
       |tensorL2Inner (I := I) (M := M) g₀ 0 2
         (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-        (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun| := neg_le_abs _
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun| := neg_le_abs _
   linarith [h₁u, h₂u, habs1, habs2, hgreen]
 
-set_option linter.unusedVariables false in
 private theorem exists_oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound_core
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
-    (htie : ∀ (y : M) (v w : TangentSpace I y),
+    (_htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    {δ : ℝ} (_hδ_lt : δ < 1) (_hδ_nn : 0 ≤ δ)
+    (_hδ : metricCauchySchwarzBound (I := I) g₀ h δ) :
     ∃ Clower : ℝ, 0 ≤ Clower ∧
       ∀ (u₀ : SmoothCcTensor g₀ 0 2),
         tensorL2Inner (I := I) (M := M) g₀ 0 2
@@ -3231,7 +3295,7 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ) :
     ∃ Clower : ℝ, 0 ≤ Clower ∧
       ∀ (u₀ : SmoothCcTensor g₀ 0 2),
         tensorL2Inner (I := I) (M := M) g₀ 0 2
@@ -3248,7 +3312,7 @@ private theorem oneMinusConnLapIter_pairing_fold
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ) :
     ∃ rem : SmoothCcTensor g₀ 0 2 → ℝ,
       (∀ (u₀ : SmoothCcTensor g₀ 0 2),
         tensorL2Inner (I := I) (M := M) g₀ 0 2
@@ -3272,12 +3336,17 @@ private theorem oneMinusConnLapIter_pairing_fold
       (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
   exact ⟨Clower, hClower_nn, hbound⟩
 
+set_option maxHeartbeats 800000 in
+-- Comparing the integral pairing with the Sobolev norm unfolds a large tensor expression.
+set_option synthInstance.maxHeartbeats 800000 in
+-- Resolving scalar multiplication in the unfolded tensor model is instance-search heavy.
+omit [BoundarylessManifold I M] in
 private theorem armPrincipalSlotPairing_le_dirichlet_top
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (u₀ : SmoothCcTensor g₀ 0 2) :
     armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
       (δ / (1 - δ)) *
@@ -3287,8 +3356,8 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
   set A : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
     iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀ with hA_def
   set B : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
-    appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
-      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+    operatorFieldApply (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+      (endoSlotZeroCcTensor (I := I) (M := M) g₀ (2 + n)
         (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁)) A with hB_def
   have hBfun : ∀ x : M,
       B.toFun x =
@@ -3356,13 +3425,14 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
   rw [hnorm] at hslot
   exact hslot
 
+omit [BoundarylessManifold I M] in
 theorem edgeArm_slot_le [Nonempty M]
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (u₀ : SmoothCcTensor g₀ 0 2) :
     armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
       (δ / (1 - δ)) *
@@ -3386,7 +3456,7 @@ private theorem oneMinusConnLapIter_l2Inner_deTurckPrincipalCometricArm_le
       (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
       (∀ (y : M) (v w : TangentSpace I y),
         g₁.inner y v w = g₀.inner y v w + h y v w) →
-      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → metricCauchySchwarzBound (I := I) g₀ h δ →
       ∃ Clower : ℝ, 0 ≤ Clower ∧
         ∀ (u₀ : SmoothCcTensor g₀ 0 2),
           tensorL2Inner (I := I) (M := M) g₀ 0 2
@@ -3433,7 +3503,7 @@ theorem deTurckPrincipalCometricArm_spectralPairing_tsum_le
       (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
       (∀ (y : M) (v w : TangentSpace I y),
         g₁.inner y v w = g₀.inner y v w + h y v w) →
-      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → metricCauchySchwarzBound (I := I) g₀ h δ →
       ∃ Clower : ℝ, 0 ≤ Clower ∧
         ∀ (u₀ : SmoothCcTensor g₀ 0 2),
           2 * ∑' i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -3472,7 +3542,7 @@ theorem two_mul_inner_smoothCcToTensorHs_deTurckPrincipalCometricArm_le
       (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
       (∀ (y : M) (v w : TangentSpace I y),
         g₁.inner y v w = g₀.inner y v w + h y v w) →
-      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+      ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → metricCauchySchwarzBound (I := I) g₀ h δ →
       ∃ Clower : ℝ, 0 ≤ Clower ∧
         ∀ (u₀ : SmoothCcTensor g₀ 0 2),
           2 * (inner ℝ (smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀)
@@ -3509,7 +3579,7 @@ theorem two_mul_inner_smoothCcToTensorHs_deTurckPrincipalCometricArm_lt_one
       (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
       (∀ (y : M) (v w : TangentSpace I y),
         g₁.inner y v w = g₀.inner y v w + h y v w) →
-      ∀ {δ : ℝ}, δ ≤ 1 / 3 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+      ∀ {δ : ℝ}, δ ≤ 1 / 3 → 0 ≤ δ → metricCauchySchwarzBound (I := I) g₀ h δ →
       ∃ Cupper Clower : ℝ, Cupper < 1 ∧ 0 ≤ Cupper ∧ 0 ≤ Clower ∧
         ∀ (u₀ : SmoothCcTensor g₀ 0 2),
           2 * (inner ℝ (smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀)

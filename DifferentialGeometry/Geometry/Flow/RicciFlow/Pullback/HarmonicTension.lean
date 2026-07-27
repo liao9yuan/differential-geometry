@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
+import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 /-!
@@ -29,17 +29,20 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] in
 /-- Reversing the two Levi-Civita connections reverses the sign of their
 connection-difference tensor. -/
 theorem connDiff_neg (g h : SmoothRiemannianMetric I M) (x : M)
@@ -58,6 +61,7 @@ def idTension (g h : SmoothRiemannianMetric I M) :
       (smoothOrthoFrame (I := I) g x i x)
       (smoothOrthoFrame (I := I) g x i x)
 
+omit [SigmaCompactSpace M] in
 /-- The identity-map tension has the opposite sign from the DeTurck vector
 field, because `deTurckVF g h` traces `∇^g - ∇^h`. -/
 theorem idTension_eq (g h : SmoothRiemannianMetric I M) (x : M) :
@@ -66,7 +70,7 @@ theorem idTension_eq (g h : SmoothRiemannianMetric I M) (x : M) :
         Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x := by
   classical
   rw [deTurckVF_eq_orthoFrame_trace (I := I) g h x]
-  simp only [idTension, Finset.sum_neg_distrib]
+  rw [idTension, ← Finset.sum_neg_distrib]
   apply Finset.sum_congr rfl
   intro i _hi
   exact connDiff_neg (I := I) g h x
@@ -79,6 +83,7 @@ def idTensionVF (g h : SmoothRiemannianMetric I M) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   -(deTurckVF (I := I) g h)
 
+omit [SigmaCompactSpace M] in
 @[simp] theorem idTensionVF_apply
     (g h : SmoothRiemannianMetric I M) (x : M) :
     idTensionVF (I := I) g h x = idTension (I := I) g h x := by
@@ -116,10 +121,11 @@ theorem tension_eq_push (g h : SmoothRiemannianMetric I M)
       -Diffeomorph.pushforward Φ
         (deTurckVF (I := I) g (Diffeomorph.pullbackMetric h Φ)) y := by
   obtain ⟨x, rfl⟩ := Φ.surjective y
-  rw [tension_image, Diffeomorph.pushforward_image]
-
-/-- Naturality identifies diffeomorphism tension with the negative DeTurck
-field of the inverse-pulled source metric on the target. -/
+  change diffeoTension (I := I) g h Φ (Φ x) =
+    -Diffeomorph.pushforward Φ
+      (deTurckVF (I := I) g (Diffeomorph.pullbackMetric h Φ)) (Φ x)
+  rw [Diffeomorph.pushforward_image]
+  exact tension_image (I := I) g h Φ x
 theorem tension_eq_DT (g h : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     diffeoTension (I := I) g h Φ y =

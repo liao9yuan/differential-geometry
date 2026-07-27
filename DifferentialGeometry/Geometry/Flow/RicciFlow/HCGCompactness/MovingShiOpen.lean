@@ -7,8 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTra
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 /-!
 # Complete Shi estimates on canonical open windows
@@ -33,18 +31,20 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff BigOperators Bundle
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section AnchorComparison
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor_eval_cont
     {K : Set Real}
     {A : (t : Real) → (x : M) →
@@ -84,6 +84,7 @@ private theorem deriv_Ici_start
   · exact hecont.tendsto.congr'
       (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) hderiv).symm
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem metric_pde_start
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -164,6 +165,7 @@ private theorem exp_bounds_log
       fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio hfa.le
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [SigmaCompactSpace M] in
 private theorem metric_equiv_start
     (g : Real → SmoothRiemannianMetric I M)
     {alpha psi K : Real}
@@ -227,6 +229,9 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+  [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exists_trunc_tower
@@ -451,6 +456,7 @@ private theorem exists_trunc_tower
   intro k hk s y
   simpa only [B] using hw'_val_le k hk s y
 
+omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Legacy fixed-order adapter to the unsupported global complete estimate. -/
@@ -516,6 +522,9 @@ private theorem complete_of_heat
   rw [hwB m le_rfl t x] at hdiv
   simpa only [hBc, hBK, hBα] using hdiv
 
+omit [NeZero (Module.finrank ℝ E)]
+  [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Fixed-order complete Bernstein adapter from a generated cutoff family and
@@ -584,6 +593,9 @@ private theorem complete_of_cutoff
   rw [hwB m (by omega) t x] at hdiv
   simpa only [hBc, hBK, hBα] using hdiv
 
+omit [NeZero (Module.finrank ℝ E)]
+  [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- Fixed-order complete Bernstein adapter from a point-centered barrier-cutoff

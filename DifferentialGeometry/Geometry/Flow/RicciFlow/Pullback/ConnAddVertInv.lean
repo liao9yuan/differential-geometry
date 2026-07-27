@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E

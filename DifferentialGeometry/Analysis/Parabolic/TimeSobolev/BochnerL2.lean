@@ -15,7 +15,7 @@ namespace Analysis
 namespace Parabolic
 namespace TimeSobolev
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
 
 def timeMeasure (T : ℝ) : Measure ℝ :=
@@ -53,22 +53,27 @@ theorem toReal_ofReal_rpow_half (T : ℝ) :
   · rw [ENNReal.ofReal_eq_zero.2 hT.le, ENNReal.zero_rpow_of_pos (by norm_num),
       ENNReal.toReal_zero, Real.sqrt_eq_zero'.2 hT.le]
 
-abbrev timeL2 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+abbrev timeL2 (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : Type _ :=
   MeasureTheory.Lp X 2 (timeMeasure T)
 
 example : NormedAddCommGroup (timeL2 X T) := inferInstance
 example : NormedSpace ℝ (timeL2 X T) := inferInstance
-example : InnerProductSpace ℝ (timeL2 X T) := inferInstance
 example : CompleteSpace (timeL2 X T) := inferInstance
-
-theorem inner_def (f g : timeL2 X T) :
-    (inner ℝ f g : ℝ) = ∫ t in Set.Icc (0 : ℝ) T, inner ℝ (f t) (g t) := by
-  rw [L2.inner_def]; rfl
 
 theorem memLp_iff {f : ℝ → X} :
     MemLp f 2 (timeMeasure T) ↔ ∃ F : timeL2 X T, F =ᵐ[timeMeasure T] f :=
   ⟨fun h => ⟨h.toLp f, h.coeFn_toLp⟩, fun ⟨F, hF⟩ => (Lp.memLp F).ae_eq hF⟩
+
+section Hilbert
+
+variable [InnerProductSpace ℝ X]
+
+example : InnerProductSpace ℝ (timeL2 X T) := inferInstance
+
+theorem inner_def (f g : timeL2 X T) :
+    (inner ℝ f g : ℝ) = ∫ t in Set.Icc (0 : ℝ) T, inner ℝ (f t) (g t) := by
+  rw [L2.inner_def]; rfl
 
 theorem norm_sq_eq_integral (f : timeL2 X T) :
     ‖f‖ ^ 2 = ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ^ 2 := by
@@ -83,11 +88,13 @@ theorem integral_norm_sq_nonneg (f : timeL2 X T) :
     0 ≤ ∫ t in Set.Icc (0 : ℝ) T, ‖f t‖ ^ 2 := by
   rw [← norm_sq_eq_integral]; positivity
 
+end Hilbert
+
 section ContinuousEmbedding
 
 variable {f : ℝ → X}
 
-omit [InnerProductSpace ℝ X] [CompleteSpace X] in
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 theorem memLp_of_continuousOn (hf : ContinuousOn f (Set.Icc (0 : ℝ) T)) :
     MemLp f 2 (timeMeasure T) := by
   have hmeas : AEStronglyMeasurable f (timeMeasure T) := by
@@ -204,7 +211,7 @@ theorem integral_norm_le (f : timeL2 X T) :
     show (1 / (1 : ℝ≥0∞).toReal - 1 / (2 : ℝ≥0∞).toReal) = (1 / 2 : ℝ) by norm_num,
     toReal_ofReal_rpow_half, mul_comm]
 
-def timeIntegralₗ (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+def timeIntegralₗ (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeL2 X T →ₗ[ℝ] X where
   toFun f := ∫ t in Set.Icc (0 : ℝ) T, f t
   map_add' f g := by
@@ -219,7 +226,7 @@ def timeIntegralₗ (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X]
     filter_upwards [(Lp.coeFn_smul c f)] with t ht
     simp only [ht, Pi.smul_apply]
 
-def timeIntegral (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
+def timeIntegral (X : Type*) [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeL2 X T →L[ℝ] X :=
   LinearMap.mkContinuous (timeIntegralₗ X T) (Real.sqrt T) (fun f => by
     refine le_trans (norm_integral_le_integral_norm _) ?_
@@ -238,7 +245,7 @@ theorem norm_timeIntegral_le (f : timeL2 X T) :
     (LinearMap.mkContinuous_norm_le _ (Real.sqrt_nonneg T) _) (norm_nonneg _)
 
 theorem norm_timeIntegral_clm_le (X : Type*) [NormedAddCommGroup X]
-    [InnerProductSpace ℝ X] [CompleteSpace X] (T : ℝ) :
+    [NormedSpace ℝ X] [CompleteSpace X] (T : ℝ) :
     ‖timeIntegral X T‖ ≤ Real.sqrt T :=
   LinearMap.mkContinuous_norm_le _ (Real.sqrt_nonneg T) _
 

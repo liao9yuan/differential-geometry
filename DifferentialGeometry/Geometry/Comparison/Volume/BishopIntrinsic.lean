@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
 import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 /-!
 # Intrinsic Bishop comparison along a complete radial geodesic
@@ -32,7 +31,7 @@ open Variation
 open BonnetMyers
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
   [I.Boundaryless]
@@ -104,6 +103,10 @@ theorem intrJacobi_raw
     rw [hraw]
     exact hintr.trans happ.symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [PseudoEMetricSpace M]
+  [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private theorem linIndep_of_ortho
     {ι : Type*} [DecidableEq ι]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -130,6 +133,7 @@ private theorem linIndep_of_ortho
   · intro i _ hij
     rw [if_neg (by simpa using hij), mul_zero]
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrVar_smooth
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -143,6 +147,7 @@ private theorem intrVar_smooth
   exact (intrinsicVar_smooth (I := I) g hEnorm p (u : E) (w : E)).of_le
     ENat.LEInfty.out
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_diff
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -183,6 +188,10 @@ private theorem intrJacobi_diff
     rw [hbase, hfield] at h
     exact h
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
+  [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] [PseudoEMetricSpace M]
+  [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 private theorem curveVelocity_comp_mul
     (γ : Real → M) (c t : Real)
     (hγ : MDifferentiableAt 𝓘(Real, Real) I γ (c * t)) :
@@ -209,6 +218,7 @@ private theorem curveVelocity_comp_mul
   simpa only [smul_eq_mul, mul_one] using
     map_smul (mfderiv 𝓘(Real, Real) I γ (a t)) c (1 : Real)
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrVel_smul
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -245,6 +255,7 @@ private theorem intrVel_smul
   rw [hct] at hvel
   exact hvel
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -308,6 +319,7 @@ private theorem intrJacobi_perp_ne
       hscaled
   exact (mul_eq_zero.mp hmul).resolve_left ht
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrGeodesic_smooth
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -333,6 +345,7 @@ private theorem intrGeodesic_smooth
   rw [heq] at hcomp
   exact hcomp
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_dperp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -388,6 +401,7 @@ private theorem intrJacobi_dperp
   simp only [hvelZero, map_zero, ContinuousLinearMap.zero_apply, zero_add] at huniq
   simpa only [γ, J] using huniq
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrWronsk_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -451,6 +465,7 @@ private theorem intrWronsk_zero
     wronskian_zero_on (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
       g γ J K hγ hJdiff hKdiff hDJdiff hDKdiff hJacJ hJacK hJ0 hK0
 
+omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_li
     {ι : Type*}
     (g : SmoothRiemannianMetric I M)

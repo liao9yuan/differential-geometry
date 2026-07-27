@@ -27,7 +27,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -225,7 +225,7 @@ theorem MetricCompactBase.exists_stage_seed
           (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
         z gamma
     let chi := fun (alpha : LiveSlot L inp.pack r) =>
-      NormalCoordinates.framedChartAt (I := I) Y.metric (beta n alpha)
+      NormalCoordinates.normalChartAt (I := I) Y.metric (beta n alpha)
     let sourceBall := Lphi.hatSourceBall inp.decay P r n
     let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
       sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha

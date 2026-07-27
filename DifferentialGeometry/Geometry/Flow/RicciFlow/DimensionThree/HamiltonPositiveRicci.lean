@@ -23,7 +23,11 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
 
+/-!
+# Hamilton Positive Ricci Endpoint
 
+This file states the global endpoint of Hamilton's three-dimensional positive
+Ricci theorem in the project's current structures.
 
 The policy here is deliberate: local tensor algebra, curvature identities,
 evolution equations, maximum-principle cores, and dimension-three algebra stay
@@ -43,7 +47,7 @@ namespace HamiltonPositiveRicci
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -510,7 +514,7 @@ def LimitRoundAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
 
 
 theorem ham3_short_exists
-    {E0 : Type*} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
+    {E0 : Type*} [NormedAddCommGroup E0] [NormedSpace Real E0]
     [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
     {H0 : Type*} [TopologicalSpace H0] {I0 : ModelWithCorners Real E0 H0}
     {M0 : Type u} [TopologicalSpace M0] [ChartedSpace H0 M0] [IsManifold I0 ∞ M0]
@@ -771,6 +775,7 @@ noncomputable def ham3RescaledSol
   paraSolution (I := I) P.S (Q.time i) (ham3BlowupScale (I := I) P Q i)
     (hsel.1 i) (hsel.2.2.1 i)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The canonical trace-free Ricci norm square has weight two under each
 selected parabolic rescaling. -/
 theorem ham3_tf_display
@@ -941,6 +946,7 @@ private theorem scaled_pinch_le
     mul_nonneg hC (Real.rpow_nonneg hR.le _)
   exact hmain.trans (by simpa using mul_le_mul_of_nonneg_left hrpow hcoef)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The time-zero trace-free Ricci norm on every selected rescaling has the
 decaying upper bound supplied by Hamilton's improved pinching estimate. -/
 theorem ham3_tf_bound0
@@ -2504,6 +2510,7 @@ theorem ham3_r0_window
   · linarith
   · exact hsright
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a finite maximal-flow interval, point selection forces the scalar
 blow-up scales themselves to tend to infinity. -/
 theorem ham3_scale_atTop
@@ -2533,6 +2540,7 @@ theorem ham3_scale_atTop
   exact le_of_lt
     (lt_of_mul_lt_mul_right (lt_of_le_of_lt hprod_i hlt) h0omega.le)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every negative power of the selected blow-up scale tends to zero along the
 smooth-CGH subsequence. -/
 theorem ham3_scale_decay
@@ -2563,6 +2571,7 @@ theorem ham3_scale_decay
     (tendsto_rpow_neg_atTop hepsilon).comp hscale
   simpa only [mul_zero] using tendsto_const_nhds.mul hpow
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The selected metric scaling eventually makes any fixed original
 noncollapsing scale `rho` contain a fixed rescaled radius `r`. -/
 theorem ham3_radius_event
@@ -2976,6 +2985,10 @@ theorem limit_tf_decay
     LimitTfDecay (I := I) L := by
   exact htransfer hreal hpinch hscalarPos
 
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M] in
 /-- At one fixed time, arbitrary-small upper bounds on the canonical
 trace-free Ricci norm force that norm to vanish. -/
 theorem tf_zero_of_decay
@@ -3010,6 +3023,10 @@ theorem tf_zero_of_decay
     exact le_of_forall_pos_le_add hforall
   simpa [q] using le_antisymm hle0 hnonneg
 
+omit [NeZero (Module.finrank ℝ E)]
+  [IsManifold I ∞ M]
+  [SigmaCompactSpace M]
+  [T2Space M] in
 /-- Once the pinching estimate has been transferred to arbitrary-small upper
 bounds on the CGH limit, nonnegativity of the canonical trace-free Ricci norm
 upgrades the decay statement to actual vanishing. -/
@@ -3021,6 +3038,7 @@ theorem limit_tf_zero_of_decay
   intro t ht
   exact tf_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The Section 10 improved pinching estimate passes to the smooth CGH limit
 and kills the trace-free Ricci part. -/
 theorem limit_tf_zero
@@ -3158,6 +3176,8 @@ theorem limitEinstein_of_tf0
     _ = (L.S.scalar t0 x / 3) * (L.S.base.metric t0).inner x v w := by
           rw [hscalar_l1]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Static Schur/space-form step for the Section 12 limit: a connected
 three-dimensional Einstein limit metric whose scalar curvature is positive at
 the base point has constant positive sectional curvature. -/
@@ -3178,6 +3198,7 @@ theorem limit_round_base
     (heinstein : LimitEinsteinAt (I := I) L t0) :
     LimitRoundAt (I := I) L t0 := by
   classical
+  letI : NeZero (Module.finrank Real E) := ⟨by omega⟩
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
@@ -3290,6 +3311,8 @@ theorem limit_round_base
           rw [hscalar_x]
           ring
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Compatibility form of `limit_round_base` for callers that already know
 pointwise positive scalar curvature on the selected slice. -/
 theorem limit_round_of_ein
@@ -3304,6 +3327,8 @@ theorem limit_round_of_ein
   exact limit_round_base (I := I) (M := M) hdim hconn hbdry
     (hscalar L.basepoint) heinstein
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M] in
 /-- Compatibility projection of the slice-indexed round package to the older
 existential constant-curvature statement. -/
 theorem limit_const_sec_of_einstein
@@ -3338,6 +3363,7 @@ theorem const_pos_of_tf0
     (hscalar : LimitScalarPosAt (I := I) L t0)
     (htf : LimitTfZeroAt (I := I) L t0) :
     LimitConstPosSec (I := I) L := by
+  letI : NeZero (Module.finrank Real E) := ⟨by omega⟩
   have heinstein : LimitEinsteinAt (I := I) L t0 :=
     limitEinstein_of_tf0 (I := I) (M := M) hdim htf
   exact limit_const_sec_of_einstein (I := I) (M := M) hdim hconn hbdry
@@ -3541,6 +3567,7 @@ theorem ham3_const_metric
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_space_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hconst : AdmitsConstPosSec (I := I) (M := M)) :
@@ -3588,6 +3615,7 @@ theorem ham3_const_box
 
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_equiv
     (hM : Closed3Manifold (I := I) (M := M)) :
     AdmitsConstPosSec (I := I) (M := M) <-> SphericalSpaceForm (I := I) (M := M) := by

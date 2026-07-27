@@ -28,7 +28,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -47,36 +47,36 @@ theorem H6Isometry.normalTrans_dist_le
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     ∀ {u v : E},
       (∀ z ∈ segment Real u v,
-        z ∈ (framedExpDiffeo (I := I) Y.metric x).source) →
+        z ∈ (expMapDiffeo (I := I) Y.metric x).source) →
       (∀ z ∈ segment Real u v,
-        framedExpDiffeo (I := I) Y.metric x z ∈
-          (framedChartAt (I := I) Y.metric y).source) →
+        expMapDiffeo (I := I) Y.metric x z ∈
+          (normalChartAt (I := I) Y.metric y).source) →
       segment Real u v ⊆ U →
-      Set.MapsTo (framedTransition (I := I) Y.metric x y)
+      Set.MapsTo (normalTransition (I := I) Y x y)
         (segment Real u v) V →
-      dist (framedTransition (I := I) Y.metric x y u)
-          (framedTransition (I := I) Y.metric x y v) ≤ 2 * dist u v := by
+      dist (normalTransition (I := I) Y x y u)
+          (normalTransition (I := I) Y x y v) ≤ 2 * dist u v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   intro u v hsrc htgt hU hV
-  let T := framedTransition (I := I) Y.metric x y
+  let T := normalTransition (I := I) Y x y
   have hdiff : ∀ z ∈ segment Real u v, DifferentiableAt Real T z := by
     intro z hz
     have hdx : MDifferentiableAt 𝓘(Real, E) I
-        (framedExpDiffeo (I := I) Y.metric x) z :=
-      ((framedExpDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
+        (expMapDiffeo (I := I) Y.metric x) z :=
+      ((expMapDiffeo (I := I) Y.metric x).contMDiffOn_toFun.mdifferentiableOn
         one_ne_zero z (hsrc z hz)).mdifferentiableAt
-          ((framedExpDiffeo (I := I) Y.metric x).open_source.mem_nhds (hsrc z hz))
+          ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds (hsrc z hz))
     have hcy : MDifferentiableAt I 𝓘(Real, E)
-        (framedChartAt (I := I) Y.metric y)
-        (framedExpDiffeo (I := I) Y.metric x z) :=
-      ((framedChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
+        (normalChartAt (I := I) Y.metric y)
+        (expMapDiffeo (I := I) Y.metric x z) :=
+      ((normalChartAt (I := I) Y.metric y).contMDiffOn_toFun.mdifferentiableOn
         one_ne_zero _ (htgt z hz)).mdifferentiableAt
-          ((framedChartAt (I := I) Y.metric y).open_source.mem_nhds (htgt z hz))
+          ((normalChartAt (I := I) Y.metric y).open_source.mem_nhds (htgt z hz))
     exact mdifferentiableAt_iff_differentiableAt.mp
-      (by simpa only [T, framedTransition] using hcy.comp z hdx)
+      (by simpa only [T, normalTransition] using hcy.comp z hdx)
   have hbound : ∀ z ∈ segment Real u v, ‖fderiv Real T z‖ ≤ 2 := by
     intro z hz
     exact H6Isometry.normal_fderiv_le_two (I := I) Y x y hx hy
@@ -84,8 +84,8 @@ theorem H6Isometry.normalTrans_dist_le
   have hmean := (convex_segment u v).norm_image_sub_le_of_norm_fderiv_le
     hdiff hbound (left_mem_segment Real u v) (right_mem_segment Real u v)
   calc
-    dist (framedTransition (I := I) Y.metric x y u)
-        (framedTransition (I := I) Y.metric x y v) =
+    dist (normalTransition (I := I) Y x y u)
+        (normalTransition (I := I) Y x y v) =
         ‖T v - T u‖ := by rw [dist_eq_norm, norm_sub_rev]
     _ ≤ 2 * ‖v - u‖ := hmean
     _ = 2 * dist u v := by rw [← dist_eq_norm, dist_comm]
@@ -102,15 +102,15 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
       letI : ChartedSpace H Y.M := Y.charted
       letI : IsManifold I ∞ Y.M := Y.smooth
       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-      U ⊆ (framedChartAt (I := I) Y.metric c).target)
+      U ⊆ (normalChartAt (I := I) Y.metric c).target)
     {u v : E} (hseg : segment Real u v ⊆ U) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     letI : MetricSpace Y.M := P.ms
-    dist ((framedChartAt (I := I) Y.metric c).symm u)
-        ((framedChartAt (I := I) Y.metric c).symm v) ≤
+    dist ((normalChartAt (I := I) Y.metric c).symm u)
+        ((normalChartAt (I := I) Y.metric c).symm v) ≤
       Real.sqrt 2 * dist u v := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -119,7 +119,7 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
   letI : MetricSpace Y.M := P.ms
   letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
     ⟨Y.metric.toRiemannianMetric⟩
-  let e := framedExpDiffeo (I := I) Y.metric c
+  let e := expMapDiffeo (I := I) Y.metric c
   let eta := ContinuousAffineMap.lineMap (R := Real) u v
   let gamma : Real → Y.M := e ∘ eta
   have hetaU : MapsTo eta (Set.Icc (0 : Real) 1) U := by
@@ -129,7 +129,7 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
     exact ⟨t, ht, rfl⟩
   have hetaSrc : MapsTo eta (Set.Icc (0 : Real) 1) e.source := by
     intro t ht
-    exact hUtgt (hetaU ht)
+    simpa only [e, normalChartAt_target_eq] using hUtgt (hetaU ht)
   have hetaSmooth : ContMDiffOn 𝓘(Real, Real) 𝓘(Real, E) 1 eta (Set.Icc (0 : Real) 1) := by
     rw [contMDiffOn_iff_contDiffOn]
     exact eta.contDiff.contDiffOn
@@ -244,8 +244,8 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
       letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
       Set.MapsTo (minJoin (I := I) Y.metric hEnorm x y)
         (Set.Icc (0 : Real) 1)
-        ((framedChartAt (I := I) Y.metric c).source ∩
-          (framedChartAt (I := I) Y.metric c) ⁻¹' U)) :
+        ((normalChartAt (I := I) Y.metric c).source ∩
+          (normalChartAt (I := I) Y.metric c) ⁻¹' U)) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -266,8 +266,8 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
         (fun z : Y.M => TangentSpace I z) := Y.riemBundle_cont (I := I)
     letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
     letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
-    dist (framedChartAt (I := I) Y.metric c x)
-        (framedChartAt (I := I) Y.metric c y) ≤
+    dist (normalChartAt (I := I) Y.metric c x)
+        (normalChartAt (I := I) Y.metric c y) ≤
       Real.sqrt 2 * (riemannianEDist I x y).toReal := by
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -291,8 +291,8 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   let w : TangentSpace I x := minimizingVec (I := I) Y.metric hEnorm x y
   let gamma : Real → Y.M := minJoin (I := I) Y.metric hEnorm x y
-  let chi := framedChartAt (I := I) Y.metric c
-  let e := framedExpDiffeo (I := I) Y.metric c
+  let chi := normalChartAt (I := I) Y.metric c
+  let e := expMapDiffeo (I := I) Y.metric c
   let eta : Real → E := chi ∘ gamma
   let d : Real := (riemannianEDist I x y).toReal
   have hd : 0 ≤ d := ENNReal.toReal_nonneg
@@ -329,6 +329,7 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
     have hetaDiff : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) eta t := by
       simpa only [eta] using hchiDiff.comp t hgammaDiff
     have hetaSrc : eta t ∈ e.source := by
+      rw [← normalChartAt_target_eq (I := I)]
       exact chi.map_source (hjoin ht).1
     have heDiff : MDifferentiableAt 𝓘(Real, E) I e (eta t) :=
       (e.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _ hetaSrc).mdifferentiableAt
@@ -350,6 +351,7 @@ theorem NormalCoordMetricEquivOn.chart_dist_le
     have hetaVel : mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1 =
         deriv eta t := by
       rw [mfderiv_eq_fderiv]
+      change (fderiv Real eta t : Real →L[Real] E) 1 = deriv eta t
       exact fderiv_apply_one_eq_deriv
     have hvel : mfderiv 𝓘(Real, E) I e (eta t) (deriv eta t) =
         mfderiv 𝓘(Real, Real) I gamma t 1 := by

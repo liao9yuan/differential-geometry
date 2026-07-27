@@ -54,6 +54,9 @@ lemma coframeS_zero_eq_unitZeroSec
   rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+  [BoundarylessManifold I M] in
 private lemma tensor01_comp
     (g : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 1 I x) {n : ℕ}
@@ -72,6 +75,9 @@ private lemma tensor01_comp
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K₀]
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+  [BoundarylessManifold I M] in
 theorem sq_unit_eval_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 1 I x) (X : TangentSpace I x) :

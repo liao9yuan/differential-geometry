@@ -26,14 +26,16 @@ noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal
+  RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.ODE
-open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 /-! ## A moving coercive mass ODE -/
 
@@ -83,7 +85,7 @@ theorem coerciveODE_exists
     have hnorm_nn : ‖(hco t ht).sharpCLM‖₊ ≤ cinv := by
       exact_mod_cast hsharp_norm t ht
     have hKL : ‖(hco t ht).sharpCLM‖₊ * L ≤ K := by
-      exact mul_le_mul_right' hnorm_nn L
+      simpa only [K, mul_comm] using mul_le_mul_left hnorm_nn L
     simpa only [f, dif_pos ht] using hcomp.weaken hKL
   have hsharp_cont : Continuous
       (fun t : Icc (0 : ℝ) T => (hco t t.2).sharpCLM) := by
@@ -94,7 +96,9 @@ theorem coerciveODE_exists
     have hres : Continuous (fun t : Icc (0 : ℝ) T => resid t v) :=
       (hcont v).restrict
     have happ := hsharp_cont.clm_apply hres
-    simpa only [f, Set.restrict_apply, dif_pos] using happ
+    convert happ using 1
+    ext t
+    simp only [f, Set.restrict_apply, dif_pos t.property]
   have haff_f : ∀ t ∈ Icc (0 : ℝ) T, ∀ v : V,
       ‖f t v‖ ≤ c⁻¹ * A + (K : ℝ) * ‖v‖ := by
     intro t ht v
@@ -130,7 +134,7 @@ derivative, not differentiability in time.  This keeps the statement usable at
 the initial edge of a Ricci flow, where the public uniqueness endpoint assumes
 only joint `C⁰` metric regularity. -/
 theorem retractResid_data
-    {V W : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+    {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V]
     [NormedAddCommGroup W] [NormedSpace ℝ W]
     (F : ℝ → V → W) {T R : ℝ} (hR : 0 ≤ R)
@@ -156,20 +160,21 @@ theorem retractResid_data
       (fun p : ℝ × V => ‖fderiv ℝ (F p.1) p.2‖) Q := by
     exact hD.norm
   obtain ⟨C, hC⟩ := hQ.exists_bound_of_continuousOn hDnorm
-  let L : ℝ≥0 := ⟨max C 0, le_max_right C 0⟩
+  let D : ℝ≥0 := ⟨max C 0, le_max_right C 0⟩
+  let L : ℝ≥0 := D * 2
   have hDbound : ∀ t ∈ Icc (0 : ℝ) T,
       ∀ v ∈ Metric.closedBall (0 : V) R,
-        ‖fderiv ℝ (F t) v‖₊ ≤ L := by
+        ‖fderiv ℝ (F t) v‖₊ ≤ D := by
     intro t ht v hv
-    rw [← NNReal.coe_le_coe]
-    exact (hC (t, v) ⟨ht, hv⟩).trans (le_max_left C 0)
+    change ‖fderiv ℝ (F t) v‖ ≤ max C 0
+    simpa only [norm_norm] using
+      (hC (t, v) ⟨ht, hv⟩).trans (le_max_left C 0)
   have hballLip : ∀ t ∈ Icc (0 : ℝ) T,
-      LipschitzOnWith L (F t) (Metric.closedBall (0 : V) R) := by
+      LipschitzOnWith D (F t) (Metric.closedBall (0 : V) R) := by
     intro t ht
-    exact lipschitzOnWith_of_nnnorm_fderiv_le
+    exact (convex_closedBall (0 : V) R).lipschitzOnWith_of_nnnorm_fderiv_le
       (fun v hv => hdiff t ht v hv) (hDbound t ht)
-      (convex_closedBall (0 : V) R)
-  have hret : LipschitzWith 1 (ballRetraction (X := V) R) :=
+  have hret : LipschitzWith 2 (ballRetraction (X := V) R) :=
     lipschitzWith_ballRetraction hR
   have hret_mem : ∀ v : V, ballRetraction R v ∈
       Metric.closedBall (0 : V) R := by
@@ -183,9 +188,17 @@ theorem retractResid_data
     have hlocal := (hballLip t ht).dist_le_mul
       (ballRetraction R u) (hret_mem u)
       (ballRetraction R v) (hret_mem v)
-    have hnonexp := hret.dist_le_mul u v
-    exact hlocal.trans
-      (mul_le_mul_of_nonneg_left hnonexp L.coe_nonneg)
+    have htwo : dist (ballRetraction R u) (ballRetraction R v) ≤
+        2 * dist u v := by
+      simpa using hret.dist_le_mul u v
+    calc
+      dist (F t (ballRetraction R u)) (F t (ballRetraction R v)) ≤
+          (D : ℝ) * dist (ballRetraction R u) (ballRetraction R v) := hlocal
+      _ ≤ (D : ℝ) * (2 * dist u v) :=
+        mul_le_mul_of_nonneg_left htwo D.coe_nonneg
+      _ = (L : ℝ) * dist u v := by
+        simp only [L, NNReal.coe_mul, NNReal.coe_ofNat]
+        ring
   have htime : ∀ v : V, ContinuousOn
       (fun t => F t (ballRetraction R v)) (Icc (0 : ℝ) T) := by
     intro v
@@ -226,7 +239,7 @@ theorem retractResid_data
 /-! ## Restriction of the HMF forms to a finite trial space -/
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -234,8 +247,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] [BoundarylessManifold I M]
 
-variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
-  [CompleteSpace V] [FiniteDimensional ℝ V]
+section FiniteNormed
+
+variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+  [FiniteDimensional ℝ V]
 
 /-- The moving HMF mass pairing restricted along a fixed finite-dimensional
 linear trial-space realization. -/
@@ -245,11 +260,14 @@ noncomputable def hmfFinMass
     V →L[ℝ] V →L[ℝ] ℝ :=
   (LinearMap.mk₂ ℝ
     (fun u v => hmfMass (I := I) (M := M) q h (J u) (J v))
-    (fun u₁ u₂ v => by rw [map_add, hmfMass_add_left])
-    (fun a u v => by rw [map_smul, hmfMass_smul_left])
-    (fun u v₁ v₂ => by rw [map_add, hmfMass_add_right])
-    (fun a u v => by rw [map_smul, hmfMass_smul_right])).toContinuousBilinearMap
+    (fun u₁ u₂ v => by simp only [map_add, hmfMass_add_left])
+    (fun a u v => by simp only [map_smul, hmfMass_smul_left, smul_eq_mul])
+    (fun u v₁ v₂ => by simp only [map_add, hmfMass_add_right])
+    (fun a u v => by
+      simp only [map_smul, hmfMass_smul_right, smul_eq_mul])).toContinuousBilinearMap
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
+  [BoundarylessManifold I M] in
 @[simp] theorem hmfFinMass_apply
     (q h : SmoothRiemannianMetric I M)
     (J : V →ₗ[ℝ] SmoothCcTensor q 0 1) (u v : V) :
@@ -263,17 +281,21 @@ noncomputable def hmfFinForm
     V →L[ℝ] V →L[ℝ] ℝ :=
   (LinearMap.mk₂ ℝ
     (fun u v => hmfWeakForm (I := I) (M := M) q h (J u) (J v))
-    (fun u₁ u₂ v => by rw [map_add, hmfWeak_add_left])
-    (fun a u v => by rw [map_smul, hmfWeak_smul_left])
-    (fun u v₁ v₂ => by rw [map_add, hmfWeak_add_right])
-    (fun a u v => by rw [map_smul, hmfWeak_smul_right])).toContinuousBilinearMap
+    (fun u₁ u₂ v => by simp only [map_add, hmfWeak_add_left])
+    (fun a u v => by simp only [map_smul, hmfWeak_smul_left, smul_eq_mul])
+    (fun u v₁ v₂ => by simp only [map_add, hmfWeak_add_right])
+    (fun a u v => by
+      simp only [map_smul, hmfWeak_smul_right, smul_eq_mul])).toContinuousBilinearMap
 
+omit [BoundarylessManifold I M] in
 @[simp] theorem hmfFinForm_apply
     (q h : SmoothRiemannianMetric I M)
     (J : V →ₗ[ℝ] SmoothCcTensor q 0 1) (u v : V) :
     hmfFinForm (I := I) (M := M) q h J u v =
       hmfWeakForm (I := I) (M := M) q h (J u) (J v) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- Joint chart-Gram continuity gives operator-norm continuity of every
 finite HMF mass matrix. -/
 theorem hmfFinMass_cont
@@ -291,6 +313,8 @@ theorem hmfFinMass_cont
   simpa only [hmfFinMass_apply] using
     hmfMass_time_cont (I := I) (M := M) q g hK hcont (J u) (J v)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
+  [BoundarylessManifold I M] in
 /-- A reference-orthonormal finite realization and reverse volume domination
 give the explicit lower bound for the moving mass matrix. -/
 theorem hmfFinMass_lower
@@ -315,6 +339,16 @@ theorem hmfFinMass_lower
     _ = hmfFinMass (I := I) (M := M) q h J u u := by
       rw [hmfFinMass_apply]
 
+end FiniteNormed
+
+section FiniteHilbert
+
+variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+  [CompleteSpace V] [FiniteDimensional ℝ V]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
+  [BoundarylessManifold I M] in
+omit [CompleteSpace V] in
 /-- The finite moving mass matrix is coercive with the same explicit lower
 constant. -/
 theorem hmfFinMass_coercive
@@ -330,6 +364,8 @@ theorem hmfFinMass_coercive
   exact hmfFinMass_lower (I := I) (M := M)
     q h C hC0 hCtop hvol J horth
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- On a compact time set, the inverse finite HMF mass matrix is continuous.
 The proof uses only mass-coefficient continuity and the uniform reverse
 volume comparison. -/
@@ -348,9 +384,15 @@ theorem hmfFinSharp_cont
     Continuous (fun t : K =>
       (hmfFinMass_coercive (I := I) (M := M) q (g t) C hC0 hCtop
         (hvol t t.2) J horth).sharpCLM) := by
-  apply IsCoercive.sharpCLM_cont_sub
-  exact hmfFinMass_cont (I := I) (M := M) q g hK hcont J
+  exact IsCoercive.sharpCLM_cont_sub
+    (fun t => hmfFinMass (I := I) (M := M) q (g t) J)
+    (hmfFinMass_cont (I := I) (M := M) q g hK hcont J)
+    (fun t ht =>
+      hmfFinMass_coercive (I := I) (M := M) q (g t) C hC0 hCtop
+        (hvol t ht) J horth)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- The finite moving-mass Galerkin system exists on the whole prescribed
 time interval once its covector residual has uniform Lipschitz and affine
 bounds.  Its equation holds on `Ico 0 T`, including the one-sided derivative
@@ -397,10 +439,13 @@ theorem hmfFin_exists
     (coerciveODE_exists (mass := mass) (resid := resid) hT (inv_pos.mpr hCr)
       hA hmass hcoer hlip hres_cont haff v₀)
 
+end FiniteHilbert
+
 /-! ## The canonical finite spectral trial spaces -/
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
 /-- The smooth intrinsic eigenvectors are orthonormal for the frozen HMF
 mass pairing. -/
 theorem hmfSpec_orthonormal
@@ -412,6 +457,14 @@ theorem hmfSpec_orthonormal
   rw [orthonormal_iff_ite]
   intro i j
   rw [← DifferentialGeometry.Integral.L2.SmoothCcTensor.inner_toL2,
+    show SmoothCcTensor.toL2
+        (eigenvectorSmooth (I := I) (M := M) q 0 1 i) =
+          (eigenvectorSmooth (I := I) (M := M) q 0 1 i :
+            TensorL2 0 1 q) from rfl,
+    show SmoothCcTensor.toL2
+        (eigenvectorSmooth (I := I) (M := M) q 0 1 j) =
+          (eigenvectorSmooth (I := I) (M := M) q 0 1 j :
+            TensorL2 0 1 q) from rfl,
     eigenvectorSmooth_toL2 (I := I) (M := M) q 0 1 i,
     eigenvectorSmooth_toL2 (I := I) (M := M) q 0 1 j]
   have horth :=
@@ -433,8 +486,9 @@ noncomputable def hmfSpecIncl
       Finset.sum_add_distrib]
   map_smul' a u := by
     simp only [WithLp.ofLp_smul, Pi.smul_apply, smul_eq_mul, mul_smul,
-      Finset.smul_sum]
+      Finset.smul_sum, RingHom.id_apply]
 
+omit [BoundarylessManifold I M] in
 @[simp] theorem hmfSpecIncl_apply
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
@@ -443,6 +497,7 @@ noncomputable def hmfSpecIncl
       ∑ j : {i // i ∈ S},
         u j • eigenvectorSmooth (I := I) (M := M) q 0 1 j.1 := rfl
 
+omit [BoundarylessManifold I M] in
 /-- The canonical finite spectral realization is exactly isometric for the
 frozen HMF mass. -/
 theorem hmfSpecIncl_orth
@@ -455,7 +510,7 @@ theorem hmfSpecIncl_orth
   rw [hmfMass_self]
   change ⟪hmfSpecIncl (I := I) (M := M) q S u,
       hmfSpecIncl (I := I) (M := M) q S u⟫_ℝ = ‖u‖ ^ 2
-  rw [hmfSpecIncl_apply, hmfSpecIncl_apply]
+  rw [hmfSpecIncl_apply]
   have horth : Orthonormal ℝ
       (fun j : {i // i ∈ S} =>
         eigenvectorSmooth (I := I) (M := M) q 0 1 j.1) :=
@@ -465,10 +520,11 @@ theorem hmfSpecIncl_orth
   simp only [RCLike.conj_to_real]
   rw [EuclideanSpace.norm_sq_eq]
   congr 1
-  apply Finset.sum_congr rfl
-  intro j _
+  funext j
+  rw [Real.norm_eq_abs, sq_abs]
   ring
 
+omit [BoundarylessManifold I M] in
 /-- Canonical finite spectral HMF Galerkin solutions exist for every finite
 mode set once the full weak residual has the stated finite-dimensional
 Lipschitz bounds.  The orbit equation includes the initial one-sided

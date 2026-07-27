@@ -44,6 +44,8 @@ private theorem trace_perm_comp (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
     traceHessianSlotPerm ((traceHessianSlotPerm⁻¹ * σ) j) = σ j := by
   rw [Equiv.Perm.mul_apply, Equiv.Perm.inv_def, Equiv.apply_symm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+  [SigmaCompactSpace M] in
 private theorem lieTrace_reindex (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ ρ : Equiv.Perm (Fin 4))
     (hcomp : ∀ j : Fin 4, traceHessianSlotPerm (ρ j) = σ j) :
@@ -73,6 +75,7 @@ private theorem lieTrace_reindex (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [hcomp j]
   rw [harg]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The combined top coefficient is the two reindexed trace-Hessian
 coefficients minus the doubled Ricci principal coefficient. -/
 theorem phiMet_reindex (g₀ g_bg g : SmoothRiemannianMetric I M) :
@@ -101,6 +104,7 @@ theorem phiMet_reindex (g₀ g_bg g : SmoothRiemannianMetric I M) :
       (trace_perm_comp deTurckLieArm2DivSlotPermAT)]
   abel
 
+omit [BoundarylessManifold I M] in
 /-- Along the realized affine metric path, the complete top coefficient is the
 DeTurck coefficient minus the two Lichnerowicz-form Ricci coefficients. -/
 theorem phi_realized_eq

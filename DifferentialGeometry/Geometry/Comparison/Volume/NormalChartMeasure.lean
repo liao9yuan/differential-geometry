@@ -86,7 +86,7 @@ lemma normalDensity_det
       Real.sqrt (normalGramMatrix (I := I) g p w).det :=
   rfl
 
-omit [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 /-- The normal-coordinate Gram matrix is continuous at the chart centre. -/
 lemma normalGram_contAt
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -112,11 +112,7 @@ lemma normalGram_contAt
         Set.inter_subset_left (fun w hw => hw.2)
   exact hcont.continuousAt (hUopen.mem_nhds hzeroU)
 
-/-- The radial variation field along the geodesic launched by `x`.
-
-
-
-
+/-- The radial variation field along the geodesic launched by `x`. -/
 def radialJacobiField (g : SmoothRiemannianMetric I M) (p : M)
     (x w : E) (t : ℝ) :
     TangentSpace I
@@ -207,6 +203,8 @@ lemma radialJacobi_one
   simpa [radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.radial_jacobi_one (I := I) g p x w hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 /-- Radial time scaling can be transferred to both launch vectors and then
 evaluated at time one.  This is an algebraic identity of the defining
 exponential variations, valid at every scale; the radial Gram comparison uses
@@ -228,6 +226,7 @@ lemma radialJacobi_scale
   rw [hfun]
   rfl
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- At any radial time in the local `C²` range, the radial Jacobi field is the
 exponential differential applied to the scaled variation direction. -/
 lemma radialJacobi_at
@@ -240,6 +239,7 @@ lemma radialJacobi_at
   rw [radialJacobi_scale (I := I) g p x w t,
     radialJacobi_one (I := I) g p (t • x) (t • w) htx]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Radial Jacobi fields preserve finite linear combinations at every time in
 the local `C²` range. -/
 lemma radialJacobi_sum_at
@@ -274,6 +274,7 @@ lemma radialJacobi_sum_at
         _ = c i • radialJacobiField (I := I) g p x (w i) t := by
           rw [radialJacobi_at (I := I) g p x (w i) t htx]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields are linear in the variation direction. -/
 lemma radialJacobi_one_smul
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (a : ℝ)
@@ -285,6 +286,7 @@ lemma radialJacobi_one_smul
   exact (mfderiv 𝓘(ℝ, E) I
     (fun b : E => (expMap (I := I) g p (show TangentSpace I p from b) : M)) x).map_smul a w
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields preserve arbitrary finite linear
 combinations of variation directions. -/
 lemma radialJacobi_sum
@@ -306,6 +308,7 @@ lemma radialJacobi_sum
   rw [radialJacobi_one (I := I) g p x (w i) hx]
   exact L.map_smul (c i) (w i)
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Endpoint radial Jacobi fields are linear over finite combinations of
 variation directions. -/
 lemma radialJacobi_one_sum

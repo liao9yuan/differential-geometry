@@ -17,7 +17,6 @@ in the total tensor chart norm.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -32,7 +31,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -61,10 +60,10 @@ private lemma ae_sum
         (ih (fun j hj => heq j (Finset.mem_insert_of_mem hj)))
 
 private lemma memWkp_sum
-    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    [FiniteDimensional ℝ X] {d k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
-    {Ω : Set X} (hΩ : IsOpen Ω) {ι : Type*} (t : Finset ι)
-    (f : ι → X → ℝ)
+    {d k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
+    {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
+    {ι : Type*} (t : Finset ι)
+    (f : ι → EuclideanSpace ℝ (Fin d) → ℝ)
     (hf : ∀ i ∈ t, MemWkp (d := d) k p (f i) Ω) :
     MemWkp (d := d) k p (fun x => ∑ i ∈ t, f i x) Ω := by
   classical
@@ -79,27 +78,42 @@ private lemma memWkp_sum
         (ih (fun j hj => hf j (Finset.mem_insert_of_mem hj)))
 
 private lemma wkpNorm_sum_le
-    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    [FiniteDimensional ℝ X] {d k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
-    {Ω : Set X} (hΩ : IsOpen Ω) {ι : Type*} (t : Finset ι)
-    (f : ι → X → ℝ)
+    {d k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
+    {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
+    {ι : Type*} (t : Finset ι)
+    (f : ι → EuclideanSpace ℝ (Fin d) → ℝ)
     (hf : ∀ i ∈ t, MemWkp (d := d) k p (f i) Ω) :
-    wkpNorm (d := d) k p (fun x => ∑ i ∈ t, f i x) Ω ≤
-      ∑ i ∈ t, wkpNorm (d := d) k p (f i) Ω := by
+    iteratedWeakSobolevNorm (d := d) k p (fun x => ∑ i ∈ t, f i x) Ω ≤
+      ∑ i ∈ t, iteratedWeakSobolevNorm (d := d) k p (f i) Ω := by
   classical
   induction t using Finset.induction_on with
   | empty =>
       simp only [Finset.sum_empty]
       rw [wkpNorm_zero_fun_zero (d := d) hp hΩ]
   | @insert i t hi ih =>
-      simp only [Finset.sum_insert hi]
-      exact (wkpNorm_add_le (d := d) hp hΩ
+      have htail_mem :
+          MemWkp (d := d) k p (fun x => ∑ j ∈ t, f j x) Ω :=
+        memWkp_sum (d := d) hp hΩ t f
+          (fun j hj => hf j (Finset.mem_insert_of_mem hj))
+      have hadd :
+          iteratedWeakSobolevNorm (d := d) k p
+              (fun x => f i x + ∑ j ∈ t, f j x) Ω ≤
+            iteratedWeakSobolevNorm (d := d) k p (f i) Ω +
+              iteratedWeakSobolevNorm (d := d) k p
+                (fun x => ∑ j ∈ t, f j x) Ω :=
+        wkpNorm_add_le (d := d) hp hΩ
         (hf i (Finset.mem_insert_self i t))
-        (memWkp_sum (d := d) hp hΩ t f
-          (fun j hj => hf j (Finset.mem_insert_of_mem hj)))).trans
-        (add_le_add_left
-          (ih (fun j hj => hf j (Finset.mem_insert_of_mem hj))) _)
+        htail_mem
+      have htail :
+          iteratedWeakSobolevNorm (d := d) k p
+              (fun x => ∑ j ∈ t, f j x) Ω ≤
+            ∑ j ∈ t, iteratedWeakSobolevNorm (d := d) k p (f j) Ω :=
+        ih (fun j hj => hf j (Finset.mem_insert_of_mem hj))
+      simpa only [Finset.sum_insert hi] using
+        hadd.trans (add_le_add_right htail
+          (iteratedWeakSobolevNorm (d := d) k p (f i) Ω))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma secComp_sum
     {r s : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → RSTensorSection I M r s) (α : M)
@@ -118,6 +132,7 @@ private lemma secComp_sum
       rw [secChartComp_add (I := I) (M := M), ih]
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma secTerm_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P Q : TensorCompIdx (E := E) r s) (v w : EuclN → ℝ) :
@@ -138,6 +153,7 @@ private lemma secTerm_sub
       chartPullback_apply_of_notMem (I := I) (M := M) β _ hx]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every POU-weighted chart component has pointwise closed support in the
 fixed compact POU kernel of its chart. -/
 theorem secComp_support
@@ -159,7 +175,7 @@ theorem secComp_support
 of its chosen component limit. -/
 def secCompErr
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -173,7 +189,7 @@ def secCompErr
 /-- Each source component error belongs to `W^{k,p}`. -/
 theorem secCompErr_mem
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -192,7 +208,7 @@ theorem secCompErr_mem
 /-- Each source component error has the same fixed compact POU support. -/
 theorem secCompErr_supp
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -219,7 +235,7 @@ theorem secCompErr_supp
 /-- Each scalar source error tends to zero in `W^{k,p}`. -/
 theorem secCompErr_tendsto
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -227,10 +243,10 @@ theorem secCompErr_tendsto
         ((u m).1 - (u n).1) ≤ ENNReal.ofReal ε)
     (β : M) (Q : TensorCompIdx (E := E) r s) :
     Tendsto
-      (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+      (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (secCompErr (I := I) (M := M) g r s k hp hp_top u h_cauchy n β Q)
         (chartTargetEuclid (I := I) (M := M) β))
-      atTop (𝒩 0) := by
+      atTop (nhds 0) := by
   simpa only [secCompErr] using
     (secCompRep_tendsto (I := I) (M := M) g r s k hp hp_top u
       h_cauchy β Q.1 Q.2)
@@ -239,7 +255,7 @@ theorem secCompErr_tendsto
 the transported scalar source limits. -/
 theorem tensorLimit_comp
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -264,7 +280,7 @@ theorem tensorLimit_comp
   have hlimit : tensorLimitSec (I := I) (M := M) g r s k hp hp_top u h_cauchy =
       ∑ β ∈ Sf, F β := by
     funext x
-    rfl
+    simp only [tensorLimitSec, Sf, F, Finset.sum_apply]
   rw [hlimit, secComp_sum (I := I) (M := M) Sf F α P]
   exact ae_sum Sf
     (fun β => secChartComp (I := I) (M := M) r s (F β) α P.1 P.2)
@@ -279,7 +295,7 @@ theorem tensorLimit_comp
 chart `W^{k,p}` carrier. -/
 theorem tensorLimit_mem
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -327,7 +343,7 @@ theorem tensorLimit_mem
 source-chart errors. -/
 theorem tensorErr_comp
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -364,6 +380,7 @@ theorem tensorErr_comp
       (secCompRep (I := I) (M := M) g r s k hp hp_top u
         h_cauchy β Q.1 Q.2)) y).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The chart sum defining the tensor norm is the finite sum over the
 canonical active atlas. -/
 theorem tensorNorm_eq_sum
@@ -373,7 +390,7 @@ theorem tensorNorm_eq_sum
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secChartComp (I := I) (M := M) r s S α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -392,7 +409,7 @@ theorem tensorNorm_eq_sum
 limit of the corresponding component of the original Cauchy sequence. -/
 theorem targetErr_tendsto
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -400,13 +417,13 @@ theorem targetErr_tendsto
         ((u m).1 - (u n).1) ≤ ENNReal.ofReal ε)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     Tendsto
-      (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+      (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
         (secChartComp (I := I) (M := M) r s
           ((u n).1 -
             tensorLimitSec (I := I) (M := M) g r s k hp hp_top u h_cauchy)
           α P.1 P.2)
         (chartTargetEuclid (I := I) (M := M) α))
-      atTop (𝒩 0) := by
+      atTop (nhds 0) := by
   classical
   let Sf := chartAtlasPOU_finset (I := I) (M := M)
   let C : M → TensorCompIdx (E := E) r s → ℝ := fun β Q =>
@@ -418,10 +435,10 @@ theorem targetErr_tendsto
   have hq : ∀ n β Q,
       MemWkp (d := Module.finrank ℝ E) k p (q n β Q)
           (chartTargetEuclid (I := I) (M := M) α) ∧
-        wkpNorm (d := Module.finrank ℝ E) k p (q n β Q)
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p (q n β Q)
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal (C β Q) *
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secCompErr (I := I) (M := M) g r s k hp hp_top u
                 h_cauchy n β Q)
               (chartTargetEuclid (I := I) (M := M) β) := by
@@ -433,7 +450,7 @@ theorem targetErr_tendsto
         (secCompErr_supp (I := I) (M := M) g r s k hp hp_top u
           h_cauchy n β Q)
   have h_bound : ∀ n,
-      wkpNorm (d := Module.finrank ℝ E) k p
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
           (secChartComp (I := I) (M := M) r s
             ((u n).1 -
               tensorLimitSec (I := I) (M := M) g r s k hp hp_top u h_cauchy)
@@ -441,7 +458,7 @@ theorem targetErr_tendsto
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ∑ β ∈ Sf, ∑ Q : TensorCompIdx (E := E) r s,
           ENNReal.ofReal (C β Q) *
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secCompErr (I := I) (M := M) g r s k hp hp_top u
                 h_cauchy n β Q)
               (chartTargetEuclid (I := I) (M := M) β) := by
@@ -467,11 +484,11 @@ theorem targetErr_tendsto
   have h_pair : ∀ β ∈ Sf, ∀ Q : TensorCompIdx (E := E) r s,
       Tendsto
         (fun n => ENNReal.ofReal (C β Q) *
-          wkpNorm (d := Module.finrank ℝ E) k p
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
             (secCompErr (I := I) (M := M) g r s k hp hp_top u
               h_cauchy n β Q)
             (chartTargetEuclid (I := I) (M := M) β))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
     intro β _ Q
     have herr := secCompErr_tendsto (I := I) (M := M) g r s k hp hp_top u
       h_cauchy β Q
@@ -485,22 +502,22 @@ theorem targetErr_tendsto
       Tendsto
         (fun n => ∑ Q : TensorCompIdx (E := E) r s,
           ENNReal.ofReal (C β Q) *
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secCompErr (I := I) (M := M) g r s k hp hp_top u
                 h_cauchy n β Q)
               (chartTargetEuclid (I := I) (M := M) β))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
     intro β hβ
     simpa using tendsto_finset_sum Finset.univ
       (fun Q _ => h_pair β hβ Q)
   have h_rhs : Tendsto
       (fun n => ∑ β ∈ Sf, ∑ Q : TensorCompIdx (E := E) r s,
         ENNReal.ofReal (C β Q) *
-          wkpNorm (d := Module.finrank ℝ E) k p
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
             (secCompErr (I := I) (M := M) g r s k hp hp_top u
               h_cauchy n β Q)
             (chartTargetEuclid (I := I) (M := M) β))
-      atTop (𝒩 0) := by
+      atTop (nhds 0) := by
     simpa using tendsto_finset_sum Sf h_inner
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le'
     tendsto_const_nhds h_rhs
@@ -511,7 +528,7 @@ theorem targetErr_tendsto
 assembly in the total tensor chart norm. -/
 theorem tensorLimit_tendsto
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -521,19 +538,19 @@ theorem tensorLimit_tendsto
       (fun n => wkpTensorNorm (I := I) (M := M) g k p
         ((u n).1 -
           tensorLimitSec (I := I) (M := M) g r s k hp hp_top u h_cauchy))
-      atTop (𝒩 0) := by
+      atTop (nhds 0) := by
   classical
   let Sf := chartAtlasPOU_finset (I := I) (M := M)
   have hcomp : ∀ α ∈ Sf,
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∀ Jdx : Fin s → Fin (Module.finrank ℝ E),
       Tendsto
-        (fun n => wkpNorm (d := Module.finrank ℝ E) k p
+        (fun n => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
           (secChartComp (I := I) (M := M) r s
             ((u n).1 - tensorLimitSec (I := I) (M := M)
               g r s k hp hp_top u h_cauchy) α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
     intro α _ Idx Jdx
     exact targetErr_tendsto (I := I) (M := M) g r s k hp hp_top u
       h_cauchy α ⟨Idx, Jdx⟩
@@ -541,12 +558,12 @@ theorem tensorLimit_tendsto
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       Tendsto
         (fun n => ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) k p
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
             (secChartComp (I := I) (M := M) r s
               ((u n).1 - tensorLimitSec (I := I) (M := M)
                 g r s k hp hp_top u h_cauchy) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
     intro α hα Idx
     simpa using tendsto_finset_sum Finset.univ
       (fun Jdx _ => hcomp α hα Idx Jdx)
@@ -554,12 +571,12 @@ theorem tensorLimit_tendsto
       Tendsto
         (fun n => ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secChartComp (I := I) (M := M) r s
                 ((u n).1 - tensorLimitSec (I := I) (M := M)
                   g r s k hp hp_top u h_cauchy) α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
     intro α hα
     simpa using tendsto_finset_sum Finset.univ
       (fun Idx _ => hJ α hα Idx)
@@ -567,12 +584,12 @@ theorem tensorLimit_tendsto
       (fun n => ∑ α ∈ Sf,
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) k p
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
               (secChartComp (I := I) (M := M) r s
                 ((u n).1 - tensorLimitSec (I := I) (M := M)
                   g r s k hp hp_top u h_cauchy) α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α))
-      atTop (𝒩 0) := by
+      atTop (nhds 0) := by
     simpa using tendsto_finset_sum Sf hIdx
   simpa only [tensorNorm_eq_sum (I := I) (M := M) g r s k hp] using htotal
 
@@ -581,7 +598,7 @@ The limit is a genuine dependent tensor section, not an arbitrary compatible
 array of chart functions. -/
 theorem wkpTensor_limit
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -591,7 +608,7 @@ theorem wkpTensor_limit
       Tendsto
         (fun n => wkpTensorNorm (I := I) (M := M) g k p
           ((u n).1 - v.1))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
   refine ⟨⟨tensorLimitSec (I := I) (M := M) g r s k hp hp_top u h_cauchy,
     tensorLimit_mem (I := I) (M := M) g r s k hp hp_top u h_cauchy⟩, ?_⟩
   exact tensorLimit_tendsto (I := I) (M := M) g r s k hp hp_top u h_cauchy
@@ -602,7 +619,7 @@ algebra or metric instances: the class of each difference has quotient norm
 tending to zero. -/
 theorem wkpTensorQ_limit
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ∞)
+    {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     (u : ℕ → WkpTensor (I := I) (M := M) g r s k p hp)
     (h_cauchy : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ m n : ℕ,
       N ≤ m → N ≤ n →
@@ -615,7 +632,7 @@ theorem wkpTensorQ_limit
             (tensorChartSetoid (I := I) (M := M) g r s k p hp)
             ⟨(u n).1 - v.1,
               MemWkpTensor.sub (I := I) (M := M) g hp (u n).2 v.2⟩))
-        atTop (𝒩 0) := by
+        atTop (nhds 0) := by
   obtain ⟨v, hv⟩ :=
     wkpTensor_limit (I := I) (M := M) g r s k hp hp_top u h_cauchy
   refine ⟨v, ?_⟩

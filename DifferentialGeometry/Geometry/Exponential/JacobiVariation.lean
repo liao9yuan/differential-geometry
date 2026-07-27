@@ -154,6 +154,7 @@ theorem covDerivAlong_const (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
 /-- A variation of complete intrinsic geodesics obtained by varying the initial
 velocity satisfies the Jacobi equation on all of `ℝ`. -/
 theorem intrinsic_jacobi
@@ -259,6 +260,7 @@ theorem intrinsic_jacobi
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- At time one, the intrinsic Jacobi variation is the vector-slot differential
 of the intrinsic exponential map. -/
 theorem intrinsic_jacobi_one
@@ -315,6 +317,7 @@ theorem intrinsic_jacobi_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- The intrinsic initial-velocity Jacobi field at time `t` is the
 vector-slot differential of the intrinsic exponential at `t • x`, applied to
 `t • w`. -/
@@ -351,6 +354,7 @@ theorem intrinsic_jacobi_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 /-- The intrinsic Jacobi variation has initial covariant derivative `w`.
 
 For the globally smooth variation
@@ -450,6 +454,7 @@ theorem intrinsic_jacobi_d0
     hcentral_ev hfield_ev
   exact hRHS.symm.trans hfinal
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- **The clamped radial slice satisfies `∇_t ∂_t = 0` at interior parameters.**
 For `‖a‖ < expMapC2Radius g p` and a clamp `ψ` that is the identity on
 `[-1, 2]`, the curve `v ↦ expMap g p (ψ v • a)` satisfies the geodesic equation
@@ -584,11 +589,13 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential in
 def jacobiVarRadius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   expMapC2Radius (I := I) g p / 26
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- The clamped radial Jacobi launch radius is positive. -/
 lemma jacobiVarRadius_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < jacobiVarRadius (I := I) g p := by
   exact div_pos (expMapC2Radius_pos (I := I) g p) (by norm_num)
 
+omit [SigmaCompactSpace M] in
 /-- **Radial `expMap` variations are Jacobi fields** on the canonical clamped
 launch radius (MSM135 Chapter 4, B0 stage 2). -/
 theorem radial_jacobi_of_lt (g : SmoothRiemannianMetric I M) (p : M)
@@ -785,6 +792,7 @@ theorem radial_jacobi_of_lt (g : SmoothRiemannianMetric I M) (p : M)
     rfl
   linear_combination (norm := module) hfinal
 
+omit [SigmaCompactSpace M] in
 /-- Existential compatibility form of `radial_jacobi_of_lt`. -/
 theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ t₀ ∈ Set.Ioo (0 : ℝ) 1,
@@ -800,6 +808,7 @@ theorem exists_radial_jacobi_radius (g : SmoothRiemannianMetric I M) (p : M) :
   exact radial_jacobi_of_lt (I := I) g p hx hw
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential in
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- **Chart-representation differentiability for radial Jacobi fields.**  Around
 every `p` there is a radius on which the clean radial Jacobi field
 `J v = ∂ₛ|₀ expMap g p (v • (x + s • w))` and its covariant derivative along
@@ -966,6 +975,7 @@ theorem jacobi_diff_of_lt (g : SmoothRiemannianMetric I M) (p : M)
     change DifferentiableAt ℝ (chartRepAt (I := I) γ D t) t
     exact hrep.differentiableAt_iff.mp hclamped
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `jacobi_diff_of_lt`. -/
 theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r → ∀ {b : ℝ}, b ≤ 1 →
@@ -995,6 +1005,8 @@ theorem exists_jacobi_diff (g : SmoothRiemannianMetric I M) (p : M) :
   intro x w hx hw
   exact jacobi_diff_of_lt (I := I) g p hx hw
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M]
+    [CompleteSpace E] in
 /-- **The radial Jacobi field vanishes at the centre.**  At `v = 0` the `s`-slice
 of the radial variation is constantly `p`, so the variation field vanishes. -/
 theorem radial_jacobi_zero (g : SmoothRiemannianMetric I M) (p : M) (x w : E) :
@@ -1069,6 +1081,7 @@ theorem radial_jacobi_one (g : SmoothRiemannianMetric I M) (p : M) (x w : E)
   exact hstep.trans hgoal
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential in
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- **The second initial condition of the radial Jacobi field.**  Around every `p`
 there is `r > 0` such that for `‖x‖, ‖w‖ < r` the radial Jacobi field
 `J v = ∂ₛ|₀ expMap g p (v • (x + s • w))` along `γ v = expMap g p (v • x)` has
@@ -1231,6 +1244,7 @@ theorem radial_deriv_of_lt (g : SmoothRiemannianMetric I M) (p : M)
     rw [hcomm]
   exact hRHS.symm.trans (hcomm_E.symm.trans (hLHS.trans (hconst.trans hderiv)))
 
+omit [T2Space M] [SigmaCompactSpace M] in
 /-- Existential compatibility form of `radial_deriv_of_lt`. -/
 theorem exists_radial_jacobi_deriv_radius (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →

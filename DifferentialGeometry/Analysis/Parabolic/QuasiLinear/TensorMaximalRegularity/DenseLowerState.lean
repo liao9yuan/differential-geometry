@@ -17,7 +17,7 @@ open scoped InnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable {Y : Type*} [NormedAddCommGroup Y] [NormedSpace ℝ Y]
 
 /-- The closed state ball measured through a continuous linear lower view. -/

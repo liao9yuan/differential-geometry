@@ -31,7 +31,7 @@ namespace Riemannian
 namespace Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
 
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -106,6 +106,10 @@ theorem cartanMap_smooth
   simpa only [cartanMap, U, invf, Function.comp_apply] using
     hexp.comp_contMDiffOn hmid
 
+omit [T2Space (TangentBundle I M)]
+  [T2Space (TangentBundle I' M')]
+  [ConnectedSpace M]
+  [ConnectedSpace M'] in
 /-- The differential of a fixed-branch Cartan map preserves the metric
 quadratic form between curvature-one manifolds. -/
 theorem cartanMap_sq
@@ -217,6 +221,10 @@ theorem cartanMap_sq
       g.inner x Y Y
   exact htransfer'.trans hsource
 
+omit [T2Space (TangentBundle I M)]
+  [T2Space (TangentBundle I' M')]
+  [ConnectedSpace M]
+  [ConnectedSpace M'] in
 /-- The differential of a fixed-branch Cartan map preserves the full
 Riemannian inner product between curvature-one manifolds. -/
 theorem cartanMap_inner
@@ -298,7 +306,7 @@ private noncomputable def pdTrans
       (Ψ.symm.contMDiffOn_toFun.mono inter_subset_left)
       (fun _ hx => hx.2)
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 @[simp]
 private theorem pdTrans_source
@@ -317,7 +325,7 @@ private theorem pdTrans_source
       Φ.source ∩ (Φ : M₀ → M₁) ⁻¹' Ψ.source :=
   rfl
 
-omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 @[simp]
 private theorem pdTrans_apply
@@ -391,6 +399,10 @@ theorem cartanPD_center
   simp only [Set.mem_preimage, B.fixedPD_symm_center, map_zero]
   exact B'.fixedPD_zero_mem
 
+omit [T2Space (TangentBundle I M)]
+  [T2Space (TangentBundle I' M')]
+  [ConnectedSpace M]
+  [ConnectedSpace M'] in
 /-- On its source, the Cartan partial diffeomorphism preserves the full
 Riemannian inner product. -/
 theorem cartanPD_inner

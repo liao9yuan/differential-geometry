@@ -95,7 +95,7 @@ def lc0Kappa (g₀ g₁ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 lemma lc0Kappa_unitModel_apply (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
@@ -125,7 +125,7 @@ def lc0LowFix (g₀ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 w
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 private lemma lc0LowFix_unitModel_apply (g₀ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
@@ -236,6 +236,119 @@ theorem lc0b_kappa_decomp (g₀ g₁ gB : SmoothRiemannianMetric I M)
   rw [map_add (g₀.inner x), map_add (ccTensorBilinSymm (I := I) g₀ P x)]
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
   ring
+
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma lc0b_koszulCovecCc_unitModel_eq_connDiff_g1_inner
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    (x : M) (a b c : TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x ![c, a, b] =
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b) c := by
+  rw [koszulCovecCc_unitModel (I := I) (M := M) g₀ P x a b c]
+  rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x a b c]
+  rfl
+
+omit [NeZero (Module.finrank ℝ E)] in
+/-- On the self-background arm, lowering the connection difference by the moving
+metric cancels the inverse metric exactly and leaves the linear Koszul covector,
+up to a cyclic permutation of its covariant slots. -/
+theorem lc0Kappa_self_eq_koszulCovecCc (g₀ g₁ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
+    lc0Kappa (I := I) (M := M) g₀ g₁ g₀ =
+      domDomCongrSection (I := I) g₀ (finRotate 3).symm
+        (koszulCovecCc (I := I) g₀ P) := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [lc0Kappa_unitModel_apply (I := I) (M := M) g₀ g₁ g₀ x m]
+  rw [domDomCongrSection_unitModel (I := I) g₀ (finRotate 3).symm
+    (koszulCovecCc (I := I) g₀ P) x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  have hargs :
+      (fun i => m ((finRotate 3).symm i)) = ![m 2, m 0, m 1] := by
+    funext i
+    fin_cases i
+    · change m ((finRotate 3).symm 0) = m 2
+      rw [show (finRotate 3).symm (0 : Fin 3) = 2 by decide]
+    · change m ((finRotate 3).symm 1) = m 0
+      rw [show (finRotate 3).symm (1 : Fin 3) = 0 by decide]
+    · change m ((finRotate 3).symm 2) = m 1
+      rw [show (finRotate 3).symm (2 : Fin 3) = 1 by decide]
+  rw [hargs]
+  exact (lc0b_koszulCovecCc_unitModel_eq_connDiff_g1_inner
+    (I := I) (M := M) g₀ g₁ P htie x (m 0) (m 1) (m 2)).symm
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma lc0b_unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ s (A - B) x m =
+      unitModel (I := I) (M := M) g₀ s A x m -
+        unitModel (I := I) (M := M) g₀ s B x m := by
+  rw [unitModel, unitModel, unitModel]
+  rw [show (A - B).toSection x = A.toSection x - B.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+      A.toSection x - B.toSection x) (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from A.toSection x)
+          (unitTensor (I := I) (M := M) x) -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from B.toSection x)
+          (unitTensor (I := I) (M := M) x) from rfl]
+  rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
+
+set_option maxHeartbeats 3200000 in
+-- The pointwise metric/connection normalization is expensive to elaborate.
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+/-- The affine-background form of `lc0Kappa`: the self-background Koszul term
+is separated from one fixed lowered connection difference and one perturbative
+pairing with that fixed difference. -/
+theorem lc0Kappa_eq_self_sub_connDiffLowered_add_pbLow
+    (g₀ g₁ gB : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
+    lc0Kappa (I := I) (M := M) g₀ g₁ gB =
+      lc0Kappa (I := I) (M := M) g₀ g₁ g₀ -
+        connDiffLoweredCc (I := I) g₀ gB +
+        lc0PbLow (I := I) (M := M) g₀ P g₀ gB := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [lc0b_unitModel_add (I := I) (M := M) g₀ 3 _ _ x m,
+    lc0b_unitModel_sub (I := I) (M := M) g₀ 3 _ _ x m]
+  rw [lc0Kappa_unitModel_apply (I := I) (M := M) g₀ g₁ gB x m,
+    lc0Kappa_unitModel_apply (I := I) (M := M) g₀ g₁ g₀ x m,
+    lc0PbLow_unitModel_apply (I := I) (M := M) g₀ P g₀ gB x m]
+  rw [lc0b_connDiffLowered_unitModel_apply (I := I) (M := M) g₀ gB x m]
+  have hanti : PDE.DeTurck.connDiff (I := I) gB g₀ x (m 0) (m 1) =
+      -PDE.DeTurck.connDiff (I := I) g₀ gB x (m 0) (m 1) := by
+    have h := PDE.DeTurck.connDiff_cocycle
+      (I := I) gB g₀ g₀ x (m 0) (m 1)
+    rw [PDE.DeTurck.connDiff_self] at h
+    exact eq_neg_of_add_eq_zero_left (by simpa only [add_comm] using h.symm)
+  rw [hanti, map_neg, ContinuousLinearMap.neg_apply, sub_neg_eq_add]
+  rw [PDE.DeTurck.connDiff_cocycle (I := I) g₀ g₁ gB x (m 0) (m 1)]
+  rw [map_add (g₁.inner x), ContinuousLinearMap.add_apply]
+  rw [htie x (PDE.DeTurck.connDiff (I := I) g₀ gB x (m 0) (m 1)) (m 2)]
+  ring
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+/-- Difference form of the affine-background `lc0Kappa` identity. -/
+theorem lc0Kappa_self_sub_eq_connDiffLowered_sub_pbLow
+    (g₀ g₁ gB : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
+    lc0Kappa (I := I) (M := M) g₀ g₁ g₀ -
+        lc0Kappa (I := I) (M := M) g₀ g₁ gB =
+      connDiffLoweredCc (I := I) g₀ gB -
+        lc0PbLow (I := I) (M := M) g₀ P g₀ gB := by
+  rw [lc0Kappa_eq_self_sub_connDiffLowered_add_pbLow
+    (I := I) (M := M) g₀ g₁ gB P htie]
+  abel
 
 def lc0FixCd (g₀ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 where
   toSection := (connDiffSection (I := I) g₀ gB).toSection
@@ -522,4 +635,3 @@ end LieCorr0BoundsAll
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
-

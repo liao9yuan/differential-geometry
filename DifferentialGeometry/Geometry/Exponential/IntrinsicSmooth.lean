@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Geodesic.ChartRegularity
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
-set_option linter.unusedSectionVars false
 
 /-!
 # Global `C^∞`-in-time regularity of the intrinsic geodesic
@@ -30,7 +29,7 @@ namespace Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
@@ -40,6 +39,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [ConnectedSpace M] in
 /-- **The intrinsic geodesic is `C^∞` in time on all of `ℝ`.**  `C^∞` upgrade
 of `intrinsicGeodesic_contMDiffOn`. -/
 theorem intrinsicGeodesic_contMDiffOn_infty
@@ -58,6 +58,7 @@ theorem intrinsicGeodesic_contMDiffOn_infty
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [ConnectedSpace M] in
 /-- **The intrinsic geodesic is globally `C^∞` in time** (unrestricted
 `ContMDiff` form of `intrinsicGeodesic_contMDiffOn_infty`, for consumers that
 ask for `ContMDiff` on all of `ℝ`, e.g. the parallel-frame producer). -/

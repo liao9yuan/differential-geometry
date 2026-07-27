@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +36,8 @@ private def rmBianchiCyc : Fin 5 ≃ Fin 5 :=
 private def rmBianchiCyc2 : Fin 5 ≃ Fin 5 :=
   Equiv.ofBijective ![2, 0, 1, 3, 4] (by decide)
 
+omit [I.Boundaryless]
+  [SigmaCompactSpace M] in
 /-- The second covariant derivative of canonical lowered Riemann satisfies the
 differentiated second Bianchi identity.  Its slots are
 `(outer derivative, inner derivative, X, Y, Z, W)`. -/

@@ -28,7 +28,7 @@ open DifferentialGeometry.Geometry.Riemannian
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -132,8 +132,8 @@ theorem HasStageJetData.inj_tail
   obtain ⟨alpha, z, hzx, hball, hcoord⟩ := hbuffer k x hxLarge
   let ck := seqCenterD inp.decay P Lphi k (alpha.1 : Nat)
   let cl := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
-  let chiK := NormalCoordinates.framedChartAt (I := I) Yk.metric ck
-  let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric cl
+  let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric ck
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   have hxBall : x ∈ Metric.ball x rho0 := Metric.mem_ball_self hrho0
   have hyBall : y ∈ Metric.ball x rho0 := by
     simpa only [Metric.mem_ball] using hxy
@@ -151,12 +151,10 @@ theorem HasStageJetData.inj_tail
     intro w hw
     have hwBall := hUexp hw
     rw [Metric.mem_ball, dist_zero_right] at hwBall
-    change w ∈ (NormalCoordinates.framedExpDiffeo
+    change w ∈ (NormalCoordinates.expMapDiffeo
       (I := I) Yk.metric ck).source
-    rw [NormalCoordinates.framedExp_source]
     apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Yk.metric ck
-    apply norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Yk.metric ck
-    simpa only [NormalCoordinates.normalFrame_sqrt] using hwBall
+    exact hwBall
   have hchiX : chiK x = zx := by
     rw [← hzxEq]
     exact chiK.right_inv (hUtgt (hIntU hzxInt))
