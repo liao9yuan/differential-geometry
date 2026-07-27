@@ -2,13 +2,13 @@
 
 ## Status
 
-The new module is focused-check and targeted-build green, warning-free, and
-contains no `sorry`.  All five public endpoints have exactly
-`[propext, Classical.choice, Quot.sound]`.
+The generic remainder tensorization and norm-estimate layer is complete.
+Focused verification and the targeted export refresh both pass, the file is
+warning-free, and it contains no `sorry`.
 
 This is a genuine partial closure of R13, not the final `hrem` producer:
 
-- R13 raw-carrier evaluation/tensorization layer: approximately **55%**.
+- R13 generic tensorization/re-lowering layer in this file: **100%**.
 - Argument-free `hrem`: **0%** until the remaining tensor product/re-lowering
   bounds are assembled into the actual slab field.
 - `ricci_flow_forward_unique`: **0%** until its theorem body is replaced and
@@ -34,6 +34,28 @@ This is a genuine partial closure of R13, not the final `hrem` producer:
   `rmRemNormSq_le`; the remaining hypotheses are norms of the now-genuine
   quadratic and drift tensors.
 
+## Additional checked results
+
+- `reLowerDefSq_le` writes the last-slot re-lowering defect as a trace of the
+  product with the metric difference and gives its pointwise product bound.
+- `metricDiffSwap_le` transports the reversed metric-difference norm through
+  the standard two-sided metric-equivalence API.
+- `roughLapSq_le` controls a rough Laplacian by the full second covariant
+  derivative whose rank-six closed-slab bound is now available.
+- `lowerTriSq_le` realizes arbitrary lowering of a trilinear family as one
+  trace of a permuted tensor product.
+- `lowerTriDiffSq_le` identifies lowering by the metric difference with the
+  negative re-lowering defect, reusing `reLowerDefSq_le`.
+- `lowerTriSwapSq_le` combines that estimate with two-sided metric comparison,
+  so a `g₁-g₂` lowering is controlled by the `g₂`-own-lowered speed.
+- `ownRmDiffSq_le` turns the two own-lowered curvature inputs of the
+  Uhlenbeck quadratic block into `rmDiffSq` plus the metric lowering gap.
+- `traceProdSq_le` is the rank-generic norm bound for a traced, slot-permuted
+  tensor product; it is the primitive needed by the `B` and drift arms.
+- `uhlSpeed_low` identifies the own-metric lowering of the actual
+  `uhlRm2Vec` with the complete rough-Laplacian, `B`, drift, and
+  Ricci-lowering component right-hand side.
+
 ## Rank correction
 
 The spatial remainder estimate deliberately records both background inputs:
@@ -46,22 +68,13 @@ The second input was not replaced by a rough-Laplacian bound. A
 
 ## Remaining exact frontier
 
-The raw-carrier obstruction is gone. The remaining work is norm algebra on
-genuine tensors:
-
-1. bound the tensorized Uhlenbeck `B` difference by curvature-difference and
-   background-curvature norms;
-2. use `driftDiff_split` to bound the tensorized Ricci drift by Ricci and
-   curvature differences against background factors;
-3. expand the second tensor in `gapDot_uhl` through `uhlRaisedDeriv` and bound
-   its rough-Laplacian, quadratic, drift, and Ricci-lowering terms;
-4. prove the missing pointwise norm bound for
-   `(reLower g₂ g₁ (roughLap₁ P) - roughLap₁ P) x`;
-5. combine those with the existing `reLowerPairSq_le` and trace bound.
-
-The last trace summand is already in the established product/trace API. The
-re-lowering defect in item 4 is the smallest distinct API gap after the new
-evaluation identities.
+The raw-carrier and generic norm-algebra obstructions in this file are gone.
+The quadratic, Ricci-drift, and own-flow speed estimates now live in the
+separate `ForwardUniqueQuad`, `ForwardUniqueDrift`, and `ForwardUniqueSpeed`
+layers.  The remaining work is solution-specific: identify those invariant
+tensors with the `fu*` component families, take the already available
+closed-slab suprema, and assemble the actual `sdecRemFam` estimate in
+`ForwardUniqueWiring`.
 
 ## Proof-route lesson
 

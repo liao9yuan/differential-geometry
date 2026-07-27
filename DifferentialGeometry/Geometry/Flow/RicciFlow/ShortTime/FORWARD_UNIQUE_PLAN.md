@@ -292,6 +292,18 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №58 (2026-07-26, CODEX GENERIC REMAINDER ALGEBRA — **QUADRATIC,
+  RICCI-DRIFT, AND OWN-SPEED BOUNDS COMPLETE**): `normSq0S_prod` supplies the
+  fiber product norm; `ForwardUniqueRem` now exports all re-lowering, rough
+  Laplacian, trace-product, and Uhlenbeck reconstruction estimates.
+  New coordinate-free modules `ForwardUniqueQuad`, `ForwardUniqueDrift`, and
+  `ForwardUniqueSpeed` prove the two-flow quadratic Lipschitz bound, invariant
+  Ricci-drift split, and full own-flow Uhlenbeck speed estimate.  All five
+  modules pass focused checks and targeted exports without local warnings;
+  representative endpoints depend on exactly
+  `[propext, Classical.choice, Quot.sound]`.  The generic algebra is 100%;
+  the next frontier is the solution-specific `fu*` identification and
+  closed-slab assembly of argument-free `hrem`.
 - №57 (2026-07-26, CODEX CURVATURE-DERIVATIVE LAYER — **CLOSED-EDGE
   `∇^kRm` AND CROSS-LOWERED SLAB SUPS COMPLETE**): added the product-within
   derivative bridge `prodExtDeriv_joint`, the finite frame recursion
