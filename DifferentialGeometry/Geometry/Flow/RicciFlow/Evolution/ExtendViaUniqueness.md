@@ -1,5 +1,23 @@
 # ExtendViaUniqueness — interior-restart + uniqueness route for `extends_of_rmBounded`
 
+## Current status (2026-07-27): black box (B) CLOSED
+
+`ricci_flow_forward_unique` keeps its statement unchanged and is now proved by
+the checked `forward_unique_of_gram` route.  Its slab input is the argument-free
+`fuSlab_of_gram`; its initial-edge input is `energyEdgeCont`.  The proof does
+not call `ricci_flow_unif_existence` or any consumer of that theorem, so black
+box (N) is not on this dependency path.
+
+The endpoint passes its focused check and targeted module build (9908/9908).
+Direct `#print axioms` is exactly
+`[propext, Classical.choice, Quot.sound]`, with no `sorryAx`.  The remaining
+`sorry` warning in this file belongs only to the independent black box (N) at
+`ricci_flow_unif_existence`.
+
+`ricci_flow_forward_unique`: **100%**.  Its dedicated Route-K machinery:
+**100%**.  Black box (N): **0%** and unchanged.  The whole HCG compactness
+project remains about **10%**.
+
 ## Why this route (user's insight, 2026-06-20)
 
 The current route restarts short-time existence **at ω** from the BBS limit `g(ω)`, which forces

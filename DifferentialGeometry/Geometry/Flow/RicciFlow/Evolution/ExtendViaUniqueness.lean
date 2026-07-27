@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueWiring
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 
 set_option autoImplicit false
@@ -212,7 +213,10 @@ theorem ricci_flow_forward_unique
         ((-2 : ℝ) * ricciTensor (I := I) (g₂ t) x v w) (Set.Ici a) t)
     (h0 : g₁ a = g₂ a) :
     ∀ t ∈ Set.Ico a b, g₁ t = g₂ t := by
-  sorry
+  exact forward_unique_of_gram (I := I) g₁ g₂ hab
+    h1smooth h1cont h2smooth h2cont h1pde h2pde h0
+    (fuSlab_of_gram (I := I) g₁ g₂ h1smooth h2smooth h1pde h2pde)
+    (energyEdgeCont (I := I) g₁ g₂ hab h1smooth h2smooth)
 
 /-- **Brick U (consumer assembly): interior restart + uniqueness ⟹ the extension tuple.**  Given the
 left-flow data on `[α, ω)` (as `ricciTensor`-form PDE + chart-Gram smooth/continuity), restart data

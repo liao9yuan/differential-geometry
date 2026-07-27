@@ -292,6 +292,17 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №61 (2026-07-27, CODEX PUBLIC ENDPOINT — **BLACK BOX (B) CLOSED**):
+  replaced the unchanged-statement `ricci_flow_forward_unique` `sorry` with
+  the direct `forward_unique_of_gram` application, supplying the
+  argument-free `fuSlab_of_gram` and `energyEdgeCont`.  The file passes its
+  focused check and targeted module build (9908/9908).  Direct
+  `#print axioms` is exactly `[propext, Classical.choice, Quot.sound]`; the
+  proof therefore does not pass through black box (N), whose independent
+  `sorryAx` remains absent from this theorem.  Public endpoint and dedicated
+  forward-uniqueness machinery are both 100%.  NEXT: run the required full
+  locked build and record any failure only at its exact foreign or lane
+  declaration.
 - №60 (2026-07-27, CODEX ARGUMENT-FREE SLAB — **LAST MACHINERY BRICK
   CLOSED**): `fuB_low`, `fuDrift_low`, and `fuSpeed_low` identify the
   solution component families with the invariant quadratic, Ricci-drift, and
