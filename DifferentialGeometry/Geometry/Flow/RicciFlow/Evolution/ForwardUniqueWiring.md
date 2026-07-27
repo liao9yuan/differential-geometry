@@ -6,6 +6,35 @@ provenance ledger), `ForwardUniqueLifts.md`, `ForwardUniqueSdec.md`, `ForwardUni
 
 ## Status
 
+### Fifth pass (2026-07-27, ADOT): `fuAdotSlab` CLOSED
+
+`fuAdotSlab` now supplies the `ForwardUniqueSlab.adotLe` field at the real
+`fuAvec`/`fuSfield` carriers from the black-box chart-Gram regularity and PDE inputs alone.
+It combines `ricciSlabSup`, `metricCompSlab`, and `nablaRicSlabSup` with
+`connDiffDot_normSq_le`.  The two realization obligations use the same intrinsic
+Ricci sections: `nablaRicReal_frame` identifies their chart components, while `fuGamma`
+supplies the coefficient identity and, through `connDiffVec_hasDerivAt`, the derivative of
+the connection-difference vector.  A single maximum constant absorbs both the density and
+the zeroth-order terms.
+
+The proof now passes both a focused check and the targeted module build with no
+local warnings or errors and contains no `sorry`.  Its direct axiom audit is exactly
+`[propext, Classical.choice, Quot.sound]`.
+The stable elaboration requires a direct `ForwardUniqueConnBound` import, an explicit
+reference-interval argument for `localFrameInv_real`, and a finite slot-map equality that
+normalizes the `vec3` realization from `nablaRicReal_frame` to the `component0S` if-slot
+form.  The `fuGamma` call uses the direct lower bound `ht.1` and the composed upper bound
+`lt_trans ht.2 hc.2`.  The final estimate unfolds the metric- and curvature-difference
+squared-norm definitions for nonnegativity and normalizes multiplication associativity
+before applying the pointwise connection-speed bound.
+
+This theorem itself and its dedicated `adotLe` machinery are **100%**.  The public
+`ricci_flow_forward_unique` theorem remains **0% proved** until its existing `sorry` is
+actually replaced; its dedicated forward-uniqueness machinery is about **95%**, with
+`hrem`/final argument-free slab assembly still to be closed.  The whole HCG compactness
+project remains about **10%**.  In this file, `fuSlab_of_gram` still accepts both `hrem` and
+`hadot`; final assembly should feed it `fuAdotSlab` rather than retain `hadot` as an input.
+
 ### Fourth pass (2026-07-26, FINAL-FIELDS): `hbounds` ASSEMBLED modulo **two** `ForwardUniqueSlab` fields
 
 Three new endpoints here, all unconditional given (B)'s own fields:

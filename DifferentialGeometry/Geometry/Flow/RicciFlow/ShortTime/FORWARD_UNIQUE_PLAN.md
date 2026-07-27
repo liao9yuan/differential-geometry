@@ -292,6 +292,18 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №59 (2026-07-27, CODEX CONNECTION-SPEED SLAB BOUND — **`adotLe`
+  COMPLETE**): `Evolution/ForwardUniqueWiring.lean` now proves `fuAdotSlab`
+  directly from the chart-Gram regularity and Ricci-flow PDE inputs.  It
+  combines the compact-slab metric, Ricci, and first covariant-Ricci bounds
+  through `connDiffDot_normSq_le`, with the chart connection-difference
+  derivative supplied by `fuGamma` and `connDiffVec_hasDerivAt`.  The file
+  passes both its focused check and targeted module build without local
+  warnings; `fuAdotSlab` depends on exactly
+  `[propext, Classical.choice, Quot.sound]`.  The `adotLe` field and its
+  dedicated machinery are 100%; the next and final machinery frontier is the
+  argument-free `hrem` assembly and removal of the `hrem`/`hadot` arguments
+  from `fuSlab_of_gram`.
 - №58 (2026-07-26, CODEX GENERIC REMAINDER ALGEBRA — **QUADRATIC,
   RICCI-DRIFT, AND OWN-SPEED BOUNDS COMPLETE**): `normSq0S_prod` supplies the
   fiber product norm; `ForwardUniqueRem` now exports all re-lowering, rough

@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSdec
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueDensReg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueSup
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueConnBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04ProducerTail
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -1235,6 +1237,240 @@ theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Rea
   exact reactSlabLe (I := I) g₁ g₂
     (fun t ht x X Y => pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x X Y)
     (fun t ht x => hΛ t (Ioo_subset_Icc_self ht) x)
+
+/-- **The `adotLe` field of `ForwardUniqueSlab` at the constructed carrier.**
+
+The four background constants of `connDiffDot_normSq_le` are supplied on the closed subslab
+by `ricciSlabSup`, `nablaRicSlabSup`, and `metricCompSlab`.  Its component inputs are the
+canonical chart-frame inverse and `∇Ric` families: `fuGamma` supplies the Christoffel
+derivatives, `connDiffVec_hasDerivAt` turns them into the invariant connection-difference
+derivative, and `nablaRicReal_frame` identifies the explicit `chartNablaRic` components with
+the intrinsic covariant derivatives. -/
+theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (h1pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₁ t) x v w) (Ici a) t)
+    (h2pde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (g₂ s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (g₂ t) x v w) (Ici a) t)
+    {c : Real} (hc : c ∈ Ioo a b) :
+    ∃ C_A : Real, ∀ t ∈ Ioo a c, ∀ x : M,
+      normSq0S (I := I) (g₁ t) x 3
+          (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x) ≤
+        C_A * (forwardUniqueDensity (I := I) g₁ g₂ t x +
+          normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x)) := by
+  have hsub : Icc a c ⊆ Ico a b := fun y hy => ⟨hy.1, lt_of_le_of_lt hy.2 hc.2⟩
+  have hres₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h1smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  have hres₂ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
+        (Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (h2smooth x₀ i j).mono (Set.prod_mono hsub (Set.Subset.refl _))
+  obtain ⟨Λric, hΛric0, hΛric⟩ := ricciSlabSup (I := I) g₁ g₁ hres₁ hres₁
+  obtain ⟨Λ, hΛ0, hΛ⟩ := metricCompSlab (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨B₁, hB₁0, hB₁⟩ := nablaRicSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  obtain ⟨B₃, hB₃0, hB₃⟩ := ricciSlabSup (I := I) g₁ g₂ hres₁ hres₂
+  let K : Real := 2 * (200 * ((Module.finrank Real E : Real) ^ 6 + 1))
+  let L : Real := (1 + Λ) ^ 2 * (B₁ + B₃)
+  let C_A : Real := max (8 * Λric + K * L) K
+  refine ⟨C_A, fun t ht x => ?_⟩
+  have hIcc : t ∈ Icc a c := Ioo_subset_Icc_self ht
+  let frame := chartFrame I x
+  let hframe := chartFrame_isFrame I x
+  have hu : IsOpen (trivializationAt E (TangentSpace I) x).baseSet :=
+    (trivializationAt E (TangentSpace I) x).open_baseSet
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := chartFrame_mem I x
+  let Ric₁ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+    CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
+      (metricCov_smooth (I := I) (g₁ t))
+  let Ric₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+    CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₂ t))
+      (metricCov_smooth (I := I) (g₂ t))
+  have hRic₁ : ∀ y : M, Ric₁ y = metricRicciAt (I := I) (g₁ t) y := by
+    intro y
+    exact CovariantDerivative.ricciSection_apply (I := I) (metricCov (I := I) (g₁ t))
+      (metricCov_smooth (I := I) (g₁ t)) y
+  have hRic₂ : ∀ y : M, Ric₂ y = metricRicciAt (I := I) (g₂ t) y := by
+    intro y
+    exact CovariantDerivative.ricciSection_apply (I := I) (metricCov (I := I) (g₂ t))
+      (metricCov_smooth (I := I) (g₂ t)) y
+  have hS : IsRmDiffField (I := I) (g₁ t) (g₂ t) (fuSfield (I := I) g₁ g₂ t) :=
+    fun y => fuSfield_apply (I := I) g₁ g₂ t y
+  have hgInv₁ : MetricInverseInBasis_gen (I := I) (g₁ t) x (hframe.toBasisAt hx)
+      (fun i j => chartFrameInv (I := I) g₁ x t x i j) := by
+    have hlocal := localFrameInv_real (I := I) (D := refD)
+      (solOfMetric (I := I) (D := refD) g₁)
+      (chartFrame I x) (chartFrame_isFrameTop I x)
+    simpa [MetricInverseInBasis_gen, InvMetricLocal, chartFrameInv, metricCompInFrame,
+      frame, hframe] using hlocal t x hx
+  have hgInv₂ : MetricInverseInBasis_gen (I := I) (g₂ t) x (hframe.toBasisAt hx)
+      (fun i j => chartFrameInv (I := I) g₂ x t x i j) := by
+    have hlocal := localFrameInv_real (I := I) (D := refD)
+      (solOfMetric (I := I) (D := refD) g₂)
+      (chartFrame I x) (chartFrame_isFrameTop I x)
+    simpa [MetricInverseInBasis_gen, InvMetricLocal, chartFrameInv, metricCompInFrame,
+      frame, hframe] using hlocal t x hx
+  have hNR₁ : ∀ d i j : Fin (Module.finrank Real E),
+      chartNablaRic (I := I) g₁ x t x d i j =
+        component0S (I := I) (hframe.toBasisAt hx)
+          (metricNabla0S (I := I) (g₁ t) Ric₁ x)
+          (fun s : Fin 3 => if s = 0 then d else if s = 1 then i else j) := by
+    intro d i j
+    have hreal := nablaRicReal_frame (I := I) (solOfMetric (I := I) (D := refD) g₁) t
+      (chartFrame I x) hframe hu hx d i j
+    have hslots :
+        (fun s : Fin 3 =>
+          (hframe.toBasisAt hx) (if s = 0 then d else if s = 1 then i else j)) =
+          DifferentialGeometry.Integral.Connection.vec3 (I := I)
+            (chartFrame I x d x) (chartFrame I x i x) (chartFrame I x j x) := by
+      funext s
+      fin_cases s <;>
+        simp [DifferentialGeometry.Integral.Connection.vec3]
+    rw [component0S_apply, hslots, metricNabla0S_apply]
+    simpa [chartNablaRic, Ric₁, nablaRicComp, solOfMetric, SolutionOn.family,
+      SolutionOn.ricci, SolutionFamily.connection, SolutionFamily.ricci, metricRicci,
+      metricCov, frame, hframe] using hreal.symm
+  have hNR₂ : ∀ d i j : Fin (Module.finrank Real E),
+      chartNablaRic (I := I) g₂ x t x d i j =
+        component0S (I := I) (hframe.toBasisAt hx)
+          (metricNabla0S (I := I) (g₂ t) Ric₂ x)
+          (fun s : Fin 3 => if s = 0 then d else if s = 1 then i else j) := by
+    intro d i j
+    have hreal := nablaRicReal_frame (I := I) (solOfMetric (I := I) (D := refD) g₂) t
+      (chartFrame I x) hframe hu hx d i j
+    have hslots :
+        (fun s : Fin 3 =>
+          (hframe.toBasisAt hx) (if s = 0 then d else if s = 1 then i else j)) =
+          DifferentialGeometry.Integral.Connection.vec3 (I := I)
+            (chartFrame I x d x) (chartFrame I x i x) (chartFrame I x j x) := by
+      funext s
+      fin_cases s <;>
+        simp [DifferentialGeometry.Integral.Connection.vec3]
+    rw [component0S_apply, hslots, metricNabla0S_apply]
+    simpa [chartNablaRic, Ric₂, nablaRicComp, solOfMetric, SolutionOn.family,
+      SolutionOn.ricci, SolutionFamily.connection, SolutionFamily.ricci, metricRicci,
+      metricCov, frame, hframe] using hreal.symm
+  have hΓcoeff := fuGamma (I := I) g₁ g₂ hab h1smooth h2smooth h1pde h2pde
+    t ⟨ht.1, lt_trans ht.2 hc.2⟩ x
+  have hΓ : ∀ i j k : Fin (Module.finrank Real E),
+      HasDerivAt
+        (fun r : Real =>
+          DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
+              (metricCov (I := I) (g₁ r)) frame hframe x i j k -
+            DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
+              (metricCov (I := I) (g₂ r)) frame hframe x i j k)
+        (christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₁ x)
+            (chartNablaRic (I := I) g₁ x) t x i j k -
+          christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₂ x)
+            (chartNablaRic (I := I) g₂ x) t x i j k) t := by
+    intro i j k
+    have hval :
+        hframe.coeff k x
+            ((fuAvec (I := I) g₁ g₂ t x (frame j x)) (frame i x)) =
+          christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₁ x)
+              (chartNablaRic (I := I) g₁ x) t x i j k -
+            christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₂ x)
+              (chartNablaRic (I := I) g₂ x) t x i j k := by
+      simpa [fuAvec, christoffelDiffSpeed, frame, hframe] using
+        (coeff_bilinOfComp (I := I) (chartFrame I x) (chartFrame_isFrame I x) hx
+          (fun i j k =>
+            christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₁ x)
+                (chartNablaRic (I := I) g₁ x) t x i j k -
+              christoffelEvolutionRHSInFrame (M := M) (chartFrameInv (I := I) g₂ x)
+                (chartNablaRic (I := I) g₂ x) t x i j k) i j k)
+    simpa only [frame, hframe, hval] using hΓcoeff i j k
+  have hA : ∀ X Y : TangentSpace I x,
+      HasDerivAt
+        (fun r : Real =>
+          CovariantDerivative.difference (metricCov (I := I) (g₁ r))
+            (metricCov (I := I) (g₂ r)) x Y X)
+        ((fuAvec (I := I) g₁ g₂ t x Y) X) t :=
+    fun X Y => connDiffVec_hasDerivAt (I := I) g₁ g₂ frame hframe hu hx
+      (fuAvec (I := I) g₁ g₂ t) hΓcoeff X Y
+  have hmain := connDiffDot_normSq_le (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂ t)
+    frame hframe hu hx (fuSfield (I := I) g₁ g₂ t) hS Ric₁ Ric₂ hRic₁ hRic₂
+    (chartFrameInv (I := I) g₁ x) (chartFrameInv (I := I) g₂ x) hgInv₁ hgInv₂
+    (chartNablaRic (I := I) g₁ x) (chartNablaRic (I := I) g₂ x) hNR₁ hNR₂ hΓ hA
+    (hΛric t hIcc x) hΛ0 (hΛ t hIcc x) (hB₁ t hIcc x) (hB₃ t hIcc x)
+  have hmetric0 : 0 ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x :=
+    by
+      rw [metricDiffSq_def]
+      exact normSq0S_nonneg (I := I) (g₁ t) x 2 _
+  have hden0 : 0 ≤ forwardUniqueDensity (I := I) g₁ g₂ t x :=
+    density_nonneg (I := I) g₁ g₂ t x
+  have hdiss0 : 0 ≤ normSq0S (I := I) (g₁ t) x 5
+      (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x) :=
+    normSq0S_nonneg (I := I) (g₁ t) x 5 _
+  have hpair : metricDiffSq (I := I) (g₁ t) (g₂ t) x +
+      connDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+        forwardUniqueDensity (I := I) g₁ g₂ t x := by
+    rw [forwardUniqueDensity]
+    exact le_add_of_nonneg_right (by
+      rw [rmDiffSq_def]
+      exact normSq0S_nonneg (I := I) (g₁ t) x 4 _)
+  have hconn : connDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+      forwardUniqueDensity (I := I) g₁ g₂ t x :=
+    (le_add_of_nonneg_left hmetric0).trans hpair
+  have hK0 : 0 ≤ K := by
+    dsimp [K]
+    positivity
+  have hL0 : 0 ≤ L := by
+    dsimp [L]
+    exact mul_nonneg (sq_nonneg _) (add_nonneg hB₁0 hB₃0)
+  have hfirst :
+      8 * Λric * connDiffSq (I := I) (g₁ t) (g₂ t) x ≤
+        8 * Λric * forwardUniqueDensity (I := I) g₁ g₂ t x :=
+    mul_le_mul_of_nonneg_left hconn (mul_nonneg (by positivity) hΛric0)
+  have hsecond :
+      K * (nablaRmDiffSq (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x +
+          L * (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
+            connDiffSq (I := I) (g₁ t) (g₂ t) x)) ≤
+        K * (normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x) +
+          L * forwardUniqueDensity (I := I) g₁ g₂ t x) := by
+    apply mul_le_mul_of_nonneg_left _ hK0
+    rw [nablaRmDiffSq, nablaRmDiff]
+    exact add_le_add (le_refl _) (mul_le_mul_of_nonneg_left hpair hL0)
+  calc
+    normSq0S (I := I) (g₁ t) x 3
+        (connSpeed (I := I) g₁ g₂ (fuAvec (I := I) g₁ g₂) t x) ≤
+        8 * Λric * connDiffSq (I := I) (g₁ t) (g₂ t) x +
+          K * (nablaRmDiffSq (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x +
+            L * (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
+              connDiffSq (I := I) (g₁ t) (g₂ t) x)) := by
+      simpa [connSpeed, K, L, mul_assoc] using hmain
+    _ ≤ 8 * Λric * forwardUniqueDensity (I := I) g₁ g₂ t x +
+          K * (normSq0S (I := I) (g₁ t) x 5
+              (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x) +
+            L * forwardUniqueDensity (I := I) g₁ g₂ t x) :=
+      add_le_add hfirst hsecond
+    _ = (8 * Λric + K * L) * forwardUniqueDensity (I := I) g₁ g₂ t x +
+          K * normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x) := by ring
+    _ ≤ C_A * forwardUniqueDensity (I := I) g₁ g₂ t x +
+          C_A * normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x) := by
+      exact add_le_add
+        (mul_le_mul_of_nonneg_right (le_max_left _ _) hden0)
+        (mul_le_mul_of_nonneg_right (le_max_right _ _) hdiss0)
+    _ = C_A * (forwardUniqueDensity (I := I) g₁ g₂ t x +
+          normSq0S (I := I) (g₁ t) x 5
+            (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x)) := by ring
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
