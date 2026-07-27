@@ -292,6 +292,14 @@ horizon. The draft stage list below is the pre-ruling record.
 
 ## Dispatch log (planner = Fable auditor; executors = Opus 5, never commit)
 
+- №54 (2026-07-26, CODEX DERIVATIVE REGULARITY — **CLOSED-EDGE `∇Ric`
+  COMPONENT REGULARITY COMPLETE**): `ForwardUniqueDensReg.lean` now exports
+  `nablaRicChartJoint`.  It composes `partRicciWithinM`, `christWithinM`, and
+  `ricciWithinM`, then identifies the intrinsic tensor with
+  `nablaRicChartComp` on the chart good set.  Focused verification and the
+  targeted module build are green; the new endpoint is exactly 3-axiom clean.
+  This is derivative-continuation step 2/4.  NEXT: `nablaRicSlabSup` in
+  `ForwardUniqueSup.lean`, then `fuAdotSlab`.
 - №53 (2026-07-26, CODEX DERIVATIVE BRIDGE — **OFF-CENTRE `∇Ric` COMPONENT
   IDENTITY COMPLETE**): added `Evolution/ForwardUniqueNablaChart.lean` with
   the sorry-free `nablaRicChartComp`.  It specializes the unconditional

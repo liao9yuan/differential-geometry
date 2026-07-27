@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueClosure
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueNablaChart
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueWithin
@@ -47,6 +48,8 @@ Christoffel/Riemann tower `gen_joint_christoffel` / `gen_joint_riemann`
   on `chartLeviCivitaGoodSet α`.
 * `connChartJoint` / `rmChartJoint` — joint `(t, x)`-`C∞` of those chart-frame components,
   from the chart-Gram packages of the two flows alone.
+* `nablaRicChartJoint` — joint `(t, x)`-`C∞` of the chart-frame components of `∇Ric`,
+  including at a one-sided initial edge.
 * `metricDiffSq_jointContMDiffOn`, `connDiffSq_jointContMDiffOn`, `rmDiffSq_jointContMDiffOn`,
   `dens_jointContMDiffOn` — the three thirds and K5's `hdens`, each consuming **only** the two
   chart-Gram packages.
@@ -662,6 +665,91 @@ theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set �
     filter_upwards [good_nhdsWithin (I := I) x₀ J t] with p hp
     exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
+
+/-- The chart-frame components of `∇Ric` are jointly `C∞` within an arbitrary time
+set `J`.  This is the closed-edge derivative input used to take a uniform slab
+bound for `|∇Ric|²`. -/
+theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
+    (x₀ : M)
+    (hgram : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (K : Fin 3 → Fin (Module.finrank ℝ E)) {t : ℝ} (ht : t ∈ J) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        metricNabla0S (I := I) (g p.1)
+          (CovariantDerivative.ricciSection (I := I)
+            (metricCov (I := I) (g p.1)) (metricCov_smooth (I := I) (g p.1))) p.2
+          (fun a : Fin 3 => chartBasisVecFiber (I := I) x₀ (K a) p.2))
+      (J ×ˢ (Set.univ : Set M)) (t, x₀) := by
+  classical
+  have hG := genGramOn_of_field (I := I) g x₀ hgram
+  have hxs : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+  have hnhdS := prodOpen_nhdsWithin (chartAt H x₀).open_source
+    (mem_chart_source H x₀) J t
+  have hΦ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        partialDeriv (E := E) (K 0)
+            (chartRicciTensor (I := I) (g p.1) x₀ (K 1) (K 2))
+            (extChartAt I x₀ p.2) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) (g p.1) x₀ (K 0) (K 1) m
+                (extChartAt I x₀ p.2) *
+              chartRicciTensor (I := I) (g p.1) x₀ m (K 2)
+                (extChartAt I x₀ p.2) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) (g p.1) x₀ (K 0) (K 2) m
+                (extChartAt I x₀ p.2) *
+              chartRicciTensor (I := I) (g p.1) x₀ (K 1) m
+                (extChartAt I x₀ p.2))
+      (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) := by
+    refine
+      ((partRicciWithinM (I := I) g x₀ hG (K 0) (K 1) (K 2) ht hxs).mono_of_mem_nhdsWithin
+        hnhdS).sub ?_ |>.sub ?_
+    · refine ContMDiffWithinAt.sum fun m _ => ?_
+      exact
+        ((christWithinM (I := I) g x₀ hG (K 0) (K 1) m ht hxs).mono_of_mem_nhdsWithin
+          hnhdS).mul
+        ((ricciWithinM (I := I) g x₀ hG m (K 2) ht hxs).mono_of_mem_nhdsWithin
+          hnhdS)
+    · refine ContMDiffWithinAt.sum fun m _ => ?_
+      exact
+        ((christWithinM (I := I) g x₀ hG (K 0) (K 2) m ht hxs).mono_of_mem_nhdsWithin
+          hnhdS).mul
+        ((ricciWithinM (I := I) g x₀ hG (K 1) m ht hxs).mono_of_mem_nhdsWithin
+          hnhdS)
+  have heq :
+      (fun p : ℝ × M =>
+        metricNabla0S (I := I) (g p.1)
+          (CovariantDerivative.ricciSection (I := I)
+            (metricCov (I := I) (g p.1)) (metricCov_smooth (I := I) (g p.1))) p.2
+          (fun a : Fin 3 => chartBasisVecFiber (I := I) x₀ (K a) p.2)) =ᶠ[
+        𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
+      fun p : ℝ × M =>
+        partialDeriv (E := E) (K 0)
+            (chartRicciTensor (I := I) (g p.1) x₀ (K 1) (K 2))
+            (extChartAt I x₀ p.2) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) (g p.1) x₀ (K 0) (K 1) m
+                (extChartAt I x₀ p.2) *
+              chartRicciTensor (I := I) (g p.1) x₀ m (K 2)
+                (extChartAt I x₀ p.2) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) (g p.1) x₀ (K 0) (K 2) m
+                (extChartAt I x₀ p.2) *
+              chartRicciTensor (I := I) (g p.1) x₀ (K 1) m
+                (extChartAt I x₀ p.2) := by
+    filter_upwards [good_nhdsWithin (I := I) x₀ J t] with p hp
+    exact nablaRicChartComp (I := I) (g p.1)
+      (CovariantDerivative.ricciSection (I := I)
+        (metricCov (I := I) (g p.1)) (metricCov_smooth (I := I) (g p.1)))
+      (fun y => by
+        rw [CovariantDerivative.ricciSection_apply]
+        rfl)
+      x₀ K hp.2
+  exact hΦ.congr_of_eventuallyEq heq
+    (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
 /-- **The chart-frame components of a moving metric, jointly.**  For the `(0,2)` carrier
 `metricTensorField (g t)` the chart-frame component *is* the chart-Gram entry, so the joint

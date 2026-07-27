@@ -1,15 +1,30 @@
 # ForwardUniqueDensReg — the `hdens` joint-regularity tower (brick TOWER)
 
-Companion note for `ForwardUniqueDensReg.lean`.  Status **2026-07-26 (second pass)**: outcome
+Companion note for `ForwardUniqueDensReg.lean`.  Status **2026-07-26 (fourth pass)**: outcome
 **(A) — the tower is CLOSED**.  All five deliverables are unconditional modulo the two honest
 chart-Gram packages of `g₁` and `g₂`; the §3 frontier of the first pass (chart-frame components
-of `A₀₃` and `S₀₄`) is discharged, and the closed-edge (`Ioo` vs `Icc`) gap is discharged too.
+of `A₀₃` and `S₀₄`) is discharged, the closed-edge (`Ioo` vs `Icc`) gap is discharged, and the
+closed-edge chart-frame regularity of `∇Ric` is now also discharged.
 
-Verification: focused check GREEN and warning-free; targeted module build GREEN.  No `sorry`,
-no new instances, axioms or notation.  Axioms of every endpoint:
-`[propext, Classical.choice, Quot.sound]`.  File length 950 lines.
+Verification: focused check GREEN; targeted module build GREEN and warning-free in this file.
+No `sorry`, no new instances, axioms or notation.  The new endpoint has exactly
+`[propext, Classical.choice, Quot.sound]`.
 
 ---
+
+## 2026-07-26 (fourth pass): the `∇Ric` closed-edge producer
+
+`nablaRicChartJoint` is the joint `(t,x)` regularity statement needed by
+`normSqSlabSup` for the rank-three tensor `metricNabla0S g Ric`.  It uses
+`partRicciWithinM` for the spatial derivative term and `christWithinM` plus
+`ricciWithinM` for the two Christoffel corrections.  The off-centre equality is
+the new `nablaRicChartComp`; the conditional `ModelDerivEqCoordDeriv0SAt`
+interface is not involved.
+
+This completes the second of the four recorded `hadot` continuation steps:
+the local derivative continuation is about 50%.  The target theorem
+`ricci_flow_forward_unique` remains unproved (0%); its dedicated machinery
+remains about 90%.  The whole HCG compactness program remains about 10%.
 
 ## 2026-07-26 (third pass, SLAB-2): the closed-edge upgrade
 
