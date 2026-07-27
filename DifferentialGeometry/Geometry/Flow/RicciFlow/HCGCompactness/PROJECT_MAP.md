@@ -579,9 +579,16 @@ its docstring BEFORE consumers are built against it.
   `HamiltonPositiveRicciAdapter.tf_decay0_of_cgh : LimitTfDecayAt L 0`.
   This source theorem and its dedicated fixed-time transfer machinery are
   focused-green and 100%; it uses neither a scalar strong maximum principle
-  nor a new transfer assumption.  The broad exact target has exited, but the
-  adapter artifact remains older than the latest source; formal build handback
-  is pending, so it is not yet exact-current.
+  nor a new transfer assumption.
+  **2026-07-26 Hamilton derivative input:** the strict buffered source,
+  constants-first `movingRmOn`, and `source_deriv` now construct the concrete
+  `FlowDerivativeInput`.  The former `k + 4` / `4 + k` frontier
+  `curvNormSq_eq` is proved by scalar slot evaluation plus
+  `normSq0S_domDomCongr`; both the bridge and Adapter pass focused checking,
+  the Adapter exact refresh is green (`10165/10165`), and axiom replay for
+  `curvNormSq_eq`, `movingRmOn`, and `source_deriv` is `sorryAx`-free.
+  This closes the derivative-input producer, not the closed-endpoint
+  `FlowUpgradeData` producer or the unconditional compactness endpoint.
   `ham3_cgh_limit` remains theorem-level 0%, and whole-HCG machinery remains
   about 60%.
 - **Hamilton E1 low-regularity short-time input:** `LowRegCoeff` and

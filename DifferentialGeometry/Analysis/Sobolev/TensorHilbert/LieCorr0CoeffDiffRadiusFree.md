@@ -17,7 +17,7 @@ single-tensor (`g₁` tied to `T` via `htie`), RHS jets over `symmS g₀ T`:
 (`2·dim E+10 ≤ a`, inherited from the DeTurck-VF tower), `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ`,
 `δ ≤ δ₀`, `htie`.
 
-## Status: HONEST PARTIAL — statement landed, 4 of 5 arm engines PROVED, ONE flagged `sorry` (lc0AMix-only)
+## Status: COMPLETE — all five arm engines proved; public endpoints are axiom-clean
 
 - `lieCorr0Field_summed_l2_radiusFree` — the deliverable, STATED + summed→per-order reduction
   PROVED (verbatim brick-2/3 summed clone).
@@ -28,11 +28,10 @@ single-tensor (`g₁` tied to `T` via `htie`), RHS jets over `symmS g₀ T`:
   - `lc0Riem_perOrder_rf` — **PROVED** (top-free).
   - `lc0VB_perOrder_rf` — **PROVED** (session 3, the atgw jets assembly; see the session-3
     entry below).
-  - `lc0AMix_perOrder_rf` — **THE single flagged `sorry`** (step (6): the 5-factor
-    traceStep-chain fibre identity, unstarted).
-  - `lc0VBAMix_perOrder_rf` — PROVED from the two halves (statement unchanged; carries
-    `sorryAx` only through `lc0AMix_perOrder_rf`).
-- Both public theorems therefore carry `sorryAx` from exactly the lc0AMix frontier.
+  - `lc0AMix_perOrder_rf` — **PROVED** from the five-factor refold, moving-trace grid bounds,
+    four pointwise product joins, and one radius-free integration.
+  - `lc0VBAMix_perOrder_rf` — **PROVED** from the two axiom-clean halves.
+- Both public theorems replay with `[propext, Classical.choice, Quot.sound]` and no `sorryAx`.
 
 ## The five-way split and per-arm routes
 
@@ -69,10 +68,11 @@ assembled by the local `sq_le_five_add` (copied from the frozen leaf) + one
    two-orientation `b4Phi` correction), with the committed producers
    `rfns_iCG_{cometricCastG0,wXi}_atgw_rf` + `rfns_icg_ipLow_le`; one integration at the end.
    The window lands at `atgw(i+3)` = the `range (i+3)` low window exactly.  No `i ≤ a` cap.
-5. **lc0AMix — THE FRONTIER (one `sorry`, `lc0AMix_perOrder_rf`).**  No fibre identity yet
-   (traceStep-chain, step (6)).  `∇²T`-free, so the sorried statement is the pure low window
-   `Flow i·(1+∑_{j<i+3})` — exactly what its eventual engine (nested grids over the committed
-   arms) will deliver.
+5. **lc0AMix — PROVED.**  `LieCorr0AMixRefold.lean` identifies the canonical `lc0AMix` with
+   the exact five-factor operator product.  `LieCorr0TraceRadiusFree.lean` bounds each moving
+   trace by a radius-free low grid window.  Two slot-extended mcd bounds and four applications
+   of `b4_join_atgw` land on `atgw(i+3)`, then one integration gives
+   `Flow i·(1+∑_{j<i+3})`.
 
 ## Exposures (minimal `private`-removals, content unchanged; homes rebuilt green)
 
@@ -87,7 +87,7 @@ New leaf imports: `LieCorr0CoeffL2JetBound` + `DeTurckVFJetRadiusFree` +
 `SobolevNonlinearityExistence` (symmS bridges).  Opens: the frozen leaf's block with `symmS`
 and `cometricRaiseSlot0Field` added to the restricted `TensorSpectral` list (both live there).
 
-## Remaining frontier assessment
+## Completed frontier assessment
 
 **UPDATE (2026-07-26, ip-engine session): the `lc0VB` half of the gap is DISSOLVED.**  The
 frozen atom's `vbPass_jetL2` is discharged (frozen leaf ZERO-sorry, axiom-clean) via the new
@@ -101,12 +101,10 @@ note's session 9).  What discharging `lc0VBAMix_perOrder_rf` still needs (route 
 producer (`b4_mcd_atgw`), the atgw jets assembly, and the single integration
 (`lc0VB_perOrder_rf`), all axiom-clean.
 
-(b) `lc0AMix` (**the only remaining frontier**, = `lc0AMix_perOrder_rf`): the 5-factor
-traceStep-chain fibre identity — three moving cometric traces at ranks `(4,2)/(5,3)/(6,4)` via
-`reindexCoeffGen(slotExtendᵏ(cometricCastG0))` (`lc0RiemLive` pattern, `k = 1,2,3`) + two
-`slotExtend`-chains over the mcd arms (`g_bg`, `g₀`; both covered by the now-committed
-`g_bg`-generic `b4_mcd_atgw`) + nested grids + integrator.  ~1–2 sessions.  Classification
-unchanged: missing-groundwork/API (fibre identity), with ALL jet engines now committed.
+(b) `lc0AMix`: **DONE.**  The smaller route uses the public `pureTrace` realization rather
+than rebuilding three separate slot-extended cometric transports.  The exact refold still
+expresses the canonical three moving traces at ranks `(4,2)/(5,3)/(6,4)` and the two mcd
+chains, but the common theorem `trace_grid_rf p` handles all three ranks.
 
 ## SESSION 2 (2026-07-26, discharge session): R-free `mcd` FIBRE IDENTITY GREEN; workhorse currency decoded; jets assembly = resumption
 
@@ -139,10 +137,8 @@ unchanged: missing-groundwork/API (fibre identity), with ALL jet engines now com
 3. ✅ (session 3) `b4_wOmega_atgw`: the tower `hpt` clone, `|∇ⁿwOmega|² ≤ KΩ n·atgw(n+2)`.
 4. ✅ (session 3) `b4_vbPass_atgw` + `b4_vb_atgw`: window lands at `atgw(i+3)` exactly.
 5. ✅ (session 3) `lc0VB_perOrder_rf` integrated; sorry NARROWED to `lc0AMix_perOrder_rf`.
-6. `lc0AMix` (NEXT session): the 5-factor fibre identity (traceStep transports =
-   `reindexCoeffGen(slotExtendᵏ(cometricCastG0))`, `k = 1,2,3`, the `lc0RiemLive` pattern; two
-   `slotExtend`-chains over mcd with `b4_mcd_atgw` covering both `g_bg` and `g₀` arms) + nested
-   grids + one integration.
+6. ✅ (session 4) `lc0AMix`: exact five-factor refold + generic moving-trace grid producer +
+   two slot-extended mcd arms + four joins + one integration.
 
 ## SESSION 3 (2026-07-26, brick-4 part A): resumption items (1)–(5) LANDED GREEN; sorry now lc0AMix-only
 
@@ -187,11 +183,11 @@ restructure transplant verbatim; `(4+1)+q`-style literal indices unify by `exact
 
 ## Honest progress (denominator: (N) `ricci_flow_unif_existence` = 0%, unstated)
 
-Item-2 proper: bricks 1-3 DONE (gate + arm0 + deTurckLie, all axiom-clean).  Brick 4
-(lieCorr0): statement + assembly + 4/5 arms done ≈ **~80% of brick 4**; the remaining ~20% is
-the lc0AMix fibre identity (step (6)), whose jet engines are ALL committed.  After brick 4: the
-threeArm/Ψ₀ topSeparated assembly (Fork-A) and the smooth-core tame lemma remain (item-2
-proper); brick 4's sorry is on Ψ₀'s critical path only through the lieCorr0 constituent.
+Item-2 proper: bricks 1-4 DONE (gate + arm0 + deTurckLie + lieCorr0, all axiom-clean).
+Brick 4 is **100%**.  The item-2 smooth-core theorem itself is still **0%** until stated and
+proved; its dedicated machinery is about **80%**.  Remaining: threeArm/Ψ₀ topSeparated
+assembly (Fork-A), then smooth-core tame layers 2-3.  Whole `(N)` remains **0%** as a theorem;
+its dedicated machinery is conservatively about **74%**.
 
 ## Verification (2026-07-26, session 3)
 
@@ -216,3 +212,26 @@ literal results:
 Frozen-leaf audit (unchanged this session — no frozen-leaf edits were needed; the four
 session-9 exposures `vbSplit`/`vbMcdArm`/`vbMcdArm_rfns_le`/`lc0VB_eq_app` were already
 public).  Session 3 compiled on the first full check pass (no proof repair was needed).
+
+## SESSION 4 (2026-07-26, Codex takeover): lc0AMix CLOSED
+
+Landed:
+
+- `LieCorr0AMixRefold.lean`: a 394-line public leaf proving the exact canonical
+  `amix_refold_rf`; it uses `metricConnDiffLoweredCc` directly and does not import the RED
+  `LieCorr0LowJet.lean`.
+- `LieCorr0TraceRadiusFree.lean`: a 203-line public leaf proving the rank-generic
+  `trace_grid_rf`; the fixed trace contributes background constants and the moving
+  inverse-metric difference contributes the low antidiagonal grid.
+- In this file: generic slot-extension and product-window joins, the five-factor pointwise
+  bound `b4_amix_atgw`, and the integrated `lc0AMix_perOrder_rf`.
+
+Verification passed for both new leaves and this consumer.  Exact axiom replay:
+
+- `lieCorr0Field_perOrder_l2_radiusFree`,
+  `lieCorr0Field_summed_l2_radiusFree`,
+  `lc0AMix_perOrder_rf`, and `lc0VBAMix_perOrder_rf`:
+  `[propext, Classical.choice, Quot.sound]`.
+
+No `sorry` remains in the three touched Lean files.  The next item-2 frontier is the
+threeArm/Ψ₀ topSeparated assembly, not another `lc0AMix` transport proof.

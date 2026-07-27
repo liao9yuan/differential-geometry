@@ -211,3 +211,22 @@ still 0%.
 which is the region its tail proof actually consumes. The obsolete conversion
 from grow membership to the whole source domain was removed. Focused
 verification and the exact module refresh pass.
+
+## 2026-07-26: closed-carrier chart-Gram continuity
+
+`gSeqExt_gram_cont` now proves joint continuity of each chart-Gram entry of
+`gSeqExt k` on `X.D.carrier ×ˢ baseSet`.  On the source domain it evaluates the
+existing carrier-level `metricTensor_cont` field of `sourceFlow` on the
+ambient chart-basis vectors restricted through the open subtype.  Off the bump
+support it uses the open complement of `tsupport` and the scalar identity
+`gSeqExt_inner_of_notMem`.  Thus the glue is entirely scalar and local; it
+introduces no regular-time inclusion, endpoint differentiability, chart
+selector, or other consumer assumption.
+
+Focused verification passes.  The theorem itself is complete (100%) and is a
+producer for the still-separate carrier-continuity assembly of the limit
+metric; it does not by itself complete that endpoint.  The surrounding Brick 4
+remains complete.  The authoritative project-map estimates remain unchanged:
+dedicated P4 consumer machinery is about 98%, the selected Route B-prime
+producer machinery about 85%, and whole-HCG supporting machinery about 60%;
+unconditional Theorem 3.10 remains theorem-level 0%.

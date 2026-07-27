@@ -115,3 +115,24 @@ refresh required only an unrelated canonical-name disambiguation in
 Both PDE-side consumers now request and apply `hcovTail` directly on
 `bf.grow k`; the redundant intermediate whole-source membership proof was
 removed. Focused verification and the exact module refresh pass.
+
+## 2026-07-26 regular-time localization
+
+`ConvOut.gInf_pde_reg` now proves the limit metric equation at an arbitrary
+regular source time even when the ambient convergence window contains
+nonregular carrier endpoints.  At that time it chooses the existing local
+closed interval supplied by `RealTimeInterval.exists_Icc_regular`, restricts
+the same `ConvOut` with `ConvOut.restrict`, applies the checked fixed-window
+`ConvOut.gInf_pde`, and upgrades the resulting within derivative because the
+local interval is a neighborhood of the chosen time.
+
+No endpoint equation, new convergence assumption, or whole-tensor equality was
+introduced.  The two pre-existing restriction-locality calls were also updated
+to the live boundaryless signature by supplying the newly explicit model
+instance in their argument lists.  Focused verification passes; an exact
+artifact refresh is pending the shared build lane.
+
+This closes the regular-time equation field for the planned closed-window
+solution constructor (100%).  The closed-endpoint upgrade theorem itself is
+still unstated and therefore 0%; its dedicated closed-window machinery is
+about 75%, and whole HCG supporting machinery remains about 60%.

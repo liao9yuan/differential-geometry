@@ -273,9 +273,94 @@ theorem metricCovDeriv_eq_of_eqOn
     (a : Nat) (x : U) (slots : Fin (a + 2) -> TangentSpace I x) :
     metricCovDeriv (I := I) h₁ gRef a (x : M) slots =
       metricCovDeriv (I := I) h₂ gRef a (x : M) slots := by
-  rw [← metricCovDeriv_restrictOpen_apply (I := I) h₁ gRef U a x slots,
-    ← metricCovDeriv_restrictOpen_apply (I := I) h₂ gRef U a x slots,
-    restrictOpen_eq_of_eqOn (I := I) h₁ h₂ U hUeq]
+  classical
+  revert x
+  induction a with
+  | zero =>
+      intro x slots
+      simpa [metricCovDeriv, Tensor0SBundle.metricTensorField] using
+        hUeq (x : M) x.2 (slots 0) (slots 1)
+  | succ a ih =>
+      intro x slots
+      obtain ⟨X, hX⟩ :=
+        ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+          (n := (⊤ : ℕ∞)) (x : M) (slots 0)
+      let V : Fin (a + 2) →
+          ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+        fun q =>
+          (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+            (n := (⊤ : ℕ∞)) (x : M) (slots q.succ)).choose
+      have hV (q : Fin (a + 2)) : V q (x : M) = slots q.succ :=
+        (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+          (n := (⊤ : ℕ∞)) (x : M) (slots q.succ)).choose_spec
+      have hslots :
+          slots = Fin.cons (X (x : M)) (fun q : Fin (a + 2) => V q (x : M)) := by
+        funext i
+        refine Fin.cases ?_ (fun q => ?_) i
+        · exact hX.symm
+        · exact (hV q).symm
+      have hleft :=
+        metricCovDeriv_succ_eval_smooth_slots_gen
+          (I := I) h₁ gRef a X V (x : M)
+      have hright :=
+        metricCovDeriv_succ_eval_smooth_slots_gen
+          (I := I) h₂ gRef a X V (x : M)
+      have hlevel :
+          (fun y : M =>
+              metricCovDeriv (I := I) h₁ gRef a y
+                (fun q : Fin (a + 2) => V q y)) =ᶠ[nhds (x : M)]
+            fun y : M =>
+              metricCovDeriv (I := I) h₂ gRef a y
+                (fun q : Fin (a + 2) => V q y) := by
+        refine Filter.eventually_of_mem (U.isOpen.mem_nhds x.2) ?_
+        intro y hy
+        exact ih ⟨y, hy⟩ (fun q : Fin (a + 2) => V q y)
+      have hderiv :=
+        DifferentialGeometry.Tensor.Coordinates.extDerivFun_congr_eventually
+          (I := I) (X (x : M)) hlevel
+      have hsum :
+          (∑ p : Fin (a + 2),
+              metricCovDeriv (I := I) h₁ gRef a (x : M)
+                (Function.update (fun q : Fin (a + 2) => V q (x : M)) p
+                  (((leviCivitaConnectionOfMetric (I := I) gRef)
+                    (fun y : M => V p y) (x : M)) (X (x : M))))) =
+            ∑ p : Fin (a + 2),
+              metricCovDeriv (I := I) h₂ gRef a (x : M)
+                (Function.update (fun q : Fin (a + 2) => V q (x : M)) p
+                  (((leviCivitaConnectionOfMetric (I := I) gRef)
+                    (fun y : M => V p y) (x : M)) (X (x : M)))) := by
+        apply Finset.sum_congr rfl
+        intro p _
+        exact ih x
+          (Function.update (fun q : Fin (a + 2) => V q (x : M)) p
+            (((leviCivitaConnectionOfMetric (I := I) gRef)
+              (fun y : M => V p y) (x : M)) (X (x : M))))
+      have hsmooth :
+          metricCovDeriv (I := I) h₁ gRef (a + 1) (x : M)
+              (Fin.cons (X (x : M)) (fun q : Fin (a + 2) => V q (x : M))) =
+            metricCovDeriv (I := I) h₂ gRef (a + 1) (x : M)
+              (Fin.cons (X (x : M)) (fun q : Fin (a + 2) => V q (x : M))) := by
+        calc
+          _ = extDerivFun (I := I)
+                (fun y : M => metricCovDeriv (I := I) h₁ gRef a y
+                  (fun q : Fin (a + 2) => V q y)) (x : M) (X (x : M)) -
+              ∑ p : Fin (a + 2),
+                metricCovDeriv (I := I) h₁ gRef a (x : M)
+                  (Function.update (fun q : Fin (a + 2) => V q (x : M)) p
+                    (((leviCivitaConnectionOfMetric (I := I) gRef)
+                      (fun y : M => V p y) (x : M)) (X (x : M)))) := hleft
+          _ = extDerivFun (I := I)
+                (fun y : M => metricCovDeriv (I := I) h₂ gRef a y
+                  (fun q : Fin (a + 2) => V q y)) (x : M) (X (x : M)) -
+              ∑ p : Fin (a + 2),
+                metricCovDeriv (I := I) h₂ gRef a (x : M)
+                  (Function.update (fun q : Fin (a + 2) => V q (x : M)) p
+                    (((leviCivitaConnectionOfMetric (I := I) gRef)
+                      (fun y : M => V p y) (x : M)) (X (x : M)))) := by
+                rw [hderiv, hsum]
+          _ = _ := hright.symm
+      rw [hslots]
+      exact hsmooth
 
 /-- **Locality of the metric covariant-derivative seminorm.**  If two metrics
 agree (as `inner` forms) on an open set `U`, then their fixed-background

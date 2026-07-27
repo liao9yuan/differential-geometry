@@ -261,6 +261,31 @@ structure ConvOut
 
 namespace ConvOut
 
+/-- Restrict a fixed-window convergence output to a smaller closed time
+window, retaining the same subsequence and limit metric family. -/
+noncomputable def restrict
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ c d : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hsub : Set.Icc c d ⊆ Set.Icc β ψ) :
+    ConvOut (I := I) Φ R bf hsrc htgt c d where
+  φ := co.φ
+  hφ := co.hφ
+  gInf := co.gInf
+  conv := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.conv K hK p ε hε
+    exact ⟨k₀, fun k hk t ht => hk₀ k hk t (hsub ht)⟩
+  convPt := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK p ε hε
+    exact ⟨k₀, fun k hk t ht a ha x hx =>
+      hk₀ k hk t (hsub ht) a ha x hx⟩
+
 /-- Reindex a fixed-window convergence output along a further strict
 subsequence, retaining its limit metric family and both convergence fields. -/
 noncomputable def comp_subseq

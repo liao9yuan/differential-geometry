@@ -328,6 +328,80 @@ private theorem metricFrameComp_Ioo
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricCLMSection_reg
+    [NeZero (Module.finrank Real E)]
+    (D : RealTimeInterval)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (D.regular ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (D.regular ×ˢ Set.univ) := by
+  intro p hp
+  obtain ⟨a, b, ht, hwin⟩ := D.exists_Icc_regular hp.1
+  have hgramIoo : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun q : ℝ × M => chartGramMatrix (I := I) (g q.1) x₀ q.2 i j)
+        (Set.Ioo a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    exact (hgram x₀ i j).mono fun q hq =>
+      ⟨hwin ⟨le_of_lt hq.1.1, le_of_lt hq.1.2⟩, hq.2⟩
+  have hlocal :=
+    metricCLMSection_Ioo (I := I) g a b hgramIoo p ⟨ht, Set.mem_univ _⟩
+  have hnhds : Set.Ioo a b ×ˢ (Set.univ : Set M) ∈ 𝓝 p :=
+    prod_mem_nhds (Ioo_mem_nhds ht.1 ht.2) Filter.univ_mem
+  exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricFrameComp_reg
+    [NeZero (Module.finrank Real E)]
+    (D : RealTimeInterval)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (D.regular ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {Idx : Type*} [Fintype Idx]
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => (g p.1).inner p.2 (frame i p.2) (frame j p.2))
+      (D.regular ×ˢ u) := by
+  have hψ : ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (D.regular ×ˢ u) :=
+    (metricCLMSection_reg (I := I) D g hgram).mono
+      (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
+  have hv : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame i p.2))
+      (D.regular ×ˢ u) :=
+    (hframe.contMDiffOn i).comp contMDiffOn_snd (fun p hp => hp.2)
+  have hw : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame j p.2))
+      (D.regular ×ˢ u) :=
+    (hframe.contMDiffOn j).comp contMDiffOn_snd (fun p hp => hp.2)
+  have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+    (E₁ := TangentSpace I (M := M)) (E₂ := TangentSpace I (M := M))
+    (E₃ := Bundle.Trivial M ℝ)
+    (b := fun p : ℝ × M => p.2) (s := D.regular ×ˢ u)
+    (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (v := fun p : ℝ × M => frame i p.2)
+    (w := fun p : ℝ × M => frame j p.2) hψ hv hw
+  intro p hp
+  have hpx := happ p hp
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
+  exact hpx.2
+
 section OpenInterval
 
 variable [NeZero (Module.finrank Real E)]
@@ -339,6 +413,43 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 namespace ConvOut
 
 variable [I.Boundaryless]
+
+/-- Joint continuity of the fixed-window limit metric tensor, obtained from
+order-zero convergence and carrier continuity of the bump-extended stages. -/
+theorem metric_cont
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.carrier)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    Tensor0SFamilyContinuousOnSet (I := I) (M := P.M) 2
+      (Set.Icc β ψ)
+      (fun t x => Tensor0SBundle.metricTensorField (I := I) (co.gInf t) x) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : LocallyCompactSpace H := I.locallyCompactSpace
+  letI : LocallyCompactSpace P.M := ChartedSpace.locallyCompactSpace H P.M
+  apply metricTensorContLim (I := I)
+    (gSeq := fun k t =>
+      gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t)
+    (gInf := co.gInf) (gRef := R) β ψ
+  · intro K hK ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK 0 ε hε
+    refine ⟨k₀, fun k hk t ht x hx => ?_⟩
+    simpa only using hk₀ k hk t ht 0 le_rfl x hx
+  · intro k x₀ i j
+    exact
+      (gSeqExt_gram_cont (I := I) Φ R bf hsrc htgt
+        (co.φ k) x₀ i j).mono (Set.prod_mono hwin Set.Subset.rfl)
 
 private theorem gSeqJet_contOn
     {R : letI : TopologicalSpace P.M := P.topology
@@ -531,18 +642,34 @@ private theorem gSeqJet_contOn
     (WithTop.coe_le_coe.2 (le_top : (r : ℕ∞) ≤ (⊤ : ℕ∞)))
   simpa only [F] using hjet.continuousWithinAt
 
+omit [NeZero (Module.finrank Real E)] in
 /-- Every finite spatial chart jet of the fixed-window limit metric is jointly
-continuous in time and chart position.  This is the locally uniform limit of
-the corresponding finite-stage jets; the conversion from covariant metric
-convergence to chart jets is provided by `chartJet_sub_le`. -/
-theorem gramJets
+continuous when the corresponding finite-stage jets are eventually continuous
+on compact chart patches.  The limit passage uses only locally uniform metric
+convergence and `chartJet_sub_le`. -/
+theorem gramJets_of_stage
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
       letI : IsManifold I ∞ P.M := P.smooth
       SmoothRiemannianMetric I P.M}
     {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
-    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.regular)
-    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    {β ψ : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hstage : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : T2Space P.M := P.t2
+      letI : IsManifold I ∞ P.M := P.smooth
+      ∀ (r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+        (C : Set E), IsCompact C →
+        C ⊆ (extChartAt I x₀).target →
+        ∀ᶠ k : Nat in atTop,
+          ContinuousOn
+            (fun p : Real × E =>
+              iteratedFDeriv Real r
+                (chartGramOnE (I := I)
+                  (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) p.1)
+                  x₀ i j) p.2)
+            (Set.Icc β ψ ×ˢ C)) :
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : T2Space P.M := P.t2
@@ -658,12 +785,8 @@ theorem gramJets
         iteratedFDeriv Real r
           (chartGramOnE (I := I)
             (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) p.1) x₀ i j) p.2)
-      (Set.Icc β ψ ×ˢ C) := by
-    obtain ⟨kgrow, hkgrow⟩ := bf.grow_cover K hKc
-    filter_upwards [Filter.eventually_ge_atTop kgrow] with k hk
-    apply gSeqJet_contOn (Φ := Φ) (R := R) (bf := bf) (hsrc := hsrc) (htgt := htgt)
-      hwin (co.φ k) r x₀ i j hCtgt
-    exact hkgrow (co.φ k) (hk.trans (co.hφ.id_le k))
+      (Set.Icc β ψ ×ˢ C) :=
+    hstage r x₀ i j C hCc hCtgt
   have hcOn : ContinuousOn
       (fun p : Real × E =>
         iteratedFDeriv Real r
@@ -679,6 +802,46 @@ theorem gramJets
     exact ⟨ht, interior_subset hzC⟩
   exact (hcOn.continuousWithinAt
     ⟨hp₀.1, interior_subset hCint⟩).mono_of_mem_nhdsWithin hmem
+
+/-- Every finite spatial chart jet of the fixed-window limit metric is jointly
+continuous in time and chart position.  Finite-stage continuity follows from
+source regularity on the window and eventual containment in the bump-one
+regions. -/
+theorem gramJets
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E)),
+      ContinuousOn
+        (fun p : Real × E =>
+          iteratedFDeriv Real r
+            (chartGramOnE (I := I) (co.gInf p.1) x₀ i j) p.2)
+        (Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  apply gramJets_of_stage (I := I) (Φ := Φ) co
+  intro r x₀ i j C hCc hCtgt
+  let K : Set P.M := (extChartAt I x₀).symm '' C
+  have hKc : IsCompact K := by
+    dsimp only [K]
+    exact hCc.image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) x₀).mono hCtgt)
+  obtain ⟨kgrow, hkgrow⟩ := bf.grow_cover K hKc
+  filter_upwards [Filter.eventually_ge_atTop kgrow] with k hk
+  apply gSeqJet_contOn (Φ := Φ) (R := R) (bf := bf) (hsrc := hsrc) (htgt := htgt)
+    hwin (co.φ k) r x₀ i j hCtgt
+  simpa only [K] using hkgrow (co.φ k) (hk.trans (co.hφ.id_le k))
 
 /-- The matrix-valued spatial chart jets of the limit metric are jointly
 continuous on the fixed time window and the interior chart target. -/
@@ -1408,6 +1571,132 @@ theorem gramSmooth
     rcases p with ⟨t, y⟩
     rfl
   exact gramModel_to_mfld (I := I) (g := co.gInf) x₀ i j hmodel
+
+/-- Joint chart-Gram smoothness on the regular times of the source flow,
+obtained by restricting the fixed-window output to local closed subwindows. -/
+theorem gramSmooth_regular
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (x₀ : P.M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × P.M =>
+          chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (X.D.regular ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  intro x₀ i j p hp
+  obtain ⟨a, b, ht, hwin⟩ := X.D.exists_Icc_regular hp.1
+  have hsub : Set.Icc a b ⊆ Set.Icc β ψ :=
+    hwin.trans (X.D.regular_subset.trans hcarrier)
+  have hlocal :=
+    ConvOut.gramSmooth (I := I) (Φ := Φ) hwin
+      (ConvOut.restrict (Φ := Φ) co hsub)
+      x₀ i j p ⟨ht, hp.2⟩
+  have hnhds :
+      Set.Ioo a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 p :=
+    prod_mem_nhds
+      (Ioo_mem_nhds ht.1 ht.2)
+      ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hp.2)
+  exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
+
+/-- Assemble the limit metric regularity package on a source interval whose
+carrier is exactly the convergence window.  Smoothness is required only on the
+source regular set; continuity is retained on the whole closed carrier. -/
+theorem metricSmooth
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier = Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    MetricFamilySmoothOn (I := I) (M := P.M) X.D
+      ({ base := { metric := co.gInf } } :
+        SolutionOn (I := I) (M := P.M) X.D).family := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  have hcar_le : X.D.carrier ⊆ Set.Icc β ψ := by
+    simpa only [hcarrier] using
+      (Set.Subset.rfl : Set.Icc β ψ ⊆ Set.Icc β ψ)
+  have hwin : Set.Icc β ψ ⊆ X.D.carrier := by
+    simpa only [hcarrier] using
+      (Set.Subset.rfl : Set.Icc β ψ ⊆ Set.Icc β ψ)
+  have hgram := ConvOut.gramSmooth_regular (I := I) (Φ := Φ) hcar_le co
+  have hcontWindow := ConvOut.metric_cont (I := I) (Φ := Φ) hwin co
+  have hcontTensor : Tensor0SFamilyContinuousOnSet (I := I) (M := P.M) 2
+      X.D.carrier
+      (fun t x => metricTensorField (I := I) (co.gInf t) x) := by
+    simpa only [hcarrier] using hcontWindow
+  refine ⟨?_, ?_, hcontTensor, ?_⟩
+  · intro x X Y
+    have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun t : ℝ => (t, x)) X.D.regular :=
+      contMDiffOn_id.prodMk contMDiffOn_const
+    have hψ' : ContMDiffOn 𝓘(ℝ, ℝ)
+        (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun t : ℝ => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x
+          ((co.gInf t).inner x)) X.D.regular :=
+      (metricCLMSection_reg (I := I) X.D co.gInf hgram).comp
+        hcurve (fun t ht => ⟨ht, Set.mem_univ _⟩)
+    have hv : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E
+          (E := fun y => TangentSpace I y) x X) X.D.regular :=
+      contMDiffOn_const
+    have hw : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E
+          (E := fun y => TangentSpace I y) x Y) X.D.regular :=
+      contMDiffOn_const
+    have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := TangentSpace I (M := P.M)) (E₂ := TangentSpace I (M := P.M))
+      (E₃ := Bundle.Trivial P.M ℝ) (b := fun _ : ℝ => x)
+      (ψ := fun t : ℝ => (co.gInf t).inner x)
+      (v := fun _ : ℝ => X) (w := fun _ : ℝ => Y) hψ' hv hw
+    have hscalar : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞
+        (fun t : ℝ => (co.gInf t).inner x X Y) X.D.regular := by
+      intro t ht
+      have hpt := happ t ht
+      rw [Bundle.contMDiffWithinAt_totalSpace] at hpt
+      exact hpt.2
+    exact hscalar.contDiffOn
+  · intro x X Y
+    have hbase : ContinuousOn
+        (fun s : ℝ => metricTensorField (I := I) (co.gInf s) x (vec2 X Y))
+        X.D.carrier := by
+      rw [continuousOn_iff_continuous_restrict]
+      exact hcontTensor.eval_continuous
+        (P := {s : ℝ // s ∈ X.D.carrier})
+        (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
+        (fun p => p.2) continuous_const
+        (v := fun i _ => vec2 X Y i) (fun _ => continuous_const)
+    refine hbase.congr (fun s _ => ?_)
+    simp [metricTensorField_apply, vec2]
+  · intro Idx _ frame u hframe i j
+    exact metricFrameComp_reg (I := I) X.D co.gInf hgram frame hframe i j
 
 end ConvOut
 

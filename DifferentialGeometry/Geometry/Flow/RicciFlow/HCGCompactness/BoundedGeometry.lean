@@ -87,6 +87,14 @@ noncomputable def curvCovDeriv
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           curvCovDerivStep (I := I) g k A)
 
+/-- Successor step of `curvCovDeriv`. -/
+theorem curvCovDeriv_succ
+    (g : SmoothRiemannianMetric I M) (k : Nat) :
+    curvCovDeriv (I := I) (M := M) g (k + 1) =
+      curvCovDerivStep (I := I) g k
+        (curvCovDeriv (I := I) (M := M) g k) :=
+  rfl
+
 /-- Squared norm `|nabla^k Rm(g)|_g^2` at a point. -/
 noncomputable def curvDerivNormSq
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=

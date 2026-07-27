@@ -458,6 +458,227 @@ theorem gSeqExt_inner_of_notMem (k : Nat) (t : Real)
     (srcMetric (I := I) Φ hsrc htgt k t) (bf.chi k) (bf.chi_smooth k) (bf.chi01 k)
     (bf.chi_supp k) x hx v w
 
+/-- Joint continuity, up to the closed time carrier, of every chart-Gram entry of the
+bump-extended metric family. -/
+theorem gSeqExt_gram_cont (k : Nat) (x₀ : P.M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : IsManifold I ∞ P.M := P.smooth
+    ContinuousOn
+      (fun p : ℝ × P.M =>
+        Integral.Measure.chartGramMatrix (I := I)
+          (gSeqExt (I := I) Φ R bf hsrc htgt k p.1) x₀ p.2 i j)
+      (X.D.carrier ×ˢ
+        (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  classical
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+      (n := (∞ : WithTop ℕ∞)) (by decide)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+    infer_instance
+  let baseSet :=
+    (trivializationAt E (TangentSpace I) x₀).baseSet
+  let s : Set (ℝ × P.M) := X.D.carrier ×ˢ baseSet
+  let sU : Set (ℝ × P.M) := X.D.carrier ×ˢ (baseSet ∩ Φ.source k)
+  let b : ↥sU → SourceDomain (I := I) Φ k :=
+    fun q => ⟨q.1.2, q.2.2.2⟩
+  have hb₀ : Continuous (fun q : ↥sU => q.1.2) :=
+    continuous_snd.comp continuous_subtype_val
+  have hb : Continuous b := by
+    exact hb₀.subtype_mk _
+  have chartVec_sub_at
+      (a : Fin (Module.finrank ℝ E)) {x : P.M}
+      (hxb : x ∈ baseSet) (hxU : x ∈ Φ.source k) :
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun z : SourceDomain (I := I) Φ k =>
+          TotalSpace.mk' E
+            (E := fun z : SourceDomain (I := I) Φ k => TangentSpace I z) z
+            (Integral.Measure.chartBasisVecFiber (I := I) x₀ a (z : P.M)))
+        ⟨x, hxU⟩ := by
+    have hf' :
+        (mfderiv I I
+          (Subtype.val : SourceDomain (I := I) Φ k → P.M) ⟨x, hxU⟩).IsInvertible := by
+      have hmf :
+          mfderiv I I
+              (Subtype.val : SourceDomain (I := I) Φ k → P.M) ⟨x, hxU⟩ =
+            ContinuousLinearMap.id ℝ E := by
+        simpa only using
+          mfderiv_subtype_val (I := I) (sourceOpen (I := I) Φ k) ⟨x, hxU⟩
+      rw [hmf]
+      change (ContinuousLinearMap.id ℝ E).IsInvertible
+      exact ContinuousLinearMap.isInvertible_equiv
+        (f := ContinuousLinearEquiv.refl ℝ E)
+    have hpull :
+        ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+          (T% (VectorField.mpullback I I
+            (Subtype.val : SourceDomain (I := I) Φ k → P.M)
+            (Integral.Measure.chartBasisVecFiber (I := I) x₀ a)))
+          (⟨x, hxU⟩ : SourceDomain (I := I) Φ k) :=
+      ContMDiffAt.mpullback_vectorField_preimage
+        (I := I) (I' := I)
+        (f := (Subtype.val : SourceDomain (I := I) Φ k → P.M))
+        (V := Integral.Measure.chartBasisVecFiber (I := I) x₀ a)
+        (x₀ := ⟨x, hxU⟩) (m := ∞) (n := ∞)
+        ((Integral.Measure.chartBasisVec_contMDiffOn (I := I) x₀ a).contMDiffAt
+          ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hxb))
+        (contMDiff_subtype_val (I := I)
+          (U := sourceOpen (I := I) Φ k)).contMDiffAt
+        hf' (by simp)
+    refine hpull.congr_of_eventuallyEq ?_
+    filter_upwards with z
+    change TotalSpace.mk' E
+        (E := fun z : SourceDomain (I := I) Φ k => TangentSpace I z) z _ =
+      TotalSpace.mk' E
+        (E := fun z : SourceDomain (I := I) Φ k => TangentSpace I z) z _
+    congr 1
+    have hfz :
+        (mfderiv I I
+          (Subtype.val : SourceDomain (I := I) Φ k → P.M) z).IsInvertible := by
+      have hmf :
+          mfderiv I I
+              (Subtype.val : SourceDomain (I := I) Φ k → P.M) z =
+            ContinuousLinearMap.id ℝ E := by
+        simpa only using
+          mfderiv_subtype_val (I := I) (sourceOpen (I := I) Φ k) z
+      rw [hmf]
+      change (ContinuousLinearMap.id ℝ E).IsInvertible
+      exact ContinuousLinearMap.isInvertible_equiv
+        (f := ContinuousLinearEquiv.refl ℝ E)
+    rw [VectorField.mpullback_apply]
+    refine ((ContinuousLinearMap.IsInvertible.inverse_apply_eq hfz).mpr ?_).symm
+    simpa only using
+      (mfderiv_subtype_val_apply (I := I) (sourceOpen (I := I) Φ k) z
+        (Integral.Measure.chartBasisVecFiber (I := I) x₀ a (z : P.M))).symm
+  let v : Fin 2 → (q : ↥sU) → TangentSpace I (b q) :=
+    fun a q =>
+      Integral.Measure.chartBasisVecFiber (I := I) x₀
+        (if a = 0 then i else j) q.1.2
+  have hτ : Continuous (fun q : ↥sU => q.1.1) :=
+    continuous_fst.comp continuous_subtype_val
+  have hτK : ∀ q : ↥sU, q.1.1 ∈ X.D.carrier :=
+    fun q => q.2.1
+  have hv : ∀ a : Fin 2, Continuous (fun q : ↥sU =>
+      TotalSpace.mk' E
+        (E := fun z : SourceDomain (I := I) Φ k => TangentSpace I z)
+        (b q) (v a q)) := by
+    intro a
+    rw [continuous_iff_continuousAt]
+    intro q
+    have ha :=
+      (chartVec_sub_at (if a = 0 then i else j) q.2.2.1 q.2.2.2).continuousAt
+    exact ContinuousAt.comp
+      (g := fun z : SourceDomain (I := I) Φ k =>
+        TotalSpace.mk' E
+          (E := fun z : SourceDomain (I := I) Φ k => TangentSpace I z) z
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀
+            (if a = 0 then i else j) (z : P.M)))
+      ha hb.continuousAt
+  have hS :=
+    isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k)
+  have heval :=
+    hS.smoothMetric.metricTensor_cont.eval_continuous
+      (P := ↥sU) (τ := fun q => q.1.1) (b := b)
+      hτ hτK hb hv
+  have hsrcC : Continuous (fun q : ↥sU =>
+      (srcMetric (I := I) Φ hsrc htgt k q.1.1).inner (b q)
+        (Integral.Measure.chartBasisVecFiber (I := I) x₀ i q.1.2)
+        (Integral.Measure.chartBasisVecFiber (I := I) x₀ j q.1.2)) := by
+    refine heval.congr ?_
+    intro q
+    rw [Tensor0SBundle.metricTensorField_apply]
+    simp [v, srcMetric, SolutionOn.family]
+  have hχ : Continuous (fun q : ↥sU => bf.chi k q.1.2) :=
+    (bf.chi_smooth k).continuous.comp
+      (continuous_snd.comp continuous_subtype_val)
+  have hRsrc : Continuous (fun q : ↥sU =>
+      Integral.Measure.chartGramMatrix (I := I) R x₀ q.1.2 i j) :=
+    (Integral.Measure.chartGramMatrix_entry_contMDiffOn
+      (I := I) R x₀ i j).continuousOn.comp_continuous
+        (continuous_snd.comp continuous_subtype_val) (fun q => q.2.2.1)
+  have hblend : Continuous (fun q : ↥sU =>
+      bf.chi k q.1.2 *
+          (srcMetric (I := I) Φ hsrc htgt k q.1.1).inner (b q)
+            (Integral.Measure.chartBasisVecFiber (I := I) x₀ i q.1.2)
+            (Integral.Measure.chartBasisVecFiber (I := I) x₀ j q.1.2)
+        + (1 - bf.chi k q.1.2) *
+          Integral.Measure.chartGramMatrix (I := I) R x₀ q.1.2 i j) :=
+    (hχ.mul hsrcC).add ((continuous_const.sub hχ).mul hRsrc)
+  have hinside : Continuous (fun q : ↥sU =>
+      Integral.Measure.chartGramMatrix (I := I)
+        (gSeqExt (I := I) Φ R bf hsrc htgt k q.1.1) x₀ q.1.2 i j) := by
+    refine hblend.congr ?_
+    intro q
+    simp only [Integral.Measure.chartGramMatrix_apply]
+    rw [
+      gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k q.1.1
+        q.1.2 q.2.2.2]
+    simp only [smul_eq_mul, b]
+  have hinsideOn : ContinuousOn
+      (fun p : ℝ × P.M =>
+        Integral.Measure.chartGramMatrix (I := I)
+          (gSeqExt (I := I) Φ R bf hsrc htgt k p.1) x₀ p.2 i j) sU := by
+    rw [continuousOn_iff_continuous_restrict]
+    exact hinside
+  have hROn : ContinuousOn
+      (fun p : ℝ × P.M =>
+        Integral.Measure.chartGramMatrix (I := I) R x₀ p.2 i j) s := by
+    rw [continuousOn_iff_continuous_restrict]
+    exact
+      (Integral.Measure.chartGramMatrix_entry_contMDiffOn
+        (I := I) R x₀ i j).continuousOn.comp_continuous
+          (continuous_snd.comp continuous_subtype_val) (fun q => q.2.2)
+  intro p hp
+  by_cases hxU : p.2 ∈ Φ.source k
+  · have hpU : p ∈ sU := by
+      exact ⟨hp.1, hp.2, hxU⟩
+    have hopen :
+        {q : ℝ × P.M | q.2 ∈ Φ.source k} ∈ 𝓝 p :=
+      ((Φ.source_open k).preimage continuous_snd).mem_nhds hxU
+    have hmem₀ :=
+      inter_mem_nhdsWithin s (a := p) hopen
+    have hset :
+        s ∩ {q : ℝ × P.M | q.2 ∈ Φ.source k} = sU := by
+      ext q
+      simp only [s, sU, mem_inter_iff, mem_prod, mem_setOf_eq]
+      tauto
+    have hmem : sU ∈ 𝓝[s] p := by
+      rwa [hset] at hmem₀
+    exact (hinsideOn p hpU).mono_of_mem_nhdsWithin hmem
+  · have hxNotSupp : p.2 ∉ tsupport (bf.chi k) :=
+      fun hx => hxU (bf.chi_supp k hx)
+    have hopen :
+        {q : ℝ × P.M | q.2 ∈ (tsupport (bf.chi k))ᶜ} ∈ 𝓝 p :=
+      (((isClosed_tsupport (bf.chi k)).isOpen_compl.preimage
+        continuous_snd).mem_nhds hxNotSupp)
+    have heq :
+        (fun q : ℝ × P.M =>
+          Integral.Measure.chartGramMatrix (I := I)
+            (gSeqExt (I := I) Φ R bf hsrc htgt k q.1) x₀ q.2 i j)
+          =ᶠ[𝓝[s] p]
+        (fun q : ℝ × P.M =>
+          Integral.Measure.chartGramMatrix (I := I) R x₀ q.2 i j) := by
+      filter_upwards [nhdsWithin_le_nhds hopen] with q hq
+      simp only [Integral.Measure.chartGramMatrix_apply]
+      rw [
+        gSeqExt_inner_of_notMem (I := I) Φ R bf hsrc htgt k q.1 q.2 hq]
+    refine (hROn p hp).congr_of_eventuallyEq heq ?_
+    simp only [Integral.Measure.chartGramMatrix_apply]
+    rw [
+      gSeqExt_inner_of_notMem (I := I) Φ R bf hsrc htgt k p.1 p.2 hxNotSupp]
+
 end Eval
 
 /-! ### `hlow`: uniform lower bound `c·R ≤ gSeqExt` -/

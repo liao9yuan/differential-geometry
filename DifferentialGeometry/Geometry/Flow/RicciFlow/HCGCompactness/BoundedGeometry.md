@@ -1,5 +1,12 @@
 # BoundedGeometry
 
+## 2026-07-26 curvature recursion projection
+
+Added `curvCovDeriv_succ`, the cheap public successor equation for the
+dependent static curvature tower.  It is definitionally true and focused- and
+exact-verified.  Downstream arity bridges can now rewrite or evaluate this
+projection without unfolding the raw `Nat.rec`.
+
 ## 2026-07-25 time-slice projection
 
 `FlowDerivBounds.at_time` now restricts the existing spacetime

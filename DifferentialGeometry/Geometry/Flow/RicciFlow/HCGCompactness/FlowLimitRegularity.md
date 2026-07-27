@@ -265,3 +265,54 @@ prove completeness of every limit time slice.  Dedicated P4 machinery is
 conservatively about 93%; whole-HCG machinery remains about 60%; the
 unconditional theorem `compactnessSol` remains unstated-by-proof and therefore
 0%.
+
+### 2026-07-26 regular-time localization
+
+`ConvOut.gramSmooth_regular` is proved and focused-green.  It localizes each
+regular source time to a closed interval contained in `X.D.regular`, restricts
+the existing `ConvOut` to that interval, and applies the fixed-window
+`ConvOut.gramSmooth` theorem.  The local statement is then upgraded across the
+product neighborhood.  This adds no endpoint regularity, convergence field, or
+consumer assumption.
+
+This closes joint chart-Gram smoothness on
+`X.D.regular × chartBaseSet`.  It deliberately does not assert smoothness at
+the nonregular endpoints of a closed carrier.  The closed-endpoint upgrade
+theorem remains unstated and hence 0%; its dedicated machinery is about 75%.
+Whole-HCG machinery remains about 60%.
+
+### 2026-07-26 finite-stage jet interface
+
+`ConvOut.gramJets_of_stage` is extracted and focused-green.  It contains the
+uniform-limit argument for closed spatial chart jets and takes only eventual
+finite-stage `ContinuousOn` on each compact chart patch.  The existing
+`ConvOut.gramJets` statement is unchanged: it remains the compatibility wrapper
+that derives this input from `hwin`, `gSeqJet_contOn`, and `grow_cover`.  No
+field was added to `ConvOut`, and no new consumer assumption was introduced.
+
+This extraction does not yet remove regular-window dependence from the whole
+smoothness proof.  `hwin` is still consumed by `ConvOut.gramPDE` and by the
+open-set bootstrap in `ConvOut.gramSmooth`.  Once a closed-window joint
+chart-Gram smoothness producer is available, the existing
+`scalarTime_of_joint` theorem can supply scalar-time differentiability on a
+`UniqueDiffOn` interval; a separate scalar-Laplacian convergence route is not
+intrinsically required.  That larger refactor was deliberately not attempted
+here.
+
+The closed-endpoint theorem remains unstated and therefore 0%.  Its dedicated
+machinery remains about 75%, while whole-HCG machinery remains about 60%.
+
+### 2026-07-26 closed-window metric continuity
+
+`ConvOut.metric_cont` is proved and focused-green.  On any convergence window
+contained in the source carrier, it applies `metricTensorContLim` to the actual
+subsequence `gSeqExt (co.φ k)`: order-zero convergence comes from `co.convPt`,
+and finite-stage joint chart-Gram continuity comes from
+`gSeqExt_gram_cont`.  Local compactness is derived from the model and charted
+manifold instances rather than exported as a new assumption.
+
+This closes the `metricTensor_cont` carrier field for the Hamilton closed
+window after rewriting its carrier as the same `Icc`.  It does not prove the
+three curvature-continuity fields or endpoint scalar-time differentiability.
+The closed-endpoint theorem remains unstated and therefore 0%; its dedicated
+machinery is now about 77%, while whole-HCG machinery remains about 60%.

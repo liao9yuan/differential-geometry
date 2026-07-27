@@ -2,6 +2,26 @@
 
 ## Goal / role
 
+## 2026-07-26 locality repair
+
+`metricCovDeriv_eq_of_eqOn` no longer proves locality by restricting both
+metrics to the open subtype `U`. That route made elaboration request
+`I.Boundaryless` for the subtype restriction even though the theorem only needs
+the germ of the two metrics on the original manifold.
+
+The replacement is an induction on the covariant-derivative order entirely on
+`M`. At the successor step, arbitrary slots at `x` are extended to global
+smooth tangent sections using `ContMDiffSection.exists_eq_at_gen`; both sides
+are expanded by `metricCovDeriv_succ_eval_smooth_slots_gen`. The induction
+hypothesis gives equality of the lower-order scalar evaluations throughout the
+open neighbourhood `U`, so
+`Tensor.Coordinates.extDerivFun_congr_eventually` identifies the leading
+directional-derivative terms. The correction sums close pointwise by the same
+induction hypothesis because the background connection `gRef` is shared.
+
+The focused check passes with no new consumer assumptions. The exact targeted
+artifact refresh is GREEN (`3930/3930`).
+
 Deliverable 1 of the P4 Brick-4 unblock: the MISSING analytic API that
 `ConvFieldAssembly.lean`'s `hgLip`/`hbdd` head/mid indices need — continuity of
 `z ↦ metricCovDerivNorm q h gRef z` and its compact-set boundedness corollary.

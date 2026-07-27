@@ -161,3 +161,18 @@ this module remains checked; no declaration or proof body changed here.
 `convOut` now carries `hcovTail` at the exact `bf.grow k` granularity used by
 the compact-exhaustion and PDE consumers. Focused verification and the exact
 module refresh pass; no new geometric input was introduced.
+
+## 2026-07-26 closed-window restriction
+
+`ConvOut.restrict` now retains the same subsequence, comparison maps, and limit
+metric family while restricting convergence from one closed time window to a
+smaller one.  Both convergence fields are inherited by composing their time
+membership proof with the supplied `Icc` inclusion; no geometric or analytic
+assumption is added.
+
+Focused verification and the exact module refresh pass.  This is the reusable
+localization needed to apply the existing fixed-window smoothness and PDE
+theorems on compact subwindows inside a source flow's open regular-time set.
+It does not itself construct the closed-endpoint `FlowUpgradeData`: that
+theorem remains unstated and therefore 0%, while its dedicated closed-window
+machinery is about 75%.  Whole HCG supporting machinery remains about 60%.

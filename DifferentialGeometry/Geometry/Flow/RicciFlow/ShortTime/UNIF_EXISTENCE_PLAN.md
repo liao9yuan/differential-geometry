@@ -1993,3 +1993,34 @@ On success brick 4 is DONE and Ψ₀'s three constituents are all green.
 - Honest partials with ONE flagged sorry; verbatim escalation on real term
   mismatches (two statement bugs were caught exactly this way: №29-30's
   currency fork, №33's order-2 bridge).
+
+## Planner acceptance №37 (2026-07-26) — BRICK 4 CLOSED by Codex
+
+Codex resumed the exact №36 frontier in the post-merge `ste-align` worktree.
+The proposed dependency on `LieCorr0LowJet.lean` was rejected after a real
+targeted build showed that module remains RED with about 40 pre-existing
+errors.  The needed subset was instead extracted into two small public leaves:
+
+- `LieCorr0AMixRefold.lean`: exact canonical five-factor refold
+  `amix_refold_rf`;
+- `LieCorr0TraceRadiusFree.lean`: rank-generic moving-trace producer
+  `trace_grid_rf`.
+
+`LieCorr0CoeffDiffRadiusFree.lean` now proves `b4_amix_atgw` and
+`lc0AMix_perOrder_rf`, so both public lieCorr0 radius-free endpoints and the
+private AMix/pair engines replay with exactly
+`[propext, Classical.choice, Quot.sound]`.  Brick 4 is **100%** and contains no
+`sorry`.
+
+Honest accounting remains separated:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**; its black-box `sorry`
+  is untouched.
+- `(N)` dedicated machinery: conservatively about **74%**.
+- item-2 smooth-core theorem: **0% until stated and proved**; dedicated
+  machinery about **80%**.
+
+The next item-2 frontier is now the **threeArm/Ψ₀ topSeparated assembly
+(Fork-A)**, followed by smooth-core tame layers 2-3.  The other live frontier
+remains general-N `hAcc_of_jets`; N=3 is already unconditional.  Do not
+re-dispatch `lc0AMix_perOrder_rf`.

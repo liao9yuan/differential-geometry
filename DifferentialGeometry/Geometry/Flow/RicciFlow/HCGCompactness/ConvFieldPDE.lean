@@ -164,7 +164,7 @@ theorem gSeqExt_ricci
   haveI sourceSigmaInst : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↥(sourceOpen (I := I) Φ k) := sourceT2
   have hricAmbient :=
-    @ricciTensor_restrictOpen E _ _ _ _ _ _ H _ I P.M
+    @ricciTensor_restrictOpen E _ _ _ _ _ _ H _ I _ P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
       (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
@@ -313,7 +313,7 @@ theorem gSeqExt_scalar
   haveI sourceSigmaInst : SigmaCompactSpace ↑(sourceOpen (I := I) Φ k) := sourceSigma
   haveI sourceT2Inst : T2Space ↑(sourceOpen (I := I) Φ k) := sourceT2
   have hscalarAmbient :=
-    @metricScalarAt_restrictOpen E _ _ _ _ _ _ H _ I P.M
+    @metricScalarAt_restrictOpen E _ _ _ _ _ _ H _ I _ P.M
       P.topology P.charted P.smooth P.t2 P.sigmaCompact
       (by infer_instance) (by infer_instance) (by infer_instance) (by infer_instance)
       (gSeqExt (I := I) Φ R bf hsrc htgt k t) (sourceOpen (I := I) Φ k)
@@ -751,6 +751,79 @@ theorem ConvOut.gInf_pde
   simpa only [gTail] using
     gSeqExt_pde (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) β ψ u hwin hu x
       (hxgrow k) v w
+
+set_option maxHeartbeats 1600000 in
+/-- The fixed-window limit satisfies the Ricci-flow equation at every regular
+source time.  The proof restricts to a local closed window contained in the
+regular set, so the ambient convergence window may retain nonregular
+endpoints. -/
+theorem ConvOut.gInf_pde_reg
+    (R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
+    (β ψ : Real) (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (cLow : Real) (hcLow : 0 < cLow)
+    (hbound : letI : TopologicalSpace P.M := P.topology
+        letI : ChartedSpace H P.M := P.charted
+        letI : IsManifold I ∞ P.M := P.smooth
+      ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
+        ∀ (y : SourceDomain (I := I) Φ k)
+          (v : letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+              sourceDomTop (I := I) Φ k
+            letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+              sourceDomCharted (I := I) Φ k
+            TangentSpace I y),
+          cLow * R.inner (y : P.M) v v ≤
+            letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+              sourceDomTop (I := I) Φ k
+            letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+              sourceDomCharted (I := I) Φ k
+            letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+              sourceDomSmooth (I := I) Φ k
+            (srcMetric (I := I) Φ hsrc htgt k t).inner y v v)
+    (hcovTail : letI : TopologicalSpace P.M := P.topology
+        letI : ChartedSpace H P.M := P.charted
+        letI : T2Space P.M := P.t2
+        letI : IsManifold I ∞ P.M := P.smooth
+        letI : SigmaCompactSpace P.M := P.sigmaCompact
+      ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
+        ∀ z : P.M, z ∈ bf.grow k →
+          metricCovDerivNorm (I := I) q
+            (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (x : P.M)
+    (v w : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      TangentSpace I x)
+    {t : Real} (ht : t ∈ X.D.regular) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    HasDerivAt (fun s : Real ↦ (co.gInf s).inner x v w)
+      ((-2 : Real) * ricciTensor (I := I) (co.gInf t) x v w) t := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  obtain ⟨a, b, htLocal, hwin⟩ := X.D.exists_Icc_regular ht
+  have hsub : Set.Icc a b ⊆ Set.Icc β ψ :=
+    hwin.trans (X.D.regular_subset.trans hcarrier)
+  have hpde :=
+    ConvOut.gInf_pde (I := I) (Φ := Φ) R bf hsrc htgt a b hwin
+      cLow hcLow
+      (fun k s hs => hbound k s (hsub hs))
+      (fun q => by
+        obtain ⟨C, hC⟩ := hcovTail q
+        exact ⟨C, fun k s hs => hC k s (hsub hs)⟩)
+      (ConvOut.restrict (Φ := Φ) co hsub) x v w
+      (Set.Ioo_subset_Icc_self htLocal)
+  simpa only [ConvOut.restrict] using
+    hpde.hasDerivAt (Icc_mem_nhds_iff.mpr htLocal)
 
 set_option maxHeartbeats 1600000 in
 /-- Scalar curvature of the reindexed source flow converges at one time in the

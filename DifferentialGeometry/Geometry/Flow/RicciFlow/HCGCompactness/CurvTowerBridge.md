@@ -1,49 +1,31 @@
 # CurvTowerBridge
 
-## 2026-07-25 verified statement and performance frontier
+## 2026-07-26 scalar arity bridge complete
 
-`curvNormSq_eq` is now stated at the canonical normalization boundary and its
-module is focused- and exact-verified.  The declaration deliberately retains
-one explicit `sorry`; therefore the theorem itself is 0% proved even though the
-interface and its downstream Adapter consumer both check.
+`curvNormSq_eq` is proved without assumptions beyond the existing solution and
+manifold context.  Focused verification and the exact module build passed, and
+`CurvTowerBridge.lean` now contains no `sorry`.
 
-The exact obstruction is the dependent rank normalization between the static
-`curvCovDeriv` tower (`k + 4`) and the PDE `nablaKRm04Field` tower (`4 + k`).
-Three genuinely different proof routes were tested:
+The obstruction was elaboration rather than mathematics.  Induction on the
+whole dependent tensor-field equality between ranks `k + 4` and `4 + k`
+reproduced the Hom/bundle normalization wall even after adding the cheap
+`curvCovDeriv_succ` projection.  Explicit whole-field `rw` and `calc` variants
+were therefore discarded.
 
-1. recursive whole-field equality with a `Fin (4 + k) ≃ Fin (k + 4)`
-   reindex;
-2. the same equality under reduced transparency and scalar evaluation;
-3. an `HEq` route avoiding an explicit transported equality.
+The successful normal form is scalar:
 
-The first two spent minutes and gigabytes in whole tensor/Hom normalization;
-the third failed dependent elimination on the arity equation.  Raising
-heartbeats does not address the bottleneck.  The smallest remaining design
-choice is either a cheap evaluated norm theorem at the tensor layer or explicit
-approval to canonicalize the public static tower to the already canonical PDE
-tower.  No consumer assumptions or wrapper black boxes were added.
+1. `curvCovDeriv_succ` exposes the dependent recursion without unfolding it.
+2. `curvEquiv` recursively extends the base-four slot equivalence.
+3. `curv_apply_iterCov` proves equality only after evaluating at a point and a
+   complete slot tuple.  Its local field equality is reconstructed from the
+   scalar induction hypothesis by extensionality, so the induction motive
+   never contains a whole dependent Hom equality.
+4. `curvNormSq_eq` reconstructs only the single fiber equality needed by the
+   consumer, then applies `normSq0S_domDomCongr` and the existing
+   `nablaKRm_eq_iterCov`.
 
-The constants-first compact Riemann estimate is separately 100% complete.
-`curvNormSq_eq` remains theorem-level 0%; `ham3_cgh_limit` remains theorem-level
-0%; whole-HCG supporting machinery remains about 60%.
-
-## 2026-07-25 static/PDE tower normalization
-
-The intended public consumer statement is `curvNormSq_eq`: the squared norm
-used by `HasSpacetimeCurvDerivBound` equals
-`nablaKRm04NormSqIntrinsic` for a Ricci-flow solution.
-
-The step identity `curvCovDerivStep = covStep` is definitional.  The initial
-field-equality route through a recursive `Fin (4 + k) ≃ Fin (k + 4)` reindex
-was abandoned: two focused attempts spent more than two minutes normalizing
-the whole tensor-field equality, reproducing the known Hom/bundle whnf
-performance wall.  The live proof instead uses an `HEq` normal form so the
-dependent arity normalization is not stated as a whole-section equality.
-
-Verification of the `HEq` version is pending the active shared build that is
-currently refreshing the newly edited `BoundedGeometry` dependency.  Until
-that focused check passes, `curvNormSq_eq` is 0% complete.  The compact
-constants-first Riemann estimate is separately 100% complete; the Hamilton
-`FlowDerivativeInput` assembly remains blocked at this normalization bridge.
-`ham3_cgh_limit` remains theorem-level 0%, and whole HCG supporting machinery
+This closes the only explicit proof dependency of the Hamilton
+`source_deriv`/`FlowDerivativeInput` assembly.  `curvNormSq_eq` is theorem-level
+100%; the constants-first compact Riemann estimate remains 100%;
+`ham3_cgh_limit` remains theorem-level 0%; whole-HCG supporting machinery
 remains about 60%.
