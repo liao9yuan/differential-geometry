@@ -21,12 +21,15 @@ open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -42,7 +45,8 @@ private theorem realize_at_thr
     (g : SmoothRiemannianMetric I M) :
     ∃ R : ℝ, 0 < R ∧
       ∀ T : SmoothCcTensor g 0 2,
-        ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤ R →
+        ‖smoothCcToTensorHs (I := I) (M := M) g
+          (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
           gFibreOpBound (I := I) (M := M) g
             (ccTensorBilinSymm (I := I) g T)
               (deTurckArmContractionThreshold'' (Module.finrank ℝ E)) := by
@@ -53,9 +57,16 @@ private theorem realize_at_thr
   intro T hT
   have htwo : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T =
       smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T :=
-    tensorHs.ext (funext (fun _ ↦ rfl))
+    by
+      ext i
+      rfl
+  have hTtwo :
+      ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤ θ / C := by
+    rw [Nat.cast_one] at hT
+    rw [show (1 : ℝ) + 1 = 2 by norm_num] at hT
+    exact hT
   have hT' : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ / C := by
-    simpa only [htwo] using hT
+    simpa only [htwo] using hTtwo
   have hdelta : C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ := by
     calc
       C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
@@ -73,11 +84,13 @@ lower-state radius. -/
 def realizeOfLE
     (g₀ : SmoothRiemannianMetric I M) {δ R Q : ℝ} (hRQ : R ≤ Q)
     (hrealQ : ∀ T : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ Q →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ Q →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ) :
     ∀ T : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ :=
   fun T hT => hrealQ T (hT.trans hRQ)
@@ -88,11 +101,12 @@ def lowRegN
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 < R)
     (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ) :
     lowerState (I := I) (M := M) g₀ 1 R →
-      tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ) :=
+      tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ) :=
   Dense.extend (smoothCore_dense (I := I) (M := M) g₀ hR)
     (coreN (I := I) (M := M) g₀ g_bg hδ hreal)
 
@@ -106,10 +120,11 @@ theorem coreN_outer
       0 < ρ ∧ 0 ≤ Ctop ∧
       (∀ Q : ℝ, 0 ≤ Q → 0 ≤ B0 Q) ∧
       (∀ Q : ℝ, 0 ≤ Q → 0 ≤ B1 Q) ∧
-      ∀ {Q R : ℝ} (hQ : 0 ≤ Q) (hQρ : Q ≤ ρ)
-        (hR : 0 ≤ R) (hRQ : R ≤ Q)
+      ∀ {Q R : ℝ} (_hQ : 0 ≤ Q) (_hQρ : Q ≤ ρ)
+        (_hR : 0 ≤ R) (hRQ : R ≤ Q)
         (hrealQ : ∀ T : SmoothCcTensor g₀ 0 2,
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ Q →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 1) T‖ ≤ Q →
             gFibreOpBound (I := I) (M := M) g₀
               (ccTensorBilinSymm (I := I) g₀ T) δ₀)
         (x y : smoothCore (I := I) (M := M) g₀ R),
@@ -118,17 +133,22 @@ theorem coreN_outer
             coreN (I := I) (M := M) g₀ g_bg hδ₀_lt
               (realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ) y‖ ≤
           Ctop * Q *
-              ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1‖ +
+              ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - y.1.1‖ +
             B0 Q *
               ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show (2 : ℝ) ≤ 3 by norm_num)
-                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ +
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ +
             B1 Q *
-                (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-                  ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+                (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖ +
+                  ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2))‖) *
               ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show (2 : ℝ) ≤ 3 by norm_num)
-                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ := by
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ := by
   obtain ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, hcore⟩ :=
     coreN_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   refine ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, ?_⟩
@@ -140,24 +160,24 @@ theorem coreN_outer
   let xQ : smoothCore (I := I) (M := M) g₀ Q := ⟨xQ0, x.2⟩
   let yQ : smoothCore (I := I) (M := M) g₀ Q := ⟨yQ0, y.2⟩
   have hxrep : coreRep g₀ xQ = coreRep g₀ x := by
-    apply smoothHs_inj (I := I) (M := M) g₀ (3 : ℝ)
+    apply smoothHs_inj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
     rw [coreRep_spec, coreRep_spec]
-    rfl
   have hyrep : coreRep g₀ yQ = coreRep g₀ y := by
-    apply smoothHs_inj (I := I) (M := M) g₀ (3 : ℝ)
+    apply smoothHs_inj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
     rw [coreRep_spec, coreRep_spec]
-    rfl
   have hxN :
       coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hrealQ xQ =
         coreN (I := I) (M := M) g₀ g_bg hδ₀_lt
           (realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ) x := by
     unfold coreN
+    apply smoothN_wd (I := I) (M := M) g₀ g_bg 1
     rw [hxrep]
   have hyN :
       coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hrealQ yQ =
         coreN (I := I) (M := M) g₀ g_bg hδ₀_lt
           (realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ) y := by
     unfold coreN
+    apply smoothN_wd (I := I) (M := M) g₀ g_bg 1
     rw [hyrep]
   have hbound := hcore hQ hQρ hrealQ xQ yQ
   rw [hxN, hyN] at hbound
@@ -173,10 +193,11 @@ theorem lowRegN_outer
       0 < ρ ∧ 0 ≤ Ctop ∧
       (∀ Q : ℝ, 0 ≤ Q → 0 ≤ B0 Q) ∧
       (∀ Q : ℝ, 0 ≤ Q → 0 ≤ B1 Q) ∧
-      ∀ {Q R : ℝ} (hQ : 0 ≤ Q) (hQρ : Q ≤ ρ)
+      ∀ {Q R : ℝ} (_hQ : 0 ≤ Q) (_hQρ : Q ≤ ρ)
         (hR : 0 < R) (hRQ : R ≤ Q)
         (hrealQ : ∀ T : SmoothCcTensor g₀ 0 2,
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ Q →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 1) T‖ ≤ Q →
             gFibreOpBound (I := I) (M := M) g₀
               (ccTensorBilinSymm (I := I) g₀ T) δ₀),
         Continuous (lowRegN (I := I) (M := M) g₀ g_bg hR hδ₀_lt
@@ -188,17 +209,23 @@ theorem lowRegN_outer
                 (realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ) u -
               lowRegN (I := I) (M := M) g₀ g_bg hR hδ₀_lt
                 (realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ) v‖ ≤
-            Ctop * Q * ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1‖ +
+            Ctop * Q *
+                ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
               B0 Q *
                 ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (2 : ℝ) ≤ 3 by norm_num)
-                  ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1)‖ +
+                  (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                  ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
               B1 Q *
-                  (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-                    ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+                  (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2))‖ +
+                    ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                      (((1 : ℕ) : ℝ) + 2))‖) *
                 ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (2 : ℝ) ≤ 3 by norm_num)
-                  ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1)‖ := by
+                  (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                  ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2)) - v.1)‖ := by
   obtain ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, hcore⟩ :=
     coreN_outer (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   refine ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, ?_⟩
@@ -206,12 +233,13 @@ theorem lowRegN_outer
   let hrealR := realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ
   let D : Set (lowerState (I := I) (M := M) g₀ 1 R) :=
     smoothCore (I := I) (M := M) g₀ R
-  let F : D → tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ) :=
+  let F : D → tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ) :=
     coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hrealR
   let e : lowerState (I := I) (M := M) g₀ 1 R →
-      tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ) := fun u => u.1
+      tensorHs (I := I) (M := M) g₀ 0 2
+        (((1 : ℕ) : ℝ) + 2) := fun u => u.1
   let J := tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-    (show (2 : ℝ) ≤ 3 by norm_num)
+    (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
   let z : lowerState (I := I) (M := M) g₀ 1 R :=
     ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩
   have hD : Dense D := by
@@ -272,21 +300,25 @@ theorem lowreg_partial_sol
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ (R δ : ℝ) (hR : 0 < R) (hδ : δ < 1)
       (hrealR : ∀ S : SmoothCcTensor g₀ 0 2,
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S‖ ≤ R →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) S‖ ≤ R →
           gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ S) δ),
       let Nfun := lowRegN (I := I) (M := M) g₀ g_bg hR hδ hrealR
       Continuous Nfun ∧
         Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hrealR) ∧
         ∃ T₀ : ℝ, 0 < T₀ ∧
-          ∀ {T : ℝ} (hT : 0 < T) (hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
-          ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (1 : ℝ) T)
+          ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+          ∃ (u : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
             (gforce : timeL2
-              (tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ)) T),
-            let field := maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2)) gforce
-            u = maxRegDuhamelMap (I := I) (M := M) (1 : ℝ) hT hT1
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2)) gforce ∧
+              (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T),
+            let field := maxRegDuhamelSolField (I := I) (M := M)
+              ((1 : ℕ) : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) gforce
+            u = maxRegDuhamelMap (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) gforce ∧
               (∀ᵐ t ∂(timeMeasure T),
                 field t ∈ lowerState (I := I) (M := M) g₀ 1 R) ∧
               gforce =ᵐ[timeMeasure T]
@@ -294,7 +326,8 @@ theorem lowreg_partial_sol
                   (zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le) field t)) ∧
               timeH1.trace0 _ T u = 0 ∧
               timeH1.timeDeriv _ T u =
-                timeScaleLaplacian (I := I) (M := M) (1 : ℝ) field + gforce ∧
+                timeScaleLaplacian (I := I) (M := M)
+                  ((1 : ℕ) : ℝ) field + gforce ∧
               ‖gforce‖ ≤ R / 4 := by
   let θ : ℝ := deTurckArmContractionThreshold'' (Module.finrank ℝ E)
   have hθ : 0 < θ := deTurckArmContractionThreshold''_pos (Module.finrank ℝ E)
@@ -325,7 +358,8 @@ theorem lowreg_partial_sol
       _ = 1 / 32 := by field_simp [ne_of_gt hCtop1]
       _ ≤ 1 / 16 := by norm_num
   have hrealQ : ∀ T : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ Q →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ Q →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) θ := by
     intro T hT
@@ -349,7 +383,7 @@ theorem lowreg_partial_sol
       _ ≤ 1 / 16 := by norm_num
   let hrealR := realizeOfLE (I := I) (M := M) g₀ hRQ hrealQ
   let Nfun : lowerState (I := I) (M := M) g₀ 1 R →
-      tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ) :=
+      tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ) :=
     lowRegN (I := I) (M := M) g₀ g_bg hR hθlt hrealR
   obtain ⟨hcont0, hcorecont0, hbound0⟩ := houter hQ.le hQρ hR hRQ hrealQ
   have hcont : Continuous Nfun := by
@@ -359,17 +393,23 @@ theorem lowreg_partial_sol
     simpa only [hrealR] using hcorecont0
   have hbound : ∀ u v : lowerState (I := I) (M := M) g₀ 1 R,
       ‖Nfun u - Nfun v‖ ≤
-        Ctop * Q * ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1‖ +
+        Ctop * Q *
+            ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
           B0 Q *
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show (2 : ℝ) ≤ 3 by norm_num)
-              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1)‖ +
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
           B1 Q *
-              (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-                ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+              (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+                ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖) *
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show (2 : ℝ) ≤ 3 by norm_num)
-              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - v.1)‖ := by
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖ := by
     simpa only [Nfun, hrealR] using hbound0
   let A : ℝ≥0 := Real.toNNReal (Ctop * Q / R)
   let B : ℝ≥0 := Real.toNNReal (B0 Q)
@@ -394,18 +434,23 @@ theorem lowreg_partial_sol
   have hsingle : ∀ u v : lowerState (I := I) (M := M) g₀ 1 R,
       ‖Nfun u - Nfun v‖ ≤
         (A : ℝ) * R *
-            ‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2)) - (v : _)‖ +
+            ‖(u : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - (v : _)‖ +
           (B : ℝ) *
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show (1 : ℝ) + 1 ≤ (1 : ℝ) + 2 by linarith) ((u : _) - (v : _))‖ +
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u : _) - (v : _))‖ +
           (C : ℝ) *
-              (‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2))‖ +
-                ‖(v : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2))‖) *
+              (‖(u : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+                ‖(v : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖) *
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show (1 : ℝ) + 1 ≤ (1 : ℝ) + 2 by linarith) ((u : _) - (v : _))‖ := by
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u : _) - (v : _))‖ := by
     intro u v
     rw [hAR, hBcoe, hCcoe]
-    convert hbound u v using 1 <;> norm_num
+    exact hbound u v
   let D : ℝ :=
     ‖Nfun ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩‖
   have hD : 0 ≤ D := norm_nonneg _

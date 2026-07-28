@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegBaseForce
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
@@ -90,6 +91,9 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- Equality of two smooth Riemannian metrics from equality of their inner-product
 fields: the remaining structure fields (`symm`, `pos`, `isVonNBounded`, `contMDiff`)
 are `Prop`-valued, hence proof-irrelevant. -/
@@ -106,25 +110,5 @@ theorem smoothRiemannianMetric_ext_inner {g g' : SmoothRiemannianMetric I M}
     | mk gi' gsymm' gpos' gvon' gcont' =>
       cases hinner
       rfl
-
-/-- The symmetrized extraction of the zero smooth tensor section is the zero
-bilinear form: `ccTensorBilinSymm g₀ 0 = 0`, since `ccTensorBilinSymm` is
-`ℝ`-homogeneous in the section and `(0 : SmoothCcTensor) = (0 : ℝ) • 0`. -/
-theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
-    (x : M) (v w : TangentSpace I x) :
-    ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
-  have h0 : (0 : SmoothCcTensor g 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g 0 2) :=
-    (zero_smul ℝ _).symm
-  rw [h0, ccTensorBilinSymm_smul]
-  ring
-
-/-- The zero smooth tensor section is uniformly `g₀`-fibre small with constant
-`0 < 1`: `gFibreOpBound g₀ (ccTensorBilinSymm g₀ 0) 0`. -/
-theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
-    gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) 0 := by
-  intro x v w
-  rw [ccTensorBilinSymm_zero_apply]
-  simp only [abs_zero, zero_mul, le_refl]
 
 end DifferentialGeometry.PDE.RicciFlow

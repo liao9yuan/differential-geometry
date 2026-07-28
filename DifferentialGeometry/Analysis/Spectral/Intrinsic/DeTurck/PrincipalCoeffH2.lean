@@ -1,7 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.JetProductIntegral
 
 /-!
 # Low-regularity DeTurck principal coefficient estimates
@@ -612,6 +614,39 @@ theorem principal_arm_h2
   have hbound := happ
     (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) U A
     hA (by simpa [A, N] using hpt) (by simpa [A, N] using hjet)
+  simpa [deTurckPrincipalCometricArm, A, N, mul_assoc] using hbound
+
+/-- On a three-dimensional spectral `H2` metric ball, the DeTurck
+principal-cometric arm is a small operator from spectral `H4` to spectral
+`H2`. -/
+theorem principal_arm_h4_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M)
+        (U : SmoothCcTensor g₀ 0 2),
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ ρ →
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀ T y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ)
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ U)‖ ≤
+          C * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ *
+            ‖ccTensorToHs (I := I) (M := M) g₀ 2 (4 : ℝ) U‖ := by
+  obtain ⟨ρ, Ccoeff, hρ, hCcoeff, hcoeff⟩ :=
+    principal_coeff_h2 (I := I) (M := M) hDim g₀
+  obtain ⟨Capp, hCapp, happ⟩ :=
+    appCc_h2_h4_h2 (I := I) (M := M) hDim g₀ 2 2
+  refine ⟨ρ, Capp * Ccoeff, hρ, mul_nonneg hCapp hCcoeff, ?_⟩
+  intro T g₁ U hT htie
+  let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖
+  let A : ℝ := Ccoeff * N
+  have hN : 0 ≤ N := norm_nonneg _
+  have hA : 0 ≤ A := mul_nonneg hCcoeff hN
+  obtain ⟨_, hjet⟩ := hcoeff T g₁ (by simpa only [N] using hT) htie
+  have hbound := happ
+    (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) U A
+    hA (by simpa only [A, N] using hjet)
   simpa [deTurckPrincipalCometricArm, A, N, mul_assoc] using hbound
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

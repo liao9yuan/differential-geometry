@@ -801,8 +801,10 @@ theorem centerReadoutB_min
     (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
+      (c := legacyBallChart (I := I) (X.obj k) x))
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e
+      (c := legacyBallChart (I := I) (X.obj k) x))
     {ι : Type} [Fintype ι] (mu : ι → Real) (xi : ι → E)
     (join : (X.obj k).M → (X.obj k).M → Real → (X.obj k).M)
     (p : (X.obj k).M) (r : Real) :

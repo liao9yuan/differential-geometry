@@ -305,6 +305,89 @@ theorem nonaut_strong_exists
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u0 forceStar]
     exact congrArg₂ (fun x y => x + y) rfl hforceStar_eq
 
+/-- Strong existence for the fixed reference tensor heat equation with two
+bounded non-autonomous perturbations and a prescribed affine forcing term. -/
+theorem nonaut_forced_exists
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
+    (A2 : Real → tensorHs (I := I) (M := M) g r s (a + 2) →L[Real]
+      tensorHs (I := I) (M := M) g r s a)
+    (hA2 : AEStronglyMeasurable A2 (timeMeasure T))
+    (C2 : NNReal) (hC2 : ∀ᵐ t ∂timeMeasure T, ‖A2 t‖ ≤ (C2 : Real))
+    (A1 : Real → tensorHs (I := I) (M := M) g r s (a + 1) →L[Real]
+      tensorHs (I := I) (M := M) g r s a)
+    (hA1 : AEStronglyMeasurable A1 (timeMeasure T))
+    (C1 : NNReal) (hC1 : ∀ᵐ t ∂timeMeasure T, ‖A1 t‖ ≤ (C1 : Real))
+    (f0 : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    (hsmall :
+      (C2 : Real) * (1 + T) + (C1 : Real) * (2 * Real.sqrt T) < 1) :
+    ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
+      (force : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
+      u = maxRegDuhamelMap (I := I) (M := M) a hT hT1 u0 force ∧
+        force =
+          timeOp A2 hA2 C2 hC2
+              (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u0 force) +
+            timeOp A1 hA1 C1 hC1
+              (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0
+                force) +
+            f0 ∧
+        TimeSobolev.timeH1.trace0 _ T u =
+            tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+              (show a ≤ a + 2 by linarith) u0 ∧
+        TimeSobolev.timeH1.timeDeriv _ T u =
+          timeScaleLaplacian (I := I) (M := M) a
+              (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u0 force) +
+            (timeOp A2 hA2 C2 hC2
+                (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u0 force) +
+              timeOp A1 hA1 C1 hC1
+                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0
+                  force) +
+              f0) := by
+  let K : NNReal :=
+    ⟨(C2 : Real) * (1 + T) + (C1 : Real) * (2 * Real.sqrt T),
+      add_nonneg
+        (mul_nonneg C2.coe_nonneg (by linarith [hT.le]))
+        (mul_nonneg C1.coe_nonneg (by positivity))⟩
+  let F : timeL2 (tensorHs (I := I) (M := M) g r s a) T →
+      timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
+    fun force =>
+      nonautMap (I := I) (M := M) a hT hT1 u0
+          A2 hA2 C2 hC2 A1 hA1 C1 hC1 force + f0
+  have hbase := nonautMap_contract (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 u0
+    A2 hA2 C2 hC2 A1 hA1 C1 hC1 hsmall
+  have hcontr : ContractingWith K F := by
+    refine ⟨hbase.1, ?_⟩
+    refine LipschitzWith.of_dist_le_mul (fun force force' => ?_)
+    change dist
+      (nonautMap (I := I) (M := M) a hT hT1 u0
+          A2 hA2 C2 hC2 A1 hA1 C1 hC1 force + f0)
+      (nonautMap (I := I) (M := M) a hT hT1 u0
+          A2 hA2 C2 hC2 A1 hA1 C1 hC1 force' + f0) ≤
+        (K : Real) * dist force force'
+    rw [dist_add_right]
+    exact hbase.2.dist_le_mul force force'
+  set forceStar := ContractingWith.fixedPoint F hcontr with hforceStar_def
+  have hforceStar_fix : F forceStar = forceStar :=
+    ContractingWith.fixedPoint_isFixedPt hcontr
+  have hforceStar_eq : forceStar =
+      timeOp A2 hA2 C2 hC2
+          (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u0 forceStar) +
+        timeOp A1 hA1 C1 hC1
+          (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0
+            forceStar) +
+        f0 := by
+    simpa only [F, nonautMap] using hforceStar_fix.symm
+  refine ⟨maxRegDuhamelMap (I := I) (M := M) a hT hT1 u0 forceStar,
+    forceStar, rfl, hforceStar_eq, ?_, ?_⟩
+  · exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
+      hT hT1 u0 forceStar
+  · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M)
+      (h_compact := h_compact) (a := a) (T := T) hT hT1 u0 forceStar]
+    exact congrArg₂ (fun x y => x + y) rfl hforceStar_eq
+
 end QuasiLinear
 end Parabolic
 end Analysis

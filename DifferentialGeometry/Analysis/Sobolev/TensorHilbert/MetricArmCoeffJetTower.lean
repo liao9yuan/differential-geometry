@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHe
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
@@ -2490,75 +2491,6 @@ theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_succ_le_arms
   rw [covGrad_gInvDiffSlotCoeff_eq_slotInsert_section (I := I) g₀ g₁]
   rw [iteratedCovGrad_add]
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 ((2 + 1) + m) x _ _
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-theorem rsDomDomCongrFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (σ : Equiv.Perm (Fin s)) (R : SmoothCcTensor g r s) :
-    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
-        (E := fun z : M => TensorRSSpace r s I z) x
-        (rsDomDomCongr σ (R.toSection x))) := by
-  classical
-  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SModel r ℝ E) (V₁ := fun x : M => Tensor0SSpace r I x)
-    (F₂ := Tensor0SModel s ℝ E) (V₂ := fun x : M => Tensor0SSpace s I x)
-    (φ := fun x : M => rsDomDomCongr σ (R.toSection x))
-  intro Y
-  have hZ := ContMDiff.clm_bundle_apply (b := id) R.toSection.contMDiff Y.contMDiff
-  have hperm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
-        (E := fun z : M => Tensor0SSpace s I z) x
-        (Tensor0SSpace.ofModel (ContinuousMultilinearMap.domDomCongr σ
-          (Tensor0SSpace.toModel
-            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from R.toSection x) (Y x)))))) := by
-    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
-      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
-      (fun x => (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
-          (ContinuousMultilinearMap.domDomCongr σ
-            (Tensor0SSpace.toModel
-              ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from R.toSection x) (Y x)))) :
-            Tensor0SSpace s I x))).mpr ?_
-    have hZcoord := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
-      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
-      (fun x => (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from R.toSection x) (Y x))).mp hZ
-    intro τ x₀
-    refine (hZcoord (τ ∘ σ) x₀).congr_of_eventuallyEq ?_
-    filter_upwards [Filter.univ_mem] with x _
-    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
-    change (ContinuousMultilinearMap.domDomCongr σ
-        (Tensor0SSpace.toModel
-          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from R.toSection x) (Y x))))
-        (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
-          ((Module.finBasis ℝ E) (τ j))) = _
-    rw [ContinuousMultilinearMap.domDomCongr_apply]
-    rfl
-  refine hperm.congr (fun x => ?_)
-  refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel s ℝ E)
-    (E := fun z : M => Tensor0SSpace s I z) x t) ?_
-  apply Tensor0SSpace.toModel_injective
-  change Tensor0SSpace.toModel
-      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
-        rsDomDomCongr σ (R.toSection x)) (Y x))
-    = Tensor0SSpace.toModel
-        (Tensor0SSpace.ofModel (ContinuousMultilinearMap.domDomCongr σ
-          (Tensor0SSpace.toModel
-            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from R.toSection x) (Y x)))))
-  rw [toModel_rsDomDomCongr_apply, Tensor0SSpace.toModel_ofModel]
-
-set_option backward.isDefEq.respectTransparency false in
-def rsDomDomCongrSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (σ : Equiv.Perm (Fin s)) (R : SmoothCcTensor g r s) : SmoothCcTensor g r s where
-  toSection :=
-    { toFun := fun x : M => rsDomDomCongr σ (R.toSection x)
-      contMDiff_toFun := rsDomDomCongrFib_contMDiff (I := I) (M := M) g r s σ R }
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
-
-set_option linter.unusedSectionVars false in
-@[simp] lemma rsDomDomCongrSection_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (σ : Equiv.Perm (Fin s)) (R : SmoothCcTensor g r s) (x : M) :
-    (rsDomDomCongrSection (I := I) (M := M) g r s σ R).toSection x =
-      rsDomDomCongr σ (R.toSection x) := rfl
 
 def armSlotEndoPassZeroCc (g : SmoothRiemannianMetric I M)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞

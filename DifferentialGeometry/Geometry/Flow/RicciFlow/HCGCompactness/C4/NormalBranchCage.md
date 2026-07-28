@@ -136,3 +136,19 @@ producer-data retention brick for the actual global stage map, not completion
 of `StepB1RawInput`: that producer and textbook B1 remain theorem-level
 **0%**. Dedicated Step-B/B1 machinery is about **98%**, Chapter 4 machinery
 about **90%**, and whole-HCG compactness machinery about **60%**.
+
+## 2026-07-27 chart-parametric center readout
+
+`HasNormalBrFull.exists_cmC` converts the checked legacy selected branch into
+the provider-independent `HasChartCmSol` package at `legacyBallChart`. The
+proof reuses the same branch witness, derives the common inverse-velocity zero,
+and applies the provider-native `chartCmEqnC` Hessian/implicit-function result;
+it does not add a radius assumption or construct a second inverse branch.
+`exists_hat_cmC_at` carries the same package through the existing prescribed
+live-slot distance ledger. Focused verification passed for both declarations.
+
+The next Gate 4 target is the first finite-hat tail/stage-comparison consumer.
+The final
+`exists_h6NormalData` theorem remains unstated (0%); dedicated radius/branch
+machinery is about 80%, branch-parametric consumer migration about 35%, and
+all-order metric-jet machinery about 35%.

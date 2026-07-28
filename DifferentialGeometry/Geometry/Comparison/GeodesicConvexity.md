@@ -25,3 +25,16 @@ machinery is only at the variation/Hessian-carrier foundation stage, dedicated
 Step-B/B1 machinery remains about 88%, Chapter 4 machinery about 82%, and the
 whole HCG machinery about 54%.  `StepB1RawInput`, the textbook B1 theorem, and
 all compactness endpoints remain theorem-level 0%.
+
+## 2026-07-27 selected-join length
+
+`minJoin_arcLength` and `minJoin_pathLen` now identify the arc length and
+extended path length of the selected complete-manifold minimizing join with
+the endpoint Riemannian distance.  Both focused verification and the targeted
+module refresh passed.  These are generic Hopf--Rinow outputs, independent of
+the CGT cutoff and of any global connectedness assumption beyond the
+complete-manifold context in which `minJoin` is selected.
+
+The new length API closes the quantitative input to the CGT first-hit fence.
+It does not prove small-ball strict convexity or the CGT finite-family center
+theorem.  Those remain separate comparison arguments.

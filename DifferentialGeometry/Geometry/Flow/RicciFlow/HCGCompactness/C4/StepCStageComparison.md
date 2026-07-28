@@ -73,6 +73,19 @@ checked; its dedicated machinery is about **80%**. The concrete
 Dedicated Step-B/B1 machinery is about **98%**, Chapter 4 machinery about
 **90%**, and whole-HCG compactness machinery about **60%**.
 
+## 2026-07-27 controlled-chart root readout
+
+`actual_cm_tail` now returns `HasChartCmSol` at the selected legacy provider
+and calls `exists_hat_cmC_at`. `stage_root_tail` consumes the packaged
+`HasCmSolC`, obtains selected-branch target membership through
+`HasCmSolC.target_mem`, and obtains the inverse-velocity root equation through
+`HasCmSolC.invVel_zero`. Center decoding uses the saved restricted-chart target
+membership rather than a separately expanded framed-chart source field.
+
+The source migration is applied but not yet focused-verified because the new
+lower exports are not current. The next check follows the ordered exact refresh
+of `NormalBranchHessian`, `NormalBranchCage`, and `StepCHatReadout`.
+
 ## 2026-07-16 actual-map local diffeomorphism and pointed field
 
 `HasStageJetData.hloc_tail` is now focused-green.  On every retained source
@@ -147,3 +160,24 @@ injectivity remains theorem-level **0%** with dedicated machinery about
 **80%**. `StepB1RawInput` and textbook B1 remain theorem-level **0%**;
 dedicated Step-B/B1 machinery is about **98%**, Chapter 4 machinery about
 **90%**, and whole-HCG compactness machinery about **60%**.
+
+## 2026-07-27 H6 Gate 4 replay
+
+The selected root proof now consumes provider-aware `HasChartCmSol` data and
+reconstructs the selected branch target and zero equation directly from the
+packaged `HasCmSolC` source/domain/zero fields. The decode uses the controlled
+chart's restricted inverse rather than a legacy source-membership expansion.
+One redundant `dsimp` was removed after `HasChartCmSol` was already unfolded.
+
+The complete legacy-provider replay through Support, StageComparison, and
+StageSeed passed in an isolated current-artifact tree. All preceding failures
+were traced to stale exports in the Atom, SourceCover, NormalMetric,
+StageMap/Fill, and inverse-velocity layers. Formal artifact refresh remains
+pending while an unrelated writer is active.
+
+Gate 4 is source-complete. Gate 5 now begins at `HasDiagPairConv`; the selected
+diagonal, fence, stage configuration, inverse-velocity equation, and root
+readout must carry one `NormalChartFamily` before the H6 provider can replace
+the legacy provider. `exists_h6NormalData` remains theorem-level 0%; branch
+parameterization is about 45%, all-order jet machinery about 35%, and overall
+dedicated H6 producer machinery about 58%.

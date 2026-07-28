@@ -1,5 +1,18 @@
 # ConvFieldEndgame.lean — concrete P4 upgrade-data producer
 
+## 2026-07-27 limit projection
+
+`flowUpgrade_maps_L` records that `flowUpgrade_of_maps` retains the supplied
+limit flow exactly.  Its proof is the constructor's definitional projection,
+so downstream completeness arguments can rewrite only `d.data.L` without
+normalizing the whole `FlowUpgradeData` object.
+
+Focused verification and the exact targeted refresh passed.  This projection
+is 100% infrastructure; it is consumed by the focused-green
+`ham3_closed_upg`.  The conditional closed-window upgrade and smooth-CGH
+package are 100%, while literal `ham3_cgh_limit` and the unconditional
+time-zero `MetricCompactBase` producer remain theorem-level 0%.
+
 ## 2026-07-17: PDE/scalar compatibility refinement
 
 `flowLimit_of_reg` partially fills the book-facing endgame without changing

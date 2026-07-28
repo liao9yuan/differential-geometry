@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.UnitModel
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
@@ -78,24 +79,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-- The canonical unit `(0, 0)`-tensor `ofModel (constOfIsEmpty 1)` at a base point `x`, used to
-read off an `(0, s)`-tensor `T : Tensor0SSpace 0 I x →L Tensor0SSpace s I x` as the `(0, s)`-form
-`Tensor0SSpace.toModel (T unit)`. -/
-def unitTensor (x : M) : Tensor0SSpace 0 I x :=
-  Tensor0SSpace.ofModel
-    (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
-
-/-- The unit-evaluated model `(0, s)`-form of a smooth compactly-supported `(0, s)`-tensor
-section at `x`: `Tensor0SSpace.toModel (W.toSection x unit)`.  An `(0, s)`-tensor section value
-`W.toSection x : Tensor0SSpace 0 I x →L Tensor0SSpace s I x` is recovered from this `(0, s)`-form
-(evaluation at the canonical unit `(0, 0)`-tensor), which is the shape in which the iterated
-covariant gradient is read off (`covGrad_toSection_apply_eval`). -/
-def unitModel (g : SmoothRiemannianMetric I M) (s : ℕ)
-    (W : SmoothCcTensor g 0 s) (x : M) : Tensor0SModel s ℝ E :=
-  Tensor0SSpace.toModel
-    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
-      (unitTensor (I := I) (M := M) x))
 
 /-- The unit-evaluated model `(0, s)`-form of the directional covariant derivative
 `tensorCovDerivAt g 0 s W x v`. -/

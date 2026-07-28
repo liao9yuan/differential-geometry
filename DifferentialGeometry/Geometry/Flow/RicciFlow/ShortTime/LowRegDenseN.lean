@@ -20,7 +20,9 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
@@ -39,8 +41,7 @@ theorem smoothHs_inj (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     Function.Injective (smoothCcToTensorHs (I := I) (M := M) g σ) := by
   intro S T hST
   apply ccToHs_injective (I := I) (M := M) g 2 σ
-  apply tensorHs.ext
-  funext i
+  ext i
   have hi := congrArg (fun u => u.coeff i) hST
   simpa only [ccTensorToHs_coeff, smoothCcToTensorHs_coeff] using hi
 
@@ -72,11 +73,17 @@ theorem smoothN_wd
     rw [tensorSectionRealizeMetric_inner, tensorSectionRealizeMetric_inner]
   have hrem :
       deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ =
-        deTurckSmoothRemainder (I := I) g₀ g_bg T hδ'_lt hδ' := by
-    unfold deTurckSmoothRemainder
+      deTurckSmoothRemainder (I := I) g₀ g_bg T hδ'_lt hδ' := by
+    apply SmoothCcTensor.ext
+    change
+      (deTurckRHSSection (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection -
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection =
+        (deTurckRHSSection (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ T hδ'_lt hδ')).toSection -
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T).toSection
     rw [hg]
-  apply tensorHs.ext
-  funext i
+  ext i
   rw [deTurckSmoothN_coeff, deTurckSmoothN_coeff, hrem]
 
 /-- Smooth spectral rank-two tensors which remain in the lower `H2` state
@@ -84,18 +91,20 @@ ball, viewed as a subset of that state-ball subtype. -/
 def smoothCore (g₀ : SmoothRiemannianMetric I M) (R : ℝ) :
     Set (lowerState (I := I) (M := M) g₀ 1 R) :=
   lowerCore
-    (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ)))
+    (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 2)))
     (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (show (2 : ℝ) ≤ 3 by norm_num)) R
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)) R
 
 /-- The smooth part of a positive lower `H2` state ball is dense in the
 strong `H3` topology of the state subtype. -/
 theorem smoothCore_dense (g₀ : SmoothRiemannianMetric I M)
     {R : ℝ} (hR : 0 < R) : Dense (smoothCore (I := I) (M := M) g₀ R) := by
   exact dense_lowerCore
-    (smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ (3 : ℝ))
+    (smoothCcToTensorHs_denseRange (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 2))
     (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (show (2 : ℝ) ≤ 3 by norm_num)) hR
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)) hR
 
 /-- The chosen smooth representative of a point in the smooth state core. -/
 def coreRep (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
@@ -104,44 +113,49 @@ def coreRep (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
 
 theorem coreRep_spec (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     (x : smoothCore (I := I) (M := M) g₀ R) :
-    smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (coreRep g₀ x) =
-      (x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) :=
+    smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) (coreRep g₀ x) =
+      (x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) :=
   Classical.choose_spec x.property
 
 /-- Symmetrizing a smooth representative of a state-core point preserves its
 lower `H2` radius. -/
 theorem coreSymm_h2 (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     (x : smoothCore (I := I) (M := M) g₀ R) :
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ)
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
       (symmS (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤ R := by
   have hsymm := norm_smoothCcToTensorHs_symmS_le
-    (I := I) (M := M) g₀ (2 : ℝ) (coreRep g₀ x)
+    (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) (coreRep g₀ x)
   have hincl := tensorHsInclusion_smoothCcToTensorHs
-    (I := I) (M := M) g₀ (show (2 : ℝ) ≤ 3 by norm_num) (coreRep g₀ x)
+    (I := I) (M := M) g₀
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith) (coreRep g₀ x)
   have hxR :
       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (2 : ℝ) ≤ 3 by norm_num) (x.1.1)‖ ≤ R := x.1.2
+        (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith) (x.1.1)‖ ≤ R :=
+    x.1.2
   calc
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ)
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
         (symmS (I := I) (M := M) g₀ (coreRep g₀ x))‖ ≤
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (coreRep g₀ x)‖ := hsymm
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
+          (coreRep g₀ x)‖ := hsymm
     _ = ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (2 : ℝ) ≤ 3 by norm_num)
-          (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (coreRep g₀ x))‖ := by
+        (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+          (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+            (coreRep g₀ x))‖ := by
       rw [hincl]
     _ = ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (2 : ℝ) ≤ 3 by norm_num) (x.1.1)‖ := by rw [coreRep_spec]
+        (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith) (x.1.1)‖ := by
+      rw [coreRep_spec]
     _ ≤ R := hxR
 
 /-- The genuine smooth Ricci--DeTurck nonlinearity on the smooth part of a
 lower state ball, with realization supplied exactly from that lower ball. -/
 def coreN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ} (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ) :
     smoothCore (I := I) (M := M) g₀ R →
-      tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ) :=
+      tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ) :=
   fun x => deTurckSmoothN (I := I) (M := M) g₀ g_bg 1
     (symmS (I := I) (M := M) g₀ (coreRep g₀ x)) hδ
     (hreal _ (coreSymm_h2 (I := I) (M := M) g₀ x))

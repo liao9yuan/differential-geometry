@@ -189,7 +189,7 @@ theorem MetricCompactBase.exists_stage_seed
     linarith [hqGamma.2.2.2]
   have hcapTail : ∀ᶠ n in Filter.atTop,
       HasSuppCmData (I := I) inp P L r hr phi hphi n
-        hcomplete hconn U aInf q δ := by
+        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
     filter_upwards [hptsTail, hreadTail] with n hn hreadN
     let Y := X.obj (Lphi.φ n)
     letI : TopologicalSpace Y.M := Y.topology
@@ -291,7 +291,7 @@ theorem MetricCompactBase.exists_stage_seed
           (I := I) (X.obj (Lphi.φ n)).metric x
   let Q : Nat → Prop := fun n =>
     HasSuppCmData (I := I) inp P L r hr phi hphi n
-        hcomplete hconn U aInf q δ ∧
+        hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ ∧
       ScaleAt n
   have hQ : ∀ᶠ n in Filter.atTop, Q n := by
     filter_upwards [hcapTail, hscaleTail] with n hcapN hscaleN

@@ -1,5 +1,19 @@
 # H6NormalCoord
 
+## 2026-07-27 combined control radius
+
+`exists_intr_control` is focused-green. It takes the minimum of the independently
+checked intrinsic half/two radius and intrinsic local-diffeomorphism radius, so
+one sequence-uniform positive model ball now carries both conclusions at every
+stage and center. Restriction is pointwise and introduces no new geometric
+assumption.
+
+`H6BallData` now retains the half/two estimate on the exact relative ball used
+to construct its whole-ball chart. This removes the final zero-order assembly
+ambiguity: the metric estimate and branch can no longer come from unrelated
+radius choices. Verification of the downstream `H6NormalData` source is waiting
+only for the coordinated refresh of the new `exists_intr_control` export.
+
 ## 2026-07-27 intrinsic ODE chain
 
 The unclamped intrinsic route now has checked lower producers:
@@ -159,54 +173,55 @@ waits only for the narrow upstream artifact refresh.
 - Sequence-uniform clamped zero-order metric producer: 100% proved and
   target-checked. It gives one curvature radius `r0`, but still intersects it
   with the pointwise `framedJacobiRadius`.
-- Sequence-uniform relative-radius/profile theorem: 0%; its dedicated
-  zero-order Jacobi/Rm04 machinery is 100%. Natural-domain containment,
-  global spray smoothness, intrinsic-lift identification, and smooth time-one
-  dependence plus the intrinsic Jacobi endpoint differential are proved. The
-  Route-A-plus-Route-C architecture is fixed, and the unclamped quantitative
-  intrinsic metric estimate is exact-green. `exists_intr_branches` now also
-  gives, on the same sequence-uniform ball, nonconjugacy and a selected smooth
-  intrinsic inverse branch at every launch vector; the H6 module refresh is
-  exact-green. The remaining profile gap is
-  the canonical name/radius migration and final H6 choice of bounds together
-  with its profile; the profile cannot target an arbitrary shrinkable bounds
-  record.
+- Intrinsic radius, injectivity, and whole-ball-branch infrastructure: 100%
+  proved; the existing checked artifacts precede the latest combined-radius
+  projection, whose source is focused-green.
+- Branch-parametric consumer migration: about 35%. The first center/readout
+  layer is migrated in source; its ordered Gate-4 verification is waiting on
+  an unrelated exact writer.
 - Native all-order `NormalCoordMetricBoundInput` producer theorem: 0%; its
   dedicated machinery is about 35%, because the high-order curvature-to-metric
   jet induction has not been formalized.
+- Overall native H6 producer machinery: about 55%; the final
+  `exists_h6NormalData` theorem is unstated and therefore 0%.
 - Unconditional MSM135 Theorem 3.9: 0%. Conditional Theorem 3.9 remains 100%;
   whole HCG compactness machinery remains about 60%.
 
 ## Next target
 
-The canonical architecture in `H6_RADIUS_CONSULT.md` is resolved as Route A
-plus Route C. Geometry Stages 1--4, the unclamped intrinsic zero-order estimate,
-and its uniform nonconjugacy/local-branch consequence are checked at source
-  and exact module levels. The smallest remaining lower-layer API is the off-zero local agreement
-of the chart-fixed exponential with the intrinsic exponential on the natural
-`expDomain`. This is exactly the next consumer recorded in
-`Comparison/InjectivityRadius.md`: combine it with `exp_dom_of_inj_rad` and
-`intrFrame_not_conj` to obtain a partial diffeomorphism on the geometric
-injectivity ball. Then the canonical radius package can consume that ball and
-H6 can choose its metric-bound record and relative profile together. Higher
-coordinate derivatives remain a separate curvature-jet induction.
+Resume from the live gates in `H6_RADIUS_CONSULT.md`:
+
+1. verify the already migrated Gate-4 legacy-provider consumer chain in its
+   recorded dependency order;
+2. parameterize the selected diagonal/root equation by the same chart family,
+   recheck it under `legacyChartFamily`, and only then instantiate it with the
+   H6 provider;
+3. prove the independent fixed-tube all-order curvature-to-coordinate-metric
+   jet induction and assemble `exists_h6NormalData`.
+
+The principal mathematical frontier is item 3. It must remain a direct
+quantitative producer, not a new input record or an assumption equivalent to
+the desired metric-jet bounds.
 
 ## Migration audit
 
-The minimal canonical migration is not a new parallel API:
+The migration is provider-based, not a new parallel normal-coordinate API.
 
-1. `Geometry/Comparison/InjectivityRadius.lean` must measure injectivity of
-   `z |-> exp_x(normalFrame z)` on model balls, equivalently `exp_x` on
-   intrinsic `g_x` tangent balls.
-2. `Geometry/Comparison/ExpBallDiffeo.lean` must restrict that same framed
-   exponential map, not the raw model identification.
-3. `C4/StepBInputs.lean` should retain its public HCG names but redefine
-   `normalCoordMetric` through `framedExpDiffeo` and `normalTransition` through
-   the checked generic `framedTransition`.
-4. Downstream B/C files should then need proof-shape repairs rather than new
-   hypotheses. The existing raw formulas remain useful only as implementation
-   lemmas relating framed coordinates to the underlying tangent-fiber map.
+1. Move the generic `exists_diffeo_of_injOn` theorem to a cycle-free
+   local-diffeomorphism file and re-export it from `ExpBallDiffeo`.
+2. Give `injRadius` intrinsic framed-map semantics. The chart-fixed backend
+   may remain temporarily under an explicit compatibility name.
+3. Add a `NormalBallChart`-style interface carrying a radius, a partial
+   diffeomorphism, ball-to-source containment, and agreement with the total
+   intrinsic framed map.
+4. Make the current qualitative branch implement that interface and migrate
+   consumers while keeping the selected route green.
+5. Construct the H6 provider from `hd.decay`, the uniform `r0`, and the generic
+   glue, then switch consumers once.
+6. Remove `NormalRadiusProfile.le_exp_radius` and legacy `expRadiusGp` source
+   proofs from the endpoint path. Do not attempt to prove a uniform lower
+   bound for that qualitative legacy choice.
+7. Prove the all-order metric-jet producer and assemble `H6NormalData`.
 
-The generic frame, chart, transition, radial-ball, differential, and pullback
-identities are now available, so none of those layers should be rebuilt during
-the migration.
+The generic frame, intrinsic exponential, endpoint Jacobi, pullback metric,
+and zero-order estimates are settled and should be reused rather than rebuilt.

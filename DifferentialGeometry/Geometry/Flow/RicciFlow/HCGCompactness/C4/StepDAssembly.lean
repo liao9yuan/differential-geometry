@@ -1243,7 +1243,68 @@ theorem compactness_conn
     letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
     ConnectedSpace C.mc.limit.M := by
   classical
-  dsimp only [compactness_canon]
+  let hdirectedEx := directed_of_b1 (I := I) P B
+  let σ := Classical.choose hdirectedEx
+  have hσpack := Classical.choose_spec hdirectedEx
+  have hdirected := hσpack.2
+  letI : ∀ j, TopologicalSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).topology
+  letI : ∀ j, ChartedSpace H (X.obj (σ j)).M := fun j => (X.obj (σ j)).charted
+  letI : ∀ j, IsManifold I ∞ (X.obj (σ j)).M := fun j => (X.obj (σ j)).smooth
+  letI : ∀ j, T2Space (X.obj (σ j)).M := fun j => (X.obj (σ j)).t2
+  letI : ∀ j, SigmaCompactSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).sigmaCompact
+  letI : ∀ j, MetricSpace (X.obj (σ j)).M := fun j => (P (σ j)).ms
+  let Ψ := Classical.choose hdirected
+  have hΨpack := Classical.choose_spec hdirected
+  have hbase := hΨpack.1
+  have hdata := hΨpack.2
+  letI : ∀ j, MetricSpace (X.obj (σ j)).M := fun j =>
+    alignedMetric (I := I) (σ j) (P (σ j))
+  letI : ∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj (σ j)).M := fun j => by
+    change IsManifold I ∞ (X.obj (σ j)).M
+    infer_instance
+  letI : ∀ j, Bundle.RiemannianBundle
+      (fun x : (X.obj (σ j)).M => TangentSpace I x) :=
+    fun j => (X.obj (σ j)).riemBundle
+  letI : ∀ j, IsRiemannianManifold I (X.obj (σ j)).M := fun j => by
+    refine ⟨fun x y => ?_⟩
+    have hreal := (P (σ j)).realizes x y
+    rw [edist_dist, ← hreal]
+    rfl
+  letI : ∀ j, ProperSpace (X.obj (σ j)).M := fun j =>
+    alignedProper (I := I) (σ j) (P (σ j))
+  let b := fun j => (X.obj (σ j)).basepoint
+  let g := fun j => (X.obj (σ j)).metric
+  have hD : Nonempty (D6ChainData (I := I) b Ψ g) := by
+    obtain ⟨j₀, hj₀, D₀, hU, hmap, _φ, _hφ, gInf, _hconv, hclose, hstep⟩ :=
+      exists_limits_close (I := I) b Ψ hbase g (by
+        intro j x v
+        simpa using
+          (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (g j) x v)) hdata
+    exact ⟨
+      { start := j₀
+        one_le := hj₀
+        zero := D₀
+        source := hU
+        maps := hmap
+        metric := gInf
+        close := hclose
+        step := hstep }⟩
+  let D := Classical.choice hD
+  let j₀ := D.start
+  let D₀ := D.zero
+  letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+  letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+  let S := tailBallSystem (I := I) b Ψ hbase g (by
+    intro j x v
+    simpa using
+      (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (g j) x v)) j₀ D₀
+  letI : ∀ n, PreconnectedSpace (tailBallOpen b j₀ n) := fun n =>
+    tailBall_preconn (I := I) b j₀ n
+  change ConnectedSpace S.toSeqSystem.Lim
   infer_instance
 
 /-- The public Step-D conclusion, obtained by forgetting the concrete

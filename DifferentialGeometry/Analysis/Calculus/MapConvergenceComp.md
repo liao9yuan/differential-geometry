@@ -66,3 +66,15 @@ by `mapDerivNorm` and avoids repeating this diagonal argument in C4 consumers.
 
 Focused verification passed.  This is quantifier-order infrastructure only;
 the chart-to-intrinsic bridge and `StepB1RawInput` remain separate endpoints.
+
+## 2026-07-27 finite-Pi projection home
+
+`mapCInf_apply` now lives in this analysis layer beside `mapCInfConv_pi`.
+It projects compact `C∞` convergence of a finite Pi-valued family to any one
+coordinate, using the Pi iterated-derivative and operator-norm identities.
+The declaration and call shape are unchanged; the duplicate HCG-local copy was
+removed from `StepCAtomConv`.
+
+Focused verification passed. This is a dependency-boundary repair, not a new
+H6 estimate: `exists_h6NormalData` remains theorem-level 0%, while its dedicated
+producer machinery remains about 55%.

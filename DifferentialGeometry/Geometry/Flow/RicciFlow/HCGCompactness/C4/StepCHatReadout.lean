@@ -903,8 +903,13 @@ theorem exists_hat_cm_min
                         ∃ hcm : CenterInput (I := I)
                             (X.obj (L.φ n)).metric (mu x) pts join x
                             (radSeq a b x),
-                          HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn
-                            q δ alpha (mu x) pts join x (radSeq a b x) hcm := by
+                          HasChartCmSol (I := I) (X.obj (L.φ n))
+                            (hcomplete.complete (L.φ n)) (hconn (L.φ n))
+                            (seqCenterD hd P L n (alpha.1 : Nat))
+                            (legacyBallChart (I := I) (X.obj (L.φ n))
+                              (seqCenterD hd P L n (alpha.1 : Nat)))
+                            (q := q alpha) (delta := δ alpha)
+                            (mu x) pts join x (radSeq a b x) hcm := by
   classical
   obtain ⟨aMin, haMin, hmin⟩ :=
     exists_slot_min (I := I) hprof hre hcomplete hconn
@@ -1066,10 +1071,10 @@ theorem exists_hat_cm_min
         apply (ENNReal.ofReal_le_ofReal ?_).trans_lt hcage6
         nlinarith [hpos a b x]
       refine ⟨hcm, ?_⟩
-      have hout := exists_hat_cm_sol_at (I := I) hd P hre L pb r n
+      have hout := exists_hat_cmC_at (I := I) hd P hre L pb r n
         hcomplete hconn q δ hqdata hn alpha (mu x) pts join x
         (radSeq a b x) hcm (hmu.sum_one x hx) (hs hx) hradCage
-      simpa only [HasHatCmStrictAt, pts, join] using hout
+      simpa only [pts, join] using hout
 
 end HCGCompactness
 end DifferentialGeometry

@@ -54,15 +54,14 @@ namespace RiemannianMetricComplete
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Global uniform equivalence of smooth Riemannian metrics preserves
-completeness. -/
-theorem of_uniformEquiv
+/-- A global positive lower bound by a complete smooth Riemannian metric
+preserves completeness. -/
+theorem of_lower
     {g h : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)
-    {C : Real} (hC : 1 ≤ C)
-    (hcomp : ∀ x : M, ∀ v : TangentSpace I x,
-      C⁻¹ * g.inner x v v ≤ h.inner x v v ∧
-      h.inner x v v ≤ C * g.inner x v v) :
+    {c : Real} (hc : 0 < c)
+    (hlower : ∀ x : M, ∀ v : TangentSpace I x,
+      c * g.inner x v v ≤ h.inner x v v) :
     RiemannianMetricComplete (I := I) h := by
   letI : IsManifold I 1 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞)
@@ -79,20 +78,18 @@ theorem of_uniformEquiv
     ⟨h.inner, h.contMDiff.continuous, by intro x v w; rfl⟩
   letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
 
-  have hCpos : 0 < C := zero_lt_one.trans_le hC
-  have hCinv : 0 < C⁻¹ := inv_pos.mpr hCpos
-  let a : ENNReal := ENNReal.ofReal (Real.sqrt C⁻¹)
+  let a : ENNReal := ENNReal.ofReal (Real.sqrt c)
   have ha0 : a ≠ 0 := by
-    exact ne_of_gt (ENNReal.ofReal_pos.mpr (Real.sqrt_pos.2 hCinv))
+    exact ne_of_gt (ENNReal.ofReal_pos.mpr (Real.sqrt_pos.2 hc))
   have hatop : a ≠ (⊤ : ENNReal) := ENNReal.ofReal_ne_top
   have hdist : ∀ x y : M,
       a * riemannianEDistOf (I := I) g x y ≤
         riemannianEDistOf (I := I) h x y := by
     intro x y
-    rw [← edistOf_scale (I := I) C⁻¹ hCinv g x y]
+    rw [← edistOf_scale (I := I) c hc g x y]
     exact edistOf_mono (I := I) _ _ (by
       intro z v
-      simpa only [scaleMetric_inner] using (hcomp z v).1) x y
+      simpa only [scaleMetric_inner] using hlower z v) x y
 
   refine EMetric.complete_of_cauchySeq_tendsto (α := M) fun s hs => ?_
   have hsTarget : ∀ ε > (0 : ENNReal), ∃ N,
@@ -122,6 +119,22 @@ theorem of_uniformEquiv
     exact lt_of_le_of_lt (hdist (s m) (s n)) (hN m hm n hn))
   obtain ⟨x, hx⟩ := cauchySeq_tendsto_of_complete hsSource
   exact ⟨x, hx⟩
+
+omit [CompleteSpace E] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Global uniform equivalence of smooth Riemannian metrics preserves
+completeness. -/
+theorem of_uniformEquiv
+    {g h : SmoothRiemannianMetric I M}
+    (hg : RiemannianMetricComplete (I := I) g)
+    {C : Real} (hC : 1 ≤ C)
+    (hcomp : ∀ x : M, ∀ v : TangentSpace I x,
+      C⁻¹ * g.inner x v v ≤ h.inner x v v ∧
+      h.inner x v v ≤ C * g.inner x v v) :
+    RiemannianMetricComplete (I := I) h :=
+  of_lower hg (inv_pos.mpr (zero_lt_one.trans_le hC))
+    (fun x v => (hcomp x v).1)
 
 end RiemannianMetricComplete
 end DifferentialGeometry

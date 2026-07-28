@@ -3,9 +3,9 @@
 ## Endpoint accounting
 
 - `ricci_flow_unif_existence`: 0%. Its exact Lean theorem is not yet proved.
-- Low-regularity Phase N machinery: about 70%. The mixed `H3 -> H1`
-  nonlinearity and forcing-space solver are assembled; this file supplies the
-  first same-horizon trace bootstrap, but the spatial parabolic bootstrap to a
+- Low-regularity Phase N machinery: about 81%. The mixed `H3 -> H1`
+  nonlinearity and forcing-space solver are now checked, and this file supplies
+  the first same-horizon trace bootstrap. The spatial parabolic bootstrap to a
   smooth solution is still missing.
 - `extends_of_rmBounded`: still depends directly on the unproved endpoint.
 
@@ -20,13 +20,15 @@ as a `CrossScaleField`.  Its intended exported facts are:
   companion almost everywhere;
 - `crossRepr_ball`: an a.e. `H^(a+1)` ball bound becomes an every-time bound,
   using continuity of the squared intermediate norm;
-- `duhRepr_toFun`, `duhRepr_field_ae`, and `duhRepr_ball`: direct Duhamel and
-  order-one Ricci--DeTurck specializations.
+- `duhRepr_toFun`, `duhRepr_field_ae`, and `duhRepr_ball`: direct Duhamel
+  specializations for an arbitrary intermediate-order state bound;
+- `duhRepr_meas`, `duhRepr_memLp`, `duhReprL2`, `duhReprL2_ae`, and
+  `duhReprL2_ae_le`: the intermediate representative as an honest
+  same-horizon time-`L2` field, retaining the prescribed state-ball bound.
 
 All conclusions retain the solver's original `T`; no `d <= T` is introduced.
-At the time of this note these declarations are source-complete but have not
-yet had a focused Lean check because the shared workspace's named Lean build is
-still reserved by another lane.
+Focused Lean verification passed without local warnings after the time-`L2`
+packaging was added on 2026-07-27.
 
 ## Three audited bootstrap routes
 
@@ -65,11 +67,14 @@ high base order.  In dimension three their visible hypotheses are
 positive `d <= T`.  They therefore neither accept the live `a = 1` solution nor
 preserve its already fixed uniform horizon.
 
-The smallest faithful next producer is a low-base, same-horizon parabolic
-regularity step for the concrete Ricci--DeTurck equation: from the order-one
-Duhamel identity, the continuous `H2` representative supplied here, and the
-`L2_t H3` field, construct an `H2` lift of the nonlinear forcing (equivalently
-an order-two maximal-regularity solution) on the same preselected `T`.  This
-must use the variable-coefficient/quasilinear equation; a generic semigroup or
-Nemytskii lemma cannot supply it.
+The faithful next producer is the low-base, same-horizon variable-coefficient
+step.  The actual `H4 -> H2` principal operator and its measurable time-family
+packaging are now available; the remaining geometric input is the
+principal-subtracted `H3 -> H2` lower-order family with an `L2` time norm.
+Once that family is produced, the mixed nonautonomous solver can construct the
+order-two maximal-regularity solution on the same preselected `T`.
+
+The import surface was narrowed to the cross-scale and maximal-regularity
+layers actually used here.  This avoids pulling the full low-regularity
+Ricci--DeTurck coefficient tree into checks of the trace package.
 

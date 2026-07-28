@@ -46,6 +46,7 @@ joint chart-Gram reconstruction can be used on the same `T`.
 This remains fixed-`g0`, dimension-three machinery.  No generic-family
 uniformization and neither public endpoint theorem is claimed here.
 
-Lean verification is deferred while the shared named build occupies the sole
-Lean slot.  No `sorry`, `admit`, axiom, new class, instance, or notation is
+Focused Lean verification passed without local warnings on 2026-07-27.
+The bridge is therefore checked against the live `lowreg_partial_sol`
+interface.  No `sorry`, `admit`, axiom, new class, instance, or notation is
 introduced.

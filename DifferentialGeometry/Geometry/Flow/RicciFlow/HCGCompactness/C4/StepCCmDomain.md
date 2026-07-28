@@ -177,3 +177,15 @@ This section supersedes the 2026-07-09 in-progress paragraph below.
   configuration domain remains open; the finite-hat instantiation is still
   0% complete.  The running machinery percentages above therefore remain
   unchanged.
+
+## 2026-07-27 explicit legacy-provider signature
+
+`centerReadoutB_min` now fixes `legacyBallChart` explicitly in both
+`IsNormalDiag` and `NormalDiagFence`. Previously Lean generalized the omitted
+optional chart argument in the elaborated public signature, so downstream
+callers received an unintended chart-valued hypothesis. The source focused
+check and exact target refresh passed (`3988/3988`).
+
+This is a Gate 4 API repair, not a new radius theorem. It lets the legacy
+provider be migrated through the chart-parametric readout before the H6
+provider switch.

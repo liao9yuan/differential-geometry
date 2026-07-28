@@ -139,4 +139,78 @@ theorem hloc_comp
       hfΦ hy'.1, hgΨ hy'.2]
     rfl
 
+section InjectiveGlue
+
+open Function
+
+variable {𝕜' : Type*} [NontriviallyNormedField 𝕜']
+  {E' : Type*} [NormedAddCommGroup E'] [NormedSpace 𝕜' E']
+  {F' : Type*} [NormedAddCommGroup F'] [NormedSpace 𝕜' F']
+  {H₁ : Type*} [TopologicalSpace H₁]
+  {G₁ : Type*} [TopologicalSpace G₁]
+  {I' : ModelWithCorners 𝕜' E' H₁}
+  {J' : ModelWithCorners 𝕜' F' G₁}
+  {M' : Type*} [TopologicalSpace M'] [ChartedSpace H₁ M']
+  {N' : Type*} [TopologicalSpace N'] [ChartedSpace G₁ N']
+  {n : WithTop ℕ∞}
+
+/-- An injective local diffeomorphism on an open set restricts to a partial
+diffeomorphism with exactly that source and its image as target. -/
+theorem exists_diffeo_of_injOn [Nonempty M']
+    {f : M' → N'} {s : Set M'}
+    (hf : IsLocalDiffeomorphOn I' J' n f s)
+    (hs : IsOpen s) (hinj : InjOn f s) :
+    ∃ Φ : PartialDiffeomorph I' J' M' N' n,
+      Φ.source = s ∧ Φ.target = f '' s ∧ EqOn Φ f s := by
+  classical
+  have htgt : IsOpen (f '' s) := by
+    rw [isOpen_iff_forall_mem_open]
+    rintro y ⟨x, hx, rfl⟩
+    obtain ⟨φ, hxφ, hEq⟩ := hf ⟨x, hx⟩
+    refine ⟨φ '' (s ∩ φ.source), ?_, ?_, ⟨x, ⟨hx, hxφ⟩, (hEq hxφ).symm⟩⟩
+    · rintro z ⟨x', ⟨hx's, hx'φ⟩, rfl⟩
+      exact ⟨x', hx's, hEq hx'φ⟩
+    · exact φ.toOpenPartialHomeomorph.isOpen_image_of_subset_source
+        (hs.inter φ.open_source) inter_subset_right
+  have hinv : ContMDiffOn J' I' n (invFunOn f s) (f '' s) := by
+    apply contMDiffOn_of_locally_contMDiffOn
+    rintro y ⟨x, hx, rfl⟩
+    obtain ⟨φ, hxφ, hEq⟩ := hf ⟨x, hx⟩
+    refine ⟨φ '' (s ∩ φ.source),
+      φ.toOpenPartialHomeomorph.isOpen_image_of_subset_source
+        (hs.inter φ.open_source) inter_subset_right,
+      ⟨x, ⟨hx, hxφ⟩, (hEq hxφ).symm⟩, ?_⟩
+    have hsub : φ '' (s ∩ φ.source) ⊆ φ.target := by
+      rintro z ⟨x', ⟨_, hx'φ⟩, rfl⟩
+      exact φ.toPartialEquiv.map_source hx'φ
+    refine ((φ.symm.contMDiffOn.mono hsub).mono inter_subset_right).congr ?_
+    rintro z ⟨-, x', ⟨hx's, hx'φ⟩, rfl⟩
+    have h2 : f x' = φ x' := hEq hx'φ
+    have hmem : invFunOn f s (φ x') ∈ s :=
+      invFunOn_mem ⟨x', hx's, h2⟩
+    have happ : f (invFunOn f s (φ x')) = φ x' :=
+      invFunOn_eq ⟨x', hx's, h2⟩
+    have h1 : φ.toPartialEquiv.symm (φ x') = x' :=
+      φ.toPartialEquiv.left_inv hx'φ
+    change invFunOn f s (φ x') = φ.toPartialEquiv.symm (φ x')
+    rw [h1]
+    exact hinj hmem hx's (by rw [happ, h2])
+  refine ⟨{
+    toFun := f
+    invFun := invFunOn f s
+    source := s
+    target := f '' s
+    map_source' := fun x hx => ⟨x, hx, rfl⟩
+    map_target' := fun y ⟨x', hx', hxy⟩ =>
+      invFunOn_mem ⟨x', hx', hxy⟩
+    left_inv' := fun x hx => hinj.leftInvOn_invFunOn hx
+    right_inv' := fun y ⟨x', hx', hxy⟩ =>
+      invFunOn_eq ⟨x', hx', hxy⟩
+    open_source := hs
+    open_target := htgt
+    contMDiffOn_toFun := hf.contMDiffOn
+    contMDiffOn_invFun := hinv }, rfl, rfl, fun x _ => rfl⟩
+
+end InjectiveGlue
+
 end DifferentialGeometry

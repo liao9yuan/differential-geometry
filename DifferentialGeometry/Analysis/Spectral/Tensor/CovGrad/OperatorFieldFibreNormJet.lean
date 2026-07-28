@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutat
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
 
 noncomputable section
@@ -415,40 +416,6 @@ theorem rfns_slotExtendIter_eq (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         (slotExtendIter (I := I) (M := M) g r s w Φ) x, ih Φ x]
       rw [pow_succ]
       ring
-
-def rsDomDomCongr {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
-    (T : TensorRSSpace r s I x) : TensorRSSpace r s I x :=
-  TensorRSSpace.ofCLM
-    ((((tensor0SSpace_continuousLinearEquiv s x).symm.toContinuousLinearMap).comp
-        (((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ).toContinuousLinearEquiv
-            : Tensor0SModel s ℝ E ≃L[ℝ] Tensor0SModel s ℝ E).toContinuousLinearMap.comp
-          ((tensor0SSpace_continuousLinearEquiv s x).toContinuousLinearMap))).comp
-      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T))
-
-lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
-    (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) :
-    Tensor0SSpace.toModel
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from rsDomDomCongr σ T) d) =
-      ContinuousMultilinearMap.domDomCongr σ
-        (Tensor0SSpace.toModel
-          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) d)) := by
-  rw [rsDomDomCongr, TensorRSSpace.ofCLM]
-  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.comp_apply]
-  rw [Tensor0SSpace.toModel]
-  simp only [ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.apply_symm_apply,
-    LinearIsometryEquiv.coe_toContinuousLinearEquiv]
-  rfl
-
-lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
-    (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :
-    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from rsDomDomCongr σ T) d v =
-      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) d (fun k => v (σ k)) := by
-  classical
-  have hL := toModel_rsDomDomCongr_apply (I := I) (M := M) σ T d
-  have hfib : ∀ (y : Tensor0SSpace s I x) (w : Fin s → TangentSpace I x),
-      (y : Tensor0SSpace s I x) w = Tensor0SSpace.toModel y w := fun y w => rfl
-  rw [hfib, hL, ContinuousMultilinearMap.domDomCongr_apply, ← hfib]
 
 lemma rsDomDomCongr_rsDomDomCongr {r s : ℕ} {x : M} (σ τ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) :

@@ -1,9 +1,9 @@
 # LowRegRealize
 
-## 2026-07-19
+## 2026-07-27
 
 Source implementation contains no `sorry`, `admit`, axiom, or replacement
-hypothesis; focused verification is pending.
+hypothesis; focused verification passed after the namespace migration.
 
 `lowreg_realize_h2` is the direct lower-order realization bridge: an `H2`
 spectral tensor whose realized smooth perturbation has the required

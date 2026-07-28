@@ -91,3 +91,17 @@ diagnostics.  No targeted `StepCStageFill` build was run.  The selected framed
 filler/configuration layer is therefore source-checked (100%); the downstream
 global comparison-map and `StepB1RawInput` producers are still not revalidated,
 and textbook B1 remains theorem-level 0%.
+
+## 2026-07-28 chart-parametric finite-stage configuration
+
+`pairStageFillSub`, `stagePtsSub`, `stageWeightSub`, and `stageCfgSub` now take
+one optional `NormalChartFamily`.  Both transition directions, point
+transport, and the global weight readout use that same family.  The legacy
+default remains definitionally equal to the prior framed implementation.
+
+An isolated current-interface replay passed through
+`StepBInputs -> NormalPhaseEndpoint -> NormalBranchConv -> StepCStageFill`.
+The only local repair was to install the selected stage's manifold instances
+explicitly in `stageWeightSub`, which the retired `seqAtomChart` wrapper had
+previously hidden.  Gate 5 now continues at `stageInvVelSub` and
+`stageRootSub`; the final H6 root instantiation is not yet complete.

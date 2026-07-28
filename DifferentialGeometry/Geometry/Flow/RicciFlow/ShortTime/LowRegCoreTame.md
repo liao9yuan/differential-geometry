@@ -29,8 +29,9 @@ low-regularity Ricci--DeTurck estimate.  It does not use the coarse
 ## Verification
 
 Source assembly is complete and contains no `sorry`, `admit`, axiom, new
-class, instance, or notation.  Lean verification was intentionally not run
-while the shared named build occupied the only Lean slot.
+class, instance, or notation.  Focused Lean verification passed on
+2026-07-27 after aligning the dense-core Sobolev exponents with the live
+`lowerState gâ‚€ 1 R` definition.
 
 ## Remaining bridge
 

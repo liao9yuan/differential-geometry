@@ -13,12 +13,13 @@ solution.
 
 ## Status
 
-Focused verification passed with no diagnostics.
+Focused verification passed with no diagnostics.  The bridge is now consumed
+by the focused-green `ham3_closed_upg` construction.
 
 ## Progress
 
 - `convOut_of_src`: implementation and focused verification 100%.
-- Closed-window Hamilton `ConvOut`: theorem not yet stated (0%); this bridge is
-  dedicated machinery for that theorem.
+- Conditional closed-window Hamilton `FlowUpgradeData`: 100%.
+- Conditional closed-window smooth-CGH package: 100%.
 - `ham3_cgh_limit`: 0%; this file does not supply the time-zero
   `MetricCompactBase` producer.

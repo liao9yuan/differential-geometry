@@ -40,29 +40,9 @@ namespace InjRadiusDecayInput
 
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The Cheeger--Gromov--Taylor injectivity-radius lower bound
-`μ[r] = a·min(ι₀,1)ⁿ·e^{−Cr}` of MSM135 Proposition `lbl384`.  This is exactly
-the radius appearing in `InjRadiusDecayInput.decay`. -/
-noncomputable def mu (hd : InjRadiusDecayInput (I := I) X) (r : Real) : Real :=
-  hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) * Real.exp (-hd.C * r)
-
 /-- MSM135 eq (`lbl386`): the covering radius `λ[r] = μ[r]/D`. -/
 noncomputable def lambda (hd : InjRadiusDecayInput (I := I) X) (D r : Real) : Real :=
   hd.mu r / D
-
-theorem mu_pos (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 < hd.mu r :=
-  mul_pos (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)) (Real.exp_pos _)
-
-theorem mu_nonneg (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 ≤ hd.mu r :=
-  (hd.mu_pos r).le
-
-theorem mu_antitone (hd : InjRadiusDecayInput (I := I) X) : Antitone hd.mu := by
-  intro r₁ r₂ h
-  have hK : 0 ≤ hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) :=
-    (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)).le
-  have hexp : Real.exp (-hd.C * r₂) ≤ Real.exp (-hd.C * r₁) :=
-    Real.exp_le_exp.mpr (by nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg])
-  exact mul_le_mul_of_nonneg_left hexp hK
 
 /-- On every fixed basepoint-distance sublevel, `mu R` is a positive
 injectivity-radius lower bound independent of the sequence index. -/
@@ -117,7 +97,9 @@ theorem lambda_hasInjRadiusAt (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   have hdecay := hd.decay k x
   rw [hasInjRadiusAt_iff] at hdecay ⊢
   refine ⟨hd.lambda_pos (lt_of_lt_of_le one_pos hD) _, ?_⟩
-  exact le_trans (ENNReal.ofReal_le_ofReal (hd.lambda_le_mu hD _)) hdecay.2
+  intro hcomplete
+  exact le_trans (ENNReal.ofReal_le_ofReal (hd.lambda_le_mu hD _))
+    (hdecay.2 hcomplete)
 
 end InjRadiusDecayInput
 
@@ -243,32 +225,6 @@ theorem lambdaNet_separated (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k 
   have hyy : y ∈ hd.lambdaBall D k y :=
     lt_of_eq_of_lt (edist_self y) (ENNReal.ofReal_pos.mpr (hd.lambda_pos hD _))
   exact hdisj hyx hyy
-
-/-- The supplied distance realizes the Riemannian emetric of each manifold:
-`edist x y = ofReal (dist k x y)`, with `dist ≥ 0`.  This makes precise the
-documented intent that `PointedSeqDistance` is the Riemannian distance, now that
-the emetric (`PointedRiemannianManifold.emetricSpace`) is available.  It bridges
-the `edist`-separated net to the `dist`-stated volume input A0'. -/
-structure RealizesEdist (hd : InjRadiusDecayInput (I := I) X) : Prop where
-  dist_nonneg : ∀ (k : Nat) (x y : (X.obj k).M), 0 ≤ hd.dist k x y
-  edist_eq : ∀ (k : Nat) (x y : (X.obj k).M),
-    (letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
-     edist x y) = ENNReal.ofReal (hd.dist k x y)
-
-namespace RealizesEdist
-
-/-- Reindex the realized-distance proof along a subsequence. -/
-theorem subseq {hd : InjRadiusDecayInput (I := I) X}
-    (hre : hd.RealizesEdist) (f : Nat -> Nat) :
-    (hd.subseq f).RealizesEdist := by
-  refine ⟨?_, ?_⟩
-  · intro k x y
-    exact hre.dist_nonneg (f k) x y
-  · intro k x y
-    simpa [InjRadiusDecayInput.subseq, PointedRiemannianSeq.subseq] using
-      hre.edist_eq (f k) x y
-
-end RealizesEdist
 
 /-- Under `RealizesEdist` the supplied distance is symmetric (from `edist_comm`). -/
 theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}

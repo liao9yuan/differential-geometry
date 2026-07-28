@@ -317,6 +317,25 @@ noncomputable def cometricLmodel (g₀ : SmoothRiemannianMetric I M) (x : M) :
   (inverseMetricSharpFib (I := I) g₀ x).comp
     (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm.toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
+/-- Raising a model covector with `cometricLmodel` inverts metric lowering. -/
+theorem cometricLmodel_inner (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (φ : E →L[ℝ] ℝ) (u : TangentSpace I x) :
+    g₀.inner x (cometricLmodel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) u = φ (u : E) := by
+  have h :
+      cometricLmodel (I := I) g₀ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ) =
+        inverseMetricSharpFib (I := I) g₀ x
+          ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv
+              (𝕜 := ℝ) (I := I) 1 x).symm
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) := rfl
+  rw [h, inverseMetricSharpFib_inner (I := I) g₀ x _ u, cotangentToDualLinear_apply,
+    cotangentToDual_apply]
+  change (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)
+      (fun _ : Fin 1 => (u : E)) = φ (u : E)
+  rw [Tensor0SBundle.model_covectorOfCLM_apply]
+
 /-- **The model `g₀⁻¹` double trace of the two leading covariant slots, `(0, s + 2) → (0, s)`.**  Given
 the model cometric raise `L : Tensor0SModel 1 → E` (`L := cometricLmodel g₀ x`), the genuine cometric
 double trace of the two leading covariant slots: raise slot `0` via `L` against the model `cDualBasis`

@@ -173,3 +173,27 @@ all-pairs stage-map and metric-carrier validation.  The source proof body of
 checks.  The separately named textbook B1 theorem and unconditional endpoints
 remain theorem-level 0%; rounded machinery estimates remain B1 95%, C4 87%,
 whole HCG 60%.
+
+## 2026-07-27 controlled-chart capstone
+
+`HasSuppCmFin` and `HasSourceCmFin` now retain `HasChartCmSol` at the selected
+legacy provider. The finite source cover, common pair-index tail, radius
+function, and subsequence proof are unchanged. This removes the expanded
+legacy `chartCmEqnB`/IFT tuple from the selected capstone while preserving the
+old lower compatibility API.
+
+Source migration is complete. Focused verification is pending the exact
+`NormalBranchHessian -> NormalBranchCage -> StepCHatReadout` export chain.
+
+## 2026-07-27 chart-family plumbing
+
+`HasSuppCmFin`, `HasSourceCmFin`, and `HasSuppCmData` now take one
+stage-indexed `NormalChartFamily`. Their subsequence and source-cover
+projections preserve exactly that family, so a center solution cannot silently
+change providers after refinement.
+
+The existing `MetricCompactBase` producers instantiate the new parameter with
+`legacyChartFamily X`; this is the behavior-preserving migration gate. The
+same predicates are now ready to receive `H6NormalData.chart`, but that provider
+switch is not yet claimed complete. Focused verification awaits the upstream
+controlled-chart artifact refresh.

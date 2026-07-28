@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocalMetrics
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtoms
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.LiveCenterScale
 
 /-!
 # C-infinity convergence of quadratic Step-C atom readouts
@@ -134,34 +135,6 @@ theorem quadBump_conv
     (mapCInfConv_const (U := (Set.univ : Set Real)) f)
     hqc hqinfc (fun _ => hf.contDiffOn) hf.contDiffOn
     (Set.mapsTo_univ _ _) (fun _ => Set.mapsTo_univ _ _)
-
-/-- A coordinate of a finite Pi-valued family inherits `C^infty` convergence
-on compacts. -/
-theorem mapCInf_apply {ι Q : Type*} [Fintype ι]
-    [NormedAddCommGroup Q] [NormedSpace Real Q]
-    {U : Set X} (hU : IsOpen U)
-    {u : Nat -> X -> (ι -> Q)} {uinf : X -> (ι -> Q)}
-    (hu : MapCInfConvOnCompacts U u uinf)
-    (huc : forall k, ContDiffOn Real (∞ : WithTop ℕ∞) (u k) U)
-    (huinfc : ContDiffOn Real (∞ : WithTop ℕ∞) uinf U) (i : ι) :
-    MapCInfConvOnCompacts U (fun k x => u k x i) (fun x => uinf x i) := by
-  intro K hK hKU p epsilon hepsilon
-  obtain ⟨k0, hk0⟩ := hu K hK hKU p epsilon hepsilon
-  refine ⟨k0, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) <= (∞ : WithTop ℕ∞) := by
-    exact_mod_cast le_top
-  have hcd : forall j : ι, ContDiffAt Real (r : ℕ∞)
-      (fun y => u k y j - uinf y j) x := by
-    intro j
-    exact (((contDiffOn_pi.mp (huc k) j).sub (contDiffOn_pi.mp huinfc j)).contDiffAt
-      (hU.mem_nhds hxU)).of_le hle
-  have hbase := hk0 k hk r hr x hx
-  simp only [mapDerivNorm] at hbase ⊢
-  change ‖iteratedFDeriv Real r (fun y j => u k y j - uinf y j) x‖ <= epsilon at hbase
-  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
-  exact (norm_le_pi_norm (fun j =>
-    iteratedFDeriv Real r (fun y => u k y j - uinf y j) x) i).trans hbase
 
 /-- Finite-family variant of `quadBump_conv`: select one bilinear coefficient
 from a convergent Pi-valued metric family and evaluate it twice on a convergent
@@ -432,101 +405,6 @@ noncomputable def stepCAtomChart
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   stepCAtom Y gamma lam hlam (framedExpDiffeo (I := I) Y.metric beta z)
-
-/-! ## Eventual live/dead slot wrappers -/
-
-/-- A total centre family for one ordered-net slot.  Before the slot becomes
-live it uses the pointed basepoint; once the slot is live it is definitionally
-the centre carried by `seqCenter`. -/
-noncomputable def seqCenterD
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
-  (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
-
-/-- The totalized centre has exactly the ordered-net radius, including the
-dead-slot convention where both sides are zero. -/
-theorem seqCenterD_dist_eq
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) :
-    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-    seqRadius hd D P (L.φ k) gamma =
-      dist (seqCenterD hd P L k gamma) (X.obj (L.φ k)).basepoint := by
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  haveI : ProperSpace (X.obj (L.φ k)).M := (P (L.φ k)).proper
-  unfold seqRadius seqCenterD seqCenter OrderedNet.netRadius
-  cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
-      (hd.lambda_continuous D) gamma <;> simp
-
-/-- Totalized moving centres commute with strict refinement of the net-limit
-data. -/
-@[simp] theorem seqCenterD_subseq
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
-    (k gamma : Nat) :
-    seqCenterD hd P (L.subseq hψ) k gamma = seqCenterD hd P L (ψ k) gamma := rfl
-
-/-- The finite subtype of slots whose Boolean profile stabilizes to live.  Only
-these slots require metric and transition-map extraction. -/
-def LiveSlot
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :=
-  {gamma : Fin (pb.A r) // L.alive (gamma : Nat) = true}
-
-/-- The stabilized live-slot subtype inherits finiteness from the frozen cage. -/
-noncomputable instance liveSlotFintype
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :
-    Fintype (LiveSlot L pb r) := by
-  letI : Finite (LiveSlot L pb r) :=
-    Finite.of_injective (fun gamma : LiveSlot L pb r => gamma.1) Subtype.val_injective
-  exact Fintype.ofFinite (LiveSlot L pb r)
-
-/-- If a slot is live at one index, its totalized centre recovers the actual
-`some` value. -/
-theorem seqCenterD_some
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat)
-    (h : (seqCenter hd D P (L.φ k) gamma).isSome = true) :
-    seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) := by
-  cases hc : seqCenter hd D P (L.φ k) gamma with
-  | none => simp [hc] at h
-  | some c => simp [seqCenterD, hc]
-
-/-- A slot whose stabilized Boolean is live eventually agrees with the
-totalized centre family. -/
-theorem seqCenterD_live
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = true) :
-    ∀ᶠ k in Filter.atTop,
-      seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) :=
-  (L.alive_eventually gamma).mono fun k hk =>
-    seqCenterD_some hd P L k gamma (hk.trans hgamma)
-
-/-- A slot whose stabilized Boolean is dead eventually has no centre. -/
-theorem seqCenter_dead
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = false) :
-    ∀ᶠ k in Filter.atTop, seqCenter hd D P (L.φ k) gamma = none :=
-  (L.alive_eventually gamma).mono fun k hk => by
-    cases hc : seqCenter hd D P (L.φ k) gamma with
-    | none => rfl
-    | some c => simp [hc, hgamma] at hk
 
 /-- Pull one ordered-net atom back by the framed exponential-side chart at
 `beta`. The wrapper installs the bundled manifold instances hidden in the

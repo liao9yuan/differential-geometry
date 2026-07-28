@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefold
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RefoldPairingCore
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjointPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
@@ -50,16 +51,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-
-/-- The Ricci order-zero combination left after adding and subtracting one
-Riemann coefficient.  It is the low-order Palatini residual; the complementary
-Riemann coefficient is the one combined with the DeTurck covariant-derivative
-arm below. -/
-def edgeRicciHalf (g g₁ : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g 2 2 :=
-  linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g₁ +
-    (1 / 2 : Real) •
-      ricciArmOrder0RiemannCoeff (I := I) (M := M) g g₁
 
 /-- The explicit zeroth-order remainder after the covariant-derivative part of
 the DeTurck coefficient has been refolded.  It contains no derivative of the
@@ -125,22 +116,6 @@ theorem edgeMetric_bal
   rw [realizedFam_inner_of_mem (I := I) g W 0 hdelta
       (edgeZeroBound (I := I) (M := M) g) hs0 x v w,
     realizedFam_inner_of_mem (I := I) g W 0 hdelta hdeltaZ hsdelta x v w]
-
-private lemma edge_rank0_decomp (x : M) (t : Tensor0SSpace 0 I x) :
-    t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) •
-      unitTensor (I := I) (M := M) x := by
-  apply Tensor0SSpace.toModel_injective
-  refine ContinuousMultilinearMap.ext (fun m => ?_)
-  beta_reduce
-  rw [show m = (fun i : Fin 0 => i.elim0 : Fin 0 → E) from by
-    funext k
-    exact k.elim0]
-  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
-  rw [show Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x)
-      (fun i : Fin 0 => i.elim0) = 1 from by
-    rw [unitTensor, Tensor0SSpace.toModel_ofModel]
-    rfl]
-  rw [smul_eq_mul, mul_one]
 
 private lemma edge_cons_sum (x : M) {n : Nat}
     (Zm : Tensor0SModel (n + 1) Real E) (d : Nat) (t : Fin d → Real)
@@ -562,86 +537,6 @@ def edgePairPartner (g gm : SmoothRiemannianMetric I M)
   domDomCongrSection (I := I) g sigma.symm
     (edgeProd4 (I := I) (M := M) g
       (edgeRaise2 (I := I) (M := M) g gm S) S)
-
-/-- The public moving-metric pair trace, arranged so that applying it to a
-rank-two tensor reproduces one Palatini refold monomial.  Keeping this field
-explicit is what later allows the second derivative to be moved by Green's
-identity before any pointwise estimate is taken. -/
-def edgePairMono (g gm : SmoothRiemannianMetric I M)
-    (G : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :
-    SmoothCcTensor g 2 2 :=
-  appCcRS (I := I) (M := M) g 2 6 2
-    (mvPairTraceOp (I := I) (M := M) g gm)
-    (rsDomDomCongrSection (I := I) (M := M) g 2 6 sigmaE
-      (slotExtendIter (I := I) (M := M) g 0 4 2
-        (domDomCongrSection (I := I) g
-          (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G)))
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-set_option maxHeartbeats 12800000 in
-/-- One moving pair-trace action is exactly one Palatini refold monomial.
-
-This is the public-API reconstruction of the algebraic identity needed by the
-closed-edge energy argument.  In particular it uses `mvPairTraceOp`, rather
-than relying on the private pair-trace implementation in the coefficient
-refold file. -/
-theorem edgeMonoRefold (g gm : SmoothRiemannianMetric I M)
-    (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
-    (σ : Equiv.Perm (Fin 4)) :
-    appCc (I := I) (M := M) g 2 2
-        (edgePairMono (I := I) (M := M) g gm G σ) S =
-      appCc (I := I) (M := M) g 4 2
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
-          (ccTensorUnitValueSection (I := I) (M := M) g S)
-          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g S) σ) G := by
-  classical
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  rw [appCc_toSection, appCc_toSection]
-  apply ContinuousLinearMap.ext
-  intro t
-  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
-  apply Tensor0SSpace.toModel_injective
-  apply ContinuousMultilinearMap.ext
-  intro v
-  rw [edge_rank0_decomp (I := I) (M := M) x t]
-  simp only [map_smul, Tensor0SSpace.toModel_smul,
-    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  congr 1
-  rw [mvPairTraceOp_apply_toModel (I := I) (M := M) g gm
-    (domDomCongrSection (I := I) g
-      (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G) x
-    ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from S.toSection x)
-      (unitTensor (I := I) (M := M) x)) v]
-  rw [show ((show Tensor0SSpace 4 I x →L[Real] Tensor0SSpace 2 I x from
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
-        (ccTensorUnitValueSection (I := I) (M := M) g S)
-        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g S) σ).toSection x)
-      ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
-        (unitTensor (I := I) (M := M) x))) =
-    curvatureRefoldMonomialBiContrFib (I := I) (M := M) gm
-      (ccTensorUnitValueSection (I := I) (M := M) g S) σ x
-      ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
-        (unitTensor (I := I) (M := M) x)) from rfl]
-  rw [curvatureRefoldMonomialBiContrFib,
-    curvatureRefoldMonomialFibFixedFrame_toModel]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  refine Finset.sum_congr rfl fun b _ => ?_
-  simp only [domDomCongrSection_unitModel,
-    ContinuousMultilinearMap.domDomCongr_apply]
-  refine congrArg₂ (· * ·) rfl ?_
-  rw [show Tensor0SSpace.toModel
-      ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
-        (unitTensor (I := I) (M := M) x)) =
-    unitModel (I := I) (M := M) g 4 G x from rfl]
-  refine congrArg _ ?_
-  funext i
-  rw [Equiv.trans_apply]
-  generalize σ i = k
-  fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -1175,24 +1070,6 @@ theorem edgePair_inner (g gm : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
   exact edgePair_l2 (I := I) (M := M) g gm S G σ
 
-/-- Pair-trace form of the DeTurck part of the second-order refold family. -/
-def edgeLiePairFam (g : SmoothRiemannianMetric I M)
-    (T : SmoothCcTensor g 0 2) {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
-    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
-    (s : Real) : SmoothCcTensor g 2 2 :=
-  s • ∑ i : Fin 3, epsilon i • ((1 / 2 : Real) •
-    (edgePairMono (I := I) (M := M) g
-        (realizedFam (I := I) g T 0 hdelta hdeltaZ s)
-        (iteratedCovGrad (I := I) g 0 2 2 T) (q i)
-      + edgePairMono (I := I) (M := M) g
-        (realizedFam (I := I) g T 0 hdelta hdeltaZ s)
-        (iteratedCovGrad (I := I) g 0 2 2 T)
-        ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
-
 /-- Rank-four formal partner of the DeTurck second-order pair family. -/
 def edgeLiePartner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}
@@ -1208,48 +1085,6 @@ def edgeLiePartner (g : SmoothRiemannianMetric I M)
       edgePairPartner (I := I) (M := M) g
         (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
         ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
-
-/-- The DeTurck second-order action is exactly the application of its
-rank-two pair-trace form to the metric difference. -/
-theorem edgeLiePair_apply
-    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
-    {delta : Real}
-    (hdelta : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g T) delta)
-    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
-      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
-    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
-    (s : Real) :
-    appCc (I := I) (M := M) g 2 2
-        (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ q epsilon s) T =
-      appCc (I := I) (M := M) g 4 2
-        (deTurckLieCovDerivRefoldC2Family
-          (I := I) (M := M) g T hdelta hdeltaZ q epsilon s)
-        (iteratedCovGrad (I := I) g 0 2 2 T) := by
-  rw [edgeLiePairFam, deTurckLieCovDerivRefoldC2Family,
-    Fin.sum_univ_three, Fin.sum_univ_three]
-  simp only [appCc_smul_left, appCc_add_left]
-  rw [edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T) (q 0),
-    edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T)
-      ((q 0).trans (Equiv.swap (0 : Fin 4) 1)),
-    edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T) (q 1),
-    edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T)
-      ((q 1).trans (Equiv.swap (0 : Fin 4) 1)),
-    edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T) (q 2),
-    edgeMonoRefold (I := I) (M := M) g
-      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T
-      (iteratedCovGrad (I := I) g 0 2 2 T)
-      ((q 2).trans (Equiv.swap (0 : Fin 4) 1))]
 
 /-- Pair-trace form of one four-monomial Palatini kernel. -/
 def edgeKernelPair (g gm : SmoothRiemannianMetric I M)

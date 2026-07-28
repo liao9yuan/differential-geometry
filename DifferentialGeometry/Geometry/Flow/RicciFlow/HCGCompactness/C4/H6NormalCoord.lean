@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialRadius
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
-import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedJacobi
+import DifferentialGeometry.Geometry.Exponential.IntrinsicBallDiffeo
 import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicGronwall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
@@ -893,6 +893,200 @@ theorem exists_intr_branches
     intrFrame_not_conj (I := I) (X.obj k).metric hEnorm x z
       (by norm_num) hlower
   exact branch_of_not_conj (I := I) (X.obj k).metric hEnorm hnot
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The uniform intrinsic H6 radius is a local-diffeomorphism domain for every
+complete intrinsic framed exponential in the sequence. -/
+theorem exists_intr_localOn
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hgeom : SeqBoundedGeometry (I := I) X) :
+    ∃ r₀ : Real, 0 < r₀ ∧ ∀ (k : Nat) (x : (X.obj k).M),
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : IsManifold I 1 (X.obj k).M :=
+        IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+      letI : T2Space (X.obj k).M := (X.obj k).t2
+      letI : T2Space (TangentBundle I (X.obj k).M) :=
+        (X.obj k).t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+        Manifold.metrizableSpace I (X.obj k).M
+      letI : T3Space (X.obj k).M := inferInstance
+      letI : RiemannianBundle
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle (I := I)
+      letI : (y : (X.obj k).M) →
+          InnerProductSpace Real (TangentSpace I y) :=
+        (X.obj k).riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle_cont (I := I)
+      letI : EMetricSpace (X.obj k).M :=
+        (X.obj k).emetricSpace (I := I)
+      letI : CompleteSpace (X.obj k).M :=
+        MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+      letI : ConnectedSpace (X.obj k).M := hconn k
+      let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+          ‖w‖ₑ =
+            ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+        intro y w
+        simpa using
+          (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (X.obj k).metric y w)
+      IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
+        (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
+        (Metric.ball (0 : E) r₀) := by
+  obtain ⟨r₀, hr₀, hbranch⟩ :=
+    exists_intr_branches (I := I) X hcomplete hconn hgeom
+  refine ⟨r₀, hr₀, ?_⟩
+  intro k x
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M :=
+    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) →
+      InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M :=
+    (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (X.obj k).metric y w)
+  exact intrFrame_localOn (I := I) (X.obj k).metric hEnorm x
+    (Metric.ball (0 : E) r₀) (hbranch k x)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- One uniform intrinsic radius simultaneously carries the half/two metric
+estimate and the local-diffeomorphism domain. -/
+theorem exists_intr_control
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hgeom : SeqBoundedGeometry (I := I) X) :
+    ∃ r₀ : Real, 0 < r₀ ∧ ∀ (k : Nat) (x : (X.obj k).M),
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : IsManifold I 1 (X.obj k).M :=
+        IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+      letI : T2Space (X.obj k).M := (X.obj k).t2
+      letI : T2Space (TangentBundle I (X.obj k).M) :=
+        (X.obj k).t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+        Manifold.metrizableSpace I (X.obj k).M
+      letI : T3Space (X.obj k).M := inferInstance
+      letI : RiemannianBundle
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle (I := I)
+      letI : (y : (X.obj k).M) →
+          InnerProductSpace Real (TangentSpace I y) :=
+        (X.obj k).riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun y : (X.obj k).M => TangentSpace I y) :=
+        (X.obj k).riemBundle_cont (I := I)
+      letI : EMetricSpace (X.obj k).M :=
+        (X.obj k).emetricSpace (I := I)
+      letI : CompleteSpace (X.obj k).M :=
+        MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+      letI : ConnectedSpace (X.obj k).M := hconn k
+      let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+          ‖w‖ₑ =
+            ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+        intro y w
+        simpa using
+          (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+            (I := I) (X.obj k).metric y w)
+      (∀ z ∈ Metric.ball (0 : E) r₀, ∀ v : E,
+          (1 / 2 : Real) * ‖v‖ ^ 2 ≤
+              intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ∧
+            intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ≤
+              2 * ‖v‖ ^ 2) ∧
+        IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
+          (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
+          (Metric.ball (0 : E) r₀) := by
+  obtain ⟨rMetric, hrMetric, hmetric⟩ :=
+    exists_intr_radii (I := I) X hcomplete hconn hgeom
+  obtain ⟨rLocal, hrLocal, hlocal⟩ :=
+    exists_intr_localOn (I := I) X hcomplete hconn hgeom
+  refine ⟨min rMetric rLocal, lt_min hrMetric hrLocal, ?_⟩
+  intro k x
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M :=
+    IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) →
+      InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M => TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M :=
+    (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+      ‖w‖ₑ =
+        ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+    intro y w
+    simpa using
+      (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) (X.obj k).metric y w)
+  have hmetricSub :
+      Metric.ball (0 : E) (min rMetric rLocal) ⊆
+        Metric.ball (0 : E) rMetric :=
+    Metric.ball_subset_ball (min_le_left _ _)
+  have hlocalSub :
+      Metric.ball (0 : E) (min rMetric rLocal) ⊆
+        Metric.ball (0 : E) rLocal :=
+    Metric.ball_subset_ball (min_le_right _ _)
+  refine ⟨?_, ?_⟩
+  · intro z hz v
+    exact hmetric k x z (hmetricSub hz) v
+  · intro z
+    exact hlocal k x ⟨z.1, hlocalSub z.2⟩
 
 /-- A uniform zeroth-order curvature bound gives one model-space radius on
 which every framed normal-coordinate metric in the sequence satisfies the

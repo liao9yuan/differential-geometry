@@ -78,14 +78,14 @@ private theorem deriv_comp_grad
   exact (gradFun_metricDual (I := I) g f (γ t)
     ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)).symm
 
-/-- Along a smooth geodesic, the ordinary second derivative of a globally
-smooth scalar function is its Riemannian Hessian evaluated twice on the
-geodesic velocity. -/
-theorem deriv2_comp_geo
+/-- At a point where a smooth curve satisfies the geodesic equation, the
+ordinary second derivative of a globally smooth scalar function is its
+Riemannian Hessian evaluated twice on the curve velocity. -/
+theorem deriv2_comp_geo_at
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (hgeo : IsGeodesic (I := I) g γ) (t : ℝ) :
+    {t : ℝ} (hgeo : HasGeodesicEquationAt (I := I) g γ t) :
     (deriv^[2] (f ∘ γ)) t =
       hessFun (I := I) g f (γ t)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
@@ -119,7 +119,7 @@ theorem deriv2_comp_geo
         (I := I) g γ t
           (hγ.contMDiffAt.of_le
             (WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)))
-          (hgeo t)
+          hgeo
   calc
     (deriv^[2] (f ∘ γ)) t = deriv (deriv (f ∘ γ)) t := by rfl
     _ = deriv (fun s => g.inner (γ s) (V s) (W s)) t := by rw [hfirst]
@@ -134,13 +134,28 @@ theorem deriv2_comp_geo
       simpa only [W, gradient_eq_gradFun] using
         (hessFun_eq_cov_grad (I := I) g hf (γ t) (W t) (W t)).symm
 
+/-- Along a smooth geodesic, the ordinary second derivative of a globally
+smooth scalar function is its Riemannian Hessian evaluated twice on the
+geodesic velocity. -/
+theorem deriv2_comp_geo
+    (g : SmoothRiemannianMetric I M) {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hgeo : IsGeodesic (I := I) g γ) (t : ℝ) :
+    (deriv^[2] (f ∘ γ)) t =
+      hessFun (I := I) g f (γ t)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
+  deriv2_comp_geo_at (I := I) g hf hγ (hgeo t)
+
 /-- Local-smoothness form of `deriv2_comp_geo`.  Only a smooth germ of the
 scalar function at the point on the geodesic is needed. -/
-theorem deriv2_comp_geo_on
+theorem deriv2_geo_on_at
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (hgeo : IsGeodesic (I := I) g γ) {t : ℝ} (ht : γ t ∈ U) :
+    {t : ℝ} (hgeo : HasGeodesicEquationAt (I := I) g γ t)
+    (ht : γ t ∈ U) :
     (deriv^[2] (f ∘ γ)) t =
       hessFun (I := I) g f (γ t)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
@@ -154,11 +169,46 @@ theorem deriv2_comp_geo_on
     _ = hessFun (I := I) g F (γ t)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
-      deriv2_comp_geo (I := I) g hF hγ hgeo t
+      deriv2_comp_geo_at (I := I) g hF hγ hgeo
     _ = hessFun (I := I) g f (γ t)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) := by
       rw [hessFun_congr (I := I) g hFf]
+
+/-- Local-smoothness form of `deriv2_comp_geo`.  Only a smooth germ of the
+scalar function at the point on the geodesic is needed. -/
+theorem deriv2_comp_geo_on
+    (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
+    (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (hgeo : IsGeodesic (I := I) g γ) {t : ℝ} (ht : γ t ∈ U) :
+    (deriv^[2] (f ∘ γ)) t =
+      hessFun (I := I) g f (γ t)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
+  deriv2_geo_on_at (I := I) g hU hf hγ (hgeo t) ht
+
+/-- Positive Hessian along a smooth geodesic implies strict convexity of the
+restricted scalar function.  Only the geodesic equation on the interior of the
+convex parameter set is required. -/
+theorem strictConvex_geo_on
+    (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
+    (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    {D : Set ℝ}
+    (hgeo : IsGeodesicOn (I := I) g γ (interior D))
+    (hD : Convex ℝ D)
+    (hcont : ContinuousOn (f ∘ γ) D)
+    (hmem : MapsTo γ (interior D) U)
+    (hpos : ∀ t ∈ interior D,
+      0 < hessFun (I := I) g f (γ t)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)) :
+    StrictConvexOn ℝ D (f ∘ γ) := by
+  apply strictConvexOn_of_deriv2_pos hD hcont
+  intro t ht
+  rw [deriv2_geo_on_at (I := I) g hU hf hγ (hgeo t ht) (hmem ht)]
+  exact hpos t ht
 
 /-- Positive Hessian along a smooth geodesic implies strict convexity of the
 restricted scalar function. -/
@@ -173,11 +223,9 @@ theorem strictConvex_geo
       0 < hessFun (I := I) g f (γ t)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)) :
-    StrictConvexOn ℝ D (f ∘ γ) := by
-  apply strictConvexOn_of_deriv2_pos hD hcont
-  intro t ht
-  rw [deriv2_comp_geo_on (I := I) g hU hf hγ hgeo (hmem ht)]
-  exact hpos t ht
+    StrictConvexOn ℝ D (f ∘ γ) :=
+  strictConvex_geo_on (I := I) g hU hf hγ
+    (fun t _ => hgeo t) hD hcont hmem hpos
 
 end Riemannian
 end Geometry

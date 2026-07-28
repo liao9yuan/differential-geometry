@@ -1,5 +1,20 @@
 # SegmentCount.lean — B6 counting core (A0′ lane)
 
+## 2026-07-27 artifact repair
+
+After `SegmentPolar` became theorem-complete, the exact rebuild exposed a
+deterministic `whnf`/`isDefEq` timeout at the calls to `segBall_vol_fin`.  This
+was not a volume-comparison gap: the geometric section redundantly carried an
+independent `[NormedSpace ℝ E]` alongside `[InnerProductSpace ℝ E]`, whereas
+`SegmentPolar` uses the canonical normed-space instance derived from the inner
+product.  Matching the resulting non-definitionally-equal
+`ModelWithCorners` types caused the elaboration wall.
+
+The redundant assumption was removed and the two finiteness calls now give
+their geometric parameters explicitly.  Focused verification is GREEN
+(25.8s); no consumer assumption was added and the public theorem signature is
+weaker, not stronger.
+
 Brick **B6** of `HCGCompactness/C4/A0PRIME_VOLUME_PLAN.md`: the member-level
 `ballMult` counting theorem, consuming `segBall_vol_rel` + `segBall_vol_fin`
 (SegmentPolar) as stated, adding **no `sorry`**.

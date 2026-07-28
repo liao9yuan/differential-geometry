@@ -25,6 +25,7 @@ namespace Riemannian
 namespace Exponential
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -139,6 +140,225 @@ theorem intrinsicJacobi_perp
     intrinsic_jacobi_one (I := I) g hEnorm p (u : E) (w : E)
   rw [← hjac] at hgauss
   simpa only [intrinsicJacobi, expMapIntrinsic_def] using hgauss
+
+omit [InnerProductSpace Real E] [FiniteDimensional Real E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
+private theorem curveVelocity_comp_mul
+    (γ : Real → M) (c t : Real)
+    (hγ : MDifferentiableAt 𝓘(Real, Real) I γ (c * t)) :
+    curveVelocity (I := I) (fun s => γ (c * s)) t =
+      c • curveVelocity (I := I) γ (c * t) := by
+  let a : Real → Real := fun s => c * s
+  have ha : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, Real) a t := by
+    have haInf : ContMDiff 𝓘(Real, Real) 𝓘(Real, Real) ∞ a :=
+      contMDiff_const.mul contMDiff_id
+    exact haInf.mdifferentiableAt (by simp)
+  have hcomp := mfderiv_comp_apply (f := a) (g := γ) (x := t)
+    hγ ha (1 : Real)
+  have ha_one :
+      mfderiv 𝓘(Real, Real) 𝓘(Real, Real) a t (1 : Real) = c := by
+    rw [mfderiv_eq_fderiv]
+    have hfd : HasFDerivAt a (c • (1 : Real →L[Real] Real)) t := by
+      simpa only [a] using (hasFDerivAt_id t).const_mul c
+    rw [hfd.fderiv]
+    change c * 1 = c
+    ring
+  change mfderiv 𝓘(Real, Real) I (γ ∘ a) t (1 : Real) =
+    c • mfderiv 𝓘(Real, Real) I γ (a t) (1 : Real)
+  rw [hcomp, ha_one]
+  simpa only [smul_eq_mul, mul_one] using
+    map_smul (mfderiv 𝓘(Real, Real) I γ (a t)) c (1 : Real)
+
+private theorem intrVel_smul
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u : TangentSpace I p) (c : Real) :
+    ((intrinsicVelocityLift (I := I) g hEnorm p (c • u) 1).snd : E) =
+      c • ((intrinsicVelocityLift (I := I) g hEnorm p u c).snd : E) := by
+  let γ : Real → M := intrinsicGeodesic (I := I) g hEnorm p u
+  have hfun :
+      (fun s : Real =>
+        intrinsicGeodesic (I := I) g hEnorm p (c • u) s) =
+        fun s => γ (c * s) := by
+    funext s
+    calc
+      intrinsicGeodesic (I := I) g hEnorm p (c • u) s =
+          intrinsicGeodesic (I := I) g hEnorm p (s • (c • u)) 1 :=
+        (intrinsicGeodesic_smul (I := I) g hEnorm p (c • u) s).symm
+      _ = intrinsicGeodesic (I := I) g hEnorm p ((c * s) • u) 1 := by
+        rw [smul_smul, mul_comm]
+      _ = γ (c * s) := by
+        simpa only [γ] using
+          intrinsicGeodesic_smul (I := I) g hEnorm p u (c * s)
+  have hγ :
+      MDifferentiableAt 𝓘(Real, Real) I γ (c * 1) :=
+    ((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p u).contMDiffAt
+      (Filter.univ_mem)).mdifferentiableAt (by norm_num)
+  have hvel := curveVelocity_comp_mul (I := I) γ c 1 hγ
+  change
+    (curveVelocity (I := I)
+      (fun s => intrinsicGeodesic (I := I) g hEnorm p (c • u) s) 1 : E) =
+      c • (curveVelocity (I := I) γ c : E)
+  rw [hfun]
+  have hct : c * 1 = c := mul_one c
+  rw [hct] at hvel
+  exact hvel
+
+/-- An intrinsic Jacobi field launched perpendicular to the radial direction
+remains perpendicular to the radial velocity at every nonzero time. -/
+theorem intrJacobi_perp_ne
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u w : TangentSpace I p) {t : Real}
+    (ht : t ≠ 0) (hperp : g.inner p u w = 0) :
+    g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+        (curveVelocity (I := I)
+          (intrinsicGeodesic (I := I) g hEnorm p u) t)
+        (intrinsicJacobi (I := I) g hEnorm p u w t) = 0 := by
+  have hfield :
+      (intrinsicJacobi (I := I) g hEnorm p u w t : E) =
+        (intrinsicJacobi (I := I) g hEnorm p (t • u) (t • w) 1 : E) := by
+    have hleft :
+        (intrinsicJacobi (I := I) g hEnorm p u w t : E) =
+          mfderiv 𝓘(Real, E) I
+            (fun z : E => expMapIntrinsic (I := I) g hEnorm p
+              (show TangentSpace I p from z))
+            (t • (u : E)) (t • (w : E)) :=
+      intrinsic_jacobi_at (I := I) g hEnorm p (u : E) (w : E) t
+    have hright :
+        (intrinsicJacobi (I := I) g hEnorm p (t • u) (t • w) 1 : E) =
+          mfderiv 𝓘(Real, E) I
+            (fun z : E => expMapIntrinsic (I := I) g hEnorm p
+              (show TangentSpace I p from z))
+            (t • (u : E)) (t • (w : E)) := by
+      change
+        mfderiv 𝓘(Real, Real) I
+            (fun s : Real =>
+              intrinsicGeodesic (I := I) g hEnorm p
+                (show TangentSpace I p from
+                  t • (u : E) + s • (t • (w : E))) 1)
+            0 (1 : Real) =
+          mfderiv 𝓘(Real, E) I
+            (fun z : E => expMapIntrinsic (I := I) g hEnorm p
+              (show TangentSpace I p from z))
+            (t • (u : E)) (t • (w : E))
+      exact intrinsic_jacobi_one (I := I) g hEnorm p
+        (t • (u : E)) (t • (w : E))
+    exact hleft.trans hright.symm
+  have hscaled :=
+    intrinsicJacobi_perp (I := I) g hEnorm p
+      (t • u) (t • w)
+  rw [intrinsicGeodesic_smul (I := I) g hEnorm p u t,
+    intrVel_smul (I := I) g hEnorm p u t, ← hfield] at hscaled
+  have hright : g.inner p (t • u) (t • w) = 0 := by
+    simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      hperp, mul_zero]
+  rw [hright] at hscaled
+  change
+    g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+        (t • curveVelocity (I := I)
+          (intrinsicGeodesic (I := I) g hEnorm p u) t)
+        (intrinsicJacobi (I := I) g hEnorm p u w t) = 0 at hscaled
+  have hmul :
+      t * g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+          (curveVelocity (I := I)
+            (intrinsicGeodesic (I := I) g hEnorm p u) t)
+          (intrinsicJacobi (I := I) g hEnorm p u w t) = 0 := by
+    simpa only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul] using
+      hscaled
+  exact (mul_eq_zero.mp hmul).resolve_left ht
+
+private theorem intrGeodesic_smooth
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u : TangentSpace I p) :
+    ContMDiff 𝓘(Real, Real) I (8 : Nat)
+      (intrinsicGeodesic (I := I) g hEnorm p u) := by
+  let F : Real → Real → M := fun s t =>
+    intrinsicGeodesic (I := I) g hEnorm p (u + s • (0 : TangentSpace I p)) t
+  have hF : IsSmoothVariation (I := I) F := by
+    change ContMDiff (𝓘(Real, Real).prod 𝓘(Real, Real)) I (8 : Nat)
+      (fun q : Real × Real =>
+        intrinsicGeodesic (I := I) g hEnorm p
+          (u + q.1 • (0 : TangentSpace I p)) q.2)
+    exact (intrinsicVar_smooth (I := I) g hEnorm p (u : E) (0 : E)).of_le
+      ENat.LEInfty.out
+  have hincl : ContMDiff 𝓘(Real, Real)
+      (𝓘(Real, Real).prod 𝓘(Real, Real)) (8 : Nat)
+      (fun t : Real => ((0 : Real), t)) :=
+    contMDiff_const.prodMk contMDiff_id
+  have hcomp := (hF : ContMDiff _ _ _ _).comp hincl
+  have heq :
+      ((fun q : Real × Real => F q.1 q.2) ∘
+          fun t : Real => ((0 : Real), t)) =
+        intrinsicGeodesic (I := I) g hEnorm p u := by
+    funext t
+    simp only [F, Function.comp_apply, zero_smul, add_zero]
+  rw [heq] at hcomp
+  exact hcomp
+
+/-- The first covariant derivative of an intrinsic Jacobi field launched
+perpendicular to the radial direction remains perpendicular to the radial
+velocity at every nonzero time. -/
+theorem intrJacobi_dperp
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u w : TangentSpace I p) {t : Real}
+    (ht : t ≠ 0) (hperp : g.inner p u w = 0) :
+    g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+      (curveVelocity (I := I)
+        (intrinsicGeodesic (I := I) g hEnorm p u) t)
+      (covDerivAlong (I := I) g
+        (intrinsicGeodesic (I := I) g hEnorm p u)
+        (intrinsicJacobi (I := I) g hEnorm p u w) t) = 0 := by
+  let γ := intrinsicGeodesic (I := I) g hEnorm p u
+  let J := intrinsicJacobi (I := I) g hEnorm p u w
+  have hγInf : ContMDiff 𝓘(Real, Real) I (8 : Nat) γ :=
+    intrGeodesic_smooth (I := I) g hEnorm p u
+  have hγ : ContMDiffAt 𝓘(Real, Real) I 2 γ t :=
+    hγInf.contMDiffAt.of_le (by norm_num)
+  have hgeo : HasGeodesicEquationAt (I := I) g γ t := by
+    simpa only [γ] using
+      intrinsicGeodesic_isGeodesic (I := I) g hEnorm p u t
+  have hvelDiff : DifferentiableAt Real
+      (chartRepAt (I := I) γ (curveVelocity (I := I) γ) t) t := by
+    simpa only [curveVelocity, chartRepAt] using
+      MFDerivAlongCurve.velocity_coord_diff (I := I) γ t hγ
+  have hJdiff : DifferentiableAt Real
+      (chartRepAt (I := I) γ J t) t := by
+    simpa only [γ, J] using
+      (intrJacobi_diff (I := I) g hEnorm p u w t).1
+  have hinner := inner_deriv_at (I := I) (n := (2 : WithTop ℕ∞))
+    (by norm_num) g γ (curveVelocity (I := I) γ) J t hγ hvelDiff hJdiff
+  have hne : ∀ᶠ s in 𝓝 t, s ≠ 0 :=
+    eventually_ne_nhds ht
+  have hzeroEv :
+      (fun s : Real =>
+        g.inner (γ s) (curveVelocity (I := I) γ s) (J s)) =ᶠ[𝓝 t]
+        (fun _ : Real => 0) := by
+    filter_upwards [hne] with s hs
+    simpa only [γ, J] using
+      intrJacobi_perp_ne (I := I) g hEnorm p u w hs hperp
+  have hzero : HasDerivAt
+      (fun s : Real =>
+        g.inner (γ s) (curveVelocity (I := I) γ s) (J s)) 0 t :=
+    (hasDerivAt_const (x := t) (c := (0 : Real))).congr_of_eventuallyEq
+      hzeroEv
+  have hvelZero :
+      covDerivAlong (I := I) g γ (curveVelocity (I := I) γ) t = 0 := by
+    simpa only [curveVelocity] using
+      covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
+        (I := I) g γ t hγ hgeo
+  have huniq := hinner.unique hzero
+  simp only [hvelZero, map_zero, ContinuousLinearMap.zero_apply, zero_add] at huniq
+  simpa only [γ, J] using huniq
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless]

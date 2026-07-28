@@ -6,6 +6,9 @@ No geometry imports. Delivers the multiplicative `ℝ≥0∞` cross-inequality a
 the two feeders that adapt it to B5's inputs (antitone real ratio; cut-time
 truncation).
 
+The segment-interior route no longer selects a cut time.  It works directly on
+the positive-radius subtype with a measurable downward-closed launch set.
+
 ## Deliverables (all in namespace `...Riemannian.VolumeComparison`)
 - `CrossAnti R f g : Prop` — division-free `ℝ≥0∞` encoding of "`f/g` antitone on
   `(0,R]`": `∀ a b, 0 < a → a ≤ b → b ≤ R → f b * g a ≤ f a * g b`. Factored as a
@@ -19,6 +22,24 @@ truncation).
   `G > 0` on the window ⟹ `CrossAnti R (ofReal∘F) (ofReal∘G)`.
 - `crossAnti_indicator` (truncation, part 3): `CrossAnti R f g →
   CrossAnti R (indicator (Iio τ) f) g` for any `τ` (lower-set argument).
+- `crossIic_indic`: the order-generic lower-set form.  If `S` is downward
+  closed, cutting the numerator by `S` preserves a pointwise cross inequality
+  on `Iic R`:
+  ```lean
+  (∀ ⦃a b⦄, a ≤ b → b ≤ R → f b * g a ≤ f a * g b) →
+  (∀ ⦃a b⦄, a ≤ b → b ∈ S → a ∈ S) →
+  ∀ ⦃a b⦄, a ≤ b → b ≤ R →
+    S.indicator f b * g a ≤ S.indicator f a * g b
+  ```
+- `lintegral_Iic_cross`: the corresponding order-generic integral theorem on
+  nested `Iic s ⊆ Iic R`.  In the volume lane it applies directly to
+  `α = Ioi 0` and `μ = volumeIoiPow d`, avoiding a pushforward to `ℝ`.  Its
+  only data hypotheses are `AEMeasurable f/g` on `μ.restrict (Iic R)`, the
+  displayed pointwise cross inequality, and `s ≤ R`; the conclusion is
+  ```lean
+  (∫⁻ t in Iic R, f t ∂μ) * (∫⁻ t in Iic s, g t ∂μ) ≤
+    (∫⁻ t in Iic s, f t ∂μ) * ∫⁻ t in Iic R, g t ∂μ
+  ```
 
 ## Mathlib search (done first, per brick instructions)
 No integral-form Chebyshev / monovary ratio inequality exists in Mathlib's
@@ -61,3 +82,7 @@ split on `b ∈ Iio τ` (`a ≤ b` keeps `a ∈ Iio τ`; else numerator is `0`).
 Focused check PASSED; targeted module build PASSED (sorry-free, no new axioms,
 no new imports beyond Mathlib measure-theory/order/ENNReal). Endpoint reminder:
 B4 is machinery — the A0′ producer `volInput_of_bg` remains 0% until B5–B7 land.
+
+The generic downward-set and `Iic` extensions are focused-check verified.  They
+add no geometry or selected-cut-time assumptions.  `segBall_vol_rel` itself
+remains a separate theorem frontier until the polar assembly uses them.

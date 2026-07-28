@@ -24,14 +24,12 @@ count `segBall_card` (`Comparison/Volume/SegmentCount.lean`) as the deep
   discharges `MetricCompactBase.dist_eq`.  Only `hd.dist`/`hreal` are consumed;
   `hd.decay` is never used, so A0′ is independent of the CGT input.
 
-## Transitive-`sorry` status
+## Endpoint status
 
-This file adds **no** `sorry` of its own.  `volInput_of_bg` nonetheless remains
-transitively `sorry`'d through `segBall_card`'s dependence on the two intended
-frontier `sorry`s in `Comparison/Volume/SegmentPolar.lean` (the manifold-valued
-non-injective area inequality and its truncated polar companion).  Per plan §7,
-the A0′ endpoint stays at 0% until those close (bricks B5b/B5c); this brick only
-lands the assembly, whose own content is `sorry`-free.
+The A0′ producer is complete.  Its full dependency path through `segBall_card`,
+`segBall_vol_fin`, and `segBall_vol_rel` is proved, and the exact downstream
+replay of `volInput_of_bg` contains no `sorryAx`.  The remaining axioms are only
+`propext`, `Classical.choice`, and `Quot.sound`.
 
 ## Ricci input
 

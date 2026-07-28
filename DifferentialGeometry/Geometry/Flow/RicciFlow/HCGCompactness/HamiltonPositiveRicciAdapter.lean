@@ -11,6 +11,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEquiv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDCanonP4
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessEndpoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
@@ -2197,6 +2198,67 @@ theorem const0_of_cgh
     exact hconnected
   simpa only [AdmitsConstPosSec] using
     (limit_to_orig (I := I) (M := M) hM h0h hconn hround)
+
+/-- A metric-compactness base for the Hamilton time-zero source yields a
+constant-positive-sectional-curvature metric on the original manifold. -/
+theorem ham3_const_of_base
+    {omega : Real} (h0omega : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hscalar : forall t : Real, t ∈ P.D.carrier →
+      forall x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    (b : MetricCompactBase (I := I)
+      ((ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).atZero
+        (I := I))) :
+    AdmitsConstPosSec (I := I) (M := M) := by
+  classical
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  change MetricCompactBase (I := I) (X.atZero (I := I)) at b
+  have hcpl : SeqMetricComplete (I := I) (X.atZero (I := I)) := by
+    refine ⟨?_⟩
+    intro k
+    change MetricComplete (I := I) ((X.term k).atTime (I := I) 0)
+    dsimp only [MetricComplete, PointedFlowData.atTime]
+    refine @complete_of_compact (X.term k).M ?_ ?_
+    simpa only [X, ham3SourceSeq] using hM.1
+  have hconn : forall k : Nat,
+      letI : TopologicalSpace ((X.atZero (I := I)).obj k).M :=
+        ((X.atZero (I := I)).obj k).topology
+      ConnectedSpace ((X.atZero (I := I)).obj k).M := by
+    intro k
+    change ConnectedSpace (X.term k).M
+    simpa only [X, ham3SourceSeq] using hM.2.1
+  let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
+    b.metricCanon hcpl hconn
+  have hcanonConn :
+      letI : TopologicalSpace canon.mc.limit.M := canon.mc.limit.topology
+      ConnectedSpace canon.mc.limit.M := by
+    simpa only [canon] using b.metricCanon_conn hcpl hconn
+  obtain ⟨d, hlimCpl⟩ :=
+    ham3_closed_upg (I := I) h0omega hM.1 P hD Q hsel hrm
+      hwindow canon
+  have hlimitConn :
+      letI : TopologicalSpace d.data.L.M := d.data.L.topology
+      ConnectedSpace d.data.L.M :=
+    d.limit_conn hcanonConn
+  have hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  let mc := canon.mc.compSubseq d.φ d.hφ
+  exact const0_of_cgh
+    (I := I) (M := M) h0omega hM P hD Q hsel hscalar hpinch
+    (ham3SourceLink (I := I) h0omega P hD Q hsel hwindow)
+    hzero d.data.L mc.subseq mc.strictMono
+    (Classical.choice d.data.converges) hlimCpl hlimitConn
 
 /-- A compactness conclusion from the new HCG interface supplies the old
 Hamilton Section 12 black-box conclusion. -/

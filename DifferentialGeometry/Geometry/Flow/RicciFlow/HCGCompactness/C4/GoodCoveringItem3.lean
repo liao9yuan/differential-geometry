@@ -102,8 +102,13 @@ def Item3RadiusInput (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     ENNReal.ofReal (ρ k α) < injRadius (I := I) (X.obj k).metric c ∧
       ρ k α ≤ expRadiusGp (I := I) (X.obj k).metric c
 
-/-- The item-3 radius discipline at one sequence index and on the finite
-packing family, for radii `a * lamInf γ`. -/
+/-- The legacy item-3 source-radius discipline at one sequence index and on
+the finite packing family, for radii `a * lamInf γ`.
+
+The first component records positivity, while the second places the requested
+ball in the legacy framed chart.  Injectivity of the intrinsic H6 branch is
+carried by `H6ChartData`; it is not converted back into the unrelated legacy
+`injRadius`. -/
 def Item3RadiusAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r a : Real)
@@ -116,8 +121,7 @@ def Item3RadiusAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
       letI := (X.obj (L.φ n)).sigmaCompact
       letI := (X.obj (L.φ n)).t2
       letI := (X.obj (L.φ n)).t2TangentBundle
-      ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
-          injRadius (I := I) (X.obj (L.φ n)).metric c ∧
+      0 < a * L.lamInf (γ : Nat) ∧
         a * L.lamInf (γ : Nat) ≤
           expRadiusGp (I := I) (X.obj (L.φ n)).metric c
 
@@ -179,8 +183,8 @@ theorem exists_seqItem3Diffeo
           (Metric.ball (0 : E) (ρ k α)) :=
   (X.obj k).exists_expBall_diffeo c (hrad k α c hc).1 (hrad k α c hc).2
 
-/-- The packing-local fixed-index item-3 radius fact gives the corresponding
-exponential-ball diffeomorphism at each selected slot. -/
+/-- A legacy injectivity witness together with the packing-local source-radius
+fact gives the corresponding legacy exponential-ball diffeomorphism. -/
 theorem exists_item3Diffeo
     (hd : InjRadiusDecayInput (I := I) X) {D a r : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -194,14 +198,17 @@ theorem exists_item3Diffeo
     letI := (X.obj (L.φ n)).sigmaCompact
     letI := (X.obj (L.φ n)).t2
     letI := (X.obj (L.φ n)).t2TangentBundle
-      ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
-        Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Φ.target = framedExpMap (I := I) (X.obj (L.φ n)).metric c ''
-          Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Set.EqOn Φ (framedExpMap (I := I) (X.obj (L.φ n)).metric c)
-          (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) :=
-  (X.obj (L.φ n)).exists_expBall_diffeo c
-    (hrad γ c hc).1 (hrad γ c hc).2
+    ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
+      injRadius (I := I) (X.obj (L.φ n)).metric c →
+    ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
+      Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+      Φ.target = framedExpMap (I := I) (X.obj (L.φ n)).metric c ''
+        Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+      Set.EqOn Φ (framedExpMap (I := I) (X.obj (L.φ n)).metric c)
+        (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) := by
+  intro hinj
+  exact (X.obj (L.φ n)).exists_expBall_diffeo c
+    hinj (hrad γ c hc).2
 
 /-- Legacy all-index form of the `lbl383`/`lbl427` `g_p` scale separation.  It
 requires every natural-numbered slot at every index and is therefore stronger

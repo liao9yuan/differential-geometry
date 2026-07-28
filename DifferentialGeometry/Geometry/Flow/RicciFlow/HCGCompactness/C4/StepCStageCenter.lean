@@ -184,10 +184,14 @@ noncomputable def stageInvVelSub
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
-    (n k l : Nat) (q : E × E) : E :=
+    (n k l : Nat) (q : E × E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E :=
   invVelSum (e n)
-    (stageCfgSub inp P L hr phi hphi alpha k l q.1).1
-    (stageCfgSub inp P L hr phi hphi alpha k l q.1).2 q.2
+    (stageCfgSub inp P L hr phi hphi alpha k l q.1
+      (chart := chart)).1
+    (stageCfgSub inp P L hr phi hphi alpha k l q.1
+      (chart := chart)).2 q.2
 
 /-- Canonical source-chart root: choose the unique root in the prescribed
 limiting tube when it exists, and use the limiting branch as a total filler. -/
@@ -198,10 +202,13 @@ noncomputable def stageRootSub
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
-    (PhiInf : E → E) (rho : Real) (n k l : Nat) (z : E) : E := by
+    (PhiInf : E → E) (rho : Real) (n k l : Nat) (z : E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E := by
   classical
   exact if h : ∃ x : E, dist x (PhiInf z) < rho ∧
-        stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x) = 0
+        stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x)
+          (chart := chart) = 0
     then Classical.choose h
     else PhiInf z
 
@@ -215,13 +222,16 @@ theorem stageRootSub_eq
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (PhiInf : E → E) (rho : Real) (n k l : Nat) (z x : E)
+    {chart : NormalChartFamily (I := I) X}
     (hx : dist x (PhiInf z) < rho)
     (hroot : stageInvVelSub inp P L hr phi hphi alpha e n k l
-      (z, x) = 0)
+      (z, x) (chart := chart) = 0)
     (huniq : ∀ y, dist y (PhiInf z) < rho →
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, y) = 0 ↔
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, y)
+        (chart := chart) = 0 ↔
         y = x)) :
-    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l z = x := by
+    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l z
+      (chart := chart) = x := by
   rw [stageRootSub]
   split
   next h =>
@@ -240,7 +250,9 @@ def HasStageRootCube
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
-    (Phi3 : Nat → Nat → Nat → E → E) : Prop :=
+    (Phi3 : Nat → Nat → Nat → E → E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   IsOpen W ∧ IsCompact (closure W) ∧ C1 alpha ⊆ W ∧
   0 < rho ∧ Set.EqOn PhiInf id (C1 alpha) ∧
   (∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
@@ -251,16 +263,19 @@ def HasStageRootCube
     ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
     dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
     stageInvVelSub inp P L hr phi hphi alpha e n k l
-      (z, Phi3 n k l z) = 0 ∧
+      (z, Phi3 n k l z) (chart := chart) = 0 ∧
     (Analysis.partialFDeriv₂
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l)
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l
+        (chart := chart))
       z (Phi3 n k l z)).IsInvertible ∧
     (∀ gamma : Fin (inp.pack.A r),
       (Phi3 n k l z,
-        (stageCfgSub inp P L hr phi hphi alpha k l z).2 gamma) ∈
+        (stageCfgSub inp P L hr phi hphi alpha k l z
+          (chart := chart)).2 gamma) ∈
           (e n).target) ∧
     ∀ x, dist x (PhiInf z) < rho →
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x) = 0 ↔
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x)
+        (chart := chart) = 0 ↔
         x = Phi3 n k l z)
 
 /-- The retained support data and one selected diagonal branch give a single

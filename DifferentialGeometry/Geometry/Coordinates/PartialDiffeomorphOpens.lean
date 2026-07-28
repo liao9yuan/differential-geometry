@@ -69,7 +69,7 @@ theorem image_opens_isOpen
 namespace PartialDiffeomorph
 
 /-- Restrict a cross-model partial diffeomorphism to a source open and its
-image, producing a global diffeomorphism of open subtypes. -/
+exact image, producing a global diffeomorphism of open subtypes. -/
 noncomputable def toOpensDiffeoCross
     (Φ : PartialDiffeomorph I J M N (∞ : WithTop ℕ∞))
     {U : Opens M} (hU : (U : Set M) ⊆ Φ.source) :

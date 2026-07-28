@@ -333,7 +333,8 @@ theorem exists_diag_full
         HasDiagPairConv (I := I) (hcomplete.subseq index)
           (PointedRiemannianSeq.connected_subseq hconn index)
           (c alpha) (q alpha) (q alpha / 2)
-          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha) ∧
+          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha)
+          (legacyChartFamily (I := I) Xpsi) ∧
         ∀ n, NormalDiagFence (I := I) (Xpsi.obj n)
           (c alpha n) (q alpha) (e alpha n) := by
   classical
@@ -407,7 +408,7 @@ theorem exists_diag_full
       HasDiagPairConv (I := I) (hcomplete.subseq index)
         (PointedRiemannianSeq.connected_subseq hconn index)
         c (q alpha) (q alpha / 2) (δ alpha) (deltaInf alpha)
-        (e alpha) (eInf alpha) := by
+        (e alpha) (eInf alpha) (legacyChartFamily (I := I) Xpsi) := by
     intro alpha
     have hcan := (hpair0 alpha).1.subseq shift hshift.tendsto_atTop
     have hcanFence : ∀ n,

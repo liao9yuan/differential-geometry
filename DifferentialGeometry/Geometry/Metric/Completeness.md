@@ -2,16 +2,18 @@
 
 ## Status
 
-The basepoint-free `RiemannianMetricComplete` predicate and its global
-uniform-equivalence transfer are implemented in the canonical metric layer.
-Focused verification is green and the source is sorry-free.
+The basepoint-free `RiemannianMetricComplete` predicate, its one-sided
+`of_lower` transfer, and its global uniform-equivalence corollary are
+implemented in the canonical metric layer.  Focused verification is green, the
+targeted artifact is exact-current, and the source is sorry-free.
 
 ## Architecture
 
 The predicate records completeness of the `EMetricSpace` induced directly by a
 `SmoothRiemannianMetric`; no pointed-manifold data or connectedness hypothesis
-is involved.  `of_uniformEquiv` uses only the lower half of the uniform
-quadratic comparison to transfer Cauchy convergence.
+is involved.  `of_lower` is the proof owner: a global positive quadratic lower
+bound transfers Cauchy convergence.  `of_uniformEquiv` is the compatibility
+corollary using the lower half of its two-sided comparison.
 
 ## Remaining frontier
 
@@ -34,6 +36,7 @@ added honestly.
 ## Project accounting
 
 - `RiemannianMetricComplete`: theorem 100%, focused-green.
+- `RiemannianMetricComplete.of_lower`: theorem 100%, focused- and exact-green.
 - `RiemannianMetricComplete.of_uniformEquiv`: theorem 100%, focused-green.
 - `RiemannianMetricComplete.closedEBall_isCompact`: theorem 0%; its dedicated
   point-pair Hopf--Rinow machinery is 0%.

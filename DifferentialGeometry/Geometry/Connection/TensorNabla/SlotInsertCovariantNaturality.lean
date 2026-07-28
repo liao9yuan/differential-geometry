@@ -81,6 +81,87 @@ set_option linter.unusedSectionVars false in
         (slotInsertEndoCc (I := I) (M := M) g s Λ).toSection x) =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) := rfl
 
+omit [CompleteSpace E] in
+/-- Composition of leading-slot insertions reverses the endomorphism
+composition, as expected for covariant slots. -/
+lemma slotInsertFib_comp (s : ℕ) (x : M)
+    (A B : TangentSpace I x →L[ℝ] TangentSpace I x) :
+    ContinuousLinearMap.comp
+        (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x A)
+        (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x B) =
+      slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
+        (ContinuousLinearMap.comp B A) := by
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  rw [ContinuousLinearMap.comp_apply, slotInsertEndoFib_apply_eval,
+    slotInsertEndoFib_apply_eval, slotInsertEndoFib_apply_eval,
+    ContinuousLinearMap.comp_apply, Function.update_self, Function.update_idem]
+
+omit [CompleteSpace E] in
+/-- Inserting the identity endomorphism in the leading covariant slot is the
+identity tensor operator. -/
+lemma slotInsertFib_id (s : ℕ) (x : M) :
+    slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
+        (ContinuousLinearMap.id ℝ (TangentSpace I x)) =
+      ContinuousLinearMap.id ℝ (Tensor0SSpace (s + 1) I x) := by
+  apply ContinuousLinearMap.ext
+  intro A
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  rw [slotInsertEndoFib_apply_eval, ContinuousLinearMap.id_apply,
+    ContinuousLinearMap.id_apply, Function.update_eq_self]
+
+omit [CompleteSpace E] in
+/-- Insertion in the leading covariant slot is additive in the endomorphism field. -/
+lemma slotInsertEndoCc_add (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    slotInsertEndoCc (I := I) (M := M) g s (A + B) =
+      slotInsertEndoCc (I := I) (M := M) g s A +
+        slotInsertEndoCc (I := I) (M := M) g s B := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  rw [show ((slotInsertEndoCc (I := I) (M := M) g s A +
+        slotInsertEndoCc (I := I) (M := M) g s B).toSection x) =
+      (slotInsertEndoCc (I := I) (M := M) g s A).toSection x +
+        (slotInsertEndoCc (I := I) (M := M) g s B).toSection x from by
+    rw [SmoothCcTensor.toSection_add]
+    rfl]
+  rw [ContinuousLinearMap.add_apply]
+  simp only [slotInsertEndoCc_toSection]
+  rw [show ((A + B) x) = A x + B x from by
+    rw [ContMDiffSection.coe_add]
+    rfl]
+  rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
+
+omit [CompleteSpace E] in
+/-- Insertion in the leading covariant slot commutes with scalar multiplication. -/
+lemma slotInsertEndoCc_smul (g : SmoothRiemannianMetric I M) (s : ℕ) (a : ℝ)
+    (A : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    slotInsertEndoCc (I := I) (M := M) g s (a • A) =
+      a • slotInsertEndoCc (I := I) (M := M) g s A := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  rw [show ((a • slotInsertEndoCc (I := I) (M := M) g s A).toSection x) =
+      a • (slotInsertEndoCc (I := I) (M := M) g s A).toSection x from by
+    rw [SmoothCcTensor.toSection_smul]
+    rfl]
+  rw [ContinuousLinearMap.smul_apply]
+  simp only [slotInsertEndoCc_toSection]
+  rw [show ((a • A) x) = a • A x from by
+    rw [ContMDiffSection.coe_smul]
+    rfl]
+  rw [slotInsertEndoFib_smul_left, ContinuousLinearMap.smul_apply]
+
 set_option linter.unusedSectionVars false in
 lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace (s + 1) I x) :

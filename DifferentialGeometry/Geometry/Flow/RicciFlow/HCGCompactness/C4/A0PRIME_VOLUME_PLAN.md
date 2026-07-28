@@ -1160,3 +1160,23 @@ lessons paragraph.  Escalation: use the CLAUDE.md GPT-Pro consult template
   parking: `volInput_of_bg` **0%** — exists, transitively `sorry` via
   exactly `segBall_vol_le`/`segBall_vol_rel`; discharging those two (by
   the V-lane) closes it with no further edits.
+
+- **LANE COMPLETE (2026-07-27) — authoritative final entry.**  The parked
+  frontier was resumed and closed.  `segBall_vol_le`, `segBall_vol_fin`, and
+  `segBall_vol_rel` are proved; the final relative proof uses the strict
+  minimizing segment and a directionwise indicator-truncated cross inequality,
+  with no globally selected cut-time function and no added consumer
+  assumptions.  `SegmentPolar` is exact GREEN (3959 jobs).  The first
+  downstream rebuild exposed only a performance seam in `SegmentCount`: a
+  redundant independent `[NormedSpace ℝ E]` made its `ModelWithCorners` type
+  non-definitionally equal to the canonical inner-product version.  Removing
+  that redundant assumption made `SegmentCount` focused GREEN and exact GREEN
+  (3961 jobs).  `VolumeOverlap` then rebuilt exact GREEN (3982 jobs).
+
+  A direct axiom replay gives
+  `segBall_vol_le`, `segBall_vol_rel`, and `volInput_of_bg` exactly
+  `[propext, Classical.choice, Quot.sound]`; there is no `sorryAx`.
+  Therefore endpoint `volInput_of_bg`: **100%**; dedicated A0′ volume
+  machinery: **100%**.  This closes this producer lane, not unconditional
+  Theorem 3.9, whose theorem-level proof remains 0% pending the other native
+  time-zero producers.

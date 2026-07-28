@@ -24,10 +24,15 @@ reference tensor heat equation with both non-autonomous perturbations.
 - `nonautMap_apply`: its evaluation formula;
 - `nonautMap_dist_le`: the combined Lipschitz estimate;
 - `nonautMap_contract`: the Banach contraction package;
-- `nonaut_strong_exists`: the strong-solution fixed-point theorem.
+- `nonaut_strong_exists`: the homogeneous strong-solution fixed-point theorem;
+- `nonaut_forced_exists`: the affine sibling with an arbitrary prescribed
+  `timeL2 H^a` forcing term and the same contraction constant.
 
 No geometric realization, moving-metric heat existence theorem, axiom, or
 `sorry` is introduced here.
+
+Focused Lean verification of the affine sibling passed without local warnings
+on 2026-07-27.
 
 ## Remaining frontier
 

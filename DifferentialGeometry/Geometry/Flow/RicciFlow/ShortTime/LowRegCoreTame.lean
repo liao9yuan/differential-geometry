@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRemainderH1
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRhs0Tame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRhsOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDenseN
 
@@ -21,6 +22,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
@@ -42,9 +44,18 @@ private theorem smoothHs_eq_ccHs
     (T : SmoothCcTensor g₀ 0 2) :
     smoothCcToTensorHs (I := I) (M := M) g₀ sigma T =
       ccTensorToHs (I := I) (M := M) g₀ 2 sigma T := by
-  apply tensorHs.ext
-  funext i
+  ext i
   rw [smoothCcToTensorHs_coeff, ccTensorToHs_coeff]
+
+omit [BoundarylessManifold I M] in
+private theorem rhsArm_eq
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    realizedRHSArm (I := I) g₀ g_bg T hδ_lt hδ =
+      deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ :=
+  rfl
 
 /-- The affine order-zero coefficient bound passes unchanged to the `H1` jet
 of its interval-integrated coefficient field. -/
@@ -99,9 +110,9 @@ theorem rem_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
         (hδ : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
@@ -110,9 +121,9 @@ theorem rem_h1_tame
         (R : ℝ), 0 ≤ R → R ≤ ρ →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
-        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-          ((realizedRHSArm (I := I) g₀ g_bg T hδ₀_lt hδ -
-              realizedRHSArm (I := I) g₀ g_bg T' hδ₀_lt hδ') -
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 ((1 : ℕ) : ℝ)
+          ((deTurckRHSArmG0 (I := I) g₀ g_bg T hδ₀_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ₀_lt hδ') -
             rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ ≤
           Ctop * R *
               ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) (T - T')‖ +
@@ -172,7 +183,10 @@ theorem rem_h1_tame
     _ ≤ Ctop * R *
           ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) (T - T')‖ +
         (Clow + Ccoef * (A0 + A1)) *
-          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) (T - T')‖ := hout
+          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) (T - T')‖ := by
+      rw [rhsArm_eq, rhsArm_eq] at hout
+      convert hout using 1
+      rw [Nat.cast_one]
     _ = Ctop * R *
           ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) (T - T')‖ +
         B0 R *
@@ -193,49 +207,58 @@ theorem smoothN_h1_tame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
         (hδ : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ₀)
         (hδ' : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T') δ₀)
         (R : ℝ), 0 ≤ R → R ≤ ρ →
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ R →
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T'‖ ≤ R →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T'‖ ≤ R →
         ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg 1 T hδ₀_lt hδ -
             deTurckSmoothN (I := I) (M := M) g₀ g_bg 1 T' hδ₀_lt hδ'‖ ≤
           Ctop * R *
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (T - T')‖ +
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀
+                (((1 : ℕ) : ℝ) + 2) (T - T')‖ +
             B0 R *
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (T - T')‖ +
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀
+                (((1 : ℕ) : ℝ) + 1) (T - T')‖ +
             B1 R *
-                (‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) T‖ +
-                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) T'‖) *
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (T - T')‖ := by
+                (‖smoothCcToTensorHs (I := I) (M := M) g₀
+                    (((1 : ℕ) : ℝ) + 2) T‖ +
+                  ‖smoothCcToTensorHs (I := I) (M := M) g₀
+                    (((1 : ℕ) : ℝ) + 2) T'‖) *
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀
+                (((1 : ℕ) : ℝ) + 1) (T - T')‖ := by
   obtain ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, hrem⟩ :=
     rem_h1_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   refine ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, ?_⟩
   intro T T' hTsymm hT'symm hδ hδ' R hR hRρ hT2 hT2'
   have hT2c :
       ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R := by
-    simpa only [← smoothHs_eq_ccHs] using hT2
+    rw [← smoothHs_eq_ccHs]
+    convert hT2 using 1
+    rw [Nat.cast_one]
+    rw [show (1 : ℝ) + 1 = 2 by norm_num]
   have hT2c' :
       ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R := by
-    simpa only [← smoothHs_eq_ccHs] using hT2'
+    rw [← smoothHs_eq_ccHs]
+    convert hT2' using 1
+    rw [Nat.cast_one]
+    rw [show (1 : ℝ) + 1 = 2 by norm_num]
   have hraw := hrem T T' hTsymm hT'symm hδ hδ' R hR hRρ hT2c hT2c'
   rw [deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
     (I := I) (M := M) g₀ g_bg 1 T T' hδ₀_lt hδ hδ₀_lt hδ']
   rw [deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff
     (I := I) g₀ g_bg T T' hδ₀_lt hδ hδ₀_lt hδ']
   simp only [smoothHs_eq_ccHs]
-  change
-    ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-      ((realizedRHSArm (I := I) g₀ g_bg T hδ₀_lt hδ -
-          realizedRHSArm (I := I) g₀ g_bg T' hδ₀_lt hδ') -
-        rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ ≤ _
-  exact hraw
+  convert hraw using 1
+  rw [Nat.cast_one]
+  rw [show (1 : ℝ) + 1 = 2 by norm_num,
+    show (1 : ℝ) + 2 = 3 by norm_num]
 
 /-- The genuine smooth Ricci--DeTurck nonlinearity on the dense lower-state
 core satisfies the consumer-shaped three-arm estimate.  Both symmetrization
@@ -249,26 +272,31 @@ theorem coreN_tame
       0 < ρ ∧ 0 ≤ Ctop ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
-      ∀ {R : ℝ} (hR : 0 ≤ R) (hRρ : R ≤ ρ)
+      ∀ {R : ℝ} (_hR : 0 ≤ R) (_hRρ : R ≤ ρ)
         (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T‖ ≤ R →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
             gFibreOpBound (I := I) (M := M) g₀
               (ccTensorBilinSymm (I := I) g₀ T) δ₀)
         (x y : smoothCore (I := I) (M := M) g₀ R),
         ‖coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hreal x -
             coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hreal y‖ ≤
           Ctop * R *
-              ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1‖ +
+              ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - y.1.1‖ +
             B0 R *
               ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show (2 : ℝ) ≤ 3 by norm_num)
-                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ +
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ +
             B1 R *
-                (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-                  ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+                (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖ +
+                  ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2))‖) *
               ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show (2 : ℝ) ≤ 3 by norm_num)
-                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ := by
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ := by
   obtain ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, hsmooth⟩ :=
     smoothN_h1_tame (I := I) (M := M) hDim g₀ g_bg hδ₀_nonneg hδ₀_lt
   refine ⟨ρ, Ctop, B0, B1, hρ, hCtop, hB0, hB1, ?_⟩
@@ -277,9 +305,11 @@ theorem coreN_tame
   let Y : SmoothCcTensor g₀ 0 2 := coreRep g₀ y
   let S : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ X
   let S' : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ Y
-  have hS2 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S‖ ≤ R := by
+  have hS2 :
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ R := by
     simpa only [S, X] using coreSymm_h2 (I := I) (M := M) g₀ x
-  have hS2' : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S'‖ ≤ R := by
+  have hS2' :
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S'‖ ≤ R := by
     simpa only [S', Y] using coreSymm_h2 (I := I) (M := M) g₀ y
   have hδS := hreal S hS2
   have hδS' := hreal S' hS2'
@@ -288,47 +318,70 @@ theorem coreN_tame
     (fun z v w => ccTensorBilin_symmS_symm' (I := I) (M := M) g₀ Y z v w)
     hδS hδS' R hR hRρ hS2 hS2'
   have hS3 :
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S‖ ≤
-        ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ := by
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) S‖ ≤
+        ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+          (((1 : ℕ) : ℝ) + 2))‖ := by
     calc
-      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) X‖ := by
+      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) X‖ := by
         simpa only [S] using
-          norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ (3 : ℝ) X
-      _ = _ := by rw [X, coreRep_spec]
+          norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 2) X
+      _ = _ := by
+        simp only [X]
+        rw [coreRep_spec]
   have hS3' :
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S'‖ ≤
-        ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ := by
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) S'‖ ≤
+        ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+          (((1 : ℕ) : ℝ) + 2))‖ := by
     calc
-      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) Y‖ := by
+      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) Y‖ := by
         simpa only [S'] using
-          norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ (3 : ℝ) Y
-      _ = _ := by rw [Y, coreRep_spec]
+          norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 2) Y
+      _ = _ := by
+        simp only [Y]
+        rw [coreRep_spec]
   have hdiff3 :
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (S - S')‖ ≤
-        ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1‖ := by
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) (S - S')‖ ≤
+        ‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+          (((1 : ℕ) : ℝ) + 2)) - y.1.1‖ := by
     calc
-      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
           (symmS (I := I) (M := M) g₀ (X - Y))‖ := by
-        rw [S, S', ← symmS_sub]
-      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (X - Y)‖ :=
-        norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ (3 : ℝ) (X - Y)
-      _ = _ := by rw [smoothCcToTensorHs_sub, X, Y, coreRep_spec, coreRep_spec]
+        simp only [S, S']
+        rw [← symmS_sub]
+      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+          (X - Y)‖ :=
+        norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 2) (X - Y)
+      _ = _ := by
+        rw [smoothCcToTensorHs_sub]
+        simp only [X, Y]
+        rw [coreRep_spec, coreRep_spec]
   have hdiff2 :
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (S - S')‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) (S - S')‖ ≤
         ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show (2 : ℝ) ≤ 3 by norm_num)
-          ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ := by
+          (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+          ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ := by
     calc
-      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
           (symmS (I := I) (M := M) g₀ (X - Y))‖ := by
-        rw [S, S', ← symmS_sub]
-      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (X - Y)‖ :=
-        norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ (2 : ℝ) (X - Y)
+        simp only [S, S']
+        rw [← symmS_sub]
+      _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
+          (X - Y)‖ :=
+        norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) (X - Y)
       _ = ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show (2 : ℝ) ≤ 3 by norm_num)
-          (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (X - Y))‖ := by
+          (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+          (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+            (X - Y))‖ := by
         rw [tensorHsInclusion_smoothCcToTensorHs]
-      _ = _ := by rw [smoothCcToTensorHs_sub, X, Y, coreRep_spec, coreRep_spec]
+      _ = _ := by
+        rw [smoothCcToTensorHs_sub]
+        simp only [X, Y]
+        rw [coreRep_spec, coreRep_spec]
   have hcoreX :
       coreN (I := I) (M := M) g₀ g_bg hδ₀_lt hreal x =
         deTurckSmoothN (I := I) (M := M) g₀ g_bg 1 S hδ₀_lt hδS := by
@@ -346,26 +399,37 @@ theorem coreN_tame
     (add_nonneg (norm_nonneg _) (norm_nonneg _))
   have hmixed :
       B1 R *
-          (‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S‖ +
-            ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S'‖) *
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (S - S')‖ ≤
+          (‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) S‖ +
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀
+              (((1 : ℕ) : ℝ) + 2) S'‖) *
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) (S - S')‖ ≤
       B1 R *
-          (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-            ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+          (‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2))‖ +
+            ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2))‖) *
         ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show (2 : ℝ) ≤ 3 by norm_num)
-          ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖ := by
+          (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+          ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖ := by
     calc
       _ = B1 R *
-          ((‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S‖ +
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S'‖) *
-            ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) (S - S')‖) := by ring
+          ((‖smoothCcToTensorHs (I := I) (M := M) g₀
+                (((1 : ℕ) : ℝ) + 2) S‖ +
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀
+                (((1 : ℕ) : ℝ) + 2) S'‖) *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀
+              (((1 : ℕ) : ℝ) + 1) (S - S')‖) := by ring
       _ ≤ B1 R *
-          ((‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖ +
-              ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ))‖) *
+          ((‖(x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+              ‖(y.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖) *
             ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show (2 : ℝ) ≤ 3 by norm_num)
-              ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) - y.1.1)‖) :=
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((x.1.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - y.1.1)‖) :=
         mul_le_mul_of_nonneg_left hprod (hB1 R hR)
       _ = _ := by ring
   exact add_le_add (add_le_add htop hlow) hmixed

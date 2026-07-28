@@ -218,7 +218,7 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
   have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
       (item3RadiusFactor inp.decay inp.D) :=
     inp.normalRadius.radiusScaleTail inp.hD
-      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r
   have hgp := inp.normalRadius.halfGpScaleTail inp.hD
     (item3Factor_pos inp.decay inp.D) hradRatio
@@ -282,7 +282,7 @@ theorem MetricCompactnessInputs.pair_overlap_tail
   have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
       (item3RadiusFactor inp.decay inp.D) :=
     inp.normalRadius.radiusScaleTail inp.hD
-      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r
   have hmetric := inp.normalRadius.metricScaleTail inp.hD
     (item3Factor_pos inp.decay inp.D) hradRatio

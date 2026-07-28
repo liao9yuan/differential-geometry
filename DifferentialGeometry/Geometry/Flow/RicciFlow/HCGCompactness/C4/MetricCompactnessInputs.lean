@@ -457,15 +457,16 @@ theorem metricScaleTail
       mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
     _ ≤ hb.radius (L.φ n) c := h.le_radius (L.φ n) c
 
-/-- On the finite packing family, a radius `a * lamInf` eventually lies below
-both the pointwise injectivity radius and the smooth exponential-chart radius.
-The two factor-`2` budgets are exactly the loss in `lambda_window`. -/
+/-- On the finite packing family, a positive radius `a * lamInf` eventually
+lies below the smooth legacy exponential-chart radius.  The factor-`2` budget
+is exactly the loss in `lambda_window`; intrinsic injectivity is carried by
+the H6 chart provider rather than this compatibility tail. -/
 theorem radiusScaleTail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) {D a : Real} (hD : 0 < D) (ha : 0 < a)
-    (haD : 2 * a < D) (haRatio : 2 * a < h.ratio * D)
+    (haRatio : 2 * a < h.ratio * D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (hre : hd.RealizesEdist) (L : NetLimitData (I := I) hd D P)
     (pb : hd.PackingBound D) (r : Real) :
@@ -495,26 +496,6 @@ theorem radiusScaleTail
     (X.obj (L.φ n)).t2TangentBundle
   have hrad_pos : 0 < a * L.lamInf (γ : Nat) :=
     mul_pos ha (hd.lambda_pos hD (L.rInf (γ : Nat)))
-  have hrad_mu : a * L.lamInf (γ : Nat) <
-      hd.mu (seqRadius hd D P (L.φ n) (γ : Nat)) := by
-    calc
-      a * L.lamInf (γ : Nat) =
-          (2 * a) * (L.lamInf (γ : Nat) / 2) := by ring
-      _ ≤ (2 * a) * hd.lambda D
-          (seqRadius hd D P (L.φ n) (γ : Nat)) :=
-        mul_le_mul_of_nonneg_left
-          (hn (γ : Nat) (Finset.mem_range.mpr γ.isLt)) (by positivity)
-      _ < D * hd.lambda D (seqRadius hd D P (L.φ n) (γ : Nat)) :=
-        mul_lt_mul_of_pos_right haD
-          (hd.lambda_pos hD (seqRadius hd D P (L.φ n) (γ : Nat)))
-      _ = hd.mu (seqRadius hd D P (L.φ n) (γ : Nat)) := by
-        rw [InjRadiusDecayInput.lambda]
-        exact mul_div_cancel₀ _ hD.ne'
-  have hmu := hd.mu_hasInj_of_le hx
-  rw [hasInjRadiusAt_iff] at hmu
-  have hinj : ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
-      Geometry.Riemannian.injRadius (I := I) (X.obj (L.φ n)).metric c :=
-    ((ENNReal.ofReal_lt_ofReal_iff_of_nonneg hrad_pos.le).2 hrad_mu).trans_le hmu.2
   have hrad_lambda : a * L.lamInf (γ : Nat) ≤
       (2 * a) * hd.lambda D (seqRadius hd D P (L.φ n) (γ : Nat)) := by
     calc
@@ -526,7 +507,7 @@ theorem radiusScaleTail
           (hn (γ : Nat) (Finset.mem_range.mpr γ.isLt)) (by positivity)
   have hexp := h.mul_lambda_lt_exp (D := D) (c := 2 * a)
     (R := seqRadius hd D P (L.φ n) (γ : Nat)) hD haRatio hx
-  exact ⟨hinj, hrad_lambda.trans hexp.le⟩
+  exact ⟨hrad_pos, hrad_lambda.trans hexp.le⟩
 
 end NormalRadiusProfile
 
@@ -839,7 +820,7 @@ theorem item3ScaleTails
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
-    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (_hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
     (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
       inp.normalRadius.ratio * inp.D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -849,7 +830,7 @@ theorem item3ScaleTails
         (item3RadiusFactor inp.decay inp.D) := by
   exact ⟨inp.normalRadius.gpScaleTail inp.hD h8 P inp.realizes L inp.pack r,
     inp.normalRadius.radiusScaleTail inp.hD
-      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r⟩
 
 /-- Build the conditional compactness input bundle from an explicit uniform

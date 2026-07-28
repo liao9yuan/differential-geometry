@@ -30,3 +30,30 @@ placeholders.
 A now consumes it and is also complete (100%).  These are producer results;
 the radial-Laplacian endpoint and unconditional `compactnessSol` theorem remain
 separately accounted.
+
+## 2026-07-27 intrinsic CGT radial fence
+
+Two intrinsic-framed consequences are now focused-green with no diagnostics:
+
+- `intrFrame_radial_le` bounds the Euclidean radial pairing by the
+  Riemannian speed measured by `intrFrameMetric`;
+- `intrLift_norm_le` integrates that pointwise estimate for a `C¹` lift
+  starting at the model origin:
+  `ofReal ‖η b‖ ≤ pathELength (intrinsicFramedExp ∘ η) a b`.
+
+The proof is the intrinsic, no-radius analogue of the checked raw Gauss length
+fence.  It uses the time-one intrinsic Jacobi formula, `intrinsic_gauss`, the
+exact normal-frame norm identity, and the existing one-sided slope/integral
+lemma.  It introduces no raw exponential-domain bound, injectivity-radius
+assumption, or new HCG input.
+
+The zero-start statement is intentional: it is exactly the continuation seam
+for the CGT short exponential lift starting from the constant path, and avoids
+adding a stronger general-start derivative API before it is needed.
+
+Theorem accounting: both radial-fence theorems are 100% focused-verified, and
+the exact module artifact is current (`3806/3806`).
+The compact continuation theorem producing the full short lift is still 0%;
+its dedicated machinery is now about 30%.  The CGT loop estimate
+`intrLoop_ge_cgt`, the sequence `InjRadiusDecayInput` producer, and the
+unconditional metric/flow compactness endpoints remain 0%.

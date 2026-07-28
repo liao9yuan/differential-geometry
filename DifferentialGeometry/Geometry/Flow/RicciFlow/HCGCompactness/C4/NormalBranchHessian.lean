@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Calculus.CLMNeumann
 import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchMin
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchScale
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalChartReadout
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricLocal
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
 
 set_option autoImplicit false
 
@@ -437,8 +437,12 @@ theorem readout_factor
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e) {w : E × E} (hw : w ∈ e.target) :
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
+    {w : E × E} (hw : w ∈ e.target) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -536,8 +540,11 @@ theorem inv_cov_coord
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {z xi : E} (hw : (z, xi) ∈ e.target)
     (hzQ : z ∈ normalQuarter (I := I) Y x) (v : E) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -745,8 +752,10 @@ theorem hess_inv_coord
     (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
+      (c := legacyBallChart (I := I) (X.obj k) x))
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e
+      (c := legacyBallChart (I := I) (X.obj k) x))
     {z xi : E} (hw : (z, xi) ∈ e.target)
     (hzQ : z ∈ normalQuarter (I := I) (X.obj k) x)
     (v w : E) :
@@ -907,7 +916,8 @@ theorem inv_cov_expand
       ConnectedSpace (X.obj k).M)
     (x : (X.obj k).M) {q : NNReal} {δ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
+      (c := legacyBallChart (I := I) (X.obj k) x))
     {z xi : E} (hw : (z, xi) ∈ e.target)
     (hzQ : z ∈ normalQuarter (I := I) (X.obj k) x)
     (hzMetric : z ∈ Metric.ball (0 : E) (hb.radius k x)) (v : E) :
@@ -987,8 +997,10 @@ theorem hess_inv_lower
     (x : (X.obj k).M) {q eta : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
+      (c := legacyBallChart (I := I) (X.obj k) x))
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e
+      (c := legacyBallChart (I := I) (X.obj k) x))
     (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
       ((PhaseFlow.freeDiagCLE (E := E)).symm :
         (E × E) →L[Real] (E × E)) e.target eta)
@@ -1201,8 +1213,10 @@ theorem hess_inv_sixth
     (x : (X.obj k).M) {q eta : NNReal} {δ ρ : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
     (hq : 0 < q)
-    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
-    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e
+      (c := legacyBallChart (I := I) (X.obj k) x))
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e
+      (c := legacyBallChart (I := I) (X.obj k) x))
     (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
       ((PhaseFlow.freeDiagCLE (E := E)).symm :
         (E × E) →L[Real] (E × E)) e.target eta)
@@ -1302,6 +1316,574 @@ theorem hess_inv_sixth
     (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hquad.1
   exact (mul_le_mul_of_nonneg_right hcoef hg0).trans hlower
 
+/-- In controlled normal-ball coordinates, the selected-branch center
+equation is exactly the weighted model inverse-velocity sum. -/
+theorem chartCmEqnC_factor
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+        (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+        z (mu, xi) =
+      invVelSum e mu xi z := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+    (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  unfold chartCmEqnC invVelSum
+  apply Finset.sum_congr rfl
+  intro i _hi
+  congr 1
+  change
+    (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).chartReadout c
+        (normalPair (I := I) Y x (z, xi i) (c := c)) =
+      (e.symm (z, xi i)).2
+  exact IsNormalDiag.chart_readout (I := I) Y hcomplete hconn x
+    hq he hf (htgt i)
+
+/-- The controlled-chart center equation and the weighted model
+inverse-velocity sum have the same zero set on the selected target. -/
+theorem chartCmC_zero_iff
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    (chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+        (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+        z (mu, xi) = 0 ↔
+      invVelSum e mu xi z = 0) := by
+  rw [chartCmEqnC_factor (I := I) Y hcomplete hconn x
+    hq he hf z mu xi htgt]
+
+/-- Every point in a packaged controlled-chart center solution lies in the
+target of the selected diagonal branch. -/
+theorem HasCmSolC.target_mem
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    HasCmSolC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+        (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+        z (mu, xi) →
+      ∀ i, (z, xi i) ∈ e.target := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  intro hsol
+  rcases hsol with ⟨hzBall, hxiBall, hdom, _hzero, _hstrict⟩
+  have hzTarget : c.hom z ∈ c.restrictBall.target := by
+    have hmap := c.restrictBall.map_source hzBall
+    change c.hom z ∈ c.restrictBall.target at hmap
+    exact hmap
+  have hxiTarget (i : ι) : c.hom (xi i) ∈ c.restrictBall.target := by
+    have hmap := c.restrictBall.map_source (hxiBall i)
+    change c.hom (xi i) ∈ c.restrictBall.target at hmap
+    exact hmap
+  intro i
+  have hout := IsNormalDiag.target_of_inv_dom (I := I) Y hcomplete hconn x
+    hq he hzTarget (hxiTarget i) (hdom i).1
+  have hzDecode : c.inv (c.hom z) = z :=
+    c.hom.left_inv (c.ball_subset hzBall)
+  have hxiDecode : c.inv (c.hom (xi i)) = xi i :=
+    c.hom.left_inv (c.ball_subset (hxiBall i))
+  rwa [hzDecode, hxiDecode] at hout
+
+/-- A packaged controlled-chart center solution has zero selected
+inverse-velocity sum, independently of the chart provider. -/
+theorem HasCmSolC.invVel_zero
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    HasCmSolC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+        (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+        z (mu, xi) →
+      invVelSum e mu xi z = 0 := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  intro hsol
+  have htgt := HasCmSolC.target_mem (I := I) Y hcomplete hconn x
+    hq he z mu xi hsol
+  exact (IsNormalDiag.chartCmC_zero_iff (I := I) Y hcomplete hconn x
+    hq he hf z mu xi htgt).mp hsol.2.2.2.1
+
+/-- The center derivative of the controlled-chart equation is invertible
+throughout the selected target under the quantitative inverse estimate. -/
+theorem cmC_deriv_inv
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {eta : NNReal}
+    (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
+      ((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E)) e.target eta)
+    (heta : eta < 1)
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target)
+    (hmu : ∀ i, 0 ≤ mu i) (hsum : ∑ i, mu i = 1) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    ∃ L : E ≃L[Real] E,
+      HasFDerivAt
+        (fun u : E =>
+          chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+            (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+            u (mu, xi))
+        (L : E →L[Real] E) z := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+    (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  have heData := he
+  change e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) delta ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ a ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e a) (c := c) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x a (c := c)) at heData
+  have hinv : ContDiffOn Real ∞ (e.symm : E × E → E × E) e.target :=
+    heData.2.2.2.2.1
+  obtain ⟨L, hL⟩ :=
+    invVelSum_inv e mu xi hinv htgt happrox hmu hsum heta
+  have htgtNhd : ∀ i, ∀ᶠ u in nhds z, (u, xi i) ∈ e.target := by
+    intro i
+    have hpair : ContinuousAt (fun u : E => (u, xi i)) z := by fun_prop
+    exact hpair.preimage_mem_nhds (e.open_target.mem_nhds (htgt i))
+  have heq :
+      (fun u : E =>
+        chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+          (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he)
+          u (mu, xi)) =ᶠ[nhds z]
+      invVelSum e mu xi := by
+    filter_upwards [Filter.eventually_all.mpr htgtNhd] with u hu
+    exact chartCmEqnC_factor (I := I) Y hcomplete hconn x
+      hq he hf u mu xi hu
+  exact ⟨L, hL.congr_of_eventuallyEq heq⟩
+
+/-- A controlled normal-ball provider supplies both the invertible center
+derivative and the strictly differentiable local implicit solution. -/
+theorem cmC_sol_strict
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {eta : NNReal}
+    (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
+      ((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E)) e.target eta)
+    (heta : eta < 1)
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target)
+    (hmu : ∀ i, 0 ≤ mu i) (hsum : ∑ i, mu i = 1)
+    (hdata :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : IsManifold I 1 Y.M := IsManifold.of_le
+        (I := I) (M := Y.M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : ConnectedSpace Y.M := hconn
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace Y.M :=
+        Manifold.metrizableSpace I Y.M
+      letI : T3Space Y.M := inferInstance
+      letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+        Y.riemBundle (I := I)
+      letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+        Y.riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+      letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+      letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+      let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+      z ∈ Metric.ball (0 : E) c.radius ∧
+        (∀ i, xi i ∈ Metric.ball (0 : E) c.radius) ∧
+        (∀ i, (c.hom z, c.hom (xi i)) ∈ B.chartReadDom c) ∧
+        chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+          B z (mu, xi) = 0) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+    ∃ L : E ≃L[Real] E,
+      HasFDerivAt
+          (fun u : E =>
+            chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+              x c B u (mu, xi))
+          (L : E →L[Real] E) z ∧
+        ∃ (f : ((ι → Real) × (ι → E)) → E)
+            (Df : ((ι → Real) × (ι → E)) →L[Real] E),
+          f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
+            (∀ᶠ params in nhds (mu, xi),
+              chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+                x c B (f params) params = 0) ∧
+            (∀ᶠ zp in nhds (z, (mu, xi)),
+              chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+                  x c B zp.1 zp.2 = 0 →
+                zp.1 = f zp.2) := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+  rcases hdata with ⟨hz, hxi, hdom, hzero⟩
+  obtain ⟨L, hL⟩ := cmC_deriv_inv (I := I) Y hcomplete hconn x hq he hf
+    happrox heta z mu xi htgt hmu hsum
+  refine ⟨L, hL, ?_⟩
+  exact readoutSolC_strict (I := I) Y.metric (normal_enorm (I := I) Y)
+    x c B z (mu, xi) hz hxi hdom ⟨L, hL⟩ hzero
+
+/-- A controlled normal-ball provider supplies a finite-order smooth local
+implicit solution of the center equation. -/
+theorem cmC_sol_cd
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {c : NormalChartAt (I := I) Y x}
+    {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e (c := c))
+    (hf : NormalDiagFence (I := I) Y x q e (c := c))
+    {eta : NNReal}
+    (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
+      ((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E)) e.target eta)
+    (heta : eta < 1)
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (n : Nat) (hn : 1 ≤ n)
+    (htgt : ∀ i, (z, xi i) ∈ e.target)
+    (hmu : ∀ i, 0 ≤ mu i) (hsum : ∑ i, mu i = 1)
+    (hdata :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : IsManifold I 1 Y.M := IsManifold.of_le
+        (I := I) (M := Y.M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : ConnectedSpace Y.M := hconn
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace Y.M :=
+        Manifold.metrizableSpace I Y.M
+      letI : T3Space Y.M := inferInstance
+      letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+        Y.riemBundle (I := I)
+      letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+        Y.riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+      letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+      letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+      let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+      z ∈ Metric.ball (0 : E) c.radius ∧
+        (∀ i, xi i ∈ Metric.ball (0 : E) c.radius) ∧
+        (∀ i, (c.hom z, c.hom (xi i)) ∈ B.chartReadDom c) ∧
+        chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y) x c
+          B z (mu, xi) = 0) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+    ∃ f : ((ι → Real) × (ι → E)) → E,
+      f (mu, xi) = z ∧ ContDiffAt Real (n : ℕ∞) f (mu, xi) ∧
+        (∀ᶠ params in nhds (mu, xi),
+          chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+            x c B (f params) params = 0) ∧
+        (∀ᶠ zp in nhds (z, (mu, xi)),
+          chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+              x c B zp.1 zp.2 = 0 →
+            zp.1 = f zp.2) := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+  rcases hdata with ⟨hz, hxi, hdom, hzero⟩
+  obtain ⟨L, hL⟩ := cmC_deriv_inv (I := I) Y hcomplete hconn x hq he hf
+    happrox heta z mu xi htgt hmu hsum
+  exact readoutSolC_cdAt (I := I) Y.metric (normal_enorm (I := I) Y)
+    x c B z (mu, xi) n hn hz hxi hdom ⟨L, hL⟩ hzero
 /-- The selected-branch center equation factors through the common normal
 readout and the weighted inverse-velocity sum. -/
 theorem chartCmEqnB_factor
@@ -1310,8 +1892,11 @@ theorem chartCmEqnB_factor
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
     (htgt : ∀ i, (z, xi i) ∈ e.target) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -1376,8 +1961,11 @@ theorem chartCm_zero_iff
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
     (htgt : ∀ i, (z, xi i) ∈ e.target)
     (hz : z ∈ normalBall (I := I) Y x) :
@@ -1443,6 +2031,118 @@ theorem chartCm_zero_iff
     ← normalReadCLE_coe (I := I) Y x hz hbase]
   exact (normalReadCLE (I := I) Y x hz hbase).map_eq_zero_iff
 
+
+/-- A weighted inverse-velocity zero yields the controlled-chart center
+equation and its local implicit solution on the same selected target. -/
+theorem cmC_sol_of_vel
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
+    {eta : NNReal}
+    (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
+      ((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E)) e.target eta)
+    (heta : eta < 1)
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target)
+    (hmu : ∀ i, 0 ≤ mu i) (hsum : ∑ i, mu i = 1)
+    (hz : z ∈ normalBall (I := I) Y x)
+    (hvel : invVelSum e mu xi z = 0) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    let c := legacyBallChart (I := I) Y x
+    let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+    ∃ L : E ≃L[Real] E,
+      HasFDerivAt
+          (fun u : E =>
+            chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+              x c B u (mu, xi))
+          (L : E →L[Real] E) z ∧
+        ∃ (f : ((ι → Real) × (ι → E)) → E)
+            (Df : ((ι → Real) × (ι → E)) →L[Real] E),
+          f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
+            (∀ᶠ params in nhds (mu, xi),
+              chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+                x c B (f params) params = 0) ∧
+            (∀ᶠ zp in nhds (z, (mu, xi)),
+              chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+                  x c B zp.1 zp.2 = 0 →
+                zp.1 = f zp.2) := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  let c := legacyBallChart (I := I) Y x
+  let B := IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he
+  have hzBall : z ∈ Metric.ball (0 : E) c.radius := by
+    simpa only [c, normalBall, legacyBallChart_radius] using hz
+  have hxiBall (i : ι) : xi i ∈ Metric.ball (0 : E) c.radius :=
+    (IsNormalDiag.target_mem_ball (I := I) Y hcomplete hconn x
+      he hf (htgt i)).2
+  have hzTarget : c.hom z ∈ c.restrictBall.target := by
+    have hmap := c.restrictBall.map_source hzBall
+    simpa only [NormalBallChart.restrictBall_apply] using hmap
+  have hdom (i : ι) :
+      (c.hom z, c.hom (xi i)) ∈ B.chartReadDom c := by
+    have hpair :
+        normalPair (I := I) Y x (z, xi i) (c := c) ∈ B.dom := by
+      rw [← (IsNormalDiag.full_transport (I := I) Y hcomplete hconn
+        x hq he hf).2.1]
+      refine ⟨(z, xi i), htgt i, ?_⟩
+      exact c.pairHome_apply (z, xi i)
+    refine ⟨?_, hzTarget⟩
+    simpa only [normalPair, NormalBallChart.pair] using hpair
+  have hzeroC :
+      chartCmEqnC (I := I) Y.metric (normal_enorm (I := I) Y)
+        x c B z (mu, xi) = 0 :=
+    (IsNormalDiag.chartCmC_zero_iff (I := I) Y hcomplete hconn x
+      hq he hf z mu xi htgt).mpr hvel
+  exact IsNormalDiag.cmC_sol_strict (I := I) Y hcomplete hconn x
+    hq he hf happrox heta z mu xi htgt hmu hsum
+      ⟨hzBall, hxiBall, hdom, hzeroC⟩
+
 /-- At a zero of the selected-branch center equation, its derivative in the
 center coordinate is a continuous linear equivalence. -/
 theorem cm_deriv_inv
@@ -1451,8 +2151,11 @@ theorem cm_deriv_inv
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {eta : NNReal}
     (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
       ((PhaseFlow.freeDiagCLE (E := E)).symm :
@@ -1597,8 +2300,11 @@ theorem cm_sol_strict
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {eta : NNReal}
     (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
       ((PhaseFlow.freeDiagCLE (E := E)).symm :
@@ -1783,8 +2489,11 @@ theorem cm_sol_cd
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) {q : NNReal} {delta : Real}
     {e : OpenPartialHomeomorph (E × E) (E × E)}
-    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
-    (hf : NormalDiagFence (I := I) Y x q e)
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e
+      (c := legacyBallChart (I := I) Y x))
+    (hf : NormalDiagFence (I := I) Y x q e
+      (c := legacyBallChart (I := I) Y x))
     {eta : NNReal}
     (happrox : ApproximatesLinearOn (e.symm : E × E → E × E)
       ((PhaseFlow.freeDiagCLE (E := E)).symm :

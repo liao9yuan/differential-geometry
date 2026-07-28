@@ -1,0 +1,230 @@
+import DifferentialGeometry.Geometry.Coordinates.TangentPartialDiffeomorph
+import DifferentialGeometry.Geometry.Exponential.NormalBallChart
+
+set_option autoImplicit false
+
+/-!
+# Tangent and pair homes of controlled normal-ball charts
+
+This file upgrades a `NormalBallChart` to the two partial homeomorphisms used
+by diagonal-exponential consumers.  The constructions depend only on the
+chart provider, so both legacy and intrinsic H6 charts use the same transport
+API.
+-/
+
+noncomputable section
+
+universe u uE uH
+
+open Bundle Manifold Set TopologicalSpace
+open scoped ContDiff Manifold Topology
+
+namespace DifferentialGeometry
+namespace Geometry
+namespace Riemannian
+namespace NormalCoordinates
+
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+variable [IsManifold I ∞ M]
+
+namespace NormalBallChart
+
+/-- Model tangent coordinates transported through the tangent map of a
+controlled normal-ball chart. -/
+noncomputable def tangentHome {p : M}
+    (c : NormalBallChart (I := I) p) :
+    OpenPartialHomeomorph (E × E) (TangentBundle I M) :=
+  (tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm.toOpenPartialHomeomorph.trans
+    (PartialDiffeomorph.tangentHome c.restrictBall (by simp))
+
+/-- A pair of model coordinates transported through a controlled normal-ball
+chart in each factor. -/
+noncomputable def pairHome {p : M}
+    (c : NormalBallChart (I := I) p) :
+    OpenPartialHomeomorph (E × E) (M × M) :=
+  c.restrictBall.toOpenPartialHomeomorph.prod
+    c.restrictBall.toOpenPartialHomeomorph
+
+/-- On the controlled source ball, `tangentHome` is the provider's tangent
+realization. -/
+theorem tangentHome_apply {p : M}
+    (c : NormalBallChart (I := I) p) (z : E × E)
+    (hz : z.1 ∈ Metric.ball (0 : E) c.radius) :
+    c.tangentHome z = c.tangent z := by
+  change tangentMapWithin 𝓘(Real, E) I
+      (c.restrictBall : E → M) c.restrictBall.source
+      ((tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm z) =
+    c.tangent z
+  have huniq : UniqueMDiffWithinAt 𝓘(Real, E)
+      c.restrictBall.source z.1 :=
+    c.restrictBall.open_source.uniqueMDiffOn z.1 (by
+      simpa only [restrictBall_source] using hz)
+  have hdiff : MDifferentiableAt 𝓘(Real, E) I
+      (c.restrictBall : E → M) z.1 :=
+    c.restrictBall.mdifferentiableAt (by simp) (by
+      simpa only [restrictBall_source] using hz)
+  rw [tangentMapWithin_eq_tangentMap huniq hdiff]
+  rfl
+
+omit [IsManifold I ∞ M] in
+@[simp] theorem pairHome_apply {p : M}
+    (c : NormalBallChart (I := I) p) (z : E × E) :
+    c.pairHome z = c.pair z :=
+  rfl
+
+/-- The source of the tangent home is determined by the base coordinate. -/
+theorem tangentHome_source {p : M}
+    (c : NormalBallChart (I := I) p) :
+    c.tangentHome.source =
+      Prod.fst ⁻¹' Metric.ball (0 : E) c.radius := by
+  ext z
+  simp only [tangentHome, OpenPartialHomeomorph.trans_source,
+    Homeomorph.toOpenPartialHomeomorph_source,
+    PartialDiffeomorph.tangentHome]
+  constructor
+  · rintro ⟨_, hz⟩
+    exact hz
+  · intro hz
+    exact ⟨mem_univ z, hz⟩
+
+/-- The target of the tangent-coordinate home consists exactly of tangent
+vectors based in the controlled chart image. -/
+theorem tangentHome_target {p : M}
+    (c : NormalBallChart (I := I) p) :
+    c.tangentHome.target =
+      Bundle.TotalSpace.proj ⁻¹' c.restrictBall.target := by
+  ext v
+  simp only [tangentHome, OpenPartialHomeomorph.trans_target,
+    Homeomorph.toOpenPartialHomeomorph_target,
+    PartialDiffeomorph.tangentHome, Set.mem_inter_iff, Set.mem_preimage]
+  simp
+
+/-- The inverse tangent-coordinate home reads a tangent vector through the
+differential of the inverse controlled chart. -/
+theorem tangentHome_symm_apply {p : M}
+    (c : NormalBallChart (I := I) p) {y : M}
+    (hy : y ∈ c.restrictBall.target) (v : TangentSpace I y) :
+    c.tangentHome.symm
+        (⟨y, v⟩ : TangentBundle I M) =
+      (c.inv y,
+        mfderiv I (modelWithCornersSelf Real E) c.inv y v) := by
+  change
+    tangentBundleModelSpaceHomeomorph (modelWithCornersSelf Real E)
+        (tangentMapWithin I (modelWithCornersSelf Real E)
+          (c.restrictBall.symm : M → E) c.restrictBall.target
+          (⟨y, v⟩ : TangentBundle I M)) =
+      (c.inv y,
+        mfderiv I (modelWithCornersSelf Real E) c.inv y v)
+  simp only [tangentMapWithin,
+    tangentBundleModelSpaceHomeomorph_coe, TotalSpace.toProd_apply]
+  rw [mfderivWithin_of_isOpen c.restrictBall.open_target hy]
+  rfl
+
+omit [IsManifold I ∞ M] in
+/-- The source of the pair home is the product of the two controlled balls. -/
+@[simp] theorem pairHome_source {p : M}
+    (c : NormalBallChart (I := I) p) :
+    c.pairHome.source =
+      Metric.ball (0 : E) c.radius ×ˢ Metric.ball (0 : E) c.radius :=
+  rfl
+
+/-- The tangent-coordinate home is smooth to all orders on its source. -/
+theorem tangentHome_inf {p : M}
+    (c : NormalBallChart (I := I) p) :
+    ContMDiffOn 𝓘(Real, E × E) I.tangent ∞
+      c.tangentHome c.tangentHome.source := by
+  rw [modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  let Φ := c.restrictBall
+  let m : OpenPartialHomeomorph (E × E) (TangentBundle 𝓘(Real, E) E) :=
+    (tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm.toOpenPartialHomeomorph
+  let t := PartialDiffeomorph.tangentHome Φ (by simp)
+  have hm : ContMDiff (𝓘(Real, E).prod 𝓘(Real, E)) 𝓘(Real, E).tangent ∞
+      (m : E × E → TangentBundle 𝓘(Real, E) E) := by
+    have hm0 := contMDiff_tangentBundleModelSpaceHomeomorph_symm
+      (I := 𝓘(Real, E)) (n := (∞ : WithTop ℕ∞))
+    unfold ModelProd at hm0
+    rw [← chartedSpaceSelf_prod] at hm0
+    simpa only [m] using hm0
+  have ht : ContMDiffOn 𝓘(Real, E).tangent I.tangent ∞
+      (t : TangentBundle 𝓘(Real, E) E → TangentBundle I M) t.source := by
+    simpa only [t, PartialDiffeomorph.tangentHome] using
+      Φ.contMDiffOn_toFun.contMDiffOn_tangentMapWithin
+        (m := (∞ : WithTop ℕ∞)) (by simp) Φ.open_source.uniqueMDiffOn
+  have hmOn : ContMDiffOn (𝓘(Real, E).prod 𝓘(Real, E))
+      𝓘(Real, E).tangent ∞
+      (m : E × E → TangentBundle 𝓘(Real, E) E) m.source :=
+    hm.contMDiffOn
+  change ContMDiffOn (𝓘(Real, E).prod 𝓘(Real, E)) I.tangent ∞
+    ((t : TangentBundle 𝓘(Real, E) E → TangentBundle I M) ∘
+      (m : E × E → TangentBundle 𝓘(Real, E) E))
+    (m.source ∩
+      (m : E × E → TangentBundle 𝓘(Real, E) E) ⁻¹' t.source)
+  exact ht.comp' hmOn
+
+/-- The inverse tangent-coordinate home is smooth to all orders on its
+target. -/
+theorem tangentHome_inv_inf {p : M}
+    (c : NormalBallChart (I := I) p) :
+    ContMDiffOn I.tangent 𝓘(Real, E × E) ∞
+      c.tangentHome.symm c.tangentHome.target := by
+  rw [modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  let Φ := c.restrictBall
+  let m : OpenPartialHomeomorph (E × E) (TangentBundle 𝓘(Real, E) E) :=
+    (tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm.toOpenPartialHomeomorph
+  let t := PartialDiffeomorph.tangentHome Φ (by simp)
+  have hm : ContMDiff 𝓘(Real, E).tangent
+      (𝓘(Real, E).prod 𝓘(Real, E)) ∞
+      (m.symm : TangentBundle 𝓘(Real, E) E → E × E) := by
+    have hm0 := contMDiff_tangentBundleModelSpaceHomeomorph
+      (I := 𝓘(Real, E)) (n := (∞ : WithTop ℕ∞))
+    unfold ModelProd at hm0
+    rw [← chartedSpaceSelf_prod] at hm0
+    simpa only [m] using hm0
+  have ht : ContMDiffOn I.tangent 𝓘(Real, E).tangent ∞
+      (t.symm : TangentBundle I M → TangentBundle 𝓘(Real, E) E) t.target := by
+    simpa only [t, PartialDiffeomorph.tangentHome] using
+      Φ.contMDiffOn_invFun.contMDiffOn_tangentMapWithin
+        (m := (∞ : WithTop ℕ∞)) (by simp) Φ.open_target.uniqueMDiffOn
+  have hmOn : ContMDiffOn 𝓘(Real, E).tangent
+      (𝓘(Real, E).prod 𝓘(Real, E)) ∞
+      (m.symm : TangentBundle 𝓘(Real, E) E → E × E) m.target :=
+    hm.contMDiffOn
+  change ContMDiffOn I.tangent (𝓘(Real, E).prod 𝓘(Real, E)) ∞
+    ((m.symm : TangentBundle 𝓘(Real, E) E → E × E) ∘
+      (t.symm : TangentBundle I M → TangentBundle 𝓘(Real, E) E))
+    (t.target ∩
+      (t.symm : TangentBundle I M → TangentBundle 𝓘(Real, E) E) ⁻¹' m.target)
+  exact hmOn.comp' ht
+
+omit [IsManifold I ∞ M] in
+/-- The pair-coordinate home is smooth to all orders on its source. -/
+theorem pairHome_inf {p : M}
+    (c : NormalBallChart (I := I) p) :
+    ContMDiffOn 𝓘(Real, E × E) (I.prod I) ∞
+      c.pairHome c.pairHome.source := by
+  rw [modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  have h := c.restrictBall.contMDiffOn_toFun.prodMap
+    c.restrictBall.contMDiffOn_toFun
+  simpa only [pairHome, OpenPartialHomeomorph.prod_source,
+    OpenPartialHomeomorph.prod_apply] using h
+
+omit [IsManifold I ∞ M] in
+/-- The inverse pair-coordinate home is smooth to all orders on its target. -/
+theorem pairHome_inv_inf {p : M}
+    (c : NormalBallChart (I := I) p) :
+    ContMDiffOn (I.prod I) 𝓘(Real, E × E) ∞
+      c.pairHome.symm c.pairHome.target := by
+  rw [modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  have h := c.restrictBall.contMDiffOn_invFun.prodMap
+    c.restrictBall.contMDiffOn_invFun
+  simpa only [pairHome, OpenPartialHomeomorph.prod_target,
+    OpenPartialHomeomorph.prod_symm_apply] using h
+
+end NormalBallChart
+end NormalCoordinates
+end Riemannian
+end Geometry
+end DifferentialGeometry

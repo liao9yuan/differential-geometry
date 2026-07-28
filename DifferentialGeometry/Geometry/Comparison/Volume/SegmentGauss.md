@@ -102,3 +102,35 @@ missing to close `segBall_vol_le` (B5d2 stopped here, failure-first):
    E-polar identity assembled from `lintegral_polar` (`PolarEvaluation.lean:50`) +
    `toSphere_apply_univ` (σ) + `volumeIoiPow` (`r^{n-1}dr`) — no packaged
    truncated-ball radial lemma exists, but all blocks are present.
+
+## 2026-07-27 basis-density adapter
+
+Added `jacDens_basis` and focused-verified it without warnings.  For two launch
+bases `B,B'` with the same finite index, it proves
+`density(B') = |B.det B'| * density(B)`.  The reusable statement is
+basis-generic: `intrinsic_jacobi_one` identifies every endpoint column with one
+continuous-linear-map evaluation, `Module.Basis.sum_repr` supplies its
+coordinate recombination, and `curveDensity_recomb` supplies the absolute
+determinant.  Chart-basis reindexing remains a separate use of
+`curveDensity_reindex` in the consumer.
+
+The older frontier list above is now historical.  Sharp pole normalization,
+density continuity, the adapted radial/transverse basis, and the model-ball
+polar integral are complete, and `segBall_vol_le` is proved and exact-verified
+in `SegmentPolar.lean` (theorem 100%; dedicated machinery 100%).  The remaining
+endpoint is `segBall_vol_rel` (theorem still 0% until its Lean body replaces
+the `sorry`); its dedicated strict-domain, area, radial-scaling, and
+cross-integral machinery is about 85%.
+
+## 2026-07-27 radial-density scaling
+
+Added `transDens_scale`.  For a `Fin d` launch frame it gives the exact
+all-time identity
+
+`D_{u,w}(t) = |t|^d * D_{t•u,w}(1)`.
+
+The proof applies `intrinsic_jacobi_at` and `intrinsic_jacobi_one` columnwise,
+extracts the resulting `t^2` from the Gram matrix, and then uses
+`Matrix.det_smul`.  It is valid for every real `t` and every natural `d`;
+in particular, the empty-frame case `d = 0` needs no separate hypothesis.
+Focused and exact verification pass without warnings.

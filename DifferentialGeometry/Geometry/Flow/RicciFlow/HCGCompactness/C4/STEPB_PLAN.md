@@ -611,8 +611,63 @@ the `lbl395` normal-coordinate metric-bound honest input.
   and constant intrinsic speed; no chart-radius clamp remains in this producer.
 - H6 relative profile theorem: 0% because it is not yet stated.
 - Dedicated zero-order machinery: 100%.
-- Next target: prove the off-zero local agreement/smoothness bridge on the
-  natural `expDomain`, combine it with `exp_dom_of_inj_rad` and the new
-  nonconjugacy theorem to make the geometric injectivity ball a partial
-  diffeomorphism source, then construct the bounds record and profile together.
-  The all-order metric-jet induction remains separate.
+- Whole-plan consultation correction: do not redefine `expRadiusGp` as a
+  fraction of injectivity radius. Injectivity alone does not imply a local
+  diffeomorphism. Keep Route A, but make Route C carry the controlled
+  whole-ball branch as part of `H6NormalData`.
+- Required producer inputs are `SeqMetricComplete`, connectedness,
+  `SeqBoundedGeometry`, `hd : InjRadiusDecayInput`, and
+  `hreal : hd.RealizesEdist`. The latter supplies the missing global estimate
+  `hd.mu distance <= hd.mu 0`.
+- Gates 1--3 are complete: intrinsic injectivity, the fixed relative
+  whole-ball partial diffeomorphism, and the provider-native Hessian/implicit
+  function package are focused/exact green.
+- Gate 4 is source-complete. `HasCmSolC`, `HasChartCmSol`, the finite-hat
+  readout, support packages, `actual_cm_tail`, `stage_root_tail`, and
+  `StepCStageSeed` all pass in one isolated current-artifact replay under
+  `legacyChartFamily`. The only source repairs were moving the generic
+  `mapCInf_apply` projection to `MapConvergenceComp`, removing one empty
+  `dsimp`, and using the controlled chart's explicit source/domain/zero fields
+  in the selected-root proof. All other failures were stale exports. Formal
+  artifacts remain pending while an unrelated writer is active.
+- Gate 5 is active. The common `NormalChartFamily` now lives in
+  `StepBInputs`; `HasDiagPairConv` preserves it through subsequences,
+  stage-branch congruence, fences, and inverse data; and
+  `pairStageFillSub`/`stagePtsSub`/`stageWeightSub`/`stageCfgSub` use one
+  family for every transition and readout. The full current-interface replay
+  through `StepCStageFill` passes under `legacyChartFamily`. The next concrete
+  target is to carry that same family through
+  `stageInvVelSub -> stageRootSub -> HasStageRootCube`, then through the
+  selected root/readout capstone before instantiating the H6 chart.
+- Feasibility correction: the H6 provider cannot be substituted only in
+  `stage_root_tail`. That proof still builds its equation and decode using the
+  legacy `chiK`, `chiL`, `qstar`, `zc`, `xi`, and `normalExpPD`. The H6
+  whole-ball chart is not known to agree with the legacy chart on that whole
+  ball, so no global compatibility rewrite is available or mathematically
+  justified. The selected diagonal/root package itself must be
+  chart-parametric; do not add an agreement assumption or a parallel H6
+  wrapper.
+- `NormalRadiusProfile` and final `exists_h6NormalData`: theorem-level 0%.
+  Radius/branch infrastructure: about 80%. Branch-parametric consumer
+  migration: about 58%. All-order metric-jet machinery: about 35%. Overall
+  native H6 producer machinery: about 61%.
+- The independent all-order curvature-to-coordinate-metric jet induction is
+  the dominant remaining theorem. Its target and all migration gates are
+  recorded in `H6_RADIUS_CONSULT.md`. The order-zero base and the final
+  provider-transfer step are focused-green:
+  `NormalBallChart.MetricEquivOn.deriv_zero`,
+  `H6ChartData.metric_eq_intr`, and
+  `NormalBallChart.MetricDerivBound.of_eqOn`. The focused-green
+  `exists_intr_control` now chooses one radius for both the half/two estimate
+  and local diffeomorphism, and `H6BallData` retains that estimate on the exact
+  relative chart ball. `H6NormalData` is now focused-green against an isolated
+  overlay containing the current `H6NormalCoord` export; the only local repair
+  was an explicit `change` past the result-type `let hEnorm`. The formal
+  artifacts remain pending while an unrelated exact writer is active.
+  Therefore the next Gate 6 target is specifically the
+  fixed-tube, sequence-uniform parameter-jet induction for the intrinsic
+  geodesic/Jacobi flow, not another chart compatibility or radius-coherence
+  lemma.
+  State it for an arbitrary finite launch radius: the focused-green
+  `H6ChartData.radius_le_global` bounds every selected chart radius by
+  `d.ratio * hd.mu 0`, which is the final instantiation.

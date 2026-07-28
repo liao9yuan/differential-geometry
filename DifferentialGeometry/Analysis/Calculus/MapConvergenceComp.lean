@@ -651,6 +651,34 @@ theorem mapCInfConv_pi {ι : Type*} [Fintype ι] {U : Set E'} (hU : IsOpen U)
   intro i
   exact hk0 i k (le_trans (Finset.le_sup (Finset.mem_univ i)) hk) r hr x hx
 
+/-- A coordinate of a finite Pi-valued family inherits `C^∞` convergence
+on compact subsets. -/
+theorem mapCInf_apply {ι : Type*} [Fintype ι]
+    {U : Set E'} (hU : IsOpen U)
+    {u : ℕ → E' → (ι → Q)} {uinf : E' → (ι → Q)}
+    (hu : MapCInfConvOnCompacts U u uinf)
+    (huc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (u k) U)
+    (huinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) uinf U) (i : ι) :
+    MapCInfConvOnCompacts U (fun k x => u k x i) (fun x => uinf x i) := by
+  intro K hK hKU p epsilon hepsilon
+  obtain ⟨k0, hk0⟩ := hu K hK hKU p epsilon hepsilon
+  refine ⟨k0, fun k hk r hr x hx => ?_⟩
+  have hxU : x ∈ U := hKU hx
+  have hle : ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+    exact_mod_cast le_top
+  have hcd : ∀ j : ι, ContDiffAt ℝ (r : ℕ∞)
+      (fun y => u k y j - uinf y j) x := by
+    intro j
+    exact (((contDiffOn_pi.mp (huc k) j).sub
+      (contDiffOn_pi.mp huinfc j)).contDiffAt (hU.mem_nhds hxU)).of_le hle
+  have hbase := hk0 k hk r hr x hx
+  simp only [mapDerivNorm] at hbase ⊢
+  change ‖iteratedFDeriv ℝ r (fun y j => u k y j - uinf y j) x‖ ≤ epsilon
+    at hbase
+  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
+  exact (norm_le_pi_norm
+    (fun j => iteratedFDeriv ℝ r (fun y => u k y j - uinf y j) x) i).trans hbase
+
 /-- **Postcomposition with a continuous linear map preserves `C^∞` convergence on compacts** —
 the summation step of the weight quotient (`L := Σ projections`): the order-`r` derivative of
 `L ∘ (difference)` is `L.compContinuousMultilinearMap` of the difference's derivative

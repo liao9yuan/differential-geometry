@@ -61,3 +61,27 @@ They move existing private comparison-layer proofs to the definition-owning
 module and introduce no radius or compactness hypothesis. The H6 relative
 profile theorem remains 0%; these declarations close its intrinsic Gronwall
 regularity sub-brick only.
+
+## 2026-07-27 all-time perpendicularity API
+
+The two fixed-first intrinsic Jacobi perpendicularity facts formerly available
+only as private `BishopIntrinsic` helpers now have canonical public declarations
+in the definition-owning endpoint layer:
+
+- `intrJacobi_perp_ne` says that `g(γ', J_w) = 0` at every nonzero time when
+  `g_p(u,w) = 0`;
+- `intrJacobi_dperp` says that `g(γ', D_t J_w) = 0` under the same hypotheses.
+
+The public derivative theorem consumes the existing `intrJacobi_diff`
+internally, so its statement no longer exposes the old technical chart-
+differentiability witness.  The proof retains the intrinsic rescaling and
+geodesic-equation route and introduces no radius, nonconjugacy, or connectedness
+hypothesis.
+
+Focused verification is green with zero diagnostics.  No exact module refresh
+was run in this source-only handoff.  These two helper theorems and their
+dedicated machinery are 100%; the geometric endpoint-positivity theorem that
+will consume them remains unstated (0%), with its dedicated machinery roughly
+80%.  `intrLoop_ge_cgt` and the `InjRadiusDecayInput` producer remain theorem-
+level 0%; whole HCG supporting machinery remains roughly 61%, and the
+unconditional Theorem 3.9 remains theorem-level 0%.

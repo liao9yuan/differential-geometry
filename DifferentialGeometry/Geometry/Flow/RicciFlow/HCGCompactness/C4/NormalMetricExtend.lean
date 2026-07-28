@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricKoszul
+import DifferentialGeometry.Geometry.Exponential.NormalBallMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
 import DifferentialGeometry.Geometry.Metric.BumpExtend
 import DifferentialGeometry.Geometry.Metric.PullbackCross
@@ -410,6 +411,20 @@ noncomputable def normalTotal
     (normalCut (I := I) Y x : E → Real)
     (normalCut_smooth (I := I) Y x) (normalCut_range (I := I) Y x)
     (normalCut_supp (I := I) Y x)
+
+/-- The legacy total normal metric is the provider-parametric extension of the
+legacy controlled chart. -/
+theorem normalTotal_eq_chart
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    normalTotal (I := I) Y x =
+      (legacyBallChart (I := I) Y x).totalMetric Y.metric := by
+  rfl
 
 /-- On the quarter-radius ball, the total extension has exactly the original
 normal-coordinate metric coefficients. -/

@@ -13,7 +13,10 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology
 open DifferentialGeometry
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -42,7 +45,7 @@ theorem lowreg_realize_h2
   intro T hT
   have htwo : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T =
       smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T :=
-    tensorHs.ext (funext (fun _ ↦ rfl))
+    by ext i; rfl
   have hT' : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ / C := by
     simpa only [htwo] using hT
   have hdelta : C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ := by
@@ -74,10 +77,10 @@ theorem lowreg_realize
   intro T hT
   have htwo : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T =
       smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T :=
-    tensorHs.ext (funext (fun _ ↦ rfl))
+    by ext i; rfl
   have hthree : ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T =
       smoothCcToTensorHs (I := I) (M := M) g (3 : ℝ) T :=
-    tensorHs.ext (funext (fun _ ↦ rfl))
+    by ext i; rfl
   have hmono :
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤
         ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ :=

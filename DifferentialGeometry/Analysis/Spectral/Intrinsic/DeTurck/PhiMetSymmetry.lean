@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppCcValue
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckTopAppCc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GradSlotCurvature
 
 /-!

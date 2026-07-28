@@ -33,13 +33,15 @@ forcing fixed-point theorem.
   does not make the circular choice `B1 R * R` before freezing a coefficient
   radius.
 
-Lean verification is deferred while the shared named build occupies the sole
-Lean slot.  No `sorry`, `admit`, axiom, new class, instance, or notation is
-introduced.
+Focused Lean verification passed without local warnings on 2026-07-27.
+`lowreg_partial_sol` is therefore a proved fixed-background endpoint, not only
+solver infrastructure.  No `sorry`, `admit`, axiom, new class, instance, or
+notation is introduced.
 
 ## Remaining frontier
 
-The exact public uniform-family Ricci-flow theorem is still unproved.  The
-next abstraction boundary is to make the constants and horizon in this
-fixed-background solver uniform under the stated family bounds, and then to
-realize and smooth the solution on that same horizon.
+The exact public uniform-family Ricci-flow theorem is still unproved (0% as a
+theorem).  The next abstraction boundary is to expose the fixed-background
+constants before the existential radius choices, prove that those constants
+are uniformly bounded under the stated family bounds, and then realize and
+smooth the solutions on the resulting common horizon.

@@ -196,7 +196,7 @@ theorem one_le_segImult (n : ℕ) (q r0 m : ℝ) : 1 ≤ segImult n q r0 m := by
 
 /-! ## Geometric setup -/
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -360,7 +360,10 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
         exact ENNReal.ofReal_pos.mpr hbigR_pos⟩
     have hbig_pos : 0 < μ big := hbig_open.measure_pos μ hbig_ne
     have hbig_fin : μ big ≠ ⊤ := by
-      rw [hbig]; exact (segBall_vol_fin (I := I) g hEnorm z hq hbigR_pos hRic).ne
+      rw [hμ, hbig]
+      exact ne_of_lt
+        (segBall_vol_fin (E := E) (H := H) (I := I) (M := M)
+          (q := q) (R := (m + 1 / 2) * r) g hEnorm z hq hbigR_pos hRic)
     have hU_pos : 0 < (μ big).toReal := ENNReal.toReal_pos hbig_pos.ne' hbig_fin
     -- The uniform per-ball lower mass.
     set L : ℝ :=
@@ -398,8 +401,10 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
           _ ≤ ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) ((4 * m + 2) * r))
                 * μ (small j) := by simp only [hsmall]; exact hrel
       have hfin_small : μ (small j) ≠ ⊤ := by
-        rw [hsmall]
-        exact (segBall_vol_fin (I := I) g hEnorm (centers j) hq hs_pos hRic).ne
+        rw [hμ, hsmall]
+        exact ne_of_lt
+          (segBall_vol_fin (E := E) (H := H) (I := I) (M := M)
+            (q := q) (R := r / 2) g hEnorm (centers j) hq hs_pos hRic)
       have hreal := (ENNReal.toReal_le_toReal
         (ENNReal.mul_ne_top hbig_fin ENNReal.ofReal_ne_top)
         (ENNReal.mul_ne_top ENNReal.ofReal_ne_top hfin_small)).mpr hcomb

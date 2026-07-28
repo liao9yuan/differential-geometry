@@ -427,7 +427,9 @@ noncomputable def pairStageFillSub
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
-    (target : InterSlot L inp.pack r alpha) (k l : Nat) : E → E := by
+    (target : InterSlot L inp.pack r alpha) (k l : Nat)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E → E := by
   let Lphi := L.subseq hphi
   let Yk := X.obj (Lphi.φ k)
   let Yl := X.obj (Lphi.φ l)
@@ -443,12 +445,14 @@ noncomputable def pairStageFillSub
   letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
   exact stageFill (L.lamInf (target.1.1 : Nat))
     (inp.decay.lambda_pos inp.hD (L.rInf (target.1.1 : Nat)))
-    (normalTransition (I := I) Yk
-      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)))
-    (normalTransition (I := I) Yl
-      (seqCenterD inp.decay P Lphi l (target.1.1 : Nat))
-      (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))
+    ((chart (Lphi.φ k)
+      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).transition
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))))
+    ((chart (Lphi.φ l)
+      (seqCenterD inp.decay P Lphi l (target.1.1 : Nat))).transition
+        (chart (Lphi.φ l)
+          (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))))
 
 /-- Finite target coordinates on a refined sequence, still totalized through
 the original stabilized interaction family. -/
@@ -458,8 +462,11 @@ noncomputable def stagePtsSub
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r) (k l : Nat)
-    (z : E) (gamma : Fin (inp.pack.A r)) : E :=
-  stageTotal alpha (pairStageFillSub inp P L phi hphi alpha) k l z gamma
+    (z : E) (gamma : Fin (inp.pack.A r))
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E :=
+  stageTotal alpha
+    (pairStageFillSub inp P L phi hphi alpha (chart := chart)) k l z gamma
 
 /-- Actual normalized chart weights after a strict refinement, indexed by the
 original source live slot. -/
@@ -469,16 +476,25 @@ noncomputable def stageWeightSub
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r) (k : Nat)
-    (z : E) (gamma : Fin (inp.pack.A r)) : Real :=
+    (z : E) (gamma : Fin (inp.pack.A r))
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Real :=
   let Lphi := L.subseq hphi
-  let beta := fun j => seqCenterD inp.decay P Lphi j (alpha.1 : Nat)
+  let Y := X.obj (Lphi.φ k)
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   let i0 := baseIndex inp.decay inp.realizes inp.pack hr
   rawWeights
     (cutRaw
-      (seqAtomChart (I := I) inp.decay inp.hD P Lphi inp.pack r beta i0 k)
-      (fun target => seqAtomChart (I := I) inp.decay inp.hD P Lphi
-        inp.pack r beta target k)
-      i0) z gamma
+      (seqAtom inp.decay inp.hD P Lphi inp.pack r k i0)
+      (seqAtom inp.decay inp.hD P Lphi inp.pack r k)
+      i0)
+    ((chart (Lphi.φ k)
+      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z)
+    gamma
 
 /-- The refined chart weight is exactly the global finite-stage weight at the
 point represented by that source chart. -/
@@ -488,8 +504,10 @@ theorem stageWeightSub_eq
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r) (k : Nat)
-    (z : E) (gamma : Fin (inp.pack.A r)) :
-    stageWeightSub inp P L hr phi hphi alpha k z gamma =
+    (z : E) (gamma : Fin (inp.pack.A r))
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
+    stageWeightSub inp P L hr phi hphi alpha k z gamma (chart := chart) =
       let Lphi := L.subseq hphi
       let Y := X.obj (Lphi.φ k)
       letI : TopologicalSpace Y.M := Y.topology
@@ -503,9 +521,8 @@ theorem stageWeightSub_eq
           (seqAtom inp.decay inp.hD P Lphi inp.pack r k i0)
           (seqAtom inp.decay inp.hD P Lphi inp.pack r k)
           i0)
-        ((NormalCoordinates.framedChartAt (I := I)
-          Y.metric
-          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z)
+        ((chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z)
         gamma := by
   rfl
 
@@ -516,10 +533,12 @@ noncomputable def stageCfgSub
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
-    (alpha : LiveSlot L inp.pack r) (k l : Nat) (z : E) :
+    (alpha : LiveSlot L inp.pack r) (k l : Nat) (z : E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
     (Fin (inp.pack.A r) → Real) × (Fin (inp.pack.A r) → E) :=
-  (stageWeightSub inp P L hr phi hphi alpha k z,
-    stagePtsSub inp P L phi hphi alpha k l z)
+  (stageWeightSub inp P L hr phi hphi alpha k z (chart := chart),
+    stagePtsSub inp P L phi hphi alpha k l z (chart := chart))
 
 /-- The actual normalized chart weights retain their exact finite-stage
 normalization on every source patch along one common tail. -/

@@ -1,4 +1,22 @@
-# SegmentPolar.lean — B2 (α) polar-measure layer (THE frontier)
+# SegmentPolar.lean — B2 (α) polar-measure layer
+
+## Current status — complete (2026-07-27)
+
+- `segBall_vol_le`: **proved, 100%**.  The essential inner-product sphere-mass
+  factor is retained.
+- `segBall_vol_fin`: **proved, 100%**.
+- `segBall_vol_rel`: **proved, 100%**.  The proof uses the exact
+  segment-interior polar representation and a per-direction
+  indicator-truncated cross inequality; it does not select a global cut-time
+  function.
+- The file is focused GREEN and its targeted build is GREEN (3959 jobs).  The
+  exported statements contain no `sorry`.
+- Dedicated A0′ volume machinery represented by this file: **100%**.  The
+  downstream endpoint `volInput_of_bg` must still be rebuilt and audited before
+  it is counted complete.
+
+The historical frontier entries below are retained as route history and are
+superseded by this completion record.
 
 Polar-measure layer of brick B2 of the A0′ `VolumeComparisonInput` lane
 (`HCGCompactness/C4/A0PRIME_VOLUME_PLAN.md` §5).  Consumes `SegmentDomain.lean`
@@ -8,15 +26,13 @@ Polar-measure layer of brick B2 of the A0′ `VolumeComparisonInput` lane
 
 - `segBall_vol_le` — absolute Bishop upper bound (deliverable B2(α)(1)):
   `V(x,R) ≤ σ · ofReal (hypRadVol q (n-1) R)`, with the **model sphere mass**
-  `σ = (modelHaar E).toSphere Set.univ` (= `finrank · vol(unit ball)`).  **`sorry`.**
+  `σ = volume.toSphere Set.univ` (= `finrank · vol(unit ball)`).  **PROVED.**
 - `segBall_vol_fin` — B6-facing finiteness corollary `V(x,R) < ⊤`; **PROVED**
-  from `segBall_vol_le` (`Measure.toSphere` is `IsFiniteMeasure`, so `σ < ⊤`;
-  `ENNReal.mul_lt_top` + `measure_lt_top` + `ofReal_lt_top`).  Its only frontier
-  dependency is `segBall_vol_le`'s `sorry`; interface stable for B6 regardless.
+  from `segBall_vol_le`.
 - `segBall_vol_rel` — capped relative Bishop–Gromov, multiplicative form
   (deliverable B2(α)(2), the B5 input): `V(x,R)·v(s) ≤ v(R)·V(x,s)`, `0 < s ≤ R`.
-  **`sorry`.**  Normalization-independent: `σ` cancels across the ratio, so it
-  carries NO sphere-mass factor.  UNCHANGED from the accepted version.
+  **PROVED.**  Normalization-independent: `σ` cancels across the ratio, so it
+  carries no sphere-mass factor.
 
 All stated in terms of `riemannianVolumeMeasure`, `hypRadVol`, and the
 `toSphere` sphere mass (no exposed density / tangent-space measure) so B5/B6
@@ -37,7 +53,7 @@ so `σ = finrank · vol(unit ball)` (= `2π` in dim 2, `2` in dim 1).  Corrected
 bound is an equality in the flat case: `πR² ≤ 2π·(R²/2)`; dim 1: `2R ≤ 2·R`.
 The relative form `segBall_vol_rel` was and stays correct because `σ` cancels.
 
-## The frontier (honest failure report)
+## Historical frontier diagnosis (superseded 2026-07-27)
 
 The brick premise — that (α)(1) is a cheap `measure_image_le`-style change of
 variables — is **incorrect as stated**.  Root cause:
@@ -89,7 +105,7 @@ maps into a Riemannian manifold) + **missing regularity API** (off-zero
 differentiability of the intrinsic exponential in the velocity).  NOT a local
 proof-search gap, wrong statement, or typeclass issue.
 
-## Status
+## Historical status log
 
 - **2026-07-26 (B5d2) — steps (i) + (a)-GLUE landed sorry-free; `segBall_vol_le`
   NOT discharged; both SegmentPolar `sorry`s UNTOUCHED; endpoint `volInput_of_bg`

@@ -134,3 +134,14 @@ HCG machinery about 53%, and all compactness endpoint theorems 0%.
   theorem remains 0% until the full downstream framed import chain is repaired
   and revalidated; the separately named textbook B1 theorem and compactness
   endpoints remain 0%. Reusable whole-HCG support machinery is about 60%.
+
+## 2026-07-27 finite-Pi projection cleanup
+
+The generic `mapCInf_apply` proof was removed from this HCG consumer and moved
+unchanged to `Analysis/Calculus/MapConvergenceComp`, its canonical home.
+`StepCAtomConv` continues to consume the same declaration name. Isolated
+current-interface verification passed after refreshing the analysis export.
+
+This closes only an accidental transitive-import dependency exposed by the H6
+chart migration. The H6 profile theorem and `exists_h6NormalData` remain
+theorem-level 0%; dedicated H6 producer machinery is about 55%.

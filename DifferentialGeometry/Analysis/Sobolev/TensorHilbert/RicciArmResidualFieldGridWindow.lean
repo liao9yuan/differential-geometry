@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MovingPairTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
@@ -1378,11 +1379,6 @@ private lemma rfns_icg_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin
     (rsDomDomCongrSection (I := I) (M := M) g₀ r s σ R)] at h
   exact h
 
-def sigmaE : Equiv.Perm (Fin 6) :=
-  ⟨fun i => (![1, 3, 4, 5, 0, 2] : Fin 6 → Fin 6) i,
-   fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
-   by decide, by decide⟩
-
 private def tauK3b : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![5, 0, 2, 1, 4, 3] : Fin 6 → Fin 6) i,
    fun i => (![1, 3, 2, 5, 4, 0] : Fin 6 → Fin 6) i,
@@ -1407,15 +1403,6 @@ private def tauM4 : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![5, 4, 0, 1, 2, 3] : Fin 6 → Fin 6) i,
    fun i => (![2, 3, 4, 5, 1, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
-
-set_option backward.isDefEq.respectTransparency false in
-
-def mvDoubleTraceField (s : ℕ) : SmoothCcTensor g₀ (s + 2) s where
-  toSection :=
-    { toFun := fun x : M =>
-        (show TensorRSSpace (s + 2) s I x from cometricDoubleTraceFib (I := I) g₁ s x)
-      contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ s }
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -1883,11 +1870,6 @@ private lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
   rw [hdecomp, map_smul]
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rfl
-
-def mvPairTraceOp : SmoothCcTensor g₀ 6 2 :=
-  appCcRS (I := I) (M := M) g₀ 6 4 2
-    (mvDoubleTraceField (I := I) (M := M) g₀ g₁ 2)
-    (mvDoubleTraceField (I := I) (M := M) g₀ g₁ 4)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in

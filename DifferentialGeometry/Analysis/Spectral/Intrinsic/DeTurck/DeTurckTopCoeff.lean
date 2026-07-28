@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckTopAppCc
 
 /-!
 # Combined Ricci--DeTurck top coefficient

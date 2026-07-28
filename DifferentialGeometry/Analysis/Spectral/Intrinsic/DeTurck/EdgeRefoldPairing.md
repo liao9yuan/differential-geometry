@@ -3,9 +3,9 @@
 ## Current state
 
 Source assembly is present in `EdgeRefoldPairing.lean`; a focused Lean check is
-still pending because the shared worktree currently has a coordinated named
-build in progress.  Nothing in this note should be read as a checked theorem
-until that focused check has run.
+still pending because a chain of missing shared artifacts blocks its new
+pair-trace dependency before source elaboration.  Nothing in this note should
+be read as a checked theorem until that focused check has run.
 
 The file contains no proof placeholder or new axiom.  Its public source-level
 producers are:
@@ -21,7 +21,7 @@ producers are:
   `fullRaisedEndoField` insertion;
 - `edgePairMono` and `edgeMonoRefold`, which reconstruct the private
   pair-trace/Palatini monomial identity using the public `mvPairTraceOp` and
-  `mvPairTraceOp_apply_toModel`;
+  `mvPairTrace_apply`;
 - `edgeLiePairFam`, `edgeRiemPairFam`, and `edgeTopPair`, together with their
   exact action theorems, which package the full returned `C2` coefficient as a
   rank-two pair-trace field acting on `W`; and
@@ -88,7 +88,10 @@ removed at source level without editing the claimed coefficient-refold file:
 `edgeMonoRefold` is the public reconstruction, `edgePair_l2` moves one monomial
 onto its rank-four partner, and `edgeTop_inner` reaches the complete `C2`
 returned by `exists_edgeRefold`.  These declarations still await focused Lean
-checking.
+checking.  The pair-trace implementation now lives in the small
+`MovingPairTrace.lean` module; its generic output-slot permutation dependency
+is verified, while the pair-trace theorem itself remains unverified because
+of the shared cache blocker.
 
 The covariant Green step is now present at source level as `edgeTop_green`; it
 turns
@@ -112,6 +115,15 @@ jet grid and the operator-field diagonal product grid are the canonical APIs
 for this step: order one of the former is linear in `nabla W`, while every
 order-one product term retains one undifferentiated `W`, which supplies the
 small `delta` factor.  A generic coefficient-jet envelope is not sharp enough.
+
+The exact algebraic declarations `edgeRicciHalf`, `edgePairMono`,
+`edgeMonoRefold`, `edgeLiePairFam`, and `edgeLiePair_apply` now live in
+`RefoldPairingCore.lean`.  This file imports that module and retains the
+energy, formal-partner, L2, and Green layers.  The move preserves the public
+names and removes the low-regularity consumer's dependency on this energy
+module.  Focused verification of the extracted core is currently blocked
+before elaboration by missing shared build artifacts; no proof error from the
+move has yet been observed.
 
 ## Progress accounting
 

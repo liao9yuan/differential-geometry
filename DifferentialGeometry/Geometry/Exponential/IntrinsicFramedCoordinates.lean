@@ -47,12 +47,27 @@ noncomputable def intrFrameCLM
   LinearMap.toContinuousLinearMap
     (normalFrame (I := I) g p).toLinearEquiv.toLinearMap
 
+/-- The normal-frame linear equivalence, viewed in the fixed model norm on
+both sides. -/
+noncomputable def intrFrameCLE
+    (g : SmoothRiemannianMetric I M) (p : M) : E ≃L[Real] E := by
+  let L : E ≃ₗ[Real] E := (normalFrame (I := I) g p).toLinearEquiv
+  exact L.toContinuousLinearEquiv
+
 omit [CompleteSpace E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] in
 @[simp] theorem intrFrameCLM_apply
     (g : SmoothRiemannianMetric I M) (p : M) (z : E) :
     intrFrameCLM (I := I) g p z = normalFrame (I := I) g p z := by
+  rfl
+
+omit [CompleteSpace E] [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [ConnectedSpace M] in
+@[simp] theorem intrFrameCLE_apply
+    (g : SmoothRiemannianMetric I M) (p : M) (z : E) :
+    intrFrameCLE (I := I) g p z = normalFrame (I := I) g p z := by
   rfl
 
 section

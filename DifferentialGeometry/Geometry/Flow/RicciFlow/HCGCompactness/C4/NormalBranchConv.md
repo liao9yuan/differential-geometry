@@ -74,3 +74,15 @@ The branch-coherence brick is complete, but the uniform moving-reference and
 all-pairs comparison-map producers are not.  `StepB1RawInput` and textbook B1
 remain theorem-level **0%**; dedicated Step-B/B1 machinery is about **95%**,
 Chapter 4 about **87%**, and whole-HCG compactness machinery about **57%**.
+
+## 2026-07-28 chart-parametric convergence package
+
+`HasDiagPairConv` now carries the `NormalChartFamily` used by its stage
+`IsNormalDiag` and `NormalDiagFence` data.  Its subsequence, stage-congruence,
+inverse-data, and inverse-existence projections preserve that same family.
+The default remains `legacyChartFamily`, so the checked selected route is
+definitionally unchanged while Gate 5 can later instantiate the H6 chart.
+
+The current-interface replay passed after first exporting the lowered family
+API from `StepBInputs`.  The next consumer is the stage inverse-velocity/root
+chain; the H6 provider has not yet been installed at the final root equation.

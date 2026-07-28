@@ -151,3 +151,12 @@ conditional Chapter-4 route is 100%, while the separately named textbook B1
 statement remains unstated at 0%.  The P4/open-flow producer machinery remains
 about 97%, whole-HCG machinery about 60%, and unconditional Theorem 3.9,
 `compactnessSol`, and the Hamilton endpoint remain theorem-level 0%.
+
+## 2026-07-27 canonical limit connectedness
+
+`compactness_conn` now exposes `ConnectedSpace` for the actual limit manifold
+selected by `compactness_canon`.  Its proof replays only the canonical
+construction prefix through the tail-ball system, uses `tailBall_preconn` for
+each positive-radius stage, and then applies the existing connected
+direct-limit instance.  It adds no field to `StepDCanonData` and no consumer
+assumption.  Focused verification passed.

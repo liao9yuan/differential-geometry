@@ -375,3 +375,28 @@ assembly; the next unconditional producer is the time-zero
 `MetricCompactBase`.  Perelman noncollapsing supplies only fixed-scale
 basepoint-ball volume data and does not replace the A0-prime arbitrary-center
 overlap or H6 inputs of that metric-compactness bundle.
+
+## 2026-07-27 closed-window upgrade
+
+`ham3_closed_upg` now constructs the actual closed-window `FlowUpgradeData`
+from honest canonical `StepDCanonData` and proves `MetricComplete` for every
+limit time slice.  The proof consumes the buffered Hamilton source estimates,
+the canonical reference-metric sidecar, `convOut_of_src`,
+`ConvOut.complete_at`, and the definitional projection
+`flowUpgrade_maps_L`; it adds no endpoint regularity or desired-conclusion
+assumption.
+
+`ham3_closed_cgh` packages that data as a genuine smooth-CGH limit with one
+strict subsequence and all-slice completeness.  Both conditional theorems are
+focused-green and are each 100%.  They do not prove literal
+`ham3_cgh_limit`, which remains theorem-level 0%.
+
+The next interface seam is connectedness of the actual canonical Step-D
+direct limit.  Once exposed, it transfers to the retained flow limit through
+`FlowUpgradeData.limit_conn`, allowing the shorter `const0_of_cgh` route and
+avoiding the legacy transfer/SMP package.  The remaining unconditional
+producer is still the time-zero `MetricCompactBase`; its A0-prime
+arbitrary-center volume-overlap is separate from the already completed
+fixed-scale Perelman noncollapse endpoint.  Dedicated post-canonical
+closed-window machinery is about 98% pending that connectedness projection;
+whole-HCG supporting machinery is about 62%.

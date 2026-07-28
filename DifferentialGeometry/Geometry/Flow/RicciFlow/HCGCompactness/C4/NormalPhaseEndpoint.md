@@ -123,3 +123,13 @@ same-branch integration seam is now closed downstream by
 infrastructure: `StepB1RawInput` and textbook B1 are theorem-level **0%**;
 dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
 whole-HCG compactness machinery about **57%**.
+
+## 2026-07-28 chart-family layer correction
+
+The common `NormalChartFamily` API was moved down to `StepBInputs`, its
+canonical dependency layer.  This module continues to own the endpoint and
+fence data only; it no longer owns a type needed by the earlier finite-stage
+configuration layer.
+
+Focused/current-interface verification passed.  No endpoint theorem or
+hypothesis changed.

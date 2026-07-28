@@ -18,12 +18,15 @@ open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -38,18 +41,23 @@ theorem symm_h2_of_state
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     (S : SmoothCcTensor g₀ 0 2)
     (hS : ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (show (2 : ℝ) ≤ 3 by norm_num)
-      (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S)‖ ≤ R) :
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ)
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+      (smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 2) S)‖ ≤ R) :
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 1)
       (symmS (I := I) (M := M) g₀ S)‖ ≤ R := by
   calc
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ)
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
         (symmS (I := I) (M := M) g₀ S)‖ ≤
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S‖ :=
-      norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ (2 : ℝ) S
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) S‖ :=
+      norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) S
     _ = ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (2 : ℝ) ≤ 3 by norm_num)
-        (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S)‖ := by
+        (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+        (smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 2) S)‖ := by
       rw [tensorHsInclusion_smoothCcToTensorHs]
     _ ≤ R := hS
 
@@ -60,7 +68,8 @@ theorem lowRegN_on_core
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) S‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ S) δ)
     (hcore : Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hreal))
@@ -76,30 +85,39 @@ theorem lowRegN_on_smooth
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ P : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) P‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) P‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
     (hcore : Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hreal))
     (S : SmoothCcTensor g₀ 0 2)
     (hS : ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (show (2 : ℝ) ≤ 3 by norm_num)
-      (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S)‖ ≤ R) :
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+      (smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 2) S)‖ ≤ R) :
     lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
-        ⟨smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S, hS⟩ =
+        ⟨smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 2) S, hS⟩ =
       deTurckSmoothN (I := I) (M := M) g₀ g_bg 1
         (symmS (I := I) (M := M) g₀ S) hδ
         (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hS)) := by
   let u : lowerState (I := I) (M := M) g₀ 1 R :=
-    ⟨smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) S, hS⟩
+    ⟨smoothCcToTensorHs (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 2) S, hS⟩
   let x : smoothCore (I := I) (M := M) g₀ R := ⟨u, ⟨S, rfl⟩⟩
   have hrep : coreRep g₀ x = S := by
-    apply smoothHs_inj (I := I) (M := M) g₀ (3 : ℝ)
+    apply smoothHs_inj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
     rw [coreRep_spec]
-    rfl
   have hx := lowRegN_on_core (I := I) (M := M) g₀ g_bg hR hδ hreal hcore x
-  unfold coreN at hx
-  rw [hrep] at hx
-  simpa only [u, x] using hx
+  have hN :
+      coreN (I := I) (M := M) g₀ g_bg hδ hreal x =
+        deTurckSmoothN (I := I) (M := M) g₀ g_bg 1
+          (symmS (I := I) (M := M) g₀ S) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hS)) := by
+    unfold coreN
+    apply smoothN_wd (I := I) (M := M) g₀ g_bg 1
+    rw [hrep]
+  simpa only [u, x] using hx.trans hN
 
 /-- If a smooth representative family is pinned to the lower-regularity
 maximal-regularity field, its forcing is the genuine smooth Ricci--DeTurck
@@ -108,12 +126,15 @@ theorem lowReg_force_smooth
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ P : SmoothCcTensor g₀ 0 2,
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) P‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) P‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
     (hcore : Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hreal))
-    (field : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ)) T)
-    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ)) T)
+    (field : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2
+      (((1 : ℕ) : ℝ) + 2)) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2
+      ((1 : ℕ) : ℝ)) T)
     (hstate : ∀ᵐ t ∂(timeMeasure T),
       field t ∈ lowerState (I := I) (M := M) g₀ 1 R)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -121,18 +142,21 @@ theorem lowReg_force_smooth
         (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le) field t)))
     (F : ℝ → SmoothCcTensor g₀ 0 2)
     (hpin : ∀ᵐ t ∂(timeMeasure T),
-      smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (F t) = field t)
+      smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 2) (F t) = field t)
     (hball : ∀ t : ℝ,
       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (2 : ℝ) ≤ 3 by norm_num)
-        (smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (F t))‖ ≤ R) :
+        (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+        (smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 2) (F t))‖ ≤ R) :
     gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSmoothN (I := I) (M := M) g₀ g_bg 1
         (symmS (I := I) (M := M) g₀ (F t)) hδ
         (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ (F t) (hball t)))) := by
   filter_upwards [hforce, hstate, hpin] with t htforce htstate htpin
   let uF : lowerState (I := I) (M := M) g₀ 1 R :=
-    ⟨smoothCcToTensorHs (I := I) (M := M) g₀ (3 : ℝ) (F t), hball t⟩
+    ⟨smoothCcToTensorHs (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 2) (F t), hball t⟩
   have hlift : aeSetLift
       (zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le) field t = uF := by
     apply Subtype.ext

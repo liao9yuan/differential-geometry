@@ -2024,3 +2024,89 @@ The next item-2 frontier is now the **threeArm/Ψ₀ topSeparated assembly
 (Fork-A)**, followed by smooth-core tame layers 2-3.  The other live frontier
 remains general-N `hAcc_of_jets`; N=3 is already unconditional.  Do not
 re-dispatch `lc0AMix_perOrder_rf`.
+
+## Planner update №38 (2026-07-27) — live low-regularity frontier
+
+The №37 next-work pointer is now stale.  Subsequent Codex work completed and
+focused-checked the fixed-background mixed low-regularity solve, its same-time
+H2 trace bootstrap, the raw principal A2 spatial/time family, and the mixed
+H3-to-H1 Ricci--DeTurck tame chain.  These are machinery results; they do not
+prove `(N)`.
+
+The remaining low-regularity gap was localized to the principal-subtracted
+order-zero coefficient in H2.  Estimating its raw C0 summands separately would
+require H4 metric control and is the wrong route.  The correct route refolds
+the complete Ricci plus DeTurck order-zero coefficient before estimating:
+
+- `RefoldPairingCore.lean` is the new exact-algebra module below the closed-edge
+  L2/Green layer.  It preserves the existing public pair-trace declarations.
+- `RHSZeroRefold.lean` states the actual no-high-jet identity
+  `rhsLow0Coeff(T) = rhsRefold0(T) + rhsRefold2(nabla^2 T)`.
+- the Ricci C2 coefficient is twice the Palatini family, and the Lie C2
+  coefficient is the DeTurck covariant-derivative refold family;
+  `rhsRefold0` has only genuine lower terms.
+
+This new theorem is **not yet verified**.  Its focused check is blocked before
+elaboration by missing shared build artifacts in several unrelated subtrees.
+Five isolated artifacts were restored successfully; refresh chasing stopped
+when the next missing artifact crossed again into
+`Analysis/Integration/DivergenceTheorem`.  No proof error has yet been
+observed, and the source contains no `sorry` or `whnf`.
+
+Resume order:
+
+1. after the shared cache is restored, focused-check
+   `RefoldPairingCore.lean`, then `RHSZeroRefold.lean`, then the refactored
+   `EdgeRefoldPairing.lean`;
+2. prove the H2 bound and time-L2 measurability for `rhsRefold0`, using only
+   the low C0/C1 coefficient arms and the H3 metric path;
+3. combine that A1 family with the already checked raw A2 time family and the
+   generic L2-time A1 solver;
+4. iterate the same-horizon bootstrap, perform geometric realization, and only
+   then assemble the uniform family constants and common existence time.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the unverified `rhsLow0_refold` theorem: **0% completed**, source body
+  written; its dedicated exact-refold machinery is about **90%** pending
+  elaboration and the H2 estimate;
+- `(N)` dedicated machinery overall: about **78--81%**;
+- order-two geometric bootstrap, all-order smoothing/realization, and uniform
+  common-horizon assembly remain genuine theorem-level frontiers.
+
+## Planner update №39 (2026-07-27) — pair-trace dependency split
+
+The order-zero refold route no longer depends at source level on the
+five-thousand-line Sobolev residual grid for its moving pair trace.
+
+- `OperatorFieldOutputSlotPermutation.lean` now owns the existing generic
+  mixed-tensor output-slot permutation API.  Its focused verification and
+  explicitly named refresh are green; the refresh compiled only the target.
+- `MovingPairTrace.lean` now owns `mvDoubleTraceField`, `mvPairTraceOp`, and
+  `mvPairTrace_apply`.  Metric retagging uses the canonical
+  `SmoothCcTensor.retagEquiv`, and the two passenger slots are extended
+  explicitly rather than importing the drop-grid recursion.
+- `OperatorFieldFibreNormJet.lean`,
+  `MetricArmCoeffJetTower.lean`, and
+  `RicciArmResidualFieldGridWindow.lean` retain their estimate layers and
+  import the new canonical lower modules; public declaration names are
+  preserved.
+
+Verification of `MovingPairTrace.lean` remains blocked before current-source
+elaboration by a shared cache chain.  Two isolated missing artifacts were
+restored with target-only builds; the third miss is
+`TensorRSChartFiberOpNorm.olean`, at which point cache chasing stopped.  Thus
+`mvPairTrace_apply`, `RefoldPairingCore`, and `rhsLow0_refold` are still
+unverified and count as theorem completion **0%**.
+
+Honest accounting is unchanged:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the verified generic output-slot permutation brick: **100%**;
+- the moving pair-trace theorem in its new home: **0% completed**, source body
+  written and dedicated machinery about **95%**;
+- `rhsLow0_refold`: **0% completed**, source body written;
+- `(N)` dedicated machinery overall remains about **78--81%**;
+- order-two geometric bootstrap, all-order smoothing/realization, and uniform
+  common-horizon assembly remain untouched theorem-level frontiers.

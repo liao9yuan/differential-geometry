@@ -48,3 +48,14 @@ The seed proof body is canonical-framed focused- and exact-green.
 yet fully validated through the framed chain.  The separately named textbook
 B1 theorem and the unconditional compactness endpoint remain theorem-level 0%;
 whole-HCG machinery remains about 60%.
+
+## 2026-07-27 controlled chart-family migration
+
+The stage-seed construction now passes `legacyChartFamily X` explicitly through
+its retained `HasSuppCmData`. This preserves the previous selected-route
+behavior while making chart identity part of the subsequence payload. No
+radius or inverse-branch assumption was added.
+
+Focused verification is pending the upstream `HatChartReadout` and
+`StepCSupportCapstone` artifact refreshes. The H6 provider substitution remains
+a separate Gate 5 step.

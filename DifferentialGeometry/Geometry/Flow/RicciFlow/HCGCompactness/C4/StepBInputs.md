@@ -262,3 +262,16 @@ Focused verification passed.  This verifies the canonical Step-B input layer,
 not `StepB1RawInput`: the live framed downstream route still requires full
 consumer revalidation before that producer or the compactness endpoint can be
 counted complete.
+
+## 2026-07-28: common normal-chart family
+
+`NormalChartFamily` and its compatibility instance `legacyChartFamily` now
+live next to `NormalChartAt` and `legacyBallChart`.  This is the lowest layer
+shared by the finite-stage filler and the diagonal/root packages, so carrying a
+single chart family no longer creates a reverse dependency on the phase
+endpoint.
+
+Focused verification passed, and a current-interface replay exported this file
+before checking `NormalPhaseEndpoint`, `NormalBranchConv`, and
+`StepCStageFill`.  This is Gate-5 plumbing, not the missing
+`exists_h6NormalData` theorem, which remains theorem-level 0%.

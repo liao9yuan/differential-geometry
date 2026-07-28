@@ -254,20 +254,13 @@ lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
   fin_cases k <;> rfl
 
 set_option linter.unusedSectionVars false in
+/-- Compatibility wrapper for `IntrinsicSpectral.DeTurck.cometricLmodel_inner`. -/
 theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (y : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
     g₁.inner y (cometricLmodel (I := I) g₁ y
         (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) u = φ (u : E) := by
-  have h1 : cometricLmodel (I := I) g₁ y
-        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ) =
-      inverseMetricSharpFib (I := I) g₁ y
-        ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
-          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) := rfl
-  rw [h1, inverseMetricSharpFib_inner (I := I) g₁ y _ u, cotangentToDualLinear_apply,
-    cotangentToDual_apply]
-  change (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)
-      (fun _ : Fin 1 => (u : E)) = φ (u : E)
-  rw [Tensor0SBundle.model_covectorOfCLM_apply]
+  exact DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel_inner
+    (I := I) g₁ y φ u
 
 set_option linter.unusedSectionVars false in
 theorem traceHessianCoeff_appCc_eq

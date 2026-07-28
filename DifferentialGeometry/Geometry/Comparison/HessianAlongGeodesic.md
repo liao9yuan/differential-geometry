@@ -16,3 +16,19 @@ and exact target refresh passed without a local warning or `sorry`.
 
 This comparison-layer API is complete for current B/C use. It is
 infrastructure, not a compactness endpoint.
+
+## 2026-07-27 local-geodesic refinement
+
+The calculation is now factored at its actual hypothesis boundary:
+`deriv2_comp_geo_at` consumes one `HasGeodesicEquationAt`, and
+`deriv2_geo_on_at` combines that pointwise equation with a smooth scalar germ.
+`strictConvex_geo_on` consequently needs the geodesic equation only on the
+interior of the convex parameter set.  The old `deriv2_comp_geo`,
+`deriv2_comp_geo_on`, and `strictConvex_geo` declarations remain compatibility
+wrappers with unchanged statements.
+
+The new declarations are focused- and exact-green with no diagnostics,
+`sorry`, `admit`, or new assumption.
+This closes the local-interval Hessian API needed by the canonical CGT
+subtype-valued join; it does not itself prove the CGT Jensen or injectivity
+theorem.

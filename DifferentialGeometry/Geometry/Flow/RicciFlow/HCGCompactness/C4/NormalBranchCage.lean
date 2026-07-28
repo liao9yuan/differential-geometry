@@ -1,7 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagBranch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchScale
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchHessian
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomConv
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatCageScale
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatChartReadout
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCmDomain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
 
@@ -26,6 +27,7 @@ open scoped ContDiff Manifold Topology
 
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
@@ -35,163 +37,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-/-- All slots in the frozen packing range share one aliveness-stabilization
-tail. -/
-theorem aliveSlots_tail
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :
-    ∀ᶠ k in Filter.atTop, ∀ gamma : Fin (pb.A r),
-      (seqCenter hd D P (L.φ k) (gamma : Nat)).isSome =
-        L.alive (gamma : Nat) :=
-  Filter.eventually_all.mpr fun gamma => L.alive_eventually (gamma : Nat)
-
-/-- Membership in a stabilized finite hat forces its slot to be live. -/
-theorem hat_mem_live
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
-    {k : Nat} {gamma : Fin (pb.A r)} {x : (X.obj (L.φ k)).M}
-    (hstable : (seqCenter hd D P (L.φ k) (gamma : Nat)).isSome =
-      L.alive (gamma : Nat))
-    (hx : x ∈ NetLimitData.hatBall (I := I) (X := X) hd D P L pb r k gamma) :
-    L.alive (gamma : Nat) = true := by
-  cases hc : seqCenter hd D P (L.φ k) (gamma : Nat) with
-  | none => simp [NetLimitData.hatBall, hc] at hx
-  | some c => simpa [hc] using hstable.symm
-
-/-- A point in a finite hat is within the canonical four-lambda radius of the
-totalized center at that stage. -/
-theorem hat_dist_centerD
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
-    {k : Nat} {gamma : Fin (pb.A r)} {x : (X.obj (L.φ k)).M}
-    (hx : x ∈ NetLimitData.hatBall (I := I) (X := X) hd D P L pb r k gamma) :
-    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-    dist x (seqCenterD hd P L k (gamma : Nat)) <
-      4 * L.lamInf (gamma : Nat) := by
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  cases hc : seqCenter hd D P (L.φ k) (gamma : Nat) with
-  | none => simp [NetLimitData.hatBall, hc] at hx
-  | some c => simpa [NetLimitData.hatBall, seqCenterD, hc] using hx
-
-/-- A stabilized live center eventually obeys the explicit ordered-net
-basepoint-distance bound. -/
-theorem seqCenterD_dist_le
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
-    (gamma : Nat) (hgamma : L.alive gamma = true) :
-    ∀ᶠ k in Filter.atTop,
-      hd.dist (L.φ k) (seqCenterD hd P L k gamma)
-          (X.obj (L.φ k)).basepoint ≤
-        2 * hd.lambda D 0 * (gamma : Real) := by
-  filter_upwards [seqCenterD_live hd P L gamma hgamma] with k hk
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  haveI : ProperSpace (X.obj (L.φ k)).M := (P (L.φ k)).proper
-  rw [← ProperMetricOn.dist_eq hd hre P (L.φ k)]
-  have hr : seqRadius hd D P (L.φ k) gamma =
-      dist (seqCenterD hd P L k gamma) (X.obj (L.φ k)).basepoint := by
-    unfold seqRadius
-    exact OrderedNet.netRadius_of_center _ _ _ gamma hk
-  rw [← hr]
-  exact (seqRadius_mem hd hD P (L.φ k) gamma).2
-
-/-- A totalized centre eventually lies in the unit enlargement of its limiting
-ordered-net radius. -/
-theorem seqCenterD_rInf_lt
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (hre : hd.RealizesEdist) (L : NetLimitData hd D P) (gamma : Nat) :
-    ∀ᶠ k in Filter.atTop,
-      hd.dist (L.φ k) (seqCenterD hd P L k gamma)
-          (X.obj (L.φ k)).basepoint < L.rInf gamma + 1 := by
-  have hrad : ∀ᶠ k in Filter.atTop,
-      seqRadius hd D P (L.φ k) gamma < L.rInf gamma + 1 :=
-    (L.tendsto gamma).eventually (Iio_mem_nhds (by linarith))
-  filter_upwards [hrad] with k hk
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  rw [← ProperMetricOn.dist_eq hd hre P (L.φ k),
-    ← seqCenterD_dist_eq hd P L k gamma]
-  exact hk
-
-/-- The finitely many stabilized live centres share the unit-enlarged
-limiting-radius tail. -/
-theorem liveCenters_rInf
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
-    (pb : hd.PackingBound D) (r : Real) :
-    ∀ᶠ k in Filter.atTop, ∀ gamma : LiveSlot L pb r,
-      hd.dist (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat))
-          (X.obj (L.φ k)).basepoint < L.rInf (gamma.1 : Nat) + 1 :=
-  Filter.eventually_all.mpr fun gamma =>
-    seqCenterD_rInf_lt hd P hre L (gamma.1 : Nat)
-
-/-- A single pre-packing divisor budget places every canonical hat radius
-strictly below half of the slotwise minimizing-branch radius. -/
-theorem lamInf_lt_halfMin
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
-    (hphys : 8 * Real.exp hd.C < aMin * D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) :
-    4 * L.lamInf gamma <
-      (aMin * hd.mu (L.rInf gamma + 1)) / 2 := by
-  have hratio : hd.lambda D (L.rInf gamma) ≤
-      Real.exp hd.C * hd.lambda D (L.rInf gamma + 1) := by
-    simpa only [mul_one] using hd.lambda_exp_le hD
-      (s := L.rInf gamma + 1) (t := L.rInf gamma) (d := 1) (by linarith)
-  have hhat : (8 * Real.exp hd.C) * hd.lambda D (L.rInf gamma + 1) <
-      aMin * hd.mu (L.rInf gamma + 1) :=
-    normalBrHat (hd := hd) hD hphys
-  calc
-    4 * L.lamInf gamma = 4 * hd.lambda D (L.rInf gamma) := rfl
-    _ ≤ 4 * (Real.exp hd.C * hd.lambda D (L.rInf gamma + 1)) :=
-      mul_le_mul_of_nonneg_left hratio (by norm_num)
-    _ = ((8 * Real.exp hd.C) * hd.lambda D (L.rInf gamma + 1)) / 2 := by ring
-    _ < (aMin * hd.mu (L.rInf gamma + 1)) / 2 :=
-      div_lt_div_of_pos_right hhat (by norm_num)
-
-/-- Choose an arbitrarily small positive center radius while retaining the
-six-radius physical cage around one stabilized hat. -/
-theorem exists_cage_rad
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
-    (haMin : 0 < aMin)
-    (hphys : 8 * Real.exp hd.C < aMin * D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat)
-    (eps : Real) (heps : 0 < eps) :
-    ∃ rad : Real, 0 < rad ∧ rad < eps ∧
-      ENNReal.ofReal (4 * L.lamInf gamma + 6 * rad) <
-        ENNReal.ofReal ((aMin * hd.mu (L.rInf gamma + 1)) / 2) := by
-  let rho := aMin * hd.mu (L.rInf gamma + 1)
-  let gap := rho / 2 - 4 * L.lamInf gamma
-  have hgap : 0 < gap := by
-    dsimp only [gap, rho]
-    linarith [lamInf_lt_halfMin hd hD hphys P L gamma]
-  let rad := min (gap / 12) (eps / 2)
-  have hrad : 0 < rad := by
-    dsimp only [rad]
-    exact lt_min (div_pos hgap (by norm_num)) (div_pos heps (by norm_num))
-  have hradGap : rad ≤ gap / 12 := min_le_left _ _
-  have hradEps : rad ≤ eps / 2 := min_le_right _ _
-  have hreal : 4 * L.lamInf gamma + 6 * rad < rho / 2 := by
-    dsimp only [gap] at hradGap
-    nlinarith
-  refine ⟨rad, hrad, by linarith, ?_⟩
-  exact (ENNReal.ofReal_lt_ofReal_iff
-    (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 (by
-      simpa only [rho] using hreal)
 
 /-- Every live slot at one stage carries the full selected normal branch,
 including its fence and intrinsic transport data. -/
@@ -387,81 +232,6 @@ theorem exists_slot_min
     letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
       (X.obj (L.φ k)).t2TangentBundle
     exact hcentres (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat)) (hk gamma).le
-
-/-- Uniform decay of the active-point radius fits the physical centre/point
-cage for every stabilized live slot after one common pair-index threshold. -/
-theorem exists_rad_cage
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
-    (haMin : 0 < aMin) (hphys : 8 * Real.exp hd.C < aMin * D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (n : Nat)
-    (s : Set (X.obj (L.φ n)).M)
-    (radSeq : Nat → Nat → (X.obj (L.φ n)).M → Real)
-    (htail : ∀ epsilon > 0, ∃ N : Nat,
-      ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s, radSeq a b x < epsilon) :
-    ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s,
-      ∀ gamma : LiveSlot L pb r,
-        ENNReal.ofReal
-            (4 * L.lamInf (gamma.1 : Nat) + 2 * radSeq a b x) <
-          ENNReal.ofReal
-            ((aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1)) / 2) := by
-  classical
-  let epsilon : LiveSlot L pb r → Real := fun gamma =>
-    ((aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1)) / 2 -
-      4 * L.lamInf (gamma.1 : Nat)) / 2
-  have hepsilon : ∀ gamma : LiveSlot L pb r, 0 < epsilon gamma := by
-    intro gamma
-    dsimp only [epsilon]
-    nlinarith [lamInf_lt_halfMin hd hD hphys P L (gamma.1 : Nat)]
-  choose N hN using fun gamma : LiveSlot L pb r =>
-    htail (epsilon gamma) (hepsilon gamma)
-  let Nmax : Nat := Finset.univ.sup N
-  refine ⟨Nmax, ?_⟩
-  intro a ha b hb x hx gamma
-  have hgamma : N gamma ≤ Nmax :=
-    Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ gamma)
-  have hrad := hN gamma a (hgamma.trans ha) b (hgamma.trans hb) x hx
-  have hreal : 4 * L.lamInf (gamma.1 : Nat) + 2 * radSeq a b x <
-      (aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1)) / 2 := by
-    dsimp only [epsilon] at hrad
-    linarith
-  exact (ENNReal.ofReal_lt_ofReal_iff
-    (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 hreal
-
-/-- All stabilized live centers obey their ordered-net bounds on one common
-tail. -/
-theorem liveCenters_dist_le
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
-    (pb : hd.PackingBound D) (r : Real) :
-    ∀ᶠ k in Filter.atTop, ∀ gamma : LiveSlot L pb r,
-      hd.dist (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat))
-          (X.obj (L.φ k)).basepoint ≤
-        2 * hd.lambda D 0 * (gamma.1 : Real) :=
-  Filter.eventually_all.mpr fun gamma =>
-    seqCenterD_dist_le hd hD P hre L (gamma.1 : Nat) gamma.2
-
-/-- On one common tail, every live center lies in the fixed packing-cage
-sublevel. -/
-theorem liveCenters_cage
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
-    (pb : hd.PackingBound D) (r : Real) :
-    ∀ᶠ k in Filter.atTop, ∀ gamma : LiveSlot L pb r,
-      hd.dist (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat))
-          (X.obj (L.φ k)).basepoint ≤
-        2 * hd.lambda D 0 * (pb.A r : Real) := by
-  filter_upwards [liveCenters_dist_le hd hD P hre L pb r] with k hk
-  intro gamma
-  refine (hk gamma).trans ?_
-  apply mul_le_mul_of_nonneg_left
-  · exact_mod_cast Nat.le_of_lt gamma.1.isLt
-  · exact (mul_pos (by norm_num) (hd.lambda_pos hD 0)).le
 
 /-- The relative normal-radius profile supplies one selected quantitative branch
 domain for every live center on a common tail. -/
@@ -691,7 +461,8 @@ theorem HasNormalBrFull.exists_cm_eqn
             (I := I) (X.obj k).metric x).symm (xi i))) <
         ENNReal.ofReal (ρ / 2) := by
     simpa only [riemannianEDist_comm] using hpairs'
-  have hz := centerReadoutB_min (I := I) hb k hcomplete hconn x hq he hf
+  have hz := centerReadoutB_min (I := I) hb k hcomplete hconn x
+    hq he hf
     mu xi join p r h' hρ hρq hρmetric hρexp hpairs''
   simpa only [xi, hdecode] using hz
 
@@ -851,7 +622,8 @@ theorem HasNormalBrFull.exists_cm_deriv
             (I := I) (X.obj k).metric x).symm (xi i))) <
         ENNReal.ofReal (ρ / 2) := by
     simpa only [riemannianEDist_comm] using hpairs'
-  have hzero' := centerReadoutB_min (I := I) hb k hcomplete hconn x hq he hf
+  have hzero' := centerReadoutB_min (I := I) hb k hcomplete hconn x
+    hq he hf
     mu xi join p r h' hρ hρq hρmetric hρexp hpairs''
   have hzero : chartCmEqnB (I := I) (X.obj k).metric
       (normal_enorm (I := I) (X.obj k)) x
@@ -895,6 +667,235 @@ theorem HasNormalBrFull.exists_cm_deriv
     (NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x c)
     mu xi htgt h.μ_nonneg hsum hzero
   simpa only [c, xi] using ⟨hcSource, htgt, hzNormal, hzero, hsol⟩
+
+/-- The legacy selected branch produces the provider-independent finite center
+readout carried by its controlled normal-ball chart. -/
+theorem HasNormalBrFull.exists_cmC
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
+    (hcomplete : MetricComplete (I := I) (X.obj k))
+    (hconn : letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
+    (hfull : HasNormalBrFull (I := I) (X.obj k) hcomplete hconn x q δ ρ)
+    {ι : Type} [Fintype ι] (mu : ι → Real) (pts : ι → (X.obj k).M)
+    (join : (X.obj k).M → (X.obj k).M → Real → (X.obj k).M)
+    (p : (X.obj k).M) (r R : Real) (hsum : ∑ i, mu i = 1) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+      (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+    letI : T2Space (X.obj k).M := (X.obj k).t2
+    letI : ConnectedSpace (X.obj k).M := hconn
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+      Manifold.metrizableSpace I (X.obj k).M
+    letI : T3Space (X.obj k).M := inferInstance
+    letI : RiemannianBundle (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle (I := I)
+    letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+      (X.obj k).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj k).M :=
+      MetricComplete.complete (I := I) (X.obj k) hcomplete
+    letI : MetricSpace (X.obj k).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+    ∀ h : CenterInput (I := I) (X.obj k).metric mu pts join p r,
+      dist p x ≤ R →
+      ENNReal.ofReal (R + 2 * r) < ENNReal.ofReal (ρ / 2) →
+      0 < ρ →
+      2 * ρ < (q : Real) →
+      ρ ≤ hb.radius k x →
+      ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
+      HasChartCmSol (I := I) (X.obj k) hcomplete hconn x
+        (legacyBallChart (I := I) (X.obj k) x)
+        (q := q) (delta := δ) mu pts join p r h := by
+  classical
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+    (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : ConnectedSpace (X.obj k).M := hconn
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) hcomplete
+  letI : MetricSpace (X.obj k).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+  intro h hpq hscale hρ hρq hρmetric hρexp
+  have hpairs₀ := centerPairs_lt_le (I := I) (X.obj k).metric
+    mu pts join p r h x R hpq hscale
+  let y := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
+  have hpairs : ∀ i,
+      max (riemannianEDist I x y) (riemannianEDist I x (pts i)) <
+        ENNReal.ofReal (ρ / 2) := by
+    simpa only [y, riemannianEDist_comm] using hpairs₀
+  have hsrc (i : ι) :
+      pts i ∈ (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).source := by
+    have hiLt := (le_max_right (riemannianEDist I x y)
+      (riemannianEDist I x (pts i))).trans_lt (hpairs i)
+    have hiFin : riemannianEDist I x (pts i) ≠ ⊤ :=
+      ne_of_lt (hiLt.trans ENNReal.ofReal_lt_top)
+    have hiReal : (riemannianEDist I x (pts i)).toReal < ρ / 2 :=
+      (ENNReal.lt_ofReal_iff_toReal_lt hiFin).mp hiLt
+    exact (hb.chart_mem_norm_le k x (pts i)
+      ⟨hiFin, hiReal.trans_le hρexp⟩).1
+  let xi : ι → E := fun i =>
+    NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x (pts i)
+  have hdecode :
+      (fun i => (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).symm (xi i)) = pts := by
+    funext i
+    exact (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).left_inv (hsrc i)
+  have h' : CenterInput (I := I) (X.obj k).metric mu
+      (fun i => (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).symm (xi i)) join p r := by
+    rw [hdecode]
+    exact h
+  dsimp only [HasNormalBrFull] at hfull
+  rcases hfull with
+    ⟨hq, e, he, hf, _hclosed, _hδdom, _hhom, _hpair, _hinv,
+      _hδinv, eta, heta, happrox⟩
+  have heta_one : eta < 1 := heta.trans (by norm_num)
+  have hpairs' := centerPairs_lt_le (I := I) (X.obj k).metric mu
+    (fun i => (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).symm (xi i))
+    join p r h' x R hpq hscale
+  have hpairs'' : ∀ i,
+      max (riemannianEDist I x
+          (centerOfMass (I := I) (X.obj k).metric mu
+            (fun j => (NormalCoordinates.framedChartAt
+              (I := I) (X.obj k).metric x).symm (xi j)) join p r h'))
+        (riemannianEDist I x
+          ((NormalCoordinates.framedChartAt
+            (I := I) (X.obj k).metric x).symm (xi i))) <
+        ENNReal.ofReal (ρ / 2) := by
+    simpa only [riemannianEDist_comm] using hpairs'
+  have hzero' := centerReadoutB_min (I := I) hb k hcomplete hconn x
+    hq he hf
+    mu xi join p r h' hρ hρq hρmetric hρexp hpairs''
+  have hzeroB₀ :
+      chartCmEqnB (I := I) (X.obj k).metric
+        (normal_enorm (I := I) (X.obj k)) x
+        (IsNormalDiag.toBranch (I := I) (X.obj k)
+          hcomplete hconn x hq he)
+        (NormalCoordinates.framedChartAt
+          (I := I) (X.obj k).metric x y) (mu, xi) = 0 := by
+    simpa only [y, xi, hdecode] using hzero'
+  obtain ⟨i₀, _hi₀⟩ := h.μ_pos
+  have hyLt : riemannianEDist I x y < ENNReal.ofReal (ρ / 2) :=
+    (le_max_left _ _).trans_lt (hpairs i₀)
+  have hyFin : riemannianEDist I x y ≠ ⊤ :=
+    ne_of_lt (hyLt.trans ENNReal.ofReal_lt_top)
+  have hyReal : (riemannianEDist I x y).toReal < ρ / 2 :=
+    (ENNReal.lt_ofReal_iff_toReal_lt hyFin).mp hyLt
+  have hySource : y ∈ (NormalCoordinates.framedChartAt
+      (I := I) (X.obj k).metric x).source :=
+    (hb.chart_mem_norm_le k x y ⟨hyFin, hyReal.trans_le hρexp⟩).1
+  have htgt (i : ι) :
+      (NormalCoordinates.framedChartAt
+          (I := I) (X.obj k).metric x y,
+        xi i) ∈ e.target := by
+    have hdom := (IsNormalDiag.inv_is_min (I := I) hb k hcomplete hconn x
+      hq he hf hρ hρq hρmetric hρexp (hpairs i)).choose_spec.1
+    simpa only [xi] using
+      IsNormalDiag.target_of_chart_dom (I := I) (X.obj k)
+        hcomplete hconn x hq he hf hySource (hsrc i) hdom
+  have hzNormal :
+      NormalCoordinates.framedChartAt (I := I) (X.obj k).metric x y ∈
+        normalBall (I := I) (X.obj k) x := by
+    have hpre : e.symm
+        (NormalCoordinates.framedChartAt
+          (I := I) (X.obj k).metric x y, xi i₀) ∈
+        Metric.ball (0 : E × E) q := by
+      rw [← he.1]
+      exact e.map_target (htgt i₀)
+    have hout := (hf (e.symm
+      (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x y, xi i₀))
+      (Metric.ball_subset_closedBall hpre)).2.1
+    simpa only [e.right_inv (htgt i₀)] using hout
+  let c := legacyBallChart (I := I) (X.obj k) x
+  let z := NormalCoordinates.framedChartAt
+    (I := I) (X.obj k).metric x y
+  have htgtZ (i : ι) : (z, xi i) ∈ e.target := by
+    simpa only [z] using htgt i
+  have hzNormalZ : z ∈ normalBall (I := I) (X.obj k) x := by
+    simpa only [z] using hzNormal
+  have hzeroB :
+      chartCmEqnB (I := I) (X.obj k).metric
+        (normal_enorm (I := I) (X.obj k)) x
+        (IsNormalDiag.toBranch (I := I) (X.obj k)
+          hcomplete hconn x hq he) z (mu, xi) = 0 := by
+    simpa only [z] using hzeroB₀
+  have hzBall : z ∈ Metric.ball (0 : E) c.radius := by
+    simpa only [z, c, normalBall, legacyBallChart_radius] using hzNormal
+  have hxiBall (i : ι) : xi i ∈ Metric.ball (0 : E) c.radius :=
+    (IsNormalDiag.target_mem_ball (I := I) (X.obj k)
+      hcomplete hconn x he hf (htgtZ i)).2
+  have hyDecode : c.hom z = y := by
+    simpa only [c, z, legacyChart_apply] using
+      (NormalCoordinates.framedChartAt
+        (I := I) (X.obj k).metric x).left_inv hySource
+  have hzTarget : c.hom z ∈ c.restrictBall.target := by
+    have hmap := c.restrictBall.map_source hzBall
+    change c.hom z ∈ c.restrictBall.target at hmap
+    exact hmap
+  have hyTarget : y ∈ c.restrictBall.target := by
+    rw [← hyDecode]
+    exact hzTarget
+  let B := IsNormalDiag.toBranch
+    (I := I) (X.obj k) hcomplete hconn x hq he
+  have hdom (i : ι) :
+      (c.hom z, c.hom (xi i)) ∈ B.chartReadDom c := by
+    have hpair :
+        normalPair (I := I) (X.obj k) x (z, xi i) (c := c) ∈ B.dom := by
+      rw [← (IsNormalDiag.full_transport (I := I) (X.obj k)
+        hcomplete hconn x hq he hf).2.1]
+      refine ⟨(z, xi i), htgtZ i, ?_⟩
+      exact c.pairHome_apply (z, xi i)
+    refine ⟨?_, hzTarget⟩
+    simpa only [normalPair, NormalBallChart.pair] using hpair
+  have hvel : invVelSum e mu xi z = 0 :=
+    (IsNormalDiag.chartCm_zero_iff (I := I) (X.obj k)
+      hcomplete hconn x hq he hf z mu xi htgtZ hzNormalZ).mp hzeroB
+  have hzeroC :
+      chartCmEqnC (I := I) (X.obj k).metric
+        (normal_enorm (I := I) (X.obj k)) x c B z (mu, xi) = 0 :=
+    (IsNormalDiag.chartCmC_zero_iff (I := I) (X.obj k)
+      hcomplete hconn x hq he hf z mu xi htgtZ).mpr hvel
+  have hsol := IsNormalDiag.cmC_sol_strict (I := I) (X.obj k)
+    hcomplete hconn x hq he hf happrox heta_one z mu xi
+    htgtZ h.μ_nonneg hsum ⟨hzBall, hxiBall, hdom, hzeroC⟩
+  dsimp only [HasChartCmSol]
+  refine ⟨hq, e, he, hf, ?_⟩
+  dsimp only
+  change y ∈ c.restrictBall.target ∧
+    HasCmSolC (I := I) (X.obj k).metric
+      (normal_enorm (I := I) (X.obj k)) x c B z (mu, xi)
+  exact ⟨hyTarget, hzBall, hxiBall, hdom, hzeroC, hsol⟩
 
 /-- A prescribed live source slot whose hat contains the center supplies its
 slotwise quantitative branch and reads the actual center equation. -/
@@ -1230,6 +1231,148 @@ theorem exists_hat_cm_sol_at
       ENNReal.toReal_ofReal (hre.dist_nonneg (L.φ k) x x0)]
     exact hhd.le
   have hresult := HasNormalBrFull.exists_cm_deriv (I := I) hb (L.φ k)
+    (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hfull
+    mu pts join x rad (4 * L.lamInf (alpha.1 : Nat)) hsum h hpq
+    hradCage hρ hρq hρmetric hρexp
+  simpa only [x0, rho0] using hresult
+
+/-- A prescribed live source slot supplies the provider-independent center
+readout at the legacy chart, ready for a later H6 provider switch. -/
+theorem exists_hat_cmC_at
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real}
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
+    (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
+    (hqdata : ∀ gamma : LiveSlot L pb r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * hd.mu Rgamma
+      0 < q gamma ∧ 0 < δ gamma ∧ 0 < rho ∧
+        2 * rho < (q gamma : Real))
+    (hbranch : ∀ gamma : LiveSlot L pb r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * hd.mu Rgamma
+      let x0 := seqCenterD hd P L k (gamma.1 : Nat)
+      letI : TopologicalSpace (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      HasNormalBrFull (I := I) (X.obj (L.φ k))
+          (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0
+          (q gamma) (δ gamma) rho ∧
+        rho ≤ hb.radius (L.φ k) x0 ∧
+        rho / 2 ≤ expRadiusGp (I := I) (X.obj (L.φ k)).metric x0)
+    (alpha : LiveSlot L pb r) :
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : IsManifold I 1 (X.obj (L.φ k)).M := IsManifold.of_le
+      (I := I) (M := (X.obj (L.φ k)).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).sigmaCompact
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : ConnectedSpace (X.obj (L.φ k)).M := hconn (L.φ k)
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ k)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ k)).M
+    letI : T3Space (X.obj (L.φ k)).M := inferInstance
+    letI : RiemannianBundle
+        (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+      (X.obj (L.φ k)).riemBundle (I := I)
+    letI : (z : (X.obj (L.φ k)).M) →
+        InnerProductSpace Real (TangentSpace I z) :=
+      (X.obj (L.φ k)).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+      (X.obj (L.φ k)).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj (L.φ k)).M :=
+      MetricComplete.complete (I := I) (X.obj (L.φ k))
+        (hcomplete.complete (L.φ k))
+    letI : MetricSpace (X.obj (L.φ k)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ k)).M)
+    ∀ (mu : Fin (pb.A r) → Real)
+        (pts : Fin (pb.A r) → (X.obj (L.φ k)).M)
+        (join : (X.obj (L.φ k)).M → (X.obj (L.φ k)).M → Real →
+          (X.obj (L.φ k)).M)
+        (x : (X.obj (L.φ k)).M) (rad : Real),
+      ∀ h : CenterInput (I := I) (X.obj (L.φ k)).metric mu pts join x rad,
+        ∑ i, mu i = 1 →
+        x ∈ NetLimitData.hatBall (I := I) (X := X) hd D P L pb r k alpha.1 →
+        ENNReal.ofReal
+            (4 * L.lamInf (alpha.1 : Nat) + 2 * rad) <
+          ENNReal.ofReal
+            ((aMin * hd.mu (L.rInf (alpha.1 : Nat) + 1)) / 2) →
+          HasChartCmSol (I := I) (X.obj (L.φ k))
+            (hcomplete.complete (L.φ k)) (hconn (L.φ k))
+            (seqCenterD hd P L k (alpha.1 : Nat))
+            (legacyBallChart (I := I) (X.obj (L.φ k))
+              (seqCenterD hd P L k (alpha.1 : Nat)))
+            (q := q alpha) (delta := δ alpha) mu pts join x rad h := by
+  classical
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : IsManifold I 1 (X.obj (L.φ k)).M := IsManifold.of_le
+    (I := I) (M := (X.obj (L.φ k)).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).sigmaCompact
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : ConnectedSpace (X.obj (L.φ k)).M := hconn (L.φ k)
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ k)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ k)).M
+  letI : T3Space (X.obj (L.φ k)).M := inferInstance
+  letI : RiemannianBundle
+      (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+    (X.obj (L.φ k)).riemBundle (I := I)
+  letI : (z : (X.obj (L.φ k)).M) →
+      InnerProductSpace Real (TangentSpace I z) :=
+    (X.obj (L.φ k)).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+    (X.obj (L.φ k)).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj (L.φ k)).M :=
+    MetricComplete.complete (I := I) (X.obj (L.φ k))
+      (hcomplete.complete (L.φ k))
+  letI : MetricSpace (X.obj (L.φ k)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ k)).M)
+  intro mu pts join x rad h hsum hxhat hradCage
+  let x0 := seqCenterD hd P L k (alpha.1 : Nat)
+  let rho0 := aMin * hd.mu (L.rInf (alpha.1 : Nat) + 1)
+  rcases hqdata alpha with ⟨_hq, _hδ, hρ, hρq⟩
+  rcases hbranch alpha with ⟨hfull, hρmetric, hρexp⟩
+  have hproper :
+      (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+       dist x x0) < 4 * L.lamInf (alpha.1 : Nat) := by
+    simpa only [x0] using hat_dist_centerD hd P L pb r hxhat
+  have hhd : hd.dist (L.φ k) x x0 < 4 * L.lamInf (alpha.1 : Nat) := by
+    rw [← ProperMetricOn.dist_eq hd hre P (L.φ k) x x0]
+    exact hproper
+  have hed : riemannianEDist I x x0 =
+      ENNReal.ofReal (hd.dist (L.φ k) x x0) := by
+    have hrealize := hre.edist_eq (L.φ k) x x0
+    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+  have hpq : dist x x0 ≤ 4 * L.lamInf (alpha.1 : Nat) := by
+    rw [HopfRinow.riemMetric_dist_eq, hed,
+      ENNReal.toReal_ofReal (hre.dist_nonneg (L.φ k) x x0)]
+    exact hhd.le
+  have hresult := HasNormalBrFull.exists_cmC (I := I) hb (L.φ k)
     (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hfull
     mu pts join x rad (4 * L.lamInf (alpha.1 : Nat)) hsum h hpq
     hradCage hρ hρq hρmetric hρexp

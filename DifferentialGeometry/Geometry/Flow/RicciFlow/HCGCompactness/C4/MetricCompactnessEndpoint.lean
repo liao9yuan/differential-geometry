@@ -53,6 +53,23 @@ def metricCanon
     compactness_canon Ppsi B
   exact canon.ofSeqSubseq psi hpsi
 
+/-- The limit selected by the canonical metric-compactness construction is
+connected. -/
+theorem metricCanon_conn
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : MetricCompactBase (I := I) X)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : forall k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M) :
+    let C := b.metricCanon hcomplete hconn
+    letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
+    ConnectedSpace C.mc.limit.M := by
+  classical
+  dsimp only [metricCanon, StepDCanonData.ofSeqSubseq,
+    MetricCompactnessConclusion.ofSeqSubseq]
+  exact compactness_conn (I := I) _ _
+
 end MetricCompactBase
 
 namespace MetricCompactnessInputs

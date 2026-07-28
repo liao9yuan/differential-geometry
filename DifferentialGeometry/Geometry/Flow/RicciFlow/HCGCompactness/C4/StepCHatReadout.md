@@ -162,3 +162,17 @@ until that validation passes.  Dedicated Step-B/B1 machinery is about **95%**,
 Chapter 4 about **87%**, and whole-HCG compactness machinery about **60%**.
 Textbook B1 and the unconditional compactness endpoints remain theorem-level
 **0%**.
+
+## 2026-07-27 controlled-chart selected tail
+
+The primary minimizing theorem `exists_hat_cm_min` now retains
+`HasChartCmSol` at the selected legacy provider instead of expanding
+`HasHatCmStrictAt`. Its finite sequence tail, active-radius tail, common
+pair-index threshold, strict-convexity proof, and quantifier order are
+unchanged; only the final call is replaced by `exists_hat_cmC_at`.
+
+The explicit `StrictDistInput` compatibility theorem and
+`HasHatCmStrictAt` remain available for old callers. Source migration is
+complete; focused verification waits for the new `NormalBranchCage` export.
+The next target is the support capstone and stage root consumer, followed by
+the actual legacy-to-H6 provider switch.

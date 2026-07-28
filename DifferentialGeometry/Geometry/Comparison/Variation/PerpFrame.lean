@@ -1138,8 +1138,8 @@ theorem velocity_chartRepAt_differentiableAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Globally-smooth parallel orthonormal perpendicular frame along a geodesic.**
-For a `C^∞` unit-speed geodesic `γ` on `Icc 0 L` (`L > 0`, unit-speed pinned at
-`t = 0` by `hUnit0`), there is a frame
+For a `C^∞` positive-speed geodesic `γ` on `Icc 0 L` (`L > 0`, positive speed
+pinned at `t = 0` by `hVel0`), there is a frame
 `e : Fin (finrank E - 1) → SectionAlongCurve I M γ` of the `g`-orthogonal
 complement of the velocity such that each `e i` is:
 
@@ -1156,13 +1156,13 @@ test field globally smooth).  Construction: an orthonormal seed basis of the
 along `γ` on an open neighbourhood of `Icc 0 L`
 (`parallelTransport_section_contMDiffOn_Ioo`), then cut off by a smooth bump
 equal to `1` on `Icc 0 L` and supported in that neighbourhood. -/
-theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
+theorem exists_perp_par_pos [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
     (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
-    (hUnit0 : g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
-      (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1) :
+    (hVel0 : 0 < g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
+      (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))) :
     ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
       (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
         DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
@@ -1180,7 +1180,7 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   set u₀ : E := (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) : E) with hu₀_def
   obtain ⟨seed, hseed_ON, hseed_perp⟩ :=
-    exists_ortho_perp (I := I) g (γ 0) u₀ hUnit0
+    exists_perp_pos (I := I) g (γ 0) u₀ hVel0
   have htransport : ∀ i, ∃ (δ : ℝ) (_ : 0 < δ) (V : ∀ t, TangentSpace I (γ t)),
       V 0 = seed i ∧
       (∀ t ∈ Set.Ioo (-δ) (L + δ), DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t) ∧
@@ -1222,27 +1222,6 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         exact (hχ_Icc i s).2
       exact Filter.Eventually.of_forall hle
     exact hmax.deriv_eq_zero
-  have hvel_par : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      covDerivAlong (I := I) g γ
-        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t = 0 := by
-    intro t ht
-    exact (covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt (I := I) g γ t hγ).mpr
-      (hgeo.hasGeodesicEquationAt ht)
-  have hvel_diff : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      DifferentiableAt ℝ
-        (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E)) t) t :=
-    fun t _ => velocity_chartRepAt_differentiableAt (I := I) γ hγ t
-  have hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L,
-      g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E)
-        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
-    intro t ht
-    have hconst :=
-      parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
-        (hγ.of_le (by exact_mod_cast le_top)) hL.le
-        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
-        (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
-        hvel_diff hvel_diff hvel_par hvel_par t ht
-    rw [hconst]; exact hUnit0
   refine ⟨fun i => ⟨fun t => χ i t • Vfun i t⟩, ?_, ?_, ?_, ?_, ?_⟩
   · intro i t ht
     change DifferentiableAt ℝ (chartRepAt (I := I) γ (fun s => χ i s • Vfun i s) t) t
@@ -1335,6 +1314,33 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
           (E := (TangentSpace I : M → Type _)) (n := ∞) (x := γ t₀)).comp t₀ (hγ t₀)
         exact this
       exact hzs
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Unit-speed compatibility wrapper for `exists_perp_par_pos`. -/
+theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
+    (hUnit0 : g.inner (γ 0) (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ))
+      (mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ)) = 1) :
+    ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        DifferentiableAt ℝ (chartRepAt (I := I) γ (e i).toFun t) t) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+        covDerivAlong (I := I) g γ (e i).toFun t = 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+        g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
+          if i = j then 1 else 0) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+        g.inner (γ t) ((e i).toFun t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)) = 0) ∧
+      (∀ i, ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+        (fun t => TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (γ t) ((e i).toFun t))) := by
+  apply exists_perp_par_pos (I := I) g γ hγ hL hgeo
+  rw [hUnit0]
+  exact zero_lt_one
 
 end SmoothPerpFrame
 

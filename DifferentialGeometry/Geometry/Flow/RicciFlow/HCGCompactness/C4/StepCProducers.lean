@@ -480,7 +480,7 @@ theorem HasAtomWeightLim.binf_of_live
   have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
       (item3RadiusFactor inp.decay inp.D) :=
     inp.normalRadius.radiusScaleTail inp.hD
-      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r
   have hradTail := hphi.tendsto_atTop.eventually hrad
   have hgpTail := hphi.tendsto_atTop.eventually hgp

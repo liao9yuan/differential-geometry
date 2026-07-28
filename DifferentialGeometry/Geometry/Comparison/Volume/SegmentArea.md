@@ -8,23 +8,21 @@ manifold, valid past the cut locus.
 ## Status
 
 - **GREEN, sorry-free, verified** (focused check + targeted build
-  `+…Comparison.Volume.SegmentArea`, 3818 jobs, exit 0).  370 lines.
+  `+…Comparison.Volume.SegmentArea`, 3818 jobs, exit 0).
 
 ## Public API
 
+- `expJacDensity` — the chart-basis Jacobi density used by the area formula.
+- `expJac_continuous` — continuity of `v ↦ expJacDensity x v`, exported for the
+  exact segment-interior polar formula.
 - `riemVol_exp_image_le` (main L5): for `IsCompact K` (⊆ `E`),
   `riemannianVolumeMeasure g (expMapIntrinsic x '' K) ≤ ∫⁻ v in K, ofReal (expJacDensity x v) ∂modelHaar`.
   No injectivity, no cut-locus hypothesis.
+- `riemVol_exp_image_eq` — the injective measurable-set equality used on the
+  strict minimizing segment.
 
 ## Private helpers
 
-- `expJacDensity g hEnorm x v` := `curveDensity g (intrinsicGeodesic x v)
-  (fun i t => intrinsicJacobi x v (chartModelBasis i) t) 1` — the RHS integrand, i.e.
-  the pointwise Riemannian Jacobian of `exp_x` (= `exp_density_curve`'s value).
-- `expJacDensity_continuous` — continuity of `v ↦ expJacDensity x v`, needed for the
-  `lintegral_tsum` swap.  Proved locally from `exp_density_curve`
-  (`= chartDensity · |det (chart∘exp)|`) + `chartDensity_continuousOn` +
-  `ContDiffAt.continuousAt_fderiv` (via `expChart_contDiffAt`) + `continuous_det`.
 - `pou_term_exp_le` — the per-chart summand bound (the crux).
 
 ## Route (verified)
@@ -73,9 +71,19 @@ exp⁻¹ source`, `Wα = ofReal(chartDensity·ρα)∘symm` piecewise), so
 - POU continuity accessor: `(chartAtlasPOU I M α).contMDiff.continuous`.
 - `ContDiffAt.continuousAt_fderiv (h) (hn : n ≠ 0)` gives ContinuousAt of `fderiv`.
 
-## Downstream (B5c L6/L7)
+## Downstream (B5c L6/L7) — completed 2026-07-27
 
-Consumers: `SegmentPolar.segBall_vol_le` should apply `riemVol_exp_image_le` with
-`K = SegDom ∩ closedGBall R` (compact), then bound `∫⁻_K expJacDensity ≤ σ·hypRadVol`
-via the Gauss radial/transverse split + Euclidean polar (`lintegral_polar`).  That
-absolute-bound step is L6 and is NOT in this file.
+`SegmentPolar.segBall_vol_le` applies `riemVol_exp_image_le` on the compact
+segment domain and then performs the Gauss radial/transverse comparison and
+Euclidean polar integration.  `segBall_vol_rel` uses
+`riemVol_exp_image_eq` on the strict minimizing segment.  Both consumers are
+now proved.
+
+## 2026-07-27 public density normal form
+
+`expJacDensity` is now public because the public area inequality
+`riemVol_exp_image_le` exposes it in its conclusion.  Keeping the definition
+private made the theorem unusable as a stable downstream interface and forced
+fragile reducibility-based `change` steps.  The definition and theorem
+statement are otherwise unchanged.  Focused verification and the exact
+targeted artifact refresh passed.

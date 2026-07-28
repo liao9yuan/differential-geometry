@@ -128,13 +128,14 @@ theorem contDiffOn_normalTransition
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  rw [← contMDiffOn_iff_contDiffOn]
-  have hexp : ContMDiffOn 𝓘(ℝ, E) I ∞
-      (fun z => framedExpDiffeo (I := I) Y.metric x z) U :=
-    (framedExp_smoothOn (I := I) Y x).mono hUx
-  have hchart := framedChart_smooth (I := I) Y y
-  simpa only [normalTransition, framedTransition, Function.comp_apply] using
-    hchart.comp hexp hmaps
+  have hovl :
+      (legacyBallChart (I := I) Y x).OverlapOn
+        (legacyBallChart (I := I) Y y) U :=
+    (legacyOverlap_iff (I := I) Y x y U).2 fun z hz =>
+      ⟨hUx hz, hmaps hz⟩
+  rw [← legacyTransition_eq (I := I) Y x y]
+  exact (legacyBallChart (I := I) Y x).transition_smooth
+    (legacyBallChart (I := I) Y y) hovl
 
 /-- Extract fixed-pair normal-transition limits from the H6 metric-jet producer.
 

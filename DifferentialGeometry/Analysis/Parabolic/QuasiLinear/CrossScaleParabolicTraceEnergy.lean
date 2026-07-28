@@ -355,6 +355,71 @@ theorem normSq_repr_le_init_add_integral (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc 
   have htsum_le := (u.summable_intervalIntegral_energyIntegrand ht).tsum_le_of_sum_le hpartial
   linarith [htsum_le]
 
+/-- The cross-scale energy estimate with its time integral discharged by
+Cauchy--Schwarz.  The bound is uniform in the horizon and uses only the two
+time-`L2` norms carried by the field. -/
+theorem repr_sq_le_norms (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
+    ‖u.repr t‖ ^ 2 ≤
+      ‖u.repr 0‖ ^ 2 + 2 * ‖u.hiL2‖ * ‖u.lo.deriv‖ := by
+  have henergy := u.normSq_repr_le_init_add_integral hT ht
+  have hsub : Set.Ioc (0 : ℝ) t ⊆ Set.Icc (0 : ℝ) T :=
+    fun x hx => ⟨le_of_lt hx.1, le_trans hx.2 ht.2⟩
+  have hmono :
+      (∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖)) ≤
+        ∫ s in Set.Icc (0 : ℝ) T,
+          2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
+    rw [intervalIntegral.integral_of_le ht.1]
+    refine setIntegral_mono_set u.integrableOn_energyBound
+      (ae_of_all _ (fun s => by positivity)) ?_
+    exact HasSubset.Subset.eventuallyLE hsub
+  have hholder :
+      (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) ≤
+        ‖u.hiL2‖ * ‖u.lo.deriv‖ := by
+    have h :=
+      MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg
+        (μ := timeMeasure T) Real.HolderConjugate.two_two
+        (f := fun s => ‖u.hiL2 s‖) (g := fun s => ‖u.lo.deriv s‖)
+        (ae_of_all _ (fun s => norm_nonneg _))
+        (ae_of_all _ (fun s => norm_nonneg _))
+        (by simpa using (Lp.memLp u.hiL2).norm)
+        (by simpa using (Lp.memLp u.lo.deriv).norm)
+    change
+      (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) ≤
+        (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ ^ (2 : ℝ)) ^ (1 / (2 : ℝ)) *
+          (∫ s in Set.Icc (0 : ℝ) T, ‖u.lo.deriv s‖ ^ (2 : ℝ)) ^ (1 / (2 : ℝ))
+      at h
+    have hhi_sq :
+        (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ ^ (2 : ℝ)) =
+          ‖u.hiL2‖ ^ 2 := by
+      simpa only [Real.rpow_two] using
+        (TimeSobolev.norm_sq_eq_integral u.hiL2).symm
+    have hlo_sq :
+        (∫ s in Set.Icc (0 : ℝ) T, ‖u.lo.deriv s‖ ^ (2 : ℝ)) =
+          ‖u.lo.deriv‖ ^ 2 := by
+      simpa only [Real.rpow_two] using
+        (TimeSobolev.norm_sq_eq_integral u.lo.deriv).symm
+    rw [hhi_sq, hlo_sq,
+      ← Real.sqrt_eq_rpow, Real.sqrt_sq (norm_nonneg _),
+      ← Real.sqrt_eq_rpow, Real.sqrt_sq (norm_nonneg _)] at h
+    exact h
+  refine henergy.trans ?_
+  calc
+    ‖u.repr 0‖ ^ 2 +
+          (∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖))
+        ≤ ‖u.repr 0‖ ^ 2 +
+            ∫ s in Set.Icc (0 : ℝ) T,
+              2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) :=
+      add_le_add_right hmono _
+    _ = ‖u.repr 0‖ ^ 2 +
+          2 * ∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖ := by
+      rw [MeasureTheory.integral_const_mul]
+    _ ≤ ‖u.repr 0‖ ^ 2 + 2 * ‖u.hiL2‖ * ‖u.lo.deriv‖ := by
+      exact add_le_add_right
+        (by
+          simpa only [mul_assoc] using
+            mul_le_mul_of_nonneg_left hholder (by norm_num : (0 : ℝ) ≤ 2))
+        _
+
 /-- Each per-mode indefinite time integral `t ↦ ∫₀ᵗ Fᵢ` is continuous on
 `[0,T]`. -/
 lemma continuousOn_intervalIntegral_energyIntegrand

@@ -4,8 +4,8 @@
 
 Produce the pointwise order-zero and order-zero-through-two `L2` jet bounds for
 the DeTurck principal-cometric coefficient from a small three-dimensional
-spectral `H2` metric perturbation.  These are exactly the coefficient inputs of
-`appCc_h2_h3_h1`.
+spectral `H2` metric perturbation.  These are the coefficient inputs of both
+the `H3 -> H1` and `H4 -> H2` principal-action estimates.
 
 ## Current route
 
@@ -20,9 +20,15 @@ three-dimensional `H2 x H3 -> H1` `appCc` estimate.  Its conclusion is the
 actual DeTurck principal-cometric arm bound, with operator size linear in the
 metric perturbation's spectral `H2` norm.
 
-`inv_coeff_h2`, `principal_coeff_h2`, and `principal_arm_h2` passed focused
-verification and the target module build.  They contain no new assumptions or
-local sorries and are theorem-level complete.
+`principal_arm_h4_h2` uses the same coefficient envelope together with
+`appCc_h2_h4_h2`.  It gives the low-base spatial estimate
+`H4 -> H2`, again with operator size linear in the metric perturbation's
+spectral `H2` norm and without a high-order `a` hypothesis.
+
+`inv_coeff_h2`, `principal_coeff_h2`, `principal_arm_h2`, and
+`principal_arm_h4_h2` passed focused verification.  The new generic
+`H4 -> H2` dependency also passed its targeted refresh.  These declarations
+contain no new assumptions or local sorries.
 
 The direct two-endpoint add-subtract route leaves a genuine coefficient
 difference multiplying the single-endpoint second jet.  The better existing

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageCenter
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchConvexity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchCage
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchHessian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCHatReadout
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSupportCapstone
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
@@ -556,8 +557,12 @@ theorem HasSuppConvData.actual_cm_tail
         ∃ hcm : CenterInput (I := I) Yl.metric (mu z)
             (centerAverage.activeFill mu stagePts qstar z)
             join (qstar z) rad,
-          HasHatCmStrictAt (I := I) inp.decay P Lphi inp.pack r l
-            hcomplete hconn q δ alpha (mu z)
+          HasChartCmSol (I := I) Yl (hcomplete.complete (Lphi.φ l))
+            (hconn (Lphi.φ l))
+            (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
+            (legacyBallChart (I := I) Yl
+              (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))
+            (q := q alpha) (delta := δ alpha) (mu z)
             (centerAverage.activeFill mu stagePts qstar z)
             join (qstar z) rad hcm ∧
           dist
@@ -755,7 +760,7 @@ theorem HasSuppConvData.actual_cm_tail
     have hscaleGamma := hscale l hlS gamma
     dsimp only [Lphi] at hscaleGamma ⊢
     exact ⟨hfullGamma, hscaleGamma.2.1, hscaleGamma.2.2⟩
-  have hout := exists_hat_cm_sol_at (I := I) inp.decay P inp.realizes
+  have hout := exists_hat_cmC_at (I := I) inp.decay P inp.realizes
     Lphi inp.pack r l hcomplete hconn q δ hqdataPhi hbranchScale alpha
     (mu z) pts join p rad hcm (hmu.sum_one z hzU) hpHat hcage2
   let c := centerOfMass (I := I) Yl.metric (mu z) pts join p rad hcm
@@ -1045,18 +1050,40 @@ theorem HasSuppConvData.stage_root_tail
       simpa only [zc, c, mu, pts, join, p, qstar, stagePts, chiL] using
         hcoord
     exact hcoordLe.trans_lt hfour
+  dsimp only [HasChartCmSol] at hstrict
   rcases hstrict with ⟨hqSel, eSel, heSel, hfSel, hread⟩
-  dsimp only at hread
-  rcases hread with ⟨hcSource, htgtSel, hzcBall, hchartSel, _hderiv⟩
-  have hselZero : invVelSum eSel (mu z) xi zc = 0 := by
-    apply (IsNormalDiag.chartCm_zero_iff (I := I) Yl
+  rcases hread with ⟨hcTarget, hsol⟩
+  have hsolSel : HasCmSolC (I := I) Yl.metric
+      (normal_enorm (I := I) Yl) x0
+      (legacyBallChart (I := I) Yl x0)
+      (IsNormalDiag.toBranch (I := I) Yl
+        (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
+        x0 hqSel heSel) zc (mu z, xi) := by
+    simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using hsol
+  let chartSel := legacyBallChart (I := I) Yl x0
+  have htgtSel : ∀ i, (zc, xi i) ∈ eSel.target := by
+    intro i
+    have hzcTarget : chartSel.hom zc ∈ chartSel.restrictBall.target := by
+      have hmap := chartSel.restrictBall.map_source hsolSel.1
+      change chartSel.hom zc ∈ chartSel.restrictBall.target at hmap
+      exact hmap
+    have hxiTarget : chartSel.hom (xi i) ∈ chartSel.restrictBall.target := by
+      have hmap := chartSel.restrictBall.map_source (hsolSel.2.1 i)
+      change chartSel.hom (xi i) ∈ chartSel.restrictBall.target at hmap
+      exact hmap
+    have hout := IsNormalDiag.target_of_inv_dom (I := I) Yl
       (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
-      x0 hqSel heSel hfSel zc (mu z) xi ?_ ?_).mp
-    · simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using
-        hchartSel
-    · simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using
-        htgtSel
-    · simpa only [zc, c, x0, Yl, Lphi, mu, pts, join, p] using hzcBall
+      x0 hqSel heSel hzcTarget hxiTarget (hsolSel.2.2.1 i).1
+    have hzcDecode : chartSel.inv (chartSel.hom zc) = zc :=
+      chartSel.hom.left_inv (chartSel.ball_subset hsolSel.1)
+    have hxiDecode : chartSel.inv (chartSel.hom (xi i)) = xi i :=
+      chartSel.hom.left_inv (chartSel.ball_subset (hsolSel.2.1 i))
+    rwa [hzcDecode, hxiDecode] at hout
+  have hselZero : invVelSum eSel (mu z) xi zc = 0 := by
+    exact (IsNormalDiag.chartCmC_zero_iff (I := I) Yl
+      (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
+      x0 hqSel heSel hfSel zc (mu z) xi htgtSel).mp hsolSel.2.2.2.1
+  have hzcBall := hsolSel.1
   have heCanon : IsNormalDiag (I := I) Yl
       (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l)) x0
       (q alpha) (δ alpha) (e l) := by
@@ -1154,10 +1181,13 @@ theorem HasSuppConvData.stage_root_tail
     exact hcenterRoot
   have hrootBall : Phi3 l k l z ∈ normalBall (I := I) Yl x0 := by
     rw [← hcenterRoot]
-    simpa only [zc, x0, Yl, Lphi, c, mu, pts, join, p] using hzcBall
+    simpa only [normalBall, legacyBallChart_radius, zc, x0, Yl, Lphi,
+      c, mu, pts, join, p] using hzcBall
   have hdecode : chiL.symm zc = c := by
-    apply chiL.left_inv
-    simpa only [chiL, x0, Yl, Lphi, c, mu, pts, join, p] using hcSource
+    have hright :=
+      (legacyBallChart (I := I) Yl x0).restrictBall.right_inv hcTarget
+    simpa only [NormalCoordinates.NormalBallChart.restrictBall_apply,
+      chiL, zc, c, x0, Yl, Lphi, mu, pts, join, p] using hright
   have hmapDecode :
       stageComparisonMap inp P Lphi r hr hconn k l x =
         chiL.symm (Phi3 l k l z) := by

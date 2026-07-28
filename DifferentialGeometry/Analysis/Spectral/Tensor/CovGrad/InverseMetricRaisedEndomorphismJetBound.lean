@@ -73,7 +73,9 @@ private lemma rfns_neg_fib (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [TensorRSSpace.toModel_neg]
   rw [show (-(TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s)
         (x := x) v)) = ((-1 : ℝ) • TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
-        (r := r) (s := s) (x := x) v) from by rw [neg_one_smul]]
+        (r := r) (s := s) (x := x) v) from
+      (neg_one_smul ℝ (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
+        (r := r) (s := s) (x := x) v)).symm]
   rw [tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
@@ -364,39 +366,6 @@ private lemma recovery_comp_fullRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma slotInsertEndoFib_comp_eq (s : ℕ) (x : M)
-    (A B : TangentSpace I x →L[ℝ] TangentSpace I x) :
-    ContinuousLinearMap.comp (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x A)
-        (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x B) =
-      slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (ContinuousLinearMap.comp B A) := by
-  have key : ∀ D : Tensor0SSpace (s + 1) I x,
-      (ContinuousLinearMap.comp (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x A)
-          (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x B)) D =
-        slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (ContinuousLinearMap.comp B A) D := by
-    intro D
-    apply Tensor0SSpace.toModel_injective
-    refine ContinuousMultilinearMap.ext (fun m => ?_)
-    rw [ContinuousLinearMap.comp_apply, slotInsertEndoFib_apply_eval,
-      slotInsertEndoFib_apply_eval, slotInsertEndoFib_apply_eval,
-      ContinuousLinearMap.comp_apply, Function.update_self, Function.update_idem]
-  exact ContinuousLinearMap.ext key
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-private lemma slotInsertEndoFib_id_eq' (s : ℕ) (x : M) :
-    slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
-        (ContinuousLinearMap.id ℝ (TangentSpace I x)) =
-      ContinuousLinearMap.id ℝ (Tensor0SSpace (s + 1) I x) := by
-  apply ContinuousLinearMap.ext
-  intro A
-  apply Tensor0SSpace.toModel_injective
-  refine ContinuousMultilinearMap.ext (fun m => ?_)
-  rw [slotInsertEndoFib_apply_eval, ContinuousLinearMap.id_apply]
-  rw [ContinuousLinearMap.id_apply]
-  rw [Function.update_eq_self]
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma appCcRS_recovery_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     appCcRS (I := I) (M := M) g₀ 1 1 1
         (slotInsertEndoCc (I := I) (M := M) g₀ 0 (fullRaisedEndoField (I := I) (M := M) g₁ g₀))
@@ -408,7 +377,7 @@ private lemma appCcRS_recovery_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro x
   rw [appCcRS_toSection]
   simp only [slotInsertEndoCc_toSection, fullRaisedEndoField_apply]
-  rw [slotInsertEndoFib_comp_eq, fullRaisedEndo_comp_recovery, gInvRaisedEndo_self]
+  rw [slotInsertFib_comp, fullRaisedEndo_comp_recovery, gInvRaisedEndo_self]
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -480,8 +449,8 @@ private lemma SI_F_comp_SI_M_eq_id (g₀ g₁ : SmoothRiemannianMetric I M) (x :
           (fullRaisedEndoField (I := I) (M := M) g₁ g₀)).toSection x) =
       ContinuousLinearMap.id ℝ (Tensor0SSpace 1 I x) := by
   simp only [slotInsertEndoCc_toSection, fullRaisedEndoField_apply]
-  rw [slotInsertEndoFib_comp_eq, recovery_comp_fullRaisedEndo]
-  exact slotInsertEndoFib_id_eq' (I := I) (M := M) 0 x
+  rw [slotInsertFib_comp, recovery_comp_fullRaisedEndo]
+  exact slotInsertFib_id (I := I) (M := M) 0 x
 
 set_option linter.unusedSectionVars false in
 private lemma slotInsertIter_recovery_comp_eq_id (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -535,29 +504,6 @@ private lemma master_isolation' (g₀ g₁ : SmoothRiemannianMetric I M) (w : �
   rw [← ContinuousLinearMap.comp_assoc]
   rw [slotInsertIter_recovery_comp_eq_id (I := I) (M := M) g₀ g₁ w x]
   rw [ContinuousLinearMap.id_comp]
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-private lemma slotInsertEndoCc_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
-    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
-      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
-    slotInsertEndoCc (I := I) (M := M) g₀ s (A + B) =
-      slotInsertEndoCc (I := I) (M := M) g₀ s A +
-        slotInsertEndoCc (I := I) (M := M) g₀ s B := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  apply ContinuousLinearMap.ext
-  intro D
-  rw [show ((slotInsertEndoCc (I := I) (M := M) g₀ s A +
-        slotInsertEndoCc (I := I) (M := M) g₀ s B).toSection x) =
-      (slotInsertEndoCc (I := I) (M := M) g₀ s A).toSection x +
-        (slotInsertEndoCc (I := I) (M := M) g₀ s B).toSection x from by
-    rw [SmoothCcTensor.toSection_add]; rfl]
-  rw [ContinuousLinearMap.add_apply]
-  simp only [slotInsertEndoCc_toSection]
-  rw [show ((A + B) x) = A x + B x from by rw [ContMDiffSection.coe_add]; rfl]
-  rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in

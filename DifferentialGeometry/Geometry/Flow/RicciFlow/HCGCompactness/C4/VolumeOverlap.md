@@ -1,10 +1,15 @@
 # VolumeOverlap.lean — A0′ producer (brick B7)
 
-Same-name note for `VolumeOverlap.lean`.  Verification: **focused check + targeted
-build both PASS**; grep-clean of `sorry`/`axiom` in the file (only the docstring
-mentions the word).  `#print axioms volInput_of_bg` = `[propext, sorryAx,
-Classical.choice, Quot.sound]` — no new axioms; the lone `sorryAx` is the intended
-transitive frontier.
+## Current endpoint status — complete (2026-07-27)
+
+Same-name note for `VolumeOverlap.lean`.  The downstream targeted build is
+GREEN (3982 jobs), and
+`#print axioms volInput_of_bg = [propext, Classical.choice, Quot.sound]`.
+The replay contains no `sorryAx`.
+
+Therefore the A0′ endpoint `volInput_of_bg` is **100%**, and its dedicated
+volume machinery is **100%**.  This closes the A0′ producer only; it does not by
+itself prove the unconditional HCG compactness endpoint.
 
 ## What this file delivers
 
@@ -92,7 +97,7 @@ are reusable CURVATURE facts; **B8 candidate: relocate to the canonical curvatur
 layer** (`Curvature/CurvatureOperator/RicciConnection.lean` or `Comparison/
 BonnetMyers/RicciBound.lean`) and register `ricci_dim1_bddBelow` there.
 
-## Transitive-`sorry` status (binding for the lane)
+## Historical transitive-`sorry` status (superseded 2026-07-27)
 
 The file adds ZERO `sorry`.  `volInput_of_bg` nonetheless remains **transitively
 `sorry`'d** through `segBall_card` → `segBall_vol_rel`/`segBall_vol_fin` →
@@ -102,7 +107,7 @@ declarations (build warnings name them).  The HopfRinow.lean `sorry`s (:779/:818
 :854) are compiled in the graph but NOT in this def's cone (segBall_card uses the
 CLEAN `hopf_rinow_expMapIntrinsic_surjective_minimizing` entrypoint, per B0).
 
-## What remains for the endpoint to go `sorry`-free
+## Historical former endpoint frontier (now closed)
 
 Only the two SegmentPolar frontiers (bricks B5b `L1`+`L2`, then B5c assembly): the
 manifold-valued non-injective area inequality (`E → M`, `riemannianVolumeMeasure`

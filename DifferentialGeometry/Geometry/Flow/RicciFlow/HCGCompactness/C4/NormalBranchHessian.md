@@ -80,3 +80,24 @@ Focused verification and the exact module refresh passed. This revalidates the
 existing selected-branch Hessian machinery after the coordinate migration; it
 does not construct the missing sequence-uniform H6 radius profile or all-order
 metric bounds.
+
+## 2026-07-27 provider-independent zero projection
+
+`HasCmSolC.invVel_zero` recovers the selected inverse-velocity equation from a
+packaged controlled-chart solution. It derives model-target membership from
+the saved `chartReadDom` data and the provider's restricted chart, then applies
+`chartCmC_zero_iff`. Downstream consumers no longer need to reopen the legacy
+`chartCmEqnB` representation. Focused verification passed.
+
+This is Gate 4 migration infrastructure. It is valid for both the legacy and
+H6 providers and introduces no radius or branch assumption.
+
+`HasCmSolC.target_mem` now exposes the target-membership part of the same
+argument as a canonical projection. `invVel_zero` reuses that projection, so a
+stage consumer can compare the selected branch with its canonical branch
+without reopening `chartReadDom`. Focused verification passes; the exact
+artifact refresh is pending the current unrelated write chain. One attempted
+refresh reached the final Hessian target but stopped because that other chain
+had temporarily removed `Geometry/Metric/Completeness.olean` while rebuilding
+it. This was an artifact-write collision, not a source diagnostic; do not retry
+until the other chain has fully stopped.

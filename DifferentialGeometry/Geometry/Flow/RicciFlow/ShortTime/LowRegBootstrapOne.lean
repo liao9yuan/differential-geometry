@@ -1,4 +1,3 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 
@@ -50,6 +49,7 @@ def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
   link := solField_toFun_ae (I := I) (M := M) hT hT1
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) u₀ f
 
+omit [BoundarylessManifold I M] in
 /-- The intermediate representative realizes the continuous lower carrier at
 every time of the original interval. -/
 theorem crossRepr_toFun
@@ -62,6 +62,7 @@ theorem crossRepr_toFun
   rw [tensorHsInclusion_coeff_apply, u.repr_coeff hT ht]
   rfl
 
+omit [BoundarylessManifold I M] in
 /-- The intermediate representative is the intermediate inclusion of the top
 companion field almost everywhere on the original interval. -/
 theorem crossRepr_hi_ae
@@ -77,6 +78,7 @@ theorem crossRepr_hi_ae
   rw [u.repr_coeff hT ht, tensorHsInclusion_coeff_apply]
   exact hcoeff i
 
+omit [BoundarylessManifold I M] in
 /-- The same-horizon Duhamel cross representative realizes the affine carrier
 at every time. -/
 theorem duhRepr_toFun
@@ -93,6 +95,7 @@ theorem duhRepr_toFun
     crossRepr_toFun (I := I) (M := M)
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT ht
 
+omit [BoundarylessManifold I M] in
 /-- The same-horizon Duhamel cross representative realizes the intermediate
 inclusion of the top Duhamel field almost everywhere. -/
 theorem duhRepr_field_ae
@@ -109,6 +112,36 @@ theorem duhRepr_field_ae
     crossRepr_hi_ae (I := I) (M := M)
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT
 
+omit [BoundarylessManifold I M] in
+/-- The same-horizon Duhamel cross representative is strongly measurable at
+the intermediate Sobolev order. -/
+theorem duhRepr_meas
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    AEStronglyMeasurable
+      (fun t => (duhamelCross (I := I) (M := M)
+        g r s a hT hT1 u₀ f).repr t)
+      (timeMeasure T) := by
+  have hfield : AEStronglyMeasurable
+      (fun t => tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t))
+      (timeMeasure T) :=
+    (tensorHsInclusion (I := I) (M := M)
+      (g := g) (r := r) (s := s)
+      (show a + 1 ≤ a + 2 by linarith)).continuous.comp_aestronglyMeasurable
+        (Lp.aestronglyMeasurable
+          (maxRegDuhamelSolField (I := I) (M := M)
+            a hT hT1 u₀ f))
+  exact hfield.congr
+    (duhRepr_field_ae (I := I) (M := M)
+      g r s a hT hT1 u₀ f).symm
+
+omit [BoundarylessManifold I M] in
 /-- An almost-everywhere intermediate-order ball bound for the top companion
 holds for the cross-scale representative at every time.  The proof uses the
 already established continuity of its squared norm, so it does not require a
@@ -144,27 +177,128 @@ theorem crossRepr_ball
   have hmax := heqOn ht
   have hsub : ‖u.repr t‖ ^ 2 - R ^ 2 ≤ 0 := by
     have hle := le_max_left (‖u.repr t‖ ^ 2 - R ^ 2) 0
+    change max (‖u.repr t‖ ^ 2 - R ^ 2) 0 = 0 at hmax
     rw [hmax] at hle
     exact hle
   exact (sq_le_sq₀ (norm_nonneg _) hR).1 (sub_nonpos.mp hsub)
 
-/-- For the order-one Ricci--DeTurck solver, its almost-everywhere lower-state
-condition becomes an every-time `H2` bound for the same-horizon cross-scale
-representative. -/
+omit [BoundarylessManifold I M] in
+/-- An almost-everywhere intermediate-order bound for a Duhamel top field
+becomes an every-time bound for its same-horizon cross representative. -/
 theorem duhRepr_ball
-    (g₀ : SmoothRiemannianMetric I M) {T R : ℝ}
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ)) T)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (hR : 0 ≤ R)
-    (hstate : ∀ᵐ t ∂(timeMeasure T),
-      maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℝ) + 2)) f t ∈
-        lowerState (I := I) (M := M) g₀ 1 R) :
+    (hball : ∀ᵐ t ∂(timeMeasure T),
+      ‖tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t)‖ ≤ R) :
     ∀ t ∈ Set.Icc (0 : ℝ) T,
-      ‖(duhamelCross (I := I) (M := M) g₀ 0 2 (1 : ℝ) hT hT1 0 f).repr t‖ ≤ R := by
-  apply crossRepr_ball (I := I) (M := M)
-    (duhamelCross (I := I) (M := M) g₀ 0 2 (1 : ℝ) hT hT1 0 f) hT hR
-  filter_upwards [hstate] with t ht
+      ‖(duhamelCross (I := I) (M := M)
+        g r s a hT hT1 u₀ f).repr t‖ ≤ R :=
+  crossRepr_ball (I := I) (M := M)
+    (duhamelCross (I := I) (M := M)
+      g r s a hT hT1 u₀ f) hT hR hball
+
+omit [BoundarylessManifold I M] in
+/-- A uniformly bounded Duhamel cross representative defines an honest
+time-`L2` field at the intermediate Sobolev order. -/
+theorem duhRepr_memLp
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    {R : ℝ} (hR : 0 ≤ R)
+    (hball : ∀ᵐ t ∂(timeMeasure T),
+      ‖tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t)‖ ≤ R) :
+    MemLp
+      (fun t => (duhamelCross (I := I) (M := M)
+        g r s a hT hT1 u₀ f).repr t)
+      2 (timeMeasure T) := by
+  refine MemLp.of_bound
+    (duhRepr_meas (I := I) (M := M)
+      g r s a hT hT1 u₀ f) R ?_
+  have hrepr := crossRepr_ball (I := I) (M := M)
+    (duhamelCross (I := I) (M := M)
+      g r s a hT hT1 u₀ f) hT hR hball
+  filter_upwards [ae_restrict_mem (μ := volume) measurableSet_Icc] with t ht
+  exact hrepr t ht
+
+/-- The intermediate Duhamel representative as a time-`L2` field. -/
+def duhReprL2
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    {R : ℝ} (hR : 0 ≤ R)
+    (hball : ∀ᵐ t ∂(timeMeasure T),
+      ‖tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t)‖ ≤ R) :
+    timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
+  (duhRepr_memLp (I := I) (M := M)
+    g r s a hT hT1 u₀ f hR hball).toLp
+      (fun t => (duhamelCross (I := I) (M := M)
+        g r s a hT hT1 u₀ f).repr t)
+
+omit [BoundarylessManifold I M] in
+/-- The time-`L2` intermediate field is represented by the Duhamel cross
+representative almost everywhere. -/
+theorem duhReprL2_ae
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    {R : ℝ} (hR : 0 ≤ R)
+    (hball : ∀ᵐ t ∂(timeMeasure T),
+      ‖tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t)‖ ≤ R) :
+    duhReprL2 (I := I) (M := M)
+        g r s a hT hT1 u₀ f hR hball =ᵐ[timeMeasure T]
+      fun t => (duhamelCross (I := I) (M := M)
+        g r s a hT hT1 u₀ f).repr t :=
+  (duhRepr_memLp (I := I) (M := M)
+    g r s a hT hT1 u₀ f hR hball).coeFn_toLp
+
+omit [BoundarylessManifold I M] in
+/-- The intermediate time-`L2` field inherits the prescribed state-ball bound
+almost everywhere. -/
+theorem duhReprL2_ae_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    {R : ℝ} (hR : 0 ≤ R)
+    (hball : ∀ᵐ t ∂(timeMeasure T),
+      ‖tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s)
+        (show a + 1 ≤ a + 2 by linarith)
+        (maxRegDuhamelSolField (I := I) (M := M)
+          a hT hT1 u₀ f t)‖ ≤ R) :
+    ∀ᵐ t ∂(timeMeasure T),
+      ‖duhReprL2 (I := I) (M := M)
+        g r s a hT hT1 u₀ f hR hball t‖ ≤ R := by
+  filter_upwards [
+    duhReprL2_ae (I := I) (M := M)
+      g r s a hT hT1 u₀ f hR hball,
+    duhRepr_field_ae (I := I) (M := M)
+      g r s a hT hT1 u₀ f,
+    hball] with t hcoe hrepr ht
+  rw [hcoe, hrepr]
   exact ht
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
