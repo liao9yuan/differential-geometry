@@ -5,7 +5,6 @@
 !/.github
 !/Examples/
 !/DifferentialGeometry.lean
-!/DeclIndex.lean
 !/lakefile.toml
 !/lean-toolchain
 !/README.md

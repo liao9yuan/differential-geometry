@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Metric.Pullback
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
