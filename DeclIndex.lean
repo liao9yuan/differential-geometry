@@ -43,4 +43,3 @@ run_cmd do
                            ("signature", Json.str sig), ("file", Json.str file), ("line", Json.num line)]
       out := out.push j.compress
   IO.FS.writeFile "DECLS.ndjson" (String.intercalate "\n" out.toList ++ "\n")
-  logInfo s!"DECLS.ndjson: {out.size} declarations indexed"
