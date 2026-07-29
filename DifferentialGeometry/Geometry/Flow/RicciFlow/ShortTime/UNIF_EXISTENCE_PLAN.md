@@ -2494,3 +2494,39 @@ Honest accounting:
 - low-base operator split / same-horizon order-two bootstrap theorem:
   **0% until stated and proved**;
 - `(N)` dedicated machinery remains conservatively **88--90%**.
+
+## Planner update No. 49 (2026-07-29) - exact zero-path brick and three-route stop
+
+The first smooth-core action brick is now checked in
+`DeTurckRemainderLowBaseZero.lean`. Rather than duplicating the already public
+fixed-order algebra in `RHSZeroRefold`, `zeroPath_split` compares
+`rhsArm_sub_eq_paths` with `rhs_sub_zero_refold` and uses `refoldTopInt_eq` to
+cancel the common top arm. It writes the original zero-plus-one path action
+as `zeroA2Act + zeroLowAct` on the diagonal, with no high-order ball or
+supercritical differentiability assumption. Focused verification is GREEN.
+
+The canonical lower theorem `lrPointwise_bfgw` is now public. It has no
+high-`a` or high-ball assumption and exposes the exact pair-contraction
+residual grid-window estimate. Its radius-free integral still has a genuine
+`nabla^(i+2) T` top leak. Consequently it cannot by itself prove the final
+`H3 -> H2` lower action bound.
+
+The three ruled routes now have distinct concrete stop signals:
+
+1. the native fibre route lacks public evaluation/decomposition lemmas for
+   the complete order-zero action;
+2. the finite-order refold route requires the private `lc0w_*` exact
+   decomposition/feed chain to transfer the remaining top head, not merely a
+   coefficientwise estimate; and
+3. the chart route cannot adapt `realizedFam` to
+   `IsMetricPerturbationFamily`, whose component functions must be globally
+   smooth on the whole model space. The required chart-cutoff family
+   producer is not public.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- `LowBaseActionSplit`: **0% until stated and proved**;
+- final `A1` high/low/compatibility: **0%**;
+- pair-reduced `A2` high/low/compatibility: **100% as stated**;
+- `(N)` dedicated machinery remains conservatively **88--90%**.

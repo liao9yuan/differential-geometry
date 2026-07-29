@@ -9646,7 +9646,9 @@ set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 25600000 in
 
-private theorem lrPointwise_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
+/-- Pointwise grid-window bound for the base-background DeTurck covariant
+derivative residual after its exact pair-contraction refold. -/
+theorem lrPointwise_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)

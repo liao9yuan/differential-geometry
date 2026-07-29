@@ -829,3 +829,86 @@ the `lbl395` normal-coordinate metric-bound honest input.
   substitution is about 20%; the dedicated H6 producer is 100%;
   `NormalRadiusProfile.le_exp_radius` and the unconditional MSM135 endpoint
   remain theorem-level 0%.
+
+### 2026-07-28 Gate 5 coherent-stage continuation
+
+- `StepCStageMap` now carries one optional `NormalChartFamily` through
+  `stageTarget`, its chart/local/subsequence lemmas, unique-center data, and
+  `stageComparisonMap`, while preserving the legacy provider as the default.
+  Focused verification and the exact module refresh are green (`4023/4023`).
+- `uniqueStage_of_fill` and `stageCompare_eq_cm` now consume the same optional
+  chart and pass it to the active fill, unique-center predicate, and global
+  stage map. The focused `StepCStageComparison` check is green. Legacy
+  call sites remain compatible; the few source-visible default-provider
+  rewrites exposed by the stage-map signature were repaired without adding an
+  agreement hypothesis.
+- Next target: prove the H6 source/target membership needed by nonzero
+  `stageWeightSub` directly from `seqWeights_data`, `hat_dist_centerD`,
+  `lamInf_lt_halfMin`, the branch radius lower bound, and
+  `H6NormalData.readout_mem`. Do not reuse the oversized legacy nesting
+  estimate. Then use that membership to make `pts_target_tail` chart-parametric.
+- Current accounting: Gate 5 provider substitution is about 40%; the dedicated
+  H6 producer is 100%; `NormalRadiusProfile.le_exp_radius` and the
+  unconditional MSM135 endpoint remain theorem-level 0%; whole-HCG supporting
+  machinery remains about 60%.
+- `stagePtsSub_eq_raw` now isolates the provider-independent filler/decode
+  step: for any coherent chart family, six-lambda source-transition membership
+  makes `stagePtsSub` equal the raw two-transition expression. The legacy
+  nonzero-weight theorem now reuses this lemma. Focused verification and the
+  exact `StepCStageFill` refresh are green (`4036/4036`).
+- `H6NormalData.weight_trans_mem` now proves the source six-lambda membership
+  consumed by `stagePtsSub_eq_raw`. A nonzero provider weight is converted to
+  actual gamma-hat membership with `seqWeights_data`; `hat_dist_centerD`,
+  `lamInf_lt_halfMin`, the H6 branch radius lower bound, and
+  `H6ChartData.readout_mem` then identify the target-chart inverse coordinate
+  and bound its norm by `4 * lamInf`, hence by `6 * lamInf`. The focused
+  `StepCStageComparison` check is green. No legacy nesting estimate is used.
+- Next target: prove that the raw target-stage point lies in the alpha H6 chart
+  image and decode it there. First test the direct triangle/hat estimate
+  against the exact branch-radius ledger; if the radii cannot be compared
+  strongly enough, record the resulting constant inequality as the real
+  mathematical blocker rather than importing the legacy `205 * exp(...)`
+  nesting bound. Then close the chart-parametric H6 `pts_target_tail`.
+- Honest accounting: Gate 5 provider substitution is about 45%;
+  `stagePtsSub_eq_raw` and `weight_trans_mem` are complete infrastructure, not
+  endpoint closure.
+  The dedicated H6 producer remains 100%;
+  `NormalRadiusProfile.le_exp_radius` and the unconditional MSM135 endpoint
+  remain theorem-level 0%; whole-HCG supporting machinery remains about 60%.
+- Target-stage membership is now stopped at the exact quantitative producer
+  gap, not at transition smoothness.  For an interacting pair `alpha, gamma`,
+  the direct `BInter` triangle and the H6 radial readout give
+  `dist(center_alpha, target_gamma) <
+  5 * lamInf_alpha + 9 * lamInf_gamma`.  Reversing `rInf_close` and applying
+  `lambda_exp_le` gives
+  `lamInf_gamma <= exp(C * (10 * lambda D 0)) * lamInf_alpha`.
+  Meanwhile the two inequalities in `hqdata`,
+  `2 * rho < q` and `6 * q < phaseRadius`, together with
+  `phaseRadius = ratio * mu R / 4`, imply `48 * aMin < ratio`.
+  Thus `hphys` and `radius_eq` improve the available alpha-chart radius from
+  the coarse `> 32 * lamInf_alpha` to `> 384 * lamInf_alpha`.  The remaining
+  sufficient inequality is exactly
+  `5 + 9 * exp(C * (10 * lambda D 0)) < 384`.
+- That inequality is not derivable from the current abstract
+  `H6NormalData`: its positive `ratio` has no retained upper normalization
+  against `mu 0`.  The concrete construction uses
+  `h6Ratio r0 = min (1/2) (r0 / (2 * mu 0))`, but
+  `exists_intr_control` returns an uncapped `r0` and the value is erased when
+  `H6ChartData` is formed.  Even retaining the separate legacy selector fact
+  `mu 0 <= D` would only give `lambda D 0 <= 1`, which is insufficient for
+  arbitrary `C`.
+- Three routes were checked.  The branch-radius lower bound alone leaves the
+  stronger unavailable inequality with right side `32`; the sharper
+  `hqdata`/`radius_eq` route leaves the displayed right side `384`; and
+  smoothness or convergence of the totalized transitions cannot prove
+  `hom (inv y) = y` outside a `PartialEquiv` target.  The oversized legacy
+  `205 * exp(...)` nesting estimate therefore remains deliberately unused.
+- Smallest next producer: in `exists_h6BallData`, replace the launch radius by
+  `min r0 1`, retain the resulting genuine construction fact
+  `ratio * mu 0 <= 1/2` through `H6BallData`/`H6ChartData`/`H6NormalData`, and
+  then resume the target-membership proof.  Combined with `48 * aMin < ratio`
+  and `hphys`, that fact gives
+  `lambda D 0 < 1 / (768 * exp C)`, hence the exponential pair ratio is
+  below `exp 1 < 3` and the target triangle closes with ample margin.
+  `H6NormalData.lean` is presently protected by claim
+  `9b474658-f07e-4fcc-a37c-802126250d0f`; it was not force-released or edited.

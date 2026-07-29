@@ -208,6 +208,126 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- On a segment where a controlled chart's pulled-back metric is bounded by
+twice the Euclidean metric, the chart map is `sqrt 2`-Lipschitz for the
+realized proper metric. -/
+theorem NormalBallChart.MetricEquivOn.hom_dist_le
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (P : ProperMetricOn (I := I) Y) {p : Y.M}
+    (c : NormalChartAt (I := I) Y p) {U : Set E}
+    (h :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      c.MetricEquivOn Y.metric U)
+    (hUsrc :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      U ⊆ c.hom.source)
+    {u v : E} (hseg : segment Real u v ⊆ U) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := P.ms
+    dist (c.hom u) (c.hom v) ≤ Real.sqrt 2 * dist u v := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : MetricSpace Y.M := P.ms
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  let e := c.hom
+  let eta := ContinuousAffineMap.lineMap (R := Real) u v
+  let gamma : Real → Y.M := e ∘ eta
+  have hetaU : MapsTo eta (Set.Icc (0 : Real) 1) U := by
+    intro t ht
+    apply hseg
+    rw [segment_eq_image_lineMap]
+    exact ⟨t, ht, rfl⟩
+  have hetaSrc : MapsTo eta (Set.Icc (0 : Real) 1) e.source := by
+    intro t ht
+    exact hUsrc (hetaU ht)
+  have hetaSmooth :
+      ContMDiffOn 𝓘(Real, Real) 𝓘(Real, E) 1 eta (Set.Icc (0 : Real) 1) := by
+    rw [contMDiffOn_iff_contDiffOn]
+    exact eta.contDiff.contDiffOn
+  have hgammaSmooth : ContMDiffOn 𝓘(Real, Real) I 1 gamma
+      (Set.Icc (0 : Real) 1) :=
+    e.contMDiffOn.comp hetaSmooth hetaSrc
+  have hgammaZero : gamma 0 = e u := by
+    simp only [gamma, Function.comp_apply, eta,
+      ContinuousAffineMap.coe_lineMap_eq, AffineMap.lineMap_apply_zero]
+  have hgammaOne : gamma 1 = e v := by
+    simp only [gamma, Function.comp_apply, eta,
+      ContinuousAffineMap.coe_lineMap_eq, AffineMap.lineMap_apply_one]
+  have hpoint : ∀ t ∈ Set.Icc (0 : Real) 1,
+      ‖mfderiv 𝓘(Real, Real) I gamma t 1‖ₑ ≤
+        ENNReal.ofReal (Real.sqrt 2 * dist u v) := by
+    intro t ht
+    have heDiff : MDifferentiableAt 𝓘(Real, E) I e (eta t) :=
+      e.mdifferentiableAt one_ne_zero (hetaSrc ht)
+    have hetaDiff : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) eta t := by
+      rw [mdifferentiableAt_iff_differentiableAt]
+      exact eta.differentiableAt
+    have hchain : mfderiv 𝓘(Real, Real) I gamma t 1 =
+        mfderiv 𝓘(Real, E) I e (eta t)
+          (mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1) := by
+      rw [show gamma = e ∘ eta from rfl, mfderiv_comp t heDiff hetaDiff]
+      rfl
+    have hetaDeriv :
+        mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1 = v - u := by
+      rw [mfderiv_eq_fderiv]
+      rw [eta.fderiv]
+      change ((AffineMap.lineMap u v).linear : Real →ₗ[Real] E) 1 = v - u
+      rw [AffineMap.lineMap_linear]
+      simp
+    rw [hchain, hetaDeriv, ← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+    refine ENNReal.ofReal_le_ofReal ?_
+    have hub := (h (eta t) (hetaU ht) (v - u)).2
+    calc
+      Real.sqrt (Y.metric.inner (e (eta t))
+          (mfderiv 𝓘(Real, E) I e (eta t) (v - u))
+          (mfderiv 𝓘(Real, E) I e (eta t) (v - u))) =
+          Real.sqrt (c.metric Y.metric (eta t) (v - u) (v - u)) := by
+            rw [c.metric_apply]
+      _ ≤ Real.sqrt (2 * ‖v - u‖ ^ 2) := Real.sqrt_le_sqrt hub
+      _ = Real.sqrt 2 * dist u v := by
+        rw [Real.sqrt_mul (by norm_num : (0 : Real) ≤ 2),
+          Real.sqrt_sq (norm_nonneg (v - u)), dist_eq_norm]
+        rw [norm_sub_rev]
+  have hriem : Manifold.riemannianEDist I (e u) (e v) ≤
+      ENNReal.ofReal (Real.sqrt 2 * dist u v) := by
+    have hpath : Manifold.riemannianEDist I (e u) (e v) ≤
+        Manifold.pathELength I gamma 0 1 :=
+      Manifold.riemannianEDist_le_pathELength hgammaSmooth hgammaZero
+        hgammaOne zero_le_one
+    refine hpath.trans ?_
+    rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
+    calc
+      ∫⁻ t in Set.Icc (0 : Real) 1, ‖mfderiv 𝓘(Real, Real) I gamma t 1‖ₑ
+          ≤ ∫⁻ _ in Set.Icc (0 : Real) 1,
+              ENNReal.ofReal (Real.sqrt 2 * dist u v) :=
+        MeasureTheory.setLIntegral_mono' measurableSet_Icc hpoint
+      _ = ENNReal.ofReal (Real.sqrt 2 * dist u v) *
+            MeasureTheory.volume (Set.Icc (0 : Real) 1) :=
+        MeasureTheory.setLIntegral_const _ _
+      _ = ENNReal.ofReal (Real.sqrt 2 * dist u v) := by
+        rw [Real.volume_Icc]
+        norm_num
+  have hreal : Manifold.riemannianEDist I (e u) (e v) =
+      ENNReal.ofReal (dist (e u) (e v)) := by
+    have hp := P.realizes (e u) (e v)
+    simpa [PointedRiemannianManifold.emetricSpace] using hp
+  rw [hreal] at hriem
+  exact (ENNReal.ofReal_le_ofReal_iff (by positivity)).mp hriem
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- If the minimizing join stays in one controlled normal chart, the inverse
 chart is `sqrt 2`-Lipschitz with respect to intrinsic distance. -/
 theorem NormalBallChart.MetricEquivOn.inv_dist_le

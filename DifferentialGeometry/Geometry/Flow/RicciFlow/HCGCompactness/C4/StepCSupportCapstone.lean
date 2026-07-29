@@ -455,8 +455,9 @@ theorem MetricCompactBase.exists_supp_cm_fin
           hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
   classical
   obtain ⟨aMin, haMin, hread⟩ :=
-    exists_hat_cm_min (I := I) b.normalRadius b.realizes
-      hcomplete hconn
+    exists_hat_cm_min (I := I) (X := X) (hd := b.decay)
+      (hb := b.normalBounds) (hprof := b.normalRadius)
+      (hre := b.realizes) hcomplete hconn
   let c0 :=
     (8 * Real.exp b.decay.C / aMin) * b.normalRadius.gpRatio
   obtain ⟨D, hD_one, _hmuD, hc0, h8, _h16, hradD, hradRatio, hcap⟩ :=
@@ -716,9 +717,11 @@ theorem MetricCompactBase.exists_supp_diag_fin
         HasDiagPairConv (I := I) (hcomplete.subseq index)
           (PointedRiemannianSeq.connected_subseq hconn index)
           (c alpha) (q alpha) (q alpha / 2)
-          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha) ∧
+          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha)
+          (chart := legacyChartFamily (I := I) Xtheta) ∧
         ∀ n, NormalDiagFence (I := I) (Xtheta.obj n)
-          (c alpha n) (q alpha) (e alpha n)) ∧
+          (c alpha n) (q alpha) (e alpha n)
+          (c := legacyBallChart (I := I) (Xtheta.obj n) (c alpha n))) ∧
       ∀ n, HasSuppCmData (I := I) inp P L r hr theta htheta n
         hcomplete hconn (legacyChartFamily (I := I) X) U aInf q δ := by
   classical
@@ -841,9 +844,11 @@ theorem MetricCompactBase.exists_supp_diag_fin
       HasDiagPairConv (I := I) (hcomplete.subseq index)
           (PointedRiemannianSeq.connected_subseq hconn index)
           (c alpha) (q alpha) (q alpha / 2)
-          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha) ∧
+          (δ alpha) (deltaInf alpha) (e alpha) (eInf alpha)
+          (chart := legacyChartFamily (I := I) Xtheta) ∧
         ∀ n, NormalDiagFence (I := I) (Xtheta.obj n)
-          (c alpha n) (q alpha) (e alpha n) := by
+          (c alpha n) (q alpha) (e alpha n)
+          (c := legacyBallChart (I := I) (Xtheta.obj n) (c alpha n)) := by
     intro alpha
     simpa only [index, Xtheta, c, Lphi, Ltheta, theta,
       PointedRiemannianSeq.subseq, NetLimitData.subseq,

@@ -221,5 +221,63 @@ def volInput_of_bg
   exact segBall_card (I := I) (X.obj k).metric hEnorm hq hr0 hRic hr hcap
     centers hsep' z J hJz'
 
+/-- **Total packing producer.** Uniform bounded geometry, realized Riemannian
+distance, completeness, and connectedness bound every finite
+`hd.lambda D r`-separated subset of the radius-`r` basepoint ball, uniformly in
+the sequence index. -/
+def packInput_of_bg
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (bg : SeqBoundedGeometry (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) (hreal : hd.RealizesEdist)
+    (hcpl : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (D : Real) (hD : 0 < D) :
+    hd.PackingBound D where
+  A := fun r =>
+    if hr : 0 ≤ r then
+      let vc :=
+        (volInput_of_bg (I := I) X bg hd hreal hcpl hconn
+          (r + 1) (by linarith)).1
+      vc.Imult (r / hd.lambda D r)
+    else
+      0
+  card_le := by
+    classical
+    intro k r J hJr hsep
+    by_cases hr : 0 ≤ r
+    · let s : Real := hd.lambda D r
+      have hs : 0 < s := hd.lambda_pos hD r
+      have hs_ne : s ≠ 0 := ne_of_gt hs
+      have hr0 : 0 < r + 1 := by linarith
+      let out :=
+        volInput_of_bg (I := I) X bg hd hreal hcpl hconn (r + 1) hr0
+      let vc : VolumeComparisonInput (I := I) X := out.1
+      have hvc : vc.dist = hd.dist := out.2
+      have hmul_eq : (r / s) * s = r := div_mul_cancel₀ r hs_ne
+      have hcap : (r / s) * s ≤ r + 1 := by
+        rw [hmul_eq]
+        linarith
+      have hmul := vc.ballMult (r / s) k
+        (centers := fun i : {x // x ∈ J} => (i : (X.obj k).M))
+        (r := s) hs hcap
+        (fun i j hij => by
+          rw [hvc]
+          exact hsep i i.2 j j.2 (fun h => hij (Subtype.ext h)))
+        (X.obj k).basepoint Finset.univ
+        (fun j _ => by
+          rw [hvc]
+          exact (hJr j j.2).trans_eq hmul_eq.symm)
+      simpa only [Finset.card_univ, Fintype.card_coe, hr, ↓reduceDIte,
+        out, vc, s] using hmul
+    · have hJ : J = ∅ := by
+        apply Finset.eq_empty_iff_forall_notMem.mpr
+        intro x hx
+        have hnonneg := hreal.dist_nonneg k x (X.obj k).basepoint
+        exact (not_lt_of_ge hnonneg) (lt_of_le_of_lt (hJr x hx) (lt_of_not_ge hr))
+      subst J
+      simp only [Finset.card_empty, hr, ↓reduceDIte, le_refl]
+
 end HCGCompactness
 end DifferentialGeometry

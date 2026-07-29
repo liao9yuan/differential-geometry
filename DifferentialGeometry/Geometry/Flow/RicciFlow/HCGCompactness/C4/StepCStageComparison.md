@@ -181,3 +181,58 @@ readout must carry one `NormalChartFamily` before the H6 provider can replace
 the legacy provider. `exists_h6NormalData` remains theorem-level 0%; branch
 parameterization is about 45%, all-order jet machinery about 35%, and overall
 dedicated H6 producer machinery about 58%.
+
+## 2026-07-28 Gate 5 coherent stage-map handoff
+
+`uniqueStage_of_fill` and `stageCompare_eq_cm` now take an optional
+`NormalChartFamily`, defaulting to `legacyChartFamily`, and thread it through
+the active fill, unique-center predicate, global stage map, and energy
+identification. The focused file check passed. Source-visible legacy defaults
+exposed by the already-refreshed `StepCStageMap` signature were repaired
+without a chart-agreement assumption.
+
+`H6NormalData.weight_trans_mem` closes the source half of the nonzero-weight
+decode bridge. It pulls actual gamma-hat membership from `seqWeights_data`,
+uses `hat_dist_centerD` and `lamInf_lt_halfMin` against the H6 branch radius,
+and invokes `H6ChartData.readout_mem` to identify and bound the same provider
+chart inverse used by `stagePtsSub_eq_raw`. The focused file check passed. No
+legacy nesting estimate or inverse-law assumption is used.
+
+The next target is target-stage alpha-chart membership and decode for the raw
+two-transition point, followed by the chart-parametric H6 `pts_target_tail`.
+The direct distance constants must be checked explicitly; failure to compare
+the active target scale with the alpha H6 radius is a mathematical blocker,
+not a reason to reintroduce the `205 * exp(...)` legacy nesting bound.
+
+That check is now exact.  For an interacting pair, `BInter` and the H6 radial
+readout bound the raw target distance from the alpha center by
+`5 * lamInf_alpha + 9 * lamInf_gamma`.  The reverse radius comparison bounds
+`lamInf_gamma` by
+`exp(C * (10 * lambda D 0)) * lamInf_alpha`.  On the other hand, the existing
+`hqdata` inequalities force `48 * aMin < d.ratio`; with `hphys` and
+`d.radius_eq`, the alpha H6 chart radius is therefore strictly larger than
+`384 * lamInf_alpha`.  The remaining sufficient constant inequality is
+
+`5 + 9 * exp(C * (10 * lambda D 0)) < 384`.
+
+The current abstract `H6NormalData` does not retain a bound on
+`d.ratio * inp.decay.mu 0`, so this inequality is not provable for arbitrary
+`C`.  The concrete `h6Ratio` construction can supply the missing genuine
+geometric fact after its launch radius is capped by one:
+`d.ratio * inp.decay.mu 0 <= 1/2`.  That fact would imply
+`lambda D 0 < 1 / (768 * exp C)` and close the displayed inequality via
+`exp 1 < 3`.  The minimal next producer is therefore to retain this
+normalization in `H6NormalData`; no synonym overlap assumption was added.
+The producer file is currently protected by another existing claim, so it was
+not edited or force-released.
+
+The other routes do not remove this gap: the branch-radius ledger alone gives
+only `32 * lamInf_alpha`, totalized transition convergence cannot supply a
+`PartialEquiv` inverse law outside the target, and the legacy nesting constant
+is too large for the H6 radius.  This is a missing quantitative producer/API
+field, not a coercion or elaboration failure.
+
+Gate 5 provider substitution is about 45%. The
+dedicated H6 producer is 100%; the unconditional MSM135 endpoint is still
+unstated and therefore 0%, and whole-HCG supporting machinery remains about
+60%.

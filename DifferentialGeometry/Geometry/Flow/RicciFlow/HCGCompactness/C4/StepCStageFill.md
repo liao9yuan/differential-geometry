@@ -105,3 +105,16 @@ The only local repair was to install the selected stage's manifold instances
 explicitly in `stageWeightSub`, which the retired `seqAtomChart` wrapper had
 previously hidden.  Gate 5 now continues at `stageInvVelSub` and
 `stageRootSub`; the final H6 root instantiation is not yet complete.
+
+## 2026-07-28 provider-independent raw filler
+
+`stagePtsSub_eq_raw` now states the exact low-level seam needed by Gate 5:
+for any coherent `NormalChartFamily`, membership of the source transition in
+the closed six-lambda ball makes the safety-totalized point equal the raw
+two-transition point. The legacy `stagePtsSub_eq_ne` proof now reuses this
+lemma after producing its established smallness bound.
+
+Focused verification passed, and the exact `StepCStageFill` refresh is green
+(`4036/4036`). The remaining H6 work is not another filler wrapper: it is the
+geometric proof of that six-lambda membership from nonzero H6 weight support,
+followed by target-chart membership and decode.

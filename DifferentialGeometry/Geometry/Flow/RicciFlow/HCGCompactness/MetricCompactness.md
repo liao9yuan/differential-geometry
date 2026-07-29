@@ -8,8 +8,9 @@ Honest frontier: this file's unconditional `metricCompactness` remains the
 single metric-compactness proof `sorry`.  The direct-limit/exhaustion and
 smooth metric-convergence assembly is now checked in the conditional endpoint;
 the remaining unconditional gap is the native production of its cited
-Cheeger--Gromov--Taylor, Bishop--Gromov, localized normal-coordinate, and
-connectedness inputs from the theorem's public hypotheses.
+Cheeger--Gromov--Taylor, Bishop--Gromov, and localized normal-coordinate inputs.
+Per-member connectedness is now an explicit public theorem hypothesis rather
+than a producer obligation.
 
 2026-05-27 review update: the metric compactness layer now consistently uses the pointed Riemannian names. `MetricSourceData` also dropped its public `smoothPlus` field; source-domain `∞ + 1` is derived locally from the stored smooth manifold instance only at the low-level norm supremum.
 
@@ -54,3 +55,11 @@ focused- and targeted-green (100%).  This file's unconditional theorem remains
 0% until the external comparison/packing/normal-coordinate bundle and required
 connectedness are produced natively.  The source docstring was updated to keep
 that separation explicit; its theorem body and sole `sorry` were not changed.
+
+## 2026-07-29 connectedness statement correction
+
+The unconditional `metricCompactness` statement now explicitly assumes
+per-member `ConnectedSpace`. This matches the checked conditional endpoint and
+the properness/direct-limit construction, and removes connectedness from the
+native producer frontier. The remaining theorem-level `sorry` is still exactly
+the CGT/Bishop--Gromov/H6 provider and final native-base assembly boundary.

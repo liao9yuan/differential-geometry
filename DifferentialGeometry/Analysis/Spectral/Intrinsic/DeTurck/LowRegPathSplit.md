@@ -86,3 +86,14 @@ boundary.  No import of `DeTurckRemainderTameLipschitz` is needed.  The final
 focused source check passes without local warnings or `sorry`s, and the named
 downstream target refresh succeeds.  The top-arm chain is 100%; the
 unconditional mixed theorem and uniform-existence endpoint remain 0%.
+
+## 2026-07-29 direct-import repair
+
+`phi_dev_h2` directly consumes
+`traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns`,
+whose canonical home is `RemainderCoeffL2JetMoser`.  The source previously
+relied on an accidental transitive import, so an exact rebuild could not see
+the declaration even after its defining artifact was refreshed.  The module
+now imports that canonical home directly.  Focused verification passes.  This
+is an import-boundary repair only; it does not change the top-arm theorem or
+advance the still-unstated compatible full action split.

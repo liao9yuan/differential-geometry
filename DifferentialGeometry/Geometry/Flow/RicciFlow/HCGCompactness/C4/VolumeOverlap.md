@@ -115,3 +115,30 @@ target) + off-zero differentiability of `expMapIntrinsic`.  Nothing in
 `VolumeOverlap.lean` blocks; when those close, `volInput_of_bg` becomes sorry-free
 with no edit here.  Endpoint per plan §7: **0%** until then (this brick is
 assembly; its own content is done).
+
+## 2026-07-28 total-packing producer
+
+`packInput_of_bg` now constructs `hd.PackingBound D` for every positive divisor
+`D` from the same honest inputs as `volInput_of_bg`. For an outer radius
+`r ≥ 0`, it takes separation `s = hd.lambda D r`, comparison ratio `m = r / s`,
+and local comparison cap `r0 = r + 1`; thus `m * s = r ≤ r0`, so the accepted
+`volInput_of_bg`/`segBall_card` count applies uniformly in the sequence index.
+For `r < 0`, realized-distance nonnegativity forces the finite set to be empty.
+
+Focused verification and the exact module refresh passed (`4028/4028`).
+The direct axiom audit reports only `propext`, `Classical.choice`, and
+`Quot.sound`, with no `sorryAx`.
+
+No mathematical route failed. The only failed iterations were local Lean
+repairs: making the finite subtype's classical `DecidableEq` explicit and using
+the current camel-case `Finset.eq_empty_iff_forall_notMem`.
+
+Accounting:
+
+- `packInput_of_bg`: endpoint 100%; dedicated machinery 100%.
+- A0′ bounded overlap plus total packing: both producer endpoints 100%.
+- final native `MetricCompactBase`: not yet stated/proved through the H6
+  provider path, so theorem-level 0%; its remaining frontier is provider
+  substitution and final bundle assembly.
+- unconditional Theorem 3.9: theorem-level 0%.
+- whole HCG supporting machinery: about 68%.

@@ -1180,3 +1180,22 @@ lessons paragraph.  Escalation: use the CLAUDE.md GPT-Pro consult template
   machinery: **100%**.  This closes this producer lane, not unconditional
   Theorem 3.9, whose theorem-level proof remains 0% pending the other native
   time-zero producers.
+
+- **PACKING FOLLOW-UP COMPLETE (2026-07-28) — authoritative addendum.**
+  `packInput_of_bg` now produces the full radius-indexed
+  `InjRadiusDecayInput.PackingBound D` from the same bounded-geometry,
+  realized-distance, completeness, and connectedness data.  For `r ≥ 0`, it
+  applies the proved segment-ball cardinality bound with separation
+  `s = λ_D(r)`, ratio `m = r / s`, and comparison cap `r + 1`; the identity
+  `m s = r ≤ r + 1` closes the local-volume input.  For `r < 0`,
+  realized-distance nonnegativity forces the finite set to be empty.
+
+  Focused verification and the exact module rebuild both passed; the latter was
+  GREEN at 4028/4028.  Direct axiom replay gives exactly
+  `[propext, Classical.choice, Quot.sound]`, with no `sorryAx`.
+  Therefore endpoint `packInput_of_bg`: **100%** and its dedicated machinery:
+  **100%**.  Together with `volInput_of_bg`, A0′ overlap and total packing are
+  complete.  The final native `MetricCompactBase` theorem remains unstated
+  (**0%**) pending H6 provider substitution and final assembly; unconditional
+  Theorem 3.9 remains **0%**.  Whole-project supporting machinery is estimated
+  at **~68%**.

@@ -1295,6 +1295,19 @@ def subseq
     NormalChartFamily (I := I) (X.subseq f) :=
   fun k x => chart (f k) x
 
+/-- The coordinate transition between two members of one normal-chart family
+at the same sequence stage. -/
+def transition
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X) (k : Nat)
+    (x y : (X.obj k).M) : E → E :=
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  (chart k x).transition (chart k y)
+
 end NormalChartFamily
 
 /-- The existing selected framed branch, packaged through the canonical

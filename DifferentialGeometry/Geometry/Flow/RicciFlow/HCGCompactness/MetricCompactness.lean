@@ -1369,8 +1369,9 @@ structure MetricCompactnessConclusion
   maps : PointedRiemannianCGMaps (I := I) X limit subseq
   convergence : PointedRiemannianCGConverges (I := I) X limit subseq maps
 
-/-- MSM135 Theorem 3.9: compactness for complete pointed Riemannian manifolds
-with uniformly bounded geometry and a basepoint injectivity-radius lower bound.
+/-- MSM135 Theorem 3.9: compactness for complete connected pointed Riemannian
+manifolds with uniformly bounded geometry and a basepoint injectivity-radius
+lower bound.
 
 This is the single honest compactness frontier for the HCG interface.
 
@@ -1379,20 +1380,23 @@ working target.  Its `sorry` decomposes as
 `C4.MetricCompactnessInputs.metricCompactness` (the now-checked conditional
 Theorem 3.9) **plus** native producers for the book-external theorems bundled
 there (Cheeger–Gromov–Taylor `lbl384`, Bishop–Gromov, and the localized [H6]
-normal-coordinate inputs) and per-member connectedness.  It stays `sorry`
-until those citations are proved natively; the Steps A→D assembly is no longer
-part of this frontier.  See `C4/MetricCompactnessEndpoint.lean` and
-`HCGCompactness/PROJECT_MAP.md`. -/
+normal-coordinate inputs).  Per-member connectedness is an explicit public
+hypothesis.  It stays `sorry` until those cited inputs are produced natively;
+the Steps A→D assembly is no longer part of this frontier.  See
+`C4/MetricCompactnessEndpoint.lean` and `HCGCompactness/PROJECT_MAP.md`. -/
 def metricCompactness
     [I.Boundaryless]
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (_hcomplete : SeqMetricComplete (I := I) X)
     (_hgeom : SeqBoundedGeometry (I := I) X)
-    (_hinj : BaseInjBound (I := I) X) :
+    (_hinj : BaseInjBound (I := I) X)
+    (_hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M) :
     MetricCompactnessConclusion (I := I) X := by
   -- The conditional direct-limit assembly is checked.  The remaining
-  -- frontier is to produce its external comparison inputs (and the required
-  -- connectedness) from these unconditional hypotheses.
+  -- frontier is to produce its external comparison inputs from these
+  -- unconditional hypotheses; connectedness is supplied explicitly.
   sorry
 
 end HCGCompactness

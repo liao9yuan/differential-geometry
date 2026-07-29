@@ -6,10 +6,10 @@ set_option autoImplicit false
 /-!
 # Finite-stage Step-C comparison map
 
-This file defines the chart-independent finite-stage comparison map used by
-Step B1.  Its weights are the actual normalized Step-C atoms at the source
-stage, and its target points are the direct source-chart to target-chart
-readouts.  Source charts enter later proofs, but not the map definition.
+This file defines the finite-stage comparison map used by Step B1. Its weights
+are the actual normalized Step-C atoms at the source stage, and its target
+points are direct readouts through one coherent normal-chart family. The
+legacy framed family remains the default provider.
 -/
 
 noncomputable section
@@ -41,7 +41,9 @@ noncomputable def stageTarget
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
-    (x : (X.obj (L.φ k)).M) (gamma : Fin (inp.pack.A s)) :
+    (x : (X.obj (L.φ k)).M) (gamma : Fin (inp.pack.A s))
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
     (X.obj (L.φ l)).M :=
   let Yk := X.obj (L.φ k)
   let Yl := X.obj (L.φ l)
@@ -55,10 +57,8 @@ noncomputable def stageTarget
   letI : IsManifold I ∞ Yl.M := Yl.smooth
   letI : T2Space Yl.M := Yl.t2
   letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-  (NormalCoordinates.framedChartAt (I := I) Yl.metric
-      (seqCenterD inp.decay P L l (gamma : Nat))).symm
-    (NormalCoordinates.framedChartAt (I := I) Yk.metric
-      (seqCenterD inp.decay P L k (gamma : Nat)) x)
+  (chart (L.φ l) (seqCenterD inp.decay P L l (gamma : Nat))).hom
+    ((chart (L.φ k) (seqCenterD inp.decay P L k (gamma : Nat))).inv x)
 
 /-- In any prescribed source-slot coordinates, the direct stage target is the
 source transition followed by the target transition.  This is a total-function
@@ -68,7 +68,9 @@ interpretation. -/
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
-    (alpha gamma : Fin (inp.pack.A s)) (z : E) :
+    (alpha gamma : Fin (inp.pack.A s)) (z : E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
     let Yk := X.obj (L.φ k)
     let Yl := X.obj (L.φ l)
     letI : TopologicalSpace Yk.M := Yk.topology
@@ -81,17 +83,20 @@ interpretation. -/
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    NormalCoordinates.framedChartAt (I := I) Yl.metric
-        (seqCenterD inp.decay P L l (alpha : Nat))
+    (chart (L.φ l)
+        (seqCenterD inp.decay P L l (alpha : Nat))).inv
         (stageTarget inp P L s k l
-          ((NormalCoordinates.framedChartAt (I := I) Yk.metric
-            (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma) =
-      NormalCoordinates.framedTransition (I := I) Yl.metric
-        (seqCenterD inp.decay P L l (gamma : Nat))
-        (seqCenterD inp.decay P L l (alpha : Nat))
-        (NormalCoordinates.framedTransition (I := I) Yk.metric
-          (seqCenterD inp.decay P L k (alpha : Nat))
-          (seqCenterD inp.decay P L k (gamma : Nat)) z) := by
+          ((chart (L.φ k)
+            (seqCenterD inp.decay P L k (alpha : Nat))).hom z) gamma
+          (chart := chart)) =
+      (chart (L.φ l)
+          (seqCenterD inp.decay P L l (gamma : Nat))).transition
+        (chart (L.φ l)
+          (seqCenterD inp.decay P L l (alpha : Nat)))
+        ((chart (L.φ k)
+            (seqCenterD inp.decay P L k (alpha : Nat))).transition
+          (chart (L.φ k)
+            (seqCenterD inp.decay P L k (gamma : Nat))) z) := by
   rfl
 
 /-- When the direct target lies in the prescribed target-stage source chart,
@@ -101,6 +106,7 @@ theorem stageTarget_local
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
     (alpha gamma : Fin (inp.pack.A s)) (z : E)
+    {chart : NormalChartFamily (I := I) X}
     (hsrc :
       let Yk := X.obj (L.φ k)
       let Yl := X.obj (L.φ l)
@@ -115,10 +121,11 @@ theorem stageTarget_local
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
       stageTarget inp P L s k l
-          ((NormalCoordinates.framedChartAt (I := I) Yk.metric
-            (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma ∈
-        (NormalCoordinates.framedChartAt (I := I) Yl.metric
-          (seqCenterD inp.decay P L l (alpha : Nat))).source) :
+          ((chart (L.φ k)
+            (seqCenterD inp.decay P L k (alpha : Nat))).hom z) gamma
+          (chart := chart) ∈
+        (chart (L.φ l)
+          (seqCenterD inp.decay P L l (alpha : Nat))).hom.target) :
     let Yk := X.obj (L.φ k)
     let Yl := X.obj (L.φ l)
     letI : TopologicalSpace Yk.M := Yk.topology
@@ -131,17 +138,20 @@ theorem stageTarget_local
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    (NormalCoordinates.framedChartAt (I := I) Yl.metric
-        (seqCenterD inp.decay P L l (alpha : Nat))).symm
-      (NormalCoordinates.framedTransition (I := I) Yl.metric
-        (seqCenterD inp.decay P L l (gamma : Nat))
-        (seqCenterD inp.decay P L l (alpha : Nat))
-        (NormalCoordinates.framedTransition (I := I) Yk.metric
-          (seqCenterD inp.decay P L k (alpha : Nat))
-          (seqCenterD inp.decay P L k (gamma : Nat)) z)) =
+    (chart (L.φ l)
+        (seqCenterD inp.decay P L l (alpha : Nat))).hom
+      ((chart (L.φ l)
+          (seqCenterD inp.decay P L l (gamma : Nat))).transition
+        (chart (L.φ l)
+          (seqCenterD inp.decay P L l (alpha : Nat)))
+        ((chart (L.φ k)
+            (seqCenterD inp.decay P L k (alpha : Nat))).transition
+          (chart (L.φ k)
+            (seqCenterD inp.decay P L k (gamma : Nat))) z)) =
       stageTarget inp P L s k l
-        ((NormalCoordinates.framedChartAt (I := I) Yk.metric
-          (seqCenterD inp.decay P L k (alpha : Nat))).symm z) gamma := by
+        ((chart (L.φ k)
+          (seqCenterD inp.decay P L k (alpha : Nat))).hom z) gamma
+        (chart := chart) := by
   letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
   letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
   letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
@@ -155,10 +165,10 @@ theorem stageTarget_local
   letI : T2Space (TangentBundle I (X.obj (L.φ l)).M) :=
     (X.obj (L.φ l)).t2TangentBundle
   dsimp only
-  rw [← stageTarget_chart (I := I) inp P L s k l alpha gamma z]
-  exact (NormalCoordinates.framedChartAt (I := I)
-    (X.obj (L.φ l)).metric
-    (seqCenterD inp.decay P L l (alpha : Nat))).left_inv hsrc
+  rw [← stageTarget_chart (I := I) inp P L s k l alpha gamma z
+    (chart := chart)]
+  exact (chart (L.φ l)
+    (seqCenterD inp.decay P L l (alpha : Nat))).hom.right_inv hsrc
 
 /-- Refining the net-limit data only reindexes the source and target stages of
 the direct finite-stage target point. -/
@@ -166,9 +176,11 @@ the direct finite-stage target point. -/
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real)
-    {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat) :
-    stageTarget inp P (L.subseq hψ) s k l =
-      stageTarget inp P L s (ψ k) (ψ l) := by
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
+    stageTarget inp P (L.subseq hψ) s k l (chart := chart) =
+      stageTarget inp P L s (ψ k) (ψ l) (chart := chart) := by
   rfl
 
 /-- The actual finite-stage center energy has exactly one global minimizer. -/
@@ -179,7 +191,9 @@ def HasUniqueStageCenter
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (k l : Nat) (x : (X.obj (L.φ k)).M) : Prop :=
+    (k l : Nat) (x : (X.obj (L.φ k)).M)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   let Y := X.obj (L.φ l)
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -196,14 +210,14 @@ def HasUniqueStageCenter
             (seqAtom inp.decay inp.hD P L inp.pack s k i0)
             (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
           x gamma)
-        (stageTarget inp P L s k l x) y ≤
+        (stageTarget inp P L s k l x (chart := chart)) y ≤
       CenterOfMass.centerEnergy (I := I) Y.metric
         (fun gamma => rawWeights
           (cutRaw
             (seqAtom inp.decay inp.hD P L inp.pack s k i0)
             (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
           x gamma)
-        (stageTarget inp P L s k l x) z
+        (stageTarget inp P L s k l x (chart := chart)) z
 
 /-- Unique global minimization for the actual stage energy is unchanged by a
 further strict reindexing of the net-limit data. -/
@@ -215,15 +229,19 @@ theorem uniqueCenter_subseq
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat)
-    (x : (X.obj ((L.subseq hψ).φ k)).M) :
-    HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x ↔
-      HasUniqueStageCenter inp P L s hs hconn (ψ k) (ψ l) x := by
+    (x : (X.obj ((L.subseq hψ).φ k)).M)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
+    HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x
+        (chart := chart) ↔
+      HasUniqueStageCenter inp P L s hs hconn (ψ k) (ψ l) x
+        (chart := chart) := by
   have hseq :
       seqAtom inp.decay inp.hD P (L.subseq hψ) inp.pack s k =
         seqAtom inp.decay inp.hD P L inp.pack s (ψ k) := by
     funext gamma
     exact seqAtom_subseq inp.decay inp.hD P L inp.pack s hψ k gamma
-  simp only [HasUniqueStageCenter, stageTarget_subseq, hseq,
+  simp only [HasUniqueStageCenter, hseq,
     NetLimitData.subseq_phi, Function.comp_apply]
   rfl
 
@@ -238,11 +256,14 @@ noncomputable def stageComparisonMap
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (k l : Nat) : (X.obj (L.φ k)).M → (X.obj (L.φ l)).M := by
+    (k l : Nat) (x : (X.obj (L.φ k)).M)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : (X.obj (L.φ l)).M := by
   classical
-  exact fun x =>
+  exact
     if hx : x ∈ L.hatSourceBall inp.decay P s k then
-      if huniq : HasUniqueStageCenter inp P L s hs hconn k l x then
+      if huniq : HasUniqueStageCenter inp P L s hs hconn k l x
+          (chart := chart) then
         Classical.choose huniq.exists
       else
         (X.obj (L.φ l)).basepoint
@@ -259,9 +280,11 @@ theorem stageCompare_choose
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (k l : Nat) (x : (X.obj (L.φ k)).M)
+    {chart : NormalChartFamily (I := I) X}
     (hx : x ∈ L.hatSourceBall inp.decay P s k)
-    (huniq : HasUniqueStageCenter inp P L s hs hconn k l x) :
-    stageComparisonMap inp P L s hs hconn k l x =
+    (huniq : HasUniqueStageCenter inp P L s hs hconn k l x
+      (chart := chart)) :
+    stageComparisonMap inp P L s hs hconn k l x (chart := chart) =
       Classical.choose huniq.exists := by
   simp only [stageComparisonMap, hx, huniq, dite_true]
 
@@ -275,9 +298,11 @@ theorem stageCompare_default
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (k l : Nat) (x : (X.obj (L.φ k)).M)
+    {chart : NormalChartFamily (I := I) X}
     (hdefault : x ∉ L.hatSourceBall inp.decay P s k ∨
-      ¬ HasUniqueStageCenter inp P L s hs hconn k l x) :
-    stageComparisonMap inp P L s hs hconn k l x =
+      ¬ HasUniqueStageCenter inp P L s hs hconn k l x
+        (chart := chart)) :
+    stageComparisonMap inp P L s hs hconn k l x (chart := chart) =
       (X.obj (L.φ l)).basepoint := by
   rcases hdefault with hx | huniq
   · simp only [stageComparisonMap, hx, dite_false]
@@ -294,12 +319,17 @@ the chart-independent comparison map. -/
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat) :
-    stageComparisonMap inp P (L.subseq hψ) s hs hconn k l =
-      stageComparisonMap inp P L s hs hconn (ψ k) (ψ l) := by
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
+    stageComparisonMap inp P (L.subseq hψ) s hs hconn k l
+        (chart := chart) =
+      stageComparisonMap inp P L s hs hconn (ψ k) (ψ l)
+        (chart := chart) := by
   classical
   funext x
   have hcenter := uniqueCenter_subseq (I := I) inp P L s hs hconn hψ k l x
+    (chart := chart)
   have hseq :
       seqAtom inp.decay inp.hD P (L.subseq hψ) inp.pack s k =
         seqAtom inp.decay inp.hD P L inp.pack s (ψ k) := by
@@ -309,7 +339,9 @@ the chart-independent comparison map. -/
   · have hx' : x ∈ (L.subseq hψ).hatSourceBall inp.decay P s k := by
       simpa only [NetLimitData.hatSourceBall_subseq] using hx
     by_cases hu : HasUniqueStageCenter inp P L s hs hconn (ψ k) (ψ l) x
-    · have hu' : HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x :=
+        (chart := chart)
+    · have hu' : HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x
+          (chart := chart) :=
         hcenter.mpr hu
       rw [stageCompare_choose (I := I) inp P (L.subseq hψ) s hs hconn k l x hx' hu',
         stageCompare_choose (I := I) inp P L s hs hconn (ψ k) (ψ l) x hx hu]
@@ -317,7 +349,8 @@ the chart-independent comparison map. -/
       · simpa only [stageTarget_subseq, hseq, NetLimitData.subseq_phi,
           Function.comp_apply] using Classical.choose_spec hu'.exists
       · exact Classical.choose_spec hu.exists
-    · have hu' : ¬ HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x :=
+    · have hu' : ¬ HasUniqueStageCenter inp P (L.subseq hψ) s hs hconn k l x
+          (chart := chart) :=
         fun h => hu (hcenter.mp h)
       rw [stageCompare_default (I := I) inp P (L.subseq hψ) s hs hconn k l x
           (Or.inr hu'),
@@ -343,9 +376,11 @@ theorem stageCompare_base
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (k l : Nat)
-    (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack s k) :
+    (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack s k)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
     stageComparisonMap inp P L s hs hconn k l
-        (X.obj (L.φ k)).basepoint =
+        (X.obj (L.φ k)).basepoint (chart := chart) =
       (X.obj (L.φ l)).basepoint := by
   classical
   let Yk := X.obj (L.φ k)
@@ -376,7 +411,7 @@ theorem stageCompare_base
     change Yk.basepoint ∈ Metric.closedBall Yk.basepoint s
     simpa only [Metric.mem_closedBall, dist_self] using hs
   by_cases huniq : HasUniqueStageCenter inp P L s hs hconn k l
-      (X.obj (L.φ k)).basepoint
+      (X.obj (L.φ k)).basepoint (chart := chart)
   · rw [stageCompare_choose (I := I) inp P L s hs hconn k l
       Yk.basepoint hx huniq]
     let i0 := baseIndex inp.decay inp.realizes inp.pack hs
@@ -398,20 +433,34 @@ theorem stageCompare_base
       simp only [i0, baseIndex_val, seqCenterD, seqCenter_zero,
         Option.getD_some, Yl]
     have htarget :
-        stageTarget inp P L s k l Yk.basepoint i0 = Yl.basepoint := by
+        stageTarget inp P L s k l Yk.basepoint i0 (chart := chart) =
+          Yl.basepoint := by
       change
-        (NormalCoordinates.framedChartAt (I := I) Yl.metric
-            (seqCenterD inp.decay P L l (i0 : Nat))).symm
-          (NormalCoordinates.framedChartAt (I := I) Yk.metric
-            (seqCenterD inp.decay P L k (i0 : Nat)) Yk.basepoint) =
+        (chart (L.φ l)
+            (seqCenterD inp.decay P L l (i0 : Nat))).hom
+          ((chart (L.φ k)
+            (seqCenterD inp.decay P L k (i0 : Nat))).inv Yk.basepoint) =
           Yl.basepoint
-      rw [hcenterK, hcenterL, NormalCoordinates.framedChart_centre]
-      change NormalCoordinates.framedExpDiffeo (I := I) Yl.metric
-        Yl.basepoint (0 : E) = Yl.basepoint
-      exact NormalCoordinates.framedExp_zero (I := I) Yl.metric Yl.basepoint
+      rw [hcenterK, hcenterL]
+      let cK := chart (L.φ k) Yk.basepoint
+      let cL := chart (L.φ l) Yl.basepoint
+      have hzeroK :
+          (0 : E) ∈ cK.hom.source :=
+        cK.ball_subset <| by
+          simpa only [Metric.mem_ball, dist_zero_right, norm_zero] using
+            cK.radius_pos
+      have hinvK : cK.inv Yk.basepoint = 0 := by
+        calc
+          cK.inv Yk.basepoint = cK.inv (cK.hom 0) :=
+            congrArg cK.inv cK.map_zero.symm
+          _ = 0 := cK.hom.left_inv hzeroK
+      change cL.hom (cK.inv Yk.basepoint) = Yl.basepoint
+      rw [hinvK]
+      exact cL.map_zero
     have hzero :
         CenterOfMass.centerEnergy (I := I) Yl.metric mu
-            (stageTarget inp P L s k l Yk.basepoint) Yl.basepoint = 0 := by
+            (stageTarget inp P L s k l Yk.basepoint (chart := chart))
+            Yl.basepoint = 0 := by
       simp only [CenterOfMass.centerEnergy]
       rw [Finset.sum_eq_zero, mul_zero]
       intro i _hi
@@ -421,9 +470,10 @@ theorem stageCompare_base
       · rw [hdelta.2 i hne, zero_mul]
     have hmin : ∀ z : Yl.M,
         CenterOfMass.centerEnergy (I := I) Yl.metric mu
-            (stageTarget inp P L s k l Yk.basepoint) Yl.basepoint ≤
+            (stageTarget inp P L s k l Yk.basepoint (chart := chart))
+            Yl.basepoint ≤
           CenterOfMass.centerEnergy (I := I) Yl.metric mu
-            (stageTarget inp P L s k l Yk.basepoint) z := by
+            (stageTarget inp P L s k l Yk.basepoint (chart := chart)) z := by
       intro z
       rw [hzero]
       simp only [CenterOfMass.centerEnergy]

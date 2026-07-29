@@ -1873,6 +1873,45 @@ theorem HasSuppConvData.toOnLegacy
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     simpa only [legacyChartFamily, legacyTransition_eq] using hsmooth alpha target k
 
+/-- Projects the normalized weight family on one retained source domain for
+an arbitrary coherent chart family. -/
+theorem HasSuppConvDataOn.weight_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (chart : NormalChartFamily (I := I) X)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r) :
+    let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+    let weightInf : E → Fin (inp.pack.A r) → Real := fun z gamma =>
+      rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
+    ContDiffOn Real (∞ : WithTop ℕ∞) weightInf (U alpha) ∧
+      centerAverage.WeightDataOn (U alpha)
+        (fun _ : Fin (inp.pack.A r) => Set.univ) weightInf := by
+  dsimp only
+  dsimp only [HasSuppConvDataOn] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hcover,
+      hlim, hweight, _htrans, _hsmooth⟩
+  have hlim0 := hlim alpha
+  dsimp only [HasAtomWeightLimOn] at hlim0
+  rcases hlim0 with
+    ⟨_hdead, _hatomC, _hatomInfC, _hatomConv, _hweightC,
+      hweightInfC, _hweightConv⟩
+  exact ⟨hweightInfC, hweight alpha⟩
+
 /-- Projects the normalized weight family on one retained source domain. -/
 theorem HasSuppConvData.weight_on
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1909,6 +1948,80 @@ theorem HasSuppConvData.weight_on
     ⟨_hdead, _hatomC, _hatomInfC, _hatomConv, _hweightC,
       hweightInfC, _hweightConv⟩
   exact ⟨hweightInfC, hweight alpha⟩
+
+/-- Projects one retained source domain and its nested compact cores from a
+chart-parametric support package. -/
+theorem HasSuppConvDataOn.core_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (chart : NormalChartFamily (I := I) X)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r) :
+    IsOpen (U alpha) ∧ IsCompact (C0 alpha) ∧ IsCompact (C1 alpha) ∧
+      C0 alpha ⊆ interior (C1 alpha) ∧ C1 alpha ⊆ U alpha := by
+  dsimp only [HasSuppConvDataOn] at h
+  rcases h with
+    ⟨hU, _hU8, hC0, hC1, hC01, hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hcover,
+      _hlim, _hweight, _htrans, _hsmooth⟩
+  exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
+
+/-- Projects the radius and geometric maps-to data for one source slot from a
+chart-parametric support package. -/
+theorem HasSuppConvDataOn.geom_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (chart : NormalChartFamily (I := I) X)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (k : Nat) (alpha : LiveSlot L inp.pack r) :
+    let Lphi := L.subseq hphi
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    U alpha ⊆ Metric.ball 0
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).radius ∧
+      Set.MapsTo
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom
+        (U alpha)
+        (Lphi.hatBall inp.decay inp.D P inp.pack r k alpha.1 ∩
+          ⋃ gamma : Fin (inp.pack.A r),
+            Lphi.innerBall inp.decay inp.D P inp.pack r k gamma) := by
+  dsimp only [HasSuppConvDataOn] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, hgeom,
+      _hlim, _hweight, _htrans, _hsmooth⟩
+  exact (hgeom k).1 alpha
 
 /-- Projects one retained source domain and its nested compact cores. -/
 theorem HasSuppConvData.core_on

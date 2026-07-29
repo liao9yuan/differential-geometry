@@ -234,8 +234,9 @@ theorem HasDiagPairConv.exists_invVel_on
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (hpair : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     {ι : Type} [Fintype ι]
     {S K : Set E} {V : Set (E × E)}
     (hS : IsOpen S) (hK : IsCompact K) (hV : IsOpen V)
@@ -314,8 +315,9 @@ theorem HasDiagPairConv.exists_invVel_tube
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (hpair : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     {ι : Type} [Fintype ι]
     {S K : Set E} (hS : IsOpen S) (hK : IsCompact K)
     {mu : E → ι → Real}
