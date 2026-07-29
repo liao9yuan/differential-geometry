@@ -208,6 +208,210 @@ theorem NormalCoordMetricEquivOn.symm_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- If the minimizing join stays in one controlled normal chart, the inverse
+chart is `sqrt 2`-Lipschitz with respect to intrinsic distance. -/
+theorem NormalBallChart.MetricEquivOn.inv_dist_le
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn :
+      letI : TopologicalSpace Y.M := Y.topology
+      ConnectedSpace Y.M)
+    (hEnorm :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+        Y.riemBundle (I := I)
+      ∀ (x : Y.M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner x v v)))
+    {p : Y.M} (c : NormalChartAt (I := I) Y p) {U : Set E}
+    (h :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      c.MetricEquivOn Y.metric U)
+    {x y : Y.M}
+    (hjoin :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : IsManifold I 1 Y.M := IsManifold.of_le
+        (I := I) (M := Y.M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : ConnectedSpace Y.M := hconn
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace Y.M :=
+        Manifold.metrizableSpace I Y.M
+      letI : T3Space Y.M := inferInstance
+      letI : RiemannianBundle (fun z : Y.M => TangentSpace I z) :=
+        Y.riemBundle (I := I)
+      letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+        Y.riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun z : Y.M => TangentSpace I z) := Y.riemBundle_cont (I := I)
+      letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+      letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+      Set.MapsTo (minJoin (I := I) Y.metric hEnorm x y)
+        (Set.Icc (0 : Real) 1)
+        (c.hom.target ∩ c.inv ⁻¹' U)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun z : Y.M => TangentSpace I z) :=
+      Y.riemBundle (I := I)
+    letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : Y.M => TangentSpace I z) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    dist (c.inv x) (c.inv y) ≤
+      Real.sqrt 2 * (riemannianEDist I x y).toReal := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun z : Y.M => TangentSpace I z) :=
+    Y.riemBundle (I := I)
+  letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : Y.M => TangentSpace I z) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  let w : TangentSpace I x := minimizingVec (I := I) Y.metric hEnorm x y
+  let gamma : Real → Y.M := minJoin (I := I) Y.metric hEnorm x y
+  let eta : Real → E := c.inv ∘ gamma
+  let d : Real := (riemannianEDist I x y).toReal
+  have hd : 0 ≤ d := ENNReal.toReal_nonneg
+  have hgammaCont : Continuous gamma := by
+    simpa only [gamma] using minJoin_cont (I := I) Y.metric hEnorm x y
+  have hdiff : ∀ t ∈ Set.Icc (0 : Real) 1,
+      DifferentiableAt Real eta t := by
+    intro t ht
+    have hgammaDiff : MDifferentiableAt 𝓘(Real, Real) I gamma t := by
+      have hs := intrinsicGeodesic_contMDiffOn
+        (I := I) Y.metric hEnorm x w
+      have hm := hs.mdifferentiableOn one_ne_zero t (Set.mem_univ t)
+      simpa only [gamma, minJoin, w] using
+        hm.mdifferentiableAt (isOpen_univ.mem_nhds (Set.mem_univ t))
+    have hinvDiff : MDifferentiableAt I 𝓘(Real, E) c.inv (gamma t) :=
+      (c.hom.symm.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _
+        (hjoin ht).1).mdifferentiableAt
+          (c.hom.open_target.mem_nhds (hjoin ht).1)
+    exact mdifferentiableAt_iff_differentiableAt.mp
+      (by simpa only [eta] using hinvDiff.comp t hgammaDiff)
+  have hbound : ∀ t ∈ Set.Icc (0 : Real) 1,
+      ‖deriv eta t‖ ≤ Real.sqrt 2 * d := by
+    intro t ht
+    have hgammaDiff : MDifferentiableAt 𝓘(Real, Real) I gamma t := by
+      have hs := intrinsicGeodesic_contMDiffOn
+        (I := I) Y.metric hEnorm x w
+      have hm := hs.mdifferentiableOn one_ne_zero t (Set.mem_univ t)
+      simpa only [gamma, minJoin, w] using
+        hm.mdifferentiableAt (isOpen_univ.mem_nhds (Set.mem_univ t))
+    have hinvDiff : MDifferentiableAt I 𝓘(Real, E) c.inv (gamma t) :=
+      (c.hom.symm.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _
+        (hjoin ht).1).mdifferentiableAt
+          (c.hom.open_target.mem_nhds (hjoin ht).1)
+    have hetaDiff : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) eta t := by
+      simpa only [eta] using hinvDiff.comp t hgammaDiff
+    have hetaSrc : eta t ∈ c.hom.source :=
+      c.hom.map_target (hjoin ht).1
+    have hhomDiff : MDifferentiableAt 𝓘(Real, E) I c.hom (eta t) :=
+      (c.hom.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _ hetaSrc).mdifferentiableAt
+        (c.hom.open_source.mem_nhds hetaSrc)
+    have hnear : ∀ᶠ s in nhds t, gamma s ∈ c.hom.target :=
+      hgammaCont.continuousAt.eventually
+        (c.hom.open_target.mem_nhds (hjoin ht).1)
+    have heq : c.hom ∘ eta =ᶠ[nhds t] gamma := by
+      filter_upwards [hnear] with s hs
+      change c.hom (c.hom.symm (gamma s)) = gamma s
+      exact c.hom.right_inv hs
+    have hcomp :
+        (mfderiv 𝓘(Real, E) I c.hom (eta t)).comp
+            (mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t) =
+          mfderiv 𝓘(Real, Real) I gamma t := by
+      have hderiv := Filter.EventuallyEq.mfderiv_eq
+        (I := 𝓘(Real, Real)) (I' := I) heq
+      rw [mfderiv_comp t hhomDiff hetaDiff] at hderiv
+      simpa only using hderiv
+    have hetaVel : mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1 =
+        deriv eta t := by
+      rw [mfderiv_eq_fderiv]
+      exact fderiv_apply_one_eq_deriv
+    have hvel : mfderiv 𝓘(Real, E) I c.hom (eta t) (deriv eta t) =
+        mfderiv 𝓘(Real, Real) I gamma t 1 := by
+      have hv := DFunLike.congr_fun hcomp (1 : Real)
+      change (mfderiv 𝓘(Real, E) I c.hom (eta t))
+          (mfderiv 𝓘(Real, Real) 𝓘(Real, E) eta t 1) =
+        mfderiv 𝓘(Real, Real) I gamma t 1 at hv
+      rw [hetaVel] at hv
+      exact hv
+    have hlaunch : Y.metric.inner x w w = d ^ 2 := by
+      have hnonneg : 0 ≤ Y.metric.inner x w w :=
+        gInner_self_nonneg (I := I) Y.metric x w
+      calc
+        Y.metric.inner x w w = (Real.sqrt (Y.metric.inner x w w)) ^ 2 :=
+          (Real.sq_sqrt hnonneg).symm
+        _ = d ^ 2 := by
+          rw [minimizingVec_len (I := I) Y.metric hEnorm x y]
+    have hspeed : Y.metric.inner (gamma t)
+          (mfderiv 𝓘(Real, Real) I gamma t 1)
+          (mfderiv 𝓘(Real, Real) I gamma t 1) = d ^ 2 := by
+      calc
+        _ = Y.metric.inner x w w := by
+          simpa only [gamma, minJoin, w] using
+            intrinsicGeodesic_speedSq_eq (I := I) Y.metric hEnorm x w t
+        _ = d ^ 2 := hlaunch
+    have hbase : c.hom (eta t) = gamma t :=
+      heq.self_of_nhds
+    have hmetric : c.metric Y.metric (eta t)
+          (deriv eta t) (deriv eta t) = d ^ 2 := by
+      rw [c.metric_apply Y.metric, hbase]
+      change Y.metric.inner (gamma t)
+          (mfderiv 𝓘(Real, E) I c.hom (eta t) (deriv eta t))
+          (mfderiv 𝓘(Real, E) I c.hom (eta t) (deriv eta t)) = d ^ 2
+      rw [hvel]
+      exact hspeed
+    have hlower := (h (eta t) (hjoin ht).2 (deriv eta t)).1
+    rw [hmetric] at hlower
+    have hsq : ‖deriv eta t‖ ^ 2 ≤
+        (Real.sqrt 2 * d) ^ 2 := by
+      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : Real) ≤ 2)]
+      nlinarith
+    exact le_of_sq_le_sq hsq (mul_nonneg (Real.sqrt_nonneg 2) hd)
+  have hmean := Convex.norm_image_sub_le_of_norm_deriv_le
+    (f := eta) hdiff hbound (convex_Icc (0 : Real) 1)
+    (left_mem_Icc.mpr zero_le_one) (right_mem_Icc.mpr zero_le_one)
+  have hend : dist (c.inv x) (c.inv y) = ‖eta 1 - eta 0‖ := by
+    simp only [eta, gamma, Function.comp_apply, minJoin_zero, minJoin_one,
+      dist_eq_norm, norm_sub_rev]
+  rw [hend]
+  norm_num at hmean
+  simpa only [d] using hmean
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- If the minimizing join stays in one controlled normal chart, the chart
 itself is `sqrt 2`-Lipschitz with respect to intrinsic distance. -/
 theorem NormalCoordMetricEquivOn.chart_dist_le

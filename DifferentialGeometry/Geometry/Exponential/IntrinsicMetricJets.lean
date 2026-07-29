@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedJacobi
 import DifferentialGeometry.Geometry.Exponential.IntrinsicJacobiJets
+import DifferentialGeometry.Analysis.Calculus.DirectionalJet
 import DifferentialGeometry.Tensor.Multilinear.Polarization
 import Mathlib.Analysis.Analytic.IteratedFDeriv
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
@@ -29,7 +30,7 @@ open Variation
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E]
   [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -103,10 +104,13 @@ theorem intrMetric_line
         (normalFrame (I := I) g p z)
         (normalFrame (I := I) g p a)
         (normalFrame (I := I) g p b) 0 r := by
-  rw [intrMetricJet_zero, intr_metric_jacobi,
-    intrLaunchJ_at, intrLaunchJ_at]
-  simp only [intrLaunch3, intrFrame_apply, map_add, map_smul, zero_smul,
-    add_zero]
+  rw [intrMetricJet_zero, intr_metric_jacobi, intrLaunchJ_at,
+    intrFrame_apply, expMapIntrinsic_def,
+    (normalFrame (I := I) g p).map_add,
+    (normalFrame (I := I) g p).map_smul]
+  unfold intrLaunch3
+  rw [zero_smul, add_zero]
+  rfl
 
 private theorem metricJet_pascal (n : Nat) (q : Nat → Real) :
     (∑ i ∈ Finset.range (n + 1), (n.choose i : Real) * q (i + 1)) +
@@ -226,6 +230,74 @@ theorem intrMetricJet_iter
       rw [iteratedDeriv_succ, ih]
       exact deriv_eq fun r =>
         intrMetricJet_deriv (I := I) g hEnorm p u a b n r
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [ConnectedSpace M] [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
+/-- Evaluating a repeated-direction Fréchet jet of the intrinsic framed metric
+in two fixed metric directions gives the corresponding endpoint Gram jet. -/
+theorem intrMetric_diag_jet
+    [PseudoEMetricSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (z a b : E) (n : Nat)
+    (hsmooth :
+      ContDiffAt Real ∞ (intrFrameMetric (I := I) g hEnorm p) z) :
+    iteratedFDeriv Real n (intrFrameMetric (I := I) g hEnorm p) z
+        (fun _ => a) b b =
+      intrMetricJet (I := I) g hEnorm p
+        (normalFrame (I := I) g p z)
+        (normalFrame (I := I) g p a)
+        (normalFrame (I := I) g p b) n 0 := by
+  have haff :
+      ContDiffAt Real ∞ (fun r : Real => z + r • a) 0 :=
+    (contDiff_const.add (contDiff_id.smul contDiff_const)).contDiffAt
+  have hline :
+      ContDiffAt Real ∞
+        (fun r : Real =>
+          intrFrameMetric (I := I) g hEnorm p (z + r • a)) 0 := by
+    have hsmooth0 :
+        ContDiffAt Real ∞ (intrFrameMetric (I := I) g hEnorm p)
+          (z + (0 : Real) • a) := by
+      simpa only [zero_smul, add_zero] using hsmooth
+    simpa only [Function.comp_apply] using hsmooth0.comp 0 haff
+  have hdiag :
+      iteratedDeriv n
+          (fun r : Real =>
+            intrFrameMetric (I := I) g hEnorm p (z + r • a) b b) 0 =
+        iteratedFDeriv Real n
+          (intrFrameMetric (I := I) g hEnorm p) z
+          (fun _ => a) b b := by
+    calc
+      iteratedDeriv n
+          (fun r : Real =>
+            intrFrameMetric (I := I) g hEnorm p (z + r • a) b b) 0 =
+          iteratedDeriv n
+            (fun r : Real =>
+              intrFrameMetric (I := I) g hEnorm p (z + r • a)) 0 b b :=
+        iteratedDeriv_apply₂ hline n b b
+      _ = iteratedFDeriv Real n
+            (intrFrameMetric (I := I) g hEnorm p) z
+            (fun _ => a) b b := by
+        exact congrArg
+          (fun B : E →L[Real] E →L[Real] Real => B b b)
+          (iteratedDeriv_line hsmooth n)
+  have hfun :
+      (fun r : Real =>
+        intrFrameMetric (I := I) g hEnorm p (z + r • a) b b) =
+        intrMetricJet (I := I) g hEnorm p
+          (normalFrame (I := I) g p z)
+          (normalFrame (I := I) g p a)
+          (normalFrame (I := I) g p b) 0 := by
+    funext r
+    exact intrMetric_line (I := I) g hEnorm p z a b r
+  rw [hfun, intrMetricJet_iter] at hdiag
+  exact hdiag.symm
 
 end NormalCoordinates
 end Riemannian

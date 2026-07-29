@@ -1504,6 +1504,161 @@ def HasCompactCover {Y J : Type*} [TopologicalSpace Y]
   ∃ K : J → Set Y, (∀ j, IsCompact (K j)) ∧
     (∀ j, K j ⊆ sourcePatch j) ∧ sourceBall = ⋃ j, K j
 
+/-- Retained source-cover, normalized-weight, and transition-limit data for one
+coherent normal-chart family on one subsequence. -/
+def HasSuppConvDataOn
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E) : Prop :=
+  let Lphi := L.subseq hphi
+  (∀ alpha, IsOpen (U alpha)) ∧
+  (∀ alpha, U alpha ⊆
+    Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+  (∀ alpha, IsCompact (C0 alpha)) ∧
+  (∀ alpha, IsCompact (C1 alpha)) ∧
+  (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
+  (∀ alpha, C1 alpha ⊆ U alpha) ∧
+  (∀ alpha, Convex Real (C0 alpha)) ∧
+  (∀ alpha, (0 : E) ∈ C0 alpha) ∧
+  (∃ eta : LiveSlot L inp.pack r → Real,
+    (∀ alpha, 0 < eta alpha) ∧
+    ∀ k,
+      let Y := X.obj (Lphi.φ k)
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+      ∀ y ∈ Lphi.hatSourceBall inp.decay P r k,
+        ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+          (chart (Lphi.φ k)
+              (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z = y ∧
+            Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha)) ∧
+  (∀ k,
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    Lphi.hatSourceBall inp.decay P r k ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom ''
+            interior (C0 alpha)) ∧
+  (∀ k,
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    (∀ alpha : LiveSlot L inp.pack r,
+      U alpha ⊆ Metric.ball 0
+          (chart (Lphi.φ k)
+            (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).radius ∧
+      Set.MapsTo
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom
+        (U alpha)
+        (Lphi.hatBall inp.decay inp.D P inp.pack r k alpha.1 ∩
+          ⋃ gamma : Fin (inp.pack.A r),
+            Lphi.innerBall inp.decay inp.D P inp.pack r k gamma)) ∧
+    Lphi.hatSourceBall inp.decay P r k ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom '' U alpha) ∧
+  (∀ alpha,
+    HasAtomWeightLimOn (I := I) chart
+      inp.decay inp.hD P Lphi inp.realizes inp.pack r hr
+      (fun k => seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+      (U alpha) (aInf alpha)) ∧
+  (∀ alpha,
+    centerAverage.WeightDataOn (U alpha)
+      (fun _ : Fin (inp.pack.A r) => Set.univ)
+      (fun z gamma =>
+        rawWeights
+          (cutRaw
+            (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
+            (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
+          z gamma)) ∧
+  (∀ alpha target,
+    ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContDiffOn Real (⊤ : ℕ∞) (Jbarinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+    ContinuousOn (Jinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContinuousOn (Jbarinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+    MapCInfConvOnCompacts
+      (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+      (fun k =>
+        let Y := X.obj (Lphi.φ k)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).transition
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))))
+      (Jinf alpha target) ∧
+    MapCInfConvOnCompacts
+      (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+      (fun k =>
+        let Y := X.obj (Lphi.φ k)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))).transition
+        (chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))))
+      (Jbarinf alpha target) ∧
+    (∀ z, z ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+      Jinf alpha target z ∈
+          Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+        Jbarinf alpha target (Jinf alpha target z) = z) ∧
+    ∀ w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+      Jbarinf alpha target w ∈
+          Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+        Jinf alpha target (Jbarinf alpha target w) = w) ∧
+  ∀ (alpha : LiveSlot L inp.pack r)
+      (target : InterSlot L inp.pack r alpha) (k : Nat),
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContDiffOn Real (⊤ : ℕ∞)
+      ((chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).transition
+      (chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))))
+      (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContDiffOn Real (⊤ : ℕ∞)
+      ((chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))).transition
+      (chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))))
+      (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+
 /-- Retained source-cover, normalized-weight, and transition-limit data on one subsequence. -/
 def HasSuppConvData
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1638,6 +1793,85 @@ def HasSuppConvData
         (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
       (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+
+/-- The retained legacy support package supplies the chart-parametric package
+for the established framed normal-chart family. -/
+theorem HasSuppConvData.toOnLegacy
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf) :
+    HasSuppConvDataOn (I := I) inp P L r hr phi hphi
+      (legacyChartFamily (I := I) X) U C0 C1 aInf Jinf Jbarinf := by
+  dsimp only [HasSuppConvData] at h
+  dsimp only [HasSuppConvDataOn]
+  rcases h with
+    ⟨hUopen, hUball, hC0, hC1, hC01, hC1U, hconv, hzero,
+      heta, hcover, hsource, hatom, hweight, htrans, hsmooth⟩
+  refine ⟨hUopen, hUball, hC0, hC1, hC01, hC1U, hconv, hzero,
+    ?_, ?_, ?_, ?_, hweight, ?_, ?_⟩
+  · rcases heta with ⟨eta, hetaPos, heta⟩
+    refine ⟨eta, hetaPos, ?_⟩
+    intro k
+    let Y := X.obj ((L.subseq hphi).φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P ((L.subseq hphi).φ k)).ms
+    simpa only [legacyChartFamily, legacyChart_apply] using heta k
+  · intro k
+    let Y := X.obj ((L.subseq hphi).φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P ((L.subseq hphi).φ k)).ms
+    simpa only [legacyChartFamily, legacyChart_apply] using hcover k
+  · intro k
+    let Y := X.obj ((L.subseq hphi).φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P ((L.subseq hphi).φ k)).ms
+    rcases hsource k with ⟨hsource, hcoverU⟩
+    refine ⟨?_, ?_⟩
+    · intro alpha
+      rcases hsource alpha with ⟨_hmetric, hradius, hmaps⟩
+      exact ⟨by
+        simpa only [legacyChartFamily, legacyBallChart_radius] using hradius,
+        by simpa only [legacyChartFamily, legacyChart_apply] using hmaps⟩
+    · simpa only [legacyChartFamily, legacyChart_apply] using hcoverU
+  · intro alpha
+    exact hatom alpha
+  · intro alpha target
+    rcases htrans alpha target with
+      ⟨hJ, hJbar, hJcont, hJbarCont, hJlim, hJbarLim, hleft, hright⟩
+    refine ⟨hJ, hJbar, hJcont, hJbarCont, ?_, ?_, hleft, hright⟩
+    · simpa only [legacyChartFamily, legacyTransition_eq] using hJlim
+    · simpa only [legacyChartFamily, legacyTransition_eq] using hJbarLim
+  · intro alpha target k
+    let Y := X.obj ((L.subseq hphi).φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    simpa only [legacyChartFamily, legacyTransition_eq] using hsmooth alpha target k
 
 /-- Projects the normalized weight family on one retained source domain. -/
 theorem HasSuppConvData.weight_on

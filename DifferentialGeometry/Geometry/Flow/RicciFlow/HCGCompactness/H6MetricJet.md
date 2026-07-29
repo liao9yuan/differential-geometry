@@ -8,16 +8,29 @@ that recover the full pullback-metric derivative norm.
 
 ## Status
 
-The first target is `intrMetricJet_abs_le`: a common bound for all launch
-Jacobi jets through order `n` gives the explicit bound
-`2 ^ n * B ^ 2` for the order-`n` Gram jet.
+The scalar layer is complete in source:
+
+- `intrMetricJet_abs_le` bounds an order-`n` Gram jet by
+  `2 ^ n * B ^ 2`;
+- `intrMetricJet_tube` supplies the common Jacobi-jet cap from
+  `H6JacobiPair.intrJet_upto_le`;
+- `intrMetric_deriv_le` uses full derivative-slot symmetry, metric-slot
+  symmetry, and the two polarization estimates to bound the complete
+  order-`n` Fréchet derivative of `intrFrameMetric`.
+
+`intrMetric_deriv_le` is focused and exact GREEN (`3964/3964`). The only
+repairs needed were removal of a redundant `NormedSpace` binder, an explicit
+normed-space instance for the bilinear-form carrier, and normalization of the
+final product bound. The mathematical statement and route were unchanged.
 
 ## Next target
 
-Instantiate the bound with `H6JacobiPair.intrJet_upto_le`, then transfer the
-diagonal affine-line estimate to the full metric derivative by polarization.
+Transfer this bound into the final `exists_h6NormalData` assembly through
+`NormalBallChart.MetricDerivBound.of_eqOn`.
 
 ## Accounting
 
-`NormalRadiusProfile.le_exp_radius` and the final `H6NormalData` producer
-remain theorem-level 0%. This file is dedicated metric-jet machinery.
+`intrMetric_deriv_le` and its dedicated metric-jet machinery are complete and
+exact-verified. `exists_h6NormalData` is stated but still unverified, so that
+theorem remains 0%. The independent legacy
+`NormalRadiusProfile.le_exp_radius` gate remains 0%.

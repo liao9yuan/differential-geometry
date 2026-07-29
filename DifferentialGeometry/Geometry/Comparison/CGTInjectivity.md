@@ -80,3 +80,33 @@ Current honest accounting:
 - sequence-level `InjRadiusDecayInput` producer: theorem 0%;
 - unconditional metric compactness theorem: 0%;
 - whole HCG supporting machinery: about 61%.
+
+## State - 2026-07-28
+
+The direct CGT route is now complete.  The multiplicity-sensitive area bridge
+from `SegmentArea` / `SegmentMeasure` combines the sharp fibre count with the
+intrinsic exponential Jacobian integral.  `flatLoop_ge_cgt` factors the common
+propeller/area argument; `intrLoop_ge_cgt` is its radial-loop specialization.
+`collision_ge_cgt` turns a strict framed-exponential collision into the loop
+estimate, and `intrInj_ge_cgt` is the final pointwise injectivity-radius
+theorem.
+
+No global `ConnectedSpace` assumption, pullback-ball completeness assumption,
+or new injectivity/cut-time input was introduced.  The formerly intentional
+`sorry` in `intrLoop_ge_cgt` is gone, and the older public statement is
+preserved.
+
+Focused verification and the exact module refresh passed.  Direct axiom audits
+of `flatLoop_ge_cgt`, `collision_ge_cgt`, `intrLoop_ge_cgt`, and
+`intrInj_ge_cgt` contain only `propext`, `Classical.choice`, and `Quot.sound`.
+
+Honest accounting:
+
+- `intrPullVol_le_hyp`: theorem 100%;
+- paper Lemma 4.6 propeller/fibre count: theorem 100%, machinery 100%;
+- `intrLoop_ge_cgt`: theorem 100%, dedicated machinery 100%;
+- `intrInj_ge_cgt`: theorem 100%, dedicated machinery 100%;
+- sequence `InjRadiusDecayInput` producer: theorem 100%, dedicated machinery
+  100%;
+- unconditional Theorem 3.9: theorem 0%; CGT is no longer its blocker;
+- whole HCG supporting machinery: about 67%.

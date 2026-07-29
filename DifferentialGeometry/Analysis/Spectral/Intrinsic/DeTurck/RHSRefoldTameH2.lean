@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSRefoldField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffDiffRadiusFree
@@ -47,15 +48,92 @@ private theorem edgePair_eq_mono
     refoldKernelContractionMonomialField_eq_mvPairTraceRefold]
   rfl
 
+private theorem refoldMono_smul
+    (g g1 : SmoothRiemannianMetric I M) (a : Real)
+    (G : SmoothCcTensor g 0 4) (sigma : Equiv.Perm (Fin 4)) :
+    refoldKernelContractionMonomialField
+        (I := I) (M := M) g g1 (a • G) sigma =
+      a • refoldKernelContractionMonomialField
+        (I := I) (M := M) g g1 G sigma := by
+  classical
+  refine SmoothCcTensor.ext (DFunLike.ext _ _ (fun x => ?_))
+  rw [refoldKernelContractionMonomialField_toSection,
+    SmoothCcTensor.toSection_smul]
+  change _ =
+    a • (refoldKernelContractionMonomialField
+      (I := I) (M := M) g g1 G sigma).toSection x
+  rw [refoldKernelContractionMonomialField_toSection]
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  change
+    Tensor0SSpace.toModel
+        (refoldKernelContractionMonomialFibFixedFrame
+          (I := I) (M := M)
+          (ccTensorFourUnitValueSection (I := I) (M := M) g (a • G))
+          sigma (smoothOrthoFrame (I := I) g1 x) x D) v =
+      a * Tensor0SSpace.toModel
+        (refoldKernelContractionMonomialFibFixedFrame
+          (I := I) (M := M)
+          (ccTensorFourUnitValueSection (I := I) (M := M) g G)
+          sigma (smoothOrthoFrame (I := I) g1 x) x D) v
+  rw [refoldKernelContractionMonomialFibFixedFrame_toModel,
+    refoldKernelContractionMonomialFibFixedFrame_toModel]
+  simp only [ccTensorFourUnitValueSection, SmoothCcTensor.toSection_smul,
+    ContMDiffSection.coe_smul, Pi.smul_apply]
+  have hGsmul :
+      ((a • (G.toSection x) : TensorRSSpace 0 4 I x)
+          (unitZeroSec (I := I) (M := M) x)) =
+        a • ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) :=
+    TensorRSSpace.smul_apply 0 4 x a (G.toSection x)
+      (unitZeroSec (I := I) (M := M) x)
+  have hGmodel (w : Fin 4 -> E) :
+      Tensor0SSpace.toModel
+          ((a • (G.toSection x) : TensorRSSpace 0 4 I x)
+            (unitZeroSec (I := I) (M := M) x)) w =
+        a * Tensor0SSpace.toModel
+          ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) w := by
+    rw [hGsmul, Tensor0SSpace.toModel_smul,
+      ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  let u : Fin 4 -> E :=
+    Fin.cons (smoothOrthoFrame (I := I) g1 x i x : E)
+      (Fin.cons (smoothOrthoFrame (I := I) g1 x j x : E) v)
+  let w : Fin 4 -> E := fun k => u (sigma k)
+  let d : Real :=
+    Tensor0SSpace.toModel D
+      ![smoothOrthoFrame (I := I) g1 x i x,
+        smoothOrthoFrame (I := I) g1 x j x]
+  change d * Tensor0SSpace.toModel
+      ((a • (G.toSection x) : TensorRSSpace 0 4 I x)
+        (unitZeroSec (I := I) (M := M) x)) w =
+    a * (d * Tensor0SSpace.toModel
+      ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) w)
+  calc
+    d * Tensor0SSpace.toModel
+        ((a • (G.toSection x) : TensorRSSpace 0 4 I x)
+          (unitZeroSec (I := I) (M := M) x)) w =
+      d * (a * Tensor0SSpace.toModel
+        ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) w) :=
+      congrArg (fun z : Real => d * z) (hGmodel w)
+    _ = a * (d * Tensor0SSpace.toModel
+        ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) w) := by
+      ring
+
 private theorem edgePair_smul
     (g g1 : SmoothRiemannianMetric I M) (a : Real)
     (G : SmoothCcTensor g 0 4) (sigma : Equiv.Perm (Fin 4)) :
     edgePairMono (I := I) (M := M) g g1 (a • G) sigma =
       a • edgePairMono (I := I) (M := M) g g1 G sigma := by
-  apply SmoothCcTensor.ext
-  apply DFunLike.coe_injective
-  funext x
-  rfl
+  rw [edgePair_eq_mono, edgePair_eq_mono,
+    refoldMono_smul]
 
 omit [BoundarylessManifold I M] in
 private theorem bilin_smul
@@ -129,6 +207,86 @@ private theorem h2_smul_le
       mul_le_mul_of_nonneg_right ha_sq (sq_nonneg _)
     _ = norm (iteratedCovGrad (I := I) g r s i A) ^ 2 := one_mul _
 
+private theorem h2_smul_eq
+    (g : SmoothRiemannianMetric I M) {r s : Nat}
+    (a : Real) (A : SmoothCcTensor g r s) :
+    (∑ i ∈ Finset.range 3,
+      norm (iteratedCovGrad (I := I) g r s i (a • A)) ^ 2) =
+        a ^ 2 * (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i A) ^ 2) := by
+  calc
+    (∑ i ∈ Finset.range 3,
+        norm (iteratedCovGrad (I := I) g r s i (a • A)) ^ 2) =
+      ∑ i ∈ Finset.range 3,
+        a ^ 2 * norm (iteratedCovGrad (I := I) g r s i A) ^ 2 := by
+        apply Finset.sum_congr rfl
+        intro i _
+        rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
+    _ = a ^ 2 * (∑ i ∈ Finset.range 3,
+        norm (iteratedCovGrad (I := I) g r s i A) ^ 2) := by
+      rw [Finset.mul_sum]
+
+private theorem h2_six_le
+    (g : SmoothRiemannianMetric I M) {r s : Nat}
+    (A B C D F G : SmoothCcTensor g r s) :
+    (∑ i ∈ Finset.range 3,
+      norm (iteratedCovGrad (I := I) g r s i
+        (((A + B) + (C + D)) + (F + G))) ^ 2) <=
+      8 * ((∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i A) ^ 2) +
+        (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i B) ^ 2) +
+        (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i C) ^ 2) +
+        (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i D) ^ 2) +
+        (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i F) ^ 2) +
+        (∑ i ∈ Finset.range 3,
+          norm (iteratedCovGrad (I := I) g r s i G) ^ 2)) := by
+  let h2 : SmoothCcTensor g r s -> Real := fun V =>
+    ∑ i ∈ Finset.range 3,
+      norm (iteratedCovGrad (I := I) g r s i V) ^ 2
+  have h2_nonneg (V : SmoothCcTensor g r s) : 0 <= h2 V := by
+    dsimp only [h2]
+    positivity
+  have hAB : h2 (A + B) <= 2 * h2 A + 2 * h2 B := by
+    simpa only [h2] using h2_add_le (I := I) g A B
+  have hCD : h2 (C + D) <= 2 * h2 C + 2 * h2 D := by
+    simpa only [h2] using h2_add_le (I := I) g C D
+  have hFG : h2 (F + G) <= 2 * h2 F + 2 * h2 G := by
+    simpa only [h2] using h2_add_le (I := I) g F G
+  have hABCD :
+      h2 ((A + B) + (C + D)) <=
+        2 * h2 (A + B) + 2 * h2 (C + D) := by
+    simpa only [h2] using h2_add_le (I := I) g (A + B) (C + D)
+  have hall :
+      h2 (((A + B) + (C + D)) + (F + G)) <=
+        2 * h2 ((A + B) + (C + D)) + 2 * h2 (F + G) := by
+    simpa only [h2] using
+      h2_add_le (I := I) g ((A + B) + (C + D)) (F + G)
+  change h2 (((A + B) + (C + D)) + (F + G)) <= _
+  calc
+    h2 (((A + B) + (C + D)) + (F + G))
+        <= 2 * h2 ((A + B) + (C + D)) + 2 * h2 (F + G) := hall
+    _ <= 2 * (2 * h2 (A + B) + 2 * h2 (C + D)) +
+          2 * (2 * h2 F + 2 * h2 G) :=
+      add_le_add
+        (mul_le_mul_of_nonneg_left hABCD (by norm_num))
+        (mul_le_mul_of_nonneg_left hFG (by norm_num))
+    _ <= 2 * (2 * (2 * h2 A + 2 * h2 B) +
+          2 * (2 * h2 C + 2 * h2 D)) +
+          2 * (2 * h2 F + 2 * h2 G) := by
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left
+          (add_le_add
+            (mul_le_mul_of_nonneg_left hAB (by norm_num))
+            (mul_le_mul_of_nonneg_left hCD (by norm_num)))
+          (by norm_num))
+        (le_refl _)
+    _ <= 8 * (h2 A + h2 B + h2 C + h2 D + h2 F + h2 G) := by
+      nlinarith [h2_nonneg F, h2_nonneg G]
+
 private theorem edgeLie_eq_sum
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -150,7 +308,20 @@ private theorem edgeLie_eq_sum
   rw [edgeLiePairFam]
   simp_rw [← edgePair_eq_mono]
   rw [iteratedCovGrad_smul]
-  simp_rw [edgePair_smul]
+  have hpair (sigma : Equiv.Perm (Fin 4)) :
+      edgePairMono (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hdelta hdeltaZ s)
+          (s • iteratedCovGrad (I := I) g 0 2 2 T) sigma =
+        s • edgePairMono (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hdelta hdeltaZ s)
+          (iteratedCovGrad (I := I) g 0 2 2 T) sigma :=
+    edgePair_smul (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) s
+      (iteratedCovGrad (I := I) g 0 2 2 T) sigma
+  simp_rw [hpair]
+  rw [Finset.smul_sum]
+  apply Finset.sum_congr rfl
+  intro i _
   module
 
 /-- A single Palatini pair-trace monomial has a uniform intrinsic `H2` tame
@@ -274,7 +445,7 @@ of all six slot permutations. -/
 theorem liePair_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
-    (hdelta0_nonneg : 0 <= delta0) (hdelta0_lt : delta0 < 1) :
+    (hdelta0_lt : delta0 < 1) :
     ∃ Ctop : Nat -> Real, (∀ i, 0 <= Ctop i) ∧
       ∃ B : Real -> Real, (∀ A, 0 <= A -> 0 <= B A) ∧
         ∀ (T : SmoothCcTensor g 0 2) {delta : Real},
@@ -328,8 +499,7 @@ theorem liePair_h2_tame
         g.inner y v w + ccTensorBilinSymm (I := I) g P y v w := by
     intro y v w
     rw [← show convexPerturbation (I := I) g T 0 s = P by
-      rw [convexPerturbation, smul_zero, zero_add]
-      rfl]
+      rw [convexPerturbation, smul_zero, zero_add]]
     exact realizedFam_inner_of_mem
       (I := I) g T 0 hdelta hdeltaZ hs_mem y v w
   have hPsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -1176,5 +1346,288 @@ theorem lieCorr_h2_tame
         (B A) ^ 2 := by
       rw [show (B A) ^ 2 = Kt * A ^ 2 + Kl * (1 + A ^ 2) by
         exact Real.sq_sqrt hinner]
+
+/-- The complete refolded order-zero Ricci--DeTurck coefficient has the
+same-horizon tame `H2` shape.  All lower terms depend only on the metric `H3`
+radius, while every fourth metric derivative remains in an explicit head. -/
+theorem rhs0_h2_tame
+    (hDim : Module.finrank Real E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) {delta0 : Real}
+    (hdelta0_nonneg : 0 <= delta0) (hdelta0_lt : delta0 < 1)
+    (hdelta0_half : delta0 <= 1 / 2) :
+    ∃ Ctop : Nat -> Real, (∀ i, 0 <= Ctop i) ∧
+      ∃ C4 : Real, 0 <= C4 ∧
+        ∃ B : Real -> Real, (∀ A, 0 <= A -> 0 <= B A) ∧
+          ∀ (T : SmoothCcTensor g 0 2) {delta : Real},
+            (∀ (x : M) (v w : TangentSpace I x),
+              ccTensorBilin (I := I) g T x v w =
+                ccTensorBilin (I := I) g T x w v) ->
+            delta <= delta0 ->
+            0 <= delta ->
+            (hdelta : gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g T) delta) ->
+            (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g
+                (0 : SmoothCcTensor g 0 2)) delta) ->
+            ∀ (s : Real), s ∈ Set.Icc (0 : Real) 1 ->
+            ∀ (A : Real), 0 <= A ->
+            (∑ j ∈ Finset.range 4,
+              norm (iteratedCovGrad (I := I) g 0 2 j (s • T)) ^ 2) <=
+                A ^ 2 ->
+            (∑ i ∈ Finset.range 3,
+              norm (iteratedCovGrad (I := I) g 2 2 i
+                (rhsRefold0 (I := I) (M := M) g g_bg T
+                  hdelta hdeltaZ s)) ^ 2) <=
+              (∑ i ∈ Finset.range 3,
+                Ctop i *
+                  norm (iteratedCovGrad (I := I) g 0 2
+                    (i + 2) (s • T)) ^ 2) +
+                C4 * norm (iteratedCovGrad (I := I) g 0 2
+                  4 (s • T)) ^ 2 +
+                (B A) ^ 2 := by
+  classical
+  obtain ⟨Cc, hCc, Bc, hBc, hconn⟩ :=
+    ricciConn_h2_tame (I := I) (M := M)
+      hDim g hdelta0_lt hdelta0_half
+  obtain ⟨Ck, hCk, Bk, hBk, hker⟩ :=
+    ricciKer_h2_tame (I := I) (M := M)
+      hDim g hdelta0_lt hdelta0_half
+  obtain ⟨Cd, hCd, Bd, hBd, hdLa⟩ :=
+    dLa_h2_tame (I := I) (M := M)
+      g g_bg hdelta0_nonneg hdelta0_lt
+  obtain ⟨Ce, hCe, Be, hBe, hdLb⟩ :=
+    dLb_h2_tame (I := I) (M := M)
+      g g_bg hdelta0_nonneg hdelta0_lt
+  obtain ⟨Cl, hCl, Bl, hBl, hlc⟩ :=
+    lieCorr_h2_tame (I := I) (M := M)
+      g g_bg hdelta0_nonneg hdelta0_lt
+  obtain ⟨Cp, hCp, Bp, hBp, hpair⟩ :=
+    liePair_h2_tame (I := I) (M := M)
+      hDim g hdelta0_lt
+  let Ctop : Nat -> Real := fun i =>
+    32 * Cc i + 32 * Ck i + 8 * Cp i
+  let C4 : Real := 8 * Cd + 8 * Ce + 8 * Cl
+  let L : Real -> Real := fun A =>
+    32 * (Bc A) ^ 2 + 32 * (Bk A) ^ 2 +
+      8 * (Bd A) ^ 2 + 8 * (Be A) ^ 2 +
+      8 * (Bl A) ^ 2 + 8 * (Bp A) ^ 2
+  let B : Real -> Real := fun A => Real.sqrt (L A)
+  have hCtop : ∀ i, 0 <= Ctop i := fun i => by
+    exact add_nonneg
+      (add_nonneg
+        (mul_nonneg (by norm_num) (hCc i))
+        (mul_nonneg (by norm_num) (hCk i)))
+      (mul_nonneg (by norm_num) (hCp i))
+  have hC4 : 0 <= C4 := by
+    exact add_nonneg
+      (add_nonneg
+        (mul_nonneg (by norm_num) hCd)
+        (mul_nonneg (by norm_num) hCe))
+      (mul_nonneg (by norm_num) hCl)
+  have hL : ∀ A, 0 <= L A := fun A => by
+    dsimp only [L]
+    positivity
+  have hB : ∀ A, 0 <= A -> 0 <= B A := fun A _ => by
+    exact Real.sqrt_nonneg _
+  refine ⟨Ctop, hCtop, C4, hC4, B, hB, ?_⟩
+  intro T delta hTsymm hdelta_le hdelta_nonneg hdelta hdeltaZ
+    s hs A hA hPjet
+  let P : SmoothCcTensor g 0 2 := s • T
+  let g1 : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g T 0 hdelta hdeltaZ s
+  have hdelta_lt : delta < 1 :=
+    lt_of_le_of_lt hdelta_le hdelta0_lt
+  have hs_mem : s ∈ realizedSmallSet (δ := delta) (δ' := delta) :=
+    Icc_subset_realizedSmallSet hdelta_lt hdelta_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      g1.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g P y v w := by
+    intro y v w
+    rw [← show convexPerturbation (I := I) g T 0 s = P by
+      rw [convexPerturbation, smul_zero, zero_add]]
+    exact realizedFam_inner_of_mem
+      (I := I) g T 0 hdelta hdeltaZ hs_mem y v w
+  have hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g P x v w =
+        ccTensorBilin (I := I) g P x w v := by
+    intro x v w
+    dsimp only [P]
+    rw [bilin_smul (I := I) (M := M),
+      bilin_smul (I := I) (M := M), hTsymm x v w]
+  have hs_abs : |s| <= 1 := by
+    rw [abs_of_nonneg hs.1]
+    exact hs.2
+  have hscaled_le : |s| * delta <= delta0 := by
+    have hscaled_delta : |s| * delta <= delta := by
+      simpa only [one_mul] using
+        mul_le_mul_of_nonneg_right hs_abs hdelta_nonneg
+    exact hscaled_delta.trans hdelta_le
+  have hscaled_nonneg : 0 <= |s| * delta :=
+    mul_nonneg (abs_nonneg s) hdelta_nonneg
+  have hboundP :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g P) (|s| * delta) := by
+    simpa only [P] using
+      gFibreOpBound_ccTensorBilinSymm_smul
+        (I := I) (M := M) g s T hdelta
+  let conn : SmoothCcTensor g 2 2 :=
+    linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g1
+  let ker : SmoothCcTensor g 2 2 :=
+    refoldKernelContractionField (I := I) (M := M) g g1
+      (iteratedCovGrad (I := I) g 0 2 2 P)
+      (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+      (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1
+  let dla : SmoothCcTensor g 2 2 :=
+    deTurckLieDLaCoeffField (I := I) (M := M) g g1 g_bg
+  let dlb : SmoothCcTensor g 2 2 :=
+    deTurckLieDLbCoeffField (I := I) (M := M) g g1 g_bg
+  let lc : SmoothCcTensor g 2 2 :=
+    lieCorr0Field (I := I) (M := M) g g1 g_bg
+  let pair : SmoothCcTensor g 2 2 :=
+    edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+      lieRefoldQ lieRefoldEps s
+  let H2 : SmoothCcTensor g 2 2 -> Real := fun V =>
+    ∑ i ∈ Finset.range 3,
+      norm (iteratedCovGrad (I := I) g 2 2 i V) ^ 2
+  have hconn0 :
+      H2 conn <=
+        (∑ i ∈ Finset.range 3,
+          Cc i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bc A) ^ 2 := by
+    simpa only [H2, conn] using
+      hconn g1 P (delta := |s| * delta) A htie
+        hscaled_le hscaled_nonneg hboundP hA hPjet
+  have hker0 :
+      H2 ker <=
+        (∑ i ∈ Finset.range 3,
+          Ck i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bk A) ^ 2 := by
+    simpa only [H2, ker] using
+      hker g1 P (delta := |s| * delta) A htie hPsymm
+        hscaled_le hscaled_nonneg hboundP hA hPjet
+  have hdla0 :
+      H2 dla <=
+        Cd * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Bd A) ^ 2 := by
+    simpa only [H2, dla] using
+      hdLa g1 P (delta := |s| * delta) A htie
+        hscaled_le hscaled_nonneg hboundP hA hPjet
+  have hdlb0 :
+      H2 dlb <=
+        Ce * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Be A) ^ 2 := by
+    simpa only [H2, dlb] using
+      hdLb g1 P (delta := |s| * delta) A htie
+        hscaled_le hscaled_nonneg hboundP hA hPjet
+  have hlc0 :
+      H2 lc <=
+        Cl * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Bl A) ^ 2 := by
+    simpa only [H2, lc] using
+      hlc g1 P (delta := |s| * delta) A htie
+        hscaled_le hscaled_nonneg hboundP hA hPjet
+  have heps : ∀ i, |lieRefoldEps i| <= 1 := by
+    intro i
+    fin_cases i <;> norm_num [lieRefoldEps]
+  have hpair0 :
+      H2 pair <=
+        (∑ i ∈ Finset.range 3,
+          Cp i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bp A) ^ 2 := by
+    simpa only [H2, pair, P] using
+      hpair T hTsymm hdelta_le hdelta_nonneg hdelta hdeltaZ
+        lieRefoldQ lieRefoldEps heps s hs A hA hPjet
+  have hconnS :
+      H2 ((-2 : Real) • conn) <=
+        4 * ((∑ i ∈ Finset.range 3,
+          Cc i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bc A) ^ 2) := by
+    rw [show H2 ((-2 : Real) • conn) = 4 * H2 conn by
+      calc
+        H2 ((-2 : Real) • conn) = (-2 : Real) ^ 2 * H2 conn := by
+          simpa only [H2] using h2_smul_eq (I := I) g (-2 : Real) conn
+        _ = 4 * H2 conn := by norm_num]
+    exact mul_le_mul_of_nonneg_left hconn0 (by norm_num)
+  have hkerS :
+      H2 ((-2 : Real) • ker) <=
+        4 * ((∑ i ∈ Finset.range 3,
+          Ck i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bk A) ^ 2) := by
+    rw [show H2 ((-2 : Real) • ker) = 4 * H2 ker by
+      calc
+        H2 ((-2 : Real) • ker) = (-2 : Real) ^ 2 * H2 ker := by
+          simpa only [H2] using h2_smul_eq (I := I) g (-2 : Real) ker
+        _ = 4 * H2 ker := by norm_num]
+    exact mul_le_mul_of_nonneg_left hker0 (by norm_num)
+  have hpairN : H2 (-pair) <=
+      (∑ i ∈ Finset.range 3,
+        Cp i * norm (iteratedCovGrad (I := I) g 0 2
+          (i + 2) P) ^ 2) + (Bp A) ^ 2 := by
+    rw [show H2 (-pair) = H2 pair by
+      rw [show -pair = (-1 : Real) • pair by module]
+      calc
+        H2 ((-1 : Real) • pair) = (-1 : Real) ^ 2 * H2 pair := by
+          simpa only [H2] using h2_smul_eq (I := I) g (-1 : Real) pair
+        _ = H2 pair := by norm_num]
+    exact hpair0
+  have hrhs :
+      rhsRefold0 (I := I) (M := M) g g_bg T hdelta hdeltaZ s =
+        ((((-2 : Real) • conn + (-2 : Real) • ker) + (dla + dlb)) +
+          (lc + (-pair))) := by
+    rw [rhsRefold_eq (I := I) (M := M)
+      g g_bg T hdelta hdeltaZ hTsymm hdelta_lt s hs]
+    dsimp only [conn, ker, dla, dlb, lc, pair, P, g1]
+    module
+  have hsix :
+      H2 ((((-2 : Real) • conn + (-2 : Real) • ker) + (dla + dlb)) +
+          (lc + (-pair))) <=
+        8 * (H2 ((-2 : Real) • conn) + H2 ((-2 : Real) • ker) +
+          H2 dla + H2 dlb + H2 lc + H2 (-pair)) := by
+    simpa only [H2] using h2_six_le (I := I) g
+      ((-2 : Real) • conn) ((-2 : Real) • ker) dla dlb lc (-pair)
+  rw [hrhs]
+  change H2 ((((-2 : Real) • conn + (-2 : Real) • ker) + (dla + dlb)) +
+      (lc + (-pair))) <= _
+  calc
+    H2 ((((-2 : Real) • conn + (-2 : Real) • ker) + (dla + dlb)) +
+        (lc + (-pair)))
+        <= 8 * (H2 ((-2 : Real) • conn) + H2 ((-2 : Real) • ker) +
+          H2 dla + H2 dlb + H2 lc + H2 (-pair)) := hsix
+    _ <= 8 * (
+        4 * ((∑ i ∈ Finset.range 3,
+          Cc i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bc A) ^ 2) +
+        4 * ((∑ i ∈ Finset.range 3,
+          Ck i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bk A) ^ 2) +
+        (Cd * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Bd A) ^ 2) +
+        (Ce * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Be A) ^ 2) +
+        (Cl * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+          (Bl A) ^ 2) +
+        ((∑ i ∈ Finset.range 3,
+          Cp i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) + (Bp A) ^ 2)) := by
+      gcongr
+    _ = (∑ i ∈ Finset.range 3,
+          Ctop i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) P) ^ 2) +
+        C4 * norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 +
+        (B A) ^ 2 := by
+      rw [show (B A) ^ 2 = L A by
+        dsimp only [B]
+        exact Real.sq_sqrt (hL A)]
+      dsimp only [Ctop, C4, L]
+      simp_rw [add_mul, mul_assoc]
+      rw [Finset.sum_add_distrib, Finset.sum_add_distrib,
+        ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum]
+      ring
+    _ = (∑ i ∈ Finset.range 3,
+          Ctop i * norm (iteratedCovGrad (I := I) g 0 2
+            (i + 2) (s • T)) ^ 2) +
+        C4 * norm (iteratedCovGrad (I := I) g 0 2 4 (s • T)) ^ 2 +
+        (B A) ^ 2 := by
+      rfl
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

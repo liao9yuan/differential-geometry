@@ -793,3 +793,39 @@ the `lbl395` normal-coordinate metric-bound honest input.
   branch-parametric consumer migration is about 72%; dedicated all-order
   metric-jet machinery is about 66%; overall native H6 producer machinery is
   about 73%.
+
+### 2026-07-28 Gate 6 closure
+
+- `IntrinsicJacobiJets` is exact GREEN (`3819/3819`),
+  `IntrinsicMetricJets` is exact GREEN (`3828/3828`), and `H6MetricJet` is
+  exact GREEN (`3964/3964`).
+- `exists_h6NormalData` is focused and exact GREEN (`3983/3983`). It constructs
+  the branch-carrying uniform normal-coordinate package from
+  `SeqMetricComplete`, connectedness, `SeqBoundedGeometry`, and a realized CGT
+  injectivity profile. No new radius, chart-agreement, forcing, or
+  consumer-side assumption is used.
+- Gate 6 and the dedicated H6 normal-coordinate producer are 100% complete.
+  The earlier percentage lines above are historical progress snapshots.
+- Resume Gate 5 next: instantiate `H6NormalData.trans_bounds_on` and the
+  existing H6 readout/transition producers in the selected support/root chain.
+  Do not restart the all-order Jacobi/metric-jet route.
+- `NormalRadiusProfile.le_exp_radius` remains an independent legacy theorem at
+  0%; the unconditional MSM135 endpoint remains unstated at 0%.
+
+### 2026-07-28 Gate 5 resumption
+
+- `HasSuppConvDataOn` now carries the source cover, atom limits, transition
+  limits, and transition smoothness for one `NormalChartFamily`.
+- `HasSuppConvData.toOnLegacy` is focused-green and preserves the established
+  public package unchanged while exposing it through `legacyChartFamily`.
+- The next concrete target is `HasSuppConvDataOn.actual_cm_tail`.  Its proof
+  must use the family chart/readout/transition operations throughout; the old
+  `HasSuppConvData.actual_cm_tail` remains a compatibility wrapper.
+- After that generic consumer is green, instantiate the selected support/root
+  chain with `H6NormalData.chart`, using
+  `H6NormalData.trans_bounds_on`/`exists_trans_lim` rather than adding a new
+  transition hypothesis.
+- Current accounting: the compatibility brick is 100%; Gate 5 provider
+  substitution is about 20%; the dedicated H6 producer is 100%;
+  `NormalRadiusProfile.le_exp_radius` and the unconditional MSM135 endpoint
+  remain theorem-level 0%.

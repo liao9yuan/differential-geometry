@@ -13,13 +13,22 @@ precomposition formulas. `iteratedDeriv_clm` records that postcomposition by a
 continuous linear map commutes with ordinary iterated derivatives under the
 same `C∞` assumption.
 
-The source is focused-green. An exact artifact refresh is deferred until the
-shared writer window is returned.
+The finite-regularity set-level commutation theorem now underlies three
+germ-level APIs:
+
+- `fderiv_iter_apply`, for a fixed directional derivative;
+- `iterFDeriv_clm_apply` and the two-slot `iterFDeriv_apply₂`;
+- `iterFDeriv_perm`, proving invariance under every permutation at `C∞`.
+
+The full permutation proof uses cyclic rotation, an adjacent swap obtained by
+induction on the fixed final direction, and the standard finite-permutation
+generation theorem. It does not strengthen `C∞` to analytic regularity.
+
+The source is focused-green. The exact artifact refresh is deferred while
+another lane owns the shared writer window.
 
 ## Next target
 
-Consume these theorems in `H6MetricJet` to identify repeated-direction
-`iteratedFDeriv` evaluations of a normal-chart metric with its affine-line Gram
-jets. The remaining lower-layer calculus frontier is permutation symmetry of
-`iteratedFDeriv` under `C∞` regularity; the Mathlib theorem requiring `ω`
-cannot be used for H6.
+Refresh this module once the writer window is returned, recheck
+`IteratedFDerivProdMatch`, and consume `iterFDeriv_perm` plus the two-slot
+evaluation lemmas in `H6MetricJet`.

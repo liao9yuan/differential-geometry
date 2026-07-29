@@ -768,4 +768,183 @@ theorem riemVol_exp_image_eq
             (show TangentSpace I x from v))
       rw [h1, one_mul]
 
+private theorem exists_inj_parts
+    {F : E → M} {U : Set E} (hU : MeasurableSet U)
+    (hloc : IsLocalHomeomorphOn F U) :
+    ∃ P : ℕ → Set E,
+      (∀ n, MeasurableSet (P n)) ∧
+      Pairwise (Disjoint on P) ∧
+      (⋃ n, P n) = U ∧
+      ∀ n, Set.InjOn F (P n) := by
+  classical
+  choose e he hFe using hloc
+  let V : E → Set E := fun x =>
+    if hx : x ∈ U then (e x hx).source else ∅
+  have hVopen : ∀ x, IsOpen (V x) := by
+    intro x
+    by_cases hx : x ∈ U
+    · simpa only [V, dif_pos hx] using (e x hx).open_source
+    · simp only [V, dif_neg hx, isOpen_empty]
+  have hxV : ∀ x (hx : x ∈ U), x ∈ V x := by
+    intro x hx
+    simpa only [V, dif_pos hx] using he x hx
+  have hVinj : ∀ x, Set.InjOn F (V x) := by
+    intro x
+    by_cases hx : x ∈ U
+    · simpa only [V, dif_pos hx, hFe x hx] using (e x hx).injOn
+    · simp only [V, dif_neg hx, Set.injOn_empty]
+  have hVnhds : ∀ x ∈ U, V x ∈ 𝓝[U] x := by
+    intro x hx
+    exact mem_nhdsWithin_of_mem_nhds ((hVopen x).mem_nhds (hxV x hx))
+  obtain ⟨t, _htU, htc, hcover⟩ :=
+    TopologicalSpace.countable_cover_nhdsWithin hVnhds
+  let enum : ℕ → E := Set.enumerateCountable htc 0
+  have ht_range : t ⊆ Set.range enum := by
+    intro x hx
+    simpa only [enum] using Set.subset_range_enumerate htc 0 hx
+  have hcoverV : U ⊆ ⋃ n, V (enum n) := by
+    intro x hx
+    rcases Set.mem_iUnion.mp (hcover hx) with ⟨z, hz⟩
+    rcases Set.mem_iUnion.mp hz with ⟨hzt, hxVz⟩
+    rcases ht_range hzt with ⟨n, hn⟩
+    exact Set.mem_iUnion.mpr ⟨n, hn ▸ hxVz⟩
+  let W : ℕ → Set E := fun n => V (enum n)
+  let P : ℕ → Set E := fun n => U ∩ disjointed W n
+  refine ⟨P, ?_, ?_, ?_, ?_⟩
+  · intro n
+    exact hU.inter
+      (MeasurableSet.disjointed
+        (fun k => (hVopen (enum k)).measurableSet) n)
+  · exact (disjoint_disjointed W).mono fun _ _ hij =>
+      hij.mono inter_subset_right inter_subset_right
+  · change (⋃ n, U ∩ disjointed W n) = U
+    rw [← Set.inter_iUnion, iUnion_disjointed,
+      Set.inter_eq_left]
+    simpa only [W] using hcoverV
+  · intro n
+    exact (hVinj (enum n)).mono
+      (inter_subset_right.trans (disjointed_subset W n))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A pointwise lower bound on the inverse-fibre multiplicity of the intrinsic
+exponential gives the corresponding multiplicity-weighted Riemannian area
+bound.  Local homeomorphism on the measurable source is enough: the source is
+partitioned into countably many measurable pieces on which the exponential is
+injective, and `riemVol_exp_image_eq` is summed over that partition. -/
+theorem riemVol_mul_le_area
+    [ConnectedSpace M] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E
+      (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {U : Set E} (hU : MeasurableSet U)
+    {S : Set M} (hS : MeasurableSet S) {m : ENat}
+    (hloc : IsLocalHomeomorphOn
+      (fun b : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from b)) U)
+    (hcount : ∀ y ∈ S, m ≤
+      {v : E | v ∈ U ∧
+        expMapIntrinsic (I := I) g hEnorm x
+          (show TangentSpace I x from v) = y}.encard) :
+    m.toENNReal *
+        riemannianVolumeMeasure (I := I) (M := M) g S
+      ≤ ∫⁻ v in U,
+          ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+        ∂(modelHaar (E := E)) := by
+  classical
+  let F : E → M := fun b =>
+    expMapIntrinsic (I := I) g hEnorm x
+      (show TangentSpace I x from b)
+  change IsLocalHomeomorphOn F U at hloc
+  change ∀ y ∈ S, m ≤ {v : E | v ∈ U ∧ F v = y}.encard at hcount
+  obtain ⟨P, hPmeas, hPdisj, hPcover, hPinj⟩ :=
+    exists_inj_parts hU hloc
+  have hFcont : Continuous F :=
+    (intrinsicFiber_smooth (I := I) g hEnorm x).continuous
+  have hQmeas : ∀ n, MeasurableSet (F '' P n) := fun n =>
+    (hPmeas n).image_of_continuousOn_injOn
+      hFcont.continuousOn (hPinj n)
+  have hpoint : ∀ y ∈ S,
+      m.toENNReal ≤ ∑' n : ℕ, (F '' P n).indicator 1 y := by
+    intro y hy
+    let Fib : Set E := {v : E | v ∈ U ∧ F v = y}
+    let J : Set ℕ := {n : ℕ | y ∈ F '' P n}
+    have hvpart : ∀ v : Fib, ∃ n, v.1 ∈ P n := by
+      intro v
+      have hv : v.1 ∈ ⋃ n, P n := hPcover.symm ▸ v.2.1
+      exact Set.mem_iUnion.mp hv
+    let idx : Fib → ℕ := fun v => Classical.choose (hvpart v)
+    have hidx : ∀ v : Fib, v.1 ∈ P (idx v) := fun v =>
+      Classical.choose_spec (hvpart v)
+    let emb : Fib ↪ J :=
+      { toFun := fun v =>
+          ⟨idx v, ⟨v.1, hidx v, v.2.2⟩⟩
+        inj' := by
+          intro v w hvw
+          have hn : idx v = idx w := congrArg Subtype.val hvw
+          apply Subtype.ext
+          apply hPinj (idx v) (hidx v)
+          · simpa only [hn] using hidx w
+          · exact v.2.2.trans w.2.2.symm }
+    have hcard : m.toENNReal ≤ J.encard.toENNReal :=
+      (ENat.toENNReal_mono (hcount y hy)).trans
+        (ENat.toENNReal_mono emb.encard_le)
+    calc
+      m.toENNReal ≤ J.encard.toENNReal := hcard
+      _ = ∑' _ : J, (1 : ENNReal) :=
+        (ENNReal.tsum_set_one J).symm
+      _ = ∑' n : ℕ, J.indicator 1 n :=
+        tsum_subtype J (fun _ : ℕ => (1 : ENNReal))
+      _ = ∑' n : ℕ, (F '' P n).indicator 1 y := by
+        apply tsum_congr
+        intro n
+        simp only [J, Set.indicator, Set.mem_setOf_eq, Pi.one_apply]
+  calc
+    m.toENNReal *
+          riemannianVolumeMeasure (I := I) (M := M) g S =
+        ∫⁻ _y in S, m.toENNReal
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+      (setLIntegral_const S m.toENNReal).symm
+    _ ≤ ∫⁻ y in S, ∑' n : ℕ, (F '' P n).indicator 1 y
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+      setLIntegral_mono' hS hpoint
+    _ ≤ ∫⁻ y, ∑' n : ℕ, (F '' P n).indicator 1 y
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+      setLIntegral_le_lintegral S _
+    _ = ∑' n : ℕ,
+        ∫⁻ y, (F '' P n).indicator 1 y
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+      simpa only using
+        (lintegral_tsum
+          (μ := riemannianVolumeMeasure (I := I) (M := M) g)
+          (f := fun n y =>
+            (F '' P n).indicator (fun _ => (1 : ENNReal)) y)
+          (fun n =>
+            (measurable_const.indicator (hQmeas n)).aemeasurable))
+    _ = ∑' n : ℕ,
+        riemannianVolumeMeasure (I := I) (M := M) g (F '' P n) := by
+      apply tsum_congr
+      intro n
+      exact lintegral_indicator_one (hQmeas n)
+    _ = ∑' n : ℕ,
+        ∫⁻ v in P n,
+          ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+        ∂(modelHaar (E := E)) := by
+      apply tsum_congr
+      intro n
+      simpa only [F] using
+        riemVol_exp_image_eq (I := I) g hEnorm x
+          (hPmeas n) (hPinj n)
+    _ = ∫⁻ v in ⋃ n, P n,
+          ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+        ∂(modelHaar (E := E)) :=
+      (lintegral_iUnion hPmeas hPdisj _).symm
+    _ = ∫⁻ v in U,
+          ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+        ∂(modelHaar (E := E)) := by
+      rw [hPcover]
+
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6NormalCoord
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.H6MetricJet
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -971,6 +972,106 @@ theorem exists_h6ChartData
   obtain ⟨d⟩ :=
     exists_h6BallData (I := I) X hcomplete hconn hgeom hd hreal
   exact ⟨d.toChartData⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Completeness, connectedness, sequence bounded geometry, and the CGT
+injectivity profile construct the full H6 normal-coordinate package. -/
+theorem exists_h6NormalData
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (hgeom : SeqBoundedGeometry (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X)
+    (hreal : hd.RealizesEdist) :
+    Nonempty (H6NormalData (I := I) X hd) := by
+  obtain ⟨d⟩ :=
+    exists_h6BallData (I := I) X hcomplete hconn hgeom hd hreal
+  let U : Real := d.ratio * hd.mu 0
+  let metricC : Nat → Real := fun n =>
+    ContinuousMultilinearMap.polarConst n *
+      (2 * (2 ^ n * jetCap hgeom.C U 1 n ^ 2))
+  refine ⟨{
+    toH6ChartData := d.toChartData
+    metricC := metricC
+    metricC_nonneg := ?_
+    metric_equiv := ?_
+    metric_deriv := ?_ }⟩
+  · intro n
+    exact mul_nonneg (ContinuousMultilinearMap.polarConst_nonneg n)
+      (mul_nonneg (by norm_num)
+        (mul_nonneg (by positivity) (sq_nonneg _)))
+  · intro k x
+    exact d.normal_equiv k x
+  · intro k n x
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : IsManifold I 1 (X.obj k).M :=
+      IsManifold.of_le (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+    letI : T2Space (X.obj k).M := (X.obj k).t2
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+      Manifold.metrizableSpace I (X.obj k).M
+    letI : T3Space (X.obj k).M := inferInstance
+    letI : RiemannianBundle
+        (fun y : (X.obj k).M => TangentSpace I y) :=
+      (X.obj k).riemBundle (I := I)
+    letI : (y : (X.obj k).M) →
+        InnerProductSpace Real (TangentSpace I y) :=
+      (X.obj k).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : (X.obj k).M => TangentSpace I y) :=
+      (X.obj k).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj k).M :=
+      (X.obj k).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj k).M :=
+      MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+    letI : ConnectedSpace (X.obj k).M := hconn k
+    let hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
+        ‖w‖ₑ =
+          ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
+      intro y w
+      simpa using
+        (tensor0SBundle_enorm_eq_riemannianBundle_enorm
+          (I := I) (X.obj k).metric y w)
+    let hPk : BoundedGeometry (I := I) (X.obj k) :=
+      { C := hgeom.C
+        nonneg := hgeom.nonneg
+        bound := hgeom.bound k }
+    refine NormalBallChart.MetricDerivBound.of_eqOn
+      (g := (X.obj k).metric) Metric.isOpen_ball
+      (d.toChartData.metric_eq_intr k (hcomplete.complete k) x) ?_
+    intro z hz
+    have hzU : ‖z‖ ≤ U := by
+      have hzRadius :
+          ‖z‖ < (d.toChartData.chart k x).radius := by
+        simpa [dist_zero_right] using Metric.mem_ball.mp hz
+      exact hzRadius.le.trans
+        (d.toChartData.radius_le_global hreal k x)
+    have hchartSmooth :
+        ContDiffAt Real ∞
+          ((d.toChartData.chart k x).metric (X.obj k).metric) z :=
+      ((d.toChartData.chart k x).metric_contDiffOn
+        (X.obj k).metric Metric.isOpen_ball
+        (d.toChartData.chart k x).smooth_to).contDiffAt
+          (Metric.isOpen_ball.mem_nhds hz)
+    have heq :
+        ((d.toChartData.chart k x).metric (X.obj k).metric) =ᶠ[nhds z]
+          intrFrameMetric (I := I) (X.obj k).metric hEnorm x :=
+      Filter.eventuallyEq_of_mem (Metric.isOpen_ball.mem_nhds hz)
+        fun q hq =>
+          d.toChartData.metric_eq_intr k (hcomplete.complete k) x hq
+    have hintrSmooth :
+        ContDiffAt Real ∞
+          (intrFrameMetric (I := I) (X.obj k).metric hEnorm x) z :=
+      hchartSmooth.congr_of_eventuallyEq heq.symm
+    exact intrMetric_deriv_le (I := I) (X.obj k)
+      (hcomplete.complete k) (hconn k) hPk x z n U hzU hintrSmooth
 
 end HCGCompactness
 end DifferentialGeometry

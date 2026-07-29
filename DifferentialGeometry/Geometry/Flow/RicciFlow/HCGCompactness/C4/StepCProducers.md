@@ -769,3 +769,25 @@ The Lean file was also reduced from 3068 to 2985 lines by condensing historical
 doc comments into result-facing summaries.  No declaration, proof, or public
 signature moved; the detailed architecture remains in this note.  This restores
 the repository's 3000-line source-file limit without broadening the migration.
+
+## 2026-07-28 Gate 5 chart-family package
+
+`HasSuppConvDataOn` is the chart-parametric form of the selected support
+convergence package.  One `NormalChartFamily` now controls the source maps,
+source radii, atom limits, sparse transition limits, and transition smoothness
+throughout the package.  The established `HasSuppConvData` declaration remains
+unchanged.
+
+`HasSuppConvData.toOnLegacy` reconstructs the generic package at
+`legacyChartFamily` from the old data.  It discards only the obsolete extra
+`normalBounds.radius` containment; the canonical `expRadiusGp` containment is
+exactly the radius field of the legacy chart family.  Focused verification
+passes.  The next target is the chart-parametric form of
+`HasSuppConvData.actual_cm_tail`, followed by the selected H6 provider
+instantiation.
+
+This closes the support-package compatibility brick, not the provider
+substitution itself.  The compatibility theorem is 100%; the Gate 5
+consumer/provider substitution is about 20%; the dedicated H6 producer remains
+100%; `NormalRadiusProfile.le_exp_radius` and the unconditional MSM135 endpoint
+remain theorem-level 0%.  Whole-HCG machinery remains approximately 60%.

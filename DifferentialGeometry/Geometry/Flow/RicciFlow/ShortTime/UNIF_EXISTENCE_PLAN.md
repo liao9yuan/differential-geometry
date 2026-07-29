@@ -2301,6 +2301,57 @@ Honest accounting:
 - the three listed H2 coefficient bricks: **100% as source-checked theorems**;
 - `(N)` dedicated machinery remains conservatively **85--88%**.
 
+## Planner update No. 46 (2026-07-28) - complete H2 assembly source written
+
+The fixed-background solver status has been re-audited against the live tree:
+`LowRegDenseSolve.lowreg_partial_sol` is already a proved order-one
+Ricci--DeTurck fixed-point endpoint, and `LowRegBootstrapOne` preserves its
+intermediate trace on the same horizon.  The current refold work is not a
+duplicate solver route.  The same note proves that generic `L2_t H1` forcing
+cannot supply the order-two step; the missing geometric input is precisely
+the principal-subtracted `L2_t H2` lower family.
+
+The remaining static coefficient assembly has now been written:
+
+- `RHSRefoldField.rhsRefold_eq` expresses literal `rhsRefold0` as the Ricci
+  connection field, Ricci Palatini kernel, DLa, DLb, `lieCorr0`, and the
+  negative Lie pair.  The complete Ricci plus DeTurck principal cancellation
+  occurs before estimation.
+- `RHSRefoldTameH2.liePair_h2_tame` controls all six signed Palatini
+  monomials uniformly in the path parameter and permutations.
+- `RHSRefoldTameH2.rhs0_h2_tame` combines the six fields into the required
+  dimension-three H2 tame shape, retaining every fourth metric derivative in
+  an explicit head and using only the H3 radius in the lower envelope.
+
+All three new theorem bodies are **unverified and count as 0% completed**.
+Focused elaboration is blocked before the edited declarations by the absent
+`CurvatureCoefficientDifferenceJetTower.olean`.  The first targeted recovery
+ended after a long high-memory compile with Windows exit `3221225477`; the
+authorized one-thread recovery also stopped without producing the artifact.
+Neither emitted a Lean source diagnostic.  A proposed small-module workaround
+was deleted after dependency audit showed that the canonical Palatini field
+and its residual-window theorem still depend directly or transitively on that
+tower; retaining a duplicate would create a forbidden parallel API.
+
+Recovery order is now exact and small:
+
+1. obtain one exact-current tower artifact, or approve a canonical split of
+   the existing Palatini/residual declarations below that tower;
+2. focused-check `RHSRefoldField.lean`;
+3. focused-check `RHSRefoldTameH2.lean` and repair only local elaboration;
+4. package `rhs0_h2_tame` as the same-horizon `L2_t H2` A1 family beside
+   exact-current `lowRegA2_data`;
+5. run the order-two nonautonomous bootstrap, then smoothing/geometric
+   realization and family-uniform common-horizon assembly.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- the new complete static H2 theorem: **0% until elaborated and checked**;
+- same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.
+
 ## Planner update No. 45 (2026-07-27) - DLb and lieCorr H2 tame bricks
 
 The order-two DeTurck coefficient split has advanced without adding a
@@ -2335,3 +2386,111 @@ Honest accounting:
 - the complete `rhsRefold0` H2/time-tame theorem: **0% until stated and
   proved**;
 - `(N)` dedicated machinery remains conservatively **85--88%**.
+
+## Planner update No. 47 (2026-07-28) - complete static H2 refold exact
+
+The artifact blocker in update No. 46 is closed:
+
+- `CurvatureCoefficientDifferenceJetTower` is exact GREEN (`9391/9391`);
+- `RHSRefoldField.rhsRefold_eq` is focused and exact GREEN
+  (`9472/9472`); and
+- `RHSRefoldTameH2.rhs0_h2_tame` is focused and exact GREEN
+  (`9523/9523`), with no local diagnostics.
+
+Thus the complete six-field static `H2` refold theorem is **100% complete as
+stated**.  The Ricci connection field, Ricci Palatini kernel, DLa, DLb,
+`lieCorr0`, and negative Lie pair are assembled only after the exact Ricci
+plus DeTurck principal cancellation.  The checked theorem has no high-`a`
+assumption and retains every fourth metric derivative in one explicit head;
+all lower envelopes depend only on the metric `H3` radius.
+
+The time-level audit prevents an invalid bookkeeping shortcut.  The existing
+order-one solution gives `L2_t H3` and a same-horizon `H2` trace, not
+`L2_t H4`.  Consequently `rhs0_h2_tame` cannot be declared to be the desired
+nonautonomous `A1(t)` datum merely by renaming its conclusion.  The remaining
+low-base regularity theorem must either:
+
+1. refold the explicit fourth-derivative head into the completed
+   `H4 -> H2` principal family before defining `A1`; or
+2. prove a same-horizon/interior parabolic regularity step that supplies the
+   needed time-integrability without assuming a uniform `H4` bound from the
+   C3 input class.
+
+The endpoint requires chart-Gram joint smoothness on the full `Ico` slab.
+Any interior-smoothing route must therefore also splice to the existing
+per-datum smooth solution near `t = 0` and prove agreement, rather than
+silently weakening the endpoint to `Ioo`.
+
+Next concrete task: audit the two alternatives against
+`lowRegPrincipal_core`, `NonautonomousL2`,
+`ParabolicInteriorSmoothing`, and the available fixed-point uniqueness API;
+then state the smallest consumer-shaped low-base regularity theorem.  Do not
+introduce an `H4` class assumption or count a conditional time-path wrapper
+as the theorem.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- complete static `rhsRefold0` `H2` theorem: **100% as stated**;
+- low-base same-horizon/interior regularity theorem: **0% until stated and
+  proved**;
+- `(N)` dedicated machinery: conservatively **88--90%**.
+
+## Planner update No. 48 (2026-07-28) - exact low-base operator frontier
+
+The post-`rhs0_h2_tame` audit rules out two bookkeeping shortcuts.
+
+First, the coefficient-only top constants are finite but are not small in the
+metric deviation.  In particular, the Ricci connection and Palatini-kernel
+top constants remain positive even at zero deviation.  Their fourth-jet heads
+become small only after the complete coefficient acts on the undifferentiated
+metric deviation.  Therefore no consequence of `rhs0_h2_tame` alone can be
+renamed as the required `A1(t) : H3 -> H2`.
+
+Second, `lowRegA2Time` packages only the endpoint
+`lowRegPrincipal : H4 -> H2`.  The remotely visible high-order theorem
+`exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThirdArm_add_tame`
+shows the missing structure precisely: after the endpoint principal arm there
+remain a small second-order arm, an order-zero arm whose highest coefficient
+jet is small only after multiplication by the metric deviation, and a
+one-order-lower tame arm.  Its proof cannot be specialized directly because
+it assumes a supercritical `H^(a+2)` ball.
+
+The smallest faithful low-base producer must therefore construct, on a small
+three-dimensional `H2` metric ball:
+
+```text
+extraA2 : metricH2 -> (metricH4 ->L metricH2)
+lowerA1 : metricH3 -> (metricH3 ->L metricH2)
+```
+
+with a smooth-core identity for the complete Ricci--DeTurck action,
+`||extraA2 S|| <= c * ||S||H2`, local Lipschitz continuity of `extraA2`, and
+`||lowerA1 S|| <= C_R * (1 + ||S||H3)`.  The last bound must be linear in the
+`H3` norm so that the existing `L2_t H3` order-one solution supplies
+`MemLp lowerA1 2`.  The current `lowRegPrincipal` is then augmented by
+`extraA2`; the generic `NonautonomousL2` solver consumes that total `A2`
+together with `lowerA1`.
+
+A value-based rank-one factorization is not yet a substitute: before this
+bootstrap the rough solution is not known to lie in `L2_t H4`, so the full
+principal-subtracted residual is not defined as an `H2` value from which to
+build that rank-one map.  It becomes legitimate only after an action-level
+mixed estimate or an equivalent operator extension is already available.
+
+The architecture stop signal is now concrete: no live public theorem provides
+the complete low-base Ricci plus DeTurck operator split above, and choosing
+between extracting the high-order three-arm proof at finite order and using
+the local chart linearization requires a design ruling.  The canonical Pro
+prompt is `UNIF_LOWBASE_PRO_PROMPT.md`.  No Lean source was changed and no
+build was run for this audit.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- complete static `rhsRefold0` `H2` coefficient theorem: **100% as stated**;
+- low-base operator split / same-horizon order-two bootstrap theorem:
+  **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **88--90%**.

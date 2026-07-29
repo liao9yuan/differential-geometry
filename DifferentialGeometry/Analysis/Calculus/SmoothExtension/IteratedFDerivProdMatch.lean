@@ -1,7 +1,5 @@
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Analysis.Calculus.ContDiff.Comp
+import DifferentialGeometry.Analysis.Calculus.DirectionalJet
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 
 /-!
@@ -54,81 +52,6 @@ open scoped ContDiff
 
 namespace DifferentialGeometry
 namespace Analysis
-
-section DirectionalCommutation
-
-/-- **Single-slot `C∞` commutation of a directional derivative with `iteratedFDerivWithin`.**
-For a `C∞` function `f` on a set `s` of unique differentiability, every point of which is
-accumulated from the interior (`s ⊆ closure (interior s)`), the Fréchet derivative of the `n`-th
-iterated derivative in a fixed direction `u` equals the `n`-th iterated derivative of the
-directional partial `y ↦ fderivWithin ℝ f s y u`:
-`fderivWithin ℝ (iteratedFDerivWithin ℝ n f s) s x u = iteratedFDerivWithin ℝ n (∂_u f) s x`.
-
-Evaluated on a tuple this is the cyclic permutation symmetry of `iteratedFDerivWithin (n+1)`
-(moving the leading slot, `Fin.cons u m`, to the trailing slot, `Fin.snoc m u`). It bootstraps from
-the second-order Clairaut symmetry `ContDiffWithinAt.isSymmSndFDerivWithinAt` by induction on `n`
-through the *outer* derivative (`iteratedFDerivWithin_succ_eq_comp_left`), which keeps the codomain
-`W` fixed, so the domain `G` and codomain `W` may live in arbitrary (independent) universes. The
-successor step reduces, via the induction hypothesis at every point of `s` and
-`fderivWithin_clm_apply`, to the second-order symmetry of `H := iteratedFDerivWithin ℝ n f s`
-(which is `C²`, being an iterated derivative of a `C∞` function); that symmetry holds because
-`x ∈ closure (interior s)`. -/
-theorem fderivWithin_iteratedFDerivWithin_apply_eq {G W : Type*}
-    [NormedAddCommGroup G] [NormedSpace ℝ G] [NormedAddCommGroup W] [NormedSpace ℝ W]
-    {s : Set G} (hs : UniqueDiffOn ℝ s) (hs' : s ⊆ closure (interior s))
-    (n : ℕ) {f : G → W} (hf : ContDiffOn ℝ ∞ f s) (u : G) :
-    ∀ x ∈ s, fderivWithin ℝ (iteratedFDerivWithin ℝ n f s) s x u
-      = iteratedFDerivWithin ℝ n (fun y => fderivWithin ℝ f s y u) s x := by
-  induction n with
-  | zero =>
-    -- `iteratedFDerivWithin 0 g s = (curryFin0).symm ∘ g`; the linear iso commutes with `fderivWithin`.
-    intro x hx
-    rw [iteratedFDerivWithin_zero_eq_comp,
-      LinearIsometryEquiv.comp_fderivWithin _ (hs x hx)]
-    ext m
-    rw [ContinuousLinearMap.comp_apply, iteratedFDerivWithin_zero_apply]
-    rfl
-  | succ n IH =>
-    intro x hx
-    -- Abbreviate the `n`-th iterate `H`; it is `C²` within `s` (an iterate of a `C∞` map).
-    set H := iteratedFDerivWithin ℝ n f s with hH_def
-    -- The currying linear isometry peeled off by `iteratedFDerivWithin_succ_eq_comp_left`.
-    set e := (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => G) W).symm with he_def
-    -- LHS factors through the outer derivative of `H` in direction `u`.
-    have hLHS : fderivWithin ℝ (iteratedFDerivWithin ℝ (n + 1) f s) s x u
-        = e (fderivWithin ℝ (fderivWithin ℝ H s) s x u) := by
-      rw [iteratedFDerivWithin_succ_eq_comp_left]
-      rw [e.comp_fderivWithin (f := fderivWithin ℝ H s) (hs x hx)]
-      rfl
-    -- RHS, by the induction hypothesis at every point, is the outer derivative of `∂_u H`.
-    have hIHeq : Set.EqOn (iteratedFDerivWithin ℝ n (fun y => fderivWithin ℝ f s y u) s)
-        (fun y => fderivWithin ℝ H s y u) s := fun y hy => (IH y hy).symm
-    have hRHS : iteratedFDerivWithin ℝ (n + 1) (fun y => fderivWithin ℝ f s y u) s x
-        = e (fderivWithin ℝ (fun y => fderivWithin ℝ H s y u) s x) := by
-      rw [iteratedFDerivWithin_succ_eq_comp_left, Function.comp_apply,
-        fderivWithin_congr hIHeq (hIHeq hx)]
-    -- The two outer derivatives agree by the second-order Clairaut symmetry of `H`.
-    rw [hLHS, hRHS]
-    congr 1
-    -- `fderivWithin (∂_u H) s x = (fderivWithin (fderivWithin H s) s x).flip u`.
-    have hHC2 : ContDiffWithinAt ℝ 2 H s x := by
-      refine (hf x hx).iteratedFDerivWithin_right hs ?_ hx
-      have h2n : (2 : WithTop ℕ∞) + (n : WithTop ℕ∞) = ((2 + n : ℕ∞) : WithTop ℕ∞) := by norm_cast
-      rw [h2n]; exact_mod_cast le_top
-    have hn2 : minSmoothness ℝ 2 ≤ (2 : WithTop ℕ∞) := le_of_eq minSmoothness_of_isRCLikeNormedField
-    have hsymH : IsSymmSndFDerivWithinAt ℝ H s x :=
-      hHC2.isSymmSndFDerivWithinAt hn2 hs (hs' hx) hx
-    have hHdiff : DifferentiableWithinAt ℝ (fderivWithin ℝ H s) s x :=
-      (hHC2.fderivWithin_right hs (m := 1) le_rfl hx).differentiableWithinAt (by simp)
-    have hflip : fderivWithin ℝ (fun y => fderivWithin ℝ H s y u) s x
-        = (fderivWithin ℝ (fderivWithin ℝ H s) s x).flip u := by
-      rw [fderivWithin_clm_apply (hs x hx) hHdiff (differentiableWithinAt_const u),
-        fderivWithin_const_apply, ContinuousLinearMap.comp_zero, zero_add]
-    refine ContinuousLinearMap.ext (fun v => ?_)
-    rw [hflip, ContinuousLinearMap.flip_apply]
-    exact hsymH.eq u v
-
-end DirectionalCommutation
 
 section ProdMatch
 
@@ -189,7 +112,11 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
         map_smul]
       -- Transverse direction `(1,0)`: commute with `iteratedFDerivWithin`, then use IH on `∂ₜ D`.
       have htrans : fderivWithin ℝ (iteratedFDerivWithin ℝ n D S) S (0, z) ((1:ℝ), (0:E)) = 0 := by
-        rw [fderivWithin_iteratedFDerivWithin_apply_eq hUD hSclo n hD ((1:ℝ), (0:E)) (0, z) hmem]
+        rw [fderivWithin_iteratedFDerivWithin_apply_eq hUD hSclo n
+          (hD.of_le
+            (WithTop.coe_le_coe.mpr le_top :
+              ((n : WithTop ℕ∞) + 2) ≤ ∞))
+          ((1:ℝ), (0:E)) (0, z) hmem]
         -- `∂ₜ D` is `C∞` on `S`.
         have hDt : ContDiffOn ℝ ∞ (fun y => fderivWithin ℝ D S y ((1:ℝ), (0:E))) S := by
           have hfd : ContDiffOn ℝ ∞ (fderivWithin ℝ D S) S :=

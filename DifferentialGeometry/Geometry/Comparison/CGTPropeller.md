@@ -69,3 +69,27 @@ pointwise fibre-cardinality lower bound.  The smallest honest implementation
 is a countable measurable injective partition for a local diffeomorphism, or
 an equivalent local-sheet area formula followed by exhaustion.  No new
 geometric assumption is needed.
+
+## Downstream closure - 2026-07-28
+
+The sharp core chain is now also exposed directly through
+`loopIter_nonexp`, `intrCycle_center`, `intrCycle_not_fin`,
+`intrIter_inj_core`, `intrIter_family_core`, `intrFiber_card_core`, and
+`intrFiber_count_core`.  The older public finite-family interfaces remain
+unchanged.
+
+The formerly open multiplicity seam was closed in the volume layer and is now
+consumed by `CGTInjectivity`.  Consequently:
+
+- paper CGT Lemma 4.6: theorem 100%, dedicated machinery 100%;
+- `intrLoop_ge_cgt`: theorem 100%, dedicated machinery 100%;
+- pointwise CGT injectivity producer: theorem 100%, dedicated machinery 100%;
+- sequence `InjRadiusDecayInput` producer: theorem 100%, dedicated machinery
+  100%;
+- unconditional Theorem 3.9: theorem 0%; its remaining work is assembly and
+  the other named native inputs, not CGT;
+- whole HCG supporting machinery: about 67%.
+
+Focused verification and the exact module refresh passed.  The downstream
+axiom audit has only `propext`, `Classical.choice`, and `Quot.sound`; there is
+no remaining `sorryAx` or independent CGT black box.

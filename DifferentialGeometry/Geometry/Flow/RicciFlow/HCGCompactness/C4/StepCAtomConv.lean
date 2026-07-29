@@ -395,22 +395,31 @@ theorem stepCAtom_readout
           (normalTransition (I := I) Y beta gamma z)) := by
   exact quadNormal_readout (I := I) Y beta gamma (stepCBump lam hlam) hsrc
 
-/-- Pull one Step-C atom back by the framed exponential-side chart at `beta`. -/
-noncomputable def stepCAtomChart
+/-- Pull one Step-C atom back through a controlled normal chart at `beta`. -/
+noncomputable def stepCAtomOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
-    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+    (lam : Real) (hlam : 0 < lam) (c : NormalChartAt (I := I) Y beta)
+    (z : E) : Real :=
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  stepCAtom Y gamma lam hlam (framedExpDiffeo (I := I) Y.metric beta z)
+  stepCAtom Y gamma lam hlam (c.hom z)
 
-/-- Pull one ordered-net atom back by the framed exponential-side chart at
-`beta`. The wrapper installs the bundled manifold instances hidden in the
+/-- Pull one Step-C atom back by the selected legacy framed chart at `beta`. -/
+noncomputable def stepCAtomChart
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
+    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+  stepCAtomOn (I := I) Y beta gamma lam hlam
+    (legacyBallChart (I := I) Y beta) z
+
+/-- Pull one ordered-net atom back through a stagewise controlled normal-chart
+family. The wrapper installs the bundled manifold instances hidden in the
 sequence. -/
-noncomputable def seqAtomChart
+noncomputable def seqAtomOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
@@ -423,7 +432,36 @@ noncomputable def seqAtomChart
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   seqAtom hd hD P L pb r k gamma
-    (framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    ((chart (L.φ k) (beta k)).hom z)
+
+/-- Pull one ordered-net atom back by the selected legacy framed chart at
+`beta`. -/
+noncomputable def seqAtomChart
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    (k : Nat) (z : E) : Real :=
+  seqAtomOn (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma k z
+
+/-- Provider-parametric chart-pulled atoms commute with strict refinement of
+the net-limit data. -/
+@[simp] theorem seqAtomOn_subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {ψ : Nat -> Nat} (hψ : StrictMono ψ) (k : Nat) :
+    seqAtomOn (I := I) chart hd hD P (L.subseq hψ) pb r
+        (fun j => beta (ψ j)) gamma k =
+      seqAtomOn (I := I) chart hd hD P L pb r beta gamma (ψ k) := by
+  unfold seqAtomOn
+  simp only [seqAtom_subseq]
+  rfl
 
 /-- Chart-pulled atoms commute with strict refinement of the net-limit data. -/
 @[simp] theorem seqAtomChart_subseq
@@ -436,14 +474,39 @@ noncomputable def seqAtomChart
     seqAtomChart (I := I) hd hD P (L.subseq hψ) pb r
         (fun j => beta (ψ j)) gamma k =
       seqAtomChart (I := I) hd hD P L pb r beta gamma (ψ k) := by
-  unfold seqAtomChart seqAtom
-  simp only [NetLimitData.subseq, NetLimitData.lamInf, Function.comp_apply]
-  funext z
-  cases hcenter : seqCenter hd D P (L.φ (ψ k)) (gamma : Nat) with
-  | none =>
-      change (0 : Real) = 0
-      rfl
-  | some c => congr
+  exact seqAtomOn_subseq (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma hψ k
+
+/-- Pulling a globally smooth ordered-net atom back through a controlled chart
+is smooth on every subset of the chart's named source-radius ball. -/
+theorem seqAtomOn_smooth
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {U : Set E}
+    (hUx :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (chart (L.φ k) (beta k)).radius) :
+    ContDiffOn Real (∞ : WithTop ℕ∞)
+      (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  rw [← contMDiffOn_iff_contDiffOn]
+  simpa only [seqAtomOn] using
+    (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
+      ((chart (L.φ k) (beta k)).smooth_to.mono hUx)
 
 /-- Pulling a globally smooth ordered-net atom back by a framed exponential-side
 chart is smooth on every set contained in its intrinsic source-radius ball. -/
@@ -523,7 +586,8 @@ theorem seqAtom_dead_conv
   refine hzero.congr_eventually hU ?_ fun _ _ => rfl
   filter_upwards [seqCenter_dead hd P L (gamma : Nat) hgamma] with k hk
   intro z _hz
-  simp [seqAtomChart, seqAtom_none hd hD P L pb r k gamma hk]
+  simp [seqAtomChart, seqAtomOn,
+    seqAtom_none hd hD P L pb r k gamma hk]
 
 /-- A slot whose five-lambda ball is eventually disjoint from the source hat
 has zero chart-pulled atom limit on the source domain. -/

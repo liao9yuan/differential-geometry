@@ -267,3 +267,19 @@ Focused verification and the exact module refresh passed.  The completed CGT
 finite-family theorem depends only on the standard axioms `propext`,
 `Classical.choice`, and `Quot.sound`, so this center path introduces no
 `sorryAx`.
+
+## 2026-07-28 - CGT consumer closure
+
+The generic public theorem `exists_global_of_lt` is now the compact-core to
+global-minimizer interface used by the propeller proof.  It keeps the center
+argument independent of any invariant-core assumption: points outside the
+compact core are excluded by the strict energy barrier, while strict Jensen
+uniqueness handles the core.
+
+The downstream propeller, pointwise injectivity estimate, and sequence decay
+producer are now all closed.  Focused verification, the exact module refresh,
+and the downstream axiom audit passed; the audit contains only `propext`,
+`Classical.choice`, and `Quot.sound`.
+
+Honest accounting: the finite-family global-center theorem is 100%, its
+dedicated machinery is 100%, and this module has no remaining CGT frontier.

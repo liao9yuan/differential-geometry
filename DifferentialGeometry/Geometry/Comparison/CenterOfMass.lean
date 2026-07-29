@@ -414,6 +414,39 @@ theorem metricEnergy_lt_far (μ : ι -> Real) (pts : ι -> X) {p q : X} {r : Rea
   exact mul_lt_mul_of_pos_left hsum (by norm_num : (0 : Real) < 1 / 2)
 
 /-- A compact strictly Jensen-convex region contains the unique global center
+when its chosen comparison point has strictly less energy than every point
+outside the region. -/
+theorem exists_global_of_lt (μ : ι -> Real) (pts : ι -> X)
+    {join : X -> X -> Real -> X} {S : Set X} {p : X}
+    (hS : IsCompact S) (hpS : p ∈ S)
+    (hfar : ∀ q : X, q ∉ S ->
+      metricEnergy μ pts p < metricEnergy μ pts q)
+    (hμ_nonneg : ∀ i : ι, 0 ≤ μ i) (hμ_pos : ∃ i : ι, 0 < μ i)
+    (hjensen : ∀ i : ι, StrictMidJensenOn join S (halfSqDist (pts i))) :
+    ∃ c ∈ S,
+      (∀ z : X, metricEnergy μ pts c ≤ metricEnergy μ pts z) ∧
+      ∀ y : X,
+        (∀ z : X, metricEnergy μ pts y ≤ metricEnergy μ pts z) -> y = c := by
+  classical
+  obtain ⟨c, hcS, hcminS⟩ :=
+    hS.exists_isMinOn ⟨p, hpS⟩ (metricEnergy_cont μ pts).continuousOn
+  have hcmin : ∀ z : X, metricEnergy μ pts c ≤ metricEnergy μ pts z := by
+    intro z
+    by_cases hzS : z ∈ S
+    · exact hcminS hzS
+    · exact (hcminS hpS).trans (hfar z hzS).le
+  have hstrict :
+      StrictMidConvexOn join S (metricEnergy μ pts) :=
+    metricEnergy_strict μ pts hμ_nonneg hμ_pos hjensen
+  refine ⟨c, hcS, hcmin, ?_⟩
+  intro y hymin
+  have hyS : y ∈ S := by
+    by_contra hyS
+    exact (not_lt_of_ge (hymin p)) (hfar y hyS)
+  exact min_unique_of_mid hstrict hyS hcS
+    (fun z _ => hymin z) (fun z _ => hcmin z)
+
+/-- A compact strictly Jensen-convex region contains the unique global center
 when it contains the `2r` ball around a point whose `r` ball contains the
 finite family.  The outside-energy barrier upgrades a constrained compact
 minimum to a global one. -/

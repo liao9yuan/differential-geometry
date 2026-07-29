@@ -51,14 +51,37 @@ zeroth-order factors.  The correct route is the public radius-free
 antidiagonal integrator at the fixed fibre-small radius.  It keeps the fourth
 jet linear after integration without any pointwise `H4` assumption.
 
-## Next frontier
+## 2026-07-28 complete assembly
 
-The DLa, DLb, and `lieCorr0` tame constituents are now checked.  The next
-frontier is the exact finite-sum assembly for `rhsRefold0`: first identify the
-public Ricci-refold and Lie pair-trace identities that connect these
-constituents to the literal `rhsRefold0` definition, then bound only the
-remaining refold fields.  Do not estimate a pre-cancellation complete
-coefficient or reintroduce a nonsmall `H3` top coefficient.
+The exact finite-sum route has now been written:
 
-The theorem `ricci_flow_unif_existence` remains unproved.  These are dedicated
-coefficient estimates for its order-two bootstrap, not the endpoint theorem.
+- `liePair_h2_tame` expands the three signed pair terms into six arbitrary
+  Palatini monomials and applies the low-order corner/residual window estimate.
+- `rhs0_h2_tame` combines the Ricci connection and Palatini kernel, DLa, DLb,
+  `lieCorr0`, and the negative Lie pair.  Its conclusion has one explicit
+  fourth-jet head and a lower envelope depending only on the `H3` radius.
+- The total proof uses the exact `rhsRefold_eq` identity from
+  `RHSRefoldField.lean`; it does not estimate the cancelled `AA` or
+  background-curvature fields.
+
+The curvature-coefficient tower recovery is now exact green.  Both
+`RHSRefoldField.lean` and this file subsequently passed focused and exact
+verification; `liePair_h2_tame` and `rhs0_h2_tame` are therefore 100%
+complete as stated.  There are no local diagnostics and no `sorry`, `admit`,
+axiom declaration, `whnf`, or trace option in this file.
+
+The next frontier is not another static coefficient estimate.  The current
+order-one maximal-regularity solution supplies a uniform same-horizon
+`L2_t H3` field and an `H2` trace, whereas `rhs0_h2_tame` honestly retains an
+`H4` head.  Therefore it cannot simply be relabelled as an `A1(t)` family
+without first proving the relevant time-regularity/linearization theorem.
+The next implementation must either refold that head into the order-two
+principal operator or prove the low-base same-horizon regularity step that
+makes the head time-integrable.  It may not assume a uniform `H4` bound from
+the C3 input class.
+
+The theorem `ricci_flow_unif_existence` remains unproved (0%).  Its dedicated
+machinery is conservatively about 88--90%; the fixed-background order-one
+solve and complete static `H2` refold estimate are proved, while the
+low-base regularity step, smoothing/realization, and uniform common-horizon
+assembly remain separate theorem frontiers.

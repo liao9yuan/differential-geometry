@@ -35,3 +35,17 @@ diagnostics.  No targeted build of this distance module was needed.
 - The global all-pairs stage-map theorem: 0% as a theorem until that
   identification is assembled.
 - `StepB1RawInput` producer and textbook Step B1: 0% as theorems.
+
+## 2026-07-28 controlled-chart distance
+
+`NormalBallChart.MetricEquivOn.inv_dist_le` is the provider-independent form
+of the chart-distance estimate.  It uses only the controlled partial
+diffeomorphism, the pullback metric carried by that chart, half/two metric
+equivalence, and containment of the minimizing join in the chart target.
+Focused verification passes.
+
+This closes the reusable distance API needed by the H6 provider switch.  The
+new lemma is 100%; the Gate 5 consumer/provider substitution remains about
+20%; the dedicated H6 producer remains 100%.  It does not prove
+`NormalRadiusProfile.le_exp_radius` or the unconditional MSM135 endpoint,
+which remain theorem-level 0%.

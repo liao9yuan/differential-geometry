@@ -20,3 +20,17 @@ passed without diagnostics.
 These measure-normalization producers are complete (100%).  They are dedicated
 machinery for the absolute segment-ball comparison; `segBall_vol_le` and
 `segBall_vol_rel` remain theorem-level 0% until their bodies are proved.
+
+## 2026-07-28 framed multiplicity bridge
+
+Added `framed_mul_le_area`, the normal-frame/canonical-volume form of the
+multiplicity-weighted area inequality.  Local measurable-space instances keep
+the statement at the existing volume-comparison layer and avoid leaking
+normalization choices into `CGTInjectivity`.
+
+Focused verification and the exact module refresh passed.  The earlier
+`segBall_vol_le` and `segBall_vol_rel` consumers are also already proved; the
+stale theorem-level 0% sentence above records the earlier state only.
+
+The framed bridge is 100%, its dedicated normalization machinery is 100%, and
+the downstream pointwise CGT theorem is now 100%.

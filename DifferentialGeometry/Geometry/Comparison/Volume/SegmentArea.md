@@ -87,3 +87,18 @@ private made the theorem unusable as a stable downstream interface and forced
 fragile reducibility-based `change` steps.  The definition and theorem
 statement are otherwise unchanged.  Focused verification and the exact
 targeted artifact refresh passed.
+
+## 2026-07-28 multiplicity-weighted area inequality
+
+Added `riemVol_mul_le_area`.  It converts a uniform lower bound on inverse-fibre
+cardinality over a measurable target set into the required lower bound
+
+`multiplicity * riemannian volume <= intrinsic exponential Jacobian integral`.
+
+This is the honest area-formula seam that the previous one-sheet image
+inequality could not express.  It introduces no injectivity assumption and no
+new geometric input.  Focused verification passed, and the downstream
+`CGTInjectivity` exact refresh and axiom audit are green.
+
+The theorem and its dedicated measure-theoretic machinery are 100%; it closes
+the last area brick of `intrLoop_ge_cgt`.

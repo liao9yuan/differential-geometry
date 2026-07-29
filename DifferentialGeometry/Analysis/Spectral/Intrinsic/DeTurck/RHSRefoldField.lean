@@ -35,6 +35,16 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
+private theorem bilin_smul
+    (g : SmoothRiemannianMetric I M) (a : Real)
+    (A : SmoothCcTensor g 0 2) (x : M)
+    (v w : TangentSpace I x) :
+    ccTensorBilin (I := I) g (a • A) x v w =
+      a * ccTensorBilin (I := I) g A x v w := by
+  rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+
 private theorem perturb_eq_diff
     (g g1 : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (v w : TangentSpace I x),
@@ -178,6 +188,108 @@ theorem ricciRefold_eq
         rw [hP]
         rfl]
   rw [htwice]
+  module
+
+/-- The complete order-zero refold is the sum of the two Ricci Palatini
+fields, the two DeTurck coefficient fields, `lieCorr0`, and the negative Lie
+pair.  Thus all principal Ricci and DeTurck cancellations occur before any
+Sobolev estimate. -/
+theorem rhsRefold_eq
+    (g g_bg : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g 0 2) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) delta)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g T x v w =
+        ccTensorBilin (I := I) g T x w v)
+    (hdelta_lt : delta < 1) (s : Real) (hs : s ∈ Set.Icc (0 : Real) 1) :
+    rhsRefold0 (I := I) (M := M) g g_bg T hdelta hdeltaZ s =
+      (-2 : Real) •
+          linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g
+            (realizedFam (I := I) g T 0 hdelta hdeltaZ s) -
+        (2 : Real) •
+          refoldKernelContractionField (I := I) (M := M) g
+            (realizedFam (I := I) g T 0 hdelta hdeltaZ s)
+            (iteratedCovGrad (I := I) g 0 2 2 (s • T))
+            (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+            (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 +
+        deTurckLieDLaCoeffField (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hdelta hdeltaZ s) g_bg +
+        deTurckLieDLbCoeffField (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hdelta hdeltaZ s) g_bg +
+        lieCorr0Field (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hdelta hdeltaZ s) g_bg -
+        edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+          lieRefoldQ lieRefoldEps s := by
+  let P : SmoothCcTensor g 0 2 := s • T
+  let g1 : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g T 0 hdelta hdeltaZ s
+  have hs_mem : s ∈ realizedSmallSet (δ := delta) (δ' := delta) :=
+    Icc_subset_realizedSmallSet hdelta_lt hdelta_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      g1.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g P y v w := by
+    intro y v w
+    rw [← show convexPerturbation (I := I) g T 0 s = P by
+      rw [convexPerturbation, smul_zero, zero_add]]
+    exact realizedFam_inner_of_mem
+      (I := I) g T 0 hdelta hdeltaZ hs_mem y v w
+  have hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g P x v w =
+        ccTensorBilin (I := I) g P x w v := by
+    intro x v w
+    dsimp only [P]
+    rw [bilin_smul (I := I) (M := M),
+      bilin_smul (I := I) (M := M), hTsymm x v w]
+  have hlie :
+      deTurckLieCovDerivArmField (I := I) (M := M) g g1 g_bg +
+          deTurckLieEndoArmField (I := I) (M := M) g g1 g_bg =
+        deTurckLieDLaCoeffField (I := I) (M := M) g g1 g_bg +
+          deTurckLieDLbCoeffField (I := I) (M := M) g g1 g_bg := by
+    rw [← deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
+      deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField]
+  rw [rhsRefold0]
+  rw [ricciRefold_eq (I := I) (M := M) g g1 P htie hPsymm]
+  rw [lieRefold0]
+  change
+    (-2 : Real) •
+          linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g1 -
+        (2 : Real) •
+          refoldKernelContractionField (I := I) (M := M) g g1
+            (iteratedCovGrad (I := I) g 0 2 2 P)
+            (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+            (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 +
+        (deTurckLieCovDerivArmField (I := I) (M := M) g g1 g_bg -
+          edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            lieRefoldQ lieRefoldEps s +
+          deTurckLieEndoArmField (I := I) (M := M) g g1 g_bg +
+          lieCorr0Field (I := I) (M := M) g g1 g_bg) =
+      (-2 : Real) •
+          linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g1 -
+        (2 : Real) •
+          refoldKernelContractionField (I := I) (M := M) g g1
+            (iteratedCovGrad (I := I) g 0 2 2 P)
+            (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+            (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 +
+        deTurckLieDLaCoeffField (I := I) (M := M) g g1 g_bg +
+        deTurckLieDLbCoeffField (I := I) (M := M) g g1 g_bg +
+        lieCorr0Field (I := I) (M := M) g g1 g_bg -
+        edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+          lieRefoldQ lieRefoldEps s
+  rw [show
+    deTurckLieCovDerivArmField (I := I) (M := M) g g1 g_bg -
+          edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            lieRefoldQ lieRefoldEps s +
+          deTurckLieEndoArmField (I := I) (M := M) g g1 g_bg +
+          lieCorr0Field (I := I) (M := M) g g1 g_bg =
+        (deTurckLieCovDerivArmField (I := I) (M := M) g g1 g_bg +
+          deTurckLieEndoArmField (I := I) (M := M) g g1 g_bg) +
+          lieCorr0Field (I := I) (M := M) g g1 g_bg -
+          edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            lieRefoldQ lieRefoldEps s by module, hlie]
   module
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

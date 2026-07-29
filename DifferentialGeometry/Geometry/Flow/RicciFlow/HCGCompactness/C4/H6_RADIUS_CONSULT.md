@@ -432,6 +432,40 @@ single local correction was binder normalization past the result-type
 needed. A formal exact refresh remains deferred until the unrelated shared
 writer exits.
 
+### 2026-07-28 Gate 6 live status
+
+Gate 6 has advanced past the fixed-tube mathematical frontier. The checked
+lower stack now includes the intrinsic curvature forcing, all-order Jacobi
+pair recursion, and the multilinear polarization bridge. The new source API
+then proves:
+
+- full permutation symmetry of `iteratedFDeriv` for a smooth germ;
+- the diagonal identity between `iteratedFDeriv` of `intrFrameMetric` and
+  `intrMetricJet`;
+- a sequence-uniform full operator-norm bound
+  `intrMetric_deriv_le` on any prescribed finite launch ball.
+
+`exists_h6NormalData` is now stated in source. It reuses one
+`H6BallData`, chooses the explicit launch radius `d.ratio * hd.mu 0`, obtains
+half/two equivalence from the same chart witness, and transfers the intrinsic
+metric-jet estimate with `metric_eq_intr` and
+`MetricDerivBound.of_eqOn`. It introduces no new radius or compatibility
+assumption.
+
+Gate 6 is complete. `IntrinsicJacobiJets` is exact GREEN (`3819/3819`),
+`IntrinsicMetricJets` is exact GREEN (`3828/3828`), `H6MetricJet` is exact
+GREEN (`3964/3964`), and `exists_h6NormalData` is focused and exact GREEN
+(`3983/3983`). The final replay required only a stale-export refresh of
+`H6NormalCoord`; it exposed no additional proof obligation.
+
+The dedicated H6 normal-coordinate producer and
+`exists_h6NormalData` are therefore 100%. The next target is Gate 5 consumer
+substitution: instantiate the existing `H6NormalData` transition/readout
+producers in the selected support/root chain. The independent legacy theorem
+`NormalRadiusProfile.le_exp_radius` remains 0% and must not be counted as
+proved by this branch-carrying route. The unconditional MSM135 endpoint remains
+a separate unstated theorem and 0%.
+
 The sections below preserve the original consultation input and historical
 route comparison. Where they conflict with the whole-plan verdict above, the
 whole-plan verdict is authoritative.
