@@ -131,8 +131,6 @@ private theorem memLp_euclidean_of_components
     simpa using hsum'
   exact hsum
 
-set_option maxHeartbeats 3200000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem exists_smooth_global_approx_of_unitBallExtension
     {p : ℝ} (hp : 1 < p) {u : E → ℝ}
     (hw : MemW1pWitness (ENNReal.ofReal p) u (Metric.ball (0 : E) 1)) :

@@ -29,6 +29,14 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace Real E]
   [NormedAddCommGroup F] [NormedSpace Real F]
 
+noncomputable local instance nestedBilinNormedGroup :
+    NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance nestedBilinNormedSpace :
+    NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
 
 
 theorem norm_apply_le_two
@@ -105,7 +113,6 @@ theorem opNorm₂_le
 
 
 
-set_option synthInstance.maxHeartbeats 800000 in
 -- Nested continuous-linear-map codomains require a deep deterministic instance search.
 theorem isom_jet_one
     (B : E -> E →L[Real] E →L[Real] Real)
@@ -157,9 +164,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
-set_option maxHeartbeats 800000 in
 -- Differentiating the lowered four-linear identity needs a larger elaboration budget.
-set_option synthInstance.maxHeartbeats 800000 in
 -- Its nested continuous-linear-map types also require deeper instance synthesis.
 theorem lowered_jet_next
     (C : F -> F →L[Real] F →L[Real] Real)
@@ -283,14 +288,6 @@ noncomputable local instance dualNormedGroup :
 
 noncomputable local instance dualNormedSpace :
     NormedSpace Real (E0 →L[Real] Real) :=
-  ContinuousLinearMap.toNormedSpace
-
-noncomputable local instance bilinNormedGroup :
-    NormedAddCommGroup (E0 →L[Real] E0 →L[Real] Real) :=
-  ContinuousLinearMap.toNormedAddCommGroup
-
-noncomputable local instance bilinNormedSpace :
-    NormedSpace Real (E0 →L[Real] E0 →L[Real] Real) :=
   ContinuousLinearMap.toNormedSpace
 
 noncomputable local instance endoNormedGroup :
@@ -1093,10 +1090,53 @@ private theorem raisedOp_deriv_summand_le
     (mul_le_mul_of_nonneg_left hinv_i (Nat.cast_nonneg _)) hKbound
     (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg _) hinv_rhs_nn)
 
+private theorem gramInverse_contDiffAt_of_lower
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat)
+    (hB : ContDiffAt Real (m : WithTop ℕ∞) B x)
+    (hlower : ∀ᶠ y in nhds x, ∀ q : E0,
+      (1 / 2 : Real) * ‖q‖ ^ 2 ≤ B y q q) :
+    ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => Ring.inverse (gramCLM (B y))) x := by
+  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
+    filter_upwards [hlower] with y hy
+    apply gram_isUnit
+    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
+      simpa only [pow_two, mul_assoc] using hy q⟩
+  obtain ⟨w, hw⟩ := hunit.self_of_nhds
+  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => gramCLM (B y)) x := by
+    simpa only [Function.comp_apply] using
+      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hB
+  have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
+      (gramCLM (B x)) := by
+    rw [← hw]
+    exact contDiffAt_ringInverse Real w
+  simpa only [Function.comp_apply] using hout.comp x hgram
+
+omit [CoerciveBilinInverse E0] in
+private theorem koszulRieszFderiv_contDiffAt
+    [CompleteSpace E0]
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat)
+    (hB : ContDiffAt Real ((m + 1 : Nat) : WithTop ℕ∞) B x) :
+    ContDiffAt Real (m : WithTop ℕ∞)
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
+  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
+    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
+  simpa only [Function.comp_apply] using
+    (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
+
+omit [ContinuousDualEquiv E0] [CoerciveBilinInverse E0] in
+private lemma nonneg_of_first_iteratedFDeriv_bound
+    (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0) (m : Nat) (D : Real)
+    (hD : ∀ i, 1 ≤ i → i ≤ m + 1 →
+      ‖iteratedFDeriv Real i B x‖ ≤ D ^ i) :
+    0 ≤ D := by
+  have h := hD 1 (by omega) (by omega)
+  simpa only [pow_one] using
+    (norm_nonneg (iteratedFDeriv Real 1 B x)).trans h
 
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 private theorem raisedOp_deriv_le
     [CompleteSpace E0]
     (B : E0 → E0 →L[Real] E0 →L[Real] Real) (x : E0)
@@ -1116,30 +1156,13 @@ private theorem raisedOp_deriv_le
   have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
     exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
   have hK : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
-    simpa only [Function.comp_apply] using
-      (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
-  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
-    filter_upwards [hlower] with y hy
-    apply gram_isUnit
-    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
-      simpa only [pow_two, mul_assoc] using hy q⟩
-  obtain ⟨w, hw⟩ := hunit.self_of_nhds
-  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => gramCLM (B y)) x := by
-    simpa only [Function.comp_apply] using
-      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hBm
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x :=
+    koszulRieszFderiv_contDiffAt B x m hB
   have hinv : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => Ring.inverse (gramCLM (B y))) x := by
-    have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
-        (gramCLM (B x)) := by
-      rw [← hw]
-      exact contDiffAt_ringInverse Real w
-    simpa only [Function.comp_apply] using hout.comp x hgram
-  have hD_nonneg : 0 ≤ D := by
-    have h := hD 1 (by omega) (by omega)
-    simpa only [pow_one] using
-      (norm_nonneg (iteratedFDeriv Real 1 B x)).trans h
+      (fun y => Ring.inverse (gramCLM (B y))) x :=
+    gramInverse_contDiffAt_of_lower B x m hBm hlower
+  have hD_nonneg : 0 ≤ D :=
+    nonneg_of_first_iteratedFDeriv_bound B x m D hD
   change ‖iteratedFDeriv Real m
       (fun y => postBilinCLM (Ring.inverse (gramCLM (B y)))
         (koszulRieszOpCLM (fderiv Real B y))) x‖ ≤ _
@@ -1166,29 +1189,12 @@ private theorem raisedOp_contDiffAt
   have hm_top : (m : WithTop ℕ∞) ≤ ((m + 1 : Nat) : WithTop ℕ∞) := by
     exact_mod_cast Nat.le_succ m
   have hBm : ContDiffAt Real (m : WithTop ℕ∞) B x := hB.of_le hm_top
-  have hfB : ContDiffAt Real (m : WithTop ℕ∞) (fderiv Real B) x := by
-    exact hB.fderiv_right (m := (m : WithTop ℕ∞)) (by norm_cast)
   have hK : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => koszulRieszOpCLM (fderiv Real B y)) x := by
-    simpa only [Function.comp_apply] using
-      (koszulRieszOpCLM (E0 := E0)).contDiff.comp_contDiffAt x hfB
-  have hunit : ∀ᶠ y in nhds x, IsUnit (gramCLM (B y)) := by
-    filter_upwards [hlower] with y hy
-    apply gram_isUnit
-    exact ⟨(1 / 2 : Real), by norm_num, fun q => by
-      simpa only [pow_two, mul_assoc] using hy q⟩
-  obtain ⟨w, hw⟩ := hunit.self_of_nhds
-  have hgram : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => gramCLM (B y)) x := by
-    simpa only [Function.comp_apply] using
-      (gramCLM (E0 := E0)).contDiff.comp_contDiffAt x hBm
+      (fun y => koszulRieszOpCLM (fderiv Real B y)) x :=
+    koszulRieszFderiv_contDiffAt B x m hB
   have hinv : ContDiffAt Real (m : WithTop ℕ∞)
-      (fun y => Ring.inverse (gramCLM (B y))) x := by
-    have hout : ContDiffAt Real (m : WithTop ℕ∞) Ring.inverse
-        (gramCLM (B x)) := by
-      rw [← hw]
-      exact contDiffAt_ringInverse Real w
-    simpa only [Function.comp_apply] using hout.comp x hgram
+      (fun y => Ring.inverse (gramCLM (B y))) x :=
+    gramInverse_contDiffAt_of_lower B x m hBm hlower
   simpa only [raisedKoszulOp, postBilin] using
     (postBilinCLM (E0 := E0)).isBoundedBilinearMap.contDiff.comp₂_contDiffAt hinv hK
 
@@ -1912,7 +1918,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 
 
-set_option synthInstance.maxHeartbeats 800000 in
 -- Iterated derivatives of bilinear-form fields require deep instance synthesis.
 theorem isom_deriv_on
     [FiniteDimensional Real E0] [CompleteSpace E0]
@@ -1973,7 +1978,6 @@ theorem isom_deriv_on
 
 
 
-set_option synthInstance.maxHeartbeats 800000 in
 -- The uniform family packages Pi-valued iterated derivatives of bilinear forms.
 theorem isom_bounds_on
     [FiniteDimensional Real E0] [CompleteSpace E0]

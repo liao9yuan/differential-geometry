@@ -30,6 +30,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+private theorem continuousOn_prod_slice
+    {α β γ : Type*} [TopologicalSpace α] [TopologicalSpace β] [TopologicalSpace γ]
+    {s : Set α} {t : Set β} {f : α × β → γ}
+    (hf : ContinuousOn f (s ×ˢ t)) {x : β} (hx : x ∈ t) :
+    ContinuousOn (fun y => f (y, x)) s :=
+  hf.comp (continuous_id.prodMk continuous_const).continuousOn
+    (fun _y hy => ⟨hy, hx⟩)
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Two smooth Riemannian metrics are equal if their Gram matrices agree in
@@ -69,8 +77,6 @@ theorem metric_eq_chartGram
       cases hinner
       rfl
 
-set_option maxHeartbeats 800000 in
--- The endpoint argument elaborates two restricted-filter limits through chart-Gram coercions.
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Equality on a left half-window passes to its right endpoint from the
@@ -99,14 +105,14 @@ theorem metric_eq_leftLim
     chartGramMatrix (I := I) (g₂ t) x x i j
   have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x
-  have hincl : Continuous (fun t : Real => (t, x)) :=
-    continuous_id.prodMk continuous_const
   have hf₁ : ContinuousOn f₁ (Ico a b) := by
-    exact (hcont₁ x i j).comp hincl.continuousOn
-      (fun t ht => ⟨ht, hx⟩)
+    change ContinuousOn
+      (fun t : Real => chartGramMatrix (I := I) (g₁ t) x x i j) (Ico a b)
+    exact continuousOn_prod_slice (hcont₁ x i j) hx
   have hf₂ : ContinuousOn f₂ (Ico a b) := by
-    exact (hcont₂ x i j).comp hincl.continuousOn
-      (fun t ht => ⟨ht, hx⟩)
+    change ContinuousOn
+      (fun t : Real => chartGramMatrix (I := I) (g₂ t) x x i j) (Ico a b)
+    exact continuousOn_prod_slice (hcont₂ x i j) hx
   have hdmem : d ∈ Ico a b := ⟨hd.1.le, hd.2⟩
   have hdnhds : Ico a b ∈ 𝓝 d := Ico_mem_nhds hd.1 hd.2
   have hf₁d : ContinuousAt f₁ d := (hf₁ d hdmem).continuousAt hdnhds

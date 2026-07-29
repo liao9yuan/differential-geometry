@@ -58,6 +58,22 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M]
 
+private theorem mapsTo_prod_slice
+    {α β γ : Type*} {s : Set α} {t : Set β} {u : Set γ} {f : α × β → γ}
+    (hf : Set.MapsTo f (s ×ˢ t) u) {a : α} (ha : a ∈ s) :
+    Set.MapsTo (fun b => f (a, b)) t u :=
+  fun _b hb => hf ⟨ha, hb⟩
+
+private theorem continuousOn_subtype_prod
+    {α β γ : Type*} [TopologicalSpace α] [TopologicalSpace β] [TopologicalSpace γ]
+    {s : Set α} {t : Set β} {f : α × β → γ}
+    (hf : ContinuousOn f (s ×ˢ t)) :
+    ContinuousOn
+      (fun q : {a : α // a ∈ s} × β => f (q.1.1, q.2))
+      {q : {a : α // a ∈ s} × β | q.2 ∈ t} :=
+  hf.comp ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+    (fun q hq => ⟨q.1.2, hq⟩)
+
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem chartGramBound_contOn
     (gRef : SmoothRiemannianMetric I M) (x₀ : M)
@@ -802,7 +818,6 @@ private theorem uniform_comp_cpt
   filter_upwards [h _ hlocal] with i hi x hx
   exact hi x hx ⟨x, hx, rfl⟩
 
-set_option synthInstance.maxHeartbeats 100000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
 private theorem gramJet_tendsto
     {R : letI : TopologicalSpace P.M := P.topology
@@ -1194,9 +1209,6 @@ private theorem gramModel_to_mfld
       ((extChartAt I x₀).symm (extChartAt I x₀ x)) i j
   rw [(extChartAt I x₀).left_inv hxsrc]
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 100000 in
 /-- Fixed-window joint spacetime smoothness of the limit metric in the
 trivialization-based chart-Gram readout. This is the remaining analytic
 regularity frontier. -/
@@ -1300,7 +1312,7 @@ theorem gramSmooth
     intro p hp
     exact (Analysis.contDiffAt_jetRicciFlow (chartModelBasis E) hp).contDiffWithinAt
   have hJetMaps : Set.MapsTo
-      (Function.uncurry (fun t y => Analysis.jet2 (G t) y)) U Ω := by
+      (Function.uncurry (fun t y => Analysis.jet2 (G t) y)) (J ×ˢ V) Ω := by
     rintro ⟨t, y⟩ ⟨ht, hy⟩
     change (Matrix.of (Analysis.jet2 (G t) y).1).det ≠ 0
     set x : P.M := (extChartAt I x₀).symm y with hx
@@ -1320,10 +1332,8 @@ theorem gramSmooth
     exact (chartGramMatrix_det_pos (I := I) (co.gInf t) x₀ hxbase).ne'
   have hRhsSlices : ∀ t ∈ J, ContDiffOn Real ∞ (RHS t) V := by
     intro t ht
-    have hmaps : Set.MapsTo (fun y => Analysis.jet2 (G t) y) V Ω := by
-      intro y hy
-      have hty : (t, y) ∈ U := ⟨ht, hy⟩
-      exact hJetMaps hty
+    have hmaps : Set.MapsTo (fun y => Analysis.jet2 (G t) y) V Ω :=
+      mapsTo_prod_slice hJetMaps ht
     simpa only [RHS, Function.comp_apply] using
       hΦ.comp (hJetSlices t ht) hmaps
   have hpde : ∀ t ∈ J, ∀ y ∈ V,
@@ -1405,8 +1415,6 @@ end ConvOut
 
 namespace OpenConvOut
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Assemble joint smoothness of the open-interval limit metric from joint
 chart-Gram smoothness on every canonical compact window. -/
 theorem smoothMetric
@@ -1461,12 +1469,7 @@ theorem smoothMetric
       (Set.Ioo a b) (fun t x => metricTensorField (I := I) (co.gInf t) x) := by
     apply metricTensorCont_of_chartGram (I := I) (K := Set.Ioo a b) co.gInf
     intro x₀ i j
-    have hincl : ContinuousOn
-        (fun q : {t : ℝ // t ∈ Set.Ioo a b} × P.M => ((q.1 : ℝ), q.2))
-        {q : {t : ℝ // t ∈ Set.Ioo a b} × P.M |
-          q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
-      ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
-    exact (hgram x₀ i j).continuousOn.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+    exact continuousOn_subtype_prod (hgram x₀ i j).continuousOn
   refine ⟨?_, ?_, hcontTensor, ?_⟩
   · intro x X Y
     have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞

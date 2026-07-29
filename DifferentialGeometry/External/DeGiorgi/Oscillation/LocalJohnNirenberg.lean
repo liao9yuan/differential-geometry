@@ -1120,9 +1120,6 @@ private lemma fivefold_cover_real_le
     ENNReal.toReal_ofReal (by positivity : (0 : ℝ) ≤ (5 : ℝ) ^ d)] at hreal
   simpa [U] using hreal
 
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 private lemma assigned_union_half_measure_real
     {u : E → ℝ} {x₀ : E} {R M lam μ A C5 avgR : ℝ}
     (_hR : 0 < R) (_hM : 0 < M)
@@ -1486,9 +1483,6 @@ private lemma closedBall_subset_ball_of_mem_ball_half_aux
     _ < r + R / 2 := by linarith
     _ ≤ R := by linarith
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 private lemma ae_pointwise_gt_subset_badCenter
     {w : E → ℝ} {x₀ : E} {R lam : ℝ}
     (hR : 0 < R)
@@ -1575,9 +1569,6 @@ private lemma ae_pointwise_gt_subset_badCenter
   refine ⟨hxB, r, hr_pos, hr_le_R, ?_⟩
   simpa [r] using hn.trans_eq havg_eq
 
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 /-- The full local John-Nirenberg inequality: if `u` has BMO seminorm at most `M`
 on all sub-balls of `ball(x₀, 6R)`, then the level sets of `|u - (u)_B|` on `B = ball(x₀, R)`
 decay exponentially. -/

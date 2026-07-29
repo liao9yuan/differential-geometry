@@ -565,8 +565,6 @@ theorem resStarNext_cost
   simp only [abs_neg, abs_one, one_mul, rmResidualCost]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1000000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The fixed canonical successor has the exact constructor cost and realizes
 the level-`k+1` component heat equation on every supplied orthonormal frame
 patch. -/

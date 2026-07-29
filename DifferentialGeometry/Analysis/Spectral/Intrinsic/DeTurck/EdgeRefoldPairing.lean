@@ -300,8 +300,6 @@ private lemma edge_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- A moving-metric double trace is a fixed-background trace after inserting
 the relative inverse-metric endomorphism in the first contracted slot. -/
 theorem edgeMvTrace (g gm : SmoothRiemannianMetric I M) (s : Nat) :
@@ -472,8 +470,6 @@ def edgePairMono (g gm : SmoothRiemannianMetric I M)
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- One moving pair-trace action is exactly one Palatini refold monomial.
 
 This is the public-API reconstruction of the algebraic identity needed by the
@@ -897,8 +893,6 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
@@ -1356,8 +1350,6 @@ theorem edgeTopPair_apply
   rw [edgeRiemPair_apply (I := I) (M := M) g T hdelta hdeltaZ qA qB s,
     edgeLiePair_apply (I := I) (M := M) g T hdelta hdeltaZ q epsilon s]
 
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [BoundarylessManifold I M] in
 /-- Exact formal-partner identity for the complete top coefficient returned by
 the Riemann--DeTurck refold. -/

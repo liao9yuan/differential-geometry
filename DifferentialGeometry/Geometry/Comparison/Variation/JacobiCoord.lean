@@ -96,7 +96,6 @@ theorem parInner_d2
   rw [jacobi_d2_eq (I := I) g γ Y hY] at h
   simpa using h
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -132,7 +131,6 @@ theorem parInner_curv_expand
   simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
     ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul]
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

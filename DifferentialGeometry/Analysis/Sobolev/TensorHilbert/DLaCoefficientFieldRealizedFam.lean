@@ -90,7 +90,6 @@ private lemma jetL2_sum_lowShift
       Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hw j)
     linarith
   linarith [hA, hB]
-set_option maxHeartbeats 3200000 in
 -- The realized-family jet assembly requires additional elaboration budget.
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (Icc_subset_realizedSmallSet) in
 /-- **`realizedFam` per-order top-separated jet-L2 bound** for the DLa coefficient field.  Fixes

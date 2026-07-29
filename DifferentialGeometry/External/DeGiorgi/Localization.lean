@@ -137,8 +137,6 @@ private noncomputable def affineMeasurableEmbedding
   ((MeasurableEquiv.addLeft x₀).measurableEmbedding).comp
     ((Homeomorph.smulOfNeZero R hR.ne').toMeasurableEquiv.measurableEmbedding)
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 -- essSup rescaling: pushforward measure equality plus essSup-as-sInf manipulation
 omit [NeZero d] in
 theorem essSup_rescale_halfBall
@@ -177,8 +175,6 @@ theorem essSup_rescale_halfBall
   ext a
   simpa [μsrc, μdst, T, ae_iff, not_le] using hiff a
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 -- essInf rescaling: pushforward measure equality plus essInf-as-sSup manipulation
 omit [NeZero d] in
 theorem essInf_rescale_halfBall
@@ -345,8 +341,6 @@ omit [NeZero d] in
     simp [hφExt, hφExtUniv, zeroExtend_memW1pWitness_p, MemW1pWitness.restrict, hφ_real]
   simpa [hcast] using hraw
 
-set_option maxHeartbeats 50000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem bilinForm_ball_restrict_eq_zeroExtend
     {Ω : Set E} (hΩ : IsOpen Ω)
     (A : EllipticCoeff d Ω)

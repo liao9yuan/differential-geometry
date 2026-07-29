@@ -25,291 +25,213 @@ local notation "E" => AmbientSpace d
 
 /-! ## Weak Problem Existence (Lax-Milgram) -/
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
-set_option synthInstance.maxHeartbeats 100000 in
--- raised elaboration budget: this declaration exceeds the default synthInstance.maxHeartbeats
--- Lax-Milgram existence assembly with instance synthesis
-/-- Existence of weak solutions via Lax-Milgram.
-The bilinear form `bilinFormOfCoeff` is bounded and coercive on `H₀¹(Ω)`
-(proved above), and the RHS is a bounded linear functional, so Lax-Milgram
-gives existence and uniqueness. -/
-theorem weakProblem_exists
-    {Ω : Set E}
-    (hd : 2 ≤ d)
-    (hΩ : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)
-    (A : EllipticCoeff d Ω)
+private theorem smoothFunToLp_norm_le
+    {Ω : Set E} (hΩ : IsOpen Ω) {Cp : ENNReal}
+    (hCp_top : Cp < (⊤ : ENNReal))
+    (hPoinc : ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      HasCompactSupport u → tsupport u ⊆ Ω →
+        eLpNorm u 2 (volume.restrict Ω) ≤
+          Cp * eLpNorm (smoothGradNorm u) 2 (volume.restrict Ω))
+    {u : E → ℝ} (hu : IsSmoothTestOn Ω u) :
+    ‖smoothFunToLp hΩ hu‖ ≤ Cp.toReal * ‖smoothGradToLp hΩ hu‖ := by
+  let μ : Measure E := volume.restrict Ω
+  have hgradNorm_memLp : MemLp (smoothGradNorm u) 2 μ := by
+    simpa [μ, norm_smoothGradField_eq_smoothGradNorm] using
+      (smoothTestWitness hΩ hu).weakGrad_memLp.norm
+  have hP :
+      eLpNorm u 2 μ ≤ Cp * eLpNorm (smoothGradNorm u) 2 μ := by
+    simpa [μ] using hPoinc hu.1 hu.2.1 hu.2.2
+  have hleft_top : eLpNorm u 2 μ ≠ ⊤ :=
+    (smoothTestWitness hΩ hu).memLp.eLpNorm_lt_top.ne
+  have hright_top : Cp * eLpNorm (smoothGradNorm u) 2 μ ≠ ⊤ := by
+    exact (ENNReal.mul_lt_top hCp_top hgradNorm_memLp.eLpNorm_lt_top).ne
+  have hToReal :
+      (eLpNorm u 2 μ).toReal ≤ (Cp * eLpNorm (smoothGradNorm u) 2 μ).toReal :=
+    (ENNReal.toReal_le_toReal hleft_top hright_top).2 hP
+  have hfunEq : ‖smoothFunToLp hΩ hu‖ = (eLpNorm u 2 μ).toReal := by
+    rw [smoothFunToLp, Lp.norm_toLp]
+  have hgradEq : ‖smoothGradToLp hΩ hu‖ = (eLpNorm (smoothGradNorm u) 2 μ).toReal := by
+    have hgrad_memLp : MemLp (smoothGradField u) 2 μ :=
+      (smoothTestWitness hΩ hu).weakGrad_memLp
+    calc
+      ‖smoothGradToLp hΩ hu‖ =
+          (∫ x, ‖smoothGradField u x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := by
+            simpa [μ] using (norm_smoothGradToLp_eq hΩ hu)
+      _ = (eLpNorm (smoothGradField u) 2 μ).toReal := by
+            symm
+            rw [MeasureTheory.toReal_eLpNorm hgrad_memLp.aestronglyMeasurable]
+            simpa using
+              (MeasureTheory.lpNorm_eq_integral_norm_rpow_toReal
+                (μ := μ) (f := smoothGradField u) (p := (2 : ENNReal))
+                (by norm_num) (by simp) hgrad_memLp.aestronglyMeasurable)
+      _ = (eLpNorm (smoothGradNorm u) 2 μ).toReal := by
+        congr 1
+        calc
+          eLpNorm (smoothGradField u) 2 μ = eLpNorm (fun x => ‖smoothGradField u x‖) 2 μ := by
+            symm
+            exact eLpNorm_norm (μ := μ) (p := (2 : ENNReal)) (smoothGradField u)
+          _ = eLpNorm (smoothGradNorm u) 2 μ := by
+                simp [norm_smoothGradField_eq_smoothGradNorm]
+  rw [hfunEq, hgradEq]
+  convert hToReal using 1
+  rw [ENNReal.toReal_mul]
+
+private theorem smoothFunToLp_eq_of_sameGrad
+    {Ω : Set E} (hΩ : IsOpen Ω) (C : ℝ)
+    (hbound : ∀ {u : E → ℝ} (hu : IsSmoothTestOn Ω u),
+      ‖smoothFunToLp hΩ hu‖ ≤ C * ‖smoothGradToLp hΩ hu‖)
+    {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v)
+    (hgradEq : smoothGradToLp hΩ hu = smoothGradToLp hΩ hv) :
+    smoothFunToLp hΩ hu = smoothFunToLp hΩ hv := by
+  have huv : IsSmoothTestOn Ω (fun x => u x - v x) := hu.sub hv
+  have hgradZero : smoothGradToLp hΩ huv = 0 := by
+    calc
+      smoothGradToLp hΩ huv = smoothGradToLp hΩ hu - smoothGradToLp hΩ hv := by
+        simpa using smoothGradToLp_sub hΩ hu hv
+      _ = 0 := by rw [hgradEq, sub_self]
+  have hfunZeroNorm : ‖smoothFunToLp hΩ huv‖ = 0 := by
+    have hupper : ‖smoothFunToLp hΩ huv‖ ≤ 0 := by
+      simpa [hgradZero] using hbound huv
+    exact le_antisymm hupper (norm_nonneg _)
+  have hfunZero : smoothFunToLp hΩ huv = 0 := norm_eq_zero.mp hfunZeroNorm
+  have hsub :
+      smoothFunToLp hΩ huv = smoothFunToLp hΩ hu - smoothFunToLp hΩ hv := by
+    simpa using smoothFunToLp_sub hΩ hu hv
+  rw [hsub] at hfunZero
+  exact sub_eq_zero.mp hfunZero
+
+private theorem rhs_eq_of_sameGrad
+    {Ω : Set E} (hΩ : IsOpen Ω)
     (rhs : (E → ℝ) → ℝ)
     (hF_add : ∀ u v : E → ℝ, MemH01 u Ω → MemH01 v Ω →
       rhs (fun x => u x + v x) = rhs u + rhs v)
     (hF_smul : ∀ c : ℝ, ∀ u : E → ℝ, MemH01 u Ω →
       rhs (fun x => c * u x) = c * rhs u)
-    (hF_bounded : ∃ C, 0 ≤ C ∧ ∀ v : E → ℝ, MemH01 v Ω →
+    (C_rhs : ℝ)
+    (hF_bound : ∀ v : E → ℝ, MemH01 v Ω →
       ∀ hwv : MemW1pWitness 2 v Ω,
-      |rhs v| ≤ C *
-        (∫ x, ‖hwv.weakGrad x‖ ^ (2 : ℝ) ∂(volume.restrict Ω)) ^ (1 / (2 : ℝ))) :
-    ∃ u : E → ℝ, IsWeakSolution (d := d) ⟨Ω, hΩ, hΩ_bdd, A, rhs⟩ u := by
-  classical
+      |rhs v| ≤ C_rhs *
+        (∫ x, ‖hwv.weakGrad x‖ ^ (2 : ℝ) ∂(volume.restrict Ω)) ^ (1 / (2 : ℝ)))
+    {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v)
+    (hgradEq : smoothGradToLp hΩ hu = smoothGradToLp hΩ hv) :
+    rhs u = rhs v := by
+  let μ : Measure E := volume.restrict Ω
+  have hu0 : MemH01 u Ω := smoothTest_memH01 hΩ hu
+  have hv0 : MemH01 v Ω := smoothTest_memH01 hΩ hv
+  have huv : IsSmoothTestOn Ω (fun x => u x - v x) := hu.sub hv
+  have huv0 : MemH01 (fun x => u x - v x) Ω := smoothTest_memH01 hΩ huv
+  let hwuv : MemW1pWitness 2 (fun x => u x - v x) Ω := smoothTestWitness hΩ huv
+  have hgradZero : smoothGradToLp hΩ huv = 0 := by
+    calc
+      smoothGradToLp hΩ huv = smoothGradToLp hΩ hu - smoothGradToLp hΩ hv := by
+        simpa using smoothGradToLp_sub hΩ hu hv
+      _ = 0 := by rw [hgradEq, sub_self]
+  have hseminormZero :
+      (∫ x, ‖hwuv.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) = 0 := by
+    have hgradZero' : gradLpOfWitness hwuv = 0 := by
+      simpa [hwuv, smoothGradToLp] using hgradZero
+    have hnormZero : ‖gradLpOfWitness hwuv‖ = 0 := by
+      rw [hgradZero']
+      simp
+    have hseminormEq := norm_gradLpOfWitness_eq hwuv
+    rw [hnormZero] at hseminormEq
+    simpa [μ] using hseminormEq.symm
+  have hbound := hF_bound (fun x => u x - v x) huv0 hwuv
+  have hrhsZero : rhs (fun x => u x - v x) = 0 := by
+    have habsZero : |rhs (fun x => u x - v x)| = 0 := by
+      have hupper : |rhs (fun x => u x - v x)| ≤ 0 := by
+        calc
+          |rhs (fun x => u x - v x)| ≤
+              C_rhs * (∫ x, ‖hwuv.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := hbound
+          _ = 0 := by rw [hseminormZero]; ring
+      exact le_antisymm hupper (abs_nonneg _)
+    exact abs_eq_zero.mp habsZero
+  have hvNeg0 : MemH01 (fun x => (-1) * v x) Ω := by
+    simpa [Pi.smul_apply, smul_eq_mul] using (MemW01p.smul (-1) hv0)
+  have hsubEq : rhs (fun x => u x - v x) = rhs u - rhs v := by
+    calc
+      rhs (fun x => u x - v x) = rhs (fun x => u x + (-1) * v x) := by
+        congr
+        ext x
+        ring
+      _ = rhs u + rhs (fun x => (-1) * v x) := hF_add u (fun x => (-1) * v x) hu0 hvNeg0
+      _ = rhs u + (-1) * rhs v := by rw [hF_smul (-1) v hv0]
+      _ = rhs u - rhs v := by ring
+  rw [hsubEq] at hrhsZero
+  linarith
+
+omit [NeZero d] in
+private theorem gradLpOfWitness_eq_of_ae
+    {Ω : Set E} {u : E → ℝ}
+    (hwu : MemW1pWitness 2 u Ω)
+    (G : MeasureTheory.Lp E 2 (volume.restrict Ω))
+    (hgrad_ae : hwu.weakGrad =ᵐ[volume.restrict Ω] fun x => G x) :
+    gradLpOfWitness hwu = G := by
+  calc
+    gradLpOfWitness hwu =
+        (Lp.memLp G).toLp (fun x => G x) := by
+          simpa [gradLpOfWitness] using
+            (MemLp.toLp_congr hwu.weakGrad_memLp (Lp.memLp G) hgrad_ae)
+    _ = G := Lp.toLp_coeFn _ _
+
+omit [NeZero d] in
+private theorem weakPartialDerivs_of_smoothApprox
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    {u : E → ℝ} {G : E → E}
+    (hu_memLp : MemLp u (ENNReal.ofReal 2) (volume.restrict Ω))
+    (hG_memLp : ∀ i : Fin d,
+      MemLp (fun x => G x i) (ENNReal.ofReal 2) (volume.restrict Ω))
+    (ψ : ℕ → E → ℝ)
+    (hψ : ∀ n, IsSmoothTestOn Ω (ψ n))
+    (hψ_fun_memLp : ∀ n,
+      MemLp (fun x => ψ n x - u x) (ENNReal.ofReal 2) (volume.restrict Ω))
+    (hψ_fun_tendsto :
+      Tendsto
+        (fun n => eLpNorm (fun x => ψ n x - u x)
+          (ENNReal.ofReal 2) (volume.restrict Ω))
+        atTop (nhds 0))
+    (hψ_grad_memLp : ∀ n i,
+      MemLp
+        (fun x => ((smoothTestWitness hΩ (hψ n)).weakGrad x).ofLp i - G x i)
+        (ENNReal.ofReal 2) (volume.restrict Ω))
+    (hψ_grad_tendsto : ∀ i : Fin d,
+      Tendsto
+        (fun n => eLpNorm
+          (fun x => ((smoothTestWitness hΩ (hψ n)).weakGrad x).ofLp i - G x i)
+          (ENNReal.ofReal 2) (volume.restrict Ω))
+        atTop (nhds 0)) :
+    ∀ i : Fin d, HasWeakPartialDeriv i (fun x => G x i) u Ω := by
+  intro i
+  exact HasWeakPartialDeriv.of_eLpNormApprox_p hΩ (p := 2) (by norm_num)
+    hu_memLp (hG_memLp i)
+    (fun n => (smoothTestWitness hΩ (hψ n)).isWeakGrad i)
+    hψ_fun_memLp hψ_fun_tendsto
+    (fun n => hψ_grad_memLp n i) (hψ_grad_tendsto i)
+
+private theorem exists_h01Representative_of_smoothGradLimit
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    (repFun : smoothGradSubmodule hΩ → E → ℝ)
+    (repSmooth : ∀ g : smoothGradSubmodule hΩ,
+      IsSmoothTestOn Ω (repFun g))
+    (repEq : ∀ g : smoothGradSubmodule hΩ,
+      smoothGradToLp hΩ (repSmooth g) =
+        (g : MeasureTheory.Lp E 2 (volume.restrict Ω)))
+    (U : (smoothGradSubmodule hΩ).topologicalClosure →L[ℝ]
+      MeasureTheory.Lp ℝ 2 (volume.restrict Ω))
+    (hU_eq : ∀ g : smoothGradSubmodule hΩ,
+      U (Submodule.inclusion
+        (smoothGradSubmodule hΩ).le_topologicalClosure g) =
+          smoothFunToLp hΩ (repSmooth g))
+    (gsol : (smoothGradSubmodule hΩ).topologicalClosure) :
+    ∃ u : E → ℝ, ∃ hwu : MemW1pWitness 2 u Ω,
+      MemH01 u Ω ∧
+        gradLpOfWitness hwu =
+          (gsol : MeasureTheory.Lp E 2 (volume.restrict Ω)) := by
   let μ : Measure E := volume.restrict Ω
   let S : Submodule ℝ (MeasureTheory.Lp E 2 μ) := smoothGradSubmodule hΩ
   let H : Submodule ℝ (MeasureTheory.Lp E 2 μ) := S.topologicalClosure
   let e : S →ₗ[ℝ] H := Submodule.inclusion S.le_topologicalClosure
-  obtain ⟨Cp, hCp_top, hPoinc⟩ := smoothCompactSupport_L2_bound_on_bounded_ge_two hd hΩ_bdd
-  obtain ⟨C_rhs, hC_rhs_nonneg, hF_bound⟩ := hF_bounded
-  let repFun : S → E → ℝ := fun g => Classical.choose g.2
-  let repSmooth : ∀ g : S, IsSmoothTestOn Ω (repFun g) := by
-    intro g
-    exact Classical.choose (Classical.choose_spec g.2)
-  have repEq : ∀ g : S, smoothGradToLp hΩ (repSmooth g) = (g : MeasureTheory.Lp E 2 μ) := by
-    intro g
-    exact Classical.choose_spec (Classical.choose_spec g.2)
-  have smoothFunToLp_bound :
-      ∀ {u : E → ℝ} (hu : IsSmoothTestOn Ω u),
-        ‖smoothFunToLp hΩ hu‖ ≤ Cp.toReal * ‖smoothGradToLp hΩ hu‖ := by
-    intro u hu
-    have hgradNorm_memLp : MemLp (smoothGradNorm u) 2 μ := by
-      simpa [μ, norm_smoothGradField_eq_smoothGradNorm] using
-        (smoothTestWitness hΩ hu).weakGrad_memLp.norm
-    have hP :
-        eLpNorm u 2 μ ≤ Cp * eLpNorm (smoothGradNorm u) 2 μ := by
-      simpa [μ] using hPoinc hu.1 hu.2.1 hu.2.2
-    have hleft_top : eLpNorm u 2 μ ≠ ⊤ :=
-      (smoothTestWitness hΩ hu).memLp.eLpNorm_lt_top.ne
-    have hright_top : Cp * eLpNorm (smoothGradNorm u) 2 μ ≠ ⊤ := by
-      exact (ENNReal.mul_lt_top hCp_top hgradNorm_memLp.eLpNorm_lt_top).ne
-    have hToReal :
-        (eLpNorm u 2 μ).toReal ≤ (Cp * eLpNorm (smoothGradNorm u) 2 μ).toReal :=
-      (ENNReal.toReal_le_toReal hleft_top hright_top).2 hP
-    have hfunEq : ‖smoothFunToLp hΩ hu‖ = (eLpNorm u 2 μ).toReal := by
-      rw [smoothFunToLp, Lp.norm_toLp]
-    have hgradEq : ‖smoothGradToLp hΩ hu‖ = (eLpNorm (smoothGradNorm u) 2 μ).toReal := by
-      have hgrad_memLp : MemLp (smoothGradField u) 2 μ :=
-        (smoothTestWitness hΩ hu).weakGrad_memLp
-      calc
-        ‖smoothGradToLp hΩ hu‖ =
-            (∫ x, ‖smoothGradField u x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := by
-              simpa [μ] using (norm_smoothGradToLp_eq hΩ hu)
-        _ = (eLpNorm (smoothGradField u) 2 μ).toReal := by
-              symm
-              rw [MeasureTheory.toReal_eLpNorm hgrad_memLp.aestronglyMeasurable]
-              simpa using
-                (MeasureTheory.lpNorm_eq_integral_norm_rpow_toReal
-                  (μ := μ) (f := smoothGradField u) (p := (2 : ENNReal))
-                  (by norm_num) (by simp) hgrad_memLp.aestronglyMeasurable)
-        _ = (eLpNorm (smoothGradNorm u) 2 μ).toReal := by
-          congr 1
-          calc
-            eLpNorm (smoothGradField u) 2 μ = eLpNorm (fun x => ‖smoothGradField u x‖) 2 μ := by
-              symm
-              exact eLpNorm_norm (μ := μ) (p := (2 : ENNReal)) (smoothGradField u)
-            _ = eLpNorm (smoothGradNorm u) 2 μ := by
-                  simp [norm_smoothGradField_eq_smoothGradNorm]
-    rw [hfunEq, hgradEq]
-    convert hToReal using 1
-    rw [ENNReal.toReal_mul]
-  have smoothFunToLp_eq_of_sameGrad :
-      ∀ {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v),
-        smoothGradToLp hΩ hu = smoothGradToLp hΩ hv →
-          smoothFunToLp hΩ hu = smoothFunToLp hΩ hv := by
-    intro u v hu hv hgradEq
-    have huv : IsSmoothTestOn Ω (fun x => u x - v x) := hu.sub hv
-    have hgradZero : smoothGradToLp hΩ huv = 0 := by
-      calc
-        smoothGradToLp hΩ huv = smoothGradToLp hΩ hu - smoothGradToLp hΩ hv := by
-          simpa using smoothGradToLp_sub hΩ hu hv
-        _ = 0 := by rw [hgradEq, sub_self]
-    have hfunZeroNorm : ‖smoothFunToLp hΩ huv‖ = 0 := by
-      have hbound := smoothFunToLp_bound huv
-      have hupper : ‖smoothFunToLp hΩ huv‖ ≤ 0 := by
-        simpa [hgradZero] using hbound
-      exact le_antisymm hupper (norm_nonneg _)
-    have hfunZero : smoothFunToLp hΩ huv = 0 := norm_eq_zero.mp hfunZeroNorm
-    have hsub :
-        smoothFunToLp hΩ huv = smoothFunToLp hΩ hu - smoothFunToLp hΩ hv := by
-      simpa using smoothFunToLp_sub hΩ hu hv
-    rw [hsub] at hfunZero
-    exact sub_eq_zero.mp hfunZero
-  have rhs_eq_of_sameGrad :
-      ∀ {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v),
-        smoothGradToLp hΩ hu = smoothGradToLp hΩ hv →
-          rhs u = rhs v := by
-    intro u v hu hv hgradEq
-    have hu0 : MemH01 u Ω := smoothTest_memH01 hΩ hu
-    have hv0 : MemH01 v Ω := smoothTest_memH01 hΩ hv
-    have huv : IsSmoothTestOn Ω (fun x => u x - v x) := hu.sub hv
-    have huv0 : MemH01 (fun x => u x - v x) Ω := smoothTest_memH01 hΩ huv
-    let hwuv : MemW1pWitness 2 (fun x => u x - v x) Ω := smoothTestWitness hΩ huv
-    have hgradZero : smoothGradToLp hΩ huv = 0 := by
-      calc
-        smoothGradToLp hΩ huv = smoothGradToLp hΩ hu - smoothGradToLp hΩ hv := by
-          simpa using smoothGradToLp_sub hΩ hu hv
-        _ = 0 := by rw [hgradEq, sub_self]
-    have hseminormZero :
-        (∫ x, ‖hwuv.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) = 0 := by
-      have hgradZero' : gradLpOfWitness hwuv = 0 := by
-        simpa [hwuv, smoothGradToLp] using hgradZero
-      have hnormZero : ‖gradLpOfWitness hwuv‖ = 0 := by
-        rw [hgradZero']
-        simp
-      have hseminormEq := norm_gradLpOfWitness_eq hwuv
-      rw [hnormZero] at hseminormEq
-      simpa [μ] using hseminormEq.symm
-    have hbound := hF_bound (fun x => u x - v x) huv0 hwuv
-    have hrhsZero : rhs (fun x => u x - v x) = 0 := by
-      have habsZero : |rhs (fun x => u x - v x)| = 0 := by
-        have hupper : |rhs (fun x => u x - v x)| ≤ 0 := by
-          calc
-            |rhs (fun x => u x - v x)| ≤
-                C_rhs * (∫ x, ‖hwuv.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := hbound
-            _ = 0 := by rw [hseminormZero]; ring
-        exact le_antisymm hupper (abs_nonneg _)
-      exact abs_eq_zero.mp habsZero
-    have hvNeg0 : MemH01 (fun x => (-1) * v x) Ω := by
-      simpa [Pi.smul_apply, smul_eq_mul] using (MemW01p.smul (-1) hv0)
-    have hsubEq : rhs (fun x => u x - v x) = rhs u - rhs v := by
-      calc
-        rhs (fun x => u x - v x) = rhs (fun x => u x + (-1) * v x) := by
-          congr
-          ext x
-          ring
-        _ = rhs u + rhs (fun x => (-1) * v x) := hF_add u (fun x => (-1) * v x) hu0 hvNeg0
-        _ = rhs u + (-1) * rhs v := by rw [hF_smul (-1) v hv0]
-        _ = rhs u - rhs v := by ring
-    rw [hsubEq] at hrhsZero
-    linarith
-  let L0 : S →ₗ[ℝ] ℝ := {
-    toFun := fun g => rhs (repFun g)
-    map_add' := by
-      intro g h
-      have hEq :
-          rhs (repFun (g + h)) = rhs (fun x => repFun g x + repFun h x) := by
-        apply rhs_eq_of_sameGrad (repSmooth (g + h)) ((repSmooth g).add (repSmooth h))
-        calc
-          smoothGradToLp hΩ (repSmooth (g + h)) = (g + h : S) := repEq (g + h)
-          _ = (g : MeasureTheory.Lp E 2 μ) + (h : MeasureTheory.Lp E 2 μ) := by rfl
-          _ = smoothGradToLp hΩ (repSmooth g) + smoothGradToLp hΩ (repSmooth h) := by
-                rw [repEq g, repEq h]
-          _ = smoothGradToLp hΩ ((repSmooth g).add (repSmooth h)) := by
-                symm
-                exact smoothGradToLp_add hΩ (repSmooth g) (repSmooth h)
-      rw [hEq, hF_add (repFun g) (repFun h)
-        (smoothTest_memH01 hΩ (repSmooth g))
-        (smoothTest_memH01 hΩ (repSmooth h))]
-    map_smul' := by
-      intro c g
-      have hEq :
-          rhs (repFun (c • g)) = rhs (fun x => c * repFun g x) := by
-        apply rhs_eq_of_sameGrad (repSmooth (c • g)) ((repSmooth g).smul c)
-        calc
-          smoothGradToLp hΩ (repSmooth (c • g)) = (c • g : S) := repEq (c • g)
-          _ = c • (g : MeasureTheory.Lp E 2 μ) := by rfl
-          _ = c • smoothGradToLp hΩ (repSmooth g) := by rw [repEq g]
-          _ = smoothGradToLp hΩ ((repSmooth g).smul c) := by
-                symm
-                exact smoothGradToLp_smul hΩ c (repSmooth g)
-      calc
-        rhs (repFun (c • g)) = rhs (fun x => c * repFun g x) := hEq
-        _ = c * rhs (repFun g) := hF_smul c (repFun g) (smoothTest_memH01 hΩ (repSmooth g))
-        _ = (RingHom.id ℝ) c • rhs (repFun g) := by simp [smul_eq_mul] }
-  have hL0_bound : ∃ C, ∀ g : S, ‖L0 g‖ ≤ C * ‖e g‖ := by
-    refine ⟨C_rhs, ?_⟩
-    intro g
-    let hwg : MemW1pWitness 2 (repFun g) Ω := smoothTestWitness hΩ (repSmooth g)
-    calc
-      ‖L0 g‖ = |rhs (repFun g)| := by rfl
-      _ ≤ C_rhs * (∫ x, ‖hwg.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := by
-            exact hF_bound (repFun g) (smoothTest_memH01 hΩ (repSmooth g)) hwg
-      _ = C_rhs * ‖gradLpOfWitness hwg‖ := by rw [norm_gradLpOfWitness_eq hwg]
-      _ = C_rhs * ‖smoothGradToLp hΩ (repSmooth g)‖ := by rfl
-      _ = C_rhs * ‖(g : MeasureTheory.Lp E 2 μ)‖ := by rw [repEq g]
-      _ = C_rhs * ‖g‖ := by rfl
-      _ = C_rhs * ‖e g‖ := by simp [e]
-  have hDense : DenseRange e := by
-    have hDenseInclusion :
-        DenseRange
-          (Set.inclusion
-            (Submodule.le_topologicalClosure S :
-              (S : Set (MeasureTheory.Lp E 2 μ)) ⊆ (H : Set (MeasureTheory.Lp E 2 μ)))) := by
-      rw [denseRange_inclusion_iff]
-      change (H : Set (MeasureTheory.Lp E 2 μ)) ⊆ closure (S : Set (MeasureTheory.Lp E 2 μ))
-      intro x hx
-      simpa [H, Submodule.topologicalClosure_coe] using hx
-    simpa [e] using hDenseInclusion
-  let U0 : S →ₗ[ℝ] MeasureTheory.Lp ℝ 2 μ := {
-    toFun := fun g => smoothFunToLp hΩ (repSmooth g)
-    map_add' := by
-      intro g h
-      have hEq :
-          smoothFunToLp hΩ (repSmooth (g + h)) =
-            smoothFunToLp hΩ ((repSmooth g).add (repSmooth h)) := by
-        apply smoothFunToLp_eq_of_sameGrad (repSmooth (g + h)) ((repSmooth g).add (repSmooth h))
-        calc
-          smoothGradToLp hΩ (repSmooth (g + h)) = (g + h : S) := repEq (g + h)
-          _ = (g : MeasureTheory.Lp E 2 μ) + (h : MeasureTheory.Lp E 2 μ) := by rfl
-          _ = smoothGradToLp hΩ (repSmooth g) + smoothGradToLp hΩ (repSmooth h) := by
-                rw [repEq g, repEq h]
-          _ = smoothGradToLp hΩ ((repSmooth g).add (repSmooth h)) := by
-                symm
-                exact smoothGradToLp_add hΩ (repSmooth g) (repSmooth h)
-      rw [hEq, smoothFunToLp_add hΩ (repSmooth g) (repSmooth h)]
-    map_smul' := by
-      intro c g
-      have hEq :
-          smoothFunToLp hΩ (repSmooth (c • g)) =
-            smoothFunToLp hΩ ((repSmooth g).smul c) := by
-        apply smoothFunToLp_eq_of_sameGrad (repSmooth (c • g)) ((repSmooth g).smul c)
-        calc
-          smoothGradToLp hΩ (repSmooth (c • g)) = (c • g : S) := repEq (c • g)
-          _ = c • (g : MeasureTheory.Lp E 2 μ) := by rfl
-          _ = c • smoothGradToLp hΩ (repSmooth g) := by rw [repEq g]
-          _ = smoothGradToLp hΩ ((repSmooth g).smul c) := by
-                symm
-                exact smoothGradToLp_smul hΩ c (repSmooth g)
-      calc
-        smoothFunToLp hΩ (repSmooth (c • g)) =
-            smoothFunToLp hΩ ((repSmooth g).smul c) := hEq
-        _ = c • smoothFunToLp hΩ (repSmooth g) := smoothFunToLp_smul hΩ c (repSmooth g)
-        _ = (RingHom.id ℝ) c • smoothFunToLp hΩ (repSmooth g) := by simp }
-  have hU0_bound : ∃ C, ∀ g : S, ‖U0 g‖ ≤ C * ‖e g‖ := by
-    refine ⟨Cp.toReal, ?_⟩
-    intro g
-    calc
-      ‖U0 g‖ = ‖smoothFunToLp hΩ (repSmooth g)‖ := by rfl
-      _ ≤ Cp.toReal * ‖smoothGradToLp hΩ (repSmooth g)‖ := by
-            exact smoothFunToLp_bound (repSmooth g)
-      _ = Cp.toReal * ‖(g : MeasureTheory.Lp E 2 μ)‖ := by rw [repEq g]
-      _ = Cp.toReal * ‖g‖ := by rfl
-      _ = Cp.toReal * ‖e g‖ := by simp [e]
-  let L : H →L[ℝ] ℝ := L0.extendOfNorm e
-  let U : H →L[ℝ] MeasureTheory.Lp ℝ 2 μ := U0.extendOfNorm e
-  have hL_eq : ∀ g : S, L (e g) = L0 g := by
-    intro g
-    exact LinearMap.extendOfNorm_eq hDense hL0_bound g
-  have hU_eq : ∀ g : S, U (e g) = U0 g := by
-    intro g
-    exact LinearMap.extendOfNorm_eq hDense hU0_bound g
-  have hcoercive : IsCoercive (coeffBilinSubmodule A H) := coeffBilinSubmodule_coercive A H
-  have hComplete : CompleteSpace H := by
-    simpa [H] using (Submodule.topologicalClosure.completeSpace (U := S))
-  let fvec : H := by
-    exact (@InnerProductSpace.toDual ℝ H _ _ _ hComplete).symm L
-  let gsol : H := by
-    exact (@IsCoercive.continuousLinearEquivOfBilin H _ _ hComplete _ hcoercive).symm fvec
   let Gsol : MeasureTheory.Lp E 2 μ := gsol
-  have hLM :
-      ∀ w : H, coeffBilinSubmodule A H gsol w = L w := by
-    intro w
-    calc
-      coeffBilinSubmodule A H gsol w =
-          ⟪(@IsCoercive.continuousLinearEquivOfBilin H _ _ hComplete _ hcoercive) gsol, w⟫_ℝ := by
-            symm
-            exact @IsCoercive.continuousLinearEquivOfBilin_apply H _ _ hComplete
-              _ hcoercive gsol w
-      _ = ⟪fvec, w⟫_ℝ := by simp [gsol]
-      _ = L w := by
-            change ⟪(@InnerProductSpace.toDual ℝ H _ _ _ hComplete).symm L, w⟫_ℝ = L w
-            exact @InnerProductSpace.toDual_symm_apply ℝ H _ _ _ hComplete (x := w) (y := L)
   have hgsol_mem :
       (gsol : MeasureTheory.Lp E 2 μ) ∈ closure (S : Set (MeasureTheory.Lp E 2 μ)) := by
     change (gsol : MeasureTheory.Lp E 2 μ) ∈ (H : Set (MeasureTheory.Lp E 2 μ))
@@ -317,7 +239,8 @@ theorem weakProblem_exists
   rw [mem_closure_iff_seq_limit] at hgsol_mem
   rcases hgsol_mem with ⟨Gseq, hGseq_mem, hGseq_tendsto⟩
   let ψ : ℕ → E → ℝ := fun n => repFun ⟨Gseq n, hGseq_mem n⟩
-  let hψ : ∀ n : ℕ, IsSmoothTestOn Ω (ψ n) := fun n => repSmooth ⟨Gseq n, hGseq_mem n⟩
+  let hψ : ∀ n : ℕ, IsSmoothTestOn Ω (ψ n) := fun n =>
+    repSmooth ⟨Gseq n, hGseq_mem n⟩
   have hψ_eq : ∀ n : ℕ, smoothGradToLp hΩ (hψ n) = Gseq n := by
     intro n
     exact repEq ⟨Gseq n, hGseq_mem n⟩
@@ -367,8 +290,7 @@ theorem weakProblem_exists
     exact
       (Lp.tendsto_Lp_iff_tendsto_eLpNorm'' (f := fun n => (smoothTestWitness hΩ (hψ n)).weakGrad)
         (f_ℒp := fun n => (smoothTestWitness hΩ (hψ n)).weakGrad_memLp)
-        (f_lim := Gsol) (f_lim_ℒp := Lp.memLp Gsol)).1
-        hgradLp_tendsto'
+        (f_lim := Gsol) (f_lim_ℒp := Lp.memLp Gsol)).1 hgradLp_tendsto'
   have hgsol_comp_memLp : ∀ i : Fin d, MemLp (fun x => Gsol x i) 2 μ := by
     intro i
     exact (Lp.memLp Gsol).eval_piLp i
@@ -435,14 +357,9 @@ theorem weakProblem_exists
     intro i
     simpa using hgrad_comp_tendsto i
   have hu_isWeakGrad : ∀ i : Fin d, HasWeakPartialDeriv i (fun x => Gsol x i) u Ω := by
-    intro i
-    exact HasWeakPartialDeriv.of_eLpNormApprox_p hΩ (p := 2) (by norm_num)
-      hu_memLp' (hgsol_comp_memLp' i)
-      (fun n => (smoothTestWitness hΩ (hψ n)).isWeakGrad i)
-      hψ_fun_memLp'
-      hψ_fun_tendsto'
-      (fun n => hψ_grad_comp_memLp' n i)
-      (hgrad_comp_tendsto' i)
+    exact weakPartialDerivs_of_smoothApprox hΩ hu_memLp' hgsol_comp_memLp'
+      ψ hψ hψ_fun_memLp' hψ_fun_tendsto' hψ_grad_comp_memLp'
+      hgrad_comp_tendsto'
   let hwu : MemW1pWitness 2 u Ω := {
     memLp := hu_memLp
     weakGrad := fun x => WithLp.toLp 2 fun i => Gsol x i
@@ -454,14 +371,7 @@ theorem weakProblem_exists
       filter_upwards with x
       change WithLp.toLp 2 (WithLp.ofLp (Gsol x)) = Gsol x
       exact WithLp.toLp_ofLp (p := 2) (x := Gsol x)
-    calc
-      gradLpOfWitness hwu =
-          (Lp.memLp Gsol).toLp (fun x => Gsol x) := by
-            simpa [gradLpOfWitness] using
-              (MemLp.toLp_congr hwu.weakGrad_memLp (Lp.memLp Gsol)
-                hgrad_ae)
-      _ = Gsol := by
-            exact Lp.toLp_coeFn _ _
+    exact gradLpOfWitness_eq_of_ae hwu Gsol hgrad_ae
   have hu0 : MemH01 u Ω := by
     refine ⟨hwu.memW1p, ⟨hwu, ψ, ?_, ?_, ?_, ?_, ?_⟩⟩
     · intro n
@@ -473,39 +383,93 @@ theorem weakProblem_exists
     · simpa [μ] using hψ_fun_tendsto
     · intro i
       simpa [μ] using hgrad_comp_tendsto i
-  have hsmooth_eq :
-      ∀ {φ : E → ℝ} (hφ : IsSmoothTestOn Ω φ),
-        bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) = rhs φ := by
-    intro φ hφ
-    let gφS : S := ⟨smoothGradToLp hΩ hφ, ⟨φ, hφ, rfl⟩⟩
-    let gφH : H := e gφS
-    have hφ_gradEq :
-        H.subtypeL gφH = gradLpOfWitness (smoothTestWitness hΩ hφ) := by
-      simp [gφH, gφS, e, smoothGradToLp]
-    calc
-      bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ)
-          = coeffBilinSubmodule A H gsol gφH := by
-              calc
-                bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) =
-                    ⟪coeffMulLpL A (gradLpOfWitness hwu),
-                      gradLpOfWitness (smoothTestWitness hΩ hφ)⟫_ℝ := by
-                        symm
-                        exact coeffMulLpL_inner_gradLpOfWitness_eq_bilinFormOfCoeff A hwu
-                          (smoothTestWitness hΩ hφ)
-                _ = ⟪coeffMulLpL A Gsol, H.subtypeL gφH⟫_ℝ := by
-                      rw [hwu_gradEq, hφ_gradEq]
-                _ = ⟪coeffMulLpL A (H.subtypeL gsol), H.subtypeL gφH⟫_ℝ := by
-                      rfl
-                _ = coeffBilinSubmodule A H gsol gφH := by rfl
-      _ = L gφH := hLM gφH
-      _ = L0 gφS := by simpa [gφH] using hL_eq gφS
-      _ = rhs φ := by
-            apply rhs_eq_of_sameGrad (repSmooth gφS) hφ
+  exact ⟨u, hwu, hu0, hwu_gradEq⟩
+
+private theorem weakIdentity_on_smoothTests
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    (A : EllipticCoeff d Ω)
+    (rhs : (E → ℝ) → ℝ)
+    (repFun : smoothGradSubmodule hΩ → E → ℝ)
+    (repSmooth : ∀ g : smoothGradSubmodule hΩ,
+      IsSmoothTestOn Ω (repFun g))
+    (repEq : ∀ g : smoothGradSubmodule hΩ,
+      smoothGradToLp hΩ (repSmooth g) =
+        (g : MeasureTheory.Lp E 2 (volume.restrict Ω)))
+    (L0 : smoothGradSubmodule hΩ →ₗ[ℝ] ℝ)
+    (hL0_eq : ∀ g : smoothGradSubmodule hΩ, L0 g = rhs (repFun g))
+    (L : (smoothGradSubmodule hΩ).topologicalClosure →L[ℝ] ℝ)
+    (hL_eq : ∀ g : smoothGradSubmodule hΩ,
+      L (Submodule.inclusion
+        (smoothGradSubmodule hΩ).le_topologicalClosure g) = L0 g)
+    (gsol : (smoothGradSubmodule hΩ).topologicalClosure)
+    (hLM : ∀ w : (smoothGradSubmodule hΩ).topologicalClosure,
+      coeffBilinSubmodule A (smoothGradSubmodule hΩ).topologicalClosure gsol w = L w)
+    {u : E → ℝ} (hwu : MemW1pWitness 2 u Ω)
+    (hwu_gradEq : gradLpOfWitness hwu =
+      (gsol : MeasureTheory.Lp E 2 (volume.restrict Ω)))
+    (rhs_eq : ∀ {u v : E → ℝ}
+      (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v),
+      smoothGradToLp hΩ hu = smoothGradToLp hΩ hv → rhs u = rhs v) :
+    ∀ {φ : E → ℝ} (hφ : IsSmoothTestOn Ω φ),
+      bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) = rhs φ := by
+  intro φ hφ
+  let S := smoothGradSubmodule hΩ
+  let H := S.topologicalClosure
+  let e : S →ₗ[ℝ] H := Submodule.inclusion S.le_topologicalClosure
+  let gφS : S := ⟨smoothGradToLp hΩ hφ, ⟨φ, hφ, rfl⟩⟩
+  let gφH : H := e gφS
+  have hφ_gradEq :
+      H.subtypeL gφH = gradLpOfWitness (smoothTestWitness hΩ hφ) := by
+    simp [gφH, gφS, e, H, S, smoothGradToLp]
+  calc
+    bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ)
+        = coeffBilinSubmodule A H gsol gφH := by
             calc
-              smoothGradToLp hΩ (repSmooth gφS) = (gφS : MeasureTheory.Lp E 2 μ) := repEq gφS
-              _ = smoothGradToLp hΩ hφ := by rfl
-  refine ⟨u, hu0, ?_⟩
+              bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) =
+                  ⟪coeffMulLpL A (gradLpOfWitness hwu),
+                    gradLpOfWitness (smoothTestWitness hΩ hφ)⟫_ℝ := by
+                      symm
+                      exact coeffMulLpL_inner_gradLpOfWitness_eq_bilinFormOfCoeff A hwu
+                        (smoothTestWitness hΩ hφ)
+              _ = ⟪coeffMulLpL A (gsol : MeasureTheory.Lp E 2 (volume.restrict Ω)),
+                    H.subtypeL gφH⟫_ℝ := by
+                    rw [hwu_gradEq, hφ_gradEq]
+              _ = ⟪coeffMulLpL A (H.subtypeL gsol), H.subtypeL gφH⟫_ℝ := by
+                    rfl
+              _ = coeffBilinSubmodule A H gsol gφH := by rfl
+    _ = L gφH := hLM gφH
+    _ = L0 gφS := by simpa [gφH, e, H, S] using hL_eq gφS
+    _ = rhs (repFun gφS) := hL0_eq gφS
+    _ = rhs φ := by
+          apply rhs_eq (repSmooth gφS) hφ
+          calc
+            smoothGradToLp hΩ (repSmooth gφS) =
+                (gφS : MeasureTheory.Lp E 2 (volume.restrict Ω)) := repEq gφS
+            _ = smoothGradToLp hΩ hφ := by rfl
+
+private theorem weakIdentity_of_smoothTests
+    {Ω : Set E}
+    (hΩ : IsOpen Ω)
+    (A : EllipticCoeff d Ω)
+    (rhs : (E → ℝ) → ℝ)
+    (hF_add : ∀ u v : E → ℝ, MemH01 u Ω → MemH01 v Ω →
+      rhs (fun x => u x + v x) = rhs u + rhs v)
+    (hF_smul : ∀ c : ℝ, ∀ u : E → ℝ, MemH01 u Ω →
+      rhs (fun x => c * u x) = c * rhs u)
+    (C_rhs : ℝ)
+    (hF_bound : ∀ v : E → ℝ, MemH01 v Ω →
+      ∀ hwv : MemW1pWitness 2 v Ω,
+      |rhs v| ≤ C_rhs *
+        (∫ x, ‖hwv.weakGrad x‖ ^ (2 : ℝ) ∂(volume.restrict Ω)) ^ (1 / (2 : ℝ)))
+    {u : E → ℝ}
+    (hwu : MemW1pWitness 2 u Ω)
+    (hsmooth_eq : ∀ {φ : E → ℝ} (hφ : IsSmoothTestOn Ω φ),
+      bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) = rhs φ) :
+    ∀ (hwu' : MemW1pWitness 2 u Ω) (v : E → ℝ), MemH01 v Ω →
+      ∀ (hv : MemW1pWitness 2 v Ω),
+        bilinFormOfCoeff A hwu' hv = rhs v := by
   intro hwu' v hv0 hv
+  let μ : Measure E := volume.restrict Ω
   have hv0_all := hv0
   rcases hv0 with ⟨_hv_mem, hvw, φ, hφ_smooth, hφ_cpt, hφ_sub, hφ_fun, hφ_grad⟩
   let hφtest : ∀ n : ℕ, IsSmoothTestOn Ω (φ n) := fun n =>
@@ -672,6 +636,206 @@ theorem weakProblem_exists
     _ = bilinFormOfCoeff A hwu hvw := by
       exact bilinFormOfCoeff_eq_right hΩ A hwu hv hvw
     _ = rhs v := hChosen
+
+-- Lax-Milgram existence assembly with instance synthesis
+/-- Existence of weak solutions via Lax-Milgram.
+The bilinear form `bilinFormOfCoeff` is bounded and coercive on `H₀¹(Ω)`
+(proved above), and the RHS is a bounded linear functional, so Lax-Milgram
+gives existence and uniqueness. -/
+theorem weakProblem_exists
+    {Ω : Set E}
+    (hd : 2 ≤ d)
+    (hΩ : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)
+    (A : EllipticCoeff d Ω)
+    (rhs : (E → ℝ) → ℝ)
+    (hF_add : ∀ u v : E → ℝ, MemH01 u Ω → MemH01 v Ω →
+      rhs (fun x => u x + v x) = rhs u + rhs v)
+    (hF_smul : ∀ c : ℝ, ∀ u : E → ℝ, MemH01 u Ω →
+      rhs (fun x => c * u x) = c * rhs u)
+    (hF_bounded : ∃ C, 0 ≤ C ∧ ∀ v : E → ℝ, MemH01 v Ω →
+      ∀ hwv : MemW1pWitness 2 v Ω,
+      |rhs v| ≤ C *
+        (∫ x, ‖hwv.weakGrad x‖ ^ (2 : ℝ) ∂(volume.restrict Ω)) ^ (1 / (2 : ℝ))) :
+    ∃ u : E → ℝ, IsWeakSolution (d := d) ⟨Ω, hΩ, hΩ_bdd, A, rhs⟩ u := by
+  classical
+  let μ : Measure E := volume.restrict Ω
+  let S : Submodule ℝ (MeasureTheory.Lp E 2 μ) := smoothGradSubmodule hΩ
+  let H : Submodule ℝ (MeasureTheory.Lp E 2 μ) := S.topologicalClosure
+  let e : S →ₗ[ℝ] H := Submodule.inclusion S.le_topologicalClosure
+  obtain ⟨Cp, hCp_top, hPoinc⟩ := smoothCompactSupport_L2_bound_on_bounded_ge_two hd hΩ_bdd
+  obtain ⟨C_rhs, hC_rhs_nonneg, hF_bound⟩ := hF_bounded
+  let repFun : S → E → ℝ := fun g => Classical.choose g.2
+  let repSmooth : ∀ g : S, IsSmoothTestOn Ω (repFun g) := by
+    intro g
+    exact Classical.choose (Classical.choose_spec g.2)
+  have repEq : ∀ g : S, smoothGradToLp hΩ (repSmooth g) = (g : MeasureTheory.Lp E 2 μ) := by
+    intro g
+    exact Classical.choose_spec (Classical.choose_spec g.2)
+  have smoothFunToLp_bound :
+      ∀ {u : E → ℝ} (hu : IsSmoothTestOn Ω u),
+        ‖smoothFunToLp hΩ hu‖ ≤ Cp.toReal * ‖smoothGradToLp hΩ hu‖ := by
+    intro u hu
+    exact smoothFunToLp_norm_le hΩ hCp_top hPoinc (u := u) hu
+  have smoothFunToLp_eq_of_sameGrad :
+      ∀ {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v),
+        smoothGradToLp hΩ hu = smoothGradToLp hΩ hv →
+          smoothFunToLp hΩ hu = smoothFunToLp hΩ hv := by
+    intro u v hu hv hgradEq
+    exact smoothFunToLp_eq_of_sameGrad hΩ Cp.toReal smoothFunToLp_bound
+      (u := u) (v := v) hu hv hgradEq
+  have rhs_eq_of_sameGrad :
+      ∀ {u v : E → ℝ} (hu : IsSmoothTestOn Ω u) (hv : IsSmoothTestOn Ω v),
+        smoothGradToLp hΩ hu = smoothGradToLp hΩ hv →
+          rhs u = rhs v := by
+    intro u v hu hv hgradEq
+    exact rhs_eq_of_sameGrad hΩ rhs hF_add hF_smul C_rhs hF_bound
+      (u := u) (v := v) hu hv hgradEq
+  let L0 : S →ₗ[ℝ] ℝ := {
+    toFun := fun g => rhs (repFun g)
+    map_add' := by
+      intro g h
+      have hEq :
+          rhs (repFun (g + h)) = rhs (fun x => repFun g x + repFun h x) := by
+        apply rhs_eq_of_sameGrad (repSmooth (g + h)) ((repSmooth g).add (repSmooth h))
+        calc
+          smoothGradToLp hΩ (repSmooth (g + h)) = (g + h : S) := repEq (g + h)
+          _ = (g : MeasureTheory.Lp E 2 μ) + (h : MeasureTheory.Lp E 2 μ) := by rfl
+          _ = smoothGradToLp hΩ (repSmooth g) + smoothGradToLp hΩ (repSmooth h) := by
+                rw [repEq g, repEq h]
+          _ = smoothGradToLp hΩ ((repSmooth g).add (repSmooth h)) := by
+                symm
+                exact smoothGradToLp_add hΩ (repSmooth g) (repSmooth h)
+      rw [hEq, hF_add (repFun g) (repFun h)
+        (smoothTest_memH01 hΩ (repSmooth g))
+        (smoothTest_memH01 hΩ (repSmooth h))]
+    map_smul' := by
+      intro c g
+      have hEq :
+          rhs (repFun (c • g)) = rhs (fun x => c * repFun g x) := by
+        apply rhs_eq_of_sameGrad (repSmooth (c • g)) ((repSmooth g).smul c)
+        calc
+          smoothGradToLp hΩ (repSmooth (c • g)) = (c • g : S) := repEq (c • g)
+          _ = c • (g : MeasureTheory.Lp E 2 μ) := by rfl
+          _ = c • smoothGradToLp hΩ (repSmooth g) := by rw [repEq g]
+          _ = smoothGradToLp hΩ ((repSmooth g).smul c) := by
+                symm
+                exact smoothGradToLp_smul hΩ c (repSmooth g)
+      calc
+        rhs (repFun (c • g)) = rhs (fun x => c * repFun g x) := hEq
+        _ = c * rhs (repFun g) := hF_smul c (repFun g) (smoothTest_memH01 hΩ (repSmooth g))
+        _ = (RingHom.id ℝ) c • rhs (repFun g) := by simp [smul_eq_mul] }
+  have hL0_bound : ∃ C, ∀ g : S, ‖L0 g‖ ≤ C * ‖e g‖ := by
+    refine ⟨C_rhs, ?_⟩
+    intro g
+    let hwg : MemW1pWitness 2 (repFun g) Ω := smoothTestWitness hΩ (repSmooth g)
+    calc
+      ‖L0 g‖ = |rhs (repFun g)| := by rfl
+      _ ≤ C_rhs * (∫ x, ‖hwg.weakGrad x‖ ^ (2 : ℝ) ∂μ) ^ (1 / (2 : ℝ)) := by
+            exact hF_bound (repFun g) (smoothTest_memH01 hΩ (repSmooth g)) hwg
+      _ = C_rhs * ‖gradLpOfWitness hwg‖ := by rw [norm_gradLpOfWitness_eq hwg]
+      _ = C_rhs * ‖smoothGradToLp hΩ (repSmooth g)‖ := by rfl
+      _ = C_rhs * ‖(g : MeasureTheory.Lp E 2 μ)‖ := by rw [repEq g]
+      _ = C_rhs * ‖g‖ := by rfl
+      _ = C_rhs * ‖e g‖ := by simp [e]
+  have hDense : DenseRange e := by
+    have hDenseInclusion :
+        DenseRange
+          (Set.inclusion
+            (Submodule.le_topologicalClosure S :
+              (S : Set (MeasureTheory.Lp E 2 μ)) ⊆ (H : Set (MeasureTheory.Lp E 2 μ)))) := by
+      rw [denseRange_inclusion_iff]
+      change (H : Set (MeasureTheory.Lp E 2 μ)) ⊆ closure (S : Set (MeasureTheory.Lp E 2 μ))
+      intro x hx
+      change x ∈ S.topologicalClosure at hx
+      exact hx
+    simpa [e] using hDenseInclusion
+  let U0 : S →ₗ[ℝ] MeasureTheory.Lp ℝ 2 μ := {
+    toFun := fun g => smoothFunToLp hΩ (repSmooth g)
+    map_add' := by
+      intro g h
+      have hEq :
+          smoothFunToLp hΩ (repSmooth (g + h)) =
+            smoothFunToLp hΩ ((repSmooth g).add (repSmooth h)) := by
+        apply smoothFunToLp_eq_of_sameGrad (repSmooth (g + h)) ((repSmooth g).add (repSmooth h))
+        calc
+          smoothGradToLp hΩ (repSmooth (g + h)) = (g + h : S) := repEq (g + h)
+          _ = (g : MeasureTheory.Lp E 2 μ) + (h : MeasureTheory.Lp E 2 μ) := by rfl
+          _ = smoothGradToLp hΩ (repSmooth g) + smoothGradToLp hΩ (repSmooth h) := by
+                rw [repEq g, repEq h]
+          _ = smoothGradToLp hΩ ((repSmooth g).add (repSmooth h)) := by
+                symm
+                exact smoothGradToLp_add hΩ (repSmooth g) (repSmooth h)
+      rw [hEq, smoothFunToLp_add hΩ (repSmooth g) (repSmooth h)]
+    map_smul' := by
+      intro c g
+      have hEq :
+          smoothFunToLp hΩ (repSmooth (c • g)) =
+            smoothFunToLp hΩ ((repSmooth g).smul c) := by
+        apply smoothFunToLp_eq_of_sameGrad (repSmooth (c • g)) ((repSmooth g).smul c)
+        calc
+          smoothGradToLp hΩ (repSmooth (c • g)) = (c • g : S) := repEq (c • g)
+          _ = c • (g : MeasureTheory.Lp E 2 μ) := by rfl
+          _ = c • smoothGradToLp hΩ (repSmooth g) := by rw [repEq g]
+          _ = smoothGradToLp hΩ ((repSmooth g).smul c) := by
+                symm
+                exact smoothGradToLp_smul hΩ c (repSmooth g)
+      calc
+        smoothFunToLp hΩ (repSmooth (c • g)) =
+            smoothFunToLp hΩ ((repSmooth g).smul c) := hEq
+        _ = c • smoothFunToLp hΩ (repSmooth g) := smoothFunToLp_smul hΩ c (repSmooth g)
+        _ = (RingHom.id ℝ) c • smoothFunToLp hΩ (repSmooth g) := by simp }
+  have hU0_bound : ∃ C, ∀ g : S, ‖U0 g‖ ≤ C * ‖e g‖ := by
+    refine ⟨Cp.toReal, ?_⟩
+    intro g
+    calc
+      ‖U0 g‖ = ‖smoothFunToLp hΩ (repSmooth g)‖ := by rfl
+      _ ≤ Cp.toReal * ‖smoothGradToLp hΩ (repSmooth g)‖ := by
+            exact smoothFunToLp_bound (repSmooth g)
+      _ = Cp.toReal * ‖(g : MeasureTheory.Lp E 2 μ)‖ := by rw [repEq g]
+      _ = Cp.toReal * ‖g‖ := by rfl
+      _ = Cp.toReal * ‖e g‖ := by simp [e]
+  let L : H →L[ℝ] ℝ := L0.extendOfNorm e
+  let U : H →L[ℝ] MeasureTheory.Lp ℝ 2 μ := U0.extendOfNorm e
+  have hL_eq : ∀ g : S, L (e g) = L0 g := by
+    intro g
+    exact LinearMap.extendOfNorm_eq hDense hL0_bound g
+  have hU_eq : ∀ g : S, U (e g) = U0 g := by
+    intro g
+    exact LinearMap.extendOfNorm_eq hDense hU0_bound g
+  have hcoercive : IsCoercive (coeffBilinSubmodule A H) := coeffBilinSubmodule_coercive A H
+  have hComplete : CompleteSpace H := by
+    exact Submodule.topologicalClosure.completeSpace (U := S)
+  let fvec : H := by
+    exact (@InnerProductSpace.toDual ℝ H _ _ _ hComplete).symm L
+  let gsol : H := by
+    exact (@IsCoercive.continuousLinearEquivOfBilin H _ _ hComplete _ hcoercive).symm fvec
+  let Gsol : MeasureTheory.Lp E 2 μ := gsol
+  have hLM :
+      ∀ w : H, coeffBilinSubmodule A H gsol w = L w := by
+    intro w
+    calc
+      coeffBilinSubmodule A H gsol w =
+          ⟪(@IsCoercive.continuousLinearEquivOfBilin H _ _ hComplete _ hcoercive) gsol, w⟫_ℝ := by
+            symm
+            exact @IsCoercive.continuousLinearEquivOfBilin_apply H _ _ hComplete
+              _ hcoercive gsol w
+      _ = ⟪fvec, w⟫_ℝ := by simp [gsol]
+      _ = L w := by
+            change ⟪(@InnerProductSpace.toDual ℝ H _ _ _ hComplete).symm L, w⟫_ℝ = L w
+            exact @InnerProductSpace.toDual_symm_apply ℝ H _ _ _ hComplete (x := w) (y := L)
+  obtain ⟨u, hwu, hu0, hwu_gradEq⟩ :=
+    exists_h01Representative_of_smoothGradLimit hΩ repFun repSmooth repEq U
+      (by
+        intro g
+        exact hU_eq g) gsol
+  have hsmooth_eq :
+      ∀ {φ : E → ℝ} (hφ : IsSmoothTestOn Ω φ),
+        bilinFormOfCoeff A hwu (smoothTestWitness hΩ hφ) = rhs φ := by
+    exact weakIdentity_on_smoothTests hΩ A rhs repFun repSmooth repEq
+      L0 (fun _ => rfl) L hL_eq gsol hLM hwu hwu_gradEq rhs_eq_of_sameGrad
+  refine ⟨u, hu0, ?_⟩
+  exact weakIdentity_of_smoothTests hΩ A rhs hF_add hF_smul C_rhs
+    hF_bound hwu hsmooth_eq
 
 /-- Existence of zero-Dirichlet weak solutions for divergence-form right-hand
 side data `div F`. -/

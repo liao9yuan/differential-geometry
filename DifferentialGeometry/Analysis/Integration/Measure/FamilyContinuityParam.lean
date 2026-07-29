@@ -62,7 +62,71 @@ private lemma density_cont_param
     exact hg x₀ (σ i) i
   exact Real.continuous_sqrt.comp_continuousOn hdet
 
-set_option maxHeartbeats 4000000 in
+private lemma density_extChart_cont_param
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : P → SmoothRiemannianMetric I M} {K : Set P}
+    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : P × M ↦ chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (K ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (α : M) :
+    ContinuousOn
+      (fun p : P × E ↦
+        chartDensity (I := I) (g p.1) α ((extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) := by
+  have hsymm_cont :
+      ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+    continuousOn_extChartAt_symm (I := I) α
+  have hpair : ContinuousOn
+      (fun p : P × E ↦ (p.1, (extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) := by
+    exact ContinuousOn.prodMk continuousOn_fst
+      (hsymm_cont.comp continuousOn_snd (fun p hp ↦ hp.2))
+  have hdensity := density_cont_param (I := I) (g := g) (K := K) hg α
+  have hcomp := hdensity.comp hpair (fun p hp ↦ ⟨hp.1, by
+      have hs := (extChartAt I α).map_target hp.2
+      rw [extChartAt_source_eq_chartAt_source (I := I)] at hs
+      exact hs⟩)
+  simpa only [Function.comp_apply] using hcomp
+
+private lemma chart_integrand_cont_param
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : P → SmoothRiemannianMetric I M}
+    {f : P → M → ℝ} {K : Set P}
+    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : P × M ↦ chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (K ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hf : ContinuousOn (fun p : P × M ↦ f p.1 p.2)
+      (K ×ˢ (Set.univ : Set M)))
+    (α : M) :
+    ContinuousOn
+      (fun p : P × E ↦
+        f p.1 ((extChartAt I α).symm p.2) *
+          (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm p.2) *
+          chartDensity (I := I) (g p.1) α ((extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) := by
+  have hsymm_cont :
+      ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+    continuousOn_extChartAt_symm (I := I) α
+  have hpair : ContinuousOn
+      (fun p : P × E ↦ (p.1, (extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) := by
+    exact ContinuousOn.prodMk continuousOn_fst
+      (hsymm_cont.comp continuousOn_snd (fun p hp ↦ hp.2))
+  have hfc : ContinuousOn
+      (fun p : P × E ↦ f p.1 ((extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) :=
+    hf.comp hpair (fun p hp ↦ ⟨hp.1, Set.mem_univ _⟩)
+  have hρc : ContinuousOn
+      (fun p : P × E ↦
+        (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm p.2))
+      (K ×ˢ (extChartAt I α).target) := by
+    exact (chartAtlasPOU I M α).contMDiff.continuous.continuousOn.comp
+      (hsymm_cont.comp continuousOn_snd (fun p hp ↦ hp.2))
+      (fun _ _ ↦ Set.mem_univ _)
+  exact (hfc.mul hρc).mul (density_extChart_cont_param (I := I) hg α)
+
 -- The compact chart estimate expands a parametric density through a finite atlas.
 private theorem chart_int_cont_param
     [FirstCountableTopology P]
@@ -109,34 +173,11 @@ private theorem chart_int_cont_param
   have hT'_target : T' ⊆ target := by
     rintro y ⟨x, hx, rfl⟩
     exact (extChartAt I α).map_source (hT_source hx)
-  have hsymm_cont : ContinuousOn symm target := by
-    simpa only [symm, target] using continuousOn_extChartAt_symm (I := I) α
-  have hsymm_base : ∀ y ∈ target,
-      symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
-    intro y hy
-    have hs := (extChartAt I α).map_target hy
-    rw [extChartAt_source_eq_chartAt_source (I := I)] at hs
-    exact hs
-  have hpair : ContinuousOn (fun p : P × E ↦ (p.1, symm p.2))
-      (K ×ˢ target) := by
-    refine ContinuousOn.prodMk continuousOn_fst ?_
-    exact hsymm_cont.comp continuousOn_snd (fun p hp ↦ hp.2)
   have hF_cont : ContinuousOn (fun p : P × E ↦ F p.1 p.2)
       (K ×ˢ target) := by
-    have hfc : ContinuousOn (fun p : P × E ↦ f p.1 (symm p.2))
-        (K ×ˢ target) :=
-      hf.comp hpair (fun p hp ↦ ⟨hp.1, Set.mem_univ _⟩)
-    have hρc : ContinuousOn (fun p : P × E ↦ ρ (symm p.2))
-        (K ×ˢ target) := by
-      exact hρ_cont.continuousOn.comp
-        (hsymm_cont.comp continuousOn_snd (fun p hp ↦ hp.2))
-        (fun _ _ ↦ Set.mem_univ _)
-    have hdc : ContinuousOn
-        (fun p : P × E ↦ chartDensity (I := I) (g p.1) α (symm p.2))
-        (K ×ˢ target) := by
-      exact (density_cont_param (I := I) hg α).comp hpair
-        (fun p hp ↦ ⟨hp.1, hsymm_base p.2 hp.2⟩)
-    exact (hfc.mul hρc).mul hdc
+    simpa only [F, ρ, symm, target] using
+      chart_integrand_cont_param (I := I) (M := M) (g := g) (f := f)
+        (K := K) hg hf α
   have hF_zero : ∀ t ∈ K, ∀ y ∈ target, y ∉ T' → F t y = 0 := by
     intro t _ y hy hyT'
     have hsymm_not : symm y ∉ T := by
@@ -197,7 +238,6 @@ private theorem chart_int_cont_param
     hb_int hlim
   simpa only [F, ρ, symm, target, μ] using hdct
 
-set_option maxHeartbeats 1600000 in
 -- The global statement unfolds the finite atlas decomposition at each parameter.
 theorem integral_family_cont_param
     [FirstCountableTopology P]
@@ -228,7 +268,8 @@ theorem integral_family_cont_param
       ∂(modelHaar (E := E))
   have hJ (α : M) : ContinuousOn (J α) K := by
     simpa only [J] using
-      chart_int_cont_param (I := I) (M := M) hK hg hf α
+      chart_int_cont_param (I := I) (M := M) (g := g) (f := f) (K := K)
+        hK hg hf α
   have hsum : ContinuousOn (fun t ↦ ∑ α ∈ S, J α t) K := by
     exact continuousOn_finset_sum S (fun α _ ↦ hJ α)
   refine hsum.congr ?_

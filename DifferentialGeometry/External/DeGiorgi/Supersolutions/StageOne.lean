@@ -22,8 +22,6 @@ local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 
 /-! ### Main theorems -/
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- First stage of weak Harnack: inverse-power iteration for positive
 supersolutions.
 
@@ -482,8 +480,6 @@ private theorem weak_harnack_stage_one_forward_power_upgrade
     _ = weakHarnackForwardUpgradeRHS (d := d) hd A u p q := by
           dsimp [weakHarnackForwardUpgradeRHS, C_weakHarnack0Forward, V, χ, X, β]
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Second stage of weak Harnack: forward low-power iteration for positive
 supersolutions.
 

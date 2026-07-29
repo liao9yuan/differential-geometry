@@ -27,8 +27,6 @@ This follows the Chapter 05 De Giorgi expand-bound-absorb pattern:
 2. Expand the bilinear form using the product/chain rule gradient structure
 3. Use coercivity + Cauchy-Schwarz + Young to absorb cross terms -/
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Pointwise gradient norm bound for the regularized powered cutoff.
 Extracted as a standalone lemma to keep the surrounding proof context small. -/
 lemma moserRegPowerCutoffWitness_norm_sq_le
@@ -351,8 +349,490 @@ theorem moserExactReg_core_eq_ae
         rw [hηx]
         ring
 
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+private theorem integrable_of_ae_nonneg_le
+    {α : Type*} [MeasurableSpace α] {μ : Measure α} {f g : α → ℝ}
+    (hg : Integrable g μ) (hf : AEStronglyMeasurable f μ)
+    (hfg : ∀ᵐ x ∂μ, 0 ≤ f x ∧ f x ≤ g x) :
+    Integrable f μ := by
+  refine Integrable.mono' hg hf ?_
+  filter_upwards [hfg] with x hx
+  have hgx : 0 ≤ g x := hx.1.trans hx.2
+  simpa [Real.norm_eq_abs, abs_of_nonneg hx.1, abs_of_nonneg hgx] using hx.2
+
+private theorem two_mul_abs_product_nonneg
+    (a b c e : ℝ) (ha : 0 ≤ a) (hc : 0 ≤ c) :
+    0 ≤ 2 * a * |b| * c * |e| := by
+  exact mul_nonneg
+    (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) ha) (abs_nonneg b)) hc)
+    (abs_nonneg e)
+
+private theorem moser_termA_constant_identity
+    (p Λ C I : ℝ) (hp1 : p - 1 ≠ 0) :
+    (p ^ 2 / (4 * (p - 1))) * (4 * Λ * ((C ^ 2 / (p - 1)) * I)) =
+      Λ * (p / (p - 1)) ^ 2 * C ^ 2 * I := by
+  field_simp [hp1]
+
+private theorem moser_termA_bound_of_absorption
+    (p Λ C I L B T : ℝ) (hp : 1 < p)
+    (hΛ : 0 ≤ Λ)
+    (hcore : T ≤ (p ^ 2 / (4 * (p - 1))) * L)
+    (hleft : L ≤ 4 * Λ * B)
+    (hbound : B ≤ (C ^ 2 / (p - 1)) * I) :
+    T ≤ Λ * (p / (p - 1)) ^ 2 * C ^ 2 * I := by
+  have hp1_pos : 0 < p - 1 := by linarith
+  have hp1 : p - 1 ≠ 0 := hp1_pos.ne'
+  have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (p - 1)) := by positivity
+  have hΛ_nonneg : 0 ≤ 4 * Λ := mul_nonneg (by norm_num) hΛ
+  calc
+    T ≤ (p ^ 2 / (4 * (p - 1))) * L := hcore
+    _ ≤ (p ^ 2 / (4 * (p - 1))) * (4 * Λ * B) :=
+      mul_le_mul_of_nonneg_left hleft hconst_nonneg
+    _ ≤ (p ^ 2 / (4 * (p - 1))) * (4 * Λ * ((C ^ 2 / (p - 1)) * I)) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hbound hΛ_nonneg) hconst_nonneg
+    _ = Λ * (p / (p - 1)) ^ 2 * C ^ 2 * I :=
+      moser_termA_constant_identity _ _ _ _ hp1
+
+private theorem moserExactReg_termB_bound
+    {Ω : Set E} {u η : E → ℝ} {p Cη ε N : ℝ}
+    (hp : 1 < p) (hε : 0 < ε) (hN : 0 ≤ N)
+    (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    (hη_grad_bound : ∀ x, ‖fderiv ℝ η x‖ ≤ Cη)
+    (hu_aestronglyMeasurable :
+      AEStronglyMeasurable u (volume.restrict Ω))
+    (hqual : ∀ᵐ x ∂(volume.restrict Ω),
+      x ∈ tsupport η → max (u x) 0 < N)
+    (hpInt : IntegrableOn (fun x => (ε + |max (u x) 0|) ^ p) Ω volume) :
+    let termB : E → ℝ := fun x =>
+      ‖fderiv ℝ η x‖ ^ 2 *
+        (moserExactRegPow ε N p (max (u x) 0)) ^ 2
+    Integrable termB (volume.restrict Ω) ∧
+      ∫ x in Ω, termB x ∂volume ≤
+        Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
+  dsimp only
+  let μ : Measure E := volume.restrict Ω
+  let termB : E → ℝ := fun x =>
+    ‖fderiv ℝ η x‖ ^ 2 *
+      (moserExactRegPow ε N p (max (u x) 0)) ^ 2
+  have hCη_nonneg : 0 ≤ Cη :=
+    le_trans (norm_nonneg _) (hη_grad_bound (0 : E))
+  have hmaxu_aemeas : AEMeasurable (fun x => max (u x) 0) μ :=
+    hu_aestronglyMeasurable.aemeasurable.max measurable_const.aemeasurable
+  have hβ_aemeas :
+      AEMeasurable (fun x => moserExactRegPow ε N p (max (u x) 0)) μ := by
+    exact
+      (moserExactRegPow_contDiff (ε := ε) (N := N) (p := p) hε hN).continuous.measurable
+        |>.comp_aemeasurable hmaxu_aemeas
+  have hgrad_aemeas :
+      AEMeasurable (fun x => ‖fderiv ℝ η x‖) μ :=
+    (hη.continuous_fderiv
+      (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aemeasurable
+  have hTermB_int : Integrable termB μ := by
+    refine Integrable.mono' (hpInt.const_mul (Cη ^ 2)) ?_ ?_
+    · exact
+        ((hgrad_aemeas.pow aemeasurable_const).mul
+          (hβ_aemeas.pow aemeasurable_const)).aestronglyMeasurable
+    · filter_upwards [hqual] with x hxqual
+      by_cases hx : x ∈ tsupport η
+      · have hboundx : max (u x) 0 < N := hxqual hx
+        have hgrad_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 :=
+          sq_le_sq.mpr (by
+            simp [abs_of_nonneg (norm_nonneg _), abs_of_nonneg hCη_nonneg,
+              hη_grad_bound x])
+        have hpow_le :=
+          moserExactRegPow_sq_le_rpow_of_support_bound (u := u) (x := x)
+            (ε := ε) (N := N) (p := p) hε hp hboundx
+        have hpow_nonneg :
+            0 ≤ (moserExactRegPow ε N p (max (u x) 0)) ^ 2 := by positivity
+        have hrhs_nonneg :
+            0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p :=
+          mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
+        have hle :
+            termB x ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p :=
+          mul_le_mul hgrad_sq_le hpow_le hpow_nonneg (sq_nonneg _)
+        simpa [termB, Real.norm_eq_abs,
+          abs_of_nonneg (mul_nonneg (sq_nonneg _) hpow_nonneg),
+          abs_of_nonneg hrhs_nonneg] using hle
+      · have hgrad_zero : ‖fderiv ℝ η x‖ = 0 :=
+          moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
+        have hrhs_nonneg :
+            0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p :=
+          mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
+        simp [termB, hgrad_zero, hrhs_nonneg]
+  have hTermB_pt :
+      ∀ᵐ x ∂μ, termB x ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
+    filter_upwards [hqual] with x hxqual
+    by_cases hx : x ∈ tsupport η
+    · have hboundx : max (u x) 0 < N := hxqual hx
+      have hgrad_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 :=
+        sq_le_sq.mpr (by
+          simp [abs_of_nonneg (norm_nonneg _), abs_of_nonneg hCη_nonneg,
+            hη_grad_bound x])
+      have hpow_le :=
+        moserExactRegPow_sq_le_rpow_of_support_bound (u := u) (x := x)
+          (ε := ε) (N := N) (p := p) hε hp hboundx
+      have hpow_nonneg :
+          0 ≤ (moserExactRegPow ε N p (max (u x) 0)) ^ 2 := by positivity
+      exact mul_le_mul hgrad_sq_le hpow_le hpow_nonneg (sq_nonneg _)
+    · have hgrad_zero : ‖fderiv ℝ η x‖ = 0 :=
+        moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
+      have hrhs_nonneg :
+          0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p :=
+        mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
+      simp [termB, hgrad_zero, hrhs_nonneg]
+  have hTermB :
+      ∫ x in Ω, termB x ∂volume ≤
+        Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
+    calc
+      ∫ x in Ω, termB x ∂volume = ∫ x, termB x ∂μ := by simp [μ]
+      _ ≤ ∫ x, Cη ^ 2 * (ε + |max (u x) 0|) ^ p ∂μ :=
+        integral_mono_ae hTermB_int (hpInt.const_mul (Cη ^ 2)) hTermB_pt
+      _ = Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
+        simp [μ, integral_const_mul]
+  exact ⟨hTermB_int, hTermB⟩
+
+private theorem moserExactReg_grad_split
+    {Ω : Set E} (hΩ : IsOpen Ω)
+    (hsub : Ω ⊆ Metric.ball (0 : E) 1)
+    {u η : E → ℝ} {p Cη ε N : ℝ}
+    (hε : 0 < ε) (hN : 0 ≤ N)
+    (hu1 : MemW1pWitness 2 u (Metric.ball (0 : E) 1))
+    (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    (hη_bound : ∀ x, |η x| ≤ 1)
+    (hη_grad_bound : ∀ x, ‖fderiv ℝ η x‖ ≤ Cη)
+    (hTermA_int : Integrable
+      (fun x =>
+        η x ^ 2 *
+          (deriv (moserExactRegPow ε N p) (max (u x) 0)) ^ 2 *
+          ‖(moserPosPartWitnessUnitBall (d := d) (u := u) hu1
+            |>.restrict hΩ hsub).weakGrad x‖ ^ 2)
+      (volume.restrict Ω))
+    (hTermB_int : Integrable
+      (fun x =>
+        ‖fderiv ℝ η x‖ ^ 2 *
+          (moserExactRegPow ε N p (max (u x) 0)) ^ 2)
+      (volume.restrict Ω)) :
+    let hwReg := moserExactRegPowerCutoffWitness (d := d) (u := u) (η := η)
+      (ε := ε) (N := N) (p := p) (Cη := Cη)
+      hε hN hu1 hη hη_bound hη_grad_bound
+    ∫ x in Ω, ‖hwReg.weakGrad x‖ ^ 2 ∂volume ≤
+      2 * ∫ x in Ω,
+        η x ^ 2 *
+          (deriv (moserExactRegPow ε N p) (max (u x) 0)) ^ 2 *
+          ‖(moserPosPartWitnessUnitBall (d := d) (u := u) hu1
+            |>.restrict hΩ hsub).weakGrad x‖ ^ 2 ∂volume +
+      2 * ∫ x in Ω,
+        ‖fderiv ℝ η x‖ ^ 2 *
+          (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂volume := by
+  dsimp only
+  let μ : Measure E := volume.restrict Ω
+  let hwPos :=
+    (moserPosPartWitnessUnitBall (d := d) (u := u) hu1).restrict hΩ hsub
+  let hwReg := moserExactRegPowerCutoffWitness (d := d) (u := u) (η := η)
+    (ε := ε) (N := N) (p := p) (Cη := Cη)
+    hε hN hu1 hη hη_bound hη_grad_bound
+  let hwRegρ := hwReg.restrict hΩ hsub
+  let termAfun : E → ℝ := fun x =>
+    η x ^ 2 *
+      (deriv (moserExactRegPow ε N p) (max (u x) 0)) ^ 2 *
+      ‖hwPos.weakGrad x‖ ^ 2
+  let termBfun : E → ℝ := fun x =>
+    ‖fderiv ℝ η x‖ ^ 2 *
+      (moserExactRegPow ε N p (max (u x) 0)) ^ 2
+  change Integrable termAfun μ at hTermA_int
+  change Integrable termBfun μ at hTermB_int
+  have hupper_int :
+      Integrable (fun x => 2 * termAfun x + 2 * termBfun x) μ := by
+    convert (hTermA_int.const_mul (2 : ℝ)).add
+      (hTermB_int.const_mul (2 : ℝ)) using 1
+  have hmono :
+      ∫ x, ‖hwRegρ.weakGrad x‖ ^ 2 ∂μ ≤
+        ∫ x, 2 * termAfun x + 2 * termBfun x ∂μ := by
+    refine integral_mono_ae ?_ hupper_int ?_
+    · simpa [pow_two, μ, hwRegρ] using hwRegρ.weakGrad_norm_memLp.integrable_sq
+    · filter_upwards with x
+      simpa [hwRegρ, hwReg, termAfun, termBfun, hwPos, mul_assoc,
+        add_comm, add_left_comm, add_assoc] using
+        (moserExactRegPowerCutoffWitness_norm_sq_le
+          (d := d) (u := u) (η := η) (ε := ε) (N := N) (p := p)
+          (Cη := Cη) hε hN hu1 hη hη_bound hη_grad_bound x)
+  calc
+    ∫ x in Ω, ‖hwReg.weakGrad x‖ ^ 2 ∂volume
+        = ∫ x, ‖hwRegρ.weakGrad x‖ ^ 2 ∂μ := by
+            change ∫ x, ‖hwReg.weakGrad x‖ ^ 2 ∂μ =
+              ∫ x, ‖hwReg.weakGrad x‖ ^ 2 ∂μ
+            simp [μ]
+    _ ≤ ∫ x, 2 * termAfun x + 2 * termBfun x ∂μ := hmono
+    _ = 2 * ∫ x in Ω, termAfun x ∂volume +
+        2 * ∫ x in Ω, termBfun x ∂volume := by
+          rw [integral_add (hTermA_int.const_mul (2 : ℝ))
+            (hTermB_int.const_mul (2 : ℝ)), integral_const_mul,
+            integral_const_mul]
+
+private theorem moserExactReg_energyPrep
+    {Ω : Set E}
+    (Aρ : NormalizedEllipticCoeff d Ω)
+    {u η : E → ℝ} {p Cη ε N : ℝ}
+    [DecidablePred fun x => x ∈ tsupport η]
+    (hΩ : IsOpen Ω)
+    (hsub : Ω ⊆ Metric.ball (0 : E) 1)
+    (hε : 0 < ε) (hN : 0 ≤ N)
+    (hp : 1 < p)
+    (hu1 : MemW1pWitness 2 u (Metric.ball (0 : E) 1))
+    (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    (hη_nonneg : ∀ x, 0 ≤ η x)
+    (hη_bound : ∀ x, |η x| ≤ 1)
+    (hη_grad_bound : ∀ x, ‖fderiv ℝ η x‖ ≤ Cη)
+    (hqual : ∀ᵐ x ∂(volume.restrict Ω),
+      x ∈ tsupport η → max (u x) 0 < N)
+    (hpInt : IntegrableOn (fun x => (ε + |max (u x) 0|) ^ p) Ω volume) :
+    let μ : Measure E := volume.restrict Ω
+    let hwPosBig : MemW1pWitness 2 (fun x => max (u x) 0) (Metric.ball (0 : E) 1) :=
+      moserPosPartWitnessUnitBall (d := d) (u := u) hu1
+    let hwPos : MemW1pWitness 2 (fun x => max (u x) 0) Ω :=
+      hwPosBig.restrict hΩ hsub
+    let ψ : E → ℝ := fun x => moserExactRegTestPow ε N p (max (u x) 0)
+    let ψd : E → ℝ := fun x =>
+      if x ∈ tsupport η then
+        deriv (moserExactRegTestPow ε N p) (max (u x) 0)
+      else 1
+    let Equad : E → ℝ := bilinFormIntegrandOfCoeff Aρ.1 hwPos hwPos
+    let leftTerm : E → ℝ := fun x => η x ^ 2 * ψd x * Equad x
+    let gradEtaNorm : E → ℝ := fun x => ‖fderiv ℝ η x‖
+    let fluxNorm : E → ℝ := fun x => ‖matMulE (Aρ.1.a x) (hwPos.weakGrad x)‖
+    let boundTerm : E → ℝ := fun x => gradEtaNorm x ^ 2 * (|ψ x| ^ 2 / ψd x)
+    let crossAbs : E → ℝ := fun x => 2 * η x * |ψ x| * gradEtaNorm x * |fluxNorm x|
+    0 ≤ Cη ∧
+      AEMeasurable (fun x => deriv (moserExactRegPow ε N p) (max (u x) 0)) μ ∧
+      AEMeasurable (fun x => moserExactRegPow ε N p (max (u x) 0)) μ ∧
+      (∀ x, 0 ≤ ψ x) ∧
+      AEMeasurable gradEtaNorm μ ∧
+      Integrable leftTerm μ ∧
+      (∀ᵐ x ∂μ, 0 < ψd x) ∧
+      Integrable boundTerm μ ∧
+      (∀ᵐ x ∂μ, |fluxNorm x| ^ 2 ≤ Aρ.1.Λ * Equad x) ∧
+      Integrable crossAbs μ := by
+  classical
+  dsimp only
+  let μ : Measure E := volume.restrict Ω
+  let hwPosBig : MemW1pWitness 2 (fun x => max (u x) 0) (Metric.ball (0 : E) 1) :=
+    moserPosPartWitnessUnitBall (d := d) (u := u) hu1
+  let hwPos : MemW1pWitness 2 (fun x => max (u x) 0) Ω :=
+    hwPosBig.restrict hΩ hsub
+  let ψ : E → ℝ := fun x => moserExactRegTestPow ε N p (max (u x) 0)
+  let ψd : E → ℝ := fun x =>
+    if x ∈ tsupport η then
+      deriv (moserExactRegTestPow ε N p) (max (u x) 0)
+    else 1
+  let Equad : E → ℝ := bilinFormIntegrandOfCoeff Aρ.1 hwPos hwPos
+  let leftTerm : E → ℝ := fun x => η x ^ 2 * ψd x * Equad x
+  let gradEtaNorm : E → ℝ := fun x => ‖fderiv ℝ η x‖
+  let fluxNorm : E → ℝ := fun x => ‖matMulE (Aρ.1.a x) (hwPos.weakGrad x)‖
+  let boundTerm : E → ℝ := fun x => gradEtaNorm x ^ 2 * (|ψ x| ^ 2 / ψd x)
+  let crossAbs : E → ℝ := fun x => 2 * η x * |ψ x| * gradEtaNorm x * |fluxNorm x|
+  have hCη_nonneg : 0 ≤ Cη :=
+    le_trans (norm_nonneg _) (hη_grad_bound (0 : E))
+  have hmaxu_aemeas : AEMeasurable (fun x => max (u x) 0) μ :=
+    (hu1.restrict hΩ hsub).memLp.aestronglyMeasurable.aemeasurable.max
+      measurable_const.aemeasurable
+  have hψ_meas : Measurable (moserExactRegTestPow ε N p) :=
+    (moserExactRegTestPow_contDiff (ε := ε) (N := N) (p := p) hε hN).continuous.measurable
+  have hψ_aemeas : AEMeasurable ψ μ :=
+    hψ_meas.comp_aemeasurable hmaxu_aemeas
+  have hψd_raw_aemeas :
+      AEMeasurable (fun x => deriv (moserExactRegTestPow ε N p) (max (u x) 0)) μ := by
+    have hcont : Continuous (deriv (moserExactRegTestPow ε N p)) := by
+      have h1 : ContDiff ℝ 1 (moserExactRegTestPow ε N p) :=
+        (moserExactRegTestPow_contDiff (ε := ε) (N := N) (p := p) hε hN).of_le (by simp)
+      exact h1.continuous_deriv_one
+    exact hcont.measurable.comp_aemeasurable hmaxu_aemeas
+  have hα_raw_aemeas :
+      AEMeasurable (fun x => deriv (moserExactRegPow ε N p) (max (u x) 0)) μ := by
+    have hcont : Continuous (deriv (moserExactRegPow ε N p)) := by
+      have h1 : ContDiff ℝ 1 (moserExactRegPow ε N p) :=
+        (moserExactRegPow_contDiff (ε := ε) (N := N) (p := p) hε hN).of_le (by simp)
+      exact h1.continuous_deriv_one
+    exact hcont.measurable.comp_aemeasurable hmaxu_aemeas
+  have hβ_meas : Measurable (moserExactRegPow ε N p) :=
+    (moserExactRegPow_contDiff (ε := ε) (N := N) (p := p) hε hN).continuous.measurable
+  have hβ_aemeas :
+      AEMeasurable (fun x => moserExactRegPow ε N p (max (u x) 0)) μ :=
+    hβ_meas.comp_aemeasurable hmaxu_aemeas
+  have hψd_aemeas : AEMeasurable ψd μ := by
+    rcases hψd_raw_aemeas with ⟨g, hg_meas, hg_ae⟩
+    refine ⟨Set.piecewise (tsupport η) g (fun _ => (1 : ℝ)),
+      hg_meas.piecewise (isClosed_tsupport η).measurableSet measurable_const, ?_⟩
+    filter_upwards [hg_ae] with x hxg
+    by_cases hx : x ∈ tsupport η
+    · simp [ψd, hx, hxg]
+    · simp [ψd, hx]
+  have hgradEtaNorm_aemeas : AEMeasurable gradEtaNorm μ :=
+    (hη.continuous_fderiv
+      (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aemeasurable
+  have hfluxNorm_aemeas : AEMeasurable fluxNorm μ :=
+    (moser_aestronglyMeasurable_matMulE Aρ.1
+      hwPos.weakGrad_memLp.aestronglyMeasurable).norm.aemeasurable
+  have hψ_nonneg : ∀ x, 0 ≤ ψ x := fun x =>
+    moserExactRegTestPow_nonneg_of_nonneg (ε := ε) (N := N) (p := p)
+      hε hN (le_max_right _ _) hp
+  have hweighted_grad_sq_int :
+      Integrable (fun x => η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) μ := by
+    have hbase : Integrable (fun x => ‖hwPos.weakGrad x‖ ^ 2) μ := by
+      simpa [pow_two, μ] using hwPos.weakGrad_norm_memLp.integrable_sq
+    refine Integrable.mono' hbase ?_ ?_
+    · exact
+        (((hη.continuous.pow 2).aemeasurable.mul
+          hbase.aestronglyMeasurable.aemeasurable).aestronglyMeasurable)
+    · filter_upwards with x
+      have hη_sq_le : η x ^ 2 ≤ 1 := by
+        have hη_sq_le' : η x ^ 2 ≤ (1 : ℝ) ^ 2 :=
+          sq_le_sq.mpr (by simpa using hη_bound x)
+        simpa using hη_sq_le'
+      have hgrad_nonneg : 0 ≤ ‖hwPos.weakGrad x‖ ^ 2 := by positivity
+      have hterm_nonneg : 0 ≤ η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2 := by positivity
+      have hle :
+          η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2 ≤ ‖hwPos.weakGrad x‖ ^ 2 := by
+        simpa [one_mul] using mul_le_mul_of_nonneg_right hη_sq_le hgrad_nonneg
+      simpa [Real.norm_eq_abs, abs_of_nonneg hterm_nonneg] using hle
+  obtain ⟨Mψd, hMψd⟩ :=
+    moserExactRegTestPow_deriv_bounded (ε := ε) (N := N) (p := p) hε hN
+  let Kψd : ℝ := max 1 |Mψd|
+  have hleft_int : Integrable leftTerm μ := by
+    refine Integrable.mono' (hweighted_grad_sq_int.const_mul (Aρ.1.Λ * Kψd)) ?_ ?_
+    · exact
+        ((((hη.continuous.pow 2).aemeasurable.mul hψd_aemeas).mul
+          (aestronglyMeasurable_bilinFormIntegrandOfCoeff Aρ.1 hwPos
+            hwPos).aemeasurable).aestronglyMeasurable)
+    · filter_upwards [Aρ.1.quadratic_upper, Aρ.1.ae_coercive_nonneg] with x hx_quad hx_nonneg
+      by_cases hx : x ∈ tsupport η
+      · have hψd_eq : ψd x = deriv (moserExactRegTestPow ε N p) (max (u x) 0) := by
+          simp [ψd, hx]
+        have hψd_abs_le : |ψd x| ≤ Kψd := by
+          rw [hψd_eq]
+          exact (hMψd _).trans (le_abs_self _ |>.trans (le_max_right _ _))
+        have hquad : Equad x ≤ Aρ.1.Λ * ‖hwPos.weakGrad x‖ ^ 2 := by
+          simpa [Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
+            hx_quad (hwPos.weakGrad x)
+        have hEquad_nonneg : 0 ≤ Equad x := by
+          simpa [Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
+            hx_nonneg (hwPos.weakGrad x)
+        have hKψd_nonneg : 0 ≤ Kψd :=
+          zero_le_one.trans (le_max_left _ _)
+        have hrhs_nonneg :
+            0 ≤ (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) :=
+          mul_nonneg (mul_nonneg Aρ.1.Λ_pos.le hKψd_nonneg) (by positivity)
+        have hη_sq_nonneg : 0 ≤ η x ^ 2 := by positivity
+        have hpoint :
+            ‖leftTerm x‖ ≤ (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) := by
+          calc
+            ‖leftTerm x‖ = |η x ^ 2 * ψd x * Equad x| := by simp [leftTerm]
+            _ = η x ^ 2 * |ψd x| * Equad x := by
+              rw [abs_mul, abs_mul, abs_of_nonneg hη_sq_nonneg,
+                abs_of_nonneg hEquad_nonneg]
+            _ ≤ η x ^ 2 * Kψd * (Aρ.1.Λ * ‖hwPos.weakGrad x‖ ^ 2) := by
+              gcongr
+            _ = (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) := by ring
+        exact hpoint
+      · have hηx : η x = 0 := image_eq_zero_of_notMem_tsupport hx
+        simp [leftTerm, ψd, hx, hηx]
+  have hψd_pos : ∀ᵐ x ∂μ, 0 < ψd x := by
+    filter_upwards [hqual] with x hxqual
+    by_cases hx : x ∈ tsupport η
+    · have hboundx : max (u x) 0 < N := hxqual hx
+      simpa [ψd, hx] using
+        moserExactRegTestPow_deriv_pos_of_support_bound
+          (u := u) (x := x) (ε := ε) (N := N) (p := p) hε hp hboundx
+    · simp [ψd, hx]
+  have hbound_int : Integrable boundTerm μ := by
+    refine Integrable.mono' (hpInt.const_mul (Cη ^ 2 / (p - 1))) ?_ ?_
+    · exact
+        (((hgradEtaNorm_aemeas.pow aemeasurable_const).mul
+          ((hψ_aemeas.norm.pow aemeasurable_const).div
+            hψd_aemeas)).aestronglyMeasurable)
+    · filter_upwards [hqual] with x hxqual
+      by_cases hx : x ∈ tsupport η
+      · have hboundx : max (u x) 0 < N := hxqual hx
+        have hp1 : 0 < p - 1 := by linarith
+        have hgrad_sq_le : gradEtaNorm x ^ 2 ≤ Cη ^ 2 :=
+          sq_le_sq.mpr (by
+            simp [gradEtaNorm, abs_of_nonneg (norm_nonneg _),
+              abs_of_nonneg hCη_nonneg, hη_grad_bound x])
+        have hψdpos : 0 < ψd x := by
+          simpa [ψd, hx] using
+            moserExactRegTestPow_deriv_pos_of_support_bound
+              (u := u) (x := x) (ε := ε) (N := N) (p := p) hε hp hboundx
+        have hquot_le :
+            |ψ x| ^ 2 / ψd x ≤ (ε + |max (u x) 0|) ^ p / (p - 1) := by
+          have hbase :=
+            moserExactRegTestPow_sq_div_deriv_le_rpow_of_support_bound
+              (u := u) (x := x) (ε := ε) (N := N) (p := p) hε hp hboundx
+          have hψd_eq : ψd x = deriv (moserExactRegTestPow ε N p) (max (u x) 0) := by
+            simp [ψd, hx]
+          have hψ_eq : |ψ x| = ψ x := abs_of_nonneg (hψ_nonneg x)
+          simpa [ψ, hψd_eq, hψ_eq] using hbase
+        have hquot_nonneg : 0 ≤ |ψ x| ^ 2 / ψd x :=
+          div_nonneg (by positivity) hψdpos.le
+        have hterm_nonneg : 0 ≤ boundTerm x :=
+          mul_nonneg (sq_nonneg _) hquot_nonneg
+        have hmul_le :
+            boundTerm x ≤ Cη ^ 2 * ((ε + |max (u x) 0|) ^ p / (p - 1)) :=
+          mul_le_mul hgrad_sq_le hquot_le hquot_nonneg (sq_nonneg _)
+        have hdom_nonneg :
+            0 ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p :=
+          mul_nonneg (div_nonneg (sq_nonneg _) hp1.le)
+            (Real.rpow_nonneg (by positivity) _)
+        calc
+          ‖boundTerm x‖ = boundTerm x := Real.norm_of_nonneg hterm_nonneg
+          _ ≤ Cη ^ 2 * ((ε + |max (u x) 0|) ^ p / (p - 1)) := hmul_le
+          _ = (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
+            field_simp [show p - 1 ≠ 0 by linarith]
+      · have hgrad_zero : gradEtaNorm x = 0 := by
+          simpa [gradEtaNorm] using
+            moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
+        have hp1 : 0 < p - 1 := by linarith
+        have hdom_nonneg :
+            0 ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p :=
+          mul_nonneg (div_nonneg (sq_nonneg _) hp1.le)
+            (Real.rpow_nonneg (by positivity) _)
+        simpa [boundTerm, hgrad_zero] using hdom_nonneg
+  have hcoeff : ∀ᵐ x ∂μ, |fluxNorm x| ^ 2 ≤ Aρ.1.Λ * Equad x := by
+    filter_upwards [Aρ.1.mulVec_sq_le] with x hx
+    simpa [fluxNorm, Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
+      hx (hwPos.weakGrad x)
+  have hcross_upper_pt :
+      ∀ᵐ x ∂μ,
+        crossAbs x ≤
+          (1 / 2 : ℝ) * leftTerm x + 2 * Aρ.1.Λ * boundTerm x := by
+    filter_upwards [hcoeff, hψd_pos] with x hx hψx
+    have hx' :=
+      moser_weighted_pointwise_core
+        (Λ := Aρ.1.Λ) (η := η x) (ζ := gradEtaNorm x) (ψ := ψ x)
+        (ψd := ψd x) (Q := Equad x) (M := fluxNorm x) Aρ.1.Λ_pos hψx hx
+    dsimp [crossAbs, leftTerm, boundTerm, gradEtaNorm, fluxNorm] at hx' ⊢
+    ring_nf at hx' ⊢
+    exact hx'
+  have hcross_upper_int :
+      Integrable
+        (fun x =>
+          (1 / 2 : ℝ) * leftTerm x + 2 * Aρ.1.Λ * boundTerm x) μ := by
+    have htmp :
+        Integrable (fun x => 2 * (Aρ.1.Λ * boundTerm x) + (1 / 2 : ℝ) * leftTerm x) μ := by
+      simpa [mul_assoc] using
+        (hbound_int.const_mul (2 * Aρ.1.Λ)).add
+          (hleft_int.const_mul (1 / 2 : ℝ))
+    simpa [mul_assoc, add_comm, add_left_comm, add_assoc] using htmp
+  have hcrossAbs_int : Integrable crossAbs μ := by
+    apply integrable_of_ae_nonneg_le hcross_upper_int
+    · simpa [crossAbs, mul_assoc, mul_left_comm, mul_comm] using
+        (((((hη.continuous.aemeasurable).mul hψ_aemeas.norm).mul
+          hgradEtaNorm_aemeas).mul hfluxNorm_aemeas.norm).const_mul
+            (2 : ℝ)).aestronglyMeasurable
+    · filter_upwards [hcross_upper_pt] with x hx
+      exact ⟨two_mul_abs_product_nonneg _ _ _ _ (hη_nonneg x) (norm_nonneg _), hx⟩
+  exact ⟨hCη_nonneg, hα_raw_aemeas, hβ_aemeas, hψ_nonneg,
+    hgradEtaNorm_aemeas, hleft_int, hψd_pos, hbound_int, hcoeff,
+    hcrossAbs_int⟩
+
 theorem moser_exact_regularized_energy_bound
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u η : E → ℝ} {p ρ Cη ε N : ℝ}
@@ -428,246 +908,23 @@ theorem moser_exact_regularized_energy_bound
     (2 * η x * ψ x) *
       inner ℝ (matMulE (Aρ.1.a x) (hwPos.weakGrad x)) (moserFderivVec η x)
   let coreIntegrand : E → ℝ := fun x => leftTerm x + crossInner x
-  have hCη_nonneg : 0 ≤ Cη := by
-    exact le_trans (norm_nonneg _) (hη_grad_bound (0 : E))
-  have hmaxu_aemeas : AEMeasurable (fun x => max (u x) 0) μ := by
-    exact huρ.memLp.aestronglyMeasurable.aemeasurable.max measurable_const.aemeasurable
-  have hψ_meas : Measurable (moserExactRegTestPow ε N p) := by
-    exact (moserExactRegTestPow_contDiff (ε := ε) (N := N) (p := p) hε hN).continuous.measurable
-  have hψ_aemeas : AEMeasurable ψ μ := by
-    exact hψ_meas.comp_aemeasurable hmaxu_aemeas
-  have hψd_raw_aemeas :
-      AEMeasurable (fun x => deriv (moserExactRegTestPow ε N p) (max (u x) 0)) μ := by
-    have hcont :
-        Continuous (deriv (moserExactRegTestPow ε N p)) := by
-      have h1 : ContDiff ℝ 1 (moserExactRegTestPow ε N p) :=
-        (moserExactRegTestPow_contDiff (ε := ε) (N := N) (p := p) hε hN).of_le (by simp)
-      exact h1.continuous_deriv_one
-    exact hcont.measurable.comp_aemeasurable hmaxu_aemeas
-  have hα_raw_aemeas :
-      AEMeasurable (fun x => deriv (moserExactRegPow ε N p) (max (u x) 0)) μ := by
-    have hcont :
-        Continuous (deriv (moserExactRegPow ε N p)) := by
-      have h1 : ContDiff ℝ 1 (moserExactRegPow ε N p) :=
-        (moserExactRegPow_contDiff (ε := ε) (N := N) (p := p) hε hN).of_le (by simp)
-      exact h1.continuous_deriv_one
-    exact hcont.measurable.comp_aemeasurable hmaxu_aemeas
-  have hβ_meas : Measurable (moserExactRegPow ε N p) := by
-    exact (moserExactRegPow_contDiff (ε := ε) (N := N) (p := p) hε hN).continuous.measurable
-  have hβ_aemeas :
-      AEMeasurable (fun x => moserExactRegPow ε N p (max (u x) 0)) μ := by
-    exact hβ_meas.comp_aemeasurable hmaxu_aemeas
-  have hψd_aemeas : AEMeasurable ψd μ := by
-    rcases hψd_raw_aemeas with ⟨g, hg_meas, hg_ae⟩
-    refine ⟨Set.piecewise (tsupport η) g (fun _ => (1 : ℝ)),
-      hg_meas.piecewise (isClosed_tsupport η).measurableSet measurable_const, ?_⟩
-    filter_upwards [hg_ae] with x hxg
-    by_cases hx : x ∈ tsupport η
-    · simp [ψd, hx, hxg]
-    · simp [ψd, hx]
-  have hψd_aestr : AEStronglyMeasurable ψd μ := by
-    exact hψd_aemeas.aestronglyMeasurable
-  have hgradEtaNorm_aemeas : AEMeasurable gradEtaNorm μ := by
-    exact (hη.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)).norm.aemeasurable
-  have hfluxNorm_aemeas : AEMeasurable fluxNorm μ := by
-    exact
-      (moser_aestronglyMeasurable_matMulE Aρ.1
-        hwPos.weakGrad_memLp.aestronglyMeasurable).norm.aemeasurable
-  have hψ_nonneg : ∀ x, 0 ≤ ψ x := by
-    intro x
-    exact moserExactRegTestPow_nonneg_of_nonneg (ε := ε) (N := N) (p := p)
-      hε hN (le_max_right _ _) hp
-  have hweighted_grad_sq_int :
-      Integrable (fun x => η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) μ := by
-    have hbase : Integrable (fun x => ‖hwPos.weakGrad x‖ ^ 2) μ := by
-      simpa [pow_two, μ] using hwPos.weakGrad_norm_memLp.integrable_sq
-    refine Integrable.mono' hbase ?_ ?_
-    · exact
-        (((hη.continuous.pow 2).aemeasurable).mul
-          hbase.aestronglyMeasurable.aemeasurable).aestronglyMeasurable
-    · filter_upwards with x
-      have hη_sq_le : η x ^ 2 ≤ 1 := by
-        have hη_sq_le' : η x ^ 2 ≤ (1 : ℝ) ^ 2 := by
-          exact sq_le_sq.mpr (by simpa using hη_bound x)
-        simpa using hη_sq_le'
-      have hgrad_nonneg : 0 ≤ ‖hwPos.weakGrad x‖ ^ 2 := by positivity
-      have hterm_nonneg : 0 ≤ η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2 := by positivity
-      have hle :
-          η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2 ≤ ‖hwPos.weakGrad x‖ ^ 2 := by
-        simpa [one_mul] using mul_le_mul_of_nonneg_right hη_sq_le hgrad_nonneg
-      simpa [Real.norm_eq_abs, abs_of_nonneg hterm_nonneg] using hle
-  obtain ⟨Mψd, hMψd⟩ :=
-    moserExactRegTestPow_deriv_bounded (ε := ε) (N := N) (p := p) hε hN
-  let Kψd : ℝ := max 1 (|Mψd|)
-  have hleft_int :
-      Integrable leftTerm μ := by
-    refine Integrable.mono' ((hweighted_grad_sq_int.const_mul (Aρ.1.Λ * Kψd))) ?_ ?_
-    · exact
-        ((((hη.continuous.pow 2).aemeasurable).mul hψd_aemeas).mul
-          (aestronglyMeasurable_bilinFormIntegrandOfCoeff Aρ.1 hwPos
-            hwPos).aemeasurable).aestronglyMeasurable
-    · filter_upwards [Aρ.1.quadratic_upper, Aρ.1.ae_coercive_nonneg] with x hx_quad hx_nonneg
-      by_cases hx : x ∈ tsupport η
-      · have hψd_eq : ψd x = deriv (moserExactRegTestPow ε N p) (max (u x) 0) := by
-          simp [ψd, hx]
-        have hψd_abs_le : |ψd x| ≤ Kψd := by
-          rw [hψd_eq]
-          calc
-            |deriv (moserExactRegTestPow ε N p) (max (u x) 0)| ≤ Mψd := hMψd _
-            _ ≤ |Mψd| := le_abs_self _
-            _ ≤ Kψd := le_max_right _ _
-        have hquad :
-            Equad x ≤ Aρ.1.Λ * ‖hwPos.weakGrad x‖ ^ 2 := by
-          simpa [Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
-            hx_quad (hwPos.weakGrad x)
-        have hEquad_nonneg : 0 ≤ Equad x := by
-          simpa [Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
-            hx_nonneg (hwPos.weakGrad x)
-        have hKψd_nonneg : 0 ≤ Kψd := by
-          exact le_trans zero_le_one (le_max_left _ _)
-        have hrhs_nonneg :
-            0 ≤ (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) := by
-          exact mul_nonneg (mul_nonneg Aρ.1.Λ_pos.le hKψd_nonneg) (by positivity)
-        have hη_sq_nonneg : 0 ≤ η x ^ 2 := by positivity
-        have hpoint :
-            ‖leftTerm x‖ ≤ (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) := by
-          calc
-            ‖leftTerm x‖ = |η x ^ 2 * ψd x * Equad x| := by
-              simp [leftTerm]
-            _ = η x ^ 2 * |ψd x| * Equad x := by
-              rw [abs_mul, abs_mul, abs_of_nonneg hη_sq_nonneg, abs_of_nonneg hEquad_nonneg]
-            _ ≤ η x ^ 2 * Kψd * (Aρ.1.Λ * ‖hwPos.weakGrad x‖ ^ 2) := by
-              gcongr
-            _ = (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) := by ring
-        have hrhs_eq :
-            (Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2) =
-              ‖(Aρ.1.Λ * Kψd) * (η x ^ 2 * ‖hwPos.weakGrad x‖ ^ 2)‖ := by
-          symm
-          rw [Real.norm_eq_abs, abs_of_nonneg hrhs_nonneg]
-        exact hpoint
-      · have hηx : η x = 0 := image_eq_zero_of_notMem_tsupport hx
-        simp [leftTerm, ψd, hx, hηx]
-  have hψd_pos :
-      ∀ᵐ x ∂μ, 0 < ψd x := by
-    filter_upwards [hqual] with x hxqual
-    by_cases hx : x ∈ tsupport η
-    · have hboundx : max (u x) 0 < N := hxqual hx
-      have hpos :=
-        moserExactRegTestPow_deriv_pos_of_support_bound (u := u) (x := x)
-          (ε := ε) (N := N) (p := p) hε hp hboundx
-      simpa [ψd, hx] using hpos
-    · simp [ψd, hx]
-  have hbound_int :
-      Integrable boundTerm μ := by
-    refine Integrable.mono' (hpInt.const_mul (Cη ^ 2 / (p - 1))) ?_ ?_
-    · exact
-        ((((hgradEtaNorm_aemeas.pow aemeasurable_const).mul
-          (((hψ_aemeas.norm).pow aemeasurable_const).div hψd_aemeas))).aestronglyMeasurable)
-    · filter_upwards [hqual] with x hxqual
-      by_cases hx : x ∈ tsupport η
-      · have hboundx : max (u x) 0 < N := hxqual hx
-        have hp1 : 0 < p - 1 := by linarith
-        have hgrad_sq_le : gradEtaNorm x ^ 2 ≤ Cη ^ 2 := by
-          have := hη_grad_bound x
-          exact sq_le_sq.mpr (by
-            simp [gradEtaNorm, abs_of_nonneg (norm_nonneg _), abs_of_nonneg hCη_nonneg, this])
-        have hψdpos : 0 < ψd x := by
-          have hbase :=
-            moserExactRegTestPow_deriv_pos_of_support_bound (u := u) (x := x)
-              (ε := ε) (N := N) (p := p) hε hp hboundx
-          simpa [ψd, hx] using hbase
-        have hquot_le :
-            |ψ x| ^ 2 / ψd x ≤ (ε + |max (u x) 0|) ^ p / (p - 1) := by
-          have hbase :=
-            moserExactRegTestPow_sq_div_deriv_le_rpow_of_support_bound (u := u) (x := x)
-              (ε := ε) (N := N) (p := p) hε hp hboundx
-          have hψd_eq : ψd x = deriv (moserExactRegTestPow ε N p) (max (u x) 0) := by
-            simp [ψd, hx]
-          have hψ_eq : |ψ x| = ψ x := by
-            rw [abs_of_nonneg (hψ_nonneg x)]
-          simpa [ψ, hψd_eq, hψ_eq] using hbase
-        have hquot_nonneg : 0 ≤ |ψ x| ^ 2 / ψd x := by
-          exact div_nonneg (by positivity) hψdpos.le
-        have hterm_nonneg : 0 ≤ boundTerm x := by
-          exact mul_nonneg (sq_nonneg _) hquot_nonneg
-        have hdom_nonneg :
-            0 ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
-          exact mul_nonneg (div_nonneg (sq_nonneg _) hp1.le) (Real.rpow_nonneg (by positivity) _)
-        have hmul_le :
-            boundTerm x ≤ Cη ^ 2 * ((ε + |max (u x) 0|) ^ p / (p - 1)) := by
-          exact mul_le_mul hgrad_sq_le hquot_le hquot_nonneg (sq_nonneg _)
-        have hpoint :
-            ‖boundTerm x‖ ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
-          calc
-            ‖boundTerm x‖ = boundTerm x := by
-              rw [Real.norm_eq_abs, abs_of_nonneg hterm_nonneg]
-            _ ≤ Cη ^ 2 * ((ε + |max (u x) 0|) ^ p / (p - 1)) := hmul_le
-            _ = (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
-              field_simp [show p - 1 ≠ 0 by linarith]
-        have hrhs_eq :
-            (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p =
-              ‖(Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p‖ := by
-          symm
-          rw [Real.norm_eq_abs, abs_of_nonneg hdom_nonneg]
-        exact hpoint
-      · have hgrad_zero : gradEtaNorm x = 0 := by
-          simpa [gradEtaNorm] using moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
-        have hp1 : 0 < p - 1 := by linarith
-        have hdom_nonneg :
-            0 ≤ (Cη ^ 2 / (p - 1)) * (ε + |max (u x) 0|) ^ p := by
-          exact mul_nonneg (div_nonneg (sq_nonneg _) hp1.le) (Real.rpow_nonneg (by positivity) _)
-        simpa [boundTerm, hgrad_zero, Real.norm_eq_abs, abs_of_nonneg hdom_nonneg]
-  have hcoeff :
-      ∀ᵐ x ∂μ, |fluxNorm x| ^ 2 ≤ Aρ.1.Λ * Equad x := by
-    filter_upwards [Aρ.1.mulVec_sq_le] with x hx
-    simpa [fluxNorm, Equad, bilinFormIntegrandOfCoeff, real_inner_comm] using
-      hx (hwPos.weakGrad x)
-  have hcross_upper_pt :
-      ∀ᵐ x ∂μ,
-        crossAbs x ≤
-          (1 / 2 : ℝ) * leftTerm x + 2 * Aρ.1.Λ * boundTerm x := by
-    filter_upwards [hcoeff, hψd_pos] with x hx hψx
-    have hx' :=
-      moser_weighted_pointwise_core
-        (Λ := Aρ.1.Λ) (η := η x) (ζ := gradEtaNorm x) (ψ := ψ x)
-        (ψd := ψd x) (Q := Equad x) (M := fluxNorm x) Aρ.1.Λ_pos hψx hx
-    dsimp [crossAbs, leftTerm, boundTerm, gradEtaNorm, fluxNorm] at hx' ⊢
-    ring_nf at hx' ⊢
-    exact hx'
-  have hcross_upper_int :
-      Integrable
-        (fun x =>
-          (1 / 2 : ℝ) * leftTerm x + 2 * Aρ.1.Λ * boundTerm x) μ := by
-    have htmp :
-        Integrable (fun x => 2 * ((Aρ.1.Λ * boundTerm x)) + (1 / 2 : ℝ) * leftTerm x) μ := by
-      simpa [mul_assoc] using
-        (hbound_int.const_mul (2 * Aρ.1.Λ)).add (hleft_int.const_mul (1 / 2 : ℝ))
-    simpa [mul_assoc, add_comm, add_left_comm, add_assoc] using htmp
-  have hcrossAbs_int :
-      Integrable crossAbs μ := by
-    refine Integrable.mono' hcross_upper_int ?_ ?_
-    · exact
-        (by
-          simpa [crossAbs, mul_assoc, mul_left_comm, mul_comm] using
-            (((((hη.continuous.aemeasurable).mul hψ_aemeas.norm).mul hgradEtaNorm_aemeas).mul
-              hfluxNorm_aemeas.norm).const_mul (2 : ℝ)).aestronglyMeasurable)
-    · filter_upwards [hcross_upper_pt] with x hx
-      have hcross_nonneg : 0 ≤ crossAbs x := by
-        have hηx : 0 ≤ η x := hη_nonneg x
-        have hψx : 0 ≤ |ψ x| := abs_nonneg _
-        have hgradx : 0 ≤ gradEtaNorm x := norm_nonneg _
-        have hfluxx : 0 ≤ |fluxNorm x| := abs_nonneg _
-        dsimp [crossAbs]
-        exact mul_nonneg
-          (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) hηx) hψx) hgradx)
-          hfluxx
-      have hrhs_nonneg :
-          0 ≤ (1 / 2 : ℝ) * leftTerm x + 2 * Aρ.1.Λ * boundTerm x := by
-        exact le_trans hcross_nonneg hx
-      have hnorm_cross : ‖crossAbs x‖ = crossAbs x := by
-        rw [Real.norm_of_nonneg hcross_nonneg]
-      rw [hnorm_cross]
-      exact hx
+  obtain ⟨hCη_nonneg, hα_raw_aemeas, hβ_aemeas, hψ_nonneg,
+      hgradEtaNorm_aemeas, hleft_int, hψd_pos, hbound_int, hcoeff,
+      hcrossAbs_int⟩ :=
+    moserExactReg_energyPrep (d := d) (Ω := Ω) Aρ Metric.isOpen_ball
+      hball_sub hε hN hp hu1 hη hη_nonneg hη_bound hη_grad_bound
+      (by simpa [μ] using hqual) (by simpa [μ] using hpInt)
+  change AEMeasurable
+    (fun x => deriv (moserExactRegPow ε N p) (max (u x) 0)) μ at hα_raw_aemeas
+  change AEMeasurable
+    (fun x => moserExactRegPow ε N p (max (u x) 0)) μ at hβ_aemeas
+  change (∀ x, 0 ≤ ψ x) at hψ_nonneg
+  change AEMeasurable gradEtaNorm μ at hgradEtaNorm_aemeas
+  change Integrable leftTerm μ at hleft_int
+  change (∀ᵐ x ∂μ, 0 < ψd x) at hψd_pos
+  change Integrable boundTerm μ at hbound_int
+  change (∀ᵐ x ∂μ, |fluxNorm x| ^ 2 ≤ Aρ.1.Λ * Equad x) at hcoeff
+  change Integrable crossAbs μ at hcrossAbs_int
   have hcore_eq_ae :
       coreIntegrand =ᵐ[μ] bilinFormIntegrandOfCoeff Aρ.1 huρ hwφ := by
     have hcore_eq_ae' :
@@ -917,108 +1174,28 @@ theorem moser_exact_regularized_energy_bound
             ∫ x, (p ^ 2 / (4 * (p - 1))) * leftTerm x ∂μ := by
         exact integral_mono_ae hTermA_int (hleft_int.const_mul (p ^ 2 / (4 * (p - 1)))) hTermA_pt
       simpa [μ, integral_const_mul] using hmono
-    calc
-      ∫ x in Ω,
+    have hraw :=
+      moser_termA_bound_of_absorption p Aρ.1.Λ Cη
+        (∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume)
+        (∫ x, leftTerm x ∂μ) (∫ x, boundTerm x ∂μ)
+        (∫ x in Ω,
           η x ^ 2 *
             (deriv (moserExactRegPow ε N p) (max (u x) 0)) ^ 2 *
-            ‖hwPos.weakGrad x‖ ^ 2 ∂volume
-          ≤ (p ^ 2 / (4 * (p - 1))) * ∫ x, leftTerm x ∂μ := hcoreA
-      _ ≤ (p ^ 2 / (4 * (p - 1))) * (4 * Aρ.1.Λ * ∫ x, boundTerm x ∂μ) := by
-            have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (p - 1)) := by
-              have hp1 : 0 < p - 1 := by linarith
-              positivity
-            exact mul_le_mul_of_nonneg_left hleft_bound hconst_nonneg
-      _ ≤ (p ^ 2 / (4 * (p - 1))) *
-            (4 * Aρ.1.Λ *
-              ((Cη ^ 2 / (p - 1)) * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume)) := by
-            have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (p - 1)) := by
-              have hp1 : 0 < p - 1 := by linarith
-              positivity
-            have hΛ_nonneg : 0 ≤ 4 * Aρ.1.Λ := by
-              nlinarith [Aρ.1.Λ_pos]
-            exact mul_le_mul_of_nonneg_left
-              (mul_le_mul_of_nonneg_left hbound_integral_le hΛ_nonneg) hconst_nonneg
-      _ = A.1.Λ * (p / (p - 1)) ^ 2 * Cη ^ 2 *
-            ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
-            have hΛeq : Aρ.1.Λ = A.1.Λ := by
-              simp [Aρ, NormalizedEllipticCoeff.restrict, EllipticCoeff.restrict_Λ]
-            rw [hΛeq]
-            have hp1 : p - 1 ≠ 0 := by linarith
-            field_simp [hp1]
-  have hTermB_int :
-      Integrable
-        (fun x =>
-          ‖fderiv ℝ η x‖ ^ 2 *
-            (moserExactRegPow ε N p (max (u x) 0)) ^ 2) μ := by
-    refine Integrable.mono' (hpInt.const_mul (Cη ^ 2)) ?_ ?_
-    · exact
-        ((((hgradEtaNorm_aemeas.pow aemeasurable_const).mul
-          (hβ_aemeas.pow aemeasurable_const))).aestronglyMeasurable)
-    · filter_upwards [hqual] with x hxqual
-      by_cases hx : x ∈ tsupport η
-      · have hboundx : max (u x) 0 < N := hxqual hx
-        have hgrad_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 := by
-          exact sq_le_sq.mpr (by
-            simp [abs_of_nonneg (norm_nonneg _), abs_of_nonneg hCη_nonneg, hη_grad_bound x])
-        have hpow_le :=
-          moserExactRegPow_sq_le_rpow_of_support_bound (u := u) (x := x)
-            (ε := ε) (N := N) (p := p) hε hp hboundx
-        have hpow_nonneg :
-            0 ≤ (moserExactRegPow ε N p (max (u x) 0)) ^ 2 := by
-          positivity
-        have hrhs_nonneg : 0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
-          exact mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
-        have hle :
-            ‖fderiv ℝ η x‖ ^ 2 * (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ≤
-              Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
-          exact mul_le_mul hgrad_sq_le hpow_le hpow_nonneg (sq_nonneg _)
-        simpa [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (sq_nonneg _) hpow_nonneg),
-          abs_of_nonneg hrhs_nonneg] using hle
-      · have hgrad_zero : ‖fderiv ℝ η x‖ = 0 := by
-          exact moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
-        have hrhs_nonneg : 0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
-          exact mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
-        simp [hgrad_zero, hrhs_nonneg]
-  have hTermB :
-      ∫ x in Ω,
-        ‖fderiv ℝ η x‖ ^ 2 *
-          (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂volume ≤
-        Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
-    have hTermB_pt :
-        ∀ᵐ x ∂μ,
-          ‖fderiv ℝ η x‖ ^ 2 *
-            (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ≤
-          Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
-      filter_upwards [hqual] with x hxqual
-      by_cases hx : x ∈ tsupport η
-      · have hboundx : max (u x) 0 < N := hxqual hx
-        have hgrad_sq_le : ‖fderiv ℝ η x‖ ^ 2 ≤ Cη ^ 2 := by
-          exact sq_le_sq.mpr (by
-            simp [abs_of_nonneg (norm_nonneg _), abs_of_nonneg hCη_nonneg, hη_grad_bound x])
-        have hpow_le :=
-          moserExactRegPow_sq_le_rpow_of_support_bound (u := u) (x := x)
-            (ε := ε) (N := N) (p := p) hε hp hboundx
-        have hpow_nonneg :
-            0 ≤ (moserExactRegPow ε N p (max (u x) 0)) ^ 2 := by
-          positivity
-        exact mul_le_mul hgrad_sq_le hpow_le hpow_nonneg (sq_nonneg _)
-      · have hgrad_zero : ‖fderiv ℝ η x‖ = 0 := by
-          exact moser_fderiv_norm_zero_outside_tsupport (d := d) (f := η) hη hx
-        have hrhs_nonneg : 0 ≤ Cη ^ 2 * (ε + |max (u x) 0|) ^ p := by
-          exact mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (by positivity) _)
-        simp [hgrad_zero, hrhs_nonneg]
-    calc
-      ∫ x in Ω,
-          ‖fderiv ℝ η x‖ ^ 2 *
-            (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂volume
-          = ∫ x,
-              ‖fderiv ℝ η x‖ ^ 2 *
-                (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂μ := by
-                simp [μ]
-      _ ≤ ∫ x, Cη ^ 2 * (ε + |max (u x) 0|) ^ p ∂μ := by
-            exact integral_mono_ae hTermB_int (hpInt.const_mul (Cη ^ 2)) hTermB_pt
-      _ = Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume := by
-            simp [μ, integral_const_mul]
+            ‖hwPos.weakGrad x‖ ^ 2 ∂volume)
+        hp Aρ.1.Λ_pos.le hcoreA hleft_bound hbound_integral_le
+    have hΛeq : Aρ.1.Λ = A.1.Λ := by
+      simp [Aρ, NormalizedEllipticCoeff.restrict, EllipticCoeff.restrict_Λ]
+    simpa only [hΛeq] using hraw
+  obtain ⟨hTermB_int, hTermB⟩ :=
+    moserExactReg_termB_bound (d := d) (Ω := Ω) hp hε hN hη
+      hη_grad_bound huρ.memLp.aestronglyMeasurable
+      (by simpa [μ] using hqual) (by simpa [μ] using hpInt)
+  change Integrable
+    (fun x => ‖fderiv ℝ η x‖ ^ 2 *
+      (moserExactRegPow ε N p (max (u x) 0)) ^ 2) μ at hTermB_int
+  change (∫ x in Ω, ‖fderiv ℝ η x‖ ^ 2 *
+      (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂volume ≤
+    Cη ^ 2 * ∫ x in Ω, (ε + |max (u x) 0|) ^ p ∂volume) at hTermB
   have hgrad_split :
       ∫ x in Ω, ‖hwReg.weakGrad x‖ ^ 2 ∂volume ≤
         2 * ∫ x in Ω,
@@ -1028,36 +1205,8 @@ theorem moser_exact_regularized_energy_bound
         2 * ∫ x in Ω,
           ‖fderiv ℝ η x‖ ^ 2 *
             (moserExactRegPow ε N p (max (u x) 0)) ^ 2 ∂volume := by
-    let termAfun : E → ℝ := fun x =>
-      η x ^ 2 *
-        (deriv (moserExactRegPow ε N p) (max (u x) 0)) ^ 2 *
-        ‖hwPos.weakGrad x‖ ^ 2
-    let termBfun : E → ℝ := fun x =>
-      ‖fderiv ℝ η x‖ ^ 2 *
-        (moserExactRegPow ε N p (max (u x) 0)) ^ 2
-    have hupper_int :
-        Integrable
-          (fun x => 2 * termAfun x + 2 * termBfun x) μ := by
-      convert (hTermA_int.const_mul (2 : ℝ)).add (hTermB_int.const_mul (2 : ℝ)) using 1
-    have hmono :
-        ∫ x, ‖hwRegρ.weakGrad x‖ ^ 2 ∂μ ≤
-          ∫ x, 2 * termAfun x + 2 * termBfun x ∂μ := by
-      refine integral_mono_ae ?_ hupper_int ?_
-      · simpa [pow_two, μ, hwRegρ] using hwRegρ.weakGrad_norm_memLp.integrable_sq
-      · filter_upwards with x
-        simpa [hwRegρ, termAfun, termBfun, mul_assoc, add_comm, add_left_comm, add_assoc] using
-          (moserExactRegPowerCutoffWitness_norm_sq_le (d := d) (u := u) (η := η)
-            (ε := ε) (N := N) (p := p) (Cη := Cη)
-            hε hN hu1 hη hη_bound hη_grad_bound x)
-    calc
-      ∫ x in Ω, ‖hwReg.weakGrad x‖ ^ 2 ∂volume
-          = ∫ x, ‖hwRegρ.weakGrad x‖ ^ 2 ∂μ := by
-              change ∫ x, ‖hwReg.weakGrad x‖ ^ 2 ∂μ = ∫ x, ‖hwReg.weakGrad x‖ ^ 2 ∂μ
-              simp [μ]
-      _ ≤ ∫ x, 2 * termAfun x + 2 * termBfun x ∂μ := hmono
-      _ = 2 * ∫ x in Ω, termAfun x ∂volume + 2 * ∫ x in Ω, termBfun x ∂volume := by
-            rw [integral_add (hTermA_int.const_mul (2 : ℝ)) (hTermB_int.const_mul (2 : ℝ)),
-              integral_const_mul, integral_const_mul]
+    exact moserExactReg_grad_split (d := d) Metric.isOpen_ball hball_sub
+      hε hN hu1 hη hη_bound hη_grad_bound hTermA_int hTermB_int
   calc
     ∫ x in Ω, ‖hwReg.weakGrad x‖ ^ 2 ∂volume
         = ∫ x in Ω, ‖hwRegρ.weakGrad x‖ ^ 2 ∂volume := by rfl

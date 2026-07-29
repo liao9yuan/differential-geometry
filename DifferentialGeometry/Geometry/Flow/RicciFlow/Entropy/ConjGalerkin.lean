@@ -732,8 +732,6 @@ theorem galPert_bdd_on
   change ‖scalarGalPert (I := I) (M := M) S T t‖ ≤ max C 0
   exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 /-- Prescribed-interval scalar Galerkin existence from continuity of the full
 perturbation.  The interval is independent of the finite spectral set. -/
@@ -862,8 +860,6 @@ theorem gal_time_mono
   · intro t ht i hi
     exact hV.deriv t ⟨ht.1, ht.2.trans_le hle⟩ i hi
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 /-- On one time interval independent of the finite spectral set, every scalar
 Galerkin truncation of the reversed conjugate-heat equation has a solution. -/

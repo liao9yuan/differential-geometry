@@ -69,6 +69,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [NeZero (Module.finrank ℝ E)] in
 /-- **Tower match (no arity cast).**  The unit-value of the abstract iterated covariant
 gradient of the realized `(0,2)` metric tensor equals, at every point and every order `j`,
@@ -215,10 +221,6 @@ private lemma rfns_eq_normSq0S_unit
      apply Fin.ext;
      simp)
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the tensor-bundle instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 1600000 in
--- Reconciling the fibre-norm realizations requires the larger normalization budget.
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace

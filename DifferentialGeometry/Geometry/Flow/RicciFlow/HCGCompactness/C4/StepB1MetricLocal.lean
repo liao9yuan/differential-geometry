@@ -200,9 +200,6 @@ theorem HasSuppConvData.source_stay
     change dist (chiK.symm w) Yk.basepoint ≤ S
     exact hdist.le
 
-set_option maxHeartbeats 2400000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 1000000 in
 /-- On one retained source patch with a fixed coordinate buffer, every finite
 jet of the actual pulled-back target metric converges to the corresponding
 source-stage normal metric, with one rectangular tail in the two stages. -/
@@ -536,9 +533,6 @@ theorem HasStageJetData.pb_buf_tail
   have hbad' := hbad (ψ n)
   simpa only [kn, ln, zn] using (not_lt_of_ge hle hbad')
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 800000 in
 /-- On a smaller source ball, the producer-owned finite buffered chart cover
 admits one common two-stage tail for all coefficient jets through a prescribed
 finite order.  The conclusion keeps the chart witnessing each source point. -/

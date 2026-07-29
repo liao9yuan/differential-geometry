@@ -67,8 +67,6 @@ theorem edgeRiem_cancel
 
 /-! ## Lie-only formal pairing -/
 
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [BoundarylessManifold I M] in
 /-- The DeTurck Lie pair field is the exact Hilbert-space formal partner of
 the Lie second-order refold family. -/

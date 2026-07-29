@@ -63,6 +63,12 @@ private local instance aaTensorRSFiberBundle (r s : ℕ) :
     FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
   Tensor0SBundle.tensorRSBundle_fiber r s
 
+private local instance aaTensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 private lemma aa_symm_eq (g : SmoothRiemannianMetric I M)
@@ -472,7 +478,6 @@ theorem ricciAAKer_rfns
       (A0 + A1 + A2 + A3 + A4 + A5) ≤ _
   simpa only [Q, mul_assoc] using hsum
 
-set_option synthInstance.maxHeartbeats 1600000 in
 -- The pointwise coefficient proof synthesizes the metric-induced tensor norm instance.
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

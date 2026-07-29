@@ -457,7 +457,6 @@ theorem dlbDiff_h1_tame
       deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀)
     R A hR hA hP2 htop hpt'
 
-set_option maxHeartbeats 800000 in
 -- The rank-changing operator composition needs an enlarged local elaboration budget.
 /-- The fixed-curvature part of `lieCorr0` is in fact a lower-order `H1`
 coefficient; its affine top-order coefficient can be chosen to be zero. -/
@@ -968,7 +967,6 @@ theorem tail_h1_tame
       rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)]
     _ = (B0 R + B1 R * A) ^ 2 := by rw [hfactor]
 
-set_option maxHeartbeats 2000000 in
 -- The affine assembly combines several rank-changing coefficient estimates.
 /-- A lower endpoint `H2` radius and an independent endpoint `H3` radius give
 the complete affine `H1` bound for `rhsLow0Coeff` along the same convex path. -/

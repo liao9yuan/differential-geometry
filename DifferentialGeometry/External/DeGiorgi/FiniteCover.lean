@@ -16,9 +16,6 @@ open scoped ENNReal
 
 namespace DeGiorgi
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 private theorem lintegral_biUnion_finset_le_sum
     {α : Type*} [MeasurableSpace α] {μ : Measure α}
     {ι : Type*} (t : Finset ι) (U : ι → Set α) (f : α → ℝ≥0∞) :

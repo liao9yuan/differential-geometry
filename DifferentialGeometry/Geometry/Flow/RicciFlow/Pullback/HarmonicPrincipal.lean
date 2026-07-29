@@ -1510,8 +1510,21 @@ private lemma hmf_inducing
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothCcTensorH1 q 0 1)
 
-set_option synthInstance.maxHeartbeats 200000 in
--- Extending twice into a dual continuous-linear-map space is instance-search heavy.
+private local instance smoothCcTensorH1FirstCountable
+    (q : SmoothRiemannianMetric I M) :
+    FirstCountableTopology (SmoothCcTensorH1 q 0 1) :=
+  UniformSpace.firstCountableTopology (SmoothCcTensorH1 q 0 1)
+
+private local instance smoothCcTensorH1Sequential
+    (q : SmoothRiemannianMetric I M) :
+    SequentialSpace (SmoothCcTensorH1 q 0 1) :=
+  FrechetUrysohnSpace.to_sequentialSpace
+
+private local instance smoothCcTensorH1DualComplete
+    (q : SmoothRiemannianMetric I M) :
+    CompleteSpace (SmoothCcTensorH1 q 0 1 →L[ℝ] ℝ) :=
+  ContinuousLinearMap.instCompleteSpace
+
 /-- Extend a continuous bilinear form from the smooth `H¹(q)` core in both
 variables.  The final flip preserves the original argument order. -/
 private noncomputable def hmfExtend
@@ -1526,8 +1539,6 @@ private noncomputable def hmfExtend
           (smoothToTensorH1Compl (I := I) (M := M) q 0 1)))
       (smoothToTensorH1Compl (I := I) (M := M) q 0 1))
 
-set_option synthInstance.maxHeartbeats 200000 in
--- Rewriting both nested extensions requires the same dual-space instance search.
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] in
 private theorem hmfExtend_coe

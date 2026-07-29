@@ -370,7 +370,6 @@ theorem spdDuhD1_space (A : Matrix n n ℝ) (hA : A.PosDef) (t : ℝ)
   simpa only [spdDuhD1, spdDuhD2, L, Function.comp_apply,
     ContinuousLinearMap.comp_apply] using h
 
-set_option maxHeartbeats 800000 in
 -- Elaborating the nested continuous-linear-map conjugation is expensive.
 /-- The original-coordinate Hessian contraction is the isotropic trace of
 the pulled-back Hessian. -/

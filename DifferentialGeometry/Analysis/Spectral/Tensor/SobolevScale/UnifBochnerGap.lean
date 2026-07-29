@@ -93,9 +93,23 @@ private theorem norm_iterCovGrad_comp
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
-set_option maxHeartbeats 1600000 in
--- The final `nlinarith` (Weitzenböck identity + Cauchy–Schwarz curvature pairing) is
--- elaboration-heavy; the budget is raised as at `DirichletSpectralBochnerGap.lean:1219`.
+private theorem bochner_scalar_close
+    {base pair lap Cbase Fc sum : ℝ}
+    (hbase : base ≤ lap + Cbase * sum ^ 2)
+    (hpair : |pair| ≤ Fc * sum ^ 2)
+    (hneg : -|pair| ≤ pair) :
+    base - pair ≤ lap + (Cbase + Fc) * sum ^ 2 := by
+  nlinarith
+
+private theorem norm_add_cross_scalar_close
+    {base pair defect Cfun0 Crc dimR Cfun1 sum : ℝ}
+    (hcross :
+      2 * pair ≤ 2 * ((Crc * sum) * (dimR * (Cfun1 * sum))))
+    (hdefect : defect ≤ Cfun0 ^ 2 * sum ^ 2) :
+    base + 2 * pair + defect ≤
+      base + (Cfun0 ^ 2 + 2 * (Crc * (dimR * Cfun1))) * sum ^ 2 := by
+  nlinarith
+
 /-- **The class-uniform single Bochner step.**  Uniform sibling of
 `iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower`
 (`DirichletSpectralBochnerGap.lean:1220`) with an EXPLICIT constant `Cbase + Fc 0`.
@@ -257,7 +271,7 @@ theorem bochner_step_unif
     (tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
       (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
       (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun)
-  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hFc 0]
+  exact bochner_scalar_close hbase_le hpair_bound hneg_le
 
 /-- **The class-uniform iterated rough-Laplacian / covariant-gradient commutator.**
 Uniform sibling of the `private` `iteratedRoughLapGrad_commutator_l2Norm_le_local`
@@ -507,9 +521,6 @@ theorem rawConnLapIter_unif
           (mul_le_mul_of_nonneg_left hsub_le (hCfun_nn 0))
     _ = (K + Cfun 0) * FULL := by ring
 
-set_option maxHeartbeats 1600000 in
--- The IBP cross-term + Cauchy–Schwarz `nlinarith` is elaboration-heavy; the budget is
--- raised as at `DirichletSpectralBochnerGap.lean:1219`.
 /-- **Class-uniform base+lower Bochner defect** — the `hbase` provider.  Uniform sibling of
 the `private` `rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower`
 (`DirichletSpectralBochnerGap.lean:1085`).  Its conclusion is EXACTLY the `hbase` hypothesis of
@@ -656,7 +667,7 @@ theorem baseAddLower_unif
         2 * ((Crc * SUM) * (dimR * (Cfun 1 * SUM))) := by
       have := (abs_le.mp hcross_abs).2
       linarith [this]
-    nlinarith [hcross_le, hDnorm_sq, hSUM_nn, hCrc_nn, hdimR_nn, hCfun_nn 0, hCfun_nn 1]
+    exact norm_add_cross_scalar_close hcross_le hDnorm_sq
 
 /-- **The fully class-uniform single Bochner step** (`hbase` discharged).  Combines
 `baseAddLower_unif` (supplying the `Cbase` input) with `bochner_step_unif`, so the only
@@ -721,8 +732,6 @@ private theorem lap_shift_le
   have hnn : 0 ≤ ‖rawTensorConnLapIter (I := I) g₀ 0 s 0 S‖ := norm_nonneg _
   linarith [key, hmono, hnn]
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- **Uniform elliptic jet engine (strong form).**  For every jet-order budget `J` there is a
 single nonnegative constant `C` such that every covariant-gradient iterate up to order `J` is
 controlled by the rough-Laplacian jet up to order `⌈a/2⌉`:

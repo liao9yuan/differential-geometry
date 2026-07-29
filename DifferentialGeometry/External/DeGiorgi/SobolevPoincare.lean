@@ -211,8 +211,6 @@ private lemma euclidean_norm_le_sum_norms (v : EuclideanSpace ℝ (Fin d)) :
     _ = ∑ i : Fin d, nv i :=
         abs_of_nonneg (Finset.sum_nonneg fun i _ => hnv i)
 
-set_option maxHeartbeats 3200000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Poincare inequality for `W^{1,p}` witnesses on the unit ball.
 Proved by density of smooth functions + `ge_of_tendsto`. -/
 private theorem poincare_unitBall_W1p
@@ -436,7 +434,9 @@ private theorem poincare_unitBall_W1p
             eLpNorm (fun _ : E =>
               (⨍ x in B, (ψ n x - u x) ∂volume : ℝ)) pp μ := by
           gcongr; exact h_fderiv_le n
-      _ = _ := by rw [mul_add]; simp only [add_assoc, add_comm, add_left_comm]
+      _ = _ := by
+        rw [mul_add]
+        abel
   -- === Error → 0 ===
   have h_err_tendsto : Tendsto (fun n =>
       eLpNorm (fun x => ψ n x - u x) pp μ +

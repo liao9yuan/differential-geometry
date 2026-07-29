@@ -49,6 +49,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+private local instance ricTensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M] in
 private lemma ric_symm_eq (g : SmoothRiemannianMetric I M)
@@ -433,10 +439,7 @@ theorem ricciPart_bds (g : SmoothRiemannianMetric I M) :
 
 /-! ## The undifferentiated connection-difference carrier -/
 
-set_option synthInstance.maxHeartbeats 1600000 in
 -- Elaborating the tensor-contraction instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 6400000 in
--- Normalizing the base Ricci coefficient bound requires the larger heartbeat budget.
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -509,12 +512,13 @@ private lemma ric_bound_mono
     (mul_le_mul_of_nonneg_right hab (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _))
 
+private lemma mul_mul_le_sixteenth_sq_add_four_sq (A δ w d : Real) :
+    A * δ * w * d ≤
+      (1 / 16 : Real) * d ^ 2 + 4 * A ^ 2 * δ ^ 2 * w ^ 2 := by
+  nlinarith [sq_nonneg (d - 8 * (A * δ * w))]
+
 /-! ## Absorption on the genuine slope segment -/
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the pathwise tensor instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 6400000 in
--- Closing the quadratic absorption estimate requires the larger heartbeat budget.
 /-- The exact derivative-only Ricci order-zero term on the realized segment
 costs at most one eighth of the Dirichlet energy, plus a fixed multiple of the
 `L2` energy.  The factor `-2` is the coefficient with which this arm occurs
@@ -771,7 +775,7 @@ theorem ricciDA_path_le [Nonempty M]
   have hcross : G * delta * ‖W‖ * ‖D‖ ≤
       (1 / 16 : Real) * ‖D‖ ^ 2 +
         4 * G ^ 2 * delta ^ 2 * ‖W‖ ^ 2 := by
-    nlinarith [sq_nonneg (‖D‖ - 8 * (G * delta * ‖W‖))]
+    exact mul_mul_le_sixteenth_sq_add_four_sq G delta ‖W‖ ‖D‖
   have hgradTerm : Hc * delta * ‖D‖ ^ 2 ≤
       (1 / 16 : Real) * ‖D‖ ^ 2 :=
     mul_le_mul_of_nonneg_right hHdelta (sq_nonneg ‖D‖)
