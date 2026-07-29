@@ -39,6 +39,53 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+/-- The metric length of a sum is at most the sum of the metric lengths. -/
+theorem sqrt_inner_add_le
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    Real.sqrt (g.inner x (v + w) (v + w)) <=
+      Real.sqrt (g.inner x v v) + Real.sqrt (g.inner x w w) := by
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x)
+      _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  have hnorm : ∀ z : TangentSpace I x,
+      Real.sqrt (g.inner x z z) = ‖z‖ := by
+    intro z
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g x) z z]
+    change Real.sqrt (D.inner z z) = ‖z‖
+    rw [← MetricFiberData.toCore_inner D z z,
+      real_inner_self_eq_norm_sq, Real.sqrt_sq_eq_abs, abs_norm]
+  rw [hnorm, hnorm, hnorm]
+  exact norm_add_le v w
+
+/-- Metric length is homogeneous under real scalar multiplication. -/
+theorem sqrt_inner_smul
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (c : Real) (v : TangentSpace I x) :
+    Real.sqrt (g.inner x (c • v) (c • v)) =
+      |c| * Real.sqrt (g.inner x v v) := by
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x)
+      _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  have hnorm : ∀ z : TangentSpace I x,
+      Real.sqrt (g.inner x z z) = ‖z‖ := by
+    intro z
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g x) z z]
+    change Real.sqrt (D.inner z z) = ‖z‖
+    rw [← MetricFiberData.toCore_inner D z z,
+      real_inner_self_eq_norm_sq, Real.sqrt_sq_eq_abs, abs_norm]
+  rw [hnorm, hnorm, norm_smul, Real.norm_eq_abs]
+
 /-- **ℓ²-identity for a `g`-orthonormal family.**  The metric of a linear
 combination against itself collapses to the sum of squared coefficients.  Pure
 bilinearity: `g.inner x` is `ContinuousLinearMap`-valued in each slot. -/
@@ -95,7 +142,7 @@ theorem expand_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
   let b : OrthonormalBasis ι ℝ (TangentSpace I x) := OrthonormalBasis.mk hONi hspan
   have hb : ∀ i, b i = v i := by
     intro i
-    show (OrthonormalBasis.mk hONi hspan) i = v i
+    change (OrthonormalBasis.mk hONi hspan) i = v i
     rw [OrthonormalBasis.coe_mk]
   calc u = ∑ i, (Inner.inner ℝ (b i) u : ℝ) • b i := (b.sum_repr' u).symm
     _ = ∑ i, g.inner x (v i) u • v i := by

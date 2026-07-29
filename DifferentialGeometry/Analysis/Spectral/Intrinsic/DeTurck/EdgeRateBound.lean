@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRiemCancel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MovingEdgeEnergy
 
 /-!
@@ -22,6 +23,7 @@ noncomputable section
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 6400000
+set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
@@ -34,9 +36,11 @@ namespace IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -156,13 +160,20 @@ theorem exists_edgePairRef
     have hriem := hidR s hs
     have hlie := hidD s hs
     simp only [iteratedCovGrad_zero] at hriem hlie
+    have hcancel := edgeRiem_cancel (I := I) (M := M) g
+      (realizedFam (I := I) (M := M) g W 0 hdelta hdeltaZ s) W
+      (C0R s)
+      ((2 : Real) •
+        riemannPalatiniRefoldC2Family (I := I) (M := M)
+          g W hdelta hdeltaZ qA qB s)
+      hriem
+    simp only [appCc_smul_left] at hcancel
     rw [hmetric]
     simp only [edgeQuadArm, edgeLowerArm, edgeQuad0,
       deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
+      edgeFold0, C0, C2,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
-    rw [hriem, hlie]
-    simp only [edgeRicciHalf, edgeFold0, C0, C2,
-      appCc_add_left, appCc_sub_left, appCc_smul_left]
+    rw [hlie, ← hcancel]
     module
   have htop : ∀ s : Real,
       appCc (I := I) (M := M) g 4 2 (C2 s)
@@ -225,10 +236,18 @@ private theorem edge_unit_smul
       c * unitModel (I := I) (M := M) g 2 A x v := by
   have hfun : unitModel (I := I) (M := M) g 2 (c • A) x =
       c • unitModel (I := I) (M := M) g 2 A x := by
-    simp only [unitModel]
-    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
-      Pi.smul_apply, ContinuousLinearMap.smul_apply,
-      Tensor0SSpace.toModel_smul]
+    rw [unitModel, unitModel]
+    have hsec : (c • A).toSection x = c • A.toSection x := by
+      rw [SmoothCcTensor.toSection_smul]
+      rfl
+    rw [show
+      ((show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from
+          (c • A).toSection x) (unitTensor (I := I) (M := M) x)) =
+        c • (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from
+          A.toSection x) (unitTensor (I := I) (M := M) x) from by
+      rw [hsec]
+      rfl]
+    rw [Tensor0SSpace.toModel_smul]
   rw [hfun, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
 private theorem edge_lap_smul
@@ -262,6 +281,8 @@ private theorem edge_core_smul
     edge_lap_smul, iteratedCovGrad_smul, appCc_smul_right]
   module
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [SigmaCompactSpace M]
+    [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma edge_bound_mono
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {a b : Real} (hab : a ≤ b)
@@ -274,6 +295,39 @@ private lemma edge_bound_mono
     (mul_le_mul_of_nonneg_right hab (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _))
 
+private lemma edge_symm_eq
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (hS : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g S x v w =
+        ccTensorBilin (I := I) g S x w v) :
+    symmS (I := I) (M := M) g S = S := by
+  have hswap :
+      domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
+    refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
+    rw [domDomCongrSection_unitModel]
+    refine ContinuousMultilinearMap.ext (fun v => ?_)
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    have hv : ∀ u w : TangentSpace I x,
+        unitModel (I := I) (M := M) g 2 S x ![u, w] =
+          unitModel (I := I) (M := M) g 2 S x ![w, u] := by
+      intro u w
+      rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x u w,
+        unitModel_eq_ccTensorBilin_local (I := I) (M := M) g S x w u]
+      exact hS x u w
+    have hveta :
+        (fun i => v ((Equiv.swap (0 : Fin 2) 1) i)) = ![v 1, v 0] := by
+      funext i
+      fin_cases i <;> rfl
+    have hveta' : v = ![v 0, v 1] := by
+      funext i
+      fin_cases i <;> rfl
+    rw [hveta]
+    conv_rhs => rw [hveta']
+    exact hv (v 1) (v 0)
+  have htwo : S + S = (2 : Real) • S := (two_smul Real S).symm
+  rw [symmS, hswap, htwo, smul_smul,
+    show (1 / 2 : Real) * 2 = 1 by norm_num, one_smul]
+
 /-- Principal and lower-order absorption at a genuine slope parameter.
 
 The realization identity for `edgeMetric g W hdelta s` is tied to `s • W`.
@@ -284,7 +338,7 @@ theorem edgeCore_path_le [Nonempty M]
     ∃ C : Real, 0 ≤ C ∧
       ∀ (C0 : SmoothCcTensor g 2 2) (C1 : SmoothCcTensor g 3 2)
         (W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g W x v w =
             ccTensorBilin (I := I) g W x w v)
         {B0 B1 delta s : Real},
@@ -338,7 +392,7 @@ theorem edgeCore_path_le [Nonempty M]
     edge_bound_mono (I := I) (M := M) g P hrad
       (by simpa only [P] using hPraw)
   have hWfix : symmS (I := I) (M := M) g W = W :=
-    symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g W hWsymm
+    edge_symm_eq (I := I) (M := M) g W hWsymm
   have hPfix : symmS (I := I) (M := M) g P = P := by
     simp only [P, symmS_smul, hWfix]
   have hp := hcore gm C0 C1 P hB0 hB1 hdelta hdelta0
@@ -409,7 +463,7 @@ theorem edgeTop_pair_le
     (g : SmoothRiemannianMetric I M) :
     ∃ delta0 K : Real, 0 < delta0 ∧ delta0 < 1 / 2 ∧ 0 ≤ K ∧
       ∀ (W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g W x v w =
             ccTensorBilin (I := I) g W x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ delta0 →
@@ -422,9 +476,10 @@ theorem edgeTop_pair_le
           (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
           (∀ i, |epsilon i| ≤ 1) →
           ∀ s ∈ Set.Icc (0 : Real) 1,
-            (⟪W, appCc (I := I) (M := M) g 2 2
-              (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-                qA qB q epsilon s) W⟫_Real : Real) ≤
+            Inner.inner Real W
+              (appCc (I := I) (M := M) g 2 2
+                (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+                  qA qB q epsilon s) W) ≤
               (1 / 4 : Real) *
                   ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 +
                 K * ‖W‖ ^ 2 := by
@@ -519,19 +574,23 @@ theorem edgeTop_pair_le
         dsimp only [A, B]
         ring
   have hpair :
-      (⟪W, appCc (I := I) (M := M) g 2 2
-        (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-          qA qB q epsilon s) W⟫_Real : Real) ≤
+      Inner.inner Real W
+        (appCc (I := I) (M := M) g 2 2
+          (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+            qA qB q epsilon s) W) ≤
         (A * delta * ‖W‖ + B * delta * ‖D‖) * ‖D‖ := by
     calc
-      (⟪W, appCc (I := I) (M := M) g 2 2
-        (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-          qA qB q epsilon s) W⟫_Real : Real) =
-          -⟪covDivergence (I := I) (M := M) g 3 P, D⟫_Real := by
+      Inner.inner Real W
+          (appCc (I := I) (M := M) g 2 2
+            (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+              qA qB q epsilon s) W) =
+          -Inner.inner Real
+            (covDivergence (I := I) (M := M) g 3 P) D := by
         simpa only [P, D] using
           edgeTop_green (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s
-      _ ≤ |⟪covDivergence (I := I) (M := M) g 3 P, D⟫_Real| := by
+      _ ≤ |Inner.inner Real
+          (covDivergence (I := I) (M := M) g 3 P) D| := by
         exact neg_le_abs _
       _ ≤ ‖covDivergence (I := I) (M := M) g 3 P‖ * ‖D‖ :=
         abs_real_inner_le_norm _ _
@@ -560,13 +619,17 @@ theorem edgeTop_pair_le
       K * ‖W‖ ^ 2 := by
     dsimp only [K]
     exact mul_le_mul_of_nonneg_right
-      (mul_le_mul_of_nonneg_left hdelta_sq (by positivity))
+      (by
+        simpa only [mul_one] using
+          (mul_le_mul_of_nonneg_left hdelta_sq
+            (by positivity : 0 ≤ 2 * A ^ 2)))
       (sq_nonneg ‖W‖)
   dsimp only [D] at hpair hcross hgrad ⊢
   calc
-    (⟪W, appCc (I := I) (M := M) g 2 2
-        (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
-          qA qB q epsilon s) W⟫_Real : Real) ≤
+      Inner.inner Real W
+        (appCc (I := I) (M := M) g 2 2
+          (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
+            qA qB q epsilon s) W) ≤
         (A * delta * ‖W‖ + B * delta *
           ‖iteratedCovGrad (I := I) g 0 2 1 W‖) *
             ‖iteratedCovGrad (I := I) g 0 2 1 W‖ := hpair
@@ -595,7 +658,7 @@ theorem edgePair_pair_le [Nonempty M]
       0 ≤ C ∧ 0 < delta0 ∧ delta0 < 1 / 2 ∧ 0 ≤ K ∧
       ∀ (C0 : SmoothCcTensor g 2 2) (C1 : SmoothCcTensor g 3 2)
         (W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g W x v w =
             ccTensorBilin (I := I) g W x w v)
         {B0 B1 delta s : Real},
@@ -674,7 +737,7 @@ theorem edgePair_pair_le [Nonempty M]
         (appCc (I := I) (M := M) g 2 2
           (edgeTopPair (I := I) (M := M) g W hdelta hdeltaZ
             qA qB q epsilon s) W),
-      real_inner_add_right]
+      inner_add_right]
   rw [hadd]
   nlinarith
 

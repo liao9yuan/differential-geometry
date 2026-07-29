@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChartBasisReadout
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 
 noncomputable section
 

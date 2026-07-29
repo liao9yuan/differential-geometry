@@ -40,13 +40,13 @@ slope, and it does not prove forward uniqueness.
 
 ## Verification state
 
-The source derivation and a separate static constant/import audit are
-complete.  No Lean check has yet been run because verification in the shared
-workspace is serialized by the parent lane.  This file is therefore
-**unverified source**, not a proved producer, until its focused check passes.
+The source derivation passes focused verification without a local diagnostic,
+and its named exact artifact is GREEN.  The public arbitrary-budget theorem
+`ricciAA_path_le` is therefore current.
 
 Endpoint accounting is unchanged:
 
-- `ricci_flow_forward_unique`: 0% (exact theorem not proved).
-- `ricci_flow_unif_existence`: unaffected by this file.
+- `ricci_flow_forward_unique`: complete and axiom-clean.
+- `ricci_flow_unif_existence`: 0% as a theorem; this file is dedicated
+  machinery only.
 - `extends_of_rmBounded`: still depends on both missing endpoint theorems.

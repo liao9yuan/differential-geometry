@@ -52,13 +52,10 @@ rank-four first-slot-swap adjoint needed to feed that pairing into Green's
 identity.
 
 There is no `sorry`, `admit`, axiom, opaque replacement, or assumed pairing
-bound in this file.  These declarations remain **source-level and
-unverified**.  A first lock-aware focused check was started after the
-coordinated `HarmonicPrincipal` build exited and its Lean process later exited
-naturally, but the command wrapper timed out before completion and did not
-return the final stdout/stderr.  It would be dishonest to classify that run
-as green or failed.  Further verification is being serialized by the parent
-lane; no overlapping Lean/Lake command was started.
+bound in this file.  The current source passes focused verification without a
+local diagnostic and its named exact artifact is GREEN.  The post-merge repair
+uses the current vector, contraction, pairing, and Green APIs without changing
+any public statement or assumption.
 
 ## Corrected trace accounting
 
@@ -116,27 +113,28 @@ theorem ricciDA_pair ... (hWsymm : ...) :
     tensorL2Inner g 0 4 (ricciDAPart g gm W) (ricciDAG g gm)
 ```
 
-The source theorem `ricciDA_green` then moves the outer slot swap to the
+The theorem `ricciDA_green` then moves the outer slot swap to the
 partner, swaps the global pairing, and applies
 `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence` directly to the
 rotated lowered tensor.  The required lowering
 bridge was private upstream, so this new, claimed file reproves it from the
 public definitions as `connRaise_eq`; `covConnRaise_eq` then follows from the
 public covariant-parallelism theorem for first-slot raising.  All these proofs
-are currently source-level and still need a conclusive coordinated focused
-Lean check.
+are focused- and exact-current.
 
 ## Honest progress
 
-- Exact `ricci_flow_forward_unique`: **0%** until its existing theorem is
-  proved and axiom-checked.
-- Concrete Ricci order-zero kernel split: **source-complete, 0% Lean
-  verified** pending a conclusive coordinated focused check.
+- Exact `ricci_flow_forward_unique`: complete and axiom-clean in the current
+  post-merge tree.
+- Concrete Ricci order-zero kernel split: **100% as stated**, focused- and
+  exact-current.
 - Ricci closed-edge pairing machinery: the true algebraic split, correct
   single-trace flux, exact component/global pairing, and Green step are all
-  source-complete.  `EdgeRicciBound.lean` now contains the source-level
-  uniform partner/divergence estimate.  The remaining adjacent analytic
-  children are the quadratic arms, the Riemann-half refold contribution, and
-  the signed Ricci order-one arm.
+  verified.  `ricciDA_path_le`, `ricciAA_path_le`, and `ricci1_path_le` are
+  now also focused- and exact-current in their three bound modules.
+- The remaining adjacent rate frontier is the non-Ricci DeTurck lower-arm
+  pairing and final space--slope packaging.  A pointwise bound for the whole
+  `edgeRate0` remains invalid because its Ricci DA part contains a derivative
+  of the connection difference.
 - `extends_of_rmBounded` and the Hamilton positive-Ricci endpoint are
   unchanged at theorem level.

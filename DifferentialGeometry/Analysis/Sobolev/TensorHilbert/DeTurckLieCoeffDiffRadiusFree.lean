@@ -73,11 +73,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option linter.unusedVariables false in
 /-- Radius-free per-order jet-L² bound for the `deTurckLieDLaCoeffField` arm.  Integrates the public
 R-free pointwise top-separated engine `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`,
-`dLaGridWin (i+3)` remainder) through the radius-free workhorse
-`antidiagonalTupleGrid_integral_radiusFree`, in place of the ball-uniform tame-window integrator. -/
-private lemma dLaField_perOrder_rf
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+`dLaGridWin (i+3)` remainder) through the radius-free workhorse.  This arm does
+not require the supercritical Sobolev index used by the companion `DLb` arm. -/
+theorem dLaField_perOrder_rf
+    (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧ ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -212,7 +211,7 @@ set_option linter.unusedVariables false in
 /-- Radius-free per-order jet-L² bound for the `deTurckLieDLbCoeffField` arm.  `‖∇ⁱDLb‖² ≤
 4·finrank·‖∇ⁱwEndoInsert‖²` (`normSq_iCG_dlbField_le`); the insert jet equals the `wAlpha` jet
 (`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the radius-free `wAlpha_L2_topsep_rf`. -/
-private lemma dLbField_perOrder_rf
+theorem dLbField_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -292,7 +291,7 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
             ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2) := by
   classical
   obtain ⟨Ka_top, hKa_top_nn, Ka_low, hKa_low_nn, hDLa⟩ :=
-    dLaField_perOrder_rf (I := I) (M := M) g₀ g_bg a ha_super hδ₀ hΛ₀0
+    dLaField_perOrder_rf (I := I) (M := M) g₀ g_bg hδ₀ hΛ₀0
   obtain ⟨Kb_top, hKb_top_nn, Kb_low, hKb_low_nn, hDLb⟩ :=
     dLbField_perOrder_rf (I := I) (M := M) g₀ g_bg a ha_super hδ₀ hΛ₀0
   refine ⟨fun i => 2 * Ka_top i + 2 * Kb_top + (2 * Ka_low i + 2 * Kb_low i),

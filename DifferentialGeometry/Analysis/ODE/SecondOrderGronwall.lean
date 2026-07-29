@@ -5,11 +5,14 @@ set_option autoImplicit false
 /-!
 # Grönwall bound for second-order linear ODEs
 
-`norm_le_gronwall_secondOrder`: if `Y : ℝ → E` satisfies the second-order estimate
+`pair_le_gronwall2`: if `Y : ℝ → E` satisfies the second-order estimate
 `‖Y''(t)‖ ≤ K‖Y(t)‖ + ε` on `[0, b)` with `‖Y 0‖ ≤ δ` and `‖Y' 0‖ ≤ δ`, then
-`‖Y t‖ ≤ gronwallBound δ (max K 1) ε t` on `[0, b]`.  Proved by passing to the
-first-order system `Z = (Y, Y')` and applying Mathlib's
+the pair `(Y t, Y' t)` is bounded by `gronwallBound δ (max K 1) ε t` on
+`[0, b]`.  Proved by passing to the first-order system `Z = (Y, Y')` and applying Mathlib's
 `norm_le_gronwallBound_of_norm_deriv_right_le`.
+
+`norm_le_gronwall_secondOrder` and `deriv_le_gronwall2` are the two coordinate
+projections of this pair estimate.
 
 This is the ODE engine for the Jacobi-field route to the normal-coordinate metric
 bounds (MSM135 Chapter 4 Step B, B0; see
@@ -159,9 +162,9 @@ lemma exists_gron_smallK
   rw [hgb]
   linarith
 
-/-- Grönwall bound for a second-order linear ODE estimate, via the first-order
-system `(Y, Y')`. -/
-theorem norm_le_gronwall_secondOrder
+/-- Grönwall bound for the position-velocity pair of a second-order ODE
+estimate. -/
+theorem pair_le_gronwall2
     {Y Y' Y'' : ℝ → E} {K eps δ b : ℝ}
     (hK : 0 ≤ K) (heps : 0 ≤ eps)
     (hcY : ContinuousOn Y (Icc 0 b))
@@ -170,7 +173,7 @@ theorem norm_le_gronwall_secondOrder
     (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
     (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖ + eps)
     (h0 : ‖Y 0‖ ≤ δ) (h0' : ‖Y' 0‖ ≤ δ) :
-    ∀ t ∈ Icc 0 b, ‖Y t‖ ≤ gronwallBound δ (max K 1) eps t := by
+    ∀ t ∈ Icc 0 b, ‖(Y t, Y' t)‖ ≤ gronwallBound δ (max K 1) eps t := by
   set Z : ℝ → E × E := fun t => (Y t, Y' t) with hZdef
   have hcZ : ContinuousOn Z (Icc 0 b) := hcY.prodMk hcY'
   have hdZ : ∀ t ∈ Ico 0 b,
@@ -198,9 +201,39 @@ theorem norm_le_gronwall_secondOrder
             linarith
   have hmain := norm_le_gronwallBound_of_norm_deriv_right_le hcZ hdZ h0Z hboundZ
   intro t ht
-  calc ‖Y t‖ ≤ ‖Z t‖ := norm_fst_le (Z t)
-    _ ≤ gronwallBound δ (max K 1) eps (t - 0) := hmain t ht
-    _ = gronwallBound δ (max K 1) eps t := by rw [sub_zero]
+  simpa [Z, sub_zero] using hmain t ht
+
+/-- Grönwall bound for the position of a second-order ODE estimate. -/
+theorem norm_le_gronwall_secondOrder
+    {Y Y' Y'' : ℝ → E} {K eps δ b : ℝ}
+    (hK : 0 ≤ K) (heps : 0 ≤ eps)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖ + eps)
+    (h0 : ‖Y 0‖ ≤ δ) (h0' : ‖Y' 0‖ ≤ δ) :
+    ∀ t ∈ Icc 0 b, ‖Y t‖ ≤ gronwallBound δ (max K 1) eps t := by
+  have hpair :=
+    pair_le_gronwall2 hK heps hcY hcY' hdY hdY' hbound h0 h0'
+  intro t ht
+  exact (norm_fst_le (Y t, Y' t)).trans (hpair t ht)
+
+/-- Grönwall bound for the velocity of a second-order ODE estimate. -/
+theorem deriv_le_gronwall2
+    {Y Y' Y'' : ℝ → E} {K eps δ b : ℝ}
+    (hK : 0 ≤ K) (heps : 0 ≤ eps)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖ + eps)
+    (h0 : ‖Y 0‖ ≤ δ) (h0' : ‖Y' 0‖ ≤ δ) :
+    ∀ t ∈ Icc 0 b, ‖Y' t‖ ≤ gronwallBound δ (max K 1) eps t := by
+  have hpair :=
+    pair_le_gronwall2 hK heps hcY hcY' hdY hdY' hbound h0 h0'
+  intro t ht
+  exact (norm_snd_le (Y t, Y' t)).trans (hpair t ht)
 
 /-- **Perturbation form of the second-order Grönwall bound.**  A solution of the
 homogeneous Jacobi-type estimate `‖Y''‖ ≤ K‖Y‖` with `Y 0 = 0`, `Y' 0 = w` stays

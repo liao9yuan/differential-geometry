@@ -3,11 +3,12 @@
 ## Current source state
 
 `EdgePartnerBound.lean` contains no `sorry`, `admit`, axiom, or opaque
-replacement.  Its focused check is still pending.  The first named refresh of
-`EdgeRefoldPairing` reached the one-hour wrapper timeout while compiling missing
-transitive spectral/elliptic artifacts; it did not report a Lean theorem error.
-The remaining child Lean processes are being left undisturbed, in accordance
-with the shared-workspace rules, before the cached refresh is resumed.
+replacement.  Its complete source now passes a focused Lean check with no local
+warning, and its exact target is GREEN.  Direct audits of `edgeFull_one`,
+`edgeSlot_one`, `edgeRaise_gen`, `edgePartner_gen`, `edgeTop_zero`, and
+`edgeTop_one` report exactly
+`[propext, Classical.choice, Quot.sound]`, with no `sorryAx`.  Downstream
+modules may now consume the exact-current artifact.
 
 The source-level public producers are:
 
@@ -32,6 +33,23 @@ partner still contains the unscaled difference `T`.  The proof uses
 `|nabla(s T)|^2 <= |nabla T|^2` for `s in [0,1]` and never replaces the
 coefficient derivative by a generic high-jet envelope.
 
+## Verification repair
+
+The first conclusive focused check exposed source/API drift rather than a
+mathematical obstruction.  The file was missing the direct
+`MetricRealization` and realized-family namespace openings, and it referred to
+an upstream private identity for `gInvRaisedEndo g g`.  The latter is now
+reproved locally from `gInvRaisedEndo_apply` and
+`inverseMetricSharpFib_g0FlatCLM`.
+
+The apparent heartbeat wall in `edgeRaise_gen` was caused by four uses of
+`add_le_add_right` in the wrong syntactic orientation.  On the large tensor
+goal this forced repeated `whnf`; replacing them with explicit
+`add_le_add ... le_rfl` made the complete file check quickly.  Section-valued
+scalar multiples also had to be evaluated through
+`ContMDiffSection.coe_smul` before applying the fibre-norm scaling theorem.
+The final source contains no `whnf`.
+
 ## Mathematical role
 
 Together with `EdgeRefoldPairing.edgeTop_green`, the differentiated partner
@@ -44,10 +62,10 @@ The public, sorry-free theorem
 `exists_iteratedCovGrad_covDivergence_l2_le` is available in
 `CovDivergenceRoughLaplacianCommutation.lean`.  A sharper pointwise contraction
 estimate `|div P|^2 <= dim(E) |nabla P|^2` is currently only private in
-`DirichletSpectralBochnerGap.lean`.  After the present source is checked, the
-smallest next packaging step is either to expose/reconstruct that sharp
-contraction estimate from public tensor APIs or to combine the public coarse
-L2 estimate with both the zero- and one-derivative partner bounds.
+`DirichletSpectralBochnerGap.lean`.  `EdgeRateBound.edgeTop_pair_le` already
+uses the public coarse L2 estimate together with both verified source bounds;
+after the exact refresh here, its focused verification is the next packaging
+step.
 
 ## Exact remaining uniqueness bridge
 
@@ -62,9 +80,10 @@ PDE identity, and inverse-flow undoing.
 
 ## Honest progress
 
-- Exact `ricci_flow_forward_unique`: **0%** until that existing theorem is
-  proved and checked.
-- This partner-bound producer: source complete, verification pending.
+- Exact `ricci_flow_forward_unique`: complete and axiom-clean in the current
+  post-merge baseline; it is no longer part of this frontier.
+- This partner-bound producer: **100% as stated**, focused-GREEN,
+  exact-current, and axiom-clean.
 - Closed-edge Ricci--DeTurck energy machinery: materially advanced at the top
   arm, but the joint visible lower-arm estimate and final rate packaging remain.
 - `extends_of_rmBounded` and the Hamilton positive-Ricci program are unchanged

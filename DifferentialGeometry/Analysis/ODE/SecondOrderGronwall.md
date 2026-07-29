@@ -1,5 +1,30 @@
 # SecondOrderGronwall
 
+## 2026-07-28 position-velocity pair estimate
+
+Status: focused verification and the exact module refresh are green
+(`2094/2094`).
+
+Completed:
+
+- Added `pair_le_gronwall2`, exposing the first-order pair estimate that the
+  existing proof already established internally.
+- Refactored `norm_le_gronwall_secondOrder` to be the position projection of
+  that estimate.
+- Added `deriv_le_gronwall2`, its velocity projection. This is the missing
+  lower-layer estimate needed by the H6 differentiated-Jacobi force, which
+  depends on covariant velocities as well as field values.
+
+No hypothesis or scalar constant changed. The next consumer is the parallel
+orthonormal-frame transfer in `CovariantGronwall`.
+
+Progress:
+
+- Pair and derivative theorem statements: 100%.
+- `exists_h6NormalData`: still unstated, hence theorem completion 0%.
+- Dedicated native H6 machinery: about 69%; this lower-layer projection does
+  not by itself prove a fixed-tube jet bound.
+
 ## 2026-07-07 V1c quantitative endpoint corollaries
 
 Status: `SecondOrderGronwall.lean` now has fixed-normed-space quantitative

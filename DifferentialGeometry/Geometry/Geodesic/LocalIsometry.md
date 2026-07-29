@@ -40,3 +40,16 @@ source.  The file is sorry-free.
 There are no new assumptions packaged as a wrapper and no new foundational
 class.  The manifold and sigma-compactness instances in the statement are the
 current inputs of the native cross-model pullback/geodesic machinery.
+
+## 2026-07-28 reflected local-isometry geodesicity
+
+Added `geoEq_of_map_localIso`, the converse of the existing pointwise
+local-isometry transport theorem.  It restricts the local diffeomorphism to
+open subtypes, uses `geoEq_of_mapCrossAt` for the pullback metric, and transfers
+the resulting equation back to the ambient source.
+
+Focused verification passed.  The forward and reflected local-isometry
+geodesic interfaces and their dedicated machinery are 100%.  The reflected
+theorem is consumed by the localized Whitehead construction; the next
+consumer `intrCore_jensen` remains theorem-level 0% with about 93% dedicated
+machinery.  Whole HCG supporting machinery is about 62%.

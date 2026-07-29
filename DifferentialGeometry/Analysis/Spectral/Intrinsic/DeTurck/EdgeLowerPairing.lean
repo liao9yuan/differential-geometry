@@ -36,6 +36,8 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open MetricRealization
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -55,6 +57,7 @@ def edgeLowerArm (g : SmoothRiemannianMetric I M)
 
 /-! ## Exact carrier/residual split at the closed initial edge -/
 
+omit [BoundarylessManifold I M] in
 /-- The zero perturbation has fibre operator bound zero.  This local
 analysis-layer lemma avoids importing the later geometric solution package
 merely to instantiate the second endpoint of `realizedFam`. -/
@@ -67,6 +70,7 @@ theorem edgeZeroBound (g : SmoothRiemannianMetric I M) :
   rw [h0, ccTensorBilinSymm_smul]
   simp only [zero_mul, abs_zero, le_refl]
 
+omit [BoundarylessManifold I M] in
 /-- The zero endpoint satisfies the unsymmetrized tensor symmetry premise
 used by the exact Ricci--DeTurck slope theorem. -/
 theorem edgeZeroSymm (g : SmoothRiemannianMetric I M) :
@@ -333,18 +337,22 @@ theorem edgeLower_pair_le
   have hpair₀ :
       tensorL2Inner (I := I) (M := M) g 0 2 W.toFun U₀.toFun ≤
         B₀ * ‖W‖ ^ 2 := by
-    rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₀]
     calc
-      ⟨W, U₀⟩_Real ≤ ‖W‖ * ‖U₀‖ := real_inner_le_norm W U₀
+      tensorL2Inner (I := I) (M := M) g 0 2 W.toFun U₀.toFun ≤
+          ‖W‖ * ‖U₀‖ := by
+        rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₀]
+        exact real_inner_le_norm W U₀
       _ ≤ ‖W‖ * (B₀ * ‖W‖) :=
         mul_le_mul_of_nonneg_left hU₀ (norm_nonneg W)
       _ = B₀ * ‖W‖ ^ 2 := by ring
   have hpair₁ :
       tensorL2Inner (I := I) (M := M) g 0 2 W.toFun U₁.toFun ≤
         B₁ * ‖W‖ * ‖D‖ := by
-    rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₁]
     calc
-      ⟨W, U₁⟩_Real ≤ ‖W‖ * ‖U₁‖ := real_inner_le_norm W U₁
+      tensorL2Inner (I := I) (M := M) g 0 2 W.toFun U₁.toFun ≤
+          ‖W‖ * ‖U₁‖ := by
+        rw [← SmoothCcTensor.inner_def (I := I) (M := M) W U₁]
+        exact real_inner_le_norm W U₁
       _ ≤ ‖W‖ * (B₁ * ‖D‖) :=
         mul_le_mul_of_nonneg_left hU₁ (norm_nonneg W)
       _ = B₁ * ‖W‖ * ‖D‖ := by ring
@@ -361,7 +369,7 @@ theorem edgeLower_pair_le
       (edgeLowerArm (I := I) (M := M) g C₀ C₁ W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W U₀,
       ← SmoothCcTensor.inner_def (I := I) (M := M) W U₁]
-    simp only [edgeLowerArm, U₀, U₁, D, real_inner_add_right]
+    simp only [edgeLowerArm, U₀, U₁, D, inner_add_right]
   rw [hadd]
   dsimp only [D] at hyoung ⊢
   nlinarith
@@ -400,6 +408,7 @@ theorem edgeCore_pair_le [Nonempty M]
   refine ⟨C, hC, ?_⟩
   intro g₁ C₀ C₁ W B₀ B₁ δ hB₀ hB₁ hδ hδ0 htie hbound hsymm hsmall hC₀ hC₁
   have hp := hprincipal g₁ W hδ hδ0 htie hbound hsymm hsmall
+  rw [SmoothCcTensor.norm_toL2] at hp
   have hlo := edgeLower_pair_le (I := I) (M := M)
     g C₀ C₁ W hB₀ hB₁ hC₀ hC₁
   have hadd :
@@ -417,7 +426,7 @@ theorem edgeCore_pair_le [Nonempty M]
           deTurckPrincipalCometricArm (I := I) (M := M) g g₁ W),
       ← SmoothCcTensor.inner_def (I := I) (M := M) W
         (edgeLowerArm (I := I) (M := M) g C₀ C₁ W)]
-    simp only [edgeCoreArm, real_inner_add_right]
+    simp only [edgeCoreArm, inner_add_right]
   rw [hadd]
   nlinarith
 

@@ -36,8 +36,11 @@ namespace IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -152,13 +155,16 @@ private theorem ric_perm_norm_le
     ‖iteratedCovGrad (I := I) g 0 s j
         (domDomCongrSection (I := I) g sigma Q)‖ ≤
       ‖iteratedCovGrad (I := I) g 0 s j Q‖ := by
-  apply ric_l2_of_rfns (I := I) (M := M) g 0 (s + j) 0 (s + j)
+  have h := ric_l2_of_rfns (I := I) (M := M) g 0 (s + j) 0 (s + j)
+    (c := 1)
     (iteratedCovGrad (I := I) g 0 s j
       (domDomCongrSection (I := I) g sigma Q))
     (iteratedCovGrad (I := I) g 0 s j Q) (by norm_num)
-  intro x
-  simpa only [one_pow, one_mul] using
-    (ric_perm_rfns (I := I) (M := M) g Q sigma j x).le
+    (by
+      intro x
+      simpa only [one_pow, one_mul] using
+        (ric_perm_rfns (I := I) (M := M) g Q sigma j x).le)
+  simpa only [one_mul] using h
 
 /-! ## Pointwise partner bounds -/
 
@@ -169,10 +175,10 @@ theorem ricciPart_bds (g : SmoothRiemannianMetric I M) :
     ∃ C0 C1 : Real, 0 ≤ C0 ∧ 0 ≤ C1 ∧
       ∀ (gm : SmoothRiemannianMetric I M)
         (P W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g W x u v =
             ccTensorBilin (I := I) g W x v u)
-        (htie : ∀ (y : M) (u v : TangentSpace I y),
+        (_htie : ∀ (y : M) (u v : TangentSpace I y),
           gm.inner y u v = g.inner y u v +
             ccTensorBilinSymm (I := I) g P y u v)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -274,12 +280,12 @@ theorem ricciPart_bds (g : SmoothRiemannianMetric I M) :
     calc
       _ ≤ K * (P1 * W0 + W1) := hraw
       _ ≤ K * (W1 * W0 + W1) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add_right ?_ W1) hK0
+        refine mul_le_mul_of_nonneg_left (add_le_add ?_ (le_refl W1)) hK0
         exact mul_le_mul_of_nonneg_right hP1W1 hW00
       _ ≤ K * (W1 * d ^ 2 + W1) := by
         refine mul_le_mul_of_nonneg_left ?_ hK0
-        exact add_le_add_right
-          (mul_le_mul_of_nonneg_left hW0coarse hW10) W1
+        exact add_le_add
+          (mul_le_mul_of_nonneg_left hW0coarse hW10) (le_refl W1)
       _ = D0 * W1 := by simp only [D0]; ring
   have hPhi0 : riemannianFiberNormSq (I := I) (M := M) g 2 4 x
       (Phi.toSection x) = d ^ 2 *
@@ -422,12 +428,14 @@ theorem ricciPart_bds (g : SmoothRiemannianMetric I M) :
 
 /-! ## The undifferentiated connection-difference carrier -/
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- The rotated lowered connection difference in `ricciDA_green` is bounded
 in `L2` by one derivative of the metric perturbation. -/
 theorem ricciBase_l2 (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
-        (htie : ∀ (y : M) (u v : TangentSpace I y),
+        (_htie : ∀ (y : M) (u v : TangentSpace I y),
           gm.inner y u v = g.inner y u v +
             ccTensorBilinSymm (I := I) g P y u v)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -477,6 +485,8 @@ theorem ricciBase_l2 (g : SmoothRiemannianMetric I M) :
         ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x)
       exact congrArg (fun z : Real => C ^ 2 * z) hn.symm
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ric_bound_mono
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {a b : Real} (hab : a ≤ b)
@@ -500,7 +510,7 @@ theorem ricciDA_path_le [Nonempty M]
     ∃ delta0 K : Real,
       0 < delta0 ∧ delta0 < 1 / 2 ∧ 0 ≤ K ∧
       ∀ (W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g W x u v =
             ccTensorBilin (I := I) g W x v u)
         {delta s : Real}, 0 ≤ delta → delta ≤ delta0 →
@@ -508,9 +518,11 @@ theorem ricciDA_path_le [Nonempty M]
           (ccTensorBilinSymm (I := I) g W) delta) →
         s ∈ Set.Icc (0 : Real) 1 →
         (-2 : Real) *
-            (⟦W, appCc (I := I) (M := M) g 2 2
+            (tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+              (appCc (I := I) (M := M) g 2 2
               (ricciDAArm (I := I) (M := M) g
-                (edgeMetric (I := I) (M := M) g W hWbound s)) W⟧_Real : Real) ≤
+                (edgeMetric (I := I) (M := M) g W hWbound s)) W).toFun :
+              Real) ≤
           (1 / 8 : Real) *
               ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 +
             K * ‖W‖ ^ 2 := by
@@ -599,9 +611,14 @@ theorem ricciDA_path_le [Nonempty M]
           ((iteratedCovGrad (I := I) g 0 2 1 W).toSection y) := by
     intro y
     rw [show iteratedCovGrad (I := I) g 0 2 1 P =
-        s • iteratedCovGrad (I := I) g 0 2 1 W from by
+        (s • iteratedCovGrad (I := I) g 0 2 1 W :
+          SmoothCcTensor g 0 3) from by
       simp only [P, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, riemannianFiberNormSq_smul]
+    change riemannianFiberNormSq (I := I) (M := M) g 0 3 y
+        (s • (iteratedCovGrad (I := I) g 0 2 1 W).toSection y) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 3 y
+        ((iteratedCovGrad (I := I) g 0 2 1 W).toSection y)
+    rw [riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   have hPnorm : ‖iteratedCovGrad (I := I) g 0 2 1 P‖ = s * ‖D‖ := by
@@ -687,13 +704,10 @@ theorem ricciDA_path_le [Nonempty M]
           (mul_le_mul_of_nonneg_right hs.2 (norm_nonneg D)) hCb0
       _ = Cb * ‖D‖ := by ring
   have hgreen :
-      (⟦W, appCc (I := I) (M := M) g 2 2
-          (ricciDAArm (I := I) (M := M) g gm) W⟧_Real : Real) =
-        -⟦Adj, Base⟧_Real := by
-    change tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+      tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
         (appCc (I := I) (M := M) g 2 2
           (ricciDAArm (I := I) (M := M) g gm) W).toFun =
-      -tensorL2Inner (I := I) (M := M) g 0 3 Adj.toFun Base.toFun
+        -tensorL2Inner (I := I) (M := M) g 0 3 Adj.toFun Base.toFun := by
     simpa only [Adj, S, R, Base, ricciDAAdj] using
       ricciDA_green (I := I) (M := M) g gm W hWsymm
   have hAdjRhs0 : 0 ≤
@@ -707,16 +721,20 @@ theorem ricciDA_path_le [Nonempty M]
     mul_le_mul hAdj1 hBase0 (norm_nonneg Base) hAdjRhs0
   have hpair :
       (-2 : Real) *
-          (⟦W, appCc (I := I) (M := M) g 2 2
-            (ricciDAArm (I := I) (M := M) g gm) W⟧_Real : Real) ≤
+          tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+            (appCc (I := I) (M := M) g 2 2
+              (ricciDAArm (I := I) (M := M) g gm) W).toFun ≤
         G * delta * ‖W‖ * ‖D‖ +
           Hc * delta * ‖D‖ ^ 2 := by
     calc
       (-2 : Real) *
-          (⟦W, appCc (I := I) (M := M) g 2 2
-            (ricciDAArm (I := I) (M := M) g gm) W⟧_Real : Real) =
-        2 * ⟦Adj, Base⟧_Real := by rw [hgreen]; ring
-      _ ≤ 2 * |⟦Adj, Base⟧_Real| :=
+          tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+            (appCc (I := I) (M := M) g 2 2
+              (ricciDAArm (I := I) (M := M) g gm) W).toFun =
+        2 * tensorL2Inner (I := I) (M := M) g 0 3
+          Adj.toFun Base.toFun := by rw [hgreen]; ring
+      _ ≤ 2 * |tensorL2Inner (I := I) (M := M) g 0 3
+          Adj.toFun Base.toFun| :=
         mul_le_mul_of_nonneg_left (le_abs_self _) (by norm_num)
       _ ≤ 2 * (‖Adj‖ * ‖Base‖) :=
         mul_le_mul_of_nonneg_left (abs_real_inner_le_norm Adj Base)
@@ -759,9 +777,10 @@ theorem ricciDA_path_le [Nonempty M]
   dsimp only [gm, D] at hpair hcross hgradTerm ⊢
   calc
     (-2 : Real) *
-        (⟦W, appCc (I := I) (M := M) g 2 2
-          (ricciDAArm (I := I) (M := M) g
-            (edgeMetric (I := I) (M := M) g W hWbound s)) W⟧_Real : Real) ≤
+        tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
+          (appCc (I := I) (M := M) g 2 2
+            (ricciDAArm (I := I) (M := M) g
+              (edgeMetric (I := I) (M := M) g W hWbound s)) W).toFun ≤
       G * delta * ‖W‖ *
           ‖iteratedCovGrad (I := I) g 0 2 1 W‖ +
         Hc * delta * ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2 := hpair

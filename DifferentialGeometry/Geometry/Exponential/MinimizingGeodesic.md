@@ -53,3 +53,23 @@ while whole HCG support remains about 60%.
   Consequently the common moving-base `C^infty` domain and finite-hat
   containment remain separate Step-C frontiers.
 
+## 2026-07-28 localized Whitehead support
+
+Added two reusable fixed-fiber facts used by the localized short-bigon proof:
+
+- `gLenBall_isCompact`, compactness of a closed ball for the length induced by
+  `g.inner p`; and
+- `intrGeo_vel_ne`, nonvanishing of the velocity of a complete intrinsic
+  geodesic launched with a nonzero vector.
+
+The compactness proof uses the existing finite-dimensional coercivity bound;
+no new properness or global geometric hypothesis is introduced.  The velocity
+proof uses constancy of speed and positive definiteness rather than a
+coordinate ODE argument.
+
+Focused verification passed.  Both helper theorems and their dedicated
+machinery are 100%.  The hard Whitehead producer that consumes them is now
+also complete; `intrCore_jensen` remains theorem-level 0% with about 93% of
+its dedicated machinery available.  Whole HCG supporting machinery is about
+62%.
+

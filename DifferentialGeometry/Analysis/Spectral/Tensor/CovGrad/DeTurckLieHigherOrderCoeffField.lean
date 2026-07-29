@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJo
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckTopAppCc
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
+import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 noncomputable section
 
@@ -600,11 +601,12 @@ private theorem deTurckLiePairTraceFib_apply_section_contMDiff
   classical
   have hprod := tensor0SProd_section_contMDiff (I := I) (p := 3) (q := 3)
     (fun x => Y x) κ Y.contMDiff hκ
-  have hperm := domDomCongr_section_contMDiff_local (I := I) (d := 6) σ
-    (fun x => Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+  let Yκ : MultilinearSection ℝ E I (TangentSpace I) ∞ 6 :=
+    ⟨fun x => Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
       (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) 3 3
         (Tensor0SBundle.Tensor0SSpace.toModel (Y x))
-        (Tensor0SBundle.Tensor0SSpace.toModel (κ x)))) hprod
+        (Tensor0SBundle.Tensor0SSpace.toModel (κ x))), hprod⟩
+  have hperm := (MultilinearSection.domDomCongr (IB := I) ∞ σ Yκ).contMDiff
   have htr4 := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 4) hperm
   have htr2 := ContMDiff.clm_bundle_apply (b := id)
@@ -627,8 +629,9 @@ private theorem deTurckLieKoszulTraceFib_apply_section_contMDiff
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x
         (deTurckLieKoszulTraceFib (I := I) g₀ g₁ σ x (Y x))) := by
   classical
-  have hperm := domDomCongr_section_contMDiff_local (I := I) (d := 3) σ
-    (fun x => Y x) Y.contMDiff
+  let Ys : MultilinearSection ℝ E I (TangentSpace I) ∞ 3 :=
+    ⟨fun x => Y x, Y.contMDiff⟩
+  have hperm := (MultilinearSection.domDomCongr (IB := I) ∞ σ Ys).contMDiff
   have htr1 := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 1) hperm
   have hkos := ContMDiff.clm_bundle_apply (b := id)
@@ -659,8 +662,10 @@ private theorem deTurckLieArm1CoreFib_apply_section_contMDiff
     deTurckLieArm1PairPermCorr
     (fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x)
     (metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g_bg) Y
-  have hpermY := domDomCongr_section_contMDiff_local (I := I) (d := 3)
-    deTurckLieArm1VecSlotPerm (fun x => Y x) Y.contMDiff
+  let Ys : MultilinearSection ℝ E I (TangentSpace I) ∞ 3 :=
+    ⟨fun x => Y x, Y.contMDiff⟩
+  have hpermY :=
+    (MultilinearSection.domDomCongr (IB := I) ∞ deTurckLieArm1VecSlotPerm Ys).contMDiff
   have hT2 := interiorProductField_contMDiff (I := I) 2
     (fun x => Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
       (ContinuousMultilinearMap.domDomCongr deTurckLieArm1VecSlotPerm
@@ -700,9 +705,10 @@ theorem deTurckLieArm1Fib_contMDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   have hW := interiorProductField_contMDiff (I := I) 2 (fun x => Y x) Y.contMDiff
     (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg)
   have hcore := deTurckLieArm1CoreFib_apply_section_contMDiff (I := I) g₀ g₁ g_bg Y
-  have hcoreswap := domDomCongr_section_contMDiff_local (I := I) (d := 2)
-    (Equiv.swap (0 : Fin 2) 1)
-    (fun x => deTurckLieArm1CoreFib (I := I) g₀ g₁ g_bg x (Y x)) hcore
+  let core : MultilinearSection ℝ E I (TangentSpace I) ∞ 2 :=
+    ⟨fun x => deTurckLieArm1CoreFib (I := I) g₀ g₁ g_bg x (Y x), hcore⟩
+  have hcoreswap :=
+    (MultilinearSection.domDomCongr (IB := I) ∞ (Equiv.swap (0 : Fin 2) 1) core).contMDiff
   have hS3 := deTurckLieKoszulTraceFib_apply_section_contMDiff (I := I) g₀ g₁
     deTurckLieArm1KoszulZeroPerm Y
   have hsum := ((hW.add_section hcore).add_section hcoreswap).add_section hS3

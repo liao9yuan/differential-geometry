@@ -2110,3 +2110,228 @@ Honest accounting is unchanged:
 - `(N)` dedicated machinery overall remains about **78--81%**;
 - order-two geometric bootstrap, all-order smoothing/realization, and uniform
   common-horizon assembly remain untouched theorem-level frontiers.
+
+## Planner update No. 40 (2026-07-27) - exact refold and edge pairing current
+
+The cache-blocked status in updates No. 38-39 is superseded.  The complete
+public refold chain is now current:
+
+- `MovingPairTrace.lean`: exact GREEN (`mvPairTrace_apply`);
+- `RefoldPairingCore.lean`: exact GREEN;
+- `RHSZeroRefold.lean`: exact GREEN, with the public refold theorems directly
+  audited free of `sorryAx`;
+- `EdgeLowerPairing.lean`: exact GREEN; and
+- `EdgeRefoldPairing.lean`: focused GREEN without local warnings and exact
+  GREEN.  Its six public pairing/refold theorems depend only on
+  `propext`, `Classical.choice`, and `Quot.sound`.
+
+This closes the algebraic Ricci plus DeTurck principal refold and the exact
+formal-adjoint/Green movement of the returned `C2` coefficient.  It does not
+close the contraction estimate: the next mathematical producer is the sharp
+structural bound for `covDivergence edgeTopPartner`.  Every differentiated
+product must retain one undifferentiated metric difference, yielding the small
+`delta * |nabla W|` factor without a high-regularity bound on the arbitrary
+edge metric.  After that bound, combine the exact refold identity with the
+already current principal and lower pairing estimates.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the public refold/pairing theorems just listed: **100% as stated**;
+- `(N)` dedicated machinery: conservatively about **84--87%**;
+- H2/time-L2 control of `rhsRefold0`, geometric bootstrap and realization,
+  and the uniform common-horizon assembly remain genuine frontiers.
+
+## Planner update No. 41 (2026-07-27) - closed-edge energy layer exact
+
+The auxiliary closed-edge energy layer is now exact-current:
+
+- `ClosedEdgeGronwall.lean` owns the scalar edge-continuity closure;
+- `FibreOpBoundUnit.lean` promotes unit quadratic bounds to fibre-operator
+  bounds; and
+- `MovingEdgeEnergy.lean` proves closed-slab energy continuity, the exact
+  moving-metric Ricci--DeTurck energy derivative, the carrier inverse-metric
+  and volume reactions, and `movingEnergy_zero`.
+
+`MovingEdgeEnergy.lean` is focused GREEN without a local diagnostic and exact
+GREEN.  Direct audits of its five key public declarations report exactly
+`[propext, Classical.choice, Quot.sound]`; the source contains no
+`sorry`/`admit`/axiom/`whnf`.
+
+This is an exact abstract implication: if the concrete nonlinear rate satisfies
+`movingRate t <= K * movingDiffEnergy t` uniformly to the closed edge, then the
+energy vanishes.  It does **not** construct the low-regularity
+Ricci--DeTurck solution and therefore does not discharge `(N)`.  The separate
+public endpoint `ricci_flow_forward_unique` is already complete in the
+post-merge tree, so this energy layer is supporting infrastructure rather than
+a new endpoint completion.
+
+The top formal-partner derivative obstruction named in update No. 40 is also
+closed by exact-current `EdgePartnerBound.lean`.  The remaining concrete rate
+frontier is the visible Ricci plus DeTurck lower-arm pairing and final
+space--slope packaging.  For `(N)` itself, the genuine remaining construction
+frontiers are still H2/time-L2 control of `rhsRefold0`, same-horizon
+order-two bootstrap, all-order smoothing/geometric realization, and the
+uniform common-horizon assembly.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the abstract closed-edge energy implication: **100% as stated**;
+- the concrete uniform nonlinear rate theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **84--87%**.
+
+## Planner update No. 42 (2026-07-27) - Ricci visible pairing producers exact
+
+The pointwise full-`edgeRate0/edgeRate1` route is superseded.  Its Ricci DA
+coefficient contains a derivative of the connection difference, so bounding
+the complete coefficient before pairing is not a low-regularity argument.
+The concrete Ricci contribution is now split and controlled at pairing level:
+
+- `EdgeRicciPairing.lean` gives the exact order-zero `AA + DA` split, the
+  single-moving-trace DA partner, and its Green identity;
+- `EdgeRicciBound.lean` gives `ricciDA_path_le`, absorbing the DA contribution
+  into one eighth of the Dirichlet energy plus a carrier-dependent `L2` term;
+- `EdgeRicciAABound.lean` gives `ricciAA_path_le` with an arbitrary positive
+  Dirichlet budget, obtained by shrinking the `C0` metric radius; and
+- `EdgeRicciOneBound.lean` gives `ricci1_path_le`, absorbing the signed
+  order-one Ricci contribution into one eighth of the Dirichlet energy.
+
+All four modules are focused GREEN without local diagnostics and exact-current;
+the three bound targets each completed GREEN.  The repair uses no `sorry`,
+`admit`, axiom, `whnf`, or trace option.  In particular, the order-one
+five-arm split now uses the public permutation coefficient and a pointwise
+definitional identity, avoiding the known TotalSpace topology diamond.
+
+The remaining concrete rate child is now narrower: prove the joint
+**non-Ricci DeTurck lower-arm pairing** after `exists_edgeLieRef`, then assemble
+it with the exact principal/top/Ricci estimates and package the spatial slope
+integral into `movingRate <= K * movingDiffEnergy`.  Do not return to a
+pointwise bound for the complete `edgeRate0`.
+
+Honest accounting remains:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the three concrete Ricci pairing producers: **100% as stated**;
+- the concrete uniform nonlinear rate theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **84--87%** because the
+  independent H2/time-L2, same-horizon order-two bootstrap, smoothing,
+  realization, and common-horizon assembly frontiers remain.
+
+## Planner update No. 43 (2026-07-27) - refolded path identity source-green
+
+`RHSRefoldPathIntegral.lean` now supplies the smaller nonautonomous-solver
+route identified by the live interface audit:
+
+- `rhsRefold0_joint` proves joint smoothness of the complete order-zero
+  Ricci--DeTurck refold along the carrier-to-zero segment;
+- `rhsRefold0Int` and `rhsRefoldTopInt` integrate the complete refolded
+  zero- and second-order coefficient families; and
+- `rhs_sub_zero_refold` proves the exact realized RHS difference as the sum
+  of the refolded C0 arm, existing C1 arm, and refolded C2 arm.
+
+The Ricci and DeTurck principal pieces cancel/refold before integration.
+There is no high-jet theorem-facing assumption and no nonsmall `H3`
+coefficient.  This avoids forcing an identification with the older
+`lowRegPrincipal`: the generic nonautonomous solver accepts any measurable,
+uniformly bounded `H^{a+2} -> H^a` family, so the complete refolded top
+coefficient can serve directly as `A2`.
+
+The new module is source-focused GREEN without a local diagnostic and has no
+`sorry`, `admit`, axiom declaration, or `whnf`.  Its direct upstream
+`RHSRefoldArms` artifact is exact GREEN; the new module has not yet been
+target-refreshed.
+
+The next concrete producer is the quantitative bounded-factor-grid window
+for `rhsRefold0Int` and `rhsRefoldTopInt`.  Apply
+`H3BoundedGrid.h2_of_bfg5` to obtain uniform coefficient `H2` bounds from
+the metric `H3` ball, then package these coefficients as the same-horizon
+nonautonomous `A1/A2` families.  Measurability/uniform boundedness, the
+order-two bootstrap, all-order smoothing/geometric realization, and the
+uniform common-horizon assembly remain genuine independent frontiers.
+
+Honest accounting:
+
+- `rhs_sub_zero_refold`: **100% as a source-checked theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- `(N)` dedicated machinery: conservatively **85--88%**.
+
+## Planner update No. 44 (2026-07-27) - low-regularity H2 coefficient split
+
+The blanket instruction in update No. 43 to apply `h2_of_bfg5` to every
+refolded coefficient was too coarse.  A complete order-zero coefficient has a
+genuine fourth metric jet, so an instantaneous `H3` radius alone cannot bound
+its `H2` norm.  The correct same-horizon tame shape is one explicit metric
+`H4` head plus a function of the metric `H3` radius; in time this becomes
+`L2_t H4` with `L-infinity_t H3`.
+
+The new `RHSRefoldTameH2.lean` source is focused GREEN and proves:
+
+- `ricciConn_h2_tame`, for the Ricci connection-difference coefficient;
+- `ricciBase_h2_tame`, for the Ricci base-curvature difference; and
+- `dLa_h2_tame`, for the DLa part of the DeTurck coefficient.
+
+For the last result, the already-proved lower theorem
+`dLaField_perOrder_rf` was made public in
+`DeTurckLieCoeffDiffRadiusFree.lean` and its genuinely unused supercritical
+parameters were removed.  That lower module is focused GREEN and exact GREEN
+(`9488/9488`).  Fibre smallness fixes the zeroth-order antidiagonal-grid
+radius, so the fourth jet remains explicit without any pointwise `H4` or
+high-`a` assumption.
+
+The false combinatorial shortcut
+`dLaGridWin b 5 = b 4 + boundedFactorGridWindow b 3 5` is permanently
+discarded: the raw fourth-order grid contains the fourth jet multiplied by
+zeroth-order factors.  Use the fixed-radius
+`antidiagonalTupleGrid_integral_radiusFree` theorem instead.
+
+Next frontier: isolate the finite order-two `DLb`/endomorphism estimate without
+the all-order `wAlpha_L2_topsep_rf` supercritical hypothesis, then handle
+`lieCorr0` and assemble the complete `rhsRefold0` H2/time-tame estimate.
+Measurability and uniform boundedness of the resulting nonautonomous A1/A2
+families, the same-horizon order-two bootstrap, all-order smoothing/geometric
+realization, and common-horizon assembly remain independent theorem
+frontiers.
+
+Honest accounting:
+
+- `ricci_flow_unif_existence`: **0% as a theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- the three listed H2 coefficient bricks: **100% as source-checked theorems**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.
+
+## Planner update No. 45 (2026-07-27) - DLb and lieCorr H2 tame bricks
+
+The order-two DeTurck coefficient split has advanced without adding a
+theorem-facing high-index assumption:
+
+- `dLbField_perOrder_rf` is now public in its canonical lower module.  Its
+  all-order ceiling can be fixed internally at
+  `2 * Module.finrank Real E + 10`; it is not a Sobolev-ball hypothesis.
+  The lower source is focused GREEN and exact GREEN (`9488/9488`).
+- `dLb_h2_tame` consumes only coefficient orders zero through two and keeps
+  one fourth metric jet explicit.
+- `lieCorr_h2_tame` projects the existing radius-free `lieCorr0Field`
+  producer in the same way.  Its lower window is controlled entirely by the
+  metric `H3` radius; only the top term sees the explicit fourth jet.
+
+`RHSRefoldTameH2.lean` is source-focused GREEN after both additions.  The
+source contains no `sorry`, `admit`, axiom declaration, or `whnf`.
+
+The complete `rhsRefold0` estimate is not yet assembled.  The next task is an
+exact algebra audit against the literal `rhsRefold0` definition: connect the
+checked Ricci, DLa, DLb, and `lieCorr0` bounds through the public Ricci-refold
+and Lie pair-trace identities, identify any remaining raw refold field, and
+bound only that field.  This is still coefficient machinery, not the
+same-horizon bootstrap theorem.
+
+Honest accounting:
+
+- `ricci_flow_unif_existence`: **0% as a theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- the five checked H2 constituent estimates in `RHSRefoldTameH2`: **100% as
+  stated**;
+- the complete `rhsRefold0` H2/time-tame theorem: **0% until stated and
+  proved**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.

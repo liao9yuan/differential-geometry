@@ -55,3 +55,21 @@ supporting brick for the moving inverse route: that final theorem is still
 unstated (0%), while its dedicated infrastructure remains only partially
 complete; the HCG project map remains the authoritative source for aggregate
 percentages.
+
+## 2026-07-28 arbitrary-time launch scaling
+
+Added `intrGeo_smul_apply`, the public arbitrary-time form of intrinsic
+geodesic homogeneity:
+
+```text
+intrinsicGeodesic p (c • u) s = intrinsicGeodesic p u (c * s).
+```
+
+It is derived from the existing time-one scaling theorem and is used to match
+the two exact length ratios in the localized Whitehead period construction.
+No new ODE uniqueness or completeness premise is introduced.
+
+Focused verification and the exact targeted refresh passed.  This theorem and
+its dedicated machinery are 100%.  The Whitehead hard producer is now
+complete; `intrCore_jensen` remains theorem-level 0% with about 93% dedicated
+machinery, and whole HCG supporting machinery is about 62%.

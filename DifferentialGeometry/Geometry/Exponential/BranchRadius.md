@@ -50,3 +50,16 @@ conjugacy-reversal upstream module to become focused green. This brick is
 complete at theorem level; `calabiDist_support` itself remains unstated and
 therefore 0%. Route B-prime remains about 45%, whole HCG supporting machinery
 about 60%, and unconditional `compactnessSol` theorem-level 0%.
+
+## 2026-07-28 differentiability at a selected nonzero launch
+
+Added `branchRadius_diff`, the pointwise differentiability theorem needed by
+the compact minimal-bigon first-variation argument.  It derives the branch
+radius from twice the smooth branch energy and differentiates `Real.sqrt` only
+after proving the selected launch has strictly positive squared length.
+
+Focused verification and the exact targeted refresh passed, so the earlier
+artifact-wait note is superseded.  `branchRadius_diff` and its dedicated
+machinery are 100%.  The localized Whitehead producer that consumes it is
+complete; `intrCore_jensen` remains theorem-level 0% with about 93% dedicated
+machinery, and whole HCG supporting machinery is about 62%.

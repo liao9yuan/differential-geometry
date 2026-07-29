@@ -2,13 +2,12 @@
 
 ## Current source state
 
-`EdgeRateBound.lean` is source-complete for the fixed-time principal and top
-formal-partner estimates, with no `sorry`, `admit`, axiom, or opaque
-replacement.  A focused Lean check has not yet run: the shared workspace is
-coordinating another named build, so every declaration below remains
-**source-level, unverified** until the lock-aware check is authorized.
+`EdgeRateBound.lean` is focused-green without a local diagnostic for the
+fixed-time principal, formal-partner, and combined pairing estimates.  It has
+no `sorry`, `admit`, axiom, `whnf`, trace, or opaque replacement.  Its exact
+artifact refresh is also green.
 
-The new source declarations are:
+The file exports:
 
 - `edgeRate0` and `edgeRate1`, the exact visible order-zero and order-one
   fields after the Palatini--DeTurck refold;
@@ -53,178 +52,57 @@ The moving inverse-metric and volume reactions are not a mathematical gap:
 moving difference norm, and `carrierEdge_bounds` supplies one carrier-speed
 constant on a closed slab.
 
-## Routes which do not close the time-uniform edge estimate
+## Durable failed routes
 
-1. **Generic coefficient suprema.**  For one fixed smooth `W`, the public
-   `joint_jet_bdd` theorem can bound `edgeRate0/1` uniformly in the slope
-   variable.  Its constant depends on high spatial jets of that particular
-   `W`.  Along a closed-edge time family the available regularity is only
-   interior-smooth and edge-continuous, so those constants may diverge as
-   `t -> 0+`; they do not produce the single `K` required by
-   `movingEnergy_zero`.
-2. **Ball-uniform coefficient estimates.**  The canonical ball-uniform APIs
-   for the Ricci connection-difference, Riemann, and DeTurck coefficient
-   fields all require a finite high-jet radius `R`.  Supplying such an `R`
-   would assume the missing edge derivative regularity rather than prove the
-   closed-edge estimate.
-3. **A standalone `C2` estimate.**  Pairing the refolded top coefficient with
-   `nabla^2 W` by a coarse `H2` bound loses the small undifferentiated `W`
-   factor.  The formal-partner Green route in `edgeTop_pair_le` is necessary.
-4. **Using `exists_edgeSlopeRef` alone.**  That producer existentially hides
-   the permutations and signs needed by the sharp partner bounds.  The source
-   theorem `exists_edgePairRef` repairs this data-flow issue rather than
-   postulating a new coefficient.
+- A standalone bound on the returned `C2` coefficient loses the small
+  undifferentiated metric difference.  The exact formal-partner and Green
+  route is required and is now implemented.
+- The older `exists_edgeSlopeRef` hides the permutations and signs required
+  by the sharp partner bounds.  `exists_edgePairRef` is the consumer-shaped
+  producer which retains them.
+- Generic smooth-family suprema depending on arbitrarily high jets of `W`
+  cannot supply a closed-edge uniform constant.  Any concrete coefficient
+  bound must use the low-regularity `C0/C1` arms and the available finite
+  Sobolev control, not a high-jet radius for the arbitrary edge solution.
 
-## Three independent closure routes audited
+## Exact remaining producer
 
-The following are genuinely different mathematical routes, not three names
-for the same missing estimate.
+The earlier proposal to instantiate `edgePair_pair_le` with pointwise bounds
+for the complete concrete `edgeRate0` and `edgeRate1` is rejected.  The
+Ricci DA part of `edgeRate0` contains a derivative of the connection
+difference, so such a bound either asks for an inadmissible high derivative
+of the arbitrary edge tensor or hides the real integration-by-parts step.
 
-1. **Direct Palatini/Green integration by parts.**  This is still the faithful
-   route.  Expanding `linearizedRicciConnDiffOrder0CLM` shows six terms
-   quadratic in `A = connDiff(g_s,g)` and two terms linear in
-   `DA = covGrad A`.  The quadratic terms and the order-one arm can retain a
-   small undifferentiated `W`; the two `DA` terms must first be moved by
-   Green's identity.  The canonical library already supplies
-   `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence`, the lowered
-   tensor `connDiffLoweredCc`, and the rank-reducing product-rule identities in
-   `RankReducingOperatorFieldGreenIBP`.  It also rewrites
-   `connDiffGradContrInsertionField` as a reindexed slot extension of
-   `covGrad connDiffSection`.  What is not supplied is the exact formal
-   adjoint through the *outer* Ricci four-trace and reindex contractions: an
-   identity lowering the two `DA` monomials through the outer trace to an
-   explicit mixed-trace flux.  A subsequent one-dimensional scaling audit
-   rules out the initially proposed use of `edgePairMono`: that operator has
-   two moving-metric traces and scales as `m^-2` for `g = 1`, `gm = m`, while
-   the actual Ricci four-trace has one and scales as `m^-1`.  The direct route
-   therefore needs a new single-moving-trace/base-trace formal partner.  This
-   is a local tensor-algebra producer, not a new regularity hypothesis.
-2. **Exact Ricci--DeTurck algebraic cancellation.**  `rhsSlope_eq_arms` and
-   `RHSThreeArmCancel` cancel the Ricci/DeTurck principal second-order symbols,
-   while `LieThreeArmCancel` and the `tail0_decomp` chain cancel the
-   self-background differentiated DeTurck tail.  They do not cancel the
-   Ricci `DA` arm.  This is visible in the final normal form:
-   `edgeRicciHalf` still contains
-   `linearizedRicciConnDiffOrder0CoeffField`, and `edgeQuad1` still contains
-   `linearizedRicciConnDiffOrder1CoeffField`; `edgeFold0` contains no hidden
-   derivative of the connection difference.  No theorem in
-   `DifferentialGeometry/` rewrites their signed `L2` sum to zero or to a
-   pointwise bounded reaction.
-3. **Low-regularity/reverse-Duhamel uniqueness.**  The concrete low-regularity
-   coefficient producers close on a spectral endpoint ball: in particular
-   `rhs0_h1_of_aux` requires endpoint `H3` control, and `edgePath_strong`
-   requires the high-scale spatial and time-derivative `MemLp` data in
-   `EdgeStrongData`.  The public forward-uniqueness theorem assumes only joint
-   `C0` regularity at the initial edge and joint smoothness for positive time,
-   so neither input follows uniformly as `t -> a+`.  The proved
-   `metricRD_local` theorem does give Ricci--DeTurck uniqueness on a positive
-   window whose left endpoint is already smooth, but it cannot be started at
-   the original `C0` edge.  Thus this route needs a new boundary-regularity
-   producer (high-scale `MemLp`, or the finite-order `ricciEdgeDeriv` package),
-   not a repackaging of the existing strong fixed-point theorem.
+The Ricci contribution is now handled at pairing level by exact-current
+`ricciDA_path_le`, `ricciAA_path_le`, and `ricci1_path_le`, after the
+Riemann--Palatini cancellation.  The next theorem must isolate and estimate
+only the remaining non-Ricci DeTurck lower arms, keeping their exact joint
+path structure.  Its constants may depend on carrier/background slab data
+and the low-regularity ball, but not on nonsmall higher jets of the arbitrary
+difference tensor.
 
-Consequently none of the three routes currently closes from the exact public
-edge hypotheses.  The first route identifies a local algebraic/analytic
-producer and does not indicate that the theorem statement is false; the third
-route would instead require a substantially broader initial-edge parabolic
-regularity theorem.  The scaling test is also a useful negative result: it
-prevents the missing single-trace adjoint from being hidden behind the already
-proved two-trace `edgePair_l2` API.
+After that producer, the remaining packaging step is to combine the slope
+path identity with the spatial `L2` pairing and feed the resulting uniform
+rate into `movingEnergy_zero`.  This packaging is not allowed to reintroduce
+a coarse `C2` estimate; the top term must remain discharged by
+`edgeTop_pair_le`.
 
-## Exact remaining mathematical producer
-
-The unique smallest analytic gap is the structural visible-lower-arm pairing,
-not another coefficient-sup theorem.  A consumer-shaped next lemma is:
-
-`edgeVis_pair_le`
-
-with conclusion, uniformly for every slope,
-
-`<W, edgeLowerArm g (edgeRate0 ...) (edgeRate1 ...) W>`
-
-`<= c * delta * ||nabla W||^2 + K * ||W||^2`,
-
-where `c * delta` is small and `K` depends only on the carrier/background
-closed-slab data, not on high jets of the arbitrary edge solution.  Expanded,
-the visible fields are
-
-`edgeRate1 = -2 * RicciConnDiff1 + DeTurckLieArm1`,
-
-and
-
-`edgeRate0 = -2 * RicciConnDiff0 - Riemann0 + DeTurckEndo + lieCorr0
-  + phiMetCurv + C0`.
-
-Their connection-difference terms must be paired at the energy level so that
-derivatives fall on `W` and retain a small undifferentiated metric difference.
-Proving separate pointwise suprema is the wrong abstraction boundary.
-
-The first non-packaging child on the direct route is narrower than
-`edgeVis_pair_le`.  The new `EdgeRicciPairing.lean` layer now gives concrete
-`ricciAAKer`, `ricciDAKer`, `ricciKer_split`, and `ricciCoeff_split`
-declarations by reproving the private six-plus-two expansion from public
-definitions.  The next identity, `ricciDA_pair`, must construct the genuine
-one-trace quadratic flux and rewrite the derivative-arm pairing as its pairing
-with `covGrad (connDiffLoweredCc g gm)`.  For symmetric `W`, the eight raw
-scalar terms cancel to
-
-`sum W[u,v] * W(L p,r) * (D[u,v,p,r] - D[p,u,v,r])`,
-
-where `L` is the relative inverse-metric endomorphism and
-`D[p,u,v,r] = g((nabla_p A)(u,v),r)`.  Thus the concrete flux has components
-
-`P[p,u,v,r] = W[p,u] * W(L v,r) - W[u,v] * W(L p,r)`.
-
-It has exactly one relative inverse-metric insertion and can be assembled
-from `edgeProd4`, `edgeSlot2`, and one fixed slot permutation.  The raw
-`2 x 4 = 8` expansion is an intermediate verification device, not a sum of
-the existing two-trace monomials.
-
-The exact Green theorem `ricciDA_green` should then follow from
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence`.  Its follow-up
-estimate `edgeRic_pair_le` must combine the six `A*A` monomials, this
-integrated derivative flux, and the Ricci order-one arm; the derivative and
-order-one pieces should be audited jointly for their signed cancellations.
-The DeTurck sibling `edgeDet_pair_le` should be lower-order: the required
-diagonal-zero fibre estimates already occur inside the low-regularity
-development, but the sharp Arm1 pieces and sharp-flat/kappa decompositions
-needed here are private; the public ball-uniform wrappers add an inadmissible
-high-jet radius.  They must be exported or reproved at this energy boundary.
-Neither child may be replaced by assuming its desired signed pairing bound.
-
-`EdgeRicciPairing.lean` directly imports
-`RicciConnDiffOrder0KernelJetGrid`,
-`FlatArmCoeffConnectionDifferenceBridge`, `EdgeRefoldPairing`, and
-`RankReducingOperatorFieldGreenIBP`.  The kernel split is now present at
-source level without modifying upstream private declarations.  The smallest
-remaining public bridge is component-level compatibility between
-`covGrad (connDiffLoweredCc g gm)` and the derivative tensor used by
-`connDiffGradContrInsertionField`: the bridge file exposes the norm identity
-`connLow_rfns`, but keeps its exact realization lemmas private.  This bridge
-may be reproved locally; the desired pairing cannot be introduced as a
-hypothesis.
-
-There is also a routine but currently unnamed packaging lemma needed after
-this estimate: interchange the slope interval integral with the spatial
-`L2` pairing in `rhsArm_sub_eq_paths`.  The shortest canonical proof uses
-`MeasureTheory.intervalIntegral_integral_swap`, following
-`PathIntegralFibreNormTransfer`, on each of the three smooth coefficient arms.
-This is an API glue task, not the analytic obstruction.  The raw
-`rhsSumSlope` fixed-vector integrability theorem alone is insufficient for the
-space--slope Fubini step.
+This fixed-time result is supporting machinery.  The already completed
+`ricci_flow_forward_unique` endpoint does not need to be reproved.  For black
+box `(N)`, the independent remaining construction frontiers are still
+`rhsRefold0` H2/time-L2 control, the same-horizon order-two bootstrap,
+all-order smoothing and geometric realization, and the uniform common-horizon
+assembly.
 
 ## Honest progress
 
-- Exact `ricci_flow_forward_unique`: **0%** until its existing theorem is
-  proved and axiom-checked.
-- `EdgeRateBound` fixed-time source machinery: **80% source-level, 0% Lean
-  verified** pending the coordinated focused check.
-- Closed-edge Ricci--DeTurck rate machinery: the principal and top arms are
-  assembled at source level, and the concrete Ricci six-plus-two kernel split
-  is written source-only; the single-trace derivative pairing, the remaining
-  visible lower-arm estimate, and final space--slope packaging remain.
-- `extends_of_rmBounded`: unchanged; it still has both analytic producer
-  dependencies.
-- The full Hamilton positive-Ricci program: unchanged at theorem level until
-  both `ricci_flow_unif_existence` and `ricci_flow_forward_unique` are proved
-  without `sorryAx`.
+- `EdgeRateBound` public theorems: **100% as stated under focused and exact
+  verification**.  Direct axiom audits of its four principal public theorems
+  report only `propext`, `Classical.choice`, and `Quot.sound`.
+- Concrete uniform nonlinear rate theorem: **0%**, because it is not yet
+  stated and proved.  Its dedicated fixed-time/refold/energy machinery is
+  approximately **85--90%**.
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**; its dedicated
+  machinery remains conservatively **84--87%**.
+- `ricci_flow_forward_unique`: complete in the post-merge tree; this file does
+  not change that endpoint.

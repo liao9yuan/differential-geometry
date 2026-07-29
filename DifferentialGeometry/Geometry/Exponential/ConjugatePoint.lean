@@ -51,7 +51,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)]
   [CompleteSpace E]
 
-private theorem covDeriv_comp_affine
+/-- Covariant differentiation along an affine reparametrization scales by the
+affine slope. -/
+theorem covDeriv_comp_affine
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (c d t : ℝ) :
     covDerivAlong (I := I) g
@@ -79,7 +81,9 @@ private theorem covDeriv_comp_affine
   rw [hderiv, hderiv,
     ChartChristoffel.contraction_smul_left, smul_add]
 
-private theorem curveVelocity_comp_affine
+/-- Curve velocity along an affine reparametrization scales by the affine
+slope. -/
+theorem curveVelocity_comp_affine
     (γ : ℝ → M) (c d t : ℝ)
     (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ (c * t + d)) :
     curveVelocity (I := I) (fun s => γ (c * s + d)) t =
@@ -105,7 +109,8 @@ private theorem curveVelocity_comp_affine
   simpa only [smul_eq_mul, mul_one] using
     map_smul (mfderiv 𝓘(ℝ, ℝ) I γ (a t)) c (1 : ℝ)
 
-private theorem jacobi_comp_affine
+/-- Affine reparametrization preserves the Jacobi equation. -/
+theorem jacobi_comp_affine
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t, TangentSpace I (γ t)) (c d : ℝ)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
@@ -165,7 +170,7 @@ private theorem intrinsicGeodesic_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem intrinsicGeodesic_reverse
+theorem intrGeo_reverse
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -238,6 +243,50 @@ private theorem intrinsicGeodesic_reverse
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The reversed intrinsic geodesic has terminal velocity equal to the negative
+of the original launch velocity. -/
+theorem intrGeo_rev_vel
+    [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (u : TangentSpace I p) :
+    let z := intrinsicVelocityLift (I := I) g hEnorm p u 1
+    (mfderiv 𝓘(ℝ, ℝ) I
+        (intrinsicGeodesic (I := I) g hEnorm z.proj (-z.snd))
+        1 (1 : ℝ) : E) = -(u : E) := by
+  let γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p u
+  let z := intrinsicVelocityLift (I := I) g hEnorm p u 1
+  let δ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm z.proj (-z.snd)
+  have hδ : δ = fun t => γ (1 - t) := by
+    simpa only [δ, γ, z] using intrGeo_reverse (I := I) g hEnorm p u
+  have hγ_inf : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ :=
+    intrinsicGeodesic_smooth (I := I) g hEnorm p u
+  have hcomp := curveVelocity_comp_affine (I := I) γ (-1) 1 1
+    (hγ_inf.contMDiffAt.mdifferentiableAt (by simp))
+  have hcomp' :
+      (curveVelocity (I := I) (fun t => γ (1 - t)) 1 : E) =
+        (-1 : ℝ) • curveVelocity (I := I) γ 0 := by
+    have hfun :
+        (fun t : ℝ => γ (1 - t)) =
+          fun t : ℝ => γ ((-1 : ℝ) * t + 1) := by
+      funext t
+      congr 1
+      ring
+    rw [hfun]
+    have ht : (-1 : ℝ) * 1 + 1 = 0 := by norm_num
+    rw [ht] at hcomp
+    simpa only [neg_one_smul] using hcomp
+  change (curveVelocity (I := I) δ 1 : E) = -(u : E)
+  rw [hδ, hcomp', neg_one_smul]
+  exact congrArg Neg.neg (by
+    simpa only [curveVelocity, γ] using
+      intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p u)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exp_pair_reverse
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -264,7 +313,7 @@ private theorem exp_pair_reverse
   let δ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm z.proj (-z.snd)
   generalize hrev_def : (fun t => γ ((-1 : ℝ) * t + 1)) = rev
   have hδrev : δ = rev := by
-    have h := intrinsicGeodesic_reverse (I := I) g hEnorm p u
+    have h := intrGeo_reverse (I := I) g hEnorm p u
     change δ = fun t => γ (1 - t) at h
     rw [h, ← hrev_def]
     funext t

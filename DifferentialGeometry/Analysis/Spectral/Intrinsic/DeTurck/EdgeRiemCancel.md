@@ -2,9 +2,9 @@
 
 ## Current source state
 
-`EdgeRiemCancel.lean` contains a source-level, placeholder-free exact
-Riemann-cancellation producer.  Focused Lean verification is pending the
-serialized shared-workspace schedule.
+`EdgeRiemCancel.lean` contains a placeholder-free exact Riemann-cancellation
+producer.  Its post-merge source is focused-green.  The public statements are
+unchanged.
 
 The file exports:
 
@@ -23,6 +23,13 @@ to instantiate the already proved exact refold identities for the fixed smooth
 edge tensor; no such radius appears in the theorem statement or downstream
 estimate.
 
+The first post-merge artifact refresh exposed only API drift: the old real
+inner-product notation no longer parsed in these statements, the
+`MetricRealization` names were no longer in scope, and the duplicated raw
+normalization relied on fragile half-coefficient reduction.  The source now
+uses `Inner.inner Real`, opens the canonical namespace, and reuses
+`edgeRiem_cancel` for that normalization.  Focused verification then passed.
+
 ## Mathematical consequence
 
 The earlier combined top coefficient spent a separate smallness budget on a
@@ -39,5 +46,7 @@ uniqueness is completed.
 ## Verification
 
 - Source placeholders (`sorry`, `admit`, axiom): none.
-- Focused Lean check: pending serialized verification.
+- Focused Lean check: passed.
+- Exact artifact refresh: the pre-repair attempt failed on the API drift above;
+  the repaired source then passed its coordinated exact refresh.
 - `extends_of_rmBounded`: unchanged.

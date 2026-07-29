@@ -31,7 +31,7 @@ R-free sibling of `deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated`
 
 `deTurckLieCoeffField = DLa + DLb`; `‖∇ⁱfield‖² ≤ 2‖∇ⁱDLa‖² + 2‖∇ⁱDLb‖²` (re-derived in-leaf from the
 public `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` + `iteratedCovGrad_add`).  Two per-order
-R-free arm engines (private helpers `dLaField_perOrder_rf` / `dLbField_perOrder_rf` in this leaf):
+R-free arm engines (`dLaField_perOrder_rf` and `dLbField_perOrder_rf` are public):
 - **DLa** — integrates the R-free pointwise `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`
   + `dLaGridWin (i+3)` remainder) through the workhorse `antidiagonalTupleGrid_integral_radiusFree`
   (in place of the ball-uniform tame-window integrator).  `dLaGridWin b m = ∑_{k<m} grid k` — defeq to
@@ -53,6 +53,31 @@ window `i+3`; one `Finset.sum_range_succ` peels the top cell `‖∇^{i+2}P‖²
 
 New import edge: this leaf now imports `DeTurckVFJetRadiusFree` (for `wAlpha_L2_topsep_rf`) and
 `SobolevNonlinearityExistence` (for the symmS bridges).
+
+## Low-regularity DLa export (2026-07-27)
+
+`dLaField_perOrder_rf` is now public in this canonical lower module.  Its
+former parameters `a` and `2 * dim E + 10 <= a` were absent from the proof:
+they belong only to the companion `DLb`/DeTurck-vector-field tower.  Removing
+them exposes the already-proved radius-free DLa estimate to the order-two
+bootstrap without introducing a high-regularity assumption.
+
+The source focused check and the exact target refresh are green.  The proof is
+unchanged apart from the parameter removal; no `sorry`, `admit`, axiom
+declaration, or `whnf` was introduced.
+
+## Low-regularity DLb export (2026-07-27)
+
+`dLbField_perOrder_rf` is now public in this canonical lower module.  Its
+supercritical index is an internal order ceiling for the all-order
+DeTurck-vector-field producer, not a Sobolev-ball hypothesis.  A finite
+order-two consumer can therefore set
+`a := 2 * Module.finrank Real E + 10` inside its proof and expose no
+theorem-facing high-`a` assumption.
+
+The source focused check and the exact target refresh are green
+(`9488/9488`).  The proof body is unchanged; no `sorry`, `admit`, axiom
+declaration, or `whnf` was introduced.
 
 ## The fork is CLOSED (no wall, no unreceivable term)
 

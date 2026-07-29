@@ -318,6 +318,232 @@ theorem intrJacobi_bounds
   rw [hγ0] at hbounds
   exact hbounds
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Simultaneous bounds for a smooth inhomogeneous field along a complete
+intrinsic geodesic. The parallel frame and chart regularity are derived here. -/
+theorem intrForce_pair
+    [PseudoEMetricSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (u : TangentSpace I p)
+    (J : ∀ t : Real,
+      TangentSpace I (intrinsicGeodesic (I := I) g hEnorm p u t))
+    {K eps delta b : Real}
+    (hK : 0 ≤ K) (heps : 0 ≤ eps) (hb : 0 < b)
+    (hJ : ContMDiff 𝓘(Real, Real) I.tangent ∞
+      (fun t : Real =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (intrinsicGeodesic (I := I) g hEnorm p u t) (J t) :
+            TangentBundle I M)))
+    (hDJ : ContMDiff 𝓘(Real, Real) I.tangent ∞
+      (fun t : Real =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (intrinsicGeodesic (I := I) g hEnorm p u t)
+          (covDerivAlong (I := I) g
+            (intrinsicGeodesic (I := I) g hEnorm p u) J t) :
+              TangentBundle I M)))
+    (hODE : ∀ t ∈ Ico (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (fun s => covDerivAlong (I := I) g
+                (intrinsicGeodesic (I := I) g hEnorm p u) J s) t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (fun s => covDerivAlong (I := I) g
+                (intrinsicGeodesic (I := I) g hEnorm p u) J s) t)) ≤
+        K * Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (J t) (J t)) + eps)
+    (hJ0 : Real.sqrt
+      (g.inner (intrinsicGeodesic (I := I) g hEnorm p u 0)
+        (J 0) (J 0)) ≤ delta)
+    (hDJ0 : Real.sqrt
+      (g.inner (intrinsicGeodesic (I := I) g hEnorm p u 0)
+        (covDerivAlong (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u) J 0)
+        (covDerivAlong (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u) J 0)) ≤ delta) :
+    (∀ t ∈ Icc (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (J t) (J t)) ≤
+        gronwallBound delta (max K 1) eps t) ∧
+    (∀ t ∈ Icc (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u) J t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u) J t)) ≤
+        gronwallBound delta (max K 1) eps t) := by
+  classical
+  let γ : Real → M :=
+    intrinsicGeodesic (I := I) g hEnorm p u
+  have hγInf : ContMDiff 𝓘(Real, Real) I ∞ γ := by
+    simpa only [γ] using
+      intrinsicGeodesic_contMDiff (I := I) g hEnorm p u
+  have hγ2 : ContMDiff 𝓘(Real, Real) I (2 : ℕ∞) γ :=
+    hγInf.of_le ENat.LEInfty.out
+  obtain ⟨basis, hON0⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+      (I := I) g (γ 0)
+  obtain ⟨F, _hF0, hFdiff, hFpar, hFON⟩ :=
+    DifferentialGeometry.Geometry.Riemannian.exists_parallel_frame
+      (I := I) g γ (N := 2) (by norm_num) hγ2 hb basis hON0
+  have hcard : ∀ t : Real,
+      Fintype.card
+          (Fin (Module.finrank Real (TangentSpace I (γ 0)))) =
+        Module.finrank Real (TangentSpace I (γ t)) := by
+    intro t
+    simp only [Fintype.card_fin]
+    rfl
+  have hfin :
+      Module.finrank Real (TangentSpace I (γ 0)) ≠ 0 := by
+    simpa using (NeZero.out : Module.finrank Real E ≠ 0)
+  letI : Nonempty (Fin (Module.finrank Real (TangentSpace I (γ 0)))) :=
+    Fin.pos_iff_nonempty.mp (Nat.pos_of_ne_zero hfin)
+  have hJdiff : ∀ t ∈ Icc (0 : Real) b,
+      DifferentiableAt Real (chartRepAt (I := I) γ J t) t := by
+    intro t _ht
+    exact chartRep_diff (I := I) γ J (by simpa only [γ] using hJ) t
+  have hDJdiff : ∀ t ∈ Icc (0 : Real) b,
+      DifferentiableAt Real
+        (chartRepAt (I := I) γ
+          (fun s => covDerivAlong (I := I) g γ J s) t) t := by
+    intro t _ht
+    exact chartRep_diff (I := I) γ
+      (fun s => covDerivAlong (I := I) g γ J s)
+      (by simpa only [γ] using hDJ) t
+  have hbounds := covGronwall_pair_at (I := I) g γ
+    (K := K) (eps := eps) (delta := delta) (b := b)
+    (fun _ _ => hγInf.contMDiffAt.of_le (by norm_num))
+    hcard F J hK heps hb.le hFpar hFON hFdiff hJdiff hDJdiff
+    (by simpa only [γ] using hODE)
+    (by simpa only [γ] using hJ0)
+    (by simpa only [γ] using hDJ0)
+  simpa only [γ] using hbounds
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Simultaneous metric-norm bounds for an intrinsic Jacobi field and its
+covariant velocity. -/
+theorem intrJacobi_pair
+    [PseudoEMetricSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (p : M) (u w : TangentSpace I p) {K b : Real}
+    (hK : 0 ≤ K) (hb : 0 < b)
+    (hODE : ∀ t ∈ Ico (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (fun s => covDerivAlong (I := I) g
+                (intrinsicGeodesic (I := I) g hEnorm p u)
+                (intrinsicJacobi (I := I) g hEnorm p u w) s) t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (fun s => covDerivAlong (I := I) g
+                (intrinsicGeodesic (I := I) g hEnorm p u)
+                (intrinsicJacobi (I := I) g hEnorm p u w) s) t)) ≤
+        K * Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (intrinsicJacobi (I := I) g hEnorm p u w t)
+            (intrinsicJacobi (I := I) g hEnorm p u w t))) :
+    (∀ t ∈ Icc (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (intrinsicJacobi (I := I) g hEnorm p u w t)
+            (intrinsicJacobi (I := I) g hEnorm p u w t)) ≤
+        gronwallBound (Real.sqrt (g.inner p w w)) (max K 1) 0 t) ∧
+    (∀ t ∈ Icc (0 : Real) b,
+      Real.sqrt
+          (g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (intrinsicJacobi (I := I) g hEnorm p u w) t)
+            (covDerivAlong (I := I) g
+              (intrinsicGeodesic (I := I) g hEnorm p u)
+              (intrinsicJacobi (I := I) g hEnorm p u w) t)) ≤
+        gronwallBound (Real.sqrt (g.inner p w w)) (max K 1) 0 t) := by
+  classical
+  let γ : Real → M :=
+    intrinsicGeodesic (I := I) g hEnorm p u
+  let J : ∀ t : Real, TangentSpace I (γ t) :=
+    intrinsicJacobi (I := I) g hEnorm p u w
+  have hγInf : ContMDiff 𝓘(Real, Real) I ∞ γ := by
+    simpa only [γ] using
+      intrinsicGeodesic_contMDiff (I := I) g hEnorm p u
+  have hγ2 : ContMDiff 𝓘(Real, Real) I (2 : ℕ∞) γ :=
+    hγInf.of_le ENat.LEInfty.out
+  obtain ⟨basis, hON0⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+      (I := I) g (γ 0)
+  obtain ⟨F, _hF0, hFdiff, hFpar, hFON⟩ :=
+    DifferentialGeometry.Geometry.Riemannian.exists_parallel_frame
+      (I := I) g γ (N := 2) (by norm_num) hγ2 hb basis hON0
+  have hcard : ∀ t : Real,
+      Fintype.card
+          (Fin (Module.finrank Real (TangentSpace I (γ 0)))) =
+        Module.finrank Real (TangentSpace I (γ t)) := by
+    intro t
+    simp only [Fintype.card_fin]
+    rfl
+  have hfin :
+      Module.finrank Real (TangentSpace I (γ 0)) ≠ 0 := by
+    simpa using (NeZero.out : Module.finrank Real E ≠ 0)
+  letI : Nonempty (Fin (Module.finrank Real (TangentSpace I (γ 0)))) :=
+    Fin.pos_iff_nonempty.mp (Nat.pos_of_ne_zero hfin)
+  have hJdiff : ∀ t ∈ Icc (0 : Real) b,
+      DifferentiableAt Real (chartRepAt (I := I) γ J t) t := by
+    intro t _ht
+    exact (intrJacobi_diff (I := I) g hEnorm p u w t).1
+  have hDJdiff : ∀ t ∈ Icc (0 : Real) b,
+      DifferentiableAt Real
+        (chartRepAt (I := I) γ
+          (fun s => covDerivAlong (I := I) g γ J s) t) t := by
+    intro t _ht
+    exact (intrJacobi_diff (I := I) g hEnorm p u w t).2
+  have hJ0 : J 0 = 0 := by
+    simpa only [J] using intrinsicJacobi_zero (I := I) g hEnorm p u w
+  have hDJ0 : covDerivAlong (I := I) g γ J 0 = w := by
+    simpa only [γ, J, intrinsicJacobi] using
+      intrinsic_jacobi_d0 (I := I) g hEnorm p (u : E) (w : E)
+  have hγ0 : γ 0 = p := by
+    simpa only [γ] using intrinsicGeodesic_zero (I := I) g hEnorm p u
+  have hJ0norm :
+      Real.sqrt (g.inner (γ 0) (J 0) (J 0)) ≤
+        Real.sqrt (g.inner p w w) := by
+    rw [hJ0]
+    simp only [map_zero, Real.sqrt_zero]
+    exact Real.sqrt_nonneg _
+  have hDJ0norm :
+      Real.sqrt
+          (g.inner (γ 0)
+            (covDerivAlong (I := I) g γ J 0)
+            (covDerivAlong (I := I) g γ J 0)) ≤
+        Real.sqrt (g.inner p w w) := by
+    rw [hDJ0, hγ0]
+  have hbounds := covGronwall_pair_at (I := I) g γ
+    (K := K) (eps := 0) (delta := Real.sqrt (g.inner p w w)) (b := b)
+    (fun _ _ => hγInf.contMDiffAt.of_le (by norm_num))
+    hcard F J hK (by norm_num) hb.le hFpar hFON hFdiff hJdiff hDJdiff
+    (by simpa only [γ, J, add_zero] using hODE) hJ0norm hDJ0norm
+  simpa only [γ, J] using hbounds
+
 end VolumeComparison
 end Riemannian
 end Geometry

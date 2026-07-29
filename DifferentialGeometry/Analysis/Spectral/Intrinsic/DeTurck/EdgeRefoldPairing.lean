@@ -1,5 +1,9 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefold
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RefoldPairingCore
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricDifferenceSlotPairing
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjointPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
@@ -27,6 +31,7 @@ not an uninstantiated symbolic decomposition.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
@@ -43,6 +48,9 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
@@ -51,6 +59,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 /-- The explicit zeroth-order remainder after the covariant-derivative part of
 the DeTurck coefficient has been refolded.  It contains no derivative of the
@@ -77,6 +87,7 @@ def edgeRefoldArm (g g₁ g_bg : SmoothRiemannianMetric I M)
     appCc (I := I) (M := M) g 4 2 C₂
       (iteratedCovGrad (I := I) g 0 2 2 W)
 
+omit [BoundarylessManifold I M] in
 /-- The zero endpoint obeys any nonnegative fibre-operator bound. -/
 theorem edgeZeroBoundAt (g : SmoothRiemannianMetric I M) {delta : Real}
     (hdelta : 0 ≤ delta) :
@@ -89,6 +100,7 @@ theorem edgeZeroBoundAt (g : SmoothRiemannianMetric I M) {delta : Real}
   simp only [zero_mul, abs_zero]
   exact mul_nonneg (mul_nonneg hdelta (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
 
+omit [BoundarylessManifold I M] in
 /-- On the genuine segment, the path using the sharp zero bound and the path
 using the same radius at both endpoints are the same metric.  This bridge lets
 the equal-radius public refold packages feed the exact closed-edge slope split.
@@ -117,7 +129,8 @@ theorem edgeMetric_bal
       (edgeZeroBound (I := I) (M := M) g) hs0 x v w,
     realizedFam_inner_of_mem (I := I) g W 0 hdelta hdeltaZ hsdelta x v w]
 
-private lemma edge_cons_sum (x : M) {n : Nat}
+omit [NeZero (Module.finrank Real E)] in
+private lemma edge_cons_sum {n : Nat}
     (Zm : Tensor0SModel (n + 1) Real E) (d : Nat) (t : Fin d → Real)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons (∑ c, t c • u c) rest) =
@@ -149,7 +162,8 @@ private lemma edge_cons_sum (x : M) {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-private lemma edge_cons2_sum (x : M) {n : Nat}
+omit [NeZero (Module.finrank Real E)] in
+private lemma edge_cons2_sum {n : Nat}
     (Zm : Tensor0SModel (n + 2) Real E) (aa : E) (d : Nat)
     (t : Fin d → Real) (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
@@ -185,6 +199,7 @@ private lemma edge_cons2_sum (x : M) {n : Nat}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma edge_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank Real E),
@@ -359,7 +374,7 @@ theorem edgeMvTrace (g gm : SmoothRiemannianMetric I M) (s : Nat) :
               (Fin.cons ((smoothOrthoFrame (I := I) g x a x : TangentSpace I x) : E) mm)) := by
         refine Finset.sum_congr rfl fun a _ => ?_
         rw [hGrep a]
-        exact edge_cons_sum (E := E) x (Tensor0SSpace.toModel Z)
+        exact edge_cons_sum (E := E) (Tensor0SSpace.toModel Z)
           (Module.finrank Real E)
           (fun c => g.inner x (smoothOrthoFrame (I := I) g x a x)
             (smoothOrthoFrame (I := I) gm x c x))
@@ -377,7 +392,7 @@ theorem edgeMvTrace (g gm : SmoothRiemannianMetric I M) (s : Nat) :
           (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
             (Fin.cons ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E) mm)) := by
         refine Finset.sum_congr rfl fun c _ => ?_
-        have hsum := edge_cons2_sum (E := E) x (Tensor0SSpace.toModel Z)
+        have hsum := edge_cons2_sum (E := E) (Tensor0SSpace.toModel Z)
           ((smoothOrthoFrame (I := I) gm x c x : TangentSpace I x) : E)
           (Module.finrank Real E)
           (fun a => g.inner x (smoothOrthoFrame (I := I) g x a x)
@@ -441,7 +456,6 @@ private lemma edge_bitrace_move
     refine Finset.sum_congr rfl fun a _ => ?_
     congr 1
     rw [gm.symm x (f a) (gInvRaisedEndo (I := I) g gm x (e i))]
-    change gm.inner x (gInvRaisedEndo (I := I) g gm x (e i)) (f a) = c i a
     rw [gInvRaisedEndo_apply]
     rw [inverseMetricSharpFib_inner (I := I) gm x
       (g0FlatCLM (I := I) g x (e i)) (f a)]
@@ -458,27 +472,47 @@ private lemma edge_bitrace_move
           (gInvRaisedEndo (I := I) g gm x (e j)) =
         ∑ a, ∑ b, (c i a * c j b) * S (f a) (f b) := by
     intro i j
-    rw [hraise i, hraise j, map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
-    refine Finset.sum_congr rfl fun a _ => ?_
-    rw [map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
-    refine Finset.sum_congr rfl fun b _ => ?_
-    ring
+    rw [hraise i, hraise j]
+    calc
+      S (∑ a, c i a • f a) (∑ b, c j b • f b) =
+          (∑ a, S (c i a • f a)) (∑ b, c j b • f b) := by
+            exact congrArg
+              (fun L : TangentSpace I x →L[Real] Real =>
+                L (∑ b, c j b • f b))
+              (map_sum S (fun a => c i a • f a) Finset.univ)
+      _ = ∑ a, S (c i a • f a) (∑ b, c j b • f b) := by
+            rw [ContinuousLinearMap.sum_apply]
+      _ = ∑ a, ∑ b, S (c i a • f a) (c j b • f b) := by
+            refine Finset.sum_congr rfl fun a _ => ?_
+            exact map_sum (S (c i a • f a))
+              (fun b => c j b • f b) Finset.univ
+      _ = ∑ a, ∑ b, (c i a * c j b) * S (f a) (f b) := by
+            refine Finset.sum_congr rfl fun a _ => ?_
+            refine Finset.sum_congr rfl fun b _ => ?_
+            simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+            ring
   have hZ : ∀ a b, Z (f a) (f b) =
       ∑ i, ∑ j, (c i a * c j b) * Z (e i) (e j) := by
     intro a b
-    rw [hframe a, hframe b, map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_sum]
-    simp only [map_smul, ContinuousLinearMap.sum_apply,
-      ContinuousLinearMap.smul_apply, smul_eq_mul]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    ring
+    rw [hframe a, hframe b]
+    calc
+      Z (∑ i, c i a • e i) (∑ j, c j b • e j) =
+          (∑ i, Z (c i a • e i)) (∑ j, c j b • e j) := by
+            exact congrArg
+              (fun L : TangentSpace I x →L[Real] Real =>
+                L (∑ j, c j b • e j))
+              (map_sum Z (fun i => c i a • e i) Finset.univ)
+      _ = ∑ i, Z (c i a • e i) (∑ j, c j b • e j) := by
+            rw [ContinuousLinearMap.sum_apply]
+      _ = ∑ i, ∑ j, Z (c i a • e i) (c j b • e j) := by
+            refine Finset.sum_congr rfl fun i _ => ?_
+            exact map_sum (Z (c i a • e i))
+              (fun j => c j b • e j) Finset.univ
+      _ = ∑ i, ∑ j, (c i a * c j b) * Z (e i) (e j) := by
+            refine Finset.sum_congr rfl fun i _ => ?_
+            refine Finset.sum_congr rfl fun j _ => ?_
+            simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+            ring
   calc
     (∑ a, ∑ b, S (f a) (f b) * Z (f a) (f b)) =
         ∑ a, ∑ b, ∑ i, ∑ j,
@@ -653,9 +687,21 @@ private lemma edge_extend2_eval (g : SmoothRiemannianMetric I M)
       (T := D) (v0 := (u 0 : E))
       (vs := Fin.cons (show E from u 1) (fun i : Fin 0 => i.elim0))]
     congr 1
-    funext k
-    fin_cases k <;> rfl
-  have hdecomp := tensor0S_rank0_eq_smul_unit (I := I) (M := M) x t
+  have hdecomp : t =
+      Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0) •
+        unitTensor (I := I) (M := M) x := by
+    apply Tensor0SSpace.toModel_injective
+    apply ContinuousMultilinearMap.ext
+    intro v
+    beta_reduce
+    rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+      smul_eq_mul]
+    have hunit : Tensor0SSpace.toModel
+        (unitTensor (I := I) (M := M) x) v = (1 : Real) := rfl
+    rw [hunit, mul_one]
+    congr 1
+    funext i
+    exact i.elim0
   rw [htval] at hdecomp
   rw [hdecomp, map_smul]
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
@@ -688,7 +734,10 @@ theorem edgePartner_eval (g gm : SmoothRiemannianMetric I M)
   rw [edgePairPartner, domDomCongrSection_unitModel,
     ContinuousMultilinearMap.domDomCongr_apply, edgeProd4_eval,
     edgeRaise2_eval]
-  congr 2 <;> funext k <;> fin_cases k <;> rfl
+  congr 2
+  all_goals
+    funext k
+    fin_cases k <;> rfl
 
 /-- Pointwise component formula for one public pair-trace monomial. -/
 theorem edgeMono_eval (g gm : SmoothRiemannianMetric I M)
@@ -728,6 +777,7 @@ private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+set_option linter.unusedSectionVars false in
 private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     edgeEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel D v := rfl
@@ -789,8 +839,6 @@ private lemma edge_sum2 {A : Type*} [Fintype A] (F : (Fin 2 → A) → Real) :
       refine Finset.sum_congr rfl fun a _ => ?_
       refine Finset.sum_congr rfl fun b _ => ?_
       congr 1
-      funext k
-      fin_cases k <;> rfl
 
 private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
     (∑ J : Fin 4 → A, F J) =
@@ -806,8 +854,6 @@ private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [Finset.sum_eq_single (fun i : Fin 0 => i.elim0)]
   · congr 1
-    funext k
-    fin_cases k <;> rfl
   · intro q _ hq
     exact absurd (Subsingleton.elim q (fun i : Fin 0 => i.elim0)) hq
   · intro h
@@ -878,6 +924,19 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
     edge_inner0 (I := I) (M := M) g 4
       (edgePairPartner (I := I) (M := M) g gm S σ) G x e bse hbse horth,
     edge_sum2]
+  have hvec2 : ∀ i j : Fin (Module.finrank Real E),
+      (fun k => (e (![i, j] k) : E)) = ![(e i : E), (e j : E)] := by
+    intro i j
+    funext k
+    fin_cases k <;> rfl
+  have hvec4 : ∀ a b i j : Fin (Module.finrank Real E),
+      (Fin.cons (e a : E)
+          (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E) =
+        fun k => (e (![a, b, i, j] k) : E) := by
+    intro a b i j
+    funext k
+    fin_cases k <;> rfl
+  simp_rw [hvec2]
   have hmove : ∀ i j : Fin (Module.finrank Real E),
       (∑ a : Fin (Module.finrank Real E),
         ∑ b : Fin (Module.finrank Real E),
@@ -929,7 +988,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                 (fun k => (Fin.cons
                   (smoothOrthoFrame (I := I) gm x a x : E)
                   (Fin.cons (smoothOrthoFrame (I := I) gm x b x : E)
-                    ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k)))) := by
+                    ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k))) := by
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [edgeMono_eval (I := I) (M := M) g gm S G σ x]
@@ -964,7 +1023,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                   unitModel (I := I) (M := M) g 4 G x
                     (fun k => (Fin.cons (e a : E)
                       (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-                      (σ k))) =
+                      (σ k)))) =
             ∑ i, ∑ j, ∑ a, ∑ b,
               unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
                 (unitModel (I := I) (M := M) g 2 S x
@@ -987,7 +1046,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
               unitModel (I := I) (M := M) g 4 G x
                 (fun k => (Fin.cons (e a : E)
                   (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
-                  (σ k)))]
+                  (σ k))))]
         refine Finset.sum_congr rfl fun a _ => ?_
         refine Finset.sum_congr rfl fun b _ => ?_
         refine Finset.sum_congr rfl fun i _ => ?_
@@ -1006,7 +1065,10 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl fun b _ => ?_
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
-        rfl
+        rw [hvec4 a b i j]
+        simp only [Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.cons_val_two, Matrix.cons_val_three,
+          Matrix.head_cons, Matrix.tail_cons]
     _ = ∑ J : Fin 4 → Fin (Module.finrank Real E),
         unitModel (I := I) (M := M) g 4
             (edgePairPartner (I := I) (M := M) g gm S σ) x
@@ -1037,9 +1099,9 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
               (fun k => K (σ k)) := by
           funext k
           simp [Equiv.arrowCongr]
-        rw [heqv, edgePartner_eval]
-        simp only [Equiv.apply_symm_apply]
-        rfl
+        rw [heqv]
+        simp only [edgePartner_eval, fullRaisedEndoField_apply,
+          Equiv.apply_symm_apply]
 
 set_option linter.unusedSectionVars false in
 /-- Exact global formal-partner identity for one moving Palatini pair-trace
@@ -1064,9 +1126,11 @@ combinations of refold monomials. -/
 theorem edgePair_inner (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
-    (⟪S, appCc (I := I) (M := M) g 2 2
-        (edgePairMono (I := I) (M := M) g gm G σ) S⟫_Real : Real) =
-      ⟪edgePairPartner (I := I) (M := M) g gm S σ, G⟫_Real := by
+    Inner.inner Real S
+        (appCc (I := I) (M := M) g 2 2
+          (edgePairMono (I := I) (M := M) g gm G σ) S) =
+      Inner.inner Real
+        (edgePairPartner (I := I) (M := M) g gm S σ) G := by
   rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
   exact edgePair_l2 (I := I) (M := M) g gm S G σ
 
@@ -1247,20 +1311,22 @@ theorem edgeTop_inner
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    Inner.inner Real T
+      (appCc (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
-      ⟪edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s,
-        iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+          qA qB q epsilon s) T) =
+      Inner.inner Real
+        (edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
+          qA qB q epsilon s)
+        (iteratedCovGrad (I := I) g 0 2 2 T) := by
   rw [edgeTopPair, edgeTopPartner, edgeRiemPairFam, edgeRiemPartner,
-    edgeKernelPair, edgeKernelPartner, edgeLiePairFam, edgeLiePartner,
+    edgeLiePairFam, edgeLiePartner,
     Fin.sum_univ_three, Fin.sum_univ_three]
-  simp only [appCc_add_left, appCc_sub_left, appCc_smul_left,
-    real_inner_add_left, real_inner_add_right, real_inner_sub_left,
-    real_inner_sub_right, real_inner_smul_left, real_inner_smul_right]
+  simp only [edgeKernelPair, edgeKernelPartner,
+    appCc_add_left, appCc_sub_left, appCc_smul_left,
+    inner_add_left, inner_add_right, inner_sub_left, inner_sub_right,
+    real_inner_smul_left, real_inner_smul_right]
   simp_rw [edgePair_inner (I := I) (M := M) g]
-  module
 
 /-- Green form of the complete top refold pairing.  All second derivatives of
 `T` have been moved onto the explicit formal partner before any estimate is
@@ -1275,38 +1341,43 @@ theorem edgeTop_green
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    Inner.inner Real T
+      (appCc (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
-      -⟪covDivergence (I := I) (M := M) g 3
+          qA qB q epsilon s) T) =
+      -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3
           (edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
-            qA qB q epsilon s),
-        iteratedCovGrad (I := I) g 0 2 1 T⟫_Real := by
+            qA qB q epsilon s))
+        (iteratedCovGrad (I := I) g 0 2 1 T) := by
   let P : SmoothCcTensor g 0 4 :=
     edgeTopPartner (I := I) (M := M) g T hdelta hdeltaZ
       qA qB q epsilon s
   let T₁ : SmoothCcTensor g 0 3 := iteratedCovGrad (I := I) g 0 2 1 T
   have hjet : iteratedCovGrad (I := I) g 0 2 2 T =
       covGrad (I := I) (M := M) g 0 3 T₁ := by
-    rw [T₁]
-    exact (iteratedCovGrad_succ g 0 2 1 T).symm
+    simpa only [T₁] using (iteratedCovGrad_succ g 0 2 1 T).symm
   have hgreen :
-      (⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real : Real) =
-        -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := by
+      Inner.inner Real (covGrad (I := I) (M := M) g 0 3 T₁) P =
+        -Inner.inner Real T₁
+          (covDivergence (I := I) (M := M) g 3 P) := by
     rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
     exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
       (I := I) (M := M) g 3 T₁ P
   calc
-    (⟪T, appCc (I := I) (M := M) g 2 2
+    Inner.inner Real T
+        (appCc (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
-          qA qB q epsilon s) T⟫_Real : Real) =
-        ⟪P, iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+          qA qB q epsilon s) T) =
+        Inner.inner Real P (iteratedCovGrad (I := I) g 0 2 2 T) := by
       exact edgeTop_inner (I := I) (M := M) g T hdelta hdeltaZ
         qA qB q epsilon s
-    _ = ⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real := by
+    _ = Inner.inner Real (covGrad (I := I) (M := M) g 0 3 T₁) P := by
       rw [hjet, real_inner_comm]
-    _ = -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := hgreen
-    _ = -⟪covDivergence (I := I) (M := M) g 3 P, T₁⟫_Real := by
+    _ = -Inner.inner Real T₁
+        (covDivergence (I := I) (M := M) g 3 P) := hgreen
+    _ = -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3 P) T₁ := by
       rw [real_inner_comm]
 
 /-- Exact full nonlinear refold on the closed-edge segment.
@@ -1354,22 +1425,28 @@ theorem exists_edgeRefold
               2 * (max (3 * deTurckArmFibreConst (Module.finrank Real E) *
                 (delta / (1 - delta) ^ 2)) 0) ^ 2) ∧
         (∀ s ∈ Set.Icc (0 : Real) 1,
-          (⟪W, edgeQuadArm (I := I) (M := M) g
-              (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W⟫_Real : Real) =
+          Inner.inner Real W
+              (edgeQuadArm (I := I) (M := M) g
+                (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W) =
             (-2 : Real) *
-                ⟪W, appCc (I := I) (M := M) g 2 2
+                Inner.inner Real W
+                  (appCc (I := I) (M := M) g 2 2
                   (edgeRicciHalf (I := I) (M := M) g
-                    (edgeMetric (I := I) (M := M) g W hdelta s)) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 2 2 (C₀ s) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 2 2
-                (edgeFold0 (I := I) (M := M) g
-                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 3 2
-                (edgeQuad1 (I := I) (M := M) g
-                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
-                (iteratedCovGrad (I := I) g 0 2 1 W)⟫_Real +
-              ⟪W, appCc (I := I) (M := M) g 4 2 (C₂ s)
-                (iteratedCovGrad (I := I) g 0 2 2 W)⟫_Real) := by
+                    (edgeMetric (I := I) (M := M) g W hdelta s)) W) +
+              Inner.inner Real W
+                (appCc (I := I) (M := M) g 2 2 (C₀ s) W) +
+              Inner.inner Real W
+                (appCc (I := I) (M := M) g 2 2
+                  (edgeFold0 (I := I) (M := M) g
+                    (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W) +
+              Inner.inner Real W
+                (appCc (I := I) (M := M) g 3 2
+                  (edgeQuad1 (I := I) (M := M) g
+                    (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
+                  (iteratedCovGrad (I := I) g 0 2 1 W)) +
+              Inner.inner Real W
+                (appCc (I := I) (M := M) g 4 2 (C₂ s)
+                  (iteratedCovGrad (I := I) g 0 2 2 W))) := by
   classical
   let a : Nat := 2 * Module.finrank Real E + 10
   let R : Real := ∑ j ∈ Finset.range (a + 3),
@@ -1437,9 +1514,10 @@ theorem exists_edgeRefold
     simp only [edgeQuadArm, edgeLowerArm, edgeQuad0,
       deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
-    rw [hriem, hlie]
     simp only [edgeRicciHalf, edgeFold0, C₀, C₂,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
+    rw [hriem, hlie]
+    simp only [appCc_smul_left]
     module
   have hBsq : 0 ≤ 2 * LambdaR ^ 2 + 2 * LambdaD ^ 2 := by positivity
   refine ⟨Real.sqrt (2 * LambdaR ^ 2 + 2 * LambdaD ^ 2), Real.sqrt_nonneg _,
@@ -1469,7 +1547,7 @@ theorem exists_edgeRefold
   · intro s hs
     have hid := hnormal s hs
     rw [hid]
-    simp only [real_inner_add_right, real_inner_smul_right]
+    simp only [inner_add_right, real_inner_smul_right]
 
 /-- Consumer-shaped full slope normal form.  This composes the closed-edge
 three-arm cancellation with `exists_edgeRefold`; no residual coefficient or

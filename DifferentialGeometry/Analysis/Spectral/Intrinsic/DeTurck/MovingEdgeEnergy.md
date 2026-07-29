@@ -1,5 +1,24 @@
 # MovingEdgeEnergy
 
+## Dependency split
+
+The scalar closed-edge closure now comes from
+`Analysis/ODE/ClosedEdgeGronwall`, and the unit-quadratic-to-operator-bound
+promotion comes from
+`Intrinsic/MetricRealization/FibreOpBoundUnit`.  Consequently this module no
+longer imports the unrelated source-only drafts `EdgeStrongData` and
+`MetricDiffSmallC0`.  Both extracted producers are independently
+focused-green and exact-current.  The downstream module now also names its
+actual direct dependencies (`RHSPointwiseLipschitz`,
+`MetricFamilyContinuity`, `FamilyLocal`, and `Gradient`) instead of relying on
+the removed drafts' transitive imports.
+
+The main performance trap in the recovered proof was `ContinuousOn.comp`
+forcing a large definitional-equality comparison against an explicit
+composition target.  Naming the inclusion map, first inferring the composed
+continuity proof, and only then simplifying `Function.comp_apply` avoids that
+`whnf` path.  No `whnf` remains in the source.
+
 ## Proved source facts
 
 - `normSq_family_cont` gives joint continuity of the squared norm of a
@@ -53,9 +72,11 @@
   input is the displayed scalar bound `movingRate t <= K * movingDiffEnergy t`.
 
 These declarations, including the newly added carrier and reaction bounds, are
-currently source-complete and contain no
-`sorry`/`admit`/axiom.  A focused Lean check is pending the coordinated named
-dependency build in the shared worktree.
+source-complete and contain no `sorry`/`admit`/axiom/`whnf`.  The whole file is
+focused-green with no local diagnostic and exact-current.  Direct audits of
+`deTurckRHS_cont`, `carrierEdge_bounds`, `movingEnergy_cont`,
+`movingEnergy_rd`, and `movingEnergy_zero` report exactly
+`[propext, Classical.choice, Quot.sound]`.
 
 ## Mathematical role
 
@@ -100,16 +121,23 @@ endpoint spatial derivatives and therefore does not improve the edge problem.
 
 ## Honest status
 
-- Closed-edge energy continuity machinery: 90% (source written; focused check
-  pending).
-- Exact moving Ricci--DeTurck energy derivative: 85% (source written; focused
-  check pending).
-- Carrier scalar-reaction control: 88% (closed-slab carrier bound, intrinsic
-  basis-independence, volume-trace identity, and combined pointwise
-  `K |W|^2` source written; focused checks pending).
-- Generic lower-order pairing and closed-edge Gronwall assembly: 72% (source
-  written; focused checks pending).  The concrete nonlinear Ricci--DeTurck RHS
-  split and its uniform-to-zero pairing bound remain the analytic frontier
-  described above.
-- `ricci_flow_forward_unique`: 0% until the exact endpoint theorem is proved and
-  verified.
+- Closed-edge energy continuity producer: **100% as stated**, focused-green,
+  exact-current, and axiom-clean.
+- Exact moving Ricci--DeTurck energy derivative producer: **100% as stated**,
+  focused-green, exact-current, and axiom-clean.
+- Carrier scalar-reaction control: **100% as stated**.  The closed-slab carrier
+  bound, intrinsic basis-independence, volume-trace identity, and combined
+  pointwise `K |W|^2` estimate are exact-current.
+- Abstract closed-edge Gronwall closure: **100% conditional on the displayed
+  scalar rate bound**.  The concrete nonlinear theorem producing
+  `movingRate t <= K * movingDiffEnergy t` from the Ricci--DeTurck hypotheses is
+  not yet stated and proved, so that theorem is **0%**; its dedicated pairing
+  machinery is materially advanced but the visible lower-arm estimate remains
+  the analytic frontier described above.
+- The separate public endpoint `ricci_flow_forward_unique` is already complete
+  and axiom-clean in the current post-merge tree.  This file is an alternate
+  closed-edge energy support layer, not a second completion of that endpoint.
+- Black box `(N) ricci_flow_unif_existence`: 0%.  Its dedicated uniform
+  low-regularity existence machinery remains approximately 84--87%; this file
+  verifies one energy/uniqueness-side component and does not itself construct
+  the short-time solution.

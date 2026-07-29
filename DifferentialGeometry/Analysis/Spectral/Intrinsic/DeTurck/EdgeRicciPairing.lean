@@ -36,6 +36,8 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DeTurck
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -79,7 +81,7 @@ private def ricPerm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
-private theorem permCoeff_smooth (g : SmoothRiemannianMetric I M) {d : Nat}
+private theorem permCoeff_smooth {d : Nat}
     (rho : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(Real, Tensor0SBundle.TensorRSModel d d Real E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d Real E)
@@ -107,7 +109,7 @@ def permCoeff (g : SmoothRiemannianMetric I M) {d : Nat}
     { toFun := fun x : M =>
         (show Tensor0SBundle.TensorRSSpace d d I x from
           slotPermCLM (I := I) rho x)
-      contMDiff_toFun := permCoeff_smooth (I := I) (M := M) g rho }
+      contMDiff_toFun := permCoeff_smooth (I := I) (M := M) rho }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 private def ricQuad0 (g gm : SmoothRiemannianMetric I M) :
@@ -284,13 +286,13 @@ theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
           (ricciDAKer (I := I) (M := M) g gm).toSection x) T)
         ![a, b, c, d] =
       -Tensor0SSpace.toModel T
-          ![rs13ContrVec (I := I) (M := M) x
+          ![rs13ContrVec (E := E) (I := I) (M := M) x
               (show TensorRSSpace 1 3 I x from
                 (covGrad (I := I) (M := M) g 1 2
                   (connDiffSection (I := I) gm g)).toSection x)
               ![a, b, c], d] -
         Tensor0SSpace.toModel T
-          ![c, rs13ContrVec (I := I) (M := M) x
+          ![c, rs13ContrVec (E := E) (I := I) (M := M) x
               (show TensorRSSpace 1 3 I x from
                 (covGrad (I := I) (M := M) g 1 2
                   (connDiffSection (I := I) gm g)).toSection x)
@@ -299,7 +301,7 @@ theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
     (covGrad (I := I) (M := M) g 1 2
       (connDiffSection (I := I) gm g)).toSection x
   change Tensor0SSpace.toModel
-      (((-(slotPermCLM (I := I) ricPerm3012 x).comp
+      ((-(slotPermCLM (I := I) ricPerm3012 x).comp
           (connContrCLM (I := I) 1 2 x DA) -
         (slotPermCLM (I := I) ricPerm2013 x).comp
           ((connContrCLM (I := I) 1 2 x DA).comp
@@ -312,6 +314,7 @@ theorem ricciDAKer_eval (g gm : SmoothRiemannianMetric I M) (x : M)
   rw [ricPerm3012_eval, ricPerm2013_eval]
   rw [connContr12_insert, connContr12_insert]
   rw [ricPerm2_eval]
+  rfl
 
 /-- A single moving-metric trace is a `g`-orthonormal diagonal trace with
 one relative inverse-metric insertion. -/
@@ -351,7 +354,9 @@ theorem ricTrace_eval (g gm : SmoothRiemannianMetric I M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [slotInsertEndoFib_apply_eval, Fin.update_cons_zero]
-  rfl
+  congr 1
+  funext j
+  fin_cases j <;> rfl
 
 /-! ## The genuine one-moving-trace flux -/
 
@@ -446,7 +451,17 @@ theorem ricciDAFlux_eval (g gm : SmoothRiemannianMetric I M)
     fin_cases i <;> rfl
   rw [hv]
   simp only [P, pairProd4_eval, WR, pairSlot2_eval]
-  congr 1 <;> congr 1 <;> funext i <;> fin_cases i <;> rfl
+  refine congrArg₂ (· - ·) ?_ ?_
+  · apply congrArg (fun z : Real =>
+      unitModel (I := I) (M := M) g 2 W x ![v 0, v 1] * z)
+    apply congrArg (fun q => unitModel (I := I) (M := M) g 2 W x q)
+    funext i
+    fin_cases i <;> rfl
+  · apply congrArg (fun z : Real =>
+      unitModel (I := I) (M := M) g 2 W x ![v 1, v 2] * z)
+    apply congrArg (fun q => unitModel (I := I) (M := M) g 2 W x q)
+    funext i
+    fin_cases i <;> rfl
 
 /-! ## A slot-aligned carrier for the Green pairing -/
 
@@ -586,6 +601,7 @@ private lemma ricInterior_eval (s : Nat) (x : M)
   rw [h]
   rfl
 
+omit [NeZero (Module.finrank Real E)] in
 private lemma ricCDual_coord
     (B : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (k : Fin (Module.finrank Real E)) :
@@ -601,11 +617,11 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
         ((show Tensor0SSpace 1 I x →L[Real] Tensor0SSpace 3 I x from B)
           beta) v =
       Tensor0SSpace.toModel beta
-        (fun _ : Fin 1 => rs13ContrVec (I := I) (M := M) x B v) := by
+        (fun _ : Fin 1 => rs13ContrVec (E := E) (I := I) (M := M) x B v) := by
   classical
   have hci : ∀ i : Fin (Module.finrank Real E),
       ((Module.finBasis Real E).cDualBasis i)
-          (rs13ContrVec (I := I) (M := M) x B v) =
+          (rs13ContrVec (E := E) (I := I) (M := M) x B v) =
         (TensorRSSpace.toModel B
           (Tensor0SBundle.model_covectorOfCLM (𝕜 := Real) (E := E)
             ((Module.finBasis Real E).cDualBasis i))) v := by
@@ -633,7 +649,7 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
             if j = i then (1 : Real) else 0 from Finsupp.single_apply,
         mul_ite, mul_one, mul_zero])]
     rw [Finset.sum_ite_eq' Finset.univ i]
-    simp
+    simp only [Finset.mem_univ, ↓reduceIte]
     rw [ricCDual_coord (Module.finBasis Real E) i]
   have hexp : Tensor0SSpace.toModel beta =
       ∑ i : Fin (Module.finrank Real E),
@@ -657,7 +673,7 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
       TensorRSSpace.toModel B (Tensor0SSpace.toModel beta) :=
     toModel_tensorRS_apply (I := I) 1 3 x B beta
   have hR : Tensor0SSpace.toModel beta
-      (fun _ : Fin 1 => rs13ContrVec (I := I) (M := M) x B v) =
+      (fun _ : Fin 1 => rs13ContrVec (E := E) (I := I) (M := M) x B v) =
       ∑ i : Fin (Module.finrank Real E),
         Tensor0SSpace.toModel beta
             (Fin.cons ((Module.finBasis Real E) i) ![]) *
@@ -665,13 +681,13 @@ private lemma ricRS13_pair (x : M) (B : TensorRSSpace 1 3 I x)
             (Tensor0SBundle.model_covectorOfCLM (𝕜 := Real) (E := E)
               ((Module.finBasis Real E).cDualBasis i))) v := by
     rw [show Tensor0SSpace.toModel beta
-        (fun _ : Fin 1 => rs13ContrVec (I := I) (M := M) x B v) =
+        (fun _ : Fin 1 => rs13ContrVec (E := E) (I := I) (M := M) x B v) =
       Tensor0SSpace.toModel beta
-        (Fin.cons (rs13ContrVec (I := I) (M := M) x B v) ![]) from
+        (Fin.cons (rs13ContrVec (E := E) (I := I) (M := M) x B v) ![]) from
       congrArg (fun w => Tensor0SSpace.toModel beta w)
         (funext (fun j => by fin_cases j; rfl))]
     rw [← sum_cons_cDual_collapse (I := I) (M := M) beta ![]
-      (rs13ContrVec (I := I) (M := M) x B v)]
+      (rs13ContrVec (E := E) (I := I) (M := M) x B v)]
     exact Finset.sum_congr rfl (fun i _ => by rw [hci i])
   rw [hL, hR]
   conv_lhs => rw [hexp]
@@ -774,7 +790,7 @@ its lowering slot recovers the corresponding `ricciDAG` component. -/
 theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
     (r p u v : TangentSpace I x) :
     g.inner x
-        (rs13ContrVec (I := I) (M := M) x
+        (rs13ContrVec (E := E) (I := I) (M := M) x
           (show TensorRSSpace 1 3 I x from
             (covGrad (I := I) (M := M) g 1 2
               (connDiffSection (I := I) gm g)).toSection x)
@@ -797,7 +813,7 @@ theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
       cometricRaiseSlot0Field_toSection]
   rw [hB]
   let q : Fin 3 → E := ![p, u, v]
-  let R : E := rs13ContrVec (I := I) (M := M) x B q
+  let R : E := rs13ContrVec (E := E) (I := I) (M := M) x B q
   change g.inner x R r = Tensor0SSpace.toModel D ![r, p, u, v]
   have hp := ricRS13_pair (I := I) (M := M) x B
     (g0FlatCLM (I := I) g x r) q
@@ -809,16 +825,9 @@ theorem ricciDAG_pair (g gm : SmoothRiemannianMetric I M) (x : M)
     dsimp [B]
     rw [cometricRaiseSlot0Fib_clm_apply,
       inverseMetricSharpFib_g0FlatCLM]
-    rw [show (Tensor0SBundle.interior_product (𝕜 := Real) (I := I) 3 x r
-          D q : Real) =
-        Tensor0SSpace.toModel
-          (Tensor0SBundle.interior_product (𝕜 := Real) (I := I) 3 x r D) q
-        from rfl]
     rw [ricInterior_eval]
     dsimp [q]
     congr 1
-    funext k
-    fin_cases k <;> rfl
   have hright :
       Tensor0SSpace.toModel (g0FlatCLM (I := I) g x r)
           (fun _ : Fin 1 => R) = g.inner x r R := by
@@ -849,7 +858,7 @@ private lemma ricL_self (g gm : SmoothRiemannianMetric I M) (x : M)
 difference. -/
 def ricDAVec (g gm : SmoothRiemannianMetric I M) (x : M)
     (a b c : TangentSpace I x) : TangentSpace I x :=
-  rs13ContrVec (I := I) (M := M) x
+  rs13ContrVec (E := E) (I := I) (M := M) x
     (show TensorRSSpace 1 3 I x from
       (covGrad (I := I) (M := M) g 1 2
         (connDiffSection (I := I) gm g)).toSection x)
@@ -903,8 +912,8 @@ theorem ricDAVec_symm (g gm : SmoothRiemannianMetric I M) (x : M)
   have hZ : Z x = c := smoothExtensionTangent_eq (I := I) x c
   have h1 := rs13ContrVec_covGrad_eq (I := I) (M := M) gm g X Y Z x
   have h2 := rs13ContrVec_covGrad_eq (I := I) (M := M) gm g X Z Y x
-  change rs13ContrVec (I := I) (M := M) x _ ![a, b, c] =
-    rs13ContrVec (I := I) (M := M) x _ ![a, c, b]
+  change rs13ContrVec (E := E) (I := I) (M := M) x _ ![a, b, c] =
+    rs13ContrVec (E := E) (I := I) (M := M) x _ ![a, c, b]
   rw [hX, hY, hZ] at h1 h2
   rw [h1, h2]
   exact covDerivConnDiff_symm23 (I := I) (M := M) gm g X Y Z x
@@ -930,10 +939,12 @@ private lemma ricW_expand (g : SmoothRiemannianMetric I M)
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
   have hy := Geometry.Riemannian.expand_orthonormal
     (I := I) (M := M) g x hcard e horth y
-  rw [unitModel_eq_ccTensorBilin_local, hy, map_sum]
+  rw [unitModel_eq_ccTensorBilin_local]
+  conv_lhs =>
+    rw [hy, map_sum, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [map_smul, smul_eq_mul, ← unitModel_eq_ccTensorBilin_local]
-  rfl
+  rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+    ← unitModel_eq_ccTensorBilin_local]
 
 private lemma ricSum_succ {A R : Type*} [Fintype A] [AddCommMonoid R]
     (s : Nat) (F : (Fin (s + 1) → A) → R) :
@@ -962,8 +973,6 @@ private lemma ricSum2 {A : Type*} [Fintype A]
       refine Finset.sum_congr rfl fun a _ => ?_
       refine Finset.sum_congr rfl fun b _ => ?_
       congr 1
-      funext k
-      fin_cases k <;> rfl
 
 private lemma ricSum4 {A : Type*} [Fintype A]
     (F : (Fin 4 → A) → Real) :
@@ -981,8 +990,6 @@ private lemma ricSum4 {A : Type*} [Fintype A]
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [Finset.sum_eq_single (fun i : Fin 0 => i.elim0)]
   · congr 1
-    funext k
-    fin_cases k <;> rfl
   · intro q _ hq
     exact absurd (Subsingleton.elim q (fun i : Fin 0 => i.elim0)) hq
   · intro h
@@ -1207,7 +1214,12 @@ private lemma ricSwap_point (g : SmoothRiemannianMetric I M)
     funext k
     simp [tau, sigma, Equiv.arrowCongr]
   rw [htau]
-  congr 1 <;> congr 1 <;> funext k <;> simp [sigma]
+  have hsigma : (fun k => e (J (sigma (sigma k)))) =
+      fun k => e (J k) := by
+    funext k
+    simp [sigma]
+  simp only
+  rw [hsigma]
 
 /-- Moving the first-two-slot swap from one rank-four covariant tensor to the
 other leaves the global `L²` pairing unchanged. -/
@@ -1243,6 +1255,7 @@ theorem ricciDAPart_eval (g gm : SmoothRiemannianMetric I M)
     funext i
     fin_cases i <;> rfl
   rw [hv, ricciDAFlux_eval]
+  simp
 
 /-- The Ricci four-trace is the signed half-sum of four genuine single
 moving-metric traces. -/
@@ -1522,16 +1535,15 @@ private lemma ricMove2 (g gm : SmoothRiemannianMetric I M)
   have hAm (q : TangentSpace I x) : Am ![q] = Wm ![r, q] := by
     rfl
   have hBm (q : TangentSpace I x) : Bm ![q] = Dm ![r, q, u, v] := by
-    simp only [Bm, ContinuousMultilinearMap.curryLeft_apply,
-      ContinuousMultilinearMap.domDomCongr_apply]
-    congr 1
+    simp only [Bm]
+    apply congrArg (fun z => Dm z)
     funext k
     fin_cases k <;> rfl
-  change (∑ p : Fin (Module.finrank Real E),
-      Am ![e p] * Bm ![L (e p)]) =
-    ∑ p : Fin (Module.finrank Real E),
-      Am ![L (e p)] * Bm ![e p] at hkey
-  simp_rw [hAm, hBm] at hkey
+  have hsingle (q : TangentSpace I x) :
+      Fin.cons q (fun k : Fin 0 => e k.elim0) = ![q] := by
+    funext k
+    (fin_cases k; rfl)
+  simp_rw [hsingle, hAm, hBm] at hkey
   calc
     (∑ p : Fin (Module.finrank Real E),
         Wm ![r, e p] * Dm ![r, L (e p), u, v]) =
@@ -1589,11 +1601,11 @@ private lemma ricMove4 (g gm : SmoothRiemannianMetric I M)
     rfl
   have hBm (q : TangentSpace I x) : Bm ![q] = Dm ![r, u, v, q] := by
     rfl
-  change (∑ p : Fin (Module.finrank Real E),
-      Am ![e p] * Bm ![L (e p)]) =
-    ∑ p : Fin (Module.finrank Real E),
-      Am ![L (e p)] * Bm ![e p] at hkey
-  simp_rw [hAm, hBm] at hkey
+  have hsingle (q : TangentSpace I x) :
+      Fin.cons q (fun k : Fin 0 => e k.elim0) = ![q] := by
+    funext k
+    (fin_cases k; rfl)
+  simp_rw [hsingle, hAm, hBm] at hkey
   calc
     (∑ p : Fin (Module.finrank Real E),
         Wm ![r, e p] * Dm ![r, u, v, L (e p)]) =
@@ -1733,6 +1745,7 @@ theorem ricciDAOut_fin (g gm : SmoothRiemannianMetric I M)
                 ![e r, v 0, v 1, e p] *
               unitModel (I := I) (M := M) g 2 W x ![e r, L (e p)] := by
         simp_rw [ricW_D (I := I) (M := M) g gm W]
+        rfl
       _ = ∑ r : Fin (Module.finrank Real E),
           ∑ p : Fin (Module.finrank Real E),
             unitModel (I := I) (M := M) g 4
@@ -1816,6 +1829,15 @@ private theorem ricDA_point (g gm : SmoothRiemannianMetric I M)
     ricSum2, ricSum4]
   simp_rw [ricciDAOut_fin (I := I) (M := M) g gm W hWsymm,
     ricciDAPart_eval (I := I) (M := M) g gm W]
+  have he2 (a b : Fin (Module.finrank Real E)) :
+      (fun k => e (![a, b] k)) = ![e a, e b] := by
+    funext k
+    fin_cases k <;> rfl
+  have he4 (a b c d : Fin (Module.finrank Real E)) :
+      (fun k => e (![a, b, c, d] k)) = ![e a, e b, e c, e d] := by
+    funext k
+    fin_cases k <;> rfl
+  simp_rw [he2, he4]
   let L : TangentSpace I x →L[Real] TangentSpace I x :=
     fullRaisedEndoField (I := I) (M := M) g gm x
   let w : Fin (Module.finrank Real E) →
@@ -1830,11 +1852,7 @@ private theorem ricDA_point (g gm : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g 4
         (ricciDAG (I := I) (M := M) g gm) x
         ![e r, e p, e u, e v]
-  change (∑ u, ∑ v, w u v *
-      (∑ r, ∑ p, h p r * (d r u v p - d r p u v))) =
-    ∑ r, ∑ p, ∑ u, ∑ v,
-      (w p u * h v r - w u v * h p r) * d r p u v
-  exact ricPair_alg w h d
+  simpa [w, h, d, e, L] using ricPair_alg w h d
 
 /-- The derivative-only Ricci connection-difference arm pairs exactly with
 the rank-four single-relative-trace partner. -/
@@ -1902,6 +1920,9 @@ theorem ricciDA_green (g gm : SmoothRiemannianMetric I M)
     (ricciDABase (I := I) (M := M) g gm)
     (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 4) 1)
       (ricciDAPart (I := I) (M := M) g gm W))]
+  change -tensorL2Inner (I := I) (M := M) g 0 3
+      (ricciDABase (I := I) (M := M) g gm).toFun
+      (ricciDAAdj (I := I) (M := M) g gm W).toFun = _
   rw [tensorL2Inner_symm (I := I) (M := M) g 0 3
     (ricciDABase (I := I) (M := M) g gm).toFun
     (ricciDAAdj (I := I) (M := M) g gm W).toFun]

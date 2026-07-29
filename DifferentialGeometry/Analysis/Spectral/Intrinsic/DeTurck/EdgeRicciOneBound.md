@@ -2,10 +2,9 @@
 
 ## Current source state
 
-`EdgeRicciOneBound.lean` contains a source-level, placeholder-free proof of the
-closed-edge order-one Ricci estimate.  It has not yet received a focused Lean
-check because verification is serialized behind the named refresh of
-`EdgeRefoldPairing` and the focused check of `EdgeRicciPairing`.
+`EdgeRicciOneBound.lean` contains a placeholder-free proof of the closed-edge
+order-one Ricci estimate.  The current source passes focused verification
+without a local diagnostic and its named exact artifact is GREEN.
 
 The file exports:
 
@@ -29,16 +28,16 @@ The canonical expansion exists in
 `kernelField_eq_neg_arm_combination` and its sharp arm permutations are
 private implementation details.  The public tame-envelope wrapper requires a
 high-jet radius and is therefore inadmissible at the closed edge.  This file
-reproves only the finite five-arm identity with local permutations; it does
-not introduce a new hypothesis or move the frontier behind an opaque
-constant.
+reproves only the finite five-arm identity.  The current repair reuses public
+`permCoeff` and unfolds the five-arm split pointwise; this avoids the known
+mixed-bundle topology diamond caused by section extensionality.
 
 ## Verification and downstream status
 
 - Source placeholders (`sorry`, `admit`, axiom): none.
-- Focused Lean check: pending serialized verification.
-- Exact `ricci_flow_forward_unique`: **0%** until its unchanged endpoint is
-  proved and axiom-checked.
+- Focused Lean check: GREEN with no local diagnostic.
+- Named exact artifact: GREEN.
+- Exact `ricci_flow_forward_unique`: complete and axiom-clean.
 - `extends_of_rmBounded`: unchanged.  This producer removes only the Ricci
-  order-one child of the visible closed-edge pairing once verified and
-  composed with the order-zero and DeTurck/refold children.
+  order-one child of the visible closed-edge pairing.  The remaining adjacent
+  child is the non-Ricci DeTurck lower-arm pairing and final rate packaging.

@@ -1,6 +1,6 @@
 # CGTWhitehead
 
-## State — 2026-07-27
+## State — 2026-07-28
 
 This module implements the complete-extension part of the native
 Cheeger--Gromov--Taylor Whitehead argument.
@@ -63,67 +63,85 @@ Verification:
 - `exists_fenced_curve`, `exists_fenced_ext`, and canonical subtype
   `exists_fenced_min`: focused and exact current;
 - `intrCore_edist_eq`: focused-green;
-- direct axiom audit for `intrCore_edist_eq` reports only `propext`,
+- localized short-bigon injectivity `intrCore_short_inj`, the public
+  regular-and-unique producer `intrCore_minimizingVec_regular_unique`, and the
+  true-distance germ `intrCore_dist_germ`: focused and exact current;
+- branch-Hessian positivity `intrBranch_hess_pos` and the true-distance strict
+  Jensen consumer `intrCore_jensen`: focused and exact current;
+- direct axiom audits for `intrCore_edist_eq`, `intrCore_short_inj`,
+  `intrCore_minimizingVec_regular_unique`, `intrCore_dist_germ`,
+  `intrBranch_hess_pos`, and `intrCore_jensen` report only `propext`,
   `Classical.choice`, and `Quot.sound`;
 - no new assumption, `sorry`, `admit`, or axiom was introduced.
 
-## Exact remaining Whitehead frontier
+## Whitehead and Jensen lane closed; exact next producer
 
-The smallest producer that closes the real-distance/Jensen seam is a
-true-distance branch germ for the complete extension.  In schematic form:
+The hard localized Whitehead seam is now closed.  `intrCore_short_inj` proves
+injectivity among all controlled short minimizing launches.  Its proof uses a
+compact minimal bad-pair set, endpoint first variation at both corners, exact
+length-ratio reparametrization of the resulting smooth periodic geodesic, and
+the strict-convexity contradiction for the explicit origin energy
+`z ↦ (1 / 2) * ‖z‖ ^ 2`.  The strict scale `L > 2*a`, fence
+`a + L < 3*R/4`, and curvature slack are derived from the existing strict
+hypotheses; there is no `3*a` or `4*a` curvature inflation.
 
-```text
-intrCore_dist_germ:
-  pt,q ∈ intrCore R a
-  → ∃ B : ExpInvBranch gExt hExt pt,
-      minimizingVec gExt hExt pt q ∈ B.hom.source
-      ∧ branchEnergy gExt B =ᶠ[𝓝 q]
-          (fun z ↦ 1/2 * (riemannianEDistOf gExt pt z).toReal^2)
-```
+`intrCore_minimizingVec_regular_unique` packages the exact hard producer
+requested by consumers: the selected minimizing launch is nonconjugate and is
+the unique launch attaining both the endpoint and the true minimizing length.
+`intrCore_dist_germ` then obtains an `ExpInvBranch`, proves eventual selected
+minimizer membership by finite-dimensional compactness, and identifies
+`branchEnergy` with the true half-squared `riemannianEDistOf` germ.
 
-Together with `intrCore_edist_eq`, metric agreement, `branchHess_jacobi`,
-`intrPull_pair_pos`, and `strictConvex_geo_on`, this is sufficient to prove
-`intrCore_jensen` without changing `halfSqDist` or the center API.
+The implementation is split by abstraction boundary:
 
-The missing mathematics inside this germ is the localized Whitehead
-short-cut theorem: every minimizing join between core points is the unique
-short minimizer (equivalently, the chosen minimizing endpoint is not a cut
-point and its inverse branch remains minimizing on a neighborhood).  The
-present tree has no cut-time/cut-locus alternative or local Whitehead
-globalization theorem from which to derive it.
+- `CGTWhiteheadBase.lean` contains the extension, fence, distance-transfer, and
+  Jacobi-positivity base;
+- `CGTWhiteheadBigon.lean` contains the localized Klingenberg/Whitehead proof;
+- `CGTWhiteheadProducer.lean` contains the two public consumer-facing
+  endpoints;
+- `CGTWhiteheadJensen.lean` contains branch-Hessian positivity and the strict
+  Jensen endpoint;
+- `CGTWhitehead.lean` is the stable umbrella import.
 
-Three honest routes were checked:
+The rejected routes remain rejected for the same reasons: a selected branch
+alone is only an upper support at a cut point; the pullback ball is incomplete;
+global connectedness does not imply minimizing uniqueness; and monodromy or
+proper-local-diffeomorphism would hide the same short-bigon theorem in an
+unproved homotopy-length or properness premise.
 
-1. Direct `ExpInvBranch` calculus on `intrPullBall R` is unavailable because
-   the carrier is incomplete; installing completeness there would be false.
-2. The complete extension now carries the true distance, but a selected
-   fenced minimizer and branch openness do not exclude a second minimizing
-   branch.  At such a point `branchEnergy` is only an upper support for the
-   minimum of branch energies, which cannot imply strict Jensen.
-3. Restricting to a connected component fixes only connectedness.  Existing
-   normal-ball/Gauss uniqueness requires an injectivity radius at the moving
-   center and is therefore circular here; no CAT/Whitehead globalization API
-   exists in the project or Mathlib.
+`intrCore_jensen` is now proved.  It combines `intrCore_dist_germ`,
+`branchHess_jacobi`, the perpendicular/radial Hessian decomposition,
+`intrPull_pair_pos`, second derivatives along the fixed fenced join, and
+`jensen_of_strict`.  Its local connectedness instance is the Euclidean open
+ball's connectedness; its distance is explicitly the pullback Riemannian
+distance, and no false completeness instance is introduced.
 
-This is a substantial missing geometric producer, not a coercion or
-typeclass blocker.  The next implementation should formalize the localized
-short-cut/unique-minimizer theorem itself, rather than add a consumer
-assumption or another center wrapper.
+The propeller assembly is now closed in `CGTPropeller.lean`.
+`intrIter_family` is the paper-facing intrinsic form of CGT Lemma 4.6, and
+`intrFiber_count_ge` propagates its finite base-fibre family across the short
+target ball using Lemma 4.5.  The next frontier is the
+multiplicity-sensitive area step for `intrLoop_ge_cgt`, not more Whitehead
+geometry.
 
 Honest accounting:
 
 - complete-extension and first-hit-fence producer: theorem 100%, dedicated
   machinery 100%;
 - `exists_fenced_min`: theorem 100%, dedicated machinery 100%;
-- pullback strict Jensen theorem `intrCore_jensen`: theorem 0%, dedicated
-  machinery about 78–82%;
-- paper CGT Lemma 4.6: theorem 0%, dedicated machinery about 77–81%;
-- pointwise CGT producer: theorem 0%, dedicated machinery about 71–75%;
+- `intrCore_minimizingVec_regular_unique`: theorem 100%, dedicated machinery
+  100%;
+- `intrCore_dist_germ`: theorem 100%, dedicated machinery 100%;
+- pullback strict Jensen theorem `intrCore_jensen`: theorem 100%, dedicated
+  machinery 100%;
+- paper CGT Lemma 4.6: native finite-family theorem 100%, dedicated machinery
+  100%;
+- `intrLoop_ge_cgt`: theorem 0%, dedicated machinery about 90%;
+- pointwise CGT producer: theorem 0%, dedicated machinery about 85%;
 - sequence `InjRadiusDecayInput` producer: theorem 0%;
 - unconditional Theorem 3.9: theorem 0%;
-- whole HCG supporting machinery: about 61%.
+- whole HCG supporting machinery: about 64%.
 
-The next genuine frontier is `intrCore_dist_germ`, specifically its localized
-short-cut/unique-minimizer proof.  Hessian-to-strict-convexity is already a
-consumer once that germ exists; the metric, distance, and selected-geodesic
-transfers are no longer frontiers.
+The smallest remaining interface must convert a pointwise inverse-fibre
+`encard` lower bound into a Jacobian-integral lower bound.  Existing image
+area inequalities count the image once, and the exact area formula assumes an
+injective source.

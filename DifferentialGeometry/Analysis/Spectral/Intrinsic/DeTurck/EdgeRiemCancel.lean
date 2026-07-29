@@ -31,8 +31,10 @@ namespace IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -80,18 +82,19 @@ theorem edgeLie_inner
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
-        (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
-          q epsilon s) T⟫_Real : Real) =
-      ⟪edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ q epsilon s,
-        iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+    Inner.inner Real T
+        (appCc (I := I) (M := M) g 2 2
+          (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            q epsilon s) T) =
+      Inner.inner Real
+        (edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ q epsilon s)
+        (iteratedCovGrad (I := I) g 0 2 2 T) := by
   rw [edgeLiePairFam, edgeLiePartner,
     Fin.sum_univ_three, Fin.sum_univ_three]
   simp only [appCc_add_left, appCc_smul_left,
-    real_inner_add_left, real_inner_add_right,
+    inner_add_left, inner_add_right,
     real_inner_smul_left, real_inner_smul_right]
   simp_rw [edgePair_inner (I := I) (M := M) g]
-  module
 
 /-- Green form of the Lie-only refold pairing.  Every second derivative of
 the edge tensor is transferred to the explicit Lie formal partner. -/
@@ -104,37 +107,44 @@ theorem edgeLie_green
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
     (s : Real) :
-    (⟪T, appCc (I := I) (M := M) g 2 2
-        (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
-          q epsilon s) T⟫_Real : Real) =
-      -⟪covDivergence (I := I) (M := M) g 3
+    Inner.inner Real T
+        (appCc (I := I) (M := M) g 2 2
+          (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            q epsilon s) T) =
+      -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3
           (edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ
-            q epsilon s),
-        iteratedCovGrad (I := I) g 0 2 1 T⟫_Real := by
+            q epsilon s))
+        (iteratedCovGrad (I := I) g 0 2 1 T) := by
   let P : SmoothCcTensor g 0 4 :=
     edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ q epsilon s
   let T₁ : SmoothCcTensor g 0 3 := iteratedCovGrad (I := I) g 0 2 1 T
   have hjet : iteratedCovGrad (I := I) g 0 2 2 T =
       covGrad (I := I) (M := M) g 0 3 T₁ := by
-    rw [T₁]
-    exact (iteratedCovGrad_succ g 0 2 1 T).symm
+    simpa only [T₁] using (iteratedCovGrad_succ g 0 2 1 T).symm
   have hgreen :
-      (⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real : Real) =
-        -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := by
+      Inner.inner Real (covGrad (I := I) (M := M) g 0 3 T₁) P =
+        -Inner.inner Real T₁
+          (covDivergence (I := I) (M := M) g 3 P) := by
     rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
     exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
       (I := I) (M := M) g 3 T₁ P
   calc
-    (⟪T, appCc (I := I) (M := M) g 2 2
-        (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
-          q epsilon s) T⟫_Real : Real) =
-        ⟪P, iteratedCovGrad (I := I) g 0 2 2 T⟫_Real := by
+    Inner.inner Real T
+        (appCc (I := I) (M := M) g 2 2
+          (edgeLiePairFam (I := I) (M := M) g T hdelta hdeltaZ
+            q epsilon s) T) =
+        Inner.inner Real P
+          (iteratedCovGrad (I := I) g 0 2 2 T) := by
       exact edgeLie_inner (I := I) (M := M) g T hdelta hdeltaZ
         q epsilon s
-    _ = ⟪covGrad (I := I) (M := M) g 0 3 T₁, P⟫_Real := by
+    _ = Inner.inner Real
+        (covGrad (I := I) (M := M) g 0 3 T₁) P := by
       rw [hjet, real_inner_comm]
-    _ = -⟪T₁, covDivergence (I := I) (M := M) g 3 P⟫_Real := hgreen
-    _ = -⟪covDivergence (I := I) (M := M) g 3 P, T₁⟫_Real := by
+    _ = -Inner.inner Real T₁
+        (covDivergence (I := I) (M := M) g 3 P) := hgreen
+    _ = -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3 P) T₁ := by
       rw [real_inner_comm]
 
 /-! ## Consumer-shaped Lie-only refold -/
@@ -234,13 +244,20 @@ theorem exists_edgeLieRef
     have hriem := hidR s hs
     have hlie := hidD s hs
     simp only [iteratedCovGrad_zero] at hriem hlie
+    have hcancel := edgeRiem_cancel (I := I) (M := M) g
+      (realizedFam (I := I) (M := M) g W 0 hdelta hdeltaZ s) W
+      (C0R s)
+      ((2 : Real) •
+        riemannPalatiniRefoldC2Family
+          (I := I) (M := M) g W hdelta hdeltaZ qA qB s)
+      hriem
+    simp only [appCc_smul_left] at hcancel
     rw [hmetric]
     simp only [edgeQuadArm, edgeLowerArm, edgeQuad0,
       deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
+      edgeFold0, C₀, C₂,
       appCc_add_left, appCc_sub_left, appCc_smul_left]
-    rw [hriem, hlie]
-    simp only [edgeRicciHalf, edgeFold0, C₀, C₂,
-      appCc_add_left, appCc_sub_left, appCc_smul_left]
+    rw [hlie, ← hcancel]
     module
   have hnormal : ∀ s ∈ Set.Icc (0 : Real) 1,
       edgeQuadArm (I := I) (M := M) g

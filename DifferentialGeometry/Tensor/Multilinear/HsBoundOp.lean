@@ -23,6 +23,9 @@ Hilbert-Schmidt squared-norm sums into operator-norm bounds for iterated derivat
 
 ## Main theorem
 
+* `ContinuousMultilinearMap.opNorm_le_basis_sum`: for an arbitrary normed real
+  output space, the operator norm is bounded by the sum of the norms of all
+  basis-tuple values.
 * `ContinuousMultilinearMap.opNorm_sq_le_sum_sq_basisEval`:
   `‖A‖^2 ≤ ∑ idx : Fin j → ι, |A (fun k => b (idx k))|^2`.
 -/
@@ -35,6 +38,72 @@ open scoped BigOperators RealInnerProductSpace
 namespace ContinuousMultilinearMap
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+
+/--
+The operator norm of a continuous multilinear map is bounded by the sum of
+the norms of its values on tuples from a finite orthonormal basis.
+-/
+theorem opNorm_le_basis_sum
+    {ι F : Type*} [Fintype ι]
+    [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (b : OrthonormalBasis ι ℝ E)
+    {j : ℕ} (A : ContinuousMultilinearMap ℝ (fun _ : Fin j => E) F) :
+    ‖A‖ ≤ ∑ idx : Fin j → ι, ‖A (fun k => b (idx k))‖ := by
+  classical
+  set S : ℝ := ∑ idx : Fin j → ι, ‖A (fun k => b (idx k))‖ with hS_def
+  have hS_nonneg : 0 ≤ S := Finset.sum_nonneg fun _ _ => norm_nonneg _
+  refine ContinuousMultilinearMap.opNorm_le_bound hS_nonneg ?_
+  intro v
+  have hv : ∀ k : Fin j, v k = ∑ i : ι, ⟪b i, v k⟫ • b i := by
+    intro k
+    exact (b.sum_repr' (v k)).symm
+  have hAv :
+      A v = ∑ idx : Fin j → ι,
+        (∏ k : Fin j, ⟪b (idx k), v k⟫) • A (fun k => b (idx k)) := by
+    have hexp :
+        A v = A (fun k => ∑ i : ι, ⟪b i, v k⟫ • b i) := by
+      refine congrArg A ?_
+      funext k
+      exact hv k
+    have hsum :
+        A (fun k => ∑ i : ι, ⟪b i, v k⟫ • b i) =
+          ∑ idx : Fin j → ι,
+            A (fun k => ⟪b (idx k), v k⟫ • b (idx k)) := by
+      simpa using A.toMultilinearMap.map_sum
+        (g := fun (k : Fin j) (i : ι) => ⟪b i, v k⟫ • b i)
+    rw [hexp, hsum]
+    refine Finset.sum_congr rfl ?_
+    intro idx _
+    exact A.map_smul_univ
+      (fun k : Fin j => ⟪b (idx k), v k⟫)
+      (fun k : Fin j => b (idx k))
+  rw [hAv]
+  refine (norm_sum_le _ _).trans ?_
+  have hcoeff : ∀ idx : Fin j → ι,
+      |∏ k : Fin j, ⟪b (idx k), v k⟫| ≤ ∏ k : Fin j, ‖v k‖ := by
+    intro idx
+    rw [Finset.abs_prod]
+    refine Finset.prod_le_prod (fun _ _ => abs_nonneg _) ?_
+    intro k _
+    simpa only [b.norm_eq_one, one_mul] using
+      abs_real_inner_le_norm (b (idx k)) (v k)
+  have hsum :
+      (∑ idx : Fin j → ι,
+          ‖(∏ k : Fin j, ⟪b (idx k), v k⟫) •
+            A (fun k => b (idx k))‖) ≤
+        ∑ idx : Fin j → ι,
+          ‖A (fun k => b (idx k))‖ * ∏ k : Fin j, ‖v k‖ := by
+    refine Finset.sum_le_sum fun idx _ => ?_
+    calc
+      ‖(∏ k : Fin j, ⟪b (idx k), v k⟫) •
+          A (fun k => b (idx k))‖ =
+          ‖A (fun k => b (idx k))‖ *
+            |∏ k : Fin j, ⟪b (idx k), v k⟫| := by
+              rw [norm_smul, Real.norm_eq_abs, mul_comm]
+      _ ≤ ‖A (fun k => b (idx k))‖ * ∏ k : Fin j, ‖v k‖ :=
+        mul_le_mul_of_nonneg_left (hcoeff idx) (norm_nonneg _)
+  refine hsum.trans ?_
+  rw [← Finset.sum_mul, hS_def]
 
 /--
 **Hilbert-Schmidt vs operator norm**, pointwise form on a finite-dimensional inner-product

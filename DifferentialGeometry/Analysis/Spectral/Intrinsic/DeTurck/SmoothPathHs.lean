@@ -13,6 +13,10 @@ tensors on an open time set.
 
 noncomputable section
 
+-- The canonical TensorRS bundle instances were elaborated with this
+-- transparency setting; section extensionality and model norms need it too.
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold Set Filter MeasureTheory Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
@@ -33,6 +37,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rankZero_one (x : M) (A : Tensor0SSpace 0 I x) :
     tensor0SSpace_evalScalar x A •
         Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
@@ -54,10 +60,15 @@ private noncomputable def oneCc (g : SmoothRiemannianMetric I M) :
   scalarCc (I := I) (M := M) g
     ⟨(fun _ : M => (1 : ℝ)), contMDiff_const⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem oneCc_apply (g : SmoothRiemannianMetric I M)
     (x : M) (A : Tensor0SSpace 0 I x) :
     (oneCc (I := I) (M := M) g).toSection x A = A := by
   simp only [oneCc, scalarCc, tensorRSField_smulByFun_apply]
+  change ((1 : ℝ) •
+      ((Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+        (I := I) (M := M) ∞).toTensorRSField ∞ x)) A = A
   rw [ContinuousLinearMap.smul_apply, one_smul,
     Tensor0SField.toRS0_apply, rankZero_one (I := I) (M := M)]
 

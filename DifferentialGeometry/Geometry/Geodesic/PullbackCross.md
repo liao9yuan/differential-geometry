@@ -32,3 +32,17 @@ model branch and exact `diagExp` square; `normal_inv_eq` gives the compatibility
 criterion with `diagExpInv`.  `StepB1RawInput` and textbook B1 remain 0%;
 dedicated normal-branch machinery is about 85%, Step B/B1 infrastructure about
 72%, Chapter 4 machinery about 69%, and whole HCG infrastructure about 49%.
+
+## 2026-07-28 reflected geodesic equation
+
+Added `geoEq_of_mapCrossAt`, the converse pointwise naturality theorem: if a
+curve mapped by a cross-model diffeomorphism is geodesic for the target metric,
+then the source curve is geodesic for the pullback metric.  The proof uses the
+injective derivative equivalence and the existing covariant-derivative
+naturality theorem; it introduces no parallel local-isometry predicate.
+
+Focused verification passed without diagnostics.  The theorem and its
+dedicated cross-model machinery are 100%.  It is supporting infrastructure for
+the now-complete localized Whitehead producer; `intrCore_jensen` remains
+theorem-level 0% with about 93% dedicated machinery, and whole HCG supporting
+machinery is about 62%.

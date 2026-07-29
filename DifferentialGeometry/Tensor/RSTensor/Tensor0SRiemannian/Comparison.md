@@ -22,3 +22,14 @@ passed.
 
 This identity is complete reusable tensor infrastructure.  It does not by
 itself advance the complete-noncompact maximum-principle theorem.
+
+## 2026-07-28 frame-free tensor evaluation
+
+Added `abs_apply_le_norm0S`, the frame-free pointwise Cauchy-Schwarz estimate
+for a covariant tensor evaluated on arbitrary tangent vectors.  Its
+orthonormal-basis construction is private, so the existing public
+`exists_gOrthonormalBasis` API is not duplicated.  The result removes repeated
+local basis choices from bounded-geometry consumers.
+
+Focused verification and the exported module refresh passed.  This closes a
+reusable tensor API gap; the H6 all-order metric-jet theorem remains unproved.

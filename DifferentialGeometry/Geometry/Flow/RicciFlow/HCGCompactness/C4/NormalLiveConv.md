@@ -49,3 +49,13 @@ stage-dependent pair threshold by one all-pairs threshold.  `StepB1RawInput`
 and textbook B1 remain theorem-level **0%**; dedicated Step-B/B1 machinery is
 about **95%**, Chapter 4 about **87%**, and whole-HCG compactness machinery
 about **57%**.
+
+## 2026-07-28 chart-family elaboration
+
+`exists_diag_full` now instantiates `HasDiagPairConv` explicitly with
+`legacyChartFamily Xpsi` in its result and intermediate refined pair package.
+This removes an unresolved optional chart metavariable from the dependent
+subsequence extraction while preserving exactly the legacy provider.
+
+Focused verification passed in the current isolated artifact replay. This is a
+behavior-preserving Gate-5 repair, not the H6 provider substitution.

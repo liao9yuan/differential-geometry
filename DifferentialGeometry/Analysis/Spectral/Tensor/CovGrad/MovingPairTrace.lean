@@ -54,7 +54,7 @@ private lemma rank0_eq_smul_unit (x : M) (t : Tensor0SSpace 0 I x) :
   rw [smul_eq_mul, mul_one]
 
 /-- The two-fold passenger-slot extension used by the pair trace. -/
-private def slotExtendTwo (g : SmoothRiemannianMetric I M)
+def slotExtendTwo (g : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g 0 4) : SmoothCcTensor g 2 6 :=
   slotExtend (I := I) (M := M) g 1 5
     (slotExtend (I := I) (M := M) g 0 4 X)

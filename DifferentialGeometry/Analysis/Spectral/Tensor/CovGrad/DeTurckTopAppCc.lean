@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
+import DifferentialGeometry.Tensor.Multilinear.DomDomCongrSection
 
 noncomputable section
 
@@ -79,40 +80,6 @@ noncomputable def deTurckLieTraceFib (g₁ : SmoothRiemannianMetric I M)
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 
-private theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
-    (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
-    (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
-        (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x (Z x))) :
-    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
-        (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x
-        (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
-          (ContinuousMultilinearMap.domDomCongr ρ
-            (Tensor0SBundle.Tensor0SSpace.toModel (Z x))))) := by
-  refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
-    (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
-    (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
-        (ContinuousMultilinearMap.domDomCongr ρ
-          (Tensor0SBundle.Tensor0SSpace.toModel (Z x))) :
-          Tensor0SBundle.Tensor0SSpace d I x))).mpr ?_
-  have hZcoord := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
-    (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
-    (fun x => Z x)).mp hZ
-  intro τ x₀
-  refine (hZcoord (τ ∘ ρ) x₀).congr_of_eventuallyEq ?_
-  filter_upwards [Filter.univ_mem] with x _
-  rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
-  change (ContinuousMultilinearMap.domDomCongr ρ
-      (Tensor0SBundle.Tensor0SSpace.toModel (Z x)))
-      (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
-        ((Module.finBasis ℝ E) (τ j))) = _
-  rw [ContinuousMultilinearMap.domDomCongr_apply]
-  rfl
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-
 theorem deTurckLieTraceFib_contMDiff (g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -124,7 +91,9 @@ theorem deTurckLieTraceFib_contMDiff (g₁ : SmoothRiemannianMetric I M) (σ : E
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => deTurckLieTraceFib (I := I) g₁ σ x)
   intro Y
-  have hYρ := domDomCongr_section_contMDiff_local (I := I) σ (fun x => Y x) Y.contMDiff
+  let Ys : MultilinearSection ℝ E I (TangentSpace I) ∞ 4 :=
+    ⟨fun x => Y x, Y.contMDiff⟩
+  have hYρ := (MultilinearSection.domDomCongr (IB := I) ∞ σ Ys).contMDiff
   have hfield := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) hYρ
   refine hfield.congr (fun x => ?_)

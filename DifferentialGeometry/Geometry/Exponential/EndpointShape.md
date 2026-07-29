@@ -85,3 +85,18 @@ will consume them remains unstated (0%), with its dedicated machinery roughly
 80%.  `intrLoop_ge_cgt` and the `InjRadiusDecayInput` producer remain theorem-
 level 0%; whole HCG supporting machinery remains roughly 61%, and the
 unconditional Theorem 3.9 remains theorem-level 0%.
+
+## 2026-07-28 branch Hessian identification
+
+Added `intrJacobi_self`, identifying the radial launch variation with terminal
+geodesic velocity, and `branchEnergy_hess`, identifying the Hessian of selected
+branch energy with the terminal Jacobi derivative pairing.  The latter works
+with a local smooth germ of branch energy and uses the existing variation
+commutation theorem; it does not assume the selected branch is globally
+minimizing.
+
+Focused verification and the exact targeted refresh passed.  These endpoint
+shape theorems and their dedicated machinery are 100%.  True-distance
+identification is supplied separately by the now-proved `intrCore_dist_germ`;
+`intrCore_jensen` itself remains theorem-level 0% with about 93% dedicated
+machinery.  Whole HCG supporting machinery is about 62%.

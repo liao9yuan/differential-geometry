@@ -1,5 +1,15 @@
 # IntrinsicGronwall
 
+## Current additions
+
+- `intrJacobi_pair` gives simultaneous metric-norm bounds for an intrinsic
+  Jacobi field and its covariant velocity.
+- `intrForce_pair` packages the parallel-frame and chart-regularity work for a
+  general smooth inhomogeneous field along a complete intrinsic geodesic.
+
+Both additions are source-complete. Focused verification is pending the current
+writer handback and exact refresh of the new `covGronwall_pair_at` export.
+
 ## 2026-07-27 intrinsic curvature ODE producer
 
 Added `intrJacobi_ode`.  The proof combines the canonical Jacobi equation,

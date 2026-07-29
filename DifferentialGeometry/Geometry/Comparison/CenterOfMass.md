@@ -247,3 +247,23 @@ to replace inactive stage targets without changing the global minimizer.
 Focused verification and the exact module refresh passed.  This helper is
 complete; it does not by itself construct a smooth inactive-slot filler or a
 Step-B1 comparison map.
+
+## 2026-07-28 - finite-orbit global center
+
+Added the metric-energy interfaces needed by the CGT propeller:
+`metricEnergy_cont`, permutation invariance and monotonicity, and the
+`fixed_of_unique_min` / `fixed_of_nonexp` fixed-center consumers.
+`exists_unique_global` upgrades the compact-core minimizer to a unique global
+minimizer by comparing every point outside the core with the origin through
+the `2r` energy barrier.  This avoids the false requirement that loop
+transport preserve one fixed core.
+
+The earlier set-preserving-isometry route remains valid only as the
+conditional `exists_fixed_center` interface.  It is not used for canonical
+loop transport, which sends a radius-`a` core only into a larger radius
+budget.  The nonexpanding-permutation route is the paper-faithful one.
+
+Focused verification and the exact module refresh passed.  The completed CGT
+finite-family theorem depends only on the standard axioms `propext`,
+`Classical.choice`, and `Quot.sound`, so this center path introduces no
+`sorryAx`.

@@ -33,8 +33,11 @@ namespace IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -171,9 +174,6 @@ private theorem aaKer_split (g gm : SmoothRiemannianMetric I M) :
         aaQuad3 (I := I) (M := M) g gm +
         aaQuad4 (I := I) (M := M) g gm +
         aaQuad5 (I := I) (M := M) g gm := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
   rfl
 
 private theorem aa_out_rfns
@@ -448,12 +448,14 @@ theorem ricciAAKer_rfns
       (A0 + A1 + A2 + A3 + A4 + A5) ≤ _
   simpa only [Q, mul_assoc] using hsum
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- The quadratic Ricci coefficient is pointwise quadratic in the first
 covariant derivative of the metric perturbation. -/
 theorem ricciAACoeff_rfns (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
-        (htie : ∀ (y : M) (u v : TangentSpace I y),
+        (_htie : ∀ (y : M) (u v : TangentSpace I y),
           gm.inner y u v = g.inner y u v +
             ccTensorBilinSymm (I := I) g P y u v)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -515,7 +517,7 @@ theorem ricciAACoeff_rfns (g : SmoothRiemannianMetric I M) :
       ricciAAKer_rfns (I := I) (M := M) g gm x
   have hTr : Tr ≤ Ct 0 := by
     have hraw := htrace gm P htie hdelta hdelta0 hPbound 0 x
-    simpa only [Tr, iteratedCovGrad_zero, Nat.add_zero,
+    simpa only [Tr, iteratedCovGrad_zero, Nat.add_zero, Nat.zero_add,
       Finset.sum_range_one, Combinatorics.antidiagonalTupleGrid_zero,
       mul_one] using hraw
   have hcomp := riemannianFiberNormSq_compRS_le_mul
@@ -545,7 +547,7 @@ theorem ricciAACoeff_rfns (g : SmoothRiemannianMetric I M) :
 private theorem aa_pair_point
     (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (F : SmoothCcTensor g 2 2)
-    {C delta : Real} (hC0 : 0 ≤ C) (hdelta0 : 0 ≤ delta)
+    {C delta : Real} (hC0 : 0 ≤ C) (_hdelta0 : 0 ≤ delta)
     (hW : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           (W.toSection x) ≤
@@ -621,6 +623,8 @@ private theorem aa_pair_point
     abs_nonneg (tensorInnerPointwise (I := I) (M := M) g 0 2 x
       (TensorRSSpace.toModel S) (TensorRSSpace.toModel U))]
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma aa_bound_mono
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     {a b : Real} (hab : a ≤ b)
@@ -640,7 +644,7 @@ theorem ricciAA_path_le (g : SmoothRiemannianMetric I M)
     {eta : Real} (heta : 0 < eta) :
     ∃ delta0 : Real, 0 < delta0 ∧ delta0 < 1 / 2 ∧
       ∀ (W : SmoothCcTensor g 0 2)
-        (hWsymm : ∀ (x : M) (u v : TangentSpace I x),
+        (_hWsymm : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g W x u v =
             ccTensorBilin (I := I) g W x v u)
         {delta s : Real}, 0 ≤ delta → delta ≤ delta0 →
@@ -728,9 +732,13 @@ theorem ricciAA_path_le (g : SmoothRiemannianMetric I M)
         riemannianFiberNormSq (I := I) (M := M) g 0 3 y
           (D.toSection y) := by
     intro y
-    rw [show iteratedCovGrad (I := I) g 0 2 1 P = s • D from by
+    rw [show iteratedCovGrad (I := I) g 0 2 1 P =
+        (s • D : SmoothCcTensor g 0 3) from by
       simp only [P, D, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, riemannianFiberNormSq_smul]
+    change riemannianFiberNormSq (I := I) (M := M) g 0 3 y
+        (s • D.toSection y) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 3 y (D.toSection y)
+    rw [riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   have hFraw := hcoeff gm P htie hdeltaHalf hdelta0' hPbound
@@ -825,10 +833,11 @@ theorem ricciAA_path_le (g : SmoothRiemannianMetric I M)
         (appCc (I := I) (M := M) g 2 2
           (ricciAAArm (I := I) (M := M) g
             (edgeMetric (I := I) (M := M) g W hWbound s)) W).toFun| := by
-        nlinarith [le_abs_self (tensorL2Inner (I := I) (M := M) g 0 2 W.toFun
-          (appCc (I := I) (M := M) g 2 2
+        have hneg := neg_le_abs (tensorL2Inner (I := I) (M := M) g 0 2
+          W.toFun (appCc (I := I) (M := M) g 2 2
             (ricciAAArm (I := I) (M := M) g
-              (edgeMetric (I := I) (M := M) g W hWbound s)) W).toFun)]
+              (edgeMetric (I := I) (M := M) g W hWbound s)) W).toFun)
+        nlinarith
     _ ≤ 2 * (C * delta ^ 2 *
         ‖iteratedCovGrad (I := I) g 0 2 1 W‖ ^ 2) :=
       mul_le_mul_of_nonneg_left habs (by norm_num)

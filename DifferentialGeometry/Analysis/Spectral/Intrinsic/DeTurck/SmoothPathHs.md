@@ -20,7 +20,7 @@ constructed by `exists_timeDerivCc` and the completed-action proof.  It adds no
 new hypothesis and makes it possible to identify the chosen derivative with a
 geometric PDE right-hand side by component extensionality.
 
-## Role in forward uniqueness
+## Role in the low-regularity path
 
 On a compact time window inside the open smooth interval of a geometric
 Ricci--DeTurck solution, this supplies the continuous `H^(a+2)` path and the
@@ -30,10 +30,17 @@ convergence is known.
 
 ## Verification state
 
-Source assembled without `sorry`, `admit`, axioms, or opaque declarations.
-Focused Lean verification is pending because the shared named build is still
-active; no competing Lean process was started.
+Focused Lean verification is green, with no local warning and no
+`sorry`/`admit`. The exact artifact refresh is still pending.
 
-Endpoint accounting: `ricci_flow_forward_unique` remains 0 percent until the
-geometric realization, local continuation, harmonic gauge, and edge-startup
-steps are connected and the exact endpoint theorem checks.
+The first exact downstream attempt exposed two compatibility failures here:
+the TensorRS bundle instances needed the canonical reduced-transparency
+elaboration setting, and the constant scalar section had to be changed
+explicitly to `1` before simplifying its action. Both are now repaired without
+changing any public statement or mathematical assumption.
+
+Forward uniqueness is already complete elsewhere; this file is now an upstream
+producer for the moving-edge estimate used by the uniform low-regularity
+existence route. The black-box theorem `ricci_flow_unif_existence` remains
+unproved (0 percent); its dedicated machinery remains approximately 84--87
+percent complete.

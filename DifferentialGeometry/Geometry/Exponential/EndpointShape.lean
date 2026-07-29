@@ -273,6 +273,63 @@ theorem intrJacobi_perp_ne
       hscaled
   exact (mul_eq_zero.mp hmul).resolve_left ht
 
+/-- The intrinsic Jacobi field obtained by varying a launch in its own radial
+direction equals the geodesic velocity at time one. -/
+theorem intrJacobi_self
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (p : M) (u : TangentSpace I p) :
+    intrinsicJacobi (I := I) g hEnorm p u u 1 =
+      curveVelocity (I := I)
+        (intrinsicGeodesic (I := I) g hEnorm p u) 1 := by
+  let γ : Real → M :=
+    intrinsicGeodesic (I := I) g hEnorm p u
+  have hrepar :
+      (fun r : Real =>
+        intrinsicGeodesic (I := I) g hEnorm p (u + r • u) 1) =
+        fun r : Real => γ (1 + r) := by
+    funext r
+    have hsmul : u + r • u = (1 + r) • u := by
+      rw [add_smul, one_smul]
+    rw [hsmul, intrinsicGeodesic_smul
+      (I := I) g hEnorm p u (1 + r)]
+  have hγdiff : MDifferentiableAt 𝓘(Real, Real) I γ 1 :=
+    ((intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p u).contMDiffAt
+      Filter.univ_mem).mdifferentiableAt (by norm_num)
+  have hshift :
+      HasMFDerivAt 𝓘(Real, Real) 𝓘(Real, Real)
+        (fun r : Real => 1 + r) 0 (ContinuousLinearMap.id Real Real) := by
+    rw [hasMFDerivAt_iff_hasFDerivAt]
+    simpa using ((hasFDerivAt_id (0 : Real)).const_add (1 : Real))
+  have hγat :
+      HasMFDerivAt 𝓘(Real, Real) I γ (1 + (0 : Real))
+        (mfderiv 𝓘(Real, Real) I γ 1) := by
+    rw [add_zero]
+    exact hγdiff.hasMFDerivAt
+  have hcomp :
+      HasMFDerivAt 𝓘(Real, Real) I
+        (fun r : Real => γ (1 + r)) 0
+        ((mfderiv 𝓘(Real, Real) I γ 1).comp
+          (ContinuousLinearMap.id Real Real)) :=
+    hγat.comp 0 hshift
+  have hJ :
+      HasMFDerivAt 𝓘(Real, Real) I
+        (fun r : Real =>
+          intrinsicGeodesic (I := I) g hEnorm p (u + r • u) 1) 0
+        ((mfderiv 𝓘(Real, Real) I γ 1).comp
+          (ContinuousLinearMap.id Real Real)) := by
+    rw [hrepar]
+    exact hcomp
+  change
+    mfderiv 𝓘(Real, Real) I
+        (fun r : Real =>
+          intrinsicGeodesic (I := I) g hEnorm p (u + r • u) 1)
+        0 1 =
+      mfderiv 𝓘(Real, Real) I γ 1 1
+  rw [hJ.mfderiv]
+  rfl
+
 private theorem intrGeodesic_smooth
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -517,6 +574,191 @@ theorem endpointJacobi_eq
     field_simp [hroot_ne]
   rw [hcoef, neg_smul]
   abel
+
+/-- The Hessian of selected fixed-first branch energy is the terminal pairing
+of the corresponding intrinsic Jacobi field with its covariant derivative. -/
+theorem branchEnergy_hess
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w))}
+    {p : M}
+    (B : ExpInvBranch (I := I) g hEnorm p)
+    {u w₁ w₂ : TangentSpace I p}
+    (hu : (u : E) ∈ B.hom.source) :
+    let γ : Real → M :=
+      intrinsicGeodesic (I := I) g hEnorm p u
+    let J := fun w =>
+      intrinsicJacobi (I := I) g hEnorm p u w
+    hessFun (I := I) g
+        (branchEnergy (I := I) g B)
+        (γ 1) (J w₁ 1) (J w₂ 1)
+      =
+        g.inner (γ 1)
+          (covDerivAlong (I := I) g γ (J w₁) 1)
+          (J w₂ 1) := by
+  dsimp only
+  let F : Real → Real → M := fun s t =>
+    intrinsicGeodesic (I := I) g hEnorm p (u + s • w₁) t
+  let γ : Real → M := fun t => F 0 t
+  let η : Real → M := fun s => F s 1
+  let J : TangentSpace I p → ∀ t, TangentSpace I (γ t) := fun w t =>
+    intrinsicJacobi (I := I) g hEnorm p u w t
+  let V : ∀ s, TangentSpace I (η s) := fun s =>
+    (intrinsicVelocityLift (I := I) g hEnorm p (u + s • w₁) 1).snd
+  let q : M := expMapIntrinsic (I := I) g hEnorm p u
+  have hF : IsSmoothVariation (I := I) F := by
+    change ContMDiff (𝓘(Real, Real).prod 𝓘(Real, Real)) I (8 : Nat)
+      (fun z : Real × Real => F z.1 z.2)
+    exact
+      (intrinsicVar_smooth (I := I) g hEnorm p (u : E) (w₁ : E)).of_le
+        ENat.LEInfty.out
+  have hη : ContMDiff 𝓘(Real, Real) I ∞ η := by
+    have hincl : ContMDiff 𝓘(Real, Real)
+        (𝓘(Real, Real).prod 𝓘(Real, Real)) ∞
+        (fun s : Real => (s, (1 : Real))) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (intrinsicVar_smooth (I := I) g hEnorm p (u : E) (w₁ : E)).comp
+      hincl
+  let U : Set M := B.dom
+  have hUopen : IsOpen U := B.hom.open_target
+  have hqU : q ∈ U := by
+    rw [show q = B.hom (u : E) from B.hom_eq hu]
+    exact B.hom.map_source hu
+  have hinv : ContMDiffOn I 𝓘(Real, E) ∞ B.inv U := by
+    simpa only [U] using B.inv_inf
+  let gp : E →L[Real] E →L[Real] Real := g.inner p
+  have hinner : ContMDiffOn I 𝓘(Real, Real) ∞
+      (fun z : M => g.inner p (B.inv z) (B.inv z)) U := by
+    have hgp : ContMDiffOn I
+        𝓘(Real, E →L[Real] E →L[Real] Real) ∞
+        (fun _ : M => gp) U :=
+      contMDiffOn_const
+    simpa only [gp] using (hgp.clm_apply hinv).clm_apply hinv
+  have heU : ContMDiffOn I 𝓘(Real, Real) ∞
+      (branchEnergy (I := I) g B) U := by
+    simpa only [branchEnergy] using
+      (contMDiffOn_const.mul hinner)
+  obtain ⟨eSmooth, heSmooth, he_eq⟩ :=
+    DifferentialGeometry.exists_smooth_germ (I := I) hUopen hqU heU
+  have hgrad_eq :
+      (fun z => gradientFun (I := I) g eSmooth z) =ᶠ[𝓝 q]
+        fun z => gradientFun (I := I) g
+          (branchEnergy (I := I) g B) z := by
+    filter_upwards [he_eq.eventuallyEq_nhds] with z hz
+    unfold gradientFun
+    rw [hz.mfderiv_eq]
+  have hgrad_total :
+      (T% fun z => gradientFun (I := I) g eSmooth z) =ᶠ[𝓝 q]
+        (T% fun z => gradientFun (I := I) g
+          (branchEnergy (I := I) g B) z) := by
+    filter_upwards [hgrad_eq] with z hz
+    change
+      TotalSpace.mk' E z (gradientFun (I := I) g eSmooth z) =
+        TotalSpace.mk' E z
+          (gradientFun (I := I) g
+            (branchEnergy (I := I) g B) z)
+    rw [hz]
+  have hgradSmooth : ContMDiff I (I.prod 𝓘(Real, E)) ∞
+      (T% fun z => gradientFun (I := I) g eSmooth z) := by
+    simpa only [gradient_eq_gradFun] using
+      gradFun_contMDiff_total_section (I := I) g heSmooth
+  have hgradAt : MDiffAt
+      (T% fun z => gradientFun (I := I) g
+        (branchEnergy (I := I) g B) z) q := by
+    have hsmoothAt :=
+      hgradSmooth.contMDiffAt.congr_of_eventuallyEq hgrad_total.symm
+    exact hsmoothAt.mdifferentiableAt (by simp)
+  have hlaunch : Continuous (fun s : Real => (u : E) + s • (w₁ : E)) :=
+    continuous_const.add (continuous_id.smul continuous_const)
+  have hsrc_ev : ∀ᶠ s in 𝓝 (0 : Real),
+      (u : E) + s • (w₁ : E) ∈ B.hom.source := by
+    have hsrc0 :
+        (u : E) + (0 : Real) • (w₁ : E) ∈ B.hom.source := by
+      simpa only [zero_smul, add_zero] using hu
+    exact hlaunch.continuousAt (B.hom.open_source.mem_nhds hsrc0)
+  have hgrad_ev :
+      (fun s => gradientFun (I := I) g
+        (branchEnergy (I := I) g B) (η s)) =ᶠ[𝓝 (0 : Real)] V := by
+    filter_upwards [hsrc_ev] with s hs
+    simpa only [η, F, V, expMapIntrinsic_def] using
+      grad_branchEnergy (I := I) B hs
+  have hcov_grad :=
+    covDerivAlong_congr_of_eventuallyEq (I := I) g η hgrad_ev
+  have hchain := covDerivAlong_restrict_eq_leviCivita
+    (I := I) g η
+      (fun z => gradientFun (I := I) g
+        (branchEnergy (I := I) g B) z) 0 hη
+      (by
+        simpa only [η, F, q, zero_smul, add_zero, expMapIntrinsic_def] using
+          hgradAt)
+  have hηvel :
+      (mfderiv 𝓘(Real, Real) I η 0 : Real →L[Real] TangentSpace I (η 0)) 1 =
+        J w₁ 1 := by
+    rfl
+  have hη0 : η 0 = q := by
+    simp only [η, F, q, zero_smul, add_zero, expMapIntrinsic_def]
+  have hchain' :
+      covDerivAlong (I := I) g η
+          (fun s => gradientFun (I := I) g
+            (branchEnergy (I := I) g B) (η s)) 0 =
+        (LeviCivita (I := I) g).toFun
+          (fun z => gradientFun (I := I) g
+            (branchEnergy (I := I) g B) z)
+          q (J w₁ 1) := by
+    rw [hη0] at hηvel hchain
+    exact hchain.trans
+      (congrArg
+        (fun Z : TangentSpace I q =>
+          (LeviCivita (I := I) g).toFun
+            (fun z => gradientFun (I := I) g
+              (branchEnergy (I := I) g B) z) q Z)
+        hηvel)
+  have hcomm := commute_ds_dt_intrinsic (I := I) g F hF 1
+  have hbase :
+      (fun t : Real => F 0 t) =
+        fun t => intrinsicGeodesic (I := I) g hEnorm p u t := by
+    funext t
+    simp only [F, zero_smul, add_zero]
+  have hfield :
+      (fun t : Real =>
+        mfderiv 𝓘(Real, Real) I (fun s : Real => F s t) 0 (1 : Real)) =
+        intrinsicJacobi (I := I) g hEnorm p u w₁ := by
+    funext t
+    rfl
+  have hcomm' :
+      covDerivAlong (I := I) g η V 0 =
+        covDerivAlong (I := I) g
+          (fun t => intrinsicGeodesic (I := I) g hEnorm p u t)
+          (intrinsicJacobi (I := I) g hEnorm p u w₁) 1 := by
+    rw [hbase, hfield] at hcomm
+    simpa only [η, V, intrinsicVelocityLift] using hcomm
+  have hvec :
+      (LeviCivita (I := I) g).toFun
+          (fun z => gradientFun (I := I) g
+            (branchEnergy (I := I) g B) z)
+          q (J w₁ 1) =
+        covDerivAlong (I := I) g
+          (fun t => intrinsicGeodesic (I := I) g hEnorm p u t)
+          (intrinsicJacobi (I := I) g hEnorm p u w₁) 1 :=
+    hchain'.symm.trans (hcov_grad.trans hcomm')
+  have hpair :
+      g.inner q
+          ((LeviCivita (I := I) g).toFun
+            (fun z => gradientFun (I := I) g
+              (branchEnergy (I := I) g B) z)
+            q (J w₁ 1))
+          (J w₂ 1) =
+        g.inner q
+          (covDerivAlong (I := I) g
+            (fun t => intrinsicGeodesic (I := I) g hEnorm p u t)
+            (intrinsicJacobi (I := I) g hEnorm p u w₁) 1)
+          (J w₂ 1) :=
+    congrArg (fun Z : TangentSpace I q => g.inner q Z (J w₂ 1)) hvec
+  have hhess :=
+    hessFun_eq_cov_local (I := I) g hUopen heU hqU
+      (J w₁ 1) (J w₂ 1)
+  simp only [q, J, expMapIntrinsic_def] at hhess hpair ⊢
+  exact hhess.trans hpair
 
 /-- The Hessian of the selected fixed-first branch radius at a time-one
 intrinsic endpoint is the normalized endpoint Jacobi derivative, with the

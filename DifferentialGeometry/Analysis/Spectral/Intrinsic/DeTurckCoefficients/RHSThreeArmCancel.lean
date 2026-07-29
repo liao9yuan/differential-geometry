@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieThreeArmCancel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0JointSmooth
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSLowCoeff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 
 /-!
@@ -293,21 +294,6 @@ theorem lieSum_eq_arms
       rw [lieSlope_eq_arms (I := I) g₀ g_bg T T'
         hδ_lt hδ hδ'_lt hδ' s x k i]
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀ W x ![v, w]
-
-/-- The complete order-zero coefficient after the Ricci and DeTurck terms are
-combined along the realized metric path. -/
-def rhsLow0Coeff
-    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
-  (-2 : ℝ) • linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s +
-    (deTurckLieCoeffField (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg +
-      lieCorr0Field (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
 
 /-- The complete order-one coefficient after the Ricci and DeTurck terms are
 combined along the realized metric path. -/

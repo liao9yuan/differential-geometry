@@ -275,3 +275,15 @@ Focused verification passed, and a current-interface replay exported this file
 before checking `NormalPhaseEndpoint`, `NormalBranchConv`, and
 `StepCStageFill`.  This is Gate-5 plumbing, not the missing
 `exists_h6NormalData` theorem, which remains theorem-level 0%.
+
+## 2026-07-28: legacy provider projections
+
+The common chart-family layer now exposes the two definitional facts needed by
+legacy consumers as stable simp lemmas: `legacyInv_eq` identifies the provider
+inverse with `framedChartAt`, and `legacyTarget_eq` identifies the provider
+target with that chart's source. This keeps compatibility rewrites at the
+provider boundary instead of reopening `legacyBallChart` downstream.
+
+Focused verification passed in the current isolated artifact replay. This is
+provider-migration infrastructure only; `exists_h6NormalData` remains
+theorem-level 0%.

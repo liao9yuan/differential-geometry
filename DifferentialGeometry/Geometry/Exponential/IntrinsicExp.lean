@@ -1924,6 +1924,28 @@ theorem intrinsicGeodesic_smul
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Scaling the launch velocity rescales every parameter time of the complete
+intrinsic geodesic. -/
+theorem intrGeo_smul_apply
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (u : TangentSpace I p) (c s : ℝ) :
+    intrinsicGeodesic (I := I) g hEnorm p (c • u) s =
+      intrinsicGeodesic (I := I) g hEnorm p u (c * s) := by
+  calc
+    intrinsicGeodesic (I := I) g hEnorm p (c • u) s =
+        intrinsicGeodesic (I := I) g hEnorm p (s • (c • u)) 1 :=
+      (intrinsicGeodesic_smul (I := I) g hEnorm p (c • u) s).symm
+    _ = intrinsicGeodesic (I := I) g hEnorm p ((c * s) • u) 1 := by
+      rw [smul_smul, mul_comm]
+    _ = intrinsicGeodesic (I := I) g hEnorm p u (c * s) :=
+      intrinsicGeodesic_smul (I := I) g hEnorm p u (c * s)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Near the centre, the chart-fixed radial exponential curve agrees with the
 single intrinsic geodesic with the same launch velocity.  This is the two-sided
 germ needed at the radial endpoint. -/

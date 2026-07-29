@@ -16,6 +16,7 @@ noncomputable section
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
+set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
@@ -30,6 +31,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -37,6 +40,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+private lemma edge_raised_self (g : SmoothRiemannianMetric I M) (x : M) :
+    gInvRaisedEndo (I := I) g g x =
+      ContinuousLinearMap.id Real (TangentSpace I x) := by
+  apply ContinuousLinearMap.ext
+  intro v
+  rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
+    ContinuousLinearMap.id_apply]
 
 private lemma edge_symm_eq (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2)
@@ -128,10 +139,10 @@ private lemma edge_endo_id_zero (g : SmoothRiemannianMetric I M)
       (fullRaisedEndoField (I := I) (M := M) g g y) (Y y)) =
       (fun y : M => Y y) := by
     funext y
-    rw [fullRaisedEndoField_apply, gInvRaisedEndo_self,
+    rw [fullRaisedEndoField_apply, edge_raised_self,
       ContinuousLinearMap.id_apply]
   rw [hLeib, hLambda]
-  rw [fullRaisedEndoField_apply, gInvRaisedEndo_self,
+  rw [fullRaisedEndoField_apply, edge_raised_self,
     ContinuousLinearMap.id_apply, sub_self]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -187,7 +198,7 @@ linear in the first derivative of the metric difference. -/
 theorem edgeFull_one (g : SmoothRiemannianMetric I M) :
     ∃ A : Real, 0 ≤ A ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -305,7 +316,7 @@ error: its derivative is controlled by `nabla T * S + nabla S`. -/
 theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
     ∃ K : Real, 0 ≤ K ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -417,7 +428,8 @@ theorem edgeSlot_one (g : SmoothRiemannianMetric I M) :
     _ ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 3 x (U.toSection x) +
         2 * riemannianFiberNormSq (I := I) (M := M) g 0 3 x (V.toSection x) := hadd
     _ ≤ 2 * (A * X) + 2 * (F * Y) := by
-      exact add_le_add (mul_le_mul_of_nonneg_left (by simpa only [X] using hU) (by norm_num))
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left (by simpa only [X, mul_assoc] using hU) (by norm_num))
         (mul_le_mul_of_nonneg_left (by simpa only [Y] using hV) (by norm_num))
     _ ≤ K * (X + Y) := by
       dsimp only [K]
@@ -430,10 +442,10 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
     ∃ Z D : Real, 0 ≤ Z ∧ 0 ≤ D ∧
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -511,11 +523,11 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
     calc
       _ ≤ K * (P1 * T0 + T1) := hraw
       _ ≤ K * (T1 * T0 + T1) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add_right ?_ T1) hK0
+        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
         exact mul_le_mul_of_nonneg_right hP1T1 hT00
       _ ≤ K * (T1 * d ^ 2 + T1) := by
         refine mul_le_mul_of_nonneg_left ?_ hK0
-        exact add_le_add_right (mul_le_mul_of_nonneg_left hT0coarse hT10) T1
+        exact add_le_add (mul_le_mul_of_nonneg_left hT0coarse hT10) le_rfl
       _ = D0 * T1 := by simp only [D0]; ring
   have hR0 := edgeSlot_zero (I := I) (M := M) g gm P htie
     hdelta hdelta0 hPbound 1 S0 x
@@ -556,14 +568,14 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
             (S0.toSection x) +
           riemannianFiberNormSq (I := I) (M := M) g 0 3 x
             ((covGrad (I := I) (M := M) g 0 2 S0).toSection x)) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add_right ?_ _) hK0
+        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
         exact mul_le_mul_of_nonneg_right hP1T1
           (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _)
       _ ≤ K * (T1 * (F * T0) + D0 * T1) := by
         refine mul_le_mul_of_nonneg_left (add_le_add ?_ hS01) hK0
         exact mul_le_mul_of_nonneg_left hS00 hT10
       _ ≤ K * (T1 * (F * d ^ 2) + D0 * T1) := by
-        refine mul_le_mul_of_nonneg_left (add_le_add_right ?_ (D0 * T1)) hK0
+        refine mul_le_mul_of_nonneg_left (add_le_add ?_ le_rfl) hK0
         exact mul_le_mul_of_nonneg_left
           (mul_le_mul_of_nonneg_left hT0coarse hF0) hT10
       _ = D * T1 := by simp only [D]; ring
@@ -573,10 +585,10 @@ theorem edgeRaise_gen (g : SmoothRiemannianMetric I M) :
 theorem edgeRaise_bds (g : SmoothRiemannianMetric I M) :
     ∃ Z D : Real, 0 ≤ Z ∧ 0 ≤ D ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -620,10 +632,10 @@ theorem edgePartner_gen (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -756,10 +768,10 @@ theorem edgePartner_zero (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M)
         (P T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g P y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -830,10 +842,10 @@ theorem edgePartner_zero (g : SmoothRiemannianMetric I M) :
 theorem edgePartner_one (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           gm.inner y v w = g.inner y v w +
             ccTensorBilinSymm (I := I) g T y v w)
         {delta : Real}, delta ≤ 1 / 2 → 0 ≤ delta →
@@ -852,6 +864,8 @@ theorem edgePartner_one (g : SmoothRiemannianMetric I M) :
   exact h gm T T hTsymm htie hdelta hdelta0 hbound hbound
     (fun _ => le_rfl) sigma x
 
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_bound_mono (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {a b : Real} (hab : a ≤ b)
     (ha : gFibreOpBound (I := I) (M := M) g
@@ -868,7 +882,7 @@ difference on the realized segment. -/
 theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ 1 / 2 →
@@ -932,7 +946,8 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
     rw [show iteratedCovGrad (I := I) g 0 2 1 P =
         s • iteratedCovGrad (I := I) g 0 2 1 T from by
       simp only [P, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, riemannianFiberNormSq_smul]
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
+      Pi.smul_apply, riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   let T0 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -967,7 +982,8 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
       N (a • Q) = a ^ 2 * N Q := by
     intro a Q
     dsimp only [N]
-    rw [SmoothCcTensor.toSection_smul, riemannianFiberNormSq_smul]
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
+      Pi.smul_apply, riemannianFiberNormSq_smul]
   have hkernel : ∀ qq : Fin 4 → Equiv.Perm (Fin 4),
       N (edgeKernelPartner (I := I) (M := M) g gm T qq) ≤ 4 * B := by
     intro qq
@@ -1096,14 +1112,14 @@ theorem edgeTop_zero (g : SmoothRiemannianMetric I M) :
           (mul_le_mul_of_nonneg_left hriem (by norm_num)) (by norm_num))
         (mul_le_mul_of_nonneg_left hlie (by norm_num))
       _ = 52 * B := by ring
-  simpa only [N, B, C, T0] using htop
+  simpa only [N, B, C, T0, mul_assoc] using htop
 
 /-- The complete top formal partner returned by the refold package retains a
 small undifferentiated metric difference after one covariant derivative. -/
 theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           ccTensorBilin (I := I) g T x v w =
             ccTensorBilin (I := I) g T x w v)
         {delta : Real}, 0 ≤ delta → delta ≤ 1 / 2 →
@@ -1168,7 +1184,8 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     rw [show iteratedCovGrad (I := I) g 0 2 1 P =
         s • iteratedCovGrad (I := I) g 0 2 1 T from by
       simp only [P, iteratedCovGrad_smul]]
-    rw [SmoothCcTensor.toSection_smul, riemannianFiberNormSq_smul]
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
+      Pi.smul_apply, riemannianFiberNormSq_smul]
     exact mul_le_of_le_one_left
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 y _) hs2
   let T1 : Real := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -1205,7 +1222,7 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
     intro a Q
     dsimp only [N]
     rw [covGrad_smul, SmoothCcTensor.toSection_smul,
-      riemannianFiberNormSq_smul]
+      ContMDiffSection.coe_smul, Pi.smul_apply, riemannianFiberNormSq_smul]
   have hkernel : ∀ qq : Fin 4 → Equiv.Perm (Fin 4),
       N (edgeKernelPartner (I := I) (M := M) g gm T qq) ≤ 4 * B := by
     intro qq
@@ -1334,7 +1351,7 @@ theorem edgeTop_one (g : SmoothRiemannianMetric I M) :
           (mul_le_mul_of_nonneg_left hriem (by norm_num)) (by norm_num))
         (mul_le_mul_of_nonneg_left hlie (by norm_num))
       _ = 52 * B := by ring
-  simpa only [N, B, C, T1] using htop
+  simpa only [N, B, C, T1, mul_assoc] using htop
 
 end IntrinsicSpectral
 end RicciFlow

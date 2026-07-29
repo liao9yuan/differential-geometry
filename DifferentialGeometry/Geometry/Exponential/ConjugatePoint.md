@@ -81,3 +81,17 @@ The source is placeholder-free; focused verification and the targeted module
 refresh pass.  The
 `conjVec_reverse` theorem and its dedicated reversal machinery are both 100%;
 the minimizing-tail theorems remain unstated here and therefore remain 0%.
+
+## 2026-07-28 affine reversal API for the Whitehead bigon
+
+The affine reparametrization lemmas `covDeriv_comp_affine`,
+`curveVelocity_comp_affine`, and `jacobi_comp_affine` are now public at their
+canonical home.  The intrinsic reversal identity is exposed as
+`intrGeo_reverse`, and `intrGeo_rev_vel` gives the exact terminal-velocity
+identity required to smooth the localized minimal bigon.
+
+This reuses the existing reversal proof rather than creating a second loop or
+cut-locus API.  Focused verification and the exact targeted refresh passed.
+The reversal/affine interface is theorem-level and machinery-level 100%.
+`intrCore_jensen` remains theorem-level 0%; its dedicated machinery is about
+93%, and whole HCG supporting machinery is about 62%.

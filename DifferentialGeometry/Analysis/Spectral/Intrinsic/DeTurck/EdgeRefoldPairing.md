@@ -2,10 +2,13 @@
 
 ## Current state
 
-Source assembly is present in `EdgeRefoldPairing.lean`; a focused Lean check is
-still pending because a chain of missing shared artifacts blocks its new
-pair-trace dependency before source elaboration.  Nothing in this note should
-be read as a checked theorem until that focused check has run.
+`EdgeRefoldPairing.lean` is source focused-GREEN with no local warning and its
+exact target is GREEN.  The checked artifact contains the complete pointwise
+pair-trace calculation, the global formal-adjoint identity, the Green step, and
+both existential assembly theorems.  A direct axiom audit of `edgePair_l2`,
+`edgePair_inner`, `edgeTop_inner`, `edgeTop_green`, `exists_edgeRefold`, and
+`exists_edgeSlopeRef` reports exactly
+`[propext, Classical.choice, Quot.sound]`, with no `sorryAx`.
 
 The file contains no proof placeholder or new axiom.  Its public source-level
 producers are:
@@ -83,15 +86,13 @@ the closed-edge argument.  Likewise, separately bounding `edgeRicciHalf` as a
 generic order-zero coefficient would reintroduce an inadmissible dependence on
 spatial derivatives of the arbitrary edge solution.
 
-The pair-trace obstruction and its algebraic formal-adjoint step have now been
-removed at source level without editing the claimed coefficient-refold file:
+The pair-trace obstruction and its algebraic formal-adjoint step are now
+focused-verified without editing the claimed coefficient-refold file:
 `edgeMonoRefold` is the public reconstruction, `edgePair_l2` moves one monomial
 onto its rank-four partner, and `edgeTop_inner` reaches the complete `C2`
-returned by `exists_edgeRefold`.  These declarations still await focused Lean
-checking.  The pair-trace implementation now lives in the small
-`MovingPairTrace.lean` module; its generic output-slot permutation dependency
-is verified, while the pair-trace theorem itself remains unverified because
-of the shared cache blocker.
+returned by `exists_edgeRefold`.  The pair-trace implementation lives in the
+small `MovingPairTrace.lean` module; that module and its generic output-slot
+permutation dependency are exact-current.
 
 The covariant Green step is now present at source level as `edgeTop_green`; it
 turns
@@ -117,21 +118,25 @@ order-one product term retains one undifferentiated `W`, which supplies the
 small `delta` factor.  A generic coefficient-jet envelope is not sharp enough.
 
 The exact algebraic declarations `edgeRicciHalf`, `edgePairMono`,
-`edgeMonoRefold`, `edgeLiePairFam`, and `edgeLiePair_apply` now live in
-`RefoldPairingCore.lean`.  This file imports that module and retains the
-energy, formal-partner, L2, and Green layers.  The move preserves the public
-names and removes the low-regularity consumer's dependency on this energy
-module.  Focused verification of the extracted core is currently blocked
-before elaboration by missing shared build artifacts; no proof error from the
-move has yet been observed.
+`edgeMonoRefold`, `edgeLiePairFam`, and `edgeLiePair_apply` live in
+`RefoldPairingCore.lean`.  This file imports that exact-current module and
+retains the energy, formal-partner, L2, and Green layers.  The move preserves
+the public names and removes the low-regularity consumer's dependency on this
+energy module.
 
 ## Progress accounting
 
-- Exact endpoint `ricci_flow_forward_unique`: **0%** until that theorem is
-  proved and checked.
-- Closed-edge Ricci--DeTurck uniqueness machinery in this lane: source-level
-  exact slope split, principal absorption, moving-energy bookkeeping, and full
-  refold pairing are assembled; the joint low-edge estimate and its verified
-  energy/Gronwall closure remain.
-- `extends_of_rmBounded` and the Hamilton positive-Ricci endpoint are unchanged
-  until both requested analytic producer theorems are genuinely proved.
+- Exact endpoint `ricci_flow_unif_existence`: **0%**; its theorem has not been
+  proved.  Dedicated uniform low-regularity machinery across the current lane
+  is about **84--87%**.  The refold artifact is now exact-current and
+  axiom-clean; the final contraction/existence assembly remains outstanding.
+- `exists_edgeRefold` and `exists_edgeSlopeRef`: **100% as stated**,
+  focused-GREEN, exact-current, and axiom-clean.  This does not by itself prove
+  the closed-edge contraction or the uniform existence endpoint.
+- The next mathematical producer is the sharp structural bound for
+  `covDivergence edgeTopPartner`, followed by its combination with the already
+  verified principal/lower pairing estimates.  The uniform contraction,
+  solution construction, and lifetime-uniformization theorem remain separate
+  endpoint work.
+- The Hamilton positive-Ricci endpoint is unchanged until the independent
+  uniform-existence and maximal-flow inputs are genuinely proved.

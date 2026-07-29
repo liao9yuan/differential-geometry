@@ -397,15 +397,6 @@ theorem MetricCompactBase.exists_supp_cm_fin
         (δ : LiveSlot L inp.pack r → Real),
       let P := inp.properMetrics hcomplete hconn
       let Lphi := L.subseq hphi
-      let beta := fun (n : Nat) (alpha : LiveSlot L inp.pack r) =>
-        seqCenterD inp.decay P Lphi n (alpha.1 : Nat)
-      let weightInf := fun (alpha : LiveSlot L inp.pack r) (z : E)
-          (gamma : Fin (inp.pack.A r)) =>
-        rawWeights
-          (cutRaw
-            (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
-            (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
-          z gamma
       HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1 aInf Jinf Jbarinf ∧
       (∀ a b : Nat,
         (∀ᶠ k in Filter.atTop,
@@ -974,7 +965,10 @@ theorem MetricCompactBase.exists_cm_on_source
   dsimp only
   refine ⟨hqdata, ?_⟩
   filter_upwards [htail] with n hn
-  exact hn.2.toSource
+  dsimp only [HasSuppCmData] at hn
+  simpa only [legacyChartFamily, legacyTarget_eq, legacyInv_eq,
+    legacyTransition_eq, legacyChart_apply, normalTransition] using
+      hn.2.toSource
 
 end HCGCompactness
 end DifferentialGeometry

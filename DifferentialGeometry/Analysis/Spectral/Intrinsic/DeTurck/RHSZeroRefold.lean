@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RefoldPairingCore
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSLowCoeff
 
 /-!
 # Low-regularity order-zero Ricci--DeTurck refold
@@ -24,8 +25,11 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -138,6 +142,7 @@ def rhsRefold2
   ricciRefold2 (I := I) (M := M) g T hδ hδZ s +
     lieRefold2 (I := I) (M := M) g T hδ hδZ s
 
+omit [BoundarylessManifold I M] in
 private lemma bilin_smul
     (g : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g 0 2)
     (x : M) (v w : TangentSpace I x) :
@@ -264,8 +269,9 @@ theorem ricciRefold_app
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g g) T)) := by
     rw [smul_smul, show (2 : ℝ) * (1 / 2) = 1 by norm_num, one_smul]
   rw [hprim] at htwice
-  module at htwice ⊢
-  exact htwice
+  rw [sub_eq_iff_eq_add] at htwice
+  rw [htwice]
+  module
 
 /-- The DeTurck covariant-derivative action is exactly its lower pair-trace
 remainder plus the new second-order action. -/

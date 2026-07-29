@@ -23,10 +23,9 @@ full `edgeRate0` estimate and it does not prove forward uniqueness.
   declaration with the same purpose that lives outside the file's import
   closure and avoids adding a heavy downstream import.
 
-The source derivation is complete, but no Lean check has yet been run.  The
-shared workspace is currently using serialized Lean verification, so this
-file must remain classified as **unverified source**, not as a proved
-producer, until its focused check passes.
+The post-merge source passes focused verification with no local diagnostic,
+and its named exact artifact is GREEN.  The proof is therefore a current
+producer, not merely an unverified draft.
 
 ## Failed or rejected routes
 
@@ -46,14 +45,16 @@ After the exact split
 
 `linearizedRicciConnDiffOrder0CoeffField = ricciAAArm + ricciDAArm`,
 
-the `edgeRate0` term still contains the non-derivative `ricciAAArm` and the
-Riemann half contribution.  The latter must be combined with the concrete
-refold output; an existential generic `C0` family cannot be treated as a
-uniform reaction coefficient without its producer bounds.  `edgeRate1` also
-still needs its concrete low-order bound.
+the companion quadratic and order-one Ricci estimates are supplied by
+exact-current `ricciAA_path_le` and `ricci1_path_le`; the Riemann--Palatini
+block is cancelled by exact-current `exists_edgeLieRef`.  The remaining
+visible rate child is the non-Ricci DeTurck lower-arm pairing, followed by the
+space--slope packaging.  It must be estimated jointly rather than by a
+pointwise envelope for the complete `edgeRate0`.
 
 Endpoint accounting remains unchanged:
 
-- `ricci_flow_forward_unique`: 0% (exact theorem not proved).
-- `ricci_flow_unif_existence`: unaffected by this file.
+- `ricci_flow_forward_unique`: complete and axiom-clean.
+- `ricci_flow_unif_existence`: 0% as a theorem; this file is dedicated
+  machinery only.
 - `extends_of_rmBounded`: still depends on both missing endpoints.

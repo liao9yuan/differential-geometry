@@ -1,6 +1,6 @@
 # MetricDiffJoint
 
-## 2026-07-19 source-only state
+## Current state
 
 This file publicizes the fixed-background metric-difference facts needed by
 the reverse-realization uniqueness route.  It is deliberately below the
@@ -27,15 +27,20 @@ argument in `Garding/ScalarFluxJetBound.lean`; it uses the live
 `MetricFamilySmoothOn.pairSmoothAt` API and the canonical parametric tensor
 section criterion.
 
-Verification status: **source-only / not yet Lean-checked**.  A named shared
-build was active while this file was written, so no competing focused check
-was started.  No `sorry`, `admit`, axiom, opaque placeholder, or replacement
-hypothesis was introduced.
+Verification status: **focused green**, with no local warning and no
+`sorry`/`admit`. The exact artifact refresh is still pending.
+
+The first exact downstream attempt exposed old API drift rather than a
+mathematical gap. The repair uses the canonical TensorRS reduced-transparency
+setting, imports the existing `ccTensorModel_sub` producer, opens the public
+Ricci-linearization joint-section bridge, and corrects the section notation
+from `Cₘ` to `Cₛ`. Public statements and assumptions are unchanged.
 
 Scope warning: `metricDiff_shift` is an **interior regular-time** producer.  It
 does not assert joint smoothness at an original flow edge where only `C0`
 control is known, and it is not an endpoint-startup uniqueness theorem.
 
-Endpoint accounting: `ricci_flow_forward_unique` remains **0%** until its exact
-public theorem is proved and Lean-verified.  These lemmas are producer
-machinery only.
+Forward uniqueness is already complete elsewhere. This file now feeds the
+moving-edge branch of uniform low-regularity existence. The black-box theorem
+`ricci_flow_unif_existence` remains unproved (0 percent); its dedicated
+machinery remains approximately 84--87 percent complete.

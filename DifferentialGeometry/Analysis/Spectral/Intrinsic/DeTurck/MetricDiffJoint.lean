@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.MetricFamilyConnDiff
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
 import DifferentialGeometry.Tensor.RSTensor.Metric
 
@@ -16,6 +17,10 @@ against one fixed background metric, gives a jointly smooth family of
 
 noncomputable section
 
+-- The canonical TensorRS bundle instances were elaborated with this
+-- transparency setting; joint section regularity needs the same setting.
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
@@ -25,6 +30,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -82,6 +88,7 @@ theorem metricDiff_unit (q h : SmoothRiemannianMetric I M)
     funext i
     fin_cases i <;> rfl
   rw [hslots, unitModel_eq_ccTensorBilin_local, metricDiff_raw]
+  rfl
 
 /-- A metric-difference tensor is symmetric before applying the realization
 symmetrizer. -/
@@ -104,6 +111,9 @@ theorem metricDiff_symVal (q h : SmoothRiemannianMetric I M)
     h.symm x v w, q.symm x v w]
   ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 private theorem metric_ext_inner
     {g h : SmoothRiemannianMetric I M}
     (heq : ∀ (x : M) (v w : TangentSpace I x),
@@ -141,7 +151,7 @@ private theorem metricDiff_eval
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (q : SmoothRiemannianMetric I M)
-    (Y Z : Cₘ^∞⟮I; E, fun x : M => TangentSpace I x⟯) :
+    (Y Z : Cₛ^∞⟮I; E, fun x : M => TangentSpace I x⟯) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ =>
         (G.metric p.2).inner p.1 (Y p.1) (Z p.1) -

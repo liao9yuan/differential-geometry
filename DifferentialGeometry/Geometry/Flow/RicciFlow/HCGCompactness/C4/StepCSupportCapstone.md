@@ -197,3 +197,15 @@ The existing `MetricCompactBase` producers instantiate the new parameter with
 same predicates are now ready to receive `H6NormalData.chart`, but that provider
 switch is not yet claimed complete. Focused verification awaits the upstream
 controlled-chart artifact refresh.
+
+## 2026-07-28 canonical support package
+
+`exists_supp_cm_fin` now returns `HasSuppCmData` at
+`legacyChartFamily X` directly instead of duplicating its full
+`chi`/source-patch/local-weight/pair-point formula. `exists_cm_on_source`
+projects the same package through the stable legacy-provider equalities.
+
+Focused verification passed in the current isolated artifact replay. The next
+provider switch is not a local chart rewrite: `actual_cm_tail` also consumes
+transition compactness, whose H6 producer requires the still-missing all-order
+metric jets. Therefore Gate 6 precedes the remaining Gate-5 substitution.

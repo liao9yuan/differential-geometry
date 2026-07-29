@@ -3,6 +3,35 @@
 Verification passed, sorry-free (2026-06-11). Part of the Step A item-3a ladder
 (`Comparison/ConvexBalls.md` B3; B0 stage-4 base).
 
+## 2026-07-28 inhomogeneous transfer
+
+Added `covGronwall_force_at`, the pointwise-curve theorem needed by the H6
+parameter-jet induction. It transports
+
+```text
+sqrt(g(D_t^2 J, D_t^2 J)) <= K * sqrt(g(J,J)) + eps
+```
+
+through a full parallel orthonormal frame and applies the existing
+fixed-space second-order Gronwall theorem. The initial position and velocity
+are bounded by metric norm, so positive-order launch jets can use their common
+zero initial data without choosing tangent representatives.
+
+Focused verification and the exact module refresh both pass, with no `sorry`,
+`admit`, or `axiom`.
+
+The transfer now exposes the full position-velocity estimate:
+
+- `covGronwall_pair_at` proves the field and covariant-velocity bounds
+  simultaneously from `pair_le_gronwall2`;
+- `covGronwall_force_at` remains the compatible field-value projection;
+- `covGronwall_deriv_at` is the new covariant-velocity projection.
+
+Focused verification is green for this extension. Its exact artifact refresh
+is pending writer coordination. The next H6 consumer combines both projections
+with `intrJacForce_le`, whose exact forcing formula contains `D_t A` and
+`D_t J`.
+
 2026-07-07 update: added `covGronwall_bounds`, a quantitative version of the
 same parallel-frame transfer.  It gives both endpoint estimates
 `sqrt(g(J,J)) ≤ t * sqrt(g(w,w)) + error` and

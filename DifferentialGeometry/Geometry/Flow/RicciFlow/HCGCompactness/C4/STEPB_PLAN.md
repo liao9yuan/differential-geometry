@@ -630,15 +630,25 @@ the `lbl395` normal-coordinate metric-bound honest input.
   `dsimp`, and using the controlled chart's explicit source/domain/zero fields
   in the selected-root proof. All other failures were stale exports. Formal
   artifacts remain pending while an unrelated writer is active.
-- Gate 5 is active. The common `NormalChartFamily` now lives in
+- Gate 5 structural preparation is complete. The common `NormalChartFamily` now lives in
   `StepBInputs`; `HasDiagPairConv` preserves it through subsequences,
   stage-branch congruence, fences, and inverse data; and
   `pairStageFillSub`/`stagePtsSub`/`stageWeightSub`/`stageCfgSub` use one
-  family for every transition and readout. The full current-interface replay
-  through `StepCStageFill` passes under `legacyChartFamily`. The next concrete
-  target is to carry that same family through
-  `stageInvVelSub -> stageRootSub -> HasStageRootCube`, then through the
-  selected root/readout capstone before instantiating the H6 chart.
+  family for every transition and readout. The same family now also passes
+  through `stageInvVelSub`, `stageRootSub`, `HasStageRootCube`, and
+  `HasSuppCmData`. `StepCSupportCapstone.exists_supp_cm_fin` returns that
+  package directly instead of restating the legacy chart formula. The full
+  current-interface replay through the support capstone passes under
+  `legacyChartFamily`.
+- Gate 5 cannot yet perform the provider substitution. The first remaining
+  consumer, `HasSuppConvData.actual_cm_tail`, uses quantitative transition
+  compactness as well as chart notation. The intrinsic producer for that
+  compactness is `H6NormalData.trans_bounds_on`/`exists_trans_lim`, which
+  consumes the all-order `metric_deriv` field. Parameterizing
+  `actual_cm_tail` before constructing that field would only move the missing
+  mathematics into a wrapper assumption. Gate 6 is therefore active now;
+  after `exists_h6NormalData` is proved, return to Gate 5 and instantiate the
+  existing H6 transition producer in the selected support/root chain.
 - Feasibility correction: the H6 provider cannot be substituted only in
   `stage_root_tail`. That proof still builds its equation and decode using the
   legacy `chiK`, `chiL`, `qstar`, `zc`, `xi`, and `normalExpPD`. The H6
@@ -649,8 +659,8 @@ the `lbl395` normal-coordinate metric-bound honest input.
   wrapper.
 - `NormalRadiusProfile` and final `exists_h6NormalData`: theorem-level 0%.
   Radius/branch infrastructure: about 80%. Branch-parametric consumer
-  migration: about 58%. All-order metric-jet machinery: about 35%. Overall
-  native H6 producer machinery: about 61%.
+  migration: about 72%. All-order metric-jet machinery: about 35%. Overall
+  native H6 producer machinery: about 64%.
 - The independent all-order curvature-to-coordinate-metric jet induction is
   the dominant remaining theorem. Its target and all migration gates are
   recorded in `H6_RADIUS_CONSULT.md`. The order-zero base and the final
@@ -671,3 +681,115 @@ the `lbl395` normal-coordinate metric-bound honest input.
   State it for an arbitrary finite launch radius: the focused-green
   `H6ChartData.radius_le_global` bounds every selected chart radius by
   `d.ratio * hd.mu 0`, which is the final instantiation.
+- Gate 6 progress: `Variation.cov_commute_curv` is focused-green with no
+  diagnostics.  It supplies the general intrinsic identity
+  `D_s D_t V - D_t D_s V = R(partial_s f, partial_t f) V` needed to
+  differentiate a Jacobi field whose value is not itself a variation velocity.
+  `IntrinsicJacobiJets.intrLaunch3`, its joint smoothness, and launch-derivative
+  commutation are also focused-green.  The exact artifact refresh is deferred
+  while another lane owns the shared writer.
+- Gate 6 progress: `IntrinsicJacobiJets.intrLaunchJ` now packages the
+  second-launch Jacobi field as the total derivative in direction `((0,1),0)`.
+  `intrLaunchJ_smooth` proves joint smoothness in the remaining launch
+  parameter and geodesic time, while `intrLaunchJ_eq` identifies this bundled
+  field with the existing one-variable Jacobi derivative. All three are
+  focused-green. This removes the six separate regularity guesses that would
+  otherwise be needed at `cov_commute_curv`.
+- Gate 6 progress: `Variation.jacobi_var_eq` is focused-green with no
+  diagnostics or proof frontier. It differentiates a smooth family of Jacobi
+  equations, commutes the parameter derivative past both time derivatives,
+  and exposes one `curvDerivAlong` term plus the five lower curvature-slot
+  terms. The exact artifact refresh is deferred while another lane owns the
+  shared writer.
+- Gate 6 progress: `IntrinsicJacobiJets.intrLaunch_var_eq` now instantiates
+  that equation for `intrLaunch3` and `intrLaunchJ`. A source-current combined
+  check is green; ordinary downstream focused/exact verification awaits the
+  upstream artifact window.
+- Gate 6 progress: `PointwiseCurvatureDerivative.nablaRiemannOp_eq` and
+  `nablaRiemannOp_sec` are focused-green, and the owning artifact is current.
+  They identify the pointwise `(nabla_D R)(X,Y)Z` with the existing
+  section-level Leibniz derivative without relying on the unstable
+  `nablaBaseSlotCurv_eq_of_leftMid` signature.
+- Gate 6 progress: `HasCurvDerivBound.nablaRiemannOp_le` and `riemannOp_le` are
+  focused- and exact-green (`BoundedGeometry` 3930/3930). They turn the sequence
+  C1 and C0 tensor bounds into the dimension-free metric norm bounds for the
+  pointwise vector-valued `(nabla_D R)(X,Y)Z` and `R(X,Y)Z`, respectively.
+- Gate 6 progress: the full arbitrary-field curvature-derivative bridge is
+  complete. `Variation.curvDeriv_restrict` handles restrictions of smooth
+  global fields; `curvDeriv_congr_at` proves point-value dependence in all
+  three slots; and `curvDeriv_eq_nabla` identifies the actual smooth
+  along-curve object with `nablaRiemannOp`. The successful point-value proof
+  uses one smooth ambient chart-frame, globally smooth scalar coefficient
+  germs, and the existing finite-sum/smooth-scalar slot linearity. It introduces
+  no forcing or extension-compatibility assumption. Focused verification is
+  green, the exact module refresh is green 3803/3803, and the file has no
+  `sorry`/`admit`/`axiom`.
+- Gate 6 progress: `H6JacobiForce.jacVarForce_le` now bounds the exact forcing
+  in the first differentiated Jacobi equation. It uses
+  `curvDeriv_eq_nabla` plus `nablaRiemannOp_le` for the two `nabla R` terms and
+  `riemannOp_le` for the four `R` terms, retaining the coefficient two on
+  `varCurv`. `intrJacForce_le` instantiates this estimate for `intrLaunch3` and
+  `intrLaunchJ`; the new exact-current `intrLaunchDir_smooth`,
+  `intrLaunchA_eq`, and `intrLaunchT_eq` discharge all seven smoothness
+  obligations without a forcing assumption. The H6 forcing file is
+  focused- and exact-green (`3935/3935`) and has no
+  `sorry`/`admit`/`axiom`.
+- Gate 6 progress: `Variation.covGronwall_force_at` is focused- and
+  exact-green (`3704/3704`).
+  It transfers an inhomogeneous covariant second-order estimate with metric
+  norm initial bounds to the existing fixed-space `gronwallBound`; this is the
+  common Gronwall consumer for every positive launch-jet order.
+- Gate 6 progress: `IntrinsicJacobiJets.intrLaunch_dmix0` is focused- and
+  exact-green (`3804/3804`). Together with `intrLaunch_mix_zero`, the first
+  differentiated Jacobi field has both zero launch initial conditions without
+  any supplied initial-data assumption.
+- Gate 6 immediate target: expose the position-velocity pair estimate already
+  proved internally by `norm_le_gronwall_secondOrder`, transport its velocity
+  projection through `CovariantGronwall`, and combine those bounds with
+  `intrLaunch_var_eq` and `intrJacForce_le`. The derivative projection is
+  required because the exact force contains `D_t A` and `D_t J`, not only
+  `A` and `J`.
+- Gate 6 progress: `SecondOrderGronwall.pair_le_gronwall2` and
+  `deriv_le_gronwall2` are focused- and exact-green (`2094/2094`). The old
+  `norm_le_gronwall_secondOrder` API is preserved as the position projection.
+- Gate 6 progress: `Variation.covGronwall_pair_at` and
+  `covGronwall_deriv_at` are source/focused-green. The existing
+  `covGronwall_force_at` statement remains the position projection. Exact
+  artifact refresh is pending writer coordination.
+- Gate 6 progress: the existing `Variation.chartRep_snd_diff` helper is now
+  public and focused-green. It supplies the chart-readout differentiability of
+  any jointly smooth launch field and of its time covariant derivative; no new
+  regularity assumption is needed. Exact artifact refresh is pending.
+- Gate 6 progress: `VolumeComparison.intrJacobi_pair` specializes the
+  position-velocity Gronwall estimate to an intrinsic Jacobi field, while
+  `intrForce_pair` derives the regularity needed for an inhomogeneous field.
+  `H6JacobiPair.intrJacobi_pair_le`, `intrMix_force_le`, and
+  `intrMix_pair_le` are now focused- and exact-current. Thus both the
+  order-zero pair bound and the first differentiated launch pair are closed
+  without a supplied forcing or initial-data assumption.
+- Gate 6 progress: the canonical tensor layer now has the full frozen-slot
+  covariant Leibniz formula `freezeNabla_leibniz`; the older
+  `allBut0SFreezeNabla` is its zero-correction corollary. This layer is focused-
+  and exact-green (`3555/3555`).
+- Gate 6 progress: `CurvOpTower.curvOpN_cov_sum` is focused-green. It raises
+  the frozen one-form formula and gives exactly one next-curvature-order main
+  term plus the finite sum in which one lower slot is replaced by its
+  covariant derivative. The previous `curvOpN_cov` constant-slot API remains
+  intact.
+- Gate 6 progress: `Variation.jacJetResidual_succ` is exact-current in
+  `CovariantJet`, while `Variation.jacCurv_smooth` gives the required honest
+  joint regularity of its curvature term. `IntrinsicJacobiJets` now exports
+  `intrJetResidual_zero`, `intrJetCurv_smooth`, and
+  `intrJetResidual_succ`; focused and exact verification are green
+  (`3819/3819`). Thus the arbitrary finite-order launch-Jacobi residual
+  recurrence is closed without a supplied forcing or ODE-jet assumption.
+- Gate 6 next target: normalize `intrJetCorr n` into a finite sum of
+  `curvOpN` evaluations and lower launch jets, using `curvOpN_cov_sum` whenever
+  a launch derivative hits curvature. Then derive constants-first force and
+  pair bounds on an arbitrary finite launch radius. Do not introduce a
+  supplied forcing bound or a generic ODE-jet assumption.
+- Current accounting: `NormalRadiusProfile` and `exists_h6NormalData` remain
+  theorem-level 0%; radius/branch infrastructure is about 80%;
+  branch-parametric consumer migration is about 72%; dedicated all-order
+  metric-jet machinery is about 66%; overall native H6 producer machinery is
+  about 73%.

@@ -7,6 +7,35 @@ dependent static curvature tower.  It is definitionally true and focused- and
 exact-verified.  Downstream arity bridges can now rewrite or evaluate this
 projection without unfolding the raw `Nat.rec`.
 
+## 2026-07-28 arbitrary-slot curvature bound
+
+Added `curv_apply_le` and `HasCurvDerivBound.apply_le`.  They project the
+canonical `normSq0S` bound for `nabla^k Rm` to an estimate on arbitrary tangent
+slots, using the frame-free tensor Cauchy-Schwarz theorem.  No new geometric
+assumption was introduced.
+
+Added `curvOne_apply` and `HasCurvDerivBound.nablaRiemannOp_le`.  The former
+identifies the first lowered curvature derivative with the metric pairing
+against the pointwise vector-valued covariant derivative of the Riemann
+operator.  The latter cancels that final metric-length factor and gives the
+dimension-free vector norm bound needed by the differentiated Jacobi equation.
+The data structure and its hypotheses are unchanged.
+
+Added the matching order-zero pair `curvZero_apply` and
+`HasCurvDerivBound.riemannOp_le`.  They identify the lowered Riemann tensor with
+the metric pairing against `riemannOp` and derive its dimension-free vector
+norm bound by the same quadratic cancellation.  This supplies the C0 estimates
+for the four lower curvature terms in `jacVarForce`; one of those terms carries
+the scalar coefficient two.
+
+Focused verification passed, and the exact artifact is current (`3930/3930`).
+This closes the routine H6 C0/C1 norm-to-vector projection gap.
+`NormalRadiusProfile` and
+`exists_h6NormalData` remain theorem-level 0%; their dedicated all-order
+Jacobi/metric-jet machinery is about 53%, the native H6 producer machinery is
+about 68%, and the whole HCG compactness machinery is about 62%.  The
+unconditional compactness endpoint remains theorem-level 0%.
+
 ## 2026-07-25 time-slice projection
 
 `FlowDerivBounds.at_time` now restricts the existing spacetime

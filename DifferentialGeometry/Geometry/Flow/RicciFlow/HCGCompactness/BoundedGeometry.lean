@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -95,6 +97,64 @@ theorem curvCovDeriv_succ
         (curvCovDeriv (I := I) (M := M) g k) :=
   rfl
 
+section PointwiseCurvature
+
+variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless]
+
+/-- The zeroth HCG curvature derivative is the metric lowering of the
+pointwise Riemann operator. -/
+theorem curvZero_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    curvCovDeriv (I := I) (M := M) g 0 x
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) =
+      g.inner x W
+        (DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          x X Y Z) := by
+  rw [show curvCovDeriv (I := I) (M := M) g 0 =
+      DifferentialGeometry.Integral.Connection.metricRm04 (I := I) (M := M) g from rfl]
+  rw [DifferentialGeometry.Integral.Connection.metricRm04_apply]
+  change
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
+        g
+        (DifferentialGeometry.Integral.Connection.metricCov (I := I) (M := M) g)
+        (DifferentialGeometry.Integral.Connection.metricCov_smooth
+          (I := I) (M := M) g) x
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) =
+      _
+  rw [DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_const]
+  letI :
+      CovariantDerivative.ContMDiffCovariantDerivative
+        (DifferentialGeometry.Integral.Connection.metricCov
+          (I := I) (M := M) g) ∞ :=
+    DifferentialGeometry.Integral.Connection.LeviCivita_isContMDiff
+      (I := I) (M := M) g
+  rw [DifferentialGeometry.riemannCurvatureAux_tangentConst_eq_riemannOp
+    (DifferentialGeometry.Integral.Connection.metricCov (I := I) (M := M) g)
+    (DifferentialGeometry.Integral.Connection.metricCov_smooth
+      (I := I) (M := M) g) x X Y Z]
+  rfl
+
+/-- The first HCG curvature derivative is the metric lowering of the
+pointwise covariant derivative of the curvature operator. -/
+theorem curvOne_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (D X Y Z W : TangentSpace I x) :
+    curvCovDeriv (I := I) (M := M) g 1 x
+        (DifferentialGeometry.Integral.Connection.vec5 (I := I) D X Y Z W) =
+      g.inner x W
+        (DifferentialGeometry.Integral.Connection.nablaRiemannOp
+          (I := I) g x D X Y Z) := by
+  simpa [curvCovDeriv, curvCovDerivStep,
+    DifferentialGeometry.Integral.Connection.metricCov,
+    DifferentialGeometry.Integral.Connection.metricRm04] using
+    (DifferentialGeometry.Integral.Connection.nablaRm04_apply
+      (I := I) g x D X Y Z W)
+
+end PointwiseCurvature
+
 /-- Squared norm `|nabla^k Rm(g)|_g^2` at a point. -/
 noncomputable def curvDerivNormSq
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
@@ -105,6 +165,18 @@ noncomputable def curvDerivNormSq
 noncomputable def curvDerivNorm
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt (curvDerivNormSq (I := I) (M := M) k g x)
+
+/-- Evaluation of an iterated curvature derivative is controlled by its
+pointwise metric norm. -/
+theorem curv_apply_le
+    (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
+    (v : Fin (k + 4) -> TangentSpace I x) :
+    |curvCovDeriv (I := I) (M := M) g k x v| <=
+      curvDerivNorm (I := I) (M := M) k g x *
+        ∏ a : Fin (k + 4), Real.sqrt (g.inner x (v a) (v a)) := by
+  simpa [curvDerivNorm, curvDerivNormSq] using
+    (Tensor0SBundle.abs_apply_le_norm0S (I := I) g x (k + 4)
+      (curvCovDeriv (I := I) (M := M) g k x) v)
 
 end FixedMetric
 
@@ -118,6 +190,198 @@ def HasCurvDerivBound
   letI : SigmaCompactSpace X.M := X.sigmaCompact
   letI : T2Space X.M := X.t2
   forall x : X.M, curvDerivNorm (I := I) k X.metric x <= C
+
+namespace HasCurvDerivBound
+
+/-- Cancel a nonnegative factor from a quadratic estimate. -/
+private theorem sqrt_le_of_sq_le_mul {q A : Real}
+    (hq : 0 <= q) (hA : 0 <= A) (h : q ^ 2 <= A * q) :
+    q <= A := by
+  rcases hq.eq_or_lt with hq0 | hqpos
+  · rw [← hq0]
+    exact hA
+  · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
+
+/-- Nonnegativity of the metric quadratic form. -/
+private theorem inner_self_nonneg
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] (g : SmoothRiemannianMetric I M)
+    (x : M) (v : TangentSpace I x) :
+    0 <= g.inner x v v := by
+  rcases eq_or_ne v 0 with hv | hv
+  · rw [hv]
+    simp
+  · exact le_of_lt (g.pos x v hv)
+
+/-- A global curvature-derivative norm bound controls evaluation on arbitrary
+tangent vectors. -/
+theorem apply_le
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {k : Nat} {C : Real}
+    (hX : HasCurvDerivBound (I := I) X k C) :
+    letI : TopologicalSpace X.M := X.topology
+    letI : ChartedSpace H X.M := X.charted
+    letI : IsManifold I ∞ X.M := X.smooth
+    letI : SigmaCompactSpace X.M := X.sigmaCompact
+    letI : T2Space X.M := X.t2
+    ∀ (x : X.M) (v : Fin (k + 4) -> TangentSpace I x),
+      |curvCovDeriv (I := I) (M := X.M) X.metric k x v| <=
+        C * ∏ a : Fin (k + 4),
+          Real.sqrt (X.metric.inner x (v a) (v a)) := by
+  letI : TopologicalSpace X.M := X.topology
+  letI : ChartedSpace H X.M := X.charted
+  letI : IsManifold I ∞ X.M := X.smooth
+  letI : SigmaCompactSpace X.M := X.sigmaCompact
+  letI : T2Space X.M := X.t2
+  intro x v
+  calc
+    |curvCovDeriv (I := I) (M := X.M) X.metric k x v| <=
+        curvDerivNorm (I := I) (M := X.M) k X.metric x *
+          ∏ a : Fin (k + 4),
+            Real.sqrt (X.metric.inner x (v a) (v a)) :=
+      curv_apply_le (I := I) X.metric k x v
+    _ <= C * ∏ a : Fin (k + 4),
+          Real.sqrt (X.metric.inner x (v a) (v a)) :=
+      mul_le_mul_of_nonneg_right (hX x)
+        (Finset.prod_nonneg fun _ _ => Real.sqrt_nonneg _)
+
+section PointwiseCurvature
+
+variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+  [I.Boundaryless]
+
+/-- A zeroth curvature-derivative bound controls the metric length of the
+pointwise Riemann operator. -/
+theorem riemannOp_le
+    (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    letI : T2Space P.M := P.t2
+    ∀ (x : P.M) (X Y Z : TangentSpace I x),
+      let R :=
+        DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita
+            (I := I) P.metric) x X Y Z
+      Real.sqrt (P.metric.inner x R R) <=
+        C * Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : T2Space P.M := P.t2
+  intro x X Y Z
+  let R :=
+    DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Integral.Connection.LeviCivita
+        (I := I) P.metric) x X Y Z
+  let q := Real.sqrt (P.metric.inner x R R)
+  let A :=
+    C * Real.sqrt (P.metric.inner x X X) *
+      Real.sqrt (P.metric.inner x Y Y) *
+      Real.sqrt (P.metric.inner x Z Z)
+  have hC : 0 <= C := by
+    exact (Real.sqrt_nonneg
+      (curvDerivNormSq (I := I) (M := P.M) 0 P.metric x)).trans (hP x)
+  have hA : 0 <= A := by
+    dsimp [A]
+    positivity
+  have hRR : 0 <= P.metric.inner x R R :=
+    inner_self_nonneg (I := I) P.metric x R
+  have hbound := apply_le (I := I) P hP x
+    (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z R)
+  rw [curvZero_apply] at hbound
+  have hprod :
+      (∏ a : Fin 4,
+          Real.sqrt (P.metric.inner x
+            (DifferentialGeometry.Integral.Connection.vec4
+              (I := I) X Y Z R a)
+            (DifferentialGeometry.Integral.Connection.vec4
+              (I := I) X Y Z R a))) =
+        Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) * q := by
+    simp [DifferentialGeometry.Integral.Connection.vec4,
+      Fin.prod_univ_succ, q, mul_assoc]
+  rw [hprod, abs_of_nonneg hRR] at hbound
+  have hquad : q ^ 2 <= A * q := by
+    rw [show q ^ 2 = P.metric.inner x R R from by
+      exact Real.sq_sqrt hRR]
+    simpa [A, mul_assoc] using hbound
+  exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
+
+/-- A first curvature-derivative bound controls the metric length of the
+pointwise vector-valued covariant derivative of the Riemann operator. -/
+theorem nablaRiemannOp_le
+    (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    letI : T2Space P.M := P.t2
+    ∀ (x : P.M) (D X Y Z : TangentSpace I x),
+      let R :=
+        DifferentialGeometry.Integral.Connection.nablaRiemannOp
+          (I := I) P.metric x D X Y Z
+      Real.sqrt (P.metric.inner x R R) <=
+        C * Real.sqrt (P.metric.inner x D D) *
+          Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : T2Space P.M := P.t2
+  intro x D X Y Z
+  let R :=
+    DifferentialGeometry.Integral.Connection.nablaRiemannOp
+      (I := I) P.metric x D X Y Z
+  let q := Real.sqrt (P.metric.inner x R R)
+  let A :=
+    C * Real.sqrt (P.metric.inner x D D) *
+      Real.sqrt (P.metric.inner x X X) *
+      Real.sqrt (P.metric.inner x Y Y) *
+      Real.sqrt (P.metric.inner x Z Z)
+  have hC : 0 <= C := by
+    exact (Real.sqrt_nonneg
+      (curvDerivNormSq (I := I) (M := P.M) 1 P.metric x)).trans (hP x)
+  have hA : 0 <= A := by
+    dsimp [A]
+    positivity
+  have hRR : 0 <= P.metric.inner x R R :=
+    inner_self_nonneg (I := I) P.metric x R
+  have hbound := apply_le (I := I) P hP x
+    (DifferentialGeometry.Integral.Connection.vec5 (I := I) D X Y Z R)
+  rw [curvOne_apply] at hbound
+  have hprod :
+      (∏ a : Fin 5,
+          Real.sqrt (P.metric.inner x
+            (DifferentialGeometry.Integral.Connection.vec5
+              (I := I) D X Y Z R a)
+            (DifferentialGeometry.Integral.Connection.vec5
+              (I := I) D X Y Z R a))) =
+        Real.sqrt (P.metric.inner x D D) *
+          Real.sqrt (P.metric.inner x X X) *
+          Real.sqrt (P.metric.inner x Y Y) *
+          Real.sqrt (P.metric.inner x Z Z) * q := by
+    simp [DifferentialGeometry.Integral.Connection.vec5,
+      Fin.prod_univ_succ, q, mul_assoc]
+  rw [hprod, abs_of_nonneg hRR] at hbound
+  have hquad : q ^ 2 <= A * q := by
+    rw [show q ^ 2 = P.metric.inner x R R from by
+      exact Real.sq_sqrt hRR]
+    simpa [A, mul_assoc] using hbound
+  exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
+
+end PointwiseCurvature
+
+end HasCurvDerivBound
 
 /-- A zeroth-order curvature-derivative bound supplies the global Rm04 bound
 used by the local volume-comparison endpoint. -/

@@ -28,6 +28,8 @@ open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -104,7 +106,7 @@ def edgePairMono (g gm : SmoothRiemannianMetric I M)
   appCcRS (I := I) (M := M) g 2 6 2
     (mvPairTraceOp (I := I) (M := M) g gm)
     (rsDomDomCongrSection (I := I) (M := M) g 2 6 sigmaE
-      (slotExtendIter (I := I) (M := M) g 0 4 2
+      (slotExtendTwo (I := I) (M := M) g
         (domDomCongrSection (I := I) g
           (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G)))
 
@@ -136,6 +138,7 @@ theorem edgeMonoRefold (g gm : SmoothRiemannianMetric I M)
   simp only [map_smul, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
+  rw [edgePairMono]
   rw [mvPairTrace_apply (I := I) (M := M) g gm
     (domDomCongrSection (I := I) g
       (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G) x
