@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageMaster
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1MetricCarrier
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1MetricCarrierH6
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageComparisonH6
 
 set_option autoImplicit false
 
@@ -29,7 +31,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 private theorem cast_preapprox
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -37,6 +39,8 @@ private theorem cast_preapprox
       ConnectedSpace (X.obj j).M)
     (i j K L' : Nat) (hi : L.φ i = K) (hj : L.φ j = L')
     (r R ε : Real) (p : Nat)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X)
     (hnative :
       let Yi := X.obj (L.φ i)
       let Yj := X.obj (L.φ j)
@@ -56,6 +60,7 @@ private theorem cast_preapprox
       letI : MetricSpace Yj.M := (P (L.φ j)).ms
       letI : Nonempty Yi.M := ⟨Yi.basepoint⟩
       let F₀ := stageComparisonMap inp P L s hs hconn i j
+        (chart := chart)
       Nonempty (PreApproxIsoDataOn (I := I)
           (Metric.closedBall Yi.basepoint r) ε p F₀ Yi.metric Yj.metric) ∧
         Nonempty (PreApproxIsoDataOn (I := I)
@@ -80,6 +85,7 @@ private theorem cast_preapprox
     letI : MetricSpace YL.M := (P L').ms
     letI : Nonempty YK.M := ⟨YK.basepoint⟩
     let F := stageMapCast inp P L s hs hconn i j K L' hi hj
+      (chart := chart)
     Nonempty (PreApproxIsoDataOn (I := I)
         (Metric.closedBall YK.basepoint r) ε p F YK.metric YL.metric) ∧
       Nonempty (PreApproxIsoDataOn (I := I)
@@ -180,7 +186,7 @@ theorem MetricCompactBase.exists_b1_raw
   have hnative := hmetric (k - q) hkNative (l - q) hlNative
   have hpair := cast_preapprox inp (inp.properMetrics hcomplete hconn) Lq q
     (Nat.cast_nonneg q) hconn (k - q) (l - q) (psi k) (psi l)
-    hki hli r R ε p hnative
+    hki hli r R ε p (chart := legacyChartFamily (I := I) X) hnative
   refine ⟨R, hrR, F, ?_, ?_, ?_, ?_, ?_⟩
   · intro x
     exact hgeomKL.1 ⟨x, Metric.ball_subset_closedBall x.property⟩
@@ -190,6 +196,165 @@ theorem MetricCompactBase.exists_b1_raw
   · exact hgeomKL.2.2
   · exact hpair.1
   · exact hpair.2
+
+/-- A provider-native master radius diagonal assembles the concrete Step-B1
+raw comparison input on its selected subsequence. -/
+theorem H6NormalData.b1_raw_of_diag
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L0 : NetLimitData inp.decay inp.D P)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (hseed : HasStageSeedOn inp P L0 hconn d.chart)
+    (psi : Nat → Nat)
+    (htail : ∀ q : Nat,
+      HasRadiusTailOn inp P L0 hconn d.chart hseed psi q) :
+    let Xpsi := X.subseq psi
+    let Ppsi : ∀ k : Nat, ProperMetricOn (I := I) (Xpsi.obj k) :=
+      fun k => P (psi k)
+    StepB1RawInput (I := I) (X := Xpsi) Ppsi := by
+  classical
+  dsimp only
+  refine { comparison := ?_ }
+  intro r hr ε hε hε1 p
+  let gap := (4 + 8 * Real.sqrt 2) * inp.decay.lambda inp.D 0
+  let Smid := r + 1 / 2
+  let R := r + 1
+  let R1 := R + gap + 1
+  let q := Nat.ceil R1 + 1
+  have hrR : r < R := by
+    dsimp only [R]
+    linarith
+  have hrS : r < Smid := by
+    dsimp only [Smid]
+    norm_num
+  have hSR : Smid < R := by
+    dsimp only [Smid, R]
+    norm_num
+  have hgap : 0 < gap := by
+    dsimp only [gap]
+    exact mul_pos (by positivity) (inp.decay.lambda_pos inp.hD 0)
+  have hroom : R + gap < R1 := by
+    dsimp only [R1]
+    linarith
+  have hR1q : R1 < (q : Real) := by
+    have hceil := Nat.le_ceil R1
+    dsimp only [q]
+    push_cast
+    linarith
+  obtain ⟨rho, hrho, hindex, hstage, N, hNq, hgeom⟩ :=
+    HasRadiusTailOn.geom_tail inp d P L0 hcomplete.complete hconn hseed psi q
+      (htail q) R R1 hroom hR1q
+  let Sstate := stageStatesOn inp P L0 hconn d.chart hseed q
+  let a := radiusPayloadOn inp P L0 hconn d.chart hseed q
+  let Lbase := L0.subseq Sstate.sigma_strict
+  obtain ⟨Nm, hmetric⟩ :=
+    d.preapprox_tail inp P Lbase (Nat.cast_nonneg q)
+      (a.phi ∘ rho) (a.phi_strict.comp hrho) hcomplete.complete hconn
+      a.V a.U a.C0 a.C1 a.aInf a.Jinf a.Jbarinf a.gInf hstage
+      hrS hSR hroom hR1q p ε hε hε1
+  let Nall := max N (q + Nm)
+  refine ⟨Nall, ?_⟩
+  intro k l hk hl
+  letI : MetricSpace ((X.subseq psi).obj k).M := (P (psi k)).ms
+  letI : MetricSpace ((X.subseq psi).obj l).M := (P (psi l)).ms
+  let Lq := Lbase.subseq (a.phi_strict.comp hrho)
+  have hkGeom : N ≤ k := (Nat.le_max_left _ _).trans hk
+  have hlGeom : N ≤ l := (Nat.le_max_left _ _).trans hl
+  have hkMetric : q + Nm ≤ k := (Nat.le_max_right _ _).trans hk
+  have hlMetric : q + Nm ≤ l := (Nat.le_max_right _ _).trans hl
+  let hkq : q ≤ k := hNq.trans hkGeom
+  let hlq : q ≤ l := hNq.trans hlGeom
+  have hkNative : Nm ≤ k - q := by omega
+  have hlNative : Nm ≤ l - q := by omega
+  let hki : Lq.φ (k - q) = psi k :=
+    (hindex (k - q)).trans (congrArg psi (Nat.add_sub_of_le hkq))
+  let hli : Lq.φ (l - q) = psi l :=
+    (hindex (l - q)).trans (congrArg psi (Nat.add_sub_of_le hlq))
+  let F : (X.obj (psi k)).M → (X.obj (psi l)).M :=
+    stageMapCast inp P Lq q (Nat.cast_nonneg q) hconn
+      (k - q) (l - q) (psi k) (psi l) hki hli (chart := d.chart)
+  have hgeomKL := hgeom k hkGeom l hlGeom
+  have hnative := hmetric (k - q) hkNative (l - q) hlNative
+  have hpair := cast_preapprox inp P Lq q (Nat.cast_nonneg q) hconn
+    (k - q) (l - q) (psi k) (psi l) hki hli r R ε p
+    (chart := d.chart) hnative
+  refine ⟨R, hrR, F, ?_, ?_, ?_, ?_, ?_⟩
+  · intro x
+    exact hgeomKL.1 ⟨x, Metric.ball_subset_closedBall x.property⟩
+  · intro x hx y hy hxy
+    exact hgeomKL.2.1 (Metric.ball_subset_closedBall hx)
+      (Metric.ball_subset_closedBall hy) hxy
+  · exact hgeomKL.2.2
+  · exact hpair.1
+  · exact hpair.2
+
+/-- Provider-neutral geometric data equipped with its native H6 chart package
+has a master subsequence carrying concrete Step-B1 raw comparison data through
+that same provider. -/
+theorem MetricCompactSeed.exists_b1_raw_h6
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : MetricCompactSeed (I := I) X)
+    (d : H6NormalData (I := I) X b.decay)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M) :
+    let P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j) :=
+      fun j => properMetricOn (I := I) (X.obj j)
+        (hcomplete.complete j) (hconn j)
+    ∃ psi : Nat → Nat, StrictMono psi ∧
+      let Xpsi := X.subseq psi
+      let Ppsi : ∀ k : Nat, ProperMetricOn (I := I) (Xpsi.obj k) :=
+        fun k => P (psi k)
+      StepB1RawInput (I := I) (X := Xpsi) Ppsi := by
+  classical
+  dsimp only
+  let aMin := d.stageScale b.realizes hcomplete hconn
+  have haMin : 0 < aMin :=
+    d.stageScale_pos b.realizes hcomplete hconn
+  let c0 := 8 * Real.exp b.decay.C / aMin
+  obtain ⟨inp, _hD_one, _hmuD, hc0⟩ := b.exists_core c0
+  have haMin' :
+      0 < d.stageScale inp.realizes hcomplete hconn := by
+    simpa only [MetricCompactSeed.withDivisor, aMin] using haMin
+  have hc0' :
+      (8 * Real.exp inp.decay.C /
+          d.stageScale inp.realizes hcomplete hconn) < inp.D := by
+    simpa only [MetricCompactSeed.withDivisor, c0, aMin] using hc0
+  have hphys :
+      8 * Real.exp inp.decay.C <
+        d.stageScale inp.realizes hcomplete hconn * inp.D := by
+    simpa only [mul_comm] using (div_lt_iff₀ haMin').1 hc0'
+  let P := inp.properMetrics hcomplete hconn
+  obtain ⟨L0, hstable⟩ := inp.exists_stable_net P
+  obtain ⟨hseed, psi, hpsi, htail⟩ :=
+    d.stage_diag inp hcomplete hconn hphys P L0 hstable
+  refine ⟨psi, hpsi, ?_⟩
+  exact d.b1_raw_of_diag inp P L0 hcomplete hconn hseed psi htail
+
+/-- Compatibility wrapper for the legacy normal-coordinate base. -/
+theorem MetricCompactBase.exists_b1_raw_h6
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : MetricCompactBase (I := I) X)
+    (d : H6NormalData (I := I) X b.decay)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M) :
+    let P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j) :=
+      fun j => properMetricOn (I := I) (X.obj j)
+        (hcomplete.complete j) (hconn j)
+    ∃ psi : Nat → Nat, StrictMono psi ∧
+      let Xpsi := X.subseq psi
+      let Ppsi : ∀ k : Nat, ProperMetricOn (I := I) (Xpsi.obj k) :=
+        fun k => P (psi k)
+      StepB1RawInput (I := I) (X := Xpsi) Ppsi := by
+  exact b.toSeed.exists_b1_raw_h6 d hcomplete hconn
 
 end HCGCompactness
 end DifferentialGeometry

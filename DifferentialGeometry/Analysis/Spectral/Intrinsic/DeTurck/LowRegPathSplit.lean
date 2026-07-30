@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSymmetry
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
@@ -75,6 +76,325 @@ private theorem phi_dev_joint
     (E := fun z : M => TensorRSSpace 4 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
+private theorem reindex_sub
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
+    reindexCoeffGen (I := I) (M := M) g₀ r s (A - B) ρ =
+      reindexCoeffGen (I := I) (M := M) g₀ r s A ρ -
+        reindexCoeffGen (I := I) (M := M) g₀ r s B ρ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((reindexCoeffGen (I := I) (M := M) g₀ r s A ρ -
+        reindexCoeffGen (I := I) (M := M) g₀ r s B ρ).toSection x) =
+      (reindexCoeffGen (I := I) (M := M) g₀ r s A ρ).toSection x -
+        (reindexCoeffGen (I := I) (M := M) g₀ r s B ρ).toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [reindexCoeffGen_toSection, reindexCoeffGen_toSection, reindexCoeffGen_toSection]
+  rw [show (A - B).toSection x = A.toSection x - B.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
+  exact ContinuousLinearMap.sub_comp _ _ _
+
+/-- The second-order Lie refold is pointwise small using only fibre metric
+smallness; no Sobolev radius or high-order jet hypothesis is required. -/
+theorem lieRefold2_cap
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ0 : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+        ((lieRefold2 (I := I) (M := M) g T hδ hδZ s).toSection x) ≤
+      (4 * deTurckArmFibreConst (Module.finrank ℝ E) *
+        (δ / (1 - δ) ^ 2)) ^ 2 := by
+  let gm := realizedFam (I := I) g T 0 hδ hδZ s
+  let P := convexPerturbation (I := I) g T 0 s
+  have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      gm.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g P y v w :=
+    fun y v w => realizedFam_inner_of_mem
+      (I := I) g T 0 hδ hδZ hsmem y v w
+  have hP : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g P) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs
+      (I := I) g T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+        abs_of_nonneg hs.1]
+      ring
+    rwa [heq] at hraw
+  let B := deTurckArmFibreConst (Module.finrank ℝ E) *
+    (δ / (1 - δ) ^ 2)
+  have hmono : ∀ σ : Equiv.Perm (Fin 4),
+      riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+          ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
+            (ccTensorUnitValueSection (I := I) (M := M) g
+              (symmS (I := I) (M := M) g T))
+            (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
+              (symmS (I := I) (M := M) g T)) σ).toSection x) ≤ B ^ 2 := by
+    intro σ
+    have hunit : ∀ (y : M) (v w : TangentSpace I y),
+        |Tensor0SSpace.toModel
+          (ccTensorUnitValueSection (I := I) (M := M) g
+            (symmS (I := I) (M := M) g T) y) ![(v : E), (w : E)]| ≤
+          δ * Real.sqrt (g.inner y v v) * Real.sqrt (g.inner y w w) := by
+      intro y v w
+      change |unitModel (I := I) (M := M) g 2
+        (symmS (I := I) (M := M) g T) y ![v, w]| ≤ _
+      rw [unitModel_eq_ccTensorBilin_local, ccTensorBilin_symmS]
+      exact hδ y v w
+    rw [curvatureRefoldMonomialCoeffField_toSection]
+    simpa only [B] using
+      (rfns_curvatureRefoldMonomialBiContrFib_le
+        (I := I) (M := M) g gm P htie hδ_lt hP
+        (ccTensorUnitValueSection (I := I) (M := M) g
+          (symmS (I := I) (M := M) g T))
+        hδ0 hunit σ x)
+  have heps : ∀ i : Fin 3, |lieRefoldEps i| ≤ (1 : ℝ) := by
+    intro i
+    fin_cases i <;> simp [lieRefoldEps]
+  let U : Fin 3 → TensorRSSpace 4 2 I x := fun i =>
+    ((lieRefoldEps i) •
+      curvatureRefoldMonomialCoeffField (I := I) (M := M) g gm
+        (ccTensorUnitValueSection (I := I) (M := M) g
+          (symmS (I := I) (M := M) g T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
+          (symmS (I := I) (M := M) g T))
+        (lieRefoldQ i)).toSection x
+  have hterm : ∀ i : Fin 3,
+      riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+          (U i) ≤ B ^ 2 := by
+    intro i
+    simp only [U]
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      riemannianFiberNormSq_smul]
+    have he2 : (lieRefoldEps i) ^ 2 ≤ 1 := by
+      nlinarith [abs_nonneg (lieRefoldEps i), sq_abs (lieRefoldEps i), heps i]
+    exact (mul_le_mul he2 (hmono (lieRefoldQ i))
+      (riemannianFiberNormSq_nonneg (I := I) (M := M) g 4 2 x _) (by norm_num)).trans
+      (by nlinarith [sq_nonneg B])
+  rw [lieRefold2, deTurckLieCovDerivRefoldC2Family_eq_symmS_weight,
+    SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+    riemannianFiberNormSq_smul]
+  simp only [Fin.sum_univ_three, SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_add, Pi.add_apply]
+  change s ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+    (U 0 + U 1 + U 2) ≤ _
+  have hadd01 := riemannianFiberNormSq_add_le
+    (I := I) (M := M) g 4 2 x (U 0) (U 1)
+  have hadd := riemannianFiberNormSq_add_le
+    (I := I) (M := M) g 4 2 x (U 0 + U 1) (U 2)
+  have hsum : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      (U 0 + U 1 + U 2) ≤ 10 * B ^ 2 := by
+    nlinarith [hterm 0, hterm 1, hterm 2, hadd01, hadd]
+  have hsum0 := riemannianFiberNormSq_nonneg
+    (I := I) (M := M) g 4 2 x (U 0 + U 1 + U 2)
+  have hs2 : s ^ 2 ≤ 1 := by nlinarith [hs.1, hs.2]
+  have hscaled : s ^ 2 * riemannianFiberNormSq
+      (I := I) (M := M) g 4 2 x (U 0 + U 1 + U 2) ≤ 10 * B ^ 2 := by
+    exact (mul_le_mul_of_nonneg_right hs2 hsum0).trans (by simpa using hsum)
+  have htarget : (4 * deTurckArmFibreConst (Module.finrank ℝ E) *
+      (δ / (1 - δ) ^ 2)) ^ 2 = 16 * B ^ 2 := by
+    simp only [B]
+    ring
+  rw [htarget]
+  nlinarith [hscaled, sq_nonneg B]
+
+/-- The complete principal Ricci--DeTurck coefficient deviation is pointwise
+small under fibre metric smallness alone. -/
+theorem phiMet_cap
+    (g g_bg : SmoothRiemannianMetric I M) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
+        {δ : ℝ}, δ < 1 → 0 ≤ δ →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gm.inner y v w =
+            g.inner y v w + ccTensorBilinSymm (I := I) g P y v w) →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g P) δ →
+        ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+            ((deTurckPhiMetTotal (I := I) (M := M) g g_bg gm -
+              deTurckPhiMetTotal (I := I) (M := M) g g_bg g).toSection x) ≤
+          (K * (δ / (1 - δ))) ^ 2 := by
+  obtain ⟨CTH, hCTH0, hCTH⟩ :=
+    traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+      (I := I) (M := M) g
+  obtain ⟨CR, hCR0, hCR⟩ :=
+    ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+      (I := I) (M := M) g
+  let K0 : ℝ := 8 * CTH 0 + 8 * CR 0
+  let n : ℝ := Module.finrank ℝ E
+  let K : ℝ := Real.sqrt K0 * n
+  have hK0 : 0 ≤ K0 := by
+    dsimp only [K0]
+    exact add_nonneg (mul_nonneg (by norm_num) (hCTH0 0))
+      (mul_nonneg (by norm_num) (hCR0 0))
+  refine ⟨K, mul_nonneg (Real.sqrt_nonneg _) (Nat.cast_nonneg _), ?_⟩
+  intro gm P δ hδ_lt hδ htie hP x
+  let DTH : SmoothCcTensor g 4 2 :=
+    traceHessianCoeff (I := I) (M := M) g gm -
+      traceHessianCoeff (I := I) (M := M) g g
+  let DR : SmoothCcTensor g 4 2 :=
+    ricciArmPrincipalCoeff (I := I) (M := M) g gm -
+      ricciArmPrincipalCoeff (I := I) (M := M) g g
+  let Dev : SmoothCcTensor g 4 2 :=
+    deTurckPhiMetTotal (I := I) (M := M) g g_bg gm -
+      deTurckPhiMetTotal (I := I) (M := M) g g_bg g
+  let ρA := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA
+  let ρAT := traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT
+  have hDev : Dev =
+      reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA +
+        reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT - (DR + DR) := by
+    dsimp only [Dev, DTH, DR]
+    rw [phiMet_reindex (I := I) (M := M) g g_bg gm,
+      phiMet_reindex (I := I) (M := M) g g_bg g,
+      reindex_sub g _ _ _ _ ρA, reindex_sub g _ _ _ _ ρAT]
+    abel
+  let S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 2 2 x
+    ((gInvDiffSlotCoeff (I := I) g gm).toSection x)
+  have hS : S ≤ (n * (δ / (1 - δ))) ^ 2 := by
+    dsimp only [S, n]
+    change riemannianFiberNormSq (I := I) (M := M) g 2 2 x
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM
+          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotEndo
+            (I := I) g gm x)) ≤ _
+    exact
+      DifferentialGeometry.Analysis.Sobolev.TensorHilbert.riemannianFiberNormSq_gInvDiffSlotEndo_le
+        (I := I) (M := M) g gm (ccTensorBilinSymm (I := I) g P)
+          htie hδ_lt hδ hP x
+  have hTH : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      (DTH.toSection x) ≤ CTH 0 * S := by
+    simpa [DTH, S] using hCTH gm 0 x
+  have hR : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      (DR.toSection x) ≤ CR 0 * S := by
+    simpa [DR, S] using hCR gm 0 x
+  have hAr : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g 4 2 x (DTH.toSection x) := by
+    rw [reindexCoeffGen_toSection]
+    exact riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g 4 2 x ρA (DTH.toSection x)
+  have hATr : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g 4 2 x (DTH.toSection x) := by
+    rw [reindexCoeffGen_toSection]
+    exact riemannianFiberNormSq_reindexCoeffFibGen
+      (I := I) (M := M) g 4 2 x ρAT (DTH.toSection x)
+  have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g 4 2 x
+    ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA).toSection x +
+      (reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT).toSection x)
+    (DR.toSection x + DR.toSection x)
+  have hadd1 := riemannianFiberNormSq_add_le (I := I) (M := M) g 4 2 x
+    ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA).toSection x)
+    ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT).toSection x)
+  have hadd2 := riemannianFiberNormSq_add_le
+    (I := I) (M := M) g 4 2 x (DR.toSection x) (DR.toSection x)
+  have h0 : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA).toSection x +
+        (reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT).toSection x -
+        (DR.toSection x + DR.toSection x)) ≤
+      4 * riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+          ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρA).toSection x) +
+        4 * riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+          ((reindexCoeffGen (I := I) (M := M) g 4 2 DTH ρAT).toSection x) +
+        8 * riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+          (DR.toSection x) := by
+    linarith
+  rw [hAr, hATr] at h0
+  have hraw : riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      (Dev.toSection x) ≤ K0 * S := by
+    rw [hDev]
+    simp only [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
+      ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+    dsimp only [K0]
+    nlinarith [h0, hTH, hR, hCTH0 0, hCR0 0]
+  change riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+      (Dev.toSection x) ≤ _
+  have hscaled := hraw.trans (mul_le_mul_of_nonneg_left hS hK0)
+  have htarget : (K * (δ / (1 - δ))) ^ 2 =
+      K0 * (n * (δ / (1 - δ))) ^ 2 := by
+    dsimp only [K]
+    rw [show (Real.sqrt K0 * n * (δ / (1 - δ))) ^ 2 =
+      (Real.sqrt K0) ^ 2 * (n * (δ / (1 - δ))) ^ 2 by ring,
+      Real.sq_sqrt hK0]
+  rw [htarget]
+  exact hscaled
+
+/-- A uniform pointwise cap for a cancellation-preserving path integrand
+controls the sum of its two integrated pieces minus the fixed coefficient. -/
+theorem path_add_sub_cap
+    (g : SmoothRiemannianMetric I M) (r : ℕ)
+    {δ δ' : ℝ}
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ'))
+    (Φ Ψ : ℝ → SmoothCcTensor g r 2) (C : SmoothCcTensor g r 2)
+    (hΦ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Φ
+      (δ := δ) (δ' := δ'))
+    (hΨ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Ψ
+      (δ := δ) (δ' := δ'))
+    (hK : linearizedRicciThreeArmHjoint (I := I) (M := M) g r
+      (fun t => Φ t + Ψ t - C) (δ := δ) (δ' := δ'))
+    (x : M) (Λ : ℝ) (hΛ : 0 ≤ Λ)
+    (hcap : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      riemannianFiberNormSq (I := I) (M := M) g r 2 x
+          ((Φ t + Ψ t - C).toSection x) ≤ Λ ^ 2) :
+    riemannianFiberNormSq (I := I) (M := M) g r 2 x
+        ((pathIntegralCoeffField (I := I) (M := M) g r 2 Φ
+              (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hΦ +
+            pathIntegralCoeffField (I := I) (M := M) g r 2 Ψ
+              (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hΨ -
+            C).toSection x) ≤ Λ ^ 2 := by
+  let K : ℝ → SmoothCcTensor g r 2 := fun t => Φ t + Ψ t - C
+  let PK := pathIntegralCoeffField (I := I) (M := M) g r 2 K
+    (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hK
+  have hcK := jointContMDiff_toModel_continuous_slice
+    (I := I) g r 2 K (realizedSmallSet (δ := δ) (δ' := δ')) hK x
+  have heq :
+      pathIntegralCoeffField (I := I) (M := M) g r 2 Φ
+            (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hΦ +
+          pathIntegralCoeffField (I := I) (M := M) g r 2 Ψ
+            (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hΨ -
+          C = PK := by
+    apply SmoothCcTensor.ext
+    apply ContMDiffSection.ext
+    intro y
+    apply TensorRSSpace.toModel_injective
+    have hcΦ := jointContMDiff_toModel_continuous_slice
+      (I := I) g r 2 Φ (realizedSmallSet (δ := δ) (δ' := δ')) hΦ y
+    have hcΨ := jointContMDiff_toModel_continuous_slice
+      (I := I) g r 2 Ψ (realizedSmallSet (δ := δ) (δ' := δ')) hΨ y
+    have hIΦ : IntervalIntegrable (fun t : ℝ =>
+        TensorRSSpace.toModel ((Φ t).toSection y)) MeasureTheory.volume 0 1 :=
+      (hcΦ.mono hSI).intervalIntegrable
+    have hIΨ : IntervalIntegrable (fun t : ℝ =>
+        TensorRSSpace.toModel ((Ψ t).toSection y)) MeasureTheory.volume 0 1 :=
+      (hcΨ.mono hSI).intervalIntegrable
+    simp only [PK, pathIntegralCoeffField_toModel, SmoothCcTensor.toSection_add,
+      SmoothCcTensor.toSection_sub, ContMDiffSection.coe_add, ContMDiffSection.coe_sub,
+      Pi.add_apply, Pi.sub_apply, TensorRSSpace.toModel_add, TensorRSSpace.toModel_sub, K]
+    rw [intervalIntegral.integral_sub (hIΦ.add hIΨ) intervalIntegrable_const,
+      intervalIntegral.integral_add hIΦ hIΨ, intervalIntegral.integral_const]
+    norm_num
+  rw [heq]
+  have hIcc : Set.Icc (0 : ℝ) 1 ⊆
+      realizedSmallSet (δ := δ) (δ' := δ') := by
+    simpa only [Set.uIcc_of_le zero_le_one] using hSI
+  apply riemannianFiberNormSq_pathIntegralCoeffField_le_sq
+    (I := I) (M := M) g r 2 K
+      (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hSI hK
+      x Λ hΛ (hcK.mono hIcc)
+  intro t ht
+  have hsqrt := Real.sqrt_le_sqrt (hcap t ht)
+  simpa only [K, Real.sqrt_sq hΛ] using hsqrt
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem norm_sq_add_le
@@ -107,26 +427,6 @@ private theorem reindex_norm_sq
       ‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2 := by
   rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
     norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
-
-private theorem reindex_sub
-    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
-    reindexCoeffGen (I := I) (M := M) g₀ r s (A - B) ρ =
-      reindexCoeffGen (I := I) (M := M) g₀ r s A ρ -
-        reindexCoeffGen (I := I) (M := M) g₀ r s B ρ := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  rw [show ((reindexCoeffGen (I := I) (M := M) g₀ r s A ρ -
-        reindexCoeffGen (I := I) (M := M) g₀ r s B ρ).toSection x) =
-      (reindexCoeffGen (I := I) (M := M) g₀ r s A ρ).toSection x -
-        (reindexCoeffGen (I := I) (M := M) g₀ r s B ρ).toSection x from by
-    rw [SmoothCcTensor.toSection_sub]; rfl]
-  rw [reindexCoeffGen_toSection, reindexCoeffGen_toSection, reindexCoeffGen_toSection]
-  rw [show (A - B).toSection x = A.toSection x - B.toSection x from by
-    rw [SmoothCcTensor.toSection_sub]; rfl]
-  rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
-  exact ContinuousLinearMap.sub_comp _ _ _
 
 private theorem convex_hs_bound
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

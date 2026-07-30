@@ -28,3 +28,9 @@ complete (100% current module verification).  `MetricCompactBase.exists_b1_raw`
 has a complete proof body, but its framed downstream validation is still in
 progress.  The separately named textbook Step B1 endpoint remains
 unstated/unproved (0%); this file closes only the master-extraction machinery.
+
+## 2026-07-29 H6 diagonal status
+
+The provider-parametric payload, nested radius states, and fixed-radius tail
+are now used by `H6NormalData.stage_diag`. Focused and exact verification pass.
+The H6 master diagonal is complete and feeds the checked raw-B1 producer.

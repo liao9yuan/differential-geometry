@@ -546,6 +546,7 @@ theorem seqAtom_live_conv
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
     {U : Set E} (hU : IsOpen U) {ainf : E -> Real}
     (hgamma : L.alive (gamma : Nat) = true)
@@ -564,9 +565,20 @@ theorem seqAtom_live_conv
   letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
-  simpa only [seqAtomChart, stepCAtomChart] using congrFun
-    (seqAtom_some hd hD P L pb r k gamma hk)
-    (framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  let q := framedExpDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z
+  have hR : 4 * L.lamInf (gamma : Nat) <
+      expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (seqCenterD hd P L k (gamma : Nat)) :=
+    hgp k gamma (seqCenterD hd P L k (gamma : Nat)) hk
+  change seqAtom hd hD P L pb r k gamma q =
+    stepCAtom (X.obj (L.φ k)) (seqCenterD hd P L k (gamma : Nat))
+      (L.lamInf (gamma : Nat))
+      (hd.lambda_pos hD (L.rInf (gamma : Nat))) q
+  rw [seqAtom_some hd hD P L pb r k gamma hk]
+  exact (stepCAtom_eq_dist (I := I) (X.obj (L.φ k)) (P (L.φ k))
+    (L.lamInf (gamma : Nat))
+    (hd.lambda_pos hD (L.rInf (gamma : Nat))) hR).symm
 
 /-- A stabilized dead atom converges in `C^infty` to the zero function without
 requiring metric or transition-map extraction for that slot. -/
@@ -634,6 +646,7 @@ theorem seqAtoms_conv
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) {U : Set E} (hU : IsOpen U)
     (ainf : Fin (pb.A r) -> E -> Real)
     (hlive : ∀ gamma : Fin (pb.A r), L.alive (gamma : Nat) = true ->
@@ -652,7 +665,7 @@ theorem seqAtoms_conv
         seqAtom_dead_conv (I := I) hd hD P L pb r beta gamma hU hgamma
   | true =>
       simpa only [hgamma, ↓reduceIte] using
-        seqAtom_live_conv (I := I) hd hD P L pb r beta gamma hU hgamma
+        seqAtom_live_conv (I := I) hd hD P L pb r hgp beta gamma hU hgamma
           (hlive gamma hgamma)
 
 /-- Concrete chart-pulled Step-C atoms converge once the finite family of

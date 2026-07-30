@@ -422,7 +422,7 @@ noncomputable def stageCfg
 /-- The interacting-pair filler after a strict refinement, while retaining the
 original stabilized `InterSlot L ... alpha` as its index. -/
 noncomputable def pairStageFillSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -457,7 +457,7 @@ noncomputable def pairStageFillSub
 /-- Finite target coordinates on a refined sequence, still totalized through
 the original stabilized interaction family. -/
 noncomputable def stagePtsSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -471,7 +471,7 @@ noncomputable def stagePtsSub
 /-- Actual normalized chart weights after a strict refinement, indexed by the
 original source live slot. -/
 noncomputable def stageWeightSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -499,7 +499,7 @@ noncomputable def stageWeightSub
 /-- The refined chart weight is exactly the global finite-stage weight at the
 point represented by that source chart. -/
 theorem stageWeightSub_eq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -529,7 +529,7 @@ theorem stageWeightSub_eq
 /-- The refined finite-stage local configuration with original interaction
 indices. -/
 noncomputable def stageCfgSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -540,13 +540,12 @@ noncomputable def stageCfgSub
   (stageWeightSub inp P L hr phi hphi alpha k z (chart := chart),
     stagePtsSub inp P L phi hphi alpha k l z (chart := chart))
 
-/-- The actual normalized weights for a prescribed chart family retain their
-exact finite-stage normalization on every source patch along one common tail. -/
-theorem HasSuppConvDataOn.weightSub_ev
-    (inp : MetricCompactnessInputs (I := I) X)
+/-- The actual distance-atom weights retain exact finite-stage normalization
+on every source patch, without a legacy normal-radius premise. -/
+theorem HasSuppConvDataOn.weightSub_ev_raw
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
-    (hgp : Item3GpScaleTail (I := I) inp.decay inp.D P L inp.pack r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (chart : NormalChartFamily (I := I) X)
     (U C0 C1 : LiveSlot L inp.pack r → Set E)
@@ -562,15 +561,11 @@ theorem HasSuppConvDataOn.weightSub_ev
         (stageWeightSub inp P L hr phi hphi alpha k (chart := chart)) := by
   classical
   let Lphi := L.subseq hphi
-  have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
-      Lphi inp.pack r :=
-    hgp.subseq inp.decay inp.D P L inp.pack r hphi
   dsimp only [HasSuppConvDataOn] at hdata
   rcases hdata with
     ⟨_hUopen, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
       _hbuffer, _hcore, hgeom, _hlim, _hweightData, _htrans, _hstage⟩
-  filter_upwards [hgpPhi] with k hgpK
-  intro alpha
+  refine Filter.Eventually.of_forall fun k alpha => ?_
   let Y := X.obj (Lphi.φ k)
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -586,8 +581,8 @@ theorem HasSuppConvDataOn.weightSub_ev
   have hf : Set.MapsTo f (U alpha) s := by
     intro z hz
     simpa only [f, s, Lphi, beta] using (((hgeom k).1 alpha).2 hz).2
-  have hw := seqWeights_data (I := I) inp.decay inp.hD P Lphi inp.pack r k
-    hgpK i0 (s := s) Set.Subset.rfl
+  have hw := seqWeights_data_raw (I := I) inp.decay inp.hD P Lphi inp.pack r k
+    i0 (s := s) Set.Subset.rfl
   have hpull := hw.comp hf
   have hweight : centerAverage.WeightDataOn (U alpha)
       (fun gamma => f ⁻¹' Lphi.hatBall inp.decay inp.D P inp.pack r k gamma)
@@ -595,6 +590,29 @@ theorem HasSuppConvDataOn.weightSub_ev
     simpa only [stageWeightSub, seqAtomChart, Lphi, beta, f, i0] using hpull
   exact ⟨hweight.nonneg, hweight.pos, hweight.sum_one,
     fun z _hz _gamma _hne => Set.mem_univ z⟩
+
+/-- Compatibility form of `HasSuppConvDataOn.weightSub_ev_raw` retaining the
+legacy radius premise. -/
+theorem HasSuppConvDataOn.weightSub_ev
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (_hgp : Item3GpScaleTail (I := I) inp.decay inp.D P L inp.pack r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf) :
+    ∀ᶠ k in Filter.atTop, ∀ alpha : LiveSlot L inp.pack r,
+      centerAverage.WeightDataOn (U alpha)
+        (fun _ : Fin (inp.pack.A r) => Set.univ)
+        (stageWeightSub inp P L hr phi hphi alpha k (chart := chart)) := by
+  exact hdata.weightSub_ev_raw inp P L hr phi hphi chart
+    U C0 C1 aInf Jinf Jbarinf
 
 /-- The actual normalized chart weights retain their exact finite-stage
 normalization on every source patch along one common tail. -/
@@ -753,7 +771,7 @@ theorem stageCfg_conv
 /-- Refined-sequence projection of `HasAtomWeightLimOn`, retaining one coherent
 chart family and the original source live-slot index. -/
 theorem HasAtomWeightLimOn.stageWeightSub_data
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -809,7 +827,7 @@ theorem HasAtomWeightLim.stageWeightSub_data
 family, with the old stabilized interaction family kept as the finite target
 index. -/
 theorem stageCfgSub_conv_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -963,7 +981,7 @@ theorem stagePts_eq_weight
 six-lambda ball makes the safety-totalized target equal the raw two-transition
 target for any coherent chart family. -/
 theorem stagePtsSub_eq_raw
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1045,6 +1063,7 @@ theorem stagePtsSub_eq_raw
           (chart (Lphi.φ l)
             (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))) hsmall)
 
+set_option maxHeartbeats 800000 in
 /-- On a refined sequence, a nonzero actual source weight makes the old-index
 Route-A target agree exactly with the raw two-transition target. -/
 theorem stagePtsSub_eq_ne
@@ -1067,9 +1086,9 @@ theorem stagePtsSub_eq_ne
           (seqCenterD inp.decay P (L.subseq hphi) k
             (target.1.1 : Nat)))
     (z : E)
-    (hweight : stageWeightSub inp P L hr phi hphi alpha k z
+    (hweight : stageWeightSub inp.toCore P L hr phi hphi alpha k z
       target.1.1 ≠ 0) :
-    stagePtsSub inp P L phi hphi alpha k l z target.1.1 =
+    stagePtsSub inp.toCore P L phi hphi alpha k l z target.1.1 =
       normalTransition (I := I) (X.obj ((L.subseq hphi).φ l))
         (seqCenterD inp.decay P (L.subseq hphi) l
           (target.1.1 : Nat))
@@ -1093,8 +1112,9 @@ theorem stagePtsSub_eq_ne
         simpa only [Lphi, NetLimitData.subseq_lamInf] using hGp) z (by
         simpa only [stageWeightSub, stageWeight, alphaPhi, Lphi] using hweight)
     simpa only [Lphi, NetLimitData.subseq_lamInf] using h
-  exact stagePtsSub_eq_raw inp P L phi hphi alpha target k l z
-    (chart := legacyChartFamily (I := I) X) (hsmall := hsmall)
+  set_option maxRecDepth 2048 in
+    exact stagePtsSub_eq_raw inp.toCore P L phi hphi alpha target k l z
+      (chart := legacyChartFamily (I := I) X) (hsmall := hsmall)
 
 /-- The pair filler converges to the identity from the retained two-sided
 transition limits and the stagewise overlap smoothness facts. -/
@@ -1147,7 +1167,7 @@ theorem pairStageFill_conv
 /-- Refined-sequence version of `pairStageFill_conv` which retains the old
 `InterSlot` index. -/
 theorem pairStageSub_conv
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1204,7 +1224,7 @@ theorem pairStageSub_conv
 
 /-- Chart-family version of `pairStageSub_conv`. -/
 theorem pairSub_conv_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1265,7 +1285,7 @@ theorem pairSub_conv_on
 /-- Stagewise smoothness of the two refined transitions implies smoothness of
 their old-index Route-A filler. -/
 theorem pairStageSub_smooth
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1314,7 +1334,7 @@ theorem pairStageSub_smooth
 
 /-- Chart-family version of `pairStageSub_smooth`. -/
 theorem pairSub_smooth_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1369,7 +1389,7 @@ theorem pairSub_smooth_on
 /-- Once every interacting refined pair has a smooth diagonal-convergent
 filler, the complete old-index finite target tuple converges to the diagonal. -/
 theorem stagePtsSub_conv
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1392,7 +1412,7 @@ theorem stagePtsSub_conv
 
 /-- Chart-family version of `stagePtsSub_conv`. -/
 theorem ptsSub_conv_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real}
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1418,7 +1438,7 @@ theorem ptsSub_conv_on
 /-- The chart-parametric support package makes the complete finite-stage point
 tuple converge to the diagonal on every retained source patch. -/
 theorem HasSuppConvDataOn.ptsSub_conv
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1532,7 +1552,7 @@ theorem HasSuppConvDataOn.ptsSub_conv
 /-- Uniform order-zero coordinate tail for the complete finite-stage point
 tuple of a prescribed chart family. -/
 theorem HasSuppConvDataOn.pts_coord_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1592,6 +1612,7 @@ theorem HasSuppConvDataOn.pts_coord_tail
     simpa only [dist_eq_norm, norm_sub_rev] using hcomp
   exact hcoord.trans_lt (by linarith)
 
+set_option maxHeartbeats 800000 in
 /-- The retained support/transition package yields convergence of the complete
 Route-A stage configuration on every source patch, once the finite-stage
 transitions are smooth on their eight-lambda balls. -/
@@ -1614,7 +1635,7 @@ theorem HasSuppConvData.cfgSub_conv
       let weightInf := fun z gamma =>
         rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
       MapCInfConvOnCompacts (U alpha)
-        (fun m => stageCfgSub inp P L hr phi hphi alpha
+        (fun m => stageCfgSub inp.toCore P L hr phi hphi alpha
           (kn m) (ln m))
         (fun z => (weightInf z, fun _ => z)) := by
   dsimp only [HasSuppConvData] at hdata
@@ -1625,10 +1646,10 @@ theorem HasSuppConvData.cfgSub_conv
   dsimp only
   have hpair : ∀ target : InterSlot L inp.pack r alpha,
       MapCInfConvOnCompacts (U alpha)
-        (fun m => pairStageFillSub inp P L phi hphi alpha target
+        (fun m => pairStageFillSub inp.toCore P L phi hphi alpha target
           (kn m) (ln m)) id := by
     intro target
-    have hball := pairStageSub_conv inp P L phi hphi alpha target
+    have hball := pairStageSub_conv inp.toCore P L phi hphi alpha target
       (Jinf alpha target) (Jbarinf alpha target)
       (htrans alpha target).1
       (htrans alpha target).2.1
@@ -1641,23 +1662,23 @@ theorem HasSuppConvData.cfgSub_conv
     exact fun K hK hKU p => hball K hK (hKU.trans (hU8 alpha)) p
   have hpairc : ∀ target : InterSlot L inp.pack r alpha, ∀ m,
       ContDiffOn Real (∞ : WithTop ℕ∞)
-        (pairStageFillSub inp P L phi hphi alpha target
+        (pairStageFillSub inp.toCore P L phi hphi alpha target
           (kn m) (ln m)) (U alpha) := by
     intro target m
-    exact (pairStageSub_smooth inp P L phi hphi alpha target
+    exact (pairStageSub_smooth inp.toCore P L phi hphi alpha target
       (kn m) (ln m) (hstage alpha target (kn m)).1
       (hstage alpha target (ln m)).2).mono (hU8 alpha)
-  have hpts := stagePtsSub_conv inp P L phi hphi alpha
+  have hpts := stagePtsSub_conv inp.toCore P L phi hphi alpha
     (hUopen alpha) kn ln hpair hpairc
   have hptsc : ∀ m,
       ContDiffOn Real (∞ : WithTop ℕ∞)
-        (fun z => stagePtsSub inp P L phi hphi alpha
+        (fun z => stagePtsSub inp.toCore P L phi hphi alpha
           (kn m) (ln m) z) (U alpha) := by
     intro m
     simpa only [stagePtsSub] using
       (contDiffOn_pi.mpr fun gamma =>
         stageTotal_smooth alpha
-          (pairStageFillSub inp P L phi hphi alpha)
+          (pairStageFillSub inp.toCore P L phi hphi alpha)
           (kn m) (ln m) (fun target => hpairc target m) gamma)
   exact stageCfgSub_conv inp P L hr phi hphi alpha (U alpha)
     (hUopen alpha) (aInf alpha) (hlim alpha) kn ln hkn hpts hptsc
@@ -1665,7 +1686,7 @@ theorem HasSuppConvData.cfgSub_conv
 /-- A chart-parametric support package provides both smoothness and convergence
 for the complete refined finite-stage configuration on every source patch. -/
 theorem HasSuppConvDataOn.cfgSub_data
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1754,6 +1775,7 @@ theorem HasSuppConvDataOn.cfgSub_data
   simpa only [stageCfgSub] using
     (hweightc (kn m)).prodMk (hptsc m)
 
+set_option maxHeartbeats 800000 in
 /-- The retained support package provides both smoothness and convergence for
 the complete refined finite-stage configuration on every source patch. -/
 theorem HasSuppConvData.cfgSub_data
@@ -1775,13 +1797,13 @@ theorem HasSuppConvData.cfgSub_data
       let weightInf := fun z gamma =>
         rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
       (∀ m, ContDiffOn Real (∞ : WithTop ℕ∞)
-        (stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m))
+        (stageCfgSub inp.toCore P L hr phi hphi alpha (kn m) (ln m))
         (U alpha)) ∧
       ContDiffOn Real (∞ : WithTop ℕ∞)
         (fun z => (weightInf z,
           fun _ : Fin (inp.pack.A r) => z)) (U alpha) ∧
       MapCInfConvOnCompacts (U alpha)
-        (fun m => stageCfgSub inp P L hr phi hphi alpha
+        (fun m => stageCfgSub inp.toCore P L hr phi hphi alpha
           (kn m) (ln m))
         (fun z => (weightInf z,
           fun _ : Fin (inp.pack.A r) => z)) := by
@@ -1798,21 +1820,21 @@ theorem HasSuppConvData.cfgSub_data
       (U alpha) (aInf alpha)
   have hpairc : ∀ target : InterSlot L inp.pack r alpha, ∀ m,
       ContDiffOn Real (∞ : WithTop ℕ∞)
-        (pairStageFillSub inp P L phi hphi alpha target
+        (pairStageFillSub inp.toCore P L phi hphi alpha target
           (kn m) (ln m)) (U alpha) := by
     intro target m
-    exact (pairStageSub_smooth inp P L phi hphi alpha target
+    exact (pairStageSub_smooth inp.toCore P L phi hphi alpha target
       (kn m) (ln m) (hstage alpha target (kn m)).1
       (hstage alpha target (ln m)).2).mono (hU8 alpha)
   have hptsc : ∀ m,
       ContDiffOn Real (∞ : WithTop ℕ∞)
-        (fun z => stagePtsSub inp P L phi hphi alpha
+        (fun z => stagePtsSub inp.toCore P L phi hphi alpha
           (kn m) (ln m) z) (U alpha) := by
     intro m
     simpa only [stagePtsSub] using
       (contDiffOn_pi.mpr fun gamma =>
         stageTotal_smooth alpha
-          (pairStageFillSub inp P L phi hphi alpha)
+          (pairStageFillSub inp.toCore P L phi hphi alpha)
           (kn m) (ln m) (fun target => hpairc target m) gamma)
   have hdiagc : ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun z : E => fun _ : Fin (inp.pack.A r) => z) (U alpha) :=
@@ -1840,7 +1862,7 @@ theorem HasSuppConvData.ptsSub_conv
     (hln : Tendsto ln atTop atTop) :
     ∀ alpha,
       MapCInfConvOnCompacts (U alpha)
-        (fun m z => stagePtsSub inp P L phi hphi alpha
+        (fun m z => stagePtsSub inp.toCore P L phi hphi alpha
           (kn m) (ln m) z)
         (fun z _ => z) := by
   intro alpha
@@ -1881,10 +1903,10 @@ theorem HasSuppConvData.pts_eq_ne
       aInf Jinf Jbarinf) :
     ∀ᶠ k in atTop, ∀ (alpha : LiveSlot L inp.pack r) (l : Nat)
         (z : E), z ∈ U alpha → ∀ gamma : Fin (inp.pack.A r),
-      stageWeightSub inp P L hr phi hphi alpha k z gamma ≠ 0 →
+      stageWeightSub inp.toCore P L hr phi hphi alpha k z gamma ≠ 0 →
         ∃ target : InterSlot L inp.pack r alpha,
           target.1.1 = gamma ∧
-          stagePtsSub inp P L phi hphi alpha k l z gamma =
+          stagePtsSub inp.toCore P L phi hphi alpha k l z gamma =
             normalTransition (I := I) (X.obj ((L.subseq hphi).φ l))
               (seqCenterD inp.decay P (L.subseq hphi) l
                 (target.1.1 : Nat))

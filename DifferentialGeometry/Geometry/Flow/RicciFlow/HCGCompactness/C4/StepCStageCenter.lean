@@ -32,7 +32,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 an outer exact-inverse convergence domain and a compactly nested inner domain
 carrying the limiting inverse-velocity root tube. -/
 theorem HasSuppConvDataOn.exists_invVel_core
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -238,7 +238,7 @@ theorem cfg_snd_conv
 /-- The actual refined finite-stage inverse-velocity equation in one source
 chart. -/
 noncomputable def stageInvVelSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -256,7 +256,7 @@ noncomputable def stageInvVelSub
 /-- Canonical source-chart root: choose the unique root in the prescribed
 limiting tube when it exists, and use the limiting branch as a total filler. -/
 noncomputable def stageRootSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -275,7 +275,7 @@ noncomputable def stageRootSub
 /-- On a tube where the finite-stage root is unique, the canonical totalized
 root is that root. -/
 theorem stageRootSub_eq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -302,7 +302,7 @@ theorem stageRootSub_eq
 /-- A fixed source-chart core carrying one canonical all-stage root cube, with
 sequential `C^∞` convergence and one uniform three-index root tail. -/
 def HasStageRootCube
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -342,7 +342,7 @@ def HasStageRootCube
 limiting center tube, chosen before the three moving stage indices, and a
 `C^∞`-convergent selected root family along every cofinal triple. -/
 theorem HasSuppConvDataOn.exists_stage_root
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -564,7 +564,7 @@ theorem HasSuppConvData.exists_stage_root
 /-- Canonicalize the sequential moving roots and extract one common
 three-index tail on the fixed source-chart core. -/
 theorem HasSuppConvDataOn.exists_stage_cube
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -704,7 +704,7 @@ theorem HasSuppConvData.exists_stage_cube
 canonical root cube has one all-pairs finite-order tail converging to the
 identity. -/
 theorem HasStageRootCube.map_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -713,8 +713,9 @@ theorem HasStageRootCube.map_tail
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
+    {chart : NormalChartFamily (I := I) X}
     (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
-      W PhiInf rho Phi3)
+      W PhiInf rho Phi3 (chart := chart))
     {K : Set E} (hK : IsCompact K) (hKC1 : K ⊆ interior (C1 alpha))
     (p : Nat) (eps : Real) (heps : 0 < eps) :
     ∃ N : Nat, ∀ n ≥ N, ∀ k ≥ N, ∀ l ≥ N,
@@ -742,7 +743,7 @@ theorem HasStageRootCube.map_tail
 /-- A pointwise germ identification with the canonical root cube transfers
 both smoothness and every prescribed finite jet tail to the identified maps. -/
 theorem HasStageRootCube.at_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -751,8 +752,9 @@ theorem HasStageRootCube.at_tail
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
+    {chart : NormalChartFamily (I := I) X}
     (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
-      W PhiInf rho Phi3)
+      W PhiInf rho Phi3 (chart := chart))
     {K : Set E} (hK : IsCompact K) (hKC1 : K ⊆ interior (C1 alpha))
     (Psi : Nat → Nat → E → E) (S : Nat → E → Prop)
     (hEq : ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ K, S k z →
@@ -1019,7 +1021,7 @@ theorem HasSuppConvData.pts_dist_tail
 /-- For one H6 chart family, coordinate convergence of the complete target
 tuple becomes uniform distance convergence in the moving target manifold. -/
 theorem H6NormalData.pts_dist_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)

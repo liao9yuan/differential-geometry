@@ -35,3 +35,10 @@ their canonical framed dependency chain has not yet been revalidated, so they
 must not be reported as framed-green.  The separately named textbook Step B1
 theorem remains unstated/unproved (0%).  Rounded dedicated Step-B/B1 machinery
 is about 95%, Chapter 4 machinery about 87%, and whole-HCG machinery about 60%.
+
+## 2026-07-29 H6 provider completion
+
+`HasRadiusTailOn.geom_tail` now transports local diffeomorphism, injectivity,
+and pointedness for the same H6 chart family used by the master stage data.
+Focused and exact verification pass. This provider-native master transport is
+complete and feeds the checked H6 raw-B1 assembly.

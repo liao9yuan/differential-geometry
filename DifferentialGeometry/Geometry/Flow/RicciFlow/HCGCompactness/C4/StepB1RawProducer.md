@@ -51,3 +51,18 @@ it to discharge the conditional Chapter-4 endpoint.
 - Conditional compactness endpoint: theorem-level 0% until the nested
   subsequence lift and final assembly are checked. Chapter-4 machinery remains
   approximately 87%; whole-HCG machinery approximately 60%.
+
+## 2026-07-29 H6 raw producer
+
+`H6NormalData.b1_raw_of_diag` assembles the real `StepB1RawInput` from one
+provider-native master diagonal. `MetricCompactBase.exists_b1_raw_h6` chooses
+the physical scale, constructs that diagonal, and returns the selected raw
+input without converting `d.chart` back to the legacy provider. Focused and
+exact verification pass (`4244/4244`), and the new declarations are
+`sorryAx`-free.
+
+The H6 raw producer and its Step-D consumer are 100%. The unconditional
+MSM135 theorem remains 0% because `MetricCompactnessInputs` still requires
+legacy `normalBounds` and `normalRadius` fields before the H6 route can be
+instantiated. The next producer is a provider-native core input interface,
+not `NormalRadiusProfile.le_exp_radius`.

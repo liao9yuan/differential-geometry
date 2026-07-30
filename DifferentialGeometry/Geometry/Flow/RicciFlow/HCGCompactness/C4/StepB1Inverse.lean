@@ -33,7 +33,9 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-private theorem exists_inv_seq
+/-- Smooth convergence of injective local diffeomorphisms to the identity
+passes to any explicitly chosen family of left inverses near a compact core. -/
+theorem exists_inv_seq
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {A G : Nat → E → E} {Q W K : Set E}

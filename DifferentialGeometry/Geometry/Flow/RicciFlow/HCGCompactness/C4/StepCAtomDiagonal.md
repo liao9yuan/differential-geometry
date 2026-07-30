@@ -95,3 +95,14 @@ theorems are 0% revalidated until that upstream refresh chain completes.  The
 selected B/C capstone, `StepB1RawInput`, textbook Step B1, and unconditional
 compactness endpoints remain theorem-level 0%; whole-HCG support machinery is
 approximately 60%.
+
+## 2026-07-29 raw normalized-weight diagonal
+
+`HasAtomWeightLimOn.of_raw` and `weight_data_raw` expose the distance-atom
+diagonal and its finite weight data without carrying
+`Item3GpScaleTail`. The old declarations remain compatibility wrappers, so
+legacy callers keep their signatures while the H6 producer consumes the
+smaller honest API.
+
+Focused and exact verification are GREEN (`4023/4023`). The raw atom/weight
+diagonal is complete and is no longer a separate H6 frontier.

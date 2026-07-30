@@ -1331,7 +1331,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
                 ((hOverlap target k) z hz).2)
           · simp only [aInf, dif_pos htarget, target]
         exact seqAtom_live_conv (I := I) inp.decay inp.hD P Lphi inp.pack r
-          beta gamma (hUopen alpha) hgamma (by
+          hgpPhi beta gamma (hUopen alpha) hgamma (by
             simpa only [Lphi, NetLimitData.subseq_lamInf] using hstep)
       · cases hgamma : L.alive (gamma : Nat) with
         | false =>
@@ -1507,7 +1507,7 @@ def HasCompactCover {Y J : Type*} [TopologicalSpace Y]
 /-- Retained source-cover, normalized-weight, and transition-limit data for one
 coherent normal-chart family on one subsequence. -/
 def HasSuppConvDataOn
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P)
     (r : Real) (hr : 0 ≤ r)
@@ -1876,7 +1876,7 @@ theorem HasSuppConvData.toOnLegacy
 /-- Projects the normalized weight family on one retained source domain for
 an arbitrary coherent chart family. -/
 theorem HasSuppConvDataOn.weight_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P)
     (r : Real) (hr : 0 ≤ r)
@@ -1952,7 +1952,7 @@ theorem HasSuppConvData.weight_on
 /-- Projects one retained source domain and its nested compact cores from a
 chart-parametric support package. -/
 theorem HasSuppConvDataOn.core_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P)
     (r : Real) (hr : 0 ≤ r)
@@ -1981,7 +1981,7 @@ theorem HasSuppConvDataOn.core_on
 /-- Projects the radius and geometric maps-to data for one source slot from a
 chart-parametric support package. -/
 theorem HasSuppConvDataOn.geom_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P)
     (r : Real) (hr : 0 ≤ r)
@@ -2197,6 +2197,65 @@ theorem HasSuppConvData.geom_on
       _hbuffer, _hcore, hgeom,
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact (hgeom k).1 alpha
+
+/-- Preserves the provider-native source-support package under strict
+refinement. -/
+theorem HasSuppConvDataOn.subseq
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    HasSuppConvDataOn (I := I) inp P L r hr
+      (phi ∘ ψ) (hphi.comp hψ) chart U C0 C1 aInf Jinf Jbarinf := by
+  dsimp only [HasSuppConvDataOn] at h ⊢
+  rcases h with
+    ⟨hU, hU8, hC0, hC1, hC01, hC1U, hconvex, hzero,
+      hbuffer, hcore, hcover, hweight,
+      hweightData, htrans, hsmooth⟩
+  refine ⟨hU, hU8, hC0, hC1, hC01, hC1U, hconvex, hzero, ?_, ?_, ?_, ?_,
+    hweightData, ?_, ?_⟩
+  · rcases hbuffer with ⟨eta, heta, hbuf⟩
+    refine ⟨eta, heta, ?_⟩
+    intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatSourceBall_subseq] using hbuf (ψ k)
+  · intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatSourceBall_subseq] using hcore (ψ k)
+  · intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatBall_subseq, NetLimitData.innerBall_subseq,
+      NetLimitData.hatSourceBall_subseq] using hcover (ψ k)
+  · intro alpha
+    have hsub := (hweight alpha).subseq hψ
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+      seqCenterD_subseq] using hsub
+  · intro alpha target
+    rcases htrans alpha target with
+      ⟨hJ, hJbar, hJcont, hJbarcont, hJconv, hJbarconv, hleft, hright⟩
+    refine ⟨hJ, hJbar, hJcont, hJbarcont, ?_, ?_, hleft, hright⟩
+    · have hsub := hJconv.comp_tendsto_atTop hψ.tendsto_atTop
+      simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+        seqCenterD_subseq] using hsub
+    · have hsub := hJbarconv.comp_tendsto_atTop hψ.tendsto_atTop
+      simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+        seqCenterD_subseq] using hsub
+  · intro alpha target k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+      seqCenterD_subseq] using hsmooth alpha target (ψ k)
 
 /-- Preserves the full source-support package under strict refinement. -/
 theorem HasSuppConvData.subseq

@@ -791,3 +791,14 @@ substitution itself.  The compatibility theorem is 100%; the Gate 5
 consumer/provider substitution is about 20%; the dedicated H6 producer remains
 100%; `NormalRadiusProfile.le_exp_radius` and the unconditional MSM135 endpoint
 remain theorem-level 0%.  Whole-HCG machinery remains approximately 60%.
+
+## 2026-07-29 provider-native refinement
+
+`HasSuppConvDataOn.subseq` preserves the complete chart-parametric support,
+weight, transition, overlap, and smoothness package under a further strict
+refinement. The legacy producer also passes its actual stagewise radius data
+directly into the distance-atom convergence step.
+
+Focused and exact verification are GREEN (`4034/4034`). Together with
+`StepCProducersH6`, this closes the support-package refinement layer; it does
+not prove the final compactness endpoint.

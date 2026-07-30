@@ -118,3 +118,8 @@ Focused verification passed, and the exact `StepCStageFill` refresh is green
 (`4036/4036`). The remaining H6 work is not another filler wrapper: it is the
 geometric proof of that six-lambda membership from nonzero H6 weight support,
 followed by target-chart membership and decode.
+
+Those membership and decode obligations are now supplied downstream by
+`stage_source_mem`, `target_mem`, and `pts_target_tail`. The raw filler seam
+therefore remains focused- and exact-green and is complete; it should not be
+reopened during the provider-native input assembly.

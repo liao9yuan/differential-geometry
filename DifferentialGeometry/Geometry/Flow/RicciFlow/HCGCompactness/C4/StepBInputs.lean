@@ -1308,6 +1308,19 @@ def transition
     (X.obj k).t2TangentBundle
   (chart k x).transition (chart k y)
 
+/-- The metric of a sequence member pulled back through one chart in a
+coherent normal-chart family. -/
+noncomputable def metric
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X) (k : Nat)
+    (x : (X.obj k).M) : E → (E →L[Real] E →L[Real] Real) :=
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  (chart k x).metric (X.obj k).metric
+
 end NormalChartFamily
 
 /-- The existing selected framed branch, packaged through the canonical

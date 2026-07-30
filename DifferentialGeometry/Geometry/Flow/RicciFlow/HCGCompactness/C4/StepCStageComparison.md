@@ -236,3 +236,31 @@ Gate 5 provider substitution is about 45%. The
 dedicated H6 producer is 100%; the unconditional MSM135 endpoint is still
 unstated and therefore 0%, and whole-HCG supporting machinery remains about
 60%.
+
+## 2026-07-29 H6 target decode and provider seam closure
+
+The normalized H6 ratio closes the formerly missing pair-radius estimate:
+`ratio_gt_48`, `pair_lam_lt_three`, `stage_radius_gt`, and `stage_rho_le`
+give direct source and target membership without the oversized legacy nesting
+bound. `target_mem` and `pts_target_tail` then decode the raw stage target in
+the same H6 chart used by the weights.
+
+`HasStageRootReadout`, `uniqueStage_of_fill`, `stageCompare_eq_cm`,
+`HasStageJetTail`, and `HasStageBaseTail` are chart-parametric with legacy
+defaults. Focused and exact verification are GREEN (`4142/4142`). The H6
+specializations live in `StepCStageComparisonH6`.
+
+The target-decode and comparison-map migration is complete (100%). Gate 5
+provider substitution is complete after the H6 support producer and its direct
+consumer are included. This does not state or prove the unconditional MSM135
+endpoint, which remains 0%; whole-HCG supporting machinery is about 70%.
+
+## 2026-07-29 selected-subsequence branch input
+
+`H6NormalData.actual_cm_tail` now consumes its branch data on the already
+selected subsequence `L.subseq hphi`, exactly matching every stage-map use in
+the proof. No extra eventual transport or stronger branch assumption is
+needed. Focused and exact verification are GREEN (`4142/4142`).
+
+The generic provider boundary remains complete. The concrete H6 master
+stage-data producer is recorded in `StepCStageComparisonH6`.

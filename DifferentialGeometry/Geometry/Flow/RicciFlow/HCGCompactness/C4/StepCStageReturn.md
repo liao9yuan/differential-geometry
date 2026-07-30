@@ -81,3 +81,10 @@ exact-green.
 fully validated through the framed downstream chain.  The
 separately named textbook B1 theorem and the unconditional compactness
 endpoint remain theorem-level 0%; whole-HCG machinery remains about 60%.
+
+## 2026-07-29 provider compatibility
+
+The return-map APIs retain the legacy chart family only as their default
+argument. The H6 return consumer supplies `d.chart` explicitly. Focused and
+exact verification pass; no legacy radius-profile theorem is used by the H6
+route.

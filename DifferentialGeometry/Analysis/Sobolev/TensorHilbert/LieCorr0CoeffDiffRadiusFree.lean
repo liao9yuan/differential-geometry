@@ -1517,6 +1517,121 @@ private lemma b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
             ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (n + 2) := by ring
 
 set_option linter.unusedVariables false in
+/-- Radius-free per-order jet bound for the moving-metric-lowered connection
+difference.  Its order-`i` estimate uses perturbation jets only through order
+`i + 1`; in particular, the order-two case is an `H³` window. -/
+theorem mcd_l2_radiusFree
+    (g₀ gb : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ F : ℕ → ℝ, (∀ i, 0 ≤ F i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w =
+            g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+            (P.toSection x) ≤ Λ₀ ^ 2)
+        (i : ℕ),
+        ‖iteratedCovGrad (I := I) g₀ 0 3 i
+            (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gb)‖ ^ 2 ≤
+          F i * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
+  obtain ⟨Kmcd, hKmcd, hmcd⟩ :=
+    b4_mcd_atgw (I := I) (M := M) g₀ gb hδ₀ hΛ₀0
+  obtain ⟨Krf, hKrf, hgrid⟩ :=
+    antidiagonalTupleGrid_integral_radiusFree
+      (I := I) (M := M) g₀ hΛ₀0
+  refine ⟨fun i => Kmcd i * ∑ k ∈ Finset.range (i + 2), Krf k,
+    fun i => mul_nonneg (hKmcd i)
+      (Finset.sum_nonneg fun k _ => hKrf k), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hsup i
+  have hAG : ∀ k : ℕ,
+      MeasureTheory.Integrable
+          (fun x => Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k)
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+        (∫ x, Combinatorics.antidiagonalTupleGrid
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+          Krf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2) := by
+    intro k
+    have hExpand : (fun x => Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k) =
+        (fun x => ∑ nn ∈ Finset.range (k + 1),
+          ∑ e ∈ Finset.Nat.antidiagonalTuple nn k,
+            ∏ m : Fin nn,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
+      funext x
+      rw [Combinatorics.antidiagonalTupleGrid]
+    rw [hExpand]
+    exact hgrid P hsup k
+  have hwin_int : MeasureTheory.Integrable
+      (fun x => Combinatorics.antidiagonalTupleGridWindow
+        (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (i + 2))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    simp only [Combinatorics.antidiagonalTupleGridWindow]
+    exact MeasureTheory.integrable_finset_sum _ fun k _ => (hAG k).1
+  have hFint : MeasureTheory.Integrable
+      (fun x => Kmcd i * Combinatorics.antidiagonalTupleGridWindow
+        (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (i + 2))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    hwin_int.const_mul _
+  have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g₀ 0 (3 + i)
+    (iteratedCovGrad (I := I) g₀ 0 3 i
+      (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gb))
+    _ hFint (fun x => hmcd g₁ P htie hδ_le hδ0 hδ hsup i x)
+  rw [MeasureTheory.integral_const_mul] at hkey
+  refine le_trans hkey ?_
+  let S : ℝ := ∑ j ∈ Finset.range (i + 2),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2
+  have hwin_bd : (∫ x, Combinatorics.antidiagonalTupleGridWindow
+      (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (i + 2)
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      ∑ k ∈ Finset.range (i + 2),
+        Krf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2) := by
+    simp only [Combinatorics.antidiagonalTupleGridWindow]
+    rw [MeasureTheory.integral_finset_sum _ fun k _ => (hAG k).1]
+    exact Finset.sum_le_sum fun k _ => (hAG k).2
+  have hinner : (∑ k ∈ Finset.range (i + 2),
+      Krf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2)) ≤
+      (∑ k ∈ Finset.range (i + 2), Krf k) * (1 + S) := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_le_sum fun k hk => ?_
+    have hkS : ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2 ≤ S :=
+      Finset.single_le_sum (fun j _ => sq_nonneg
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖) hk
+    exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hkS) (hKrf k)
+  calc
+    Kmcd i * (∫ x, Combinatorics.antidiagonalTupleGridWindow
+        (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (i + 2)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+        ≤ Kmcd i * ∑ k ∈ Finset.range (i + 2),
+          Krf k * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 k P‖ ^ 2) :=
+      mul_le_mul_of_nonneg_left hwin_bd (hKmcd i)
+    _ ≤ Kmcd i * ((∑ k ∈ Finset.range (i + 2), Krf k) * (1 + S)) :=
+      mul_le_mul_of_nonneg_left hinner (hKmcd i)
+    _ = (Kmcd i * ∑ k ∈ Finset.range (i + 2), Krf k) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+      simp only [S]
+      ring
+
+set_option linter.unusedVariables false in
 /-- **(3) Pointwise radius-free `atgw` bound for `wOmega`** — the in-proof fold of the tower's
 `wOmega_lowOrder_jetL2_radiusFree` re-derived at the pointwise level from the two exposed
 producers: `|∇ⁿ(wOmega g₀ g₁ gb)|²(x) ≤ KΩ n · atgw(bP)(n+2)`. -/

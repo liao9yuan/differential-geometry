@@ -69,3 +69,15 @@ Focused verification passed.  This atom-level adapter is complete; it is
 infrastructure for the master radius diagonal.  `StepB1RawInput` and textbook
 B1 remain theorem-level 0%; dedicated Step-B/B1 machinery is roughly 98%,
 Chapter-4 machinery roughly 90%, and whole-HCG machinery roughly 60%.
+
+## 2026-07-29 H6 chart atom readout
+
+`stepCAtom_mem_ball` and `stepCAtom_eq_dist` expose the provider-independent
+source-ball membership and intrinsic-distance readout needed by the H6 atom
+limit proof. The H6 support producer reuses these declarations instead of
+unfolding the atom implementation.
+
+Focused and exact verification are GREEN (`3913/3913`). This atom bridge is
+complete (100%) and is infrastructure for the now-complete Gate 5 provider
+substitution. The unconditional MSM135 endpoint remains unstated (0%);
+whole-HCG supporting machinery is about 70%.

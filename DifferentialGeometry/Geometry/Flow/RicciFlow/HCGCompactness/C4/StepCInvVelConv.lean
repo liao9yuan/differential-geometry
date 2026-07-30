@@ -35,7 +35,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 common open inverse domain give convergence of the Step-C inverse-velocity
 equations. -/
 theorem invVelSub_conv_on
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -120,13 +120,13 @@ theorem invVelSub_conv
     (weightInf : E → Fin (inp.pack.A r) → Real)
     {chart : NormalChartFamily (I := I) X}
     (hcfgC : ∀ m, ContDiffOn Real (∞ : WithTop ℕ∞)
-      (stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)
+      (stageCfgSub inp.toCore P L hr phi hphi alpha (kn m) (ln m)
         (chart := chart)) S)
     (hcfgInfC : ContDiffOn Real (∞ : WithTop ℕ∞)
       (fun z => (weightInf z,
         fun _ : Fin (inp.pack.A r) => z)) S)
     (hcfg : MapCInfConvOnCompacts S
-      (fun m => stageCfgSub inp P L hr phi hphi alpha (kn m) (ln m)
+      (fun m => stageCfgSub inp.toCore P L hr phi hphi alpha (kn m) (ln m)
         (chart := chart))
       (fun z => (weightInf z, fun _ : Fin (inp.pack.A r) => z)))
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
@@ -143,15 +143,15 @@ theorem invVelSub_conv
       ∀ (D : Set (E × E)), IsOpen D →
         MapsTo (fun q : E × E => q.1) D S →
         (∀ m q, q ∈ D → ∀ gamma : Fin (inp.pack.A r),
-          (q.2, (stageCfgSub inp P L hr phi hphi alpha
+          (q.2, (stageCfgSub inp.toCore P L hr phi hphi alpha
             (kn m) (ln m) q.1 (chart := chart)).2 gamma) ∈
               Metric.ball 0 delta0) →
         (∀ q, q ∈ D → (q.2, q.1) ∈ Metric.ball 0 delta0) →
         MapCInfConvOnCompacts D
           (fun m q => invVelSum (e (nn m))
-            (stageCfgSub inp P L hr phi hphi alpha
+            (stageCfgSub inp.toCore P L hr phi hphi alpha
               (kn m) (ln m) q.1 (chart := chart)).1
-            (stageCfgSub inp P L hr phi hphi alpha
+            (stageCfgSub inp.toCore P L hr phi hphi alpha
               (kn m) (ln m) q.1 (chart := chart)).2 q.2)
       (fun q => invVelSum eInf
             (weightInf q.1) (fun _ => q.1) q.2) := by
@@ -159,7 +159,7 @@ theorem invVelSub_conv
   refine ⟨delta0, hdelta0, ?_⟩
   intro D hD hfst hmap hmapInf
   have he := hinv.comp_tendsto_atTop hnn
-  exact invVelSub_conv_on inp P L hr phi hphi alpha kn ln hS weightInf
+  exact invVelSub_conv_on inp.toCore P L hr phi hphi alpha kn ln hS weightInf
     hcfgC hcfgInfC hcfg (fun m => e (nn m)) eInf Metric.isOpen_ball
     (Filter.Eventually.of_forall fun m => heC (nn m)) heInfC he hD hfst
     (Filter.Eventually.of_forall hmap) hmapInf

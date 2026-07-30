@@ -287,3 +287,15 @@ provider boundary instead of reopening `legacyBallChart` downstream.
 Focused verification passed in the current isolated artifact replay. This is
 provider-migration infrastructure only; `exists_h6NormalData` remains
 theorem-level 0%.
+
+## 2026-07-29: provider-native metric readout
+
+`NormalChartFamily.metric` is the common pullback-metric readout used by the
+H6 fixed-center diagonal and finite live-slot extraction. It keeps the metric
+and the chart provider in one API and leaves `legacyChartFamily` available only
+as the compatibility choice.
+
+Focused and exact verification are GREEN (`3866/3866`). The dedicated H6
+normal-coordinate producer is now complete; this declaration is infrastructure
+for the provider-native stage package, not an unconditional compactness
+endpoint.

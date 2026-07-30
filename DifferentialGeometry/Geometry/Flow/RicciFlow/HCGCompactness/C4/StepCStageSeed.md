@@ -59,3 +59,24 @@ radius or inverse-branch assumption was added.
 Focused verification is pending the upstream `HatChartReadout` and
 `StepCSupportCapstone` artifact refreshes. The H6 provider substitution remains
 a separate Gate 5 step.
+
+## 2026-07-29 elaboration hardening
+
+After the H6/Stage comparison artifacts were refreshed, the exact downstream
+build exposed a recursion-depth failure while elaborating the long dependent
+`HasSuppCmFin` constructor tuple.  The proof now introduces the same fields with
+sequential `constructor` steps and restricts a larger recursion budget to the
+two remaining dependent leaf matches.  This changes no theorem statement,
+input, or mathematics; it only keeps elaboration from normalizing the entire
+dependent tuple at once.
+
+Focused verification passes.  Its exact refresh is currently blocked upstream:
+the source-newer H6 migration in `StepCStageComparison` has two unresolved
+framed-chart versus framed-exponential-map result-shape mismatches.  This seed
+file itself has no remaining diagnostic.
+
+## 2026-07-29 H6 seed status
+
+`HasStageSeedOn` is now consumed by the H6 canonical stage-scale and master
+diagonal route. Focused and exact verification pass. The earlier framed-chain
+artifact blocker is obsolete; the provider-native seed itself is complete.

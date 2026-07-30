@@ -65,3 +65,35 @@ normal-coordinate producer machinery are 100% complete. This does not prove
 the independent legacy `NormalRadiusProfile.le_exp_radius`, and it does not by
 itself complete the provider substitution in the selected Step B/C consumer.
 The unconditional MSM135 endpoint remains 0%.
+
+## 2026-07-29 radius normalization
+
+`exists_h6BallData` now caps the launch radius by `min r₀ 1`. The resulting
+construction theorem `h6Ratio_mu0_le_half` proves
+`h6Ratio r₁ * hd.mu 0 ≤ 1 / 2`, and the field `ratio_mu0_le` carries this
+genuine fact through `H6BallData`, `H6ChartData`, and therefore
+`H6NormalData`. The smaller chart balls remain inside the original
+`exists_intr_control` ball, so the existing local-diffeomorphism and half/two
+metric estimates are unchanged.
+
+Focused and exact verification are GREEN (`3983/3983`). The next consumer is
+the H6 target-stage membership/decode proof in `StepCStageComparison`; it may
+now use the retained normalization to close the exponential pair-radius bound.
+
+The dedicated H6 producer remains 100%. This strengthening removes the current
+Gate 5 quantitative producer blocker but does not itself close provider
+substitution or the unconditional MSM135 endpoint, which remains theorem-level
+0%.
+
+## 2026-07-29 subsequence transport
+
+`H6NormalData.subseq` now transports the complete controlled chart family,
+including its branch radii, metric bounds, and normalized ratio, to an
+arbitrary subsequence. This is the producer-side bridge used by the finite
+transition diagonal in `StepCProducersH6`.
+
+Focused verification is GREEN and the producer artifact is exact-current
+(`3983/3983`). `exists_h6NormalData` remains 100%. Gate 5 provider substitution
+is now complete in the downstream H6 support/readout modules; the unconditional
+MSM135 endpoint is still unstated and therefore 0%, and whole-HCG supporting
+machinery is about 70%.

@@ -53,3 +53,16 @@ After that owner chain was focused- and exact-refreshed, the authorized exact
 stage-center module is now exact-green. This validates this module and its
 current import chain only; it does not by itself complete the downstream B1
 producer validation or the separately named textbook theorem.
+
+## 2026-07-29 chart-family stage centers
+
+The map-tail and point-tail center lemmas now take the same
+`NormalChartFamily` used by the stage fill, while the legacy family remains the
+default. The H6 root-cube construction therefore no longer crosses a
+fixed-provider seam.
+
+Focused verification and the current exact refresh are GREEN (`4126/4126`).
+The stage-center provider migration is complete (100%). Together with the H6
+support producer and readout module this closes Gate 5 provider substitution;
+the unconditional MSM135 endpoint remains unstated (0%), and whole-HCG
+supporting machinery is about 70%.

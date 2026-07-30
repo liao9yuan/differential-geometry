@@ -145,3 +145,15 @@ current-interface verification passed after refreshing the analysis export.
 This closes only an accidental transitive-import dependency exposed by the H6
 chart migration. The H6 profile theorem and `exists_h6NormalData` remain
 theorem-level 0%; dedicated H6 producer machinery is about 55%.
+
+## 2026-07-29 distance-atom convergence
+
+The live atom convergence proof now identifies the chart atom with the
+intrinsic distance atom through `stepCAtom_eq_dist` and the actual stagewise
+radius bound. This removes reliance on an accidental definitional equality of
+chart realizations while retaining the genuine radius input exactly where the
+readout needs it.
+
+Focused and exact verification are GREEN (`4017/4017`). This is a completed
+atom-convergence brick in Gate 5; the unconditional compactness theorem remains
+unproved.

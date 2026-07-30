@@ -62,6 +62,19 @@ theorem h6Ratio_lt_one {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     hd.h6Ratio r₀ < 1 :=
   lt_of_le_of_lt (min_le_left _ _) (by norm_num)
 
+/-- Capping the launch radius by one normalizes the global H6 radius. -/
+theorem h6Ratio_mu0_le_half
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : r₀ ≤ 1) :
+    hd.h6Ratio r₀ * hd.mu 0 ≤ 1 / 2 := by
+  have hmu₀ : 0 < hd.mu 0 := hd.mu_pos 0
+  calc
+    hd.h6Ratio r₀ * hd.mu 0
+        ≤ (r₀ / (2 * hd.mu 0)) * hd.mu 0 :=
+      mul_le_mul_of_nonneg_right (min_le_right _ _) hmu₀.le
+    _ = r₀ / 2 := by field_simp [ne_of_gt hmu₀]
+    _ ≤ 1 / 2 := by linarith
+
 /-- Every selected H6 radius is positive. -/
 theorem h6Radius_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : 0 < r₀)
@@ -116,6 +129,7 @@ structure H6BallData
       ConnectedSpace (X.obj k).M) where
   ratio : Real
   ratio_pos : 0 < ratio
+  ratio_mu0_le : ratio * hd.mu 0 ≤ 1 / 2
   chart : ∀ (k : Nat) (x : (X.obj k).M),
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -322,6 +336,7 @@ structure H6ChartData
     (hd : InjRadiusDecayInput (I := I) X) where
   ratio : Real
   ratio_pos : 0 < ratio
+  ratio_mu0_le : ratio * hd.mu 0 ≤ 1 / 2
   chart : ∀ (k : Nat) (x : (X.obj k).M),
     letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
     letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -633,6 +648,35 @@ structure H6NormalData
 
 namespace H6NormalData
 
+/-- Reindex the complete H6 normal-coordinate package along a subsequence. -/
+def subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    (d : H6NormalData (I := I) X hd) (f : Nat → Nat) :
+    H6NormalData (I := I) (X.subseq f) (hd.subseq f) where
+  ratio := d.ratio
+  ratio_pos := d.ratio_pos
+  ratio_mu0_le := by
+    simpa [InjRadiusDecayInput.subseq, InjRadiusDecayInput.mu] using
+      d.ratio_mu0_le
+  chart := fun k x => d.chart (f k) x
+  radius_eq := by
+    intro k x
+    simpa [InjRadiusDecayInput.subseq, InjRadiusDecayInput.mu,
+      PointedRiemannianSeq.subseq] using d.radius_eq (f k) x
+  hom_eq := by
+    intro k x hcomplete
+    simpa [PointedRiemannianSeq.subseq] using
+      d.hom_eq (f k) x hcomplete
+  metricC := d.metricC
+  metricC_nonneg := d.metricC_nonneg
+  metric_equiv := by
+    intro k x
+    simpa [PointedRiemannianSeq.subseq] using d.metric_equiv (f k) x
+  metric_deriv := by
+    intro k p x
+    simpa [PointedRiemannianSeq.subseq] using d.metric_deriv (f k) p x
+
 /-- The metric at stage `k` pulled back through the H6 chart centered at `x`.
 This is the branch-independent replacement for the legacy
 `normalCoordMetric`. -/
@@ -672,6 +716,20 @@ def metricBounds
       radius_pos := (d.chart k x).radius_pos
       equiv := d.metric_equiv k x
       deriv := fun p => d.metric_deriv k p x }
+
+/-- Evaluate an H6 chart while installing the bundled manifold instances of
+the selected sequence member. -/
+def chartMap
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    (d : H6NormalData (I := I) X hd) (k : Nat)
+    (x : (X.obj k).M) : E → (X.obj k).M :=
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  (d.chart k x).hom
 
 /-- The transition between two H6 charts at the same sequence stage. -/
 def chartTransition
@@ -716,6 +774,7 @@ noncomputable def H6BallData.toChartData
     H6ChartData (I := I) X hd where
   ratio := d.ratio
   ratio_pos := d.ratio_pos
+  ratio_mu0_le := d.ratio_mu0_le
   chart := fun k x => d.normalChart k x
   radius_eq := fun k x => d.normalChart_radius k x
   hom_eq := fun k x hcomplete' => by
@@ -847,9 +906,14 @@ theorem exists_h6BallData
     Nonempty (H6BallData (I := I) X hd hcomplete hconn) := by
   obtain ⟨r₀, hr₀, hcontrol⟩ :=
     exists_intr_control (I := I) X hcomplete hconn hgeom
+  let r₁ : Real := min r₀ 1
+  have hr₁ : 0 < r₁ := lt_min hr₀ (by norm_num)
+  have hr₁_le_r₀ : r₁ ≤ r₀ := min_le_left _ _
+  have hr₁_le_one : r₁ ≤ 1 := min_le_right _ _
   refine ⟨{
-    ratio := hd.h6Ratio r₀
-    ratio_pos := hd.h6Ratio_pos hr₀
+    ratio := hd.h6Ratio r₁
+    ratio_pos := hd.h6Ratio_pos hr₁
+    ratio_mu0_le := hd.h6Ratio_mu0_le_half hr₁_le_one
     chart := ?_
     intr_equiv := ?_ }⟩
   · intro k x
@@ -886,11 +950,11 @@ theorem exists_h6BallData
       simpa using
         (tensor0SBundle_enorm_eq_riemannianBundle_enorm
           (I := I) (X.obj k).metric y w)
-    let r : Real := hd.h6Radius r₀ k x
-    have hr : 0 < r := hd.h6Radius_pos hr₀ k x
-    have hr₀' : r < r₀ := hd.h6Radius_lt_r0 hreal hr₀ k x
+    let r : Real := hd.h6Radius r₁ k x
+    have hr : 0 < r := hd.h6Radius_pos hr₁ k x
+    have hr₁' : r < r₁ := hd.h6Radius_lt_r0 hreal hr₁ k x
     have hsub : Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) r₀ :=
-      Metric.ball_subset_ball hr₀'.le
+      Metric.ball_subset_ball (hr₁'.le.trans hr₁_le_r₀)
     have hloc :
         IsLocalDiffeomorphOn (modelWithCornersSelf Real E) I ∞
           (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
@@ -905,7 +969,7 @@ theorem exists_h6BallData
         InjOn (intrinsicFramedExp (I := I) (X.obj k).metric hEnorm x)
           (Metric.ball (0 : E) r) := by
       exact hdecay.injOn_ball (hcomplete.complete k)
-        (hd.h6Radius_lt_mu r₀ k x)
+        (hd.h6Radius_lt_mu r₁ k x)
     exact Classical.choice <| by
       simpa only [r, InjRadiusDecayInput.h6Radius] using
         exists_intrBallChart (I := I) (X.obj k).metric hEnorm x hloc hinj
@@ -943,17 +1007,17 @@ theorem exists_h6BallData
       simpa using
         (tensor0SBundle_enorm_eq_riemannianBundle_enorm
           (I := I) (X.obj k).metric y w)
-    change ∀ z ∈ Metric.ball (0 : E) (hd.h6Radius r₀ k x), ∀ v : E,
+    change ∀ z ∈ Metric.ball (0 : E) (hd.h6Radius r₁ k x), ∀ v : E,
       (1 / 2 : Real) * ‖v‖ ^ 2 ≤
           intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ∧
         intrFrameMetric (I := I) (X.obj k).metric hEnorm x z v v ≤
           2 * ‖v‖ ^ 2
     intro z hz v
-    have hr₀' :
-        hd.h6Radius r₀ k x < r₀ :=
-      hd.h6Radius_lt_r0 hreal hr₀ k x
+    have hr₁' :
+        hd.h6Radius r₁ k x < r₁ :=
+      hd.h6Radius_lt_r0 hreal hr₁ k x
     exact (hcontrol k x).1 z
-      (Metric.ball_subset_ball hr₀'.le hz) v
+      (Metric.ball_subset_ball (hr₁'.le.trans hr₁_le_r₀) hz) v
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

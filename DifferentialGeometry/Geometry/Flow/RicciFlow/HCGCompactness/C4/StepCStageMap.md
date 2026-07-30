@@ -76,3 +76,14 @@ Focused verification passed.  This restores the map-definition layer itself
 to framed-green (100%).  It does not verify the downstream all-pairs chart
 tail: the concrete framed `StepB1RawInput` producer and textbook B1 theorem
 remain theorem-level 0%, while whole-HCG machinery remains about 60%.
+
+## 2026-07-29 provider-native pointed map
+
+The canonical stage target and comparison map carry an optional
+`NormalChartFamily`, with the legacy family retained as the default.
+`stageCmp_base_raw` proves pointed preservation directly from the intrinsic
+distance weights without a legacy radius premise; `stageCompare_base` remains
+the compatibility wrapper.
+
+Focused and exact verification are GREEN (`4023/4023`). The stage-map provider
+boundary is complete and is consumed by the H6 root/jet package.

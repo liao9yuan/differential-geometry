@@ -43,15 +43,18 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-private noncomputable def constTangentSection (v : E) :
+/-- The constant smooth tangent field on a real model space. -/
+noncomputable def constTangentField (v : E) :
     ContMDiffSection 𝓘(Real, E) E (∞ : WithTop ℕ∞)
       (TangentSpace 𝓘(Real, E) : E → Type _) where
   toFun := fun x : E => (show TangentSpace 𝓘(Real, E) x from v)
   contMDiff_toFun := contMDiff_vectorSpace_iff_contDiff.mpr contDiff_const
 
 omit [NeZero (Module.finrank Real E)] in
-private theorem constBasis_isLocalFrame_open
-    {Idx : Type*} [Fintype Idx]
+/-- A fixed basis gives a smooth local frame on every open subtype of the
+model space. -/
+theorem constBasis_frame
+    {Idx : Type*}
     (U : TopologicalSpace.Opens E) [SigmaCompactSpace U] [T2Space U]
     (e : Module.Basis Idx Real E) :
     IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
@@ -67,17 +70,17 @@ private theorem constBasis_isLocalFrame_open
     have hsmooth : ContMDiff 𝓘(Real, E)
         (𝓘(Real, E).prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
         (T% (fun y : U => (Integral.Connection.restrictOpenTangentSection
-          (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))) y)) :=
+          (I := 𝓘(Real, E)) U (constTangentField (E := E) (e i))) y)) :=
       (Integral.Connection.restrictOpenTangentSection
-        (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))).contMDiff.of_le
+        (I := 𝓘(Real, E)) U (constTangentField (E := E) (e i))).contMDiff.of_le
           (by simp : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
     have hsec : ContMDiffOn 𝓘(Real, E)
         (𝓘(Real, E).prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
         (T% (fun y : U => (Integral.Connection.restrictOpenTangentSection
-          (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))) y))
+          (I := 𝓘(Real, E)) U (constTangentField (E := E) (e i))) y))
         Set.univ := hsmooth.contMDiffOn
     simpa only [Integral.Connection.restrictOpenTangentSection_apply,
-      constTangentSection] using hsec
+      constTangentField] using hsec
 
 /-- The fixed Euclidean metric used only to read constant-frame components on
 normal-coordinate open subtypes. -/
@@ -90,7 +93,10 @@ private noncomputable def flatModelMetricB1 :
   contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
 
 omit [NeZero (Module.finrank Real E)] in
-private theorem metric_norm_le_comp
+/-- A uniform bound for every constant-frame component of a metric-difference
+covariant-derivative tensor controls its intrinsic norm under a fixed
+Euclidean comparison for the reference metric. -/
+theorem metric_norm_le_comp
     (V : TopologicalSpace.Opens E) [SigmaCompactSpace V] [T2Space V]
     (G g : SmoothRiemannianMetric 𝓘(Real, E) V) (a : Nat) (z : V)
     {B : Real} (hB : 0 ≤ B)
@@ -104,7 +110,7 @@ private theorem metric_norm_le_comp
             (Integral.Connection.leviCivitaConnectionOfMetric
               (I := 𝓘(Real, E)) g)
             (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i)
-            (constBasis_isLocalFrame_open V
+            (constBasis_frame V
               (stdOrthonormalBasis Real E).toBasis) y)
           (frameComp0S (I := 𝓘(Real, E))
             (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
@@ -122,7 +128,7 @@ private theorem metric_norm_le_comp
   let frame : Fin (Module.finrank Real E) →
       (y : V) → TangentSpace 𝓘(Real, E) y := fun i _ ↦ e i
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
-      frame Set.univ := constBasis_isLocalFrame_open V e
+      frame Set.univ := constBasis_frame V e
   let g0 := (flatModelMetricB1 (E := E)).restrictOpen (I := 𝓘(Real, E)) V
   have hON0 : ∀ i j : Fin (Module.finrank Real E),
       g0.inner z (e i) (e j) = if i = j then (1 : Real) else 0 := by
@@ -317,7 +323,7 @@ private theorem normal_christoffel
           (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
             ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V))
           (fun q (y : V) => (show TangentSpace 𝓘(Real, E) y from e q))
-          (constBasis_isLocalFrame_open V e) z i j m =
+          (constBasis_frame V e) z i j m =
         e.coord m
           (MetricKoszul.koszulVec hco
             (fderiv Real (normalCoordMetric (I := I) Y x) (z : E))
@@ -334,19 +340,19 @@ private theorem normal_christoffel
   let frame : Fin (Module.finrank Real E) →
       (y : V) → TangentSpace 𝓘(Real, E) y := fun q _ => e q
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
-      frame Set.univ := constBasis_isLocalFrame_open V e
+      frame Set.univ := constBasis_frame V e
   have hfield : Integral.Connection.restrictOpenTangentField
       (I := 𝓘(Real, E)) V
-      (fun y : E => (constTangentSection (E := E) (e j)) y) =
+      (fun y : E => (constTangentField (E := E) (e j)) y) =
         fun y : V => (show TangentSpace 𝓘(Real, E) y from e j) := by
     funext y
-    simpa only [constTangentSection] using
+    simpa only [constTangentField] using
       (Integral.Connection.restrictOpenTangentField_apply
         (I := 𝓘(Real, E)) V
-        (fun y : E => (constTangentSection (E := E) (e j)) y) y)
+        (fun y : E => (constTangentField (E := E) (e j)) y) y)
   have hres := Integral.Connection.metricCov_restrictOpen_globalSection
     (I := 𝓘(Real, E)) (normalTotal (I := I) Y x) V
-    (constTangentSection (E := E) (e j)) z (e i)
+    (constTangentField (E := E) (e j)) z (e i)
   rw [hfield] at hres
   have hres' :
       ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
@@ -354,7 +360,7 @@ private theorem normal_christoffel
           (frame j) z) (e i)) =
         ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           (normalTotal (I := I) Y x) (fun _ : E => e j) (z : E)) (e i)) := by
-    simpa only [Integral.Connection.metricCov, frame, constTangentSection] using hres
+    simpa only [Integral.Connection.metricCov, frame, constTangentField] using hres
   have hcov :
       ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V)
@@ -585,7 +591,7 @@ private theorem local_norm_le
   let frame : Fin (Module.finrank Real E) →
       (w : V) → TangentSpace 𝓘(Real, E) w := fun i _ ↦ e i
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
-      frame Set.univ := constBasis_isLocalFrame_open V e
+      frame Set.univ := constBasis_frame V e
   have hchrEq :
       (fun w ↦ Tensor.Coordinates.christoffelSymbolInFrame
         (Integral.Connection.leviCivitaConnectionOfMetric
@@ -624,7 +630,7 @@ private theorem local_norm_le
           (Integral.Connection.leviCivitaConnectionOfMetric
             (I := 𝓘(Real, E)) gv)
           (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i)
-          (constBasis_isLocalFrame_open V
+          (constBasis_frame V
             (stdOrthonormalBasis Real E).toBasis) w)
         (frameComp0S (I := 𝓘(Real, E))
           (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) Gv -
@@ -643,7 +649,7 @@ omit [NeZero (Module.finrank Real E)] in
 omit [NeZero (Module.finrank Real E)] in
 /-- Smooth coefficient fields make every level of their metric covariant
 component tower differentiable on the same open coordinate buffer. -/
-private theorem metricTower_mdiff
+theorem metric_tower_mdiff
     (V : TopologicalSpace.Opens E)
     (e : Module.Basis (Fin (Module.finrank Real E)) Real E)
     (B Q : E → (E →L[Real] E →L[Real] Real))
@@ -683,8 +689,8 @@ private theorem metricTower_mdiff
         (fun (y : E) => TotalSpace.mk' E (E := TangentSpace 𝓘(Real, E)) y
           (show TangentSpace 𝓘(Real, E) y from e d)) V := by
     intro d
-    simpa only [constTangentSection] using
-      (constTangentSection (E := E) (e d)).contMDiff_toFun.contMDiffOn
+    simpa only [constTangentField] using
+      (constTangentField (E := E) (e d)).contMDiff_toFun.contMDiffOn
   intro q z slots
   exact DifferentialGeometry.PDE.RicciFlow.iterCovComp_mdiffAt V.2
     (fun i (_ : E) ↦ e i)
@@ -1485,7 +1491,7 @@ theorem HasStageJetData.fwd_norm_tail
           (fun y : E ↦ iterCovComp (I := 𝓘(Real, E))
             (fun i _ ↦ e i) Gamma base q y slots) (w : E) := by
     simpa only [Gamma, base] using
-      metricTower_mdiff V e B Q hBcd hQcd hBco
+      metric_tower_mdiff V e B Q hBcd hQcd hBco
   have hcompLe : ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
       |iterCovComp (I := 𝓘(Real, E)) (fun i _ ↦ e i)
           Gamma base a z slots| ≤ epsComp := by
@@ -1992,7 +1998,7 @@ theorem HasStageJetData.inv_norm_tail
           (fun x : E ↦ iterCovComp (I := 𝓘(Real, E))
             (fun i _ ↦ e i) Gamma base q' x slots) (w : E) := by
     simpa only [Gamma, base] using
-      metricTower_mdiff V e BL Q hBLcd hQcd hBLco
+      metric_tower_mdiff V e BL Q hBLcd hQcd hBLco
   have hcompLe : ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
       |iterCovComp (I := 𝓘(Real, E)) (fun i _ ↦ e i)
           Gamma base a (A z) slots| ≤ epsComp := by

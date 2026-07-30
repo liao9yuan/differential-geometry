@@ -910,5 +910,96 @@ the `lbl395` normal-coordinate metric-bound honest input.
   and `hphys`, that fact gives
   `lambda D 0 < 1 / (768 * exp C)`, hence the exponential pair ratio is
   below `exp 1 < 3` and the target triangle closes with ample margin.
-  `H6NormalData.lean` is presently protected by claim
-  `9b474658-f07e-4fcc-a37c-802126250d0f`; it was not force-released or edited.
+
+### 2026-07-29 Gate 5 radius normalization
+
+- `exists_h6BallData` now uses the capped launch radius `min r₀ 1`. The new
+  construction theorem `h6Ratio_mu0_le_half` and field `ratio_mu0_le` retain
+  `ratio * mu 0 ≤ 1/2` through `H6BallData`, `H6ChartData`, and
+  `H6NormalData`. The original `exists_intr_control` radius still supplies the
+  local-diffeomorphism and half/two bounds by ball inclusion. Focused and exact
+  verification are green (`3983/3983`).
+- The previous constant obstruction is therefore removed at its natural
+  producer. Next target: use `ratio_mu0_le`, `hqdata`, `hphys`, `rInf_close`,
+  and `lambda_exp_le` to prove raw target-stage membership and decode in the
+  alpha H6 chart. Close the chart-parametric H6 `pts_target_tail` before
+  migrating root readout and jet tail.
+- Honest accounting: the dedicated H6 producer remains 100%; Gate 5 provider
+  substitution is about 48%. The normalization is completed infrastructure,
+  not root/jet consumer closure. `NormalRadiusProfile.le_exp_radius` and the
+  unconditional MSM135 endpoint remain theorem-level 0%.
+
+### 2026-07-29 Gate 5 closure
+
+- The target/decode/root/jet/base chain now uses one H6
+  `NormalChartFamily`. `target_mem` and `pts_target_tail` close the raw
+  target-stage decode from the normalized H6 radius ledger. The stage-root,
+  stage-jet, and pointed-base consumers in `StepCStageComparisonH6` all use
+  `d.chart`; the legacy family remains only as the compatibility default in the
+  generic APIs.
+- `H6NormalData.exists_supp_data` constructs the complete
+  `HasSuppConvDataOn ... d.chart` package after one finite refinement. It
+  proves actual forward/reverse overlap and inverse laws, atom limits,
+  normalized weight data, transition convergence, and stage transition
+  smoothness. Per-member connectedness is explicit in the statement. The proof
+  does not add a synonym overlap assumption and does not use the legacy
+  `205 * exp(...)` nesting estimate.
+- `H6NormalData.exists_supp_base` is the direct consumer: on the same selected
+  subsequence it returns the H6 support/transition package and pointed
+  preservation of the actual stage maps. The provider-native root and jet
+  theorems consume that same package when their diagonal/root inputs are
+  supplied.
+- Focused verification is GREEN. Exact verification is GREEN for
+  `StepCProducersH6` (`4144/4144`) and `StepCStageComparisonH6`
+  (`4148/4148`). Direct axiom audits of the H6 support, finite metric/branch
+  diagonals, and master stage-data producer contain only `propext`,
+  `Classical.choice`, and `Quot.sound`, with no `sorryAx`.
+- Gate 5 provider substitution is complete (100%). This is a provider/consumer
+  closure, not an unconditional compactness endpoint. The raw distance-atom
+  route removes `Item3GpScaleTail` from the H6 support producer; the independent
+  legacy theorem `NormalRadiusProfile.le_exp_radius` remains 0%.
+- `H6NormalData.exists_stage_data` now combines the H6 support package,
+  finite live-slot metric extraction, exact branch pairs, root readout, jets,
+  and pointed preservation into one `HasStageJetDataOn ... d.chart` on a
+  common subsequence. Focused and exact verification are GREEN
+  (`4148/4148`), and the declaration is axiom-clean.
+- Next target: introduce the provider-native input/Step-B1 consumer seam and
+  use this master package after the disjoint uniform-existence refinement is
+  stable. Do not convert it back through the legacy `NormalRadiusProfile`.
+  Do not reopen Gates 5 or 6. The unconditional MSM135 endpoint remains
+  unstated and therefore 0%; whole-HCG supporting machinery is about 70%.
+
+### 2026-07-29 provider-native Step-B1 and Step-D assembly
+
+- The provider-native forward/reverse metric chain is complete:
+  `chart_conv`, `pb_conv`, `source_stay`, `cov_comp_tail`,
+  `inv_chart_conv`, `inv_cov_comp_tail`, `fwd_norm_tail`, and
+  `inv_norm_tail` all consume `d.chart`. Their focused and exact checks pass.
+- `H6NormalData.preapprox_tail` packages both native
+  `PreApproxIsoDataOn` carriers. `H6NormalData.b1_raw_of_diag` then fills the
+  real five-field `StepB1RawInput`, and
+  `MetricCompactBase.exists_b1_raw_h6` performs the canonical-scale,
+  large-divisor, stable-net, master-diagonal, and raw-input assembly.
+  Focused and exact verification pass through `StepB1MetricCarrierH6`
+  (`4234/4234`) and `StepB1RawProducer` (`4244/4244`).
+- `stageScale`, `stage_data`, and `stage_diag` make the H6 cage coefficient a
+  deterministic pre-divisor choice, removing the former existential-ordering
+  loop. `StepCStageComparisonH6` is focused- and exact-green (`4150/4150`).
+- `MetricCompactBase.metricCanonH6`, `metricCompactH6`, and
+  `metricCanonH6_conn` feed the H6 raw producer through the existing Step-D
+  construction. Focused and exact verification pass
+  (`MetricCompactnessEndpointH6`, `4320/4320`). Direct axiom checks of the new
+  scale, stage, raw, and endpoint declarations contain only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- Honest accounting: Gate 5 provider substitution is 100%; the H6
+  raw-Step-B1 consumer and H6 conditional Step-D endpoint are 100%. The
+  unconditional MSM135 theorem is still 0%. Whole-HCG supporting machinery is
+  about 72%.
+- Exact next target: split the provider-neutral fields of
+  `MetricCompactnessInputs` (`decay`, packing, divisor, volume comparison,
+  distance realization, and the Step-A cap) from its legacy-only
+  `normalBounds`/`normalRadius` payload, and instantiate that core directly
+  from CGT, Bishop--Gromov, and `exists_h6NormalData`. The H6 raw/Step-D
+  consumer must accept that core without converting back through
+  `NormalRadiusProfile.le_exp_radius`. This is an input-interface refactor,
+  not another stage-map lemma.

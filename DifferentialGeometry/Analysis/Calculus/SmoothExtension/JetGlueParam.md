@@ -227,3 +227,11 @@ available hypothesis; this file's splice is the ready assembly tool.
 
 Verification policy: focused `lake env lean` read-only first, then `lake-locked check`. Do not record
 commands/logs here — only pass/fail + exact blocker.
+
+## 2026-07-29 directional-jet API compatibility
+
+The two transverse commutation calls now explicitly weaken their `C∞`
+hypotheses to the finite order required by the canonical theorem in
+`DirectionalJet`. Focused and exact verification pass (`2082/2082`). This is
+a local API migration repair; it changes neither the glue statement nor its
+mathematics.

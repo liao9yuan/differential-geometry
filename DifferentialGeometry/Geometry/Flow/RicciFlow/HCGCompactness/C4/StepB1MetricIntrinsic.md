@@ -56,3 +56,10 @@ or analytic route changed.
 - Dedicated Step-B/B1 machinery: approximately 95%; Chapter 4 machinery:
   approximately 87%; whole-HCG machinery: approximately 60%.  Unconditional
   compactness endpoints remain theorem-level 0%.
+
+## 2026-07-29 shared analytic helpers
+
+`constTangentField`, `constBasis_frame`, `metric_norm_le_comp`, and
+`metric_tower_mdiff` are the public provider-independent analytic helpers used
+by the H6 forward and reverse intrinsic norm tails. Focused and exact
+verification pass (`4223/4223`).

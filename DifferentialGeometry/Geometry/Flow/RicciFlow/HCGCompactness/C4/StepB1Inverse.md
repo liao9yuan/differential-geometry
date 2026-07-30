@@ -59,3 +59,9 @@ unchanged `StepB1RawInput`. This file introduces no new analytic frontier.
 - Dedicated Step-B/B1 machinery: about 95%; Chapter 4 machinery: about 87%;
   whole HCG machinery: about 60%.
 - Textbook Step B1 and unconditional compactness endpoints: theorem-level 0%.
+
+## 2026-07-29 inverse extraction API
+
+`exists_inv_seq` is public and documented so the provider-native inverse chart
+tail can reuse the existing compact-open inverse extraction. Focused and exact
+verification pass (`4148/4148`).

@@ -63,3 +63,5 @@ per-member `ConnectedSpace`. This matches the checked conditional endpoint and
 the properness/direct-limit construction, and removes connectedness from the
 native producer frontier. The remaining theorem-level `sorry` is still exactly
 the CGT/Bishop--Gromov/H6 provider and final native-base assembly boundary.
+Focused verification and the exact module refresh passed; the expected
+unconditional endpoint `sorry` remains visible.

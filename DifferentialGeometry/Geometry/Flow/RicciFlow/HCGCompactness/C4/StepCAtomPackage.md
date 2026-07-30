@@ -113,3 +113,14 @@ framed fixed-source atom/weight package is 0% revalidated, although its source
 migration is complete.  The selected B/C capstone, `StepB1RawInput`, textbook
 Step B1, and the unconditional compactness endpoints remain 0% theorem
 completion; whole-HCG support machinery remains approximately 60%.
+
+## 2026-07-29 raw atom/weight package
+
+`atomWeightOn_raw` packages the intrinsic distance atoms and their normalized
+weights without a legacy exponential-radius premise. The former
+`atomWeightOn_of_atoms` signature remains as a compatibility wrapper, while
+the concrete producer passes its real stagewise radius evidence only to the
+atom convergence theorem that consumes it.
+
+Focused and exact verification are GREEN (`4022/4022`). This package is now
+fully revalidated and feeds the provider-native H6 support producer.

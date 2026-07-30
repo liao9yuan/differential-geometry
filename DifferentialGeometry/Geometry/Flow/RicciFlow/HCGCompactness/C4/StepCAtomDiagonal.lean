@@ -86,16 +86,15 @@ def HasAtomWeightLim
     ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
     MapCInfConvOnCompacts U weight weightInf
 
-/-- Packages prescribed per-slot atom limits for a coherent normal-chart
-family as the downstream atom/weight limit predicate. -/
-theorem HasAtomWeightLimOn.of_atoms
+/-- Packages prescribed distance-atom limits for a coherent normal-chart
+family without a legacy exponential-radius premise. -/
+theorem HasAtomWeightLimOn.of_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist)
     (pb : hd.PackingBound D) (r : Real) (hr : 0 ≤ r)
-    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M)
     (U : Set E) (hU : IsOpen U)
     (hcoverU : ∀ k,
@@ -120,7 +119,44 @@ theorem HasAtomWeightLimOn.of_atoms
     (hatomInfSmooth : ∀ gamma : Fin (pb.A r),
       ContDiffOn Real (∞ : WithTop ℕ∞) (aInf gamma) U) :
     HasAtomWeightLimOn (I := I) chart hd hD P L hre pb r hr beta U aInf := by
-  exact atomWeightOn_of_atoms (I := I) chart hD P L hre pb r hr hgp beta U hU
+  exact atomWeightOn_raw (I := I) chart hD P L hre pb r hr beta U hU
+    hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
+
+/-- Compatibility form of `HasAtomWeightLimOn.of_raw` retaining the legacy
+normal-radius premise. -/
+theorem HasAtomWeightLimOn.of_atoms
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist)
+    (pb : hd.PackingBound D) (r : Real) (hr : 0 ≤ r)
+    (_hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M)
+    (U : Set E) (hU : IsOpen U)
+    (hcoverU : ∀ k,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => (chart (L.φ k) (beta k)).hom z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
+    (aInf : Fin (pb.A r) → E → Real)
+    (hdead : ∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0)
+    (hatom : ∀ gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts U
+        (fun k => seqAtomOn (I := I) chart hd hD P L pb r beta gamma k)
+        (aInf gamma))
+    (hatomSmooth : ∀ k (gamma : Fin (pb.A r)),
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U)
+    (hatomInfSmooth : ∀ gamma : Fin (pb.A r),
+      ContDiffOn Real (∞ : WithTop ℕ∞) (aInf gamma) U) :
+    HasAtomWeightLimOn (I := I) chart hd hD P L hre pb r hr beta U aInf := by
+  exact HasAtomWeightLimOn.of_raw (I := I) chart hD P L hre pb r hr beta U hU
     hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
 
 /-- Packages prescribed per-slot atom limits as the downstream atom/weight
@@ -260,10 +296,9 @@ theorem HasAtomWeightLim.weight_ne_tail
           (baseIndex hd hre pb hr)) z gamma ≠ 0 := by
   exact HasAtomWeightLimOn.weight_ne_tail hlim hz hweight
 
-/-- The normalized limit weights for a coherent normal-chart family retain
-their pointwise finite weight data when the source chart maps directly into
-the strict inner-ball cover. -/
-theorem HasAtomWeightLimOn.weight_data_of_innerCover
+/-- The normalized limit weights retain their pointwise finite weight data
+from the direct inner-cover hypothesis, without a legacy radius premise. -/
+theorem HasAtomWeightLimOn.weight_data_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
@@ -274,7 +309,6 @@ theorem HasAtomWeightLimOn.weight_data_of_innerCover
     {aInf : Fin (pb.A r) → E → Real}
     (hlim : HasAtomWeightLimOn (I := I) chart
       hd hD P L hre pb r hr beta U aInf)
-    (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
     (hcoverU : ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -306,8 +340,8 @@ theorem HasAtomWeightLimOn.weight_data_of_innerCover
         (rawWeights
           (cutRaw (seqAtom hd hD P L pb r k i0)
             (seqAtom hd hD P L pb r k) i0)) := by
-    filter_upwards [hgp] with k hgpK
-    exact seqWeights_data hd hD P L pb r k hgpK i0 Set.Subset.rfl
+    exact Filter.Eventually.of_forall fun k =>
+      seqWeights_data_raw hd hD P L pb r k i0 Set.Subset.rfl
   dsimp only [HasAtomWeightLimOn] at hlim
   rcases hlim with
     ⟨_hdead, _hatomSmooth, _hatomInfSmooth, _hatomConv,
@@ -368,6 +402,35 @@ theorem HasAtomWeightLimOn.weight_data_of_innerCover
     norm_num at hsumNonpos
   · intro _z _hz _gamma _hweight
     exact Set.mem_univ _
+
+/-- Compatibility form of `HasAtomWeightLimOn.weight_data_raw` retaining the
+legacy normal-radius premise. -/
+theorem HasAtomWeightLimOn.weight_data_of_innerCover
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {chart : NormalChartFamily (I := I) X}
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
+    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    {L : NetLimitData hd D P} {hre : hd.RealizesEdist}
+    {pb : hd.PackingBound D} {r : Real} {hr : 0 ≤ r}
+    {beta : ∀ k : Nat, (X.obj (L.φ k)).M} {U : Set E}
+    {aInf : Fin (pb.A r) → E → Real}
+    (hlim : HasAtomWeightLimOn (I := I) chart
+      hd hD P L hre pb r hr beta U aInf)
+    (_hgp : Item3GpScaleTail (I := I) hd D P L pb r)
+    (hcoverU : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => (chart (L.φ k) (beta k)).hom z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma)) :
+    centerAverage.WeightDataOn U (fun _ : Fin (pb.A r) => Set.univ)
+      (fun z gamma => rawWeights
+        (cutRaw (aInf (baseIndex hd hre pb hr)) aInf
+          (baseIndex hd hre pb hr)) z gamma) := by
+  exact hlim.weight_data_raw hcoverU
 
 /-- Compatibility form of
 `HasAtomWeightLimOn.weight_data_of_innerCover` for the selected legacy framed

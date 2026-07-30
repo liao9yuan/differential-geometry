@@ -3233,6 +3233,11 @@ private def bdSigmaE0 : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+/-- The fixed six-slot permutation in the covariant-derivative residual
+normal form. -/
+def lieCovSigma : Equiv.Perm (Fin 6) :=
+  bdSigmaE0
+
 set_option linter.unusedSectionVars false in
 private lemma bdTensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) • unitTensor (I := I) (M := M) x := by
@@ -3616,6 +3621,11 @@ private def bdPairTraceOp (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTen
   appCcRS (I := I) (M := M) g₀ 6 4 2
     (bdPureDT (I := I) (M := M) g₀ g₁ 2)
     (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+
+/-- The pair-cometric contraction in the fixed-order covariant-derivative
+residual normal form. -/
+def lieCovPair (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 6 2 :=
+  bdPairTraceOp (I := I) (M := M) g₀ g₁
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -4712,6 +4722,25 @@ private lemma bdArmSlot2_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (j : �
     (armSlotEndoCc (I := I) (M := M) g₀ 0 (bdConnPair (I := I) (M := M) g₀ g₁)) j x) ?_
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
+
+/-- The lifted connection-difference operator used by the quadratic
+fixed-order covariant-derivative residual. -/
+def lieCovArm2 (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 4 :=
+  armSlotEndoCc (I := I) (M := M) g₀ 2
+    (bdConnPair (I := I) (M := M) g₀ g₁)
+
+/-- Each covariant jet of `lieCovArm2` is controlled by the corresponding
+connection-difference jet. -/
+theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  simpa only [lieCovArm2] using
+    bdArmSlot2_rfns_le (I := I) (M := M) g₀ g₁ j x
 
 private noncomputable def bdKernelCLM (gA gB : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -8226,6 +8255,16 @@ private def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 
   (-(s / 2) : ℝ) • lrCurvF (I := I) (M := M) g₀ T
     - lrQuadF (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
 
+/-- The fourth-covariant normal form remaining after the exact
+pair-contraction refold of the DeTurck covariant-derivative arm. -/
+def lieCovR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) : SmoothCcTensor g₀ 0 4 :=
+  lrR4 (I := I) (M := M) g₀ T hδ hδZ s
+
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 25600000 in
 
@@ -8845,6 +8884,37 @@ private theorem lrArm_sub_family_eq_pairTrace (g₀ : SmoothRiemannianMetric I M
     from Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun a _ => hpoint b a]
   simp only [Finset.sum_add_distrib, ← Finset.mul_sum]
   ring
+
+/-- Exact fixed-order normal form for the base-background covariant-derivative
+residual after the pair-contraction second-order refold. -/
+theorem lieCov_residual (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w =
+        ccTensorBilin (I := I) g₀ T x w v)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀ -
+      deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M)
+        g₀ T hδ hδZ
+          ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+            Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 *
+              Equiv.swap (0 : Fin 4) 1,
+            Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+          ![(-1 : ℝ), -1, 1] s =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (lieCovPair (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s))) := by
+  simpa only [lieCovPair, lieCovSigma, lieCovR4] using
+    lrArm_sub_family_eq_pairTrace (I := I) (M := M)
+      g₀ T hδ_lt hδ hδZ hTsymm hs
 
 set_option linter.unusedSectionVars false in
 private lemma lrSingle_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq : 1 ≤ q) :

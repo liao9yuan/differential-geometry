@@ -38,7 +38,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 partial-equivalence coercions make this a total function; its geometric chart
 meaning is used only on the controlled normal-coordinate domains. -/
 noncomputable def stageTarget
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
     (x : (X.obj (L.φ k)).M) (gamma : Fin (inp.pack.A s))
@@ -65,7 +65,7 @@ source transition followed by the target transition.  This is a total-function
 identity; domain hypotheses are needed only for its geometric inverse-chart
 interpretation. -/
 @[simp] theorem stageTarget_chart
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
     (alpha gamma : Fin (inp.pack.A s)) (z : E)
@@ -102,7 +102,7 @@ interpretation. -/
 /-- When the direct target lies in the prescribed target-stage source chart,
 the local two-transition expression decodes to that same manifold point. -/
 theorem stageTarget_local
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (k l : Nat)
     (alpha gamma : Fin (inp.pack.A s)) (z : E)
@@ -173,7 +173,7 @@ theorem stageTarget_local
 /-- Refining the net-limit data only reindexes the source and target stages of
 the direct finite-stage target point. -/
 @[simp] theorem stageTarget_subseq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real)
     {ψ : Nat → Nat} (hψ : StrictMono ψ) (k l : Nat)
@@ -185,7 +185,7 @@ the direct finite-stage target point. -/
 
 /-- The actual finite-stage center energy has exactly one global minimizer. -/
 def HasUniqueStageCenter
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -222,7 +222,7 @@ def HasUniqueStageCenter
 /-- Unique global minimization for the actual stage energy is unchanged by a
 further strict reindexing of the net-limit data. -/
 theorem uniqueCenter_subseq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -250,7 +250,7 @@ source ball it selects the unique global center of the actual stage energy;
 outside that ball, or when uniqueness fails, it uses the target
 basepoint as a harmless totalization. -/
 noncomputable def stageComparisonMap
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -273,7 +273,7 @@ noncomputable def stageComparisonMap
 /-- On the controlled source ball, once uniqueness is available, the global
 stage map is the chosen unique minimizer. -/
 theorem stageCompare_choose
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -291,7 +291,7 @@ theorem stageCompare_choose
 /-- If the controlled source-ball test or unique-center test fails, the total
 stage comparison map uses the target basepoint. -/
 theorem stageCompare_default
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -313,7 +313,7 @@ theorem stageCompare_default
 /-- Reindexing the net-limit data only reindexes the two stage arguments of
 the chart-independent comparison map. -/
 @[simp] theorem stageCompare_subseq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -365,18 +365,16 @@ the chart-independent comparison map. -/
         (Or.inl hx)]
     simp only [NetLimitData.subseq_phi, Function.comp_apply]
 
-/-- The finite-stage comparison map preserves the pointed basepoint whenever
-the source-stage atom family has the item-3 normal-radius control needed by the
-canonical normalized weights. -/
-theorem stageCompare_base
-    (inp : MetricCompactnessInputs (I := I) X)
+/-- The finite-stage comparison map preserves the pointed basepoint for the
+canonical distance atoms, without a normal-radius premise. -/
+theorem stageCmp_base_raw
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (k l : Nat)
-    (hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack s k)
     (chart : NormalChartFamily (I := I) X :=
       legacyChartFamily (I := I) X) :
     stageComparisonMap inp P L s hs hconn k l
@@ -423,7 +421,7 @@ theorem stageCompare_base
         Yk.basepoint gamma
     have hdelta : mu i0 = 1 ∧ ∀ j, j ≠ i0 → mu j = 0 := by
       simpa only [mu, i0] using
-        seqWeights_base inp.decay inp.hD P L inp.realizes inp.pack hs k hgp
+        seqWeights_base_raw inp.decay inp.hD P L inp.realizes inp.pack hs k
     have hcenterK :
         seqCenterD inp.decay P L k (i0 : Nat) = Yk.basepoint := by
       simp only [i0, baseIndex_val, seqCenterD, seqCenter_zero,
@@ -486,6 +484,24 @@ theorem stageCompare_base
     · exact Classical.choose_spec huniq.exists
     · exact hmin
   · simp only [stageComparisonMap, hx, huniq, dite_true, dite_false]
+
+/-- Compatibility form of `stageCmp_base_raw` retaining the legacy
+normal-radius premise. -/
+theorem stageCompare_base
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (k l : Nat)
+    (_hgp : Item3GpScaleAt (I := I) inp.decay inp.D P L inp.pack s k)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) :
+    stageComparisonMap inp P L s hs hconn k l
+        (X.obj (L.φ k)).basepoint (chart := chart) =
+      (X.obj (L.φ l)).basepoint :=
+  stageCmp_base_raw inp P L s hs hconn k l chart
 
 end HCGCompactness
 end DifferentialGeometry
