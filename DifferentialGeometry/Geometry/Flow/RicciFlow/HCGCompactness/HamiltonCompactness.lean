@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessUncondH6
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCompactnessInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldCanon
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -76,11 +78,16 @@ theorem compactnessSol
     exact h0
   have hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)) :=
     hcomplete.at_time hzero
-  have hbase :
-      Nonempty (MetricCompactBase (I := I) (X.atZero (I := I))) := by
-    sorry
+  let hgeom0 : SeqBoundedGeometry (I := I) (X.atZero (I := I)) :=
+    CurvBoundInput.atZeroGeomOpen (I := I) h0 X hD hcomplete hcurv
+  let seed : MetricCompactSeed (I := I) (X.atZero (I := I)) :=
+    metricSeedOfBG (I := I) (X.atZero (I := I))
+      hcomplete0 hgeom0 hinj hconn
+  have hd : Nonempty (H6NormalData (I := I) (X.atZero (I := I)) seed.decay) :=
+    exists_h6NormalData (I := I) (X.atZero (I := I))
+      hcomplete0 hconn hgeom0 seed.decay seed.realizes
   let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
-    (Classical.choice hbase).metricCanon hcomplete0 hconn
+    seed.metricCanonH6 (Classical.choice hd) hcomplete0 hconn
   obtain ⟨d, hcompleteL⟩ :=
     open_upgrade_canon (I := I) canon h0 hD hcomplete hcurv
   let mc := canon.mc.compSubseq d.φ d.hφ

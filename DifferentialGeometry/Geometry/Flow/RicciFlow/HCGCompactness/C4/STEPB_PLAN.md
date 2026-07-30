@@ -991,10 +991,11 @@ the `lbl395` normal-coordinate metric-bound honest input.
   (`MetricCompactnessEndpointH6`, `4320/4320`). Direct axiom checks of the new
   scale, stage, raw, and endpoint declarations contain only `propext`,
   `Classical.choice`, and `Quot.sound`.
-- Honest accounting: Gate 5 provider substitution is 100%; the H6
-  raw-Step-B1 consumer and H6 conditional Step-D endpoint are 100%. The
-  unconditional MSM135 theorem is still 0%. Whole-HCG supporting machinery is
-  about 72%.
+- Historical checkpoint accounting: Gate 5 provider substitution, the H6
+  raw-Step-B1 consumer, and the H6 conditional Step-D endpoint were each 100%.
+  At this checkpoint the unconditional MSM135 theorem was still 0% and
+  whole-HCG supporting machinery was about 72%; the closure section below
+  supersedes those two figures.
 - Exact next target: split the provider-neutral fields of
   `MetricCompactnessInputs` (`decay`, packing, divisor, volume comparison,
   distance realization, and the Step-A cap) from its legacy-only
@@ -1003,3 +1004,93 @@ the `lbl395` normal-coordinate metric-bound honest input.
   consumer must accept that core without converting back through
   `NormalRadiusProfile.le_exp_radius`. This is an input-interface refactor,
   not another stage-map lemma.
+
+### 2026-07-29 provider-neutral core and unconditional Theorem 3.9 closure
+
+- `MetricCompactCore` and `MetricCompactSeed` now separate the Step-A,
+  packing, volume, distance-realization, and divisor data from the legacy
+  normal-radius payload. The H6 stage, raw-B1, and Step-D consumers accept this
+  provider-neutral layer directly; the old `MetricCompactBase` entrypoints are
+  compatibility wrappers.
+- `metricSeedOfBG` assembles the seed from CGT decay and the Bishop--Gromov
+  volume/packing producers. `metricCompactnessH6` chooses the native
+  `H6NormalData` and feeds the same chart provider through the complete
+  raw-B1/Step-D chain.
+- The public `metricCompactness` declaration is now proved with explicit
+  per-member `ConnectedSpace`, as required by the properness and direct-limit
+  construction. No conversion through `NormalRadiusProfile.le_exp_radius`
+  occurs.
+- Focused and exact verification are GREEN through
+  `MetricCompactnessInputs` (`3957/3957`), `StepB1RawProducer`
+  (`4244/4244`), `MetricCompactnessEndpointH6` (`4320/4320`), and
+  `MetricCompactnessUncondH6` (`4444/4444`). The public HCG umbrella is exact
+  GREEN (`10482/10482`). Its one downstream connectedness seam in
+  `HamiltonPositiveRicciAdapter` was repaired by making the stored topology
+  explicit; that adapter is focused- and exact-green (`10425/10425`).
+- A direct axiom audit of `metricCompactness` reports only `propext`,
+  `Classical.choice`, and `Quot.sound`, with no `sorryAx`.
+- Honest accounting: unconditional MSM135 Theorem 3.9 is 100%; Gate 5
+  provider substitution is 100%; the provider-native H6 producer, raw-B1
+  consumer, and Step-D assembly are each 100%. The independent legacy theorem
+  `NormalRadiusProfile.le_exp_radius` remains 0% and is no longer on this
+  endpoint's dependency path. Whole-HCG supporting machinery is approximately
+  78%; unconditional Theorem 3.10 and the later Hamilton endpoint remain
+  theorem-level 0%.
+- The H6 lane is closed. The next HCG target, if selected, is the visible
+  `compactnessSol` seam in `HamiltonCompactness.lean`: replace its legacy
+  `Nonempty (MetricCompactBase (X.atZero))` block by the provider-native
+  `MetricCompactSeed`/`H6NormalData` canonical construction and feed that
+  `StepDCanonData` to the already checked open-window upgrade. Do not reopen
+  Gates 5 or 6.
+
+### 2026-07-29 unconditional Theorem 3.10 closure
+
+- `movingRm_of_bound` exposes the Riemann-tower estimate already proved inside
+  the complete Shi argument. `CurvBoundInput.atZeroGeomOpen` packages its
+  fixed buffered-window specialization into time-zero `SeqBoundedGeometry`.
+- `compactnessSol` now constructs `MetricCompactSeed`, chooses the native
+  `H6NormalData`, builds `StepDCanonData` through `metricCanonH6`, and calls
+  `open_upgrade_canon`. The obsolete legacy `MetricCompactBase` seam and the
+  endpoint's only `sorry` are gone.
+- Focused checks are green. Exact verification is green for
+  `MovingShiOpen` (`9679/9679`) and `HamiltonCompactness` (`9982/9982`).
+  Direct axiom audits of both the time-zero producer and `compactnessSol`
+  contain only `propext`, `Classical.choice`, and `Quot.sound`.
+- Honest accounting: Gate 5 provider substitution, unconditional Theorems 3.9
+  and 3.10, and the P4 producer/assembly are each 100%. Whole-HCG supporting
+  machinery is approximately 84%. The independent legacy
+  `NormalRadiusProfile.le_exp_radius` remains 0% off the endpoint path.
+- Exact next target: migrate the real Hamilton blow-up consumer
+  `ham3_cgh_limit` to the now-unconditional `compactnessSol` route. Do not
+  reopen Gates 5 or 6 and do not revive the removed legacy metric-base
+  interface.
+
+### 2026-07-29 provider-native Hamilton consumer closure
+
+- `flowInj_of_vol` is proved by the pointwise CGT theorem from the actual
+  curvature-controlled base-ball volume lower bound. Its focused check,
+  exact refresh (`4132/4132`), and direct axiom audit are GREEN with only the
+  standard three axioms.
+- `exists_ham3_vol` constructs one all-index `FlowBaseVolData` package for the
+  canonical Hamilton source. It uses Perelman noncollapse and the buffered
+  scale-time inequality to choose a single positive source radius; it does not
+  route eventual data through a lossy wrapper.
+- `ham3_const` consumes that package through `flowInj_of_vol`, native H6
+  compactness, and the open-window upgrade. `ham3_const_hcg` and
+  `ham3_main_hcg` assemble the initial positive-Ricci statement with
+  connectedness included in `Closed3Manifold`, while bypassing the legacy
+  `ham3_cgh_limit`.
+- The adapter is focused- and exact-GREEN (`10470/10470`). Direct axiom audits
+  of `exists_ham3_vol` and `ham3_const` contain only `propext`,
+  `Classical.choice`, and `Quot.sound`. The initial-data pair currently
+  inherits `sorryAx` only from the separate
+  `ham3_flow_exists_normalized` uniform-existence producer.
+- Honest accounting: Gate 5, unconditional Theorems 3.9 and 3.10, P4, the
+  Hamilton noncollapse/injectivity consumer, and `ham3_const` are each 100%.
+  The main-statement assembly is checked, but its axiom-clean endpoint remains
+  0% until the uniform-existence producer closes. Whole-HCG supporting
+  machinery is approximately 87%. The legacy `ham3_cgh_limit` remains
+  unproved but is not on the new main route.
+- Exact next target: after `ham3_flow_exists_normalized` is focused-GREEN,
+  refresh exactly `HamiltonPositiveRicci`, then this adapter, and repeat the
+  `ham3_main_hcg` axiom audit. No H6 Gate 5/6 source should be reopened.

@@ -26,3 +26,11 @@ The package is now consumed by `H6NormalData.exists_stage_data` together with
 the provider-native metric and branch diagonals. Do not reopen the H6 radius,
 transition, atom-support, or target-decode routes. The next phase is the
 provider-native input/Step-B1 assembly.
+
+## 2026-07-29 endpoint closure
+
+The provider-native input/Step-B1 phase is complete through
+`MetricCompactSeed.exists_b1_raw_h6`, and the resulting Step-D assembly proves
+unconditional Theorem 3.9. The support/transition producer and Gate 5 remain
+100%; there is no remaining H6 producer target. The legacy radius-profile
+theorem remains separate.

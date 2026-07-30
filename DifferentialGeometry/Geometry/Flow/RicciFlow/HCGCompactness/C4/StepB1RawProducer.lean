@@ -318,7 +318,8 @@ theorem MetricCompactSeed.exists_b1_raw_h6
   have haMin : 0 < aMin :=
     d.stageScale_pos b.realizes hcomplete hconn
   let c0 := 8 * Real.exp b.decay.C / aMin
-  obtain ⟨inp, _hD_one, _hmuD, hc0⟩ := b.exists_core c0
+  obtain ⟨D, hD, hcap, _hD_one, _hmuD, hc0⟩ := b.exists_core c0
+  let inp := b.withDivisor D hD hcap
   have haMin' :
       0 < d.stageScale inp.realizes hcomplete hconn := by
     simpa only [MetricCompactSeed.withDivisor, aMin] using haMin

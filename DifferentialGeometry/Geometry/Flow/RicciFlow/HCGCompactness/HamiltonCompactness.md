@@ -86,3 +86,25 @@ in `NoncollapseInjectivity.lean`.
 The 2026-05-27/28 review notes about the pointed Riemannian rename,
 `[I.Boundaryless]`, and `_hinj` are historical context for the deleted route,
 not a live API or resume point.
+
+## 2026-07-29 unconditional endpoint closure
+
+`compactnessSol` is now fully proved.  The open-window complete-Shi route
+supplies `CurvBoundInput.atZeroGeomOpen`; the proof then constructs the
+provider-neutral `MetricCompactSeed`, chooses the native `H6NormalData`, builds
+`StepDCanonData` with `metricCanonH6`, and feeds it to the already checked
+`open_upgrade_canon`.  The obsolete `Nonempty (MetricCompactBase
+(X.atZero))` boundary and its only `sorry` were removed.
+
+Focused verification is green, and the exact module build is green
+(`9982/9982`).  Direct axiom replay for `compactnessSol` contains only
+`propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx`.
+
+Honest accounting:
+
+- unconditional MSM135 Theorem 3.10 `compactnessSol`: 100%;
+- its dedicated time-zero, H6 metric, and open-window flow-upgrade machinery:
+  100%;
+- whole-HCG supporting machinery: approximately 84%;
+- `ham3_cgh_limit`, the later Hamilton blow-up consumer, remains a distinct
+  theorem-level 0% until it is migrated to this endpoint.

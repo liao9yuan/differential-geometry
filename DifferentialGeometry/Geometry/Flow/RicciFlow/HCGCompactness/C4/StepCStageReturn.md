@@ -88,3 +88,9 @@ The return-map APIs retain the legacy chart family only as their default
 argument. The H6 return consumer supplies `d.chart` explicitly. Focused and
 exact verification pass; no legacy radius-profile theorem is used by the H6
 route.
+
+After the upstream stage predicates moved to `MetricCompactCore`, the legacy
+return proofs were replayed with explicit `MetricCompactnessInputs.toCore`
+simplifications and one explicit reverse-chart readout rewrite. Focused and
+exact verification are GREEN (`4143/4143`); this is compatibility maintenance,
+not a new geometric assumption.

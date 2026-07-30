@@ -4079,6 +4079,31 @@ private lemma bdOmRecover_eq_idEndo_add_raise
     rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
     ring]
 
+/-- The reverse raised endomorphism, inserted in slot zero over `g₀`, is the
+metric-recovery endomorphism. -/
+theorem fullRev0_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    slotInsertEndoCc (I := I) (M := M) g₀ 0
+        (fullRaisedEndoField (I := I) (M := M) g₁ g₀) =
+      omRecoverEndoCc (I := I) g₀ g₁ :=
+  bdSlotInsertZero_fullRaisedRev_eq_omRecover
+    (I := I) (M := M) g₀ g₁
+
+/-- Under an additive metric perturbation, the recovery endomorphism is the
+fixed identity endomorphism plus the raised symmetric perturbation. -/
+theorem omRecover_add
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    omRecoverEndoCc (I := I) g₀ g₁ =
+      slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (fullRaisedEndoField (I := I) (M := M) g₀ g₀) +
+        cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+          (symmS (I := I) (M := M) g₀ T) :=
+  bdOmRecover_eq_idEndo_add_raise
+    (I := I) (M := M) g₀ g₁ T htie
+
 set_option linter.unusedSectionVars false in
 private lemma bdRfns_iCG_symmS_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :

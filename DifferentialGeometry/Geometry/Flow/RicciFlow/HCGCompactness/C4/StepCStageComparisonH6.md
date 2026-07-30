@@ -42,3 +42,10 @@ The master package now feeds `H6NormalData.b1_raw_of_diag`; the H6 provider
 path through the raw record and Step D is complete and axiom-clean. The
 remaining unconditional seam is the legacy shape of
 `MetricCompactnessInputs`, not stage geometry or a missing radius inequality.
+
+## 2026-07-29 endpoint closure
+
+`MetricCompactCore` and `MetricCompactSeed` remove that former legacy input
+seam. This H6 master package now lies on the proved unconditional Theorem 3.9
+dependency path. Gate 5 and this module remain 100%; no stage-comparison work
+is left.

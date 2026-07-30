@@ -298,3 +298,19 @@ conversion.  The old `half_le_gpConst` path was removed.  Focused verification
 and the exact module refresh passed.  This is input-layer infrastructure only;
 `MetricCompactBase.exists_b1_raw` remains theorem-level 0% until the full
 framed producer route is revalidated.
+
+## 2026-07-29 provider-neutral input split
+
+`MetricCompactCore` now owns the fixed-divisor Step-A, packing, volume,
+distance-realization, and injectivity-decay fields used by the selected
+producer. `MetricCompactSeed` owns the divisor-independent data and chooses a
+concrete sufficiently large divisor through `exists_core`.
+
+The legacy `MetricCompactnessInputs` and `MetricCompactBase` project to these
+types, so old callers remain compatible while the H6 route no longer imports
+`normalBounds` or `NormalRadiusProfile`. Focused verification and the exact
+refresh are GREEN (`3957/3957`).
+
+This interface split is 100% and is consumed by the now-complete
+provider-native unconditional Theorem 3.9. The independent
+`NormalRadiusProfile.le_exp_radius` theorem remains 0%.

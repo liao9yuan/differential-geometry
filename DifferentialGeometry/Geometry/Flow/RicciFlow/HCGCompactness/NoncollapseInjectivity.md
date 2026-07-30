@@ -1,6 +1,28 @@
 # NoncollapseInjectivity
 
-## State — 2026-07-09
+## State — 2026-07-29 closure
+
+`flowInj_of_vol` is proved.  It converts the genuine curvature-controlled
+time-zero base-ball volume lower bound into one uniform positive injectivity
+radius by the pointwise Cheeger--Gromov--Taylor theorem.  The proof constructs
+the uniform intrinsic control scale from `SeqBoundedGeometry`, transfers the
+base-ball volume lower bound to the CGT scale by relative Bishop--Gromov, and
+uses the absolute and pullback volume upper bounds required by
+`intrInj_ge_cgt`.
+
+Focused verification passed, the exact module refresh is GREEN
+(`4132/4132`), and direct axiom replay contains only `propext`,
+`Classical.choice`, and `Quot.sound`.  Thus `flowInj_of_vol` and its dedicated
+CGT consumer machinery are each 100%; no independent injectivity black box
+remains.
+
+`HamiltonPositiveRicciAdapter.exists_ham3_vol` now supplies the corresponding
+all-index `FlowBaseVolData` and `IsFlowBaseVolBound` for the canonical Hamilton
+source using one fixed radius and one Perelman `kappa`.  The remaining
+axiom-clean Hamilton-main blocker is not noncollapse or H6: it is the separate
+`ham3_flow_exists_normalized` uniform-existence producer.
+
+## Historical state — 2026-07-09
 
 The canonical HCG bridge now separates data from proofs:
 

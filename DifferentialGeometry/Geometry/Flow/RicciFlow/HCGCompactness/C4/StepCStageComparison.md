@@ -264,3 +264,11 @@ needed. Focused and exact verification are GREEN (`4142/4142`).
 
 The generic provider boundary remains complete. The concrete H6 master
 stage-data producer is recorded in `StepCStageComparisonH6`.
+
+## 2026-07-29 core compatibility replay
+
+The generic H6 comparison theorems consume `MetricCompactCore`. Legacy
+`MetricCompactnessInputs` wrappers now pass `inp.toCore` explicitly in
+`pts_target_tail` and `stage_root_tail`, avoiding coercion-search timeouts
+without changing their public calls. Focused and exact verification are GREEN
+(`4142/4142`).

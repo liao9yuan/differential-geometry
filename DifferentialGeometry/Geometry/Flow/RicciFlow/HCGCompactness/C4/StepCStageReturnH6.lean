@@ -31,6 +31,43 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
+/-- Stabilized live centers have a common pairwise radial tail using only the
+provider-neutral compactness core. -/
+theorem liveCenters_core
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (s : Real)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (eps : Real) (heps : 0 < eps) :
+    ∃ N : Nat, ∀ k l : Nat, N ≤ k → N ≤ l →
+      ∀ alpha : LiveSlot L inp.pack s,
+        let Lphi := L.subseq hphi
+        let Yk := X.obj (Lphi.φ k)
+        let Yl := X.obj (Lphi.φ l)
+        letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
+        letI : MetricSpace Yl.M := (P (Lphi.φ l)).ms
+        dist (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)) Yl.basepoint <
+          dist (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) Yk.basepoint + eps := by
+  let Lphi := L.subseq hphi
+  have hrad : ∀ᶠ n in Filter.atTop, ∀ alpha : LiveSlot L inp.pack s,
+      |seqRadius inp.decay inp.D P (Lphi.φ n) (alpha.1 : Nat) -
+        L.rInf (alpha.1 : Nat)| < eps / 2 :=
+    Filter.eventually_all.mpr fun alpha =>
+      (Lphi.tendsto (alpha.1 : Nat)).eventually
+        (Metric.ball_mem_nhds (L.rInf (alpha.1 : Nat)) (half_pos heps))
+  rw [Filter.eventually_atTop] at hrad
+  obtain ⟨N, hN⟩ := hrad
+  refine ⟨N, ?_⟩
+  intro k l hk hl alpha
+  dsimp only
+  letI : MetricSpace (X.obj (Lphi.φ k)).M := (P (Lphi.φ k)).ms
+  letI : MetricSpace (X.obj (Lphi.φ l)).M := (P (Lphi.φ l)).ms
+  rw [← seqCenterD_dist_eq inp.decay P Lphi l (alpha.1 : Nat),
+    ← seqCenterD_dist_eq inp.decay P Lphi k (alpha.1 : Nat)]
+  have hk' := abs_lt.mp (hN k hk alpha)
+  have hl' := abs_lt.mp (hN l hl alpha)
+  linarith
+
 /-- Under the explicit construction-radius room, H6-provider stage maps
 eventually send the smaller retained source ball into the larger target ball. -/
 theorem H6NormalData.mapsTo_tail
@@ -96,7 +133,7 @@ theorem H6NormalData.mapsTo_tail
     hjets R0 hR0s 0 (epsA alpha) (hepsA alpha)
   choose Njet hNjet using hjetA
   let Njets := Finset.univ.sup Njet
-  obtain ⟨Nrad, hrad⟩ := liveCenters_radial inp P L s phi hphi
+  obtain ⟨Nrad, hrad⟩ := liveCenters_core inp P L s phi hphi
     (gap / 4) (div_pos hgap (by norm_num))
   refine ⟨max Nrad Njets, ?_⟩
   intro k l hk hl

@@ -9,9 +9,10 @@ set_option linter.unusedSectionVars false
 # H6-provider Chapter-4 endpoint assembly
 
 This module feeds the provider-native Step-B1 raw producer into the existing
-Step-D construction.  It records a conditional endpoint on
-`MetricCompactBase` together with its native `H6NormalData`; it does not claim
-that the unconditional geometric inputs have already been assembled.
+Step-D construction.  Its native conditional endpoint consumes a
+`MetricCompactSeed` together with matching `H6NormalData`; a
+`MetricCompactBase` wrapper is retained only for compatibility.  The
+unconditional geometric assembly lives in `MetricCompactnessUncondH6`.
 -/
 
 noncomputable section

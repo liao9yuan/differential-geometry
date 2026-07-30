@@ -123,3 +123,11 @@ Those membership and decode obligations are now supplied downstream by
 `stage_source_mem`, `target_mem`, and `pts_target_tail`. The raw filler seam
 therefore remains focused- and exact-green and is complete; it should not be
 reopened during the provider-native input assembly.
+
+## 2026-07-29 core compatibility replay
+
+The three legacy wrappers now pass `inp.toCore` explicitly, and their expensive
+compatibility elaboration is bounded locally rather than by a file-wide option.
+`stagePtsSub_eq_raw` also uses a declaration-local recursion budget. Focused
+and exact verification are GREEN (`4036/4036`); the provider-native H6 proof
+remains unchanged.

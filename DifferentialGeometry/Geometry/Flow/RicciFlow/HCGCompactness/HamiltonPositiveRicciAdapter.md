@@ -1,5 +1,43 @@
 # HamiltonPositiveRicciAdapter
 
+## 2026-07-29 provider-native Hamilton main route
+
+The real Hamilton blow-up consumer now bypasses the legacy
+`ham3_cgh_limit` black box.
+
+- `ham3_ball_rm` and `ham3_src_rm` give scale-one curvature control on every
+  fixed-radius canonical source ball.
+- `exists_ham3_vol` applies `no_local_open` once, then uses the buffered
+  inequality
+  `2 * ham3_r0 ^ 2 <= scale_i * time_i` and `time_i < omega` to choose one
+  positive radius below `sqrt scale_i * ham3_r0` for every source index.  The
+  resulting `FlowBaseVolData` and `IsFlowBaseVolBound` are genuinely
+  all-index; no eventual-prefix data are discarded.
+- `ham3_const_of_vol` passes this data through the proved
+  `flowInj_of_vol`, H6 metric compactness, the open-window flow upgrade, and
+  the time-zero round-limit transfer.  `ham3_const` removes the explicit
+  volume input.
+- `ham3_const_hcg` and `ham3_main_hcg` assemble the initial positive-Ricci
+  route.  Their public `Closed3Manifold` hypothesis explicitly includes
+  connectedness, and neither theorem depends on the old `ham3_cgh_limit`.
+
+Focused verification and the exact adapter refresh are GREEN
+(`10470/10470`).  Direct axiom replay for `flowInj_of_vol`,
+`exists_ham3_vol`, and `ham3_const` contains only `propext`,
+`Classical.choice`, and `Quot.sound`.  The two initial-data theorems currently
+inherit exactly one nonstandard axiom source:
+`ham3_flow_exists_normalized`, whose uniform-existence `N` route is being
+repaired separately.  Axiom replay confirms that this producer, not H6,
+noncollapse, or `ham3_cgh_limit`, is the source of `sorryAx`.
+
+Honest accounting: the provider-native Hamilton compactness/noncollapse
+consumer is 100%; `ham3_const` is theorem-level 100% and axiom-clean.  The
+initial-data main statement/proof assembly is 100%, but its axiom-clean
+endpoint remains 0% until `ham3_flow_exists_normalized` is proved and rebuilt.
+Whole-HCG supporting machinery is approximately 87%.  After that producer is
+GREEN, refresh `HamiltonPositiveRicci` and this adapter, then repeat the direct
+axiom audit; no H6 source change is expected.
+
 ## 2026-07-26 buffered Shi derivative input
 
 The canonical source index now retains both the requested
@@ -400,3 +438,16 @@ arbitrary-center volume-overlap is separate from the already completed
 fixed-scale Perelman noncollapse endpoint.  Dedicated post-canonical
 closed-window machinery is about 98% pending that connectedness projection;
 whole-HCG supporting machinery is about 62%.
+
+## 2026-07-29 connected metric-compactness replay
+
+The public Theorem 3.9 endpoint now requires per-member connectedness. During
+the exact HCG umbrella replay, `ham3_const_of_base` exposed one elaboration seam:
+the `ConnectedSpace (X.term k).M` goal did not synthesize the topology stored
+inside `X.term k`. The proof now writes that record topology explicitly; no
+Hamilton or uniform-existence argument changed.
+
+Focused verification and the exact adapter refresh are GREEN (`10425/10425`).
+The full HCG umbrella is exact GREEN (`10482/10482`). The remaining
+`compactnessSol`/Hamilton endpoint work is separate from this compatibility
+repair.

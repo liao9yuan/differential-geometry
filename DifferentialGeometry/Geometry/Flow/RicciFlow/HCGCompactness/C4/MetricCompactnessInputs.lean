@@ -572,8 +572,10 @@ Step-A multiplicity cap. -/
 theorem exists_core
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (s : MetricCompactSeed (I := I) X) (c : Real) :
-    ∃ inp : MetricCompactCore (I := I) X,
-      1 < inp.D ∧ inp.decay.mu 0 ≤ inp.D ∧ c < inp.D := by
+    ∃ D : Real, 0 < D ∧
+      max 4 (50 * Real.exp (s.decay.C * (20 * s.decay.lambda D 0))) *
+          s.decay.lambda D 0 ≤ s.volume.r0 ∧
+        1 < D ∧ s.decay.mu 0 ≤ D ∧ c < D := by
   let q : Real :=
     s.decay.a * (min s.decay.baseInj.ρ 1) ^ (Module.finrank Real E)
   let K : Real := max 4 (50 * Real.exp (s.decay.C * 20))
@@ -633,10 +635,7 @@ theorem exists_core
           (s.decay.C * (20 * s.decay.lambda D 0))) *
         s.decay.lambda D 0 ≤ s.volume.r0 :=
     (mul_le_mul_of_nonneg_right hfac hlam_nonneg).trans hKlam.le
-  refine ⟨s.withDivisor D hD hcap, ?_, ?_, ?_⟩
-  · exact hD_one
-  · exact hmuD
-  · exact hcB.trans_lt hB_lt
+  exact ⟨D, hD, hcap, hD_one, hmuD, hcB.trans_lt hB_lt⟩
 
 end MetricCompactSeed
 

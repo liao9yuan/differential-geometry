@@ -26,9 +26,9 @@ writing a new overview elsewhere.
 ## 1. Goal and theorem tree (MSM135 Chapters 3–4)
 
 ```
-Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
+Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint DONE;
                                                        conditional wrapper checked]
-  ⇐ Thm 3.9  metric compactness                      [Ch4 line, proved in book Ch4]
+  ⇐ Thm 3.9  metric compactness                      [unconditional endpoint DONE]
   ⇐ Lemma 3.11  whole-window C^p metric bounds       [DONE sorry-free, hShi = cited hyp]
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
@@ -38,7 +38,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
                       textbook B1 statement remains unstated, 0%)
                     → Step C historical arbitrary-recurrence route (separate,
                       incomplete, and not required by the selected producer)
-                    → Step D (direct limit + assembly, DONE conditionally)
+                    → Step D (direct limit + assembly, DONE; H6 route assembled)
                     + F-track engines (F1–F13, 100%)
 ```
 
@@ -47,10 +47,11 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Endpoint | Where | Status |
 |---|---|---|
 | **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessEndpoint.lean` | **100% checked.**  `MetricCompactBase.exists_b1_raw` produces all 5/5 fields, `compactness_of_b1` performs Step-D assembly, and `MetricCompactnessConclusion.ofSeqSubseq` transports the nested subsequence conclusion back to the original sequence.  Focused check and exact targeted refresh are green. |
-| Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | 0%; the conditional endpoint and the native CGT, Bishop–Gromov overlap/total-packing, branch-carrying [H6] producer, and H6 provider substitution are complete. Per-member connectedness is now an explicit public hypothesis. The remaining frontier is the provider-native input/Step-B1 assembly; converting back to the legacy `MetricCompactBase` would reintroduce the unproved `NormalRadiusProfile.le_exp_radius`. |
+| Unconditional Thm 3.9 `metricCompactness` | `C4/MetricCompactnessUncondH6.lean` (conclusion structures remain in `MetricCompactness.lean`) | **100% checked.** Per-member connectedness is an explicit public hypothesis. `metricSeedOfBG` assembles CGT decay plus Bishop–Gromov volume/packing data, `exists_h6NormalData` supplies the native chart package, and the provider-neutral raw-B1/Step-D route returns `MetricCompactnessConclusion`. Focused and exact verification are green through `4444/4444`; the HCG umbrella is exact-green `10482/10482`. A direct axiom audit contains only `propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx`. |
 | Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer of the now-complete conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not produce that P4 input or prove unconditional Thm 3.10 |
-| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible `sorry`; theorem 0%. The proof is now filled after the single boundary `Nonempty (MetricCompactBase (X.atZero))`: it constructs `StepDCanonData`, calls checked `open_upgrade_canon`, and returns smooth convergence plus completeness of every limit slice. The no-extra-input complete-Shi route is trusted end to end and axiom-clean apart from the standard three axioms; P4 producer/assembly is 100%. Native CGT decay, Bishop–Gromov overlap/total packing, the branch-carrying H6 package, and H6 provider substitution are complete; the remaining time-zero frontier is the same provider-native input/Step-B1 assembly. |
+| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `MovingShiOpen.lean` | **100% checked.** `CurvBoundInput.atZeroGeomOpen` extracts all-order time-zero bounded geometry from the complete open-window curvature estimates. `compactnessSol` then constructs `MetricCompactSeed`, chooses the native `H6NormalData`, builds provider-native `StepDCanonData`, and calls `open_upgrade_canon`. Focused checks and exact builds are green through `9679/9679` and `9982/9982`; direct axiom replay contains only `propext`, `Classical.choice`, and `Quot.sound`. |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
+| Hamilton positive-Ricci main `ham3_main_hcg` | `HamiltonPositiveRicciAdapter.lean` | **Statement and proof assembly checked; axiom-clean endpoint still 0%.** `Closed3Manifold` explicitly carries connectedness. The provider-native route bypasses legacy `ham3_cgh_limit`; `flowInj_of_vol`, `exists_ham3_vol`, and `ham3_const` are exact-green and axiom-clean. The adapter is exact-green `10470/10470`. The only `sorryAx` on `ham3_main_hcg` is inherited from the separate `ham3_flow_exists_normalized` uniform-existence producer. |
 
 ## 3. Live lanes and their entry documents
 
@@ -64,10 +65,10 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 |---|---|---|
 | Ch4 Step B/C (selected B1 producer route) | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCStageComparison.md` + `C4/StepCStageDiagonal.md` + `C4/StepCStageInjectivity.md` + `C4/StepCStageMaster.md` + `C4/StepB1MetricLocal.md` + `C4/StepB1MetricIntrinsic.md` + `C4/StepB1MetricCarrier.md` + `C4/StepB1RawProducer.md` | **100% checked for the selected canonical framed producer route.**  The support capstone, full stage-master DAG, forward intrinsic tail, exact-`Function.invFunOn` reverse tail, two-carrier capstone, and `MetricCompactBase.exists_b1_raw` are focused/exact-green; the unchanged `StepB1RawInput` closes 5/5 fields for one global finite-stage map.  The separately named textbook B1 theorem remains unstated at 0%, and the historical full Step-C arbitrary recurrence remains separate/incomplete. |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` + `C4/MetricCompactnessEndpoint.md` | **100% checked for the concrete conditional route.** `compactness_canon` now proves its canonical whole-source metric-equivalence and all-order covariant bounds by joining the `D.close` tail with compact finite-head collars, then transports them through the canonical pullback and nested subsequence. `StepDAssembly` and `MetricCompactnessEndpoint` are focused- and exact-green on the live framed import chain; no `HasCanonBounds` frontier remains. |
-| Native [H6] normal-coordinate producer | `C4/H6_RADIUS_CONSULT.md` + `C4/H6NormalData.md` + `C4/StepCProducersH6.md` + `C4/StepCStageComparisonH6.md` | **Branch-carrying producer 100%; Gate 5 provider substitution 100%; provider-native master stage data 100%.** `exists_h6NormalData` is focused/exact-green (`3983/3983`): completeness, connectedness, sequence bounded geometry, and the realized CGT injectivity profile construct one uniform whole-ball chart package with half/two metric equivalence and all-order metric-derivative bounds. `exists_supp_data` and `exists_stage_data` then carry that same `d.chart` through support, target decode, transition inverse laws, finite metric/branch diagonals, root/jet consumers, and pointed stage maps; exact verification is green (`4144/4144`, `4148/4148`) and direct axiom audits contain no `sorryAx`. No extra radius or chart-agreement assumption is introduced. The legacy `NormalRadiusProfile.le_exp_radius` theorem is separate and still 0%. |
+| Native [H6] normal-coordinate producer | `C4/H6_RADIUS_CONSULT.md` + `C4/H6NormalData.md` + `C4/StepCProducersH6.md` + `C4/StepCStageComparisonH6.md` + `C4/MetricCompactnessUncondH6.md` | **Branch-carrying producer 100%; Gate 5 provider substitution 100%; provider-native raw-B1/Step-D route 100%; unconditional Theorem 3.9 100%.** `exists_h6NormalData` constructs one uniform whole-ball chart package. The same `d.chart` passes through support, target decode, transition inverse laws, metric/branch diagonals, root/jet consumers, intrinsic forward/reverse estimates, the five-field raw B1 input, and Step D. No extra radius or chart-agreement assumption is introduced. The legacy `NormalRadiusProfile.le_exp_radius` theorem is separate, still 0%, and absent from the completed endpoint dependency path. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `DISTANCE_CALABI_CONSULT.md` + `CALABI_BRANCH_CONSULT.md` + **`CALABI_BRANCH_PLAN.md`** + `DISTANCE_BARRIER_PERF_CONSULT.md` + `ConvFieldCanon.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `rm04Base_of_solution_any`, `e0Residual`, the arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, direct tower `towerHeatSol_raw`, HCG `rmTowerCost`, constants-first `srcCovLip_of_soln`, and `open_upgrade_canon` are focused- and exact-green. Route B-prime is now closed through the public no-extra-input Shi wrapper: fixed-first Calabi support, evolving distance barrier, concrete point-centered cutoff producer, Kato-controlled barrier Bernstein consumer, constants-first single-flow theorem, and canonical-window sequence wrapper are all focused/exact-green. The earlier `whnf` blocker was a redundant normed-space instance diamond and required no new hypothesis or resource override. `CurvBoundInput.movingShi_open` is theorem-level 100% and axiom-clean apart from the standard three axioms. Thm 3.10 itself stays 0% until its final visible `sorry` is replaced; dedicated P4 consumer machinery remains about 98%, the selected complete-Shi producer sublane is 100%, and whole HCG supporting machinery remains about 60%. |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
-| A0′ volume-overlap and total-packing producers (unconditional 3.9) | `C4/A0PRIME_VOLUME_PLAN.md` + `C4/VolumeOverlap.md` | **COMPLETE 2026-07-28. Endpoints `volInput_of_bg` and `packInput_of_bg`: 100%; dedicated volume/packing machinery: 100%.** `segBall_vol_le`, `segBall_vol_fin`, and `segBall_vol_rel` are proved and exact-current. `packInput_of_bg` applies the accepted `segBall_card` count at separation `hd.lambda D r`, ratio `r / hd.lambda D r`, and comparison cap `r + 1`, producing `MetricCompactBase.pack` for every positive `D` without an unbounded-ratio assumption. `VolumeOverlap` replays exact GREEN (`4028/4028`), and direct axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx`. Honest inputs remain `RealizesEdist`, `SeqMetricComplete`, per-member connectedness, and `SeqBoundedGeometry`. This closes both Bishop–Gromov fields, not unconditional Theorem 3.9, which remains theorem-level 0%. |
+| A0′ volume-overlap and total-packing producers (unconditional 3.9) | `C4/A0PRIME_VOLUME_PLAN.md` + `C4/VolumeOverlap.md` | **COMPLETE 2026-07-28. Endpoints `volInput_of_bg` and `packInput_of_bg`: 100%; dedicated volume/packing machinery: 100%.** `segBall_vol_le`, `segBall_vol_fin`, and `segBall_vol_rel` are proved and exact-current. `packInput_of_bg` applies the accepted `segBall_card` count at separation `hd.lambda D r`, ratio `r / hd.lambda D r`, and comparison cap `r + 1`, producing packing data for every positive `D` without an unbounded-ratio assumption. `VolumeOverlap` is exact-green (`4028/4028`) and axiom-clean apart from the standard three axioms. These producers are now consumed by `metricSeedOfBG` in the completed unconditional Theorem 3.9 route. |
 | Space-form / quotient curvature | same-name `.md`s under `Geometry/Metric/Sphere` and `DimensionThree/HamiltonPositiveRicci.md` | **CLOSED, exact-green and axiom-clean;** parallel and unrelated to 3.9/3.10 |
 
 Superseded/historical: `C4/STEPC_HANDOFF.md`, `C4/STEPC_B1_HANDOFF.md` (banners in
@@ -82,7 +83,7 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 
 | Input | Book cite | Verdict | Notes |
 |---|---|---|---|
-| `InjRadiusDecayInput` (A0) | Cheeger--Gromov--Taylor injectivity-radius decay | **COMPLETE 2026-07-28. Endpoint `exists_injDecay`: 100%; dedicated CGT machinery: 100%.** The localized Whitehead/Jensen lane, paper Lemma 4.6 propeller count, multiplicity-weighted area bridge, loop estimate, collision-to-loop theorem, and pointwise `intrInj_ge_cgt` are all proved. `C4/CGTDecay.lean` combines the uniform intrinsic control radius, basepoint intrinsic-ball lower volume, relative/absolute Bishop comparison, pullback-volume bound, and the pointwise theorem to construct `injDecay_of_bg`; `injDecay_realizes` proves its stored distance is the actual member emetric. Focused verification and the exact module refresh are green (`4128/4128`), and direct axiom audits of the pointwise and sequence endpoints contain only `propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx` or independent CGT black box. Honest inputs are `SeqMetricComplete`, per-member connectedness, `SeqBoundedGeometry`, and `BaseInjBound`; no cut-time, injectivity, pullback-completeness, or extra normal-radius input was added. Unconditional Theorem 3.9 remains theorem-level 0% pending final native assembly; connectedness is now explicit in its public statement. Whole HCG supporting machinery is about 70%. |
+| `InjRadiusDecayInput` (A0) | Cheeger--Gromov--Taylor injectivity-radius decay | **COMPLETE 2026-07-28. Endpoint `exists_injDecay`: 100%; dedicated CGT machinery: 100%.** The localized Whitehead/Jensen lane, paper Lemma 4.6 propeller count, multiplicity-weighted area bridge, loop estimate, collision-to-loop theorem, and pointwise `intrInj_ge_cgt` are all proved. `C4/CGTDecay.lean` combines the uniform intrinsic control radius, basepoint intrinsic-ball lower volume, relative/absolute Bishop comparison, pullback-volume bound, and the pointwise theorem to construct `injDecay_of_bg`; `injDecay_realizes` proves its stored distance is the actual member emetric. Focused verification and the exact module refresh are green (`4128/4128`), and direct axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx` or independent CGT black box. Honest inputs are `SeqMetricComplete`, per-member connectedness, `SeqBoundedGeometry`, and `BaseInjBound`; no cut-time, injectivity, pullback-completeness, or extra normal-radius input was added. This producer is now consumed by the completed unconditional Theorem 3.9 endpoint. |
 | `PackingBound` | `lbl387` | **PROVED 2026-07-28; endpoint `packInput_of_bg` 100%.** | The per-radius count `A(r)` is constructed from `segBall_card`; for `r ≥ 0`, the proof uses separation `λ_D(r)`, ratio `r / λ_D(r)`, and cap `r + 1`, while `r < 0` forces the finite set empty. Thus no uniformity trap or unbounded containing-scale claim is introduced. Focused/exact verification is green (`4028/4028`) and the endpoint is axiom-clean apart from the standard three axioms. |
 | `VolumeComparisonInput` (A0') | Bishop–Gromov | **FIXED** | Uncapped-in-`r` multiplicity was **FALSE** (hyperbolic members: `r`-separated counts in `m·r`-balls grow like `e^{(n−1)(m−½)√C₀·r}`).  Now capped at containing scale `m * r ≤ r0`; consumers (`net_multiplicity`, `inter_count`) thread the needed Step-A ratio times `λ[0]` into the cap. |
 | `RealizesEdist` | — | plumbing | provable at instantiation from `ProperMetricOn`; not external math. |
@@ -113,7 +114,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-24)
+## 6. Honest progress (updated 2026-07-29)
 
 - **Conditional Thm 3.9 endpoint: 100% checked.**
   `MetricCompactBase.exists_b1_raw` is checked and fills the concrete
@@ -427,7 +428,8 @@ its docstring BEFORE consumers are built against it.
    This historical snapshot estimated Ch4 machinery at ≈87%; the current
    rounded estimate is ≈95%.  The conditional endpoint is now 100%, while the
    separately named textbook B1 theorem remains 0%.
-- Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
+ - Unconditional Thm 3.9: 100% through the provider-neutral CGT,
+   Bishop--Gromov, and H6 assembly recorded below.
 - Ch3: Lemma 3.11 is done under its cited `hShi` hypothesis.  The canonical
   conditional assembly `solutionComp_cond` → `compactnessSol_cond` is checked from
   conditional Theorem 3.9 plus concrete `FlowUpgradeData`.  In the P4 producer
@@ -446,11 +448,13 @@ its docstring BEFORE consumers are built against it.
   consumer assembly, including completeness of every time slice of the
   constructed limit. `open_upgrade_canon`, the Route-B-prime complete-Shi
   producer, and the constants-first source estimates are all checked; P4
-  producer/assembly is therefore 100%. The `compactnessSol` proof is filled
-  from `MetricCompactBase (X.atZero)` onward, and its one visible `sorry` is
-  exactly the native construction of that time-zero base. The Hamilton
-  nonregular-endpoint route remains a separate stronger consumer.
-  Unconditional Theorem 3.10 remains theorem-level 0%.
+  producer/assembly is therefore 100%. `CurvBoundInput.atZeroGeomOpen` exposes
+  the underlying Riemann-tower estimate as time-zero `SeqBoundedGeometry`.
+  `compactnessSol` constructs `MetricCompactSeed`, native `H6NormalData`, and
+  canonical Step-D data without a legacy radius profile, then calls
+  `open_upgrade_canon`. Unconditional Theorem 3.10 is 100%, exact-green
+  (`9982/9982`), and has no `sorryAx`. The Hamilton nonregular-endpoint route
+  remains a separate stronger consumer.
   **2026-07-09 noncollapse repair:**
   the canonical Perelman layer
   now defines actual time-slice metric balls, Riemannian volume, parabolic
@@ -460,8 +464,9 @@ its docstring BEFORE consumers are built against it.
   machinery includes `ham3_rm_control`, the original-flow theorem
   `no_local_open`, and the rescaled Hamilton consumer `ham3_noncollapse`.
   The latter two theorems and their dedicated noncollapsing machinery are
-  100%; the separate Cheeger-Gromov-Taylor `flowInj_of_vol` producer remains
-  theorem-level 0%.
+  100%. The separate Cheeger--Gromov--Taylor `flowInj_of_vol` producer is now
+  also theorem-level 100%, exact-green (`4132/4132`), and axiom-clean apart
+  from the standard three axioms.
   The W-entropy producer lane has now checked conjugate-heat total-mass
   conservation, time reversal, the interval-local classical-solution
   interface, conditional nonnegativity, a time-operator lift, the abstract
@@ -699,15 +704,15 @@ its docstring BEFORE consumers are built against it.
   `4232/4232`, `4234/4234`, `4244/4244`, and `4320/4320`; direct axiom audits
   show only `propext`, `Classical.choice`, and `Quot.sound`.  Thus Gate 5
   provider substitution, the H6 raw B1 input, and the H6 conditional Step-D
-  endpoint are each 100%.  This does **not** close the unconditional theorem:
-  `metricCompactness` remains theorem-level 0% because its current input shape
-  still requires the legacy `NormalCoordMetricBoundInput` and
-  `NormalRadiusProfile`.  The next target is to split out the provider-neutral
-  core (`decay`, packing/volume, large `D`, distance realization, Step-A
-  capacity, and realization data), instantiate it from CGT/Bishop--Gromov plus
-  `exists_h6NormalData`, and let the H6 consumer use that core directly.  The
-  H6 route must not be converted back through the independent legacy
-  `NormalRadiusProfile.le_exp_radius` theorem.
+  endpoint are each 100%. `MetricCompactCore` and `MetricCompactSeed` now split
+  these fields from the legacy normal-radius payload. `metricSeedOfBG`
+  instantiates the seed from CGT and Bishop--Gromov, and
+  `metricCompactnessH6` combines it with `exists_h6NormalData`. The public
+  connected `metricCompactness` endpoint is therefore theorem-level 100%,
+  exact-green through `4444/4444`; the umbrella is exact-green
+  `10482/10482`, and its direct axiom audit has no `sorryAx`. The independent
+  `NormalRadiusProfile.le_exp_radius` theorem remains 0% but is not on this
+  dependency path.
 - **Perelman noncollapse cutoff closure (2026-07-23):** the fixed-metric W
   lower bounds, quantitative cutoff/contradiction, initial-time volume lower
   bound, and positive-time entropy route now assemble the checked theorem
@@ -716,15 +721,29 @@ its docstring BEFORE consumers are built against it.
   dependency of this chain.  `no_local_open` and the downstream
   `ham3_noncollapse` are each theorem-level 100%, and their dedicated
   noncollapsing machinery is 100%.  Their axiom audits contain only `propext`,
-  `Classical.choice`, and `Quot.sound`.  Whole-HCG machinery remains about 72%.
-  The unconditional Hamilton main/compactness endpoint remains theorem-level
-  0%; the separate `ham3_space_box` classification theorem is closed.  See
+  `Classical.choice`, and `Quot.sound`.  With the later unconditional
+  Theorems 3.9 and 3.10 closures, the separate `ham3_space_box`
+  classification theorem is closed.  See
   `../Perelman/Noncollapsing.md`.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 72%** (this is
-  infrastructure coverage, not completion of the unconditional Hamilton
-  endpoint).  **Conditional Thm 3.9 is 100% checked.  Unconditional Thm 3.9,
-  unconditional Thm 3.10, and `ham3_cgh_limit` remain 0%.**  The selected B/C
-  producer and conditional Step-D/endpoint chain are closed; the separately
+- **Provider-native Hamilton consumer closure (2026-07-29):**
+  `flowInj_of_vol` proves the uniform injectivity input from actual base-ball
+  volume and curvature data. `exists_ham3_vol` constructs one fixed-radius,
+  fixed-kappa all-index package for the canonical Hamilton source.
+  `ham3_const` then runs the native H6/Step-D/open-window route to a
+  constant-positive-sectional-curvature metric. These declarations are
+  exact-green and their axiom audits contain only the standard three axioms.
+  `ham3_const_hcg` and `ham3_main_hcg` give the initial-data statement with
+  connectedness carried by `Closed3Manifold`; their proof assembly is
+  exact-green, and their sole nonstandard axiom dependency is
+  `ham3_flow_exists_normalized`. The legacy `ham3_cgh_limit` is no longer on
+  this main route.
+- **Whole HCG project — conservative MACHINERY estimate ≈ 87%** (this is
+  infrastructure coverage, not axiom-clean completion of the Hamilton main
+  endpoint). **Conditional and unconditional Thm 3.9 are both 100% checked.
+  Unconditional Thm 3.10 and `ham3_const` are 100%; the axiom-clean
+  `ham3_main_hcg` endpoint remains 0% pending
+  `ham3_flow_exists_normalized`.** The selected B/C producer, H6 provider
+  route, and Step-D/endpoint chain are closed; the separately
   named textbook B1 theorem remains unstated at 0%, and the historical full
   Step-C arbitrary recurrence remains incomplete.  The `g_p`,
   exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`, physical
@@ -734,15 +753,20 @@ its docstring BEFORE consumers are built against it.
   conditional root producer, D5 metric exhaustion, and flat nested-open
   convergence are no longer on this list.
 
-## 7. Real sorries in this tree (audited 2026-07-23)
+## 7. Real sorries in this tree (audited 2026-07-29)
 
-`MetricCompactness.lean` (unconditional metric endpoint) ·
-`HamiltonCompactness.lean` (`compactnessSol`, unconditional solution endpoint) ·
-`NoncollapseInjectivity.lean` (`flowInj_of_vol`, the separately declared CGT
-frontier) · `Evolution/BernsteinComplete.lean` (`estimate_complete`, legacy insufficient
-complete-Bernstein interface).  The legacy `estimate_complete` statement
-remains visible while its caller awaits the solution-produced cutoff; a green
-wrapper does not discharge that mathematics.
+`DimensionThree/HamiltonPositiveRicci.lean` has two proof `sorry`s:
+`ham3_flow_exists_normalized`, the uniform-existence producer currently on the
+new `ham3_main_hcg` dependency path, and legacy `ham3_cgh_limit`, which the new
+provider-native route bypasses. `Evolution/BernsteinComplete.lean`
+(`estimate_complete`) is a separate legacy insufficient complete-Bernstein
+interface. The legacy statement remains visible while its caller awaits the
+solution-produced cutoff; a green wrapper does not discharge that
+mathematics. `NoncollapseInjectivity.lean` has no remaining proof `sorry`;
+`flowInj_of_vol` is exact-green and axiom-clean.
+`MetricCompactness.lean` and `HamiltonCompactness.lean` have no remaining proof
+`sorry`; their unconditional Theorems 3.9 and 3.10 are exact-green and
+axiom-audited without `sorryAx`.
 `FlowLimitRegularity.lean` has no remaining proof `sorry`; in particular,
 `ConvOut.gramSmooth` is checked.  Neither
 `C4/MetricCompactnessInputs.lean` nor `C4/StepB1RawProducer.lean` is in the live

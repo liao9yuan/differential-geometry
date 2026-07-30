@@ -65,3 +65,17 @@ native producer frontier. The remaining theorem-level `sorry` is still exactly
 the CGT/Bishop--Gromov/H6 provider and final native-base assembly boundary.
 Focused verification and the exact module refresh passed; the expected
 unconditional endpoint `sorry` remains visible.
+
+## 2026-07-29 unconditional endpoint closure
+
+The former `sorry` declaration has been removed from this lower structure
+module. The public `metricCompactness` endpoint now lives in
+`C4/MetricCompactnessUncondH6.lean`, while this file continues to own
+`MetricCompactnessConclusion` and the convergence structures needed below the
+Chapter-4 implementation.
+
+The endpoint explicitly assumes per-member connectedness and is 100% proved
+through the provider-neutral CGT, Bishop--Gromov, and H6 route. Its direct axiom
+audit contains only `propext`, `Classical.choice`, and `Quot.sound`, with no
+`sorryAx`. The independent legacy `NormalRadiusProfile.le_exp_radius` theorem
+remains 0% but is not a dependency.

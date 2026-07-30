@@ -9,9 +9,16 @@ Focused and exact verification pass (`4320/4320`). Direct axiom checks of the
 new H6 scale, stage, raw-input, and endpoint declarations report only
 `propext`, `Classical.choice`, and `Quot.sound`.
 
-This H6 conditional endpoint is 100%. The unconditional MSM135 theorem remains
-0%: the current `MetricCompactnessInputs` constructor still requires the
-legacy `NormalCoordMetricBoundInput` and `NormalRadiusProfile`, even though the
-H6 consumer path does not use their chart provider. The next target is a
-provider-native core input interface; converting H6 back through
-`NormalRadiusProfile.le_exp_radius` is explicitly not the route.
+This H6 conditional endpoint is 100%. The provider-neutral input split has now
+removed the former legacy-base obstruction described at this historical
+checkpoint.
+
+## 2026-07-29 seed endpoint
+
+`MetricCompactSeed.metricCanonH6`, `metricCompactH6`, and
+`metricCanonH6_conn` are the canonical provider-native endpoints. The
+`MetricCompactBase` versions remain compatibility wrappers only. Focused and
+exact verification are GREEN (`4320/4320`).
+
+These declarations are consumed by the now-complete unconditional Theorem 3.9
+assembly. `NormalRadiusProfile.le_exp_radius` remains separate and unused.

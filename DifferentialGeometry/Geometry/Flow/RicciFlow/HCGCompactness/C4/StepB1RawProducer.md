@@ -61,8 +61,17 @@ input without converting `d.chart` back to the legacy provider. Focused and
 exact verification pass (`4244/4244`), and the new declarations are
 `sorryAx`-free.
 
-The H6 raw producer and its Step-D consumer are 100%. The unconditional
-MSM135 theorem remains 0% because `MetricCompactnessInputs` still requires
-legacy `normalBounds` and `normalRadius` fields before the H6 route can be
-instantiated. The next producer is a provider-native core input interface,
-not `NormalRadiusProfile.le_exp_radius`.
+The H6 raw producer and its Step-D consumer are 100%. At this checkpoint the
+unconditional theorem still awaited the provider-neutral input split; that
+frontier is superseded by the closure below.
+
+## 2026-07-29 provider-neutral seed consumer
+
+`MetricCompactSeed.exists_b1_raw_h6` now chooses the divisor first, defines
+the resulting `MetricCompactCore`, and carries the seed's decay data
+definitionally into the same `H6NormalData`. The legacy
+`MetricCompactBase.exists_b1_raw_h6` is only a compatibility wrapper.
+
+Focused and exact verification remain GREEN (`4244/4244`). This raw producer
+is now part of the completed unconditional Theorem 3.9 route; it never uses
+`NormalRadiusProfile.le_exp_radius`.

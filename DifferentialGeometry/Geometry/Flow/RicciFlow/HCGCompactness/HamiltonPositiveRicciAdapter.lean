@@ -10,8 +10,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndgame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEquiv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.NoncollapseInjectivity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDCanonP4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessEndpoint
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessUncondH6
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
@@ -380,6 +382,62 @@ private theorem ham3_shi_rm
     _ = (100 : Real) ^ 2 := by
       field_simp [ne_of_gt hscale]
 
+/-- Every canonical Hamilton source member has scale-one curvature control on
+any positive subradius of the fixed common-window radius. -/
+private theorem ham3_ball_rm
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q)
+    {r : Real} (hr : 0 < r) (hrle : r ≤ ham3_r0)
+    (i : Nat) :
+    (ham3RescaledBall (I := I) P Q hsel
+      (ham3Start (I := I) P Q hsel hwindow + i) r hr).IsRmControlled := by
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  let B := ham3RescaledBall (I := I) P Q hsel j r hr
+  change B.IsRmControlled
+  unfold PDE.RicciFlow.Perelman.FlowMetricBall.IsRmControlled
+  dsimp only [B, ham3RescaledBall, ham3RescaledZero]
+  have hrsq : r ^ 2 ≤ ham3_r0 ^ 2 := by
+    nlinarith
+      [mul_nonneg (sub_nonneg.mpr hrle)
+        (add_nonneg hr.le ham3_r0_pos.le)]
+  constructor
+  · intro t ht
+    apply ham3_shi_car (I := I) h0omega P hD Q hsel hwindow i
+    refine ⟨?_, ht.2⟩
+    dsimp only [ham3ShiLeft]
+    nlinarith [ht.1, hrsq, sq_nonneg ham3_r0]
+  · intro t ht x _hx
+    have htShi : t ∈ Set.Icc ham3ShiLeft 0 := by
+      refine ⟨?_, ht.2⟩
+      dsimp only [ham3ShiLeft]
+      nlinarith [ht.1, hrsq, sq_nonneg ham3_r0]
+    have hsq :=
+      ham3_shi_rm (I := I) P Q hsel hwindow hrm i t htShi x
+    change r ^ 4 *
+        Tensor0SBundle.normSq0S (I := I)
+          ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+          ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x) ≤ 1
+    have hmul :=
+      mul_le_mul_of_nonneg_left hsq (pow_nonneg hr.le 4)
+    calc
+      r ^ 4 *
+            Tensor0SBundle.normSq0S (I := I)
+              ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+              ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x)
+          ≤ r ^ 4 * (100 : Real) ^ 2 := hmul
+      _ ≤ ham3_r0 ^ 4 * (100 : Real) ^ 2 := by
+        gcongr
+      _ = 1 := by
+        norm_num [ham3_r0]
+
 /-- The buffered Hamilton rescalings admit one time-zero metric-equivalence
 factor and one finite majorant on the full closed common window. -/
 private theorem ham3_win_equiv
@@ -640,6 +698,94 @@ noncomputable def ham3SourceSeq
     (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.regular =
       Set.Ioo (-(ham3_r0 ^ 2)) 0 := by
   rfl
+
+/-- Curvature control on a raw selected rescaling descends to the same
+time-zero ball in the canonical common-window source. -/
+private theorem ham3_src_rm
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q)
+    {r : Real} (hr : 0 < r) (hrle : r ≤ ham3_r0)
+    (i : Nat) :
+    let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+    let hzero : (0 : Real) ∈ X.D.carrier := by
+      change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+      exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+    letI : TopologicalSpace (X.term i).M := (X.term i).topology
+    letI : ChartedSpace H (X.term i).M := (X.term i).charted
+    letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+    letI : IsManifold I 1 (X.term i).M :=
+      IsManifold.of_le (I := I) (M := (X.term i).M) (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+      change IsManifold I ∞ (X.term i).M
+      infer_instance
+    letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+    letI : T2Space (X.term i).M := (X.term i).t2
+    (PointedFlowData.baseFlowBall (I := I) (X.term i)
+      hzero r hr).IsRmControlled := by
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  let hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  letI : TopologicalSpace (X.term i).M := (X.term i).topology
+  letI : ChartedSpace H (X.term i).M := (X.term i).charted
+  letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+  letI : IsManifold I 1 (X.term i).M :=
+    IsManifold.of_le (I := I) (M := (X.term i).M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+    change IsManifold I ∞ (X.term i).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+  letI : T2Space (X.term i).M := (X.term i).t2
+  let B := PointedFlowData.baseFlowBall (I := I) (X.term i)
+    hzero r hr
+  change B.IsRmControlled
+  unfold PDE.RicciFlow.Perelman.FlowMetricBall.IsRmControlled
+  have hrsq : r ^ 2 ≤ ham3_r0 ^ 2 := by
+    nlinarith
+      [mul_nonneg (sub_nonneg.mpr hrle)
+        (add_nonneg hr.le ham3_r0_pos.le)]
+  constructor
+  · intro t ht
+    have ht' : t ∈ Set.Icc ((0 : Real) - r ^ 2) 0 := by
+      simpa only [B, PointedFlowData.baseFlowBall] using ht
+    change t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨by linarith [ht'.1, hrsq], ht'.2⟩
+  · intro t ht x _hx
+    have ht' : t ∈ Set.Icc ((0 : Real) - r ^ 2) 0 := by
+      simpa only [B, PointedFlowData.baseFlowBall] using ht
+    let j := ham3Start (I := I) P Q hsel hwindow + i
+    have htShi : t ∈ Set.Icc ham3ShiLeft 0 := by
+      refine ⟨?_, ht'.2⟩
+      dsimp only [ham3ShiLeft]
+      linarith [ht'.1, hrsq, sq_nonneg ham3_r0]
+    have hsq :=
+      ham3_shi_rm (I := I) P Q hsel hwindow hrm i t htShi x
+    change r ^ 4 *
+        Tensor0SBundle.normSq0S (I := I)
+          ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+          ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x) ≤ 1
+    have hmul :=
+      mul_le_mul_of_nonneg_left hsq (pow_nonneg hr.le 4)
+    calc
+      r ^ 4 *
+            Tensor0SBundle.normSq0S (I := I)
+              ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+              ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x)
+          ≤ r ^ 4 * (100 : Real) ^ 2 := hmul
+      _ ≤ ham3_r0 ^ 4 * (100 : Real) ^ 2 := by
+        gcongr
+      _ = 1 := by
+        norm_num [ham3_r0]
 
 /-- Every finite spatial chart jet of a Hamilton blow-up stage is jointly
 continuous on the canonical closed window.  The proof uses the untruncated
@@ -2199,6 +2345,320 @@ theorem const0_of_cgh
   simpa only [AdmitsConstPosSec] using
     (limit_to_orig (I := I) (M := M) hM h0h hconn hround)
 
+/-- A uniform time-zero injectivity bound feeds the Hamilton source through the
+provider-native H6 compactness route and produces a constant-positive-
+sectional-curvature metric on the original manifold. -/
+theorem ham3_const_of_inj
+    {omega : Real} (h0omega : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hscalar : forall t : Real, t ∈ P.D.carrier →
+      forall x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    (hinj : FlowBaseInjBound (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow)) :
+    AdmitsConstPosSec (I := I) (M := M) := by
+  classical
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  change FlowBaseInjBound (I := I) X at hinj
+  have hcpl : SeqMetricComplete (I := I) (X.atZero (I := I)) := by
+    refine ⟨?_⟩
+    intro k
+    change MetricComplete (I := I) ((X.term k).atTime (I := I) 0)
+    dsimp only [MetricComplete, PointedFlowData.atTime]
+    refine @complete_of_compact (X.term k).M ?_ ?_
+    simpa only [X, ham3SourceSeq] using hM.1
+  have hconn : forall k : Nat,
+      letI : TopologicalSpace ((X.atZero (I := I)).obj k).M :=
+        ((X.atZero (I := I)).obj k).topology
+      ConnectedSpace ((X.atZero (I := I)).obj k).M := by
+    intro k
+    change @ConnectedSpace (X.term k).M (X.term k).topology
+    simpa only [X, ham3SourceSeq] using hM.2.1
+  let hderiv : FlowDerivativeInput (I := I) X :=
+    source_deriv (I := I) h0omega hM.1 hM.2.2.2 P hD Q hsel hrm hwindow
+  let seed : MetricCompactSeed (I := I) (X.atZero (I := I)) :=
+    metricSeedOfBG (I := I) (X.atZero (I := I))
+      hcpl hderiv.at_zero_geom hinj hconn
+  have hd : Nonempty (H6NormalData (I := I) (X.atZero (I := I)) seed.decay) :=
+    exists_h6NormalData (I := I) (X.atZero (I := I))
+      hcpl hconn hderiv.at_zero_geom seed.decay seed.realizes
+  let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
+    seed.metricCanonH6 (Classical.choice hd) hcpl hconn
+  have hcanonConn :
+      letI : TopologicalSpace canon.mc.limit.M := canon.mc.limit.topology
+      ConnectedSpace canon.mc.limit.M := by
+    simpa only [canon] using
+      seed.metricCanonH6_conn (Classical.choice hd) hcpl hconn
+  obtain ⟨d, hlimCpl⟩ :=
+    ham3_closed_upg (I := I) h0omega hM.1 P hD Q hsel hrm
+      hwindow canon
+  have hlimitConn :
+      letI : TopologicalSpace d.data.L.M := d.data.L.topology
+      ConnectedSpace d.data.L.M :=
+    d.limit_conn hcanonConn
+  have hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  let mc := canon.mc.compSubseq d.φ d.hφ
+  exact const0_of_cgh
+    (I := I) (M := M) h0omega hM P hD Q hsel hscalar hpinch
+    (ham3SourceLink (I := I) h0omega P hD Q hsel hwindow)
+    hzero d.data.L mc.subseq mc.strictMono
+    (Classical.choice d.data.converges) hlimCpl hlimitConn
+
+/-- Perelman's no-local-collapsing theorem supplies one fixed radius and one
+fixed positive volume ratio for every member of the canonical Hamilton
+source. -/
+theorem exists_ham3_vol
+    {omega : Real} (h0omega : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    ∃ V : FlowBaseVolData (I := I)
+        (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow),
+      IsFlowBaseVolBound (I := I) V := by
+  classical
+  letI : CompactSpace M := hM.1
+  letI : ConnectedSpace M := hM.2.1
+  letI : I.Boundaryless := hM.2.2.1
+  have hsol : PDE.RicciFlow.IsSolutionOn (I := I) P.S :=
+    P.isSmooth.isSolution
+  have hnlc :
+      PDE.RicciFlow.Perelman.NoLocalCollapsing P.S ham3_r0 := by
+    have htransport :
+        ∀ (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+          (hD' : D =
+            DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+              0 omega h0omega)
+          (S : PDE.RicciFlow.SolutionOn (I := I) (M := M) D),
+          PDE.RicciFlow.IsSolutionOn (I := I) S →
+            PDE.RicciFlow.Perelman.NoLocalCollapsing S ham3_r0 := by
+      intro D hD' S hS
+      subst D
+      exact PDE.RicciFlow.Perelman.no_local_open
+        (I := I) (M := M) h0omega S hS hM.2.2.2 ham3_r0_pos
+    exact htransport P.D hD P.S hsol
+  rcases hnlc with ⟨kappa, hkappa, hbelow⟩
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  have hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  let c : Real := (2 * ham3_r0 ^ 2) / omega
+  have hc : 0 < c := by
+    dsimp only [c]
+    exact div_pos
+      (mul_pos (by norm_num) (sq_pos_of_pos ham3_r0_pos)) h0omega
+  let r : Real := min ham3_r0 (Real.sqrt c * ham3_r0)
+  have hr : 0 < r := by
+    dsimp only [r]
+    exact lt_min ham3_r0_pos
+      (mul_pos (Real.sqrt_pos.2 hc) ham3_r0_pos)
+  have hrle : r ≤ ham3_r0 := by
+    exact min_le_left _ _
+  let V : FlowBaseVolData (I := I) X :=
+    { zero_mem := hzero
+      kappa := kappa
+      kappa_pos := hkappa
+      radius := r
+      radius_pos := hr }
+  refine ⟨V, ?_⟩
+  refine ⟨?_, ?_⟩
+  · intro i
+    simpa only [V, X] using
+      (ham3_src_rm (I := I) h0omega P hD Q hsel hwindow hrm
+        hr hrle i)
+  · intro i
+    let j := ham3Start (I := I) P Q hsel hwindow + i
+    have hj : ham3Start (I := I) P Q hsel hwindow ≤ j := by
+      simpa only [j] using
+        Nat.le_add_right (ham3Start (I := I) P Q hsel hwindow) i
+    have hbuf := ham3Buf_spec (I := I) P Q hsel hwindow j hj
+    have hscale : 0 < ham3BlowupScale (I := I) P Q j := hsel.1 j
+    have htime := hsel.2.2.1 j
+    rw [hD] at htime
+    have hcscale : c ≤ ham3BlowupScale (I := I) P Q j := by
+      apply (div_le_iff₀ h0omega).2
+      have hlt :
+          ham3BlowupScale (I := I) P Q j * Q.time j <
+            ham3BlowupScale (I := I) P Q j * omega :=
+        mul_lt_mul_of_pos_left htime.2 hscale
+      linarith
+    have hsqrt :
+        Real.sqrt c ≤
+          Real.sqrt (ham3BlowupScale (I := I) P Q j) :=
+      Real.sqrt_le_sqrt hcscale
+    have hradius :
+        r ≤ Real.sqrt (ham3BlowupScale (I := I) P Q j) * ham3_r0 := by
+      exact (min_le_right _ _).trans
+        (mul_le_mul_of_nonneg_right hsqrt ham3_r0_pos.le)
+    let B := ham3RescaledBall (I := I) P Q hsel j r hr
+    have hRmB : B.IsRmControlled := by
+      simpa only [B, j] using
+        (ham3_ball_rm (I := I) h0omega P hD Q hsel hwindow hrm
+          hr hrle i)
+    have hbelow_i :=
+      PDE.RicciFlow.Perelman.para_noncollapse
+        (I := I) P.S (Q.time j)
+        (ham3BlowupScale (I := I) P Q j) hscale (hsel.2.2.1 j)
+        kappa ham3_r0 hbelow
+    have hkB : B.IsKappaNoncollapsed kappa :=
+      hbelow_i.2 (ham3RescaledZero (I := I) P Q hsel j) B
+        hradius hRmB
+    simpa only [V, X, B, j, ham3SourceSeq,
+      PointedFlowData.baseFlowBall, ham3RescaledBall,
+      PDE.RicciFlow.Perelman.FlowMetricBall.IsKappaNoncollapsed,
+      PDE.RicciFlow.Perelman.FlowMetricBall.volume,
+      PDE.RicciFlow.Perelman.FlowMetricBall.set,
+      PDE.RicciFlow.Perelman.FlowMetricBall.setAt,
+      PDE.RicciFlow.SolutionOn.timeRestrict_metric] using hkB
+
+/-- Genuine curvature-controlled time-zero base-ball volume bounds feed the
+pointwise CGT producer and then the provider-native Hamilton compactness
+consumer. -/
+theorem ham3_const_of_vol
+    {omega : Real} (h0omega : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hscalar : forall t : Real, t ∈ P.D.carrier →
+      forall x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    (V : FlowBaseVolData (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow))
+    (hvol : IsFlowBaseVolBound (I := I) V) :
+    AdmitsConstPosSec (I := I) (M := M) := by
+  classical
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  change FlowBaseVolData (I := I) X at V
+  change IsFlowBaseVolBound (I := I) V at hvol
+  have hcpl : SeqMetricComplete (I := I) (X.atZero (I := I)) := by
+    refine ⟨?_⟩
+    intro k
+    change MetricComplete (I := I) ((X.term k).atTime (I := I) 0)
+    dsimp only [MetricComplete, PointedFlowData.atTime]
+    refine @complete_of_compact (X.term k).M ?_ ?_
+    simpa only [X, ham3SourceSeq] using hM.1
+  have hconn : forall k : Nat,
+      letI : TopologicalSpace ((X.atZero (I := I)).obj k).M :=
+        ((X.atZero (I := I)).obj k).topology
+      ConnectedSpace ((X.atZero (I := I)).obj k).M := by
+    intro k
+    change @ConnectedSpace (X.term k).M (X.term k).topology
+    simpa only [X, ham3SourceSeq] using hM.2.1
+  let hderiv : FlowDerivativeInput (I := I) X :=
+    source_deriv (I := I) h0omega hM.1 hM.2.2.2 P hD Q hsel hrm hwindow
+  have hinj : FlowBaseInjBound (I := I) X :=
+    flowInj_of_vol (I := I) X hcpl hconn hderiv.at_zero_geom V hvol
+  exact ham3_const_of_inj
+    (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
+    hscalar hpinch hinj
+
+/-- The Hamilton blow-up data, raw curvature bound, and fixed backward window
+produce a constant-positive-sectional-curvature metric on the original closed
+connected three-manifold. -/
+theorem ham3_const
+    {omega : Real} (h0omega : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hscalar : ∀ t : Real, t ∈ P.D.carrier →
+      ∀ x : M, 0 < P.S.scalar t x)
+    (hpinch : Ham3PinchEstimate (I := I) P) :
+    AdmitsConstPosSec (I := I) (M := M) := by
+  obtain ⟨V, hV⟩ :=
+    exists_ham3_vol (I := I) h0omega hM P hD Q hsel hrm hwindow
+  exact ham3_const_of_vol
+    (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
+    hscalar hpinch V hV
+
+/-- The provider-native HCG route proves Hamilton's constant-curvature
+conclusion directly from a positive-Ricci metric on a closed connected
+three-manifold, without using the legacy `ham3_cgh_limit` black box. -/
+theorem ham3_const_hcg
+    (hM : Closed3Manifold (I := I) (M := M))
+    (hpos : AdmitsPosRicci (I := I) (M := M)) :
+    AdmitsConstPosSec (I := I) (M := M) := by
+  rcases hpos with ⟨g0, hg0⟩
+  rcases ham3_flow_exists_normalized (I := I) (M := M) hM g0 hg0 with
+    ⟨omega, h0omega, P, hD⟩
+  have hfinite_core :
+      ∃ c0 : Real, 0 < c0 ∧ omega ≤ 3 / (2 * c0) :=
+    ham3_finite_time (I := I) (M := M) h0omega hM g0 hg0 P hD
+  have hfinite :
+      ∃ omega c0 : Real, ∃ h0omega : 0 < omega,
+        P.D =
+            DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+              0 omega h0omega ∧
+          0 < c0 ∧ omega ≤ 3 / (2 * c0) := by
+    rcases hfinite_core with ⟨c0, hc0, hbound⟩
+    exact ⟨omega, c0, h0omega, hD, hc0, hbound⟩
+  have hnonneg9 : Ham3Section9RicNonneg (I := I) P omega :=
+    ham3_ric_nonneg9 (I := I) (M := M) h0omega hM hg0 P hD
+  have hscalarBlow : Ham3ScalarBlowup (I := I) P :=
+    ham3_scalar_blowup (I := I) (M := M) h0omega hM P hD hnonneg9
+  rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite
+      hscalarBlow with
+    ⟨Q, hsel⟩
+  have hric : Ham3RescaledRicNonneg (I := I) P Q :=
+    ham3_rescaled_ric_nonneg
+      (I := I) (M := M) h0omega hM g0 hg0 P hD Q hsel
+  have hsec9 : Ham3Section9Pinch (I := I) P omega :=
+    ham3_pinch9 (I := I) (M := M) h0omega hM hg0 P hD
+  have hpinch : Ham3PinchEstimate (I := I) P :=
+    ham3_pinch_imp_can
+      (I := I) (M := M) h0omega hM g0 hg0 P hD Q hsel hric hsec9
+  have hrm : Ham3RmBound (I := I) P Q :=
+    ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric
+  have hwindow : Ham3Window (I := I) P Q ham3_r0 :=
+    ham3_r0_window (I := I) P Q hsel
+  have hscalar :
+      ∀ t : Real, t ∈ P.D.carrier → ∀ x : M, 0 < P.S.scalar t x :=
+    ham3_scalar_pos (I := I) (M := M) h0omega hM g0 hg0 P hD
+  exact ham3_const
+    (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
+    hscalar hpinch
+
+/-- Hamilton's positive-Ricci theorem through the provider-native HCG route.
+Connectedness is part of the explicit `Closed3Manifold` hypothesis. -/
+theorem ham3_main_hcg
+    (hM : Closed3Manifold (I := I) (M := M))
+    (hpos : AdmitsPosRicci (I := I) (M := M)) :
+    AdmitsConstPosSec (I := I) (M := M) ∧
+      SphericalSpaceForm (I := I) (M := M) := by
+  have hconst : AdmitsConstPosSec (I := I) (M := M) :=
+    ham3_const_hcg (I := I) (M := M) hM hpos
+  exact ⟨hconst, (ham3_equiv (I := I) (M := M) hM).1 hconst⟩
+
 /-- A metric-compactness base for the Hamilton time-zero source yields a
 constant-positive-sectional-curvature metric on the original manifold. -/
 theorem ham3_const_of_base
@@ -2235,7 +2695,7 @@ theorem ham3_const_of_base
         ((X.atZero (I := I)).obj k).topology
       ConnectedSpace ((X.atZero (I := I)).obj k).M := by
     intro k
-    change ConnectedSpace (X.term k).M
+    change @ConnectedSpace (X.term k).M (X.term k).topology
     simpa only [X, ham3SourceSeq] using hM.2.1
   let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
     b.metricCanon hcpl hconn

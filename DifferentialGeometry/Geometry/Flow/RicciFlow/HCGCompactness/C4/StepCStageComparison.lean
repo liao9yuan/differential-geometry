@@ -2201,9 +2201,9 @@ theorem HasSuppConvData.stage_root_tail
         (seqCenterD inp.decay P Lphi n (alpha.1 : Nat)) (q alpha) (e n))
     (W : Set E) (PhiInf : E → E) (rootRho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
-    (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
+    (hroot : HasStageRootCube inp.toCore P L hr phi hphi C1 alpha e
       W PhiInf rootRho Phi3) :
-    HasStageRootReadout inp P L hr phi hphi hconn C0 alpha Phi3 := by
+    HasStageRootReadout inp.toCore P L hr phi hphi hconn C0 alpha Phi3 := by
   dsimp only [HasStageRootReadout]
   rcases hroot with
     ⟨_hW, _hWcpt, hC1W, hrootRho, hPhiInf, _htriple,
@@ -2260,9 +2260,9 @@ theorem HasSuppConvData.stage_root_tail
     (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
   let chiL := NormalCoordinates.framedChartAt (I := I) Yl.metric
     (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
-  let mu := stageWeightSub inp P L hr phi hphi alpha k
+  let mu := stageWeightSub inp.toCore P L hr phi hphi alpha k
   let stagePts := fun w gamma =>
-    stageTarget inp P Lphi r k l (chiK.symm w) gamma
+    stageTarget inp.toCore P Lphi r k l (chiK.symm w) gamma
   let qstar := fun w => chiL.symm w
   let p := qstar z
   let x0 := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
@@ -2335,7 +2335,7 @@ theorem HasSuppConvData.stage_root_tail
     hdata.core_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
   have hzU : z ∈ U alpha := hC1U (interior_subset (hC01 hz))
   have hxi : ∀ i, mu z i ≠ 0 →
-      xi i = stagePtsSub inp P L phi hphi alpha k l z i := by
+      xi i = stagePtsSub inp.toCore P L phi hphi alpha k l z i := by
     intro i hi
     have hdecode := htgtTail k hkTgt l hlTgt alpha z hzU i hi
     dsimp only at hdecode
@@ -2343,13 +2343,13 @@ theorem HasSuppConvData.stage_root_tail
     simp only [centerAverage.activeFill, hi, ↓reduceIte]
     simpa only [stagePts, chiL, chiK, Lphi, Yk, Yl] using hdecode.2
   have hcanonPtsZero : invVelSum (e l) (mu z)
-      (stagePtsSub inp P L phi hphi alpha k l z) zc = 0 := by
+      (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc = 0 := by
     calc
       invVelSum (e l) (mu z)
-          (stagePtsSub inp P L phi hphi alpha k l z) zc =
+          (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc =
           invVelSum (e l) (mu z) xi zc :=
         (invVelSum_congr_ne (e l) (mu z) xi
-          (stagePtsSub inp P L phi hphi alpha k l z) zc hxi).symm
+          (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc hxi).symm
       _ = 0 := hcanonXiZero
   have hstageZero : stageInvVelSub inp P L hr phi hphi alpha e
       l k l (z, zc) = 0 := by
@@ -2383,13 +2383,13 @@ theorem HasSuppConvData.stage_root_tail
     simpa only [muM, x, mu, i0, Lphi, Yk, chiK] using
       (stageWeightSub_eq (I := I) inp P L hr phi hphi alpha k z gamma).symm
   have hptsEq : centerAverage.activeFill muM
-      (stageTarget inp P Lphi r k l) qstarM x = pts := by
+      (stageTarget inp.toCore P Lphi r k l) qstarM x = pts := by
     funext gamma
     simp only [centerAverage.activeFill]
     rw [congrFun hmu gamma]
     rfl
   have hcmM : CenterInput (I := I) Yl.metric (muM x)
-      (centerAverage.activeFill muM (stageTarget inp P Lphi r k l)
+      (centerAverage.activeFill muM (stageTarget inp.toCore P Lphi r k l)
         qstarM x) join (pM x) (radM x) := by
     rw [hmu, hptsEq]
     simpa only [pM, radM] using hcm
@@ -2397,16 +2397,16 @@ theorem HasSuppConvData.stage_root_tail
     qstarM join pM radM x hx
       (chart := legacyChartFamily (I := I) X) hcmM
   have hcGlobal : c = centerOfMass (I := I) Yl.metric (muM x)
-      (centerAverage.activeFill muM (stageTarget inp P Lphi r k l)
+      (centerAverage.activeFill muM (stageTarget inp.toCore P Lphi r k l)
         qstarM x) join (pM x) (radM x) hcmM := by
     apply centerOfMass.unique hcmM c
     intro y
     rw [hmu, hptsEq]
     simpa only [c] using centerOfMass.min hcm y
-  have hmapC : stageComparisonMap inp P Lphi r hr hconn k l x = c := by
+  have hmapC : stageComparisonMap inp.toCore P Lphi r hr hconn k l x = c := by
     exact hmap.trans hcGlobal.symm
   have hchartReadout :
-      chiL (stageComparisonMap inp P Lphi r hr hconn k l x) =
+      chiL (stageComparisonMap inp.toCore P Lphi r hr hconn k l x) =
         Phi3 l k l z := by
     rw [hmapC]
     exact hcenterRoot
@@ -2420,14 +2420,14 @@ theorem HasSuppConvData.stage_root_tail
     simpa only [NormalCoordinates.NormalBallChart.restrictBall_apply,
       chiL, zc, c, x0, Yl, Lphi, mu, pts, join, p] using hright
   have hmapDecode :
-      stageComparisonMap inp P Lphi r hr hconn k l x =
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x =
         chiL.symm (Phi3 l k l z) := by
     calc
-      stageComparisonMap inp P Lphi r hr hconn k l x = c := hmapC
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x = c := hmapC
       _ = chiL.symm zc := hdecode.symm
       _ = chiL.symm (Phi3 l k l z) := congrArg chiL.symm hcenterRoot
   have htarget :
-      stageComparisonMap inp P Lphi r hr hconn k l x ∈
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x ∈
         (legacyBallChart (I := I) Yl x0).hom.target := by
     rw [hmapDecode]
     have hball :

@@ -136,3 +136,28 @@ replay for `movingShi_of_bound`, `movingShi_complete`, and
   theorem: 100% checked.
 - unconditional `compactnessSol`: theorem 0%.
 - whole-HCG support machinery: about 60%.
+
+## 2026-07-29 time-zero bounded geometry
+
+The complete-barrier proof already produced the intrinsic Riemann curvature
+tower before taking its Ricci trace.  That estimate is now exposed as
+`rmOpenBound` and `movingRm_of_bound`; `movingShi_of_bound` is its
+Ricci-trace consequence.  `CurvBoundInput.atZeroGeomOpen` applies the same
+constants-first estimate on one fixed buffered canonical window and packages
+the resulting all-order time-zero bounds as `SeqBoundedGeometry`.
+
+Focused verification and the exact module refresh are green (`9679/9679`).
+A direct axiom audit of `atZeroGeomOpen` contains only `propext`,
+`Classical.choice`, and `Quot.sound`.  The unrelated legacy `sorry` warning in
+`BernsteinComplete.estimate_complete` is not on this declaration's dependency
+path.
+
+This closes the last time-zero producer used by unconditional
+`compactnessSol`.  Superseding the historical accounting above:
+
+- `movingRm_of_bound`, `movingShi_of_bound`, `movingShi_open`, and
+  `atZeroGeomOpen`: 100%;
+- unconditional MSM135 Theorem 3.10 `compactnessSol`: 100%;
+- whole-HCG supporting machinery: approximately 84%;
+- the later Hamilton blow-up endpoint `ham3_cgh_limit`: still a separate
+  theorem-level 0%.

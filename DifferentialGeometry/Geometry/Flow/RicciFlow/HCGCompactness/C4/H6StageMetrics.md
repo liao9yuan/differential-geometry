@@ -14,3 +14,10 @@ metric extraction is complete (100%).
 This extraction is now combined with the H6 support, root, and branch
 producers by `H6NormalData.exists_stage_data`. The next frontier is the
 provider-native input/Step-B1 consumer seam, not another metric diagonal.
+
+## 2026-07-29 downstream closure
+
+The provider-native input/Step-B1 seam is now closed through
+`MetricCompactSeed`, and this metric diagonal feeds the completed
+unconditional Theorem 3.9 route. No further H6 metric extraction is pending.
+The module remains focused- and exact-green (`4145/4145`).

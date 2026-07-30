@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CurvTowerBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
@@ -612,6 +613,15 @@ noncomputable def shiOpenConst
         ((towerConst c (K * (psi - alpha)) k) ^ 2 * K ^ 2 /
           ((beta - alpha) / 2) ^ k))
 
+/-- The squared order-`k` Riemann-tower bound underlying `shiOpenConst`. -/
+noncomputable def rmOpenBound
+    (d : Nat) (C alpha beta psi : Real) (N k : Nat) : Real :=
+  let K := max 1 C
+  let c := max 0
+    (∑ j ∈ Finset.range (N + 2), rmTowerCost d j)
+  (towerConst c (K * (psi - alpha)) k) ^ 2 * K ^ 2 /
+    ((beta - alpha) / 2) ^ k
+
 /-- The explicit complete-Shi envelope is nonnegative. -/
 theorem shiOpenConst_nonneg
     (d : Nat) (C alpha beta psi : Real) (N : Nat) :
@@ -620,14 +630,13 @@ theorem shiOpenConst_nonneg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Constants-first complete Shi estimate on a buffered slab.
+/-- Constants-first complete Riemann-tower estimate on a buffered slab.
 
 The proof assembles the arbitrary-dimensional solution tower, the
 point-centered barrier Bernstein estimate, the curvature-tower Kato bound, the
-solution-produced cutoff family, and the Ricci trace estimate.  The displayed
-constant is independent of the particular flow, which is what permits the
-sequence wrapper below. -/
-theorem movingShi_of_bound
+solution-produced cutoff family.  The displayed constant is independent of the
+particular flow, which is what permits the sequence wrapper below. -/
+theorem movingRm_of_bound
     {D : RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D)
     {alpha beta psi C : Real}
@@ -652,9 +661,9 @@ theorem movingShi_of_bound
       infer_instance
     letI : SigmaCompactSpace F.M := F.sigmaCompact
     letI : T2Space F.M := F.t2
-    MovingShiBoundOn (I := I) Set.univ beta psi
-      (fun _ t => F.S.family.metric t) N
-      (shiOpenConst (Module.finrank Real E) C alpha beta psi N) := by
+    ∀ k : Nat, k ≤ N → ∀ t : Real, t ∈ Set.Icc beta psi → ∀ x : F.M,
+      nablaKRm04NormSqIntrinsic (I := I) F.S k t x ≤
+        rmOpenBound (Module.finrank Real E) C alpha beta psi N k := by
   classical
   letI : TopologicalSpace F.M := F.topology
   letI : ChartedSpace H F.M := F.charted
@@ -874,7 +883,7 @@ theorem movingShi_of_bound
       Nonempty (ShiBarrierCutoffData (I := I) (flowG (I := I) S0) T O) :=
     shiBarrierCutoff_of_sol (I := I) S0 hS0 hT hSlab hReg0 hcomplete0
       (sq_nonneg K) hw0
-  intro k hk _i t ht x _hx
+  intro k hk t ht x
   have htShiftMem : t - t0 ∈ Set.Icc 0 T := by
     dsimp only [T]
     exact ⟨by linarith [hT0Beta, ht.1], by linarith [ht.2]⟩
@@ -914,9 +923,62 @@ theorem movingShi_of_bound
     rw [hField] at hUniform
     simpa [S0, SShift, Sco, SolutionOn.timeRestrict, SolutionOn.timeShift,
       SolutionFamily.timeShift] using hUniform
+  simpa [rmOpenBound, delta, aScale, c, levelC, K, d] using hUniformS
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Constants-first complete Shi estimate on a buffered slab.
+
+This is the Ricci-trace consequence of `movingRm_of_bound`. -/
+theorem movingShi_of_bound
+    {D : RealTimeInterval}
+    (F : PointedFlowData.{u, uE, uH} (I := I) D)
+    {alpha beta psi C : Real}
+    (halphaBeta : alpha < beta)
+    (hbetaPsi : beta <= psi)
+    (hslab : Set.Icc alpha psi ⊆ D.carrier)
+    (hreg : Set.Ioc alpha psi ⊆ D.regular)
+    (hcomplete : MetricComplete (I := I) (F.atTime (I := I) alpha))
+    (hC : 0 <= C)
+    (hcurv : ∀ t ∈ Set.Icc alpha psi, ∀ x : F.M,
+      F.rmNormSq (I := I) t x <= C)
+    (N : Nat) :
+    letI : TopologicalSpace F.M := F.topology
+    letI : ChartedSpace H F.M := F.charted
+    letI : IsManifold I ∞ F.M := F.smooth
+    letI : IsManifold I 1 F.M :=
+      IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+    letI : IsManifold I 2 F.M :=
+      IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) F.M := by
+      change IsManifold I ∞ F.M
+      infer_instance
+    letI : SigmaCompactSpace F.M := F.sigmaCompact
+    letI : T2Space F.M := F.t2
+    MovingShiBoundOn (I := I) Set.univ beta psi
+      (fun _ t => F.S.family.metric t) N
+      (shiOpenConst (Module.finrank Real E) C alpha beta psi N) := by
+  classical
+  letI : TopologicalSpace F.M := F.topology
+  letI : ChartedSpace H F.M := F.charted
+  letI : IsManifold I ∞ F.M := F.smooth
+  letI : IsManifold I 1 F.M :=
+    IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+  letI : IsManifold I 2 F.M :=
+    IsManifold.of_le (I := I) (M := F.M) (n := ∞) (by decide)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) F.M := by
+    change IsManifold I ∞ F.M
+    infer_instance
+  letI : SigmaCompactSpace F.M := F.sigmaCompact
+  letI : T2Space F.M := F.t2
+  intro k hk _i t ht x _hx
+  have hRm := movingRm_of_bound (I := I) F halphaBeta hbetaPsi hslab hreg
+    hcomplete hC hcurv N k hk t ht x
+  let d : Nat := Module.finrank Real E
+  let levels : Finset Nat := Finset.range (N + 2)
   let term : Nat → Real := fun j ↦
     (d : Real) ^ ((2 + j) + 2) *
-      ((towerConst c aScale j) ^ 2 * K ^ 2 / delta ^ j)
+      rmOpenBound d C alpha beta psi N j
   have hRic := ricTower_normSq_le (I := I) F.S t k x
   have hRicTerm :
       normSq0S (I := I) (F.S.base.metric t) x (2 + k)
@@ -927,17 +989,21 @@ theorem movingShi_of_bound
           nablaKRm04NormSqIntrinsic (I := I) F.S k t x := by
         simpa only [d] using hRic
       _ ≤ (d : Real) ^ ((2 + k) + 2) *
-          ((towerConst c aScale k) ^ 2 * K ^ 2 / delta ^ k) :=
-        mul_le_mul_of_nonneg_left hUniformS (by positivity)
+          rmOpenBound d C alpha beta psi N k :=
+        mul_le_mul_of_nonneg_left hRm (by positivity)
       _ = term k := rfl
   have hkMem : k ∈ levels := by
     simp only [levels, Finset.mem_range]
     omega
   have hTermSum : term k ≤ ∑ j ∈ levels, term j :=
     Finset.single_le_sum (f := term)
-      (fun j _ ↦ by dsimp only [term]; positivity) hkMem
+      (fun j _ ↦ by
+        dsimp only [term, rmOpenBound]
+        have hdelta : 0 ≤ (beta - alpha) / 2 := by linarith
+        exact mul_nonneg (by positivity)
+          (div_nonneg (by positivity) (pow_nonneg hdelta j))) hkMem
   have hsqrt := Real.sqrt_le_sqrt (hRicTerm.trans hTermSum)
-  simpa [shiOpenConst, term, levels, delta, aScale, c, levelC, K, d] using hsqrt
+  simpa [shiOpenConst, term, rmOpenBound, levels, d] using hsqrt
 
 /-- A complete Ricci flow with a curvature bound on a larger left-buffered
 slab has moving Shi bounds through every prescribed finite order. -/
@@ -1046,6 +1112,83 @@ theorem movingShi_open
   exact movingShi_of_bound (I := I) (X.term k) halphaBeta hbetaPsi hslab hreg
     (hcomplete.complete_on k alpha halphaCarrier) hC
     (fun t ht x => hcurvC k t ht x) N
+
+/-- Complete open-interval curvature control supplies uniform bounded geometry
+on the time-zero sequence. -/
+noncomputable def atZeroGeomOpen
+    {a b : Real} (h0 : (0 : Real) ∈ Set.Ioo a b)
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (hD : X.D = RealTimeInterval.openInterval a b 0 h0)
+    (hcomplete : CompleteInput (I := I) X)
+    (hcurv : CurvBoundInput (I := I) X) :
+    SeqBoundedGeometry (I := I) (X.atZero (I := I)) := by
+  classical
+  let alpha := RealTimeInterval.openWindowLeft a 0 1
+  let beta := RealTimeInterval.openWindowLeft a 0 0
+  let psi := RealTimeInterval.openWindowRight b 0 0
+  have halphaBeta : alpha < beta := by
+    have hnum : 0 < (0 : Real) - a := sub_pos.mpr h0.1
+    have hdenAlpha : 0 < ((1 : Nat) : Real) + 2 := by positivity
+    have hdenBeta : 0 < ((0 : Nat) : Real) + 2 := by positivity
+    simp only [alpha, beta, RealTimeInterval.openWindowLeft]
+    rw [add_lt_add_iff_left, div_lt_div_iff₀ hdenAlpha hdenBeta]
+    norm_num at hdenAlpha ⊢
+    nlinarith
+  have hzeroWindow : (0 : Real) ∈ Set.Icc beta psi := by
+    simpa only [beta, psi, RealTimeInterval.openWindow] using
+      RealTimeInterval.initial_mem_window h0 0
+  have hbetaPsi : beta ≤ psi := hzeroWindow.1.trans hzeroWindow.2
+  have hright : psi ≤ RealTimeInterval.openWindowRight b 0 1 := by
+    have hmem : psi ∈ RealTimeInterval.openWindow a b 0 0 :=
+      ⟨hbetaPsi, le_rfl⟩
+    exact (RealTimeInterval.openWindow_mono h0 (Nat.zero_le 1) hmem).2
+  have hslab : Set.Icc alpha psi ⊆ X.D.carrier := by
+    intro t ht
+    have htWindow : t ∈ RealTimeInterval.openWindow a b 0 1 :=
+      ⟨ht.1, ht.2.trans hright⟩
+    rw [hD]
+    exact RealTimeInterval.openWindow_subset h0 1 htWindow
+  have hreg : Set.Ioc alpha psi ⊆ X.D.regular := by
+    intro t ht
+    have htWindow : t ∈ RealTimeInterval.openWindow a b 0 1 :=
+      ⟨ht.1.le, ht.2.trans hright⟩
+    rw [hD]
+    exact RealTimeInterval.openWindow_subset h0 1 htWindow
+  let hCdata := hcurv.bound_on_window alpha psi hslab
+  let C := Classical.choose hCdata
+  have hC : 0 ≤ C := (Classical.choose_spec hCdata).1
+  have hcurvC := (Classical.choose_spec hCdata).2
+  have halphaCarrier : alpha ∈ X.D.carrier :=
+    hslab ⟨le_rfl, halphaBeta.le.trans hbetaPsi⟩
+  let Cderiv : Nat → Real := fun k =>
+    Real.sqrt
+      (rmOpenBound (Module.finrank Real E) C alpha beta psi k k)
+  refine
+    { C := Cderiv
+      nonneg := fun k => Real.sqrt_nonneg _
+      bound := ?_ }
+  intro i k
+  letI : TopologicalSpace (X.term i).M := (X.term i).topology
+  letI : ChartedSpace H (X.term i).M := (X.term i).charted
+  letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+    change IsManifold I ∞ (X.term i).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+  letI : T2Space (X.term i).M := (X.term i).t2
+  unfold HasCurvDerivBound
+  intro x
+  have hsq := movingRm_of_bound (I := I) (X.term i) halphaBeta hbetaPsi
+    hslab hreg (hcomplete.complete_on i alpha halphaCarrier) hC
+    (fun t ht y => hcurvC i t ht y) k k le_rfl 0 hzeroWindow x
+  unfold curvDerivNorm Cderiv
+  change
+    Real.sqrt
+        (curvDerivNormSq k ((X.term i).S.base.metric 0) x) ≤
+      Real.sqrt
+        (rmOpenBound (Module.finrank Real E) C alpha beta psi k k)
+  rw [curvNormSq_eq (S := (X.term i).S)]
+  exact Real.sqrt_le_sqrt hsq
 
 end CurvBoundInput
 end HCGCompactness

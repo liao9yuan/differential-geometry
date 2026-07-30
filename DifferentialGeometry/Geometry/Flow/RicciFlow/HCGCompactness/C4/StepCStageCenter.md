@@ -66,3 +66,14 @@ The stage-center provider migration is complete (100%). Together with the H6
 support producer and readout module this closes Gate 5 provider substitution;
 the unconditional MSM135 endpoint remains unstated (0%), and whole-HCG
 supporting machinery is about 70%.
+
+## 2026-07-29 core replay
+
+The provider-native root construction consumes `MetricCompactCore`.
+`HasStageRootCube.symm_dist_tail` remains intentionally on
+`MetricCompactnessInputs` because that legacy compatibility theorem genuinely
+uses `normalBounds`; it is not on the H6 endpoint path. Focused and exact
+verification remain GREEN (`4126/4126`).
+
+The earlier endpoint figures above are historical: unconditional Theorem 3.9
+is now 100% through the provider-neutral H6 assembly.
