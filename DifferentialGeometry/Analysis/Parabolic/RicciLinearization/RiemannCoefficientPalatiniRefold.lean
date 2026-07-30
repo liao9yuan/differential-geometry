@@ -4748,6 +4748,76 @@ private lemma bdArmSlot2_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (j : �
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
 
+private lemma bdArmSlot_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))) :
+    armSlotEndoCc (I := I) (M := M) g₀ s (A - B) =
+      armSlotEndoCc (I := I) (M := M) g₀ s A -
+        armSlotEndoCc (I := I) (M := M) g₀ s B := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  change armSlotFib (I := I) (M := M) s x ((A - B) x) D =
+    armSlotFib (I := I) (M := M) s x (A x) D -
+      armSlotFib (I := I) (M := M) s x (B x) D
+  rw [show (A - B) x = A x - B x by
+    rw [ContMDiffSection.coe_sub]
+    rfl]
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [armSlotFib_apply_eval]
+  change _ =
+    Tensor0SSpace.toModel
+        (armSlotFib (I := I) (M := M) s x (A x) D) v -
+      Tensor0SSpace.toModel
+        (armSlotFib (I := I) (M := M) s x (B x) D) v
+  rw [armSlotFib_apply_eval, armSlotFib_apply_eval]
+  rw [ContinuousLinearMap.sub_apply, slotInsertEndoFib_sub_left,
+    ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma bdArmSlot2_sub_le
+    (g₀ : SmoothRiemannianMetric I M)
+    (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
+    (S : SmoothCcTensor g₀ 1 2)
+    (hAS : armSlotEndoCc (I := I) (M := M) g₀ 0 A = S)
+    (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (armSlotEndoCc (I := I) (M := M) g₀ 2 A)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j S).toSection x) := by
+  rw [bdArmSlotEndoCc_two_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 3 4
+    (Equiv.swap (0 : Fin 3) 1) bdTau4
+    (slotExtend (I := I) (M := M) g₀ 2 3
+      (armSlotEndoCc (I := I) (M := M) g₀ 1 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 2 3
+    (armSlotEndoCc (I := I) (M := M) g₀ 1 A) j x) ?_
+  rw [pow_two, mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+  rw [bdArmSlotEndoCc_one_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 2 3
+    (Equiv.swap (0 : Fin 2) 1) (finRotate 3).symm
+    (slotExtend (I := I) (M := M) g₀ 1 2
+      (armSlotEndoCc (I := I) (M := M) g₀ 0 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 1 2
+    (armSlotEndoCc (I := I) (M := M) g₀ 0 A) j x) ?_
+  refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
+  rw [hAS]
+
 /-- The lifted connection-difference operator used by the quadratic
 fixed-order covariant-derivative residual. -/
 def lieCovArm2 (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 4 :=
@@ -4766,6 +4836,39 @@ theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
             (connDiffSection (I := I) g₁ g₀)).toSection x) := by
   simpa only [lieCovArm2] using
     bdArmSlot2_rfns_le (I := I) (M := M) g₀ g₁ j x
+
+/-- Each covariant jet of a two-metric `lieCovArm2` difference is controlled
+by the corresponding connection-difference jet. -/
+theorem lieCovArm2_sub_l2
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁ -
+            lieCovArm2 (I := I) (M := M) g₀ g₂)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀ -
+              connDiffSection (I := I) g₂ g₀)).toSection x) := by
+  let A :=
+    bdConnPair (I := I) (M := M) g₀ g₁ -
+      bdConnPair (I := I) (M := M) g₀ g₂
+  have hA :
+      armSlotEndoCc (I := I) (M := M) g₀ 0 A =
+        connDiffSection (I := I) g₁ g₀ -
+          connDiffSection (I := I) g₂ g₀ := by
+    dsimp only [A]
+    rw [bdArmSlot_sub]
+    rw [← bdConnDiffSection_eq_armSlotEndoCc_zero
+      (I := I) (M := M) g₀ g₁,
+      ← bdConnDiffSection_eq_armSlotEndoCc_zero
+        (I := I) (M := M) g₀ g₂]
+  rw [show lieCovArm2 (I := I) (M := M) g₀ g₁ -
+      lieCovArm2 (I := I) (M := M) g₀ g₂ =
+        armSlotEndoCc (I := I) (M := M) g₀ 2 A by
+    dsimp only [A, lieCovArm2]
+    rw [bdArmSlot_sub]]
+  exact bdArmSlot2_sub_le (I := I) (M := M) g₀ A _ hA j x
 
 private noncomputable def bdKernelCLM (gA gB : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -7424,7 +7527,7 @@ private def lrPermC : Equiv.Perm (Fin 4) :=
 
 set_option linter.unusedVariables false in
 
-private def lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+def lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) (lrQB (I := I) (M := M) g₀ gm)
     + lrQB (I := I) (M := M) g₀ gm
     + domDomCongrSection (I := I) g₀ lrPermA (lrQA (I := I) (M := M) g₀ gm)
@@ -7434,7 +7537,7 @@ private def lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma lrQuadF_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
+lemma lrQuadF_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (lrQuadF (I := I) (M := M) g₀ gm) x m =
       gm.inner x (PDE.DeTurck.connDiff (I := I) gm g₀ x (m 2) (m 3))
@@ -7501,7 +7604,7 @@ private def lrSigmaW2 : Equiv.Perm (Fin 6) :=
 
 set_option linter.unusedVariables false in
 
-private def lrRiemW1 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
+def lrRiemW1 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW1
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -7509,7 +7612,7 @@ private def lrRiemW1 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2
 
 set_option linter.unusedVariables false in
 
-private def lrRiemW2 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
+def lrRiemW2 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW2
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
@@ -7687,14 +7790,14 @@ private lemma lrRiemW2_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
 
 set_option linter.unusedVariables false in
 
-private def lrCurvF (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+def lrCurvF (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 2 4 (lrRiemW1 (I := I) (M := M) g₀) T
     + appCcRS (I := I) (M := M) g₀ 0 2 4 (lrRiemW2 (I := I) (M := M) g₀) T
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma lrCurvF_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
+lemma lrCurvF_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (lrCurvF (I := I) (M := M) g₀ T) x m =
       ccTensorBilin (I := I) g₀ T x
@@ -8289,6 +8392,21 @@ def lieCovR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (s : ℝ) : SmoothCcTensor g₀ 0 4 :=
   lrR4 (I := I) (M := M) g₀ T hδ hδZ s
+
+/-- Decomposition of the fourth-covariant normal form: a curvature-contracted
+term linear in the state and a connection-difference quadratic evaluated at
+the realized family.  This is the interface consumed by the two-state `H¹`
+coefficient chain. -/
+theorem lieCovR4_eq (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) :
+    lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s =
+      (-(s / 2) : ℝ) • lrCurvF (I := I) (M := M) g₀ T
+        - lrQuadF (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) :=
+  rfl
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 25600000 in

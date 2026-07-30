@@ -2,78 +2,103 @@
 
 ## Role
 
-This is the intrinsic fixed-order smooth-core module for the low-regularity
-Ricci--DeTurck remainder.  It refolds the dangerous Ricci zero-head at the
-self-action level before any Sobolev estimate is taken.
+This is the intrinsic smooth-core action module for the uniform
+low-regularity Ricci--DeTurck remainder.  It performs the dangerous
+zero-head self-action refold before differentiation and keeps the small
+second-order arm separate from the true first-order action.
 
 ## Verified state
 
-Focused verification is GREEN and warning-free.  The file is below the
-3000-line limit and contains no `sorry`, `admit`, axiom declaration, `whnf`,
-or trace command.
+Focused verification and the targeted exact module refresh are GREEN for the
+current source.  The source contains no `sorry`, `admit`, axiom declaration,
+`whnf`, or trace command.  Existing style warnings in older proof blocks
+remain local and do not affect elaboration.
 
-The public surface is now limited to:
+The public surface now includes:
 
 - `lowJetSq`;
-- `LowBaseActionData` and its `a1`/`a2` actions;
-- the exact zero-based split `remainder_low_split`;
-- the fixed three-dimensional coefficient-envelope estimates `a1_h3_h2` and
-  `a1_h2_h1`.
+- `LowBaseActionData` and its `a1` and `a2` actions;
+- `lowBaseData`, the deterministic canonical producer used by the split;
+- `lowData_a1_coeff`, which names that producer directly and bounds the
+  combined two-jet window of its `C0` and `C1` coefficients by the state
+  through order three;
+- `a1_h3_h2` and `a1_h2_h1` for arbitrary smooth passengers;
+- `c2_h2_small`, which proves that the complete canonical `C2` coefficient is
+  simultaneously pointwise and two-jet `O(R)` on a sufficiently small
+  spectral `H2` state ball;
+- `remainder_low_split`, the same-background zero-based split with the
+  fibre-small complete `C2` arm;
+- `remainder_diag_h2`, which names `lowBaseData` directly and proves
+  `J2 (A.a1 T) <= (D R * (A + A^2))^2` under `J2 T <= R^2` and
+  `J3 T <= A^2`.
 
-The exact algebra is complete.  In particular, the connection-difference
-Ricci head is split into a true lower coefficient and a transposed
-second-order self-action, then integrated in the path parameter.  No
-arbitrary-passenger operator identity is assumed.
+The implementation namespace `LowBaseInternal` now exposes the exact,
+transparent finite product trees needed by the sibling pairwise proofs.  In
+addition to the connection/Ricci top factors, self-top path integral,
+canonical `C2` projection, and two-trace curvature-monomial factorization, it
+contains the low Ricci product tree, the zero-arm self-action integrand and
+integral, its exact rewrite to the genuinely first-order `ricciGoodLow`
+coefficient on the symmetric realized segment, and canonical `C0`/`C1`
+read-offs.  These are implementation bridges for the canonical producer, not
+a second user-facing action hierarchy.  In particular, the `C0` read-off no
+longer strands the pairwise telescope behind inaccessible private constants.
 
-## Remaining frontier
+The diagonal estimate is radius-free in the high norm: `D` depends only on
+the lower `H2` radius.  Its proof treats the complete `C0` self-action before
+path integration and uses the affine Ricci/Lie order-one coefficient
+producers for `C1`.  The highest state derivative is therefore order three;
+no separate order-four state term or `H3` smallness enters.
 
-The final state-dependent low-base producer is not yet stated or proved
-(0%).  The generic A1 scale estimates are proved, but they still require an
-`H2` envelope for `C0` and `C1`.  The complete `C2` fibre-small estimate also
-remains to be attached to the exact split.
+## Current frontier
 
-The precise missing producer is a fixed `q = 0,1,2` radius-free bound for the
-`rhsSelfLow` path family, followed by the corresponding path-integral
-transfer.  The needed cancellation-preserving Lie fields and their exact
-decomposition currently exist only as private declarations in
-`DeTurckRemainderTameLipschitz.lean`; the public radius-free wrappers still
-require a supercritical order `a` and `ha_super`, so they are not valid inputs
-to this module.
+The intrinsic smooth-core A+ action split, its canonical producer, and the
+fixed `H2` smallness of the complete `C2` coefficient are complete.  The
+coefficient proof first estimates the exact three-term top integrand
 
-The smallest next lemma is a private `rhsSelfLow` H2-jet envelope whose
-constants and polynomial degree are chosen before `T` and whose right-hand
-side uses only `1 + lowJetSq g 3 T`.  It must be proved from fixed-order
-producers, not from an all-order ball theorem.
+`lieRefold2 + (deTurckPhiMetTotal(g_s) - deTurckPhiMetTotal(g)) +
+(-2s) • ricciTop`
 
-The live API audit confirms that this is a genuine lower-layer gap:
+and only then integrates it.  The private `lieRefold2_h2` estimate extracts
+the fixed-order curvature monomial factorization, while `ricciTop_h2` follows
+the finite product chain `daWeight -> daTrans -> dagTopOp -> ricciTop`.  Both
+use only an `H2` state radius; neither invokes a high-order ball or `H3`/`H4`
+smallness.
 
-- the cancellation-preserving `lc0CdVField`, `lc0VBField`, `lc0AMixField`,
-  `lc0RiemField`, and their two exact decomposition lemmas are private inside
-  the 46k-line tame-Lipschitz reference module;
-- extracting those declarations also requires their private fibre/model
-  realization chain, so it does not fit the remaining line budget as a local
-  copy, and importing that module would invert the intended dependency;
-- the chart first-order remainder proves the correct local symbol statement,
-  but no global intrinsic value/first-jet realization producer is available
-  to turn it into the required smooth coefficient fields.
+The next frontier is time realization:
 
-Thus the next canonical implementation step is to expose a small fixed-order
-Lie cancellation producer at the coefficient layer, with no `a`, high-order
-ball, or radius parameter.  The present Action module should then consume that
-producer to prove the state-polynomial envelope and complete `C2` smallness.
+1. prove the pairwise coefficient estimate for
+   `lowBaseData(T).C2 - lowBaseData(T').C2` on a common spectral `H2` ball;
+   this is the geometric producer consumed by the already available
+   `LowBaseA2.a2_diff`;
+2. combine that result with the first-order pairwise producer and realize the
+   deterministic complete action as a strongly measurable operator family;
+3. prove its time-integrable norm bound and feed `nonautL2_forced`.
 
-The historical Pair and Zero modules have now been retired to import-only
-compatibility shims.  They have no declaration consumers and both pass focused
-verification against the refreshed Action artifact, so the removed
-`extraA2Act` and `rhsRefold2Int` facades no longer create a stale downstream
-risk.
+The complete canonical `lowBaseData.a2` is the sole `A2` in the final
+decomposition.  `lowRegPrincipal` is only an internal comparison/subtraction
+reference and must never be added to `lowBaseData.a2`, because doing so would
+double-count its principal part.  Nonprincipal second-order material remains
+inside `lowBaseData.C2`; it is not moved into `A1` or a lower passenger.
+Pairwise core continuity, not an existential selector or a diagonal estimate
+alone, remains the visible completion/measurability obligation.
 
 ## Progress accounting
 
-- exact smooth-core zero-based action identity: 100%;
-- generic H3-to-H2 and H2-to-H1 estimates for the same A1 formula: 100%;
-- state-polynomial coefficient envelope and complete A2 smallness: 0% as a
-  theorem, with substantial exact/refold machinery already present;
-- final `LowBaseActionSplit`: unstated/unproved, 0%;
-- `ricci_flow_unif_existence`: unstated/unproved, 0%; its dedicated machinery
-  is approximately 90--92%.
+- exact zero-based smooth-core action split: 100%;
+- complete small second-order coefficient: 100%;
+- fixed spectral-`H2` pointwise/two-jet smallness of that coefficient: 100%;
+- arbitrary-passenger high/low action estimates and static compatibility:
+  100%;
+- diagonal time-integrable growth estimate: 100% at smooth-core level;
+- pairwise `C2` coefficient Lipschitz theorem: unstated/unproved, 0%; its
+  inverse/principal coefficient Lipschitz submachinery and the exact Action
+  product bridge are now verified, and its downstream high/low
+  action-difference consumer is already available;
+- measurable complete time operator packaging: 0% as a stated theorem, with
+  generic analytic infrastructure mostly available;
+- `ricci_flow_unif_existence`: unstated/unproved, 0%;
+- dedicated uniform-existence machinery: approximately 98%.
+
+The source is temporarily above the normal line budget under the explicit
+session ruling.  It must be split by abstraction boundary after the proof
+chain closes.

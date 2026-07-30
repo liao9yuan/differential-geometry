@@ -235,3 +235,36 @@ Verification passed for both new leaves and this consumer.  Exact axiom replay:
 
 No `sorry` remains in the three touched Lean files.  The next item-2 frontier is the
 threeArm/Ψ₀ topSeparated assembly, not another `lc0AMix` transport proof.
+
+## 2026-07-29 low-base action extraction
+
+The canonical lower-connection correction is now exported as
+`metricLowerCorr`, with exact split `mcd_lower_split` and the fixed-order
+product estimate `metricCorr_h2_mul`.  These declarations let the intrinsic
+low-base action estimate the refolded zero head directly, without reopening
+the former all-order ball machinery.
+
+Focused verification and the targeted exact module refresh are GREEN.  The
+new declarations contain no `sorry`, `admit`, axiom declaration, `whnf`, or
+trace command.  They are consumed by
+`DeTurckRemainderLowBaseAction.lean`.
+
+## 2026-07-30 pairwise low-base extraction
+
+`metricCorr_sub` exposes the structural linearity of `metricLowerCorr` in its
+metric-perturbation slot.  It is proved only from the canonical public
+linearity lemmas for slot extension and operator-field application.  Together
+with `metricCorr_h2_mul`, this turns a difference of the correction fields
+into the same fixed-order product estimate applied to `P - Q`; no new
+Sobolev-ball assumption is introduced.
+
+`metricCorr_move` supplies the complementary moving-metric arm.  With the
+perturbation `P` fixed, it bounds the correction-field difference by the
+product of the `H2` jet of `P` and the `H2` jet of the corresponding `wXi`
+difference.  The proof factors through one private arbitrary-passenger
+bilinear estimate, so it does not duplicate a coordinate hierarchy or expose
+the private `b4Phi` representation.
+
+Focused verification of both pairwise additions is GREEN.  Their consumer is
+the pairwise `C0` coefficient estimate in
+`DeTurckRemainderLowBaseLip.lean`.

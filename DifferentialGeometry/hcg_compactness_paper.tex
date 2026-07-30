@@ -1,0 +1,929 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs,array}
+\usepackage{xcolor}
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{xurl}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\hypersetup{
+  pdftitle={A Formalized Proof of Cheeger--Gromov--Hamilton Compactness},
+  pdfauthor={Bennett Chow, Yuan Liao, and Ziyang Qin}
+}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Rm}{\operatorname{Rm}}
+\newcommand{\Ric}{\operatorname{Ric}}
+\newcommand{\Vol}{\operatorname{Vol}}
+\newcommand{\inj}{\operatorname{inj}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\diam}{\operatorname{diam}}
+\newcommand{\Id}{\operatorname{Id}}
+\newcommand{\Exp}{\operatorname{Exp}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\del}{\delta}
+\newcommand{\N}{\mathbb N}
+\newcommand{\R}{\mathbb R}
+\newcommand{\norm}[1]{\left|#1\right|}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\ip}[2]{\left\langle #1,#2\right\rangle}
+\newcommand{\leanref}[1]{\nolinkurl{#1}}
+\newcommand{\leanfile}[1]{\nolinkurl{#1}}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\do\_\do\.\do\/}
+\makeatother
+\Urlmuskip=0mu plus 2mu\relax
+\emergencystretch=3em
+
+\title{A Formalized Proof of Cheeger--Gromov--Hamilton Compactness}
+\author{Bennett Chow \and Yuan Liao \and Ziyang Qin}
+\date{Working draft, July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We give a mathematical account of a Lean formalization of two compactness
+theorems used in Ricci flow.  The first is pointed smooth
+Cheeger--Gromov compactness for complete connected Riemannian manifolds with
+uniformly bounded curvature derivatives and a uniform injectivity-radius
+bound at the basepoints.  The second is Hamilton's compactness theorem for
+complete pointed Ricci flows on a common open time interval, assuming
+curvature bounds on compact time windows and a time-zero basepoint
+injectivity-radius bound.
+
+The proof is not recorded as a single appeal to a classical black box.
+Starting from the geometric hypotheses, the formalization constructs
+injectivity-radius decay, volume and packing estimates, controlled normal
+coordinates, stabilized nets, approximate comparison diffeomorphisms, a
+smooth direct-limit manifold, a complete limiting metric, and finally a
+smooth limiting Ricci flow.  Special attention is paid to the points where a
+paper proof silently identifies local branches, changes subsequences, or
+passes from local convergence to completeness.  We also explain how the
+completed compactness theorems enter the formalized Hamilton
+positive-Ricci-curvature program and distinguish the compactness result from
+the remaining uniform-existence frontier.
+\end{abstract}
+
+\noindent\textbf{Keywords.}
+Ricci flow; Cheeger--Gromov compactness; Hamilton compactness; bounded
+geometry; injectivity radius; smooth direct limits; formalized mathematics;
+Lean.
+
+\medskip
+\noindent\textbf{Mathematics Subject Classification (2020).}
+Primary 53E20, 53C20, 68V20; Secondary 35K59, 53C21.
+
+\tableofcontents
+
+\section{Introduction}
+
+Compactness arguments in geometric analysis replace a sequence of spaces
+whose geometry is uniformly controlled by a single limiting space on which
+one can pass inequalities, differential equations, and curvature identities
+to the limit.  In Ricci flow the relevant notion is smooth pointed
+Cheeger--Gromov--Hamilton convergence.  One must extract both a limiting
+manifold and comparison maps, prove smooth convergence of the pulled-back
+metrics, and retain completeness of the limit.
+
+In an informal proof, several operations are often suppressed:
+\begin{itemize}[leftmargin=2em]
+  \item one repeatedly passes to subsequences and silently replaces the old
+  indices by the new ones;
+  \item one chooses normal coordinates whose radius depends on the distance
+  from a basepoint;
+  \item one glues local maps which are only approximately compatible;
+  \item one constructs a manifold from an increasing system of open sets;
+  \item and one upgrades local smooth convergence to completeness of the
+  limiting metric.
+\end{itemize}
+Each of these is mathematically standard, but each carries nontrivial domain,
+compatibility, and quantifier information.  The purpose of the formalization
+is to make that information explicit without changing the classical
+argument.
+
+The metric theorem corresponds to Theorem 3.9 of
+Morgan--Tian \cite{MR2274812}.  The Ricci-flow theorem corresponds to their
+Theorem 3.10 and to Hamilton's compactness theorem
+\cite{HamiltonCompactness}.  The formal proof follows the bounded-geometry
+route: construct controlled charts, compare distant members of the sequence
+on larger and larger balls, form a direct limit, and then use Shi estimates
+\cite{Shi1989a} to recover the space--time statement.
+
+\subsection{Main results}
+
+We first state the two results in ordinary mathematical language.
+
+\begin{theorem}[Pointed smooth metric compactness]\label{thm:metric}
+Let
+\[
+  (M_i,g_i,x_i),\qquad i\in\N,
+\]
+be complete connected pointed smooth Riemannian \(n\)-manifolds without
+boundary.  Suppose that for every \(m\geq 0\) there is a constant
+\(C_m<\infty\), independent of \(i\), such that
+\[
+  \sup_{M_i}\norm{\nabla^m\Rm(g_i)}_{g_i}\leq C_m.
+\]
+Suppose also that there is \(\iota_0>0\) such that
+\[
+  \inj_{g_i}(x_i)\geq \iota_0
+  \qquad\text{for every }i.
+\]
+Then there are a subsequence, still denoted by \(i\), a complete connected
+pointed smooth Riemannian manifold
+\[
+  (M_\infty,g_\infty,x_\infty),
+\]
+and pointed smooth embeddings from an exhaustion of \(M_\infty\) into the
+members of the subsequence such that
+\[
+  (M_i,g_i,x_i)\longrightarrow
+  (M_\infty,g_\infty,x_\infty)
+\]
+in the smooth pointed Cheeger--Gromov sense.
+\end{theorem}
+
+The formal conclusion uses open source domains rather than a preselected
+compact exhaustion.  It produces increasing comparison domains whose union
+is the limit and partial diffeomorphisms into the sequence members.  On every
+compact subset \(K\subset M_\infty\) and for every \(p\geq0\),
+\[
+  \sup_K
+  \norm{\nabla_{g_\infty}^{\,p}
+    \bigl(\Phi_i^*g_i-g_\infty\bigr)}_{g_\infty}
+  \longrightarrow 0.
+\]
+This formulation is equivalent to the usual compact-exhaustion version and
+is better suited to keeping domains and restrictions explicit.
+
+\begin{theorem}[Compactness for complete Ricci flows]\label{thm:flow}
+Let \(J=(a,b)\subset\R\) be an open interval containing \(0\), and let
+\[
+  (M_i,g_i(t),x_i),\qquad t\in J,
+\]
+be complete connected pointed Ricci flows on \(n\)-manifolds without
+boundary.  Assume that for every compact interval \(J'\Subset J\) there is
+\(C(J')<\infty\) such that
+\[
+  \sup_i\sup_{M_i\times J'}\norm{\Rm(g_i(t))}_{g_i(t)}^2
+  \leq C(J').
+\]
+Assume also that
+\[
+  \inj_{g_i(0)}(x_i)\geq\iota_0>0
+\]
+uniformly in \(i\).  Then a subsequence converges smoothly in the pointed
+Cheeger--Gromov--Hamilton sense on \(J\) to a pointed Ricci flow
+\[
+  (M_\infty,g_\infty(t),x_\infty),\qquad t\in J.
+\]
+Every time slice \((M_\infty,g_\infty(t))\) is complete.
+\end{theorem}
+
+\begin{remark}[What is and is not assumed]
+Theorem~\ref{thm:flow} assumes only a zeroth-order curvature bound on each
+compact time window.  Higher spatial derivative estimates are produced from
+the Ricci-flow equation by complete Shi estimates.  Thus the all-order
+bounded geometry needed by Theorem~\ref{thm:metric} is a consequence at
+time zero, not an additional hypothesis.
+\end{remark}
+
+\subsection{Formal status}
+
+The formal counterparts of Theorems~\ref{thm:metric} and
+\ref{thm:flow} are respectively \leanref{metricCompactness} and
+\leanref{compactnessSol}.
+In the July 2026 working tree both are checked without a project-defined
+axiom or a \leanref{sorryAx} dependency.  Their direct axiom reports contain
+only the standard logical principles \leanref{propext},
+\leanref{Classical.choice}, and \leanref{Quot.sound}.  This status is
+different from the earlier account in \leanfile{main24.tex}, where
+Cheeger--Gromov--Hamilton compactness was still presented as a deferred
+global input.
+
+\section{Pointed convergence and bounded geometry}
+
+\subsection{Pointed manifolds and convergence maps}
+
+A pointed Riemannian manifold is a triple \((M,g,x)\).  A convergence datum
+from a sequence \((M_i,g_i,x_i)\) to a pointed limit
+\((M_\infty,g_\infty,x_\infty)\) consists of:
+\begin{enumerate}[leftmargin=2em]
+  \item a strictly increasing subsequence \(i_k\);
+  \item increasing open sets \(U_k\subset M_\infty\) which contain
+  \(x_\infty\) and exhaust \(M_\infty\);
+  \item open sets \(V_k\subset M_{i_k}\);
+  \item pointed diffeomorphisms
+  \[
+    \Phi_k:U_k\longrightarrow V_k,
+    \qquad \Phi_k(x_\infty)=x_{i_k};
+  \]
+  \item compact-open \(C^\infty\) convergence
+  \[
+    \Phi_k^*g_{i_k}\longrightarrow g_\infty.
+  \]
+\end{enumerate}
+The exhaustion property means that every compact set \(K\subset M_\infty\)
+is contained in \(U_k\) for all sufficiently large \(k\).
+
+The formalization packages the maps separately from the convergence of the
+metrics.  This separation is important.  A partial diffeomorphism determines
+where pullback makes sense, while metric convergence is a quantified
+statement on compact subsets of its source.
+
+\subsection{Uniform bounded geometry}
+
+For a fixed pointed manifold, bounded geometry means that every covariant
+derivative of the curvature tensor is globally bounded.  For a sequence we
+require a single function
+\[
+  m\longmapsto C_m
+\]
+such that the \(m\)-th estimate holds for every member:
+\[
+  \norm{\nabla^m\Rm(g_i)}\leq C_m.
+\]
+No growth condition in \(m\) is imposed.  Compactness at a fixed derivative
+order uses only finitely many of these constants; the final smooth
+subsequence is obtained by a diagonal argument over all orders.
+
+The tensor convention in the formal development uses the lowered
+\((0,m+4)\)-tensor \(\nabla^m\Rm_{04}\).  This is equivalent to the usual
+operator-valued formulation because the metric identifies the raised and
+lowered versions.  It also makes the norm and pullback statements uniform in
+the tensor valence.
+
+\section{From basepoint control to controlled local geometry}
+
+The central local-to-global issue is that a lower bound for
+\(\inj_{g_i}(x_i)\) is given only at the distinguished point, while the
+compactness construction needs charts at every point in larger and larger
+balls.  The first part of the proof propagates a positive, though decaying,
+injectivity scale away from the basepoint.
+
+\subsection{Injectivity-radius decay}
+
+\begin{proposition}[Controlled injectivity scale]\label{prop:injdecay}
+Under the hypotheses of Theorem~\ref{thm:metric}, for every \(R<\infty\)
+there is \(\lambda(R)>0\), depending only on \(R\), the dimension, the
+curvature bounds, and \(\iota_0\), such that
+\[
+  y\in B_{g_i}(x_i,R)
+  \quad\Longrightarrow\quad
+  \inj_{g_i}(y)\geq\lambda(R)
+\]
+for every \(i\).
+\end{proposition}
+
+\begin{proof}[Proof outline]
+Completeness and connectedness identify the intrinsic Riemannian distance
+with the proper metric used to form balls and minimizing geodesics.  Curvature
+control gives a uniform conjugate-radius estimate on bounded regions.  If
+the injectivity radius degenerates at a point before the conjugate radius,
+one obtains a short geodesic loop.
+
+The Cheeger--Gromov--Taylor argument compares such loops with the volume of
+controlled balls.  A localized Whitehead construction supplies unique short
+inverse branches of the exponential map.  Strict convexity of the half
+squared-distance function, proved through the Jacobi-field Hessian formula,
+prevents incompatible short branches.  The resulting propeller-count
+estimate bounds the number of short lifts.  Combined with the lower volume
+available at the basepoint and relative volume comparison along a chain of
+balls, this rules out arbitrarily small injectivity radius on
+\(B_{g_i}(x_i,R)\).
+
+The argument produces an explicit positive profile \(\lambda(R)\).  The
+profile may decay as \(R\to\infty\); only positivity for each fixed \(R\) is
+needed.
+\end{proof}
+
+The proof must use the actual Riemannian distance.  Replacing it by an
+arbitrary stored distance would make the volume and ball statements
+unusable.  In the formalization the realization theorem identifies the
+extended distance in the decay package with the metric distance of each
+sequence member.
+
+\subsection{Volume comparison and packing}
+
+The curvature bound gives a Ricci lower bound, so Bishop--Gromov comparison
+controls the relative volumes of balls.  Together with
+Proposition~\ref{prop:injdecay}, it yields both a lower bound for small balls
+and an upper bound for the number of separated points in a bounded ball.
+
+\begin{lemma}[Finite packing on bounded balls]\label{lem:packing}
+Fix \(R<\infty\) and \(0<r\leq\lambda(R)\).  There is a finite number
+\(A(R,r)\), independent of \(i\), such that every \(r\)-separated subset of
+\(B_{g_i}(x_i,R)\) has cardinality at most \(A(R,r)\).
+\end{lemma}
+
+\begin{proof}
+The balls of radius \(r/2\) centered at points of an \(r\)-separated family
+are pairwise disjoint.  Injectivity and curvature control give a uniform
+lower bound for the volume of each small ball.  Bishop--Gromov comparison
+places all of them in a slightly larger ball with uniformly controlled
+volume.  Comparing the total volume of the disjoint union with the containing
+ball gives the cardinality estimate.
+\end{proof}
+
+In the implemented route the containing scale is capped explicitly.  This
+matters because a statement uniform in an unbounded ratio of radii would be
+false, for example on hyperbolic space.  The cap is threaded through every
+consumer which uses the packing estimate.
+
+\subsection{Stable nets}
+
+For each large ball choose a maximal separated set.  Maximality makes the
+corresponding enlarged balls a cover, while Lemma~\ref{lem:packing} bounds the
+number of centers and the overlap multiplicity.  Since only finitely many
+incidence patterns can occur at each fixed radius, repeated finite
+subsequence extraction stabilizes:
+\begin{itemize}[leftmargin=2em]
+  \item the number of centers;
+  \item which controlled coordinate balls overlap;
+  \item the parent relation between consecutive radii;
+  \item and the finite combinatorial data needed to define transition maps.
+\end{itemize}
+A diagonal subsequence makes these choices compatible for every integer
+radius.
+
+\section{Uniform normal coordinates}
+
+\subsection{A branch-carrying normal-coordinate package}
+
+At a center \(y\in B_{g_i}(x_i,R)\), choose a radius
+\[
+  0<\rho_R<
+  \min\{\lambda(R),\rho_{\mathrm{Jac}}(R)\},
+\]
+where \(\rho_{\mathrm{Jac}}(R)\) is a uniform radius on which Jacobi-field
+estimates control the differential of the exponential map.  The exponential
+map then has a genuine inverse branch on the whole controlled ball.
+
+\begin{proposition}[Uniform normal-coordinate control]\label{prop:h6}
+For every finite \(R\) there is a radius \(\rho_R>0\) such that each center
+\(y\in B_{g_i}(x_i,R)\) admits a normal chart
+\[
+  \chi_{i,y}:B(0,\rho_R)\subset T_yM_i\longrightarrow M_i
+\]
+with the following properties.
+\begin{enumerate}[leftmargin=2em]
+  \item The chart is the selected inverse branch of the exponential map on
+  its image.
+  \item In Euclidean coordinates,
+  \[
+    \frac12\del_{ab}\leq (\chi_{i,y}^*g_i)_{ab}\leq2\del_{ab}
+  \]
+  as quadratic forms.
+  \item For every \(m\geq0\) there is \(C'_m(R)<\infty\), independent of
+  \(i\) and \(y\), such that
+  \[
+    \sup_{B(0,\rho_R)}
+    \norm{\partial^m(\chi_{i,y}^*g_i)}
+    \leq C'_m(R).
+  \]
+  \item On overlaps, the transition maps and their inverses have uniform
+  derivative bounds of every prescribed finite order.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}[Proof outline]
+The differential of \(\Exp_y\) is described by Jacobi fields.  Curvature and
+curvature-derivative bounds give uniform ODE estimates for the Jacobi
+equation and its derivatives with respect to the initial vector.  On a
+sufficiently small ball, \(D\Exp_y\) is close to the identity, hence
+invertible with controlled inverse.  The injectivity-radius bound ensures
+that the local inverse agrees with the selected intrinsic branch on the
+whole ball.  Pulling back the metric and differentiating the Jacobi equation
+gives the metric estimates.  Transition maps are compositions of one branch
+with the inverse of another, so the same estimates and the inverse function
+theorem control their derivatives.
+\end{proof}
+
+The branch is part of the data.  Merely knowing that some chart exists at
+each point is insufficient: later overlap and cocycle statements must refer
+to the same chart.  This is one of the main proof-engineering differences
+between the formal argument and a short textbook proof.
+
+\section{Approximate comparison maps}
+
+\subsection{Local limits of chart metrics and transitions}
+
+Fix a controlled radius level.  There are finitely many net centers and
+finitely many relevant overlaps.  Proposition~\ref{prop:h6} gives uniform
+\(C^m\) bounds on all chart metrics and transition maps.  Arzela--Ascoli and
+a diagonal argument therefore give smooth limits on slightly smaller balls.
+The limiting transition maps retain the inverse and cocycle identities
+because these identities hold before taking the limit and composition is
+continuous in the relevant compact-open topology.
+
+The finite chart system defines a smooth model for the bounded region.  The
+remaining task is to compare two sufficiently late sequence members on that
+region by a single smooth map.
+
+\subsection{Gluing by a center-of-mass construction}
+
+Local chart identifications agree only approximately.  Let
+\[
+  f_\alpha:U_\alpha\subset M_i\longrightarrow M_j
+\]
+denote the local comparison maps obtained from corresponding chart centers,
+and let \(\{\eta_\alpha\}\) be a partition of unity subordinate to the source
+cover.  For \(x\) in the controlled source region, define a point
+\(\Phi_{ij}(x)\) as the unique minimizer of
+\[
+  F_x(z)
+  =
+  \frac12\sum_\alpha
+  \eta_\alpha(x)\,
+  \dist_{g_j}\bigl(z,f_\alpha(x)\bigr)^2.
+\]
+All active points \(f_\alpha(x)\) lie in a common strongly convex ball.  The
+Hessian of \(F_x\) is therefore positive definite.  The implicit function
+theorem gives a smooth center \(\Phi_{ij}(x)\).
+
+The uniform overlap bound from Lemma~\ref{lem:packing} prevents the sums from
+growing with \(i\) or \(j\).  Differentiating the center equation and using
+the uniform inverse Hessian estimate controls all derivatives of
+\(\Phi_{ij}\).  Repeating the construction in the reverse direction and
+comparing both compositions with the identity yields a genuine partial
+diffeomorphism on a slightly smaller source ball.
+
+\begin{proposition}[Textbook comparison step]\label{prop:b1}
+After passing to one subsequence, the following holds.  Given \(r>0\),
+\(0<\eps<1\), and \(p\in\N\), there is \(k_0\) such that for every
+\(k,\ell\geq k_0\) there is a pointed partial diffeomorphism
+\[
+  \Phi_{k\ell}:M_k\dashrightarrow M_\ell
+\]
+whose source contains \(\overline{B}_{g_k}(x_k,r)\) and such that
+\(\Phi_{k\ell}\) is an \(\eps\)-approximate isometry through order \(p\) on
+that ball:
+\[
+  \sup_{\overline{B}_{g_k}(x_k,r)}
+  \norm{\nabla_{g_k}^{\,q}
+  \bigl(\Phi_{k\ell}^*g_\ell-g_k\bigr)}_{g_k}
+  <\eps,
+  \qquad 0\leq q\leq p.
+\]
+The inverse branch satisfies the analogous estimate on the image.
+\end{proposition}
+
+\begin{proof}
+Choose a chart radius small compared with the injectivity and Jacobi radii on
+a ball slightly larger than \(r\).  Stabilize the finite covering and overlap
+data, take smooth limits of all chart metrics and transition maps, and form
+the center-of-mass map described above.  The positive Hessian and the
+implicit derivative estimates give the required \(C^p\) bounds.  The
+slightly larger ambient radius absorbs the support of the partition of unity
+and guarantees that the inverse construction is defined wherever it is
+used.  Finally choose the subsequence far enough out that every error is
+below \(\eps\).
+\end{proof}
+
+The formal theorem corresponding to Proposition~\ref{prop:b1} is
+\leanref{MetricCompactBase.exists_b1}.  The implementation first proves a
+stronger raw package which retains the forward and reverse comparison maps,
+their domains, and their common chart provider; the textbook statement is a
+projection of that package.
+
+\section{The smooth direct limit}
+
+\subsection{A coherent tail system}
+
+Apply Proposition~\ref{prop:b1} with radii tending to infinity, errors tending
+to zero, and derivative orders tending to infinity.  A further diagonal
+subsequence gives adjacent comparison maps
+\[
+  \Psi_j:U_j\subset M_j\longrightarrow M_{j+1}
+\]
+defined on balls whose radii grow at least exponentially.  Restricting to
+smaller balls \(B_j\Subset U_j\) gives:
+\[
+  \Psi_j(B_j)\Subset B_{j+1}.
+\]
+The restrictions form a smooth sequential system.  Its direct limit
+\[
+  M_\infty=\varinjlim(B_j,\Psi_j)
+\]
+is a smooth Hausdorff manifold.  All images of the basepoints represent one
+point \(x_\infty\).
+
+The use of smaller tail balls is essential.  The large balls are needed to
+define the comparison maps; the gap between the large and small radii
+provides relatively compact image inclusions and room for later path and
+metric estimates.
+
+\subsection{Limit metrics on the stages}
+
+Fix a source stage \(B_j\).  Pull every later metric back to \(B_j\) by the
+finite chain
+\[
+  \Psi_{j,\ell}
+  =
+  \Psi_{\ell-1}\circ\cdots\circ\Psi_j.
+\]
+The approximate-isometry estimates imply that
+\[
+  \Psi_{j,\ell}^*g_\ell
+\]
+is Cauchy in every \(C^p\) seminorm on compact subsets of \(B_j\).  After a
+common diagonal extraction it converges smoothly to a metric
+\(g_{\infty,j}\).
+
+The chain identity gives the cocycle
+\[
+  \Psi_j^*g_{\infty,j+1}=g_{\infty,j}.
+\]
+Hence the stage metrics glue to a smooth Riemannian metric \(g_\infty\) on
+the direct limit.  The order-zero estimates ensure that the limit is positive
+definite; positivity is not inferred merely from pointwise convergence of
+uncontrolled bilinear forms.
+
+\subsection{Completeness}
+
+Local smooth convergence does not by itself imply completeness.  The proof
+uses compact cores inside the tail stages.  Let
+\[
+  K_j
+  =
+  \overline{B}_{g_j}(x_j,R_j/2)
+  \subset B_{g_j}(x_j,R_j)=B_j.
+\]
+Completeness and connectedness of \(M_j\) give properness, so \(K_j\) is
+compact.  Its image in \(M_\infty\) is compact.
+
+The order-zero comparison estimate gives a uniform lower bound
+\[
+  g_\infty\geq \frac12 g_j
+\]
+on the relevant stage.  Consequently a path starting near the common
+basepoint and leaving the image of \(K_j\) has \(g_\infty\)-length bounded
+below by a fixed multiple of \(R_j\).  Since \(R_j\to\infty\), every finite
+\(g_\infty\)-ball about \(x_\infty\) lies in one compact core.  Thus closed
+bounded balls are compact, and the induced metric is complete.
+
+\begin{lemma}[Exhaustion by compact cores]\label{lem:core}
+For every \(R<\infty\) there is \(j\) such that
+\[
+  \overline{B}_{g_\infty}(x_\infty,R)
+\]
+is contained in the image of the compact core \(K_j\).
+\end{lemma}
+
+\begin{corollary}
+The metric \(g_\infty\) is complete.
+\end{corollary}
+
+\begin{proof}
+Lemma~\ref{lem:core} makes every Cauchy sequence eventually lie in one
+compact set.  It therefore has a convergent subsequence, and the Cauchy
+property forces the whole sequence to converge.
+\end{proof}
+
+\subsection{Convergence to the original sequence}
+
+The direct-limit inclusions provide maps from each stage into \(M_\infty\).
+Inverting them on their images and composing with the finite comparison
+chains gives pointed maps
+\[
+  \Phi_j:U_j^\infty\longrightarrow M_{i_j}
+\]
+whose targets are the original ambient sequence members, not merely the open
+tail stages.  The stagewise metric limits imply
+\[
+  \Phi_j^*g_{i_j}\longrightarrow g_\infty
+\]
+smoothly on compact subsets.
+
+Every \(B_j\) is path connected, and the transition maps preserve the
+basepoint.  The direct limit is therefore connected.  This proves
+Theorem~\ref{thm:metric}.
+
+\section{From metric compactness to flow compactness}
+
+\subsection{Complete Shi estimates}
+
+Let \(J'\Subset J\).  Choose a slightly larger compact interval
+\[
+  J'\Subset J''\Subset J.
+\]
+The curvature bound on \(J''\), completeness of every time slice, and the
+Ricci-flow equation give, for every \(m\geq1\),
+\[
+  \sup_i\sup_{M_i\times J'}
+  \norm{\nabla^m\Rm(g_i(t))}
+  \leq C_m(J',J'').
+\]
+The time buffer is essential: derivative estimates at a time \(t\) consume
+curvature control on a larger parabolic neighborhood.
+
+The formal proof uses an evolving distance barrier and a point-centered
+cutoff.  The cutoff is inserted in a Bernstein argument for the curvature
+tower.  Kato-type inequalities and the Ricci-flow evolution of
+\(\nabla^m\Rm\) control the error at the moving boundary.  This gives a
+constants-first complete Shi estimate and then a uniform version for every
+canonical compact subinterval of \(J\).
+
+\subsection{The time-zero metric limit}
+
+At \(t=0\), the Shi bounds yield
+\[
+  \sup_i\sup_{M_i}\norm{\nabla^m\Rm(g_i(0))}\leq C_m
+\]
+for every \(m\).  Theorem~\ref{thm:metric} therefore gives a subsequence, a
+complete pointed limit \((M_\infty,g_\infty(0),x_\infty)\), and pointed
+comparison maps \(\Phi_i\).
+
+The maps are chosen once at time zero.  They are then used to pull back the
+entire family:
+\[
+  \widetilde g_i(t)=\Phi_i^*g_i(t).
+\]
+This fixed-map formulation avoids differentiating a moving family of
+comparison maps.
+
+\subsection{Space--time compactness}
+
+On each compact \(K\subset M_\infty\) and compact interval \(J'\Subset J\),
+the spatial curvature-derivative bounds control the spatial derivatives of
+\(\widetilde g_i(t)\).  The Ricci-flow equation
+\[
+  \partial_t\widetilde g_i(t)
+  =
+  -2\Ric(\widetilde g_i(t))
+\]
+converts spatial bounds into time-derivative bounds.  Repeatedly commuting
+\(\partial_t\) with covariant derivatives yields uniform estimates for every
+mixed derivative on \(K\times J'\).
+
+Arzela--Ascoli and a diagonal argument over:
+\[
+  K_1\Subset K_2\Subset\cdots,\qquad
+  J_1\Subset J_2\Subset\cdots\Subset J,
+\]
+and all derivative orders produce a smooth family \(g_\infty(t)\) such that
+\[
+  \Phi_i^*g_i(t)\longrightarrow g_\infty(t)
+\]
+in \(C^\infty_{\mathrm{loc}}(M_\infty\times J)\).
+Passing to the limit in the Ricci-flow equation gives
+\[
+  \partial_tg_\infty=-2\Ric(g_\infty).
+\]
+
+\subsection{Completeness of all time slices}
+
+Completeness at \(t=0\) comes from the metric compactness theorem.  On a
+compact time interval \(J'\Subset J\), the curvature bound controls the
+Ricci tensor and hence the time variation of vector lengths:
+\[
+  \left|\frac{\dd}{\dd t}\log g_\infty(t)(v,v)\right|
+  \leq C(J').
+\]
+Integrating gives uniform metric equivalence
+\[
+  e^{-C|t-s|}g_\infty(s)
+  \leq g_\infty(t)
+  \leq e^{C|t-s|}g_\infty(s).
+\]
+Metrics which are uniformly equivalent have the same Cauchy sequences.
+Therefore completeness propagates from \(t=0\) to every \(t\in J\).  This
+finishes the proof of Theorem~\ref{thm:flow}.
+
+\section{Correspondence with the formal proof}
+
+The preceding proof is organized mathematically.  For reproducibility, this
+section records the principal formal counterparts without turning the paper
+into a line-by-line Lean commentary.
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.31\textwidth}
+                >{\raggedright\arraybackslash}p{0.29\textwidth}
+                >{\raggedright\arraybackslash}p{0.31\textwidth}}
+\toprule
+Mathematical ingredient & Principal declaration & Source module \\
+\midrule
+Uniform curvature derivatives &
+\leanref{SeqBoundedGeometry} &
+\leanfile{BoundedGeometry.lean} \\
+Basepoint injectivity bound &
+\leanref{BaseInjBound} &
+\leanfile{InjectivityRadius.lean} \\
+Injectivity decay &
+\leanref{injDecay_of_bg} &
+\leanfile{C4/CGTDecay.lean} \\
+Volume and packing &
+\leanref{volInput_of_bg}, \leanref{packInput_of_bg} &
+\leanfile{C4/VolumeOverlap.lean} \\
+Controlled normal charts &
+\leanref{exists_h6NormalData} &
+\leanfile{C4/H6NormalData.lean} \\
+Pairwise approximate maps &
+\leanref{MetricCompactBase.exists_b1} &
+\leanfile{C4/StepB1Textbook.lean} \\
+Direct limit and complete metric &
+\leanref{compactness_canon} &
+\leanfile{C4/StepDAssembly.lean} \\
+Metric compactness &
+\leanref{metricCompactness} &
+\leanfile{C4/MetricCompactnessUncondH6.lean} \\
+Complete Shi estimates &
+\leanref{movingShi_open} &
+\leanfile{MovingShiOpen.lean} \\
+Ricci-flow compactness &
+\leanref{compactnessSol} &
+\leanfile{HamiltonCompactness.lean} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Why the conclusion is structured}
+
+The metric theorem returns more than an existential statement.  Its
+conclusion contains:
+\begin{itemize}[leftmargin=2em]
+  \item the subsequence and its strict monotonicity;
+  \item the pointed limit manifold and completeness of its metric;
+  \item the source and target domains of every comparison map;
+  \item the partial diffeomorphisms themselves;
+  \item and compact-open convergence at every derivative order.
+\end{itemize}
+This structure is what later curvature-transfer and Ricci-flow arguments
+consume.  An opaque statement that merely says ``a convergent subsequence
+exists'' would be too weak for downstream formalization.
+
+\subsection{Subsequence bookkeeping}
+
+The construction uses several diagonals: one for finite packing data, one for
+chart transitions, one for derivative orders, one for direct-limit stage
+metrics, and one for compact time windows.  The formal proof represents each
+subsequence by an explicit strictly monotone function \(\N\to\N\) and proves
+that compositions remain strictly monotone.  At the endpoint the convergence
+conclusion is transported back through the nested subsequence maps to the
+original sequence.
+
+\subsection{Domains and actual branches}
+
+Every coordinate comparison is restricted to its genuine open source.
+Normal coordinates retain the selected inverse branch of the exponential
+map, and every overlap theorem carries the membership hypotheses needed to
+use it.  This prevents two common informal ambiguities:
+\begin{enumerate}[leftmargin=2em]
+  \item evaluating a local frame or inverse branch outside its domain;
+  \item using two existentially chosen charts as if they were definitionally
+  the same chart.
+\end{enumerate}
+
+\section{Role in the Hamilton positive-Ricci program}
+
+The compactness theorem is used after selecting and rescaling a sequence of
+high-curvature points.  The rescaled flows share a fixed time window, have
+uniform curvature bounds there, and have a uniform time-zero injectivity
+bound obtained from the proved noncollapsing and volume-to-injectivity
+machinery.  Theorem~\ref{thm:flow} then gives a complete smooth pointed limit.
+
+The provider-native Hamilton adapter uses this limit directly.  It no longer
+depends on the legacy theorem-shaped placeholder
+\leanref{ham3_cgh_limit}.  Curvature and pinching transfer are derived from
+the actual smooth convergence witness, the limit is shown to have constant
+positive sectional curvature, and compactness plus the global convergence
+maps transfer the resulting metric back to the original manifold.
+
+\begin{remark}[Separation of compactness from the Hamilton endpoint]
+Closing Theorems~\ref{thm:metric} and \ref{thm:flow} does not by itself close
+the entire Hamilton theorem.  Compactness begins only after a sufficiently
+long Ricci flow and a normalized blow-up sequence have been constructed.
+The current provider-native Hamilton endpoint has one remaining nonstandard
+axiom source: the uniform-existence producer used to construct the required
+maximal flow package.
+\end{remark}
+
+\section{Remaining formalization boundary}
+
+\subsection{No deferred compactness input on the new route}
+
+The metric compactness theorem, the complete Shi estimates, the Ricci-flow
+compactness theorem, the volume-to-injectivity bridge, and the Hamilton
+compactness adapter are all proved on the current provider-native route.
+Accordingly, the final presentation should not list
+Cheeger--Gromov--Hamilton compactness, Shi estimates, Perelman
+noncollapsing, or the spherical-space-form classification as deferred inputs
+of that route.
+
+\subsection{The live critical frontier}
+
+The remaining critical input is the uniform Ricci-flow existence theorem
+represented by \leanref{ham3_flow_exists_normalized}.
+Its role is to construct a common positive existence time from uniform
+ellipticity and finitely many initial metric-jet bounds, and then to support
+the continuation argument.  The analytic work is concentrated in a
+time-dependent Ricci--DeTurck operator:
+\begin{itemize}[leftmargin=2em]
+  \item a small second-order perturbation acting on the \(H^4\to H^2\)
+  scale;
+  \item a first-order term acting on the adjacent
+  \(H^3\to H^2\) and \(H^2\to H^1\) scales;
+  \item strong measurability and time-integrability of these operator
+  families along a rough solution;
+  \item a same-horizon nonautonomous maximal-regularity bootstrap;
+  \item and all-order smoothing, including compatibility at \(t=0\).
+\end{itemize}
+The static low-order operator decomposition and its Sobolev bounds are
+substantially developed, but the time-dependent packaging and final
+same-horizon assembly remain the active frontier.
+
+\subsection{Noncritical legacy and library frontiers}
+
+Several unfinished declarations are not dependencies of the completed
+compactness theorem or of the new Hamilton adapter:
+\begin{itemize}[leftmargin=2em]
+  \item the legacy \leanref{ham3_cgh_limit} wrapper still has an unfinished
+  proof, but the provider-native Hamilton route bypasses it;
+  \item a generic arbitrary-valence Weyl eigenvalue-counting theorem remains
+  deferred, while the live scalar spectral consumers use a proved
+  Weyl-free tail argument;
+  \item a textbook-style Hopf--Rinow capstone file remains incomplete, while
+  the properness and minimizing-geodesic results used by compactness are
+  proved through a separate route.
+\end{itemize}
+These are legitimate cleanup or library-completion projects, but they should
+not be displayed as blockers for Theorems~\ref{thm:metric} or
+\ref{thm:flow}.
+
+\section{Recommended final presentation}
+
+For a final paper or research talk, the compactness result is clearest when
+presented as a theorem with three mathematical innovations in the
+formalization, rather than as a chronology of file construction.
+
+\paragraph{First: state the two closed theorems.}
+Begin with Theorems~\ref{thm:metric} and \ref{thm:flow}, including
+completeness, connectedness, the common open time interval, and the exact
+curvature hypotheses.
+
+\paragraph{Second: isolate the three proof bottlenecks.}
+The mathematical body of the presentation should emphasize:
+\begin{enumerate}[leftmargin=2em]
+  \item propagation from basepoint injectivity to a controlled local scale,
+  using CGT, volume comparison, and packing;
+  \item construction of one coherent chart provider and pairwise
+  approximate diffeomorphisms by center-of-mass gluing;
+  \item the smooth direct limit and the compact-core proof of completeness.
+\end{enumerate}
+The Ricci-flow upgrade can then be presented as a fourth, shorter step:
+complete Shi estimates plus a space--time diagonal.
+
+\paragraph{Third: explain formalization-specific choices after the proof.}
+Only after the mathematical proof should one discuss explicit subsequences,
+actual branch domains, dependent tensor fibers, and structured convergence
+data.  These choices explain why the Lean development is large without
+obscuring the geometry.
+
+\paragraph{Fourth: end with an honest dependency ledger.}
+The ledger should show metric compactness, flow compactness,
+noncollapsing, and the Hamilton compactness adapter as completed.  The
+uniform-existence theorem should be the sole red node on the new
+Hamilton-main dependency path.  Legacy unfinished wrappers and independent
+library generalizations should appear in a separate gray ``not on the
+critical path'' box.
+
+\section{Conclusion}
+
+The formal proof follows the classical compactness strategy but makes its
+hidden coherence data explicit.  Uniform curvature control and one
+basepoint injectivity bound produce local geometric control on every bounded
+region.  Stable nets and controlled normal charts yield smooth comparison
+maps between late sequence members.  These maps define a smooth direct
+limit, compact cores prove completeness, and the resulting comparison maps
+give pointed \(C^\infty\) convergence.  Complete Shi estimates and the
+Ricci-flow equation upgrade the static theorem to smooth
+Cheeger--Gromov--Hamilton compactness on a common open time interval.
+
+The compactness portion of the Hamilton program is therefore no longer a
+deferred input on the provider-native route.  The remaining critical work is
+analytic rather than compactness-theoretic: a uniform short-time and
+continuation package for the Ricci--DeTurck construction.  Presenting the
+project in this order makes the mathematical result visible while preserving
+an exact account of what the final Hamilton endpoint still assumes.
+
+\bibliographystyle{amsalpha}
+\bibliography{references}
+
+\end{document}

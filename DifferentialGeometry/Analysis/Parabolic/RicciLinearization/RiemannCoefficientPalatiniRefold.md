@@ -34,3 +34,14 @@ residual after the exact pair-contraction refold.
 Focused and exact verification pass. Radius-free integration of this bound
 still leaves an explicit `nabla^(i+2) T` top leak; the theorem is a producer,
 not the final low-base `A1` estimate.
+
+## 2026-07-30 - two-state lifted connection arm
+
+`lieCovArm2_sub_l2` is the linear two-metric companion of the existing
+`lieCovArm2_l2` estimate. It controls every covariant jet of the lifted arm
+difference by the same jet of
+`connDiffSection(g1,g0) - connDiffSection(g2,g0)`, with only the fixed
+dimension factor. The proof reuses the existing two slot-extension
+factorization; it adds no state regularity or smallness hypothesis.
+
+Focused verification and the targeted exact refresh pass.

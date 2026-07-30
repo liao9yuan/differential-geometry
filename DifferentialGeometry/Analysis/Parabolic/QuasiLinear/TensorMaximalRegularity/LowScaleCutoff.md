@@ -109,3 +109,14 @@ Ruling item **3 of 6**.  Items 1–2 are the prior bricks; 4 (tame Nemytskii),
 instantiate `τ₀`.  The black box **(N)** itself is still **0%** — this brick is
 pure analytic infrastructure that item 4 consumes; it does not by itself close
 any `sorryAx` on `short-time-existence`.
+
+## 2026-07-29 continuity bridge
+
+`lowScaleCutoff_cont` now proves continuity of the high-space cutoff for a
+positive radius and an injective lower-space inclusion. At zero it uses the
+local identity region; away from zero it uses continuity of the explicit
+scalar formula. This avoids asserting continuity of the scalar selector
+itself, which is false at zero under the total division convention.
+
+Focused verification and the targeted exact refresh are GREEN. The uniform
+existence theorem remains 0%; this is reusable analytic machinery.

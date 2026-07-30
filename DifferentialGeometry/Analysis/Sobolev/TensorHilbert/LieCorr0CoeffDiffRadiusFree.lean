@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffL2JetBou
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0TraceRadiusFree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 
 /-!
 # Radius-free jet-L² bound for the `lieCorr0` coefficient field
@@ -65,6 +67,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (deTurckLieEndoArmField deTurckLieEndoArmField_toSection deTurckLieDLbFib
     reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen reindexCoeffFibGen_apply
+    iteratedCovGrad_reindexCoeffGen norm_reindexCoeffGen_eq
     domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib
     metricConnDiffLoweredFib metricConnDiffLoweredFib_contMDiff
     symmS cometricRaiseSlot0Field unitModel unitTensor covGrad covGrad_zero
@@ -637,6 +640,252 @@ private noncomputable def b4Phi (g₀ : SmoothRiemannianMetric I M)
       (cometricDoubleTraceField (I := I) g₀ 3) σ)
     (b4Pk3 (I := I) (M := M) g₀ P)
 
+private noncomputable def b4Jet2
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) : ℝ :=
+  ∑ q ∈ Finset.range 3,
+    ‖iteratedCovGrad (I := I) g r s q S‖ ^ 2
+
+omit [BoundarylessManifold I M] in
+private theorem b4_jet2_nonneg
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) :
+    0 ≤ b4Jet2 (I := I) (M := M) g r s S :=
+  Finset.sum_nonneg fun _ _ => sq_nonneg _
+
+private theorem b4_jet2_add
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) :
+    b4Jet2 (I := I) (M := M) g r s (S + T) ≤
+      2 * (b4Jet2 (I := I) (M := M) g r s S +
+        b4Jet2 (I := I) (M := M) g r s T) := by
+  unfold b4Jet2
+  calc
+    ∑ q ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g r s q (S + T)‖ ^ 2 ≤
+      ∑ q ∈ Finset.range 3,
+        2 * (‖iteratedCovGrad (I := I) g r s q S‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g r s q T‖ ^ 2) := by
+        refine Finset.sum_le_sum fun q _ => ?_
+        rw [iteratedCovGrad_add]
+        have htri := norm_add_le
+          (iteratedCovGrad (I := I) g r s q S)
+          (iteratedCovGrad (I := I) g r s q T)
+        calc
+          ‖iteratedCovGrad (I := I) g r s q S +
+              iteratedCovGrad (I := I) g r s q T‖ ^ 2 ≤
+              (‖iteratedCovGrad (I := I) g r s q S‖ +
+                ‖iteratedCovGrad (I := I) g r s q T‖) ^ 2 :=
+            pow_le_pow_left₀ (norm_nonneg _) htri 2
+          _ ≤ 2 * (‖iteratedCovGrad (I := I) g r s q S‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g r s q T‖ ^ 2) := by
+            nlinarith [sq_nonneg
+              (‖iteratedCovGrad (I := I) g r s q S‖ -
+                ‖iteratedCovGrad (I := I) g r s q T‖)]
+    _ = 2 * ((∑ q ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r s q S‖ ^ 2) +
+        ∑ q ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r s q T‖ ^ 2) := by
+      simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
+
+private theorem b4_jet2_smul
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (S : SmoothCcTensor g r s) :
+    b4Jet2 (I := I) (M := M) g r s (c • S) =
+      c ^ 2 * b4Jet2 (I := I) (M := M) g r s S := by
+  unfold b4Jet2
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro q _
+  rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
+    mul_pow, sq_abs]
+
+private theorem b4_slot_l2
+    (g : SmoothRiemannianMetric I M) (r s i : ℕ)
+    (Φ : SmoothCcTensor g r s) :
+    ‖iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+        (slotExtend (I := I) (M := M) g r s Φ)‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
+  let F : M → ℝ := fun x => (Module.finrank ℝ E : ℝ) *
+    riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+      ((iteratedCovGrad (I := I) g r s i Φ).toSection x)
+  have hF : MeasureTheory.Integrable F
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    dsimp only [F]
+    exact (integrable_riemannianFiberNormSq_toSection
+      (I := I) (M := M) g r (s + i)
+      (iteratedCovGrad (I := I) g r s i Φ)).const_mul _
+  have hsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g (r + 1) ((s + 1) + i)
+    (iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+      (slotExtend (I := I) (M := M) g r s Φ))
+    F hF (fun x =>
+      rfns_iteratedCovGrad_slotExtend_le
+        (I := I) (M := M) g r s Φ i x)
+  have hint : (∫ x,
+      riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+        ((iteratedCovGrad (I := I) g r s i Φ).toSection x)
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
+    rw [SmoothCcTensor.norm_def,
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+        (I := I) (M := M) g r (s + i)]
+  dsimp only [F] at hsq
+  rw [MeasureTheory.integral_const_mul, hint] at hsq
+  exact hsq
+
+private theorem b4_slot_h2
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) :
+    b4Jet2 (I := I) (M := M) g (r + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g r s Φ) ≤
+      (Module.finrank ℝ E : ℝ) *
+        b4Jet2 (I := I) (M := M) g r s Φ := by
+  unfold b4Jet2
+  calc
+    ∑ i ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+          (slotExtend (I := I) (M := M) g r s Φ)‖ ^ 2 ≤
+      ∑ i ∈ Finset.range 3, (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 :=
+      Finset.sum_le_sum fun i _ =>
+        b4_slot_l2 (I := I) (M := M) g r s i Φ
+    _ = (Module.finrank ℝ E : ℝ) *
+        ∑ i ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
+      rw [Finset.mul_sum]
+
+private theorem b4_reindex_h2
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
+    b4Jet2 (I := I) (M := M) g r s
+        (reindexCoeffGen (I := I) (M := M) g r s Φ ρ) =
+      b4Jet2 (I := I) (M := M) g r s Φ := by
+  unfold b4Jet2
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [iteratedCovGrad_reindexCoeffGen,
+    norm_reindexCoeffGen_eq]
+
+set_option linter.unusedVariables false in
+private theorem b4_app_h2_mul
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r),
+        b4Jet2 (I := I) (M := M) g p c
+            (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+          C * b4Jet2 (I := I) (M := M) g r c Φ *
+            b4Jet2 (I := I) (M := M) g p r W := by
+  obtain ⟨C₀, hC₀, happ⟩ :=
+    appRS_h2_h2_h2 (I := I) (M := M) hDim g p r c
+  refine ⟨C₀ ^ 2, sq_nonneg _, ?_⟩
+  intro Φ W
+  have hΦ0 : 0 ≤ b4Jet2 (I := I) (M := M) g r c Φ :=
+    b4_jet2_nonneg (I := I) (M := M) g r c Φ
+  have hW0 : 0 ≤ b4Jet2 (I := I) (M := M) g p r W :=
+    b4_jet2_nonneg (I := I) (M := M) g p r W
+  have hsΦ :
+      Real.sqrt (b4Jet2 (I := I) (M := M) g r c Φ) ^ 2 =
+        b4Jet2 (I := I) (M := M) g r c Φ :=
+    Real.sq_sqrt hΦ0
+  have hsW :
+      Real.sqrt (b4Jet2 (I := I) (M := M) g p r W) ^ 2 =
+        b4Jet2 (I := I) (M := M) g p r W :=
+    Real.sq_sqrt hW0
+  have h := happ Φ W
+    (Real.sqrt (b4Jet2 (I := I) (M := M) g r c Φ))
+    (Real.sqrt (b4Jet2 (I := I) (M := M) g p r W))
+    (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+    (by exact le_of_eq hsΦ.symm)
+    (by exact le_of_eq hsW.symm)
+  calc
+    b4Jet2 (I := I) (M := M) g p c
+        (appCcRS (I := I) (M := M) g p r c Φ W) ≤
+      (C₀ *
+        Real.sqrt (b4Jet2 (I := I) (M := M) g r c Φ) *
+        Real.sqrt (b4Jet2 (I := I) (M := M) g p r W)) ^ 2 := by
+      simpa only [b4Jet2] using h
+    _ = C₀ ^ 2 * b4Jet2 (I := I) (M := M) g r c Φ *
+        b4Jet2 (I := I) (M := M) g p r W := by
+      rw [mul_pow, mul_pow, hsΦ, hsW]
+
+private theorem b4_pk3_h2
+    (g : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g 0 2) :
+    b4Jet2 (I := I) (M := M) g 3 5
+        (b4Pk3 (I := I) (M := M) g P) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 *
+        b4Jet2 (I := I) (M := M) g 0 2 P := by
+  have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
+  have h1 := b4_slot_h2 (I := I) (M := M) g 0 2 P
+  have h2 := b4_slot_h2 (I := I) (M := M) g 1 3
+    (slotExtend (I := I) (M := M) g 0 2 P)
+  have h3 := b4_slot_h2 (I := I) (M := M) g 2 4
+    (slotExtend (I := I) (M := M) g 1 3
+      (slotExtend (I := I) (M := M) g 0 2 P))
+  calc
+    b4Jet2 (I := I) (M := M) g 3 5
+        (b4Pk3 (I := I) (M := M) g P) ≤
+      (Module.finrank ℝ E : ℝ) *
+        b4Jet2 (I := I) (M := M) g 2 4
+          (slotExtend (I := I) (M := M) g 1 3
+            (slotExtend (I := I) (M := M) g 0 2 P)) := by
+          simpa only [b4Pk3] using h3
+    _ ≤ (Module.finrank ℝ E : ℝ) *
+        ((Module.finrank ℝ E : ℝ) *
+          b4Jet2 (I := I) (M := M) g 1 3
+            (slotExtend (I := I) (M := M) g 0 2 P)) :=
+      mul_le_mul_of_nonneg_left h2 hfr
+    _ ≤ (Module.finrank ℝ E : ℝ) *
+        ((Module.finrank ℝ E : ℝ) *
+          ((Module.finrank ℝ E : ℝ) *
+            b4Jet2 (I := I) (M := M) g 0 2 P)) := by
+      exact mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left h1 hfr) hfr
+    _ = (Module.finrank ℝ E : ℝ) ^ 3 *
+        b4Jet2 (I := I) (M := M) g 0 2 P := by ring
+
+private theorem b4_phi_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (P : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 5)),
+        b4Jet2 (I := I) (M := M) g 3 3
+            (b4Phi (I := I) (M := M) g P σ) ≤
+          C * b4Jet2 (I := I) (M := M) g 0 2 P := by
+  obtain ⟨Ca, hCa0, happ⟩ :=
+    b4_app_h2_mul (I := I) (M := M) hDim g 3 5 3
+  let Jtr : ℝ := b4Jet2 (I := I) (M := M) g 5 3
+    (cometricDoubleTraceField (I := I) g 3)
+  have hJtr0 : 0 ≤ Jtr :=
+    b4_jet2_nonneg (I := I) (M := M) g 5 3
+      (cometricDoubleTraceField (I := I) g 3)
+  have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
+  refine ⟨Ca * Jtr * (Module.finrank ℝ E : ℝ) ^ 3,
+    mul_nonneg (mul_nonneg hCa0 hJtr0) (pow_nonneg hfr 3), ?_⟩
+  intro P σ
+  have hprod := happ
+    (reindexCoeffGen (I := I) (M := M) g 5 3
+      (cometricDoubleTraceField (I := I) g 3) σ)
+    (b4Pk3 (I := I) (M := M) g P)
+  rw [b4_reindex_h2 (I := I) (M := M)] at hprod
+  have hpk := b4_pk3_h2 (I := I) (M := M) g P
+  calc
+    b4Jet2 (I := I) (M := M) g 3 3
+        (b4Phi (I := I) (M := M) g P σ) ≤
+      Ca * Jtr *
+        b4Jet2 (I := I) (M := M) g 3 5
+          (b4Pk3 (I := I) (M := M) g P) := by
+            simpa only [b4Phi, Jtr] using hprod
+    _ ≤ Ca * Jtr *
+        ((Module.finrank ℝ E : ℝ) ^ 3 *
+          b4Jet2 (I := I) (M := M) g 0 2 P) :=
+      mul_le_mul_of_nonneg_left hpk (mul_nonneg hCa0 hJtr0)
+    _ = (Ca * Jtr * (Module.finrank ℝ E : ℝ) ^ 3) *
+        b4Jet2 (I := I) (M := M) g 0 2 P := by ring
+
 /-- Center evaluation of the rank-`3` cometric double trace (orthoframe diagonal). -/
 private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 5 I x) (m : Fin 3 → E) :
@@ -1143,6 +1392,341 @@ private theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
   rw [ccTensorBilinSymm_apply (I := I) g₀ P x V (m 2)]
   rw [hccb V (m 2), hccb (m 2) V]
   ring
+
+/-- The correction from background lowering to moving-metric lowering of the
+connection-difference covariant tensor. -/
+noncomputable def metricLowerCorr
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 3 :=
+  (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermA)
+      (wXi (I := I) (M := M) g₀ g₁ g_bg) +
+    (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermB)
+      (wXi (I := I) (M := M) g₀ g₁ g_bg)
+
+/-- The moving-lowering correction is linear in the metric-perturbation
+slot. -/
+theorem metricCorr_sub
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (P Q : SmoothCcTensor g₀ 0 2) :
+    metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg (P - Q) =
+      metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P -
+        metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg Q := by
+  simp only [metricLowerCorr, b4Phi, b4Pk3, slotExtend_sub,
+    appCcRS_sub_right, appCc_sub_left]
+  module
+
+/-- Moving-metric lowering is background lowering plus the bilinear metric
+perturbation correction. -/
+theorem mcd_lower_split
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
+    metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =
+      wXi (I := I) (M := M) g₀ g₁ g_bg +
+        metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P := by
+  simpa only [metricLowerCorr] using
+    b4_mcd_eq (I := I) (M := M) g₀ g₁ g_bg P htie
+
+private theorem metricCorrAct_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (P : SmoothCcTensor g₀ 0 2)
+        (W : SmoothCcTensor g₀ 0 3),
+        b4Jet2 (I := I) (M := M) g₀ 0 3
+            ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermA) W +
+              (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermB) W) ≤
+          C * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+  obtain ⟨Cφ, hCφ0, hφ⟩ :=
+    b4_phi_h2 (I := I) (M := M) hDim g₀
+  obtain ⟨Ca, hCa0, happ⟩ :=
+    b4_app_h2_mul (I := I) (M := M) hDim g₀ 0 3 3
+  refine ⟨Ca * Cφ, mul_nonneg hCa0 hCφ0, ?_⟩
+  intro P W
+  let UA : SmoothCcTensor g₀ 0 3 :=
+    appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermA) W
+  let UB : SmoothCcTensor g₀ 0 3 :=
+    appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermB) W
+  have hP0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 2 P :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 2 P
+  have hW0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 W :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 W
+  have hA0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 UA :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 UA
+  have hB0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 UB :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 UB
+  have hA :
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UA ≤
+        Ca * Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+    have ha := happ
+      (b4Phi (I := I) (M := M) g₀ P b4PermA) W
+    have hφA := hφ P b4PermA
+    calc
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UA ≤
+          Ca *
+            b4Jet2 (I := I) (M := M) g₀ 3 3
+              (b4Phi (I := I) (M := M) g₀ P b4PermA) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        simpa only [UA, appCc] using ha
+      _ ≤ Ca *
+            (Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        exact mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hφA hCa0) hW0
+      _ = Ca * Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by ring
+  have hB :
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UB ≤
+        Ca * Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+    have hb := happ
+      (b4Phi (I := I) (M := M) g₀ P b4PermB) W
+    have hφB := hφ P b4PermB
+    calc
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UB ≤
+          Ca *
+            b4Jet2 (I := I) (M := M) g₀ 3 3
+              (b4Phi (I := I) (M := M) g₀ P b4PermB) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        simpa only [UB, appCc] using hb
+      _ ≤ Ca *
+            (Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        exact mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hφB hCa0) hW0
+      _ = Ca * Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by ring
+  have hadd := b4_jet2_add (I := I) (M := M) g₀ 0 3
+    ((1 / 2 : ℝ) • UA) ((1 / 2 : ℝ) • UB)
+  rw [b4_jet2_smul, b4_jet2_smul] at hadd
+  change b4Jet2 (I := I) (M := M) g₀ 0 3
+      ((1 / 2 : ℝ) • UA + (1 / 2 : ℝ) • UB) ≤ _
+  calc
+    b4Jet2 (I := I) (M := M) g₀ 0 3
+        ((1 / 2 : ℝ) • UA + (1 / 2 : ℝ) • UB) ≤
+      2 * (((1 / 2 : ℝ) ^ 2 *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 UA) +
+        (1 / 2 : ℝ) ^ 2 *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 UB) := hadd
+    _ ≤ Ca * Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+        b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+      nlinarith
+
+/-- On a closed three-manifold, the moving-lowering correction is H²-bilinear
+in the metric perturbation and the background-lowered connection difference. -/
+theorem metricCorr_h2_mul
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (g₁ g_bg : SmoothRiemannianMetric I M)
+        (P : SmoothCcTensor g₀ 0 2),
+        (∑ q ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 3 q
+            (metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P)‖ ^ 2) ≤
+          C *
+            (∑ q ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) *
+            (∑ q ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g₀ 0 3 q
+                (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) := by
+  obtain ⟨Cφ, hCφ0, hφ⟩ :=
+    b4_phi_h2 (I := I) (M := M) hDim g₀
+  obtain ⟨Ca, hCa0, happ⟩ :=
+    b4_app_h2_mul (I := I) (M := M) hDim g₀ 0 3 3
+  refine ⟨Ca * Cφ, mul_nonneg hCa0 hCφ0, ?_⟩
+  intro g₁ g_bg P
+  let W : SmoothCcTensor g₀ 0 3 :=
+    wXi (I := I) (M := M) g₀ g₁ g_bg
+  let UA : SmoothCcTensor g₀ 0 3 :=
+    appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermA) W
+  let UB : SmoothCcTensor g₀ 0 3 :=
+    appCc (I := I) (M := M) g₀ 3 3
+      (b4Phi (I := I) (M := M) g₀ P b4PermB) W
+  have hP0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 2 P :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 2 P
+  have hW0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 W :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 W
+  have hA0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 UA :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 UA
+  have hB0 : 0 ≤ b4Jet2 (I := I) (M := M) g₀ 0 3 UB :=
+    b4_jet2_nonneg (I := I) (M := M) g₀ 0 3 UB
+  have hA :
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UA ≤
+        Ca * Cφ *
+          b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+    have ha := happ
+      (b4Phi (I := I) (M := M) g₀ P b4PermA) W
+    have hφA := hφ P b4PermA
+    calc
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UA ≤
+          Ca *
+            b4Jet2 (I := I) (M := M) g₀ 3 3
+              (b4Phi (I := I) (M := M) g₀ P b4PermA) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        simpa only [UA, appCc] using ha
+      _ ≤ Ca *
+            (Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        exact mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hφA hCa0) hW0
+      _ = Ca * Cφ *
+            b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by ring
+  have hB :
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UB ≤
+        Ca * Cφ *
+          b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+    have hb := happ
+      (b4Phi (I := I) (M := M) g₀ P b4PermB) W
+    have hφB := hφ P b4PermB
+    calc
+      b4Jet2 (I := I) (M := M) g₀ 0 3 UB ≤
+          Ca *
+            b4Jet2 (I := I) (M := M) g₀ 3 3
+              (b4Phi (I := I) (M := M) g₀ P b4PermB) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        simpa only [UB, appCc] using hb
+      _ ≤ Ca *
+            (Cφ * b4Jet2 (I := I) (M := M) g₀ 0 2 P) *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        exact mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hφB hCa0) hW0
+      _ = Ca * Cφ *
+            b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 W := by ring
+  have hadd := b4_jet2_add (I := I) (M := M) g₀ 0 3
+    ((1 / 2 : ℝ) • UA) ((1 / 2 : ℝ) • UB)
+  rw [b4_jet2_smul, b4_jet2_smul] at hadd
+  have hcorr :
+      b4Jet2 (I := I) (M := M) g₀ 0 3
+          (metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P) ≤
+        Ca * Cφ *
+          b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+    rw [show metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P =
+        (1 / 2 : ℝ) • UA + (1 / 2 : ℝ) • UB from by
+      rfl]
+    calc
+      b4Jet2 (I := I) (M := M) g₀ 0 3
+          ((1 / 2 : ℝ) • UA + (1 / 2 : ℝ) • UB) ≤
+        2 * (((1 / 2 : ℝ) ^ 2 *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 UA) +
+          (1 / 2 : ℝ) ^ 2 *
+            b4Jet2 (I := I) (M := M) g₀ 0 3 UB) := hadd
+      _ ≤ Ca * Cφ *
+          b4Jet2 (I := I) (M := M) g₀ 0 2 P *
+          b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
+        nlinarith
+  simpa only [b4Jet2, W] using hcorr
+
+private theorem b4App_sub
+    (g₀ : SmoothRiemannianMetric I M)
+    (Φ : SmoothCcTensor g₀ 3 3)
+    (W V : SmoothCcTensor g₀ 0 3) :
+    appCc (I := I) (M := M) g₀ 3 3 Φ (W - V) =
+      appCc (I := I) (M := M) g₀ 3 3 Φ W -
+        appCc (I := I) (M := M) g₀ 3 3 Φ V := by
+  rw [sub_eq_add_neg, appCc_add_right]
+  have hneg := appCc_smul_right (I := I) (M := M) g₀ 3 3
+    (-1 : ℝ) Φ V
+  simp only [neg_one_smul] at hneg
+  rw [hneg]
+  rfl
+
+/-- The moving-lowering correction is uniformly H²-Lipschitz in the
+moving-metric connection-difference slot, with the metric perturbation as
+the other bilinear factor. -/
+theorem metricCorr_move
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (g₁ g₂ g_bg : SmoothRiemannianMetric I M)
+        (P : SmoothCcTensor g₀ 0 2),
+        (∑ q ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 3 q
+            (metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P -
+              metricLowerCorr (I := I) (M := M) g₀ g₂ g_bg P)‖ ^ 2) ≤
+          C *
+            (∑ q ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) *
+            (∑ q ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g₀ 0 3 q
+                (wXi (I := I) (M := M) g₀ g₁ g_bg -
+                  wXi (I := I) (M := M) g₀ g₂ g_bg)‖ ^ 2) := by
+  obtain ⟨C, hC, hact⟩ :=
+    metricCorrAct_h2 (I := I) (M := M) hDim g₀
+  refine ⟨C, hC, ?_⟩
+  intro g₁ g₂ g_bg P
+  let W₁ : SmoothCcTensor g₀ 0 3 :=
+    wXi (I := I) (M := M) g₀ g₁ g_bg
+  let W₂ : SmoothCcTensor g₀ 0 3 :=
+    wXi (I := I) (M := M) g₀ g₂ g_bg
+  let W : SmoothCcTensor g₀ 0 3 := W₁ - W₂
+  have hA :
+      appCc (I := I) (M := M) g₀ 3 3
+          (b4Phi (I := I) (M := M) g₀ P b4PermA) W =
+        appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) W₁ -
+          appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) W₂ := by
+    simpa only [W] using
+      b4App_sub (I := I) (M := M) g₀
+        (b4Phi (I := I) (M := M) g₀ P b4PermA) W₁ W₂
+  have hB :
+      appCc (I := I) (M := M) g₀ 3 3
+          (b4Phi (I := I) (M := M) g₀ P b4PermB) W =
+        appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) W₁ -
+          appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) W₂ := by
+    simpa only [W] using
+      b4App_sub (I := I) (M := M) g₀
+        (b4Phi (I := I) (M := M) g₀ P b4PermB) W₁ W₂
+  have heq :
+      metricLowerCorr (I := I) (M := M) g₀ g₁ g_bg P -
+          metricLowerCorr (I := I) (M := M) g₀ g₂ g_bg P =
+        (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) W +
+          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) W := by
+    change
+      ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) W₁ +
+          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) W₁) -
+        ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermA) W₂ +
+          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3
+            (b4Phi (I := I) (M := M) g₀ P b4PermB) W₂) = _
+    calc
+      _ = (1 / 2 : ℝ) •
+            (appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermA) W₁ -
+              appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermA) W₂) +
+          (1 / 2 : ℝ) •
+            (appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermB) W₁ -
+              appCc (I := I) (M := M) g₀ 3 3
+                (b4Phi (I := I) (M := M) g₀ P b4PermB) W₂) := by
+        module
+      _ = _ := by rw [← hA, ← hB]
+  have hraw := hact P W
+  rw [heq]
+  simpa only [b4Jet2, W, W₁, W₂] using hraw
 
 /-! #### The `atgw` jets assembly for the `lc0VB` half (session-2 resumption items (1)–(5)).
 
