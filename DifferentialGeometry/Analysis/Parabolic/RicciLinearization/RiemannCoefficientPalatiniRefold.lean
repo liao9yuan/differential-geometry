@@ -4342,7 +4342,7 @@ private theorem bdLambdaSlotInsert3_gridWindow (g₀ : SmoothRiemannianMetric I 
   rw [mul_assoc]
   exact mul_le_mul_of_nonneg_left (hC g₁ T htie hδ_le hδ0 hbound l x) (by positivity)
 
-private def bdConnPair (g₀ gc : SmoothRiemannianMetric I M) :
+def bdConnPair (g₀ gc : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) :=
   ⟨fun x : M => PDE.DeTurck.connDiff (I := I) gc g₀ x,
@@ -4351,12 +4351,12 @@ private def bdConnPair (g₀ gc : SmoothRiemannianMetric I M) :
       (fun V0 W => PDE.DeTurck.connDiff_contMDiff (I := I) gc g₀ V0.contMDiff W.contMDiff)⟩
 
 set_option linter.unusedSectionVars false in
-private lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
+lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
     bdConnPair (I := I) (M := M) g₀ gc x = PDE.DeTurck.connDiff (I := I) gc g₀ x := rfl
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
+lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       armSlotEndoCc (I := I) (M := M) g₀ 0 (bdConnPair (I := I) (M := M) g₀ g₁) := by
   apply SmoothCcTensor.ext
@@ -7323,14 +7323,14 @@ private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedVariables false in
 
-private def lrOmegaHat (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :=
+def lrOmegaHat (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :=
   appCcRS (I := I) (M := M) g₀ 0 3 3
     (slotInsertEndoCc (I := I) (M := M) g₀ 2 (fullRaisedEndoField (I := I) (M := M) gm g₀))
     (domDomCongrSection (I := I) g₀ (finRotate 3) (connDiffLoweredCc (I := I) g₀ gm))
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
+lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (lrOmegaHat (I := I) (M := M) g₀ gm) x m =
       gm.inner x (PDE.DeTurck.connDiff (I := I) gm g₀ x (m 1) (m 2)) (m 0) := by
@@ -7388,14 +7388,14 @@ private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
 
 set_option linter.unusedVariables false in
 
-private def lrQB (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+def lrQB (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 3 4
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (bdConnPair (I := I) (M := M) g₀ gm))
     (lrOmegaHat (I := I) (M := M) g₀ gm)
 
 set_option linter.unusedVariables false in
 
-private def lrQA (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+def lrQA (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 3 4
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (bdConnPair (I := I) (M := M) g₀ gm))
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 3) 1)
@@ -7433,7 +7433,7 @@ private lemma lrArmSlotTuple (g₀ gm : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
+lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (lrQB (I := I) (M := M) g₀ gm) x m =
       gm.inner x (PDE.DeTurck.connDiff (I := I) gm g₀ x (m 2) (m 3))
@@ -7465,7 +7465,7 @@ private lemma lrQB_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-private lemma lrQA_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
+lemma lrQA_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (lrQA (I := I) (M := M) g₀ gm) x m =
       gm.inner x (PDE.DeTurck.connDiff (I := I) gm g₀ x
@@ -7510,17 +7510,17 @@ private lemma lrQA_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
-private def lrPermA : Equiv.Perm (Fin 4) :=
+def lrPermA : Equiv.Perm (Fin 4) :=
   ⟨fun i => (![2, 0, 1, 3] : Fin 4 → Fin 4) i,
    fun i => (![1, 2, 0, 3] : Fin 4 → Fin 4) i,
    by decide, by decide⟩
 
-private def lrPermB : Equiv.Perm (Fin 4) :=
+def lrPermB : Equiv.Perm (Fin 4) :=
   ⟨fun i => (![3, 0, 1, 2] : Fin 4 → Fin 4) i,
    fun i => (![1, 2, 3, 0] : Fin 4 → Fin 4) i,
    by decide, by decide⟩
 
-private def lrPermC : Equiv.Perm (Fin 4) :=
+def lrPermC : Equiv.Perm (Fin 4) :=
   ⟨fun i => (![3, 1, 0, 2] : Fin 4 → Fin 4) i,
    fun i => (![2, 1, 3, 0] : Fin 4 → Fin 4) i,
    by decide, by decide⟩

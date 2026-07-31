@@ -215,7 +215,7 @@ private theorem a1_spec_hi
       simp only [R, D, N]
       ring
 
-private theorem a1_spec_lo
+theorem a1_spec_lo
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (A : LowBaseActionData g) (Q : ℝ), 0 ≤ Q →
@@ -491,7 +491,10 @@ private theorem a1Hi_core_any
   apply LinearMap.extendOfNorm_eq hdense3
   exact ⟨Cs * Real.sqrt Q, hspec A Q hQ hact⟩
 
-private theorem a1Lo_core_any
+/-- The low adjacent-scale realization of the first-order action agrees with
+the smooth first-order action on the dense smooth core.  This is the `a1`
+sibling of `a2Lo_core`. -/
+theorem a1Lo_core_any
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
     (W : SmoothCcTensor g 0 2) :

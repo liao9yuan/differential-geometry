@@ -5797,7 +5797,8 @@ private theorem h3p_app_of
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-private theorem connLow_h3_rf
+/-- Single-state H3 bound: `lowJetSq g 3 (connLowOp g g₁) ≤ K * (1 + lowJetSq g 3 P)`. -/
+theorem connLow_h3_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -5863,7 +5864,8 @@ private theorem connLow_h3_rf
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-private theorem dagLow_h2_rf
+/-- Single-state H2 bound: `lowJetSq g 2 (dagLowOp g g₁) ≤ K * (1 + lowJetSq g 3 P)`. -/
+theorem dagLow_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :

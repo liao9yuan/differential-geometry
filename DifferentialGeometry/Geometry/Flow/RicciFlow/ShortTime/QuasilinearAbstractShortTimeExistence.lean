@@ -34,7 +34,6 @@ set_option linter.unusedVariables false in
 theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
     (F : SmoothRiemannianMetric I M → (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a:ℝ)+2) → tensorHs (I := I) (M := M) g₀ 0 2 (a:ℝ))
     (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ), SmoothCcTensor g₀ 0 2)
@@ -161,7 +160,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, R₀, hR₀pos, hHorizon, hForceRepr_fam⟩ :=
     hForce2
   obtain ⟨T₁, hT₁pos, hT₁le, F_fam, δ, hδ_lt, hδ, hF_zero, hF_pin, hF_flow, hF_joint⟩ :=
-    maxreg_solution_jointly_smooth_representative_of_nemytskii g₀ a ha_super ha_eq Nfun F Nsec hRepr
+    maxreg_solution_jointly_smooth_representative_of_nemytskii g₀ a ha_super Nfun F Nsec hRepr
       hT_pos hT_le1 u htrace hd₂F_pos hd₂F_le f hf_smooth hf_mass hf_id hR₀pos hHorizon hForceRepr_fam
   refine ⟨T₁, fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F_fam t) hδ_lt (hδ t), ⟨hT₁pos, ?_, ?_⟩, hF_joint⟩
   · refine smoothRiemannianMetric_ext_inner (fun x v w => ?_)

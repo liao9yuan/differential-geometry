@@ -116,6 +116,47 @@ private theorem curv_apply_iterCov
                   (I := I) (M := M) g) (m + 1)) x)) v := by
           rfl
 
+/-- **The curvature-tower packaging identity** (`∇^m Rm` in generic covariant-derivative
+currency).
+
+The squared `g`-fibre norm of the static curvature-derivative tower `curvCovDeriv g m`
+equals the squared `g`-fibre norm of the *generic* iterated covariant derivative
+`iterCov g 4 (metricRm04 g) m` of the lowered Riemann tensor.
+
+This is the public face of the slot-reindexing bridge: it lets any estimate proved in the
+generic `iterCov` / `covStep` / `diffStep` currency (where `metricRm04 g` is just a
+`Tensor0SField` of rank `4`) be read off on the canonical static tower and conversely,
+without exposing the `Fin (4 + m) ≃ Fin (m + 4)` reindexing. -/
+theorem curvCovDeriv_normSq_eq
+    (g : SmoothRiemannianMetric I M) (m : Nat) (x : M) :
+    normSq0S (I := I) g x (m + 4) (curvCovDeriv (I := I) (M := M) g m x) =
+      normSq0S (I := I) g x (4 + m)
+        ((iterCov (I := I) g 4
+          (DifferentialGeometry.Integral.Connection.metricRm04
+            (I := I) (M := M) g) m) x) := by
+  classical
+  have hfiber :
+      curvCovDeriv (I := I) (M := M) g m x =
+        ContinuousMultilinearMap.domDomCongr (curvEquiv m)
+          ((iterCov (I := I) g 4
+            (DifferentialGeometry.Integral.Connection.metricRm04
+              (I := I) (M := M) g) m) x) := by
+    refine ContinuousMultilinearMap.ext (fun v => ?_)
+    exact curv_apply_iterCov (I := I) (M := M) g m x v
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g x
+  have hinv :
+      MetricInverseInBasis_gen (I := I) g x basis
+        (identityInvMetric
+          (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    have h' := metricInverseInBasis_of_orthonormal (I := I) g basis hON
+    intro i j
+    simpa [identityInvMetric, diagonalInvMetric] using h' i j
+  rw [hfiber]
+  exact normSq0S_domDomCongr (I := I) g x basis hinv (curvEquiv m)
+    ((iterCov (I := I) g 4
+      (DifferentialGeometry.Integral.Connection.metricRm04
+        (I := I) (M := M) g) m) x)
+
 /-- On a Ricci-flow solution, the HCG squared curvature-derivative norm is the
 intrinsic squared norm controlled by the Bernstein--Shi tower. -/
 theorem curvNormSq_eq
@@ -126,48 +167,10 @@ theorem curvNormSq_eq
       nablaKRm04NormSqIntrinsic (I := I) S k t x := by
   classical
   unfold curvDerivNormSq nablaKRm04NormSqIntrinsic
-  have hfiber :
-      curvCovDeriv (I := I) (M := M) (S.base.metric t) k x =
-        ContinuousMultilinearMap.domDomCongr (curvEquiv k)
-          ((iterCov (I := I) (S.base.metric t) 4
-            (DifferentialGeometry.Integral.Connection.metricRm04
-              (I := I) (M := M) (S.base.metric t)) k) x) := by
-    refine ContinuousMultilinearMap.ext (fun v => ?_)
-    exact curv_apply_iterCov (I := I) (M := M) (S.base.metric t) k x v
-  obtain ⟨basis, hON⟩ :=
-    exists_gOrthonormalBasis (I := I) (S.base.metric t) x
-  have hinv :
-      MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
-        (identityInvMetric
-          (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
-    have h' :=
-      metricInverseInBasis_of_orthonormal
-        (I := I) (S.base.metric t) basis hON
-    intro i j
-    simpa [identityInvMetric, diagonalInvMetric] using h' i j
-  calc
-    normSq0S (I := I) (S.base.metric t) x (k + 4)
-        (curvCovDeriv (I := I) (M := M) (S.base.metric t) k x) =
-      normSq0S (I := I) (S.base.metric t) x (k + 4)
-        (ContinuousMultilinearMap.domDomCongr (curvEquiv k)
-          ((iterCov (I := I) (S.base.metric t) 4
-            (DifferentialGeometry.Integral.Connection.metricRm04
-              (I := I) (M := M) (S.base.metric t)) k) x)) :=
-      congrArg (fun A => normSq0S (I := I) (S.base.metric t) x (k + 4) A) hfiber
-    _ = normSq0S (I := I) (S.base.metric t) x (4 + k)
-        ((iterCov (I := I) (S.base.metric t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04
-            (I := I) (M := M) (S.base.metric t)) k) x) :=
-      normSq0S_domDomCongr (I := I) (S.base.metric t) x basis hinv
-        (curvEquiv k)
-        ((iterCov (I := I) (S.base.metric t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04
-            (I := I) (M := M) (S.base.metric t)) k) x)
-    _ = normSq0S (I := I) (S.base.metric t) x (4 + k)
-        (nablaKRm04Field (I := I) S t k x) := by
-      exact congrArg
-        (fun A => normSq0S (I := I) (S.base.metric t) x (4 + k) (A x))
-        (nablaKRm_eq_iterCov (I := I) S t k).symm
+  rw [curvCovDeriv_normSq_eq (I := I) (M := M) (S.base.metric t) k x]
+  exact congrArg
+    (fun A => normSq0S (I := I) (S.base.metric t) x (4 + k) (A x))
+    (nablaKRm_eq_iterCov (I := I) S t k).symm
 
 end HCGCompactness
 end DifferentialGeometry

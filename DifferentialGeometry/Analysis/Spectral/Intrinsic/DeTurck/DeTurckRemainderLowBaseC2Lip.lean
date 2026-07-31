@@ -4628,8 +4628,509 @@ theorem pairTrace_bdd_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     hbdd T gT hTtie hT
 
+set_option maxHeartbeats 1600000 in
+private theorem trace1_h2_lip
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T U : SmoothCcTensor g 0 2)
+        (gT gU : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gU.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g U y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+        c2JetSq (I := I) (M := M) g
+            (pureTrace (I := I) (M := M) g gT 1 -
+              pureTrace (I := I) (M := M) g gU 1) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+            (T - U)‖) ^ 2 := by
+  classical
+  obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ :=
+    invCoeff_h2_lip (I := I) (M := M) hDim g
+  obtain ⟨C₁, hC₁, happ₁⟩ :=
+    appRS_h2_h2_h2 (I := I) (M := M) hDim g 3 3 1
+  let F₁ : SmoothCcTensor g 3 1 :=
+    cometricDoubleTraceField (I := I) g 1
+  let J₁ : ℝ := c2JetSq (I := I) (M := M) g F₁
+  let A₁ : ℝ := Real.sqrt J₁
+  let K₁ : ℝ := C₁ * A₁ * (2 * Cinv)
+  have hJ₁ : 0 ≤ J₁ := by
+    exact jet3_nonneg_c2 (I := I) (M := M) g F₁
+  have hA₁ : 0 ≤ A₁ := Real.sqrt_nonneg _
+  have hA₁sq : A₁ ^ 2 = J₁ := by
+    simpa only [A₁] using Real.sq_sqrt hJ₁
+  have hK₁ : 0 ≤ K₁ := by
+    dsimp only [K₁]
+    exact mul_nonneg (mul_nonneg hC₁ hA₁)
+      (mul_nonneg (by norm_num) hCinv)
+  refine ⟨ρ, K₁, hρ, hK₁, ?_⟩
+  intro T U gT gU hTtie hUtie hT hU
+  set N : ℝ :=
+    ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
+  let Λ :=
+    gInvDiffRaisedEndoField (I := I) g gT -
+      gInvDiffRaisedEndoField (I := I) g gU
+  let D₁ : SmoothCcTensor g 3 3 :=
+    slotInsertEndoCc (I := I) (M := M) g 2 Λ
+  have hN : 0 ≤ N := norm_nonneg _
+  have hinvJet :
+      c2JetSq (I := I) (M := M) g
+          (gInvDiffSlotCoeff (I := I) g gT -
+            gInvDiffSlotCoeff (I := I) g gU) ≤
+        (Cinv * N) ^ 2 := by
+    simpa only [c2JetSq, N] using
+      (hinv T U gT gU hTtie hUtie hT hU).2
+  have hslot1 :
+      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+        gInvDiffSlotCoeff (I := I) g gT -
+          gInvDiffSlotCoeff (I := I) g gU := by
+    dsimp only [Λ]
+    rw [slotInsertEndoCc_sub,
+      ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
+      ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
+  have hD₁ :
+      c2JetSq (I := I) (M := M) g D₁ ≤
+        (2 * Cinv * N) ^ 2 := by
+    calc
+      c2JetSq (I := I) (M := M) g D₁ ≤
+          (Module.finrank ℝ E : ℝ) *
+            c2JetSq (I := I) (M := M) g
+              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+        simpa only [D₁, Nat.reduceAdd] using
+          insertSucc_jet_c2 (I := I) (M := M) g 1 Λ
+      _ = 3 * c2JetSq (I := I) (M := M) g
+            (gInvDiffSlotCoeff (I := I) g gT -
+              gInvDiffSlotCoeff (I := I) g gU) := by
+        rw [hDim, hslot1]
+        norm_num
+      _ ≤ 3 * (Cinv * N) ^ 2 :=
+        mul_le_mul_of_nonneg_left hinvJet (by norm_num)
+      _ ≤ (2 * Cinv * N) ^ 2 := by nlinarith [sq_nonneg (Cinv * N)]
+  have htrace₁ :
+      pureTrace (I := I) (M := M) g gT 1 -
+          pureTrace (I := I) (M := M) g gU 1 =
+        appCcRS (I := I) (M := M) g 3 3 1 F₁ D₁ := by
+    rw [pureTrace_split (I := I) (M := M) g gT 1,
+      pureTrace_split (I := I) (M := M) g gU 1]
+    calc
+      (appCcRS (I := I) (M := M) g 3 3 1 F₁
+            (slotInsertEndoCc (I := I) (M := M) g 2
+              (gInvDiffRaisedEndoField (I := I) g gT)) + F₁) -
+          (appCcRS (I := I) (M := M) g 3 3 1 F₁
+            (slotInsertEndoCc (I := I) (M := M) g 2
+              (gInvDiffRaisedEndoField (I := I) g gU)) + F₁) =
+        appCcRS (I := I) (M := M) g 3 3 1 F₁
+            (slotInsertEndoCc (I := I) (M := M) g 2
+              (gInvDiffRaisedEndoField (I := I) g gT)) -
+          appCcRS (I := I) (M := M) g 3 3 1 F₁
+            (slotInsertEndoCc (I := I) (M := M) g 2
+              (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
+      _ = appCcRS (I := I) (M := M) g 3 3 1 F₁ D₁ := by
+        rw [← appCcRS_sub_right]
+        congr 1
+        dsimp only [D₁, Λ]
+        rw [slotInsertEndoCc_sub]
+  have hF₁ : c2JetSq (I := I) (M := M) g F₁ ≤ A₁ ^ 2 := by
+    rw [hA₁sq]
+  rw [htrace₁]
+  have h := happ₁ F₁ D₁ A₁ (2 * Cinv * N)
+    hA₁ (mul_nonneg (mul_nonneg (by norm_num) hCinv) hN) hF₁ hD₁
+  simpa only [c2JetSq, K₁] using
+    (show (C₁ * A₁ * (2 * Cinv * N)) ^ 2 =
+        (K₁ * N) ^ 2 by
+      dsimp only [K₁]
+      ring ▸ h)
+
+/-- Two-state `H²` modulus of the moving one-slot trace coefficient. -/
+theorem trace1_pair_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T U : SmoothCcTensor g 0 2)
+        (gT gU : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gU.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g U y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 1 -
+              pureTrace (I := I) (M := M) g gU 1) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+            (T - U)‖) ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, htrace⟩ :=
+    trace1_h2_lip (I := I) (M := M) hDim g
+  refine ⟨ρ, C, hρ, hC, ?_⟩
+  intro T U gT gU hTtie hUtie hT hU
+  simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
+    htrace T U gT gU hTtie hUtie hT hU
+
+/-- On the same local metric ball, the moving one-slot trace coefficient
+has a uniform intrinsic `H²` jet bound. -/
+theorem trace1_h2_bdd
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ B : ℝ, 0 < ρ ∧ 0 ≤ B ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (gT : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 1) ≤ B ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, hlip⟩ :=
+    trace1_pair_h2 (I := I) (M := M) hDim g
+  let P : SmoothRiemannianMetric I M → SmoothCcTensor g 3 1 :=
+    fun gm => pureTrace (I := I) (M := M) g gm 1
+  let J : ℝ := lowJetSq (I := I) (M := M) g 2 (P g)
+  let Z : ℝ := 2 * ((C * ρ) ^ 2 + J)
+  let B : ℝ := Real.sqrt Z
+  have hJ : 0 ≤ J := by
+    dsimp only [J, P]
+    exact Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hZ : 0 ≤ Z := by
+    dsimp only [Z]
+    exact mul_nonneg (by norm_num)
+      (add_nonneg (sq_nonneg (C * ρ)) hJ)
+  have hB : 0 ≤ B := Real.sqrt_nonneg _
+  have hBsq : B ^ 2 = Z := by
+    simpa only [B] using Real.sq_sqrt hZ
+  refine ⟨ρ, B, hρ, hB, ?_⟩
+  intro T gT hTtie hT
+  have hzero_app : ∀ (y : M) (v w : TangentSpace I y),
+      ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2) y v w = 0 := by
+    intro y v w
+    have hz : (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) :=
+      (zero_smul ℝ _).symm
+    rw [hz, ccTensorBilinSymm_smul]
+    ring
+  have hzero_tie : ∀ (y : M) (v w : TangentSpace I y),
+      g.inner y v w =
+        g.inner y v w +
+          ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2) y v w := by
+    intro y v w
+    rw [hzero_app, add_zero]
+  have hcc0 :
+      ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+          (0 : SmoothCcTensor g 0 2) = 0 := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+      (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul]
+  have hzero_norm :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ := by
+    rw [hcc0, norm_zero]
+    exact le_of_lt hρ
+  have hraw := hlip T (0 : SmoothCcTensor g 0 2) gT g
+    hTtie hzero_tie hT hzero_norm
+  have hmul :
+      C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - 0)‖ ≤
+        C * ρ := by
+    rw [sub_zero]
+    exact mul_le_mul_of_nonneg_left hT hC
+  have hdiff :
+      lowJetSq (I := I) (M := M) g 2 (P gT - P g) ≤
+        (C * ρ) ^ 2 := by
+    exact hraw.trans
+      (pow_le_pow_left₀
+        (mul_nonneg hC (norm_nonneg _)) hmul 2)
+  rw [hBsq]
+  calc
+    lowJetSq (I := I) (M := M) g 2 (P gT) =
+        c2JetSq (I := I) (M := M) g ((P gT - P g) + P g) := by
+      rw [show (P gT - P g) + P g = P gT by abel]
+      rfl
+    _ ≤ 2 * (c2JetSq (I := I) (M := M) g (P gT - P g) +
+          c2JetSq (I := I) (M := M) g (P g)) :=
+      jet3_add_c2 (I := I) (M := M) g _ _
+    _ ≤ 2 * ((C * ρ) ^ 2 + J) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      simpa only [lowJetSq, c2JetSq, Nat.reduceAdd, J] using
+        add_le_add hdiff le_rfl
+    _ = Z := rfl
+
 /-- The moving two-slot trace coefficient is locally Lipschitz from the
 metric `H²` perturbation ball to its intrinsic coefficient `H²` jet. -/
+private theorem insert4_jet_c2
+    (g : SmoothRiemannianMetric I M)
+    (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    c2JetSq (I := I) (M := M) g
+        (slotInsertEndoCc (I := I) (M := M) g 4 Λ) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 *
+        c2JetSq (I := I) (M := M) g
+          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+  have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
+  calc
+    c2JetSq (I := I) (M := M) g
+        (slotInsertEndoCc (I := I) (M := M) g 4 Λ) ≤
+      (Module.finrank ℝ E : ℝ) *
+        c2JetSq (I := I) (M := M) g
+          (slotInsertEndoCc (I := I) (M := M) g 3 Λ) :=
+      insertSucc_jet_c2 (I := I) (M := M) g 3 Λ
+    _ ≤ (Module.finrank ℝ E : ℝ) *
+        ((Module.finrank ℝ E : ℝ) ^ 2 *
+          c2JetSq (I := I) (M := M) g
+            (slotInsertEndoCc (I := I) (M := M) g 1 Λ)) :=
+      mul_le_mul_of_nonneg_left
+        (insert3_jet_c2 (I := I) (M := M) g Λ) hfr
+    _ = (Module.finrank ℝ E : ℝ) ^ 3 *
+        c2JetSq (I := I) (M := M) g
+          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by ring
+
+set_option maxHeartbeats 1600000 in
+private theorem trace3_h2_lip
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T U : SmoothCcTensor g 0 2)
+        (gT gU : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gU.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g U y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+        c2JetSq (I := I) (M := M) g
+            (pureTrace (I := I) (M := M) g gT 3 -
+              pureTrace (I := I) (M := M) g gU 3) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+            (T - U)‖) ^ 2 := by
+  classical
+  obtain ⟨ρ, Cinv, hρ, hCinv, hinv⟩ :=
+    invCoeff_h2_lip (I := I) (M := M) hDim g
+  obtain ⟨C₃, hC₃, happ₃⟩ :=
+    appRS_h2_h2_h2 (I := I) (M := M) hDim g 5 5 3
+  let F₃ : SmoothCcTensor g 5 3 :=
+    cometricDoubleTraceField (I := I) g 3
+  let J₃ : ℝ := c2JetSq (I := I) (M := M) g F₃
+  let A₃ : ℝ := Real.sqrt J₃
+  let K₃ : ℝ := C₃ * A₃ * (6 * Cinv)
+  have hJ₃ : 0 ≤ J₃ := by
+    exact jet3_nonneg_c2 (I := I) (M := M) g F₃
+  have hA₃ : 0 ≤ A₃ := Real.sqrt_nonneg _
+  have hA₃sq : A₃ ^ 2 = J₃ := by
+    simpa only [A₃] using Real.sq_sqrt hJ₃
+  have hK₃ : 0 ≤ K₃ := by
+    dsimp only [K₃]
+    exact mul_nonneg (mul_nonneg hC₃ hA₃)
+      (mul_nonneg (by norm_num) hCinv)
+  refine ⟨ρ, K₃, hρ, hK₃, ?_⟩
+  intro T U gT gU hTtie hUtie hT hU
+  set N : ℝ :=
+    ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
+  let Λ :=
+    gInvDiffRaisedEndoField (I := I) g gT -
+      gInvDiffRaisedEndoField (I := I) g gU
+  let D₃ : SmoothCcTensor g 5 5 :=
+    slotInsertEndoCc (I := I) (M := M) g 4 Λ
+  have hN : 0 ≤ N := norm_nonneg _
+  have hinvJet :
+      c2JetSq (I := I) (M := M) g
+          (gInvDiffSlotCoeff (I := I) g gT -
+            gInvDiffSlotCoeff (I := I) g gU) ≤
+        (Cinv * N) ^ 2 := by
+    simpa only [c2JetSq, N] using
+      (hinv T U gT gU hTtie hUtie hT hU).2
+  have hslot1 :
+      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+        gInvDiffSlotCoeff (I := I) g gT -
+          gInvDiffSlotCoeff (I := I) g gU := by
+    dsimp only [Λ]
+    rw [slotInsertEndoCc_sub,
+      ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
+      ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
+  have hD₃ :
+      c2JetSq (I := I) (M := M) g D₃ ≤
+        (6 * Cinv * N) ^ 2 := by
+    calc
+      c2JetSq (I := I) (M := M) g D₃ ≤
+          (Module.finrank ℝ E : ℝ) ^ 3 *
+            c2JetSq (I := I) (M := M) g
+              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+        simpa only [D₃] using
+          insert4_jet_c2 (I := I) (M := M) g Λ
+      _ = 27 * c2JetSq (I := I) (M := M) g
+            (gInvDiffSlotCoeff (I := I) g gT -
+              gInvDiffSlotCoeff (I := I) g gU) := by
+        rw [hDim, hslot1]
+        norm_num
+      _ ≤ 27 * (Cinv * N) ^ 2 :=
+        mul_le_mul_of_nonneg_left hinvJet (by norm_num)
+      _ ≤ (6 * Cinv * N) ^ 2 := by nlinarith [sq_nonneg (Cinv * N)]
+  have htrace₃ :
+      pureTrace (I := I) (M := M) g gT 3 -
+          pureTrace (I := I) (M := M) g gU 3 =
+        appCcRS (I := I) (M := M) g 5 5 3 F₃ D₃ := by
+    rw [pureTrace_split (I := I) (M := M) g gT 3,
+      pureTrace_split (I := I) (M := M) g gU 3]
+    calc
+      (appCcRS (I := I) (M := M) g 5 5 3 F₃
+            (slotInsertEndoCc (I := I) (M := M) g 4
+              (gInvDiffRaisedEndoField (I := I) g gT)) + F₃) -
+          (appCcRS (I := I) (M := M) g 5 5 3 F₃
+            (slotInsertEndoCc (I := I) (M := M) g 4
+              (gInvDiffRaisedEndoField (I := I) g gU)) + F₃) =
+        appCcRS (I := I) (M := M) g 5 5 3 F₃
+            (slotInsertEndoCc (I := I) (M := M) g 4
+              (gInvDiffRaisedEndoField (I := I) g gT)) -
+          appCcRS (I := I) (M := M) g 5 5 3 F₃
+            (slotInsertEndoCc (I := I) (M := M) g 4
+              (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
+      _ = appCcRS (I := I) (M := M) g 5 5 3 F₃ D₃ := by
+        rw [← appCcRS_sub_right]
+        congr 1
+        dsimp only [D₃, Λ]
+        rw [slotInsertEndoCc_sub]
+  have hF₃ : c2JetSq (I := I) (M := M) g F₃ ≤ A₃ ^ 2 := by
+    rw [hA₃sq]
+  rw [htrace₃]
+  have h := happ₃ F₃ D₃ A₃ (6 * Cinv * N)
+    hA₃ (mul_nonneg (mul_nonneg (by norm_num) hCinv) hN) hF₃ hD₃
+  simpa only [c2JetSq, K₃] using
+    (show (C₃ * A₃ * (6 * Cinv * N)) ^ 2 =
+        (K₃ * N) ^ 2 by
+      dsimp only [K₃]
+      ring ▸ h)
+
+/-- Two-state `H²` modulus of the moving three-slot trace coefficient. -/
+theorem trace3_pair_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T U : SmoothCcTensor g 0 2)
+        (gT gU : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gU.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g U y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 3 -
+              pureTrace (I := I) (M := M) g gU 3) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+            (T - U)‖) ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, htrace⟩ :=
+    trace3_h2_lip (I := I) (M := M) hDim g
+  refine ⟨ρ, C, hρ, hC, ?_⟩
+  intro T U gT gU hTtie hUtie hT hU
+  simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
+    htrace T U gT gU hTtie hUtie hT hU
+
+/-- On the same local metric ball, the moving three-slot trace coefficient
+has a uniform intrinsic `H²` jet bound. -/
+theorem trace3_h2_bdd
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ B : ℝ, 0 < ρ ∧ 0 ≤ B ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (gT : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 3) ≤ B ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, hlip⟩ :=
+    trace3_pair_h2 (I := I) (M := M) hDim g
+  let P : SmoothRiemannianMetric I M → SmoothCcTensor g 5 3 :=
+    fun gm => pureTrace (I := I) (M := M) g gm 3
+  let J : ℝ := lowJetSq (I := I) (M := M) g 2 (P g)
+  let Z : ℝ := 2 * ((C * ρ) ^ 2 + J)
+  let B : ℝ := Real.sqrt Z
+  have hJ : 0 ≤ J := by
+    dsimp only [J, P]
+    exact Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hZ : 0 ≤ Z := by
+    dsimp only [Z]
+    exact mul_nonneg (by norm_num)
+      (add_nonneg (sq_nonneg (C * ρ)) hJ)
+  have hB : 0 ≤ B := Real.sqrt_nonneg _
+  have hBsq : B ^ 2 = Z := by
+    simpa only [B] using Real.sq_sqrt hZ
+  refine ⟨ρ, B, hρ, hB, ?_⟩
+  intro T gT hTtie hT
+  have hzero_app : ∀ (y : M) (v w : TangentSpace I y),
+      ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2) y v w = 0 := by
+    intro y v w
+    have hz : (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) :=
+      (zero_smul ℝ _).symm
+    rw [hz, ccTensorBilinSymm_smul]
+    ring
+  have hzero_tie : ∀ (y : M) (v w : TangentSpace I y),
+      g.inner y v w =
+        g.inner y v w +
+          ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2) y v w := by
+    intro y v w
+    rw [hzero_app, add_zero]
+  have hcc0 :
+      ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+          (0 : SmoothCcTensor g 0 2) = 0 := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+      (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul]
+  have hzero_norm :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ := by
+    rw [hcc0, norm_zero]
+    exact le_of_lt hρ
+  have hraw := hlip T (0 : SmoothCcTensor g 0 2) gT g
+    hTtie hzero_tie hT hzero_norm
+  have hmul :
+      C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - 0)‖ ≤
+        C * ρ := by
+    rw [sub_zero]
+    exact mul_le_mul_of_nonneg_left hT hC
+  have hdiff :
+      lowJetSq (I := I) (M := M) g 2 (P gT - P g) ≤
+        (C * ρ) ^ 2 := by
+    exact hraw.trans
+      (pow_le_pow_left₀
+        (mul_nonneg hC (norm_nonneg _)) hmul 2)
+  rw [hBsq]
+  calc
+    lowJetSq (I := I) (M := M) g 2 (P gT) =
+        c2JetSq (I := I) (M := M) g ((P gT - P g) + P g) := by
+      rw [show (P gT - P g) + P g = P gT by abel]
+      rfl
+    _ ≤ 2 * (c2JetSq (I := I) (M := M) g (P gT - P g) +
+          c2JetSq (I := I) (M := M) g (P g)) :=
+      jet3_add_c2 (I := I) (M := M) g _ _
+    _ ≤ 2 * ((C * ρ) ^ 2 + J) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      simpa only [lowJetSq, c2JetSq, Nat.reduceAdd, J] using
+        add_le_add hdiff le_rfl
+    _ = Z := rfl
+
 theorem trace2_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4677,6 +5178,124 @@ theorem trace2_h2_bdd
     trace2_pair_h2 (I := I) (M := M) hDim g
   let P : SmoothRiemannianMetric I M → SmoothCcTensor g 4 2 :=
     fun gm => pureTrace (I := I) (M := M) g gm 2
+  let J : ℝ := lowJetSq (I := I) (M := M) g 2 (P g)
+  let Z : ℝ := 2 * ((C * ρ) ^ 2 + J)
+  let B : ℝ := Real.sqrt Z
+  have hJ : 0 ≤ J := by
+    dsimp only [J, P]
+    exact Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hZ : 0 ≤ Z := by
+    dsimp only [Z]
+    exact mul_nonneg (by norm_num)
+      (add_nonneg (sq_nonneg (C * ρ)) hJ)
+  have hB : 0 ≤ B := Real.sqrt_nonneg _
+  have hBsq : B ^ 2 = Z := by
+    simpa only [B] using Real.sq_sqrt hZ
+  refine ⟨ρ, B, hρ, hB, ?_⟩
+  intro T gT hTtie hT
+  have hzero_app : ∀ (y : M) (v w : TangentSpace I y),
+      ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2) y v w = 0 := by
+    intro y v w
+    have hz : (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) :=
+      (zero_smul ℝ _).symm
+    rw [hz, ccTensorBilinSymm_smul]
+    ring
+  have hzero_tie : ∀ (y : M) (v w : TangentSpace I y),
+      g.inner y v w =
+        g.inner y v w +
+          ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2) y v w := by
+    intro y v w
+    rw [hzero_app, add_zero]
+  have hcc0 :
+      ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+          (0 : SmoothCcTensor g 0 2) = 0 := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+      (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul]
+  have hzero_norm :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ := by
+    rw [hcc0, norm_zero]
+    exact le_of_lt hρ
+  have hraw := hlip T (0 : SmoothCcTensor g 0 2) gT g
+    hTtie hzero_tie hT hzero_norm
+  have hmul :
+      C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - 0)‖ ≤
+        C * ρ := by
+    rw [sub_zero]
+    exact mul_le_mul_of_nonneg_left hT hC
+  have hdiff :
+      lowJetSq (I := I) (M := M) g 2 (P gT - P g) ≤
+        (C * ρ) ^ 2 := by
+    exact hraw.trans
+      (pow_le_pow_left₀
+        (mul_nonneg hC (norm_nonneg _)) hmul 2)
+  rw [hBsq]
+  calc
+    lowJetSq (I := I) (M := M) g 2 (P gT) =
+        c2JetSq (I := I) (M := M) g ((P gT - P g) + P g) := by
+      rw [show (P gT - P g) + P g = P gT by abel]
+      rfl
+    _ ≤ 2 * (c2JetSq (I := I) (M := M) g (P gT - P g) +
+          c2JetSq (I := I) (M := M) g (P g)) :=
+      jet3_add_c2 (I := I) (M := M) g _ _
+    _ ≤ 2 * ((C * ρ) ^ 2 + J) := by
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      simpa only [lowJetSq, c2JetSq, Nat.reduceAdd, J] using
+        add_le_add hdiff le_rfl
+    _ = Z := rfl
+
+/-- Two-state `H²` modulus of the moving four-slot trace coefficient. -/
+theorem trace4_pair_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ (T U : SmoothCcTensor g 0 2)
+        (gT gU : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          gU.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g U y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 4 -
+              pureTrace (I := I) (M := M) g gU 4) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+            (T - U)‖) ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, htrace⟩ :=
+    trace24_h2_lip (I := I) (M := M) hDim g
+  refine ⟨ρ, C, hρ, hC, ?_⟩
+  intro T U gT gU hTtie hUtie hT hU
+  simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
+    (htrace T U gT gU hTtie hUtie hT hU).2
+
+/-- On the same local metric ball, the moving four-slot trace coefficient
+has a uniform intrinsic `H²` jet bound. -/
+theorem trace4_h2_bdd
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ B : ℝ, 0 < ρ ∧ 0 ≤ B ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (gT : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          gT.inner y v w =
+            g.inner y v w +
+              ccTensorBilinSymm (I := I) g T y v w) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
+        lowJetSq (I := I) (M := M) g 2
+            (pureTrace (I := I) (M := M) g gT 4) ≤ B ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, hlip⟩ :=
+    trace4_pair_h2 (I := I) (M := M) hDim g
+  let P : SmoothRiemannianMetric I M → SmoothCcTensor g 6 4 :=
+    fun gm => pureTrace (I := I) (M := M) g gm 4
   let J : ℝ := lowJetSq (I := I) (M := M) g 2 (P g)
   let Z : ℝ := 2 * ((C * ρ) ^ 2 + J)
   let B : ℝ := Real.sqrt Z

@@ -2530,3 +2530,473 @@ Honest accounting:
 - final `A1` high/low/compatibility: **0%**;
 - pair-reduced `A2` high/low/compatibility: **100% as stated**;
 - `(N)` dedicated machinery remains conservatively **88--90%**.
+
+## Planner update No. 50 (2026-07-30) - C0 uniqueness chain landed; R1tau convergence
+
+A parallel Fable lane completed the ENTIRE C0 H1 two-state coefficient
+chain in `DeTurckRemainderLowBaseLip.lean` (~11000 lines, zero sorry,
+full lake build green 9577 jobs).  New public/consumable endpoints:
+
+- five class moduli `good/lieCov/vb/amix/riem_pair_h1` (uniform
+  currency `B R * (1+A+A^2)^4 * (D2^2+N^2)`, D2 = H2 state difference,
+  N = spectral H2 difference; NO J3-of-difference in the C0 leg);
+- `selfLow_pair_h1` (five-way master telescope at fixed s);
+- `c0Diff_tame`: J1(lowC0Diff) bound, path-integral discharged;
+- `a1Sub_lo_tame` (endpoint): for the difference data
+  `lowBaseDiff g T U`, per-W operator bound
+  ||Hs1((lowBaseDiff).a1 W)|| <= C*sqrt(Bq R*(1+A+A^2)^4*(D2^2+N^2)
+  + (B0*D3+B1*N+B1*A*N)^2)*||Hs2 W|| on the common spectral H2 ball;
+- supporting publics: `mcd_pair_h1`, `fullSlot_bdd_h2/pair_h1`,
+  `connSec_self_h2` (C1Lip); `trace1/3_pair_h2`+`_h2_bdd` (C2Lip);
+  `a1_spec_lo` (Pair, was private); `dagLow_h2_rf`, `connLow_h3_rf`
+  (Action, privates dropped); Palatini `lieCovR4_eq` +
+  `bdConnDiffSection_eq_armSlotEndoCc_zero`.
+
+RELEVANCE TO R1tau: these are the coefficient-difference blocks of the
+item-2 decisive route test (the second-order tame smooth-core
+difference estimate WITHOUT endpoint high-ball hypotheses): via
+`lowData_split`, N(U)-N(V) telescopes into diagonal a2/a1 actions
+(pair-reduced A2 layer + `a1_pair`) plus coefficient-difference
+actions, whose operator bounds are exactly `a1Sub_lo_tame` (a1-part)
+and the C2Lip difference layer (a2-part).  No H4-ball enters anywhere
+in these bounds - the item-2 stop signal does NOT fire on this leg.
+A gap-recon pass is mapping the remaining bricks (items 1,3,4,5,6 +
+endpoint instantiation) as of this update.
+
+## Planner update No. 51 (2026-07-30) - (N) endgame fleet dispatched; rulings
+
+Gap recon (full report in session artifacts opus_ngap/) established:
+the geometric endgame is ALREADY sorry-free (`ricci_gauge_of_dt` +
+`deTurckRicci_solution_with_jointReg` deliver (N)'s three conclusion
+fields from a per-datum DT solution bundle); `lowreg_partial_sol`
+(LowRegDenseSolve:298) is a sorry-free a=1 solve with an EXPLICIT
+horizon floor; No. 49's three stop signals are resolved/bypassed/moot
+via `lowData_split`/`remainder_low_split`.  The live frontier is the
+CONSTANT SHAPE: `remainder_low_pair` gives degree-6 H3 growth where
+MemLp/arm-3 need LINEAR; repair = the C0-side H2-level pair with
+C1-shaped modulus (B0*D3+B1*D2+B1*A*D2)^2 (D3 allowed; only J4 is
+forbidden).  Lanes: A `selfLow_pair_h2`->`c0Diff_h2_tame`->
+`lowA1_pair_tame`->`a1Hi_lin` + `a2Hi_small`; B lowRegA1Time/memLp +
+lowRegA2Total_data; C lowRadial_eq_self_along_sol -> lowreg_lift_two
+-> realize -> lowreg_force_id; D smooth-rep (gated on decision 1);
+E narrow uniform packet s<=4; F wire the sorry.
+
+RULINGS (this planner):
+- Decision 2 RATIFIED per recon: ONE base solve.  The low-base split
+  layer is consumed as the split ALONG `lowreg_partial_sol`'s
+  solution; the duplicate lowBaseN/partial_sol_tame assembly lane is
+  demoted (no new three-arm estimate to be built for it).
+- Decision 1 (ha_eq at 4n+10 in the smooth representative): AUDIT
+  DISPATCHED (load-bearing or generalizable to a >= a_min?).
+- Decision 3 (uniformity strategy): item-6 risk-2 audit to run before
+  Lane E work (hidden lambda_1/inj-radius dependence hunt).
+- Decision 4 (dimension): all low-base bricks carry hDim = 3 while
+  (N) is stated dimension-general.  OPTIONS: amend (N) to dim 3
+  (coordinated statement change in Evolution lane) or generalize the
+  low-base layer later.  USER-VISIBLE statement change - flagged, not
+  silently applied.
+
+Fleet in flight: Lane-A builder (new file
+DeTurckRemainderLowBaseH2Pair.lean), Lane-C builder
+(LowRegLiftTwo), decision-1 auditor.  Parallel Fable lane's C0-H1
+chain (No. 50) feeds Lane A's pattern and the (T,0)-pair uses.
+
+## Planner update No. 52 (2026-07-30) - decision 1 RESOLVED: a=2 smooth rep is mechanical
+
+Audit verdict (full ledger: session artifact opus_ngap/ha_eq_audit.txt):
+the joint-smooth representative lives at
+MaxRegSolutionJointlySmooth.lean:958/:1306 (NOT TensorMaximalRegularity).
+- `ha_eq : a = 4n+10` is DEAD CODE in both theorems (only binders;
+  linter.unusedVariables silenced).  One call site passes it
+  (QuasilinearAbstractShortTimeExistence.lean:164).
+- `ha_super` is load-bearing at exactly ONE call (:227/:239 eigen
+  bound in the private realizedFamily_flowDeriv_of_repr) and the `a`
+  there is a FREE Cauchy-Schwarz split parameter decoupled from the
+  solution index: re-instantiate abs_eigenBilinScalar_le at
+  m := 2n+4 (le_rfl) and the hypothesis can be DROPPED for all a.
+  All weight-exponent partners are supplied by forall-quantified
+  all-order hypotheses (hphi_mass, weighted_summable).
+- The real a-constraint is hC (the sqrt-t smallness modulus), already
+  dischargeable at a=2, n=3 via hs2_op_bound (H2Pointwise:323) +
+  ccTensorToHs = smoothCcToTensorHs (ext i; rfl).
+- ALSO: the tame theorem is NOT the only JointChartGramSmooth
+  producer (jointChartGramSmooth_of_spectralSmooth_timeSmooth is
+  public, a-free); it is the sole producer of the full PACKAGE
+  (Gram-smooth + flow deriv + pin + F 0 = 0).
+- Splice alternative confirmed blocked (deTurckStrong_unique needs
+  global Lipschitz) but reducible to routine plumbing (ball-local
+  mixForce_unique sibling via nemytskiiOn) if ever needed.
+Lane-D builder dispatched with the exact recipe (delete ha_eq,
+decouple eigen-bound at m := 2n+4, hs2 adapter).  Zero new
+mathematics on this lane.
+
+## Planner update No. 53 (2026-07-30) - Lane A wall dissolved by ruling-shaped arms
+
+Lane A's first pass STOPPED on a genuine finding: three of five C0
+classes carry A^2 passengers (ricciAAKer Gamma*Gamma is sharp ~A^2 at
+H2; covX ~(A+A^2); vb inner ~A^2), so the planner-specified modulus
+class {D3, D2, A*D2, N} (A-linear, no H4) is NOT attainable, and
+a1Hi_lin cannot go through C0 in that shape (even at U=0 the
+single-state C0 H2 norm is ~A^2).  Delivered anyway: new file
+DeTurckRemainderLowBaseH2Pair.lean (867 lines, green + 4 sorries):
+telescope equation re-proved from publics, class 5 proved, master +
+c0Diff_h2_tame proved FROM the (sorried) class lemmas.
+
+PLANNER CORRECTION: the spec was stricter than the Pro ruling.  At
+the a=2 rung the ruling's arms are (1+H3-size)*D4 + H4-size*D3 - the
+H4 SIZE (A4) and H4 DIFFERENCE (D4) are each allowed LINEARLY (the
+fixed-point space L2_t H4 makes them integrable; only quadratic
+high-norm growth is fatal).  Under these arms the A^2 obstruction
+dissolves by re-pairing: A^2 <= R*A4 (spectral interpolation, CS on
+eigencoefficients / jet sums), so A^2*N -> C_R*A4*N and A*D3 <=
+(1+A)*D3 etc.  Lane A resumed with corrected target
+(every difference-slot coefficient at A-degree <= 1 OR A4-degree <= 1,
+never quadratic), new hypotheses J4 T/U <= A4^2, J4(T-U) <= D4^2, and
+authorization to publicize the minimal set of Lip/Action private
+helpers it needs (list to be recorded).
+
+## Planner update No. 54 (2026-07-30) - Lane D LANDED: index-free tame representative
+
+MaxRegSolutionJointlySmooth.lean edits verified (targeted builds 9601/
+9606 jobs, zero errors): dead ha_eq deleted from both public theorems
+(+ the forwarding QuasilinearAbstractShortTimeExistence + rfl-caller
+DeTurckInitialDataExistence:149); ha_super DROPPED from
+realizedFamily_flowDeriv_of_repr and the TAME theorem via the
+audit-verified decoupling (Cauchy-Schwarz split exponent
+re-instantiated at the true threshold 2n+4; 29 body casts rewritten).
+NOTE the asymmetry: ha_super is NOT decouplable in the shrinking
+_of_nemytskii sibling (there a is the genuine solution index in the
+heq/timeH1 chain) - kept there; this is exactly why the tame sibling
+exists.  NEW: hs2_opBound_at_two - concrete hC producer at a=2, n=3
+(H2Pointwise import added, no cycle), FIT-TESTED against the tame
+theorem at (a := 2) by elaboration.  Item 5 usability half: done.
+Remaining item-5 depth (H^{a+2}-ball -> item-3 cutoff via item-4 tame
+Nemytskii) gated on item 2 (Lane A, resumed under No. 53 arms).
+
+## Planner update No. 55 (2026-07-30) - Lane C bricks 1-2 LANDED
+
+New file ShortTime/LowRegLiftTwo.lean (sorry-free, axiom-clean,
+targeted builds green): `lowRadial_eq_self_along_sol` (CORRECTED
+understanding: lowRadialH3 = lowScaleCutoff o symmHs, NOT a
+retraction - identity needs ball membership AND spectral symmetry;
+generic bridges lowRadialHs_eq_self/lowRadialH3_eq_self + the
+a.e.-along-path version, one symmetry input via symmHs_incl) and
+`lowreg_lift_two` (nonautL2_lift instantiated at aLo=1, aHi=2, all
+coefficient-family inputs as explicit hypotheses, pointwise a.e.
+inclusion identities exported).  PLUS reusable transport layer
+Analysis/Spectral/Tensor/SobolevScale/ExponentCongr.lean
+(tensorHsCongr/tensorHsCongrL + inclusion naturality +
+liftCompat_congr): resolves the real-exponent defeq wall
+((2:R)+2 vs (4:R)) that blocked matching the literal-order Time
+families - validated on a real a2_pair-shaped square.
+NEW IDENTIFIED BRICK: symmetry preservation of the rough fixed point
+(symmHs commutes with the spectral heat semigroup hence with
+maxRegDuhamelSolField) - not in tree, needed before the lift's
+symmetry hypothesis can be discharged.
+Lane C remaining: nonautL2_realize instantiation + lowreg_force_id
+(the lane's genuine mathematics), gated on Lanes A/B for the MemLp
+discharge.  Naming deviation recorded: lowRadial_eq_self_along_sol
+is 23 letters (kept for cross-reference consistency).
+
+## Planner update No. 56 (2026-07-30) - Lane B LANDED; A2 lift bundle unconditional
+
+New file TensorMaximalRegularity/LowRegOperatorTime.lean (sorry-free,
+targeted build green): `lowRegA1Time` (H3->L H2 time field via
+tensorHsCongr transport), `lowRegA1_memLp` (MemLp 2 via
+memLp_clm_affine; takes hcont + LINEAR-growth hlin as deferred
+hypotheses - Lane A's debt; both collapse to one LipschitzWith),
+`lowRegA2Total`/`lowRegA2Total_data` UNCONDITIONAL (+ lowA2Hi_small
+from c2_h2_small -> radialA2_pair/lip with radius NESTING, not min).
+The A2 half of the nonautL2_lift input bundle is DONE.
+Planner actions taken: lowA1HiOp/lowA2HiOp private-abbrev poison
+FIXED (privates dropped in DeTurckRemainderLowBaseTime.lean, checked
+green 54.9s) - cross-module SeminormedAddGroup synthesis now works.
+Placement note recorded: LowRegOperatorTime.lean sits in
+TensorMaximalRegularity/ importing ShortTime/LowRegPrincipalTime (a
+layer inversion, no cycle today); natural home = ShortTime/ - move
+before anything in TensorMaximalRegularity imports it.
+Critical-path bookkeeping per Lane B: ~14 bricks
+A1a->A1b->A2->A3->A4->B1->C0..C3->D1..D3->F1 + E1..E3 parallel;
+landed so far: B-lane 3, C-lane 2, D-lane usability, class-5 H2 +
+H2 telescope skeleton; open hard math: A (selfLow_pair_h2 under
+No. 53 arms, resumed), E (uniform packet, audit in flight),
+C3/lowreg_force_id, symmHs commutation (agent in flight).
+
+## Planner update No. 57 (2026-07-30) - Lane E audit CLEAN; rulings; E8a/E1 dispatched
+
+Risk-2 audit verdict (artifacts opus_laneE/): lambda_1 NEVER enters
+(only lambda >= 0 is used anywhere in the scale; the one gap-shaped
+theorem has zero call sites); injectivity radius NEVER enters (the
+PoU is chartAtlasPOU - metric-free; chart Sobolev norm discards the
+metric; same atlas/covering for every metric on (I,M)); Weyl node
+unreachable at s <= 4 (weylSobolevExp = 8 > 4).  No cross-metric
+eigenvalue comparison needed (route: g0-spectral <-> g0-covariant
+(Garding) -> jets+volume -> gBase).  Recon risks 1/3 dissolve at
+k <= 2.  REAL GATE: covsum_hs_unif/hsCovsum_unif conclude
+per-metric exists-C (constant NOT exposed as F(Fc,n)) - mechanical
+~14-theorem refactor = brick E1.  tau_0 reduces to SIX numbers
+(Ctop, B0, B1, D upper; rho, P lower) through the explicit
+partial_sol_tame floor - brick E8a exposes this as
+lowreg_partial_sol_of_bounds in ShortTime/UnifClassBounds.lean.
+
+RULINGS:
+- E3 FALLBACK RATIFIED AS STAGING: prove the Lambda < 2 variant
+  (N-sub-2) FIRST (order-0 already proved there); general-Lambda
+  telescoping stays on the board as the known-hard brick (needs the
+  moving-base metric-jet + ungated nabla-connDiff bound).  The final
+  (N) needs general Lambda (its consumer takes Lambda = max of tail
+  producers) - do not silently weaken the endpoint.
+- E0 RATIFIED: amend (N) to `a <= 6` (the plan's long-anticipated
+  A(n)-raise; consumer's hcov is a hypothesis whose Shi-type
+  producers support all orders) AND `hDim : finrank = 3`
+  (No. 51 decision 4) - ONE coordinated edit of
+  ExtendViaUniqueness.lean (both (N) and ricci_flow_interior_restart's
+  hcov clause), to be executed together with Lane F wiring, not
+  before (avoid churning the Evolution lane twice).
+Dispatched: E8a (six-number refactor) + E1 (constant exposure).
+
+## Planner update No. 58 (2026-07-30) - Lane A pass 2: arms adopted, two gaps ruled
+
+H2Pair file restated in the No. 53 arms (890 lines green, 4 sorries):
+modulus (B0 R(1+A)(D4+D3+D2+N) + B1 R*A4*(D3+N))^2, hypotheses
+J3 U, J4 T/U, J4(T-U) added; telescope + class 5 + master + path
+integral proved; classes 1-4 sorried with correct statements.
+CORRECTION to No. 53's optimism: the four class proofs need genuinely
+NEW H2 pair lemmas (aaKer/covX/vb/amixHalf _pair_h2, ~2700 lines
+total) - the H1 privates are the PATTERN, not the producer.
+RULINGS: (gap 1) jet interpolation A^2 <= Ceq*R*A4 via SPECTRAL
+Cauchy-Schwarz on eigencoefficients + the public sorry-free
+jet<->spectral equivalences (hsJet_le/hs_le_jet) - the
+GagliardoNirenberg sorry-leaf is NOT to be imported; per-g0 Ceq fine
+(uniformity is Lane E's).  (gap 2) aaKer_bdd_h2's (1+A+A^2)^4
+envelope is lossy: rebuild sharp via H2-algebra products of the
+sharp (1+A)-factor bounds (mcd_h2_bdd shape) -> J2(aaKer) <=
+(B(1+A)^2)^2, then (1+A)^2 re-pairs through the interpolation into
+the A4-linear arm.  Execution order 4 -> 3 -> 2 -> 1 (class 4 needs
+no publicization).  Lane A resumed (pass 3).
+
+## Planner update No. 59 (2026-07-30) - symmetry sub-brick analytic half LANDED
+
+New file ShortTime/LowRegSymmPreserve.lean (559 lines, sorry-free,
+targeted build + #print axioms clean): KEY STRUCTURAL FACT - spectral
+symmetrization is BLOCK-DIAGONAL in the eigenbasis (slot-swap
+equivariance of the connection Laplacian; eigenblocks finite so the
+whole commutation is a finite coefficient identity, no tsum):
+`symmHs_coeff` (reusable), then symmHs_homField/solField/
+duhamel_comm, duhamel_symm_ae, `lowreg_sol_symm` (delivers exactly
+the hsymm shape lowRadial_eq_self_along_sol consumes; zero-initial
+half free).  Dead end recorded: source-density alone fails (heat flow
+leaves the smooth core); the coefficient formula is the fix.
+REMAINING INPUT (one brick, dispatched): tensor-level slot symmetry
+of deTurckSmoothRemainder (bridge from the bilinear-form
+deTurckRicciRHS_symm + slot-equivariance of the connection
+Laplacian; evaluation plumbing, not new math) -> discharge
+lowreg_sol_symm's forcing hypothesis.
+
+## Planner update No. 60 (2026-07-30) - E8a LANDED: closed tau0 formula
+
+New file ShortTime/UnifClassBounds.lean (451 lines, sorry-free,
+axiom-clean, 9670-job targeted build green):
+lowregOuterRad/lowregStateRad/lowregHorizon (the CLOSED tau0 in six
+numbers: Ctop, B0, B1, D upper; rho, P lower),
+`lowreg_partial_sol_of_bounds` (tau0 PINNED by rewriting the
+engine's exported equation, not merely bounded), positivity +
+monotonicity, AND `lowreg_bounds_exist` (satisfiability from the
+existing per-metric producer - the refactor provably recovers the
+original endpoint).  delta left free; hDim only in satisfiability.
+Planner action: realize_at_thr publicized in LowRegDenseSolve.lean
+(checked green 112.2s) - the natural site for Lane E's lower bound
+on P.  Lane E remainder is now literally: bound six numbers by
+F(gBase, Lambda) (E1 gate in flight).
+
+## Planner update No. 61 (2026-07-30) - jetInterp3 LANDED; class-4 handoff
+
+Lane A pass 3: the re-pairing device `jetInterp3` (J3 <= C*(R*A4))
+is PROVED sorry-free via the spectral route: wgtAmgm (termwise
+AM-GM on (1+lambda)-weights) -> specInterp3 (parametric) ->
+prodOfParam (Young: forall-t bound to product, via
+le_of_forall_pos_le_add, no limits) -> hsJet_le/hs_le_jet transport.
+NO GN leaf, no covariant IBP, no sorryAx.  Note for the record: the
+naive jet-sum Cauchy-Schwarz is genuinely FALSE (counterexample
+a0=eps,a3=1); the spectral weights are what make it a termwise AM-GM
+- interpolation must be done in the spectral currency.
+H2Pair file at 1253 lines, green, 4 class sorries each annotated
+with its exact remaining recipe.  Class-4 discharge dispatched to a
+fresh builder (all-public ingredients, no interpolation, H1 sibling
+as pattern).  Remaining after that: class 3 (re-pair via
+jetInterp3), class 2 (covX_bdd/pair_h2), class 1 (aaKer sharpening
++ pair + dagLow_pair_h2, needs minimal Lip publicization).
+
+## Planner update No. 62 (2026-07-30) - E1 LANDED (the Lane-E gate); E2/E5 + E4 dispatched
+
+UnifBochnerGap.lean refactor complete (1693 -> 2213 lines, sorry-free,
+9348-job build, axiom-clean): 15 closed constant defs
+(roughLapCommC ... covsumHsC) + 14 constant-exposed sibling theorems;
+endpoints `hsCovsum_unif_const` / `covsum_hs_unif_const` are rank- and
+order-generic (s <= 4 covered with room).  One new mathematical
+input: `rawLap_le_secGrad_dim` (explicit d constant, rebuilt locally
+from the public pointwise bound).  Deviation accepted: originals
+delegate to the const siblings (file not imported anywhere yet; no
+parallel hierarchy per CLAUDE.md).
+RULING (E6): g_bg := gBase RATIFIED - the (N) box fixes gBase and
+the low-base machinery's background parameter instantiates there;
+no third metric's jets enter N(0).
+Dispatched: E2+E5 (rank-(0,2) face + uniform hs2_op_bound + P-lower
+corollary into UnifClassBounds interface) and E4 (uniform
+fibre-Morrey; the metric-free-atlas structural fact makes it
+Gram-norms + jet conversions only).
+In flight elsewhere: H2Pair class-4 discharge, RHS tensor slot
+symmetry.  Still queued: E3 (Lambda<2 staging first), E6, E7 (gated
+on Lane A), C3/realize, Lane F wiring.
+
+## Planner update No. 63 (2026-07-30) - RHS slot symmetry LANDED; C3 dispatched
+
+New file ShortTime/LowRegRHSSymm.lean (486 lines, sorry-free,
+9693-job build, axiom-clean, 7 public endpoints): the Ricci-DeTurck
+smooth remainder is slot-symmetric - the ARM for every T (bilinear
+deTurckRicciRHS_symm transported to the SmoothCcTensor via a new
+ccTensorBilin-extensionality bridge), the LAPLACIAN only for
+symmetric T (slot-swap equivariance, same lemma as the eigenblock
+argument).  Chain lifted through symmHs_smoothCc_eq_self -> coreN
+(symmS idempotent) -> lowRegN (density + isClosed_symmFixed) ->
+forcing-symmetry hypothesis of lowreg_sol_symm DISCHARGED;
+`lowreg_sol_symm_h3` lands at literal exponent 3 = exactly
+lowRadial_eq_self_along_sol's hsymm shape.  The symmetry sub-brick
+is ~95% (residual = call-site witness destructuring).
+Dispatched: Lane C3 (nonautL2_realize instantiation +
+lowreg_force_id staging in ShortTime/LowRegRealize.lean, consuming
+the landed lift/symmetry/OperatorTime layers, hypothesis-
+parameterized where Lane A/B debts remain).
+
+## Planner update No. 64 (2026-07-30) - E2 + E5 LANDED; P uniformized
+
+New files Estimates/H2PointwiseUnif.lean + ShortTime/
+UnifRealizeRadius.lean (sorry-free, axiom-clean, targeted builds):
+E2 `ccHs_eq_smoothHs` (tensorHs.ext rfl) + E1 endpoints restated in
+the smoothCc currency with the SAME closed constants; E5 closed
+constants hs2FibreC/hs2OpC/unifRealizeRad (= theta(n)/hs2OpC) +
+endpoints hs2_op_bound_unif / realize_at_unif whose conclusion is
+VERBATIM lowreg_partial_sol_of_bounds' hreal at P := unifRealizeRad,
+delta := theta(n); unifRealizeRad_pos = its hP;
+lowregHorizon_unif_pos.  One Classical.choose eliminated (Garding);
+the remaining P-input is E4's fibre-Morrey Cpt (hypothesis in the
+supercritical shape, E4 drops in without restatement) + E3's hcurv.
+The horizon's metric dependence is now entirely in
+Ctop, B0, B1, D, rho.  Reusable extraction: gFibreOp_of_fiberSq.
+Dedup chip filed: four rfl-copies of the ccTensorToHs =
+smoothCcToTensorHs identification (canonical home
+IteratedCovGradHsJetBound, deferred to avoid mid-session olean
+invalidation).  Lane E ~25-30%.  E6 dispatched (g_bg := gBase per
+No. 62 ruling).
+
+## Planner update No. 65 (2026-07-30) - C2 LANDED; C3 structurally collapsed; 3 new B-gaps
+
+New file ShortTime/LowRegRealizeTwo.lean (554 lines, 13 decls,
+sorry-free, axiom-clean; name -Two because LowRegRealize was taken).
+STRUCTURAL FINDING: C3 is NOT the analytic problem
+NonautonomousL2Smooth.md feared - tensorHsInclusion is INJECTIVE, so
+the lower-scale identity determines the high-scale forcing:
+`lowreg_force_lo` (lifted forcing at H1 = genuine Ricci-DeTurck
+nonlinearity at genuine states) is UNCONDITIONAL; `lowreg_force_id`
+upgrades to any inclusion-lift N2 of lowRegN; the dense-core lift
+exhibited (spectral coordinates order-independent); completing N2 to
+the ball = the Lane-A frontier or the frozen split N u = N 0 +
+(A2 u + A1 u) u at H4 regularity.  C2 = pure composition
+(`lowreg_realize_two` via nonautL2_realize, no new hypotheses).
+C0's symmetry input DISCHARGED (`lowRadial_eq_self_sol`).
+THREE NEW LANE-B GAPS (located in source): (i) completed first-order
+commuting square (radialA1_pair is smooth-core only; no radialA1_lip
+analog for lowA1Hi/lowA1Lo); (ii) low sibling of the principal A2
+(lowRegA2_data packages only lowRegPrincipal H4->H2); (iii) horizon
+smallness producer C2(1+T) + 2 sqrt(1+T)||A1||_L2t < 1.
+Builder dispatched for (i)+(ii); (iii) queued with E7.
+
+## Planner update No. 66 (2026-07-30) - E4 LANDED (70%); Kjet discharge dispatched
+
+New file Analysis/Sobolev/Embedding/SobolevEmbeddingUnif.lean
+(sorry-free, axiom-clean, targeted build): morreyUnifConst closed def
++ `fibreMorrey_unif_base` (Lambda-comparable class, per-slot Lambda
+factor via the new generic-(0,s) `fibreNormSq_cross_le`; the
+metric-free-atlas claim held EXACTLY - no inj-radius, no lambda_1,
+no covering number).  New expressibility device:
+`SmoothCcTensor.recast` (the section is metric-free - makes
+cross-metric statements about one section stateable).  Scope
+discipline: the drafted spectral face was DELETED in favor of E5's
+landed endpoint; the E4->E5 seam verified verbatim (composite
+typechecks).  Remaining abstract inputs on the whole P-path: Kjet
+(this brick's residual) and Fc (E3's lane).  ORDER BUDGET FINDING:
+E4 needs cross-metric jets only to order 2, covered UNCONDITIONALLY
+by iterCovG1_two (UnifCovSumCross:1249) - hAcc_of_jets is NOT on
+this path and E0's order raise does not apply to E4.  Kjet's genuine
+gap is currency plumbing: the iterCov/Tensor0SField <->
+iteratedCovGrad/SmoothCcTensor tower match at generic rank
+(~200-400 lines, home HCGCompactness/) - dispatched.
+Lane E ~30% (E1/E2/E4-70/E5/E8a landed; E3 hard geometry + E7 bulk
++ E6 in flight + E8b remain).
+
+## Planner update No. 67 (2026-07-30) - H2Pair CLASS 4 DISCHARGED
+
+amixH2Pair proved sorry-free (file 1253 -> 2542 lines, 3 sorries
+left: classes 1/2/3).  RECIPE CORRECTION recorded: class 4 DID need
+jetInterp3 (two mcd factors -> (1+A)^2*N without it); the two
+devices that closed it: (a) instantiate both mcd producers at
+a := sqrt(Cip*R*A4) via jetInterp3, collapsing the envelope into an
+A4-linear arm; (b) feed mcd_pair_h2 with D2 := D3 (jet-mono
+legitimate) so its B1*A*D2 slot re-pairs to the ADMISSIBLE A4*D3
+instead of the forbidden A4*D2... i.e. the difference budget is
+u := D3^2+N^2 at H2 (vs D2^2+N^2 at H1).  No Lip publicization was
+needed: a local public-source helper layer (jetMono/slot/reindex/
+tr/appH2, ~180 lines) was re-derived and is now available to
+classes 1-3.  LEAN LESSON (crash-grade): linarith/nlinarith in an
+~80-hypothesis context of nested tensor jets caused 'deep recursion
+detected at interpreter' at 12.8M heartbeats - hoist ALL scalar
+endgames into standalone real-variable lemmas and close the big
+declaration with one exact.
+Dispatched: class 3 (vb, with the class-4 devices) + Kjet
+tower-match discharge (HCGCompactness/UnifJetTowerMatch.lean).
+CLASS 3 DONE 2026-07-30: vbH2Pair sorry-free in NEW sibling
+...H2VB.lean (H2 algebra moved there); H2Pair 2 sorries (cls 1-2).
+
+## Planner update No. 68 (2026-07-30) - E6 LANDED (70%); E3 is the convergence point
+
+New file ShortTime/UnifNZeroBound.lean (484 lines, 14 decls,
+sorry-free, axiom-clean): `nZero_eq_static` (N(0) = the STATIC
+Ricci-DeTurck field -2Ric + L_W g of g0 against gBase - no third
+metric under the g_bg := gBase ruling, no Laplacian);
+closed constant nZeroC = sqrt2 * 2 * Ksup * sqrt(sqrt(Lambda^n) *
+volBase); DISCOVERY: the easy-direction Garding constant at spectral
+order 1 evaluates to bare sqrt2 (no Fc, no dimension).
+`nZero_lowregNfun` fits the hzero slot of the six-number interface
+verbatim.  Reusables: smoothCc_norm_le_of_fibreSq (rank-generic
+L2-from-fibre-sup, no integrand continuity), volReal_cross_le, three
+zero-evaluation lemmas.  PARAMETERIZED INPUT: Ksup (pointwise fibre
+bound on the static field's jets j <= 1; = E3 restricted to order 1;
+metric jets <= 3 against gBase; NO producer in tree - the DeTurck
+VF term + j=1 derivative + fibre packaging are the missing pieces).
+Lane E ~35%.  E3 (Lambda<2 staging per No. 57) DISPATCHED - it now
+unblocks BOTH E5's hcurv (Fc) and E6's Ksup.
+
+## Planner update No. 69 (2026-07-30) - Lane-B gap squares CLOSED
+
+Gap (ii) UNCONDITIONAL: lowRegPrincipalLo + principal_comm +
+principal_pair_norm already existed in PrincipalLowRegPair.lean (the
+RealizeTwo note misplaced the hole); the missing TIME layer built in
+LowRegOperatorTime.lean (380 -> 1027 lines): lowRegA2TimeLo /
+lowRegA2Lo_data / lowRegA2TotalLo(_data) - the full hA2Lo + hC2Lo +
+hA2compat bundle of lowreg_lift_two, one radius, forall-t squares.
+New upstream: principalLo_cont (NormedRing.inverse_continuousAt on
+the unit ball - no invPerturbH1_lip port), norm_congr_comp
+(ExponentCongr codomain transport; ((1:N):R) vs (1:R) is NOT rfl).
+Gap (i) closed CONDITIONAL on exactly one estimate: lowA1_lip via
+the dense-extension idiom (dense_lipschitz + DenseRange.induction_on
++ isClosed_eq, mirroring radialA2_lip), consuming smooth-core
+Lipschitz hHiPair/hLoPair = the missing first-order sibling
+`c1_pair_lip` (unavoidable: Dense.extend of a discontinuous core is
+informationless).  Via a1_diff it reduces to a two-jet
+coefficient-difference bound at H3 modulus - CHECK whether the
+landed rhs1_pair_h2 / c1Diff_tame layer discharges it by packaging
+before treating it as a new grind (dispatched).  Remaining Lane-B
+packaging: horizon smallness hsmallHi/hsmallLo (dispatched).
+Machinery ~76%.
+
+CONTINUED IN UNIF_EXISTENCE_PLAN2.md (entries No. 70+).

@@ -33,3 +33,31 @@ Focused verification and the targeted exact module refresh pass with no
 - Its dedicated low-regularity machinery, including parallel residual work:
   approximately 97%; the remaining theorem-level work is the completed
   coefficient-state maps, time realization, and final evolution assembly.
+
+## Addendum 2026-07-30: `principalLo_cont`
+
+The Lane-B time layer needed the `H3 → H1` principal correction to be strongly
+measurable along the solution's `H2` state field, i.e. it needed *continuity*
+of `lowRegPrincipalLo` on a ball.  There is no `invPerturbH1_lip` here, and the
+obvious move — porting the ~100-line `invPerturbH2_lip` from
+`PrincipalNeumannH2` — is unnecessary: on the ball `1 + perturbH1 g T` is a
+unit, so `NormedRing.inverse_continuousAt` already gives what is needed.
+`principalLo_cont` states `∃ ρ > 0, ContinuousOn (lowRegPrincipalLo g) {‖T‖ ≤ ρ}`
+and is about 40 lines.
+
+Two traps recorded:
+
+* Writing `have hu : IsUnit (1 + perturbH1 g T)` elaborates `IsUnit` at
+  `ContinuousLinearMap.monoidWithZero`, which does **not** unify with the
+  `NormedRing.toRing.toMonoidWithZero` that `NormedRing.inverse_continuousAt`
+  demands.  Build the unit inside the `NormedRing` context instead:
+  `Units.oneSub (-perturbH1 g T) h`, then `rw [Units.val_oneSub, sub_neg_eq_add]`.
+* `ContinuousAt.comp` must be given `(f := …)` explicitly.  Left to itself,
+  higher-order unification splits `fun S => 1 + perturbH1 g S` as
+  `HAdd.hAdd 1 ∘ perturbH1 g` and the composition fails.
+
+The sandwich `B ↦ traceH1 ∘ B ∘ hessianH1` is continuous by two
+`ContinuousLinearMap.compL … |>.continuous₂` steps.
+
+Verification: focused check and targeted module build passed; the declaration
+is axiom-clean.

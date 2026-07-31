@@ -497,6 +497,29 @@ theorem lowRadial_norm
   rw [lowRadial_embed (I := I) (M := M)]
   exact ballRetraction_mem_closedBall hρ _
 
+/-- Inside the cutoff ball the radial retraction is inactive: `lowRadial` is
+then exactly spectral symmetrization.  This is the smooth-tensor sibling of
+`lowRadialHs_eq_self` / `lowRadialH3_eq_self`; unlike those it needs no
+separate symmetry hypothesis, because `lowRadial` symmetrizes first. -/
+theorem lowRadial_eq_self
+    (g : SmoothRiemannianMetric I M) {ρ : ℝ}
+    (T : SmoothCcTensor g 0 2)
+    (hT : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+      (symmS (I := I) (M := M) g T)‖ ≤ ρ) :
+    lowRadial (I := I) (M := M) g ρ T = symmS (I := I) (M := M) g T := by
+  rcases eq_or_lt_of_le (norm_nonneg
+      (ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (symmS (I := I) (M := M) g T))) with hz | hz
+  · have hzero : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2) = 0 := by
+      simpa only [ccToHsLin_apply] using
+        map_zero (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ))
+    have hS : symmS (I := I) (M := M) g T = (0 : SmoothCcTensor g 0 2) :=
+      ccToHs_injective (I := I) (M := M) g 2 (2 : ℝ)
+        ((norm_eq_zero.mp hz.symm).trans hzero.symm)
+    rw [lowRadial, hS, smul_zero]
+  · rw [lowRadial, min_eq_left ((one_le_div hz).mpr hT), one_smul]
+
 /-- The radial smooth representative is fibrewise symmetric. -/
 theorem lowRadial_symm
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
@@ -1388,7 +1411,7 @@ noncomputable def lowCoreData
     (hreal _ (lowRadial_norm (I := I) (M := M) g hρ T))
     (zeroBound (I := I) (M := M) g hδ0)
 
-private abbrev lowA2HiOp (g : SmoothRiemannianMetric I M) :=
+abbrev lowA2HiOp (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (4 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 
@@ -1555,7 +1578,7 @@ noncomputable def lowA2Lo
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (lowA2LoCore (I := I) (M := M) g hρ hδ0 hδ_le hreal)
 
-private abbrev lowA1HiOp (g : SmoothRiemannianMetric I M) :=
+abbrev lowA1HiOp (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 

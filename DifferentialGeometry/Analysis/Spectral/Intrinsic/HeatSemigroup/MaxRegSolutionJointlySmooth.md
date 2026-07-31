@@ -148,6 +148,84 @@ timed out at 10 min after building the ShortTime deps; resumed in background.
   4 ✓, and now item 5's FIXED-HORIZON layer ✓ (this file); item 2 in flight
   (other executor's LieCorr0 lane); item 6 open.
 
+## Session 2026-07-30 — Lane D: making the tame representative usable at `a = 2`
+
+Goal: the tame (fixed-horizon) representative was gated behind two Sobolev-index
+hypotheses that made `a = 2` unreachable.  Both are now gone, and the `hC`
+producer at `a = 2, n = 3` is wired.
+
+### What was actually load-bearing (audit re-verified against the build)
+
+- `ha_eq : a = 4 * finrank + 10` — **dead in both public theorems**.  Zero uses
+  in either proof body (masked by `set_option linter.unusedVariables false`).
+  Deleted from both.
+- `ha_super : 2 * finrank + 10 ≤ a` in the **tame** theorem — its ONLY use was
+  passing it to the private `realizedFamily_flowDeriv_of_repr`.  After
+  decoupling that lemma (below) it became dead, and was deleted.  Checked there
+  is no `omega`/`linarith` in the tame body that could consume it silently.
+- `ha_super` in the **shrinking** `_of_nemytskii` sibling — **KEPT.  It is
+  genuinely load-bearing**, contrary to the pre-audit reading.  Its `ha_lossy`
+  feeds `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy g₀ a`, whose constant
+  `C` is then used against `‖smoothCcToTensorHs g₀ (a : ℝ) (Fdef t)‖` with
+  `heq : smoothCcToTensorHs g₀ (a : ℝ) (Fdef t) = timeH1.toFun u t`.  That `a`
+  IS the solution regularity index — it cannot be re-instantiated at a free
+  threshold.  This is exactly the asymmetry that motivates the tame sibling:
+  the tame theorem takes `hC` as a HYPOTHESIS at order `a`, so the caller may
+  supply a sharp low-order producer.
+
+### The decoupling in `realizedFamily_flowDeriv_of_repr` (the real content)
+
+Inside that lemma every occurrence of `a` in the BODY is part of one
+Cauchy–Schwarz split: the eigen-bound `abs_eigenBilinScalar_le … a ha_lossy`
+together with its weight partners `tensorSobolevWeight i (a : ℝ)` and
+`tensorSobolevWeight i ((a : ℝ) + (sW : ℝ))`.  Nothing there couples to
+`h_pin`, `hf_id`, or `MaxRegSolutionSpace (a : ℝ) T` — those mention `a` only in
+the STATEMENT binders, which are unchanged.  The split exponent is therefore a
+free parameter.  Replaced it by an opaque
+`obtain ⟨m, hm_lossy⟩ : ∃ m : ℕ, 2 * finrank + 4 ≤ m := ⟨_, le_rfl⟩`
+and renamed the 29 body casts `(a : ℝ) → (m : ℝ)`.  This is renaming, not
+re-proving, because both partner suppliers are ∀-quantified in the exponent:
+`hφ_mass k σ (0 ≤ σ)` (via `perModeConv_allOrder_timeDeriv_spectralMass_le`)
+and `smoothCcTensor_tensorL2Coeff_weighted_summable g₀ τ R hc` (all real `τ`).
+Net effect: the lemma now holds for EVERY `a`, including `a = 1, 2`, with no
+extra hypothesis.  `ha_super` deleted from its binder list.
+
+### `hC` at `a = 2` (part 2)
+
+New public `hs2_opBound_at_two` at the end of the file: under
+`hDim : finrank ℝ E = 3` it repackages `hs2_op_bound`
+(`Analysis/Spectral/Tensor/Estimates/H2Pointwise.lean:323`) into exactly the
+tame theorem's `(C, hC_pos, hC)` shape, using
+`ccTensorToHs g 2 (2:ℝ) = smoothCcToTensorHs g (2:ℝ)` (`ext i; rfl`, the same
+step as `realize_at_thr` in `ShortTime/LowRegDenseSolve.lean:58`).  Proof is
+`simpa only [htwo, Nat.cast_ofNat] using hOp S` — the `Nat.cast_ofNat` is needed
+because the tame binder reads `((2 : ℕ) : ℝ)`, not `(2 : ℝ)`.
+
+`H2Pointwise` was NOT in this file's import closure (verified by transitive
+scan), so one import line was added.  No cycle: `H2Pointwise`'s own closure
+(1380 modules) contains nothing under `HeatSemigroup/`.
+
+The shapes were confirmed to MEET, not merely to look alike: a scratch fit-test
+elaborated
+`maxreg_solution_jointly_smooth_representative_of_tame_nemytskii (g₀ := g₀)
+(a := 2) (T := 1) (R₀ := 1) (C := C) (hC_pos := hC_pos) (hC := hC)` against the
+adapter's output and it typechecks.
+
+### Signature changes and their call sites
+
+- `…_of_tame_nemytskii`: dropped `ha_super`, `ha_eq`.  Zero Lean call sites.
+- `…_of_nemytskii`: dropped `ha_eq` only.  One call site,
+  `ShortTime/QuasilinearAbstractShortTimeExistence.lean:164`.
+- `quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence` (that same file)
+  had `ha_eq` only to forward it, so it was dropped there too — which DOES have
+  a call site, `ShortTime/DeTurckInitialDataExistence.lean:149`, where the
+  argument was the literal `rfl`.  (An initial grep for callers using guessed
+  name fragments missed this; the reliable check is grepping the exact theorem
+  name plus the list of importing modules.)
+
+Verification: all edited files green under focused checks, and the authoritative
+targeted builds completed successfully.
+
 ## Remaining frontier for the FULL clean item 5 (deferred, multi-session)
 
 The delivered variant removes all three shrinks by (i) the √t-modulus floor for

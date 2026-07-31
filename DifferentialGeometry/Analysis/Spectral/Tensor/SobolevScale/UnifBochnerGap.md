@@ -253,7 +253,99 @@ estimated ~200-line follow-up dispatch once the publicize lands.  Distance to ST
 endpoints (`covsum_hs_unif`/`hs_covsum_unif`) is exactly this wrapper layer + the 2.2 strong
 induction; STEP 2.1's hard mathematical content (the Bochner elliptic recursion) is now DONE.
 
+## BRICK E1 LANDED (session 11) — the constant chain is now CLOSED-FORM in `(Fc, d, order)`
+
+The gap flagged by session 10's delta 2 ("expose-aggregate-constant") is CLOSED.  Every `exists C`
+in the chain is now produced by an explicit `def` in the abstract curvature family `Fc`, the
+ambient dimension `d = Module.finrank R E`, and the order arguments only.  Two metrics of the same
+`Lambda`-class sharing one `Fc` therefore receive the SAME constant — the property the `(N)`
+horizon floor `tau0` consumes and which the `exists C` form could not supply.
+
+### The defs (closed formulas)
+```
+roughLapCommC Fc m p   = sum_{q<m} Fc (p+q)                       -- solves C_{m+1}(p)=Fc p + C_m(p+1)
+rawLapIterC   Fc d a   = d + roughLapCommC Fc a 0
+baseLowerC    Fc d k   = roughLapCommC Fc k 0 ^2
+                          + 2 * rawLapIterC Fc d (k-1) * sqrt d * roughLapCommC Fc k 1
+bochnerStepC  Fc d k   = baseLowerC Fc d k + Fc 0
+ellipticTopC  Fc d J   = if J = 0 then 1 else sqrt (1 + bochnerStepC Fc d (J-1) * (J+1)^2)
+ellipticEngC  Fc d 0   = 1
+ellipticEngC  Fc d (J+1) = max (ellipticEngC Fc d J) (ellipticEngC Fc d J * ellipticTopC Fc d J)
+jetEvenC      Fc d k   = (2k+1) * ellipticEngC Fc d (2k) * (k+1)
+iterRawLapC   Fc d 0 p = 1
+iterRawLapC   Fc d (i+1) p = iterRawLapC Fc d i p * sum_{a <= 2i+p} rawLapIterC Fc d a
+modeJetC      Fc d j   = (iterRawLapC Fc d (j/2) (j%2))^2        -- unifies the even/odd branches
+hsCovsumC     Fc d n   = sqrt (2^(n-1) * (modeJetC Fc d 0 + modeJetC Fc d n))
+lapGradCommC  Fc d 0 p = 0
+lapGradCommC  Fc d (i+1) p = Fc p * sum_{a<p+2} iterRawLapC Fc d i a
+                               + rawLapIterC Fc d p * sum_{q<p+3} lapGradCommC Fc d i q
+jetOddC       Fc d k   = jetEvenC Fc d k
+                          + ellipticEngC Fc d (2k) * ((k+1) + (sum_{i<=k} lapGradCommC Fc d i 0)
+                                                              * jetEvenC Fc d k)
+covsumHsC     Fc d n   = if n % 2 = 0 then jetEvenC Fc d (n/2) else jetOddC Fc d (n/2)
+```
+Nonnegativity is a separate `..._nonneg` lemma per def (four of them —
+`ellipticTopC/ellipticEngC/jetEvenC/modeJetC/hsCovsumC` — do not need `hFc` and take `Fc d`
+explicitly; the rest live in a `section ConstNonneg` with `include hFc`).
+
+### Constant-exposed siblings (all `S`-pointwise, no `exists`)
+`roughLapComm_const`, `rawConnLapIter_const`, `baseAddLower_const`, `bochnerStep_const`,
+`elliptic_engine_const` (private), `ellipticLapSum_const`, `jetEven_const`, `iterRawLap_const`,
+`modeLeJet_const`, **`hsCovsum_unif_const`** (endpoint, easy direction), `lapGradComm_const`,
+`lapCovComm_const`, `jetOdd_const`, **`covsum_hs_unif_const`** (endpoint, hard direction).
+Both endpoints are rank/order generic: exposed at EVERY `(s, n)`, so Lane E's `s <= 4` /
+order-depth `k <= 2` window is covered with room to spare.
+
+### DEVIATION from the dispatch (recorded deliberately)
+The dispatch asked for siblings ALONGSIDE untouched originals.  What landed instead: every one of
+the 14 original theorem STATEMENTS is byte-identical and still public, but their PROOFS are now
+three-line delegations `exact <const, nonneg, const-sibling>`.  Reasons: (i) no Lean file in the
+tree imports `UnifBochnerGap` today (it is not even in the aggregate `DifferentialGeometry.lean`),
+so the "other files consume them" risk is currently empty and the public interface is preserved
+either way; (ii) duplicating the chain would have doubled the elaboration cost of a file that
+already needs three `maxHeartbeats 1600000` blocks; (iii) `CLAUDE.md`'s "one canonical API per
+concept / no parallel hierarchy" rule.  Net effect for consumers: unchanged.
+One private helper, the old `elliptic_engine`, was superseded by `elliptic_engine_const` (private,
+so no API surface).
+
+### New in-file infrastructure
+`rawLap_le_secGrad_dim` (private) — `norm (Delta_nabla S) <= d * norm (nabla^2 S)` with the
+EXPLICIT dimension constant.  `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
+(`RoughLaplacianSecondCovGradL2Bound.lean:537`) hides its witness behind `exists K`, but that
+witness is literally `finrank R E`, and the PUBLIC pointwise `rawConnLap_fiberNormSq_le_secondCovGrad`
+(`:441`, constant `d^2`) plus `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` reproduce it in
+~20 lines locally.  This is the ONLY place the chain needed a new non-`Fc` input, and no upstream
+file was edited.  `roughLapCommC_succ` — the recursion equation of `roughLapCommC`.
+
+### Lessons
+- `rw [Finset.sum_range_succ' f m]` leaves beta-redexes, so a follow-up `Finset.sum_congr` on the
+  reindexed summand does not match; `simp only [Finset.sum_range_succ', Nat.add_zero]` beta-reduces
+  and works.
+- `rw [if_neg h]` inside an `ellipticTopC`-style def does NOT auto-close on `J+1-1` vs `J` and
+  `J+1+1` vs `J+2`: rewrite both index identities (`have ... := by omega`) explicitly first.
+- Defining the two-base-case recursion `| 0 | 1 | (J+2)` directly is avoidable: factoring the top
+  factor into its own `ellipticTopC` def turns it into a single-step structural recursion, which
+  makes `induction J` and the `rw [ellipticEngC]` equation lemma trivial.
+- Unifying an even/odd pair of constants as `f (j/2) (j%2)` removes the need for two defs and lets
+  one `modeLeJet_const` cover both branches (`omega` discharges `j/2`/`j%2` in each branch).
+- The `unusedSectionVars` linter is the reliable detector of which `..._nonneg` lemmas genuinely
+  need `hFc`; four did not.
+
+### Verification
+Focused file check GREEN; authoritative targeted module build GREEN; both endpoints and both
+original endpoints axiom-clean `[propext, Classical.choice, Quot.sound]`; 0 `sorry`.
+File is now 2213 lines (limit 3000).
+
+### Next
+E2 (rank-`(0,2)` `smoothCcToTensorHs` face of these two endpoints) is unblocked and unchanged in
+scope; E5/E6 can now quote `hsCovsumC` / `covsumHsC` by name instead of an opaque `exists C`.
+
 ## Status
+- 2026-07-30 (session 11, brick E1): CONSTANT CHAIN EXPOSED.  14 constant-exposed
+  siblings + 15 `def`s + their `_nonneg` lemmas; endpoints `hsCovsum_unif_const` /
+  `covsum_hs_unif_const`.  All original statements byte-identical (proofs delegated).
+  New private `rawLap_le_secGrad_dim` supplies the explicit dimension constant.  Focused
+  check + authoritative targeted module build GREEN; endpoints axiom-clean; 0 sorry.
 - 2026-07-24 (session 9): STEP 2.1 WRAPPER LAYER COMPLETE — BOTH `Hs`↔covsum endpoints LANDED +
   VERIFIED + AUDITED.  Publicize GRANTED + applied (four one-token edits in
   `IteratedCovGradHsJetBound.lean`: `private` dropped from `rawIter_tsum`, `covIter_tsum`,

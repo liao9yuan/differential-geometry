@@ -179,6 +179,128 @@ re-deriving the maximal-regularity engine on a fixed scale (large; overlaps R2's
 Recommend the planner weigh "uniform cross-metric layer (§5(i)) + quantitative-floor
 layer (§5(ii))" vs "fixed-scale re-derivation" before Stage 1 is unblocked.
 
+---
+
+# UnifClassBounds.lean — brick E8a (the six-number refactor)
+
+Written 2026-07-30.  `UnifClassBounds.lean` now exists (451 lines, sorry-free,
+axiom-clean: only `propext / Classical.choice / Quot.sound`).  Note that §0–§5
+above audit the **`a = 4n+10` engine** (`quasilinear_..._shortTimeExistence`),
+whose horizon really does sit behind un-floored caps `d, d₂, d₂F`.  E8a is about
+the **`a = 1` low-regularity solve** (`lowreg_partial_sol`), a *different*
+endpoint whose horizon is the bare `partial_sol_tame` floor with no extra caps.
+For that endpoint the six-number reduction is exact.
+
+## What is in the file
+
+Scalar layer (no manifold hypotheses at all — plain `ℝ` functions):
+
+- `lowregOuterRad Ctop ρ P = min (ρ/2) (min (P/2) (1/(32*(Ctop+1))))` — the
+  coefficient-freezing radius `Q` chosen at `LowRegDenseSolve.lean:339`.
+- `lowregStateRad Ctop B1 ρ P = min (lowregOuterRad Ctop ρ P / 2) (1/(32*(B1+1)))`
+  — the solver state radius `R` chosen at `:368`.
+- `lowregHorizon Ctop B0 B1 D ρ P =`
+  `min 1 (min (1/(64*(B0+1)^2)) ((lowregStateRad Ctop B1 ρ P / 4 / (2*(D+1)))^2))`
+  — `partial_sol_tame`'s floor (`TameForcingFixedPoint.lean:483`) evaluated at
+  `B = B0` and `R = lowregStateRad`.  This is `τ₀`.
+- support lemmas: `_le_rho / _le_P / _le_cap / _pos / _small` for both radii
+  (`_small` = the two contraction caps `Ctop*Q ≤ 1/16`, `B1*R ≤ 1/16`),
+  `lowregHorizon_pos`, `lowregHorizon_le_one`, and the three monotonicity
+  lemmas `lowregOuterRad_mono / lowregStateRad_mono / lowregHorizon_mono`
+  (primed = worse inputs: larger `Ctop,B0,B1,D`, smaller `ρ,P` ⟹ smaller `τ₀`).
+
+Geometry layer:
+
+- `lowregRealRad` — restriction of a realization bound from radius `P` to
+  `lowregStateRad` (thin wrapper on `realizeOfLE`; only needs `0 ≤ P`).
+- `lowregNfun g₀ g_bg hδ hCtop hB1 hρ hP hreal` — the dense nonlinearity
+  `lowRegN` on the state ball of the *closed* radius.
+- `lowreg_partial_sol_of_bounds` — the endpoint.  Hypotheses: `hδ : δ < 1`,
+  signs `0 ≤ Ctop, B0, B1`, `0 < ρ, P`, the realization bound at radius `P`,
+  `hcont`, the three-arm tame estimate `htame` with coefficients
+  `(Ctop * lowregOuterRad Ctop ρ P, B0, B1)`, and `hzero : ‖Nfun 0‖ ≤ D`.
+  Conclusion: for every `0 < T ≤ lowregHorizon Ctop B0 B1 D ρ P` with `T ≤ 1`
+  the Duhamel/max-reg solution exists, stays in
+  `lowerState g₀ 1 (lowregStateRad Ctop B1 ρ P)`, and has
+  `‖gforce‖ ≤ lowregStateRad Ctop B1 ρ P / 4`.
+- `lowreg_bounds_exist` — the honest-input check: for every `g₀` (given
+  `hDim : finrank = 3` and a realization bound at radius `P`) the existing
+  producers `lowRegN_outer` do supply `Ctop, B0, B1, D, ρ` satisfying every
+  hypothesis above.  So the refactor recovers `lowreg_partial_sol` with the
+  opaque `∃ T₀` replaced by the closed `lowregHorizon`.
+
+## Design decisions (and why)
+
+1. **`δ` is a parameter, not `deTurckArmContractionThreshold''`.**  The
+   original fixes `δ = θ(n)` only because its private `realize_at_thr` produces
+   exactly that.  Since the realization bound is now a hypothesis, keeping `δ`
+   generic costs nothing; Lane E instantiates `δ := θ(n)`, which is
+   dimension-only and therefore already class-uniform.
+2. **`R` is closed, not chosen.**  The original picks
+   `R = min (Q/2) (1/(32*(B1 Q + 1)))` at the *actual* `B1 Q`.  Taking `R` at
+   the *bound* `B1` is still admissible (`B1 Q ≤ B1` and
+   `R ≤ 1/(32*(B1+1))` still give `B1 Q * R ≤ 1/32 ≤ 1/16`), so the state
+   radius becomes class-uniform too — which E8b needs, since `‖gforce‖ ≤ R/4`.
+3. **`htame` is stated at the two specific radii**, not `∀ Q ≤ ρ`.  Weakest
+   hypothesis, and it is what makes `lowreg_bounds_exist` provable: an
+   `∀ Q ≤ ρ` form would need `B0' Q ≤ B0` for every admissible `Q`, which the
+   producer does not give (`B0', B1'` are arbitrary functions of `Q`).
+4. **`hD : 0 ≤ D` dropped** — it follows from `hzero` by `norm_nonneg`.
+   `Continuous (coreN …)` dropped from both hypotheses and conclusion — it was
+   only carried through the original statement and has no Lean consumer.
+5. **`hDim : finrank = 3` is NOT needed** by `lowreg_partial_sol_of_bounds`
+   (only by `lowreg_bounds_exist`, which calls the producer).
+
+## Deviation from the brick spec
+
+The spec said "the proof body is the existing one with the obtains replaced by
+the hypotheses".  That is what happened, with one addition: `lowreg_bounds_exist`
+was written as well, so that the parameterization is *checked* against the live
+producers rather than merely asserted.  The one thing that could **not** be done
+in this file is re-deriving `lowreg_partial_sol` itself: its realization input
+comes from `realize_at_thr`, which is `private` in `LowRegDenseSolve.lean`.
+`lowreg_bounds_exist` therefore takes the radius-`P` realization bound as a
+hypothesis instead.  If Lane E wants a literal `lowreg_partial_sol` corollary,
+the smallest fix is to drop `private` from `realize_at_thr` (it is already the
+statement "`P = θ/Cop` works"), which is also the natural home for E's lower
+bound on `P`.
+
+## What Lane E must now produce (E1–E7 ⟹ E8b)
+
+Six class-uniform numbers, nothing else:
+
+| number | direction | current producer | file |
+|---|---|---|---|
+| `Ctop` | upper | `lowRegN_outer` ⟵ `coreN_tame` ⟵ `rem_h1_tame` | `LowRegCoreTame.lean:104` |
+| `B0`   | upper | same (`B0 Q = Clow + Ccoef*(Z0+O0)`) | same |
+| `B1`   | upper | same (`B1 Q = Ccoef*(Z1+O1)`) | same |
+| `D`    | upper | `‖lowregNfun … 0‖` = `H¹` norm of the DeTurck nonlinearity at `0` | — |
+| `ρ`    | lower | `lowRegN_outer` | `LowRegDenseSolve.lean:188` |
+| `P`    | lower | `realize_at_thr`, `P = θ(n)/Cop` | `LowRegDenseSolve.lean:43` |
+
+Then `lowregHorizon_mono` + `lowregHorizon_pos` give the uniform `τ₀ > 0`.
+
+## Verification
+
+Focused check green; targeted module build
+`+…ShortTime.UnifClassBounds` green (whole 9670-job dependency closure built,
+0 errors, no warnings attributable to this file); `#print axioms` on
+`lowreg_partial_sol_of_bounds`, `lowreg_bounds_exist`, `lowregHorizon_pos`,
+`lowregHorizon_mono` shows only `propext, Classical.choice, Quot.sound`.
+
+## Lean lessons
+
+- `rw [hT₀eq, hBcoe]` leaves `lowregHorizon … = min 1 (…)`; `rw`'s trailing
+  `rfl` runs at reducible transparency and does **not** unfold a plain `def`.
+  An explicit `rfl` tactic (default transparency) closes it.  Worth remembering
+  whenever a closed-form `def` has to be matched against an engine's exported
+  equation.
+- Realization bounds (`gFibreOpBound …`) are `Prop`, so `lowRegN g₀ g_bg hR hδ
+  hreal` is definitionally independent of *which* proof is supplied.  That is
+  what lets `lowreg_bounds_exist` discharge `hcont`/`htame` by a bare `exact`
+  against the producer's output even though the producer builds its realization
+  via `realizeOfLE` and the statement builds it via `lowregRealRad`.
+
 ## Status
 - 2026-07-20: Stage 0 audit COMPLETE. Stage 1 NOT started (blocked; see §0/§5). STOP for
   planner acceptance of the re-scope. No `.lean` written (no sorry-free producer exists).
@@ -187,3 +309,7 @@ layer (§5(ii))" vs "fixed-scale re-derivation" before Stage 1 is unblocked.
   S1 = the `Λ`-uniform `g₀`-side spectral↔covariant Gårding constant (`DirichletSpectralBochnerGap`
   re-derivation; the one HARD level, no high-order min-max transfer), with S0/S1b/S2/S3/S4
   routine-to-medium and inheriting it.
+- 2026-07-30: brick E8a DONE — UnifClassBounds.lean written (lowregOuterRad /
+  lowregStateRad / lowregHorizon + lowreg_partial_sol_of_bounds +
+  lowreg_bounds_exist), sorry-free, targeted module build green.  Lane E's
+  remaining work is now exactly 'bound six numbers'; see the E8a section above.

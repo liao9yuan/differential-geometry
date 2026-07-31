@@ -146,7 +146,7 @@ theorem deTurckRicci_solution_with_jointReg
     rw [← hreal]
     exact deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS (I := I) g_bg gDT x v w
   exact quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence (I := I)
-    (deTurckRicciRHS (I := I) g_bg) g₀ (4 * Module.finrank ℝ E + 10) ha_super rfl
+    (deTurckRicciRHS (I := I) g_bg) g₀ (4 * Module.finrank ℝ E + 10) ha_super
     (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg (4 * Module.finrank ℝ E + 10))
     (fun S {δ} hδ_lt hδ => deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
       (symmS (I := I) (M := M) g₀ S) hδ_lt (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ))

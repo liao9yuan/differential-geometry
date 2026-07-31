@@ -695,6 +695,63 @@ private theorem principalLo_norm
       dsimp only [C]
       ring
 
+/-- On one spectral `H2` metric ball, the low principal correction depends
+continuously on the metric deviation.  This is what a time-dependent low
+principal family needs for strong measurability, and unlike the `H4 -> H2`
+side it needs no Lipschitz estimate: on the ball the perturbed identity is a
+unit, and `Ring.inverse` is continuous at units of a complete normed ring. -/
+theorem principalLo_cont
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ContinuousOn (lowRegPrincipalLo (I := I) (M := M) g)
+        {T : tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) | ‖T‖ ≤ ρ} := by
+  obtain ⟨ρ, C, hρ, hC, hinv⟩ :=
+    invPerturbH1_norm (I := I) (M := M) hDim g
+  refine ⟨ρ, hρ, ?_⟩
+  have hsand : Continuous fun B : rank4End1 (I := I) (M := M) g =>
+      (traceH1 (I := I) (M := M) g).comp
+        (B.comp (hessianH1 (I := I) (M := M) g)) := by
+    have hin : Continuous fun B : rank4End1 (I := I) (M := M) g =>
+        B.comp (hessianH1 (I := I) (M := M) g) :=
+      (ContinuousLinearMap.compL ℝ
+        (rank2H3 (I := I) (M := M) g)
+        (rank4H1 (I := I) (M := M) g)
+        (rank4H1 (I := I) (M := M) g)).continuous₂.comp
+          (continuous_id.prodMk continuous_const)
+    exact (ContinuousLinearMap.compL ℝ
+      (rank2H3 (I := I) (M := M) g)
+      (rank4H1 (I := I) (M := M) g)
+      (rank2H1 (I := I) (M := M) g)).continuous₂.comp
+        (continuous_const.prodMk hin)
+  intro T hT
+  have hhalf : ‖perturbH1 (I := I) (M := M) g T‖ ≤ (1 : ℝ) / 2 :=
+    (hinv T hT).1
+  have hlt : ‖-perturbH1 (I := I) (M := M) g T‖ < 1 := by
+    rw [norm_neg]
+    linarith
+  have hbase : ContinuousAt
+      (fun S : metricH2 (I := I) (M := M) g =>
+        (1 : rank4End1 (I := I) (M := M) g) +
+          perturbH1 (I := I) (M := M) g S) T :=
+    (continuous_const.add
+      (perturbH1 (I := I) (M := M) g).continuous).continuousAt
+  have hring := NormedRing.inverse_continuousAt
+    (Units.oneSub (-perturbH1 (I := I) (M := M) g T) hlt)
+  rw [Units.val_oneSub, sub_neg_eq_add] at hring
+  have hstep : ContinuousAt
+      (fun S : metricH2 (I := I) (M := M) g =>
+        invPerturbH1 (I := I) (M := M) g S) T := by
+    refine ContinuousAt.sub ?_ continuousAt_const
+    exact ContinuousAt.comp
+      (f := fun S : metricH2 (I := I) (M := M) g =>
+        (1 : rank4End1 (I := I) (M := M) g) +
+          perturbH1 (I := I) (M := M) g S) hring hbase
+  exact (ContinuousAt.comp
+    (f := fun S : metricH2 (I := I) (M := M) g =>
+      invPerturbH1 (I := I) (M := M) g S)
+    hsand.continuousAt hstep).continuousWithinAt
+
 private noncomputable def inc43
     (g : SmoothRiemannianMetric I M) :
     rank2H4 (I := I) (M := M) g →L[ℝ]

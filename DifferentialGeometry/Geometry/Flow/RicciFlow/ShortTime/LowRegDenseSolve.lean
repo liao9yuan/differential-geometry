@@ -40,7 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- The `H2` realization radius with its fibre bound fixed at the positive
 DeTurck contraction threshold. -/
-private theorem realize_at_thr
+theorem realize_at_thr
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ R : ℝ, 0 < R ∧

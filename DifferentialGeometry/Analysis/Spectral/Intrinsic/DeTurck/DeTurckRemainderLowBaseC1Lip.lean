@@ -4859,6 +4859,484 @@ theorem mcd_h2_bdd
     _ = (B R * (1 + A)) ^ 2 := by
       rw [mul_pow, hBsq]
 
+set_option maxHeartbeats 1600000 in
+set_option linter.unusedVariables false in
+/-- `H¹` two-state modulus for the moving-metric lowered connection
+difference, with the `D2`-only (third-difference-free) right-hand side
+required by the `C0` low-regularity lane. -/
+theorem mcd_pair_h1
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ B0 B1 : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
+      ∀ (gT gU : SmoothRiemannianMetric I M)
+        (T U : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hU : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g U x u v =
+            ccTensorBilin (I := I) g U x v u)
+        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+          gT.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+          gU.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
+        {δT δU : ℝ}
+        (hδT_le : δT ≤ δ₀) (hδT0 : 0 ≤ δT)
+        (hδT : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δT)
+        (hδU_le : δU ≤ δ₀) (hδU0 : 0 ≤ δU)
+        (hδU : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g U) δU)
+        (R A D2 : ℝ),
+        0 ≤ R → 0 ≤ A → 0 ≤ D2 →
+        lowJetSq (I := I) (M := M) g 2 U ≤ R ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 T ≤ A ^ 2 →
+        lowJetSq (I := I) (M := M) g 2 (T - U) ≤ D2 ^ 2 →
+      lowJetSq (I := I) (M := M) g 1
+          (metricConnDiffLoweredCc (I := I) (M := M) g gT g -
+            metricConnDiffLoweredCc (I := I) (M := M) g gU g) ≤
+        (B0 R * D2 + B1 R * A * D2) ^ 2 := by
+  obtain ⟨W0, W1, hW0, hW1, hwp⟩ :=
+    wXi_pair_h1 (I := I) (M := M) hDim g hδ₀0 hδ₀
+  obtain ⟨Kw, hKw, hwlow⟩ :=
+    wXi_h2_low (I := I) (M := M) g hδ₀0 hδ₀
+  obtain ⟨Cc, hCc, hcp⟩ :=
+    metricCorr_pair_h1 (I := I) (M := M) hDim g
+  let Q0 : ℝ → ℝ := fun R =>
+    2 * (2 * (W0 R) ^ 2 + Cc * (Kw + R ^ 2 * (2 * (W0 R) ^ 2)))
+  let Q1 : ℝ → ℝ := fun R =>
+    2 * (2 * (W1 R) ^ 2 + Cc * (Kw + R ^ 2 * (2 * (W1 R) ^ 2)))
+  have hQ0 : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q0 R := by
+    intro R hR
+    have : 0 ≤ Cc * (Kw + R ^ 2 * (2 * (W0 R) ^ 2)) :=
+      mul_nonneg hCc (by positivity)
+    positivity
+  have hQ1 : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q1 R := by
+    intro R hR
+    have : 0 ≤ Cc * (Kw + R ^ 2 * (2 * (W1 R) ^ 2)) :=
+      mul_nonneg hCc (by positivity)
+    positivity
+  refine ⟨fun R => Real.sqrt (Q0 R), fun R => Real.sqrt (Q1 R),
+    fun R hR => Real.sqrt_nonneg _, fun R hR => Real.sqrt_nonneg _, ?_⟩
+  intro gT gU T U hT hU hTtie hUtie
+    δT δU hδT_le hδT0 hδT hδU_le hδU0 hδU
+    R A D2 hR hA hD2 hU2 hT3 hTU2
+  have hwd : lowJetSq (I := I) (M := M) g 1
+      (wXi (I := I) (M := M) g gT g -
+        wXi (I := I) (M := M) g gU g) ≤
+      (W0 R * D2 + W1 R * A * D2) ^ 2 :=
+    hwp gT gU g T U hT hU hTtie hUtie
+      hδT_le hδT0 hδT hδU_le hδU0 hδU R A D2 hR hA hD2 hU2 hT3 hTU2
+  have hws : lowJetSq (I := I) (M := M) g 1
+      (wXi (I := I) (M := M) g gT g) ≤ Kw * (1 + A ^ 2) := by
+    have h2 := hwlow gT T hT hTtie hδT_le hδT0 hδT
+    have hmono : lowJetSq (I := I) (M := M) g 1
+        (wXi (I := I) (M := M) g gT g) ≤
+        lowJetSq (I := I) (M := M) g 2
+          (wXi (I := I) (M := M) g gT g) :=
+      jet_mono (I := I) (M := M) g (by norm_num) _
+    refine hmono.trans (h2.trans ?_)
+    have : 1 + lowJetSq (I := I) (M := M) g 3 T ≤ 1 + A ^ 2 := by
+      linarith [hT3]
+    exact mul_le_mul_of_nonneg_left this hKw
+  have hcd : lowJetSq (I := I) (M := M) g 1
+      (metricLowerCorr (I := I) (M := M) g gT g T -
+        metricLowerCorr (I := I) (M := M) g gU g U) ≤
+      Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+        R ^ 2 * (W0 R * D2 + W1 R * A * D2) ^ 2) := by
+    refine (hcp gT gU T U).trans
+      (mul_le_mul_of_nonneg_left ?_ hCc)
+    have hx : lowJetSq (I := I) (M := M) g 2 (T - U) *
+        lowJetSq (I := I) (M := M) g 1
+          (wXi (I := I) (M := M) g gT g) ≤
+        D2 ^ 2 * (Kw * (1 + A ^ 2)) :=
+      mul_le_mul hTU2 hws
+        (jet_nonneg (I := I) (M := M) g _) (sq_nonneg _)
+    have hy : lowJetSq (I := I) (M := M) g 2 U *
+        lowJetSq (I := I) (M := M) g 1
+          (wXi (I := I) (M := M) g gT g -
+            wXi (I := I) (M := M) g gU g) ≤
+        R ^ 2 * (W0 R * D2 + W1 R * A * D2) ^ 2 :=
+      mul_le_mul hU2 hwd
+        (jet_nonneg (I := I) (M := M) g _) (sq_nonneg _)
+    linarith
+  have hsub := mcd_sub_eq (I := I) (M := M) g gT gU T U hTtie hUtie
+  rw [hsub]
+  have hadd := jet_add1 (I := I) (M := M) g 1
+    (wXi (I := I) (M := M) g gT g -
+      wXi (I := I) (M := M) g gU g)
+    (metricLowerCorr (I := I) (M := M) g gT g T -
+      metricLowerCorr (I := I) (M := M) g gU g U)
+  have hcross : (W0 R * D2 + W1 R * A * D2) ^ 2 ≤
+      2 * (W0 R) ^ 2 * D2 ^ 2 + 2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2) := by
+    nlinarith [sq_nonneg (W0 R * D2 - W1 R * A * D2)]
+  have hs0 : Real.sqrt (Q0 R) ^ 2 = Q0 R :=
+    Real.sq_sqrt (hQ0 R hR)
+  have hs1 : Real.sqrt (Q1 R) ^ 2 = Q1 R :=
+    Real.sq_sqrt (hQ1 R hR)
+  have hrhs : (Real.sqrt (Q0 R) * D2 + Real.sqrt (Q1 R) * (A * D2)) ^ 2 =
+      Q0 R * D2 ^ 2 + Q1 R * (A ^ 2 * D2 ^ 2) +
+        2 * (Real.sqrt (Q0 R) * Real.sqrt (Q1 R)) * (A * D2 ^ 2) := by
+    have : (Real.sqrt (Q0 R) * D2 + Real.sqrt (Q1 R) * (A * D2)) ^ 2 =
+        Real.sqrt (Q0 R) ^ 2 * D2 ^ 2 +
+          Real.sqrt (Q1 R) ^ 2 * (A ^ 2 * D2 ^ 2) +
+          2 * (Real.sqrt (Q0 R) * Real.sqrt (Q1 R)) * (A * D2 ^ 2) := by
+      ring
+    rw [this, hs0, hs1]
+  have hcross0 : 0 ≤
+      2 * (Real.sqrt (Q0 R) * Real.sqrt (Q1 R)) * (A * D2 ^ 2) := by
+    have h1 : 0 ≤ Real.sqrt (Q0 R) * Real.sqrt (Q1 R) :=
+      mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+    have h2 : 0 ≤ A * D2 ^ 2 := mul_nonneg hA (sq_nonneg _)
+    positivity
+  calc
+    lowJetSq (I := I) (M := M) g 1
+        ((wXi (I := I) (M := M) g gT g -
+            wXi (I := I) (M := M) g gU g) +
+          (metricLowerCorr (I := I) (M := M) g gT g T -
+            metricLowerCorr (I := I) (M := M) g gU g U)) ≤
+      2 * (lowJetSq (I := I) (M := M) g 1
+          (wXi (I := I) (M := M) g gT g -
+            wXi (I := I) (M := M) g gU g) +
+        lowJetSq (I := I) (M := M) g 1
+          (metricLowerCorr (I := I) (M := M) g gT g T -
+            metricLowerCorr (I := I) (M := M) g gU g U)) := hadd
+    _ ≤ 2 * ((W0 R * D2 + W1 R * A * D2) ^ 2 +
+        Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+          R ^ 2 * (W0 R * D2 + W1 R * A * D2) ^ 2)) := by
+      linarith [hwd, hcd]
+    _ ≤ Q0 R * D2 ^ 2 + Q1 R * (A ^ 2 * D2 ^ 2) := by
+      have hexp : Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+          R ^ 2 * (W0 R * D2 + W1 R * A * D2) ^ 2) ≤
+          Cc * (D2 ^ 2 * (Kw * (1 + A ^ 2)) +
+            R ^ 2 * (2 * (W0 R) ^ 2 * D2 ^ 2 +
+              2 * (W1 R) ^ 2 * (A ^ 2 * D2 ^ 2))) := by
+        refine mul_le_mul_of_nonneg_left ?_ hCc
+        have := mul_le_mul_of_nonneg_left hcross (sq_nonneg R)
+        linarith
+      have hcross' := hcross
+      simp only [Q0, Q1]
+      nlinarith [hexp, hcross', hCc, hKw, sq_nonneg D2, sq_nonneg A,
+        mul_nonneg (sq_nonneg A) (sq_nonneg D2)]
+    _ ≤ (Real.sqrt (Q0 R) * D2 + Real.sqrt (Q1 R) * (A * D2)) ^ 2 := by
+      rw [hrhs]
+      linarith [hcross0]
+    _ = (Real.sqrt (Q0 R) * D2 + Real.sqrt (Q1 R) * A * D2) ^ 2 := by
+      ring
+
+set_option linter.unusedVariables false in
+/-- Raw fixed-order `H²` bound for the moving-second raised-endomorphism
+factor inserted at the rank-two slot, in the `H²` size of the tied metric
+perturbation. -/
+private theorem fullSlot1_h2
+    (g : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (gm : SmoothRiemannianMetric I M)
+        (P : SmoothCcTensor g 0 2)
+        (hP : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g P x u v =
+            ccTensorBilin (I := I) g P x v u)
+        (htie : ∀ (x : M) (u v : TangentSpace I x),
+          gm.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g P x u v)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g P) δ),
+      lowJetSq (I := I) (M := M) g 2
+          (slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g gm)) ≤
+        K * (1 + lowJetSq (I := I) (M := M) g 2 P) := by
+  obtain ⟨K₀, hK₀, hsharp⟩ :=
+    sharp_h2_low (I := I) (M := M) g hδ₀0 hδ₀
+  let fr : ℝ := Module.finrank ℝ E
+  let K : ℝ := fr ^ 1 * K₀
+  have hfr : 0 ≤ fr := Nat.cast_nonneg _
+  have hK : 0 ≤ K := mul_nonneg (pow_nonneg hfr 1) hK₀
+  refine ⟨K, hK, ?_⟩
+  intro gm P hP htie δ hδ_le hδ0 hδ
+  calc
+    lowJetSq (I := I) (M := M) g 2
+        (slotInsertEndoCc (I := I) (M := M) g 1
+          (fullRaisedEndoField (I := I) (M := M) g gm)) ≤
+      fr ^ 1 * lowJetSq (I := I) (M := M) g 2
+        (slotInsertEndoCc (I := I) (M := M) g 0
+          (fullRaisedEndoField (I := I) (M := M) g gm)) := by
+      simpa only [fr] using
+        endo_slot_h2 (I := I) (M := M) g 1
+          (fullRaisedEndoField (I := I) (M := M) g gm)
+    _ = fr ^ 1 * lowJetSq (I := I) (M := M) g 2
+        (sharpFlatEndoCc (I := I) g gm) := by
+      rw [sharp_eq_slot0 (I := I) (M := M) g gm]
+    _ ≤ fr ^ 1 * (K₀ *
+        (1 + lowJetSq (I := I) (M := M) g 2 P)) :=
+      mul_le_mul_of_nonneg_left
+        (hsharp gm P hP htie hδ_le hδ0 hδ) (pow_nonneg hfr 1)
+    _ = K * (1 + lowJetSq (I := I) (M := M) g 2 P) := by
+      simp only [K]
+      ring
+
+set_option linter.unusedVariables false in
+/-- Single-state `H²` bound for the moving-second raised-endomorphism factor
+`slotInsertEndoCc g 1 (fullRaisedEndoField g gm)` used by `daMono`: the size
+is controlled by the `H²` radius of the tied metric perturbation alone. -/
+theorem fullSlot_bdd_h2
+    (g : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ B : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
+      ∀ (gm : SmoothRiemannianMetric I M)
+        (P : SmoothCcTensor g 0 2)
+        (hP : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g P x u v =
+            ccTensorBilin (I := I) g P x v u)
+        (htie : ∀ (x : M) (u v : TangentSpace I x),
+          gm.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g P x u v)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g P) δ)
+        (R : ℝ), 0 ≤ R →
+        lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 →
+      lowJetSq (I := I) (M := M) g 2
+          (slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g gm)) ≤
+        (B R) ^ 2 := by
+  obtain ⟨K, hK, hfull⟩ :=
+    fullSlot1_h2 (I := I) (M := M) g hδ₀0 hδ₀
+  let Q : ℝ → ℝ := fun R => K * (1 + R ^ 2)
+  let B : ℝ → ℝ := fun R => Real.sqrt (Q R)
+  have hQ : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q R := by
+    intro R hR
+    exact mul_nonneg hK (by positivity)
+  refine ⟨B, fun R hR => Real.sqrt_nonneg _, ?_⟩
+  intro gm P hP htie δ hδ_le hδ0 hδ R hR hP2
+  have hBsq : (B R) ^ 2 = Q R := by
+    simpa only [B] using Real.sq_sqrt (hQ R hR)
+  calc
+    lowJetSq (I := I) (M := M) g 2
+        (slotInsertEndoCc (I := I) (M := M) g 1
+          (fullRaisedEndoField (I := I) (M := M) g gm)) ≤
+      K * (1 + lowJetSq (I := I) (M := M) g 2 P) :=
+        hfull gm P hP htie hδ_le hδ0 hδ
+    _ ≤ Q R := by
+      simp only [Q]
+      exact mul_le_mul_of_nonneg_left (by linarith) hK
+    _ = (B R) ^ 2 := hBsq.symm
+
+set_option maxHeartbeats 1600000 in
+set_option linter.unusedVariables false in
+/-- `H¹` two-state modulus for the moving-second raised-endomorphism factor,
+with the `D2`-only (third-difference-free) right-hand side required by the
+`C0` low-regularity lane.  The difference is handled by the resolvent
+factorisation `invSlot_sub_factor`, so only the `H²` size `D2` of the
+perturbation difference enters. -/
+theorem fullSlot_pair_h1
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ B0 B1 : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
+      ∀ (gT gU : SmoothRiemannianMetric I M)
+        (T U : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hU : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g U x u v =
+            ccTensorBilin (I := I) g U x v u)
+        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+          gT.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
+        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+          gU.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
+        {δT δU : ℝ}
+        (hδT_le : δT ≤ δ₀) (hδT0 : 0 ≤ δT)
+        (hδT : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δT)
+        (hδU_le : δU ≤ δ₀) (hδU0 : 0 ≤ δU)
+        (hδU : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g U) δU)
+        (R A D2 : ℝ),
+        0 ≤ R → 0 ≤ A → 0 ≤ D2 →
+        lowJetSq (I := I) (M := M) g 2 U ≤ R ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 T ≤ A ^ 2 →
+        lowJetSq (I := I) (M := M) g 2 (T - U) ≤ D2 ^ 2 →
+      lowJetSq (I := I) (M := M) g 1
+          (slotInsertEndoCc (I := I) (M := M) g 1
+              (fullRaisedEndoField (I := I) (M := M) g gT) -
+            slotInsertEndoCc (I := I) (M := M) g 1
+              (fullRaisedEndoField (I := I) (M := M) g gU)) ≤
+        (B0 R * D2 + B1 R * A * D2) ^ 2 := by
+  obtain ⟨K, hK, hfull⟩ :=
+    fullSlot1_h2 (I := I) (M := M) g hδ₀0 hδ₀
+  obtain ⟨Cm, hCm, happ⟩ :=
+    app_h21_mul (I := I) (M := M) hDim g 2 2 2
+  let fr : ℝ := Module.finrank ℝ E
+  have hfr : (0 : ℝ) ≤ fr := Nat.cast_nonneg _
+  let Z : ℝ := Cm ^ 2 * K ^ 2 * fr
+  have hZ : 0 ≤ Z :=
+    mul_nonneg (mul_nonneg (sq_nonneg Cm) (sq_nonneg K)) hfr
+  let Q : ℝ → ℝ := fun R => 2 * Z * (1 + R ^ 2)
+  let B : ℝ → ℝ := fun R => Real.sqrt (Q R)
+  have hQ : ∀ R : ℝ, 0 ≤ R → 0 ≤ Q R := by
+    intro R hR
+    exact mul_nonneg (mul_nonneg (by norm_num) hZ) (by positivity)
+  refine ⟨B, B, fun R hR => Real.sqrt_nonneg _,
+    fun R hR => Real.sqrt_nonneg _, ?_⟩
+  intro gT gU T U hT hU hTtie hUtie
+    δT δU hδT_le hδT0 hδT hδU_le hδU0 hδU
+    R A D2 hR hA hD2 hU2 hT3 hTU2
+  have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
+    rw [symmS_sub, symm_eq_self (I := I) (M := M) g T hT,
+      symm_eq_self (I := I) (M := M) g U hU]
+  have hdiff :
+      fullRaisedEndoField (I := I) (M := M) g gT -
+          fullRaisedEndoField (I := I) (M := M) g gU =
+        gInvDiffRaisedEndoField (I := I) g gT -
+          gInvDiffRaisedEndoField (I := I) g gU := by
+    apply ContMDiffSection.ext
+    intro x
+    rw [ContMDiffSection.coe_sub, Pi.sub_apply,
+      ContMDiffSection.coe_sub, Pi.sub_apply]
+    apply ContinuousLinearMap.ext
+    intro v
+    rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
+      fullRaisedEndoField_apply, fullRaisedEndoField_apply,
+      show gInvDiffRaisedEndoField (I := I) g gT x =
+        gInvDiffRaisedEndo (I := I) g gT x from rfl,
+      show gInvDiffRaisedEndoField (I := I) g gU x =
+        gInvDiffRaisedEndo (I := I) g gU x from rfl,
+      gInvRaisedEndo_eq_diff_add_id (I := I) g gT x v,
+      gInvRaisedEndo_eq_diff_add_id (I := I) g gU x v]
+    abel
+  have hslot :
+      slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g gT) -
+          slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g gU) =
+        gInvDiffSlotCoeff (I := I) g gT -
+          gInvDiffSlotCoeff (I := I) g gU := by
+    rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
+      gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU,
+      ← slotInsertEndoCc_sub, ← slotInsertEndoCc_sub, hdiff]
+  have hT2 : lowJetSq (I := I) (M := M) g 2 T ≤ A ^ 2 :=
+    (jet_mono (I := I) (M := M) (m := 2) (n := 3) g
+      (by norm_num) T).trans hT3
+  have hbdU : lowJetSq (I := I) (M := M) g 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g gU)) ≤
+      K * (1 + R ^ 2) :=
+    (hfull gU U hU hUtie hδU_le hδU0 hδU).trans
+      (mul_le_mul_of_nonneg_left (by linarith) hK)
+  have hbdT2 : lowJetSq (I := I) (M := M) g 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g gT)) ≤
+      K * (1 + A ^ 2) :=
+    (hfull gT T hT hTtie hδT_le hδT0 hδT).trans
+      (mul_le_mul_of_nonneg_left (by linarith) hK)
+  have hbdT1 : lowJetSq (I := I) (M := M) g 1
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g gT)) ≤
+      K * (1 + A ^ 2) :=
+    (jet_mono (I := I) (M := M) (m := 1) (n := 2) g
+      (by norm_num) _).trans hbdT2
+  have hbdP : lowJetSq (I := I) (M := M) g 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (symmRaiseEndo (I := I) (M := M) g (T - U))) ≤
+      fr * D2 ^ 2 := by
+    have h1 := endo_slot_h2 (I := I) (M := M) g 1
+      (symmRaiseEndo (I := I) (M := M) g (T - U))
+    have h2 : lowJetSq (I := I) (M := M) g 2
+        (slotInsertEndoCc (I := I) (M := M) g 0
+          (symmRaiseEndo (I := I) (M := M) g (T - U))) =
+        lowJetSq (I := I) (M := M) g 2 (T - U) := by
+      rw [show slotInsertEndoCc (I := I) (M := M) g 0
+          (symmRaiseEndo (I := I) (M := M) g (T - U)) =
+          perturb0 (I := I) (M := M) g (T - U) from rfl]
+      exact perturb_h2_eq (I := I) (M := M) g (T - U) hsymm
+    rw [h2] at h1
+    refine h1.trans ?_
+    simp only [fr, pow_one]
+    exact mul_le_mul_of_nonneg_left hTU2 (Nat.cast_nonneg _)
+  have harith : ∀ a b c y w : ℝ,
+      w ≤ Cm * a * y → y ≤ Cm * b * c →
+      a ≤ K * (1 + R ^ 2) → b ≤ fr * D2 ^ 2 →
+      c ≤ K * (1 + A ^ 2) →
+      0 ≤ a → 0 ≤ b → 0 ≤ c → 0 ≤ y →
+      w ≤ Z * ((1 + R ^ 2) * ((1 + A ^ 2) * D2 ^ 2)) := by
+    intro a b c y w hw hyb haR hbD hcA ha hb hc hy
+    have hA1 : Cm * a ≤ Cm * (K * (1 + R ^ 2)) :=
+      mul_le_mul_of_nonneg_left haR hCm
+    have hB1 : Cm * b * c ≤
+        Cm * (fr * D2 ^ 2) * (K * (1 + A ^ 2)) :=
+      mul_le_mul (mul_le_mul_of_nonneg_left hbD hCm) hcA hc
+        (mul_nonneg hCm (mul_nonneg hfr (sq_nonneg D2)))
+    have hy' : y ≤ Cm * (fr * D2 ^ 2) * (K * (1 + A ^ 2)) :=
+      hyb.trans hB1
+    have hprod : Cm * a * y ≤
+        Cm * (K * (1 + R ^ 2)) *
+          (Cm * (fr * D2 ^ 2) * (K * (1 + A ^ 2))) :=
+      mul_le_mul hA1 hy' hy
+        (mul_nonneg hCm (mul_nonneg hK (by positivity)))
+    refine hw.trans (hprod.trans (le_of_eq ?_))
+    simp only [Z]
+    ring
+  have hinner := happ
+    (slotInsertEndoCc (I := I) (M := M) g 1
+      (symmRaiseEndo (I := I) (M := M) g (T - U)))
+    (slotInsertEndoCc (I := I) (M := M) g 1
+      (fullRaisedEndoField (I := I) (M := M) g gT))
+  have houter := happ
+    (slotInsertEndoCc (I := I) (M := M) g 1
+      (fullRaisedEndoField (I := I) (M := M) g gU))
+    (appCcRS (I := I) (M := M) g 2 2 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (symmRaiseEndo (I := I) (M := M) g (T - U)))
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g gT)))
+  rw [hslot,
+    invSlot_sub_factor (I := I) (M := M) g gT gU T U hTtie hUtie,
+    jet_neg1]
+  refine (harith _ _ _ _ _ houter hinner hbdU hbdP hbdT1
+    (jet_nonneg (I := I) (M := M) (m := 2) g _)
+    (jet_nonneg (I := I) (M := M) (m := 2) g _)
+    (jet_nonneg (I := I) (M := M) (m := 1) g _)
+    (jet_nonneg (I := I) (M := M) (m := 1) g _)).trans ?_
+  have hBsq : (B R) ^ 2 = Q R := by
+    simpa only [B] using Real.sq_sqrt (hQ R hR)
+  have hexp : (B R * D2 + B R * A * D2) ^ 2 =
+      Q R * (D2 ^ 2 * (1 + A) ^ 2) := by
+    have h : (B R * D2 + B R * A * D2) ^ 2 =
+        (B R) ^ 2 * (D2 ^ 2 * (1 + A) ^ 2) := by ring
+    rw [h, hBsq]
+  rw [hexp]
+  have hA2 : 1 + A ^ 2 ≤ (1 + A) ^ 2 := by nlinarith [hA]
+  have hstep : Z * ((1 + R ^ 2) * ((1 + A ^ 2) * D2 ^ 2)) ≤
+      Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) := by
+    refine mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_right hA2 (sq_nonneg D2))
+        (by positivity)) hZ
+  have hnn : 0 ≤ Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) :=
+    mul_nonneg hZ (mul_nonneg (by positivity)
+      (mul_nonneg (sq_nonneg _) (sq_nonneg _)))
+  refine hstep.trans ?_
+  simp only [Q]
+  calc
+    Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) ≤
+        Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) +
+          Z * ((1 + R ^ 2) * ((1 + A) ^ 2 * D2 ^ 2)) := by
+      linarith [hnn]
+    _ = 2 * Z * (1 + R ^ 2) * (D2 ^ 2 * (1 + A) ^ 2) := by ring
+
 end LowBaseInternal
 
 private theorem raiseDom_h2
@@ -5375,7 +5853,7 @@ private theorem jet14
       mul_le_mul_of_nonneg_left (add_le_add hO2 h13) (by norm_num)
     _ ≤ (47 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
 
-private theorem connSec_self_h2
+theorem connSec_self_h2
     (g gm : SmoothRiemannianMetric I M) :
     lowJetSq (I := I) (M := M) g 2
         (connDiffSection (I := I) gm g) =
