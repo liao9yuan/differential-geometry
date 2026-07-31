@@ -134,6 +134,30 @@ frontiers of the sibling `H²`-pair lane, which feed
 
 ## Project accounting
 
+### 2026-07-30 update: the low pair frontier is closed
+
+The public theorem `a1Lo_pair_lip` now gives the completed `H2 -> H1`
+operator difference estimate using only `R`, the two state `H3` jet
+envelopes, and the `H2`/`H3` difference envelopes.  Its conclusion has
+the scalar modulus
+
+`K * R * (1 + A + A^2)^2 * (D3 + D2 + N)`.
+
+In particular, neither an `A4` state envelope nor a `D4` difference
+envelope occurs.  The proof combines the now-unconditional
+`c0Diff_tame`, `c1Diff_tame`, and the completed `a1Lo_diff` transfer.
+The older discussion above remains useful as the record of why the high
+`a1Hi` global-Lipschitz route is false, but its claim that the low
+D4-free estimate is still open is superseded by this update.
+
+Focused verification and the exact module refresh are GREEN.  The source
+contains no `sorry`, `admit`, `axiom`, or `whnf`.
+
+Project accounting remains separated: `ricci_flow_unif_existence` is
+still at 0% with its existing endpoint placeholder; the dedicated
+uniform-existence machinery is approximately 77%; the whole HCG
+compactness project remains in the low single digits.
+
 * `ricci_flow_unif_existence` (the `(N)` endpoint): still one `sorry`, **0%**.
 * The Lane-B first-order square that this estimate was supposed to unlock:
   **not unlocked**, and now known to be unlockable only after items (1) and (2)

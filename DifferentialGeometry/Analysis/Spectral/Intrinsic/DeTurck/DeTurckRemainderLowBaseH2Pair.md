@@ -21,14 +21,13 @@ Every difference slot carries a coefficient of `A`-degree `≤ 1` **or**
 excluded.  Hypotheses added over the first draft: `J3 U ≤ A²`, `J4 T ≤ A4²`,
 `J4 U ≤ A4²`, `J4 (T−U) ≤ D4²`.
 
-## Status (`lake build` GREEN, 1 `sorry`)
+## Status (focused check GREEN, five classes complete)
 
-**Class 2 is done (class-2 pass).**  `lieCovH2Pair` is proved sorry-free in the
-new sibling `DeTurckRemainderLowBaseH2Cov.lean` (import order
-`…Lip → …H2VB → …H2Cov → …H2Pair`); the `sorry` stub here was deleted and the
-master's call site is unchanged, since the proved theorem carries the same name
-in the same namespace.  See `DeTurckRemainderLowBaseH2Cov.md` for the route.
-Only **class 1** (`goodH2Pair`) is still open.
+**Class 1 is now closed.**  `goodH2Pair` is proved without placeholders by a
+sharp six-block `ricciAAKer` estimate, an inverse-slot H² factorization, the
+AA/DA pair estimates, third-jet interpolation, and the bounded input
+symmetrizer.  Its real focused check is GREEN.  Together with the sibling
+class-2 and class-3 proofs, the five-class H² capstone is now **5/5**.
 
 **File split (class-3 pass).**  The whole `H²` jet-algebra layer that used to be
 `private` here — `jetNn / jetSmul / jetAdd / sqAdd2 / jetMono`, the spectral
@@ -47,7 +46,7 @@ the 3000-line limit, and the split keeps the class-3 iteration loop off the
 | jet algebra / interpolation / slot-reindex-product layer | **moved** to `DeTurckRemainderLowBaseH2VB.lean`, all proved |
 | `selfParts` | proved — re-proof of Lip's private `selfLow_parts` from public `LowBaseInternal.selfLow_good`, `deTurckLieCoeffField_eq_covDerivArm_add_endoArm`, `tail_base_split` |
 | `selfSubParts` | proved — five-class telescope equation, level-agnostic |
-| `goodH2Pair` (class 1, `ricciGoodLow`) | **`sorry`** |
+| `goodH2Pair` (class 1, `ricciGoodLow`) | **proved** — sharp AA + DA re-pairing |
 | `lieCovH2Pair` (class 2, Lie cov-deriv edge) | **proved** — in `DeTurckRemainderLowBaseH2Cov.lean`; see that file's `.md` |
 | `vbH2Pair` (class 3, `lc0VB`) | **proved** — in `DeTurckRemainderLowBaseH2VB.lean`; see that file's `.md` |
 | `amixScalar` | **proved** — the class-4 scalar re-pairing step, isolated (now in the VB module) |
@@ -112,64 +111,25 @@ the Λ-class is Lane E's job.
 Canonical home for the whole block once it has a second consumer:
 `Analysis/Spectral/Tensor/SobolevScale/IteratedCovGradHsJetBound.lean`.
 
-## GAP 2 — class 1 still needs `aaKer_bdd_h2` sharpened first
+## Class 1 resolved — sharp AA and DA re-pairing
 
-`aaKer_bdd_h2` (Lip:8451) gives `J2 (ricciAAKer) ≤ B R·(1+A+A²)⁴`, i.e.
-`H²`-**norm** `≲ A⁴`, while `ricciAAKer ~ Γ*Γ` is truly `~A²` (compare the
-sharp `wXi_self_tame`: `J2 (wXi) ≤ (B R·A)²`).  Re-pairing the lossy bound with
-`jetInterp3` yields `A⁴ ≤ (C R A4)²` — the forbidden `A4²`.  The rebuild is
-mechanical (six blocks, `appRS_h2_h2_h2` against the two sharp connection
-factors) and is recorded as sub-step 1 of the class-1 `sorry`.
+The lossy all-order `aaKer_bdd_h2` wrapper was not used.  The proof rebuilds
+the six `ricciAAKer` blocks directly with `appRS_h2_h2_h2`, giving the sharp
+quadratic connection envelope needed before interpolation.  The remaining
+pieces are then assembled in this order:
 
-## Blocker 3 — the `H¹` chain is `private`, and the `H²` pair lemmas do not exist
+* `fullPairH2` uses the exact inverse-slot factorization and has no state-`A`
+  passenger;
+* `ricciAAPairH2` controls the AA contribution with the sharp six-block bound;
+* `ricciDAPairH2` interpolates the state `J3` size by
+  `sqrt (C · R · A4)`, so the high arm is `A4 · D3`, never `A4²`;
+* `inputSymmH2` transfers the combined unsymmetrized estimate to
+  `ricciGoodLow`.
 
-Every helper the `H¹` capstone consumes is `private` to `…LowBaseLip.lean` /
-`…Action.lean` (`good_pair_h1`, `lieCov_pair_h1`, `vb_pair_h1`,
-`amix_pair_h1`, `amixHalf_pair_h1`, `ricciAA_pair_h1`, `ricciDA_pair_h1`,
-`aaKer_*`, `fourtrace_*`, `dagLow_*`, `covX_*`, `lcvPair_*`, `refold_*`,
-`inputSymm_*`, `app_h*_mul_lip`, and even
-`selfLow_parts`/`selfLow_sub_parts`).  There is no `open private` in this
-toolchain (absent from Mathlib and Batteries here).
-
-**Publicization was authorised but deliberately not performed**, because it is
-not the binding constraint: what the four class proofs need at `H²` does not
-exist at any visibility.  Only `H¹` pair versions exist.  Each class needs one
-genuinely new `H²` pair lemma:
-
-| class | missing `H²` lemma | nearest existing | rough size |
-|---|---|---|---|
-| 1 | `aaKer_pair_h2` **+ sharpened `aaKer_bdd_h2`** + `dagLow_pair_h2` | `aaKer_pair_h1` (Lip:8654), `dagLow_pair_h1` (Lip:8045) | ~600 |
-| 2 | ~~`covX_bdd_h2`, `covX_pair_h2`~~ | **done** — `covXBddH2` / `covXPairH2` + `lieCovH2Pair` in `…H2Cov.lean`, ~1780 lines | — |
-| 3 | ~~`vb_pair_h2`~~ | **done** — `vbH2Pair` in `…H2VB.lean`, ~730 lines | — |
-| 4 | ~~`amixHalf_pair_h2`~~ | **done** — `amixHalfH2Pair`, ~940 lines | — |
-
-Class 4 confirmed the estimate (~940 lines including the re-derived `H²`
-slot/reindex/product layer) and confirmed that **no publicization was needed**:
-the private Lip helpers `slot_h2_lip`, `reindex_jet_lip`, `reindex_sub_lip`,
-`trPair_sub_lip`, `trPair_jet_lip`, `jet_mono_lip`, `app_h2_mul_lip` were all
-re-derived locally in ~180 lines from the public `rfns_iteratedCovGrad_*` layer
-and `appRS_h2_h2_h2`.  The same local layer is available to classes 1–3.
-
-Minimal publicization list, **once those exist and are wanted from this file**
-(all in `…LowBaseLip.lean` unless noted): `jet_mono_lip`, `app_h2_mul_lip`,
-`fourtrace_bdd_h2`, `fourtrace_pair_h2`, `aaKer_bdd_h2`, `dagLow_bdd_h2`,
-`inputSymm_h1` / `inputSymm_h2` (Action:7017), `refold_h2_lip`,
-`wXi_self_tame`, `lcvPair_h2_bdd`.  Note `lcvPair_pair_h2` and
-`lcvPair_h2_bdd` already have public C2Lip twins
-(`LowBaseInternal.pairTrace_pair_h2` / `pairTrace_bdd_h2`), and a public
-single-state `wXi` `H²` bound is recoverable from the public `wXi_sub_tame` at
-`U := 0, gU := g` (`wXi g g g = 0`) — so the list may shrink further.
-
-Public `H²` material usable now: `riem_pair_h2`,
-`lieOmega_pair_h2 / _bdd_h2`, `lieArm2_pair_h2 / _bdd_h2`,
-`metricCorr_pair_h3`, `metricCorr_sub_h2`; C1Lip `wXi_sub_h2 / wXi_sub_tame`,
-`connSec_sub_tame`, `connIns_sub_tame`, `ricciKer_sub_tame`,
-`mcd_pair_h2 / mcd_pair_h1 / mcd_h2_bdd`, `revSlot_pair_h2 / _bdd_h2`,
-`fullSlot_bdd_h2`, `connSec_self_h2`, `ricci1_pair_h2`, `lie1_pair_h2`,
-`rhs1_pair_h2`; C2Lip (`LowBaseInternal`) `trace{1,2,3,4}_pair_h2 / _h2_bdd`,
-`pairTrace_pair_h2 / _bdd_h2`, `connLow_pair_h2 / _h2_bdd`,
-`invCoeff_h2_lip`; Action `dagLow_h2_rf`, `connLow_h3_rf`.  Product engines:
-`appRS_h2_h2_h2`, `appCc_h2_h2_h2`.
+No private H¹ declaration was publicized.  The H² lemmas were rebuilt locally
+from the public slot, reindex, trace, connection, and product APIs.  This closes
+the only remaining five-class dependency of `selfLow_pair_h2` and hence makes
+`c0Diff_h2_tame` unconditional.
 
 ## Lean lessons banked
 
@@ -208,8 +168,16 @@ Public `H²` material usable now: `riem_pair_h2`,
 
 ## Verification
 
-Targeted `lake build` of this module passes: exactly **one** `sorry` warning
-(class 1, `goodH2Pair`), no errors, no other warnings.  Classes 2, 3, 4 and 5
-are sorry-free, as are `selfLow_pair_h2` and `c0Diff_h2_tame` *conditional on*
-that single remaining class sorry.  The siblings `…H2VB.lean` and
-`…H2Cov.lean` both build fully sorry-free.
+The final real focused check of this module passes with no errors or warnings.
+The source contains no `sorry`, `admit`, `axiom`, or `whnf`.  All five class
+lemmas, `selfLow_pair_h2`, and `c0Diff_h2_tame` are now unconditional.  The
+siblings `…H2VB.lean` and `…H2Cov.lean` remain fully checked as recorded in
+their own ledgers.
+
+Project accounting after this brick: `ricci_flow_unif_existence` itself remains
+unstated here and still has its one endpoint placeholder elsewhere, so the
+theorem is **0%**.  Its dedicated machinery is approximately **76%**.  The
+whole HCG compactness project remains in the low single-digit percentage range.
+The next low-regularity brick is the D₄-free `a1Lo` pair estimate, which should
+simultaneously discharge the `hfLo` bridge, the `lowA1` restatement, and the
+M-witness consumer.

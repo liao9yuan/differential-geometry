@@ -562,3 +562,65 @@ UnifCurvaturePack only because that file was held during this run.
 Move them and keep UnifCurvaturePack as the curvature instance.
 Details and two Lean lessons (the `4 + 0` vs `4` rewrite trap; `set`
 zeta-expanding a `have` goal) in `UnifCurvaturePack.md`.
+
+## Planner update No. 82 (2026-07-30) - H2 FIVE-CLASS CAPSTONE CLOSED; resume order
+
+`DeTurckRemainderLowBaseH2Pair.lean` is now five classes out of five.
+The last class, `goodH2Pair`, was discharged by rebuilding the sharp
+six-block `ricciAAKer` H2 estimate, proving the inverse-slot H2
+factorization and the AA/DA pair estimates, applying the spectral
+`jetInterp3` bridge before re-pairing, and finally passing through the
+input symmetrizer.  The high arm is `A4 * D3`; no `A4^2` term is
+introduced.  The real focused check is GREEN with no placeholders.
+Consequently `selfLow_pair_h2` and `c0Diff_h2_tame` are unconditional.
+
+Honest accounting: `ricci_flow_unif_existence` itself remains 0% (its
+endpoint declaration still has one placeholder); dedicated machinery
+is approximately 76%.  Whole-project HCG compactness remains in the
+low single digits.
+
+Resume in this order:
+
+1. Prove the D4-free `a1Lo` pair estimate.  This one brick should
+   discharge the `hfLo` bridge, the `lowA1` restatement, and the
+   M-witness consumer.
+2. Finish the Palatini field identity, then the `a = 1` envelope,
+   class-uniform `Ksup` at `j = 1`, and E6.
+3. Assemble the E7 class-consistency packet, then the c-witness and
+   E8b `tau0`.
+4. Close Lane F by correcting E0 (`a <= 6`, dimension three) and
+   coordinating the endpoint edit; the geometric terminal route is
+   already placeholder-free.
+
+## Planner update No. 83 (2026-07-30) - D4-free low affine packet CLOSED
+
+The first item of No. 82 is now complete.  The fourth-jet-free
+`a1Lo_pair_lip` was transported through the radial cutoff and dense
+completion.  `ShortTime/LowRegA1LoPair.lean` exports the unconditional
+`LowA1CorePair` producer and `lowA1Lo_ball`, a genuine uniform operator bound
+on each fixed ambient H3 ball.  It does not assert the false global affine
+envelope.
+
+`ShortTime/LowRegLiftHfLo.lean` now contains the exact low affine split and all
+three time-family witnesses consumed on the low side:
+
+1. `lowAffA2_data`: strong measurability plus an `NNReal` pointwise A2 bound;
+2. `lowAffA1_data`: strong measurability, `MemLp`, and the pointwise M-bound
+   along an a.e. bounded H3 Duhamel trajectory;
+3. `lowreg_hfLo_data`: the two packets plus the exact `hfLo` fixed-point
+   equality on one radius.
+
+The A2 family contains the radialized total low-base second-order coefficient,
+and the A1 family contains the radialized first-order coefficient.  The
+self-application identity was checked before estimating, so the principal arm
+is not counted twice.  Both new ShortTime modules passed focused and exact
+verification and are placeholder-free.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0% because its endpoint
+declaration still has one placeholder.  Dedicated machinery is approximately
+78%.  Whole-project HCG compactness remains in the low single digits.
+
+Resume at item 2 of No. 82: audit and finish the field-level Palatini
+difference identity, then feed it to the `a = 1` envelope, class-uniform
+`Ksup` at `j = 1`, and E6.  Do not reopen the completed D4-free pair or hfLo
+routes.

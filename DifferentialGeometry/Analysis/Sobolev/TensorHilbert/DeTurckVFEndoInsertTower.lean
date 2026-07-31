@@ -351,7 +351,9 @@ private lemma wVF_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
         (wVF (I := I) (M := M) g₁ g_bg b)) :=
   (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg).contMDiff
 
-private lemma wAlphaA_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+/-- The unit-model value of `wAlphaA` is the `g₀`-lowered covariant derivative of the
+DeTurck vector field, with the passenger slot first. -/
+lemma wAlphaA_unit_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (wAlphaA (I := I) (M := M) g₀ g₁ g_bg) x ![u, w] =
       g₀.inner x
@@ -570,7 +572,7 @@ theorem deTurckLieWEndoInsert_eq_cometricRaise
     (deTurckLieWEndo (I := I) g₁ g_bg x) om w]
   rw [wEndo_eq_covDeriv_add_connDiff (I := I) (M := M) g₀ g₁ g_bg x w]
   rw [wAlpha, unitModel_add, ContinuousMultilinearMap.add_apply,
-    wAlphaA_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x
+    wAlphaA_unit_apply (I := I) (M := M) g₀ g₁ g_bg x
       (inverseMetricSharpFib (I := I) g₀ x om) w,
     wAlphaB_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x
       (inverseMetricSharpFib (I := I) g₀ x om) w]
