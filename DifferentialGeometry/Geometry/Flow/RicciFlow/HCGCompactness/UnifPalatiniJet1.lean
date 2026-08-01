@@ -134,41 +134,73 @@ noncomputable def palatiniJet1At
     (extSec (I := I) x D) (extSec (I := I) x X)
     (extSec (I := I) x Y) (extSec (I := I) x Z) x
 
+/-- The explicit first differentiated-Palatini coefficient at class size `Λ`. -/
+def palatiniOneC (Λ : ℝ) : ℝ :=
+  2 * (3 / 2 * Λ ^ 5 * Λ + 9 / 2 * Λ ^ 6 * Λ * Λ + 3 * Λ ^ 7 * Λ ^ 3) +
+    4 * (3 / 2 * Λ ^ 3 * Λ) * (3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2))
+
 set_option linter.unusedSectionVars false in
-/-- The differentiated Palatini term has a class-uniform quadrilinear bound
-using metric jets only through order three. -/
-theorem unifPalatini1
+/-- The differentiated Palatini term obeys the explicit `palatiniOneC` bound. -/
+theorem unifPalatini1_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (x : M) (D X Y Z : TangentSpace I x),
-        Real.sqrt (gBase.inner x
-            (palatiniJet1At (I := I) gBase g₀ x D X Y Z)
-            (palatiniJet1At (I := I) gBase g₀ x D X Y Z)) ≤
-          C * Real.sqrt (gBase.inner x D D) *
-            Real.sqrt (gBase.inner x X X) *
-            Real.sqrt (gBase.inner x Y Y) *
-            Real.sqrt (gBase.inner x Z Z) := by
+    ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (palatiniJet1At (I := I) gBase g₀ x D X Y Z)
+          (palatiniJet1At (I := I) gBase g₀ x D X Y Z)) ≤
+        palatiniOneC Λ * Real.sqrt (gBase.inner x D D) *
+          Real.sqrt (gBase.inner x X X) *
+          Real.sqrt (gBase.inner x Y Y) *
+          Real.sqrt (gBase.inner x Z Z) := by
   classical
   have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
     ⟨hΛ, fun x _hx v => hcomp x v⟩
-  obtain ⟨C₀, hC₀0, hC₀⟩ :=
-    unifConnDiffSup (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1
-  obtain ⟨C₁, hC₁0, hC₁⟩ :=
-    unifCovConnDiffSup (I := I) (M := M) gBase g₀
-      hΛ hΛ2 hcomp hjet1 hjet2
+  let C₀ : ℝ := 3 / 2 * Λ ^ 3 * Λ
+  have hC₀0 : 0 ≤ C₀ := by
+    dsimp [C₀]
+    positivity
+  have hC₀ : ∀ (x : M) (v w : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)) ≤
+        C₀ * Real.sqrt (gBase.inner x v v) *
+          Real.sqrt (gBase.inner x w w) := by
+    intro x v w
+    have h := connDiff_gJet_le (I := I) hEq hjet1 (Set.mem_univ x) w v
+    simpa [C₀, DifferentialGeometry.PDE.DeTurck.connDiff,
+      mul_assoc, mul_left_comm, mul_comm] using h
+  let C₁ : ℝ := 3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2)
+  have hC₁0 : 0 ≤ C₁ := by
+    dsimp [C₁]
+    positivity
+  have hC₁ : ∀ (x : M) (v w u : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (covDerivConnDiff (I := I) gBase g₀
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)
+          (covDerivConnDiff (I := I) gBase g₀
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x w)
+            (smoothExtensionTangent (I := I) x u) x)) ≤
+        C₁ * Real.sqrt (gBase.inner x v v) *
+          Real.sqrt (gBase.inner x w w) *
+          Real.sqrt (gBase.inner x u u) := by
+    intro x v w u
+    simpa [C₁] using
+      covDerivConnDiff_gJet_le (I := I) hEq hjet1 hjet2
+        (Set.mem_univ x) v w u
   let C₂ : ℝ :=
     3 / 2 * Λ ^ 5 * Λ + 9 / 2 * Λ ^ 6 * Λ * Λ + 3 * Λ ^ 7 * Λ ^ 3
   have hC₂0 : 0 ≤ C₂ := by
     dsimp [C₂]
     positivity
-  refine ⟨2 * C₂ + 4 * C₀ * C₁, by positivity, ?_⟩
   intro x D X Y Z
   let Ds := extSec (I := I) x D
   let Xs := extSec (I := I) x X
@@ -358,6 +390,38 @@ theorem unifPalatini1
         Real.sqrt (gBase.inner x Z Z) := by
       dsimp [prod4, L]
       ring
+    _ = palatiniOneC Λ * Real.sqrt (gBase.inner x D D) *
+        Real.sqrt (gBase.inner x X X) *
+        Real.sqrt (gBase.inner x Y Y) *
+        Real.sqrt (gBase.inner x Z Z) := by
+      dsimp [palatiniOneC, C₀, C₁, C₂]
+
+set_option linter.unusedSectionVars false in
+/-- The differentiated Palatini term has a class-uniform quadrilinear bound
+using metric jets only through order three. -/
+theorem unifPalatini1
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (x : M) (D X Y Z : TangentSpace I x),
+        Real.sqrt (gBase.inner x
+            (palatiniJet1At (I := I) gBase g₀ x D X Y Z)
+            (palatiniJet1At (I := I) gBase g₀ x D X Y Z)) ≤
+          C * Real.sqrt (gBase.inner x D D) *
+            Real.sqrt (gBase.inner x X X) *
+            Real.sqrt (gBase.inner x Y Y) *
+            Real.sqrt (gBase.inner x Z Z) := by
+  refine ⟨palatiniOneC Λ, ?_, ?_⟩
+  · unfold palatiniOneC
+    positivity
+  · exact unifPalatini1_le (I := I) (M := M) gBase g₀
+      hΛ hcomp hjet1 hjet2 hjet3
 
 end RicciFlow
 end PDE

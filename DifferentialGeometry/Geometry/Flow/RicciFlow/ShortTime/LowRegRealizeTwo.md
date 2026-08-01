@@ -89,6 +89,15 @@ one object:
 > an `H^σ`-valued Nemytskii map `N2` on the lower state ball with
 > `tensorHsInclusion ∘ N2 = lowRegN`.
 
+**Superseding fixed-trajectory route (2026-07-31).**  A global `N2` on the
+entire lower state ball is not needed for the actual lifted trajectory, and in
+the intended `H³ → H²` shape it is generally too strong because the small
+second-order action has an `H⁴` passenger.  `LowRegForceHi.force_hi_smooth`
+instead proves the honest `H²` identity along a supplied smooth representative:
+it combines `lowReg_force_smooth`, `deTurckSmoothN_incl`, and injectivity of
+`tensorHsInclusion`.  The remaining task is to supply that representative from
+the solution packet, not to complete a global Nemytskii map on the whole ball.
+
 `coreNAt_incl` exhibits `N2` on the dense smooth core (`deTurckSmoothN` has
 order-independent spectral coordinates: `smoothN_eq_embed` plus
 `tensorHsInclusion_smoothCcToTensorHs`). Completing it to the whole ball is a

@@ -106,6 +106,18 @@ private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : �
         + diffStep (I := I) g₁ g₂ r T := rfl
   rw [hunfold, show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero', zero_add]
 
+/-- Explicit coefficient for the level-two telescoping accumulator. -/
+noncomputable def covStepAcc2C (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
+  max 0 (covStepDiff2C (E := E) r Λ Λ' Λ'' Λ''' +
+    (((r + 1 : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 3)) *
+      (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+        (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))) *
+      ((r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 1)) *
+          ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) +
+        (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
+          (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+            (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) + 1))
+
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 /-- **The `hAcc` `m = 2` accumulator bound** (the a=2 glue).  The `g₂`-fibre norm of the base
@@ -124,7 +136,7 @@ pieces `∇₂²(A ⋆ T)` (the a=2 atom `covStepDiff2_exists_const`), `∇₂(A
 `diffStep_jet_one_le` and `covStepDiff_of_jets` at level `r`.  The metric jets carry the session-12
 role asymmetry: `hjet` measures `∇g₂` against `g₁`, while `hJet1`/`hJet2`/`hJet3` measure
 `∇g₁`/`∇²g₁`/`∇³g₁` against `g₂`. -/
-theorem covStepAcc2_le
+theorem covStepAcc2_bound
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
@@ -132,15 +144,19 @@ theorem covStepAcc2_le
     (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
     (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
     (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
-        Real.sqrt (normSq0S (I := I) g₂ x (r + 3)
-            (covStep (I := I) g₂ (r + 2) (telescAccum (I := I) g₁ g₂ r T 2) x)) ≤
-          C * ∑ k ∈ Finset.range 3,
+    ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
+      Real.sqrt (normSq0S (I := I) g₂ x (r + 3)
+          (covStep (I := I) g₂ (r + 2) (telescAccum (I := I) g₁ g₂ r T 2) x)) ≤
+        covStepAcc2C (E := E) r Λ Λ' Λ'' Λ''' *
+          ∑ k ∈ Finset.range 3,
             Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
   classical
-  obtain ⟨C₂, hC₂nn, hC₂⟩ := covStepDiff2_exists_const (I := I) g₁ g₂ r
+  let C₂ : ℝ := covStepDiff2C (E := E) r Λ Λ' Λ'' Λ'''
+  have hC₂nn : 0 ≤ C₂ := by
+    dsimp [C₂, covStepDiff2C]
+    exact le_max_left _ _
+  have hC₂ := covStepDiff2_le (I := I) g₁ g₂ r
     (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hJet3 hjet
   -- the committed a=1 constants (`covStepDiff_of_jets` at levels `r`, `r+1`; `diffStep_jet_one_le`)
   set CA0 : ℝ := (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
@@ -149,7 +165,6 @@ theorem covStepAcc2_le
     (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) with hCA1def
   set cs0 : ℝ := (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 1)) *
     ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) with hcs0def
-  refine ⟨max 0 (C₂ + CA1 * (cs0 + CA0 + 1)), le_max_left _ _, ?_⟩
   intro T x hx
   -- Λ-nonnegativity at `x ∈ K` and nonnegativity of the constants
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
@@ -268,6 +283,37 @@ theorem covStepAcc2_le
     _ ≤ (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hSle
     _ ≤ max 0 (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hfin
 
+/-- Compatibility wrapper for the explicit level-two accumulator bound. -/
+theorem covStepAcc2_le
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    {Λ Λ' Λ'' Λ''' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
+        Real.sqrt (normSq0S (I := I) g₂ x (r + 3)
+            (covStep (I := I) g₂ (r + 2) (telescAccum (I := I) g₁ g₂ r T 2) x)) ≤
+          C * ∑ k ∈ Finset.range 3,
+            Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
+  refine ⟨covStepAcc2C (E := E) r Λ Λ' Λ'' Λ''', ?_, ?_⟩
+  · dsimp [covStepAcc2C]
+    exact le_max_left _ _
+  · exact covStepAcc2_bound (I := I) g₁ g₂ r hEq hjet hJet1 hJet2 hJet3
+
+/-- Explicit coefficient for the third iterated-covariant-derivative transfer. -/
+noncomputable def iterCovThreeC (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
+  max 0 (Dtower (Module.finrank ℝ E)
+    ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r
+    (fun m => if m = 1 then
+      (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
+        (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+          (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
+    else if m = 2 then covStepAcc2C (E := E) r Λ Λ' Λ'' Λ''' else 0) 3)
+
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 /-- **The `∇₁³`-jet telescoping bound (brick T-B), unconditional `N = 3` endpoint.**
@@ -287,7 +333,7 @@ This is the `N = 3` case of `iterCovG1_le`, with `hAcc` discharged outright: `m 
 realised as the `Dtower` recursion with `Racc 1` the explicit a=1 constant and `Racc 2` the
 `covStepAcc2_le` constant.  For `N ≥ 4` the remaining input is the general accumulator bound
 `hAcc_of_jets` below. -/
-theorem iterCovG1_three
+theorem iterCovThree_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
@@ -295,21 +341,19 @@ theorem iterCovG1_three
     (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
     (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
     (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
-        Real.sqrt (normSq0S (I := I) g₂ x (r + 3) (iterCov (I := I) g₁ r T 3 x)) ≤
-          C * ∑ k ∈ Finset.range 4,
+    ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
+      Real.sqrt (normSq0S (I := I) g₂ x (r + 3) (iterCov (I := I) g₁ r T 3 x)) ≤
+        iterCovThreeC (E := E) r Λ Λ' Λ'' Λ''' *
+          ∑ k ∈ Finset.range 4,
             Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
   classical
-  obtain ⟨C2acc, hC2accnn, hC2acc⟩ :=
-    covStepAcc2_le (I := I) g₁ g₂ r hEq hjet hJet1 hJet2 hJet3
-  refine ⟨max 0 (Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r
-      (fun m => if m = 1 then
-        (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
-          (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
-      else if m = 2 then C2acc else 0) 3),
-    le_max_left _ _, ?_⟩
+  let C2acc : ℝ := covStepAcc2C (E := E) r Λ Λ' Λ'' Λ'''
+  have hC2accnn : 0 ≤ C2acc := by
+    dsimp [C2acc, covStepAcc2C]
+    exact le_max_left _ _
+  have hC2acc := covStepAcc2_bound (I := I) g₁ g₂ r
+    hEq hjet hJet1 hJet2 hJet3
   intro T x hx
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
   have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hjet x hx)
@@ -360,6 +404,26 @@ theorem iterCovG1_three
   · -- fold the `Dtower` constant into its `max 0` majorant
     exact mul_le_mul_of_nonneg_right (le_max_right _ _)
       (Finset.sum_nonneg fun k _ => Real.sqrt_nonneg _)
+
+/-- Compatibility wrapper for the explicit third-jet transfer bound. -/
+theorem iterCovG1_three
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    {Λ Λ' Λ'' Λ''' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
+        Real.sqrt (normSq0S (I := I) g₂ x (r + 3) (iterCov (I := I) g₁ r T 3 x)) ≤
+          C * ∑ k ∈ Finset.range 4,
+            Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
+  refine ⟨iterCovThreeC (E := E) r Λ Λ' Λ'' Λ''', ?_, ?_⟩
+  · dsimp [iterCovThreeC]
+    exact le_max_left _ _
+  · exact iterCovThree_le (I := I) g₁ g₂ r hEq hjet hJet1 hJet2 hJet3
 
 /-- **FRONTIER (`sorry`) — the general accumulator bound (the a ≥ 3 campaign).**
 

@@ -5226,6 +5226,11 @@ private def bdSigma4 : Equiv.Perm (Fin 4) :=
    fun i => (![3, 1, 2, 0] : Fin 4 → Fin 4) i,
    by decide, by decide⟩
 
+/-- The three fixed input permutations in the low-order `DLa` background
+correction. -/
+def lieBgPerm : Fin 3 → Equiv.Perm (Fin 4) :=
+  ![bdSigma2, bdSigma3, bdSigma4]
+
 private def bdLow0 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   (-1 : ℝ) • bdFixLoweredCc (I := I) (M := M) g₀ g_bg g₀
     + domDomCongrSection (I := I) g₀ bdSigma2 (bdQuadLowCc (I := I) (M := M) g₀ g_bg g_bg)
@@ -5234,6 +5239,93 @@ private def bdLow0 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTenso
     - domDomCongrSection (I := I) g₀ bdSigma2 (bdQuadLowCc (I := I) (M := M) g₀ g_bg g₁)
     + domDomCongrSection (I := I) g₀ bdSigma3 (bdQuadLowCc (I := I) (M := M) g₀ g₁ g_bg)
     + domDomCongrSection (I := I) g₀ bdSigma4 (bdQuadLowCc (I := I) (M := M) g₀ g₁ g_bg)
+
+/-- The four-covariant low coefficient in the fixed-background `DLa`
+normal form. Its state dependence is only through the connection difference. -/
+def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  (-1 : ℝ) • bdFixLoweredCc (I := I) (M := M) g₀ g_bg g₀
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    - domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ g₁))
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+    + domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+
+private theorem lieBgLow_eq_bd
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    lieBgLow (I := I) (M := M) g₀ g₁ g_bg =
+      bdLow0 (I := I) (M := M) g₀ g₁ g_bg := by
+  rfl
+
+set_option linter.unusedVariables false in
+private theorem bdDom_sub
+    (g : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
+    domDomCongrSection (I := I) g σ (A - B) =
+      domDomCongrSection (I := I) g σ A -
+        domDomCongrSection (I := I) g σ B := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g
+  intro x
+  have hsub : ∀ (P Q : SmoothCcTensor g 0 s),
+      unitModel (I := I) (M := M) g s (P - Q) x =
+        unitModel (I := I) (M := M) g s P x -
+          unitModel (I := I) (M := M) g s Q x := by
+    intro P Q
+    simp only [unitModel]
+    rw [SmoothCcTensor.toSection_sub]
+    rfl
+  rw [domDomCongrSection_unitModel, hsub A B]
+  rw [hsub
+    (domDomCongrSection (I := I) g σ A)
+    (domDomCongrSection (I := I) g σ B)]
+  rw [domDomCongrSection_unitModel, domDomCongrSection_unitModel]
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp only [ContinuousMultilinearMap.sub_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+/-- The state difference of the low `DLa` background coefficient has exactly
+three first-order telescoping arms. -/
+theorem lieBgLow_sub
+    (g₀ gT gU g_bg : SmoothRiemannianMetric I M) :
+    lieBgLow (I := I) (M := M) g₀ gT g_bg -
+        lieBgLow (I := I) (M := M) g₀ gU g_bg =
+      (-1 : ℝ) • domDomCongrSection (I := I) g₀ (lieBgPerm 0)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ g_bg)
+          (connDiffLoweredCc (I := I) g₀ gT -
+            connDiffLoweredCc (I := I) g₀ gU))
+      + domDomCongrSection (I := I) g₀ (lieBgPerm 1)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ gT -
+            lieCovArm2 (I := I) (M := M) g₀ gU)
+          (connDiffLoweredCc (I := I) g₀ g_bg))
+      + domDomCongrSection (I := I) g₀ (lieBgPerm 2)
+        (appCcRS (I := I) (M := M) g₀ 0 3 4
+          (lieCovArm2 (I := I) (M := M) g₀ gT -
+            lieCovArm2 (I := I) (M := M) g₀ gU)
+          (connDiffLoweredCc (I := I) g₀ g_bg)) := by
+  rw [lieBgLow, lieBgLow]
+  simp only [appCcRS_sub_right, appCcRS_sub_left, bdDom_sub]
+  module
 
 set_option linter.unusedSectionVars false in
 private lemma bdUnitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
@@ -5315,6 +5407,21 @@ private def bdXd (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor 
   domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1)
       (bdXdHalf (I := I) (M := M) g₀ g₁ g_bg)
     + bdXdHalf (I := I) (M := M) g₀ g₁ g_bg
+
+/-- The complete four-covariant core acted on by the pair-cometric in the
+fixed-background `DLa` normal form. -/
+def lieBgCore (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  let half := appCcRS (I := I) (M := M) g₀ 0 4 4
+    (slotInsertEndoCc (I := I) (M := M) g₀ 3
+      (fullRaisedEndoField (I := I) (M := M) g₁ g₀))
+    (lieBgLow (I := I) (M := M) g₀ g₁ g_bg)
+  domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) half + half
+
+private theorem lieBgCore_eq_bd
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    lieBgCore (I := I) (M := M) g₀ g₁ g_bg =
+      bdXd (I := I) (M := M) g₀ g₁ g_bg := by
+  rfl
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (gInvRaisedEndo gInvRaisedEndo_apply
   inverseMetricSharpFib_g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM) in
@@ -5556,6 +5663,20 @@ private theorem bdCovDerivArmDiff_eq_pairTrace
     rw [hXval a b]
     ring
   linear_combination hS
+
+/-- The fixed-background `DLa` correction is the pair-cometric action on its
+explicit four-covariant low core. -/
+theorem dlaBg_eq
+    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
+    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+        deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g₀ =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (lieCovPair (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (lieBgCore (I := I) (M := M) g₀ g₁ g_bg))) := by
+  rw [lieCovPair, lieCovSigma, lieBgCore_eq_bd]
+  exact bdCovDerivArmDiff_eq_pairTrace (I := I) (M := M) g₀ g_bg g₁
 set_option linter.unusedSectionVars false in
 private lemma bdRfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
@@ -6524,6 +6645,28 @@ private theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRieman
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hcell)
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
+
+set_option linter.unusedVariables false in
+/-- Pointwise low-order product-grid control of the `DLa` coefficient when
+only the fixed DeTurck background is changed. -/
+theorem dlaBg_grid (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+                deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+          C i * Combinatorics.antidiagonalTupleGridWindow
+            (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x)) (i + 2) :=
+  bdCovDerivArmDiff_pointwise_gridWindow (I := I) (M := M) g₀ g_bg hδ₀
 
 set_option linter.unusedVariables false in
 

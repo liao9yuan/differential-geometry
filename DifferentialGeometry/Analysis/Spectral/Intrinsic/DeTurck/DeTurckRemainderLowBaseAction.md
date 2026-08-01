@@ -19,6 +19,8 @@ The public surface now includes:
 - `lowJetSq`;
 - `LowBaseActionData` and its `a1` and `a2` actions;
 - `lowBaseData`, the deterministic canonical producer used by the split;
+- `lowData_split`, the exact zero-based action identity and fibre-small `C2`
+  bound for an arbitrary fixed DeTurck background;
 - `lowData_a1_coeff`, which names that producer directly and bounds the
   combined two-jet window of its `C0` and `C1` coefficients by the state
   through order three;
@@ -80,11 +82,15 @@ reference and must never be added to `lowBaseData.a2`, because doing so would
 double-count its principal part.  Nonprincipal second-order material remains
 inside `lowBaseData.C2`; it is not moved into `A1` or a lower passenger.
 Pairwise core continuity, not an existential selector or a diagonal estimate
-alone, remains the visible completion/measurability obligation.
+alone, remains the visible completion/measurability obligation.  The A2 pair
+producer already accepts an arbitrary fixed DeTurck background.  The remaining
+background-migration frontier is the pairwise C0/C1 modulus for A1; the static
+general-background coefficient and action bounds live in `LowRegBgH2.lean`.
 
 ## Progress accounting
 
-- exact zero-based smooth-core action split: 100%;
+- exact zero-based smooth-core action split for arbitrary fixed background:
+  100%;
 - complete small second-order coefficient: 100%;
 - fixed spectral-`H2` pointwise/two-jet smallness of that coefficient: 100%;
 - arbitrary-passenger high/low action estimates and static compatibility:
@@ -97,7 +103,8 @@ alone, remains the visible completion/measurability obligation.
 - measurable complete time operator packaging: 0% as a stated theorem, with
   generic analytic infrastructure mostly available;
 - `ricci_flow_unif_existence`: unstated/unproved, 0%;
-- dedicated uniform-existence machinery: approximately 98%.
+- this intrinsic action layer: complete for its stated smooth-core duties;
+- whole dedicated uniform-existence machinery: approximately 73--75%.
 
 The source is temporarily above the normal line budget under the explicit
 session ruling.  It must be split by abstraction boundary after the proof

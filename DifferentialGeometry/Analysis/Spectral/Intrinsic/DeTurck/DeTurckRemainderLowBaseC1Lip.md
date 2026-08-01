@@ -80,3 +80,17 @@ focused GREEN and the exact targeted refresh of this module has been done
 (9574/9574).  `metricCorr_pair_h1` allocation:
 `J1(metricCorr_T - metricCorr_U) <= C*(J2(T-U)*J1(wXi_T) + J2(U)*J1(wXi_T-wXi_U))`.
 No re-refresh needed unless the public surface changes again.
+
+## 2026-07-31 fixed-background reuse
+
+The generic fixed-order producers `sharp_h2_low`, `sharp_pair_h2`, and
+`liePiece_pair` are now public. Their statements are background-neutral and
+are reused by the fixed-background correction in `LowRegBgC1Pair`; the
+same-background `psi_pair_h2` remains private because it has the wrong public
+statement for that task. Focused verification and the exact module refresh
+passed. No theorem body changed.
+
+The exact reverse-orientation identity `LowBaseInternal.fullRev_sub` is now
+public as the canonical algebraic input for the arbitrary fixed-background
+`DLa` pair.  This is an interface exposure only: the existing proof and the
+`revSlot_pair_h2` / `revSlot_bdd_h2` estimates are unchanged.

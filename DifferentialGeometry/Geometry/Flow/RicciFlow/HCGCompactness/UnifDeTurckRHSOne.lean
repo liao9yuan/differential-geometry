@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvature
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifDeTurckRHSZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumN3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivArityBridge
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
@@ -131,7 +129,8 @@ private theorem cometricTrace_eq
     metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis
       (identityInvMetric (Idx := Fin (Module.finrank ℝ E))) hinv D tail]
   simp only [tensor0SSpace_sum_apply]
-  simp [metricTrace0S2InBasis, identityInvMetric, diagonalInvMetric, hbasis]
+  simp only [metricTrace0S2InBasis, identityInvMetric, diagonalInvMetric, hbasis,
+    ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rfl
 
@@ -317,21 +316,38 @@ private theorem metric_self_sum
     exact sqrt_normSq_zero (I := I) g x _
   · simp
 
+/-- Explicit reverse first metric-jet coefficient. -/
+noncomputable def revJetOneC (Λ : ℝ) : ℝ :=
+  2 * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) *
+    ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ)) *
+    (Real.sqrt (Λ ^ 2) * Real.sqrt (Module.finrank ℝ E : ℝ))
+
+/-- Explicit reverse second metric-jet coefficient. -/
+noncomputable def revJetTwoC (Λ : ℝ) : ℝ :=
+  let L₁ := max (revJetOneC (E := E) Λ) Λ
+  let D := Dtower (Module.finrank ℝ E)
+    ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * L₁)) 2
+    (fun m => if m = 1 then
+      (2 : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (2 + 2)) *
+        (3 / 2 * Λ ^ 4 * (Λ + Λ * L₁ ^ 2) +
+          (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * L₁))
+    else 0) 2
+  max 0 (Real.sqrt (Λ ^ 4) *
+    (D * Real.sqrt (Module.finrank ℝ E : ℝ)))
+
+/-- Explicit reverse third metric-jet coefficient. -/
+noncomputable def revJetThreeC (Λ : ℝ) : ℝ :=
+  let L₁ := max (revJetOneC (E := E) Λ) Λ
+  let D := iterCovThreeC (E := E) 2 Λ L₁ Λ Λ
+  Real.sqrt (Λ ^ 5) * (D * Real.sqrt (Module.finrank ℝ E : ℝ))
+
 private theorem reverseJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      MetricCovDerivOrderBoundOn (I := I) Set.univ 1 gBase g₀ C := by
+    MetricCovDerivOrderBoundOn (I := I) Set.univ 1 gBase g₀
+      (revJetOneC (E := E) Λ) := by
   have hΛ0 : 0 ≤ Λ := le_trans zero_le_one hEq.1
-  let C : ℝ :=
-    2 * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) *
-      ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ)) *
-      (Real.sqrt (Λ ^ 2) * Real.sqrt (Module.finrank ℝ E : ℝ))
-  have hC0 : 0 ≤ C := by
-    dsimp [C]
-    positivity
-  refine ⟨C, hC0, ?_⟩
   intro x _
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
@@ -358,7 +374,7 @@ private theorem reverseJetOne
     (metricTensorField (I := I) gBase x)
   rw [metric_self_norm (I := I) gBase x] at hmetric
   refine hstep.trans ?_
-  dsimp [C]
+  dsimp [revJetOneC]
   exact mul_le_mul_of_nonneg_left hmetric (by positivity)
 
 private theorem reverseJetTwo
@@ -366,9 +382,10 @@ private theorem reverseJetTwo
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      MetricCovDerivOrderBoundOn (I := I) Set.univ 2 gBase g₀ C := by
-  obtain ⟨C₁, _hC₁0, hrev1⟩ := reverseJetOne (I := I) gBase g₀ hEq hjet1
+    MetricCovDerivOrderBoundOn (I := I) Set.univ 2 gBase g₀
+      (revJetTwoC (E := E) Λ) := by
+  let C₁ : ℝ := revJetOneC (E := E) Λ
+  have hrev1 := reverseJetOne (I := I) gBase g₀ hEq hjet1
   let L₁ : ℝ := max C₁ Λ
   have hrev1' :
       MetricCovDerivOrderBoundOn (I := I) Set.univ 1 gBase g₀ L₁ :=
@@ -384,10 +401,6 @@ private theorem reverseJetTwo
           (3 / 2 * Λ ^ 4 * (Λ + Λ * L₁ ^ 2) +
             (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * L₁))
         else 0) 2
-  let C : ℝ :=
-    max 0 (Real.sqrt (Λ ^ 4) *
-      (D * Real.sqrt (Module.finrank ℝ E : ℝ)))
-  refine ⟨C, le_max_left _ _, ?_⟩
   intro x _
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
@@ -416,9 +429,10 @@ private theorem reverseJetThree
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      MetricCovDerivOrderBoundOn (I := I) Set.univ 3 gBase g₀ C := by
-  obtain ⟨C₁, _hC₁0, hrev1⟩ := reverseJetOne (I := I) gBase g₀ hEq hjet1
+    MetricCovDerivOrderBoundOn (I := I) Set.univ 3 gBase g₀
+      (revJetThreeC (E := E) Λ) := by
+  let C₁ : ℝ := revJetOneC (E := E) Λ
+  have hrev1 := reverseJetOne (I := I) gBase g₀ hEq hjet1
   let L₁ : ℝ := max C₁ Λ
   have hrev1' :
       MetricCovDerivOrderBoundOn (I := I) Set.univ 1 gBase g₀ L₁ :=
@@ -426,15 +440,10 @@ private theorem reverseJetThree
   have hfwd1' :
       MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase L₁ :=
     fun x hx => (hjet1 x hx).trans (le_max_right _ _)
-  obtain ⟨D, hD0, hD⟩ := iterCovG1_three (I := I) (K := Set.univ)
+  let D : ℝ := iterCovThreeC (E := E) 2 Λ L₁ Λ Λ
+  have hD := iterCovThree_le (I := I) (K := Set.univ)
     g₀ gBase 2 (metricUniformEquivalentOn_symm (I := I) hEq)
       hrev1' hfwd1' hjet2 hjet3
-  let C : ℝ := Real.sqrt (Λ ^ 5) *
-    (D * Real.sqrt (Module.finrank ℝ E : ℝ))
-  have hC0 : 0 ≤ C := by
-    dsimp [C]
-    positivity
-  refine ⟨C, hC0, ?_⟩
   intro x _
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
@@ -451,215 +460,469 @@ private theorem reverseJetThree
         D * Real.sqrt (Module.finrank ℝ E : ℝ) := by
     simpa using hthree
   refine hcomp.trans ?_
-  simpa [C] using
+  simpa [revJetThreeC, C₁, L₁, D] using
     (mul_le_mul_of_nonneg_left hthree' (Real.sqrt_nonneg (Λ ^ 5)))
 
 set_option linter.unusedSectionVars false in
-private theorem metricDiff_rfns_zero
-    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ)
-    (hcomp : ∀ (x : M) (v : TangentSpace I x),
-      Λ⁻¹ * g₀.inner x v v ≤ gBase.inner x v v ∧
-        gBase.inner x v v ≤ Λ * g₀.inner x v v)
-    (x : M) :
-    riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-        ((metricDifferenceCcTensor (I := I) (M := M) g₀ gBase).toSection x) ≤
-      ((Module.finrank ℝ E : ℝ) * (Λ - 1)) ^ 2 := by
-  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
-    tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-  have hnorm := metricDiff_order0_bound (I := I) g₀ gBase hΛ hcomp x
-  have hbridge := norm_toSection_eq_sqrt_riemannianFiberNormSq
-    (I := I) (M := M) g₀ 0 2 x
-      (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase)
-  have hroot :
-      Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-        ((metricDifferenceCcTensor (I := I) (M := M) g₀ gBase).toSection x)) ≤
-        (Module.finrank ℝ E : ℝ) * (Λ - 1) := by
-    rw [← hbridge]
-    exact hnorm
-  have hp := pow_le_pow_left₀ (Real.sqrt_nonneg _) hroot 2
-  rwa [Real.sq_sqrt
-    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x _)] at hp
+private theorem connLowOne_eval
+    (gBase g₀ : SmoothRiemannianMetric I M)
+    (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) (x : M) :
+    covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+        (vec4 (I := I) (X x) (Y x) (Z x) (W x)) =
+      g₀.inner x
+        (covDerivConnDiff (I := I) g₀ gBase X Z Y x) (W x) := by
+  classical
+  let cov := leviCivitaConnectionOfMetric (I := I) g₀
+  let hcov :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g₀
+  let A : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => PDE.DeTurck.connDiff (I := I) gBase g₀ p (Y p) (Z p),
+      PDE.DeTurck.connDiff_contMDiff (I := I) gBase g₀ Y.contMDiff Z.contMDiff⟩
+  let DY : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => Y q) p) (X p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov X Y p⟩
+  let DZ : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => Z q) p) (X p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov X Z p⟩
+  let DW : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => W q) p) (X p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov X W p⟩
+  let slots : Fin 3 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)
+    | ⟨0, _⟩ => Y
+    | ⟨1, _⟩ => Z
+    | ⟨2, _⟩ => W
+  have hvec :
+      vec4 (I := I) (X x) (Y x) (Z x) (W x) =
+        Fin.cons (X x) (fun q : Fin 3 => slots q x) := by
+    funext q
+    fin_cases q <;> rfl
+  have hfun :
+      (fun p : M =>
+        connDiffLoweredField (I := I) g₀ gBase p
+          (fun q : Fin 3 => slots q p)) =
+        fun p : M => g₀.inner p (A p) (W p) := by
+    funext p
+    rfl
+  have hpairfun :
+      (fun p : M => g₀.inner p (A p) (W p)) =
+        fun p : M =>
+          metricTensorField (I := I) g₀ p
+            (fun q : Fin 2 => (![A, W] : Fin 2 →
+              ContMDiffSection I E (∞ : WithTop ℕ∞)
+                (TangentSpace I : M → Type _)) q p) := by
+    funext p
+    rfl
+  have hderiv :
+      extDerivFun (I := I)
+          (fun p : M =>
+            connDiffLoweredField (I := I) g₀ gBase p
+              (fun q : Fin 3 => slots q p))
+          x (X x) =
+        g₀.inner x ((cov (fun p : M => A p) x) (X x)) (W x) +
+          g₀.inner x (A x) (DW x) := by
+    rw [hfun, hpairfun,
+      metric_leibniz_extDeriv (I := I) g₀ g₀ ![A, W] X x,
+      nabla_metric_zero (I := I) (LeviCivita (I := I) g₀) g₀
+        (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g₀) X x]
+    simp [Fin.sum_univ_two, metricTensorField_apply, cov, DW,
+      LeviCivita_eq_leviCivitaConnectionOfMetric]
+  have hcorr :
+      (∑ q : Fin 3,
+        connDiffLoweredField (I := I) g₀ gBase x
+          (Function.update (fun b : Fin 3 => slots b x) q
+            ((cov (fun p : M => slots q p) x) (X x)))) =
+        g₀.inner x
+            (PDE.DeTurck.connDiff (I := I) gBase g₀ x (DY x) (Z x)) (W x) +
+          g₀.inner x
+            (PDE.DeTurck.connDiff (I := I) gBase g₀ x (Y x) (DZ x)) (W x) +
+          g₀.inner x (A x) (DW x) := by
+    rw [Fin.sum_univ_three]
+    rfl
+  rw [hvec, covStep_eval_smooth_slots (I := I) g₀ 3
+    (connDiffLoweredField (I := I) g₀ gBase) X slots x]
+  rw [hderiv, hcorr]
+  have hvalue :
+      covDerivConnDiff (I := I) g₀ gBase X Z Y x =
+        (cov (fun p : M => A p) x) (X x) -
+          PDE.DeTurck.connDiff (I := I) gBase g₀ x (Y x) (DZ x) -
+          PDE.DeTurck.connDiff (I := I) gBase g₀ x (DY x) (Z x) := by
+    rw [covDerivConnDiff_eq]
+    unfold covDerivDiff
+    rw [LeviCivita_eq_leviCivitaConnectionOfMetric]
+    dsimp only [A, DY, DZ, cov]
+    rfl
+  rw [hvalue]
+  simp only [map_sub, ContinuousLinearMap.sub_apply]
+  ring
 
 set_option linter.unusedSectionVars false in
-private theorem metricDiff_rfns_pos
-    (gBase g₀ : SmoothRiemannianMetric I M) (a : ℕ) {C : ℝ}
-    (hjet : MetricCovDerivOrderBoundOn (I := I) Set.univ (a + 1)
-      gBase g₀ C)
-    (x : M) :
-    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (a + 1)) x
-        ((iteratedCovGrad (I := I) g₀ 0 2 (a + 1)
-          (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase)).toSection x) ≤
-      C ^ 2 := by
-  letI : Bundle.RiemannianBundle
-      (fun b : M => TensorRSSpace 0 (2 + (a + 1)) I b) :=
-    tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + (a + 1))
-  have hnorm := metricDiff_orderPos_bound (I := I) g₀ gBase a hjet x
-  have hbridge := norm_toSection_eq_sqrt_riemannianFiberNormSq
-    (I := I) (M := M) g₀ 0 (2 + (a + 1)) x
-      (iteratedCovGrad (I := I) g₀ 0 2 (a + 1)
-        (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase))
-  have hroot :
-      Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀
-        0 (2 + (a + 1)) x
-          ((iteratedCovGrad (I := I) g₀ 0 2 (a + 1)
-            (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase)).toSection x)) ≤
-        C := by
-    rw [← hbridge]
-    exact hnorm
-  have hp := pow_le_pow_left₀ (Real.sqrt_nonneg _) hroot 2
-  rwa [Real.sq_sqrt
-    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀
-      0 (2 + (a + 1)) x _)] at hp
+private theorem connLowTwo_eval
+    (gBase g₀ : SmoothRiemannianMetric I M)
+    (D X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) (x : M) :
+    iterCov (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) 2 x
+        (vec5 (I := I) (D x) (X x) (Y x) (Z x) (W x)) =
+      g₀.inner x
+        (Integral.Connection.covDerivConnDiff2
+          (I := I) g₀ gBase D X Z Y x) (W x) := by
+  classical
+  let cov := leviCivitaConnectionOfMetric (I := I) g₀
+  let hcov :=
+    leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g₀
+  let R : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => covDerivConnDiff (I := I) g₀ gBase X Z Y p,
+      covDerivConnDiff_contMDiff (I := I) g₀ gBase X Z Y⟩
+  let DX : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => X q) p) (D p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov D X p⟩
+  let DY : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => Y q) p) (D p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov D Y p⟩
+  let DZ : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => Z q) p) (D p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov D Z p⟩
+  let DW : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    ⟨fun p => (cov (fun q => W q) p) (D p), by
+      intro p
+      exact CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (I := I) cov hcov D W p⟩
+  let slots : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)
+    | ⟨0, _⟩ => X
+    | ⟨1, _⟩ => Y
+    | ⟨2, _⟩ => Z
+    | ⟨3, _⟩ => W
+  have hvec :
+      vec5 (I := I) (D x) (X x) (Y x) (Z x) (W x) =
+        Fin.cons (D x) (fun q : Fin 4 => slots q x) := by
+    funext q
+    fin_cases q <;> rfl
+  have hfun :
+      (fun p : M =>
+        covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) p
+          (fun q : Fin 4 => slots q p)) =
+        fun p : M => g₀.inner p (R p) (W p) := by
+    funext p
+    have ht :
+        (fun q : Fin 4 => slots q p) =
+          vec4 (I := I) (X p) (Y p) (Z p) (W p) := by
+      funext q
+      fin_cases q <;> rfl
+    rw [ht]
+    exact connLowOne_eval (I := I) gBase g₀ X Y Z W p
+  have hpairfun :
+      (fun p : M => g₀.inner p (R p) (W p)) =
+        fun p : M =>
+          metricTensorField (I := I) g₀ p
+            (fun q : Fin 2 => (![R, W] : Fin 2 →
+              ContMDiffSection I E (∞ : WithTop ℕ∞)
+                (TangentSpace I : M → Type _)) q p) := by
+    funext p
+    rfl
+  have hderiv :
+      extDerivFun (I := I)
+          (fun p : M =>
+            covStep (I := I) g₀ 3
+              (connDiffLoweredField (I := I) g₀ gBase) p
+              (fun q : Fin 4 => slots q p))
+          x (D x) =
+        g₀.inner x ((cov (fun p : M => R p) x) (D x)) (W x) +
+          g₀.inner x (R x) (DW x) := by
+    rw [hfun, hpairfun,
+      metric_leibniz_extDeriv (I := I) g₀ g₀ ![R, W] D x,
+      nabla_metric_zero (I := I) (LeviCivita (I := I) g₀) g₀
+        (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g₀) D x]
+    simp [Fin.sum_univ_two, metricTensorField_apply, cov, DW,
+      LeviCivita_eq_leviCivitaConnectionOfMetric]
+  have hcorr0 :
+      covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+          (Function.update (fun b : Fin 4 => slots b x) 0
+            ((cov (fun p : M => slots 0 p) x) (D x))) =
+        g₀.inner x
+          (covDerivConnDiff (I := I) g₀ gBase DX Z Y x) (W x) := by
+    have ht :
+        Function.update (fun b : Fin 4 => slots b x) 0
+            ((cov (fun p : M => slots 0 p) x) (D x)) =
+          vec4 (I := I) (DX x) (Y x) (Z x) (W x) := by
+      funext q
+      fin_cases q <;> simp [slots, DX, vec4]
+    rw [ht]
+    exact connLowOne_eval (I := I) gBase g₀ DX Y Z W x
+  have hcorr1 :
+      covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+          (Function.update (fun b : Fin 4 => slots b x) 1
+            ((cov (fun p : M => slots 1 p) x) (D x))) =
+        g₀.inner x
+          (covDerivConnDiff (I := I) g₀ gBase X Z DY x) (W x) := by
+    have ht :
+        Function.update (fun b : Fin 4 => slots b x) 1
+            ((cov (fun p : M => slots 1 p) x) (D x)) =
+          vec4 (I := I) (X x) (DY x) (Z x) (W x) := by
+      funext q
+      fin_cases q <;> simp [slots, DY, vec4]
+    rw [ht]
+    exact connLowOne_eval (I := I) gBase g₀ X DY Z W x
+  have hcorr2 :
+      covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+          (Function.update (fun b : Fin 4 => slots b x) 2
+            ((cov (fun p : M => slots 2 p) x) (D x))) =
+        g₀.inner x
+          (covDerivConnDiff (I := I) g₀ gBase X DZ Y x) (W x) := by
+    have ht :
+        Function.update (fun b : Fin 4 => slots b x) 2
+            ((cov (fun p : M => slots 2 p) x) (D x)) =
+          vec4 (I := I) (X x) (Y x) (DZ x) (W x) := by
+      funext q
+      fin_cases q <;> simp [slots, DZ, vec4]
+    rw [ht]
+    exact connLowOne_eval (I := I) gBase g₀ X Y DZ W x
+  have hcorr3 :
+      covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+          (Function.update (fun b : Fin 4 => slots b x) 3
+            ((cov (fun p : M => slots 3 p) x) (D x))) =
+        g₀.inner x (R x) (DW x) := by
+    have ht :
+        Function.update (fun b : Fin 4 => slots b x) 3
+            ((cov (fun p : M => slots 3 p) x) (D x)) =
+          vec4 (I := I) (X x) (Y x) (Z x) (DW x) := by
+      funext q
+      fin_cases q <;> simp [slots, DW, vec4]
+    rw [ht]
+    exact connLowOne_eval (I := I) gBase g₀ X Y Z DW x
+  have hcorr :
+      (∑ q : Fin 4,
+        covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) x
+          (Function.update (fun b : Fin 4 => slots b x) q
+            ((cov (fun p : M => slots q p) x) (D x)))) =
+        g₀.inner x
+            (covDerivConnDiff (I := I) g₀ gBase DX Z Y x) (W x) +
+          g₀.inner x
+            (covDerivConnDiff (I := I) g₀ gBase X Z DY x) (W x) +
+          g₀.inner x
+            (covDerivConnDiff (I := I) g₀ gBase X DZ Y x) (W x) +
+          g₀.inner x (R x) (DW x) := by
+    rw [Fin.sum_univ_four, hcorr0, hcorr1, hcorr2, hcorr3]
+  change covStep (I := I) g₀ 4
+      (covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase)) x
+        (vec5 (I := I) (D x) (X x) (Y x) (Z x) (W x)) = _
+  rw [hvec, covStep_eval_smooth_slots (I := I) g₀ 4
+    (covStep (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase))
+      D slots x]
+  rw [hderiv, hcorr]
+  have hvalue :
+      Integral.Connection.covDerivConnDiff2 (I := I) g₀ gBase D X Z Y x =
+        (cov (fun p : M => R p) x) (D x) -
+          covDerivConnDiff (I := I) g₀ gBase DX Z Y x -
+          covDerivConnDiff (I := I) g₀ gBase X DZ Y x -
+          covDerivConnDiff (I := I) g₀ gBase X Z DY x := by
+    rw [Integral.Connection.covDerivConnDiff2_eq]
+    rw [LeviCivita_eq_leviCivitaConnectionOfMetric]
+    dsimp only [R, DX, DY, DZ, cov]
+    rfl
+  rw [hvalue]
+  simp only [map_sub, ContinuousLinearMap.sub_apply]
+  ring
 
+private theorem connLow_unit
+    (g₀ gBase : SmoothRiemannianMetric I M) :
+    ccUnitField (I := I) g₀ 3 (connDiffLoweredCc (I := I) g₀ gBase) =
+      connDiffLoweredField (I := I) g₀ gBase :=
+  MixedSection.toMultilinearSection_fromMultilinearSection
+    (𝕜 := ℝ) (F := E) (IB := I)
+    (E := (TangentSpace I : M → Type _)) ∞
+      (connDiffLoweredField (I := I) g₀ gBase)
+
+/-- Explicit coefficient for the second covariant derivative of the connection
+difference under the class metric-jet bounds. -/
+noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
+  let C₁ := revJetOneC (E := E) Λ
+  let C₂ := revJetTwoC (E := E) Λ
+  let C₃ := revJetThreeC (E := E) Λ
+  let C :=
+    3 / 2 * Λ ^ 5 * C₃ +
+      9 / 2 * Λ ^ 6 * C₁ * C₂ +
+      3 * Λ ^ 7 * C₁ ^ 3
+  (Module.finrank ℝ E : ℝ) ^ 5 * C ^ 2
+
+set_option linter.unusedSectionVars false in
 private theorem unifConnDiffTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+    ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 2) x
           ((iteratedCovGrad (I := I) g₀ 1 2 2
-            (connDiffSection (I := I) gBase g₀)).toSection x) ≤ K := by
+            (connDiffSection (I := I) gBase g₀)).toSection x) ≤
+        connDiffTwoC (E := E) Λ := by
   classical
   have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
     ⟨hΛ, fun x _ v => hcomp x v⟩
   have hEq' := metricUniformEquivalentOn_symm (I := I) hEq
-  have hcomp' : ∀ (x : M) (v : TangentSpace I x),
-      Λ⁻¹ * g₀.inner x v v ≤ gBase.inner x v v ∧
-        gBase.inner x v v ≤ Λ * g₀.inner x v v :=
-    fun x v => hEq'.2 x (Set.mem_univ x) v
-  obtain ⟨C₁, hC₁0, hrev1⟩ :=
-    reverseJetOne (I := I) gBase g₀ hEq hjet1
-  obtain ⟨C₂, hC₂0, hrev2⟩ :=
-    reverseJetTwo (I := I) gBase g₀ hEq hjet1 hjet2
-  obtain ⟨C₃, hC₃0, hrev3⟩ :=
-    reverseJetThree (I := I) gBase g₀ hEq hjet1 hjet2 hjet3
-  have hδtop : Λ - 1 < 1 := by linarith
-  have hδ0 : 0 ≤ Λ - 1 := by linarith
-  obtain ⟨CA, hCA0, hCA⟩ :=
-    exists_rfns_iteratedCovGrad_connDiffSection_tgrid
-      (I := I) (M := M) g₀ hδtop
-  have hbound := metricDiff_gFibreOpBound (I := I) g₀ gBase hΛ hcomp'
-  let B₀ : ℝ := (Module.finrank ℝ E : ℝ) * (Λ - 1)
-  let Q : ℝ := max 1 (B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2)
-  have hQ1 : 1 ≤ Q := le_max_left _ _
-  have hQ0 : 0 ≤ Q := le_trans zero_le_one hQ1
-  let F : ℝ := Q ^ 3
-  have hF0 : 0 ≤ F := pow_nonneg hQ0 _
-  let cnt : ℝ :=
-    ∑ k ∈ Finset.range 4, ∑ n ∈ Finset.range (k + 1),
-      ((Finset.Nat.antidiagonalTuple n k).card : ℝ)
-  have hcnt0 : 0 ≤ cnt := by
-    dsimp [cnt]
-    exact Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
-      (fun _ _ => Nat.cast_nonneg _))
-  let K : ℝ := CA 2 * (cnt * F)
-  have hK0 : 0 ≤ K :=
-    mul_nonneg (hCA0 2) (mul_nonneg hcnt0 hF0)
-  refine ⟨K, hK0, ?_⟩
+  let C₁ : ℝ := revJetOneC (E := E) Λ
+  let C₂ : ℝ := revJetTwoC (E := E) Λ
+  let C₃ : ℝ := revJetThreeC (E := E) Λ
+  have hrev1 := reverseJetOne (I := I) gBase g₀ hEq hjet1
+  have hrev2 := reverseJetTwo (I := I) gBase g₀ hEq hjet1 hjet2
+  have hrev3 := reverseJetThree (I := I) gBase g₀ hEq hjet1 hjet2 hjet3
+  have hC₁0 : 0 ≤ C₁ := by
+    dsimp [C₁, revJetOneC]
+    positivity
+  have hC₂0 : 0 ≤ C₂ := by
+    dsimp [C₂, revJetTwoC]
+    exact le_max_left _ _
+  have hC₃0 : 0 ≤ C₃ := by
+    dsimp [C₃, revJetThreeC]
+    exact mul_nonneg (Real.sqrt_nonneg _) <|
+      mul_nonneg (le_max_left _ _) (Real.sqrt_nonneg _)
+  let C : ℝ :=
+    3 / 2 * Λ ^ 5 * C₃ +
+      9 / 2 * Λ ^ 6 * C₁ * C₂ +
+      3 * Λ ^ 7 * C₁ ^ 3
+  have hC0 : 0 ≤ C := by
+    dsimp [C]
+    positivity
+  let d : ℝ := Module.finrank ℝ E
+  have hd0 : 0 ≤ d := by
+    dsimp [d]
+    positivity
   intro x
-  let b : ℕ → ℝ := fun j =>
-    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-      ((iteratedCovGrad (I := I) g₀ 0 2 j
-        (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase)).toSection x)
-  have hb0 : ∀ j, 0 ≤ b j := fun j =>
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x _
-  have hbQ : ∀ j, j ≤ 3 → b j ≤ Q := by
-    intro j hj
-    have hsumQ :
-        B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2 ≤ Q :=
-      le_max_right _ _
-    interval_cases j
-    · have h := metricDiff_rfns_zero (I := I) gBase g₀ hΛ hcomp' x
-      change b 0 ≤ B₀ ^ 2 at h
-      exact h.trans (by
-        calc
-          B₀ ^ 2 ≤ B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2 := by
-            nlinarith [sq_nonneg C₁, sq_nonneg C₂, sq_nonneg C₃]
-          _ ≤ Q := hsumQ)
-    · have h := metricDiff_rfns_pos (I := I) gBase g₀ 0 hrev1 x
-      change b 1 ≤ C₁ ^ 2 at h
-      exact h.trans (by
-        calc
-          C₁ ^ 2 ≤ B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2 := by
-            nlinarith [sq_nonneg B₀, sq_nonneg C₂, sq_nonneg C₃]
-          _ ≤ Q := hsumQ)
-    · have h := metricDiff_rfns_pos (I := I) gBase g₀ 1 hrev2 x
-      change b 2 ≤ C₂ ^ 2 at h
-      exact h.trans (by
-        calc
-          C₂ ^ 2 ≤ B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2 := by
-            nlinarith [sq_nonneg B₀, sq_nonneg C₁, sq_nonneg C₃]
-          _ ≤ Q := hsumQ)
-    · have h := metricDiff_rfns_pos (I := I) gBase g₀ 2 hrev3 x
-      change b 3 ≤ C₃ ^ 2 at h
-      exact h.trans (by
-        calc
-          C₃ ^ 2 ≤ B₀ ^ 2 + C₁ ^ 2 + C₂ ^ 2 + C₃ ^ 2 := by
-            nlinarith [sq_nonneg B₀, sq_nonneg C₁, sq_nonneg C₂]
-          _ ≤ Q := hsumQ)
-  have hprod : ∀ k ∈ Finset.range 4, ∀ n ∈ Finset.range (k + 1),
-      ∀ e ∈ Finset.Nat.antidiagonalTuple n k,
-        (∏ m : Fin n, b (e m)) ≤ F := by
-    intro k hk n hn e he
-    have hk3 : k ≤ 3 := by
-      rw [Finset.mem_range] at hk
-      omega
-    have hn3 : n ≤ 3 := by
-      rw [Finset.mem_range] at hn
-      omega
-    have hsum_e : (∑ m : Fin n, e m) = k :=
-      Finset.Nat.mem_antidiagonalTuple.mp he
-    have hem : ∀ m : Fin n, e m ≤ 3 := by
-      intro m
-      have hle : e m ≤ ∑ i : Fin n, e i :=
-        Finset.single_le_sum (fun i _ => Nat.zero_le _) (Finset.mem_univ m)
-      omega
-    have hstep : (∏ m : Fin n, b (e m)) ≤ ∏ _m : Fin n, Q :=
-      Finset.prod_le_prod
-        (fun m _ => hb0 (e m))
-        (fun m _ => hbQ (e m) (hem m))
-    refine hstep.trans ?_
-    rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-    change Q ^ n ≤ Q ^ 3
-    exact pow_le_pow_right₀ hQ1 hn3
-  have hgrid :
-      (∑ k ∈ Finset.range 4, Combinatorics.antidiagonalTupleGrid b k) ≤
-        cnt * F := by
-    change (∑ k ∈ Finset.range 4, ∑ n ∈ Finset.range (k + 1),
-      ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-        ∏ m : Fin n, b (e m)) ≤ cnt * F
-    rw [show cnt = ∑ k ∈ Finset.range 4, ∑ n ∈ Finset.range (k + 1),
-      ((Finset.Nat.antidiagonalTuple n k).card : ℝ) from rfl, Finset.sum_mul]
-    refine Finset.sum_le_sum (fun k hk => ?_)
-    rw [Finset.sum_mul]
-    refine Finset.sum_le_sum (fun n hn => ?_)
+  obtain ⟨basis, _hbasis, horth⟩ := centeredBasis (I := I) g₀ x
+  have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank ℝ E))) := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal (I := I) g₀ basis horth
+  have hunit : ∀ i, g₀.inner x (basis i) (basis i) = 1 := by
+    intro i
+    rw [horth i i]
+    simp
+  let T : Tensor0SSpace 5 I x :=
+    iterCov (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) 2 x
+  have hcompB : ∀ slots : Fin 5 → Fin (Module.finrank ℝ E),
+      |component0S (I := I) basis T slots| ≤ C := by
+    intro slots
+    let D : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 0)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 0))⟩
+    let X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 1)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 1))⟩
+    let Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 2)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 2))⟩
+    let Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 3)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 3))⟩
+    let W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 4)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 4))⟩
+    have hD : D x = basis (slots 0) := by
+      exact smoothExtensionTangent_eq (I := I) x (basis (slots 0))
+    have hX : X x = basis (slots 1) := by
+      exact smoothExtensionTangent_eq (I := I) x (basis (slots 1))
+    have hY : Y x = basis (slots 2) := by
+      exact smoothExtensionTangent_eq (I := I) x (basis (slots 2))
+    have hZ : Z x = basis (slots 3) := by
+      exact smoothExtensionTangent_eq (I := I) x (basis (slots 3))
+    have hW : W x = basis (slots 4) := by
+      exact smoothExtensionTangent_eq (I := I) x (basis (slots 4))
+    have hvec : (fun a : Fin 5 => basis (slots a)) =
+        vec5 (I := I) (basis (slots 0)) (basis (slots 1))
+          (basis (slots 2)) (basis (slots 3)) (basis (slots 4)) := by
+      funext a
+      fin_cases a <;> simp [vec5]
+    have hval :
+        component0S (I := I) basis T slots =
+          g₀.inner x
+            (Integral.Connection.covDerivConnDiff2
+              (I := I) g₀ gBase D X Z Y x) (W x) := by
+      rw [component0S]
+      rw [show (fun a : Fin 5 => basis (slots a)) =
+          vec5 (I := I) (D x) (X x) (Y x) (Z x) (W x) by
+        rw [hD, hX, hY, hZ, hW]
+        exact hvec]
+      exact connLowTwo_eval (I := I) gBase g₀ D X Y Z W x
+    let N : TangentSpace I x :=
+      Integral.Connection.covDerivConnDiff2
+        (I := I) g₀ gBase D X Z Y x
+    have hNN : Real.sqrt (g₀.inner x N N) ≤ C := by
+      have h := covDConnDiff2_gJet_le (I := I)
+        hEq' hrev1 hrev2 hrev3 (Set.mem_univ x)
+        (basis (slots 0)) (basis (slots 1))
+        (basis (slots 3)) (basis (slots 2))
+      rw [hunit (slots 0), hunit (slots 1),
+        hunit (slots 3), hunit (slots 2)] at h
+      simpa [C, N, D, X, Y, Z] using h
+    rw [hval]
+    change |g₀.inner x N (W x)| ≤ C
     calc
-      (∑ e ∈ Finset.Nat.antidiagonalTuple n k, ∏ m : Fin n, b (e m))
-          ≤ ∑ _e ∈ Finset.Nat.antidiagonalTuple n k, F :=
-        Finset.sum_le_sum (fun e he => hprod k hk n hn e he)
-      _ = (Finset.Nat.antidiagonalTuple n k).card • F :=
-        Finset.sum_const F
-      _ = ((Finset.Nat.antidiagonalTuple n k).card : ℝ) * F :=
-        nsmul_eq_mul _ _
-  have hraw := hCA gBase
-    (metricDifferenceCcTensor (I := I) (M := M) g₀ gBase)
-    (metricDiff_tie (I := I) g₀ gBase) (δ := Λ - 1)
-    le_rfl hδ0 hbound 2 x
-  have hraw' :
-      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 2) x
+      |g₀.inner x N (W x)| ≤
+          Real.sqrt (g₀.inner x N N) *
+            Real.sqrt (g₀.inner x (W x) (W x)) :=
+        abs_metric_inner_le_sqrt_metric_quadratic
+          (I := I) (M := M) g₀ x N (W x)
+      _ = Real.sqrt (g₀.inner x N N) := by
+        rw [hW, hunit (slots 4)]
+        simp
+      _ ≤ C := hNN
+  have hcard :=
+    normSq0S_le_card_of_component_bound (I := I) g₀ x 5 basis hinv T C hC0 hcompB
+  have hcardval :
+      (Fintype.card (Fin 5 → Fin (Module.finrank ℝ E)) : ℝ) =
+        (Module.finrank ℝ E : ℝ) ^ 5 := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    ring
+  rw [hcardval] at hcard
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 2) x
           ((iteratedCovGrad (I := I) g₀ 1 2 2
-            (connDiffSection (I := I) gBase g₀)).toSection x) ≤
-        CA 2 * ∑ k ∈ Finset.range 4,
-          Combinatorics.antidiagonalTupleGrid b k := by
-    simpa [b] using hraw
-  exact hraw'.trans
-    ((mul_le_mul_of_nonneg_left hgrid (hCA0 2)).trans_eq rfl)
+            (connDiffSection (I := I) gBase g₀)).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 2) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 2
+            (connDiffLoweredCc (I := I) g₀ gBase)).toSection x) :=
+      (connLow_rfns (I := I) (M := M) g₀ gBase 2 x).symm
+    _ = normSq0S (I := I) g₀ x 5 T := by
+      rw [rfns_iterCovGrad_eq (I := I) g₀ 3 2
+        (connDiffLoweredCc (I := I) g₀ gBase) x,
+        connLow_unit (I := I) g₀ gBase]
+    _ ≤ d ^ 5 * C ^ 2 := by
+      simpa [d] using hcard
+    _ = connDiffTwoC (E := E) Λ := rfl
 
 private theorem connLow_self_zero
     (g : SmoothRiemannianMetric I M) :
@@ -761,30 +1024,51 @@ private theorem rfns_neg
   ring
 
 set_option linter.unusedSectionVars false in
-private theorem unifOmegaTwo
+private theorem rfns_iter_neg
+    (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (W : SmoothCcTensor g r s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
+        ((iteratedCovGrad (I := I) g r s j (-W)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
+        ((iteratedCovGrad (I := I) g r s j W).toSection x) := by
+  rw [iteratedCovGrad_neg]
+  rw [show
+    ((-(iteratedCovGrad (I := I) g r s j W)).toSection x) =
+        -((iteratedCovGrad (I := I) g r s j W).toSection x) from by
+      rw [SmoothCcTensor.toSection_neg]
+      rfl]
+  exact rfns_neg (I := I) g r (s + j) x _
+
+set_option linter.unusedSectionVars false in
+/-- Explicit coefficient for the first covariant jet of the DeTurck Lie arm. -/
+noncomputable def alphaOneC (Λ : ℝ) : ℝ :=
+  Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 * connDiffTwoC (E := E) Λ)
+
+set_option linter.unusedSectionVars false in
+private theorem unifOmegaTwo_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+    ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + 2) x
         ((iteratedCovGrad (I := I) g₀ 0 1 2
-          (wOmega (I := I) (M := M) g₀ g₀ gBase)).toSection x) ≤ K ^ 2 := by
-  obtain ⟨KC, hKC0, hC⟩ :=
-    unifConnDiffTwo (I := I) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2 hjet3
+          (wOmega (I := I) (M := M) g₀ g₀ gBase)).toSection x) ≤
+        alphaOneC (E := E) Λ ^ 2 := by
+  let KC : ℝ := connDiffTwoC (E := E) Λ
+  have hKC0 : 0 ≤ KC := by
+    dsimp [KC, connDiffTwoC]
+    positivity
+  have hC := unifConnDiffTwo (I := I) gBase g₀
+    hΛ hcomp hjet1 hjet2 hjet3
   let d : ℝ := Module.finrank ℝ E
-  let K : ℝ := Real.sqrt (d ^ 5 * KC)
   have hd0 : 0 ≤ d := by
     dsimp [d]
     positivity
-  have hK0 : 0 ≤ K := by
-    dsimp [K]
-    positivity
-  refine ⟨K, hK0, ?_⟩
   intro x
   rw [rfns_iterCovGrad_eq (I := I) g₀ 1 2
     (wOmega (I := I) (M := M) g₀ g₀ gBase) x,
@@ -813,31 +1097,63 @@ private theorem unifOmegaTwo
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 2) x
           ((iteratedCovGrad (I := I) g₀ 0 3 2
             (connDiffLoweredCc (I := I) g₀ gBase)).toSection x) := by
-          congr 1
-          rw [iteratedCovGrad_neg]
-          rw [show
-            ((-(iteratedCovGrad (I := I) g₀ 0 3 2
-              (connDiffLoweredCc (I := I) g₀ gBase))).toSection x) =
-              -((iteratedCovGrad (I := I) g₀ 0 3 2
-                (connDiffLoweredCc (I := I) g₀ gBase)).toSection x) from by
-                rw [SmoothCcTensor.toSection_neg]
-                rfl]
-          exact rfns_neg (I := I) g₀ 0 (3 + 2) x _
+          exact congrArg (fun z : ℝ => d ^ 5 * z)
+            (rfns_iter_neg (I := I) g₀ 0 3 2
+              (connDiffLoweredCc (I := I) g₀ gBase) x)
     _ = d ^ 5 *
         riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 2) x
           ((iteratedCovGrad (I := I) g₀ 1 2 2
             (connDiffSection (I := I) gBase g₀)).toSection x) := by
-          rw [connLow_rfns (I := I) (M := M) g₀ gBase 2 x]
+          exact congrArg (fun z : ℝ => d ^ 5 * z)
+            (connLow_rfns (I := I) (M := M) g₀ gBase 2 x)
     _ ≤ d ^ 5 * KC :=
       mul_le_mul_of_nonneg_left (hC x) (pow_nonneg hd0 5)
-    _ = K ^ 2 := by
-      dsimp [K]
+    _ = alphaOneC (E := E) Λ ^ 2 := by
+      change d ^ 5 * KC = (Real.sqrt (d ^ 5 * KC)) ^ 2
       rw [Real.sq_sqrt (mul_nonneg (pow_nonneg hd0 5) hKC0)]
+
+set_option linter.unusedSectionVars false in
+private theorem unifOmegaTwo
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + 2) x
+        ((iteratedCovGrad (I := I) g₀ 0 1 2
+          (wOmega (I := I) (M := M) g₀ g₀ gBase)).toSection x) ≤ K ^ 2 := by
+  exact ⟨alphaOneC (E := E) Λ, Real.sqrt_nonneg _,
+    unifOmegaTwo_of (I := I) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3⟩
+
+set_option linter.unusedSectionVars false in
+private theorem unifAlphaOne_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 1
+          (wAlphaA (I := I) (M := M) g₀ g₀ gBase)).toSection x) ≤
+        alphaOneC (E := E) Λ ^ 2 := by
+  have hK := unifOmegaTwo_of (I := I) gBase g₀
+    hΛ hcomp hjet1 hjet2 hjet3
+  intro x
+  rw [wAlphaA_shift (I := I) g₀ g₀ gBase 1 x]
+  simpa using hK x
 
 set_option linter.unusedSectionVars false in
 private theorem unifAlphaOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -848,40 +1164,49 @@ private theorem unifAlphaOne
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
         ((iteratedCovGrad (I := I) g₀ 0 2 1
           (wAlphaA (I := I) (M := M) g₀ g₀ gBase)).toSection x) ≤ K ^ 2 := by
-  obtain ⟨K, hK0, hK⟩ :=
-    unifOmegaTwo (I := I) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2 hjet3
-  refine ⟨K, hK0, ?_⟩
-  intro x
-  rw [wAlphaA_shift (I := I) g₀ g₀ gBase 1 x]
-  simpa using hK x
+  exact ⟨alphaOneC (E := E) Λ, Real.sqrt_nonneg _,
+    unifAlphaOne_of (I := I) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3⟩
 
 set_option linter.unusedSectionVars false in
-private theorem unifRicOne
+/-- Explicit coefficient for the first Ricci jet after tracing the Riemann jet. -/
+noncomputable def ricciOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
+  Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 *
+    rmOneC (E := E) Λ Kb₀ Kb₁ ^ 2)
+
+set_option linter.unusedSectionVars false in
+private theorem unifRicOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
+    {Kb₀ Kb₁ : ℝ} (hKb₀0 : 0 ≤ Kb₀)
+    (hKb₀ : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb₀ * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hKb₁0 : 0 ≤ Kb₁)
+    (hKb₁ : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) gBase x 5
+        (iterCov (I := I) gBase 4
+          (metricRm04 (I := I) (M := M) gBase) 1 x)) ≤ Kb₁)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+    ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
         ((iteratedCovGrad (I := I) g₀ 0 2 1
           (ccOfField (I := I) g₀ 2
-            (metricRicci (I := I) (M := M) g₀))).toSection x) ≤ K ^ 2 := by
-  obtain ⟨KR, _hKR0, hRm⟩ :=
-    unifRmSecOne (I := I) (M := M) gBase g₀
-      hΛ hΛ2 hcomp hjet1 hjet2 hjet3
+            (metricRicci (I := I) (M := M) g₀))).toSection x) ≤
+        ricciOneC (E := E) Λ Kb₀ Kb₁ ^ 2 := by
+  let KR : ℝ := rmOneC (E := E) Λ Kb₀ Kb₁
+  have hRm := unifRmSecOne_of (I := I) (M := M) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
   let d : ℝ := Module.finrank ℝ E
-  let K : ℝ := Real.sqrt (d ^ 5 * KR ^ 2)
+  let K : ℝ := ricciOneC (E := E) Λ Kb₀ Kb₁
   have hd0 : 0 ≤ d := by
     dsimp [d]
     positivity
-  have hK0 : 0 ≤ K := by
-    dsimp [K]
-    positivity
-  refine ⟨K, hK0, ?_⟩
   intro x
   have hcan :
       metricRicci (I := I) (M := M) g₀ =
@@ -913,8 +1238,373 @@ private theorem unifRicOne
     _ ≤ d ^ 5 * KR ^ 2 :=
       mul_le_mul_of_nonneg_left (hRm x) (pow_nonneg hd0 5)
     _ = K ^ 2 := by
-      dsimp [K]
+      dsimp [K, ricciOneC, KR, d]
       rw [Real.sq_sqrt (mul_nonneg (pow_nonneg hd0 5) (sq_nonneg KR))]
+
+set_option linter.unusedSectionVars false in
+private theorem unifRicOne
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 1
+          (ccOfField (I := I) g₀ 2
+            (metricRicci (I := I) (M := M) g₀))).toSection x) ≤ K ^ 2 := by
+  obtain ⟨Kb₀, hKb₀0, hKb₀⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  obtain ⟨Kb₁, hKb₁0, hKb₁⟩ :=
+    exists_curvJet_sup (I := I) (M := M) gBase 1
+  refine ⟨ricciOneC (E := E) Λ Kb₀ Kb₁, Real.sqrt_nonneg _, ?_⟩
+  exact unifRicOne_of (I := I) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+
+private def ricciCc
+    (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 2 :=
+  ccOfField (I := I) g 2 (metricRicci (I := I) (M := M) g)
+
+set_option linter.unusedSectionVars false in
+private lemma unit_add2
+    (g : SmoothRiemannianMetric I M)
+    (S T : SmoothCcTensor g 0 2) (x : M) :
+    unitModel (I := I) (M := M) g 2 (S + T) x =
+      unitModel (I := I) (M := M) g 2 S x +
+        unitModel (I := I) (M := M) g 2 T x := by
+  rw [unitModel, unitModel, unitModel]
+  have hsec : (S + T).toSection x = S.toSection x + T.toSection x := by
+    rw [SmoothCcTensor.toSection_add]
+    rfl
+  rw [show
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (S + T).toSection x) (unitTensor (I := I) (M := M) x)) =
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          S.toSection x) (unitTensor (I := I) (M := M) x) +
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          T.toSection x) (unitTensor (I := I) (M := M) x) from by
+      rw [hsec]
+      rfl]
+  rw [Tensor0SSpace.toModel_add]
+
+set_option linter.unusedSectionVars false in
+private lemma unit_add2_apply
+    (g : SmoothRiemannianMetric I M)
+    (S T : SmoothCcTensor g 0 2) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g 2 (S + T) x v =
+      unitModel (I := I) (M := M) g 2 S x v +
+        unitModel (I := I) (M := M) g 2 T x v := by
+  rw [unit_add2, ContinuousMultilinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma unit_smul2
+    (g : SmoothRiemannianMetric I M)
+    (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
+    unitModel (I := I) (M := M) g 2 (c • T) x =
+      c • unitModel (I := I) (M := M) g 2 T x := by
+  rw [unitModel, unitModel]
+  have hsec : (c • T).toSection x = c • T.toSection x := by
+    rw [SmoothCcTensor.toSection_smul]
+    rfl
+  rw [show
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (c • T).toSection x) (unitTensor (I := I) (M := M) x)) =
+        c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          T.toSection x) (unitTensor (I := I) (M := M) x) from by
+      rw [hsec]
+      rfl]
+  rw [Tensor0SSpace.toModel_smul]
+
+set_option linter.unusedSectionVars false in
+private lemma unit_smul2_apply
+    (g : SmoothRiemannianMetric I M)
+    (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g 2 (c • T) x v =
+      c * unitModel (I := I) (M := M) g 2 T x v := by
+  rw [unit_smul2, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+
+set_option linter.unusedSectionVars false in
+private theorem rhs_unit
+    (gBase g : SmoothRiemannianMetric I M) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g 2
+        (deTurckRHSSection (I := I) gBase g) x v =
+      deTurckRicciRHS (I := I) gBase g x (v 0) (v 1) := by
+  rw [unitModel]
+  exact deTurckRHSSection_toModel_apply (I := I) gBase g x v
+
+set_option linter.unusedSectionVars false in
+private theorem ricci_unit
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g 2
+        (ricciCc (I := I) (M := M) g) x v =
+      ricciTensor (I := I) g x (v 0) (v 1) := by
+  rw [unitModel]
+  change Tensor0SSpace.toModel
+    (ccUnitField (I := I) g 2 (ricciCc (I := I) (M := M) g) x) v = _
+  rw [ricciCc, ccOfField_unit]
+  change metricRicci (I := I) (M := M) g x v = _
+  have hcmm : metricRicciAt (I := I) (M := M) g x v =
+      metricRicciAt (I := I) (M := M) g x (vec2 (v 0) (v 1)) :=
+    congrArg _ (by
+      funext i
+      fin_cases i <;> rfl)
+  rw [metricRicci_apply, hcmm]
+  exact metricRicciAt_apply_eq_ricciTensor (I := I) g x (v 0) (v 1)
+
+set_option linter.unusedSectionVars false in
+private theorem rhs_split
+    (gBase g : SmoothRiemannianMetric I M) :
+    deTurckRHSSection (I := I) gBase g =
+      ((-2 : ℝ) • ricciCc (I := I) (M := M) g +
+        wAlphaA (I := I) (M := M) g g gBase) +
+      domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
+        (wAlphaA (I := I) (M := M) g g gBase) := by
+  classical
+  refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  have hv : v = ![v 0, v 1] := by
+    funext i
+    fin_cases i <;> rfl
+  have hswap :
+      (fun i => v ((Equiv.swap (0 : Fin 2) 1) i)) = ![v 1, v 0] := by
+    funext i
+    fin_cases i <;> rfl
+  rw [rhs_unit, unit_add2_apply, unit_add2_apply,
+    unit_smul2_apply, ricci_unit]
+  rw [domDomCongrSection_unitModel, ContinuousMultilinearMap.domDomCongr_apply]
+  rw [hswap, hv]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [wAlphaA_unit_apply, wAlphaA_unit_apply,
+    deTurckRicciRHS_apply,
+    DifferentialGeometry.PDE.RicciFlow.Pullback.cartan_formula_for_lie_deriv_metric]
+  rw [g.symm x (v 0)]
+  unfold wVF
+  ring
+
+set_option linter.unusedSectionVars false in
+private theorem rhs_one_split
+    (gBase g : SmoothRiemannianMetric I M) :
+    iteratedCovGrad (I := I) g 0 2 1
+        (deTurckRHSSection (I := I) gBase g) =
+      ((-2 : ℝ) • iteratedCovGrad (I := I) g 0 2 1
+          (ricciCc (I := I) (M := M) g) +
+        iteratedCovGrad (I := I) g 0 2 1
+          (wAlphaA (I := I) (M := M) g g gBase)) +
+      iteratedCovGrad (I := I) g 0 2 1
+        (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
+          (wAlphaA (I := I) (M := M) g g gBase)) := by
+  rw [rhs_split, iteratedCovGrad_add, iteratedCovGrad_add,
+    iteratedCovGrad_smul]
+
+set_option linter.unusedSectionVars false in
+/-- Explicit coefficient for the first covariant jet of the static
+Ricci--DeTurck field. -/
+noncomputable def ksupOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
+  4 * (ricciOneC (E := E) Λ Kb₀ Kb₁ + alphaOneC (E := E) Λ)
+
+set_option linter.unusedSectionVars false in
+/-- The `j = 1` static Ricci--DeTurck bound with fixed background curvature
+coefficients supplied before the varying metric. -/
+theorem unifKsupOne_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    {Kb₀ Kb₁ : ℝ} (hKb₀0 : 0 ≤ Kb₀)
+    (hKb₀ : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb₀ * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hKb₁0 : 0 ≤ Kb₁)
+    (hKb₁ : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) gBase x 5
+        (iterCov (I := I) gBase 4
+          (metricRm04 (I := I) (M := M) gBase) 1 x)) ≤ Kb₁)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 1
+          (deTurckRHSSection (I := I) gBase g₀)).toSection x) ≤
+        ksupOneC (E := E) Λ Kb₀ Kb₁ ^ 2 := by
+  let KR : ℝ := ricciOneC (E := E) Λ Kb₀ Kb₁
+  let KA : ℝ := alphaOneC (E := E) Λ
+  have hKR0 : 0 ≤ KR := by
+    dsimp [KR, ricciOneC]
+    positivity
+  have hKA0 : 0 ≤ KA := by
+    dsimp [KA, alphaOneC]
+    positivity
+  have hRic := unifRicOne_of (I := I) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+  have hAlpha := unifAlphaOne_of (I := I) gBase g₀
+    hΛ hcomp hjet1 hjet2 hjet3
+  intro x
+  let R1 := (iteratedCovGrad (I := I) g₀ 0 2 1
+    (ricciCc (I := I) (M := M) g₀)).toSection x
+  let A1 := (iteratedCovGrad (I := I) g₀ 0 2 1
+    (wAlphaA (I := I) (M := M) g₀ g₀ gBase)).toSection x
+  let P1 := (iteratedCovGrad (I := I) g₀ 0 2 1
+    (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
+      (wAlphaA (I := I) (M := M) g₀ g₀ gBase))).toSection x
+  have hR :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x R1 ≤
+        KR ^ 2 := by
+    simpa [R1, ricciCc] using hRic x
+  have hA :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x A1 ≤
+        KA ^ 2 := by
+    simpa [A1] using hAlpha x
+  have hP :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x P1 =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x A1 := by
+    simpa [P1, A1] using
+      (riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+        (I := I) (M := M) g₀ (Equiv.swap (0 : Fin 2) 1)
+        (wAlphaA (I := I) (M := M) g₀ g₀ gBase) 1 x)
+  have hS :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+          ((-2 : ℝ) • R1) =
+        4 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x R1 := by
+    rw [riemannianFiberNormSq_smul]
+    norm_num
+  have hRA :=
+    riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + 1) x
+      ((-2 : ℝ) • R1) A1
+  have hRAP :=
+    riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + 1) x
+      (((-2 : ℝ) • R1) + A1) P1
+  have hsum :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+          (((-2 : ℝ) • R1) + A1 + P1) ≤
+        16 * KR ^ 2 + 6 * KA ^ 2 := by
+    nlinarith [hRA, hRAP, hR, hA, hS, hP]
+  rw [rhs_one_split (I := I) gBase g₀]
+  have hout :
+      (((-2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 1
+          (ricciCc (I := I) (M := M) g₀) +
+        iteratedCovGrad (I := I) g₀ 0 2 1
+          (wAlphaA (I := I) (M := M) g₀ g₀ gBase)) +
+        iteratedCovGrad (I := I) g₀ 0 2 1
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
+            (wAlphaA (I := I) (M := M) g₀ g₀ gBase))).toSection x =
+        ((-2 : ℝ) • R1) + A1 + P1 := by
+    rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
+      SmoothCcTensor.toSection_smul]
+    rfl
+  rw [hout]
+  exact hsum.trans (by
+    dsimp [ksupOneC, KR, KA]
+    nlinarith [mul_nonneg hKR0 hKA0, sq_nonneg KA])
+
+set_option linter.unusedSectionVars false in
+/-- The `j = 1` slot of the class-uniform static Ricci--DeTurck fibre bound. -/
+theorem unifKsupOne
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 1
+          (deTurckRHSSection (I := I) gBase g₀)).toSection x) ≤ K ^ 2 := by
+  obtain ⟨Kb₀, hKb₀0, hKb₀⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  obtain ⟨Kb₁, hKb₁0, hKb₁⟩ :=
+    exists_curvJet_sup (I := I) (M := M) gBase 1
+  refine ⟨ksupOneC (E := E) Λ Kb₀ Kb₁, ?_, ?_⟩
+  · dsimp [ksupOneC]
+    exact mul_nonneg (by norm_num) <|
+      add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+  · exact unifKsupOne_of (I := I) gBase g₀ hΛ
+      hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+
+set_option linter.unusedSectionVars false in
+/-- A single background-dependent coefficient controls the static
+Ricci--DeTurck field through covariant order one for every metric in the class. -/
+theorem unifKsupLeOne
+    (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ) :
+    ∃ Kstar : ℝ, 0 ≤ Kstar ∧
+      ∀ g₀ : SmoothRiemannianMetric I M,
+        (∀ (x : M) (v : TangentSpace I x),
+          Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+            g₀.inner x v v ≤ Λ * gBase.inner x v v) →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ →
+        ∀ j : ℕ, j ≤ 1 → ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSSection (I := I) gBase g₀)).toSection x) ≤ Kstar ^ 2 := by
+  obtain ⟨Kb₀, hKb₀0, hKb₀⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  obtain ⟨Kb₁, hKb₁0, hKb₁⟩ :=
+    exists_curvJet_sup (I := I) (M := M) gBase 1
+  let K₀ : ℝ := ksupZeroC (E := E) Λ Kb₀
+  let K₁ : ℝ := ksupOneC (E := E) Λ Kb₀ Kb₁
+  have hK₀0 : 0 ≤ K₀ := by
+    dsimp [K₀]
+    exact ksupZeroC_nonneg (E := E) hΛ
+  have hK₁0 : 0 ≤ K₁ := by
+    dsimp [K₁, ksupOneC]
+    exact mul_nonneg (by norm_num) <|
+      add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+  refine ⟨K₀ + K₁, add_nonneg hK₀0 hK₁0, ?_⟩
+  intro g₀ hcomp hjet1 hjet2 hjet3 j hj x
+  have h0 := unifKsupZero_of (I := I) (M := M) gBase g₀ hΛ
+    hKb₀0 hKb₀ hcomp hjet1 hjet2
+  have h1 := unifKsupOne_of (I := I) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+  interval_cases j
+  · exact (h0 x).trans (by
+      nlinarith [mul_nonneg hK₀0 hK₁0, sq_nonneg K₁])
+  · exact (h1 x).trans (by
+      nlinarith [mul_nonneg hK₀0 hK₁0, sq_nonneg K₀])
+
+set_option linter.unusedSectionVars false in
+/-- The complete class-uniform covariant one-jet packet for the static
+Ricci--DeTurck field. -/
+theorem unifKsupLow
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ j : ℕ, j ≤ 1 → ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j
+            (deTurckRHSSection (I := I) gBase g₀)).toSection x) ≤ K ^ 2 := by
+  obtain ⟨K₀, hK₀, h0⟩ :=
+    unifKsupZero (I := I) (M := M) gBase g₀
+      hΛ hcomp hjet1 hjet2
+  obtain ⟨K₁, hK₁, h1⟩ :=
+    unifKsupOne (I := I) gBase g₀
+      hΛ hcomp hjet1 hjet2 hjet3
+  refine ⟨K₀ + K₁, add_nonneg hK₀ hK₁, ?_⟩
+  intro j hj x
+  interval_cases j
+  · exact (h0 x).trans (by
+      nlinarith [mul_nonneg hK₀ hK₁, sq_nonneg K₁])
+  · exact (h1 x).trans (by
+      nlinarith [mul_nonneg hK₀ hK₁, sq_nonneg K₀])
 
 end RicciFlow
 end PDE

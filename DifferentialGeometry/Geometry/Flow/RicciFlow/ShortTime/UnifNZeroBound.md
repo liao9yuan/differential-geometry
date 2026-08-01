@@ -1,8 +1,10 @@
 # UnifNZeroBound.lean — brick E6 (the `D`-number of the six-number horizon)
 
-Status: **LANDED, sorry-free, axiom-clean** (14 public declarations, 484 lines).
-Verification: focused check green; targeted module build green; axiom probe green
-(`propext, Classical.choice, Quot.sound` only for every declaration).
+Status: **LANDED; curvature-free order-one revision verified GREEN**.
+Focused and exact verification passed.  Direct axiom audits of
+`staticN_h1_le`, `nZero_unif`, and `nZero_lowregNfun` report only
+`propext`, `Classical.choice`, and `Quot.sound`; the source has no `sorry`,
+`admit`, or new axiom declaration.
 
 ## What the brick had to produce
 
@@ -40,12 +42,20 @@ class information.  E6 replaces it by a closed number in `(gBase`-data`, Λ, fin
    `nZero_eq_static` packages this: `lowRegN … ⟨0,_⟩ = smoothCcToTensorHs g₀ 1
    (deTurckRHSSection g_bg g₀)`.
 
-2. **Spectral `H¹` → covariant `1`-jets.**  `hsCovsum_smoothCc` (E1×E2, easy direction).
-   *Discovery worth keeping*: at spectral order `1` its closed constant evaluates to a bare
-   `√2` — `hsCovsumC Fc d 1 = √(2^0 · (modeJetC 0 + modeJetC 1))` and both mode constants are
-   the empty Laplacian iterate `iterRawLapC _ _ 0 _ = 1`.  So E6 inherits **no** dependence on
-   the curvature-jet family `Fc` or on the dimension through the Gårding side; `hcurv` is
-   carried only because `hsCovsum_smoothCc`'s *statement* demands it (`hsCovsumC_one`).
+2. **Spectral `H¹` → covariant `1`-jets, without curvature.**  The private
+   `hsOne_sq` specializes the public coefficient identities `rawIter_tsum` and
+   `covIter_tsum` at the empty rough-Laplacian iterate and proves the exact
+   identity
+
+   ```
+   ‖S‖_{H¹(g₀)}² = ‖S‖_{L²(g₀)}² + ‖∇S‖_{L²(g₀)}².
+   ```
+
+   Hence `‖S‖_{H¹} ≤ ‖S‖ + ‖∇S‖`, which is harmlessly enlarged by the old
+   factor `√2` so `nZeroC` does not change.  The former `Fc/hFc/hcurv`
+   parameters were artifacts of invoking the arbitrary-order Bochner wrapper;
+   they are now absent from `staticN_h1_le`, `nZero_unif`, and
+   `nZero_lowregNfun`.
 
 3. **Jets → `L²(g₀)` from a fibre sup bound.**  `smoothCc_norm_le_of_fibreSq`:
    `‖S‖_{L²(g)} ≤ K·√(vol_g M)` from `riemannianFiberNormSq ≤ K²` pointwise.  Route:
@@ -68,23 +78,22 @@ nZeroC Ksup Λ volBase n = √2 · (2 · (Ksup · √(√(Λ^n) · volBase)))
 
 ## Parameterized inputs (the honest frontier)
 
-* **`Ksup`** — `∀ j ≤ 1, ∀ x, riemannianFiberNormSq g₀ 0 (2+j) x (∇^j(deTurckRHSSection gBase g₀) x)
-  ≤ Ksup²`.  This is the *only* genuinely geometric input and it is Lane-E-adjacent (E3 at
-  order `≤ 1`): the fibre norm of the static Ricci–DeTurck field and of its first covariant
-  derivative.  Metric jets of order `≤ 3` against `gBase` suffice for it mathematically
-  (Riemann = 2 metric derivatives, `∇Riemann` one more, plus the connection-difference terms
-  of the DeTurck vector field), comfortably inside E0's `a ≤ 6` budget.  Taken as a hypothesis
-  in the shape a Λ-class producer will deliver, exactly as `H2PointwiseUnif.lean` takes `Cpt`.
-  **No such bound exists in the tree today** — this is the remaining E6 debt.
-* **`hcurv`** — `UnifBochnerGap`'s abstract Weitzenböck-defect hypothesis (E3's other face).
-  Structurally required by `hsCovsum_smoothCc`; the constant it yields here is `√2`.
+* **`Ksup`** — `∀ j ≤ 1, ∀ x, riemannianFiberNormSq g₀ 0 (2+j) x
+  (∇^j(deTurckRHSSection gBase g₀) x) ≤ Ksup²`.  The geometric estimate is
+  proved in `UnifDeTurckRHSOne.unifKsupLow`, but its current public quantifier
+  order is only `∀ g₀, ∃ K`.  A uniform horizon needs `∃ Kstar, ∀ g₀`.
+  Therefore the remaining E6 debt is not another curvature estimate: it is the
+  explicit-constant extraction and quantifier correction of that producer.
+  The current producer also assumes `Λ < 2`; this is only the staged
+  sub-two class, not the final endpoint for arbitrary `Λ ≥ 1`.
 * **`hcore`** — `Continuous (coreN g₀ gBase hδ hreal)`, produced by `lowRegN_outer` alongside
   `Ctop, B0, B1, ρ`.  Not a new frontier: it is the same producer E7 already consumes.
 * **`hEq`** — `MetricUniformEquivalentOn Set.univ gBase g₀ Λ`, the class comparability.
 
 ## Reuse ledger
 
-Reused directly, not reproved: `hsCovsum_smoothCc` / `hsCovsumC` (E1+E2),
+Reused directly, not reproved: `rawIter_tsum`, `covIter_tsum`,
+`ccToHs_norm_sq`, `norm_ccHs_eq_smoothHs`,
 `volumeMeasure_cross_le` (S0 volume brick), `tensorL2Norm_sq_eq_integral_riemannianFiberNormSq`,
 `riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace`, `smoothN_wd`, `coreRep_spec`,
 `coreSymm_h2`, `norm_smoothCcToTensorHs_symmS_le`, `smoothCcToTensorHs_sub`,
@@ -96,11 +105,14 @@ Reused directly, not reproved: `hsCovsum_smoothCc` / `hsCovsumC` (E1+E2),
 * `smoothCc_norm_le_of_fibreSq` is a rank-generic `L²` fact whose canonical home is
   `Analysis/Integration/L2/SmoothSections/`.  Kept local to avoid invalidating that low-level
   module while other lanes build.
-* `hsCovsumC_one`, `smoothCcToTensorHs_zero`, `rawTensorConnLapSmooth_zero` are evaluation
-  lemmas whose canonical homes are `UnifBochnerGap.lean`,
-  `DeTurck/SobolevNonlinearityExistence.lean` and
-  `RawConnLapL2SobolevBounds/RawTensorConnLapIterL2WtwokTwoBound.lean` respectively; same
-  reason.
+* `hsOne_sq` is kept private because the rank-generic public spectral
+  coefficient identities already provide its reusable algebra, while importing
+  the existing high-level odd-ladder wrapper here pulled a 46k-line DeTurck
+  module into the exact refresh path.
+* `smoothCcToTensorHs_zero` and `rawTensorConnLapSmooth_zero` are evaluation
+  lemmas whose canonical homes are `DeTurck/SobolevNonlinearityExistence.lean`
+  and `RawConnLapL2SobolevBounds/RawTensorConnLapIterL2WtwokTwoBound.lean`
+  respectively; they remain local for the same surgical-change reason.
 
 ## Lessons
 
@@ -115,10 +127,16 @@ Reused directly, not reproved: `hsCovsum_smoothCc` / `hsCovsumC` (E1+E2),
 
 ## Next concrete target
 
-The `Ksup` producer: a Λ-class bound on `riemannianFiberNormSq g₀ 0 (2+j) x
-(∇^j(deTurckRHSSection gBase g₀) x)` for `j ≤ 1`, from comparability plus
-`MetricCovDerivOrderBoundOn` at orders `≤ 3`.  Order-`0` inputs already exist
-(`unifCurvatureSup_singleLink` for `1 ≤ Λ < 2`,
-`exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope`,
-`exists_norm_covGrad_connDiffSection_le_of_jetEnvelope`); the missing pieces are the DeTurck
-vector-field term and the `j = 1` covariant derivative, plus the fibre-norm packaging.
+Prove `unifKsupLeOne` with `∃ Kstar` before `∀ g₀` for arbitrary `Λ ≥ 1`.
+Keeping `Λ < 2` and only reordering the witness requires two API extractions:
+the dimension bound `rfns_idEndo_le` and the explicit constants behind
+`iterCovG1_three`.  That staged result is not the final theorem.
+
+Removing `Λ < 2` requires a finite-order, nonperturbative assembly from the
+existing `A₀/A₁/A₂` connection-difference estimates.  First extract the
+arbitrary-`Λ` `A₀` estimate as `connDiff_gJet_le`; then combine it with
+`covDerivConnDiff_gJet_le`, `covDConnDiff2_gJet_le`,
+`riemannSec_difference`, and `unifCurvatureSup_singleLink_of_diff`.
+This avoids the perturbative coefficient grid and the currently incomplete
+convex-subdivision route.  Only after `unifKsupLeOne` may a high-level sibling
+state the common `Dstar` before the class member `g₀`.

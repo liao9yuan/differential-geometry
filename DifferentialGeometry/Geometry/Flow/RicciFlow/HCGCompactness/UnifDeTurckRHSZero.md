@@ -62,3 +62,16 @@ The `j = 1` slot of `Ksup` (`∇` of the static field) — it needs `∇Ric(g₀
 on the missing order-`≥ 1` curvature-difference asset (the "2a-hi" brick) recorded in
 `UnifCurvatureJetsLow.md` and PLAN2 №71.  Nothing in this file depends on it, and nothing
 here unblocks it.
+
+## Superseding status (2026-07-31)
+
+The zero-order witness has been made explicit and its quantifiers reordered.
+The public packet now includes `vfZeroC`, `rhsZeroC`, `ksupZeroC`, their
+nonnegativity lemmas, and the supplied-background-cap endpoints
+`unifCovDerivVF_of`, `unifRHSBilin_of`, `unifRHSFib_of`, and
+`unifKsupZero_of`.  Thus the zero-slot constant depends only on `gBase`, `Λ`,
+and a background curvature cap chosen before `g₀`.
+
+Focused and exact verification passed.  The old compatibility endpoints remain
+available.  The `j = 1` obstruction described above was subsequently closed in
+`UnifDeTurckRHSOne.lean`; it is no longer a live frontier.

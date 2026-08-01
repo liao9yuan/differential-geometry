@@ -1,5 +1,29 @@
 # UnifCurvatureJetBound — brick (2a) design note (item-6 S1 gate)
 
+## Current ruling (2026-07-31)
+
+The historical `Λ < 2` / convex-telescope order-zero frontier below is
+superseded.  `ConnDiffDerivBound.connDiff_gJet_le` now supplies the ungated
+`A₀` connection-difference atom, while `covDerivConnDiff_gJet_le` supplies
+`A₁`.  The classical `riemannSec_difference` identity therefore gives the
+explicit arbitrary-`Λ` bound
+
+```
+riemannDiffC Λ Λ' Λ'' = 2·A₁ + 2·A₀²
+```
+
+in `riemannDiff_gJet_le`.  The public `unifCurvSup` combines this with the
+fixed-`gBase` curvature bound and proves the class-uniform order-zero curvature
+estimate for every `Λ ≥ 1`, with the witness chosen from `gBase` and `Λ` data.
+Both focused and exact verification passed; direct axiom audits of the two new
+theorems report only `[propext, Classical.choice, Quot.sound]`.
+
+This closes only the order-zero curvature producer.  The next
+`unifKsupLeOne` brick is the differentiated Palatini estimate using the
+existing ungated `A₀/A₁/A₂` atoms.  Higher order-generic curvature packaging
+remains separate.  The older sections are retained as route history and must
+not be read as the current order-zero frontier.
+
 Session 3 recon (Opus 4.8, LANE C) in worktree
 `C:/Users/liao9/.codex/worktrees/e87b/...`, branch `codex/analytic-producers-e87b`.
 **No `.lean` written this session** (see §6 for why — two design-gating findings
@@ -584,6 +608,12 @@ conversion is fully proved.
   higher-order curvature-difference extension the current asset lacks).
 
 ## Status
+- 2026-07-31: **ARBITRARY-`Λ` ORDER ZERO CLOSED.**
+  `riemannDiff_gJet_le` and `unifCurvSup` are focused/exact GREEN and
+  axiom-clean.  The finite-order connection-difference route replaced the
+  incomplete convex-telescope route.  The remaining route to
+  `unifKsupLeOne` begins at the differentiated Palatini/A₂ estimate; it does
+  not require reopening order-zero curvature.
 - 2026-07-24 (session 6, LANE C): **Discharger 1 LANDED** + verified + axiom-clean
   (`metricDiff_gFibreOpBound` + reusable `clm_offdiag_le_of_diag` + `metricDiff_diag_le`;
   `[propext, Classical.choice, Quot.sound]`; `lake build` 9405 jobs EXIT=0).

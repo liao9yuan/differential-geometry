@@ -3700,7 +3700,10 @@ theorem c1_eq
 end LowBaseInternal
 
 set_option maxHeartbeats 1600000 in
-private theorem lowData_split
+/-- The zero-based Ricci--DeTurck remainder at an arbitrary fixed DeTurck
+background is the canonical low-base second-order action plus its first-order
+action, with a fibre-small complete second-order coefficient. -/
+theorem lowData_split
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g 0 2)

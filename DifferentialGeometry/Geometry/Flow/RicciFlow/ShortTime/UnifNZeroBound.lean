@@ -34,12 +34,14 @@ matters: only the two metrics `g₀` and `gBase` of the `Λ`-class enter `N(0)`.
 
 ## The bound
 
-`hsCovsum_smoothCc` (bricks E1/E2, easy direction) converts the spectral `H¹` norm into the
-covariant `1`-jet sum; at spectral order `1` its closed constant collapses to `√2`
-(`hsCovsumC_one`), free of both the curvature-jet family and the dimension.  Each jet is then
-converted from a fibre sup bound to an `L²(g₀)` norm (`smoothCc_norm_le_of_fibreSq`) and the
-`g₀`-volume is compared with the `gBase`-volume by `volumeMeasure_cross_le`
-(`volReal_cross_le`, factor `√(Λ^n)`).  The result is the closed
+The private curvature-free identity `hsOne_sq`, obtained directly from
+`rawIter_tsum` and `covIter_tsum` at the empty rough-Laplacian iterate, identifies
+the spectral `H¹` norm squared with the sum of the squared `L²` norms of the zero-
+and one-jets.  Thus the `H¹` norm is bounded by the covariant `1`-jet sum without
+invoking the all-order Bochner curvature hypothesis.  Each jet is then converted from a fibre sup bound
+to an `L²(g₀)` norm (`smoothCc_norm_le_of_fibreSq`) and the `g₀`-volume is compared with the
+`gBase`-volume by `volumeMeasure_cross_le` (`volReal_cross_le`, factor `√(Λ^n)`).  The result
+is the closed
 
 ```
 nZeroC Ksup Λ volBase n = √2 · (2 · (Ksup · √(√(Λ^n) · volBase)))
@@ -56,8 +58,6 @@ with `volBase` the total `gBase`-volume, `Λ` the comparability constant and `n 
   `H2PointwiseUnif.lean` takes the fibre-Morrey constant `Cpt`.  Metric jets of order `≤ 3`
   suffice for it (Riemann costs two metric derivatives, `∇Riemann` one more), well inside the
   `a ≤ 6` budget of brick E0.
-* `hcurv` — `UnifBochnerGap`'s abstract Weitzenböck-defect hypothesis, needed only to invoke
-  `hsCovsum_smoothCc`; the constant it produces at order `1` is `√2` regardless of `Fc`.
 * `hcore` — continuity of `coreN`, produced alongside `Ctop, B0, B1, ρ` by `lowRegN_outer`.
 
 ## Main statements
@@ -65,7 +65,6 @@ with `volBase` the total `gBase`-volume, `Λ` the comparability constant and `n 
 * `smoothCc_norm_le_of_fibreSq` — `L²` from a uniform fibre bound on a closed manifold.
 * `volReal_cross_le` — real-valued total-volume comparison of `Λ`-comparable metrics.
 * `deTurckRem_zero` / `nZero_eq_static` — `N(0)` is the static field `deTurckRHSSection g_bg g₀`.
-* `hsCovsumC_one` — the order-`1` easy-direction constant is `√2`.
 * `nZeroC` — the closed constant.
 * `staticN_h1_le` — the `H¹(g₀)` bound on the static field.
 * `nZero_unif` / `nZero_lowregNfun` — the `hzero` slot of `lowreg_partial_sol_of_bounds`,
@@ -305,21 +304,109 @@ theorem nZero_eq_static (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ} (h
           (deTurckRHSSection (I := I) g_bg g₀) :=
         deTurckSmoothN_zero (I := I) (M := M) g₀ g_bg 1 hδ hb0
 
-/-! ### The closed constant -/
+/-! ### Curvature-free spectral order one -/
 
-/-- At spectral order `1` the easy-direction Gårding constant of `UnifBochnerGap` collapses to
-`√2`: both mode constants are the empty Laplacian iterate.  (Canonical home of this evaluation
-is `UnifBochnerGap.lean`; it is stated here to keep that module untouched.) -/
-theorem hsCovsumC_one (Fc : ℕ → ℝ) (d : ℕ) : hsCovsumC Fc d 1 = Real.sqrt 2 := by
-  have h0 : modeJetC Fc d 0 = 1 := by
-    unfold modeJetC
-    norm_num [iterRawLapC]
-  have h1 : modeJetC Fc d 1 = 1 := by
-    unfold modeJetC
-    norm_num [iterRawLapC]
-  unfold hsCovsumC
-  rw [h0, h1]
-  norm_num
+private theorem hsOne_sq (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) :
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) S‖ ^ 2 =
+      ‖S‖ ^ 2 + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖ ^ 2 := by
+  classical
+  have hsum0 :
+      Summable (fun m :
+          DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2 =>
+        (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) m) ^ 0 *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 S) m) ^ 2) := by
+    simpa only [pow_zero, one_mul, tensorSobolevWeight_zero, ccTensorToHs_coeff] using
+      (ccTensorToHs (I := I) (M := M) g₀ 2 (0 : ℝ) S).weighted_summable
+  have hsum1 :
+      Summable (fun m :
+          DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2 =>
+        (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) m) ^ 1 *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 S) m) ^ 2) := by
+    have hfull :=
+      (ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ) S).weighted_summable
+    refine Summable.of_nonneg_of_le ?_ ?_ hfull
+    · intro m
+      have hlam : (0 : ℝ) ≤
+          DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      positivity
+    · intro m
+      have hlam : (0 : ℝ) ≤
+          DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      have hle :
+          DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) m ≤
+            1 +
+              DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+                (I := I) (M := M) m := by
+        linarith
+      have hweight :
+          tensorSobolevWeight (I := I) (M := M) m (1 : ℝ) =
+            1 +
+              DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+                (I := I) (M := M) m := by
+        unfold tensorSobolevWeight
+        rw [Real.rpow_one]
+      rw [pow_one, hweight, ccTensorToHs_coeff]
+      exact mul_le_mul_of_nonneg_right hle (sq_nonneg _)
+  rw [Nat.cast_one]
+  rw [← norm_ccHs_eq_smoothHs (I := I) (M := M) g₀ (1 : ℝ) S,
+    ccToHs_norm_sq]
+  calc
+    ∑' m :
+        DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) m (1 : ℝ) *
+        (tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 S) m) ^ 2 =
+        ∑' m, (
+          (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) m) ^ 0 *
+              (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 S) m) ^ 2 +
+            (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) m) ^ 1 *
+              (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 S) m) ^ 2) := by
+          refine tsum_congr (fun m => ?_)
+          unfold tensorSobolevWeight
+          rw [Real.rpow_one]
+          ring
+    _ =
+        (∑' m,
+          (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) m) ^ 0 *
+            (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 S) m) ^ 2) +
+        ∑' m,
+          (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) m) ^ 1 *
+            (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 S) m) ^ 2 :=
+      Summable.tsum_add hsum0 hsum1
+    _ = ‖S‖ ^ 2 + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖ ^ 2 := by
+      rw [← rawIter_tsum (I := I) (M := M) g₀ 2 0 S,
+        ← covIter_tsum (I := I) (M := M) g₀ 2 0 S,
+        rawTensorConnLapIter_zero, SmoothCcTensor.norm_toL2]
+
+/-! ### The closed constant -/
 
 /-- **The closed class-uniform bound on `‖N(0)‖_{H¹}`.**
 
@@ -341,12 +428,6 @@ The spectral `H¹` norm of `deTurckRHSSection gBase g₀` is at most the closed 
 of a fibre sup bound `Ksup` on its covariant `1`-jet, the comparability constant `Λ` and the
 `gBase` volume. -/
 theorem staticN_h1_le (gBase g₀ : SmoothRiemannianMetric I M)
-    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
-    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
-        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
-            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
-          Fc p * ∑ a ∈ Finset.range (p + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
     {Λ Ksup : ℝ} (hKsup : 0 ≤ Ksup)
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
     (hsup : ∀ j : ℕ, j ≤ 1 → ∀ x : M,
@@ -361,9 +442,33 @@ theorem staticN_h1_le (gBase g₀ : SmoothRiemannianMetric I M)
   classical
   have hvol₀nn : 0 ≤ (riemannianVolumeMeasure (I := I) (M := M) g₀).real Set.univ :=
     ENNReal.toReal_nonneg
-  have hjet := hsCovsum_smoothCc (I := I) (M := M) g₀ Fc hFc hcurv 1
-    (deTurckRHSSection (I := I) gBase g₀)
-  rw [hsCovsumC_one] at hjet
+  let S := deTurckRHSSection (I := I) gBase g₀
+  have hjet_sq := hsOne_sq (I := I) (M := M) g₀ S
+  have hcross : 0 ≤ ‖S‖ * ‖covGrad (I := I) (M := M) g₀ 0 2 S‖ :=
+    mul_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hjet0 :
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) S‖ ≤
+        ‖S‖ + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖ := by
+    apply le_of_sq_le_sq
+    · rw [hjet_sq]
+      nlinarith
+    · positivity
+  have hsqrt : (1 : ℝ) ≤ Real.sqrt 2 := Real.one_le_sqrt.mpr (by norm_num)
+  have hjet :
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) S‖ ≤
+        Real.sqrt 2 * ∑ j ∈ Finset.range 2,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by
+    calc
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) S‖ ≤
+          ‖S‖ + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖ := hjet0
+      _ = 1 * (‖S‖ + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖) := by ring
+      _ ≤ Real.sqrt 2 *
+          (‖S‖ + ‖covGrad (I := I) (M := M) g₀ 0 2 S‖) :=
+        mul_le_mul_of_nonneg_right hsqrt (add_nonneg (norm_nonneg _) (norm_nonneg _))
+      _ = Real.sqrt 2 * ∑ j ∈ Finset.range 2,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by
+        simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+          iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
   have hterm : ∀ j ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (deTurckRHSSection (I := I) gBase g₀)‖ ≤
         Ksup * Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g₀).real Set.univ) := by
@@ -424,12 +529,6 @@ theorem nZero_unif (gBase g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
         gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hcore : Continuous (coreN (I := I) (M := M) g₀ gBase hδ hreal))
-    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
-    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
-        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
-            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
-          Fc p * ∑ a ∈ Finset.range (p + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
     {Λ Ksup : ℝ} (hKsup : 0 ≤ Ksup)
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
     (hsup : ∀ j : ℕ, j ≤ 1 → ∀ x : M,
@@ -442,7 +541,7 @@ theorem nZero_unif (gBase g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 
         ((riemannianVolumeMeasure (I := I) (M := M) gBase).real Set.univ)
         (Module.finrank ℝ E) := by
   rw [nZero_eq_static (I := I) (M := M) g₀ gBase hR hδ hreal hcore]
-  exact staticN_h1_le (I := I) (M := M) gBase g₀ Fc hFc hcurv hKsup hEq hsup
+  exact staticN_h1_le (I := I) (M := M) gBase g₀ hKsup hEq hsup
 
 /-- **The `hzero` slot of `lowreg_partial_sol_of_bounds`.**
 
@@ -457,12 +556,6 @@ theorem nZero_lowregNfun (gBase g₀ : SmoothRiemannianMetric I M)
         gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hcore : Continuous (coreN (I := I) (M := M) g₀ gBase hδ
       (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ) hP.le hreal)))
-    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
-    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
-        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
-            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
-          Fc p * ∑ a ∈ Finset.range (p + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
     {Λ Ksup : ℝ} (hKsup : 0 ≤ Ksup)
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
     (hsup : ∀ j : ℕ, j ≤ 1 → ∀ x : M,
@@ -477,7 +570,7 @@ theorem nZero_lowregNfun (gBase g₀ : SmoothRiemannianMetric I M)
         (Module.finrank ℝ E) :=
   nZero_unif (I := I) (M := M) gBase g₀ (lowregStateRad_pos hCtop hB1 hρ hP) hδ
     (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ) hP.le hreal)
-    hcore Fc hFc hcurv hKsup hEq hsup
+    hcore hKsup hEq hsup
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

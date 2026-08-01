@@ -624,3 +624,129 @@ Resume at item 2 of No. 82: audit and finish the field-level Palatini
 difference identity, then feed it to the `a = 1` envelope, class-uniform
 `Ksup` at `j = 1`, and E6.  Do not reopen the completed D4-free pair or hfLo
 routes.
+
+## Planner update No. 84 (2026-07-30) - KSUP j=1 GEOMETRIC PRODUCER CLOSED
+
+The intrinsic class-uniform first covariant jet of the static
+Ricci--DeTurck field is now proved.  The completed chain is:
+
+1. the differentiated Palatini and curvature-one-jet packets;
+2. reverse metric jets through order three and the connection-difference
+   two-jet estimate;
+3. a fixed rank-three-to-rank-one trace tower for the differentiated
+   DeTurck covector;
+4. the exact section-level split into the differentiated Ricci arm and the two
+   Cartan/Lie arms.
+
+`HCGCompactness/UnifDeTurckRHSOne.lean` exports `unifKsupOne` and
+`unifKsupLow`.  The latter is exactly the `j <= 1` `hsup` shape consumed by
+`ShortTime/UnifNZeroBound.lean`.  Focused and exact verification are GREEN,
+and the module is placeholder-free.
+
+This closes the geometric `hsup` producer, not the whole E6 assembly.
+`staticN_h1_le`, `nZero_unif`, and `nZero_lowregNfun` still take the independent
+`Fc/hFc/hcurv` packet explicitly, and there is no existing higher-level class
+assembly call site.  Do not import the class-specific producer into the
+parameterized consumer.  The smallest remaining E6 frontier is the
+class-uniform `Fc/hcurv` producer; after it exists, assemble both packets in a
+new high-level sibling and feed `nZero_lowregNfun`.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0% because its endpoint
+proof still has a placeholder.  Dedicated machinery is approximately 80%.
+Whole-project HCG compactness remains in the low single digits.
+
+## Planner update No. 85 (2026-07-31) - E6 H1 CURVATURE ARTIFACT REMOVED; TRUE UNIFORM WALL EXPOSED
+
+`ShortTime/UnifNZeroBound.lean` now derives the spectral `H¹` norm from the
+curvature-free order-one identity `hsOne_sq`, specialized directly from
+`rawIter_tsum` and `covIter_tsum`.  Consequently `staticN_h1_le`,
+`nZero_unif`, and `nZero_lowregNfun` no longer take the artificial
+`Fc/hFc/hcurv` packet.  Focused and exact verification are GREEN, and direct
+axiom audits report only `propext`, `Classical.choice`, and `Quot.sound`.  This
+supersedes the remaining-boundary diagnosis in No. 84.
+
+The E6 consumer is therefore curvature-free, but the class-uniform producer is
+not yet in the quantifier shape required by a common horizon:
+`unifKsupLow` currently gives only `∀ g₀, ∃ K` and assumes `Λ < 2`.  The final
+route needs one `Kstar` chosen before `g₀`, uniformly for arbitrary `Λ ≥ 1`.
+The route-closing theorem is `unifKsupLeOne`.  Reordering the witness under
+`Λ < 2` is only a staged API refactor; removing that restriction requires a
+finite-order nonperturbative assembly from the existing connection-difference
+`A₀/A₁/A₂` estimates.  Do not present the staged sub-two result as the uniform
+theorem.
+
+A second, independent frontier remains on the high side:
+`hfHi_eq_nemytskii` must identify the high fixed-point forcing almost
+everywhere with the concrete Ricci--DeTurck Nemytskii term.  The affine high
+equation alone cannot provide this identification for arbitrary supplied
+`A2/A1/f0` data.  The fixed DeTurck background must remain `gBase`; any
+low-affine producer hard-coded to `g_bg := g₀` must be parameterized before it
+can feed the endpoint.
+
+Honest accounting: `ricci_flow_unif_existence` itself remains 0% because its
+endpoint proof still has a placeholder.  Recalibrated dedicated machinery is
+approximately 65% complete; the previous 80% estimate omitted the uniform
+quantifier reversal, removal of the `Λ < 2` restriction, and the independent
+high Nemytskii realization frontier.  Whole-project HCG compactness remains in
+the low single digits.
+
+## Planner update No. 86 (2026-07-31) - KSUP j≤1 UNIFORM QUANTIFIERS CLOSED
+
+The route-closing geometric theorem `unifKsupLeOne` is now proved in
+`HCGCompactness/UnifDeTurckRHSOne.lean`.  For arbitrary `Λ ≥ 1`, it chooses one
+nonnegative `Kstar` from the fixed background before `g₀`, and controls the
+static Ricci--DeTurck fibre jets for every `j ≤ 1` throughout the metric class.
+
+The dependency chain was made explicit rather than hidden behind
+metric-dependent existential witnesses:
+
+1. `UnifCurvatureJetsLow.lean` exposes fixed low-order connection and Ricci
+   coefficients with supplied background caps;
+2. `UnifDeTurckRHSZero.lean` exposes `ksupZeroC` and `unifKsupZero_of`;
+3. `UnifDeTurckRHSOne.lean` exposes `ksupOneC`, `unifKsupOne_of`, and combines
+   the two slots under one sum coefficient.
+
+Focused and exact verification are GREEN.  Direct axiom audit of
+`unifKsupLeOne` contains only `propext`, `Classical.choice`, and `Quot.sound`.
+The upstream `.olean` files were refreshed only after their focused checks;
+the already-open downstream LSP worker was then deliberately recycled before
+continuing, preventing an old-import false diagnostic.
+
+This closes the uniform `Ksup` producer, not E6 or the endpoint theorem.  The
+next independent frontier is the high-side identity `hfHi_eq_nemytskii`, with
+the fixed DeTurck background kept equal to `gBase`; after that producer is
+available, assemble the class-level zero-forcing packet without importing a
+class-specific theorem back into the parameterized consumer.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0% because its endpoint
+proof still contains a placeholder.  Dedicated machinery is approximately
+68% complete; the whole HCG compactness project remains in the low single
+digits.
+
+## Planner update No. 87 (2026-07-31) - HIGH FORCING SMOOTH IDENTITY CLOSED
+
+`ShortTime/LowRegForceHi.lean` now proves `force_hi_smooth`: whenever the
+lifted solution field is represented by a smooth family `F`, the high `H²`
+forcing is almost everywhere the genuine order-two smooth Ricci--DeTurck
+nonlinearity of `symmS (F t)`.  The fixed DeTurck background remains the
+independent parameter `g_bg`, so the endpoint may specialize it to `gBase`.
+
+The proof is purely the correct spectral-scale injectivity argument.  It
+combines the existing high-to-low forcing identity, `lowReg_force_smooth`, and
+`deTurckSmoothN_incl`, then applies `tensorHsInclusion_injective`.  It does not
+postulate the mathematically over-strong global `H³ → H²` Nemytskii map whose
+second-order passenger would require `H⁴` regularity.
+
+Persistent-LSP diagnostics, focused verification, and the targeted module
+refresh are GREEN.  Direct axiom audit contains only `propext`,
+`Classical.choice`, and `Quot.sound`; the module is placeholder-free.
+
+This closes `hfHi_eq_nemytskii` only after a smooth representative `F` with
+the stated pinning and ball bounds is available.  The smallest remaining
+high-side frontier is therefore the representative producer from the actual
+low-regularity solution packet, followed by the class-level E6 assembly.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0% because its endpoint
+proof still contains a placeholder.  Dedicated machinery is approximately
+70% complete; the whole HCG compactness project remains in the low single
+digits.

@@ -142,6 +142,33 @@ theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact ccBilinConnDiffLoweredFib_toModel (I := I) g₀ P gA gB x m
 
+/-- The perturbative lowered connection-difference passenger is subtractive in
+the perturbation tensor. -/
+theorem pbLow_sub (g₀ : SmoothRiemannianMetric I M)
+    (P Q : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) :
+    lc0PbLow (I := I) (M := M) g₀ (P - Q) gA gB =
+      lc0PbLow (I := I) (M := M) g₀ P gA gB -
+        lc0PbLow (I := I) (M := M) g₀ Q gA gB := by
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [show unitModel (I := I) (M := M) g₀ 3
+      (lc0PbLow (I := I) (M := M) g₀ P gA gB -
+        lc0PbLow (I := I) (M := M) g₀ Q gA gB) x m =
+      unitModel (I := I) (M := M) g₀ 3
+          (lc0PbLow (I := I) (M := M) g₀ P gA gB) x m -
+        unitModel (I := I) (M := M) g₀ 3
+          (lc0PbLow (I := I) (M := M) g₀ Q gA gB) x m by
+    simp only [unitModel]
+    rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+      ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+      ContinuousMultilinearMap.sub_apply]]
+  rw [pbLow_unit (I := I) (M := M) g₀ (P - Q) gA gB x m,
+    pbLow_unit (I := I) (M := M) g₀ P gA gB x m,
+    pbLow_unit (I := I) (M := M) g₀ Q gA gB x m,
+    ccTensorBilinSymm_sub]
+
 set_option linter.unusedSectionVars false in
 private theorem unit_add0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :

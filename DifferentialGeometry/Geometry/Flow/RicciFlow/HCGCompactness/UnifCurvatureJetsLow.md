@@ -1,29 +1,43 @@
-# UnifCurvatureJetsLow — brick E3 (Λ < 2 staging), session 1
+# UnifCurvatureJetsLow — brick E3 low-order connection layer
 
-Sibling of `UnifCurvatureJetBound.lean` (order-0 Riemann sup, session 9/10).
-This file is the order-`≤ 1` **connection-difference + Ricci** layer of the same
-`Λ < 2` staging scope, reading three `Geometry/Curvature/` jet-envelope assets
-through the discharger triple already proved in `UnifCurvatureJetBound.lean`.
+## CURRENT RULING (2026-07-30)
 
-## LANDED (sorry-free; focused check green, targeted module build green)
+The focused check and targeted module build are green, and the file is
+sorry-free.  Direct axiom audits of both migrated theorems report only
+`propext`, `Classical.choice`, and `Quot.sound`.  The two canonical
+connection-difference producers have been migrated from the old perturbative
+route to the explicit finite-order route:
 
-All three constants are chosen from assets applied at the fixed background
-`gBase` with radius `δ₀ = Λ − 1` and envelope `B = n(Λ−1) + 2Λ` **before** any
-class member `g₀` is named — i.e. closed in `(Λ, gBase)`, which is the
-class-uniformity the E5/E6 endpoints need.
+* `unifConnDiffSup` now holds for every `Λ ≥ 1`, using `connDiff_gJet_le`;
+* `unifCovConnDiffSup` now holds for every `Λ ≥ 1`, using
+  `covDerivConnDiff_gJet_le`;
+* `unifRicSup` and `unifRicBilin` still retain `Λ < 2`.  They are not being
+  advertised as arbitrary-`Λ` results.
+
+All constants are chosen before the class member `g₀`.  The two migrated
+constants are explicit functions of `Λ`; the Ricci constant remains closed in
+`(Λ, gBase)` through the older perturbative asset.
+
+This supersedes the historical `Λ < 2` diagnosis below for the A0/A1
+connection-difference producers.  The next live consumer is
+`UnifCurvatureJetOne.lean`, whose remaining `hΛ2` arguments can now be removed
+using the arbitrary-`Λ` order-zero curvature theorem and differentiated
+Palatini theorem.
+
+## LANDED API
 
 | theorem | bounds | source asset |
 |---|---|---|
 | `unifRicSup` | `g₀(Ric♯v, Ric♯v) ≤ (Λ·C)²·g₀(v,v)` for `ricEndoRaisedFib g₀` | `exists_ricEndoRaisedFib_perturbed_gQuadratic_le_of_jetEnvelope` (`Geometry/Curvature/PerturbedCurvatureOperatorBound.lean:208`) |
-| `unifConnDiffSup` | `√gBase(A(v,w),A(v,w)) ≤ (C·Λ)·√gBase(v,v)·√gBase(w,w)`, `A = Γ(g₀)−Γ(gBase)` | `connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one` (`Analysis/Spectral/Tensor/CovGrad/ConnectionDifferenceFibreBound.lean:724`) + `metricDiff_orderPos_bound` for `‖∇^{gBase,1}(g₀−gBase)‖ ≤ Λ` |
-| `unifCovConnDiffSup` | `√gBase(∇^{gBase}A, ∇^{gBase}A) ≤ C·√·√·√` | `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope` (`Geometry/Curvature/CovDerivConnDiffQuadraticBound.lean:235`) |
+| `unifConnDiffSup` | `√gBase(A(v,w),A(v,w)) ≤ C·√gBase(v,v)·√gBase(w,w)`, `A = Γ(g₀)−Γ(gBase)` | `connDiff_gJet_le` |
+| `unifCovConnDiffSup` | `√gBase(∇^{gBase}A, ∇^{gBase}A) ≤ C·√·√·√` | `covDerivConnDiff_gJet_le` |
 | `unifRicBilin` | `|Ric_{g₀}(v,w)| ≤ C·√g₀(v,v)·√g₀(w,w)` — the bilinear face of `unifRicSup` | Cauchy–Schwarz + `inner_ricEndoRaisedFib` (`CovGradRoughLap/RicciTraceCarrier.lean:136`) |
 
 Private helper: `gBase_le_scaled` (the `Λ⁻¹·gBase ≤ g₀ ⟹ gBase ≤ Λ·g₀` rearrangement).
 
-Reuse, not reproof: every hypothesis of the three assets is discharged by the
-EXISTING `metricDiff_gFibreOpBound` / `metricDiff_tie` / `metricDiff_jetEnvelope`
-triple.  Nothing in `UnifCurvatureJetBound.lean` was edited.
+The sections below are retained as historical routing evidence; their claims
+about the absence of differentiated curvature infrastructure have been
+superseded by `UnifPalatiniJet1.lean` and `UnifCurvatureJetOne.lean`.
 
 ## WHY (a)/(b)/(c) AS BRIEFED DO NOT CLOSE — three walls, all upstream
 
@@ -177,3 +191,16 @@ in `Geometry/Flow/DeTurckVFConnDiffVariation.lean` or a sibling.  With it,
 `Ksup` at `j = 0` closes from what is already in this file.  `Ksup` at `j = 1`,
 `Fc`, and `∇^a Rm` for `a ≥ 1` all remain behind Wall 1 (`2a-hi`), which should
 be dispatched as its own `Geometry/Curvature/` brick.
+
+## Superseding status (2026-07-31)
+
+The old `Λ < 2` boundary above is closed for the fixed low orders used by the
+uniform-existence lane.  The module now exposes the explicit, radius-free
+coefficients `connDiffZeroC`, `connDiffOneC`, and `ricciZeroC`, together with
+the supplied-cap estimates `connDiffSup_le`, `covConnDiff_le`, and
+`ricciBilin_of`.  These declarations work for arbitrary `Λ ≥ 1`; their
+background curvature cap is fixed before the varying metric.
+
+Focused and exact verification passed.  No new placeholder or axiom was
+introduced.  The next consumer is the explicit zero-order Ricci--DeTurck
+coefficient packet in `UnifDeTurckRHSZero.lean`.

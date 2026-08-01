@@ -1467,7 +1467,9 @@ private theorem sharp_eq_slot0
   rw [g.symm x w (inverseMetricSharpFib (I := I) gm x om)]
 
 set_option linter.unusedVariables false in
-private theorem sharp_h2_low
+/-- A radius-free low-order `H²` bound for the inverse-metric endomorphism on
+a fixed fibre-small metric neighborhood. -/
+theorem sharp_h2_low
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -3749,7 +3751,9 @@ private theorem liePiece_sub
   module
 
 set_option maxHeartbeats 800000 in
-private theorem liePiece_pair
+/-- The generic `H²` two-factor pair estimate for one order-one DeTurck Lie
+piece. -/
+theorem liePiece_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3963,7 +3967,9 @@ private theorem jet_neg1
 
 set_option maxHeartbeats 1200000 in
 set_option linter.unusedVariables false in
-private theorem sharp_pair_h2
+/-- The inverse-metric endomorphism is `H²`-Lipschitz on a sufficiently small
+spectral `H²` metric ball. -/
+theorem sharp_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -4384,7 +4390,9 @@ private theorem mcd_sub_eq
 
 namespace LowBaseInternal
 
-private theorem fullRev_sub
+/-- At fixed covariant background, the reverse raised-endomorphism difference
+is exactly the raised symmetric metric perturbation difference. -/
+theorem fullRev_sub
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
     (hTtie : ∀ (x : M) (u v : TangentSpace I x),

@@ -9,7 +9,8 @@ import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 This module assembles the intrinsic `(1,3)` curvature-derivative split.  The
 base derivative of the curvature difference is the differentiated Palatini
 term, while changing the differentiating connection contributes four
-algebraic connection-insertion terms.
+algebraic connection-insertion terms.  The resulting estimates hold for every
+metric-comparability factor `Λ ≥ 1`; no perturbative `Λ < 2` gate remains.
 -/
 
 set_option autoImplicit false
@@ -298,32 +299,65 @@ private theorem sqrt_sq_mul3 {F a b c : ℝ}
     Real.sqrt_mul ha, Real.sqrt_mul hb]
   ring
 
+/-- Explicit coefficient for the connection-insertion part of `∇Rm`. -/
+noncomputable def curvConnC (Λ Kb : ℝ) : ℝ :=
+  4 * (Real.sqrt Λ) ^ 3 * (3 / 2 * Λ ^ 3 * Λ) *
+    (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
+
+/-- Explicit operator coefficient for the full first curvature jet. -/
+noncomputable def rmOneOpC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
+  curvConnC Λ Kb₀ + (Real.sqrt Λ) ^ 5 * palatiniOneC Λ +
+    (Real.sqrt Λ) ^ 5 * Kb₁
+
+/-- Explicit section-norm coefficient for the full first curvature jet. -/
+noncomputable def rmOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
+  Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * rmOneOpC Λ Kb₀ Kb₁
+
 set_option linter.unusedSectionVars false in
-private theorem curvConn_le
+private theorem curvConn_le_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
+    {Kb : ℝ} (hKb0 : 0 ≤ Kb)
+    (hKb : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (x : M) (D X Y Z : TangentSpace I x),
-        Real.sqrt (g₀.inner x
-            (curvConnAt (I := I) gBase g₀ x D X Y Z)
-            (curvConnAt (I := I) gBase g₀ x D X Y Z)) ≤
-          C * Real.sqrt (g₀.inner x D D) *
-            Real.sqrt (g₀.inner x X X) *
-            Real.sqrt (g₀.inner x Y Y) *
-            Real.sqrt (g₀.inner x Z Z) := by
+    ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g₀.inner x
+          (curvConnAt (I := I) gBase g₀ x D X Y Z)
+          (curvConnAt (I := I) gBase g₀ x D X Y Z)) ≤
+        curvConnC Λ Kb * Real.sqrt (g₀.inner x D D) *
+          Real.sqrt (g₀.inner x X X) *
+          Real.sqrt (g₀.inner x Y Y) *
+          Real.sqrt (g₀.inner x Z Z) := by
   classical
-  obtain ⟨C₀, hC₀0, hC₀⟩ :=
-    unifConnDiffSup (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1
-  obtain ⟨F, hF0, hF⟩ :=
-    unifCurvatureSup_singleLink (I := I) (M := M)
-      gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ => hcomp x⟩
+  let C₀ : ℝ := 3 / 2 * Λ ^ 3 * Λ
+  have hC₀0 : 0 ≤ C₀ := by
+    dsimp [C₀]
+    positivity
+  have hC₀ : ∀ (x : M) (v w : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)) ≤
+        C₀ * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) := by
+    intro x v w
+    have h := connDiff_gJet_le (I := I) hEq hjet1 (Set.mem_univ x) w v
+    simpa [C₀, DifferentialGeometry.PDE.DeTurck.connDiff,
+      mul_assoc, mul_left_comm, mul_comm] using h
+  let F : ℝ := Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb)
+  have hF0 : 0 ≤ F := by
+    dsimp [F, riemannDiffC]
+    positivity
+  have hF := unifCurvSup_of (I := I) (M := M) gBase g₀ hΛ
+    hKb0 hKb hcomp hjet1 hjet2
   let S : ℝ := Real.sqrt Λ
-  refine ⟨4 * S ^ 3 * C₀ * F, by positivity, ?_⟩
   intro x D X Y Z
   let L₀ : TangentSpace I x → ℝ := fun v => Real.sqrt (g₀.inner x v v)
   let LB : TangentSpace I x → ℝ := fun v => Real.sqrt (gBase.inner x v v)
@@ -460,21 +494,54 @@ private theorem curvConn_le
         Real.sqrt (g₀.inner x Z Z) := by
       dsimp [B, L₀]
       ring
+    _ = curvConnC Λ Kb * Real.sqrt (g₀.inner x D D) *
+        Real.sqrt (g₀.inner x X X) *
+        Real.sqrt (g₀.inner x Y Y) *
+        Real.sqrt (g₀.inner x Z Z) := by
+      dsimp [curvConnC, S, C₀, F]
 
 set_option linter.unusedSectionVars false in
-private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
-    ∃ K : ℝ, 0 ≤ K ∧
+private theorem curvConn_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
+    ∃ C : ℝ, 0 ≤ C ∧
       ∀ (x : M) (D X Y Z : TangentSpace I x),
-        Real.sqrt (g.inner x
-            (nablaRiemannOp (I := I) g x D X Y Z)
-            (nablaRiemannOp (I := I) g x D X Y Z)) ≤
-          K * Real.sqrt (g.inner x D D) *
-            Real.sqrt (g.inner x X X) *
-            Real.sqrt (g.inner x Y Y) *
-            Real.sqrt (g.inner x Z Z) := by
+        Real.sqrt (g₀.inner x
+            (curvConnAt (I := I) gBase g₀ x D X Y Z)
+            (curvConnAt (I := I) gBase g₀ x D X Y Z)) ≤
+          C * Real.sqrt (g₀.inner x D D) *
+            Real.sqrt (g₀.inner x X X) *
+            Real.sqrt (g₀.inner x Y Y) *
+            Real.sqrt (g₀.inner x Z Z) := by
+  obtain ⟨Kb, hKb0, hKb⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  refine ⟨curvConnC Λ Kb, ?_, ?_⟩
+  · have hΛ0 : 0 ≤ Λ := le_trans zero_le_one hΛ
+    dsimp [curvConnC, riemannDiffC]
+    positivity
+  · exact curvConn_le_of (I := I) (M := M) gBase g₀ hΛ
+      hKb0 hKb hcomp hjet1 hjet2
+
+set_option linter.unusedSectionVars false in
+private theorem fixedRmOpOne_of (g : SmoothRiemannianMetric I M)
+    {K : ℝ} (hK0 : 0 ≤ K)
+    (hK : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) g x 5
+        (iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x)) ≤ K) :
+    ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g.inner x
+          (nablaRiemannOp (I := I) g x D X Y Z)
+          (nablaRiemannOp (I := I) g x D X Y Z)) ≤
+        K * Real.sqrt (g.inner x D D) *
+          Real.sqrt (g.inner x X X) *
+          Real.sqrt (g.inner x Y Y) *
+          Real.sqrt (g.inner x Z Z) := by
   classical
-  obtain ⟨K, hK0, hK⟩ := exists_curvJet_sup (I := I) (M := M) g 1
-  refine ⟨K, hK0, ?_⟩
   intro x D X Y Z
   let R : TangentSpace I x := nablaRiemannOp (I := I) g x D X Y Z
   let q : ℝ := Real.sqrt (g.inner x R R)
@@ -515,6 +582,20 @@ private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
     simpa [A, mul_assoc] using hbound
   have hq := sqrt_cancel (Real.sqrt_nonneg _) hA0 hquad
   simpa [q, A, R] using hq
+
+set_option linter.unusedSectionVars false in
+private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (x : M) (D X Y Z : TangentSpace I x),
+        Real.sqrt (g.inner x
+            (nablaRiemannOp (I := I) g x D X Y Z)
+            (nablaRiemannOp (I := I) g x D X Y Z)) ≤
+          K * Real.sqrt (g.inner x D D) *
+            Real.sqrt (g.inner x X X) *
+            Real.sqrt (g.inner x Y Y) *
+            Real.sqrt (g.inner x Z Z) := by
+  obtain ⟨K, hK0, hK⟩ := exists_curvJet_sup (I := I) (M := M) g 1
+  exact ⟨K, hK0, fixedRmOpOne_of (I := I) (M := M) g hK0 hK⟩
 
 set_option linter.unusedSectionVars false in
 private theorem jet1_norm_le
@@ -592,32 +673,51 @@ private theorem jet1_norm_le
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 set_option linter.unusedSectionVars false in
-private theorem unifRmOpOne
+private theorem unifRmOpOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
+    {Kb₀ Kb₁ : ℝ} (hKb₀0 : 0 ≤ Kb₀)
+    (hKb₀ : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb₀ * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hKb₁0 : 0 ≤ Kb₁)
+    (hKb₁ : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) gBase x 5
+        (iterCov (I := I) gBase 4
+          (metricRm04 (I := I) (M := M) gBase) 1 x)) ≤ Kb₁)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
     (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
     (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
     (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (x : M) (D X Y Z : TangentSpace I x),
-        Real.sqrt (g₀.inner x
-            (nablaRiemannOp (I := I) g₀ x D X Y Z)
-            (nablaRiemannOp (I := I) g₀ x D X Y Z)) ≤
-          C * Real.sqrt (g₀.inner x D D) *
-            Real.sqrt (g₀.inner x X X) *
-            Real.sqrt (g₀.inner x Y Y) *
-            Real.sqrt (g₀.inner x Z Z) := by
+    ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g₀.inner x
+          (nablaRiemannOp (I := I) g₀ x D X Y Z)
+          (nablaRiemannOp (I := I) g₀ x D X Y Z)) ≤
+        rmOneOpC Λ Kb₀ Kb₁ * Real.sqrt (g₀.inner x D D) *
+          Real.sqrt (g₀.inner x X X) *
+          Real.sqrt (g₀.inner x Y Y) *
+          Real.sqrt (g₀.inner x Z Z) := by
   classical
-  obtain ⟨Cc, hCc0, hCc⟩ :=
-    curvConn_le (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2
-  obtain ⟨Cp, hCp0, hCp⟩ :=
-    unifPalatini1 (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2 hjet3
-  obtain ⟨Cb, hCb0, hCb⟩ := fixedRmOpOne (I := I) (M := M) gBase
+  let Cc : ℝ := curvConnC Λ Kb₀
+  let Cp : ℝ := palatiniOneC Λ
+  let Cb : ℝ := Kb₁
+  have hCc0 : 0 ≤ Cc := by
+    have hΛ0 : 0 ≤ Λ := le_trans zero_le_one hΛ
+    dsimp [Cc, curvConnC, riemannDiffC]
+    positivity
+  have hCp0 : 0 ≤ Cp := by
+    dsimp [Cp, palatiniOneC]
+    positivity
+  have hCb0 : 0 ≤ Cb := by simpa [Cb] using hKb₁0
+  have hCc := curvConn_le_of (I := I) (M := M) gBase g₀ hΛ
+    hKb₀0 hKb₀ hcomp hjet1 hjet2
+  have hCp := unifPalatini1_le (I := I) (M := M) gBase g₀
+    hΛ hcomp hjet1 hjet2 hjet3
+  have hCb := fixedRmOpOne_of (I := I) (M := M) gBase hKb₁0 hKb₁
   let S : ℝ := Real.sqrt Λ
-  refine ⟨Cc + S ^ 5 * Cp + S ^ 5 * Cb, by positivity, ?_⟩
   intro x D X Y Z
   let L₀ : TangentSpace I x → ℝ := fun v => Real.sqrt (g₀.inner x v v)
   let LB : TangentSpace I x → ℝ := fun v => Real.sqrt (gBase.inner x v v)
@@ -698,13 +798,84 @@ private theorem unifRmOpOne
           Real.sqrt (g₀.inner x Z Z) := by
       dsimp [L₀]
       ring
+    _ = rmOneOpC Λ Kb₀ Kb₁ * Real.sqrt (g₀.inner x D D) *
+          Real.sqrt (g₀.inner x X X) *
+          Real.sqrt (g₀.inner x Y Y) *
+          Real.sqrt (g₀.inner x Z Z) := by
+      dsimp [rmOneOpC, Cc, Cp, Cb, S]
 
 set_option linter.unusedSectionVars false in
-/-- The first lowered-curvature jet has a class-uniform `g₀` fibre bound using
-metric jets only through order three. -/
+private theorem unifRmOpOne
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (x : M) (D X Y Z : TangentSpace I x),
+        Real.sqrt (g₀.inner x
+            (nablaRiemannOp (I := I) g₀ x D X Y Z)
+            (nablaRiemannOp (I := I) g₀ x D X Y Z)) ≤
+          C * Real.sqrt (g₀.inner x D D) *
+            Real.sqrt (g₀.inner x X X) *
+            Real.sqrt (g₀.inner x Y Y) *
+            Real.sqrt (g₀.inner x Z Z) := by
+  obtain ⟨Kb₀, hKb₀0, hKb₀⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  obtain ⟨Kb₁, hKb₁0, hKb₁⟩ :=
+    exists_curvJet_sup (I := I) (M := M) gBase 1
+  refine ⟨rmOneOpC Λ Kb₀ Kb₁, ?_, ?_⟩
+  · have hΛ0 : 0 ≤ Λ := le_trans zero_le_one hΛ
+    dsimp [rmOneOpC, curvConnC, palatiniOneC, riemannDiffC]
+    positivity
+  · exact unifRmOpOne_of (I := I) (M := M) gBase g₀ hΛ
+      hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+
+set_option linter.unusedSectionVars false in
+/-- The first curvature jet with both fixed-background caps supplied. -/
+theorem unifRmJetOne_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hKb₀0 : 0 ≤ Kb₀)
+    (hKb₀ : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb₀ * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hKb₁0 : 0 ≤ Kb₁)
+    (hKb₁ : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) gBase x 5
+        (iterCov (I := I) gBase 4
+          (metricRm04 (I := I) (M := M) gBase) 1 x)) ≤ Kb₁)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∀ x : M,
+      Real.sqrt (normSq0S (I := I) g₀ x 5
+        (iterCov (I := I) g₀ 4
+          (metricRm04 (I := I) (M := M) g₀) 1 x)) ≤
+        rmOneC (E := E) Λ Kb₀ Kb₁ := by
+  have hOp0 : 0 ≤ rmOneOpC Λ Kb₀ Kb₁ := by
+    have hΛ0 : 0 ≤ Λ := le_trans zero_le_one hΛ
+    dsimp [rmOneOpC, curvConnC, palatiniOneC, riemannDiffC]
+    positivity
+  have hOp := unifRmOpOne_of (I := I) (M := M) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
+  intro x
+  simpa [rmOneC] using
+    jet1_norm_le (I := I) (M := M) g₀ hOp0 hOp x
+
+set_option linter.unusedSectionVars false in
+/-- For every `Λ ≥ 1`, the first lowered-curvature jet has a class-uniform
+`g₀` fibre bound using metric jets only through order three. -/
 theorem unifRmJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -718,7 +889,7 @@ theorem unifRmJetOne
             (metricRm04 (I := I) (M := M) g₀) 1 x)) ≤ K := by
   obtain ⟨C, hC0, hC⟩ :=
     unifRmOpOne (I := I) (M := M) gBase g₀
-      hΛ hΛ2 hcomp hjet1 hjet2 hjet3
+      hΛ hcomp hjet1 hjet2 hjet3
   refine ⟨Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * C, by positivity, ?_⟩
   intro x
   exact jet1_norm_le (I := I) (M := M) g₀ hC0 hC x
@@ -729,11 +900,44 @@ private theorem sq_le_of_sqrt_le {a K : ℝ}
   nlinarith [Real.sq_sqrt ha, Real.sqrt_nonneg a]
 
 set_option linter.unusedSectionVars false in
-/-- The class-uniform first curvature jet in the smooth section currency used
-by the short-time existence estimates. -/
+/-- The section-currency first curvature jet with both background caps supplied. -/
+theorem unifRmSecOne_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hKb₀0 : 0 ≤ Kb₀)
+    (hKb₀ : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb₀ * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hKb₁0 : 0 ≤ Kb₁)
+    (hKb₁ : ∀ x : M,
+      Real.sqrt (normSq0S (I := I) gBase x 5
+        (iterCov (I := I) gBase 4
+          (metricRm04 (I := I) (M := M) gBase) 1 x)) ≤ Kb₁)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ)
+    (hjet3 : MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g₀ gBase Λ) :
+    ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + 1) x
+          ((iteratedCovGrad (I := I) g₀ 0 4 1
+            (rmSection (I := I) (M := M) g₀)).toSection x) ≤
+        rmOneC (E := E) Λ Kb₀ Kb₁ ^ 2 := by
+  intro x
+  apply sq_le_of_sqrt_le
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + 1) x _)
+  rw [rfns_rmSection_eq (I := I) g₀ 1 x]
+  exact unifRmJetOne_of (I := I) (M := M) gBase g₀ hΛ
+    hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3 x
+
+set_option linter.unusedSectionVars false in
+/-- For every `Λ ≥ 1`, the class-uniform first curvature jet in the smooth
+section currency used by the short-time existence estimates. -/
 theorem unifRmSecOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
-    (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -746,7 +950,7 @@ theorem unifRmSecOne
             (rmSection (I := I) (M := M) g₀)).toSection x) ≤ K ^ 2 := by
   obtain ⟨K, hK0, hK⟩ :=
     unifRmJetOne (I := I) (M := M) gBase g₀
-      hΛ hΛ2 hcomp hjet1 hjet2 hjet3
+      hΛ hcomp hjet1 hjet2 hjet3
   refine ⟨K, hK0, fun x => ?_⟩
   apply sq_le_of_sqrt_le
     (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + 1) x _)

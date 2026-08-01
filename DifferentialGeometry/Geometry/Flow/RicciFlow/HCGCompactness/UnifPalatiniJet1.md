@@ -10,21 +10,28 @@ the already banked class-uniform bounds for `A`, `∇A`, and `∇²A`.
 `unifPalatini1` is proved.  It gives a class-uniform fixed-order quadrilinear
 bound for the canonical pointwise differentiated Palatini vector using metric
 jets only through order three.  Both focused verification and the exact
-targeted module refresh passed, and the declarations are axiom-clean.
+targeted module refresh passed, and direct axiom audit reports only
+`[propext, Classical.choice, Quot.sound]`.
 
-The proof uses the canonical `covDerivPal_eq` split together with the banked
-uniform bounds for `A`, `∇A`, and `∇²A`.  The older HCG-local
+The proof uses the canonical `covDerivPal_eq` split together with the explicit
+ungated bounds for `A`, `∇A`, and `∇²A`.  Its public signature now assumes only
+`1 ≤ Λ`; the former `Λ < 2` hypothesis was an artifact of the old perturbative
+`A₀/A₁` producers.  The older HCG-local
 `covDerivConnDiff2` is definitionally identical to the canonical curvature
 layer definition; a private equality bridge keeps the public API canonical.
 
 ## Remaining frontier
 
-The complete fixed-order `a = 1` curvature envelope is now closed by
-`UnifCurvatureJetOne.unifRmSecOne`. The next frontier is its class-uniform
-`Ksup` consumer at `j = 1`.
+The Palatini producer is now arbitrary-`Λ`, but its direct consumers in
+`UnifCurvatureJetOne.lean` still carry the staged `Λ < 2` argument.  The next
+brick is to migrate `curvConn_le`, `unifRmOpOne`, and `unifRmSecOne` to
+`unifCurvSup` plus this new signature, then propagate that removal into the
+static `j = 1` Ricci--DeTurck bound.
 
 ## Project accounting
 
 `ricci_flow_unif_existence` itself remains 0%. This closes the field-level
-Palatini wall inside the dedicated machinery; the `a = 1` envelope is also
-closed, while class-uniform `Ksup` at `j = 1` and E6 remain.
+Palatini wall for arbitrary comparability inside the dedicated machinery.
+The final `unifKsupLeOne` theorem is still unstated (0%); its dedicated
+finite-order geometric producers are now substantially closer, while the
+consumer migration and uniform witness assembly remain.

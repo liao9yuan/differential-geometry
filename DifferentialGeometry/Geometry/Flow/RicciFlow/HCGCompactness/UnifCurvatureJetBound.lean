@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.ConvexCombination
 
@@ -17,20 +18,14 @@ difference/fixed assets (upstream of HCG, so importable) — see
 `UnifCurvatureJetBound.md` for the ratified route (2a-0 → 2a-tel → 2a-hi → 2a-pkg)
 and the asset inventory.
 
-## This file (session 4, order-0 composition core)
+## Arbitrary-comparability order-zero endpoint
 
-`unifCurvatureSup_singleLink_of_diff` — the order-0 curvature sup bound assembled
-from the order-0 Riemann *difference* bound (its conclusion, taken as a
-hypothesis `hdiff`; discharged from the class jets by the frontier layer) and the
-committed *fixed*-`gBase` curvature bound
-(`exists_uniform_riemannOp_LeviCivita_gNorm_bound`), converted from the `gBase`
-to the `g₀` inner product by `Λ`-comparability.  Explicit constant
-`F = Λ²·(Cd + √Kbase)`.
-
-The genuinely-missing infrastructure (constructing `P = g₀ − gBase` as a
-`SmoothCcTensor gBase 0 2`, its `htie`, the comparability→`gFibreOpBound` bridge,
-and the metric-jet envelope), together with the `convexComb` telescoping to the
-full class `Λ ≥ 1`, is the named frontier recorded in `UnifCurvatureJetBound.md`.
+`riemannDiff_gJet_le` assembles the classical curvature-difference identity
+from the ungated order-zero and order-one connection-difference estimates.
+`unifCurvSup` combines it with the fixed `gBase` curvature bound, yielding the
+class-uniform order-zero curvature estimate for every `Λ ≥ 1`.  The older
+small-perturbation and convex-path declarations remain as compatibility and
+historical infrastructure, but the endpoint no longer depends on them.
 -/
 
 set_option autoImplicit false
@@ -99,25 +94,253 @@ private lemma gAddNorm_le
   rw [hsq]
   linarith [hcs]
 
-/-- **Order-0 curvature sup bound, single-link (`Λ < 2`) regime.**
+set_option linter.unusedSectionVars false in
+/-- The `g`-norm triangle inequality for a fibre difference. -/
+private lemma gSubNorm_le
+    (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
+    Real.sqrt (g.inner x (a - b) (a - b)) ≤
+      Real.sqrt (g.inner x a a) + Real.sqrt (g.inner x b b) := by
+  have h := gAddNorm_le (I := I) (M := M) g x a (-b)
+  have hnb : g.inner x (-b) (-b) = g.inner x b b := by
+    rw [map_neg (g.inner x), ContinuousLinearMap.neg_apply, map_neg, neg_neg]
+  rw [hnb] at h
+  rw [show a - b = a + (-b) from by abel]
+  exact h
 
-Given the order-0 Riemann *difference* bound `hdiff` (the conclusion of
-`exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope` at role
-base = `gBase`, `g₁ = g₀`; discharged from the class metric jets by the frontier
-layer) and `Λ`-comparability of `g₀` with `gBase`, the absolute Riemann operator
+/-- The explicit arbitrary-comparability constant for the order-zero Riemann
+difference estimate. -/
+def riemannDiffC (Λ Λ' Λ'' : ℝ) : ℝ :=
+  2 * (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)) +
+    2 * (3 / 2 * Λ ^ 3 * Λ') ^ 2
+
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 1600000 in
+/-- The ungated order-zero Riemann-difference estimate in metric-jet currency.
+
+It combines the classical curvature-difference identity with the explicit
+order-zero and order-one connection-difference bounds.  No smallness condition
+on `Λ - 1` is used. -/
+theorem riemannDiff_gJet_le
+    {K : Set M} (g₂ g₁ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    {x : M} (hx : x ∈ K) (v w u : TangentSpace I x) :
+    g₂.inner x
+        (riemannOp (cov := LeviCivita (I := I) g₁) x v w u -
+          riemannOp (cov := LeviCivita (I := I) g₂) x v w u)
+        (riemannOp (cov := LeviCivita (I := I) g₁) x v w u -
+          riemannOp (cov := LeviCivita (I := I) g₂) x v w u) ≤
+      riemannDiffC Λ Λ' Λ'' ^ 2 *
+        g₂.inner x v v * g₂.inner x w w * g₂.inner x u u := by
+  classical
+  have hL1 : (1 : ℝ) ≤ Λ := hEq.1
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hL1
+  have hJ1 : metricCovDerivNorm (I := I) 1 g₁ g₂ x ≤ Λ' := hJet1 x hx
+  have hJ2 : metricCovDerivNorm (I := I) 2 g₁ g₂ x ≤ Λ'' := hJet2 x hx
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) hJ1
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans (Real.sqrt_nonneg _) hJ2
+  set C0 : ℝ := 3 / 2 * Λ ^ 3 * Λ' with hC0
+  set C1 : ℝ := 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) with hC1
+  set Cd : ℝ := riemannDiffC Λ Λ' Λ'' with hCd
+  have hC0nn : (0 : ℝ) ≤ C0 := by
+    rw [hC0]
+    positivity
+  have hC1nn : (0 : ℝ) ≤ C1 := by
+    rw [hC1]
+    positivity
+  have hCd_expand : Cd = 2 * C1 + 2 * C0 ^ 2 := by
+    rw [hCd, hC1, hC0]
+    rfl
+  have hCdnn : (0 : ℝ) ≤ Cd := by
+    rw [hCd_expand]
+    positivity
+  set X : Π b : M, TangentSpace I b :=
+    smoothExtensionTangent (I := I) x v with hX
+  set Y : Π b : M, TangentSpace I b :=
+    smoothExtensionTangent (I := I) x w with hY
+  set Z : Π b : M, TangentSpace I b :=
+    smoothExtensionTangent (I := I) x u with hZ
+  have hX_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X) :=
+    smoothExtensionTangent_contMDiff x v
+  have hY_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y) :=
+    smoothExtensionTangent_contMDiff x w
+  have hZ_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z) :=
+    smoothExtensionTangent_contMDiff x u
+  have hXx : X x = v := smoothExtensionTangent_eq x v
+  have hYx : Y x = w := smoothExtensionTangent_eq x w
+  have hZx : Z x = u := smoothExtensionTangent_eq x u
+  set R1 : TangentSpace I x :=
+    riemannOp (cov := LeviCivita (I := I) g₁) x v w u with hR1
+  set R0 : TangentSpace I x :=
+    riemannOp (cov := LeviCivita (I := I) g₂) x v w u with hR0
+  have hR1_sec : R1 = riemannSec (LeviCivita (I := I) g₁) X Y Z x := by
+    rw [hR1, ← hXx, ← hYx, ← hZx,
+      riemannOp_apply_smooth (cov := LeviCivita (I := I) g₁) hX_sm hY_sm hZ_sm]
+  have hR0_sec : R0 = riemannSec (LeviCivita (I := I) g₂) X Y Z x := by
+    rw [hR0, ← hXx, ← hYx, ← hZx,
+      riemannOp_apply_smooth (cov := LeviCivita (I := I) g₂) hX_sm hY_sm hZ_sm]
+  have htor : (LeviCivita (I := I) g₂).torsion = 0 :=
+    LeviCivita_torsion_eq_zero (I := I) g₂
+  have hdiff :=
+    riemannSec_difference (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+      hX_sm hY_sm hZ_sm htor x
+  set A1 : TangentSpace I x :=
+    covDerivConnDiff (I := I) g₂ g₁ X Y Z x with hA1
+  set A2 : TangentSpace I x :=
+    covDerivConnDiff (I := I) g₂ g₁ Y X Z x with hA2
+  set S1 : TangentSpace I x :=
+    diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁) Y Z x with hS1
+  set S2 : TangentSpace I x :=
+    diffSec (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁) X Z x with hS2
+  set Q1 : TangentSpace I x :=
+    CovariantDerivative.difference (LeviCivita (I := I) g₁)
+      (LeviCivita (I := I) g₂) x S1 (X x) with hQ1
+  set Q2 : TangentSpace I x :=
+    CovariantDerivative.difference (LeviCivita (I := I) g₁)
+      (LeviCivita (I := I) g₂) x S2 (Y x) with hQ2
+  have hRsub : R1 - R0 = (A1 - A2) + (Q1 - Q2) := by
+    rw [hR1_sec, hR0_sec, hdiff]
+    rw [show covDerivDiff (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+          X Y Z x = A1 from rfl,
+      show covDerivDiff (LeviCivita (I := I) g₂) (LeviCivita (I := I) g₁)
+          Y X Z x = A2 from rfl]
+    abel
+  set Sv : ℝ := Real.sqrt (g₂.inner x v v) with hSv
+  set Sw : ℝ := Real.sqrt (g₂.inner x w w) with hSw
+  set Su : ℝ := Real.sqrt (g₂.inner x u u) with hSu
+  have hSvnn : (0 : ℝ) ≤ Sv := by rw [hSv]; positivity
+  have hSwnn : (0 : ℝ) ≤ Sw := by rw [hSw]; positivity
+  have hSunn : (0 : ℝ) ≤ Su := by rw [hSu]; positivity
+  have hA1_bd : Real.sqrt (g₂.inner x A1 A1) ≤ C1 * Sv * Sw * Su := by
+    have h := covDerivConnDiff_gJet_le (I := I) hEq hJet1 hJet2 hx v w u
+    rw [← hX, ← hY, ← hZ, ← hSv, ← hSw, ← hSu] at h
+    rw [hA1, hC1]
+    exact h
+  have hA2_bd : Real.sqrt (g₂.inner x A2 A2) ≤ C1 * Sw * Sv * Su := by
+    have h := covDerivConnDiff_gJet_le (I := I) hEq hJet1 hJet2 hx w v u
+    rw [← hX, ← hY, ← hZ, ← hSv, ← hSw, ← hSu] at h
+    rw [hA2, hC1]
+    exact h
+  have hS1_eq :
+      S1 = (CovariantDerivative.difference
+          (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x u) w := by
+    rw [hS1]
+    change (CovariantDerivative.difference
+        (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x (Z x)) (Y x) = _
+    rw [hZx, hYx]
+  have hS2_eq :
+      S2 = (CovariantDerivative.difference
+          (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x u) v := by
+    rw [hS2]
+    change (CovariantDerivative.difference
+        (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x (Z x)) (X x) = _
+    rw [hZx, hXx]
+  have hS1_bd : Real.sqrt (g₂.inner x S1 S1) ≤ C0 * Sw * Su := by
+    rw [hS1_eq, hC0, hSw, hSu]
+    exact connDiff_gJet_le (I := I) hEq hJet1 hx w u
+  have hS2_bd : Real.sqrt (g₂.inner x S2 S2) ≤ C0 * Sv * Su := by
+    rw [hS2_eq, hC0, hSv, hSu]
+    exact connDiff_gJet_le (I := I) hEq hJet1 hx v u
+  have hQ1_raw :
+      Real.sqrt (g₂.inner x Q1 Q1) ≤
+        C0 * Sv * Real.sqrt (g₂.inner x S1 S1) := by
+    rw [hQ1, hXx, hC0, hSv]
+    exact connDiff_gJet_le (I := I) hEq hJet1 hx v S1
+  have hQ2_raw :
+      Real.sqrt (g₂.inner x Q2 Q2) ≤
+        C0 * Sw * Real.sqrt (g₂.inner x S2 S2) := by
+    rw [hQ2, hYx, hC0, hSw]
+    exact connDiff_gJet_le (I := I) hEq hJet1 hx w S2
+  have hQ1_bd :
+      Real.sqrt (g₂.inner x Q1 Q1) ≤ C0 ^ 2 * Sv * Sw * Su := by
+    calc
+      Real.sqrt (g₂.inner x Q1 Q1) ≤
+          C0 * Sv * Real.sqrt (g₂.inner x S1 S1) := hQ1_raw
+      _ ≤ C0 * Sv * (C0 * Sw * Su) :=
+        mul_le_mul_of_nonneg_left hS1_bd (mul_nonneg hC0nn hSvnn)
+      _ = C0 ^ 2 * Sv * Sw * Su := by ring
+  have hQ2_bd :
+      Real.sqrt (g₂.inner x Q2 Q2) ≤ C0 ^ 2 * Sv * Sw * Su := by
+    calc
+      Real.sqrt (g₂.inner x Q2 Q2) ≤
+          C0 * Sw * Real.sqrt (g₂.inner x S2 S2) := hQ2_raw
+      _ ≤ C0 * Sw * (C0 * Sv * Su) :=
+        mul_le_mul_of_nonneg_left hS2_bd (mul_nonneg hC0nn hSwnn)
+      _ = C0 ^ 2 * Sv * Sw * Su := by ring
+  have hRsub_bd :
+      Real.sqrt (g₂.inner x (R1 - R0) (R1 - R0)) ≤ Cd * Sv * Sw * Su := by
+    rw [hRsub]
+    have hA2_norm : Real.sqrt (g₂.inner x A2 A2) ≤ C1 * Sv * Sw * Su := by
+      calc
+        Real.sqrt (g₂.inner x A2 A2) ≤ C1 * Sw * Sv * Su := hA2_bd
+        _ = C1 * Sv * Sw * Su := by ring
+    have htri1 : Real.sqrt (g₂.inner x (A1 - A2) (A1 - A2)) ≤
+        C1 * Sv * Sw * Su + C1 * Sv * Sw * Su :=
+      le_trans (gSubNorm_le (I := I) (M := M) g₂ x A1 A2)
+        (add_le_add hA1_bd hA2_norm)
+    have htri2 : Real.sqrt (g₂.inner x (Q1 - Q2) (Q1 - Q2)) ≤
+        C0 ^ 2 * Sv * Sw * Su + C0 ^ 2 * Sv * Sw * Su :=
+      le_trans (gSubNorm_le (I := I) (M := M) g₂ x Q1 Q2)
+        (add_le_add hQ1_bd hQ2_bd)
+    have htri := gAddNorm_le (I := I) (M := M) g₂ x (A1 - A2) (Q1 - Q2)
+    calc
+      Real.sqrt
+          (g₂.inner x ((A1 - A2) + (Q1 - Q2)) ((A1 - A2) + (Q1 - Q2))) ≤
+          Real.sqrt (g₂.inner x (A1 - A2) (A1 - A2)) +
+            Real.sqrt (g₂.inner x (Q1 - Q2) (Q1 - Q2)) := htri
+      _ ≤ (C1 * Sv * Sw * Su + C1 * Sv * Sw * Su) +
+          (C0 ^ 2 * Sv * Sw * Su + C0 ^ 2 * Sv * Sw * Su) :=
+        add_le_add htri1 htri2
+      _ = Cd * Sv * Sw * Su := by rw [hCd_expand]; ring
+  have hRnn : 0 ≤ g₂.inner x (R1 - R0) (R1 - R0) :=
+    metric_inner_self_nonneg (I := I) (M := M) g₂ x (R1 - R0)
+  have hrhs_nn : 0 ≤ Cd * Sv * Sw * Su :=
+    mul_nonneg (mul_nonneg (mul_nonneg hCdnn hSvnn) hSwnn) hSunn
+  have hsq :
+      g₂.inner x (R1 - R0) (R1 - R0) ≤ (Cd * Sv * Sw * Su) ^ 2 := by
+    have hmul := mul_le_mul hRsub_bd hRsub_bd (Real.sqrt_nonneg _) hrhs_nn
+    rw [Real.mul_self_sqrt hRnn] at hmul
+    rw [sq]
+    exact hmul
+  calc
+    g₂.inner x
+        (riemannOp (cov := LeviCivita (I := I) g₁) x v w u -
+          riemannOp (cov := LeviCivita (I := I) g₂) x v w u)
+        (riemannOp (cov := LeviCivita (I := I) g₁) x v w u -
+          riemannOp (cov := LeviCivita (I := I) g₂) x v w u) =
+        g₂.inner x (R1 - R0) (R1 - R0) := by rw [hR1, hR0]
+    _ ≤ (Cd * Sv * Sw * Su) ^ 2 := hsq
+    _ = Cd ^ 2 * (Sv ^ 2) * (Sw ^ 2) * (Su ^ 2) := by ring
+    _ = Cd ^ 2 * g₂.inner x v v * g₂.inner x w w * g₂.inner x u u := by
+      rw [hSv, hSw, hSu, Real.sq_sqrt
+          (metric_inner_self_nonneg (I := I) (M := M) g₂ x v),
+        Real.sq_sqrt (metric_inner_self_nonneg (I := I) (M := M) g₂ x w),
+        Real.sq_sqrt (metric_inner_self_nonneg (I := I) (M := M) g₂ x u)]
+    _ = riemannDiffC Λ Λ' Λ'' ^ 2 *
+        g₂.inner x v v * g₂.inner x w w * g₂.inner x u u := by rw [hCd]
+
+/- **Order-0 curvature sup bound from supplied background and difference bounds.**
+
+Given any nonnegative order-0 Riemann *difference* bound `hdiff` and
+`Λ`-comparability of `g₀` with `gBase`, the absolute Riemann operator
 of `g₀` is bounded in the `g₀` inner product by `F²` with
 
   `F = Λ² · (Cd + √Kbase)`,
 
 where `Kbase` is the fixed `gBase` curvature constant
-(`exists_uniform_riemannOp_LeviCivita_gNorm_bound`).  This is the composition
-spine of brick 2a-0; the full class `Λ ≥ 1` follows by `convexComb` telescoping
-(2a-tel). -/
-theorem unifCurvatureSup_singleLink_of_diff
+(`exists_uniform_riemannOp_LeviCivita_gNorm_bound`).  This composition theorem
+itself has no smallness restriction on `Λ`. -/
+private theorem curvSup_of_diff
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    {Kb : ℝ} (hKb0 : 0 ≤ Kb)
+    (hKb : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
     {Cd : ℝ} (hCd : 0 ≤ Cd)
     (hdiff : ∀ (x : M) (v w u : TangentSpace I x),
       gBase.inner x
@@ -126,18 +349,14 @@ theorem unifCurvatureSup_singleLink_of_diff
           (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
             riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
         Cd ^ 2 * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) :
-    ∃ F : ℝ, 0 ≤ F ∧
-      ∀ (x : M) (v w u : TangentSpace I x),
-        g₀.inner x
-            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
-            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
-          F ^ 2 * g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
+    ∀ (x : M) (v w u : TangentSpace I x),
+      g₀.inner x
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
+        (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
+          g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
   classical
   have hΛ0 : (0 : ℝ) < Λ := lt_of_lt_of_le one_pos hΛ
-  obtain ⟨Kb, hKb0, hKb⟩ :=
-    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
-  refine ⟨Λ ^ 2 * (Cd + Real.sqrt Kb),
-    mul_nonneg (sq_nonneg _) (add_nonneg hCd (Real.sqrt_nonneg _)), ?_⟩
   intro x v w u
   set R0 : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) g₀) x v w u with hR0
   set Rb : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) gBase) x v w u with hRb
@@ -226,6 +445,97 @@ theorem unifCurvatureSup_singleLink_of_diff
             (mul_le_mul_of_nonneg_left hP3_conv hcoeff_nn) hΛ0.le
     _ = (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
           g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by ring
+
+/-- **Order-0 curvature sup bound from a supplied Riemann-difference bound.**
+
+Given any nonnegative order-0 Riemann *difference* bound `hdiff` and
+`Λ`-comparability of `g₀` with `gBase`, the absolute Riemann operator
+of `g₀` is bounded in the `g₀` inner product. -/
+theorem unifCurvatureSup_singleLink_of_diff
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    {Cd : ℝ} (hCd : 0 ≤ Cd)
+    (hdiff : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
+            riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u -
+            riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Cd ^ 2 * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) :
+    ∃ F : ℝ, 0 ≤ F ∧
+      ∀ (x : M) (v w u : TangentSpace I x),
+        g₀.inner x
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
+          F ^ 2 * g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
+  obtain ⟨Kb, hKb0, hKb⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  refine ⟨Λ ^ 2 * (Cd + Real.sqrt Kb),
+    mul_nonneg (sq_nonneg _) (add_nonneg hCd (Real.sqrt_nonneg _)), ?_⟩
+  exact curvSup_of_diff (I := I) (M := M) gBase g₀ hΛ hcomp
+    hKb0 hKb hCd hdiff
+
+/-- The arbitrary-`Λ` curvature bound with the fixed background cap supplied. -/
+theorem unifCurvSup_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb : ℝ} (hΛ : 1 ≤ Λ)
+    (hKb0 : 0 ≤ Kb)
+    (hKb : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
+    ∀ (x : M) (v w u : TangentSpace I x),
+      g₀.inner x
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
+        (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb)) ^ 2 *
+          g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ => hcomp x⟩
+  have hCd : 0 ≤ riemannDiffC Λ Λ Λ := by
+    unfold riemannDiffC
+    positivity
+  exact curvSup_of_diff (I := I) (M := M) gBase g₀ hΛ hcomp
+    hKb0 hKb hCd
+      (fun x v w u =>
+        riemannDiff_gJet_le (I := I) (M := M) gBase g₀
+          hEq hjet1 hjet2 (Set.mem_univ x) v w u)
+
+/-- The class-uniform order-zero curvature bound for arbitrary `Λ ≥ 1`.
+
+The witness depends only on `gBase`, `Λ`, and the two metric-jet bounds; it is
+obtained from the ungated finite-order Riemann-difference estimate rather than
+from a small perturbation or a telescoping path. -/
+theorem unifCurvSup
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
+    ∃ F : ℝ, 0 ≤ F ∧
+      ∀ (x : M) (v w u : TangentSpace I x),
+        g₀.inner x
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u)
+            (riemannOp (cov := LeviCivita (I := I) g₀) x v w u) ≤
+          F ^ 2 * g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ => hcomp x⟩
+  have hΛ0 : (0 : ℝ) ≤ Λ := le_trans zero_le_one hΛ
+  have hCd : 0 ≤ riemannDiffC Λ Λ Λ := by
+    unfold riemannDiffC
+    positivity
+  exact unifCurvatureSup_singleLink_of_diff (I := I) (M := M)
+    gBase g₀ hΛ hcomp hCd
+      (fun x v w u =>
+        riemannDiff_gJet_le (I := I) (M := M) gBase g₀
+          hEq hjet1 hjet2 (Set.mem_univ x) v w u)
 
 /-! ### P-construction tie API (session 5)
 

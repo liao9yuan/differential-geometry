@@ -3,34 +3,25 @@ import DifferentialGeometry.Geometry.Curvature.PerturbedCurvatureOperatorBound
 import DifferentialGeometry.Geometry.Curvature.CovDerivConnDiffQuadraticBound
 
 /-!
-# Low-order class-uniform curvature and connection-difference bounds (brick E3, `Λ < 2`)
+# Low-order class-uniform curvature and connection-difference bounds (brick E3)
 
-The `Λ < 2` staging layer of brick E3.  `UnifCurvatureJetBound.lean` proves the
-order-`0` Riemann sup `unifCurvatureSup_singleLink` for the `Λ`-class together
-with the three dischargers of the perturbation package consumed by the
-`Geometry/Curvature/` jet-envelope assets:
+This file now has two scopes.
 
-* `metricDiff_gFibreOpBound` — the fibre operator bound `δ = Λ − 1`;
-* `metricDiff_tie` — `g₀ = gBase + h_sym(g₀ − gBase)`;
-* `metricDiff_jetEnvelope` — `∑_{j ≤ 2} ‖∇^{gBase,j}(g₀ − gBase)‖ ≤ n(Λ−1) + 2Λ`.
+* `unifConnDiffSup` and `unifCovConnDiffSup` are finite-order estimates for
+  arbitrary `Λ ≥ 1`.  They use the explicit Koszul estimates
+  `connDiff_gJet_le` and `covDerivConnDiff_gJet_le`, so no perturbative
+  `Λ < 2` gate remains.
+* `unifRicSup` and its bilinear face `unifRicBilin` still use the older
+  perturbative Ricci asset and therefore retain `Λ < 2`.
 
-This file reads three further `Geometry/Curvature/` assets through the *same*
-discharger triple, producing the remaining order-`≤ 1` class-uniform geometric
-bounds that the E6 static-field fibre bound `Ksup` consumes:
+In every case the constant is chosen before the class member `g₀`.  The two
+connection-difference constants are explicit functions of `Λ`; the Ricci
+constant is closed in `(Λ, gBase)`.
 
-* `unifRicSup` — the raised Ricci endomorphism of `g₀`;
-* `unifConnDiffSup` — the Levi-Civita connection difference `Γ(g₀) − Γ(gBase)`;
-* `unifCovConnDiffSup` — its first `gBase`-covariant derivative.
-
-All three constants are closed in `(Λ, gBase)` alone: they are chosen from
-assets applied at the fixed background `gBase` with radius `δ₀ = Λ − 1` and
-envelope `B = n(Λ−1) + 2Λ`, before any class member `g₀` is named.  That is the
-class-uniformity the E5/E6 endpoints need.
-
-See `UnifCurvatureJetsLow.md` for the E3 scope audit — in particular for why the
-order-`≥ 1` *curvature* jets (`∇^a Rm`, `a ≥ 1`), and hence the `Fc` family and
-the `j = 1` half of `Ksup`, are blocked on a missing upstream
-curvature-difference asset rather than on anything in this layer.
+The arbitrary-`Λ` order-zero curvature producer now lives in
+`UnifCurvatureJetBound.lean`, while the differentiated Palatini and first
+curvature-jet assembly live in their dedicated sibling modules.  See
+`UnifCurvatureJetsLow.md` for the current consumer-migration status.
 -/
 
 set_option autoImplicit false
@@ -128,19 +119,48 @@ theorem unifRicSup
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Class-uniform connection-difference sup (`1 ≤ Λ < 2`), order `0`.**
+/-- Explicit order-zero connection-difference coefficient. -/
+noncomputable def connDiffZeroC (Λ : ℝ) : ℝ :=
+  3 / 2 * Λ ^ 3 * Λ
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- The order-zero connection-difference estimate with its fixed coefficient. -/
+theorem connDiffSup_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn Set.univ 1 g₀ gBase Λ) :
+    ∀ (x : M) (v w : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)
+          (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)) ≤
+        connDiffZeroC Λ * Real.sqrt (gBase.inner x v v) *
+          Real.sqrt (gBase.inner x w w) := by
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ => hcomp x⟩
+  intro x v w
+  have h := connDiff_gJet_le (I := I) hEq hjet1 (Set.mem_univ x) w v
+  simpa [connDiffZeroC, DifferentialGeometry.PDE.DeTurck.connDiff,
+    mul_assoc, mul_left_comm, mul_comm] using h
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Class-uniform connection-difference sup for arbitrary `Λ ≥ 1`, order `0`.**
 
 The Levi-Civita connection difference `A = Γ(g₀) − Γ(gBase)` has `gBase`-fibre
 length at most `C · √(gBase(v,v)) · √(gBase(w,w))` with `C` closed in
-`(Λ, gBase)`: the order-`1` metric jet `‖∇^{gBase,1}(g₀ − gBase)‖ ≤ Λ` of the
-class feeds the Koszul bound
-`connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one` at radius `δ₀ = Λ − 1`.
+`Λ`: the order-`1` metric jet of the class feeds the ungated finite-order
+Koszul estimate `connDiff_gJet_le`.
 
 This is the order-`0` half of the DeTurck vector-field envelope: the DeTurck
 field `W = deTurckVF g₀ gBase` is the `g₀`-trace of `A`
 (`deTurckVF_eq_orthoFrame_trace`). -/
 theorem unifConnDiffSup
-    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -151,44 +171,57 @@ theorem unifConnDiffSup
             (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)
             (DifferentialGeometry.PDE.DeTurck.connDiff (I := I) g₀ gBase x v w)) ≤
           C * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) := by
-  classical
-  have hΛ0 : (0 : ℝ) < Λ := lt_of_lt_of_le one_pos hΛ
-  have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
-  letI inst3 : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 3 I b) :=
-    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 3
-  obtain ⟨C, hC0, hC⟩ :=
-    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M)
-      gBase (δ₀ := Λ - 1) hΛ1 (by linarith : Λ - 1 < 1)
-  refine ⟨C * Λ, mul_nonneg hC0 hΛ0.le, ?_⟩
-  intro x v w
-  set N : ℝ := ‖((iteratedCovGrad (I := I) gBase 0 2 1
-      (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x :
-        TensorRSSpace 0 3 I x)‖ with hN_def
-  have hjetx : N ≤ Λ :=
-    metricDiff_orderPos_bound (I := I) (M := M) gBase g₀ 0 hjet1 x
-  have hstep := hC g₀ (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)
-    (fun y a b => metricDiff_tie (I := I) (M := M) gBase g₀ y a b) (δ := Λ - 1)
-    (le_refl _) hΛ1
-    (metricDiff_gFibreOpBound (I := I) (M := M) gBase g₀ hΛ hcomp) x v w
-  refine hstep.trans ?_
-  have hvw : (0 : ℝ) ≤ Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) :=
-    mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
-  have hmono : C * N ≤ C * Λ := mul_le_mul_of_nonneg_left hjetx hC0
-  calc C * N * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w)
-      = (C * N) * (Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w)) := by ring
-    _ ≤ (C * Λ) * (Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w)) :=
-        mul_le_mul_of_nonneg_right hmono hvw
-    _ = C * Λ * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) := by ring
+  refine ⟨connDiffZeroC Λ, ?_, ?_⟩
+  · dsimp [connDiffZeroC]
+    positivity
+  · exact connDiffSup_le (I := I) (M := M) gBase g₀ hΛ hcomp hjet1
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Class-uniform connection-difference sup (`1 ≤ Λ < 2`), order `1`.**
+/-- Explicit order-one connection-difference coefficient. -/
+noncomputable def connDiffOneC (Λ : ℝ) : ℝ :=
+  3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2)
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- The order-one connection-difference estimate with its fixed coefficient. -/
+theorem covConnDiff_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn Set.univ 2 g₀ gBase Λ) :
+    ∀ (x : M) (v w u : TangentSpace I x),
+      Real.sqrt (gBase.inner x
+          (covDerivConnDiff (I := I) gBase g₀
+              (smoothExtensionTangent (I := I) x v)
+              (smoothExtensionTangent (I := I) x w)
+              (smoothExtensionTangent (I := I) x u) x)
+          (covDerivConnDiff (I := I) gBase g₀
+              (smoothExtensionTangent (I := I) x v)
+              (smoothExtensionTangent (I := I) x w)
+              (smoothExtensionTangent (I := I) x u) x)) ≤
+        connDiffOneC Λ * Real.sqrt (gBase.inner x v v) *
+          Real.sqrt (gBase.inner x w w) * Real.sqrt (gBase.inner x u u) := by
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ => hcomp x⟩
+  intro x v w u
+  simpa [connDiffOneC] using
+    covDerivConnDiff_gJet_le (I := I) hEq hjet1 hjet2
+      (Set.mem_univ x) v w u
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Class-uniform connection-difference sup for arbitrary `Λ ≥ 1`, order `1`.**
 
 The first `gBase`-covariant derivative `∇^{gBase}A` of the connection difference
 obeys the `gBase`-quadratic bound with a constant closed in `(Λ, gBase)`,
-obtained from `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope` at radius
-`δ₀ = Λ − 1` and envelope `B = n(Λ−1) + 2Λ` through the same discharger triple.
+obtained directly from the ungated finite-order estimate
+`covDerivConnDiff_gJet_le`.
 
 This is the order-`1` half of the DeTurck vector-field envelope.  (An
 `MetricUniformEquivalentOn`-currency sibling with the *explicit* constant
@@ -197,7 +230,7 @@ This is the order-`1` half of the DeTurck vector-field envelope.  (An
 face, matching the hypothesis package the other `Geometry/Curvature/` assets in
 this lane consume.) -/
 theorem unifCovConnDiffSup
-    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -216,30 +249,120 @@ theorem unifCovConnDiffSup
                 (smoothExtensionTangent (I := I) x u) x)) ≤
           C * Real.sqrt (gBase.inner x v v) * Real.sqrt (gBase.inner x w w) *
             Real.sqrt (gBase.inner x u u) := by
-  classical
-  have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
-  have hB0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ :=
-    add_nonneg (mul_nonneg (Nat.cast_nonneg _) hΛ1) (by linarith)
-  obtain ⟨C, hC0, hC⟩ :=
-    exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope (I := I) (M := M)
-      gBase (δ₀ := Λ - 1) (by linarith : Λ - 1 < 1)
-      ((Module.finrank ℝ E : ℝ) * (Λ - 1) + 2 * Λ) hB0
-  refine ⟨C, hC0, ?_⟩
-  intro x v w u
-  exact hC g₀ (metricDifferenceCcTensor (I := I) (M := M) gBase g₀) (δ := Λ - 1)
-    (le_of_eq (max_eq_left hΛ1).symm)
-    (metricDiff_gFibreOpBound (I := I) (M := M) gBase g₀ hΛ hcomp)
-    (fun y a b => metricDiff_tie (I := I) (M := M) gBase g₀ y a b) x
-    (metricDiff_jetEnvelope (I := I) (M := M) gBase g₀ hΛ hcomp hjet1 hjet2 x) v w u
+  refine ⟨connDiffOneC Λ, ?_, ?_⟩
+  · dsimp [connDiffOneC]
+    positivity
+  · exact covConnDiff_le (I := I) (M := M) gBase g₀
+      hΛ hcomp hjet1 hjet2
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform Ricci bilinear bound (`1 ≤ Λ < 2`).**  The bilinear face of
-`unifRicSup`, obtained by Cauchy–Schwarz against the defining property
-`g₀(Ric♯v, w) = Ric(v, w)` of `ricEndoRaisedFib`.  This is the shape the E6
-static-field fibre bound consumes: read on a `g₀`-orthonormal frame it bounds
-every component of the Ricci summand of `deTurckRicciRHS gBase g₀`. -/
+/-- Explicit zero-order Ricci coefficient with the fixed background curvature
+cap supplied. -/
+noncomputable def ricciZeroC (Λ Kb : ℝ) : ℝ :=
+  (Module.finrank ℝ E : ℝ) *
+    (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
+
+set_option linter.unusedSectionVars false in
+/-- **Class-uniform Ricci bilinear bound for arbitrary `Λ ≥ 1`.**
+
+The arbitrary-`Λ` curvature operator estimate `unifCurvSup` is traced in a
+`g₀`-orthonormal frame.  Cauchy--Schwarz on each trace summand gives the
+bilinear Ricci bound with the sole dimensional loss `finrank ℝ E`. -/
+theorem ricciBilin_of
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    {Kb : ℝ} (hKb0 : 0 ≤ Kb)
+    (hKb : ∀ (x : M) (v w u : TangentSpace I x),
+      gBase.inner x (riemannOp (cov := LeviCivita (I := I) gBase) x v w u)
+          (riemannOp (cov := LeviCivita (I := I) gBase) x v w u) ≤
+        Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn Set.univ 2 g₀ gBase Λ) :
+    ∀ (x : M) (v w : TangentSpace I x),
+      |ricciTensor (I := I) g₀ x v w| ≤
+        ricciZeroC (E := E) Λ Kb * Real.sqrt (g₀.inner x v v) *
+          Real.sqrt (g₀.inner x w w) := by
+  classical
+  let F : ℝ := Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb)
+  have hCd0 : 0 ≤ riemannDiffC Λ Λ Λ := by
+    unfold riemannDiffC
+    positivity
+  have hF0 : 0 ≤ F :=
+    mul_nonneg (sq_nonneg _) (add_nonneg hCd0 (Real.sqrt_nonneg _))
+  have hF := unifCurvSup_of (I := I) (M := M) gBase g₀ hΛ
+    hKb0 hKb hcomp hjet1 hjet2
+  intro x v w
+  let B : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun i => smoothOrthoFrame (I := I) g₀ x i x
+  have hB : ∀ i j : Fin (Module.finrank ℝ E),
+      g₀.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0 := by
+    intro i j
+    exact smoothOrthoFrame_orthonormal_at_center (I := I) g₀ x i j
+  rw [ricciTensor_eq_orthonormal_trace (I := I) g₀ x v w B hB]
+  calc
+    |∑ i, g₀.inner x
+        (riemannOp (cov := LeviCivita (I := I) g₀) x (B i) v w) (B i)|
+        ≤ ∑ i, |g₀.inner x
+          (riemannOp (cov := LeviCivita (I := I) g₀) x (B i) v w) (B i)| :=
+      Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _i : Fin (Module.finrank ℝ E),
+        F * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+      refine Finset.sum_le_sum (fun i _ => ?_)
+      set R : TangentSpace I x :=
+        riemannOp (cov := LeviCivita (I := I) g₀) x (B i) v w with hR
+      have hBii : g₀.inner x (B i) (B i) = 1 := by
+        rw [hB i i]
+        simp
+      have hRR : g₀.inner x R R ≤
+          F ^ 2 * g₀.inner x v v * g₀.inner x w w := by
+        have h := hF x (B i) v w
+        rw [← hR, hBii] at h
+        simpa only [mul_one] using h
+      have hv0 : 0 ≤ g₀.inner x v v :=
+        metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+      have hw0 : 0 ≤ g₀.inner x w w :=
+        metric_inner_self_nonneg (I := I) (M := M) g₀ x w
+      have hsqrt : Real.sqrt (g₀.inner x R R) ≤
+          F * Real.sqrt (g₀.inner x v v) *
+            Real.sqrt (g₀.inner x w w) := by
+        have heq : F ^ 2 * g₀.inner x v v * g₀.inner x w w =
+            (F * Real.sqrt (g₀.inner x v v) *
+              Real.sqrt (g₀.inner x w w)) ^ 2 := by
+          calc
+            F ^ 2 * g₀.inner x v v * g₀.inner x w w =
+                F ^ 2 * Real.sqrt (g₀.inner x v v) ^ 2 *
+                  Real.sqrt (g₀.inner x w w) ^ 2 := by
+              rw [Real.sq_sqrt hv0, Real.sq_sqrt hw0]
+            _ = (F * Real.sqrt (g₀.inner x v v) *
+                Real.sqrt (g₀.inner x w w)) ^ 2 := by ring
+        rw [heq] at hRR
+        have h := Real.sqrt_le_sqrt hRR
+        rwa [Real.sqrt_sq
+          (mul_nonneg (mul_nonneg hF0 (Real.sqrt_nonneg _))
+            (Real.sqrt_nonneg _))] at h
+      change |g₀.inner x R (B i)| ≤ _
+      calc
+        |g₀.inner x R (B i)| ≤
+            Real.sqrt (g₀.inner x R R) *
+              Real.sqrt (g₀.inner x (B i) (B i)) :=
+          abs_metric_inner_le_sqrt_metric_quadratic
+            (I := I) (M := M) g₀ x R (B i)
+        _ = Real.sqrt (g₀.inner x R R) := by
+          rw [hBii]
+          simp
+        _ ≤ _ := hsqrt
+    _ = ricciZeroC (E := E) Λ Kb *
+        Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      dsimp [ricciZeroC, F]
+      ring
+
+set_option linter.unusedSectionVars false in
+/-- **Class-uniform Ricci bilinear bound for arbitrary `Λ ≥ 1`.** -/
 theorem unifRicBilin
-    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
         g₀.inner x v v ≤ Λ * gBase.inner x v v)
@@ -249,28 +372,17 @@ theorem unifRicBilin
       ∀ (x : M) (v w : TangentSpace I x),
         |ricciTensor (I := I) g₀ x v w| ≤
           C * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
-  classical
-  obtain ⟨C, hC0, hC⟩ :=
-    unifRicSup (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2
-  refine ⟨C, hC0, ?_⟩
-  intro x v w
-  set R : TangentSpace I x := ricEndoRaisedFib (I := I) g₀ x v with hR
-  have hRic : ricciTensor (I := I) g₀ x v w = g₀.inner x R w :=
-    (inner_ricEndoRaisedFib (I := I) g₀ x v w).symm
-  have hcs : |g₀.inner x R w| ≤
-      Real.sqrt (g₀.inner x R R) * Real.sqrt (g₀.inner x w w) :=
-    abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x R w
-  have hvv : (0 : ℝ) ≤ g₀.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
-  have hRR : Real.sqrt (g₀.inner x R R) ≤ C * Real.sqrt (g₀.inner x v v) := by
-    calc Real.sqrt (g₀.inner x R R)
-        ≤ Real.sqrt (C ^ 2 * g₀.inner x v v) := Real.sqrt_le_sqrt (hC x v)
-      _ = C * Real.sqrt (g₀.inner x v v) := by
-          rw [Real.sqrt_mul (sq_nonneg C), Real.sqrt_sq hC0]
-  rw [hRic]
-  refine hcs.trans ?_
-  exact le_of_eq_of_le rfl
-    (le_trans (mul_le_mul_of_nonneg_right hRR (Real.sqrt_nonneg _))
-      (le_of_eq (by ring)))
+  obtain ⟨Kb, hKb0, hKb⟩ :=
+    exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) gBase
+  have hCd0 : 0 ≤ riemannDiffC Λ Λ Λ := by
+    unfold riemannDiffC
+    positivity
+  refine ⟨ricciZeroC (E := E) Λ Kb, ?_, ?_⟩
+  · dsimp [ricciZeroC]
+    exact mul_nonneg (Nat.cast_nonneg _) <|
+      mul_nonneg (sq_nonneg _) (add_nonneg hCd0 (Real.sqrt_nonneg _))
+  · exact ricciBilin_of (I := I) (M := M) gBase g₀ hΛ
+      hKb0 hKb hcomp hjet1 hjet2
 
 end RicciFlow
 end PDE

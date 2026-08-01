@@ -800,6 +800,15 @@ construction outer **peel** (`covStep2_diffStep_peel`) and the fully-resolved **
 `H`-correction sum, and the final `∇₂²S`-cancellation assembly. -/
 
 open DifferentialGeometry.Integral.Connection in
+/-- Explicit coefficient for the differentiated mixed-commutator term. -/
+noncomputable def mixedCommC (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
+  max 0 (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
+    ((s : ℝ) *
+        (3 / 2 * Λ ^ 5 * Λ''' + 9 / 2 * Λ ^ 6 * Λ' * Λ'' + 3 * Λ ^ 7 * Λ' ^ 3) +
+      (3 * (s : ℝ) + 1) * (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)) +
+      (2 * (s : ℝ) + 1) * (3 / 2 * Λ ^ 3 * Λ')))
+
+open DifferentialGeometry.Integral.Connection in
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **The a=2 connection-difference-derivative bound in the metric-jet currency** (the
@@ -2450,21 +2459,21 @@ per-slot Cauchy–Schwarz at a `g₂`-orthonormal frame against the `g₂`-curre
 `CA₁`), and the a=0 atom `connDiffVec_norm_le` converted through the `g₁` fibre (`A`, constant
 `(3/2)·Λ³·Λ'`), assembled by `normSq0S_le_card_of_component_bound`.  The role-swapped jet `∇g₂/g₁`
 is NOT needed: the `A`-atom runs entirely in the `g₁` tensor norm plus metric comparability. -/
-theorem covStepDiff2_mixedComm_le
+private theorem mixedComm_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
     (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
     (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
     (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
-            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
-        Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
-            (covStep (I := I) g₂ (s + 2)
-              (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
-                - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x)) ≤
-          C * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
+    ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
+      Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
+          (covStep (I := I) g₂ (s + 2)
+            (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+              - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x)) ≤
+        mixedCommC (E := E) s Λ Λ' Λ'' Λ''' *
+          (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
                 (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
@@ -2485,9 +2494,6 @@ theorem covStepDiff2_mixedComm_le
   set CA2 : ℝ := 3 / 2 * Λ ^ 5 * Λ''' + 9 / 2 * Λ ^ 6 * Λ' * Λ'' + 3 * Λ ^ 7 * Λ' ^ 3 with hCA2def
   set CA1 : ℝ := 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) with hCA1def
   set NAb : ℝ := 3 / 2 * Λ ^ 3 * Λ' with hNAbdef
-  refine ⟨max 0 (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
-      ((s : ℝ) * CA2 + (3 * (s : ℝ) + 1) * CA1 + (2 * (s : ℝ) + 1) * NAb)),
-    le_max_left _ _, ?_⟩
   intro S x hx
   -- sign facts (available at `x ∈ K`)
   have hL1 : (1 : ℝ) ≤ Λ := hEq.1
@@ -2999,6 +3005,37 @@ theorem covStepDiff2_mixedComm_le
         exact mul_le_mul_of_nonneg_right (le_max_right 0 _)
           (add_nonneg (add_nonneg hNSnn hN1nn) hN2nn)
 
+open DifferentialGeometry.Integral.Connection in
+/-- Compatibility wrapper for the explicit differentiated mixed-commutator bound. -/
+theorem covStepDiff2_mixedComm_le
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    {Λ Λ' Λ'' Λ''' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''') :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
+        Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
+            (covStep (I := I) g₂ (s + 2)
+              (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
+                - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S)) x)) ≤
+          C * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+                (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
+  refine ⟨mixedCommC (E := E) s Λ Λ' Λ'' Λ''', le_max_left _ _, ?_⟩
+  exact mixedComm_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3
+
+/-- Explicit coefficient for the second base derivative of one difference step. -/
+noncomputable def covStepDiff2C (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
+  max 0 ((((s + 1 : ℕ) : ℝ) *
+      Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
+      (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+        3 / 2 * (Real.sqrt (Λ ^ 3) * Λ'))) +
+    mixedCommC (E := E) s Λ Λ' Λ'' Λ''')
+
 /-- **FRONTIER (`sorry`) — the a=2 base-Leibniz jet of a single connection-difference step.**
 
 Under `Λ`-comparability of `g₁, g₂` on `K` and metric covariant-derivative bounds through **order 3**
@@ -3027,7 +3064,7 @@ bounded by `covStepDiff2_mixedComm_le` through the full eval identity `covStep2_
 The two fibre norms combine by the triangle inequality `sqrt_normSq0S_add_le`; the constant is
 `max 0 (K₁ + C_bridge)`, uniform in `S, x`.  A downstream `hAcc`-facing consumer reads
 `Racc 2 := C₂`, `hRnn 2 := ·.1` directly. -/
-theorem covStepDiff2_exists_const
+theorem covStepDiff2_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -3035,13 +3072,13 @@ theorem covStepDiff2_exists_const
     (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
     (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''')
     (hJet1' : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ') :
-    ∃ C₂ : ℝ, 0 ≤ C₂ ∧
-      ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
-            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
-        Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
-            (covStep (I := I) g₂ (s + 2)
-              (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x)) ≤
-          C₂ * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
+    ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
+      Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
+          (covStep (I := I) g₂ (s + 2)
+            (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x)) ≤
+        covStepDiff2C (E := E) s Λ Λ' Λ'' Λ''' *
+          (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
             + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
                 (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
@@ -3050,12 +3087,14 @@ theorem covStepDiff2_exists_const
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I (1 + 1) M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
-  obtain ⟨Cbr, hCbr_nn, hCbr⟩ :=
-    covStepDiff2_mixedComm_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3
+  let Cbr : ℝ := mixedCommC (E := E) s Λ Λ' Λ'' Λ'''
+  have hCbr_nn : 0 ≤ Cbr := by
+    dsimp [Cbr, mixedCommC]
+    exact le_max_left _ _
+  have hCbr := mixedComm_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3
   -- The committed-atom constant of `covStepDiff_of_jets` at level `s+1`.
   set K1 : ℝ := ((s + 1 : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
     (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + 3 / 2 * (Real.sqrt (Λ ^ 3) * Λ')) with hK1def
-  refine ⟨max 0 (K1 + Cbr), le_max_left _ _, ?_⟩
   intro S x hx
   -- Λ-nonnegativity at `x ∈ K` and nonnegativity of `K1`.
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
@@ -3108,9 +3147,35 @@ theorem covStepDiff2_exists_const
   rw [hFx]
   refine le_trans (sqrt_normSq0S_add_le (I := I) g₂ _ _ basis hinv) ?_
   refine le_trans (add_le_add hp1 hp2) ?_
+  change K1 * (b + c) + Cbr * (a + b + c) ≤
+    max 0 (K1 + Cbr) * (a + b + c)
   nlinarith [mul_nonneg hK1nn ha, mul_nonneg hCbr_nn hc,
     mul_nonneg (sub_nonneg.mpr (le_max_right 0 (K1 + Cbr)))
       (add_nonneg (add_nonneg ha hb) hc), ha, hb, hc, hK1nn, hCbr_nn]
+
+/-- Compatibility wrapper for the explicit second base-derivative bound. -/
+theorem covStepDiff2_exists_const
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    {Λ Λ' Λ'' Λ''' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet3 : MetricCovDerivOrderBoundOn (I := I) K 3 g₁ g₂ Λ''')
+    (hJet1' : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ') :
+    ∃ C₂ : ℝ, 0 ≤ C₂ ∧
+      ∀ (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
+            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s) (x : M), x ∈ K →
+        Real.sqrt (normSq0S (I := I) g₂ x (s + 3)
+            (covStep (I := I) g₂ (s + 2)
+              (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S)) x)) ≤
+          C₂ * (Real.sqrt (normSq0S (I := I) g₂ x s (S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))
+            + Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+                (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₂ s S) x))) := by
+  refine ⟨covStepDiff2C (E := E) s Λ Λ' Λ'' Λ''', ?_, ?_⟩
+  · dsimp [covStepDiff2C]
+    exact le_max_left _ _
+  · exact covStepDiff2_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3 hJet1'
 
 end HCGCompactness
 end DifferentialGeometry

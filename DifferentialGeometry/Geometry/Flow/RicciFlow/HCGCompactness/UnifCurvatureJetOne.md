@@ -15,12 +15,16 @@ background curvature derivative.
 `unifRmJetOne` then gives the complete class-uniform first curvature-jet
 envelope in `iterCov`/`normSq0S` currency, and `unifRmSecOne` transports it to
 the `iteratedCovGrad`/`riemannianFiberNormSq` currency used by the short-time
-consumers. The class input stops at metric-jet order three. No lowering defect
-or fourth metric derivative appears.
+consumers. Both theorems now hold for every `Λ ≥ 1`; their former `Λ < 2`
+arguments were removed by routing through the arbitrary-`Λ` A0 connection,
+order-zero curvature, and differentiated Palatini producers. The class input
+stops at metric-jet order three. No lowering defect or fourth metric derivative
+appears.
 
-Focused verification and the exact targeted module refresh pass. The file has
-no local warnings or placeholders; the exact build reported only pre-existing
-warnings in imported modules.
+Focused verification and the exact targeted module refresh pass. Direct axiom
+audits of `unifRmJetOne` and `unifRmSecOne` report only `propext`,
+`Classical.choice`, and `Quot.sound`. The file has no placeholders; the exact
+build reported only pre-existing warnings in imported modules.
 
 ## Proof route
 

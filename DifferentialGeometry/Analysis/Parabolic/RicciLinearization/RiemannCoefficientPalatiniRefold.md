@@ -8,6 +8,8 @@ Two small public aliases were added without changing their underlying proofs:
   and the concrete `DLb` coefficient field.
 - `dlbDiff_grid` exposes the existing pointwise product-grid estimate for the
   change `DLb(g_bg) - DLb(g0)`.
+- `dlaBg_grid` exposes the matching fixed-order product-grid estimate for
+  `DLa(g_bg) - DLa(g0)`, without the all-order Sobolev ball parameters.
 
 The second estimate has grid window `i + 2`; for `i < 2` it is integrable from
 the metric jet through order three in dimension three.
@@ -45,3 +47,19 @@ dimension factor. The proof reuses the existing two slot-extension
 factorization; it adds no state regularity or smallness hypothesis.
 
 Focused verification and the targeted exact refresh pass.
+
+## 2026-07-31 - exact fixed-background DLa core
+
+`lieBgLow`, `lieBgCore`, and `dlaBg_eq` expose the existing fixed-background
+normal form without introducing Sobolev or ball parameters.  The companion
+identity `lieBgLow_sub` cancels all state-independent terms before estimating
+and leaves exactly three arms: one fixed lifted connection operator acting on
+the moving connection difference and two moving lifted operators acting on the
+fixed background connection difference.
+
+This is the algebraic input for the ShortTime `DLa` H1 pair estimate.  The
+reverse raised endomorphism in `lieBgCore` is affine in the tied metric state,
+so the route uses only the H2 state difference and has no D4 leak.  Persistent
+LSP elaboration reports no new errors.  The targeted exact refresh passes after
+reducing Lean concurrency; the first attempt exhausted memory while the large
+LSP worker was resident, not because of a source or proof error.

@@ -299,6 +299,109 @@ private theorem lcDiff_covOne_le
   exact diff_le_covOne_basis_ref_lc (I := I) h g hx C hEq basis hhinv
 
 set_option linter.unusedSectionVars false in
+/-- The ungated order-zero connection-difference bound in metric-jet currency.
+
+Under `Λ`-uniform equivalence and an order-one bound for `∇^{g₂} g₁`, the
+Levi-Civita connection difference is bounded in the `g₂` fibre by
+`(3 / 2) * Λ ^ 3 * Λ'`. -/
+theorem connDiff_gJet_le
+    {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    {x : M} (hx : x ∈ K) (w u : TangentSpace I x) :
+    Real.sqrt (g₂.inner x
+        ((CovariantDerivative.difference
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x u) w)
+        ((CovariantDerivative.difference
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x u) w)) ≤
+      (3 / 2 * Λ ^ 3 * Λ') *
+        Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u) := by
+  classical
+  have hL1 : (1 : ℝ) ≤ Λ := hEq.1
+  have hL0 : (0 : ℝ) < Λ := lt_of_lt_of_le zero_lt_one hL1
+  have hLnn : (0 : ℝ) ≤ Λ := le_of_lt hL0
+  have hJ1 : metricCovDerivNorm (I := I) 1 g₁ g₂ x ≤ Λ' := hJet1 x hx
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) hJ1
+  have hs2 : Real.sqrt Λ ^ 2 = Λ := Real.sq_sqrt hLnn
+  have hs3 : Real.sqrt (Λ ^ 3) = Λ * Real.sqrt Λ := by
+    rw [show Λ ^ 3 = Λ ^ 2 * Λ by ring, Real.sqrt_mul (by positivity),
+      Real.sqrt_sq hLnn]
+  have hvec : ∀ z : TangentSpace I x,
+      Real.sqrt (g₁.inner x z z) ≤
+        Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := by
+    intro z
+    calc
+      Real.sqrt (g₁.inner x z z) ≤ Real.sqrt (Λ * g₂.inner x z z) :=
+        Real.sqrt_le_sqrt (hEq.2 x hx z).2
+      _ = Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := Real.sqrt_mul hLnn _
+  have hout : ∀ z : TangentSpace I x,
+      Real.sqrt (g₂.inner x z z) ≤
+        Real.sqrt Λ * Real.sqrt (g₁.inner x z z) := by
+    intro z
+    have h := (hEq.2 x hx z).1
+    have h' : g₂.inner x z z ≤ Λ * g₁.inner x z z := by
+      have h2 := mul_le_mul_of_nonneg_left h hLnn
+      rw [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hL0), one_mul] at h2
+      exact h2
+    calc
+      Real.sqrt (g₂.inner x z z) ≤ Real.sqrt (Λ * g₁.inner x z z) :=
+        Real.sqrt_le_sqrt h'
+      _ = Real.sqrt Λ * Real.sqrt (g₁.inner x z z) := Real.sqrt_mul hLnn _
+  have hNA :
+      Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+          (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+            (leviCivitaConnectionOfMetric (I := I) g₁)
+            (leviCivitaConnectionOfMetric (I := I) g₂) x)) ≤
+        3 / 2 * (Λ * Real.sqrt Λ * Λ') := by
+    have h := lcDiff_covOne_le (I := I) g₂ g₁ hEq hx
+    rw [hs3] at h
+    refine le_trans h ?_
+    exact mul_le_mul_of_nonneg_left
+      (mul_le_mul_of_nonneg_left hJ1
+        (mul_nonneg hLnn (Real.sqrt_nonneg _)))
+      (by norm_num : (0 : ℝ) ≤ 3 / 2)
+  let A : TangentSpace I x :=
+    (CovariantDerivative.difference
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) x u) w
+  have hg1 :
+      Real.sqrt (g₁.inner x A A) ≤
+        Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
+            (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g₁)
+              (leviCivitaConnectionOfMetric (I := I) g₂) x)) *
+          Real.sqrt (g₁.inner x w w) * Real.sqrt (g₁.inner x u u) := by
+    dsimp only [A]
+    exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
+      (leviCivitaConnectionOfMetric (I := I) g₁)
+      (leviCivitaConnectionOfMetric (I := I) g₂) w u
+  have hstep :
+      Real.sqrt (g₁.inner x A A) ≤
+        3 / 2 * (Λ * Real.sqrt Λ * Λ') *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x u u)) := by
+    refine le_trans hg1 ?_
+    exact mul_le_mul
+      (mul_le_mul hNA (hvec w) (Real.sqrt_nonneg _) (by positivity))
+      (hvec u) (Real.sqrt_nonneg _) (by positivity)
+  change Real.sqrt (g₂.inner x A A) ≤ _
+  calc
+    Real.sqrt (g₂.inner x A A) ≤
+        Real.sqrt Λ * Real.sqrt (g₁.inner x A A) := hout A
+    _ ≤ Real.sqrt Λ *
+        (3 / 2 * (Λ * Real.sqrt Λ * Λ') *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x w w)) *
+          (Real.sqrt Λ * Real.sqrt (g₂.inner x u u))) :=
+      mul_le_mul_of_nonneg_left hstep (Real.sqrt_nonneg _)
+    _ = (3 / 2 * Λ ^ 3 * Λ') *
+        Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u) := by
+      linear_combination
+        (3 / 2 * Λ' * (Real.sqrt Λ ^ 2 + Λ) *
+          (Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u)) * Λ) * hs2
+
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- **B2 P2 — the dual Koszul core.**  Pairing the differentiated Koszul identity
 `connDiff_koszul_deriv` against the output vector itself bounds the `g₁`-length of

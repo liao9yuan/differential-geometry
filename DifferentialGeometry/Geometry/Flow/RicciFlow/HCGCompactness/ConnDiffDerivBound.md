@@ -12,6 +12,13 @@ Companion note for `ConnDiffDerivBound.lean`.  Full mission route: `UNIF_ITEM6_R
   `ext · = smoothExtensionTangent x ·`; norm is the `g₂`-fibre norm via `tensorRS_riemannianBundle g₂ 1 3`.
 - `covGrad_connDiffSection_flat_eval_eq_inner` (private helper): the flat/eval bridge, re-derived from the
   PUBLIC `connDiffSection_covGrad_eq_covDerivConnDiff` (the parent file's copy is `private`).
+- `connDiff_gJet_le` (public): the ungated order-zero sibling.  Under
+  `MetricUniformEquivalentOn K g₂ g₁ Λ` and the order-one jet bound `Λ'`,
+  ```
+  |(∇^{g₁} - ∇^{g₂})_u w|_{g₂}
+      ≤ (3/2)·Λ³·Λ'·|w|_{g₂}·|u|_{g₂}.
+  ```
+  It is the `A₀` atom for the arbitrary-`Λ` curvature-difference route.
 - `covDerivConnDiff_gJet_le` (public): **the B2 endpoint** (session 7).  Under
   `MetricUniformEquivalentOn K g₂ g₁ Λ` + `MetricCovDerivOrderBoundOn K 1/2 g₁ g₂ Λ'/Λ''` and
   `x ∈ K`,
@@ -298,3 +305,10 @@ namespace `DifferentialGeometry.HCGCompactness`).  B3 target `hA1`: `UnifCovSumC
   landed (verified, whole-file `lake build` EXIT=0).  Dual-route chosen (see above).  Resume at the two
   numbered "EXACT NEXT STEPS" (dual core + endpoint) — all ingredients present, no new frontier.
 - 2026-07-25 (session 1): P1 LANDED (verified, axiom-clean).  Recon COMPLETE (`UNIF_ITEM6_RECON.md`).
+- 2026-07-31: `connDiff_gJet_le` extracted from the already-proved a=2
+  consumer-local estimate into its canonical order-zero sibling position.
+  Focused and exact verification passed; direct axiom audit reports only
+  `[propext, Classical.choice, Quot.sound]`.  No `Λ < 2` hypothesis occurs.
+  This closes the first producer for `unifKsupLeOne`; the next finite-order
+  brick is the Riemann-difference bound assembled from this `A₀` atom and
+  `covDerivConnDiff_gJet_le`.
