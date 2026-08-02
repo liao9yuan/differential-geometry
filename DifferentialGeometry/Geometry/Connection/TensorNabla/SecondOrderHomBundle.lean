@@ -15,7 +15,6 @@ section ModelFiber
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
 
-@[nolint unusedArguments]
 def HomTensorRSModel (r a c : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedField 𝕜]
     [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :=
   TensorRSModel r a 𝕜 E →L[𝕜] TensorRSModel r c 𝕜 E
@@ -69,7 +68,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensio
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
-@[nolint unusedArguments]
 abbrev HomTensorRSSpace (r a c : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type
     _ :=
   TensorRSSpace r a I x →L[𝕜] TensorRSSpace r c I x

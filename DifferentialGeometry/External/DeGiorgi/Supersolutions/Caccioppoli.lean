@@ -20,6 +20,21 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => AmbientSpace d
 local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 
+private theorem le_four_mul_of_le_two_mul_and_sq_le
+    {a c Λ R : ℝ}
+    (ha : 0 ≤ a) (hac : a ≤ 2 * c)
+    (hc_sq : c ^ 2 ≤ Λ * a * R)
+    (hΛ : 0 ≤ Λ) (hR : 0 ≤ R) :
+    a ≤ 4 * Λ * R := by
+  by_cases ha_zero : a = 0
+  · rw [ha_zero]
+    exact mul_nonneg (mul_nonneg (by norm_num) hΛ) hR
+  · have ha_pos : 0 < a := lt_of_le_of_ne ha (Ne.symm ha_zero)
+    have hsq : a ^ 2 ≤ (2 * c) ^ 2 :=
+      sq_le_sq' (by linarith) hac
+    have htwo_sq : (2 * c) ^ 2 = 4 * c ^ 2 := by ring
+    nlinarith
+
 /-! ### Weighted Caccioppoli inequality for supersolutions
 
 The abstract tool for Moser-type energy bounds: if `u > 0` is a supersolution
@@ -31,8 +46,6 @@ then testing with `φ² Ψ(u)` gives:
 Proof: expand `bilinFormOfCoeff` via `bilinFormIntegrand_mul_smooth_eq`,
 apply AM-GM to the cross term, absorb into the principal term. -/
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- Weighted Caccioppoli inequality for supersolutions.
 
 For `u > 0` a supersolution on `Ω`, `Ψ` smooth with `Ψ(0) = 0`, bounded derivative,
@@ -454,13 +467,7 @@ theorem weighted_caccioppoli_of_supersolution
   -- Since `R` is defined using `‖∇φ‖²`, the upper ellipticity bound
   -- `⟨A∇φ, ∇φ⟩ ≤ Λ ‖∇φ‖²` contributes the factor `Λ` in the final estimate.
   change absP ≤ 4 * A.1.Λ * R
-  by_cases habsP_zero : absP = 0
-  · rw [habsP_zero]
-    apply mul_nonneg (mul_nonneg (by positivity) A.1.Λ_nonneg)
-    exact hR_nonneg
-  · have habsP_pos : 0 < absP := lt_of_le_of_ne habsP_nonneg (Ne.symm habsP_zero)
-    have h1 : absP ^ 2 ≤ (2 * C) ^ 2 := sq_le_sq' (by linarith) habsP_le_2C
-    have h2 : (2 * C) ^ 2 = 4 * C ^ 2 := by ring
-    nlinarith [h1, h2, hCS, habsP_pos, A.1.Λ_nonneg, hR_nonneg]
+  exact le_four_mul_of_le_two_mul_and_sq_le
+    habsP_nonneg habsP_le_2C hCS A.1.Λ_nonneg hR_nonneg
 
 end DeGiorgi

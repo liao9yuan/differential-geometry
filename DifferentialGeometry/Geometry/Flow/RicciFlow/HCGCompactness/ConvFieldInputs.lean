@@ -973,8 +973,6 @@ theorem covTail_of_bounds
     _ <= C := hC k t ht y hzgrow
 /-! ### Producer 4: `hlipSrc` (the per-`k` source-granularity time-Lipschitz bound) -/
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero (Module.finrank ℝ E)] in
 /-- **Producer for the `hlipSrc` carried input of `hgLip_gSeqExt`/`convOut`.**  This one
 is fully produced (no Lipschitz citation): per `k`, the solution-driven producers

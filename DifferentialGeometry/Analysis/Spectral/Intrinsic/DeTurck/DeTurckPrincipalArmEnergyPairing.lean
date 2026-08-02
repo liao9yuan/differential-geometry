@@ -48,6 +48,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance tensorRSModelSMul_local (r s : ℕ) :
+    SMul ℝ (Tensor0SBundle.TensorRSModel r s ℝ E) :=
+  ContinuousLinearMap.mulAction.toSMul
+
 omit [BoundarylessManifold I M] in
 theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm
     (g₀ : SmoothRiemannianMetric I M)
@@ -217,10 +221,6 @@ theorem rawConnLap_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (rawTensorConnLapSmooth (I := I) g r s v).toFun T.toFun
   rw [hsymm1, hvT] at hTv; rw [← hsymm2]; linarith [hTv]
 
-set_option maxHeartbeats 800000 in
--- Elaborating the pointwise tensor integral identity needs additional reduction budget.
-set_option synthInstance.maxHeartbeats 800000 in
--- Resolving scalar multiplication through the bundled tensor section is instance-search heavy.
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -253,10 +253,6 @@ private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M)
     tensorL2Inner_smul_left]
   ring
 
-set_option maxHeartbeats 800000 in
--- Elaborating the pointwise tensor integral identity needs additional reduction budget.
-set_option synthInstance.maxHeartbeats 800000 in
--- Resolving scalar multiplication through the bundled tensor section is instance-search heavy.
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -299,10 +295,6 @@ private noncomputable def armPrincipalSlotPairing
         (I := I) g₀ g₁ (2 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x)))
 
-set_option maxHeartbeats 800000 in
--- Normalizing the tensor-slot pairing through the bundled section maps is reduction-heavy.
-set_option synthInstance.maxHeartbeats 800000 in
--- Resolving scalar multiplication on the pointwise tensor model is instance-search heavy.
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem armPrincipalSlotPairing_eq_neg_inner
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) :
@@ -885,9 +877,7 @@ def edgeArmCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
       (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
 
-set_option maxHeartbeats 800000 in
 -- The integration-by-parts normalization expands several bundled tensor operators.
-set_option synthInstance.maxHeartbeats 800000 in
 -- Resolving the tensor-valued scalar operations in the expanded identity is instance-search heavy.
 private theorem deTurckArm_residual_ibp_zero
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -3336,9 +3326,7 @@ private theorem oneMinusConnLapIter_pairing_fold
       (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
   exact ⟨Clower, hClower_nn, hbound⟩
 
-set_option maxHeartbeats 800000 in
 -- Comparing the integral pairing with the Sobolev norm unfolds a large tensor expression.
-set_option synthInstance.maxHeartbeats 800000 in
 -- Resolving scalar multiplication in the unfolded tensor model is instance-search heavy.
 omit [BoundarylessManifold I M] in
 private theorem armPrincipalSlotPairing_le_dirichlet_top

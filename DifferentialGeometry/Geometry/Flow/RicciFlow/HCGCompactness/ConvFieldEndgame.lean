@@ -43,8 +43,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Compatibility wrapper promoting the pointwise closed-window scalar
 producer to all carrier times when the carrier lies in that one window. -/
 theorem ConvOut.scalar_conv
@@ -119,8 +117,6 @@ theorem ConvOut.scalar_conv
     ConvOut.scalar_conv_at (I := I) Φ R bf hsrc htgt β ψ cLow hcLow hbound
       hcovTail co (hcarrier ht) x
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Compatibility wrapper promoting the pointwise closed-window squared
 Ricci-norm producer to all carrier times. -/
 theorem ConvOut.ricNorm_conv

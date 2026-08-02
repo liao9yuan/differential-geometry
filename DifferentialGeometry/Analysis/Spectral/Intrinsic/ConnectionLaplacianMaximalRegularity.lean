@@ -23,6 +23,14 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian
 
+private theorem apply_eq_apply_add_of_eq
+    {X Y : Type*} [Add X] [Add Y]
+    (F : X → Y) {x y z : X} {w : Y}
+    (hxyz : x = y + z) (hadd : F (y + z) = F y + F z)
+    (hz : F z = w) :
+    F x = F y + w := by
+  rw [hxyz, hadd, hz]
+
 noncomputable def timeH1blockTransport
     {X Y : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y] {Tt : ℝ}
@@ -70,11 +78,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option maxHeartbeats 400000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Maximal regularity for the connection Laplacian on tensor-valued `L²`
-paths.  The enlarged heartbeat budget is needed to elaborate the final
-transported operator identity through the Sobolev equivalences. -/
+paths, including the transported operator identity through the Sobolev
+equivalences. -/
 theorem connection_laplacian_l2_maximal_regularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
     (_hT : 0 < T) (_hT1 : T ≤ 1) :
@@ -245,6 +251,7 @@ theorem connection_laplacian_l2_maximal_regularity
       have hsolves := maximalRegularityOp_solves (I := I) (M := M)
         (h_compact := h_compact) (a := 0) _hT _hT1 (Φsymm f)
       rw [maximalRegularityOp_timeDeriv (I := I) (M := M) (a := 0) _hT _hT1 (Φsymm f)] at hsolves
-      rw [hsolves, ContinuousLinearMap.map_add, hΦΦsymm]
+      exact apply_eq_apply_add_of_eq Φ hsolves
+        (ContinuousLinearMap.map_add Φ _ _) (hΦΦsymm f)
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

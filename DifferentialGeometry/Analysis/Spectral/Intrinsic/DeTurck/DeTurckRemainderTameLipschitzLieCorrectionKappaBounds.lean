@@ -300,7 +300,6 @@ private lemma lc0b_unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
           (unitTensor (I := I) (M := M) x) from rfl]
   rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
 
-set_option maxHeartbeats 3200000 in
 -- The pointwise metric/connection normalization is expensive to elaborate.
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The affine-background form of `lc0Kappa`: the self-background Koszul term

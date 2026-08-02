@@ -159,7 +159,7 @@ private theorem core_h2
         calc
           _ = Real.sqrt (3 : ℝ) ^ 2 *
               ‖iteratedCovGrad (I := I) g₀ 0 3 i
-                (connDiffLoweredCc (I := I) g₀ g₁)‖ := by ring
+                (connDiffLoweredCc (I := I) g₀ g₁)‖ := by ring_nf
           _ = _ := by rw [hs]
   have hsq : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 3 4 i

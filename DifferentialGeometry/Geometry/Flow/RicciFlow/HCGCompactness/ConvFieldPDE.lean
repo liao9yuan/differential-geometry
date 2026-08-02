@@ -25,6 +25,21 @@ open DifferentialGeometry.PDE.RicciFlow (metric_derivWithin_eq_neg_two_ricci)
 namespace DifferentialGeometry
 namespace HCGCompactness
 
+private theorem function_le_max_zero_one_two
+    (C : Nat → Real) {a : Nat} (ha : a ≤ 2) :
+    C a ≤ max (C 0) (max (C 1) (C 2)) := by
+  interval_cases a <;> simp only [le_max_iff] <;> aesop
+
+private theorem le_max_zero_add_one_of_le_add
+    {target err source Cmax : Real}
+    (htri : target ≤ source + err) (herr : err < 1)
+    (hsource : source ≤ Cmax) :
+    target ≤ max 0 (Cmax + 1) := by
+  calc
+    target ≤ source + err := htri
+    _ ≤ Cmax + 1 := add_le_add hsource herr.le
+    _ ≤ max 0 (Cmax + 1) := le_max_right _ _
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
@@ -172,8 +187,6 @@ theorem gSeqExt_ricci
       xsrc v w
   exact hricAmbient.symm.trans hricSource.symm
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the scalar curvature of `gSeqExt` is the scalar
 curvature of the original sequence flow at the comparison-map image. -/
@@ -342,8 +355,6 @@ theorem gSeqExt_scalar
     _ = (X.term (subseq k)).S.scalar t (Φ.map k x) := by
       rw [sourceTargetDiff_apply]
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero (Module.finrank ℝ E)] in
 /-- On the agreement region, the intrinsic squared Ricci norm of `gSeqExt`
 equals the squared Ricci norm of the original sequence flow at the
@@ -537,8 +548,6 @@ theorem gSeqExt_ricNorm
           (X.term (subseq k)).S t (Φ.map k x) := by
       rw [sourceTargetDiff_apply]
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero (Module.finrank ℝ E)] in
 /-- On a regular time window, `gSeqExt` satisfies the scalar Ricci-flow metric
 equation at every point of its agreement region. -/
@@ -618,8 +627,6 @@ theorem gSeqExt_pde
   have hric := gSeqExt_ricci (I := I) Φ R bf hsrc htgt k t x hx v w
   exact hder.congr_deriv (congrArg (fun q : Real => (-2 : Real) * q) hric.symm)
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The Arzelà–Ascoli limit of the bump-extended sequence satisfies the
 Ricci-flow metric equation on its closed regular-time window. -/
 theorem ConvOut.gInf_pde
@@ -724,7 +731,7 @@ theorem ConvOut.gInf_pde
     exact le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -734,7 +741,8 @@ theorem ConvOut.gInf_pde
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -744,8 +752,7 @@ theorem ConvOut.gInf_pde
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hRicConv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
       ∀ u ∈ Set.Icc β ψ,
         |ricciTensor (I := I) (gTail k u) x v w -
@@ -759,8 +766,6 @@ theorem ConvOut.gInf_pde
     gSeqExt_pde (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) β ψ u hwin hu x
       (hxgrow k) v w
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Scalar curvature of the reindexed source flow converges at one time in the
 closed convergence window.  This is the local analytic producer behind the
 carrier-wide compatibility theorem in `ConvFieldEndgame`. -/
@@ -875,7 +880,7 @@ theorem ConvOut.scalar_conv_at
   have hB0 : 0 ≤ B0 := le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -885,7 +890,8 @@ theorem ConvOut.scalar_conv_at
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -895,8 +901,7 @@ theorem ConvOut.scalar_conv_at
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hScalarConv : ∀ ε : Real, 0 < ε → ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k →
       ∀ u ∈ Set.Icc β ψ,
         |metricScalarAt (I := I) (gTail k u) x -
@@ -918,8 +923,6 @@ theorem ConvOut.scalar_conv_at
   simpa only [gTail, Function.comp_apply] using
     gSeqExt_scalar (I := I) Φ R bf hsrc htgt (co.φ (k + kgrow)) t x (hxgrow k)
 
-set_option maxHeartbeats 1600000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- The intrinsic squared Ricci norm of the reindexed source flow converges at
 one time in the closed convergence window. -/
 theorem ConvOut.ricNorm_conv_at
@@ -1036,7 +1039,7 @@ theorem ConvOut.ricNorm_conv_at
   have hB0 : 0 ≤ B0 := le_max_left _ _
   have hCmax : ∀ a : Nat, a ≤ 2 → C a ≤ Cmax := by
     intro a ha
-    interval_cases a <;> simp only [Cmax, le_max_iff] <;> aesop
+    exact function_le_max_zero_one_two C ha
   have hbddSeqC : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
@@ -1046,7 +1049,8 @@ theorem ConvOut.ricNorm_conv_at
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
     exact le_trans (hbddSeqC k u hu a ha)
-      (le_trans (hCmax a ha) (le_trans (by linarith) (le_max_right _ _)))
+      (le_trans (hCmax a ha)
+        (le_trans (le_add_of_nonneg_right zero_le_one) (le_max_right _ _)))
   have hbddInf : ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (co.gInf u) R x ≤ B0 := by
     intro u hu a ha
@@ -1056,8 +1060,7 @@ theorem ConvOut.ricNorm_conv_at
     rw [metricDerivNorm_symm (I := I) a (co.gInf u) (gTail k0 u) R x] at htri
     have hseq := hbddSeqC k0 u hu a ha
     have hCa := hCmax a ha
-    have hCB : Cmax + 1 ≤ B0 := le_max_right _ _
-    linarith
+    exact le_max_zero_add_one_of_le_add htri hd (le_trans hseq hCa)
   have hRicNormConv : ∀ ε : Real, 0 < ε →
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ u ∈ Set.Icc β ψ,
         |normSq0S (I := I) (gTail k u) x 2

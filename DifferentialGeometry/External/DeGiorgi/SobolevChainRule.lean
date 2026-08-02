@@ -73,8 +73,6 @@ private theorem chain_rule_smooth_ibp
 
 /-! ## Limit passage lemmas -/
 
-set_option maxHeartbeats 400000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 private theorem integral_mul_tendsto_of_eLpNorm_tendsto
     {S : Set E} (_hS : MeasurableSet S) (hS_fin : volume S < ⊤)
@@ -292,8 +290,6 @@ private theorem exists_ae_tendsto_of_eLpNorm_tendsto
 
 /-! ## Main theorem: chain rule on the unit ball -/
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem sobolev_chain_rule_unitBall
     {u : E → ℝ}
     (hw : MemW1pWitness 2 u (Metric.ball (0 : E) 1))
@@ -703,8 +699,6 @@ private theorem setIntegral_fderiv_eq_of_tsupport_subset
   rw [setIntegral_eq_integral_of_forall_compl_eq_zero h1,
       setIntegral_eq_integral_of_forall_compl_eq_zero h2]
 
-set_option maxHeartbeats 3200000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 -- partition-of-unity decomposition of test functions
 omit [NeZero d] in
 /-- Local-to-global for `HasWeakPartialDeriv'`: if the property holds on every
@@ -857,8 +851,6 @@ private noncomputable def MemW1p.toWitness
       (fun x => (WithLp.toLp 2 fun j' => (hu.2 j').choose x : E) j) f Ω
     simpa using (hu.2 j).choose_spec.2
 
-set_option maxHeartbeats 400000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem sobolev_chain_rule
     {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} {g : E → ℝ} {i : Fin d}

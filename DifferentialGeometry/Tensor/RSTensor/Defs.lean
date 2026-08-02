@@ -38,7 +38,6 @@ def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedFiel
   [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :=
   (Tensor0SModel r 𝕜 E) →L[𝕜] (Tensor0SModel s 𝕜 E)
 
-@[nolint unusedArguments]
 def Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
   Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x
 
@@ -192,7 +191,6 @@ instance tensor0SSpace_normedSpace (s : ℕ) (x : M) :
 def CotangentSpace (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
   Tensor0SSpace 1 I x
 
-@[nolint unusedArguments]
 def TensorRSSpace (r s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) : Type _ :=
   Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x
 

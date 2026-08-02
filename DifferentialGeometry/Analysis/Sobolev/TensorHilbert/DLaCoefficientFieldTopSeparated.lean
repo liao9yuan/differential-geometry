@@ -471,7 +471,6 @@ private theorem exists_rfns_dLaLowered_topsep (g₀ g_bg : SmoothRiemannianMetri
   rw [hbridge]
   exact hker g₁ T htie hδ_le hδ0 hbound i x
 
-set_option maxHeartbeats 3200000 in
 -- The top-separated coefficient assembly requires additional elaboration budget.
 /-- **dLaSymCc top-separated.**  Exported top coefficient `Ktop_sym` is a FIXED `R`-free real;
 the `diagonalGridGrowthFactor i` power is explicit so the summed layer fixes one constant via
@@ -726,7 +725,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
         (8 * KcL i + 8 * diagonalGridGrowthFactor (E := E) i * cPer * KcL i + 8 * CLT i) * W := by ring
 
 
-set_option maxHeartbeats 3200000 in
 -- The nested coefficient-field extraction requires additional elaboration budget.
 /-- **Field pointwise top-separated bound** for `deTurckLieConnDiffDerivCoeffField`.  Exported base top
 coefficient `Ktop` is `R`-free; the `diagonalGridGrowthFactor i` powers are explicit (the field carries TWO

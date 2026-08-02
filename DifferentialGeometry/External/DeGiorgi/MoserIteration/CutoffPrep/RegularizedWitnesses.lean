@@ -163,8 +163,6 @@ theorem moserRegTestCutoff_memH01
       (by simpa using hwTest.memW1p) hv_compact hv_support
   simpa using hv_memW01p
 
-set_option maxHeartbeats 400000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 /-- The gradient of `moserRegPowerCutoffWitness` decomposes as η · (chain rule) + (product rule).
 This is the analogue of `deGiorgiCutoffTestWitnessWeighted_grad` from Chapter 05. -/
 lemma moserRegPowerCutoffWitness_grad

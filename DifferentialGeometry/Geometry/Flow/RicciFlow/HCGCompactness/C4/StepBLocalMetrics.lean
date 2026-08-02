@@ -130,7 +130,6 @@ theorem exists_metricLimit_normalCoord
 
 
 
-set_option synthInstance.maxHeartbeats 800000 in
 -- Pi-valued iterated derivatives trigger a deep deterministic instance search.
 theorem exists_metric_lim_pi
     {ι : Type*} [Fintype ι]

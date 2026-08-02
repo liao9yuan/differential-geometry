@@ -21,8 +21,87 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => AmbientSpace d
 local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+private theorem integrable_half_mul_add_two_mul
+    {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g : α → ℝ} (Λ : ℝ)
+    (hf : Integrable f μ) (hg : Integrable g μ) :
+    Integrable (fun x => (1 / 2 : ℝ) * g x + 2 * Λ * f x) μ := by
+  simpa [mul_comm, add_comm] using
+    (hg.const_mul (1 / 2 : ℝ)).add (hf.const_mul (2 * Λ))
+
+private theorem integrable_of_ae_nonneg_le
+    {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g : α → ℝ}
+    (hg : Integrable g μ) (hf : AEStronglyMeasurable f μ)
+    (hf_nonneg : ∀ᵐ x ∂μ, 0 ≤ f x) (hfg : ∀ᵐ x ∂μ, f x ≤ g x) :
+    Integrable f μ := by
+  refine Integrable.mono' hg hf ?_
+  filter_upwards [hf_nonneg, hfg] with x hfx hx
+  simpa [Real.norm_of_nonneg hfx] using hx
+
+private theorem aestronglyMeasurable_two_mul_abs_product
+    {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g h k : α → ℝ}
+    (hf : AEMeasurable f μ) (hg : AEMeasurable g μ)
+    (hh : AEMeasurable h μ) (hk : AEMeasurable k μ) :
+    AEStronglyMeasurable (fun x => 2 * |f x| * |g x| * h x * |k x|) μ := by
+  simpa [mul_assoc, mul_left_comm, mul_comm] using
+    (((((hf.norm.mul hg.norm).mul hh).mul hk.norm).const_mul (2 : ℝ)).aestronglyMeasurable)
+
+private theorem ae_nonneg_two_mul_abs_product
+    {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g h k : α → ℝ}
+    (hh : ∀ x, 0 ≤ h x) :
+    ∀ᵐ x ∂μ, 0 ≤ 2 * |f x| * |g x| * h x * |k x| := by
+  filter_upwards with x
+  exact mul_nonneg
+    (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) (abs_nonneg _)) (abs_nonneg _))
+      (hh x))
+    (abs_nonneg _)
+
+private theorem weighted_pointwise_core_abs
+    (Λ η ζ ψ ψd Q M : ℝ)
+    (hΛ : 0 < Λ) (hψd : 0 < ψd)
+    (hM_sq : |M| ^ 2 ≤ Λ * Q) (hM_nonneg : 0 ≤ M) :
+    2 * |η| * |ψ| * ζ * |M| ≤
+      (1 / 2 : ℝ) * (η ^ 2 * ψd * Q) +
+        2 * Λ * (ζ ^ 2 * (|ψ| ^ 2 / ψd)) := by
+  have hpt :=
+    weighted_pointwise_core (Λ := Λ) (η := |η|) (ζ := ζ)
+      (ψ := ψ) (ψd := ψd) (Q := Q) (M := M) hΛ hψd hM_sq
+  have hη_sq : |η| ^ 2 = η ^ 2 := by
+    rw [pow_two, pow_two, abs_mul_abs_self]
+  simpa [hη_sq, abs_of_nonneg hM_nonneg, div_eq_mul_inv, mul_assoc, mul_left_comm,
+    mul_comm, add_assoc, add_left_comm, add_comm] using hpt
+
+private theorem sq_div_four_one_add_nonneg {p : ℝ} (hp : 0 < p) :
+    0 ≤ p ^ 2 / (4 * (1 + p)) :=
+  div_nonneg (sq_nonneg _)
+    (mul_nonneg (by norm_num) (add_nonneg zero_le_one hp.le))
+
+private theorem inverse_termA_bound
+    {termA left bound shift Λ p Cη : ℝ}
+    (hp : 0 < p) (hΛ : 0 < Λ)
+    (hcoreA : termA ≤ (p ^ 2 / (4 * (1 + p))) * left)
+    (hleft : left ≤ 4 * Λ * bound)
+    (hbound : bound ≤ (Cη ^ 2 / (1 + p)) * shift) :
+    termA ≤ Λ * (p / (1 + p)) ^ 2 * Cη ^ 2 * shift := by
+  have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (1 + p)) :=
+    sq_div_four_one_add_nonneg hp
+  have hΛ_nonneg : 0 ≤ 4 * Λ :=
+    mul_nonneg (by norm_num) hΛ.le
+  calc
+    termA ≤ (p ^ 2 / (4 * (1 + p))) * left := hcoreA
+    _ ≤ (p ^ 2 / (4 * (1 + p))) * (4 * Λ * bound) :=
+      mul_le_mul_of_nonneg_left hleft hconst_nonneg
+    _ ≤ (p ^ 2 / (4 * (1 + p))) *
+          (4 * Λ * ((Cη ^ 2 / (1 + p)) * shift)) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hbound hΛ_nonneg) hconst_nonneg
+    _ = Λ * (p / (1 + p)) ^ 2 * Cη ^ 2 * shift := by
+      have hp1 : 1 + p ≠ 0 := by linarith
+      field_simp [hp1]
+
 -- inverse energy bound assembly
 /-- Regularized energy bound: for each `ε > 0`, the exact shifted-power cutoff
 `η · (ε + u)^{-p/2}` lies in `W₀^{1,2}(B_s)` with the expected Caccioppoli
@@ -296,41 +375,22 @@ theorem superPowerCutoff_energy_bound_reg
         crossAbs x ≤
           (1 / 2 : ℝ) * leftTerm x + 2 * A.1.Λ * boundTerm x := by
     filter_upwards [hcoeff, hψd_pos] with x hx hψx
-    have hpt :=
-      weighted_pointwise_core (Λ := A.1.Λ) (η := |η x|) (ζ := gradEtaNorm x)
-        (ψ := ψ x) (ψd := ψd x) (Q := Equad x) (M := fluxNorm x) A.1.Λ_pos hψx hx
-    have hη_sq : |η x| ^ 2 = η x ^ 2 := by
-      rw [pow_two, pow_two, abs_mul_abs_self]
-    have hflux_abs : |fluxNorm x| = fluxNorm x := by
-      exact abs_of_nonneg (norm_nonneg _)
     simpa [crossAbs, leftTerm, boundTerm, gradEtaNorm, ψ, ψd, fluxNorm, Equad,
-      hη_sq, hflux_abs, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm,
-      add_assoc, add_left_comm, add_comm]
-      using hpt
+      mul_assoc, mul_left_comm, mul_comm] using
+        weighted_pointwise_core_abs A.1.Λ (η x) (gradEtaNorm x) (ψ x) (ψd x)
+          (Equad x) (fluxNorm x) A.1.Λ_pos hψx hx (norm_nonneg _)
   have hcross_upper_int :
       Integrable (fun x => (1 / 2 : ℝ) * leftTerm x + 2 * A.1.Λ * boundTerm x) μ := by
-    have htmp :
-        Integrable (fun x => 2 * (A.1.Λ * boundTerm x) + (1 / 2 : ℝ) * leftTerm x) μ := by
-      simpa [mul_assoc] using
-        (hbound_int.const_mul (2 * A.1.Λ)).add (hleft_int.const_mul (1 / 2 : ℝ))
-    simpa [mul_assoc, add_comm, add_left_comm, add_assoc] using htmp
+    exact integrable_half_mul_add_two_mul A.1.Λ hbound_int hleft_int
   have hcrossAbs_int :
       Integrable crossAbs μ := by
-    refine Integrable.mono' hcross_upper_int ?_ ?_
-    · exact
-        (by
-          simpa [crossAbs, gradEtaNorm, fluxNorm, mul_assoc, mul_left_comm, mul_comm] using
-            (((((hη.continuous.norm.aemeasurable).mul hψ_aemeas.norm).mul hgradEtaNorm_aemeas).mul
-              hfluxNorm_aemeas.norm).const_mul (2 : ℝ)).aestronglyMeasurable)
-    · filter_upwards [hcross_upper_pt] with x hx
-      have hcross_nonneg : 0 ≤ crossAbs x := by
-        dsimp [crossAbs, gradEtaNorm, fluxNorm]
-        exact mul_nonneg
-          (mul_nonneg (mul_nonneg (mul_nonneg (by positivity) (abs_nonneg _)) (abs_nonneg _))
-            (norm_nonneg _))
-          (abs_nonneg _)
-      rw [Real.norm_of_nonneg hcross_nonneg]
-      exact hx
+    refine integrable_of_ae_nonneg_le hcross_upper_int ?_ ?_ hcross_upper_pt
+    · exact aestronglyMeasurable_two_mul_abs_product
+        hη.continuous.aemeasurable hψ_aemeas hgradEtaNorm_aemeas hfluxNorm_aemeas
+    · change ∀ᵐ x ∂μ,
+        0 ≤ 2 * |η x| * |ψ x| * gradEtaNorm x * |fluxNorm x|
+      exact ae_nonneg_two_mul_abs_product fun x => by
+        simp [gradEtaNorm]
   have hcrossInner_int :
       Integrable crossInner μ := by
     convert hcore_int.add hleft_int using 1
@@ -474,23 +534,7 @@ theorem superPowerCutoff_energy_bound_reg
             ∫ x, (p ^ 2 / (4 * (1 + p))) * leftTerm x ∂μ := by
         exact integral_mono_ae hTermA_int (hleft_int.const_mul (p ^ 2 / (4 * (1 + p)))) hTermA_pt
       simpa [μ, integral_const_mul] using hmono
-    calc
-      ∫ x in Ω, termAfun x ∂volume
-          ≤ (p ^ 2 / (4 * (1 + p))) * ∫ x, leftTerm x ∂μ := hcoreA
-      _ ≤ (p ^ 2 / (4 * (1 + p))) * (4 * A.1.Λ * ∫ x, boundTerm x ∂μ) := by
-            have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (1 + p)) := by positivity
-            exact mul_le_mul_of_nonneg_left hleft_bound hconst_nonneg
-      _ ≤ (p ^ 2 / (4 * (1 + p))) *
-            (4 * A.1.Λ *
-              ((Cη ^ 2 / (1 + p)) * ∫ x in Ω, superExactShiftPow ε (-p) (u x) ∂volume)) := by
-            have hconst_nonneg : 0 ≤ p ^ 2 / (4 * (1 + p)) := by positivity
-            have hΛ_nonneg : 0 ≤ 4 * A.1.Λ := by nlinarith [A.1.Λ_pos]
-            exact mul_le_mul_of_nonneg_left
-              (mul_le_mul_of_nonneg_left hbound_est hΛ_nonneg) hconst_nonneg
-      _ = A.1.Λ * (p / (1 + p)) ^ 2 * Cη ^ 2 *
-            ∫ x in Ω, superExactShiftPow ε (-p) (u x) ∂volume := by
-            have hp1 : 1 + p ≠ 0 := by linarith
-            field_simp [hp1]
+    exact inverse_termA_bound hp A.1.Λ_pos hcoreA hleft_bound hbound_est
   have hTermB_int :
       Integrable termBfun μ := by
     have hpow_int :
@@ -506,9 +550,6 @@ theorem superPowerCutoff_energy_bound_reg
     · filter_upwards [ae_restrict_mem Metric.isOpen_ball.measurableSet] with x hx
       have hux : 0 < u x := hu_pos x (hΩ_sub_Ω1 hx)
       have hlhs_nonneg : 0 ≤ termBfun x := by positivity
-      have hrhs_nonneg :
-          0 ≤ Cη ^ 2 * superExactShiftPow ε (-p) (u x) := by
-        exact mul_nonneg (sq_nonneg _) (superExactShiftPow_nonneg (ε := ε) (a := -p) hε)
       have hle :=
         superExactInv_termB_pointwise (u := u) (η := η) (ε := ε) (p := p) (Cη := Cη)
           (x := x) hε hCη_nonneg hη_grad_bound hux
@@ -519,10 +560,16 @@ theorem superPowerCutoff_energy_bound_reg
   have hTermB :
       ∫ x in Ω, termBfun x ∂volume ≤
         Cη ^ 2 * ∫ x in Ω, superExactShiftPow ε (-p) (u x) ∂volume := by
-    simpa [Ω, termBfun] using
-      superExactInv_termB_bound_on_ball (d := d) (u := u) (η := η) (ε := ε) (p := p)
-        (s := s) (Cη := Cη) hε hp hs (fun x hx => hu_pos x (hΩ_sub_Ω1 hx)) hu hη
-        hCη_nonneg hη_grad_bound
+    change
+      ∫ x in Metric.ball (0 : E) s,
+          ‖fderiv ℝ η x‖ ^ 2 * (superExactShiftPow ε (-(p / 2)) (u x)) ^ 2 ∂volume ≤
+        Cη ^ 2 *
+          ∫ x in Metric.ball (0 : E) s,
+            superExactShiftPow ε (-p) (u x) ∂volume
+    exact superExactInv_termB_bound_on_ball
+      (d := d) (u := u) (η := η) (ε := ε) (p := p) (s := s) (Cη := Cη)
+      hε hp hs (fun x hx => hu_pos x (hΩ_sub_Ω1 hx)) hu hη
+      hCη_nonneg hη_grad_bound
   have hgrad_split :
       ∫ x in Ω, ‖hwv.weakGrad x‖ ^ 2 ∂volume ≤
         2 * ∫ x in Ω, termAfun x ∂volume +
@@ -536,11 +583,20 @@ theorem superPowerCutoff_energy_bound_reg
       refine integral_mono_ae ?_ hupper_int ?_
       · simpa [pow_two, μ] using hwv.weakGrad_norm_memLp.integrable_sq
       · filter_upwards with x
-        simpa [μ, hwv, hwvBig, termAfun, termBfun, add_assoc, add_left_comm, add_comm,
-          mul_assoc, MemW1pWitness.restrict] using
-          (superExactPowerCutoffWitness_norm_sq_le (d := d) (u := u) (η := η) (ε := ε)
-            (a := -(p / 2)) (s := s) (Cη := Cη) hε ha_pow hu1 hη hη_bound
-            hη_grad_bound hη_sub_ball x)
+        change
+          ‖(superExactPowerCutoffWitness
+              (d := d) (u := u) (η := η) (ε := ε) (a := -(p / 2))
+              (s := s) (Cη := Cη) hε ha_pow hu1 hη hη_bound
+              hη_grad_bound hη_sub_ball).weakGrad x‖ ^ 2 ≤
+            2 * (η x ^ 2 *
+              (deriv (superExactShiftReg ε (-(p / 2))) (u x)) ^ 2 *
+                ‖hu1.weakGrad x‖ ^ 2) +
+            2 * (‖fderiv ℝ η x‖ ^ 2 *
+              (superExactShiftPow ε (-(p / 2)) (u x)) ^ 2)
+        exact superExactPowerCutoffWitness_norm_sq_le
+          (d := d) (u := u) (η := η) (ε := ε) (a := -(p / 2))
+          (s := s) (Cη := Cη) hε ha_pow hu1 hη hη_bound
+          hη_grad_bound hη_sub_ball x
     calc
       ∫ x in Ω, ‖hwv.weakGrad x‖ ^ 2 ∂volume = ∫ x, ‖hwv.weakGrad x‖ ^ 2 ∂μ := by
             rfl
@@ -550,11 +606,6 @@ theorem superPowerCutoff_energy_bound_reg
             rw [integral_add (hTermA_int.const_mul (2 : ℝ)) (hTermB_int.const_mul (2 : ℝ)),
               integral_const_mul, integral_const_mul]
   refine ⟨hwv, hvW01, ?_⟩
-  have hI_nonneg :
-      0 ≤ ∫ x in Ω, superExactShiftPow ε (-p) (u x) ∂volume := by
-    apply setIntegral_nonneg_ae Metric.isOpen_ball.measurableSet
-    filter_upwards with x hx
-    exact superExactShiftPow_nonneg (ε := ε) (a := -p) hε
   calc
     ∫ x in Ω, ‖hwv.weakGrad x‖ ^ 2 ∂volume
         ≤ 2 * ∫ x in Ω, termAfun x ∂volume +
@@ -632,8 +683,6 @@ theorem superExactInv_energy_mainBall
     _ ≤ 2 * Cη ^ 2 * (A.1.Λ * (p / (1 + p)) ^ 2 + 1) *
           ∫ x in Ω, superExactShiftPow (superEpsSeq n) (-p) (u x) ∂volume := henergyReg
 
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem superPowerCutoff_memW1p_energy_of_supersolution_core
     (hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))

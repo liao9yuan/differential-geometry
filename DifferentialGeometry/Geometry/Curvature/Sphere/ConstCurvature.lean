@@ -58,8 +58,6 @@ theorem metricRm04_round_invariant [NeZero n]
     x X Y Z W
   rwa [pullbackMetric_round_eq] at h
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 omit [NeZero n] in
 omit [FiniteDimensional ℝ E] in
 /-- **The round sphere's sectional-curvature numerator is the Gram determinant** (constant curvature

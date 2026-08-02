@@ -215,8 +215,6 @@ private lemma scalarGalPert_continuousOn_of_parts
   have hsum := h2.add hPot
   exact hsum
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Exact-interval energy bounds and perturbation continuity produce a
 modewise uniformly convergent Galerkin subsequence on that same interval. -/
 theorem gal_subseq_on
@@ -409,8 +407,6 @@ theorem gal_subseq_on
 
 
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- Every smooth scalar initial datum has, on one common time interval, a
 modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
 The limit inherits the all-order weighted spectral mass bounds. -/

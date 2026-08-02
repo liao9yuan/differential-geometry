@@ -25,8 +25,6 @@ local notation "Cmo" =>
 
 Helper lemmas for the John-Nirenberg-based crossover argument. -/
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- Smooth cutoff: φ = 1 on closedBall 0 1, tsupport ⊆ ball 0 (7/6), range ⊆ [0,1].
     Used for the log gradient bound on rescaled cover balls. -/
@@ -1274,8 +1272,63 @@ theorem regularizedLog_smallBallAverage_to_origin_le
   convert h24 using 1
   ring
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
+omit [NeZero d] in
+private theorem volume_restrict_ball_measureReal_univ_pos
+    (x : E) {r : ℝ} (hr : 0 < r) :
+    0 < (volume.restrict (Metric.ball x r)).real Set.univ := by
+  have hμ_univ :
+      (volume.restrict (Metric.ball x r)) Set.univ =
+        volume (Metric.ball x r) := by
+    simp
+  rw [measureReal_def, hμ_univ]
+  exact ENNReal.toReal_pos
+    (measure_ball_pos (μ := volume) x hr).ne'
+    (measure_ball_lt_top (μ := volume) (x := x) (r := r)).ne
+
+private theorem average_eq_one_add_inverse_mul_integral_sub_one
+    {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsFiniteMeasure μ]
+    {g : α → ℝ}
+    (hg : Integrable (fun z => g z - 1) μ)
+    (hμ_pos : 0 < μ.real Set.univ) :
+    (⨍ z, g z ∂μ) =
+      1 + (μ.real Set.univ)⁻¹ * ∫ z, (g z - 1) ∂μ := by
+  have hconst_int : Integrable (fun _ : α => (1 : ℝ)) μ := integrable_const 1
+  rw [MeasureTheory.average_eq]
+  rw [show (∫ z, g z ∂μ) = ∫ z, ((g z - 1) + 1) ∂μ by
+    apply integral_congr_ae
+    exact Eventually.of_forall fun z => by ring]
+  rw [integral_add hg hconst_int, integral_const]
+  rw [smul_eq_mul, smul_eq_mul, mul_one]
+  field_simp [hμ_pos.ne']
+  ring
+
+private theorem inv_mul_le_of_le_mul
+    {m I C : ℝ} (hm : 0 < m) (h : I ≤ C * m) :
+    m⁻¹ * I ≤ C := by
+  rw [show m⁻¹ * I = I / m by field_simp [hm.ne']]
+  exact (div_le_iff₀ hm).2 (by simpa [mul_comm] using h)
+
+private theorem one_add_inv_mul_le_of_le_mul
+    {m I C : ℝ} (hm : 0 < m) (h : I ≤ C * m) :
+    1 + m⁻¹ * I ≤ 1 + C := by
+  simpa [add_comm] using add_le_add_left (inv_mul_le_of_le_mul hm h) 1
+
+private theorem integrable_of_sub_one
+    {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsFiniteMeasure μ]
+    {g : α → ℝ} (h : Integrable (fun z => g z - 1) μ) :
+    Integrable g μ := by
+  have hconst : Integrable (fun _ : α => (1 : ℝ)) μ := integrable_const 1
+  refine (h.add hconst).congr ?_
+  exact Eventually.of_forall fun z => by simp
+
+private theorem ae_exp_mul_sub_one_nonneg
+    {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    {p : ℝ} {f : α → ℝ}
+    (hp : 0 ≤ p) (hf : 0 ≤ᵐ[μ] f) :
+    0 ≤ᵐ[μ] fun z => Real.exp (p * f z) - 1 := by
+  filter_upwards [hf] with z hfz
+  exact sub_nonneg.mpr (Real.one_le_exp_iff.mpr (mul_nonneg hp hfz))
+
 theorem regularizedLog_smallBall_exp_average_le
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u : E → ℝ}
@@ -1581,25 +1634,14 @@ theorem regularizedLog_smallBall_exp_average_le
   have hF_meas :
       AEMeasurable (fun z => ENNReal.ofReal (Real.exp (p * f z) - 1)) μ := by
     exact (hf_meas.const_mul p).exp.sub_const 1 |>.ennreal_ofReal
+  have hF_nonneg :
+      0 ≤ᵐ[μ] fun z => Real.exp (p * f z) - 1 :=
+    ae_exp_mul_sub_one_nonneg hp_pos.le hf_nonneg
   have hF_int :
       Integrable (fun z => Real.exp (p * f z) - 1) μ := by
     refine (integrable_toReal_of_lintegral_ne_top hF_meas hlin_finite).congr ?_
-    filter_upwards with z
-    have hnonneg : 0 ≤ Real.exp (p * f z) - 1 := by
-      have hpf_nonneg : 0 ≤ p * f z := by
-        exact mul_nonneg hp_pos.le (by simp [f])
-      have hexp_ge : 1 ≤ Real.exp (p * f z) := by
-        simpa using (Real.one_le_exp_iff.mpr hpf_nonneg)
-      exact sub_nonneg.mpr hexp_ge
-    simp [hnonneg]
-  have hF_nonneg :
-      0 ≤ᵐ[μ] fun z => Real.exp (p * f z) - 1 := by
-    filter_upwards with z
-    have hpf_nonneg : 0 ≤ p * f z := by
-      exact mul_nonneg hp_pos.le (by simp [f])
-    have hexp_ge : 1 ≤ Real.exp (p * f z) := by
-      simpa using (Real.one_le_exp_iff.mpr hpf_nonneg)
-    exact sub_nonneg.mpr hexp_ge
+    filter_upwards [hF_nonneg] with z hz
+    exact ENNReal.toReal_ofReal hz
   have hF_le :
       ∫ z, (Real.exp (p * f z) - 1) ∂μ ≤ C_JN d * μ.real Set.univ := by
     have hof :
@@ -1614,42 +1656,17 @@ theorem regularizedLog_smallBall_exp_average_le
       exact mul_nonneg (C_JN_pos d).le hμ_nonneg
     exact (ENNReal.ofReal_le_ofReal_iff hrhs_nonneg).mp hof
   have hμ_pos : 0 < μ.real Set.univ := by
-    have hμ_univ :
-        μ Set.univ = volume (Metric.ball x₀ (1 / 48 : ℝ)) := by
-      simp [μ, B]
-    rw [measureReal_def, hμ_univ]
-    exact ENNReal.toReal_pos
-      (measure_ball_pos (μ := volume) x₀ (by norm_num : (0 : ℝ) < 1 / 48)).ne'
-      (measure_ball_lt_top (μ := volume) (x := x₀) (r := (1 / 48 : ℝ))).ne
+    exact volume_restrict_ball_measureReal_univ_pos x₀ (by norm_num)
   have havg_eq :
       (⨍ z, Real.exp (p * f z) ∂μ) =
         1 + (μ.real Set.univ)⁻¹ * ∫ z, (Real.exp (p * f z) - 1) ∂μ := by
-    have hconst_int : Integrable (fun _ : E => (1 : ℝ)) μ := integrable_const 1
-    rw [MeasureTheory.average_eq]
-    rw [show (∫ z, Real.exp (p * f z) ∂μ) =
-        ∫ z, ((Real.exp (p * f z) - 1) + 1) ∂μ by
-          apply integral_congr_ae
-          exact Eventually.of_forall fun z => by ring]
-    rw [integral_add hF_int hconst_int, integral_const]
-    rw [smul_eq_mul, smul_eq_mul, mul_one]
-    field_simp [hμ_pos.ne']
-    ring
+    exact average_eq_one_add_inverse_mul_integral_sub_one hF_int hμ_pos
   have havg_le :
       (⨍ z, Real.exp (p * f z) ∂μ) ≤ 1 + C_JN d := by
     rw [havg_eq]
-    have hterm :
-        (μ.real Set.univ)⁻¹ * ∫ z, (Real.exp (p * f z) - 1) ∂μ ≤ C_JN d := by
-      rw [show (μ.real Set.univ)⁻¹ * ∫ z, (Real.exp (p * f z) - 1) ∂μ =
-          (∫ z, (Real.exp (p * f z) - 1) ∂μ) / μ.real Set.univ by
-            field_simp [hμ_pos.ne']]
-      exact (div_le_iff₀ hμ_pos).2 (by simpa [mul_comm, mul_left_comm, mul_assoc] using hF_le)
-    simpa [add_comm, add_left_comm, add_assoc] using add_le_add_left hterm 1
+    exact one_add_inv_mul_le_of_le_mul hμ_pos hF_le
   have hExp_int : Integrable (fun z => Real.exp (p * f z)) μ := by
-    have hconst_int : Integrable (fun _ : E => (1 : ℝ)) μ := integrable_const 1
-    refine (hF_int.add hconst_int).congr ?_
-    filter_upwards with z
-    have hpoint : (Real.exp (p * f z) - 1) + 1 = Real.exp (p * f z) := by ring
-    simp [hpoint]
+    exact integrable_of_sub_one hF_int
   have hExp_int_ball :
       IntegrableOn
         (fun z => Real.exp (p * |v z - ⨍ y in Metric.ball x₀ (1 / 48 : ℝ), v y ∂volume|))
@@ -1662,8 +1679,6 @@ theorem regularizedLog_smallBall_exp_average_le
     simpa [μ, B, f, avg, Real.norm_eq_abs] using havg_le
   exact ⟨hExp_int_ball, havg_ball⟩
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem regularizedLog_halfBall_exp_average_to_origin_le
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
     {u : E → ℝ}

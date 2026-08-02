@@ -61,6 +61,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- The `g`-norm triangle inequality on a fibre:
@@ -556,8 +562,6 @@ private lemma component0S_unit_eq_ccBilin
   funext k
   fin_cases k <;> rfl
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -634,8 +638,6 @@ theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : 
     _ = (Module.finrank ℝ E : ℝ) * (Λ - 1) := by
         rw [← mul_pow, Real.sqrt_sq (mul_nonneg (Nat.cast_nonneg _) hΛ1)]
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -673,8 +675,6 @@ theorem metricDiff_orderPos_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ 
   rw [hsplit, normBridge g₀ gBase (a + 1) x]
   exact hjet x (Set.mem_univ x)
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

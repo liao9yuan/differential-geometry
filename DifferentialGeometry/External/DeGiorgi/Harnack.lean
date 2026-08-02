@@ -33,8 +33,6 @@ local notation "E" => AmbientSpace d
 local notation "μ1" => volume.restrict (Metric.ball (0 : E) 1)
 local notation "μhalf" => volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ))
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- An a.e. upper bound on the half ball upgrades to an essential-supremum
 bound on the half ball. -/
@@ -65,8 +63,6 @@ theorem essSup_halfBall_le_of_ae_bound
         (Measure.measure_univ_eq_zero.mp hzero)
   · simpa [not_le] using (ae_iff.mp hbound)
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 /-- An a.e. lower bound on the half ball upgrades to an essential-infimum
 bound on the half ball. -/
@@ -366,8 +362,6 @@ private theorem aemeasurable_on_ball_of_isSolution
   let huw : MemW1pWitness 2 u (Metric.ball (0 : E) 1) := MemW1p.someWitness hsol.1.1
   exact (huw.restrict Metric.isOpen_ball hsub).memLp.aestronglyMeasurable.aemeasurable
 
-set_option maxHeartbeats 5000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem ae_le_localHarnack_on_eighthBall
     (hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))

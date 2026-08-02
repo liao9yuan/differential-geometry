@@ -1271,9 +1271,6 @@ private theorem tsupport_mul_smooth_bounded_p_weakGrad_component_subset
 
 -- Global smooth approximation for a local witness whose function and weak
 -- gradient are already supported in a compact set inside the open domain.
-set_option maxHeartbeats 1000000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 theorem exists_smooth_W1p_approx_of_supportedWitness
     {Ω K : Set E} (hΩ : IsOpen Ω)
     {p : ℝ} (hp : 1 < p)

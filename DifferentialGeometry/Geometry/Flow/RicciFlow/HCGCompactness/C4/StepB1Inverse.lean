@@ -31,9 +31,6 @@ open DifferentialGeometry.Analysis
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-set_option maxHeartbeats 2400000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem exists_inv_seq
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
@@ -115,10 +112,12 @@ private theorem exists_inv_seq
   have hKpre : eInf.symm '' K ⊆ Q := by
     rintro _ ⟨x, hx, rfl⟩
     exact hKQ hx
-  obtain ⟨V, hV, hVcompact, hKV, _hVtarget, _hVpre, hstage, hinv⟩ :=
-    OpenPartialHomeomorph.exists_symm_cInf hQ hK he_conv
-      (Filter.Eventually.of_forall hsource) hstage_cd heInf_cd
-      heInf_symm_cd hKt hKpre
+  have hsymm :=
+    OpenPartialHomeomorph.exists_symm_cInf
+      (X := E) (e := e) (eInf := eInf) (Q := Q) (K := K)
+      hQ hK he_conv (Filter.Eventually.of_forall hsource) hstage_cd
+      heInf_cd heInf_symm_cd hKt hKpre
+  obtain ⟨V, hV, hVcompact, hKV, _hVtarget, _hVpre, hstage, hinv⟩ := hsymm
   have heq_inv : ∀ᶠ n in atTop,
       Set.EqOn (G n) (e n).symm V := by
     filter_upwards [eventually_atTop.2 ⟨N, fun n hn ↦ hn⟩, hstage] with n hn hstageN
@@ -164,9 +163,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-set_option maxHeartbeats 3000000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 1200000 in
 /-- Along any cofinal pair of stages, the exact coordinate inverse of the
 forward comparison map converges smoothly to the identity on a neighborhood
 of every compact target core.  The reverse comparison map is not used here. -/
@@ -469,9 +465,6 @@ theorem HasStageJetData.inv_chart_conv
     exact ⟨hAloc, hAinj, hleft⟩
   exact exists_inv_seq hQ hW hK hKQ hQW hAconv hgood
 
-set_option maxHeartbeats 3000000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
-set_option synthInstance.maxHeartbeats 1200000 in
 /-- On a fixed compact target core, the exact coordinate inverses of all
 sufficiently late forward comparison maps have one common two-stage jet tail.
 The inverse is `Function.invFunOn` on the prescribed source ball. -/

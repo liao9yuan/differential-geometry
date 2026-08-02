@@ -552,7 +552,6 @@ noncomputable def canonCutRepack
           chartRepack (I := I) (M := M) r s a.1
             (u ⟨a, z⟩) x
 
-set_option maxHeartbeats 800000 in
 -- The dependent finite-index normalization needs an enlarged elaboration budget.
 omit [NeZero (Module.finrank ℝ E)] in
 /-- The middle-cutoff reassembly is still an exact left inverse on genuine

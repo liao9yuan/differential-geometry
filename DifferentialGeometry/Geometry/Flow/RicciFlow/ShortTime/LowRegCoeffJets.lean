@@ -1730,7 +1730,6 @@ theorem dlbDiff_h1
     simp only [B, Real.sq_sqrt (hQ A hA)]]
   exact hle
 
-set_option maxHeartbeats 800000 in
 -- The rank-changing operator composition needs an enlarged local elaboration budget.
 /-- In dimension three, the fixed-curvature piece of `lieCorr0` has an
 intrinsic `H1` bound from only the metric `H3` jet.  Algebraically it is one

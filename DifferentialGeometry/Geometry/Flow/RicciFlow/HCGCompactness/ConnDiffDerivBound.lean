@@ -59,6 +59,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
 /-- The flat/eval bridge specialised to the connection-difference section: the model-basis evaluation of
@@ -120,10 +126,6 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner
   rw [hA_def]
   exact hbridge
 
-set_option synthInstance.maxHeartbeats 1600000 in
--- Elaborating the tensor-bundle instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 1600000 in
--- Cancelling the fibre-norm estimate requires the larger normalization budget.
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -193,7 +195,7 @@ theorem covDerivConnDiff_fibreNorm_le
     exact hp
   rcases eq_or_lt_of_le hNA_nn with hNA0 | hNApos
   · rw [← hNA0]
-    positivity
+    exact mul_nonneg (mul_nonneg (mul_nonneg hNW_nn hSv_nn) hSw_nn) hSu_nn
   · have hkey : NA * NA ≤ NA * (NW * Sv * Su * Sw) := by
       rw [show NA * NA = NA ^ 2 from by ring]
       refine le_trans hprim' ?_

@@ -996,7 +996,6 @@ lemma norm_sub_le_of_fderiv_bound_closedBall
   simpa [norm_sub_rev] using h
 
 -- Inner proof extracted to a standalone lemma to keep the proof context small.
-set_option maxHeartbeats 1600000 in
 -- elaboration budget for chained fderiv bound on shell annulus
 omit [NeZero d] in
 lemma shellSubPsi_error_bound_at
@@ -1041,8 +1040,6 @@ theorem exists_shellSubPsi_error_bound
   rcases exists_shellSubPsi_fderiv_bound (d := d) hψ with ⟨C, hC_nonneg, hC⟩
   exact ⟨C, hC_nonneg, fun n x hx => shellSubPsi_error_bound_at (d := d) hψ hC_nonneg hC hx⟩
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 lemma shellFormula_error_bound_at
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1085,7 +1082,6 @@ theorem exists_shellFormula_error_bound
   rcases exists_shellFormula_fderiv_bound (d := d) hψ with ⟨C, hC_nonneg, hC⟩
   exact ⟨C, hC_nonneg, fun n x hx => shellFormula_error_bound_at (d := d) hψ hC_nonneg hC hx⟩
 
-set_option maxHeartbeats 800000 in
 -- elaboration budget for bad-set indicator error bound assembly
 omit [NeZero d] in
 theorem exists_fun_error_bound_badSet

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Defs
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
 
 
 

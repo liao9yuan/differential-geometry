@@ -235,9 +235,6 @@ theorem smoothCompactSupport_L2_bound_on_bounded_ge_two
         _ = C * eLpNorm (smoothGradNorm u) 2 volume := by
               rfl
 
-set_option maxHeartbeats 400000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
--- elaboration of this declaration exceeds the default maxHeartbeats budget
 omit [NeZero d] in
 private lemma indicator_integrable_on_sphere_prod
     {R : ℝ} {F : E → ℝ} (hF : IntegrableOn F (Metric.ball (0 : E) R) volume) :

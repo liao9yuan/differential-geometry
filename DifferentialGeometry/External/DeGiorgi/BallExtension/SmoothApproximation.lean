@@ -64,8 +64,6 @@ private lemma eLpNorm_indicator_le_of_norm_le {F : E → ℝ} {H : E → ℝ}
     · exact hFH x
     · simp
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem tendsto_eLpNorm_smoothUnitBallExtensionApprox_sub_unitBallExtension
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -163,8 +161,6 @@ private theorem tendsto_eLpNorm_smoothUnitBallExtensionApprox_sub_unitBallExtens
   rw [hEq0] at hLpF0
   simpa [F] using hLpF0
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 -- elaboration budget for gradApply error bound on inner bad annulus
 private theorem exists_gradApply_error_bound_badAnnulusOne
@@ -356,8 +352,6 @@ private theorem exists_gradApply_error_bound_badAnnulusOne
             linarith
       _ ≤ Cder + Cerr * (↑Mst / 2) := product_bound_cancel_eps hε
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 omit [NeZero d] in
 -- elaboration budget for gradApply error bound on outer bad annulus
 private theorem exists_gradApply_error_bound_badAnnulusTwo
@@ -545,7 +539,6 @@ private theorem exists_gradApply_error_bound_badAnnulusTwo
             linarith
       _ ≤ Cder + Cerr * (↑Mst / 2) := product_bound_cancel_eps hε
 
-set_option maxHeartbeats 1600000 in
 -- elaboration budget for fderiv equality off the bad set
 omit [NeZero d] in
 private lemma
@@ -680,7 +673,6 @@ private lemma
         using congrArg (fun A => A (EuclideanSpace.single i 1)) hDer
 
 -- Standalone: pointwise gradient convergence at a point away from spheres.
-set_option maxHeartbeats 1600000 in
 -- elaboration budget for pointwise fderiv convergence
 omit [NeZero d] in
 private lemma tendsto_fderiv_sub_exactGrad_pointwise
@@ -708,8 +700,6 @@ private lemma tendsto_fderiv_sub_exactGrad_pointwise
       hpt
   rwa [tendsto_sub_nhds_zero_iff]
 
-set_option maxHeartbeats 3200000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem tendsto_eLpNorm_fderiv_smoothUnitBallExtensionApprox_sub_exactGradApply
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -854,7 +844,6 @@ private theorem tendsto_eLpNorm_fderiv_smoothUnitBallExtensionApprox_sub_exactGr
   rw [hEq0] at hLpF0
   simpa [F] using hLpF0
 
-set_option maxHeartbeats 800000 in
 -- elaboration budget for L^p membership of smooth approximant
 omit [NeZero d] in
 private theorem memLp_smoothUnitBallExtensionApprox_sub_unitBallExtension
@@ -931,8 +920,6 @@ private theorem memLp_smoothUnitBallExtensionApprox_sub_unitBallExtension
     (Eventually.of_forall hF_dom).mono fun x hx => by
       simpa [abs_of_nonneg (hH_nonneg x)] using hx
 
-set_option maxHeartbeats 800000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 private theorem memLp_fderiv_smoothUnitBallExtensionApprox_sub_exactGradApply
     {p : ℝ} (_hp : 1 < p) {ψ : E → ℝ}
     (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (n : ℕ) (i : Fin d) :
@@ -1179,8 +1166,6 @@ private lemma ae_eq_exactUnitBallExtensionGrad_sub
   simp only [smoothUnitBallExtensionGrad, PiLp.toLp_apply, unitBallExtension_sub]
   exact congrArg (· (EuclideanSpace.single i 1)) (fderiv_sub hdu hdv)
 
-set_option maxHeartbeats 1600000 in
--- raised elaboration budget: this declaration exceeds the default maxHeartbeats
 theorem exactUnitBallExtensionGrad_bound
     {p : ℝ} (hp : 1 < p) {ψ : E → ℝ}
     (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -1377,7 +1362,6 @@ theorem smooth_input_unitBallExtension_smoothing
   filter_upwards with x; simp [hwExt]
 
 
-set_option maxHeartbeats 800000 in
 -- elaboration budget for component-vs-norm lintegral bound
 omit [NeZero d] in
 /-- Lintegral component bound: ∫ |F · i|^p ≤ ∫ ‖F‖^p. Uses lintegral_mono. -/

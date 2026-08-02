@@ -165,10 +165,7 @@ theorem perpCurvOp_apply
         (F i t) * y j := by
   rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 1000000 in
--- Normalizing the finite-frame curvature expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -467,10 +464,7 @@ theorem perpCoeff_ne_zero
     hFperp hYperp hON]
   exact perpLift_zero (I := I) F (perpCoeff (I := I) g F Y) t hcoeff
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 1000000 in
--- Normalizing the finite-frame curvature expansion requires the larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -828,7 +822,6 @@ theorem perpLift_smooth
   rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
     ℝ (γ t) ht]
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Elaborating the geometric instance chain requires the larger synthesis budget.
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in

@@ -66,6 +66,12 @@ private local instance oneTensorRSFiberBundle (r s : ℕ) :
     FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
   Tensor0SBundle.tensorRSBundle_fiber r s
 
+private local instance oneTensorRSNormedAddCommGroupOfRiemannianBundle
+    (r s : ℕ) [Bundle.RiemannianBundle (fun y : M => TensorRSSpace r s I y)] (x : M) :
+    NormedAddCommGroup (TensorRSSpace r s I x) :=
+  Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+    (E := fun y : M => TensorRSSpace r s I y) x
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M] in
 private lemma one_symm_eq (g : SmoothRiemannianMetric I M)
@@ -332,10 +338,7 @@ private theorem one_insert_rfns
       simp only [A]
       ring
 
-set_option synthInstance.maxHeartbeats 1600000 in
 -- Elaborating the tensor-contraction instance chain requires the larger synthesis budget.
-set_option maxHeartbeats 6400000 in
--- Normalizing the order-one Ricci coefficient bound requires the larger heartbeat budget.
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- The order-one Ricci coefficient is pointwise linear in the first

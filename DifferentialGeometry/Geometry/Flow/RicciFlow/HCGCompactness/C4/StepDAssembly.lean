@@ -955,14 +955,12 @@ def ofSeqSubseq
 
 end StepDCanonData
 
-set_option maxHeartbeats 800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The complete Step D assembly from the honest B/C comparison-map package,
 retaining the canonical reference-metric provenance used by its concrete
 restrict/pullback convergence construction. -/
-noncomputable def compactness_canon
+noncomputable opaque compactness_canon
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
     (B : StepB1RawInput (X := X) P) :

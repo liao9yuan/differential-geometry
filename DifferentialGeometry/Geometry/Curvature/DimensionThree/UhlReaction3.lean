@@ -1,5 +1,9 @@
-import Mathlib.Tactic
 import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Data.Real.Basic
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.LinearCombination
+import Mathlib.Tactic.Ring
+import Mathlib.Tactic.SplitIfs
 
 
 
@@ -114,10 +118,24 @@ variable {R}
 
 theorem driftG_eq_knRsq (hR : ∀ i j, R i j = R j i) (a b c d : Fin 3) :
     drift R a b c d + Gg R a b c d = 2 * knRsq R a b c d := by
-  fin_cases a <;> fin_cases b <;> fin_cases c <;> fin_cases d <;>
-    simp only [drift, Gg, knRsq, Rsq, rm, sc, kd, Fin.sum_univ_three, Fin.isValue,
-      Fin.reduceFinMk, Fin.reduceEq, reduceIte] <;>
-    (try simp only [hR 1 0, hR 2 0, hR 2 1]) <;> ring
+  have hchain (i j : Fin 3) : (∑ x, R i x * R x j) = Rsq R i j := rfl
+  have hdot (i j : Fin 3) : (∑ x, R i x * R j x) = Rsq R i j := by
+    rw [Rsq]
+    exact Finset.sum_congr rfl fun x _ => by rw [hR j x]
+  have hsq (i j : Fin 3) : Rsq R i j = Rsq R j i := by
+    unfold Rsq
+    exact Finset.sum_congr rfl fun p _ => by
+      rw [hR i p, hR p j, mul_comm]
+  simp only [drift, rm, Gg, knRsq, sc, kd, mul_add, mul_sub,
+    Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  simp only [mul_ite, mul_one, mul_zero, mul_neg, Finset.sum_ite_irrel,
+    Finset.sum_neg_distrib, Finset.sum_const_zero, Finset.sum_ite_eq',
+    Finset.mem_univ, reduceIte, Fin.isValue, Finset.sum_ite_eq, ite_mul,
+    one_mul, zero_mul]
+  simp_rw [hchain, hdot]
+  rw [hsq c a, hsq d a, hsq d b, hsq c b]
+  rw [hR c b, hR d a, hR d b, hR c a]
+  split_ifs <;> ring
 
 
 theorem kd_comm (i j : Fin 3) : kd i j = kd j i := by

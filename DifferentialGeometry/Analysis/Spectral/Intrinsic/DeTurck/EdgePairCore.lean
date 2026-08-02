@@ -168,8 +168,6 @@ private lemma pair_frame_repr (g : SmoothRiemannianMetric I M) (x : M)
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 12800000 in
--- Normalizing the finite tensor expansion requires the larger heartbeat budget.
 /-- A moving-metric double trace is a fixed-background trace after inserting
 the relative inverse-metric endomorphism in the first contracted slot. -/
 theorem pairTrace_refold (g gm : SmoothRiemannianMetric I M) (s : Nat) :

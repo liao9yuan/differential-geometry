@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
+import DifferentialGeometry.Geometry.Comparison.Volume.RadialJacobiScaling
 
 
 /-!
