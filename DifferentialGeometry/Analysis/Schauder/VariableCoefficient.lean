@@ -304,6 +304,108 @@ theorem matrixLapFreezeDefect_holderWith
   rw [heq]
   simpa only [C] using hall
 
+section Estimates
+
+variable [CompleteSpace F]
+
+theorem frozen_matrix_laplacian_schauder_estimate
+    {alpha K B : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
+    (hdu : ∀ x,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
+    (hbound : ‖frozenMatrixLap a x0 d2u‖ ≤ B)
+    (hholder : HolderWith K alpha (frozenMatrixLap a x0 d2u)) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ (u : Euc n → F) ≤
+      spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha K B u := by
+  let A : Matrix n n Real := fun i j ↦ a i j x0
+  have heq : spdMatrixLap A hA d2u = frozenMatrixLap a x0 d2u := by
+    ext x
+    simp only [spdMatrixLap_apply, frozenMatrixLap_apply, A]
+  apply spd_laplacian_schauder_estimate halpha0 halpha1 A hA
+    u du d2u hu hdu
+  · rw [heq]
+    exact hbound
+  · rw [heq]
+    exact hholder
+
+theorem variable_coefficient_schauder_estimate_of_freeze_defect
+    {alpha Kf Kdefect Bf Bdefect : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
+    (hdu : ∀ x,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
+    (hfBound : ‖variableMatrixLap a d2u‖ ≤ Bf)
+    (hdefectBound : ‖matrixLapFreezeDefect a x0 d2u‖ ≤ Bdefect)
+    (hfHolder : HolderWith Kf alpha (variableMatrixLap a d2u))
+    (hdefectHolder : HolderWith Kdefect alpha
+      (matrixLapFreezeDefect a x0 d2u)) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ (u : Euc n → F) ≤
+      spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha
+        (Kf + Kdefect) (Bf + Bdefect) u := by
+  have hbound : ‖frozenMatrixLap a x0 d2u‖ ≤ Bf + Bdefect := by
+    rw [frozenMatrixLap_eq_variableMatrixLap_add_defect]
+    exact (norm_add_le _ _).trans (add_le_add hfBound hdefectBound)
+  have hholder : HolderWith (Kf + Kdefect) alpha
+      (frozenMatrixLap a x0 d2u) := by
+    rw [frozenMatrixLap_eq_variableMatrixLap_add_defect]
+    exact hfHolder.add hdefectHolder
+  exact frozen_matrix_laplacian_schauder_estimate halpha0 halpha1
+    a x0 hA u du d2u hu hdu hbound hholder
+
+theorem variable_coefficient_schauder_estimate_of_coefficient_oscillation
+    {alpha Kf Kd2u Bf : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
+    (hdu : ∀ x,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
+    (hfBound : ‖variableMatrixLap a d2u‖ ≤ Bf)
+    (hfHolder : HolderWith Kf alpha (variableMatrixLap a d2u))
+    (Ka omega : n → n → NNReal) (M : NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha (a i j : Euc n → Real))
+    (homega : ∀ i j x, ‖a i j x0 - a i j x‖ ≤ omega i j)
+    (hd2unorm : ∀ x, ‖d2u x‖ ≤ M)
+    (hd2uHolder : HolderWith Kd2u alpha
+      (d2u : Euc n → Euc n →L[Real] Euc n →L[Real] F)) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ (u : Euc n → F) ≤
+      spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha
+        (Kf + ∑ i, ∑ j, (omega i j * Kd2u + M * Ka i j))
+        (Bf + ∑ i, ∑ j, omega i j * M) u := by
+  let Kdefect : NNReal :=
+    ∑ i, ∑ j, (omega i j * Kd2u + M * Ka i j)
+  let Bdefect : NNReal := ∑ i, ∑ j, omega i j * M
+  have hdefectBound : ‖matrixLapFreezeDefect a x0 d2u‖ ≤ Bdefect := by
+    have hraw := norm_matrixLapFreezeDefect_le a x0 d2u omega M
+      homega hd2unorm
+    exact_mod_cast hraw
+  have hdefectHolder : HolderWith Kdefect alpha
+      (matrixLapFreezeDefect a x0 d2u) :=
+    matrixLapFreezeDefect_holderWith a x0 d2u Ka omega M
+      ha homega hd2unorm hd2uHolder
+  exact variable_coefficient_schauder_estimate_of_freeze_defect
+    halpha0 halpha1 a x0 hA u du d2u hu hdu hfBound hdefectBound
+    hfHolder hdefectHolder
+
+end Estimates
+
 end DifferentialGeometry.Analysis.Schauder
 
 end
