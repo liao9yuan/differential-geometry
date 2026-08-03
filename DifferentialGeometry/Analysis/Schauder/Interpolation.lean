@@ -52,4 +52,73 @@ theorem norm_first_order_taylor_remainder_le
   norm_first_order_taylor_remainder_le_on convex_univ
     (fun z _ => hf z) (hDf.holderOnWith univ) (mem_univ x) (mem_univ y)
 
+theorem norm_fderiv_le_at_scale
+    {f : E → F} {M C alpha : NNReal}
+    (hf : Differentiable Real f)
+    (hDf : HolderWith C alpha (fderiv Real f))
+    (hfnorm : ∀ z, ‖f z‖ ≤ M) {epsilon : Real} (hepsilon : 0 < epsilon) (x : E) :
+    ‖fderiv Real f x‖ ≤
+      2 * M / epsilon + C * epsilon ^ (alpha : Real) := by
+  apply ContinuousLinearMap.opNorm_le_of_unit_norm
+  · positivity
+  intro v hv
+  let y := x + epsilon • v
+  have hstep : y - x = epsilon • v := by simp [y]
+  have hstepnorm : ‖y - x‖ = epsilon := by
+    rw [hstep, norm_smul, Real.norm_of_nonneg hepsilon.le, hv, mul_one]
+  have htaylor := norm_first_order_taylor_remainder_le hf hDf x y
+  have hfunction : ‖f y - f x‖ ≤ 2 * M := by
+    calc
+      ‖f y - f x‖ ≤ ‖f y‖ + ‖f x‖ := norm_sub_le _ _
+      _ ≤ M + M := add_le_add (hfnorm y) (hfnorm x)
+      _ = 2 * M := by ring
+  have hderivstep : ‖fderiv Real f x (y - x)‖ ≤
+      2 * M + C * epsilon ^ (1 + (alpha : Real)) := by
+    calc
+      ‖fderiv Real f x (y - x)‖ ≤
+          ‖f y - f x‖ + ‖(f y - f x) - fderiv Real f x (y - x)‖ :=
+        norm_le_norm_add_norm_sub (f y - f x) (fderiv Real f x (y - x))
+      _ ≤ 2 * M + C * ‖y - x‖ ^ (1 + (alpha : Real)) :=
+        add_le_add hfunction htaylor
+      _ = 2 * M + C * epsilon ^ (1 + (alpha : Real)) := by rw [hstepnorm]
+  have hleft : ‖fderiv Real f x (y - x)‖ =
+      epsilon * ‖fderiv Real f x v‖ := by
+    rw [hstep, map_smul, norm_smul, Real.norm_of_nonneg hepsilon.le]
+  have hright : epsilon * (2 * M / epsilon + C * epsilon ^ (alpha : Real)) =
+      2 * M + C * epsilon ^ (1 + (alpha : Real)) := by
+    rw [mul_add, mul_div_cancel₀ _ hepsilon.ne']
+    congr 1
+    calc
+      epsilon * (C * epsilon ^ (alpha : Real)) =
+          C * (epsilon ^ (1 : Real) * epsilon ^ (alpha : Real)) := by
+        rw [Real.rpow_one]
+        ring
+      _ = C * epsilon ^ (1 + (alpha : Real)) := by
+        rw [Real.rpow_add hepsilon]
+  have hmul : epsilon * ‖fderiv Real f x v‖ ≤
+      epsilon * (2 * M / epsilon + C * epsilon ^ (alpha : Real)) := by
+    rw [hright]
+    simpa only [hleft] using hderivstep
+  exact le_of_mul_le_mul_left hmul hepsilon
+
+theorem norm_iteratedFDeriv_succ_le_at_scale
+    {f : E → F} {k : Nat} {M C alpha : NNReal}
+    (hf : ContDiff Real (k + 1) f)
+    (hjet : HolderWith C alpha (iteratedFDeriv Real (k + 1) f))
+    (hfnorm : ∀ z, ‖iteratedFDeriv Real k f z‖ ≤ M)
+    {epsilon : Real} (hepsilon : 0 < epsilon) (x : E) :
+    ‖iteratedFDeriv Real (k + 1) f x‖ ≤
+      2 * M / epsilon + C * epsilon ^ (alpha : Real) := by
+  let curryEquiv :=
+    continuousMultilinearCurryLeftEquiv Real (fun _ : Fin (k + 1) => E) F
+  have hderivHolder : HolderWith C alpha
+      (fderiv Real (iteratedFDeriv Real k f)) := by
+    rw [fderiv_iteratedFDeriv]
+    simpa only [curryEquiv, one_mul, NNReal.rpow_one, NNReal.coe_one] using
+      (curryEquiv.lipschitz.holderWith.comp hjet)
+  have hbound := norm_fderiv_le_at_scale
+    (hf.differentiable_iteratedFDeriv (mod_cast Nat.lt_succ_self k))
+    hderivHolder hfnorm hepsilon x
+  rwa [norm_fderiv_iteratedFDeriv] at hbound
+
 end DifferentialGeometry.Analysis.Schauder
