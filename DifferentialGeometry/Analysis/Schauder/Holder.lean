@@ -649,6 +649,45 @@ theorem holderWith_parabolic_const_time
     simpa only [NNReal.one_rpow, mul_one, Function.comp_apply, one_mul] using hfull
   exact (hfull'.holderOnWith (parabolicCylinder J Set.univ)).holderWith
 
+theorem holderWith_parabolic_const_space
+    {V F : Type*} [PseudoMetricSpace V] [MetricSpace F]
+    {alpha K : NNReal} {f : Real → F}
+    (hf : HolderWith K (alpha / 2) f) :
+    HolderWith K alpha (fun p : ParabolicPoint V ↦ f p.time) := by
+  intro p q
+  have hdist : |p.time - q.time| ^ (1 / 2 : Real) ≤ dist p q := by
+    rw [← parabolicPoint_time_space p, ← parabolicPoint_time_space q,
+      dist_parabolicPoint]
+    exact le_max_left _ _
+  have hpower : dist p.time q.time ^ ((alpha / 2 : NNReal) : Real) ≤
+      dist p q ^ (alpha : Real) := by
+    rw [Real.dist_eq]
+    calc
+      |p.time - q.time| ^ ((alpha / 2 : NNReal) : Real) =
+          (|p.time - q.time| ^ (1 / 2 : Real)) ^ (alpha : Real) := by
+        rw [← Real.rpow_mul (abs_nonneg _)]
+        congr 1
+        push_cast
+        ring
+      _ ≤ dist p q ^ (alpha : Real) :=
+        Real.rpow_le_rpow (Real.rpow_nonneg (abs_nonneg _) _)
+          hdist alpha.coe_nonneg
+  have hreal : dist (f p.time) (f q.time) ≤
+      (K : Real) * dist p q ^ (alpha : Real) :=
+    (hf.dist_le p.time q.time).trans
+      (mul_le_mul_of_nonneg_left hpower K.coe_nonneg)
+  rw [edist_dist, edist_dist]
+  calc
+    ENNReal.ofReal (dist (f p.time) (f q.time)) ≤
+        ENNReal.ofReal ((K : Real) * dist p q ^ (alpha : Real)) :=
+      ENNReal.ofReal_le_ofReal hreal
+    _ = (K : ENNReal) * ENNReal.ofReal (dist p q ^ (alpha : Real)) := by
+      rw [ENNReal.ofReal_mul K.coe_nonneg]
+      congr 1
+      exact ENNReal.ofReal_coe_nnreal
+    _ = (K : ENNReal) * ENNReal.ofReal (dist p q) ^ (alpha : Real) := by
+      rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
+
 section Parabolic
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
