@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ScalarStrong
+import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 
 set_option autoImplicit false
 
@@ -184,6 +185,53 @@ theorem heat_pot_pos_of_initial_pos
     (I := I) G htau.1 hgrad_cont hlaplacian_cont V L u hu_cont
     hu_nonneg hu_time hu_mdiff hu_grad hu_super hV_lower
     (t := 0) ⟨le_rfl, htau.1.le⟩ hc y
+
+theorem heat_pot_pos_of_initial_pos_of_metricFamilySmoothOn
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T) (V u : Real -> M -> Real)
+    (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
+    (C : Real)
+    (hV_upper : ∀ t ∈ Set.Icc 0 T, ∀ x : M, V t x ≤ C)
+    (hinit : ∀ x : M, 0 ≤ u 0 x)
+    {c : M} (hc : 0 < u 0 c)
+    {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
+    {D : RealTimeInterval}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hslab : Set.Icc 0 tau ⊆ D.regular)
+    (hconn : ∀ t ∈ Set.Icc 0 tau,
+      G.connection t = LeviCivita (I := I) (G.metric t))
+    (L : Real) (hV_lower : ∀ t ∈ Set.Icc 0 tau, ∀ x : M, L ≤ V t x)
+    (y : M) :
+    0 < u tau y := by
+  exact heat_pot_pos_of_initial_pos (I := I) G hT V u hsol C hV_upper hinit hc htau
+    (fun ρ hρ => G.gradient_norm_sq_continuousOn hG hslab hρ)
+    (fun ρ hρ => G.laplacianAt_continuousOn
+      hG hslab (uniqueDiffOn_Icc htau.1) hconn hρ)
+    L hV_lower y
+
+theorem heat_pos_of_initial_pos_of_metricFamilySmoothOn
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T) (u : Real -> M -> Real)
+    (hsol : IsHeatOn (RealTimeInterval.closed 0 T hT) G u)
+    (hinit : ∀ x : M, 0 ≤ u 0 x)
+    {c : M} (hc : 0 < u 0 c)
+    {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
+    {D : RealTimeInterval}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hslab : Set.Icc 0 tau ⊆ D.regular)
+    (hconn : ∀ t ∈ Set.Icc 0 tau,
+      G.connection t = LeviCivita (I := I) (G.metric t))
+    (y : M) :
+    0 < u tau y := by
+  exact heat_pot_pos_of_initial_pos_of_metricFamilySmoothOn
+    (I := I) G hT (fun _ _ => 0) u hsol 0 (fun _ _ _ => le_rfl)
+    hinit hc htau hG hslab hconn 0 (fun _ _ _ => le_rfl) y
 
 end
 

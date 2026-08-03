@@ -2879,6 +2879,7 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
+import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.Laplacian

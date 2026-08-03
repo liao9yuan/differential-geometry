@@ -81,6 +81,50 @@ theorem lap_eq_hess_on [I.Boundaryless]
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+theorem laplacian_eq_chart_hessian_trace [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    {x : M} (hx : x ∈ (chartAt H α).source) :
+    laplacian (I := I) (LeviCivita (I := I) g) g f x =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g α x i j *
+          chartHessianTensor (I := I) g α f i j x := by
+  classical
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rwa [trivializationAt_baseSet_eq_chartAt_source]
+  let basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    chartBasisFamily (I := I) α hbase
+  let gInv : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i j => chartInvGramMatrix (I := I) g α x i j
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv := by
+    intro i j
+    constructor
+    · have hmatrix := congrArg (fun A => A i j)
+        (chartInvGramMatrix_mul_chartGramMatrix (I := I) g α hbase)
+      simpa [Matrix.mul_apply, Matrix.one_apply, basis, gInv,
+        chartBasisFamily_apply] using hmatrix
+    · have hmatrix := congrArg (fun A => A i j)
+        (chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase)
+      simpa [Matrix.mul_apply, Matrix.one_apply, basis, gInv,
+        chartBasisFamily_apply] using hmatrix
+  rw [lap_eq_hess_on (I := I) g isOpen_univ hf.contMDiffOn (Set.mem_univ x)]
+  rw [metricTracePair0SAt_eq_sum_basis
+    (I := I) g basis gInv hinv (hessTensorAt (I := I) g f x)]
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  change gInv i j * hessFun (I := I) g f x (basis i) (basis j) = _
+  rw [hessFun_eq_cov_local (I := I) g isOpen_univ hf.contMDiffOn
+    (Set.mem_univ x)]
+  rw [abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf]
+  change chartInvGramMatrix (I := I) g α x i j *
+      abstractHessian (I := I) g f x
+        (chartBasisVecFiber (I := I) α i x)
+        (chartBasisVecFiber (I := I) α j x) = _
+  rw [chartAlphaMatrixIdentity_holds (I := I) g α hf hx i j]
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem connLaplacian_function_eq_chartLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
