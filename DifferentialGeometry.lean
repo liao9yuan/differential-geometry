@@ -802,6 +802,7 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1Modulus
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import DifferentialGeometry.Analysis.Schauder.Holder
+import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Scaling
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
