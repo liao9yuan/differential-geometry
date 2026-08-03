@@ -722,6 +722,174 @@ theorem heatSup_parabolic_holder
     heatSup_scaled hq_pos u q.space]
   exact h
 
+omit [CompleteSpace F] in
+theorem heatSup_fderiv_eq
+    {t : Real} (ht : 0 < t)
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x) (x : V) :
+    fderiv Real (fun y : V ↦ heatSup t u y) x = heatSup t du x := by
+  have hscaled := heatScaled_space t u du hu x
+  have hfun : (fun y : V ↦ heatSup t u y) =
+      fun y : V ↦ heatScaled t u y := by
+    funext y
+    exact heatSup_scaled ht u y
+  rw [hfun, hscaled.fderiv, ← heatSup_scaled ht du x]
+
+omit [CompleteSpace F] in
+theorem heatSup_hessianCurryEquiv_iteratedFDeriv_two
+    {t : Real} (ht : 0 < t)
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x) (x : V) :
+    hessianCurryEquiv V F
+        (iteratedFDeriv Real 2 (fun y : V ↦ heatSup t u y) x) =
+      heatSup t d2u x := by
+  have hfd : fderiv Real (fun y : V ↦ heatSup t u y) =
+      fun y : V ↦ heatSup t du y := by
+    funext y
+    exact heatSup_fderiv_eq ht u du hu y
+  ext v w
+  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
+    continuousMultilinearCurryFin1_apply,
+    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
+  rw [hfd, heatSup_fderiv_eq ht du d2u hdu x]
+  rfl
+
+omit [CompleteSpace F] in
+theorem heatSup_parabolicTimeDerivative_eq
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x)
+    (p : ParabolicPoint V) (ht : 0 < p.time) :
+    parabolicTimeDerivative (fun t x ↦ heatSup t u x) p =
+      heatSup p.time (coreLap d2u) p.space := by
+  unfold parabolicTimeDerivative
+  rw [(heatSup_time ht u du d2u hu hdu p.space).hasFDerivAt.fderiv]
+  simp
+
+def heatSupParabolicSchauderConst
+    (alpha B0 B1 B2 K2 : NNReal) : NNReal :=
+  B0 + B1 + B2 + Module.finrank Real V * B2 +
+    heatScaledParabolicHolderConst (V := V) alpha K2 +
+      heatScaledParabolicHolderConst (V := V) alpha
+        (Module.finrank Real V * K2)
+
+omit [CompleteSpace F] in
+theorem heatSup_parabolic_schauder_estimate
+    {alpha B0 B1 B2 K2 : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x)
+    (hB0 : ‖u‖ ≤ B0) (hB1 : ‖du‖ ≤ B1) (hB2 : ‖d2u‖ ≤ B2)
+    (hK2 : HolderWith K2 alpha d2u) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioi (0 : Real)) Set.univ)
+      (fun t x ↦ heatSup t u x) ≤
+        heatSupParabolicSchauderConst (V := V) alpha B0 B1 B2 K2 := by
+  let Q : Set (ParabolicPoint V) :=
+    parabolicCylinder (Ioi (0 : Real)) Set.univ
+  let w : Real → V → F := fun t x ↦ heatSup t u x
+  let Cspatial : Nat → NNReal
+    | 0 => B0
+    | 1 => B1
+    | _ => B2
+  have hspatial : ∀ j < 3, ∀ p ∈ Q,
+      ‖parabolicSpatialJet j w p‖ ≤ Cspatial j := by
+    intro j hj p hp
+    have ht : 0 < p.time := hp.1
+    interval_cases j
+    · unfold parabolicSpatialJet w
+      rw [norm_iteratedFDeriv_zero]
+      exact (heatSup_contract ht u p.space).trans hB0
+    · unfold parabolicSpatialJet w
+      rw [norm_iteratedFDeriv_one, heatSup_fderiv_eq ht u du hu p.space]
+      exact (heatSup_contract ht du p.space).trans hB1
+    · unfold parabolicSpatialJet w
+      rw [← (hessianCurryEquiv V F).norm_map,
+        heatSup_hessianCurryEquiv_iteratedFDeriv_two ht u du d2u hu hdu]
+      exact (heatSup_contract ht d2u p.space).trans hB2
+  have htime : ∀ p ∈ Q,
+      ‖parabolicTimeDerivative w p‖ ≤
+        ((Module.finrank Real V : NNReal) * B2 : NNReal) := by
+    intro p hp
+    have ht : 0 < p.time := hp.1
+    rw [heatSup_parabolicTimeDerivative_eq u du d2u hu hdu p ht]
+    calc
+      ‖heatSup p.time (coreLap d2u) p.space‖ ≤ ‖coreLap d2u‖ :=
+        heatSup_contract ht (coreLap d2u) p.space
+      _ ≤ Module.finrank Real V * ‖d2u‖ := coreLap_norm_le d2u
+      _ ≤ Module.finrank Real V * B2 :=
+        mul_le_mul_of_nonneg_left hB2 (Nat.cast_nonneg _)
+      _ = ((Module.finrank Real V : NNReal) * B2 : NNReal) := by
+        simp only [NNReal.coe_mul, NNReal.coe_natCast]
+  have hspatialHolder : HolderWith
+      (heatScaledParabolicHolderConst (V := V) alpha K2) alpha
+      (Q.restrict (parabolicSpatialJet 2 w)) := by
+    have hraw := heatSup_parabolic_holder (V := V) halpha d2u hK2
+    have hcomp := (hessianCurryEquiv V F).symm.lipschitz.holderWith.comp hraw
+    have hcomp' : HolderWith
+        (heatScaledParabolicHolderConst (V := V) alpha K2) alpha
+        ((hessianCurryEquiv V F).symm ∘
+          Q.restrict (fun p ↦ heatSup p.time d2u p.space)) := by
+      simpa only [Q, NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+    convert hcomp' using 1
+    funext p
+    apply (hessianCurryEquiv V F).injective
+    simp only [Function.comp_apply, Set.restrict_apply,
+      LinearIsometryEquiv.apply_symm_apply]
+    exact heatSup_hessianCurryEquiv_iteratedFDeriv_two p.2.1
+      u du d2u hu hdu p.1.space
+  have htimeHolder : HolderWith
+      (heatScaledParabolicHolderConst (V := V) alpha
+        (Module.finrank Real V * K2)) alpha
+      (Q.restrict (parabolicTimeDerivative w)) := by
+    have hlap := coreLap_holder d2u hK2
+    have hraw := heatSup_parabolic_holder (V := V) halpha (coreLap d2u) hlap
+    convert hraw using 1
+    funext p
+    exact heatSup_parabolicTimeDerivative_eq u du d2u hu hdu p.1 p.2.1
+  have hresult := eParabolicC2HolderGaugeOn_le Cspatial
+    (Module.finrank Real V * B2)
+    (heatScaledParabolicHolderConst (V := V) alpha K2)
+    (heatScaledParabolicHolderConst (V := V) alpha
+      (Module.finrank Real V * K2))
+    hspatial htime hspatialHolder htimeHolder
+  unfold heatSupParabolicSchauderConst
+  simpa only [Q, w, Cspatial, Finset.sum_range_succ,
+    Finset.sum_range_zero, zero_add, ENNReal.coe_add, ENNReal.coe_mul,
+    NNReal.coe_natCast] using hresult
+
+omit [CompleteSpace F] in
+theorem heatSup_parabolic_schauder_estimate_nnnorm
+    {alpha K2 : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x)
+    (hK2 : HolderWith K2 alpha d2u) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioi (0 : Real)) Set.univ)
+      (fun t x ↦ heatSup t u x) ≤
+        heatSupParabolicSchauderConst (V := V) alpha
+          ‖u‖₊ ‖du‖₊ ‖d2u‖₊ K2 := by
+  apply heatSup_parabolic_schauder_estimate halpha u du d2u hu hdu
+  · exact le_rfl
+  · exact le_rfl
+  · exact le_rfl
+  · exact hK2
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 end

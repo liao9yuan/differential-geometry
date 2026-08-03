@@ -16,13 +16,6 @@ open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 private abbrev Euc (n : Type*) := EuclideanSpace Real n
 
-private def hessianCurryEquiv
-    (E F : Type*) [NormedAddCommGroup E] [NormedSpace Real E]
-    [NormedAddCommGroup F] [NormedSpace Real F] :
-    (E [×2]→L[Real] F) ≃ₗᵢ[Real] E →L[Real] E →L[Real] F :=
-  (continuousMultilinearCurryRightEquiv' Real 1 E F).trans
-    (continuousMultilinearCurryFin1 Real E (E →L[Real] F))
-
 variable {n F : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
   [NormedAddCommGroup F] [NormedSpace Real F]
 

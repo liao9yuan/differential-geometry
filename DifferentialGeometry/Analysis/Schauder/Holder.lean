@@ -486,6 +486,13 @@ theorem topSpatialJet_holderWith_restrict {k : Nat} {alpha C : NNReal}
   holderWith_restrict_of_eHolderSeminormOn_le
     ((holderSeminorm_le_eContDiffHolderGaugeOn k alpha s f).trans h)
 
+def hessianCurryEquiv
+    (V F : Type*) [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F] :
+    (V [×2]→L[Real] F) ≃ₗᵢ[Real] V →L[Real] V →L[Real] F :=
+  (continuousMultilinearCurryRightEquiv' Real 1 V F).trans
+    (continuousMultilinearCurryFin1 Real V (V →L[Real] F))
+
 end Spatial
 
 abbrev ParabolicPoint (V : Type*) :=
