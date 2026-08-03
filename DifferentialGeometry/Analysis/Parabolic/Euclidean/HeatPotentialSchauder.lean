@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderTime
+import DifferentialGeometry.Analysis.Schauder.Holder
 import Mathlib.MeasureTheory.Integral.Prod
 
 noncomputable section
@@ -7,6 +8,8 @@ open MeasureTheory Real Set Filter
 open scoped NNReal RealInnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
+
+open DifferentialGeometry.Analysis.Schauder
 
 variable {V : Type*}
   [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
@@ -1310,6 +1313,135 @@ theorem heatD2Duh_time_norm_sub_le_of_holder
         simpa only [heq] using hmeass) hmeast
     simpa only [heq, norm_sub_rev,
       abs_of_nonpos (sub_nonpos.mpr hts), neg_sub] using h
+
+def d2DuhParabolicHolderConst (alpha : NNReal) (v w : V) (K : NNReal) : Real :=
+  d2DuhSpaceHolderConst alpha v w K + d2DuhTimeHolderConst alpha v w K
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+theorem d2DuhParabolicHolderConst_nonneg {alpha : NNReal} (halpha : alpha ≤ 1)
+    (v w : V) (K : NNReal) :
+    0 ≤ d2DuhParabolicHolderConst alpha v w K := by
+  exact add_nonneg (d2DuhSpaceHolderConst_nonneg (V := V) halpha v w K)
+    (d2DuhTimeHolderConst_nonneg (V := V) halpha v w K)
+
+theorem heatD2Duh_parabolic_norm_sub_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {s t : Real} (hs : 0 < s) (ht : 0 < t)
+    (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) (max s t), HolderWith K alpha (f r))
+    (v w x y : V)
+    (hmeastx : AEStronglyMeasurable
+      (fun r : Real ↦ heatD2Conv (t - r) v w (f r) x)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeasty : AEStronglyMeasurable
+      (fun r : Real ↦ heatD2Conv (t - r) v w (f r) y)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeassy : AEStronglyMeasurable
+      (fun r : Real ↦ heatD2Conv (s - r) v w (f r) y)
+      (volume.restrict (uIoc (0 : Real) s))) :
+    ‖heatD2Duh t v w f x - heatD2Duh s v w f y‖ ≤
+      d2DuhParabolicHolderConst alpha v w K *
+        (max (|t - s| ^ (1 / 2 : Real)) ‖x - y‖) ^ (alpha : Real) := by
+  have halpha_le : alpha ≤ 1 := halpha1.le
+  have hft : ∀ r ∈ Icc (0 : Real) t, HolderWith K alpha (f r) := by
+    intro r hr
+    exact hf r ⟨hr.1, hr.2.trans (le_max_right s t)⟩
+  have hspace := heatD2Duh_norm_sub_le_of_holder
+    halpha0 halpha1 ht f hft v w x y hmeastx hmeasty
+  have htime := heatD2Duh_time_norm_sub_le_of_holder
+    halpha0 halpha_le hs ht f hf v w y hmeassy hmeasty
+  let D : Real := max (|t - s| ^ (1 / 2 : Real)) ‖x - y‖
+  have hspaceD : ‖x - y‖ ^ (alpha : Real) ≤ D ^ (alpha : Real) := by
+    apply Real.rpow_le_rpow (norm_nonneg _) (le_max_right _ _) alpha.coe_nonneg
+  have htimeD : |t - s| ^ ((alpha : Real) / 2) ≤ D ^ (alpha : Real) := by
+    have hhalf : |t - s| ^ (1 / 2 : Real) ≤ D := le_max_left _ _
+    calc
+      |t - s| ^ ((alpha : Real) / 2) =
+          (|t - s| ^ (1 / 2 : Real)) ^ (alpha : Real) := by
+        rw [← Real.rpow_mul (abs_nonneg _)]
+        congr 1
+        ring
+      _ ≤ D ^ (alpha : Real) :=
+        Real.rpow_le_rpow (Real.rpow_nonneg (abs_nonneg _) _)
+          hhalf alpha.coe_nonneg
+  have hCs := d2DuhSpaceHolderConst_nonneg (V := V) halpha_le v w K
+  have hCt := d2DuhTimeHolderConst_nonneg (V := V) halpha_le v w K
+  calc
+    ‖heatD2Duh t v w f x - heatD2Duh s v w f y‖ =
+        ‖(heatD2Duh t v w f x - heatD2Duh t v w f y) +
+          (heatD2Duh t v w f y - heatD2Duh s v w f y)‖ := by
+      congr 1
+      abel
+    _ ≤ ‖heatD2Duh t v w f x - heatD2Duh t v w f y‖ +
+          ‖heatD2Duh t v w f y - heatD2Duh s v w f y‖ := norm_add_le _ _
+    _ ≤ d2DuhSpaceHolderConst alpha v w K * ‖x - y‖ ^ (alpha : Real) +
+        d2DuhTimeHolderConst alpha v w K * |t - s| ^ ((alpha : Real) / 2) :=
+      add_le_add (by simpa only [norm_sub_rev] using hspace) htime
+    _ ≤ d2DuhSpaceHolderConst alpha v w K * D ^ (alpha : Real) +
+        d2DuhTimeHolderConst alpha v w K * D ^ (alpha : Real) :=
+      add_le_add (mul_le_mul_of_nonneg_left hspaceD hCs)
+        (mul_le_mul_of_nonneg_left htimeD hCt)
+    _ = d2DuhParabolicHolderConst alpha v w K * D ^ (alpha : Real) := by
+      unfold d2DuhParabolicHolderConst
+      ring
+
+def heatD2DuhField (v w : V) (f : Real → V → F) : ParabolicPoint V → F :=
+  fun p ↦ heatD2Duh p.time v w f p.space
+
+theorem heatD2DuhField_holderOnWith_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (v w : V)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r) v w (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderOnWith (Real.toNNReal (d2DuhParabolicHolderConst alpha v w K)) alpha
+      (heatD2DuhField v w f)
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) := by
+  intro p hp q hq
+  have hf' : ∀ r ∈ Icc (0 : Real) (max q.time p.time),
+      HolderWith K alpha (f r) := by
+    intro r hr
+    exact hf r ⟨hr.1, hr.2.trans (max_le hq.1.2 hp.1.2)⟩
+  have hreal := heatD2Duh_parabolic_norm_sub_le_of_holder
+    halpha0 halpha1 hq.1.1 hp.1.1 f hf' v w p.space q.space
+    (hmeas p.time hp.1 p.space) (hmeas p.time hp.1 q.space)
+    (hmeas q.time hq.1 q.space)
+  have hp_repr : parabolicPoint p.time p.space = p := by
+    rcases p with ⟨⟨pt⟩, px⟩
+    rfl
+  have hq_repr : parabolicPoint q.time q.space = q := by
+    rcases q with ⟨⟨qt⟩, qx⟩
+    rfl
+  have hdist : dist p q =
+      max (|p.time - q.time| ^ (1 / 2 : Real)) ‖p.space - q.space‖ := by
+    rw [← hp_repr, ← hq_repr, dist_parabolicPoint, dist_eq_norm]
+    simp only [parabolicPoint_time, parabolicPoint_space]
+  change edist (heatD2Duh p.time v w f p.space)
+      (heatD2Duh q.time v w f q.space) ≤ _
+  rw [edist_dist, edist_dist, hdist, ENNReal.ofNNReal_toNNReal,
+    ENNReal.ofReal_rpow_of_nonneg (by positivity) alpha.coe_nonneg,
+    ← ENNReal.ofReal_mul
+      (d2DuhParabolicHolderConst_nonneg (V := V) halpha1.le v w K)]
+  simpa only [dist_eq_norm] using ENNReal.ofReal_le_ofReal hreal
+
+theorem heatD2DuhField_holderWith_restrict_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (v w : V)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r) v w (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderWith (Real.toNNReal (d2DuhParabolicHolderConst alpha v w K)) alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (heatD2DuhField v w f)) :=
+  (heatD2DuhField_holderOnWith_of_holder
+    halpha0 halpha1 f hf v w hmeas).holderWith
 
 end Convolution
 
