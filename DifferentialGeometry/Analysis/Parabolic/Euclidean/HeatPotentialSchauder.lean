@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderHigher
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderTime
 import Mathlib.MeasureTheory.Integral.Prod
 
 noncomputable section

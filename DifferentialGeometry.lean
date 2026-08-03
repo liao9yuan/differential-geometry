@@ -615,6 +615,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelLpPower
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelPDE
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderHigher
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderTime
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSPD
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSup
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSchauder
