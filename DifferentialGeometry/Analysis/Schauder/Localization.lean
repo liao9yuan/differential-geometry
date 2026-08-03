@@ -41,6 +41,18 @@ theorem eContDiffHolderGaugeOn_mono {s t : Set V} (hst : s ⊆ t)
   · exact eSupNormOn_mono hst _
   · exact eHolderSeminormOn_mono hst alpha _
 
+theorem eParabolicC2HolderGaugeOn_mono
+    {Q R : Set (ParabolicPoint V)} (hQR : Q ⊆ R)
+    (alpha : NNReal) (u : Real → V → F) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      eParabolicC2HolderGaugeOn alpha R u := by
+  unfold eParabolicC2HolderGaugeOn
+  gcongr with j
+  · exact eSupNormOn_mono hQR _
+  · exact eSupNormOn_mono hQR _
+  · exact eHolderSeminormOn_mono hQR alpha _
+  · exact eHolderSeminormOn_mono hQR alpha _
+
 omit [MetricSpace X] [NormedSpace Real F]
     [NormedAddCommGroup V] [NormedSpace Real V] in
 theorem eSupNormOn_congr {s : Set X} {f g : X → F}
@@ -73,6 +85,38 @@ theorem eContDiffHolderGaugeOn_congr {s : Set V} {f g : V → F}
     exact eSupNormOn_congr
       (hfg j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))
   · exact eHolderSeminormOn_congr (hfg k le_rfl) alpha
+
+theorem eParabolicC2HolderGaugeOn_congr
+    {Q : Set (ParabolicPoint V)} {u v : Real → V → F}
+    (hspatial : ∀ j ≤ 2,
+      Set.EqOn (parabolicSpatialJet j u) (parabolicSpatialJet j v) Q)
+    (htime : Set.EqOn (parabolicTimeDerivative u)
+      (parabolicTimeDerivative v) Q)
+    (alpha : NNReal) :
+    eParabolicC2HolderGaugeOn alpha Q u =
+      eParabolicC2HolderGaugeOn alpha Q v := by
+  have hsum :
+      (∑ j ∈ Finset.range 3,
+        eSupNormOn Q (parabolicSpatialJet j u)) =
+      ∑ j ∈ Finset.range 3,
+        eSupNormOn Q (parabolicSpatialJet j v) := by
+    apply Finset.sum_congr rfl
+    intro j hj
+    exact eSupNormOn_congr
+      (hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))
+  have hsupTime : eSupNormOn Q (parabolicTimeDerivative u) =
+      eSupNormOn Q (parabolicTimeDerivative v) :=
+    eSupNormOn_congr htime
+  have hholderSpatial :
+      eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) =
+        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 v) :=
+    eHolderSeminormOn_congr (hspatial 2 le_rfl) alpha
+  have hholderTime :
+      eHolderSeminormOn alpha Q (parabolicTimeDerivative u) =
+        eHolderSeminormOn alpha Q (parabolicTimeDerivative v) :=
+    eHolderSeminormOn_congr htime alpha
+  unfold eParabolicC2HolderGaugeOn
+  rw [hsum, hsupTime, hholderSpatial, hholderTime]
 
 theorem eContDiffHolderGaugeOn_congr_of_eqOn_open
     {s U : Set V} (hU : IsOpen U) (hsU : s ⊆ U)

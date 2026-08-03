@@ -306,7 +306,7 @@ variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
 
 omit [NormedSpace Real V] in
 theorem eHolderSeminormOn_sub_le
-    (alpha : NNReal) (s : Set V) (f g : V → F) :
+    (alpha : NNReal) (s : Set X) (f g : X → F) :
     eHolderSeminormOn alpha s (f - g) ≤
       eHolderSeminormOn alpha s f + eHolderSeminormOn alpha s g := by
   have hrestrict : s.restrict (f - g) = s.restrict f - s.restrict g := by
@@ -548,6 +548,80 @@ def eParabolicC2HolderGaugeOn (alpha : NNReal)
     eSupNormOn Q (parabolicTimeDerivative u) +
     eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
     eHolderSeminormOn alpha Q (parabolicTimeDerivative u)
+
+theorem eParabolicC2HolderGaugeOn_sub_le
+    (alpha : NNReal) (Q : Set (ParabolicPoint V))
+    (u v : Real → V → F)
+    (hu_space : ∀ t : Real, ContDiff Real 2 (u t))
+    (hv_space : ∀ t : Real, ContDiff Real 2 (v t))
+    (hu_time : ∀ x : V, Differentiable Real (fun t => u t x))
+    (hv_time : ∀ x : V, Differentiable Real (fun t => v t x)) :
+    eParabolicC2HolderGaugeOn alpha Q (fun t x => u t x - v t x) ≤
+      eParabolicC2HolderGaugeOn alpha Q u +
+        eParabolicC2HolderGaugeOn alpha Q v := by
+  have hspatial : ∀ j ≤ 2,
+      parabolicSpatialJet j (fun t x => u t x - v t x) =
+        parabolicSpatialJet j u - parabolicSpatialJet j v := by
+    intro j hj
+    funext p
+    unfold parabolicSpatialJet
+    change iteratedFDeriv Real j (u p.time - v p.time) p.space = _
+    rw [iteratedFDeriv_sub
+      ((hu_space p.time).of_le (by exact_mod_cast hj))
+      ((hv_space p.time).of_le (by exact_mod_cast hj))]
+    rfl
+  have htime :
+      parabolicTimeDerivative (fun t x => u t x - v t x) =
+        parabolicTimeDerivative u - parabolicTimeDerivative v := by
+    funext p
+    unfold parabolicTimeDerivative
+    change (fderiv Real
+        ((fun t => u t p.space) - fun t => v t p.space) p.time) 1 =
+      (fderiv Real (fun t => u t p.space) p.time) 1 -
+        (fderiv Real (fun t => v t p.space) p.time) 1
+    rw [fderiv_sub (hu_time p.space p.time) (hv_time p.space p.time)]
+    exact ContinuousLinearMap.sub_apply _ _ _
+  unfold eParabolicC2HolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range 3,
+        eSupNormOn Q
+          (parabolicSpatialJet j (fun t x => u t x - v t x))) +
+        eSupNormOn Q
+          (parabolicTimeDerivative (fun t x => u t x - v t x)) +
+        eHolderSeminormOn alpha Q
+          (parabolicSpatialJet 2 (fun t x => u t x - v t x)) +
+        eHolderSeminormOn alpha Q
+          (parabolicTimeDerivative (fun t x => u t x - v t x)) ≤
+      (∑ j ∈ Finset.range 3,
+        (eSupNormOn Q (parabolicSpatialJet j u) +
+          eSupNormOn Q (parabolicSpatialJet j v))) +
+        (eSupNormOn Q (parabolicTimeDerivative u) +
+          eSupNormOn Q (parabolicTimeDerivative v)) +
+        (eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 v)) +
+        (eHolderSeminormOn alpha Q (parabolicTimeDerivative u) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
+      gcongr with j hj
+      · rw [hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
+        exact eSupNormOn_sub_le Q _ _
+      · rw [htime]
+        exact eSupNormOn_sub_le Q _ _
+      · rw [hspatial 2 le_rfl]
+        exact eHolderSeminormOn_sub_le alpha Q _ _
+      · rw [htime]
+        exact eHolderSeminormOn_sub_le alpha Q _ _
+    _ = ((∑ j ∈ Finset.range 3,
+          eSupNormOn Q (parabolicSpatialJet j u)) +
+          eSupNormOn Q (parabolicTimeDerivative u) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative u)) +
+        ((∑ j ∈ Finset.range 3,
+          eSupNormOn Q (parabolicSpatialJet j v)) +
+          eSupNormOn Q (parabolicTimeDerivative v) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 v) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
+      rw [Finset.sum_add_distrib]
+      abel
 
 def IsParabolicC2HolderOn (alpha : NNReal)
     (Q : Set (ParabolicPoint V)) (u : Real → V → F) : Prop :=
