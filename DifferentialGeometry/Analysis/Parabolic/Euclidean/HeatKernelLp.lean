@@ -686,6 +686,24 @@ theorem heatD2_bound {t : ℝ} (ht : 0 < t) (v w x : V) :
           (heatScale t)⁻¹ * (heatScale t)⁻¹ *
           baseD2Maj ((heatScale t)⁻¹ • x)) := by ring
 
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD1Map_norm_le {t : Real} (ht : 0 < t) (x : V) :
+    ‖heatD1Map t x‖ ≤ heatD1Maj t x := by
+  apply ContinuousLinearMap.opNorm_le_bound (heatD1Map t x)
+    (heatD1Maj_nonneg ht x)
+  intro v
+  rw [heatD1Map_apply]
+  exact (heatD1_bound ht v x).trans_eq (by ring)
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD2Map_norm_le {t : Real} (ht : 0 < t) (v x : V) :
+    ‖heatD2Map t v x‖ ≤ ‖v‖ * heatD2Maj t x := by
+  apply ContinuousLinearMap.opNorm_le_bound (heatD2Map t v x)
+    (mul_nonneg (norm_nonneg v) (heatD2Maj_nonneg ht x))
+  intro w
+  rw [heatD2Map_apply]
+  exact (heatD2_bound ht v w x).trans_eq (by ring)
+
 /-- Integrability of the first heat derivative kernel. -/
 theorem heatD1_int {t : ℝ} (ht : 0 < t) (v : V) :
     Integrable (heatD1 t v : V → ℝ) := by

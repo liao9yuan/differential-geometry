@@ -266,6 +266,16 @@ theorem heatD3_bound {t : ℝ} (ht : 0 < t) (u v w x : V) :
           (heatScale t)⁻¹ * (heatScale t)⁻¹ *
             baseD3Maj ((heatScale t)⁻¹ • x)) := by ring
 
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD3Map_norm_le {t : Real} (ht : 0 < t) (v w x : V) :
+    ‖heatD3Map t v w x‖ ≤ ‖v‖ * ‖w‖ * heatD3Maj t x := by
+  apply ContinuousLinearMap.opNorm_le_bound (heatD3Map t v w x)
+    (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w))
+      (heatD3Maj_nonneg ht x))
+  intro u
+  rw [heatD3Map_apply]
+  exact (heatD3_bound ht u v w x).trans_eq (by ring)
+
 /-- Integrability of the scaled third-derivative majorant. -/
 theorem heatD3Maj_int {t : ℝ} (ht : 0 < t) :
     Integrable (heatD3Maj t : V → ℝ) := by
