@@ -590,6 +590,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldCo
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.Cutoff
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.DuhamelRepresentation
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FourierL2Bridge
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamelSPD
