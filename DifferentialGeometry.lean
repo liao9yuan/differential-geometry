@@ -816,6 +816,7 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1Modulus
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import DifferentialGeometry.Analysis.Schauder.BallCutoff
+import DifferentialGeometry.Analysis.Schauder.BallInterior
 import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
 import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffExistence

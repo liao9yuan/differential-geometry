@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Calculus.BallCutoff
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
+import DifferentialGeometry.Analysis.Schauder.CutoffExistence
 import DifferentialGeometry.Analysis.Schauder.Localization
 
 set_option autoImplicit false
@@ -63,6 +64,13 @@ def ballCutoffLaplacianFDerivBound (r R : Real) : Real :=
 def ballCutoffLaplacianHolderConst (r R : Real) : NNReal :=
   max (2 * Real.toNNReal (ballCutoffLaplacianBound (V := V) r R))
     (Real.toNNReal (ballCutoffLaplacianFDerivBound (V := V) r R))
+
+def ballCutoffHolderConst (r R : Real) : NNReal :=
+  max 2 (Real.toNNReal (ballCutoffFDerivBound r R))
+
+def ballCutoffFDerivHolderConst (r R : Real) : NNReal :=
+  max (2 * Real.toNNReal (ballCutoffFDerivBound r R))
+    (Real.toNNReal (ballCutoffFDeriv2Bound r R))
 
 omit [FiniteDimensional Real V] in
 theorem hasFDerivAt_ballNormSq (center x : V) :
@@ -341,6 +349,89 @@ theorem ballCutoffLaplacian_holderWith
     rw [Real.coe_toNNReal _ hN]
     exact norm_ballCutoffLaplacianFDeriv_le hr hrR x
 
+omit [FiniteDimensional Real V] in
+theorem ballCutoff_holderWith
+    {center : V} {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    {alpha : NNReal} (halpha0 : 0 ≤ alpha) (halpha1 : alpha ≤ 1) :
+    HolderWith (ballCutoffHolderConst r R) alpha
+      (ballCutoff center r R) := by
+  have hN := ballCutoffFDerivBound_nonneg hr hrR
+  have h : HolderWith
+      (max (2 * (1 : NNReal))
+        (Real.toNNReal (ballCutoffFDerivBound r R))) alpha
+      (ballCutoff center r R) := by
+    apply holderWith_of_hasFDerivAt_of_norm_le
+      (M := (1 : NNReal))
+      (N := Real.toNNReal (ballCutoffFDerivBound r R))
+      halpha0 halpha1
+    · exact hasFDerivAt_ballCutoff center r R
+    · intro x
+      rw [Real.norm_eq_abs,
+        abs_of_nonneg (ballCutoff_mem_Icc center r R x).1]
+      exact (ballCutoff_mem_Icc center r R x).2
+    · intro x
+      rw [Real.coe_toNNReal _ hN]
+      exact norm_ballCutoffFDeriv_le hr hrR x
+  simpa only [ballCutoffHolderConst, mul_one] using h
+
+omit [FiniteDimensional Real V] in
+theorem ballCutoffFDeriv_holderWith
+    {center : V} {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    {alpha : NNReal} (halpha0 : 0 ≤ alpha) (halpha1 : alpha ≤ 1) :
+    HolderWith (ballCutoffFDerivHolderConst r R) alpha
+      (ballCutoffFDeriv center r R) := by
+  have hM := ballCutoffFDerivBound_nonneg hr hrR
+  have hN := ballCutoffFDeriv2Bound_nonneg hr hrR
+  apply holderWith_of_hasFDerivAt_of_norm_le
+    (M := Real.toNNReal (ballCutoffFDerivBound r R))
+    (N := Real.toNNReal (ballCutoffFDeriv2Bound r R))
+    halpha0 halpha1
+  · exact hasFDerivAt_ballCutoffFDeriv center r R
+  · intro x
+    rw [Real.coe_toNNReal _ hM]
+    exact norm_ballCutoffFDeriv_le hr hrR x
+  · intro x
+    rw [Real.coe_toNNReal _ hN]
+    exact norm_ballCutoffFDeriv2_le hr hrR x
+
+def ballCutoffBcf
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) :
+    BoundedContinuousFunction V Real :=
+  compactSupportBcf (ballCutoff center r R)
+    (ballCutoff_contDiff center r R).continuous
+    (ballCutoff_hasCompactSupport hr hrR)
+
+def ballCutoffFDerivBcf
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) :
+    BoundedContinuousFunction V (V →L[Real] Real) :=
+  compactSupportBcf (ballCutoffFDeriv center r R)
+    (ballCutoffFDeriv_contDiff center r R).continuous
+    (ballCutoffFDeriv_hasCompactSupport hr hrR)
+
+def ballCutoffFDeriv2Bcf
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) :
+    BoundedContinuousFunction V (V →L[Real] V →L[Real] Real) :=
+  compactSupportBcf (ballCutoffFDeriv2 center r R)
+    (ballCutoffFDeriv2_contDiff center r R).continuous
+    (ballCutoffFDeriv2_hasCompactSupport hr hrR)
+
+@[simp]
+theorem ballCutoffBcf_apply
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (x : V) :
+    ballCutoffBcf center hr hrR x = ballCutoff center r R x := rfl
+
+@[simp]
+theorem ballCutoffFDerivBcf_apply
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (x : V) :
+    ballCutoffFDerivBcf center hr hrR x =
+      ballCutoffFDeriv center r R x := rfl
+
+@[simp]
+theorem ballCutoffFDeriv2Bcf_apply
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (x : V) :
+    ballCutoffFDeriv2Bcf center hr hrR x =
+      ballCutoffFDeriv2 center r R x := rfl
+
 theorem lapEval_ballCutoffFDeriv2
     (center : V) (r R : Real) (x : V) :
     lapEval (ballCutoffFDeriv2 center r R x) =
@@ -373,6 +464,14 @@ theorem lapEval_ballCutoffFDeriv2
   simp only [pow_two]
   unfold ballCutoffLaplacian
   ring
+
+@[simp]
+theorem coreLap_ballCutoffFDeriv2Bcf
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (x : V) :
+    coreLap (ballCutoffFDeriv2Bcf center hr hrR) x =
+      ballCutoffLaplacian center r R x := by
+  change lapEval (ballCutoffFDeriv2 center r R x) = _
+  exact lapEval_ballCutoffFDeriv2 center r R x
 
 end DifferentialGeometry.Analysis.Schauder
 

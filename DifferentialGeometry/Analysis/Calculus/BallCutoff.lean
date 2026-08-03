@@ -321,6 +321,32 @@ theorem ballCutoff_contDiff [InnerProductSpace ℝ E]
   simpa [ballCutoffArgument, ballCutoff] using
     CutoffProfile.contDiff.comp harg
 
+theorem fderiv_ballCutoff [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) :
+    fderiv ℝ (ballCutoff center r R) = ballCutoffFDeriv center r R := by
+  funext x
+  exact (hasFDerivAt_ballCutoff center r R x).fderiv
+
+theorem fderiv_ballCutoffFDeriv [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) :
+    fderiv ℝ (ballCutoffFDeriv center r R) =
+      ballCutoffFDeriv2 center r R := by
+  funext x
+  exact (hasFDerivAt_ballCutoffFDeriv center r R x).fderiv
+
+theorem ballCutoffFDeriv_contDiff [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) :
+    ContDiff ℝ ∞ (ballCutoffFDeriv center r R) := by
+  rw [← fderiv_ballCutoff]
+  exact (ballCutoff_contDiff center r R).fderiv_right (m := ∞) (by simp)
+
+theorem ballCutoffFDeriv2_contDiff [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) :
+    ContDiff ℝ ∞ (ballCutoffFDeriv2 center r R) := by
+  rw [← fderiv_ballCutoffFDeriv]
+  exact (ballCutoffFDeriv_contDiff center r R).fderiv_right
+    (m := ∞) (by simp)
+
 theorem ballCutoff_mem_Icc (center : E) (r R : ℝ) (x : E) :
     ballCutoff center r R x ∈ Set.Icc (0 : ℝ) 1 :=
   CutoffProfile.mem_Icc _
@@ -383,6 +409,22 @@ theorem ballCutoff_hasCompactSupport
     HasCompactSupport (ballCutoff center r R) := by
   exact (isCompact_closedBall center R).of_isClosed_subset
     isClosed_closure (ballCutoff_tsupport_subset_closedBall hr hrR)
+
+theorem ballCutoffFDeriv_hasCompactSupport
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) :
+    HasCompactSupport (ballCutoffFDeriv center r R) := by
+  rw [← fderiv_ballCutoff]
+  exact (ballCutoff_hasCompactSupport hr hrR).fderiv ℝ
+
+theorem ballCutoffFDeriv2_hasCompactSupport
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) :
+    HasCompactSupport (ballCutoffFDeriv2 center r R) := by
+  rw [← fderiv_ballCutoffFDeriv]
+  exact (ballCutoffFDeriv_hasCompactSupport hr hrR).fderiv ℝ
 
 end DifferentialGeometry.Analysis
 
