@@ -304,4 +304,97 @@ theorem heatD3Cancel_norm_of_holder {alpha K : NNReal}
 
 end Cancellation
 
+theorem holderHeatScale_integral_sq {alpha : NNReal} (halpha : 0 < alpha)
+    {r : Real} (hr : 0 ≤ r) :
+    ∫ t : Real in 0..r ^ 2, holderHeatScale alpha t =
+      (2 / (alpha : Real)) * r ^ (alpha : Real) := by
+  unfold holderHeatScale
+  rw [integral_rpow (Or.inl (by
+    have : 0 < (alpha : Real) := by exact_mod_cast halpha
+    linarith))]
+  have halpha_real : (alpha : Real) ≠ 0 := by exact_mod_cast halpha.ne'
+  have hexp : (alpha : Real) / 2 - 1 + 1 = (alpha : Real) / 2 := by ring
+  rw [hexp, Real.zero_rpow (by positivity)]
+  have hpow : (r ^ 2) ^ ((alpha : Real) / 2) = r ^ (alpha : Real) := by
+    rw [← Real.rpow_natCast]
+    rw [← Real.rpow_mul hr]
+    congr 1
+    ring
+  rw [hpow]
+  field_simp
+  ring
+
+theorem holderThirdHeatScale_integral_le {alpha : NNReal}
+    (halpha1 : alpha < 1)
+    {r T : Real} (hr : 0 < r) (hT : r ^ 2 ≤ T) :
+    ∫ t : Real in r ^ 2..T, holderThirdHeatScale alpha t ≤
+      (2 / (1 - (alpha : Real))) * r ^ ((alpha : Real) - 1) := by
+  let q : Real := ((alpha : Real) - 1) / 2
+  have halpha_real : (alpha : Real) < 1 := by exact_mod_cast halpha1
+  have hr2 : 0 < r ^ 2 := sq_pos_of_pos hr
+  have hT0 : 0 < T := hr2.trans_le hT
+  have hq : q < 0 := by
+    dsimp [q]
+    linarith
+  have hqne : q ≠ 0 := hq.ne
+  have hone : 1 - (alpha : Real) ≠ 0 := by
+    linarith
+  have hone' : (alpha : Real) - 1 ≠ 0 := by linarith
+  have hpne : (alpha : Real) / 2 - 3 / 2 ≠ -1 := by
+    have : (alpha : Real) ≠ 1 := by exact_mod_cast halpha1.ne
+    intro h
+    apply this
+    linarith
+  have hzero : 0 ∉ Set.uIcc (r ^ 2) T := by
+    rw [Set.uIcc_of_le hT]
+    simp only [Set.mem_Icc, not_and_or]
+    exact Or.inl (not_le.mpr hr2)
+  unfold holderThirdHeatScale
+  rw [integral_rpow (Or.inr ⟨hpne, hzero⟩)]
+  have hexp : (alpha : Real) / 2 - 3 / 2 + 1 = q := by
+    dsimp [q]
+    ring
+  rw [hexp]
+  have hrewrite : (T ^ q - (r ^ 2) ^ q) / q =
+      (2 / (1 - (alpha : Real))) * ((r ^ 2) ^ q - T ^ q) := by
+    dsimp [q] at hqne ⊢
+    field_simp [hone, hone', hqne]
+    ring
+  rw [hrewrite]
+  have hcoef : 0 ≤ 2 / (1 - (alpha : Real)) := by
+    exact div_nonneg (by norm_num) (sub_nonneg.mpr halpha_real.le)
+  calc
+    (2 / (1 - (alpha : Real))) * ((r ^ 2) ^ q - T ^ q) ≤
+        (2 / (1 - (alpha : Real))) * (r ^ 2) ^ q := by
+      exact mul_le_mul_of_nonneg_left
+        (sub_le_self _ (Real.rpow_nonneg hT0.le q)) hcoef
+    _ = (2 / (1 - (alpha : Real))) * r ^ ((alpha : Real) - 1) := by
+      congr 1
+      rw [← Real.rpow_natCast]
+      rw [← Real.rpow_mul hr.le]
+      congr 1
+      dsimp [q]
+      ring
+
+theorem mul_holderThirdHeatScale_integral_le {alpha : NNReal}
+    (halpha1 : alpha < 1)
+    {r T : Real} (hr : 0 < r) (hT : r ^ 2 ≤ T) :
+    r * (∫ t : Real in r ^ 2..T, holderThirdHeatScale alpha t) ≤
+      (2 / (1 - (alpha : Real))) * r ^ (alpha : Real) := by
+  have h := mul_le_mul_of_nonneg_left
+    (holderThirdHeatScale_integral_le halpha1 hr hT) hr.le
+  refine h.trans_eq ?_
+  calc
+    r * ((2 / (1 - (alpha : Real))) * r ^ ((alpha : Real) - 1)) =
+        (2 / (1 - (alpha : Real))) *
+          (r ^ (1 : Real) * r ^ ((alpha : Real) - 1)) := by
+      rw [Real.rpow_one]
+      ring_nf
+    _ = (2 / (1 - (alpha : Real))) *
+        r ^ (1 + ((alpha : Real) - 1)) := by
+      rw [Real.rpow_add hr]
+    _ = (2 / (1 - (alpha : Real))) * r ^ (alpha : Real) := by
+      congr 1
+      ring_nf
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
