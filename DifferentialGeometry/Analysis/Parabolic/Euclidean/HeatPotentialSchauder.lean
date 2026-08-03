@@ -688,6 +688,85 @@ theorem heatD2Duh_norm_sub_le_of_holder {alpha K : NNReal}
       simpa only [sub_sub_cancel] using hmeasy)
   simpa only [sub_sub_cancel, norm_sub_rev] using h
 
+theorem heatD2Conv_time_add_sub_eq_cancel_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t d : Real} (ht : 0 < t) (hd : 0 ≤ d)
+    {f : V → F} (hf : HolderWith K alpha f) (v w x : V) :
+    heatD2Conv (t + d) v w f x - heatD2Conv t v w f x =
+      ∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) •
+        (f (x - y) - f x) := by
+  have htplus : 0 < t + d := ht.trans_le (le_add_of_nonneg_right hd)
+  have hrawplus := heatD2Conv_int_of_holder halpha0 halpha1 htplus hf v w x
+  have hrawnow := heatD2Conv_int_of_holder halpha0 halpha1 ht hf v w x
+  have hker := (heatD2_int htplus v w).sub (heatD2_int ht v w)
+  have hconst := hker.smul_const (f x)
+  have hrawdiff := hrawplus.sub hrawnow
+  have hcancel : Integrable (fun y : V ↦
+      (heatD2 (t + d) v w y - heatD2 t v w y) •
+        (f (x - y) - f x)) := by
+    refine (hrawdiff.sub hconst).congr (Eventually.of_forall fun y ↦ ?_)
+    simp only [Pi.sub_apply, sub_smul, smul_sub]
+  unfold heatD2Conv
+  rw [← integral_sub hrawplus hrawnow]
+  calc
+    (∫ y : V, heatD2 (t + d) v w y • f (x - y) -
+        heatD2 t v w y • f (x - y)) =
+        ∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) •
+          (f (x - y) - f x) +
+            (heatD2 (t + d) v w y - heatD2 t v w y) • f x := by
+      apply integral_congr_ae
+      filter_upwards with y
+      simp only [sub_smul, smul_sub]
+      module
+    _ = (∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) •
+          (f (x - y) - f x)) +
+        ∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) • f x :=
+      integral_add hcancel hconst
+    _ = ∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) •
+        (f (x - y) - f x) := by
+      rw [integral_smul_const, integral_sub (heatD2_int htplus v w)
+        (heatD2_int ht v w), integral_heatD2_zero htplus,
+        integral_heatD2_zero ht, sub_zero, zero_smul, add_zero]
+
+theorem heatD2Conv_time_add_sub_norm_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t d : Real} (ht : 0 < t) (hd : 0 ≤ d)
+    {f : V → F} (hf : HolderWith K alpha f) (v w x : V) :
+    ‖heatD2Conv (t + d) v w f x - heatD2Conv t v w f x‖ ≤
+      d * ‖v‖ * ‖w‖ * (K : Real) * holderSecondTimeHeatScale alpha t *
+        heatC2DtHolder (V := V) alpha := by
+  rw [heatD2Conv_time_add_sub_eq_cancel_of_holder
+    halpha0 halpha1 ht hd hf]
+  have hmajor :=
+    (heatD2_time_add_diff_holder_int halpha1 ht hd v w).const_mul (K : Real)
+  calc
+    ‖∫ y : V, (heatD2 (t + d) v w y - heatD2 t v w y) •
+        (f (x - y) - f x)‖ ≤
+      ∫ y : V, (K : Real) *
+        (‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+          ‖y‖ ^ (alpha : Real)) := by
+      apply norm_integral_le_of_norm_le hmajor
+      filter_upwards with y
+      rw [norm_smul, Real.norm_eq_abs]
+      have hshift := holder_shift_bound_heatPotential hf x y
+      rw [← Real.norm_eq_abs]
+      calc
+        ‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+            ‖f (x - y) - f x‖ ≤
+          ‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+            ((K : Real) * ‖y‖ ^ (alpha : Real)) := by gcongr
+        _ = (K : Real) *
+            (‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+              ‖y‖ ^ (alpha : Real)) := by ring
+    _ ≤ (K : Real) *
+        (d * ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha t *
+          heatC2DtHolder (V := V) alpha) := by
+      rw [integral_const_mul]
+      gcongr
+      exact heatD2_time_add_diff_holder halpha1 ht hd v w
+    _ = d * ‖v‖ * ‖w‖ * (K : Real) * holderSecondTimeHeatScale alpha t *
+        heatC2DtHolder (V := V) alpha := by ring
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean

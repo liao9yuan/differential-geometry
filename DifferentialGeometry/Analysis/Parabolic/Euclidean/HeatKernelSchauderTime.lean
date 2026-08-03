@@ -448,4 +448,54 @@ theorem heatD2_time_add_diff_holder {alpha : NNReal} (halpha : alpha ≤ 1)
       unfold C
       ring
 
+theorem heatD2_time_add_diff_holder_int {alpha : NNReal}
+    (halpha : alpha ≤ 1) {t d : Real} (ht : 0 < t) (hd : 0 ≤ d)
+    (v w : V) :
+    Integrable (fun y : V ↦
+      ‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+        ‖y‖ ^ (alpha : Real)) := by
+  have hweighted : ∀ {r : Real}, 0 < r → Integrable (fun y : V ↦
+      ‖heatD2 r v w y‖ * ‖y‖ ^ (alpha : Real)) := by
+    intro r hr
+    have hmajor : Integrable
+        (fun y : V ↦ (‖v‖ * ‖w‖) * heatD2Holder alpha r y) :=
+      (heatD2Holder_int (V := V) halpha hr).const_mul _
+    refine hmajor.mono' ?_ ?_
+    · apply Continuous.aestronglyMeasurable
+      have hpow : Continuous (fun y : V ↦ ‖y‖ ^ (alpha : Real)) :=
+        continuous_norm.rpow_const (fun _ ↦ Or.inr alpha.coe_nonneg)
+      have hd2 : Continuous (fun y : V ↦ heatD2 r v w y) := by
+        unfold heatD2 baseD2 baseHeat baseHeatMass heatScale
+        fun_prop
+      exact hd2.norm.mul hpow
+    filter_upwards with y
+    rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (norm_nonneg _) (Real.rpow_nonneg (norm_nonneg y) _))]
+    exact heatD2_holder_bound alpha hr v w y
+  have hplus := hweighted (ht.trans_le (le_add_of_nonneg_right hd))
+  have hnow := hweighted ht
+  refine (hplus.add hnow).mono' ?_ ?_
+  · apply Continuous.aestronglyMeasurable
+    have hpow : Continuous (fun y : V ↦ ‖y‖ ^ (alpha : Real)) :=
+      continuous_norm.rpow_const (fun _ ↦ Or.inr alpha.coe_nonneg)
+    have hplusc : Continuous (fun y : V ↦ heatD2 (t + d) v w y) := by
+      unfold heatD2 baseD2 baseHeat baseHeatMass heatScale
+      fun_prop
+    have hnowc : Continuous (fun y : V ↦ heatD2 t v w y) := by
+      unfold heatD2 baseD2 baseHeat baseHeatMass heatScale
+      fun_prop
+    exact (hplusc.sub hnowc).norm.mul hpow
+  filter_upwards with y
+  rw [Real.norm_eq_abs, abs_of_nonneg
+    (mul_nonneg (norm_nonneg _) (Real.rpow_nonneg (norm_nonneg y) _))]
+  calc
+    ‖heatD2 (t + d) v w y - heatD2 t v w y‖ *
+        ‖y‖ ^ (alpha : Real) ≤
+      (‖heatD2 (t + d) v w y‖ + ‖heatD2 t v w y‖) *
+        ‖y‖ ^ (alpha : Real) := by
+      gcongr
+      exact norm_sub_le _ _
+    _ = ‖heatD2 (t + d) v w y‖ * ‖y‖ ^ (alpha : Real) +
+        ‖heatD2 t v w y‖ * ‖y‖ ^ (alpha : Real) := by ring
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
