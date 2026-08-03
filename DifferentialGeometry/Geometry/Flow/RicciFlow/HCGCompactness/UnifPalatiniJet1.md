@@ -22,16 +22,18 @@ layer definition; a private equality bridge keeps the public API canonical.
 
 ## Remaining frontier
 
-The Palatini producer is now arbitrary-`Λ`, but its direct consumers in
-`UnifCurvatureJetOne.lean` still carry the staged `Λ < 2` argument.  The next
-brick is to migrate `curvConn_le`, `unifRmOpOne`, and `unifRmSecOne` to
-`unifCurvSup` plus this new signature, then propagate that removal into the
-static `j = 1` Ricci--DeTurck bound.
+RETIRED 2026-08-02 (verification pass, ledger No. 97): the `Λ < 2`
+migration this section used to demand is DONE — `unifCurvSup` and
+`unifRmJetOne` (`UnifCurvatureJetOne.lean:876`) take only `1 ≤ Λ` — and
+`unifKsupLeOne` EXISTS sorry-free at `UnifDeTurckRHSOne.lean:1538` with
+`∃ Kstar` quantified before `∀ g₀`.  See `ShortTime/PALATINI_WALL_PLAN.md`
+for the grep-verified closure inventory.  The only dormant residue in this
+area is the all-order abstract `hcurv` of `UnifBochnerGap.lean:304`
+(no live consumer).
 
 ## Project accounting
 
-`ricci_flow_unif_existence` itself remains 0%. This closes the field-level
-Palatini wall for arbitrary comparability inside the dedicated machinery.
-The final `unifKsupLeOne` theorem is still unstated (0%); its dedicated
-finite-order geometric producers are now substantially closer, while the
-consumer migration and uniform witness assembly remain.
+`ricci_flow_unif_existence` itself remains 0%. The field-level Palatini
+wall is CLOSED for arbitrary comparability, including its three consumers
+(`a = 1` envelope, class-uniform `Ksup` at `j = 1`, and `unifFc` — the
+latter dissolved by ledger No. 85).

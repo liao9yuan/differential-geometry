@@ -174,6 +174,11 @@ already in `ExtendViaUniqueness.lean`:
   their lane.  This is the main post-merge engineering item of the E-track;
   audit their proof's time-choice locus first (where `T_DT` is fixed) —
   that single lemma's hypotheses tell us the exact uniform-data form.
+  **Live discharge ledger** (the running (N) campaign):
+  `ShortTime/UNIF_EXISTENCE_PLAN3.md` (entries No. 104+;
+  `UNIF_EXISTENCE_PLAN2.md` = frozen No. 70–103, `UNIF_EXISTENCE_PLAN.md`
+  = frozen No. 1–69).  Read the highest-numbered planner entry there for
+  current state before doing anything on this track.
 - **E2 — the restart wiring** `ricci_flow_interior_restart` (provable from
   (N); the route is already written in its docstring: choose `t_star` with
   `ω < t_star + τ₀`, apply (N) at `g₀ := g_fam t_star`).  Its two tail-bound

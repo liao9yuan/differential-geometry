@@ -571,3 +571,141 @@ Appending `∧ …` after a conjunct whose right-hand side ends in a `fun t => �
 lambda puts the `∧` **inside the lambda**.  The elaboration error appears as
 `argument … has type tensorHs g 0 2 (1+2) but is expected to have type Prop`,
 pointing at the *previous* conjunct.  Parenthesise the previous conjunct.
+
+## 2026-08-03, brick 7 — `IsRealizedTwo` widened to carry the producer certificates, GREEN
+
+The `a = 2` consumer (`ShortTime/LowRegAllOrderJet.lean`) could not build the
+endpoint's `hForce` slot because the package exposed `FHi` as an
+*unconstrained* existential: no continuity, no smooth-core formula, no
+commuting square, and no low-scale radius.  `lowreg_apply_two` already had all
+of that in scope and discarded it.  This brick re-exports it.
+
+### New `∃`-binders (appended after `u`)
+
+`FLo`, `R`, `hR : 0 < R`, `hreal` (the `R`-radius realization at
+`smoothCcToTensorHs g (((1:ℕ):ℝ)+1)`).
+
+### New conjuncts (appended, conjuncts 14–25; the first thirteen are byte-stable)
+
+`R ≤ ρ`; `Continuous (lowRegN g g hR _ hreal)`; `Continuous (coreN g g _ hreal)`;
+`Continuous (lowA2Lo …)`; the `lowA2Lo` smooth-core formula against
+`refoldCore`; `Continuous (lowA2Hi …)`; `Continuous FHi`; `Continuous FLo`; the
+`FLo` smooth-core formula against `c0CoreData`/`oneCore`; the second-order
+square `hA2sq`; the first-order square `hFComm`; and
+`∀ᵐ t ∂timeMeasure T, ‖u.lo.toFun t‖ ≤ R`.
+
+The `δ < 1` proof the two nonlinearity continuities need is spelled
+`lt_of_le_of_lt hδ_le (by norm_num : (1:ℝ)/3 < 1)` inside the `def`; consumers
+may supply any `δ < 1` proof (proof irrelevance).
+
+### The only new mathematics: the carrier state-ball conjunct
+
+`hball` is stated for `stateField g hT hT1 f`; the consumer needs it for the
+carrier `u.lo.toFun`.  The bridge is a five-step `calc` inside
+`lowreg_apply_two`, using `hreprpin` (the `H³` representative pins to the
+carrier), `hreprae` (the representative is the order-one Duhamel field a.e.),
+`tensorHsInclusion_trans_apply`, `norm_incl_congr`
+(`LowRegRealizeTwo.lean`, exactly the exponent-transport-under-inclusion norm
+lemma this needed) and `hsf`.  `hstate`/`hsf`/`hctrans` were hoisted above the
+final `refine` so the new conjunct can be discharged before it.
+
+### `lowreg_solve_two`
+
+Unchanged — every new item was already an argument it passes to
+`lowreg_apply_two`.  It reports the stronger package for free.
+
+### Verification
+
+Focused check GREEN; targeted `build +…LowRegApplyTwo` GREEN, no warnings from
+this file.  No `sorry`, no heartbeat option.
+
+### Lean note (cost one wasted compile)
+
+After editing a `def` that a downstream file destructures with `obtain`, the
+downstream focused check reads the **stale `.olean`**.  The symptom is not
+"unknown constant" but a *misaligned* `rcases` pattern: the extra patterns are
+pushed onto the last visible conjunct and `rcases` calls `cases` on it,
+reporting `Dependent elimination failed … at case Eq.refl` with the *unfolded*
+`Filter.EventuallyEq` (`some 0 = μ {x | …}ᶜ`).  Run the targeted upstream
+`build +Module` before checking the consumer.
+
+## 2026-08-03, brick 9 — the forcing floor `√T‖fHi‖ ≤ Kf`, GREEN
+
+Brick 8 left `hfloor` (`√T·‖u.deriv‖ ≤ 1/(2C)`) as the last visible obligation
+of `lowreg_joint_of_re` and diagnosed it as a *smallness condition on `T`*, to
+be folded into the horizon this file reports.  This brick does that fold.
+
+### The chain, in one line
+
+`u.deriv = ∂_t (Duhamel 0 fHi)`, so `‖u.deriv‖ ≤ 2‖fHi‖`; `fHi` solves
+`fHi = nonautL2Map … fHi + liftForceHi g g T`, so a Neumann bound at the uniform
+contraction gap `q` gives `q‖fHi‖ ≤ ‖liftForceHi‖ ≤ ‖staticForce g g 2‖·√T`;
+hence `√T‖fHi‖ ≤ ‖SF‖·T/q`, and `T ≤ Kf·q/‖SF‖` makes it `≤ Kf`.
+
+### What was added here
+
+* `lowregFloorHorizon g c Kf := Kf(1-c)/(4(‖staticForce g g 2‖+1))` and
+  `lowregFloorHorizon_pos`.  The `+1` in the denominator avoids a positivity
+  side condition on the frozen forcing.
+* `nonautL2Map_zero` (private) — the map fixes the origin.  Both arms need it:
+  `maxRegHomogeneousSolField_norm_le` at `u₀ = 0` and
+  `maximalRegularitySolField_norm_le` at `f = 0` give `‖·‖ ≤ 0`, and
+  `a1L2Term_norm` at `f = 0` does the same for the first-order arm.  `timeOp` is
+  a CLM so `map_zero` finishes.  Its canonical home is
+  `TensorMaximalRegularity/NonautonomousL2.lean` beside `nonautL2_dist_le`; kept
+  private here so that shared module stays untouched.
+* `norm_fix_le` (private) — the **Neumann bound**.  From
+  `nonautL2_dist_le` (the Lipschitz constant is
+  `(C2)(1+T) + 2√(1+T)‖A1‖_{L²}`) plus `nonautL2Map_zero`, any solution of
+  `x = N x + b` with the constant `≤ 1 - q` obeys `q‖x‖ ≤ ‖b‖`.
+  The strict condition `… < 1` used to *build* the fixed point is useless here:
+  it bounds nothing.
+* `IsRealizedTwo` gains the parameter `(Kf : ℝ)` (appended after `f`) and the
+  final conjunct `√T·‖fHi‖ ≤ Kf`.  All earlier binders/conjuncts byte-stable.
+* `lowreg_apply_two`: `hmargin` strengthened to `6·(2L‖f‖) ≤ (1-c)/2` and one
+  new hypothesis `hTfloor : T ≤ lowregFloorHorizon g c Kf`.
+* `lowreg_solve_two`: gains `{Kf} (hKf : 0 < Kf)`, and `T₀` gains the third
+  `min` factor `lowregFloorHorizon g c Kf`.
+
+### Why the margin had to be halved (the real design point)
+
+`lift_aff_arith` concludes only `κ < 1`, which gives **no** bound on `1/(1-κ)`,
+so no Neumann bound.  The budget split inside it is
+`κ ≤ c + (1-c)/4 [cT] + 3A + (1-c)/4 [3√T Z]`, i.e. `1-κ ≥ (1-c)/2 - 3A`.  With
+only `6A < 1-c` that lower bound is not uniform.  With `6A ≤ (1-c)/2` it becomes
+`1-κ ≥ (1-c)/4`, a `T`-free gap.  The new
+`lift_aff_margin` (`LowRegLiftSmall.lean`, canonical home beside
+`lift_aff_arith`) states exactly that; `hsmallHi` is now derived from it by
+`linarith` and `lift_small_aff` is used only at the low rung.
+
+The halved margin costs nothing: `lowreg_solve_two` already proved it, since
+`‖f‖ ≤ P/4` and `P·6(L+1) ≤ 1-c` give `12L‖f‖ ≤ 3LP ≤ (1-c)/2` — the old proof
+threw the factor 2 away in a `linarith`.
+
+### Why `Kf` is a parameter and not `1/(4C)`
+
+`C = (hs2_opBound_at_two hDim g).choose` is the *endpoint* fibre constant.
+Hard-wiring it here would make the Lane-C realization package depend on the
+joint-smoothness layer.  Taking the floor level as a parameter keeps this file
+layer-neutral: the consumer names the level, the solver shrinks the horizon to
+meet it.  `LowRegAllOrderJet.lowreg_joint_two` instantiates `Kf := 1/(4C)`.
+
+### Lean notes
+
+* `linarith`/`nlinarith` **without `only`** scan the whole local context.  In
+  `lowreg_apply_two` (dozens of real-valued hypotheses) that turned an
+  otherwise-cheap step into a `(deterministic) timeout at whnf` reported at the
+  *declaration* line, not at the tactic.  Every arithmetic step in the new block
+  uses `linarith only [...]`; the file went from failing at 78s to green at 37s.
+  Prefer `linarith only` in any tactic block inside a wide-context theorem.
+* `omit [Inst] in` must precede the **docstring**, exactly like `set_option … in`
+  ("unexpected token 'omit'; expected 'lemma'" otherwise).
+* `field_simp` on `2·(1/(4C)) = 1/(2C)` leaves `2 ^ 2 = 4`; follow it with
+  `norm_num`.
+
+### Verification
+
+Focused checks GREEN for `LowRegLiftSmall`, `LowRegApplyTwo`, `LowRegAllOrderJet`;
+targeted builds of all three GREEN ("Build completed successfully").  No new
+`sorry`/`admit`/`axiom`, no heartbeat option.  Sorry census over the three files:
+exactly one, the frontier `lowreg_forceJetMass`.

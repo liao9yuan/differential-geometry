@@ -525,19 +525,6 @@ private lemma mass_le_of_sqrt_split {A B C c d : ℝ}
     linarith [hyoung_mul]
   exact le_trans hAle hkey
 
-open scoped Classical in
-private lemma finiteEigenComboHs_eq_smoothCcToTensorHs
-    (g₀ : SmoothRiemannianMetric I M)
-    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
-    (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (σ : ℝ) :
-    finiteEigenComboHs (I := I) (M := M) g₀ S c σ =
-      smoothCcToTensorHs (I := I) (M := M) g₀ σ
-        (finiteEigenCombo (I := I) (M := M) g₀ S c) := by
-  refine tensorHs.ext ?_
-  funext i
-  rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
-    ← SmoothCcTensor.toL2_apply]
-
 private noncomputable def galerkinCoordFieldSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
@@ -805,21 +792,6 @@ private lemma gscr_eigenIdxFinset_lambda_closed (g₀ : SmoothRiemannianMetric I
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
-    (g₀ : SmoothRiemannianMetric I M)
-    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
-    (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (σ : ℝ) :
-    finiteEigenComboHs (I := I) (M := M) g₀ S c σ =
-      smoothCcToTensorHs (I := I) (M := M) g₀ σ
-        (finiteEigenCombo (I := I) (M := M) g₀ S c) := by
-  refine tensorHs.ext ?_
-  funext i
-  rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
-    ← SmoothCcTensor.toL2_apply]
-
-set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 
 theorem deTurckSmoothRemainder_spectralCoercive_split'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1027,7 +999,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
         smoothCcToTensorHs (I := I) (M := M) g₀ τ Tb :=
     fun τ => by
       rw [hTb_def]
-      exact gscr_finiteEigenComboHs_eq_smoothCcToTensorHs g₀ S (U N t) τ
+      exact finiteEigenComboHs_eq g₀ S (U N t) τ
   have hTb_coeff_off : ∀ i, i ∉ S →
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Tb).coeff i = 0 := by
     intro i hi
@@ -1222,7 +1194,7 @@ private lemma deTurckSobolevNHa2Symm_finiteEigenComboHs_eq
       deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
           (symmS (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))) := by
-  rw [gscr_finiteEigenComboHs_eq_smoothCcToTensorHs g₀ S c ((a : ℝ) + 2),
+  rw [finiteEigenComboHs_eq g₀ S c ((a : ℝ) + 2),
     deTurckSobolevNHa2Symm_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
       (finiteEigenCombo (I := I) (M := M) g₀ S c),
     ← deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super

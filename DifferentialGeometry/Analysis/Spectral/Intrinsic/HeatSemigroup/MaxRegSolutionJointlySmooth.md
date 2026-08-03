@@ -240,3 +240,70 @@ Also deferred: extract the shared F-construction into a private
 `realizedForcingFamily_pin` and retrofit both representatives (removes the
 ~55-line duplication; kept inline this session to protect the verified-green
 existing theorem).
+
+---
+
+## 2026-08-03 — option-(b) brick B1: the engine's floor slot is now a STATE slot
+
+Planner ruling No. 106 (`ShortTime/UNIF_EXISTENCE_PLAN3.md`), design
+`ShortTime/OPTIONB_FLOOR_PLAN.md` §6.  Pure refactor of
+`maxreg_solution_jointly_smooth_representative_of_tame_nemytskii`; no
+mathematics added or removed, tree stays green between bricks.
+
+### What changed (three edits, all in the tame representative)
+
+* `:1349` — hypothesis `hfloor : Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C)` is
+  replaced by `hstate : ∀ t ∈ Set.Icc (0:ℝ) T, ‖timeH1.toFun u t‖ ≤ 1 / (2 * C)`.
+* `:1499` — the four-line `calc` inside `hF_small`'s `hnorm_le`
+  (`‖u(t)‖ = ‖u(t) − u.init‖ ≤ √t‖u.deriv‖ ≤ √T‖u.deriv‖ ≤ 1/(2C)`) collapses to
+  `exact hstate t ht_icc`.  The surrounding `rw [heq]` is untouched.
+* `:1298-1304` — the docstring bullet that advertised the `√t` floor now
+  advertises the state ball, and points at the producer for callers holding the
+  old floor.
+
+`hfloor` had exactly ONE use in the file (verified by grep before and after);
+`hinit`/`htrace` remain live through `hu0` at `:1391-1393`.
+
+### Why this is the right slot
+
+The engine never needed the derivative.  Its consumer is `hF_small`, i.e.
+`gFibreOpBound … (1/2)` via `hC`, which only ever sees
+`‖smoothCcToTensorHs g₀ a (Fdef t)‖ = ‖timeH1.toFun u t‖` (through `heq`).  So
+the true content of the old hypothesis was smallness of the STATE; `u.deriv` was
+a proxy reached through the `√t` trace modulus.  Lowering the slot to the state
+lets a caller with an a.e./everywhere trajectory ball (which the front-2 package
+`IsRealizedTwo` already carries) feed the engine directly, and takes
+`‖staticForce g g 2‖` out of the horizon.
+
+### The old route is preserved, not deleted
+
+The deleted `calc` is now the public producer
+`TimeSobolev.timeH1.state_le_of_sqrt_floor`
+(`Analysis/Parabolic/TimeSobolev/TimeH1Modulus.lean:136`), generic in the bound.
+Its canonical home is beside `norm_toFun_sub_init_le`, the only lemma it uses;
+`TimeH1Modulus.lean` has exactly one importer (this file), so the placement
+costs no extra rebuild.  The single call site
+(`ShortTime/LowRegAllOrderJet.lean:1556`) keeps passing the old floor through
+that shim, so `lowreg_joint_smooth`'s public statement is UNCHANGED.
+
+### Verification
+
+**GREEN.**  Focused check passed; targeted olean refresh of this module and of
+the downstream `LowRegAllOrderJet` chain both completed clean.  `#print axioms`
+on the engine theorem = `[propext, Classical.choice, Quot.sound]`, identical to
+the baseline census taken before the edit — no `sorryAx`.
+
+Two `unusedSectionVars` warnings surfaced in the focused check at `:49` and
+`:66` (`tensorL2_ext_of_tensorL2Coeff_jsmooth`,
+`ccTensorBilinSymm_zero_apply_jsmooth`, both private, both flagging
+`[BoundarylessManifold I M]`).  They are PRE-EXISTING, unrelated to this brick,
+and suppressed in real builds by the lakefile's
+`linter.unusedSectionVars = false`; left alone deliberately (touching shared
+private signatures is out of brick scope).
+
+### Honest accounting
+
+0% new mathematics — a slot swap plus a lemma relocation.  Nothing about (N)
+moved; (N) stays **0%**.  What this unlocks is bricks B3–B5, which delete the
+`√T‖fHi‖ ≤ Kf` conjunct and `lowregFloorHorizon` and cap `P ≤ Rcap`; only then
+does `‖staticForce g g 2‖` actually leave the tree.

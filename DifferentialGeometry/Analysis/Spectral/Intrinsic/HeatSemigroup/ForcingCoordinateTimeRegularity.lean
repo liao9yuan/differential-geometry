@@ -35,7 +35,9 @@ of it.
   its eigen-coordinates (the solution is `C∞`-in-time into *every* spatial order, with the
   full all-order time-jet/all-order spatial spectral-mass majorant), together with the a-priori
   bound that the solution stays inside the Nemytskii realizability ball
-  (`‖u t‖_{H^{a+2}} ≤ deTurckRealizabilityRadius`) on `[0,T]`.  Honest `sorry`.
+  (`‖u t‖_{H^{a+2}} ≤ deTurckRealizabilityRadius`) on `[0,T]`.  **Proved** (commit
+  `358687842`); its analytic content is the Galerkin uniform spatial mass estimate of
+  `GalerkinLimitUniformMass.lean` plus the per-mode ODE recursion.
 
 * `deTurckSobolevNHa2_jetSpectralMass_preserving` — **POSIT (B)**, the order-preserving
   smoothness of the Ricci–DeTurck Nemytskii forcing on the supercritical Sobolev algebra: it
@@ -43,7 +45,9 @@ of it.
   jet-spectral-mass-controlled output coordinate field.  The in-ball guard is essential — the
   ball-retraction truncation inside `deTurckSobolevNHa2` is only Lipschitz (a kink) at the
   realizability sphere, so smoothness preservation is a statement about in-ball data, where the
-  nonlinearity is the genuine smooth intrinsic remainder.  Honest `sorry`.
+  nonlinearity is the genuine smooth intrinsic remainder.  **Proved** (commits
+  `b369c07f0`, `272498f86`), through the finite-order layer of
+  `ForcingFiniteOrderTimeRegularity.lean` and the a.e.-agreement diagonal.
 
 * `deTurckForcing_timeModeCoeff_smooth_allOrderJet` — **the deep core**, stated at the most
   primitive grain: the `L²` TIME-MODE coordinate elements `timeModeCoeff gforce i` carry
@@ -77,11 +81,15 @@ genuine quasilinear smoothing input, isolated here as the two classical deep pre
 (A) the quasilinear interior-time smoothing of the solution and (B) the order-preserving
 smoothness of the Nemytskii forcing, with the core assembled sorry-free on top of them.
 
-DEFERRED (the two honest `sorry`s are exactly POSIT (A)
-`deTurckForcing_solCoeff_jetSpectralMass` and POSIT (B)
-`deTurckSobolevNHa2_jetSpectralMass_preserving`; the core
-`deTurckForcing_timeModeCoeff_smooth_allOrderJet` and the consumer leaf are sorry-free glue
-over them, and consumers transitively depend on their `sorryAx`).
+STATUS: this file is `sorry`-free.  POSIT (A) and POSIT (B) above were discharged
+(commits `358687842`, `b369c07f0`, `272498f86`); the deep core and the consumer leaf are
+sorry-free glue over them, and nothing here depends on `sorryAx`.
+
+The `SymmSCoefficientBlockTransfer` section exports four public reusable pieces that the
+`a = 2` lane of `ShortTime/LowRegAllOrderJet.lean` consumes:
+`exists_smoothCcPath_realizing_coeff` (all-order spatial mass ⟹ a smooth tensor path) and
+the symmetrizer coordinate transport `symmCoeffPath` with `symmCoeffPath_contDiff`,
+`symmCoeffPath_realizes` and `symmCoeffPath_spectralMass`.
 -/
 
 noncomputable section
@@ -371,13 +379,21 @@ private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M
     rw [h]
   rw [hlam]
 
-private noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
+/-- **The eigen-coordinate family of the slot symmetrization.**  If `φ` realizes the
+eigen-coordinates of a smooth path, then `symmCoeffPath g₀ φ` realizes those of the
+slot-symmetrized path `symmS g₀ ∘ ·` (`symmCoeffPath_realizes`).  Only the finitely
+many coordinates in the same eigenvalue block are mixed, which is what keeps time
+regularity (`symmCoeffPath_contDiff`) and spectral mass (`symmCoeffPath_spectralMass`)
+intact. -/
+noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) : ℝ :=
   (1 / 2 : ℝ) * (φ i t + ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
     swapEigenCoeff (I := I) (M := M) g₀ i j * φ j t)
 
-private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
+/-- The symmetrized coordinate family inherits the time regularity of `φ`: it is a
+finite block combination of the `φ j`. -/
+lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} {n : WithTop ℕ∞}
     (hφ : ∀ i, ContDiff ℝ n (φ i)) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     ContDiff ℝ n (symmCoeffPath (I := I) (M := M) g₀ φ i) := by
@@ -385,7 +401,10 @@ private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
   exact contDiff_const.mul ((hφ i).add
     (ContDiff.sum fun j _ => contDiff_const.mul (hφ j)))
 
-private lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
+/-- **`symmCoeffPath` realizes the eigen-coordinates of the symmetrized tensor.**  If the
+smooth tensor `X` has eigen-coordinates `φ · t`, then `symmS g₀ X` has eigen-coordinates
+`symmCoeffPath g₀ φ · t`. -/
+lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (X : SmoothCcTensor g₀ 0 2) {t : ℝ}
     (hX : ∀ j, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
@@ -431,7 +450,11 @@ private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     ((ContDiff.sum fun j _ => contDiff_const.mul (hφ j)).contDiffAt),
     iteratedDeriv_finsetSum_const_mul _ _ _ k hφ t]
 
-private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
+/-- **The symmetrizer preserves jet spectral mass.**  A `τ`-mass majorant for the `k`-th
+time jet of `φ`, together with one at the Weyl-shifted order `τ + (weylSobolevExp + 1)`,
+majorizes the `τ`-mass of the `k`-th jet of `symmCoeffPath g₀ φ`.  The shifted input pays
+for the Cauchy--Schwarz over the eigenvalue block. -/
+lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
     {d : ℝ} (hd_pos : 0 < d)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
     (hφ : ∀ j, ContDiff ℝ (k : ℕ) (φ j)) (τ : ℝ)
@@ -529,7 +552,11 @@ private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           add_le_add (mul_le_mul_of_nonneg_left h1 (by norm_num))
             (mul_le_mul_of_nonneg_left h2 (by norm_num))
 
-private theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
+/-- **All-order spatial spectral mass reconstructs a smooth tensor path.**  A coordinate
+family with a summable `σ`-mass majorant at every `σ ≥ 0` on `Icc 0 d₂` is realized, at each
+time of that slab, by a genuine `SmoothCcTensor`.  This is the `(S2)` step of the forcing
+time-regularity template. -/
+theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
     {d₂ : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hmass0 : ∀ σ : ℝ, 0 ≤ σ →

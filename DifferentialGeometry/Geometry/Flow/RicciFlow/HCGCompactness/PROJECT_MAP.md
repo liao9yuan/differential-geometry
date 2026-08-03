@@ -620,7 +620,9 @@ its docstring BEFORE consumers are built against it.
   is the three-dimensional mixed `H^3 -> H^1` tame estimate; the uniformly
   parabolic low-regularity solver, same-interval smoothing, and
   `ricci_flow_unif_existence` remain theorem-level 0%; see
-  `../SHORTTIME_MERGE_PLAN.md`.
+  `../SHORTTIME_MERGE_PLAN.md`, and for the running (N)-discharge
+  campaign the live ledger `../ShortTime/UNIF_EXISTENCE_PLAN3.md`
+  (No. 104+; PLAN2/PLAN frozen).
 - **B/C support-local H6 integration (historical milestone; superseded by the
   checked selected-route capstone below):** the normalized limit-weight projection,
   actual-support compact cages, producer-owned finite source cover,

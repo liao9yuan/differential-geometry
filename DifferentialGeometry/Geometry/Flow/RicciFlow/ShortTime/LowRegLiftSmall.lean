@@ -342,6 +342,53 @@ theorem lift_aff_arith {c A Z T C V : ℝ}
   rw [show C * (1 + T) = C + C * T from by ring]
   linarith
 
+/-- **The quantitative companion of `lift_aff_arith`.**  Halving the `T`-free
+margin to `6 A ≤ (1-c)/2` upgrades the strict inequality `… < 1` to a *uniform*
+gap: the contraction constant of `nonautL2_lift` is then at most `1 - (1-c)/4`.
+
+The budget split is the same as in `lift_aff_arith` — `c·T ≤ (1-c)/4` from the
+first cap, `3·√T·Z ≤ (1-c)/4` from the second — but now `3A ≤ (1-c)/4` as well,
+so the three spends leave a quarter of `1 - c` untouched.  A uniform gap is what
+turns a fixed-point equation `x = N x + b` into a Neumann bound on `‖x‖`; the
+strict form gives no bound at all. -/
+theorem lift_aff_margin {c A Z T C V : ℝ}
+    (hc0 : 0 ≤ c) (hc1 : c < 1) (hZ : 0 ≤ Z)
+    (hA : 6 * A ≤ (1 - c) / 2)
+    (hT : 0 < T) (hTle : T ≤ lowregLiftHorizon' c Z)
+    (hCc : C ≤ c) (hV0 : 0 ≤ V) (hV : V ≤ A + Real.sqrt T * Z) :
+    C * (1 + T) + 2 * Real.sqrt (1 + T) * V ≤ 1 - (1 - c) / 4 := by
+  have h1c : (0 : ℝ) < 1 - c := by linarith
+  have hZ1 : (0 : ℝ) < Z + 1 := by linarith
+  have hT1 : T ≤ 1 := hTle.trans lowregLiftHorizon'_le_one
+  have hs0 : (0 : ℝ) ≤ Real.sqrt T := Real.sqrt_nonneg _
+  have hTa : T ≤ (1 - c) / (4 * (c + 1)) :=
+    hTle.trans (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hcT : c * T ≤ (1 - c) / 4 := by
+    have hden : (0 : ℝ) < 4 * (c + 1) := by linarith
+    rw [le_div_iff₀ hden] at hTa
+    nlinarith
+  have hq : Real.sqrt (1 + T) ≤ 3 / 2 := by
+    have h := Real.sqrt_le_sqrt (show 1 + T ≤ (3 / 2 : ℝ) ^ 2 by nlinarith)
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 3 / 2)] at h
+  have hTb : T ≤ (1 - c) ^ 2 / (144 * (Z + 1) ^ 2) :=
+    hTle.trans (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hsq : ((1 - c) / (12 * (Z + 1))) ^ 2 =
+      (1 - c) ^ 2 / (144 * (Z + 1) ^ 2) := by
+    rw [div_pow, mul_pow]
+    norm_num
+  have hs : Real.sqrt T ≤ (1 - c) / (12 * (Z + 1)) := by
+    have h := Real.sqrt_le_sqrt (hTb.trans_eq hsq.symm)
+    rwa [Real.sqrt_sq (by positivity)] at h
+  have hs' : Real.sqrt T * (12 * (Z + 1)) ≤ 1 - c := by
+    rw [← le_div_iff₀ (by linarith : (0 : ℝ) < 12 * (Z + 1))]
+    exact hs
+  have hzT : 3 * (Real.sqrt T * Z) ≤ (1 - c) / 4 := by nlinarith
+  have hfirst : Real.sqrt (1 + T) * V ≤ 3 / 2 * V :=
+    mul_le_mul_of_nonneg_right hq hV0
+  have hCT : C * T ≤ c * T := mul_le_mul_of_nonneg_right hCc hT.le
+  rw [show C * (1 + T) = C + C * T from by ring]
+  linarith
+
 /-- **One contraction condition from the affine time-`L²` certificate**, in the
 exact shape consumed by `lowreg_lift_two` / `nonautL2_lift`.  This is the
 `memLp_clm_affine` companion of `lift_small_toLp`: the producer supplies the

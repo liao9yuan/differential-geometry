@@ -50,9 +50,11 @@ private theorem zero_fb_refold
     (mul_nonneg hδ (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- The original path-integrated order-one arm, isolated as an action bundle. -/
-noncomputable def oneCore
-    (g : SmoothRiemannianMetric I M)
+/-- The path-integrated order-one arm against an arbitrary DeTurck background
+`gB`, isolated as an action bundle over the state metric `g`.  The diagonal
+`gB = g` is `oneCore`. -/
+noncomputable def oneCoreBg
+    (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
@@ -61,8 +63,20 @@ noncomputable def oneCore
     (T : SmoothCcTensor g 0 2) : LowBaseActionData g where
   C0 := 0
   C1 := (lowCoreDataBg (I := I) (M := M)
-    g g hρ hδ0 hδ_le hreal T).C1
+    g gB hρ hδ0 hδ_le hreal T).C1
   C2 := 0
+
+/-- The original path-integrated order-one arm, isolated as an action bundle.
+It is the same-background diagonal `oneCoreBg g g` of the two-metric arm. -/
+noncomputable def oneCore
+    (g : SmoothRiemannianMetric I M)
+    {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+    (T : SmoothCcTensor g 0 2) : LowBaseActionData g :=
+  oneCoreBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal T
 
 /-- The complete same-background refolded low-base bundle.  Its first-order
 coefficient is the sum of the order-zero passenger produced by the refold and
@@ -160,7 +174,7 @@ theorem refoldLo_core
   have hcore :
       C.a1 (I := I) (M := M) W + O.a1 (I := I) (M := M) W =
         F.a1 (I := I) (M := M) W := by
-    simp only [C, O, F, refoldCore, oneCore, LowBaseActionData.a1,
+    simp only [C, O, F, refoldCore, oneCore, oneCoreBg, LowBaseActionData.a1,
       ← appCcRS_zero_eq_appCc, appCcRS_zero_left, appCcRS_add_left,
       zero_add, add_assoc]
   rw [ContinuousLinearMap.add_apply,
@@ -317,20 +331,20 @@ private noncomputable abbrev incl12
   tensorHsInclusion (I := I) (M := M) (g := g)
     (r := 0) (s := 2) (by norm_num)
 
-/-- **The trajectory-free affine packet of the complete same-background
-refolded first-order action.**  It is the sum of the order-zero packet
-`c0_pack` and the order-one packet `c1_bg_pack`: on every coefficient radius
-`ρ ≤ ρ₀` the two completed action maps `FHi`, `FLo` are continuous, realize the
-refolded core action on smooth data, satisfy a common affine growth certificate
-`‖F x‖ ≤ Z + L‖x‖`, and form the Sobolev-inclusion square.
+/-- **The trajectory-free affine packet of the complete refolded first-order
+action against an arbitrary DeTurck background `gB`.**  It is the sum of the
+background-free order-zero packet `c0_pack g` and the two-metric order-one
+packet `c1_bg_pack g gB`: on every coefficient radius `ρ ≤ ρ₀` the two completed
+action maps `FHi`, `FLo` are continuous, realize the refolded core action on
+smooth data, satisfy a common affine growth certificate `‖F x‖ ≤ Z + L‖x‖`, and
+form the Sobolev-inclusion square.
 
-No time horizon and no trajectory occur, so a consumer may cap a radius against
-`L` before any trajectory exists; the time-`L²` certificates along a trajectory
-are produced from this packet alone by `refoldAffA1_memLp` and
-`refoldAffA1Hi_memLp`, and the a.e. square by `refoldAffA1_compat`. -/
-theorem refold_aff
+Only the state metric `g` indexes the Sobolev scales; the background enters
+solely through the order-one coefficient `oneCoreBg g gB`.  The same-background
+diagonal is `refold_aff`. -/
+theorem refold_aff_bg
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g gB : SmoothRiemannianMetric I M) :
     ∃ ρ0 : ℝ, 0 < ρ0 ∧
       ∀ {ρ δ : ℝ} (hρ : 0 < ρ) (_ : ρ ≤ ρ0)
         (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -351,16 +365,16 @@ theorem refold_aff
                 (c0CoreData (I := I) (M := M)
                   g hρ.le hδ0 hδ_le hreal S).a1Hi
                     (I := I) (M := M) +
-                (oneCore (I := I) (M := M)
-                  g hρ.le hδ0 hδ_le hreal S).a1Hi
+                (oneCoreBg (I := I) (M := M)
+                  g gB hρ.le hδ0 hδ_le hreal S).a1Hi
                     (I := I) (M := M)) ∧
             (∀ S : SmoothCcTensor g 0 2,
               FLo (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
                 (c0CoreData (I := I) (M := M)
                   g hρ.le hδ0 hδ_le hreal S).a1Lo
                     (I := I) (M := M) +
-                (oneCore (I := I) (M := M)
-                  g hρ.le hδ0 hδ_le hreal S).a1Lo
+                (oneCoreBg (I := I) (M := M)
+                  g gB hρ.le hδ0 hδ_le hreal S).a1Lo
                     (I := I) (M := M)) ∧
             (∀ x : metricH3 (I := I) (M := M) g,
               ‖FHi x‖ ≤ Z + L * ‖x‖) ∧
@@ -370,7 +384,7 @@ theorem refold_aff
               (incl12 (I := I) (M := M) g).comp (FHi x) =
                 (FLo x).comp (incl32 (I := I) (M := M) g)) := by
   obtain ⟨ρc, hρc, hc⟩ := c0_pack (I := I) (M := M) hDim g
-  obtain ⟨ρo, hρo, ho⟩ := c1_bg_pack (I := I) (M := M) hDim g g
+  obtain ⟨ρo, hρo, ho⟩ := c1_bg_pack (I := I) (M := M) hDim g gB
   let ρ0 : ℝ := min ρc ρo
   have hρ0 : 0 < ρ0 := lt_min hρc hρo
   refine ⟨ρ0, hρ0, ?_⟩
@@ -421,8 +435,8 @@ theorem refold_aff
       FHi (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
         (c0CoreData (I := I) (M := M)
           g hρ.le hδ0 hδ_le hreal S).a1Hi (I := I) (M := M) +
-        (oneCore (I := I) (M := M)
-          g hρ.le hδ0 hδ_le hreal S).a1Hi (I := I) (M := M) := by
+        (oneCoreBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal S).a1Hi (I := I) (M := M) := by
     intro S
     rw [show FHi (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
         FcHi (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) +
@@ -433,8 +447,8 @@ theorem refold_aff
       FLo (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
         (c0CoreData (I := I) (M := M)
           g hρ.le hδ0 hδ_le hreal S).a1Lo (I := I) (M := M) +
-        (oneCore (I := I) (M := M)
-          g hρ.le hδ0 hδ_le hreal S).a1Lo (I := I) (M := M) := by
+        (oneCoreBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal S).a1Lo (I := I) (M := M) := by
     intro S
     rw [show FLo (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
         FcLo (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) +
@@ -457,6 +471,62 @@ theorem refold_aff
     simp only [ContinuousLinearMap.comp_apply, hv, hw, map_add, h1, h2]
   exact ⟨Z, L, hZ, hL, FHi, FLo, hFHi, hFLo,
     hHiCore, hLoCore, hFHiBd, hFLoBd, hcomm⟩
+
+/-- **The trajectory-free affine packet of the complete same-background
+refolded first-order action.**  It is the sum of the order-zero packet
+`c0_pack` and the order-one packet `c1_bg_pack`: on every coefficient radius
+`ρ ≤ ρ₀` the two completed action maps `FHi`, `FLo` are continuous, realize the
+refolded core action on smooth data, satisfy a common affine growth certificate
+`‖F x‖ ≤ Z + L‖x‖`, and form the Sobolev-inclusion square.
+
+No time horizon and no trajectory occur, so a consumer may cap a radius against
+`L` before any trajectory exists; the time-`L²` certificates along a trajectory
+are produced from this packet alone by `refoldAffA1_memLp` and
+`refoldAffA1Hi_memLp`, and the a.e. square by `refoldAffA1_compat`.
+
+This is the same-background diagonal `gB = g` of `refold_aff_bg`. -/
+theorem refold_aff
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ0 : ℝ, 0 < ρ0 ∧
+      ∀ {ρ δ : ℝ} (hρ : 0 < ρ) (_ : ρ ≤ ρ0)
+        (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hreal : ∀ S : SmoothCcTensor g 0 2,
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+            gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g S) δ),
+      ∃ Z L : ℝ, 0 ≤ Z ∧ 0 ≤ L ∧
+        ∃ FHi : metricH3 (I := I) (M := M) g →
+              (metricH3 (I := I) (M := M) g →L[ℝ]
+                metricH2 (I := I) (M := M) g),
+          ∃ FLo : metricH3 (I := I) (M := M) g →
+              (metricH2 (I := I) (M := M) g →L[ℝ]
+                metricH1 (I := I) (M := M) g),
+            Continuous FHi ∧ Continuous FLo ∧
+            (∀ S : SmoothCcTensor g 0 2,
+              FHi (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
+                (c0CoreData (I := I) (M := M)
+                  g hρ.le hδ0 hδ_le hreal S).a1Hi
+                    (I := I) (M := M) +
+                (oneCore (I := I) (M := M)
+                  g hρ.le hδ0 hδ_le hreal S).a1Hi
+                    (I := I) (M := M)) ∧
+            (∀ S : SmoothCcTensor g 0 2,
+              FLo (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) S) =
+                (c0CoreData (I := I) (M := M)
+                  g hρ.le hδ0 hδ_le hreal S).a1Lo
+                    (I := I) (M := M) +
+                (oneCore (I := I) (M := M)
+                  g hρ.le hδ0 hδ_le hreal S).a1Lo
+                    (I := I) (M := M)) ∧
+            (∀ x : metricH3 (I := I) (M := M) g,
+              ‖FHi x‖ ≤ Z + L * ‖x‖) ∧
+            (∀ x : metricH3 (I := I) (M := M) g,
+              ‖FLo x‖ ≤ Z + L * ‖x‖) ∧
+            (∀ x : metricH3 (I := I) (M := M) g,
+              (incl12 (I := I) (M := M) g).comp (FHi x) =
+                (FLo x).comp (incl32 (I := I) (M := M) g)) :=
+  refold_aff_bg (I := I) (M := M) hDim g g
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

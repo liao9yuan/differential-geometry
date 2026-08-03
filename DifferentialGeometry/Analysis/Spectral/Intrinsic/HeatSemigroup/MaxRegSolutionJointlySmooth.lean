@@ -1295,11 +1295,13 @@ smooth representative on the FULL given horizon `T`, with no existential
 shrinking.  Sibling of `maxreg_solution_jointly_smooth_representative_of_nemytskii`
 whose three horizon shrinks (`d`, `d₂`, `d₂F`) are all removed:
 
-* the qualitative `t = 0` continuity `δ` is replaced by the a-priori √t trace
-  modulus `timeH1.norm_toFun_sub_init_le` (ruling item 1): with `u.init = 0`
-  the fibre-operator smallness holds on all of `[0, T)` once `T` lies below the
-  explicit floor `Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C)`, where `C` is the
-  lossy fibre constant of `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`;
+* the qualitative `t = 0` continuity `δ` is replaced by the a-priori state
+  bound `hstate` (ruling item 1): the fibre-operator smallness holds on all of
+  `[0, T)` as soon as the trajectory stays in the ball of radius `1 / (2 * C)`,
+  where `C` is the lossy fibre constant of
+  `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`.  A caller holding the
+  horizon floor `Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C)` instead gets `hstate`
+  from the √t trace modulus through `timeH1.state_le_of_sqrt_floor`;
 * the `H^{a+2}`-realizability ball (`hball_full`) and the forcing/mode-mass
   window (`hf_mass`, `hf_id`) are supplied on the full interval (`d₂`, `d₂F`
   folded to `T`).
@@ -1344,7 +1346,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     (hC : ∀ (S : SmoothCcTensor g₀ 0 2),
       gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
         (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) S‖))
-    (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C))
+    (hstate : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤ 1 / (2 * C))
     {R₀ : ℝ} (hR₀_pos : 0 < R₀)
     (hball_full : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g₀ 0 2,
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
@@ -1494,12 +1496,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
       have hnorm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖ ≤
           1 / (2 * C) := by
         rw [heq]
-        calc ‖timeH1.toFun u t‖
-            = ‖timeH1.toFun u t - u.init‖ := by rw [hinit, sub_zero]
-          _ ≤ Real.sqrt t * ‖u.deriv‖ := u.norm_toFun_sub_init_le ht_icc
-          _ ≤ Real.sqrt T * ‖u.deriv‖ :=
-              mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg _)
-          _ ≤ 1 / (2 * C) := hfloor
+        exact hstate t ht_icc
       intro x v w
       rw [hFt]
       refine le_trans (hC (Fdef t) x v w) ?_

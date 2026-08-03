@@ -4978,8 +4978,7 @@ private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
 
 set_option linter.unusedVariables false in
 private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -5115,7 +5114,6 @@ private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
 set_option linter.unusedVariables false in
 theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -5144,7 +5142,7 @@ theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
   classical
   obtain ⟨ψ, Rjet, hψ_smooth, hψ_eq, hjet, hcovbnd⟩ :=
     deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection (I := I) (M := M)
-      g₀ g_bg a ha_super hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+      g₀ g_bg hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
   refine ⟨ψ, hψ_smooth, ?_, ?_⟩
   · intro j hj σ hσ
     obtain ⟨k', hk'⟩ : ∃ k' : ℕ,
@@ -5381,7 +5379,7 @@ theorem deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving
       exact hp_pos.le
   obtain ⟨ψ, hψ_smooth, hψ_mass, hψ_coeff⟩ :=
     deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a ha_super hd₂_pos k F hδ_lt hδ_all φ hφ_smooth
+      g₀ g_bg a hd₂_pos k F hδ_lt hδ_all φ hφ_smooth
       hF_coeff hφ_mass
   refine ⟨ψ, hψ_smooth, hψ_mass, fun i => ?_⟩
   have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),

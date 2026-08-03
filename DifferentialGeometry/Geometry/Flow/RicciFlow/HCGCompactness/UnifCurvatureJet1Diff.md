@@ -88,7 +88,15 @@ cross-metric `Λ^{s/2}` conversion is needed anywhere**.  The sign is absorbed b
 
 This trick should be reused for every future `diffStep`-based Λ-class bound.
 
-## 4. THE WALL — stage 2, second term
+## 4. THE WALL — stage 2, second term (CLOSED 2026-07-30/31; kept as history)
+
+> 2026-08-02 verification (ledger No. 97): everything below is SOLVED —
+> the bundled field identity is `curvCovDerivOf_sub_base`
+> (`UnifPalatiniDiff.lean:319`) on top of `covDerivPal_eq`
+> (`Geometry/Curvature/CurvatureOperator/DifferentiatedPalatini.lean:380`);
+> the extension-correction obstruction was killed by tensoriality
+> (`covDerivConnDiff_congr`/`covDerivConnDiff_eq_ext`).  The W1/W2 analysis
+> below is retained as the historical record of how the wall was located.
 
 Not proved, not stated as a hypothesis anywhere (deliberately: an
 envelope theorem carrying it as `hpal` would move no mathematics).
@@ -138,16 +146,18 @@ Do NOT re-attempt by adding hypotheses to `unifCurvJet1Conn`.
 
 ## 5. Still-open packaging gap (separate from the wall)
 
-The E3 consumers (`hcurv` in `UnifBochnerGap.lean:304`, `hsup` in
-`UnifNZeroBound.lean:343`) speak `SmoothCcTensor g₀ 0 r` + `iteratedCovGrad` +
-`riemannianFiberNormSq`.  Everything proved here is `Tensor0SField` + `iterCov`
-+ `normSq0S`.  Those two towers are **not** bridged anywhere in the tree.
-Ingredients that exist: `Tensor0SField.toTensorRSField`
-(`Tensor/RSTensor/Coordinates/Field.lean:307`) for the object; compact support is
-free on `CompactSpace M`.  Missing: `iteratedCovGrad g 0 s j (toRS0 A) =
-toRS0 (iterCov g s A j)` (or the norm-level equivalent), i.e. `covGrad ≈ covStep`.
-This is independent of the curvature wall and is worth a separate small brick —
-it would unlock *every* `iterCov`-currency estimate for the E3 consumers at once.
+RETIRED 2026-08-02 (verification, ledger No. 97 era): the towers ARE
+bridged, twice over — section→field by `UnifJetTowerMatch.lean` (No. 73:
+`ccUnitField`, `iterCovGrad_unit_eq`, `rfns_iterCovGrad_eq`) and
+field→section by `UnifCurvaturePack.lean` (No. 81: `ccOfField`,
+`rfns_ccOfField_eq`, `rmSection`), with the consumer corollary already
+present as `exists_rmJetSup`.  On 2026-08-02 the bridge was additionally
+strengthened to the OBJECT level with constant exactly 1:
+`iterCovGrad_ccOfField` (`UnifCurvaturePack.lean:200`,
+`iteratedCovGrad g 0 s j (ccOfField g s A) = ccOfField g (s+j)
+(iterCov g s A j)`) plus the extensionality `cc_ext_unit` and
+`iterCovGrad_rmSection` — one rewrite now transports every functional of
+the jets, not just norms.  See `UnifCurvaturePack.md` (dated section).
 
 ## 6. Honest progress
 

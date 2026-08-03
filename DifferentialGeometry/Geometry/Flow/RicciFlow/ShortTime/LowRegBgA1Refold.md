@@ -108,3 +108,47 @@ longer required**.  The blow-up came from the `timeL2` / `MemLp` / `toLp` layer
 in the statement, not from the action maps.
 
 Focused check + targeted `.olean` build GREEN; `refold_aff` axiom-clean.
+
+## 2026-08-03 — brick G1: two-metric widening (`refold_aff_bg`), GREEN
+
+Front 3's first dispatchable brick (`FRONT3_ASSEMBLY_PLAN.md` §7/§10).  The
+DeTurck background was hard-wired to the state metric on this path in exactly
+one definition, `oneCore g = (lowCoreDataBg g g …).C1`; the packet inherited it.
+
+What is in the file now:
+
+- `oneCoreBg g gB …` (`:56`) — the order-one arm at an arbitrary background,
+  `C1 := (lowCoreDataBg g gB …).C1`, `C0 = C2 = 0`.
+- `oneCore g … := oneCoreBg g g …` (`:71`) — unchanged signature and type; the
+  diagonal wrapper.
+- `refold_aff_bg hDim g gB` (`:345`) — the same packet shape as `refold_aff`
+  with the smooth-core conjuncts reading `oneCoreBg g gB`, proved from
+  `c0_pack g` (background-free) + `c1_bg_pack g gB` (already two-metric).
+- `refold_aff hDim g` (`:488`) — statement byte-identical to the previous one,
+  proved term-mode by `refold_aff_bg hDim g g`.
+
+Why an instance theorem and not a redefinition of `refold_aff`.  The packet's
+conclusion is carried as a *hypothesis* by seven downstream theorems
+(`LowRegLiftHfLo`, `LowRegLiftAffine`, `LowRegForceHi`, `LowRegApplyTwo`,
+`LowRegAllOrderJet`), all of which name `oneCore` in their statements.  Defining
+`refold_aff := refold_aff_bg … g g` would have printed `oneCoreBg g g` in that
+conclusion and forced a lock-step edit of all of them.  Keeping the old
+statement and discharging it by `exact` costs one line and no churn.
+
+Only unfolding site of `oneCore` in the whole tree: `refoldLo_core`'s
+`simp only` (`:177`).  It now also lists `oneCoreBg`, because after the
+redefinition `simp only [oneCore]` stops one delta-step short of the structure
+literal and the `LowBaseActionData.a1` projections would not fire.  This is the
+single thing to remember if another `oneCore`-unfolding proof is ever added.
+
+Verification: focused check green; targeted module build green; downstream
+`LowRegLiftAffine`, `LowRegLiftHfLo`, `LowRegApplyTwo` all green with **no
+edits**, plus targeted builds of `LowRegLiftAffine`, `LowRegLiftHfLo`,
+`LowRegForceHi`.  No `sorry`, no `set_option` (the №95 hoist still holds — the
+packet statement has no `timeL2`/`MemLp` layer, so `synthInstance` stays cheap
+even with the extra metric argument).
+
+Nothing here moves mathematics: `c1_bg_pack`'s `hreal` hypothesis is about `g`
+alone, so both lanes share their hypothesis bundle at any background and the
+sum/affine-addition arguments never mention `gB`.  The plan's failure signal (a
+`g g`-dependent `rfl` in the `a1Lo_congr` layer) did not appear.

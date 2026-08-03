@@ -130,8 +130,7 @@ theorem perModeConv_sq_le_time_mul_integral' (lam : ℝ) (hlam : 0 ≤ lam)
 
 set_option linter.unusedVariables false in
 theorem deTurckRemainder_path_timeJet_section
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -214,7 +213,6 @@ theorem deTurckRemainder_path_timeJet_section
 
 private theorem deTurckSmoothN_path_coeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -244,7 +242,7 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rem t)) i with hcpath_def
   obtain ⟨Rjet, hsmooth, hjet, hcovbnd⟩ :=
     deTurckRemainder_path_timeJet_section (I := I) (M := M)
-      g₀ g_bg a ha_super hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+      g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
   have hext : ∀ i, ∃ ψi : ℝ → ℝ, ContDiff ℝ ∞ ψi ∧
       Set.EqOn (cpath i) ψi (Set.Icc (0 : ℝ) T) :=
     fun i => contDiffOn_Icc_scalar_globalExtend hT (hsmooth i)
@@ -480,7 +478,7 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       exact hp_pos.le
   obtain ⟨ψ, hψ_ctrl, hψ_coeff⟩ :=
     deTurckSmoothN_path_coeff_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a ha_super hd₂_pos F hδ_lt hδ_all φ hφ_smooth
+      g₀ g_bg a hd₂_pos F hδ_lt hδ_all φ hφ_smooth
       hF_coeff hφ_mass
   refine ⟨ψ, hψ_ctrl, fun i => ?_⟩
   have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
