@@ -162,38 +162,38 @@ theorem chartGramPartialOnE_contDiffOn
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-omit [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E] in
-private theorem matrixDet_continuousOn {s : Set (Real × E)}
+omit [FiniteDimensional Real E] [CompleteSpace E] in
+private theorem matrixDet_contDiffOn {s : Set (Real × E)}
     {A : Real × E → Matrix n n Real}
-    (hA : ∀ i j, ContinuousOn (fun p : Real × E => A p i j) s) :
-    ContinuousOn (fun p : Real × E => (A p).det) s := by
+    (hA : ∀ i j, ContDiffOn Real ∞ (fun p : Real × E => A p i j) s) :
+    ContDiffOn Real ∞ (fun p : Real × E => (A p).det) s := by
   classical
   simp_rw [Matrix.det_apply']
-  refine continuousOn_finset_sum _ fun σ _ => ?_
-  exact continuousOn_const.mul (continuousOn_finset_prod _ fun i _ => hA (σ i) i)
+  refine ContDiffOn.sum fun σ _ => ?_
+  exact contDiffOn_const.mul (contDiffOn_prod fun i _ => hA (σ i) i)
 
-omit [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E] in
-private theorem matrixAdjugate_continuousOn {s : Set (Real × E)}
+omit [FiniteDimensional Real E] [CompleteSpace E] in
+private theorem matrixAdjugate_contDiffOn {s : Set (Real × E)}
     {A : Real × E → Matrix n n Real}
-    (hA : ∀ i j, ContinuousOn (fun p : Real × E => A p i j) s)
+    (hA : ∀ i j, ContDiffOn Real ∞ (fun p : Real × E => A p i j) s)
     (a b : n) :
-    ContinuousOn (fun p : Real × E => (A p).adjugate a b) s := by
+    ContDiffOn Real ∞ (fun p : Real × E => (A p).adjugate a b) s := by
   classical
   simp_rw [Matrix.adjugate_apply]
-  refine matrixDet_continuousOn (A := fun p => (A p).updateRow b (Pi.single a 1)) ?_
+  refine matrixDet_contDiffOn (A := fun p => (A p).updateRow b (Pi.single a 1)) ?_
   intro i j
   by_cases hij : i = b
   · subst hij
     simp only [Matrix.updateRow_self]
-    exact continuousOn_const
+    exact contDiffOn_const
   · simpa only [Matrix.updateRow_ne hij] using hA i j
 
-omit [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E] in
-private theorem matrixInv_entry_continuousOn {s : Set (Real × E)}
+omit [FiniteDimensional Real E] [CompleteSpace E] in
+private theorem matrixInv_entry_contDiffOn {s : Set (Real × E)}
     {A : Real × E → Matrix n n Real}
-    (hA : ∀ i j, ContinuousOn (fun p : Real × E => A p i j) s)
+    (hA : ∀ i j, ContDiffOn Real ∞ (fun p : Real × E => A p i j) s)
     (hdet : ∀ p ∈ s, (A p).det ≠ 0) (a b : n) :
-    ContinuousOn (fun p : Real × E => (A p)⁻¹ a b) s := by
+    ContDiffOn Real ∞ (fun p : Real × E => (A p)⁻¹ a b) s := by
   classical
   have hrewrite : (fun p : Real × E => (A p)⁻¹ a b) =
       fun p : Real × E => (A p).det⁻¹ * (A p).adjugate a b := by
@@ -201,27 +201,27 @@ private theorem matrixInv_entry_continuousOn {s : Set (Real × E)}
     rw [Matrix.inv_def]
     simp [Ring.inverse_eq_inv', Matrix.smul_apply, smul_eq_mul]
   rw [hrewrite]
-  exact ((matrixDet_continuousOn hA).inv₀ hdet).mul
-    (matrixAdjugate_continuousOn hA a b)
+  exact ((matrixDet_contDiffOn hA).inv hdet).mul
+    (matrixAdjugate_contDiffOn hA a b)
 
 omit [CompleteSpace E] in
-theorem chartInvGramOnE_continuousOn
+theorem chartInvGramOnE_contDiffOn
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     {J : Set Real} (hJreg : J ⊆ D.regular) (α : M)
     (a b : Fin (Module.finrank Real E)) :
-    ContinuousOn
+    ContDiffOn Real ∞
       (fun p : Real × E => chartInvGramOnE (I := I) (G.metric p.1) α a b p.2)
       (J ×ˢ interior (extChartAt I α).target) := by
   classical
   let A : Real × E →
       Matrix (Fin (Module.finrank Real E)) (Fin (Module.finrank Real E)) Real :=
     fun p => Matrix.of fun i j => chartGramOnE (I := I) (G.metric p.1) α i j p.2
-  have hA : ∀ i j, ContinuousOn (fun p : Real × E => A p i j)
+  have hA : ∀ i j, ContDiffOn Real ∞ (fun p : Real × E => A p i j)
       (J ×ˢ interior (extChartAt I α).target) := by
     intro i j
-    simpa [A] using (chartGramOnE_contDiffOn (I := I) hG hJreg α i j).continuousOn
+    simpa [A] using chartGramOnE_contDiffOn (I := I) hG hJreg α i j
   have hdet : ∀ p ∈ J ×ˢ interior (extChartAt I α).target, (A p).det ≠ 0 := by
     intro p hp
     have hbase : (extChartAt I α).symm p.2 ∈
@@ -237,20 +237,32 @@ theorem chartInvGramOnE_continuousOn
         rfl]
       exact chartGramMatrix_det_pos (I := I) (G.metric p.1) α hbase
     exact ne_of_gt hpos
-  have hinv := matrixInv_entry_continuousOn hA hdet a b
+  have hinv := matrixInv_entry_contDiffOn (A := A) hA hdet a b
   refine hinv.congr ?_
   intro p _
   simp only [A, chartInvGramOnE_def]
   rfl
 
 omit [CompleteSpace E] in
-theorem chartChristoffelOnE_continuousOn
+theorem chartInvGramOnE_continuousOn
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {J : Set Real} (hJreg : J ⊆ D.regular) (α : M)
+    (a b : Fin (Module.finrank Real E)) :
+    ContinuousOn
+      (fun p : Real × E => chartInvGramOnE (I := I) (G.metric p.1) α a b p.2)
+      (J ×ˢ interior (extChartAt I α).target) :=
+  (chartInvGramOnE_contDiffOn (I := I) hG hJreg α a b).continuousOn
+
+omit [CompleteSpace E] in
+theorem chartChristoffelOnE_contDiffOn
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     {J : Set Real} (hJreg : J ⊆ D.regular) (hJ : UniqueDiffOn Real J)
     (α : M) (i j k : Fin (Module.finrank Real E)) :
-    ContinuousOn
+    ContDiffOn Real ∞
       (fun p : Real × E => chartChristoffel (I := I) (G.metric p.1) α i j k p.2)
       (J ×ˢ interior (extChartAt I α).target) := by
   classical
@@ -268,11 +280,23 @@ theorem chartChristoffelOnE_continuousOn
     funext p
     rw [chartChristoffel_def]
     rfl]
-  refine continuousOn_const.mul (continuousOn_finset_sum _ fun l _ => ?_)
-  exact (chartInvGramOnE_continuousOn (I := I) hG hJreg α k l).mul
-    (((chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α i l j).continuousOn.add
-      (chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α j l i).continuousOn).sub
-      (chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α l i j).continuousOn)
+  refine contDiffOn_const.mul (ContDiffOn.sum fun l _ => ?_)
+  exact (chartInvGramOnE_contDiffOn (I := I) hG hJreg α k l).mul
+    (((chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α i l j).add
+      (chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α j l i)).sub
+      (chartGramPartialOnE_contDiffOn (I := I) hG hJreg hJ α l i j))
+
+omit [CompleteSpace E] in
+theorem chartChristoffelOnE_continuousOn
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {J : Set Real} (hJreg : J ⊆ D.regular) (hJ : UniqueDiffOn Real J)
+    (α : M) (i j k : Fin (Module.finrank Real E)) :
+    ContinuousOn
+      (fun p : Real × E => chartChristoffel (I := I) (G.metric p.1) α i j k p.2)
+      (J ×ˢ interior (extChartAt I α).target) :=
+  (chartChristoffelOnE_contDiffOn (I := I) hG hJreg hJ α i j k).continuousOn
 
 omit [CompleteSpace E] in
 private theorem partialDeriv_contDiffOn
