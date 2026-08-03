@@ -30,7 +30,7 @@ section Euclidean
 variable {V : Type*}
   [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
 
-theorem exists_schauder_cutoff
+theorem exists_schauder_cutoff_with_hessian
     {K Omega : Set V} (hK : IsCompact K) (hOmega : IsOpen Omega)
     (hKOmega : K ⊆ Omega) {alpha : NNReal}
     (halpha0 : 0 ≤ alpha) (halpha1 : alpha ≤ 1) :
@@ -38,7 +38,7 @@ theorem exists_schauder_cutoff
       (chi : BoundedContinuousFunction V Real)
       (dchi : BoundedContinuousFunction V (V →L[Real] Real))
       (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
-      (Kchi Kdchi Klapchi : NNReal),
+      (Kchi Kdchi Kd2chi Klapchi : NNReal),
       IsOpen U ∧ K ⊆ U ∧
       (∀ x ∈ U, chi x = 1) ∧
       tsupport (chi : V → Real) ⊆ Omega ∧
@@ -47,6 +47,8 @@ theorem exists_schauder_cutoff
       (∀ x, HasFDerivAt (dchi : V → V →L[Real] Real) (d2chi x) x) ∧
       HolderWith Kchi alpha (chi : V → Real) ∧
       HolderWith Kdchi alpha (dchi : V → V →L[Real] Real) ∧
+      HolderWith Kd2chi alpha
+        (d2chi : V → V →L[Real] V →L[Real] Real) ∧
       HolderWith Klapchi alpha (coreLap d2chi : V → Real) := by
   obtain ⟨chiRaw, hchiCd, hchiCs, hchiOne, hchiSupp, hchiRange⟩ :=
     DifferentialGeometry.Analysis.exists_bump_compact hK hOmega hKOmega
@@ -85,6 +87,24 @@ theorem exists_schauder_cutoff
       (M := ‖dchi‖₊) (N := ‖d2chi‖₊) halpha0 halpha1 hdchiDeriv
     · exact fun x ↦ by simpa using dchi.norm_coe_le_norm x
     · exact fun x ↦ by simpa using d2chi.norm_coe_le_norm x
+  let d3chiRaw := fderiv Real d2chiRaw
+  have hd3chiCd : ContDiff Real ∞ d3chiRaw :=
+    hd2chiCd.fderiv_right (m := ∞) (by simp)
+  have hd3chiCont : Continuous d3chiRaw := hd3chiCd.continuous
+  have hd3chiCs : HasCompactSupport d3chiRaw := hd2chiCs.fderiv Real
+  let d3chi := compactSupportBcf d3chiRaw hd3chiCont hd3chiCs
+  have hd2chiDeriv : ∀ x, HasFDerivAt
+      (d2chi : V → V →L[Real] V →L[Real] Real) (d3chi x) x := by
+    intro x
+    change HasFDerivAt d2chiRaw (fderiv Real d2chiRaw x) x
+    exact (hd2chiCd.differentiable (by simp) x).hasFDerivAt
+  let Kd2chi := max (2 * ‖d2chi‖₊) ‖d3chi‖₊
+  have hd2chiHolder : HolderWith Kd2chi alpha
+      (d2chi : V → V →L[Real] V →L[Real] Real) := by
+    apply holderWith_of_hasFDerivAt_of_norm_le
+      (M := ‖d2chi‖₊) (N := ‖d3chi‖₊) halpha0 halpha1 hd2chiDeriv
+    · exact fun x ↦ by simpa using d2chi.norm_coe_le_norm x
+    · exact fun x ↦ by simpa using d3chi.norm_coe_le_norm x
   have hlapCd : ContDiff Real ∞ (coreLap d2chi : V → Real) := by
     change ContDiff Real ∞ (fun x ↦ lapEval (d2chi x))
     exact (lapEval (V := V) (F := Real)).contDiff.comp hd2chiCd
@@ -112,13 +132,39 @@ theorem exists_schauder_cutoff
     · exact fun x ↦ by simpa using dlap.norm_coe_le_norm x
   have honeSet : {x : V | chiRaw x = 1} ∈ 𝓝ˢ K := hchiOne
   obtain ⟨U, hU, hKU, hUone⟩ := mem_nhdsSet_iff_exists.mp honeSet
-  refine ⟨U, chi, dchi, d2chi, Kchi, Kdchi, Klapchi,
+  refine ⟨U, chi, dchi, d2chi, Kchi, Kdchi, Kd2chi, Klapchi,
     hU, hKU, ?_, ?_, ?_, hchiDeriv, hdchiDeriv,
-    hchiHolder, hdchiHolder, hlapHolder⟩
+    hchiHolder, hdchiHolder, hd2chiHolder, hlapHolder⟩
   · intro x hx
     exact hUone hx
   · simpa only [chi, compactSupportBcf_apply] using hchiSupp
   · simpa only [chi, compactSupportBcf_apply] using hchiRange
+
+theorem exists_schauder_cutoff
+    {K Omega : Set V} (hK : IsCompact K) (hOmega : IsOpen Omega)
+    (hKOmega : K ⊆ Omega) {alpha : NNReal}
+    (halpha0 : 0 ≤ alpha) (halpha1 : alpha ≤ 1) :
+    ∃ (U : Set V)
+      (chi : BoundedContinuousFunction V Real)
+      (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+      (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+      (Kchi Kdchi Klapchi : NNReal),
+      IsOpen U ∧ K ⊆ U ∧
+      (∀ x ∈ U, chi x = 1) ∧
+      tsupport (chi : V → Real) ⊆ Omega ∧
+      Set.range (chi : V → Real) ⊆ Set.Icc 0 1 ∧
+      (∀ x, HasFDerivAt (chi : V → Real) (dchi x) x) ∧
+      (∀ x, HasFDerivAt (dchi : V → V →L[Real] Real) (d2chi x) x) ∧
+      HolderWith Kchi alpha (chi : V → Real) ∧
+      HolderWith Kdchi alpha (dchi : V → V →L[Real] Real) ∧
+      HolderWith Klapchi alpha (coreLap d2chi : V → Real) := by
+  obtain ⟨U, chi, dchi, d2chi, Kchi, Kdchi, Kd2chi, Klapchi,
+    hU, hKU, hchiOne, hchiSupp, hchiRange, hchiDeriv, hdchiDeriv,
+    hchiHolder, hdchiHolder, hd2chiHolder, hlapHolder⟩ :=
+      exists_schauder_cutoff_with_hessian hK hOmega hKOmega halpha0 halpha1
+  exact ⟨U, chi, dchi, d2chi, Kchi, Kdchi, Klapchi,
+    hU, hKU, hchiOne, hchiSupp, hchiRange, hchiDeriv, hdchiDeriv,
+    hchiHolder, hdchiHolder, hlapHolder⟩
 
 end Euclidean
 
