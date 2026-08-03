@@ -217,6 +217,32 @@ theorem integral_holderD3 {alpha : NNReal} (halpha : alpha ≤ 1)
       rw [holderThirdHeatScale_eq alpha ht]
       ring
 
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD3_neg (t : Real) (u v w x : V) :
+    heatD3 t u v w (-x) = -heatD3 t u v w x := by
+  unfold heatD3 baseD3 baseHeat
+  simp only [smul_neg, inner_neg_left, norm_neg]
+  ring
+
+theorem heatD3_int {t : Real} (ht : 0 < t) (u v w : V) :
+    Integrable (heatD3 t u v w : V → Real) := by
+  refine ((heatD3Maj_int (V := V) ht).const_mul
+    (‖u‖ * ‖v‖ * ‖w‖)).mono' ?_ ?_
+  · apply Continuous.aestronglyMeasurable
+    unfold heatD3 baseD3 baseHeat baseHeatMass heatScale
+    fun_prop
+  filter_upwards with x
+  simpa [mul_assoc] using heatD3_bound ht u v w x
+
+omit [Nontrivial V] in
+theorem integral_heatD3_zero (t : Real) (u v w : V) :
+    ∫ x : V, heatD3 t u v w x = 0 := by
+  have hneg := MeasureTheory.integral_neg_eq_self
+    (fun x : V => heatD3 t u v w x) (volume : Measure V)
+  simp_rw [heatD3_neg] at hneg
+  rw [integral_neg] at hneg
+  linarith
+
 section Cancellation
 
 variable {F : Type*}
@@ -224,6 +250,9 @@ variable {F : Type*}
 
 def heatD3Cancel (t : Real) (u v w : V) (f : V → F) (x : V) : F :=
   ∫ y : V, heatD3 t u v w y • (f (x - y) - f x)
+
+def heatD3Conv (t : Real) (u v w : V) (f : V → F) (x : V) : F :=
+  ∫ y : V, heatD3 t u v w y • f (x - y)
 
 omit [InnerProductSpace Real V] [FiniteDimensional Real V]
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
@@ -278,6 +307,37 @@ theorem heatD3Cancel_int_of_holder {alpha K : NNReal}
   exact d3_cancel_bound_of_holder ht hf u v w x y
 
 omit [CompleteSpace F] in
+theorem heatD3Conv_int_of_holder {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
+    (u v w x : V) :
+    Integrable (fun y : V => heatD3 t u v w y • f (x - y)) := by
+  have hcancel := heatD3Cancel_int_of_holder halpha0 halpha1 ht hf u v w x
+  have hconst := (heatD3_int (V := V) ht u v w).smul_const (f x)
+  refine (hcancel.add hconst).congr (Filter.Eventually.of_forall fun y => ?_)
+  simp only [Pi.add_apply, smul_sub, sub_add_cancel]
+
+theorem heatD3Conv_eq_cancel_of_holder {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
+    (u v w x : V) :
+    heatD3Conv t u v w f x = heatD3Cancel t u v w f x := by
+  have hcancel := heatD3Cancel_int_of_holder halpha0 halpha1 ht hf u v w x
+  have hconst := (heatD3_int (V := V) ht u v w).smul_const (f x)
+  unfold heatD3Conv heatD3Cancel
+  calc
+    (∫ y : V, heatD3 t u v w y • f (x - y)) =
+        ∫ y : V, heatD3 t u v w y • (f (x - y) - f x) +
+          heatD3 t u v w y • f x := by
+      apply integral_congr_ae
+      filter_upwards with y
+      simp only [smul_sub, sub_add_cancel]
+    _ = (∫ y : V, heatD3 t u v w y • (f (x - y) - f x)) +
+          ∫ y : V, heatD3 t u v w y • f x := integral_add hcancel hconst
+    _ = ∫ y : V, heatD3 t u v w y • (f (x - y) - f x) := by
+      rw [integral_smul_const, integral_heatD3_zero, zero_smul, add_zero]
+
+omit [CompleteSpace F] in
 theorem heatD3Cancel_norm_of_holder {alpha K : NNReal}
     (halpha : alpha ≤ 1) {t : Real} (ht : 0 < t)
     {f : V → F} (hf : HolderWith K alpha f) (u v w x : V) :
@@ -301,6 +361,16 @@ theorem heatD3Cancel_norm_of_holder {alpha K : NNReal}
         heatC3Holder (V := V) alpha := by
       rw [holderThirdHeatScale_eq alpha ht]
       ring
+
+theorem heatD3Conv_norm_of_holder {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
+    (u v w x : V) :
+    ‖heatD3Conv t u v w f x‖ ≤
+      ‖u‖ * ‖v‖ * ‖w‖ * (K : Real) * holderThirdHeatScale alpha t *
+        heatC3Holder (V := V) alpha := by
+  rw [heatD3Conv_eq_cancel_of_holder halpha0 halpha1 ht hf]
+  exact heatD3Cancel_norm_of_holder halpha1 ht hf u v w x
 
 end Cancellation
 
