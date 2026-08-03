@@ -397,6 +397,313 @@ def heatLapTriangle
     (f : Real → BoundedContinuousFunction V F) (x : V) (z : Real × Real) : F :=
   if z.2 < z.1 then heatLapSup (z.1 - z.2) (f z.2) x else 0
 
+private def heatLapTriangleIntegrand
+    (f : Real → BoundedContinuousFunction V F) (x : V)
+    (i : Fin (Module.finrank Real V)) (z : (Real × Real) × V) : F :=
+  if z.1.2 < z.1.1 then
+    heatD2 (z.1.1 - z.1.2) ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) z.2 • f z.1.2 (x - z.2)
+  else 0
+
+omit [Nontrivial V] [CompleteSpace F] in
+private theorem heatLapTriangleIntegrand_aestronglyMeasurable
+    {alpha Csource : NNReal} (halpha0 : 0 < alpha)
+    {S t : Real} (htS : t ≤ S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (x : V) (i : Fin (Module.finrank Real V)) :
+    AEStronglyMeasurable (heatLapTriangleIntegrand f x i)
+      (((volume.restrict (Ioc (0 : Real) t)).prod
+          (volume.restrict (Ioc (0 : Real) t))).prod volume) := by
+  let D : Set ((Real × Real) × V) :=
+    {z | z.1.2 ∈ Ioc (0 : Real) S ∧ z.1.2 < z.1.1}
+  let Q : Set (ParabolicPoint V) :=
+    parabolicCylinder (Ioc (0 : Real) S) Set.univ
+  let psi : D → Q := fun z =>
+    ⟨parabolicPoint z.1.1.2 (x - z.1.2), ⟨z.2.1, Set.mem_univ _⟩⟩
+  let g : ((Real × Real) × V) → F := fun z =>
+    heatD2 (z.1.1 - z.1.2) ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) z.2 • f z.1.2 (x - z.2)
+  have hD : MeasurableSet D := by
+    apply MeasurableSet.inter
+    · exact measurableSet_Ioc.preimage (measurable_snd.comp measurable_fst)
+    · exact measurableSet_lt (measurable_snd.comp measurable_fst)
+        (measurable_fst.comp measurable_fst)
+  have hpsi : Continuous psi := by
+    unfold psi parabolicPoint
+    fun_prop
+  have hsourceD : Continuous (fun z : D => f z.1.1.2 (x - z.1.2)) := by
+    simpa only [Q, Set.restrict_apply, psi] using
+      (hsource.continuous halpha0).comp hpsi
+  have hkernelD : Continuous (fun z : D =>
+      heatD2 (z.1.1.1 - z.1.1.2) ((stdOrthonormalBasis Real V) i)
+        ((stdOrthonormalBasis Real V) i) z.1.2) := by
+    let ρ : D → Real := fun z => Real.sqrt (z.1.1.1 - z.1.1.2)
+    have hq : Continuous (fun z : D => z.1.1.1 - z.1.1.2) := by fun_prop
+    have hρ : Continuous ρ := by
+      exact Real.continuous_sqrt.comp hq
+    have hρne : ∀ z : D, ρ z ≠ 0 := by
+      intro z
+      exact (Real.sqrt_pos.2 (sub_pos.mpr z.2.2)).ne'
+    have hρinv : Continuous (fun z : D => (ρ z)⁻¹) :=
+      hρ.inv₀ hρne
+    have hpowInv : Continuous
+        (fun z : D => (ρ z ^ Module.finrank Real V)⁻¹) :=
+      (hρ.pow _).inv₀ (fun z => pow_ne_zero _ (hρne z))
+    have harg : Continuous (fun z : D => (ρ z)⁻¹ • z.1.2) :=
+      hρinv.smul (continuous_snd.comp continuous_subtype_val)
+    have hbase : Continuous (fun y : V =>
+        baseD2 ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) y) := by
+      unfold baseD2 baseHeat
+      fun_prop
+    unfold heatD2 heatScale
+    change Continuous (fun z : D =>
+      (ρ z ^ Module.finrank Real V)⁻¹ * (ρ z)⁻¹ * (ρ z)⁻¹ *
+        baseD2 ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) ((ρ z)⁻¹ • z.1.2))
+    exact (((hpowInv.mul hρinv).mul hρinv).mul (hbase.comp harg))
+  have hg : ContinuousOn g D := by
+    rw [continuousOn_iff_continuous_restrict]
+    exact hkernelD.smul hsourceD
+  have hind : AEStronglyMeasurable (D.indicator g)
+      (((volume : Measure Real).prod volume).prod volume) := by
+    rw [aestronglyMeasurable_indicator_iff hD]
+    exact hg.aestronglyMeasurable hD
+  rw [Measure.prod_restrict, Measure.restrict_prod_eq_prod_univ]
+  refine hind.restrict.congr ?_
+  filter_upwards [ae_restrict_mem
+    ((measurableSet_Ioc.prod measurableSet_Ioc).prod MeasurableSet.univ)] with z hz
+  have hzs : z.1.2 ∈ Ioc (0 : Real) S :=
+    ⟨hz.1.2.1, hz.1.2.2.trans htS⟩
+  by_cases hsr : z.1.2 < z.1.1
+  · have hzD : z ∈ D := ⟨hzs, hsr⟩
+    rw [Set.indicator_of_mem hzD]
+    simp only [heatLapTriangleIntegrand, if_pos hsr, g]
+  · have hzD : z ∉ D := fun h => hsr h.2
+    rw [Set.indicator_of_notMem hzD]
+    simp only [heatLapTriangleIntegrand, if_neg hsr]
+
+omit [Nontrivial V] [CompleteSpace F] in
+private theorem heatLapTriangle_aestronglyMeasurable_of_holder
+    {alpha Csource : NNReal} (halpha0 : 0 < alpha)
+    {S t : Real} (htS : t ≤ S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (x : V) :
+    AEStronglyMeasurable (heatLapTriangle f x)
+      ((volume.restrict (Ioc (0 : Real) t)).prod
+        (volume.restrict (Ioc (0 : Real) t))) := by
+  let μ : Measure Real := volume.restrict (Ioc (0 : Real) t)
+  have hterm : ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun z : Real × Real => if z.2 < z.1 then
+          heatD2Conv (z.1 - z.2) ((stdOrthonormalBasis Real V) i)
+            ((stdOrthonormalBasis Real V) i) (f z.2) x else 0) (μ.prod μ) := by
+    intro i
+    have hraw := (heatLapTriangleIntegrand_aestronglyMeasurable
+      halpha0 htS f hsource x i).integral_prod_right'
+    apply hraw.congr
+    filter_upwards with z
+    by_cases hsr : z.2 < z.1
+    · simp only [heatLapTriangleIntegrand, if_pos hsr]
+      rfl
+    · simp only [heatLapTriangleIntegrand, if_neg hsr, integral_zero]
+  have hsum : AEStronglyMeasurable
+      (fun z : Real × Real =>
+        ∑ i : Fin (Module.finrank Real V), if z.2 < z.1 then
+          heatD2Conv (z.1 - z.2) ((stdOrthonormalBasis Real V) i)
+            ((stdOrthonormalBasis Real V) i) (f z.2) x else 0) (μ.prod μ) := by
+    fun_prop
+  apply hsum.congr
+  filter_upwards with z
+  by_cases hsr : z.2 < z.1
+  · simp only [heatLapTriangle, heatLapSup, if_pos hsr]
+  · simp only [heatLapTriangle, if_neg hsr, Finset.sum_const_zero]
+
+private def heatLapTriangleMajor (alpha K : NNReal) (z : Real × Real) : Real :=
+  if z.2 < z.1 then
+    Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha) *
+      holderHeatScale alpha (z.1 - z.2)
+  else 0
+
+omit [Nontrivial V] in
+private theorem heatLapTriangleMajor_nonneg
+    {alpha K : NNReal} (z : Real × Real) :
+    0 ≤ heatLapTriangleMajor (V := V) alpha K z := by
+  by_cases h : z.2 < z.1
+  · simp only [heatLapTriangleMajor, if_pos h]
+    exact mul_nonneg
+      (mul_nonneg (Nat.cast_nonneg _)
+        (mul_nonneg (NNReal.coe_nonneg K)
+          (heatC2Holder_nonneg (V := V) alpha)))
+      (Real.rpow_nonneg (sub_pos.mpr h).le _)
+  · simp only [heatLapTriangleMajor, if_neg h, le_refl]
+
+omit [Nontrivial V] in
+private theorem heatLapTriangleMajor_aestronglyMeasurable
+    {alpha K : NNReal} {t : Real} :
+    AEStronglyMeasurable (heatLapTriangleMajor (V := V) alpha K)
+      ((volume.restrict (Ioc (0 : Real) t)).prod
+        (volume.restrict (Ioc (0 : Real) t))) := by
+  let A : Set (Real × Real) := {z | z.2 < z.1}
+  let g : Real × Real → Real := fun z =>
+    Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha) *
+      holderHeatScale alpha (z.1 - z.2)
+  have hA : MeasurableSet A := by
+    exact measurableSet_lt measurable_snd measurable_fst
+  have hg : ContinuousOn g A := by
+    unfold g holderHeatScale
+    apply continuousOn_const.mul
+    apply ContinuousOn.rpow_const
+      (continuous_fst.sub continuous_snd).continuousOn
+    intro z hz
+    exact Or.inl (sub_ne_zero.mpr (ne_of_gt hz))
+  have hind : AEStronglyMeasurable (A.indicator g)
+      ((volume : Measure Real).prod volume) := by
+    rw [aestronglyMeasurable_indicator_iff hA]
+    exact hg.aestronglyMeasurable hA
+  rw [Measure.prod_restrict]
+  refine hind.restrict.congr ?_
+  apply Filter.Eventually.of_forall
+  intro z
+  by_cases hz : z ∈ A
+  · have hz' : z.2 < z.1 := by simpa only [A, Set.mem_setOf_eq] using hz
+    rw [Set.indicator_of_mem hz]
+    simp only [heatLapTriangleMajor, if_pos hz', g]
+  · have hz' : ¬ z.2 < z.1 := by simpa only [A, Set.mem_setOf_eq] using hz
+    rw [Set.indicator_of_notMem hz]
+    simp only [heatLapTriangleMajor, if_neg hz']
+
+omit [Nontrivial V] in
+private theorem integral_heatLapTriangleMajor_right
+    {alpha K : NNReal} (halpha : 0 < alpha)
+    {t r : Real} (hr : r ∈ Ioc (0 : Real) t) :
+    (∫ s : Real, heatLapTriangleMajor (V := V) alpha K (r, s)
+      ∂(volume.restrict (Ioc (0 : Real) t))) =
+      Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha) *
+        ((2 / (alpha : Real)) * r ^ ((alpha : Real) / 2)) := by
+  have hsection :
+      (∫ s : Real, heatLapTriangleMajor (V := V) alpha K (r, s)
+        ∂(volume.restrict (Ioc (0 : Real) t))) =
+        ∫ s : Real in 0..r,
+          Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha) *
+            holderHeatScale alpha (r - s) := by
+    rw [intervalIntegral.integral_of_le hr.1.le]
+    rw [← integral_indicator measurableSet_Ioc,
+      ← integral_indicator measurableSet_Ioc]
+    apply integral_congr_ae
+    have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ r := by
+      simp [ae_iff, measure_singleton]
+    filter_upwards [hne] with s hsr0
+    by_cases hs : s ∈ Ioc (0 : Real) t
+    · by_cases hsr : s < r
+      · have hsrMem : s ∈ Ioc (0 : Real) r := ⟨hs.1, hsr.le⟩
+        simp [Set.indicator_of_mem hs, Set.indicator_of_mem hsrMem,
+          heatLapTriangleMajor, hsr]
+      · have hsrMem : s ∉ Ioc (0 : Real) r := fun h =>
+          hsr (lt_of_le_of_ne h.2 hsr0)
+        simp [Set.indicator, hs, hsrMem, heatLapTriangleMajor, hsr]
+    · have hsrMem : s ∉ Ioc (0 : Real) r := by
+        intro h
+        exact hs ⟨h.1, h.2.trans hr.2⟩
+      simp [Set.indicator, hs, hsrMem]
+  rw [hsection, intervalIntegral.integral_const_mul,
+    timeHolderHeatScale_int halpha hr.1]
+
+omit [Nontrivial V] in
+private theorem heatLapTriangleMajor_integrable
+    {alpha K : NNReal} (halpha : 0 < alpha)
+    {t : Real} (ht : 0 < t) :
+    Integrable (heatLapTriangleMajor (V := V) alpha K)
+      ((volume.restrict (Ioc (0 : Real) t)).prod
+        (volume.restrict (Ioc (0 : Real) t))) := by
+  let μ : Measure Real := volume.restrict (Ioc (0 : Real) t)
+  let A : Real :=
+    Module.finrank Real V * ((K : Real) * heatC2Holder (V := V) alpha)
+  have hmeas : AEStronglyMeasurable
+      (heatLapTriangleMajor (V := V) alpha K) (μ.prod μ) := by
+    simpa only [μ] using
+      heatLapTriangleMajor_aestronglyMeasurable (V := V) (alpha := alpha)
+        (K := K) (t := t)
+  rw [integrable_prod_iff hmeas]
+  constructor
+  · filter_upwards [ae_restrict_mem measurableSet_Ioc,
+      hmeas.prodMk_left] with r hr hrmeas
+    have hraw : IntervalIntegrable
+        (fun s : Real => A * holderHeatScale alpha (r - s)) volume 0 r :=
+      (holderHeatScale_intble halpha hr.1).const_mul A
+    have hOn : IntegrableOn
+        (fun s : Real => A * holderHeatScale alpha (r - s))
+        (Ioo (0 : Real) r) volume := by
+      have hIoc : IntegrableOn
+          (fun s : Real => A * holderHeatScale alpha (r - s))
+          (Ioc (0 : Real) r) volume := by
+        simpa only [intervalIntegrable_iff, uIoc_of_le hr.1.le] using hraw
+      exact hIoc.mono_set Ioo_subset_Ioc_self
+    have hglobal := hOn.integrable_indicator measurableSet_Ioo
+    refine (hglobal.mono_measure Measure.restrict_le_self).congr ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
+    by_cases hsr : s < r
+    · have hmem : s ∈ Ioo (0 : Real) r := ⟨hs.1, hsr⟩
+      simp [heatLapTriangleMajor, A, hsr, Set.indicator_of_mem hmem]
+    · have hmem : s ∉ Ioo (0 : Real) r := fun h => hsr h.2
+      simp [heatLapTriangleMajor, A, hsr, hmem]
+  · have hrpowInt : IntervalIntegrable
+        (fun r : Real => r ^ ((alpha : Real) / 2)) volume 0 t :=
+      intervalIntegral.intervalIntegrable_rpow' (by
+        have halphaReal : 0 < (alpha : Real) := by exact_mod_cast halpha
+        linarith)
+    have houter : Integrable
+        (fun r : Real => A * ((2 / (alpha : Real)) *
+          r ^ ((alpha : Real) / 2))) μ := by
+      have hraw := hrpowInt.const_mul (A * (2 / (alpha : Real)))
+      have hIoc : IntegrableOn
+          (fun r : Real => A * ((2 / (alpha : Real)) *
+            r ^ ((alpha : Real) / 2))) (Ioc (0 : Real) t) volume := by
+        simpa only [intervalIntegrable_iff, uIoc_of_le ht.le,
+          mul_assoc] using hraw
+      simpa only [μ] using hIoc
+    refine houter.congr ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr
+    calc
+      A * ((2 / (alpha : Real)) * r ^ ((alpha : Real) / 2)) =
+          ∫ s : Real, heatLapTriangleMajor (V := V) alpha K (r, s) ∂μ := by
+        symm
+        simpa only [μ, A] using
+          integral_heatLapTriangleMajor_right (V := V) halpha hr
+      _ = ∫ s : Real, ‖heatLapTriangleMajor (V := V) alpha K (r, s)‖ ∂μ := by
+        apply integral_congr_ae
+        filter_upwards with s
+        rw [Real.norm_eq_abs,
+          abs_of_nonneg (heatLapTriangleMajor_nonneg (V := V) (r, s))]
+
+private theorem heatLapTriangle_integrable_of_aestronglyMeasurable
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
+    (x : V)
+    (hmeas : AEStronglyMeasurable (heatLapTriangle f x)
+      ((volume.restrict (Ioc (0 : Real) t)).prod
+        (volume.restrict (Ioc (0 : Real) t)))) :
+    Integrable (heatLapTriangle f x)
+      ((volume.restrict (Ioc (0 : Real) t)).prod
+        (volume.restrict (Ioc (0 : Real) t))) := by
+  apply (heatLapTriangleMajor_integrable (V := V) (K := K) halpha0 ht).mono' hmeas
+  rw [Measure.prod_restrict]
+  filter_upwards [ae_restrict_mem (measurableSet_Ioc.prod measurableSet_Ioc)] with z hz
+  by_cases hsr : z.2 < z.1
+  · have hraw := heatLapSup_norm_le_of_holder halpha0 halpha1
+      (sub_pos.mpr hsr) (hf z.2 ⟨hz.2.1.le, hz.2.2⟩) x
+    simpa only [heatLapTriangle, heatLapTriangleMajor, if_pos hsr] using
+      hraw.trans_eq (by ring)
+  · simp [heatLapTriangle, heatLapTriangleMajor, hsr]
+
 omit [Nontrivial V] [CompleteSpace F] in
 private theorem integral_heatLapTriangle_right
     {t r : Real} (hr : r ∈ Ioc (0 : Real) t)
@@ -582,7 +889,7 @@ theorem heatDuhTimeCandidate_continuousAt
     continuousOn_iff_continuous_restrict.mpr hcomp
   exact (hOn t ⟨ht.1, ht.2.le⟩).continuousAt (Ioc_mem_nhds ht.1 ht.2)
 
-theorem heatDuh_time
+theorem heatDuh_time_of_integrable_triangle
     {alpha K Csource : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
     {S t : Real} (ht : t ∈ Ioo (0 : Real) S)
     (f : Real → BoundedContinuousFunction V F)
@@ -655,6 +962,109 @@ theorem heatDuh_time
   filter_upwards [Ioc_mem_nhds ht.1 ht.2] with q hq
   exact heq q hq
 
+theorem heatDuh_time_of_intervalIntegrable
+    {alpha K Csource : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S t : Real} (ht : t ∈ Ioo (0 : Real) S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hf : ∀ r ∈ Icc (0 : Real) S, HolderWith K alpha (f r))
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (hmeas2 : ∀ q ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real => heatSupHessian (q - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) q)))
+    (hftime : ∀ q ∈ Ioc (0 : Real) S, ∀ z : V,
+      IntervalIntegrable (fun s : Real => f s z) volume 0 q)
+    (x : V) :
+    HasDerivAt (fun q : Real => heatDuh q f x)
+      (heatDuhTimeCandidateField (fun r z => f r z)
+        (parabolicPoint t x)) t := by
+  apply heatDuh_time_of_integrable_triangle halpha0 halpha1 ht f hf hsource
+    hmeas2 hftime
+  · intro q hq z
+    exact heatLapTriangle_integrable_of_aestronglyMeasurable
+      halpha0 halpha1.le hq.1 f
+        (fun s hs => hf s ⟨hs.1, hs.2.trans hq.2⟩) z
+        (heatLapTriangle_aestronglyMeasurable_of_holder
+          halpha0 hq.2 f hsource z)
+
+omit [InnerProductSpace Real V] [FiniteDimensional Real V]
+  [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
+  [NormedSpace Real F] [CompleteSpace F] in
+private theorem heatSource_intervalIntegrable_of_holder
+    {alpha Csource : NNReal} (halpha0 : 0 < alpha)
+    {S t : Real} (ht : t ∈ Ioc (0 : Real) S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (x : V) : IntervalIntegrable (fun r : Real => f r x) volume 0 t := by
+  let Q : Set (ParabolicPoint V) :=
+    parabolicCylinder (Ioc (0 : Real) S) Set.univ
+  let phi : Ioc (0 : Real) S → Q := fun q =>
+    ⟨parabolicPoint q.1 x, ⟨q.2, Set.mem_univ x⟩⟩
+  have hphi : Continuous phi := by
+    unfold phi parabolicPoint
+    fun_prop
+  have hcomp : Continuous (fun q : Ioc (0 : Real) S => f q.1 x) := by
+    simpa only [Q, Set.restrict_apply, phi] using
+      (hsource.continuous halpha0).comp hphi
+  have hOn : ContinuousOn (fun r : Real => f r x) (Ioc (0 : Real) S) :=
+    continuousOn_iff_continuous_restrict.mpr hcomp
+  have hmeas : AEStronglyMeasurable (fun r : Real => f r x)
+      (volume.restrict (Ioc (0 : Real) t)) :=
+    (hOn.mono fun r hr => ⟨hr.1, hr.2.trans ht.2⟩).aestronglyMeasurable
+      measurableSet_Ioc
+  have hint : IntegrableOn (fun r : Real => f r x) (Ioc (0 : Real) t) volume := by
+    apply IntegrableOn.of_bound measure_Ioc_lt_top hmeas
+      (‖f t x‖ + (Csource : Real) * t ^ ((alpha : Real) / 2))
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr
+    have hdist := parabolicHolder_time_dist_le hsource
+      (t := r) (s := t) (x := x)
+      ⟨⟨hr.1, hr.2.trans ht.2⟩, Set.mem_univ x⟩
+      ⟨ht, Set.mem_univ x⟩
+    have habs : |r - t| ≤ t := by
+      rw [abs_of_nonpos (sub_nonpos.mpr hr.2)]
+      linarith [hr.1]
+    have hpow : |r - t| ^ ((alpha : Real) / 2) ≤
+        t ^ ((alpha : Real) / 2) :=
+      Real.rpow_le_rpow (abs_nonneg _) habs (by positivity)
+    calc
+      ‖f r x‖ ≤ ‖f t x‖ + ‖f r x - f t x‖ :=
+        norm_le_norm_add_norm_sub' _ _
+      _ = ‖f t x‖ + dist (f r x) (f t x) := by rw [dist_eq_norm]
+      _ ≤ ‖f t x‖ + (Csource : Real) *
+          |r - t| ^ ((alpha : Real) / 2) := by
+        simpa only [parabolicPoint_time, parabolicPoint_space] using
+          add_le_add (le_refl ‖f t x‖) hdist
+      _ ≤ ‖f t x‖ + (Csource : Real) *
+          t ^ ((alpha : Real) / 2) := by
+        exact add_le_add (le_refl ‖f t x‖)
+          (mul_le_mul_of_nonneg_left hpow (NNReal.coe_nonneg Csource))
+  simpa only [intervalIntegrable_iff, uIoc_of_le ht.1.le] using hint
+
+theorem heatDuh_time
+    {alpha K Csource : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S t : Real} (ht : t ∈ Ioo (0 : Real) S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hf : ∀ r ∈ Icc (0 : Real) S, HolderWith K alpha (f r))
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (hmeas2 : ∀ q ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real => heatSupHessian (q - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) q)))
+    (x : V) :
+    HasDerivAt (fun q : Real => heatDuh q f x)
+      (heatDuhTimeCandidateField (fun r z => f r z)
+        (parabolicPoint t x)) t := by
+  apply heatDuh_time_of_intervalIntegrable halpha0 halpha1 ht f hf hsource
+    hmeas2
+  intro q hq z
+  exact heatSource_intervalIntegrable_of_holder halpha0 hq f hsource z
+
 theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
     {alpha K B Csource C0 C1 : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
@@ -680,13 +1090,7 @@ theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
     (hmeas2 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
       AEStronglyMeasurable
         (fun s : Real => heatSupHessian (t - s) (f s) z)
-        (volume.restrict (uIoc (0 : Real) t)))
-    (hftime : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
-      IntervalIntegrable (fun s : Real => f s z) volume 0 t)
-    (htriangle : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
-      Integrable (heatLapTriangle f z)
-        ((volume.restrict (Ioc (0 : Real) t)).prod
-          (volume.restrict (Ioc (0 : Real) t)))) :
+        (volume.restrict (uIoc (0 : Real) t))) :
     eParabolicC2HolderGaugeOn alpha
       (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
       (fun t x => heatDuh t f x) ≤
@@ -704,7 +1108,7 @@ theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
   · intro p hp
     exact heatDuh_time halpha0 halpha1
       ⟨hp.1.1, lt_of_le_of_lt hp.1.2 hTS⟩ f hf hsource
-        hmeas2 hftime htriangle p.space
+        hmeas2 p.space
   · intro t ht z
     exact hmeas0 t ⟨ht.1, ht.2.trans hTS.le⟩ z
   · intro t ht z
