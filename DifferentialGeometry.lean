@@ -1817,6 +1817,7 @@ import DifferentialGeometry.External.DeGiorgi.WholeSpaceSobolev
 import DifferentialGeometry.Geometry.Boundary.BoundaryGramMatrix
 import DifferentialGeometry.Geometry.Boundary.BoundaryManifold
 import DifferentialGeometry.Geometry.Boundary.DefiningFunction
+import DifferentialGeometry.Geometry.Boundary.DefiningFunctionCurve
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Geometry.Boundary.InducedMetric
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
