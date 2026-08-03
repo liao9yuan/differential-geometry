@@ -1400,6 +1400,125 @@ theorem scalar_strong_maximum_principle_fixed_metric_with_drift_positive
     g hT X hC hX u hu_cont hu_nonneg hu_time hu_space hu_super hy0 t ht x
   linarith
 
+private theorem time_dependent_metric_with_drift_strong_maximum_principle_of_barrier
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
+    {rho : M → Real}
+    (hrho : ContMDiff I 𝓘(Real, Real) ∞ rho)
+    (hrho_nonneg : ∀ x : M, 0 ≤ rho x)
+    {r R delta eta : Real}
+    (hR : 0 < R) (hdelta : 0 < delta) (heta : 0 < eta)
+    (hlocal : ∀ t ∈ Set.Icc 0 T, T - delta < t → ∀ x : M,
+      rho x < r → eta ≤ u t x)
+    (hcompact : IsCompact {x : M | r ≤ rho x ∧ rho x ≤ R})
+    (hgrad_ne : ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      r ≤ rho x → rho x ≤ R →
+      gradientFun (I := I) (G.metric t) rho x ≠ 0)
+    (hgrad_cont : ContinuousOn (fun p : Real × M =>
+      (G.metric p.1).inner p.2
+        (gradientFun (I := I) (G.metric p.1) rho p.2)
+        (gradientFun (I := I) (G.metric p.1) rho p.2))
+      (spacetimeSlab (M := M) T))
+    (hheat_cont : ContinuousOn (fun p : Real × M =>
+      heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+      (spacetimeSlab (M := M) T))
+    {y : M} (hy : rho y < R) :
+    0 < u T y := by
+  let K : Set M := {x : M | r ≤ rho x ∧ rho x ≤ R}
+  let S : Set (Real × M) := Set.Icc 0 T ×ˢ K
+  let q : Real × M → Real := fun p => (G.metric p.1).inner p.2
+    (gradientFun (I := I) (G.metric p.1) rho p.2)
+    (gradientFun (I := I) (G.metric p.1) rho p.2)
+  let ell : Real × M → Real := fun p =>
+    |heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2|
+  have hScompact : IsCompact S := isCompact_Icc.prod hcompact
+  have hq_cont : ContinuousOn q S := by
+    exact hgrad_cont.mono (fun p hp => ⟨hp.1, Set.mem_univ p.2⟩)
+  have hell_cont : ContinuousOn ell S := by
+    exact (hheat_cont.abs).mono (fun p hp => ⟨hp.1, Set.mem_univ p.2⟩)
+  obtain ⟨m, B, hm, hB, hgrad_lower, hheat_upper⟩ :
+      ∃ m B : Real, 0 < m ∧ 0 ≤ B ∧
+        (∀ p ∈ S, m ≤ q p) ∧
+        (∀ p ∈ S,
+          heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2 ≤ B) := by
+    by_cases hKne : K.Nonempty
+    · have hSne : S.Nonempty := by
+        obtain ⟨x, hx⟩ := hKne
+        exact ⟨(0, x), ⟨⟨le_rfl, hT.le⟩, hx⟩⟩
+      obtain ⟨pm, hpm, hpmin⟩ := hScompact.exists_isMinOn hSne hq_cont
+      obtain ⟨pB, hpB, hpBmax⟩ := hScompact.exists_isMaxOn hSne hell_cont
+      have hqm : 0 < q pm := by
+        exact (G.metric pm.1).pos pm.2 _
+          (hgrad_ne pm.1 hpm.1 pm.2 hpm.2.1 hpm.2.2)
+      refine ⟨q pm, ell pB, hqm, by positivity, hpmin, ?_⟩
+      intro p hp
+      have habs := hpBmax hp
+      have hself := le_abs_self
+        (heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+      change |heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2| ≤
+        ell pB at habs
+      exact hself.trans habs
+    · refine ⟨1, 0, by positivity, le_rfl, ?_, ?_⟩
+      · intro p hp
+        exact (hKne ⟨p.2, hp.2⟩).elim
+      · intro p hp
+        exact (hKne ⟨p.2, hp.2⟩).elim
+  let kappa : Real := max (R / T ^ 2) (R / delta ^ 2) + 1
+  have hT_sq : 0 < T ^ 2 := sq_pos_of_pos hT
+  have hdelta_sq : 0 < delta ^ 2 := sq_pos_of_pos hdelta
+  have hkappa : 0 < kappa := by
+    dsimp [kappa]
+    linarith [le_max_left (R / T ^ 2) (R / delta ^ 2), div_pos hR hT_sq]
+  have hinit : R ≤ kappa * T ^ 2 := by
+    apply le_of_lt ((div_lt_iff₀ hT_sq).mp ?_)
+    dsimp [kappa]
+    linarith [le_max_left (R / T ^ 2) (R / delta ^ 2)]
+  have htime : R ≤ kappa * delta ^ 2 := by
+    apply le_of_lt ((div_lt_iff₀ hdelta_sq).mp ?_)
+    dsimp [kappa]
+    linarith [le_max_right (R / T ^ 2) (R / delta ^ 2)]
+  let alpha : Real := (2 * kappa * T + B) / m + 1
+  have hnum : 0 ≤ 2 * kappa * T + B := by positivity
+  have halpha : 0 < alpha := by
+    dsimp [alpha]
+    have := div_nonneg hnum hm.le
+    linarith
+  have hdom : 2 * kappa * T + B ≤ alpha * m := by
+    apply le_of_lt ((div_lt_iff₀ hm).mp ?_)
+    dsimp [alpha]
+    linarith
+  apply scalar_strong_maximum_principle_of_barrier (I := I)
+    G hT X u hu_cont hu_nonneg hu_time hu_mdiff hu_grad hu_super hrho
+    hrho_nonneg hR hdelta heta hlocal (m := m) (B := B)
+    (kappa := kappa) (alpha := alpha)
+  · intro t ht htpos x hxr hxR
+    exact hgrad_lower (t, x) ⟨ht, hxr, hxR⟩
+  · intro t ht htpos x hxr hxR
+    exact hheat_upper (t, x) ⟨ht, hxr, hxR⟩
+  · exact hkappa
+  · exact hinit
+  · exact htime
+  · exact halpha
+  · exact hdom
+  · exact hy
+
 private theorem time_dependent_metric_strong_maximum_principle_of_barrier
     [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
     [T2Space M] [CompactSpace M]
@@ -1515,12 +1634,13 @@ private theorem time_dependent_metric_strong_maximum_principle_of_barrier
   · exact hdom
   · exact hy
 
-theorem scalar_strong_maximum_principle_time_dependent_metric_spatial
+theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial
     [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
     [T2Space M] [CompactSpace M] [ConnectedSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
     (hgrad_cont : ∀ (rho : M → Real),
       ContMDiff I 𝓘(Real, Real) ∞ rho →
       ContinuousOn (fun p : Real × M =>
@@ -1528,10 +1648,10 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_spatial
           (gradientFun (I := I) (G.metric p.1) rho p.2)
           (gradientFun (I := I) (G.metric p.1) rho p.2))
         (spacetimeSlab (M := M) T))
-    (hlaplacian_cont : ∀ (rho : M → Real),
+    (hheat_cont : ∀ (rho : M → Real),
       ContMDiff I 𝓘(Real, Real) ∞ rho →
       ContinuousOn (fun p : Real × M =>
-        laplacianAt (I := I) G p.1 rho p.2)
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
         (spacetimeSlab (M := M) T))
     (u : Real → M → Real)
     (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
@@ -1545,8 +1665,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_spatial
       MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (u t) y) x)
     (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
-      0 ≤ derivWithin (fun s => u s x) (Set.Icc 0 T) t -
-        laplacianAt (I := I) G t (u t) x)
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
     {c : M} (hc : 0 < u T c) (y : M) :
     0 < u T y := by
   let P : Set M := {x | 0 < u T x}
@@ -1677,22 +1796,76 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_spatial
         rho x < r → eta ≤ u t x := by
       intro t ht htnear x hxr
       exact hlocal t ht htnear x (hrV hxr)
-    have hpos := time_dependent_metric_strong_maximum_principle_of_barrier (I := I)
-      G hT u hu_cont hu_nonneg hu_time hu_mdiff hu_grad hu_super hrho
+    have hpos :=
+      time_dependent_metric_with_drift_strong_maximum_principle_of_barrier (I := I)
+      G hT X u hu_cont hu_nonneg hu_time hu_mdiff hu_grad hu_super hrho
       hrho_nonneg hR hdelta heta hlocal' hcompact hgrad
-      (hgrad_cont rho hrho) (hlaplacian_cont rho hrho) hrhoaR
+      (hgrad_cont rho hrho) (hheat_cont rho hrho) hrhoaR
     exact (haP hpos).elim
   have hPuniv : P = Set.univ :=
     IsClopen.eq_univ ⟨hPclosed, hPopen⟩ ⟨c, hc⟩
   have hyP : y ∈ P := by rw [hPuniv]; exact Set.mem_univ y
   exact hyP
 
-private theorem time_dependent_metric_lower_bound_from_positive_time
+theorem scalar_strong_maximum_principle_time_dependent_metric_spatial
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (hgrad_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) T))
+    (hlaplacian_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        laplacianAt (I := I) G p.1 rho p.2)
+        (spacetimeSlab (M := M) T))
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ derivWithin (fun s => u s x) (Set.Icc 0 T) t -
+        laplacianAt (I := I) G t (u t) x)
+    {c : M} (hc : 0 < u T c) (y : M) :
+    0 < u T y := by
+  let X : Real → (x : M) → TangentSpace I x := fun _ x => 0
+  have hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T) := by
+    intro rho hrho
+    simpa [heatOperatorWithDrift, driftTerm, gradientAt, X] using
+      hlaplacian_cont rho hrho
+  have hu_super' : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x := by
+    intro t ht htpos x
+    simpa [parabolicOperatorWithDrift, heatOperatorWithDrift, driftTerm,
+      gradientAt, X] using hu_super t ht htpos x
+  exact scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial
+    (I := I) G hT X hgrad_cont hheat_cont u hu_cont hu_nonneg
+      hu_time hu_mdiff hu_grad hu_super' hc y
+
+private theorem time_dependent_metric_with_drift_lower_bound_from_positive_time
     [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
     [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T a m : Real} (ha : 0 < a) (haT : a ≤ T)
+    (X : Real → (x : M) → TangentSpace I x)
     (u : Real → M → Real)
     (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
       (spacetimeSlab (M := M) T))
@@ -1704,8 +1877,7 @@ private theorem time_dependent_metric_lower_bound_from_positive_time
       MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (u t) y) x)
     (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
-      0 ≤ derivWithin (fun s => u s x) (Set.Icc 0 T) t -
-        laplacianAt (I := I) G t (u t) x)
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
     (hinit : ∀ x : M, m ≤ u a x) :
     ∀ t ∈ Set.Icc a T, ∀ x : M, m ≤ u t x := by
   let S : Real := T - a
@@ -1713,7 +1885,7 @@ private theorem time_dependent_metric_lower_bound_from_positive_time
   let v : Real → M → Real := fun s x => u (a + s) x - m
   let G' : RealizedMetricFamily (I := I) (M := M) Real :=
     shiftedStrongMetricFamily G a
-  let X : Real → (x : M) → TangentSpace I x := fun _ x => 0
+  let X' : Real → (x : M) → TangentSpace I x := fun s x => X (a + s) x
   have hshift : a +ᵥ Set.Icc (0 : Real) S = Set.Icc a T := by
     dsimp [S]
     exact vadd_Icc_eq_Icc (a := a) (T := T)
@@ -1782,7 +1954,7 @@ private theorem time_dependent_metric_lower_bound_from_positive_time
       simpa using congrFun heq y]
     exact hu_grad (a + s) hq hqpos x
   have hv_super : ∀ s ∈ Set.Icc 0 S, 0 < s → ∀ x : M,
-      0 ≤ parabolicOperatorWithDrift (I := I) G' S X v s x := by
+      0 ≤ parabolicOperatorWithDrift (I := I) G' S X' v s x := by
     intro s hs hspos x
     have hq : a + s ∈ Set.Icc (0 : Real) T := by
       apply hsub
@@ -1807,15 +1979,16 @@ private theorem time_dependent_metric_lower_bound_from_positive_time
       rw [derivWithin_sub_const]
       exact hderiv_shift.trans hderiv_subset
     have hheat := heatOperatorWithDrift_sub_const (I := I) G' s
-      (X s) m (fun y => hu_mdiff (a + s) hq hqpos y) x
+      (X' s) m (fun y => hu_mdiff (a + s) hq hqpos y) x
     unfold parabolicOperatorWithDrift
     rw [hderiv]
-    rw [show heatOperatorWithDrift (I := I) G' s (X s) (v s) x =
-        heatOperatorWithDrift (I := I) G' s (X s) (u (a + s)) x by
+    rw [show heatOperatorWithDrift (I := I) G' s (X' s) (v s) x =
+        heatOperatorWithDrift (I := I) G' s (X' s) (u (a + s)) x by
       simpa [v] using hheat]
-    simpa [G', X, shiftedStrongMetricFamily, heatOperatorWithDrift, driftTerm,
-      gradientAt] using hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_posReg (I := I) G' S hS X v
+    simpa [G', X', shiftedStrongMetricFamily, heatOperatorWithDrift, driftTerm,
+      gradientAt, parabolicOperatorWithDrift] using
+        hu_super (a + s) hq hqpos x
+  have hv_nonneg := strict_barrier_posReg (I := I) G' S hS X' v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -1824,6 +1997,116 @@ private theorem time_dependent_metric_lower_bound_from_positive_time
     constructor <;> linarith [ht.1, ht.2]
   have hv := hv_nonneg (t - a) hs x
   simpa [v] using hv
+
+private theorem time_dependent_metric_lower_bound_from_positive_time
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T a m : Real} (ha : 0 < a) (haT : a ≤ T)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ derivWithin (fun s => u s x) (Set.Icc 0 T) t -
+        laplacianAt (I := I) G t (u t) x)
+    (hinit : ∀ x : M, m ≤ u a x) :
+    ∀ t ∈ Set.Icc a T, ∀ x : M, m ≤ u t x := by
+  let X : Real → (x : M) → TangentSpace I x := fun _ x => 0
+  have hu_super' : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x := by
+    intro t ht htpos x
+    simpa [parabolicOperatorWithDrift, heatOperatorWithDrift, driftTerm,
+      gradientAt, X] using hu_super t ht htpos x
+  exact time_dependent_metric_with_drift_lower_bound_from_positive_time
+    (I := I) G ha haT X u hu_cont hu_time hu_mdiff hu_grad hu_super' hinit
+
+private theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial_at
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T t : Real} (ht : 0 < t) (htT : t ≤ T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (hgrad_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) T))
+    (hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T))
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ s ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u s x)
+    (hu_time : ∀ s ∈ Set.Icc 0 T, 0 < s → ∀ x : M,
+      DifferentiableWithinAt Real (fun q => u q x) (Set.Icc 0 T) s)
+    (hu_mdiff : ∀ s ∈ Set.Icc 0 T, 0 < s → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u s) x)
+    (hu_grad : ∀ s ∈ Set.Icc 0 T, 0 < s → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric s) (u s) y) x)
+    (hu_super : ∀ s ∈ Set.Icc 0 T, 0 < s → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u s x)
+    {c : M} (hc : 0 < u t c) (y : M) :
+    0 < u t y := by
+  have hsub : Set.Icc (0 : Real) t ⊆ Set.Icc 0 T := by
+    intro s hs
+    exact ⟨hs.1, hs.2.trans htT⟩
+  have hgrad_cont' : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) t) := by
+    intro rho hrho
+    exact (hgrad_cont rho hrho).mono fun p hp => ⟨hsub hp.1, hp.2⟩
+  have hheat_cont' : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) t) := by
+    intro rho hrho
+    exact (hheat_cont rho hrho).mono fun p hp => ⟨hsub hp.1, hp.2⟩
+  have hu_time' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
+      DifferentiableWithinAt Real (fun q => u q x) (Set.Icc 0 t) s := by
+    intro s hs hspos x
+    exact (hu_time s (hsub hs) hspos x).mono hsub
+  have hu_mdiff' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u s) x := by
+    intro s hs hspos x
+    exact hu_mdiff s (hsub hs) hspos x
+  have hu_grad' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric s) (u s) y) x := by
+    intro s hs hspos x
+    exact hu_grad s (hsub hs) hspos x
+  have hu_super' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G t X u s x := by
+    intro s hs hspos x
+    have hderiv := derivWithin_subset hsub
+      ((uniqueDiffOn_Icc ht).uniqueDiffWithinAt hs)
+      (hu_time s (hsub hs) hspos x)
+    rw [parabolicOperatorWithDrift_eq, hderiv]
+    exact hu_super s (hsub hs) hspos x
+  exact scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial
+    (I := I) G ht X hgrad_cont' hheat_cont' u
+    (hu_cont.mono fun p hp => ⟨hsub hp.1, hp.2⟩)
+    (fun s hs x => hu_nonneg s (hsub hs) x) hu_time' hu_mdiff'
+    hu_grad' hu_super' hc y
 
 private theorem scalar_strong_maximum_principle_time_dependent_metric_spatial_at
     [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
@@ -1859,52 +2142,138 @@ private theorem scalar_strong_maximum_principle_time_dependent_metric_spatial_at
         laplacianAt (I := I) G s (u s) x)
     {c : M} (hc : 0 < u t c) (y : M) :
     0 < u t y := by
-  have hsub : Set.Icc (0 : Real) t ⊆ Set.Icc 0 T := by
-    intro s hs
-    exact ⟨hs.1, hs.2.trans htT⟩
-  have hgrad_cont' : ∀ (rho : M → Real),
+  let X : Real → (x : M) → TangentSpace I x := fun _ x => 0
+  have hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T) := by
+    intro rho hrho
+    simpa [heatOperatorWithDrift, driftTerm, gradientAt, X] using
+      hlaplacian_cont rho hrho
+  have hu_super' : ∀ s ∈ Set.Icc 0 T, 0 < s → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u s x := by
+    intro s hs hspos x
+    simpa [parabolicOperatorWithDrift, heatOperatorWithDrift, driftTerm,
+      gradientAt, X] using hu_super s hs hspos x
+  exact
+    scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial_at
+      (I := I) G ht htT X hgrad_cont hheat_cont u hu_cont hu_nonneg
+        hu_time hu_mdiff hu_grad hu_super' hc y
+
+theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (hgrad_cont : ∀ (rho : M → Real),
       ContMDiff I 𝓘(Real, Real) ∞ rho →
       ContinuousOn (fun p : Real × M =>
         (G.metric p.1).inner p.2
           (gradientFun (I := I) (G.metric p.1) rho p.2)
           (gradientFun (I := I) (G.metric p.1) rho p.2))
-        (spacetimeSlab (M := M) t) := by
-    intro rho hrho
-    exact (hgrad_cont rho hrho).mono fun p hp => ⟨hsub hp.1, hp.2⟩
-  have hlaplacian_cont' : ∀ (rho : M → Real),
+        (spacetimeSlab (M := M) T))
+    (hheat_cont : ∀ (rho : M → Real),
       ContMDiff I 𝓘(Real, Real) ∞ rho →
       ContinuousOn (fun p : Real × M =>
-        laplacianAt (I := I) G p.1 rho p.2)
-        (spacetimeSlab (M := M) t) := by
-    intro rho hrho
-    exact (hlaplacian_cont rho hrho).mono fun p hp => ⟨hsub hp.1, hp.2⟩
-  have hu_time' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
-      DifferentiableWithinAt Real (fun q => u q x) (Set.Icc 0 t) s := by
-    intro s hs hspos x
-    exact (hu_time s (hsub hs) hspos x).mono hsub
-  have hu_mdiff' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
-      MDifferentiableAt I 𝓘(Real, Real) (u s) x := by
-    intro s hs hspos x
-    exact hu_mdiff s (hsub hs) hspos x
-  have hu_grad' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T))
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
       MDiffAt (T% fun y : M =>
-        gradientFun (I := I) (G.metric s) (u s) y) x := by
-    intro s hs hspos x
-    exact hu_grad s (hsub hs) hspos x
-  have hu_super' : ∀ s ∈ Set.Icc 0 t, 0 < s → ∀ x : M,
-      0 ≤ derivWithin (fun q => u q x) (Set.Icc 0 t) s -
-        laplacianAt (I := I) G s (u s) x := by
-    intro s hs hspos x
-    have hderiv := derivWithin_subset hsub
-      ((uniqueDiffOn_Icc ht).uniqueDiffWithinAt hs)
-      (hu_time s (hsub hs) hspos x)
-    rw [hderiv]
-    exact hu_super s (hsub hs) hspos x
-  exact scalar_strong_maximum_principle_time_dependent_metric_spatial (I := I)
-    G ht hgrad_cont' hlaplacian_cont' u
-    (hu_cont.mono fun p hp => ⟨hsub hp.1, hp.2⟩)
-    (fun s hs x => hu_nonneg s (hsub hs) x) hu_time' hu_mdiff'
-    hu_grad' hu_super' hc y
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
+    {y : M} (hy : u T y = 0) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M, u t x = 0 := by
+  intro t ht x
+  apply le_antisymm (le_of_not_gt ?_) (hu_nonneg t ht x)
+  intro htx
+  obtain ⟨a, ha, haT, c, hc⟩ :
+      ∃ a : Real, 0 < a ∧ a ≤ T ∧ ∃ c : M, 0 < u a c := by
+    by_cases ht0 : t = 0
+    · subst t
+      obtain ⟨a, haI, haPos⟩ :=
+        exists_positive_time_of_initial_value (M := M) hT u hu_cont htx
+      exact ⟨a, haI.1, haI.2, x, haPos⟩
+    · exact ⟨t, lt_of_le_of_ne ht.1 (Ne.symm ht0), ht.2, x, htx⟩
+  have hslice : ∀ z : M, 0 < u a z := by
+    intro z
+    exact
+      scalar_strong_maximum_principle_time_dependent_metric_with_drift_spatial_at
+        (I := I) G ha haT X hgrad_cont hheat_cont u hu_cont hu_nonneg
+          hu_time hu_mdiff hu_grad hu_super hc z
+  have hua_cont : Continuous (u a) := by
+    rw [continuous_iff_continuousAt]
+    intro z
+    exact (hu_mdiff a ⟨ha.le, haT⟩ ha z).continuousAt
+  obtain ⟨xm, _, hxmin⟩ :=
+    (isCompact_univ : IsCompact (Set.univ : Set M)).exists_isMinOn
+      Set.univ_nonempty hua_cont.continuousOn
+  let m : Real := u a xm
+  have hm : 0 < m := hslice xm
+  have hinit : ∀ z : M, m ≤ u a z := by
+    intro z
+    exact hxmin (Set.mem_univ z)
+  have hlower :=
+    time_dependent_metric_with_drift_lower_bound_from_positive_time (I := I)
+      G ha haT X u hu_cont hu_time hu_mdiff hu_grad hu_super hinit
+      T ⟨haT, le_rfl⟩ y
+  rw [hy] at hlower
+  exact (not_lt_of_ge hlower hm).elim
+
+theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_positive
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (hgrad_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) T))
+    (hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T))
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
+    {t : Real} (ht : t ∈ Set.Icc 0 T) {x : M} (hx : 0 < u t x)
+    (y : M) :
+    0 < u T y := by
+  by_contra hy
+  have hy0 : u T y = 0 := le_antisymm (le_of_not_gt hy)
+    (hu_nonneg T ⟨hT.le, le_rfl⟩ y)
+  have hpast :=
+    scalar_strong_maximum_principle_time_dependent_metric_with_drift (I := I)
+      G hT X hgrad_cont hheat_cont u hu_cont hu_nonneg hu_time
+        hu_mdiff hu_grad hu_super hy0 t ht x
+  linarith
 
 theorem scalar_strong_maximum_principle_time_dependent_metric
     [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
@@ -2204,6 +2573,143 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_potential_pos
     scalar_strong_maximum_principle_time_dependent_metric_with_potential (I := I)
       G hT hgrad_cont hlaplacian_cont V L u hu_cont hu_nonneg hu_time
       hu_mdiff hu_grad hu_super hV hy0 t ht x
+  linarith
+
+theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_and_potential
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (hgrad_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) T))
+    (hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T))
+    (V : Real → M → Real) (L : Real)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x -
+        V t x * u t x)
+    (hV : ∀ t ∈ Set.Icc 0 T, ∀ x : M, L ≤ V t x)
+    {y : M} (hy : u T y = 0) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M, u t x = 0 := by
+  let z : Real → M → Real := fun t x => Real.exp (-L * t) * u t x
+  have hz_cont : ContinuousOn (fun p : Real × M => z p.1 p.2)
+      (spacetimeSlab (M := M) T) := by
+    exact (by fun_prop : Continuous
+      (fun p : Real × M => Real.exp (-L * p.1))).continuousOn.mul hu_cont
+  have hz_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ z t x := by
+    intro t ht x
+    exact mul_nonneg (Real.exp_pos _).le (hu_nonneg t ht x)
+  have hz_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => z s x) (Set.Icc 0 T) t := by
+    intro t ht htpos x
+    have hscale : DifferentiableWithinAt Real
+        (fun s => Real.exp (-L * s)) (Set.Icc 0 T) t := by
+      fun_prop
+    exact hscale.mul (hu_time t ht htpos x)
+  have hz_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (z t) x := by
+    intro t ht htpos x
+    exact (hu_mdiff t ht htpos x).const_smul (Real.exp (-L * t))
+  have hz_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (z t) y) x := by
+    intro t ht htpos x
+    have heq :
+        (T% fun y : M => gradientFun (I := I) (G.metric t) (z t) y) =
+          (T% fun y : M => Real.exp (-L * t) •
+            gradientFun (I := I) (G.metric t) (u t) y) := by
+      funext y
+      apply congrArg (fun q =>
+        (⟨y, q⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+      change gradientFun (I := I) (G.metric t)
+        (Real.exp (-L * t) • u t) y = _
+      exact gradientFun_const_smul (I := I) (G.metric t)
+        (Real.exp (-L * t)) (hu_mdiff t ht htpos y)
+    rw [heq]
+    exact mdifferentiableAt_const.smul_section (hu_grad t ht htpos x)
+  have hz_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X z t x := by
+    intro t ht htpos x
+    simpa only [z] using parabolic_exp_rescale_nonneg_of_potential (I := I)
+      G T hT L X V u t ht (hu_mdiff t ht htpos) x
+        (hu_grad t ht htpos x) (hu_time t ht htpos x)
+        (hu_nonneg t ht x) (hV t ht x) (hu_super t ht htpos x)
+  have hzy : z T y = 0 := by simp [z, hy]
+  have hzzero :=
+    scalar_strong_maximum_principle_time_dependent_metric_with_drift (I := I)
+      G hT X hgrad_cont hheat_cont z hz_cont hz_nonneg hz_time
+        hz_mdiff hz_grad hz_super hzy
+  intro t ht x
+  have hz := hzzero t ht x
+  change Real.exp (-L * t) * u t x = 0 at hz
+  exact (mul_eq_zero.mp hz).resolve_left (Real.exp_ne_zero _)
+
+theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_and_potential_positive
+    [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M]
+    [T2Space M] [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (hgrad_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) T))
+    (hheat_cont : ∀ (rho : M → Real),
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M =>
+        heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+        (spacetimeSlab (M := M) T))
+    (V : Real → M → Real) (L : Real)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x -
+        V t x * u t x)
+    (hV : ∀ t ∈ Set.Icc 0 T, ∀ x : M, L ≤ V t x)
+    {t : Real} (ht : t ∈ Set.Icc 0 T) {x : M} (hx : 0 < u t x)
+    (y : M) :
+    0 < u T y := by
+  by_contra hy
+  have hy0 : u T y = 0 := le_antisymm (le_of_not_gt hy)
+    (hu_nonneg T ⟨hT.le, le_rfl⟩ y)
+  have hpast :=
+    scalar_strong_maximum_principle_time_dependent_metric_with_drift_and_potential
+      (I := I) G hT X hgrad_cont hheat_cont V L u hu_cont hu_nonneg
+        hu_time hu_mdiff hu_grad hu_super hV hy0 t ht x
   linarith
 
 theorem scalar_strong_maximum_principle_fixed_metric_spatial

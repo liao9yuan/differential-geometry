@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
+import DifferentialGeometry.Geometry.Curvature.Realized.Operators
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
@@ -482,6 +483,25 @@ theorem laplacianAt_continuousOn [I.Boundaryless] [T2Space M]
   intro p hp
   simp only [RealizedMetricFamily.restrict_metric]
   rw [laplacianAt_eq, hconn p.1 hp.1]
+
+omit [CompleteSpace E] in
+theorem heatOperatorWithDrift_continuousOn [I.Boundaryless] [T2Space M]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {D : RealTimeInterval}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    {J : Set Real} (hJreg : J ⊆ D.regular) (hJ : UniqueDiffOn Real J)
+    (hconn : ∀ t ∈ J,
+      G.connection t = LeviCivita (I := I) (G.metric t))
+    (X : Real → (x : M) → TangentSpace I x)
+    {ρ : M → Real} (hρ : ContMDiff I 𝓘(Real, Real) ∞ ρ)
+    (hdrift : ContinuousOn (fun p : Real × M =>
+      driftTerm (I := I) G p.1 (X p.1) ρ p.2)
+      (J ×ˢ (Set.univ : Set M))) :
+    ContinuousOn (fun p : Real × M =>
+      heatOperatorWithDrift (I := I) G p.1 (X p.1) ρ p.2)
+      (J ×ˢ (Set.univ : Set M)) := by
+  simpa only [heatOperatorWithDrift] using
+    (G.laplacianAt_continuousOn hG hJreg hJ hconn hρ).add hdrift
 
 end RealizedMetricFamily
 
