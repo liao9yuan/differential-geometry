@@ -1,4 +1,4 @@
-import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.MetricSpace.HolderNorm
 import Mathlib.Topology.MetricSpace.Snowflaking
@@ -31,8 +31,32 @@ theorem holderWith_zero_of_norm_le
         ENNReal.ofReal_mul (by positivity : (0 : Real) ≤ 2),
         ENNReal.ofReal_ofNat, ENNReal.ofReal_coe_nnreal]
 
+theorem holderWith_sub
+    {Y G : Type*} [PseudoMetricSpace Y] [NormedAddCommGroup G]
+    {alpha C D : NNReal} {f g : Y → G}
+    (hf : HolderWith C alpha f) (hg : HolderWith D alpha g) :
+    HolderWith (C + D) alpha (f - g) := by
+  have hneg : HolderWith D alpha (-g) := by
+    intro x y
+    simpa only [Pi.neg_apply, edist_neg_neg] using hg x y
+  simpa only [Pi.add_apply, Pi.sub_apply, sub_eq_add_neg] using hf.add hneg
+
 def eSupNormOn (s : Set X) (f : X → F) : ENNReal :=
   ⨆ x : s, ENNReal.ofReal ‖f x‖
+
+omit [MetricSpace X] in
+theorem eSupNormOn_sub_le (s : Set X) (f g : X → F) :
+    eSupNormOn s (f - g) ≤ eSupNormOn s f + eSupNormOn s g := by
+  apply iSup_le
+  intro x
+  calc
+    ENNReal.ofReal ‖f x - g x‖ ≤ ENNReal.ofReal (‖f x‖ + ‖g x‖) :=
+      ENNReal.ofReal_le_ofReal (norm_sub_le (f x) (g x))
+    _ = ENNReal.ofReal ‖f x‖ + ENNReal.ofReal ‖g x‖ := by
+      rw [ENNReal.ofReal_add (norm_nonneg _) (norm_nonneg _)]
+    _ ≤ eSupNormOn s f + eSupNormOn s g := by
+      exact add_le_add (le_iSup (fun y : s ↦ ENNReal.ofReal ‖f y‖) x)
+        (le_iSup (fun y : s ↦ ENNReal.ofReal ‖g y‖) x)
 
 omit [MetricSpace X] in
 theorem norm_le_eSupNormOn (s : Set X) (f : X → F) (x : X) (hx : x ∈ s) :
@@ -135,6 +159,56 @@ theorem continuousMultilinearMap_norm_le_sum_stdOrthonormalBasis
       intro β _
       ring
 
+theorem continuousLinearMap_norm_le_sum_stdOrthonormalBasis
+    {V G : Type*} [NormedAddCommGroup V] [InnerProductSpace Real V]
+    [FiniteDimensional Real V] [NormedAddCommGroup G] [NormedSpace Real G]
+    (A : V →L[Real] G) :
+    ‖A‖ ≤ ∑ i : Fin (Module.finrank Real V),
+      ‖A ((stdOrthonormalBasis Real V) i)‖ := by
+  classical
+  let b := stdOrthonormalBasis Real V
+  let C : Real := ∑ i : Fin (Module.finrank Real V), ‖A (b i)‖
+  have hC : 0 ≤ C := Finset.sum_nonneg fun _ _ ↦ norm_nonneg _
+  refine ContinuousLinearMap.opNorm_le_bound (𝕜 := Real) (𝕜₂ := Real) A hC ?_
+  intro v
+  calc
+    ‖A v‖ = ‖A (∑ i, b.repr v i • b i)‖ := by
+      rw [b.sum_repr]
+    _ = ‖∑ i, A (b.repr v i • b i)‖ := by rw [map_sum]
+    _ ≤ ∑ i, ‖A (b.repr v i • b i)‖ := norm_sum_le _ _
+    _ = ∑ i, |b.repr v i| * ‖A (b i)‖ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [map_smul, norm_smul, Real.norm_eq_abs]
+    _ ≤ ∑ i, ‖v‖ * ‖A (b i)‖ := by
+      gcongr with i
+      exact orthonormal_repr_abs_le_norm b v i
+    _ = C * ‖v‖ := by
+      unfold C
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro i _
+      ring
+
+theorem continuousLinearMap_two_norm_le_sum_stdOrthonormalBasis
+    {V G : Type*} [NormedAddCommGroup V] [InnerProductSpace Real V]
+    [FiniteDimensional Real V] [NormedAddCommGroup G] [NormedSpace Real G]
+    (A : V →L[Real] V →L[Real] G) :
+    ‖A‖ ≤ ∑ i, ∑ j : Fin (Module.finrank Real V),
+      ‖A ((stdOrthonormalBasis Real V) i)
+        ((stdOrthonormalBasis Real V) j)‖ := by
+  calc
+    ‖A‖ ≤ ∑ i : Fin (Module.finrank Real V),
+        ‖A ((stdOrthonormalBasis Real V) i)‖ :=
+      continuousLinearMap_norm_le_sum_stdOrthonormalBasis A
+    _ ≤ ∑ i : Fin (Module.finrank Real V),
+        ∑ j : Fin (Module.finrank Real V),
+          ‖A ((stdOrthonormalBasis Real V) i)
+            ((stdOrthonormalBasis Real V) j)‖ := by
+      gcongr with i
+      exact continuousLinearMap_norm_le_sum_stdOrthonormalBasis
+        (A ((stdOrthonormalBasis Real V) i))
+
 theorem holderWith_continuousMultilinearMap_of_stdOrthonormalBasis
     {X V G : Type*} [PseudoMetricSpace X]
     [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
@@ -176,15 +250,119 @@ theorem holderWith_continuousMultilinearMap_of_stdOrthonormalBasis
         ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
       rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
 
+theorem holderWith_continuousLinearMap_two_of_stdOrthonormalBasis
+    {X V G : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup G] [NormedSpace Real G]
+    {alpha : NNReal}
+    (A : X → V →L[Real] V →L[Real] G)
+    (C : Fin (Module.finrank Real V) → Fin (Module.finrank Real V) → NNReal)
+    (h : ∀ i j, HolderWith (C i j) alpha
+      (fun x ↦ A x ((stdOrthonormalBasis Real V) i)
+        ((stdOrthonormalBasis Real V) j))) :
+    HolderWith (∑ i, ∑ j, C i j) alpha A := by
+  intro x y
+  have hreal : dist (A x) (A y) ≤
+      ((∑ i, ∑ j, C i j : NNReal) : Real) *
+        dist x y ^ (alpha : Real) := by
+    rw [dist_eq_norm (A x) (A y)]
+    calc
+      ‖A x - A y‖ ≤
+          ∑ i, ∑ j : Fin (Module.finrank Real V),
+            ‖(A x - A y) ((stdOrthonormalBasis Real V) i)
+              ((stdOrthonormalBasis Real V) j)‖ :=
+        continuousLinearMap_two_norm_le_sum_stdOrthonormalBasis (A x - A y)
+      _ ≤ ∑ i, ∑ j : Fin (Module.finrank Real V),
+          (C i j : Real) * dist x y ^ (alpha : Real) := by
+        apply Finset.sum_le_sum
+        intro i hi
+        apply Finset.sum_le_sum
+        intro j hj
+        simpa only [ContinuousLinearMap.sub_apply, dist_eq_norm] using
+          (h i j).dist_le x y
+      _ = ((∑ i, ∑ j, C i j : NNReal) : Real) *
+          dist x y ^ (alpha : Real) := by
+        push_cast
+        simp only [Finset.sum_mul]
+  rw [edist_dist, edist_dist]
+  calc
+    ENNReal.ofReal (dist (A x) (A y)) ≤
+        ENNReal.ofReal (((∑ i, ∑ j, C i j : NNReal) : Real) *
+          dist x y ^ (alpha : Real)) := ENNReal.ofReal_le_ofReal hreal
+    _ = ((∑ i, ∑ j, C i j : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y ^ (alpha : Real)) := by
+      rw [ENNReal.ofReal_mul (by positivity :
+        (0 : Real) ≤ (∑ i, ∑ j, C i j : NNReal))]
+      congr 1
+      exact ENNReal.ofReal_coe_nnreal
+    _ = ((∑ i, ∑ j, C i j : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
+      rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
+
 section Spatial
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
   [NormedSpace Real F]
 
+omit [NormedSpace Real V] in
+theorem eHolderSeminormOn_sub_le
+    (alpha : NNReal) (s : Set V) (f g : V → F) :
+    eHolderSeminormOn alpha s (f - g) ≤
+      eHolderSeminormOn alpha s f + eHolderSeminormOn alpha s g := by
+  have hrestrict : s.restrict (f - g) = s.restrict f - s.restrict g := by
+    rfl
+  have hneg : eHolderNorm alpha (-s.restrict g) =
+      eHolderNorm alpha (s.restrict g) := by
+    have hfun : -s.restrict g = (-1 : Real) • s.restrict g := by
+      ext x
+      simp
+    rw [hfun, eHolderNorm_smul]
+    simp
+  unfold eHolderSeminormOn
+  rw [hrestrict, sub_eq_add_neg]
+  exact eHolderNorm_add_le.trans_eq
+    (congrArg (eHolderNorm alpha (s.restrict f) + ·) hneg)
+
 def eContDiffHolderGaugeOn (k : Nat) (alpha : NNReal)
     (s : Set V) (f : V → F) : ENNReal :=
   (∑ j ∈ Finset.range (k + 1), eSupNormOn s (iteratedFDeriv Real j f)) +
     eHolderSeminormOn alpha s (iteratedFDeriv Real k f)
+
+theorem eContDiffHolderGaugeOn_sub_le
+    (k : Nat) (alpha : NNReal) (s : Set V) (f g : V → F)
+    (hf : ContDiff Real k f) (hg : ContDiff Real k g) :
+    eContDiffHolderGaugeOn k alpha s (f - g) ≤
+      eContDiffHolderGaugeOn k alpha s f +
+        eContDiffHolderGaugeOn k alpha s g := by
+  have hjet : ∀ j ≤ k,
+      iteratedFDeriv Real j (f - g) =
+        iteratedFDeriv Real j f - iteratedFDeriv Real j g := by
+    intro j hj
+    apply iteratedFDeriv_sub
+    · exact hf.of_le (by exact_mod_cast hj)
+    · exact hg.of_le (by exact_mod_cast hj)
+  unfold eContDiffHolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range (k + 1),
+        eSupNormOn s (iteratedFDeriv Real j (f - g))) +
+        eHolderSeminormOn alpha s (iteratedFDeriv Real k (f - g)) ≤
+      (∑ j ∈ Finset.range (k + 1),
+        (eSupNormOn s (iteratedFDeriv Real j f) +
+          eSupNormOn s (iteratedFDeriv Real j g))) +
+        (eHolderSeminormOn alpha s (iteratedFDeriv Real k f) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
+      gcongr with j hj
+      · rw [hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
+        exact eSupNormOn_sub_le s _ _
+      · rw [hjet k le_rfl]
+        exact eHolderSeminormOn_sub_le alpha s _ _
+    _ = ((∑ j ∈ Finset.range (k + 1),
+          eSupNormOn s (iteratedFDeriv Real j f)) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k f)) +
+        ((∑ j ∈ Finset.range (k + 1),
+          eSupNormOn s (iteratedFDeriv Real j g)) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
+      simp only [Finset.sum_add_distrib, add_assoc, add_left_comm]
 
 def IsContDiffHolderOn (k : Nat) (alpha : NNReal)
     (s : Set V) (f : V → F) : Prop :=

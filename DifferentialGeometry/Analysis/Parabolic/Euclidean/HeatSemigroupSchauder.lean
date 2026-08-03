@@ -352,6 +352,12 @@ def heatSupHessianHolderConst (t : Real)
   ∑ _β : Fin 2 → Fin (Module.finrank Real V),
     heatD2SupHolderConst (V := V) t u
 
+def heatSupHessianMapHolderConst (t : Real)
+    (u : BoundedContinuousFunction V F) : NNReal :=
+  ∑ _i : Fin (Module.finrank Real V),
+    ∑ _j : Fin (Module.finrank Real V),
+      heatD2SupHolderConst (V := V) t u
+
 def heatSupSchauderConst (t : Real)
     (u : BoundedContinuousFunction V F) : NNReal :=
   (∑ j ∈ Finset.range 3, heatSupSpatialJetConst (V := V) t u j) +
@@ -420,6 +426,33 @@ theorem heatSup_iteratedFDeriv_two_holder
     (by simp) (by simp) u
   simpa only [heatSupHessianHolderConst,
     heatSup_iteratedFDeriv_two_apply ht, heatSupHessian_apply ht] using h
+
+theorem heatSupHessian_holder
+    {alpha : NNReal} (halpha : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) (u : BoundedContinuousFunction V F) :
+    HolderWith (heatSupHessianMapHolderConst (V := V) t u) alpha
+      (heatSupHessian t u) := by
+  unfold heatSupHessianMapHolderConst
+  apply holderWith_continuousLinearMap_two_of_stdOrthonormalBasis
+    (A := heatSupHessian t u)
+    (C := fun _ _ ↦ heatD2SupHolderConst (V := V) t u)
+  intro i j
+  have h := heatD2Conv_holder_of_norm_le_one halpha ht
+    ((stdOrthonormalBasis Real V) j)
+    ((stdOrthonormalBasis Real V) i)
+    (by simp) (by simp) u
+  simpa only [heatSupHessian_apply ht] using h
+
+theorem heatSup_contDiff_two
+    {t : Real} (ht : 0 < t) (u : BoundedContinuousFunction V F) :
+    ContDiff Real 2 (fun x : V ↦ heatSup t u x) := by
+  have hhess : Continuous (heatSupHessian t u) :=
+    (heatSupHessian_holder (alpha := 1) le_rfl ht u).continuous (by norm_num)
+  have hgrad : ContDiff Real 1 (heatSupGradient t u) :=
+    contDiff_one_iff_hasFDerivAt.mpr
+      ⟨heatSupHessian t u, hhess, heatSupGradient_hasFDerivAt ht u⟩
+  exact (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr
+    ⟨heatSupGradient t u, hgrad, heatSup_hasFDerivAt ht u⟩
 
 theorem heatSup_schauder_estimate
     {alpha : NNReal} (halpha : alpha ≤ 1)

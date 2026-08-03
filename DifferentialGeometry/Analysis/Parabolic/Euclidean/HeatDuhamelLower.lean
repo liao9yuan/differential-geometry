@@ -53,6 +53,16 @@ theorem d0DuhMajor_int (t : ℝ) (K : ℝ≥0) :
 def heatDuh (t : ℝ) (f : ℝ → BoundedContinuousFunction V F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatSup (t - s) (f s) x
 
+omit [Nontrivial V] [CompleteSpace F] in
+theorem heatDuh_const_eq_integral_heatSup
+    (t : Real) (f : BoundedContinuousFunction V F) (x : V) :
+    heatDuh t (fun _ ↦ f) x =
+      ∫ s : Real in 0..t, heatSup s f x := by
+  unfold heatDuh
+  rw [intervalIntegral.integral_comp_sub_left
+    (fun s : Real ↦ heatSup s f x) t]
+  simp
+
 omit [CompleteSpace F] in
 /-- A strongly measurable, uniformly bounded forcing path has an integrable
 value heat-potential integrand. -/

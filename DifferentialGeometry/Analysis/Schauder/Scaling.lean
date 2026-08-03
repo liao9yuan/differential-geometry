@@ -229,6 +229,134 @@ theorem lipschitzWith_compContinuousLinearMapL
     ContinuousMultilinearMap.norm_compContinuousLinearMap_le
       (B - C) (fun _ : Fin j => L)
 
+def contDiffHolderLinearEquivConst
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V ≃L[Real] V) (alpha C : NNReal) : NNReal :=
+  let R := max 1 ‖(L.symm : V →L[Real] V)‖₊
+  C + R * C + R ^ 2 * C + R ^ 2 * (C * R ^ (alpha : Real))
+
+theorem eContDiffHolderGaugeOn_linearEquiv_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (L : V ≃L[Real] V) (alpha C : NNReal) (u : V → F)
+    (h : eContDiffHolderGaugeOn 2 alpha Set.univ (fun x ↦ u (L x)) ≤ C) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ u ≤
+      contDiffHolderLinearEquivConst L alpha C := by
+  let v : V → F := fun x ↦ u (L x)
+  let R : NNReal := max 1 ‖(L.symm : V →L[Real] V)‖₊
+  let Cspatial : Nat → NNReal := fun j ↦
+    match j with
+    | 0 => C
+    | 1 => R * C
+    | _ => R ^ 2 * C
+  have h' : eContDiffHolderGaugeOn 2 alpha Set.univ v ≤ C := h
+  have hR : ‖(L.symm : V →L[Real] V)‖₊ ≤ R := le_max_right _ _
+  have hspatial : ∀ j ≤ 2, ∀ x ∈ (Set.univ : Set V),
+      ‖iteratedFDeriv Real j u x‖ ≤ Cspatial j := by
+    intro j hj x hx
+    let q := L.symm x
+    have heq : iteratedFDeriv Real j u x =
+        (iteratedFDeriv Real j v q).compContinuousLinearMap
+          (fun _ ↦ (L.symm : V →L[Real] V)) := by
+      have hlin := L.symm.iteratedFDerivWithin_comp_right v
+        uniqueDiffOn_univ (mem_univ (L.symm x)) j
+      have hfun : v ∘ L.symm = u := by
+        funext y
+        simp only [v, Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply]
+      rw [hfun] at hlin
+      simpa only [v, q, preimage_univ, iteratedFDerivWithin_univ,
+        Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply] using hlin
+    rw [heq]
+    have hnorm := ContinuousMultilinearMap.norm_compContinuousLinearMap_le
+      (iteratedFDeriv Real j v q)
+      (fun _ : Fin j ↦ (L.symm : V →L[Real] V))
+    have hadapt := spatialJet_norm_le h' hj (Set.mem_univ q)
+    interval_cases j
+    · calc
+        ‖(iteratedFDeriv Real 0 v q).compContinuousLinearMap
+            (fun _ ↦ (L.symm : V →L[Real] V))‖ ≤
+            ‖iteratedFDeriv Real 0 v q‖ * 1 := by
+          simpa only [Finset.prod_fin_eq_prod_range,
+            Finset.prod_range_zero] using hnorm
+        _ = ‖iteratedFDeriv Real 0 v q‖ := mul_one _
+        _ ≤ (Cspatial 0 : Real) := by simpa only [Cspatial] using hadapt
+    · calc
+        ‖(iteratedFDeriv Real 1 v q).compContinuousLinearMap
+            (fun _ ↦ (L.symm : V →L[Real] V))‖ ≤
+            ‖iteratedFDeriv Real 1 v q‖ *
+              ‖(L.symm : V →L[Real] V)‖ := by
+          simpa only [Fin.prod_univ_one] using hnorm
+        _ ≤ C * (R : Real) := by
+          exact mul_le_mul hadapt (by exact_mod_cast hR)
+            (norm_nonneg _) C.coe_nonneg
+        _ = (Cspatial 1 : Real) := by
+          simp only [Cspatial, NNReal.coe_mul]
+          ring
+    · calc
+        ‖(iteratedFDeriv Real 2 v q).compContinuousLinearMap
+            (fun _ ↦ (L.symm : V →L[Real] V))‖ ≤
+            ‖iteratedFDeriv Real 2 v q‖ *
+              (‖(L.symm : V →L[Real] V)‖ *
+                ‖(L.symm : V →L[Real] V)‖) := by
+          simpa only [Fin.prod_univ_two] using hnorm
+        _ ≤ C * ((R : Real) * R) := by
+          apply mul_le_mul hadapt
+          · exact mul_le_mul (by exact_mod_cast hR) (by exact_mod_cast hR)
+              (norm_nonneg _) R.coe_nonneg
+          · positivity
+          · exact C.coe_nonneg
+        _ = (Cspatial 2 : Real) := by
+          simp only [Cspatial, NNReal.coe_mul, NNReal.coe_pow]
+          ring
+  have hholder : HolderWith (R ^ 2 * (C * R ^ (alpha : Real))) alpha
+      ((Set.univ : Set V).restrict (iteratedFDeriv Real 2 u)) := by
+    have hadapt := topSpatialJet_holderWith_restrict h'
+    have hadaptGlobal : HolderWith C alpha (iteratedFDeriv Real 2 v) :=
+      holderOnWith_univ.mp (HolderWith.restrict_iff.mp hadapt)
+    have hdomain : HolderWith (C * R ^ (alpha : Real)) alpha
+        ((Set.univ : Set V).restrict
+          (iteratedFDeriv Real 2 v ∘ L.symm)) := by
+      have hraw := hadaptGlobal.comp L.symm.lipschitz.holderWith
+      have hraw' : HolderWith
+          (C * ‖(L.symm : V →L[Real] V)‖₊ ^ (alpha : Real)) alpha
+          (iteratedFDeriv Real 2 v ∘ L.symm) := by
+        simpa only [mul_one] using hraw
+      have hweak : HolderWith (C * R ^ (alpha : Real)) alpha
+          (iteratedFDeriv Real 2 v ∘ L.symm) :=
+        hraw'.mono (by gcongr)
+      have hrestrict := (hweak.holderOnWith (Set.univ : Set V)).holderWith
+      simpa only [Function.comp_apply, Set.restrict_apply, mul_one] using hrestrict
+    let P := ContinuousMultilinearMap.compContinuousLinearMapL
+      (F := F) (fun _ : Fin 2 ↦ (L.symm : V →L[Real] V))
+    have hP0 := lipschitzWith_compContinuousLinearMapL
+      (F := F) 2 (L.symm : V →L[Real] V)
+    have hprod : (∏ _ : Fin 2, ‖(L.symm : V →L[Real] V)‖₊) ≤ R ^ 2 := by
+      simpa only [Fin.prod_univ_two, pow_two] using
+        mul_le_mul hR hR (zero_le _) (zero_le _)
+    have hP : LipschitzWith (R ^ 2) P := hP0.weaken hprod
+    have hcomp := hP.holderWith.comp hdomain
+    have hcomp' : HolderWith (R ^ 2 * (C * R ^ (alpha : Real))) alpha
+        (P ∘ (Set.univ : Set V).restrict
+          (iteratedFDeriv Real 2 v ∘ L.symm)) := by
+      simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+    convert hcomp' using 1
+    funext x
+    have hlin := L.symm.iteratedFDerivWithin_comp_right v
+      uniqueDiffOn_univ (mem_univ (L.symm x.1)) 2
+    have hfun : v ∘ L.symm = u := by
+      funext y
+      simp only [v, Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply]
+    rw [hfun] at hlin
+    simpa only [P, v, Function.comp_apply, Set.restrict_apply,
+      preimage_univ, iteratedFDerivWithin_univ,
+      ContinuousLinearEquiv.apply_symm_apply] using hlin
+  have hresult := eContDiffHolderGaugeOn_le Cspatial
+    (R ^ 2 * (C * R ^ (alpha : Real))) hspatial hholder
+  unfold contDiffHolderLinearEquivConst
+  simpa only [R, Cspatial, Finset.sum_range_succ, Finset.sum_range_zero,
+    zero_add, NNReal.coe_add, NNReal.coe_mul, NNReal.coe_pow,
+    NNReal.coe_rpow] using hresult
+
 def parabolicC2HolderLinearEquivConst
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     (L : V ≃L[Real] V) (alpha C : NNReal) : NNReal :=
