@@ -680,6 +680,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammSpaces
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammTailGauss
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammTailScale
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammValue
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.LowerOrder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.NeumannRightInverse
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.QuantCover
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.QuasilinearFlux
