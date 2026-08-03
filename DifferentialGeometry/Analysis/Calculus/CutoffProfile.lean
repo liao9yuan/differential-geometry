@@ -310,4 +310,18 @@ theorem exists_deriv_bounds :
               (Set.mem_Icc.2 ⟨hs0, hs3⟩))
         exact hmax.trans (le_max_right _ _)
 
+noncomputable def derivBound : ℝ :=
+  Classical.choose exists_deriv_bounds
+
+theorem derivBound_nonneg : 0 ≤ derivBound :=
+  (Classical.choose_spec exists_deriv_bounds).1
+
+theorem abs_deriv_le_derivBound (s : ℝ) :
+    |deriv value s| ≤ derivBound :=
+  (Classical.choose_spec exists_deriv_bounds).2.1 s
+
+theorem abs_deriv2_le_derivBound (s : ℝ) :
+    |deriv (deriv value) s| ≤ derivBound :=
+  (Classical.choose_spec exists_deriv_bounds).2.2 s
+
 end DifferentialGeometry.Analysis.CutoffProfile
