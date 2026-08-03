@@ -1808,6 +1808,7 @@ import DifferentialGeometry.Geometry.Boundary.BoundaryManifold
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Geometry.Boundary.InducedMetric
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
+import DifferentialGeometry.Geometry.Boundary.NormalDerivative
 import DifferentialGeometry.Geometry.Boundary.Orientation
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 import DifferentialGeometry.Geometry.Boundary.SecondFundamentalForm
